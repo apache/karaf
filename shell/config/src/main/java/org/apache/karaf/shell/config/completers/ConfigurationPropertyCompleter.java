@@ -50,6 +50,7 @@ public class ConfigurationPropertyCompleter implements Completer {
 
     private ConfigurationAdmin configAdmin;
 
+    @SuppressWarnings("rawtypes")
     public int complete(final String buffer, final int cursor, final List candidates) {
         CommandSession session = CommandSessionHolder.getSession();
         if (session != null) {
@@ -96,6 +97,7 @@ public class ConfigurationPropertyCompleter implements Completer {
      * @param pid
      * @return
      */
+    @SuppressWarnings("rawtypes")
     private Set<String> getPropertyNames(String pid) {
         Set<String> propertyNames = new HashSet<String>();
         if (pid != null) {

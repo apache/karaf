@@ -21,15 +21,18 @@
         <reference-listener ref="mbeanRegistrer" bind-method="registerMBeanServer" unbind-method="unregisterMBeanServer"/>
     </reference>
 
-    <!-- Reference to the configuration instance -->
-    <reference id="configurationAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"  />
+    <bean id="configRepo" class="org.apache.karaf.shell.config.ConfigRepository">
+        <argument value="${storage}"/>
+        <argument ref="configAdmin"/>
+    </bean>
+
+    <reference id="configAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"  />
 
     <!-- Config MBean -->
     <bean id="configMBean" class="org.apache.karaf.management.mbeans.config.internal.ConfigMBeanImpl">
-        <property name="configurationAdmin" ref="configurationAdmin"/>
-        <property name="storage" value="${storage}"/>
+        <property name="configRepo" ref="configRepo"/>
     </bean>
-
+    
     <!-- Register MBean in the MBeanServer -->
     <bean id="mbeanRegistrer" class="org.apache.karaf.management.MBeanRegistrer">
         <property name="mbeans">

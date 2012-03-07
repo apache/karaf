@@ -16,21 +16,20 @@
  */
 package org.apache.karaf.shell.config;
 
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+
 import java.util.Dictionary;
 import java.util.Properties;
 
 import junit.framework.TestCase;
+
 import org.apache.felix.service.command.CommandSession;
 import org.easymock.EasyMock;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
-
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
 
 /**
  * Test cases for {@link EditCommand}
@@ -47,12 +46,13 @@ public class EditCommandTest extends TestCase {
     @Override
     protected void setUp() throws Exception {
         command = new EditCommand();
+
         
         context = EasyMock.createMock(BundleContext.class);
         command.setBundleContext(context);
         
         admin = createMock(ConfigurationAdmin.class);
-        command.setConfigurationAdmin(admin);
+        command.setConfigRepository(new ConfigRepository(null, admin));
         expect(context.getBundle(0)).andReturn(null).anyTimes();
 
         replay(context);
@@ -80,7 +80,7 @@ public class EditCommandTest extends TestCase {
                    props, session.get(ConfigCommandSupport.PROPERTY_CONFIG_PROPS));
     }
     
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("rawtypes")
     public void testExecuteOnNewPid() throws Exception {        
         Configuration config = createMock(Configuration.class);
         expect(admin.getConfiguration(PID, null)).andReturn(config);

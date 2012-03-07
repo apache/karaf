@@ -13,7 +13,7 @@
  */
 package org.apache.karaf.management.mbeans.config;
 
-import javax.management.openmbean.TabularData;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -37,6 +37,8 @@ public interface ConfigMBean {
      * @throws Exception
      */
     void create(String pid) throws Exception;
+    
+    void update(String pid, Map<String, String> properties) throws IOException;
 
     /**
      * Delete a configuration identified by the given PID.

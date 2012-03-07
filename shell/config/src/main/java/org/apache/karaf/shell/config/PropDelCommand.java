@@ -20,7 +20,6 @@ import java.util.Dictionary;
 
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
-import org.osgi.service.cm.ConfigurationAdmin;
 
 @Command(scope = "config", name = "delete-property", description = "Deletes a property from the configuration being edited.")
 public class PropDelCommand extends ConfigPropertyCommandSupport {
@@ -28,6 +27,7 @@ public class PropDelCommand extends ConfigPropertyCommandSupport {
     @Argument(index = 0, name = "property", description = "The name of the property to delete", required = true, multiValued = false)
     String prop;
 
+    @SuppressWarnings("rawtypes")
     @Override
     public void propertyAction(Dictionary props) {
         props.remove(prop);

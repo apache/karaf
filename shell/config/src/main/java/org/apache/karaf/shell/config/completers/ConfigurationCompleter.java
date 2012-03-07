@@ -65,6 +65,7 @@ public class ConfigurationCompleter implements Completer, ConfigurationListener 
         delegate.getStrings().addAll(pids);
     }
 
+    @SuppressWarnings("rawtypes")
     public int complete(final String buffer, final int cursor, final List candidates) {
         return delegate.complete(buffer, cursor, candidates);
     }

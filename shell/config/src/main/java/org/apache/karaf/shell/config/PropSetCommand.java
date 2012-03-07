@@ -30,6 +30,7 @@ public class PropSetCommand extends ConfigPropertyCommandSupport {
     @Argument(index = 1, name = "value", description = "The value of the property", required = true, multiValued = false)
     String value;
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public void propertyAction(Dictionary props) {
         props.put(prop, value);

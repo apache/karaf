@@ -2,9 +2,8 @@ package org.apache.karaf.shell.config;
 
 import java.util.Dictionary;
 import java.util.Properties;
+
 import org.apache.karaf.shell.commands.Option;
-import org.osgi.service.cm.Configuration;
-import org.osgi.service.cm.ConfigurationAdmin;
 
 /**
  * Abstract class which commands that are related to property processing should extend.
@@ -18,7 +17,8 @@ public abstract class ConfigPropertyCommandSupport extends ConfigCommandSupport 
     protected boolean bypassStorage;
 
 
-    protected void doExecute(ConfigurationAdmin admin) throws Exception {
+    @SuppressWarnings("rawtypes")
+    protected Object doExecute() throws Exception {
         Dictionary props = getEditedProps();
         if (props == null && pid == null) {
             System.err.println("No configuration is being edited--run the edit command first");
@@ -28,15 +28,17 @@ public abstract class ConfigPropertyCommandSupport extends ConfigCommandSupport 
             }
             propertyAction(props);
             if(requiresUpdate(pid)) {
-                update(admin, pid, props, bypassStorage);
+                this.configRepository.update(pid, props, bypassStorage);
             }
         }
+        return null;
     }
 
     /**
      * Perform an action on the properties.
      * @param props
      */
+    @SuppressWarnings("rawtypes")
     protected abstract void propertyAction(Dictionary props);
 
     /**
@@ -59,17 +61,10 @@ public abstract class ConfigPropertyCommandSupport extends ConfigCommandSupport 
      * @return
      * @throws Exception
      */
+    @SuppressWarnings("rawtypes")
     @Override
     protected Dictionary getEditedProps() throws Exception {
-        if(pid != null) {
-            ConfigurationAdmin configurationAdmin = getConfigurationAdmin();
-            if(configurationAdmin != null) {
-                Configuration configuration = configurationAdmin.getConfiguration(pid);
-                if(configuration != null) {
-                    return configuration.getProperties();
-                }
-            }
-        }
-        return super.getEditedProps();
+        Dictionary props = this.configRepository.getConfigProperties(pid);
+        return (props != null) ? props : super.getEditedProps();
     }
 }
