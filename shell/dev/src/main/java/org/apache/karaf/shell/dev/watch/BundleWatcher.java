@@ -100,6 +100,7 @@ public class BundleWatcher implements Runnable, BundleListener {
                         {
                             InputStream is = new FileInputStream(location);
                             try {
+                                logger.info("[Watch] Updating watched bundle: " + bundle.getSymbolicName() + " (" + bundle.getVersion() + ")");
                                 System.out.println("[Watch] Updating watched bundle: " + bundle.getSymbolicName() + " (" + bundle.getVersion() + ")");
                                 bundle.update(is);
                             } finally {
