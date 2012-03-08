@@ -54,19 +54,23 @@ public class ObrMBeanImpl extends StandardMBean implements ObrMBean {
 
     public TabularData getBundles() throws Exception {
         CompositeType bundleType = new CompositeType("OBR Resource", "Bundle available in the OBR",
-                new String[]{ "presentationname", "symbolicname", "version" },
-                new String[]{ "Presentation Name", "Symbolic Name", "Version" },
-                new OpenType[]{ SimpleType.STRING, SimpleType.STRING, SimpleType.STRING });
+                new String[]{"presentationname", "symbolicname", "version"},
+                new String[]{"Presentation Name", "Symbolic Name", "Version"},
+                new OpenType[]{SimpleType.STRING, SimpleType.STRING, SimpleType.STRING});
         TabularType tableType = new TabularType("OBR Resources", "Table of all resources/bundles available in the OBR",
-                bundleType, new String[]{ "presentationname" });
+                bundleType, new String[]{"presentationname"});
         TabularData table = new TabularDataSupport(tableType);
 
         Resource[] resources = repositoryAdmin.discoverResources("(|(presentationname=*)(symbolicname=*))");
         for (int i = 0; i < resources.length; i++) {
-            CompositeData data = new CompositeDataSupport(bundleType,
-                    new String[]{ "presentationname", "symbolicname", "version" },
-                    new Object[]{ resources[i].getPresentationName(), resources[i].getSymbolicName(), resources[i].getVersion() });
-            table.put(data);
+            try {
+                CompositeData data = new CompositeDataSupport(bundleType,
+                        new String[]{"presentationname", "symbolicname", "version"},
+                        new Object[]{resources[i].getPresentationName(), resources[i].getSymbolicName(), resources[i].getVersion()});
+                table.put(data);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
         return table;
@@ -96,8 +100,8 @@ public class ObrMBeanImpl extends StandardMBean implements ObrMBean {
             throw new IllegalArgumentException("Unknown bundle " + target[0]);
         }
         resolver.add(resource);
-       if ((resolver.getAddedResources() != null) &&
-            (resolver.getAddedResources().length > 0)) {
+        if ((resolver.getAddedResources() != null) &&
+                (resolver.getAddedResources().length > 0)) {
         }
         if (resolver.resolve()) {
             Resource[] resources = resolver.getAddedResources();
@@ -159,11 +163,9 @@ public class ObrMBeanImpl extends StandardMBean implements ObrMBean {
         String[] target;
         int idx = bundle.indexOf(VERSION_DELIM);
         if (idx > 0) {
-            target = new String[] { bundle.substring(0, idx), bundle.substring(idx+1) };
-        }
-        else
-        {
-            target = new String[] { bundle, null };
+            target = new String[]{bundle.substring(0, idx), bundle.substring(idx + 1)};
+        } else {
+            target = new String[]{bundle, null};
         }
         return target;
     }

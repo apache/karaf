@@ -49,33 +49,37 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
 
     public TabularData getBundles() throws Exception {
         CompositeType bundleType = new CompositeType("Bundle", "OSGi Bundle",
-                new String[]{ "ID", "Name", "Version", "Start Level", "State" },
-                new String[]{ "ID of the Bundle", "Name of the Bundle", "Version of the Bundle", "Start Level of the Bundle", "Current State of the Bundle" },
-                new OpenType[]{ SimpleType.LONG, SimpleType.STRING, SimpleType.STRING, SimpleType.INTEGER, SimpleType.STRING });
-        TabularType tableType = new TabularType("Bundles", "Tables of all Bundles", bundleType, new String[]{ "ID" });
+                new String[]{"ID", "Name", "Version", "Start Level", "State"},
+                new String[]{"ID of the Bundle", "Name of the Bundle", "Version of the Bundle", "Start Level of the Bundle", "Current State of the Bundle"},
+                new OpenType[]{SimpleType.LONG, SimpleType.STRING, SimpleType.STRING, SimpleType.INTEGER, SimpleType.STRING});
+        TabularType tableType = new TabularType("Bundles", "Tables of all Bundles", bundleType, new String[]{"ID"});
         TabularData table = new TabularDataSupport(tableType);
 
         Bundle[] bundles = bundleContext.getBundles();
 
         for (int i = 0; i < bundles.length; i++) {
-            int bundleStartLevel = getBundleStartLevel(bundles[i]).getStartLevel();
-            int bundleState = bundles[i].getState();
-            String bundleStateString;
-            if (bundleState == Bundle.ACTIVE)
-                bundleStateString = "ACTIVE";
-            else if (bundleState == Bundle.INSTALLED)
-                bundleStateString = "INSTALLED";
-            else if (bundleState == Bundle.RESOLVED)
-                bundleStateString = "RESOLVED";
-            else if (bundleState == Bundle.STARTING)
-                bundleStateString = "STARTING";
-            else if (bundleState == Bundle.STOPPING)
-                bundleStateString = "STOPPING";
-            else bundleStateString = "UNKNOWN";
-            CompositeData data = new CompositeDataSupport(bundleType,
-                    new String[]{ "ID", "Name", "Version", "Start Level", "State" },
-                    new Object[]{ bundles[i].getBundleId(), bundles[i].getSymbolicName(), bundles[i].getVersion().toString(), bundleStartLevel, bundleStateString });
-            table.put(data);
+            try {
+                int bundleStartLevel = getBundleStartLevel(bundles[i]).getStartLevel();
+                int bundleState = bundles[i].getState();
+                String bundleStateString;
+                if (bundleState == Bundle.ACTIVE)
+                    bundleStateString = "ACTIVE";
+                else if (bundleState == Bundle.INSTALLED)
+                    bundleStateString = "INSTALLED";
+                else if (bundleState == Bundle.RESOLVED)
+                    bundleStateString = "RESOLVED";
+                else if (bundleState == Bundle.STARTING)
+                    bundleStateString = "STARTING";
+                else if (bundleState == Bundle.STOPPING)
+                    bundleStateString = "STOPPING";
+                else bundleStateString = "UNKNOWN";
+                CompositeData data = new CompositeDataSupport(bundleType,
+                        new String[]{"ID", "Name", "Version", "Start Level", "State"},
+                        new Object[]{bundles[i].getBundleId(), bundles[i].getSymbolicName(), bundles[i].getVersion().toString(), bundleStartLevel, bundleStateString});
+                table.put(data);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         return table;
     }
