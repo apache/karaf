@@ -13,7 +13,7 @@
     </description>
 
     <properties>
-        <karaf.version>2.2.5-SNAPSHOT</karaf.version>
+        <karaf.version>2.2.6-SNAPSHOT</karaf.version>
     </properties>
 
     <dependencies>
