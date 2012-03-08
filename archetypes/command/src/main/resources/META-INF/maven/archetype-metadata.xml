@@ -22,6 +22,7 @@
 	<requiredProperty key="scope"/>
 	<requiredProperty key="command"/>
 	<requiredProperty key="description"/>
+    <requiredProperty key="package"/>
   </requiredProperties>
   <fileSets>
     <fileSet filtered="true" packaged="true" encoding="UTF-8">
