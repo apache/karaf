@@ -39,33 +39,37 @@ public class WebMBeanImpl extends StandardMBean implements WebMBean {
 
     public TabularData list() throws Exception {
         CompositeType webType = new CompositeType("Web Bundle", "An OSGi Web bundle",
-                new String[]{ "ID", "Name", "Context" },
-                new String[]{ "ID of the bundle", "Name of the bundle", "Web Context" },
-                new OpenType[]{ SimpleType.STRING, SimpleType.STRING, SimpleType.STRING });
+                new String[]{"ID", "Name", "Context"},
+                new String[]{"ID of the bundle", "Name of the bundle", "Web Context"},
+                new OpenType[]{SimpleType.STRING, SimpleType.STRING, SimpleType.STRING});
         TabularType tableType = new TabularType("Web Bundles", "Table of web bundles", webType,
-                new String[]{ "ID" });
+                new String[]{"ID"});
         TabularData table = new TabularDataSupport(tableType);
         for (Bundle bundle : bundleContext.getBundles()) {
-            String webContext = (String) bundle.getHeaders().get("Web-ContextPath");
-            if (webContext == null)
-                webContext = (String) bundle.getHeaders().get("Webapp-Context");
-            if (webContext == null)
-                continue;
+            try {
+                String webContext = (String) bundle.getHeaders().get("Web-ContextPath");
+                if (webContext == null)
+                    webContext = (String) bundle.getHeaders().get("Webapp-Context");
+                if (webContext == null)
+                    continue;
 
-            webContext.trim();
-            if (!webContext.startsWith("/")) {
-                webContext = "/" + webContext;
-            }
+                webContext.trim();
+                if (!webContext.startsWith("/")) {
+                    webContext = "/" + webContext;
+                }
 
-            String name = (String) bundle.getHeaders().get(Constants.BUNDLE_NAME);
-            name = (name == null) ? bundle.getSymbolicName() : name;
+                String name = (String) bundle.getHeaders().get(Constants.BUNDLE_NAME);
+                name = (name == null) ? bundle.getSymbolicName() : name;
                 // If there is no symbolic name, resort to location.
-            name = (name == null) ? bundle.getLocation() : name;
+                name = (name == null) ? bundle.getLocation() : name;
 
-            CompositeData data = new CompositeDataSupport(webType,
-                    new String[]{ "ID", "Name", "Context"},
-                    new Object[]{ bundle.getBundleId(), name, webContext });
-            table.put(data);
+                CompositeData data = new CompositeDataSupport(webType,
+                        new String[]{"ID", "Name", "Context"},
+                        new Object[]{bundle.getBundleId(), name, webContext});
+                table.put(data);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         return table;
     }

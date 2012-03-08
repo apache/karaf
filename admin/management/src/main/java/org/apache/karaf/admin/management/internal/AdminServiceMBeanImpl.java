@@ -102,7 +102,11 @@ public class AdminServiceMBeanImpl extends StandardMBean implements AdminService
         List<Instance> allInstances = Arrays.asList(adminService.getInstances());
         List<JmxInstance> instances = new ArrayList<JmxInstance>();
         for (Instance instance : allInstances) {
-            instances.add(new JmxInstance(instance));
+            try {
+                instances.add(new JmxInstance(instance));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         TabularData table = JmxInstance.tableFrom(instances);
         return table;
