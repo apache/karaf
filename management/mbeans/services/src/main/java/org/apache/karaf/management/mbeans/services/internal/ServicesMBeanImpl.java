@@ -52,38 +52,42 @@ public class ServicesMBeanImpl extends StandardMBean implements ServicesMBean {
 
     public TabularData getServices(long bundleId, boolean inUse) throws Exception {
         CompositeType serviceType = new CompositeType("Service", "OSGi Service",
-                new String[]{ "Interfaces", "Properties" },
-                new String[]{ "Interfaces class name of the service", "Properties of the service" },
-                new OpenType[]{ new ArrayType(1, SimpleType.STRING), new ArrayType(1, SimpleType.STRING) });
+                new String[]{"Interfaces", "Properties"},
+                new String[]{"Interfaces class name of the service", "Properties of the service"},
+                new OpenType[]{new ArrayType(1, SimpleType.STRING), new ArrayType(1, SimpleType.STRING)});
         TabularType tableType = new TabularType("Services", "Table of OSGi Services", serviceType,
-                new String[]{ "Interfaces" });
+                new String[]{"Interfaces"});
         TabularData table = new TabularDataSupport(tableType);
 
         Bundle[] bundles;
         if (bundleId >= 0) {
-            bundles = new Bundle[]{ bundleContext.getBundle(bundleId) };
+            bundles = new Bundle[]{bundleContext.getBundle(bundleId)};
         } else {
             bundles = bundleContext.getBundles();
         }
-        for (Bundle bundle : bundles) {;
-            ServiceReference[] serviceReferences;
-            if (inUse) {
-                serviceReferences = bundle.getServicesInUse();
-            } else {
-                serviceReferences = bundle.getRegisteredServices();
-            }
-            if (serviceReferences != null) {
-                for (ServiceReference reference : serviceReferences) {
-                    String[] interfaces = (String[]) reference.getProperty("objectClass");
-                    List<String> properties = new ArrayList<String>();
-                    for (String key : reference.getPropertyKeys()) {
-                        properties.add(key + " = " + reference.getProperty(key));
-                    }
-                    CompositeData data = new CompositeDataSupport(serviceType,
-                        new String[]{ "Interfaces", "Properties" },
-                        new Object[]{ interfaces, properties.toArray(new String[0]) });
-                    table.put(data);
+        for (Bundle bundle : bundles) {
+            try {
+                ServiceReference[] serviceReferences;
+                if (inUse) {
+                    serviceReferences = bundle.getServicesInUse();
+                } else {
+                    serviceReferences = bundle.getRegisteredServices();
                 }
+                if (serviceReferences != null) {
+                    for (ServiceReference reference : serviceReferences) {
+                        String[] interfaces = (String[]) reference.getProperty("objectClass");
+                        List<String> properties = new ArrayList<String>();
+                        for (String key : reference.getPropertyKeys()) {
+                            properties.add(key + " = " + reference.getProperty(key));
+                        }
+                        CompositeData data = new CompositeDataSupport(serviceType,
+                                new String[]{"Interfaces", "Properties"},
+                                new Object[]{interfaces, properties.toArray(new String[0])});
+                        table.put(data);
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
         return table;
