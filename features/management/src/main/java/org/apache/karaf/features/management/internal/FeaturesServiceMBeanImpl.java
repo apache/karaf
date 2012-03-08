@@ -91,7 +91,11 @@ public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
             List<Feature> insFeatures = Arrays.asList(featuresService.listInstalledFeatures());
             ArrayList<JmxFeature> features = new ArrayList<JmxFeature>();
             for (Feature feature : allFeatures) {
-                features.add(new JmxFeature(feature, insFeatures.contains(feature)));
+                try {
+                    features.add(new JmxFeature(feature, insFeatures.contains(feature)));
+                } catch (Throwable t) {
+                    t.printStackTrace();
+                }
             }
             TabularData table = JmxFeature.tableFrom(features);
             return table;
