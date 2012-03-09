@@ -26,7 +26,6 @@
             <includes>
                 <include>feature.xml</include>
             </includes>
-
         </fileSet>
     </fileSets>
 
