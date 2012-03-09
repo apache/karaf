@@ -11,21 +11,17 @@
     <name>${artifactId}-feature</name>
     <description>${artifactId} details</description>
 
-    <properties>
-        <karaf.version>^project.version^</karaf.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>org.apache.karaf.features</groupId>
             <artifactId>framework</artifactId>
-            <version>${karaf.version}</version>
+            <version>^project.version^</version>
             <type>kar</type>
         </dependency>
         <dependency>
             <groupId>org.apache.karaf.features</groupId>
             <artifactId>standard</artifactId>
-            <version>${karaf.version}</version>
+            <version>^project.version^</version>
             <classifier>features</classifier>
             <type>xml</type>
             <scope>runtime</scope>
@@ -38,7 +34,7 @@
                 <plugin>
                     <groupId>org.apache.karaf.tooling</groupId>
                     <artifactId>karaf-maven-plugin</artifactId>
-                    <version>${karaf.version}</version>
+                    <version>^project.version^</version>
                     <extensions>true</extensions>
                 </plugin>
             </plugins>
@@ -47,7 +43,6 @@
             <plugin>
                 <groupId>org.apache.karaf.tooling</groupId>
                 <artifactId>karaf-maven-plugin</artifactId>
-
                 <configuration>
                     <startupFeatures></startupFeatures>
                     <bootFeatures>
