@@ -202,11 +202,11 @@ public class ConfigRepository {
     }
 
     @SuppressWarnings("rawtypes")
-    public Dictionary getConfigProperties(String pid) throws IOException {
+    public Dictionary getConfigProperties(String pid) throws IOException, InvalidSyntaxException {
         if(pid != null && configAdmin != null) {
-            Configuration configuration = this.configAdmin.getConfiguration(pid);
-            if(configuration != null) {
-                return configuration.getProperties();
+            Configuration[] configuration = this.configAdmin.listConfigurations("(service.pid="+pid+")");
+            if(configuration != null && configuration.length > 0) {
+                return configuration[0].getProperties();
             }
         }
         return null;
