@@ -104,8 +104,6 @@
     </feature>
 
     <feature name="deployers" description="Provide Karaf deployer" version="${project.version}" resolver="(obr)">
-        <bundle start-level="30">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.blueprint/${project.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.features/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.wrap/${project.version}</bundle>
     </feature>
 
