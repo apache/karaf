@@ -64,6 +64,7 @@
                     <delimiters>
                         <delimiter>^*^</delimiter>
                     </delimiters>
+                    <useDefaultDelimiters>false</useDefaultDelimiters>
                 </configuration>
             </plugin>
             <plugin>
