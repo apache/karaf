@@ -49,7 +49,6 @@
             </includes>
         </fileSet>
         <fileSet filtered="true" encoding="UTF-8">
-            <directory></directory>
             <includes>
                 <include>pom.xml</include>
             </includes>
