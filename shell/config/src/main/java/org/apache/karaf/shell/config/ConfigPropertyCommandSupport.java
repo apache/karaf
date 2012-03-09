@@ -64,10 +64,13 @@ public abstract class ConfigPropertyCommandSupport extends ConfigCommandSupport 
     protected Dictionary getEditedProps() throws Exception {
         if(pid != null) {
             ConfigurationAdmin configurationAdmin = getConfigurationAdmin();
-            if(configurationAdmin != null) {
-                Configuration configuration = configurationAdmin.getConfiguration(pid);
-                if(configuration != null) {
-                    return configuration.getProperties();
+            if (configurationAdmin != null) {
+                Configuration[] configs = configurationAdmin.listConfigurations("(service.pid=" + pid + ")");
+                if (configs != null && configs.length > 0) {
+                    Configuration configuration = configs[0];
+                    if (configuration != null) {
+                        return configuration.getProperties();
+                    }
                 }
             }
         }

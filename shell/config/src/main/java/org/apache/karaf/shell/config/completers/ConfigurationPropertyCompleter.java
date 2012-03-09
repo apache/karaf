@@ -32,6 +32,7 @@ import org.apache.karaf.shell.console.Completer;
 import org.apache.karaf.shell.console.completer.ArgumentCompleter;
 import org.apache.karaf.shell.console.completer.StringsCompleter;
 import org.apache.karaf.shell.console.jline.CommandSessionHolder;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 
@@ -101,18 +102,23 @@ public class ConfigurationPropertyCompleter implements Completer {
         if (pid != null) {
             Configuration configuration = null;
             try {
-                configuration = configAdmin.getConfiguration(pid);
-                if (configuration != null) {
-                    Dictionary properties = configuration.getProperties();
-                    if (properties != null) {
-                        Enumeration keys = properties.keys();
-                        while (keys.hasMoreElements()) {
-                            propertyNames.add(String.valueOf(keys.nextElement()));
+                Configuration[] configs = configAdmin.listConfigurations("(service.pid="+pid+")");
+                if (configs != null && configs.length > 0) {
+                    configuration = configs[0];
+                    if (configuration != null) {
+                        Dictionary properties = configuration.getProperties();
+                        if (properties != null) {
+                            Enumeration keys = properties.keys();
+                            while (keys.hasMoreElements()) {
+                                propertyNames.add(String.valueOf(keys.nextElement()));
+                            }
                         }
                     }
                 }
             } catch (IOException e) {
               //Ignore
+            } catch (InvalidSyntaxException e) {
+                //Ignore
             }
         }
         return propertyNames;
