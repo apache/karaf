@@ -36,7 +36,6 @@
         <property name="boot" value="$[featuresBoot]" />
         <property name="resolverTimeout" value="$[resolverTimeout]" />
         <property name="configAdmin" ref="configAdmin" />
-        <property name="mvnUrlHandler" ref="mvnUrlHandler" />
         <property name="bundleContext" ref="blueprintBundleContext" />
     </bean>
 
@@ -48,8 +47,9 @@
 
     <reference id="configAdmin" interface="org.osgi.service.cm.ConfigurationAdmin" />
 
-
     <reference id="mvnUrlHandler" interface="org.osgi.service.url.URLStreamHandlerService" filter="(url.handler.protocol=mvn)" />
+    <reference id="blueprintUrlHandler" interface="org.osgi.service.url.URLStreamHandlerService" filter="(url.handler.protocol=blueprint)" />
+    <reference id="springUrlHandler" interface="org.osgi.service.url.URLStreamHandlerService" filter="(url.handler.protocol=spring)" />
 
     <service ref="featuresService" interface="org.apache.karaf.features.FeaturesService" />
 
