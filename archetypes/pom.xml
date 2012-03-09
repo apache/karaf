@@ -39,7 +39,6 @@
         <module>command</module>
         <module>feature</module>
         <module>kar</module>
-        <module>itests</module>
     </modules>
 
 </project>
