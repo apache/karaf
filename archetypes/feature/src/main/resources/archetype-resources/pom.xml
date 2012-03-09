@@ -8,9 +8,7 @@
     <version>${version}</version>
     <packaging>pom</packaging>
     <name>${artifactId} feature</name>
-    <description>
-        Create a feature with the defined dependencies set.
-    </description>
+    <description>Create a feature with the defined dependencies set.</description>
 
     <dependencies>
         <!-- Put here the artifacts which should be included in the feature -->
@@ -21,7 +19,7 @@
             <plugin>
                 <groupId>org.apache.karaf.tooling</groupId>
                 <artifactId>features-maven-plugin</artifactId>
-                <version>2.2.6-SNAPSHOT</version>
+                <version>^project.version^</version>
                 <executions>
                     <execution>
                         <id>generate-features-file</id>
@@ -29,7 +27,7 @@
                             <goal>generate-features-file</goal>
                         </goals>
                         <configuration>
-                            <karafVersion>2.2.6-SNAPSHOT</karafVersion>
+                            <karafVersion>^project.version^</karafVersion>
                         </configuration>
                     </execution>
                 </executions>
