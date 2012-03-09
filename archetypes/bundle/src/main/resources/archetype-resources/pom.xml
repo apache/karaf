@@ -14,7 +14,7 @@
     </description>
 
     <properties>
-        <maven-bundle-plugin.version>2.3.6</maven-bundle-plugin.version>
+        <maven-bundle-plugin.version>2.3.7</maven-bundle-plugin.version>
         <osgi.version>4.3.0</osgi.version>
     </properties>
 
