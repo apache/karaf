@@ -34,20 +34,32 @@
     <name>Apache Karaf :: Archetypes :: Kar Archetype</name>
     <description>This archetype sets up an empty karaf kar project.</description>
 
+    <properties>
+        <archetype.version>2.2</archetype.version>
+    </properties>
+
     <build>
         <extensions>
             <extension>
                 <groupId>org.apache.maven.archetype</groupId>
                 <artifactId>archetype-packaging</artifactId>
-                <version>2.2</version>
+                <version>${archetype.version}</version>
             </extension>
         </extensions>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-archetype-plugin</artifactId>
+            </plugin>
+        </plugins>
 
         <pluginManagement>
             <plugins>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-archetype-plugin</artifactId>
+                    <version>${archetype.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
