@@ -9,20 +9,13 @@
     <packaging>bundle</packaging>
 
     <name>${artifactId} Bundle</name>
-    <description>
-        ${artifactId} OSGi bundle project.
-    </description>
-
-    <properties>
-        <maven-bundle-plugin.version>2.3.6</maven-bundle-plugin.version>
-        <osgi.version>4.2.0</osgi.version>
-    </properties>
+    <description>${artifactId} OSGi bundle project.</description>
 
     <dependencies>
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
-            <version>${osgi.version}</version>
+            <version>^osgi.version^</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
@@ -32,7 +25,7 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>${maven-bundle-plugin.version}</version>
+                <version>^felix.plugin.version^</version>
                 <extensions>true</extensions>
                 <configuration>
                     <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
