@@ -20,6 +20,10 @@
                       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                       name="karaf-blueprint-archetype">
 
+    <requiredProperties>
+        <requiredProperty key="package"/>
+    </requiredProperties>
+
     <fileSets>
         <fileSet filtered="true" packaged="true" encoding="UTF-8">
             <directory>src/main/java</directory>
