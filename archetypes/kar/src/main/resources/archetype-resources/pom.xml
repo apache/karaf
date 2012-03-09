@@ -11,12 +11,8 @@
     <name>${artifactId}-kar</name>
     <description>${artifactId} details</description>
 
-    <properties>
-        <karaf.version>3.0.0-SNAPSHOT</karaf.version>
-    </properties>
-
     <dependencies>
-
+        <!-- add the artifacts that should be in the kar in the dependencies set -->
     </dependencies>
 
     <build>
@@ -25,7 +21,7 @@
                 <plugin>
                     <groupId>org.apache.karaf.tooling</groupId>
                     <artifactId>karaf-maven-plugin</artifactId>
-                    <version>${karaf.version}</version>
+                    <version>^project.version^</version>
                     <extensions>true</extensions>
                 </plugin>
             </plugins>
@@ -34,12 +30,10 @@
             <plugin>
                 <groupId>org.apache.karaf.tooling</groupId>
                 <artifactId>karaf-maven-plugin</artifactId>
-
                 <configuration>
                     <startLevel>50</startLevel>
                     <aggregateFeatures>true</aggregateFeatures>
                     <resolver>(obr)</resolver>
-
                     <checkDependencyChange>true</checkDependencyChange>
                     <warnOnDependencyChange>true</warnOnDependencyChange>
                     <logDependencyChanges>true</logDependencyChanges>
@@ -48,4 +42,5 @@
             </plugin>
         </plugins>
     </build>
+
 </project>

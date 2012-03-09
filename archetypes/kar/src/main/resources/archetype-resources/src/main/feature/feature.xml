@@ -22,7 +22,7 @@
 
     <feature name='${project.artifactId}' description='${project.name}' version='${project.version}' resolver="${resolver}">
         <details>${project.description}</details>
-        <config>foo=bar</config>
+        <!-- <config>foo=bar</config> -->
     </feature>
 
 </features>
