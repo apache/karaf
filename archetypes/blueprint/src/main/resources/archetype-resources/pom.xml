@@ -14,7 +14,7 @@
     </description>
 
     <properties>
-        <maven-bundle-plugin.version>2.3.6</maven-bundle-plugin.version>
+        <maven-bundle-plugin.version>^felix.plugin.version^</maven-bundle-plugin.version>
     </properties>
 
     <build>
