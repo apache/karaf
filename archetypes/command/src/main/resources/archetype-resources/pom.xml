@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
     <modelVersion>4.0.0</modelVersion>
+
     <groupId>${groupId}</groupId>
     <artifactId>${artifactId}</artifactId>
     <packaging>bundle</packaging>
@@ -9,39 +11,31 @@
 
     <description>Provides the OSGi ${scope} commands</description>
 
-    <properties>
-        <junit.bundle.version>^junit.bundle.version^</junit.bundle.version>
-        <osgi.version>^osgi.version^</osgi.version>
-        <osgi.compendium.version>^osgi.compendium.version^</osgi.compendium.version>
-        <karaf.version>^project.version^</karaf.version>
-        <maven-bundle-plugin.version>^felix.plugin.version^</maven-bundle-plugin.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>org.apache.karaf.shell</groupId>
             <artifactId>org.apache.karaf.shell.console</artifactId>
-            <version>${project.version}</version>
+            <version>^project.version^</version>
         </dependency>
 
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
-            <version>${osgi.version}</version>
+            <version>^osgi.version^</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.compendium</artifactId>
-            <version>${osgi.compendium.version}</version>
+            <version>^osgi.compendium.version^</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.junit</artifactId>
-            <version>${junit.bundle.version}</version>
+            <version>^junit.bundle.version^</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -60,7 +54,7 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>${maven-bundle-plugin.version}</version>
+                <version>^felix.plugin.version^</version>
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
