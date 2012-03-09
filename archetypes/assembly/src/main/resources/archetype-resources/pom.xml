@@ -8,12 +8,10 @@
     <version>${version}</version>
     <packaging>pom</packaging>
     <name>${artifactId} Karaf Assembly</name>
-    <description>
-        This project creates a Karaf custom distribution that you can customize to fit your needs.
-    </description>
+    <description>This project creates a Karaf custom distribution that you can customize to fit your needs.</description>
 
     <properties>
-        <karaf.version>2.2.6-SNAPSHOT</karaf.version>
+        <karaf.version>^project.version^</karaf.version>
     </properties>
 
     <dependencies>
