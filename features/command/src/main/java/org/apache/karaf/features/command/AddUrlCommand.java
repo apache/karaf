@@ -34,7 +34,8 @@ public class AddUrlCommand extends FeaturesCommandSupport {
             try {
                 admin.addRepository(new URI(url));
             } catch (Exception e) {
-                System.out.println("Could not add Feature Repository:\n" + e );  
+                System.out.println("Could not add Feature Repository:\n" + e );
+                System.out.println("Please verify that the feature repository URL is correct and that your network connection works fine.");
             }
         }
     }
