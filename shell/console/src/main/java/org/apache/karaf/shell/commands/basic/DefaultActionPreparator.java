@@ -46,44 +46,36 @@ import org.fusesource.jansi.Ansi;
 public class DefaultActionPreparator implements ActionPreparator {
 
     public static final Option HELP = new Option() {
-        public String name()
-        {
+        public String name() {
             return "--help";
         }
 
-        public String[] aliases()
-        {
-            return new String[] { };
+        public String[] aliases() {
+            return new String[]{};
         }
 
-        public String description()
-        {
+        public String description() {
             return "Display this help message";
         }
 
-        public boolean required()
-        {
+        public boolean required() {
             return false;
         }
 
-        public boolean multiValued()
-        {
+        public boolean multiValued() {
             return false;
         }
 
-        public String valueToShowInHelp()
-        {
+        public String valueToShowInHelp() {
             return Option.DEFAULT_STRING;
         }
 
-        public Class<? extends Annotation> annotationType()
-        {
+        public Class<? extends Annotation> annotationType() {
             return Option.class;
         }
     };
 
-    public boolean prepare(Action action, CommandSession session, List<Object> params) throws Exception
-    {
+    public boolean prepare(Action action, CommandSession session, List<Object> params) throws Exception {
         Map<Option, Field> options = new HashMap<Option, Field>();
         Map<Argument, Field> arguments = new HashMap<Argument, Field>();
         List<Argument> orderedArguments = new ArrayList<Argument>();
@@ -103,21 +95,27 @@ public class DefaultActionPreparator implements ActionPreparator {
                             public String name() {
                                 return name;
                             }
+
                             public String description() {
                                 return delegate.description();
                             }
+
                             public boolean required() {
                                 return delegate.required();
                             }
+
                             public int index() {
                                 return delegate.index();
                             }
+
                             public boolean multiValued() {
                                 return delegate.multiValued();
                             }
+
                             public String valueToShowInHelp() {
                                 return delegate.valueToShowInHelp();
                             }
+
                             public Class<? extends Annotation> annotationType() {
                                 return delegate.annotationType();
                             }
@@ -146,7 +144,7 @@ public class DefaultActionPreparator implements ActionPreparator {
         Map<Argument, Object> argumentValues = new HashMap<Argument, Object>();
         boolean processOptions = true;
         int argIndex = 0;
-        for (Iterator<Object> it = params.iterator(); it.hasNext();) {
+        for (Iterator<Object> it = params.iterator(); it.hasNext(); ) {
             Object param = it.next();
             // Check for help
             if (HELP.name().equals(param) || Arrays.asList(HELP.aliases()).contains(param)) {
@@ -172,25 +170,29 @@ public class DefaultActionPreparator implements ActionPreparator {
                 }
                 if (option == null) {
                     Command command = action.getClass().getAnnotation(Command.class);
-                    throw new CommandException(
-                            Ansi.ansi()
-                                    .fg(Ansi.Color.RED)
-                                    .a("Error executing command ")
-                                    .a(command.scope())
-                                    .a(":")
-                                    .a(Ansi.Attribute.INTENSITY_BOLD)
-                                    .a(command.name())
-                                    .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
-                                    .a(" undefined option ")
-                                    .a(Ansi.Attribute.INTENSITY_BOLD)
-                                    .a(param)
-                                    .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
-                                    .fg(Ansi.Color.DEFAULT)
-                                    .newline()
-                                    .a("Try '" + command.scope() + ":" + command.name() + " --help' for more information.")
-                                    .toString(),
-                            "Undefined option: " + param
-                    );
+                    if (command != null) {
+                        throw new CommandException(
+                                Ansi.ansi()
+                                        .fg(Ansi.Color.RED)
+                                        .a("Error executing command ")
+                                        .a(command.scope())
+                                        .a(":")
+                                        .a(Ansi.Attribute.INTENSITY_BOLD)
+                                        .a(command.name())
+                                        .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
+                                        .a(" undefined option ")
+                                        .a(Ansi.Attribute.INTENSITY_BOLD)
+                                        .a(param)
+                                        .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
+                                        .fg(Ansi.Color.DEFAULT)
+                                        .newline()
+                                        .a("Try '" + command.scope() + ":" + command.name() + " --help' for more information.")
+                                        .toString(),
+                                "Undefined option: " + param
+                        );
+                    } else {
+                        throw new CommandException("Undefined option: " + param);
+                    }
                 }
                 Field field = options.get(option);
                 if (value == null && (field.getType() == boolean.class || field.getType() == Boolean.class)) {
@@ -201,29 +203,33 @@ public class DefaultActionPreparator implements ActionPreparator {
                 }
                 if (value == null) {
                     Command command = action.getClass().getAnnotation(Command.class);
-                    throw new CommandException(
-                            Ansi.ansi()
-                                    .fg(Ansi.Color.RED)
-                                    .a("Error executing command ")
-                                    .a(command.scope())
-                                    .a(":")
-                                    .a(Ansi.Attribute.INTENSITY_BOLD)
-                                    .a(command.name())
-                                    .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
-                                    .a(" missing value for option ")
-                                    .a(Ansi.Attribute.INTENSITY_BOLD)
-                                    .a(param)
-                                    .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
-                                    .fg(Ansi.Color.DEFAULT)
-                                    .toString(),
-                            "Missing value for option: " + param
-                    );
+                    if (command != null) {
+                        throw new CommandException(
+                                Ansi.ansi()
+                                        .fg(Ansi.Color.RED)
+                                        .a("Error executing command ")
+                                        .a(command.scope())
+                                        .a(":")
+                                        .a(Ansi.Attribute.INTENSITY_BOLD)
+                                        .a(command.name())
+                                        .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
+                                        .a(" missing value for option ")
+                                        .a(Ansi.Attribute.INTENSITY_BOLD)
+                                        .a(param)
+                                        .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
+                                        .fg(Ansi.Color.DEFAULT)
+                                        .toString(),
+                                "Missing value for option: " + param
+                        );
+                    } else {
+                        throw new CommandException("Missing value for option: " + param);
+                    }
                 }
                 if (option.multiValued()) {
                     List<Object> l = (List<Object>) optionValues.get(option);
                     if (l == null) {
                         l = new ArrayList<Object>();
-                        optionValues.put(option,  l);
+                        optionValues.put(option, l);
                     }
                     l.add(value);
                 } else {
@@ -233,20 +239,24 @@ public class DefaultActionPreparator implements ActionPreparator {
                 processOptions = false;
                 if (argIndex >= orderedArguments.size()) {
                     Command command = action.getClass().getAnnotation(Command.class);
-                    throw new CommandException(
-                            Ansi.ansi()
-                                    .fg(Ansi.Color.RED)
-                                    .a("Error executing command ")
-                                    .a(command.scope())
-                                    .a(":")
-                                    .a(Ansi.Attribute.INTENSITY_BOLD)
-                                    .a(command.name())
-                                    .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
-                                    .a(": too many arguments specified")
-                                    .fg(Ansi.Color.DEFAULT)
-                                    .toString(),
-                            "Too many arguments specified"
-                    );
+                    if (command != null) {
+                        throw new CommandException(
+                                Ansi.ansi()
+                                        .fg(Ansi.Color.RED)
+                                        .a("Error executing command ")
+                                        .a(command.scope())
+                                        .a(":")
+                                        .a(Ansi.Attribute.INTENSITY_BOLD)
+                                        .a(command.name())
+                                        .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
+                                        .a(": too many arguments specified")
+                                        .fg(Ansi.Color.DEFAULT)
+                                        .toString(),
+                                "Too many arguments specified"
+                        );
+                    } else {
+                        throw new CommandException("Too many arguments specified");
+                    }
                 }
                 Argument argument = orderedArguments.get(argIndex);
                 if (!argument.multiValued()) {
@@ -268,47 +278,55 @@ public class DefaultActionPreparator implements ActionPreparator {
         for (Option option : options.keySet()) {
             if (option.required() && optionValues.get(option) == null) {
                 Command command = action.getClass().getAnnotation(Command.class);
-                throw new CommandException(
-                        Ansi.ansi()
-                                .fg(Ansi.Color.RED)
-                                .a("Error executing command ")
-                                .a(command.scope())
-                                .a(":")
-                                .a(Ansi.Attribute.INTENSITY_BOLD)
-                                .a(command.name())
-                                .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
-                                .a(": option ")
-                                .a(Ansi.Attribute.INTENSITY_BOLD)
-                                .a(option.name())
-                                .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
-                                .a(" is required")
-                                .fg(Ansi.Color.DEFAULT)
-                                .toString(),
-                        "Option " + option.name() + " is required"
-                );
+                if (command != null) {
+                    throw new CommandException(
+                            Ansi.ansi()
+                                    .fg(Ansi.Color.RED)
+                                    .a("Error executing command ")
+                                    .a(command.scope())
+                                    .a(":")
+                                    .a(Ansi.Attribute.INTENSITY_BOLD)
+                                    .a(command.name())
+                                    .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
+                                    .a(": option ")
+                                    .a(Ansi.Attribute.INTENSITY_BOLD)
+                                    .a(option.name())
+                                    .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
+                                    .a(" is required")
+                                    .fg(Ansi.Color.DEFAULT)
+                                    .toString(),
+                            "Option " + option.name() + " is required"
+                    );
+                } else {
+                    throw new CommandException("Option " + option.name() + " is required");
+                }
             }
         }
         for (Argument argument : arguments.keySet()) {
             if (argument.required() && argumentValues.get(argument) == null) {
                 Command command = action.getClass().getAnnotation(Command.class);
-                throw new CommandException(
-                        Ansi.ansi()
-                                .fg(Ansi.Color.RED)
-                                .a("Error executing command ")
-                                .a(command.scope())
-                                .a(":")
-                                .a(Ansi.Attribute.INTENSITY_BOLD)
-                                .a(command.name())
-                                .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
-                                .a(": argument ")
-                                .a(Ansi.Attribute.INTENSITY_BOLD)
-                                .a(argument.name())
-                                .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
-                                .a(" is required")
-                                .fg(Ansi.Color.DEFAULT)
-                                .toString(),
-                        "Argument " + argument.name() + " is required"
-                );
+                if (command != null) {
+                    throw new CommandException(
+                            Ansi.ansi()
+                                    .fg(Ansi.Color.RED)
+                                    .a("Error executing command ")
+                                    .a(command.scope())
+                                    .a(":")
+                                    .a(Ansi.Attribute.INTENSITY_BOLD)
+                                    .a(command.name())
+                                    .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
+                                    .a(": argument ")
+                                    .a(Ansi.Attribute.INTENSITY_BOLD)
+                                    .a(argument.name())
+                                    .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
+                                    .a(" is required")
+                                    .fg(Ansi.Color.DEFAULT)
+                                    .toString(),
+                            "Argument " + argument.name() + " is required"
+                    );
+                } else {
+                    throw new CommandException("Argument " + argument.name() + " is required");
+                }
             }
         }
         // Convert and inject values
@@ -319,29 +337,35 @@ public class DefaultActionPreparator implements ActionPreparator {
                 value = convert(action, session, entry.getValue(), field.getGenericType());
             } catch (Exception e) {
                 Command command = action.getClass().getAnnotation(Command.class);
-                throw new CommandException(
-                        Ansi.ansi()
-                                .fg(Ansi.Color.RED)
-                                .a("Error executing command ")
-                                .a(command.scope())
-                                .a(":")
-                                .a(Ansi.Attribute.INTENSITY_BOLD)
-                                .a(command.name())
-                                .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
-                                .a(": unable to convert option ")
-                                .a(Ansi.Attribute.INTENSITY_BOLD)
-                                .a(entry.getKey().name())
-                                .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
-                                .a(" with value '")
-                                .a(entry.getValue())
-                                .a("' to type ")
-                                .a(new GenericType(field.getGenericType()).toString())
-                                .fg(Ansi.Color.DEFAULT)
-                                .toString(),
-                        "Unable to convert option " + entry.getKey().name() + " with value '"
-                                + entry.getValue() + "' to type " + new GenericType(field.getGenericType()).toString(),
-                        e
-                );
+                if (command != null) {
+                    throw new CommandException(
+                            Ansi.ansi()
+                                    .fg(Ansi.Color.RED)
+                                    .a("Error executing command ")
+                                    .a(command.scope())
+                                    .a(":")
+                                    .a(Ansi.Attribute.INTENSITY_BOLD)
+                                    .a(command.name())
+                                    .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
+                                    .a(": unable to convert option ")
+                                    .a(Ansi.Attribute.INTENSITY_BOLD)
+                                    .a(entry.getKey().name())
+                                    .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
+                                    .a(" with value '")
+                                    .a(entry.getValue())
+                                    .a("' to type ")
+                                    .a(new GenericType(field.getGenericType()).toString())
+                                    .fg(Ansi.Color.DEFAULT)
+                                    .toString(),
+                            "Unable to convert option " + entry.getKey().name() + " with value '"
+                                    + entry.getValue() + "' to type " + new GenericType(field.getGenericType()).toString(),
+                            e
+                    );
+                } else {
+                    throw new CommandException("Unable to convert option " + entry.getKey().name() + " with value '"
+                            + entry.getValue() + "' to type " + new GenericType(field.getGenericType()).toString(),
+                            e);
+                }
             }
             field.setAccessible(true);
             field.set(action, value);
@@ -353,29 +377,35 @@ public class DefaultActionPreparator implements ActionPreparator {
                 value = convert(action, session, entry.getValue(), field.getGenericType());
             } catch (Exception e) {
                 Command command = action.getClass().getAnnotation(Command.class);
-                throw new CommandException(
-                        Ansi.ansi()
-                                .fg(Ansi.Color.RED)
-                                .a("Error executing command ")
-                                .a(command.scope())
-                                .a(":")
-                                .a(Ansi.Attribute.INTENSITY_BOLD)
-                                .a(command.name())
-                                .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
-                                .a(": unable to convert argument ")
-                                .a(Ansi.Attribute.INTENSITY_BOLD)
-                                .a(entry.getKey().name())
-                                .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
-                                .a(" with value '")
-                                .a(entry.getValue())
-                                .a("' to type ")
-                                .a(new GenericType(field.getGenericType()).toString())
-                                .fg(Ansi.Color.DEFAULT)
-                                .toString(),
-                        "Unable to convert argument " + entry.getKey().name() + " with value '" 
-                                + entry.getValue() + "' to type " + new GenericType(field.getGenericType()).toString(),
-                        e
-                );
+                if (command != null) {
+                    throw new CommandException(
+                            Ansi.ansi()
+                                    .fg(Ansi.Color.RED)
+                                    .a("Error executing command ")
+                                    .a(command.scope())
+                                    .a(":")
+                                    .a(Ansi.Attribute.INTENSITY_BOLD)
+                                    .a(command.name())
+                                    .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
+                                    .a(": unable to convert argument ")
+                                    .a(Ansi.Attribute.INTENSITY_BOLD)
+                                    .a(entry.getKey().name())
+                                    .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
+                                    .a(" with value '")
+                                    .a(entry.getValue())
+                                    .a("' to type ")
+                                    .a(new GenericType(field.getGenericType()).toString())
+                                    .fg(Ansi.Color.DEFAULT)
+                                    .toString(),
+                            "Unable to convert argument " + entry.getKey().name() + " with value '"
+                                    + entry.getValue() + "' to type " + new GenericType(field.getGenericType()).toString(),
+                            e
+                    );
+                } else {
+                    throw new CommandException("Unable to convert argument " + entry.getKey().name() + " with value '"
+                            + entry.getValue() + "' to type " + new GenericType(field.getGenericType()).toString(),
+                            e);
+                }
             }
             field.setAccessible(true);
             field.set(action, value);
@@ -383,127 +413,115 @@ public class DefaultActionPreparator implements ActionPreparator {
         return true;
     }
 
-    protected void printUsage(CommandSession session, Action action, Map<Option,Field> optionsMap, Map<Argument,Field> argsMap, PrintStream out)
-    {
+    protected void printUsage(CommandSession session, Action action, Map<Option, Field> optionsMap, Map<Argument, Field> argsMap, PrintStream out) {
         Command command = action.getClass().getAnnotation(Command.class);
-        Terminal term = session != null ? (Terminal) session.get(".jline.terminal") : null;
-        List<Argument> arguments = new ArrayList<Argument>(argsMap.keySet());
-        Collections.sort(arguments, new Comparator<Argument>() {
-            public int compare(Argument o1, Argument o2) {
-                return Integer.valueOf(o1.index()).compareTo(Integer.valueOf(o2.index()));
+        if (command != null) {
+            Terminal term = session != null ? (Terminal) session.get(".jline.terminal") : null;
+            List<Argument> arguments = new ArrayList<Argument>(argsMap.keySet());
+            Collections.sort(arguments, new Comparator<Argument>() {
+                public int compare(Argument o1, Argument o2) {
+                    return Integer.valueOf(o1.index()).compareTo(Integer.valueOf(o2.index()));
+                }
+            });
+            Set<Option> options = new HashSet<Option>(optionsMap.keySet());
+            options.add(HELP);
+            boolean globalScope = NameScoping.isGlobalScope(session, command.scope());
+            if (command != null && (command.description() != null || command.name() != null)) {
+                out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("DESCRIPTION").a(Ansi.Attribute.RESET));
+                out.print("        ");
+                if (command.name() != null) {
+                    if (globalScope) {
+                        out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a(command.name()).a(Ansi.Attribute.RESET));
+                    } else {
+                        out.println(Ansi.ansi().a(command.scope()).a(":").a(Ansi.Attribute.INTENSITY_BOLD).a(command.name()).a(Ansi.Attribute.RESET));
+                    }
+                    out.println();
+                }
+                out.print("\t");
+                out.println(command.description());
+                out.println();
             }
-        });
-        Set<Option> options = new HashSet<Option>(optionsMap.keySet());
-        options.add(HELP);
-        boolean globalScope = NameScoping.isGlobalScope(session, command.scope());
-        if (command != null && (command.description() != null || command.name() != null))
-        {
-            out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("DESCRIPTION").a(Ansi.Attribute.RESET));
-            out.print("        ");
-            if (command.name() != null) {
+            StringBuffer syntax = new StringBuffer();
+            if (command != null) {
                 if (globalScope) {
-                    out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a(command.name()).a(Ansi.Attribute.RESET));
+                    syntax.append(command.name());
                 } else {
-                    out.println(Ansi.ansi().a(command.scope()).a(":").a(Ansi.Attribute.INTENSITY_BOLD).a(command.name()).a(Ansi.Attribute.RESET));
+                    syntax.append(String.format("%s:%s", command.scope(), command.name()));
+                }
+            }
+            if (options.size() > 0) {
+                syntax.append(" [options]");
+            }
+            if (arguments.size() > 0) {
+                syntax.append(' ');
+                for (Argument argument : arguments) {
+                    if (!argument.required()) {
+                        syntax.append(String.format("[%s] ", argument.name()));
+                    } else {
+                        syntax.append(String.format("%s ", argument.name()));
+                    }
+                }
+            }
+
+            out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("SYNTAX").a(Ansi.Attribute.RESET));
+            out.print("        ");
+            out.println(syntax.toString());
+            out.println();
+            if (arguments.size() > 0) {
+                out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("ARGUMENTS").a(Ansi.Attribute.RESET));
+                for (Argument argument : arguments) {
+                    out.print("        ");
+                    out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a(argument.name()).a(Ansi.Attribute.RESET));
+                    printFormatted("                ", argument.description(), term != null ? term.getWidth() : 80, out);
+                    if (!argument.required()) {
+                        if (argument.valueToShowInHelp() != null && argument.valueToShowInHelp().length() != 0) {
+                            try {
+                                if (Argument.DEFAULT_STRING.equals(argument.valueToShowInHelp())) {
+                                    argsMap.get(argument).setAccessible(true);
+                                    Object o = argsMap.get(argument).get(action);
+                                    printObjectDefaultsTo(out, o);
+                                } else {
+                                    printDefaultsTo(out, argument.valueToShowInHelp());
+                                }
+                            } catch (Throwable t) {
+                                // Ignore
+                            }
+                        }
+                    }
                 }
                 out.println();
             }
-            out.print("\t");
-            out.println(command.description());
-            out.println();
-        }
-        StringBuffer syntax = new StringBuffer();
-        if (command != null)
-        {
-            if (globalScope) {
-                syntax.append(command.name());
-            } else {
-                syntax.append(String.format("%s:%s", command.scope(), command.name()));
-            }
-        }
-        if (options.size() > 0)
-        {
-            syntax.append(" [options]");
-        }
-        if (arguments.size() > 0)
-        {
-            syntax.append(' ');
-            for (Argument argument : arguments)
-            {
-                if (!argument.required())
-                {
-                    syntax.append(String.format("[%s] ", argument.name()));
-                }
-                else
-                {
-                    syntax.append(String.format("%s ", argument.name()));
-                }
-            }
-        }
-
-        out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("SYNTAX").a(Ansi.Attribute.RESET));
-        out.print("        ");
-        out.println(syntax.toString());
-        out.println();
-        if (arguments.size() > 0)
-        {
-            out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("ARGUMENTS").a(Ansi.Attribute.RESET));
-            for (Argument argument : arguments)
-            {
-                out.print("        ");
-                out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a(argument.name()).a(Ansi.Attribute.RESET));
-                printFormatted("                ", argument.description(), term != null ? term.getWidth() : 80, out);
-                if (!argument.required()) {
-                    if (argument.valueToShowInHelp() != null && argument.valueToShowInHelp().length() != 0) {
-                         try {
-                            if (Argument.DEFAULT_STRING.equals(argument.valueToShowInHelp())) {
-                                argsMap.get(argument).setAccessible(true);
-                                Object o = argsMap.get(argument).get(action);
+            if (options.size() > 0) {
+                out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("OPTIONS").a(Ansi.Attribute.RESET));
+                for (Option option : options) {
+                    String opt = option.name();
+                    for (String alias : option.aliases()) {
+                        opt += ", " + alias;
+                    }
+                    out.print("        ");
+                    out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a(opt).a(Ansi.Attribute.RESET));
+                    printFormatted("                ", option.description(), term != null ? term.getWidth() : 80, out);
+                    if (option.valueToShowInHelp() != null && option.valueToShowInHelp().length() != 0) {
+                        try {
+                            if (Option.DEFAULT_STRING.equals(option.valueToShowInHelp())) {
+                                optionsMap.get(option).setAccessible(true);
+                                Object o = optionsMap.get(option).get(action);
                                 printObjectDefaultsTo(out, o);
                             } else {
-                                printDefaultsTo(out, argument.valueToShowInHelp());
+                                printDefaultsTo(out, option.valueToShowInHelp());
                             }
                         } catch (Throwable t) {
                             // Ignore
                         }
                     }
                 }
+                out.println();
             }
-            out.println();
-        }
-        if (options.size() > 0)
-        {
-            out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("OPTIONS").a(Ansi.Attribute.RESET));
-            for (Option option : options)
-            {
-                String opt = option.name();
-                for (String alias : option.aliases())
-                {
-                    opt += ", " + alias;
-                }
-                out.print("        ");
-                out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a(opt).a(Ansi.Attribute.RESET));
-                printFormatted("                ", option.description(), term != null ? term.getWidth() : 80, out);
-                if (option.valueToShowInHelp() != null && option.valueToShowInHelp().length() != 0) {
-                    try {
-                        if(Option.DEFAULT_STRING.equals(option.valueToShowInHelp())) {
-                            optionsMap.get(option).setAccessible(true);
-                            Object o = optionsMap.get(option).get(action);
-                            printObjectDefaultsTo(out, o);
-                        } else {
-                            printDefaultsTo(out, option.valueToShowInHelp());
-                        }
-                    } catch (Throwable t) {
-                        // Ignore
-                    }
-                }
+            if (command.detailedDescription().length() > 0) {
+                out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("DETAILS").a(Ansi.Attribute.RESET));
+                String desc = loadDescription(action.getClass(), command.detailedDescription());
+                printFormatted("        ", desc, term != null ? term.getWidth() : 80, out);
             }
-            out.println();
-        }
-        if (command.detailedDescription().length() > 0) {
-            out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("DETAILS").a(Ansi.Attribute.RESET));
-            String desc = loadDescription(action.getClass(), command.detailedDescription());
-            printFormatted("        ", desc, term != null ? term.getWidth() : 80, out);
         }
     }
 
@@ -568,8 +586,7 @@ public class DefaultActionPreparator implements ActionPreparator {
         return str.length();
     }
 
-    protected Object convert(Action action, CommandSession session, Object value, Type toType) throws Exception
-    {
+    protected Object convert(Action action, CommandSession session, Object value, Type toType) throws Exception {
         if (toType == String.class) {
             return value != null ? value.toString() : null;
         }
