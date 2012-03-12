@@ -117,9 +117,10 @@
     <bean id="configRepo" class="org.apache.karaf.shell.config.ConfigRepository">
         <argument value="${storage}"/>
         <argument ref="configAdmin"/>
+        <argument ref="artifactInstallers"/>
     </bean>
     
-    <service interface="org.apache.karaf.shell.config.ConfigRepository" ref="configRepo"/>
+    <reference-list id="artifactInstallers" interface="org.apache.felix.fileinstall.ArtifactInstaller" availability="optional" />
 
     <reference id="configAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"  />
 

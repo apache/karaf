@@ -51,7 +51,7 @@ public class UpdateCommandTest extends TestCase {
         command.setBundleContext(context);
 
         admin = createMock(ConfigurationAdmin.class);
-        command.setConfigRepository(new ConfigRepository(null, admin));
+        command.setConfigRepository(new ConfigRepository(null, admin, null));
         expect(context.getBundle(0)).andReturn(null).anyTimes();
 
         replay(context);

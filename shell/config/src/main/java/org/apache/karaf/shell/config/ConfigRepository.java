@@ -21,14 +21,19 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Enumeration;
+import java.util.List;
 
+import org.apache.felix.fileinstall.ArtifactInstaller;
 import org.apache.felix.utils.properties.Properties;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ConfigRepository {
+    private static final Logger LOG = LoggerFactory.getLogger(ConfigRepository.class);
     private static final String FILEINSTALL_FILE_NAME="felix.fileinstall.filename";
 
     private static final String PID_FILTER="(service.pid=%s*)";
@@ -37,11 +42,14 @@ public class ConfigRepository {
     private static final String FACTORY_SEPARATOR = "-";
 
     private ConfigurationAdmin configAdmin;
-    private File storage;
     
-    public ConfigRepository(File storage, ConfigurationAdmin configAdmin) {
+    private File storage;
+    private List<ArtifactInstaller> artifactInstallers;
+
+    public ConfigRepository(File storage, ConfigurationAdmin configAdmin, List<ArtifactInstaller> artifactInstallers) {
         this.storage = storage;
         this.configAdmin = configAdmin;
+        this.artifactInstallers = artifactInstallers;
     }
     
     /**
@@ -141,7 +149,27 @@ public class ConfigRepository {
         // save the cfg file
         storage.mkdirs();
         p.save();
-
+        updateFileInstall(storageFile);
+    }
+    
+    /**
+     * Trigger felix fileinstall to update the config so there is no delay till it polls the file
+     * 
+     * @param storageFile
+     * @throws Exception
+     */
+    private void updateFileInstall(File storageFile) {
+        if (artifactInstallers != null) {
+            for (ArtifactInstaller installer : artifactInstallers) {
+                if (installer.canHandle(storageFile)) {
+                    try {
+                        installer.update(storageFile);
+                    } catch (Exception e) {
+                        LOG.warn("Error updating config " + storageFile + " in felix fileinstall" + e.getMessage(), e);
+                    }
+                }
+            }
+        }
     }
 
     private boolean shouldPersist(Object key) {
