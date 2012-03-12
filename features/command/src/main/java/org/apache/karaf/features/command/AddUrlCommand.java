@@ -49,7 +49,7 @@ public class AddUrlCommand extends FeaturesCommandSupport {
                     try {
                         admin.addRepository(new URI(url));
                     } catch (Exception e) {
-                        throw new Exception("Unable to add features repository " + url, e);
+                        throw new Exception(e);
                     }
                 } else {
                     refreshUrl(admin, url);
@@ -58,6 +58,6 @@ public class AddUrlCommand extends FeaturesCommandSupport {
                 exceptions.add(e);
             }
         }
-        MultiException.throwIf("Unable to add repositories", exceptions);
+        MultiException.throwIf("Unable to add repositories (please verify the features repository URL and your network connection)", exceptions);
     }
 }
