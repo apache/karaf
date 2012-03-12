@@ -98,8 +98,7 @@ public class Console implements Runnable
         this.closeCallback = closeCallback;
 
         reader = new ConsoleReader(this.consoleInput,
-                                   new PrintWriter(this.out),
-                                   getClass().getResourceAsStream("keybinding.properties"),
+                                   this.out,
                                    this.terminal);
 
         final File file = getHistoryFile();
@@ -109,14 +108,11 @@ public class Console implements Runnable
 		} catch (Exception e) {
 			LOGGER.error("Can not read history from file " + file + ". Using in memory history", e);
 		}
-
+        session.put(".jline.reader", reader);
         session.put(".jline.history", reader.getHistory());
         Completer completer = createCompleter();
         if (completer != null) {
             reader.addCompleter(new CompleterAsCompletor(completer));
-        }
-        if (Boolean.getBoolean("jline.nobell")) {
-            reader.setBellEnabled(false);
         }
         pipe = new Thread(new Pipe());
         pipe.setName("gogo shell pipe thread");
@@ -128,7 +124,8 @@ public class Console implements Runnable
      * @return
      */
     protected File getHistoryFile() {
-        return new File(System.getProperty("karaf.history", new File(System.getProperty("user.home"), ".karaf/karaf.history").toString()));
+        String defaultHistoryPath = new File(System.getProperty("user.home"), ".karaf/karaf.history").toString();
+        return new File(System.getProperty("karaf.history", defaultHistoryPath));
     }
 
     public CommandSession getSession() {
@@ -159,6 +156,105 @@ public class Console implements Runnable
         welcome();
         setSessionProperties();
         String scriptFileName = System.getProperty(SHELL_INIT_SCRIPT);
+        executeScript(scriptFileName);
+        while (running) {
+            try {
+                String command = readAndParseCommand();
+                if (command == null) {
+                    break;
+                }
+                Object result = session.execute(command);
+                if (result != null) {
+                    session.getConsole().println(session.format(result, Converter.INSPECT));
+                }
+            }
+            catch (InterruptedIOException e) {
+                // System.err.println("^C");
+                // TODO: interrupt current thread
+            }
+            catch (CloseShellException e) {
+                break;
+            }
+            catch (Throwable t) {
+                logException(t);
+            }
+        }
+        close();
+        //System.err.println("Exiting console...");
+        if (closeCallback != null)
+        {
+            closeCallback.run();
+        }
+    }
+
+    private void logException(Throwable t) {
+        try {
+            if (t instanceof CommandNotFoundException) {
+                LOGGER.debug("Unknown command entered", t);
+            } else {
+                LOGGER.info("Exception caught while executing command", t);
+            }
+            session.put(LAST_EXCEPTION, t);
+            if (t instanceof CommandException) {
+                session.getConsole().println(((CommandException) t).getNiceHelp());
+            } else if (t instanceof CommandNotFoundException) {
+                String str = Ansi.ansi()
+                        .fg(Ansi.Color.RED)
+                        .a("Command not found: ")
+                        .a(Ansi.Attribute.INTENSITY_BOLD)
+                        .a(((CommandNotFoundException) t).getCommand())
+                        .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
+                        .fg(Ansi.Color.DEFAULT).toString();
+                session.getConsole().println(str);
+            }
+            if (getBoolean(PRINT_STACK_TRACES)) {
+                session.getConsole().print(Ansi.ansi().fg(Ansi.Color.RED).toString());
+                t.printStackTrace(session.getConsole());
+                session.getConsole().print(Ansi.ansi().fg(Ansi.Color.DEFAULT).toString());
+            } else if (!(t instanceof CommandException) && !(t instanceof CommandNotFoundException)) {
+                session.getConsole().print(Ansi.ansi().fg(Ansi.Color.RED).toString());
+                session.getConsole().println("Error executing command: "
+                    + (t.getMessage() != null ? t.getMessage() : t.getClass().getName()));
+                session.getConsole().print(Ansi.ansi().fg(Ansi.Color.DEFAULT).toString());
+            }
+        } catch (Exception ignore) {
+            // ignore
+        }
+    }
+
+    private String readAndParseCommand() throws IOException {
+        String command = null;
+        boolean loop = true;
+        boolean first = true;
+        while (loop) {
+            checkInterrupt();
+            String line = reader.readLine(first ? getPrompt() : "> ");
+            if (line == null)
+            {
+                break;
+            }
+            if (command == null) {
+                command = line;
+            } else {
+                command += " " + line;
+            }
+            if (reader.getHistory().size()==0) {
+                reader.getHistory().add(command);
+            } else {
+                reader.getHistory().replace(command);
+            }
+            try {
+                new Parser(command).program();
+                loop = false;
+            } catch (Exception e) {
+                loop = true;
+                first = false;
+            }
+        }
+        return command;
+    }
+
+    private void executeScript(String scriptFileName) {
         if (scriptFileName != null) {
             Reader r = null;
             try {
@@ -183,98 +279,6 @@ public class Console implements Runnable
                     }
                 }
             }
-        }
-        while (running) {
-            try {
-                String command = null;
-                boolean loop = true;
-                boolean first = true;
-                while (loop) {
-                    checkInterrupt();
-                    String line = reader.readLine(first ? getPrompt() : "> ");
-                    if (line == null)
-                    {
-                        break;
-                    }
-                    if (command == null) {
-                        command = line;
-                    } else {
-                        command += " " + line;
-                    }
-                    if (reader.getHistory().size()==0) {
-                        reader.getHistory().add(command);
-                    } else {
-                        reader.getHistory().replace(command);
-                    }                        
-                    try {
-                        new Parser(command).program();
-                        loop = false;
-                    } catch (Exception e) {
-                        loop = true;
-                        first = false;
-                    }
-                }
-                if (command == null) {
-                    break;
-                }
-                //session.getConsole().println("Executing: " + line);
-                Object result = session.execute(command);
-                if (result != null)
-                {
-                    session.getConsole().println(session.format(result, Converter.INSPECT));
-                }
-            }
-            catch (InterruptedIOException e)
-            {
-                //System.err.println("^C");
-                // TODO: interrupt current thread
-            }
-            catch (CloseShellException e)
-            {
-                break;
-            }
-            catch (Throwable t)
-            {
-                try {
-                    if (t instanceof CommandNotFoundException) {
-                        LOGGER.debug("Unknown command entered", t);
-                    } else {
-                        LOGGER.info("Exception caught while executing command", t);
-                    }
-                    session.put(LAST_EXCEPTION, t);
-                    if (t instanceof CommandException) {
-                        session.getConsole().println(((CommandException) t).getNiceHelp());
-                    } else if (t instanceof CommandNotFoundException) {
-                        String str = Ansi.ansi()
-                            .fg(Ansi.Color.RED)
-                            .a("Command not found: ")
-                            .a(Ansi.Attribute.INTENSITY_BOLD)
-                            .a(((CommandNotFoundException) t).getCommand())
-                            .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
-                            .fg(Ansi.Color.DEFAULT).toString();
-                        session.getConsole().println(str);
-                    }
-                    if ( getBoolean(PRINT_STACK_TRACES)) {
-                        session.getConsole().print(Ansi.ansi().fg(Ansi.Color.RED).toString());
-                        t.printStackTrace(session.getConsole());
-                        session.getConsole().print(Ansi.ansi().fg(Ansi.Color.DEFAULT).toString());
-                    }
-                    else if (!(t instanceof CommandException) && !(t instanceof CommandNotFoundException)) {
-                        session.getConsole().print(Ansi.ansi().fg(Ansi.Color.RED).toString());
-                        session.getConsole().println("Error executing command: "
-                                + (t.getMessage() != null ? t.getMessage() : t.getClass().getName()));
-                        session.getConsole().print(Ansi.ansi().fg(Ansi.Color.DEFAULT).toString());
-                    }
-                } catch (Exception ignore) {
-                        // ignore
-                }
-            }
-        }
-        close();
-        //System.err.println("Exiting console...");
-        if (closeCallback != null)
-        {
-            closeCallback.run();
         }
     }
 
@@ -465,7 +469,7 @@ public class Console implements Runnable
                 {
                     try
                     {
-                        int c = terminal.readCharacter(in);
+                        int c = in.read();
                         if (c == -1)
                         {
                             return;
@@ -473,6 +477,7 @@ public class Console implements Runnable
                         else if (c == 4 && !getBoolean(IGNORE_INTERRUPTS))
                         {
                             err.println("^D");
+                            return;
                         }
                         else if (c == 3 && !getBoolean(IGNORE_INTERRUPTS))
                         {
