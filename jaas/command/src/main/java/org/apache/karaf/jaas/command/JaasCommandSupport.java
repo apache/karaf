@@ -65,12 +65,12 @@ public abstract class JaasCommandSupport extends OsgiCommandSupport {
      * @param realmName
      * @return
      */
-    public JaasRealm findRealmByName(String realmName) {
+    public JaasRealm findRealmByNameOrIndex(String realmName, int index) {
         JaasRealm realm = null;
         if (realms != null) {
-            for (JaasRealm jaasRealm : realms) {
-                if (jaasRealm.getName().equals(realmName))
-                    return jaasRealm;
+            for (int i=1; i <= realms.size();i++) {
+                if (realms.get(i-1).getName().equals(realmName) || index == i)
+                    return realms.get(i-1);
             }
         }
         return realm;
