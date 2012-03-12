@@ -28,7 +28,10 @@
     <bean id="configMBean" class="org.apache.karaf.management.mbeans.config.internal.ConfigMBeanImpl">
         <property name="configurationAdmin" ref="configurationAdmin"/>
         <property name="storage" value="${storage}"/>
+        <property name="artifactInstallers" ref="artifactInstallers" />
     </bean>
+    
+    <reference-list id="artifactInstallers" interface="org.apache.felix.fileinstall.ArtifactInstaller" availability="optional" />
 
     <!-- Register MBean in the MBeanServer -->
     <bean id="mbeanRegistrer" class="org.apache.karaf.management.MBeanRegistrer">

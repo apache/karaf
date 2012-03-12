@@ -17,6 +17,9 @@
 package org.apache.karaf.shell.config;
 
 import java.util.Dictionary;
+import java.util.List;
+
+import org.apache.felix.fileinstall.ArtifactInstaller;
 import org.apache.felix.gogo.commands.Command;
 import org.apache.felix.gogo.commands.Option;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -26,7 +29,7 @@ public class UpdateCommand extends ConfigCommandSupport {
 
     @Option(name = "-b", aliases = {"--bypass-storage"}, multiValued = false, required = false, description = "Do not store the configuration in a properties file, but feed it directly to ConfigAdmin")
     protected boolean bypassStorage;
-
+    
     protected void doExecute(ConfigurationAdmin admin) throws Exception {
         Dictionary props = getEditedProps();
         if (props == null) {

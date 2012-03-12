@@ -92,9 +92,12 @@
         <command name="config/update">
             <action class="org.apache.karaf.shell.config.UpdateCommand">
                 <property name="storage" value="${storage}" />
+                <property name="artifactInstallers" ref="artifactInstallers"/>
             </action>
         </command>
     </command-bundle>
+    
+    <reference-list id="artifactInstallers" interface="org.apache.felix.fileinstall.ArtifactInstaller" availability="optional" />
 
     <bean id="configCompleter" class="org.apache.karaf.shell.config.completers.ConfigurationCompleter" init-method="init">
         <property name="admin" ref="configAdmin"/>
