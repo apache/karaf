@@ -21,6 +21,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Enumeration;
+import java.util.List;
+
+import org.apache.felix.fileinstall.ArtifactInstaller;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.apache.karaf.util.Properties;
 import org.osgi.framework.Constants;
@@ -46,6 +49,7 @@ public abstract class ConfigCommandSupport extends OsgiCommandSupport {
     private static final String FILEINSTALL_FILE_NAME = "felix.fileinstall.filename";
 
     protected File storage;
+    private List<ArtifactInstaller> artifactInstallers;
 
     protected Object doExecute() throws Exception {
         // Get config admin service.
@@ -177,7 +181,27 @@ public abstract class ConfigCommandSupport extends OsgiCommandSupport {
         // save the cfg file
         storage.mkdirs();
         p.save();
+        updateFileInstall(storageFile);
+    }
 
+    /**
+     * Trigger felix fileinstall to update the config so there is no delay till it polls the file
+     * 
+     * @param storageFile
+     * @throws Exception
+     */
+    private void updateFileInstall(File storageFile) {
+        if (artifactInstallers != null) {
+            for (ArtifactInstaller installer : artifactInstallers) {
+                if (installer.canHandle(storageFile)) {
+                    try {
+                        installer.update(storageFile);
+                    } catch (Exception e) {
+                        log.warn("Error updating config " + storageFile + " in felix fileinstall" + e.getMessage(), e);
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -224,5 +248,9 @@ public abstract class ConfigCommandSupport extends OsgiCommandSupport {
 
     public void setStorage(File storage) {
         this.storage = storage;
+    }
+    
+    public void setArtifactInstallers(List<ArtifactInstaller> artifactInstallers) {
+        this.artifactInstallers = artifactInstallers;
     }
 }

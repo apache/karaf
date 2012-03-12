@@ -13,11 +13,14 @@
  */
 package org.apache.karaf.management.mbeans.config.internal;
 
+import org.apache.felix.fileinstall.ArtifactInstaller;
 import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.management.mbeans.config.ConfigMBean;
 import org.osgi.framework.Constants;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
@@ -28,10 +31,12 @@ import java.util.*;
  * Implementation of the ConfigMBean.
  */
 public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
-
+    private static final Logger LOG = LoggerFactory.getLogger(ConfigMBeanImpl.class);
+    
     private final String FELIX_FILEINSTALL_FILENAME = "felix.fileinstall.filename";
 
     private ConfigurationAdmin configurationAdmin;
+    private List<ArtifactInstaller> artifactInstallers;
     private File storage;
 
     public ConfigurationAdmin getConfigurationAdmin() {
@@ -48,6 +53,10 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
 
     public void setStorage(File storage) {
         this.storage = storage;
+    }
+
+    public void setArtifactInstallers(List<ArtifactInstaller> artifactInstallers) {
+        this.artifactInstallers = artifactInstallers;
     }
 
     public ConfigMBeanImpl() throws NotCompliantMBeanException {
@@ -197,6 +206,7 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
             // save the cfg file
             storage.mkdirs();
             p.save();
+            updateFileInstall(storageFile);
         } else {
             Configuration cfg = configurationAdmin.getConfiguration(pid, null);
             if (cfg.getProperties() == null) {
@@ -209,6 +219,26 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
                 cfg.setBundleLocation(null);
             }
             cfg.update(properties);
+        }
+    }
+    
+    /**
+     * Trigger felix fileinstall to update the config so there is no delay till it polls the file
+     * 
+     * @param storageFile
+     * @throws Exception
+     */
+    private void updateFileInstall(File storageFile) {
+        if (artifactInstallers != null) {
+            for (ArtifactInstaller installer : artifactInstallers) {
+                if (installer.canHandle(storageFile)) {
+                    try {
+                        installer.update(storageFile);
+                    } catch (Exception e) {
+                        LOG.warn("Error updating config " + storageFile + " in felix fileinstall" + e.getMessage(), e);
+                    }
+                }
+            }
         }
     }
 
