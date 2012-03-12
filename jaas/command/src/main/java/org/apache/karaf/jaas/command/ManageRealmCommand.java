@@ -32,8 +32,11 @@ import java.util.Queue;
 @Command(scope = "jaas", name = "manage", description = "Manage user and roles of a Jaas Realm.")
 public class ManageRealmCommand extends JaasCommandSupport {
 
-    @Argument(index = 0, name = "realm", description = "Jaas Realm", required = true, multiValued = false)
+    @Option(name = "--realm", description = "Jaas Realm", required = false, multiValued = false)
     String realmName;
+
+    @Option(name = "--index", description = "Realm Index", required = false, multiValued = false)
+    int index;
 
     @Option(name = "--module", aliases = {}, description = "Realm Module", required = false, multiValued = false)
     String moduleName;
@@ -43,6 +46,10 @@ public class ManageRealmCommand extends JaasCommandSupport {
 
     @Override
     protected Object doExecute() throws Exception {
+        if (realmName == null && index <= 0 ) {
+            System.err.println("A valid realm or the realm index need to be specified");
+            return null;
+        }
         JaasRealm oldRealm = (JaasRealm) this.session.get(JAAS_REALM);
         AppConfigurationEntry oldEntry = (AppConfigurationEntry) this.session.get(JAAS_ENTRY);
 
@@ -52,7 +59,7 @@ public class ManageRealmCommand extends JaasCommandSupport {
             System.err.println("Another module is being edited.  Cancel / update first, or use the --force option");
         } else {
 
-            JaasRealm realm = findRealmByName(realmName);
+            JaasRealm realm = findRealmByNameOrIndex(realmName, index);
 
             if (realm != null) {
                 AppConfigurationEntry entry = findEntryByRealmAndName(realm, moduleName);
