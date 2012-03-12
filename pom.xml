@@ -139,8 +139,8 @@
         <aries.proxy.version>0.3</aries.proxy.version>
         <aries.transaction.version>0.3</aries.transaction.version>
         <aries.util.version>0.3</aries.util.version>
-        <jansi.version>1.7</jansi.version>
-        <jline.version>2.5</jline.version>
+        <jansi.version>1.8</jansi.version>
+        <jline.version>2.6</jline.version>
         <jsw.version>3.2.3</jsw.version>
         <log4j.version>1.2.16</log4j.version>
         <maven.version>2.0.9</maven.version>
@@ -739,7 +739,7 @@
                 <version>${log4j.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.sonatype.jline</groupId>
+                <groupId>jline</groupId>
                 <artifactId>jline</artifactId>
                 <version>${jline.version}</version>
             </dependency>
