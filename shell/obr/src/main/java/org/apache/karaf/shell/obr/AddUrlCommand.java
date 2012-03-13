@@ -22,7 +22,7 @@ import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 
-@Command(scope = "obr", name = "add-url", description = "Adds a list of repository URLs to the OBR service.")
+@Command(scope = "obr", name = "url-add", description = "Adds a list of repository URLs to the OBR service.")
 public class AddUrlCommand extends ObrCommandSupport {
 
     @Argument(index = 0, name = "urls", description = "Repository URLs to add to the OBR service separated by whitespaces", required = true, multiValued = true)
