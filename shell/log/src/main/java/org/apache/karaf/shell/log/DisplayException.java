@@ -21,7 +21,7 @@ import org.apache.karaf.shell.commands.Command;
 import org.ops4j.pax.logging.spi.PaxLoggingEvent;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 
-@Command(scope = "log", name = "display-exception", description = "Displays the last occurred exception from the log.")
+@Command(scope = "log", name = "exception-display", description = "Displays the last occurred exception from the log.")
 public class DisplayException extends OsgiCommandSupport {
 
     @Argument(index = 0, name = "logger", description = "The name of the logger. This can be ROOT, ALL, or the name of a logger specified in the org.ops4j.pax.logger.cfg file.", required = false, multiValued = false)
