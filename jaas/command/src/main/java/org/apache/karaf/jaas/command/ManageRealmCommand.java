@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package org.apache.karaf.jaas.command;
 
 import org.apache.karaf.shell.commands.Command;
@@ -25,7 +24,7 @@ import javax.security.auth.login.AppConfigurationEntry;
 import java.util.LinkedList;
 import java.util.Queue;
 
-@Command(scope = "jaas", name = "manage-realm", description = "Manage user and roles of a Jaas Realm.")
+@Command(scope = "jaas", name = "realm-manage", description = "Manage user and roles of a JAAS Realm.")
 public class ManageRealmCommand extends JaasCommandSupport {
 
     @Option(name = "--realm", description = "Jaas Realm", required = false, multiValued = false)

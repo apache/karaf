@@ -13,17 +13,13 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package org.apache.karaf.jaas.command;
 
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.jaas.modules.BackingEngine;
 
-/**
- * Adds a role to a user of the active realm/module.
- */
-@Command(scope = "jaas", name = "add-role", description = "Add a role to a user.")
+@Command(scope = "jaas", name = "role-add", description = "Add a role to a user.")
 public class RoleAddCommand extends JaasCommandSupport {
 
     @Argument(index = 0, name = "username", description = "User Name", required = true, multiValued = false)
