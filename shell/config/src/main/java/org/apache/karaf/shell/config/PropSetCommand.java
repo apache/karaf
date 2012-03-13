@@ -21,7 +21,7 @@ import java.util.Dictionary;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 
-@Command(scope = "config", name = "set-property", description = "Sets a property in the currently edited configuration.")
+@Command(scope = "config", name = "property-set", description = "Sets a property in the currently edited configuration.")
 public class PropSetCommand extends ConfigPropertyCommandSupport {
 
     @Argument(index = 0, name = "property", description = "The name of the property to set", required = true, multiValued = false)

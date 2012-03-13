@@ -21,7 +21,7 @@ import java.util.Dictionary;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 
-@Command(scope = "config", name = "delete-property", description = "Deletes a property from the configuration being edited.")
+@Command(scope = "config", name = "property-delete", description = "Deletes a property from the configuration being edited.")
 public class PropDelCommand extends ConfigPropertyCommandSupport {
 
     @Argument(index = 0, name = "property", description = "The name of the property to delete", required = true, multiValued = false)
