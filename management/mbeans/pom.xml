@@ -37,7 +37,6 @@
         <module>bundles</module>
         <module>services</module>
         <module>packages</module>
-        <module>config</module>
         <module>dev</module>
         <module>http</module>
         <module>log</module>
