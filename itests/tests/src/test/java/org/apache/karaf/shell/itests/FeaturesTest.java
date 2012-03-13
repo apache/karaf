@@ -76,7 +76,7 @@ public class FeaturesTest {
         assertNotNull(wrapperService);
         // Run some commands to make sure they are installed properly
         CommandSession cs = cp.createSession(System.in, System.out, System.err);
-        cs.execute("obr:list-url");
+        cs.execute("obr:url-list");
         cs.execute("wrapper:install --help");
         cs.close();
     }
