@@ -31,19 +31,19 @@ import org.osgi.framework.Bundle;
 @Command(scope = "region", name = "info", description = "Prints information about region digraph.")
 public class InfoCommand extends RegionCommandSupport {
 
-    @Option(name = "-v", aliases = "--verbose", required = false, description = "Show all info")
+    @Option(name = "-v", aliases = "--verbose", required = false, description = "Show all info.")
     boolean verbose;
 
-    @Option(name = "-b", aliases = "--bundles", required = false, description = "Show bundles in each region")
+    @Option(name = "-b", aliases = "--bundles", required = false, description = "Show bundles in each region.")
     boolean bundles;
 
-    @Option(name = "-f", aliases = "--filters", required = false, description = "Show filters")
+    @Option(name = "-f", aliases = "--filters", required = false, description = "Show filters.")
     boolean filters;
 
-    @Option(name = "-n", aliases = "--namespaces", required = false, description = "Show namespaces in each filter")
+    @Option(name = "-n", aliases = "--namespaces", required = false, description = "Show namespaces in each filter.")
     boolean namespaces;
 
-    @Argument(index = 0, name = "regions", description = "Regions to provide detailed info for", required = false, multiValued = true)
+    @Argument(index = 0, name = "regions", description = "Regions to provide detailed info for.", required = false, multiValued = true)
     List<String> regions;
 
     protected void doExecute(RegionDigraph regionDigraph) throws Exception {

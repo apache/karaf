@@ -24,7 +24,7 @@ import org.eclipse.equinox.region.Region;
 import org.eclipse.equinox.region.RegionDigraph;
 import org.osgi.framework.Bundle;
 
-@Command(scope = "region", name = "addBundle", description = "Adds a list of known bundles by id to a specified Region.")
+@Command(scope = "region", name = "bundle-add", description = "Adds a list of known bundles by id to a specified region.")
 public class AddBundleCommand extends RegionCommandSupport {
 
     @Argument(index = 0, name = "region", description = "Region to add the bundles to", required = true, multiValued = false)
