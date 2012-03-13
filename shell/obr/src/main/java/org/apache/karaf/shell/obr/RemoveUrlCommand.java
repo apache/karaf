@@ -22,7 +22,7 @@ import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 
-@Command(scope = "obr", name = "remove-url", description = "Removes a list of repository URLs from the OBR service.")
+@Command(scope = "obr", name = "url-remove", description = "Removes a list of repository URLs from the OBR service.")
 public class RemoveUrlCommand extends ObrCommandSupport {
 
     @Argument(index = 0, name = "urls", description = "Repository URLs to remove from OBR service", required = true, multiValued = true)
