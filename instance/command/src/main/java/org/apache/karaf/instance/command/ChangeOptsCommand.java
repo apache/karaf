@@ -19,7 +19,7 @@ package org.apache.karaf.instance.command;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 
-@Command(scope = "instance", name = "change-opts", description = "Changes the Java options of an existing container instance.")
+@Command(scope = "instance", name = "opts-change", description = "Changes the Java options of an existing container instance.")
 public class ChangeOptsCommand extends InstanceCommandSupport {
 
     @Argument(index = 0, name = "name", description="The name of the container instance", required = true, multiValued = false)

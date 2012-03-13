@@ -19,7 +19,7 @@ package org.apache.karaf.instance.command;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 
-@Command(scope = "instance", name = "change-ssh-port", description = "Changes the secure shell port of an existing container instance.")
+@Command(scope = "instance", name = "ssh-port-change", description = "Changes the secure shell port of an existing container instance.")
 public class ChangeSshPortCommand extends InstanceCommandSupport {
 
     @Argument(index = 0, name = "name", description="The name of the container instance", required = true, multiValued = false)

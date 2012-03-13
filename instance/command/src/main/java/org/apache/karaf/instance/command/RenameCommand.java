@@ -20,9 +20,6 @@ import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
 
-/**
- * Rename an existing Karaf container instance.
- */
 @Command(scope = "instance", name = "rename", description = "Rename an existing container instance.")
 public class RenameCommand extends InstanceCommandSupport {
 
