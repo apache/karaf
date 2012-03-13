@@ -19,7 +19,7 @@ package org.apache.karaf.instance.command;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 
-@Command(scope = "instance", name = "change-rmi-server-port", description = "Changes the RMI server port (used by management layer) of an existing instance.")
+@Command(scope = "instance", name = "rmi-server-port-change", description = "Changes the RMI server port (used by management layer) of an existing instance.")
 public class ChangeRmiServerPortCommand extends InstanceCommandSupport {
 
     @Argument(index = 0, name = "name", description = "The name of the container instance", required = true, multiValued = false)

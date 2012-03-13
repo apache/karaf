@@ -20,9 +20,6 @@ import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.instance.Instance;
 
-/**
- * List available instances
- */
 @Command(scope = "instance", name = "list", description = "Lists all existing container instances.")
 public class ListCommand extends InstanceCommandSupport {
 
