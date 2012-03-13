@@ -26,7 +26,7 @@ import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
 
-@Command(scope = "feature", name = "list-version", description = "Lists all versions of a feature available from the currently available repositories.")
+@Command(scope = "feature", name = "version-list", description = "Lists all versions of a feature available from the currently available repositories.")
 public class ListFeatureVersionsCommand extends FeaturesCommandSupport {
 
 	@Argument(index = 0, name = "feature", description = "Name of feature.", required = true, multiValued = false)

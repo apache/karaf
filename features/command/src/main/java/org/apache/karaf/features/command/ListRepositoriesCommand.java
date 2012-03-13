@@ -21,7 +21,7 @@ import org.apache.karaf.features.Repository;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
 
-@Command(scope = "feature", name = "list-repository", description = "Displays a list of all defined repositories.")
+@Command(scope = "feature", name = "repository-list", description = "Displays a list of all defined repositories.")
 public class ListRepositoriesCommand extends FeaturesCommandSupport {
 
 	private static final String REPOSITORY = "Repository";

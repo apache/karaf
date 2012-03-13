@@ -28,9 +28,6 @@ import org.apache.karaf.features.Dependency;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
 
-/**
- * Utility command to display info about features.
- */
 @Command(scope = "feature", name = "info", description = "Shows information about selected information.")
 public class InfoFeatureCommand extends FeaturesCommandSupport {
 
@@ -175,7 +172,6 @@ public class InfoFeatureCommand extends FeaturesCommandSupport {
 
     /**
      * Called originally with featureName and featureVersion that have already been resolved successfully.
-     *
      *
      * @param admin
      * @param featureName
