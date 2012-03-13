@@ -13,17 +13,13 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package org.apache.karaf.jaas.command;
 
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.jaas.modules.BackingEngine;
 
-/**
- * Creates a new user in the active realm/module.
- */
-@Command(scope = "jaas", name = "add-user", description = "Add a user.")
+@Command(scope = "jaas", name = "user-add", description = "Add a user.")
 public class UserAddCommand extends JaasCommandSupport {
 
     @Argument(index = 0, name = "username", description = "User Name", required = true, multiValued = false)
