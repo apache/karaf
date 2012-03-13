@@ -48,7 +48,9 @@
     </feature>
 
     <feature name="config" description="Provide OSGi ConfigAdmin support" version="${project.version}">
-        <bundle start-level="30" start="true">mvn:org.apache.karaf.shell/org.apache.karaf.shell.config/${project.version}</bundle>
+        <bundle start-level="30" start="true">mvn:org.apache.karaf.config/org.apache.karaf.config.core/${project.version}</bundle>
+        <bundle start-level="30" start="true">mvn:org.apache.karaf.config/org.apache.karaf.config.command/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.karaf.config/org.apache.karaf.config.management/${project.version}</bundle>
     </feature>
 
     <feature name="region" description="Provide Region Support" version="${project.version}">
@@ -151,7 +153,6 @@
         <bundle start-level="30">mvn:org.apache.karaf.management.mbeans/org.apache.karaf.management.mbeans.bundles/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.management.mbeans/org.apache.karaf.management.mbeans.services/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.management.mbeans/org.apache.karaf.management.mbeans.packages/${project.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.karaf.management.mbeans/org.apache.karaf.management.mbeans.config/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.jmx/org.apache.aries.jmx/${aries.jmx.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.jmx/org.apache.aries.jmx.blueprint/${aries.jmx.version}</bundle>
     </feature>
