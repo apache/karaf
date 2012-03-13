@@ -95,8 +95,10 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
+                        <Export-Package>org.apache.karaf.config.core</Export-Package>
                         <Private-Package>
-                            org.apache.felix.utils.properties
+                            org.apache.felix.utils.properties,
+                            org.apache.karaf.config.core.impl
                         </Private-Package>
                     </instructions>
                 </configuration>
