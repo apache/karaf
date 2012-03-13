@@ -79,6 +79,11 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
+                <configuration>
+                    <instructions>
+                        <Export-Package>org.apache.karaf.config.management</Export-Package>
+                    </instructions>
+                </configuration>
             </plugin>
         </plugins>
     </build>
