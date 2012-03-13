@@ -69,7 +69,7 @@ public class CoreTest {
         CommandSession cs = cp.createSession(System.in, System.out, System.err);
 
         try {
-            cs.execute("obr:list-url");
+            cs.execute("obr:url-list");
             fail("command should not exist");
         } catch (IllegalArgumentException e) {
             assertTrue(e.getMessage().indexOf("Command not found") >= 0);
@@ -78,14 +78,14 @@ public class CoreTest {
         cs.execute("feature:install obr");
 
         Thread.sleep(1000);
-        cs.execute("obr:list-url");
+        cs.execute("obr:url-list");
 
         cs.execute("feature:uninstall obr");
 
         Thread.sleep(1000);
 
         try {
-            cs.execute("obr:list-url");
+            cs.execute("obr:url-list");
             fail("command should not exist");
         } catch (IllegalArgumentException e) {
             assertTrue(e.getMessage().indexOf("Command not found") >= 0);
