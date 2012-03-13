@@ -34,7 +34,7 @@ import org.apache.karaf.shell.console.OsgiCommandSupport;
 /**
  * Command to create dump from shell.
  */
-@Command(scope = "dev", name = "create-dump", description = "Creates zip archive with diagnostic info.")
+@Command(scope = "dev", name = "dump-create", description = "Creates zip archive with diagnostic info.")
 public class DumpCommand extends OsgiCommandSupport {
 
     /**
