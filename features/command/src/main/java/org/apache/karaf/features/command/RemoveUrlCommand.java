@@ -23,7 +23,7 @@ import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.features.FeaturesService;
 
-@Command(scope = "feature", name = "remove-url", description = "Removes the given list of repository URLs from the features service.")
+@Command(scope = "feature", name = "url-remove", description = "Removes the given list of repository URLs from the features service.")
 public class RemoveUrlCommand extends FeaturesCommandSupport {
 
     @Argument(index = 0, name = "urls", description = "One or more repository URLs separated by whitespaces", required = true, multiValued = true)

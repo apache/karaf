@@ -24,7 +24,7 @@ import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
 import org.apache.karaf.shell.console.MultiException;
 
-@Command(scope = "feature", name = "refresh-url", description = "Reloads the list of available features from the repositories.")
+@Command(scope = "feature", name = "url-refresh", description = "Reloads the list of available features from the repositories.")
 public class RefreshUrlCommand extends FeaturesCommandSupport {
 
     @Argument(index = 0, name = "urls", description = "Repository URLs to reload (leave empty for all)", required = false, multiValued = true)

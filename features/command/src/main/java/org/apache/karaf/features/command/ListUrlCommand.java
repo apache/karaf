@@ -23,11 +23,7 @@ import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
 
-/**
- * Command which lists feature URLs.
- * 
- */
-@Command(scope = "feature", name = "list-url", description = "Displays a list of all defined repository URLs.")
+@Command(scope = "feature", name = "url-list", description = "Displays a list of all defined repository URLs.")
 public class ListUrlCommand extends FeaturesCommandSupport {
 
     @Option(name = "-v", aliases = "-validate", description = "Validate current version of descriptors", required = false, multiValued = false)

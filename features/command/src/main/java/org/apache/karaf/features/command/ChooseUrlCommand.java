@@ -1,4 +1,3 @@
-package org.apache.karaf.features.command;
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -15,7 +14,7 @@ package org.apache.karaf.features.command;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+package org.apache.karaf.features.command;
 
 import java.net.URI;
 
@@ -24,18 +23,13 @@ import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.console.AbstractAction;
 
-/**
- * Concatenate and print files and/or URLs.
- *
- * @version $Rev: 593392 $ $Date: 2007-11-09 03:14:15 +0100 (Fri, 09 Nov 2007) $
- */
-@Command(scope = "feature", name = "chooseurl", description = "Add a repository url for well known features")
+@Command(scope = "feature", name = "url-choose", description = "Add a repository url for well known features.")
 public class ChooseUrlCommand extends AbstractAction {
 
-    @Argument(index = 0, name = "", description = "", required = true, multiValued = false)
+    @Argument(index = 0, name = "Feature name", description = "The name of the feature", required = true, multiValued = false)
     private String name;
     
-    @Argument(index = 1, name = "", description = "", required = false, multiValued = false)
+    @Argument(index = 1, name = "Feature version", description = "The version of the feature", required = false, multiValued = false)
     private String version;
     
     private FeatureFinder featureFinder;
@@ -55,7 +49,7 @@ public class ChooseUrlCommand extends AbstractAction {
         if (uri == null) {
             throw new RuntimeException("No feature found for name " + name + " and version " + version);
         }
-        System.out.println("adding feature url " + uri);
+        System.out.println("Adding feature url " + uri);
         featuresService.addRepository(uri);
         return null;
     }
