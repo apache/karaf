@@ -22,10 +22,10 @@ import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.eclipse.equinox.region.RegionDigraph;
 
-@Command(scope = "region", name = "addRegion", description = "Adds a list of regions to the RegionDigraph service.")
+@Command(scope = "region", name = "region-add", description = "Adds a list of regions to the region digraph service.")
 public class AddRegionCommand extends RegionCommandSupport {
 
-    @Argument(index = 0, name = "name", description = "Regions to add to the RegionDigraph service separated by whitespaces", required = true, multiValued = true)
+    @Argument(index = 0, name = "name", description = "Regions to add to the region digraph service separated by whitespaces.", required = true, multiValued = true)
     List<String> regions;
 
     protected void doExecute(RegionDigraph regionDigraph) throws Exception {

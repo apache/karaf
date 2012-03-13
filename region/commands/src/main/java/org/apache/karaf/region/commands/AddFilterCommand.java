@@ -32,16 +32,16 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 
-@Command(scope = "region", name = "addFilter", description = "Adds a Filter between two regions")
+@Command(scope = "region", name = "filter-add", description = "Adds a filter between two regions.")
 public class AddFilterCommand extends RegionCommandSupport {
 
-    @Argument(index = 0, name = "fromregion", description = "Region 1", required = true, multiValued = false)
+    @Argument(index = 0, name = "from", description = "The from region.", required = true, multiValued = false)
     String fromRegion;
 
-    @Argument(index = 1, name = "toregion", description = "Region 2", required = true, multiValued = false)
+    @Argument(index = 1, name = "to", description = "The to region.", required = true, multiValued = false)
     String toRegion;
 
-    @Argument(index = 2, name = "filteritems", description = "bundles by id and packages with version to allow", required = false, multiValued = true)
+    @Argument(index = 2, name = "items", description = "The bundles by id and packages with version to allow.", required = false, multiValued = true)
     List<String> items;
 
     protected void doExecute(RegionDigraph regionDigraph) throws Exception {
