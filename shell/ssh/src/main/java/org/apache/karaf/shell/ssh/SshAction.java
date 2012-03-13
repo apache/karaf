@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.karaf.shell.ssh;
 
 import java.io.ByteArrayInputStream;
@@ -40,11 +39,6 @@ import org.osgi.service.blueprint.container.BlueprintContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Connect to a SSH server.
- *
- * @version $Rev: 721244 $ $Date: 2008-11-27 18:19:56 +0100 (Thu, 27 Nov 2008) $
- */
 @Command(scope = "ssh", name = "ssh", description = "Connects to a remote SSH server")
 public class SshAction
     extends OsgiCommandSupport implements BlueprintContainerAware

@@ -18,7 +18,6 @@
  */
 package org.apache.karaf.shell.ssh;
 
-
 import jline.TerminalSupport;
 import org.apache.sshd.server.Environment;
 
