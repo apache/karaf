@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.karaf.shell.ssh;
 
 import org.apache.karaf.shell.commands.Command;
@@ -28,11 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.osgi.service.blueprint.container.BlueprintContainer;
 
-/**
- * Start a SSH server.
- *
- * @version $Rev: 720411 $ $Date: 2008-11-25 05:32:43 +0100 (Tue, 25 Nov 2008) $
- */
 @Command(scope = "ssh", name = "sshd", description = "Creates a SSH server")
 public class SshServerAction extends OsgiCommandSupport implements BlueprintContainerAware
 {
