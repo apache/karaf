@@ -300,7 +300,11 @@
         </dependency>
         <dependency>
             <groupId>org.apache.aries.jmx</groupId>
-            <artifactId>org.apache.aries.jmx</artifactId>
+            <artifactId>org.apache.aries.jmx.api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.aries.jmx</groupId>
+            <artifactId>org.apache.aries.jmx.core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.aries.jmx</groupId>
