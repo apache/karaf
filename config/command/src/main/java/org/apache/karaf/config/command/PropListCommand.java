@@ -20,8 +20,7 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 import org.apache.karaf.shell.commands.Command;
 
-
-@Command(scope = "config", name = "list-property", description = "Lists properties from the currently edited configuration.")
+@Command(scope = "config", name = "property-list", description = "Lists properties from the currently edited configuration.")
 public class PropListCommand extends ConfigPropertyCommandSupport {
 
     @SuppressWarnings("rawtypes")
