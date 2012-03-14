@@ -21,10 +21,7 @@ import java.util.Dictionary;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 
-/**
- * Appends a value to the current property value.
- */
-@Command(scope = "config", name = "append-property", description = "Appends the given value to an existing property or creates the property with the specified name and value.")
+@Command(scope = "config", name = "property-append", description = "Appends the given value to an existing property or creates the property with the specified name and value.")
 public class PropAppendCommand extends ConfigPropertyCommandSupport {
 
     @Argument(index = 0, name = "name", description = "The name of the property", required = true, multiValued = false)
