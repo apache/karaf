@@ -164,10 +164,10 @@
             <unpack>false</unpack>
             <useProjectArtifact>false</useProjectArtifact>
             <outputFileNameMapping>
-                org/apache/karaf/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}
+                org/apache/karaf/management/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}
             </outputFileNameMapping>
             <includes>
-                <include>org.apache.karaf:org.apache.karaf.management</include>
+                <include>org.apache.karaf.management:org.apache.karaf.management.server</include>
             </includes>
         </dependencySet>
         <dependencySet>
