@@ -25,6 +25,9 @@ import org.slf4j.LoggerFactory;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URL;
 import java.util.*;
 
 /**
@@ -173,11 +176,18 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
             Configuration configuration = configurationAdmin.getConfiguration(pid, null);
             if (configuration != null && configuration.getProperties() != null) {
                 Object val = configuration.getProperties().get(FELIX_FILEINSTALL_FILENAME);
-                if (val instanceof String) {
-                    if (((String) val).startsWith("file:")) {
-                        val = ((String) val).substring("file:".length());
+                try {
+                    if (val instanceof URL) {
+                        storageFile = new File(((URL) val).toURI());
                     }
-                    storageFile = new File((String) val);
+                    if (val instanceof URI) {
+                        storageFile = new File((URI) val);
+                    }
+                    if (val instanceof String) {
+                        storageFile = new File(new URL((String) val).toURI());
+                    }
+                } catch (Exception e) {
+                    throw new IOException(e);
                 }
             }
             Properties p = new Properties(storageFile);

@@ -18,6 +18,8 @@ package org.apache.karaf.shell.config;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Enumeration;
@@ -149,11 +151,18 @@ public abstract class ConfigCommandSupport extends OsgiCommandSupport {
         Configuration cfg = admin.getConfiguration(pid, null);
         if (cfg != null && cfg.getProperties() != null) {
             Object val = cfg.getProperties().get(FILEINSTALL_FILE_NAME);
+            try {
+            if (val instanceof URL) {
+                storageFile = new File(((URL) val).toURI());
+            }
+            if (val instanceof URI) {
+                storageFile = new File((URI) val);
+            }
             if (val instanceof String) {
-                if (((String) val).startsWith("file:")) {
-                    val = ((String) val).substring("file:".length());
-                }
-                storageFile = new File((String) val);
+                storageFile = new File(new URL((String) val).toURI());
+            }
+            } catch (Exception e) {
+                throw new IOException(e);
             }
         }
         Properties p = new Properties(storageFile);
