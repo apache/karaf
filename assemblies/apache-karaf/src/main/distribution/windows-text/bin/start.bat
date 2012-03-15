@@ -67,7 +67,7 @@ if "%KARAF_BASE%" == "" (
 )
 
 :EXECUTE
-    start "Karaf" /MIN "%KARAF_HOME%\bin\karaf.bat" server
+    start "Karaf" /MIN "%KARAF_HOME%\bin\karaf.bat" server %*
 
 rem # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
