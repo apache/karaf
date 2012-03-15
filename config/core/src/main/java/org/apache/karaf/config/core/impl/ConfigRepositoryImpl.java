@@ -18,6 +18,8 @@ package org.apache.karaf.config.core.impl;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Enumeration;
@@ -106,7 +108,6 @@ public class ConfigRepositoryImpl implements ConfigRepository {
 
     /**
      * Persists configuration to storage.
-     * @param admin
      * @param pid
      * @param props
      * @throws IOException
@@ -117,11 +118,18 @@ public class ConfigRepositoryImpl implements ConfigRepository {
         Configuration cfg = this.configAdmin.getConfiguration(pid, null);
         if (cfg != null && cfg.getProperties() != null) {
             Object val = cfg.getProperties().get(FILEINSTALL_FILE_NAME);
-            if (val instanceof String) {
-                if (((String) val).startsWith("file:")) {
-                    val = ((String) val).substring("file:".length());
+            try {
+                if (val instanceof URL) {
+                    storageFile = new File(((URL) val).toURI());
                 }
-                storageFile = new File((String) val);
+                if (val instanceof URI) {
+                    storageFile = new File((URI) val);
+                }
+                if (val instanceof String) {
+                    storageFile = new File(new URL((String) val).toURI());
+                }
+            } catch (Exception e) {
+                throw new IOException(e);
             }
         }
         Properties p = new Properties(storageFile);
