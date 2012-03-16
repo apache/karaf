@@ -337,7 +337,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
                     }
                     sb.append(b.getSymbolicName()).append(" (").append(b.getBundleId()).append(")");
                 }
-                LOGGER.info("Bundles to refresh: {}", sb.toString());
+                LOGGER.debug("Bundles to refresh: {}", sb.toString());
                 if (!bundlesToRefresh.isEmpty()) {
                     if (print) {
                         if (refresh) {
@@ -347,7 +347,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
                         }
                     }
                     if (refresh) {
-                        LOGGER.info("Refreshing bundles: {}", sb.toString());
+                        LOGGER.debug("Refreshing bundles: {}", sb.toString());
                         refreshPackages(bundlesToRefresh);
                     }
                 }
@@ -445,7 +445,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
     }
 
     protected void doInstallFeature(InstallationState state, Feature feature, boolean verbose) throws Exception {
-        LOGGER.info("Installing feature " + feature.getName() + " " + feature.getVersion());
+        LOGGER.debug("Installing feature " + feature.getName() + " " + feature.getVersion());
         if (verbose) {
             System.out.println("Installing feature " + feature.getName() + " " + feature.getVersion());
         }
@@ -712,7 +712,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
                     vStr = (String) b.getHeaders().get(Constants.BUNDLE_VERSION);
                     Version bv = vStr == null ? Version.emptyVersion : Version.parseVersion(vStr);
                     if (v.equals(bv)) {
-                        LOGGER.info("Found installed bundle: " + b);
+                        LOGGER.debug("Found installed bundle: " + b);
                         if (verbose) {
                             System.out.println("Found installed bundle: " + b);
                         }
@@ -727,7 +727,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
                 is.close();
                 is = new BufferedInputStream(new URL(bundleLocation).openStream());
             }
-            LOGGER.info("Installing bundle " + bundleLocation);
+            LOGGER.debug("Installing bundle " + bundleLocation);
             if (verbose) {
                 System.out.println("Installing bundle " + bundleLocation);
             }
@@ -750,7 +750,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
     }
     
     public void installConfigurationFile(String fileLocation, String finalname, boolean override, boolean verbose) throws IOException {
-    	LOGGER.info("Checking configuration file " + fileLocation);
+    	LOGGER.debug("Checking configuration file " + fileLocation);
         if (verbose) {
             System.out.println("Checking configuration file " + fileLocation);
         }
@@ -767,7 +767,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
     	
     	File file = new File(finalname); 
     	if (file.exists() && !override) {
-    		LOGGER.info("configFile already exist, don't override it");
+    		LOGGER.debug("configFile already exist, don't override it");
     		return;
     	}
 
