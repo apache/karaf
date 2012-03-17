@@ -67,7 +67,9 @@ public class OsgiKeystoreManager implements KeystoreManager {
 
     public SSLContext createSSLContext(String provider, String protocol, String algorithm, String keyStore, String keyAlias, String trustStore, long timeout) throws GeneralSecurityException {
 
-        this.checkForKeystoresAvailability(keyStore, keyAlias, trustStore, timeout);
+        if (!this.checkForKeystoresAvailability(keyStore, keyAlias, trustStore, timeout)) {
+            throw new GeneralSecurityException("Unable to lookup configured keystore and/or truststore");
+        }
 
         KeystoreInstance keyInstance = getKeystore(keyStore);
         if (keyInstance != null && keyInstance.isKeystoreLocked()) {
@@ -125,7 +127,8 @@ public class OsgiKeystoreManager implements KeystoreManager {
      * @param trustStore
      * @param timeout
      */
-    private void checkForKeystoresAvailability(  String keyStore, String keyAlias, String trustStore, long timeout ) {
+    private boolean checkForKeystoresAvailability(  String keyStore, String keyAlias, String trustStore, long timeout ) {
+        boolean found = false;
         for (int i = 0 ; i < timeout/1000; ++i) {
             KeystoreInstance keyInstance = getKeystore(keyStore);
             if (keyInstance == null || (keyInstance != null && keyInstance.isKeystoreLocked())) {
@@ -146,7 +149,11 @@ public class OsgiKeystoreManager implements KeystoreManager {
                 continue;
             }
 
+            found = true;
+            break;
         }
+
+        return found;
     }
 
 }
