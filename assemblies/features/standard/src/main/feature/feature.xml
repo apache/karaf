@@ -99,6 +99,10 @@
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-extender-war/${pax.web.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-deployer/${pax.web.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.url/pax-url-war/${pax.url.version}</bundle>
+        <bundle start-level="30">mvn:org.ops4j.pax.url/pax-url-commons/${pax.url.version}</bundle>
+        <bundle start-level="30">mvn:org.ops4j.pax.swissbox/pax-swissbox-bnd/${pax.swissbox.version}</bundle>
+        <bundle start-level="30">mvn:org.ops4j.pax.swissbox/pax-swissbox-property/${pax.swissbox.version}</bundle>
+        <bundle start-level="30">mvn:biz.aQute/bndlib/${bndlib.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.web/org.apache.karaf.web.core/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.web/org.apache.karaf.web.commands/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.web/org.apache.karaf.web.management/${project.version}</bundle>
