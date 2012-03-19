@@ -157,13 +157,13 @@
         <felix.scr.annotation.version>1.6.0</felix.scr.annotation.version>
 
         <aries.application.version>0.3</aries.application.version>
-        <aries.blueprint.annotation.api.version>0.3.2</aries.blueprint.annotation.api.version>
-        <aries.blueprint.annotation.impl.version>0.3.2</aries.blueprint.annotation.impl.version>
+        <aries.blueprint.annotation.api.version>0.3.3-SNAPSHOT</aries.blueprint.annotation.api.version>
+        <aries.blueprint.annotation.impl.version>0.3.3-SNAPSHOT</aries.blueprint.annotation.impl.version>
         <aries.blueprint.api.version>0.3.1</aries.blueprint.api.version>
         <aries.blueprint.cm.version>0.3.3-SNAPSHOT</aries.blueprint.cm.version>
         <aries.blueprint.core.compatibility.version>0.4.1-SNAPSHOT</aries.blueprint.core.compatibility.version>
         <aries.blueprint.core.version>0.4.1-SNAPSHOT</aries.blueprint.core.version>
-        <aries.blueprint.jexl.evaluator.version>0.1.0</aries.blueprint.jexl.evaluator.version>
+        <aries.blueprint.jexl.evaluator.version>0.1.1-SNAPSHOT</aries.blueprint.jexl.evaluator.version>
         <aries.jmx.version>0.3</aries.jmx.version>
         <aries.jpa.version>0.3</aries.jpa.version>
         <aries.jndi.api.version>0.3</aries.jndi.api.version>
