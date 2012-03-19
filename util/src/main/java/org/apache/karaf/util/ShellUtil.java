@@ -59,7 +59,10 @@ public class ShellUtil {
 
     public static String getValueString(Object obj)
     {
-        if (obj.getClass().isArray())
+        if (obj == null) {
+            return "null";
+        } 
+        else if (obj.getClass().isArray())
         {
             Object[] array = (Object[]) obj;
             StringBuilder sb = new StringBuilder();
@@ -115,10 +118,6 @@ public class ShellUtil {
                 LOGGER.error("URI could not be transformed to URL",e);
                 return obj.toString();
             }
-        }
-        else if (obj == null)
-        {
-            return "null";
         }
         else
         {
