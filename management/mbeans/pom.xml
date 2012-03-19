@@ -34,7 +34,6 @@
     <name>Apache Karaf :: Management :: MBeans</name>
 
     <modules>
-        <module>bundles</module>
         <module>services</module>
         <module>packages</module>
         <module>dev</module>

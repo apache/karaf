@@ -22,51 +22,26 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.karaf.shell</groupId>
-        <artifactId>shell</artifactId>
+        <groupId>org.apache.karaf.bundle</groupId>
+        <artifactId>bundle</artifactId>
         <version>3.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>org.apache.karaf.shell.services</artifactId>
+    <artifactId>org.apache.karaf.bundle.management</artifactId>
     <packaging>bundle</packaging>
-    <name>Apache Karaf :: Shell :: Services Commands</name>
-    <description>This bundle provides shell commands to manipulate OSGi services.</description>
+    <name>Apache Karaf :: Bundle :: Management</name>
+    <description>Provides a JMX MBean to manipulate OSGi bundles</description>
 
     <properties>
-        <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
+        <appendedResourcesDirectory>${basedir}/../../etc/appended-resources/</appendedResourcesDirectory>
     </properties>
 
     <dependencies>
         <dependency>
-            <groupId>org.apache.karaf.shell</groupId>
-            <artifactId>org.apache.karaf.shell.console</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.bundle</groupId>
-            <artifactId>org.apache.karaf.bundle.command</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf</groupId>
-            <artifactId>org.apache.karaf.main</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.compendium</artifactId>
+            <artifactId>org.osgi.core</artifactId>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf</groupId>
-            <artifactId>org.apache.karaf.util</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-jdk14</artifactId>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -92,8 +67,12 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
+                        <Export-Package>
+                            org.apache.karaf.bundle.management;version=${project.version}
+                        </Export-Package>
                         <Private-Package>
-                            org.apache.karaf.util
+                            org.apache.karaf.bundle.management.internal,
+                            !*
                         </Private-Package>
                     </instructions>
                 </configuration>

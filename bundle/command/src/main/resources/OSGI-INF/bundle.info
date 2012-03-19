@@ -1,0 +1,30 @@
+h1. Synopsis
+
+${project.name}
+
+${project.description}
+
+Maven URL:
+   [mvn:${project.groupId}/${project.artifactId}/${project.version}]
+
+h1. Description
+
+This bundle provides the low level OSGi shell commands.
+
+The following commands are available:
+* bundle:headers - Display OSGi headers of a given bundle.
+* bundle:info - Display detailed information of a given bundle.
+* bundle:install - Install one or more bundles.
+* bundle:list - List all installed bundles.
+* bundle:refresh - Refresh bundles.
+* bundle:resolve - Resolve bundles.
+* bundle:restart - Stop and restart bundles.
+* bundle:start - Starts bundles.
+* bundlestart-level - Get or set the start level of a bundle.
+* bundle:stop - Stop bundles.
+* bundle:uninstall - Uninstall bundles.
+* bundle:update - Update a bundle.
+
+h1. See also
+
+Commands and Using the console sections of the Karaf User Guide
