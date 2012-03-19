@@ -36,7 +36,6 @@
     <modules>
         <module>commands</module>
         <module>console</module>
-        <module>bundles</module>
         <module>dev</module>
         <module>http</module>
         <module>log</module>
