@@ -23,7 +23,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.karaf.bundle.core.BundleSelector;
-import org.apache.karaf.util.ShellUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -40,11 +39,11 @@ public class BundleSelectorImpl implements BundleSelector {
      * @see org.apache.karaf.bundle.core.internal.BundleSelector#selectBundles(java.util.List)
      */
     @Override
-    public List<Bundle> selectBundles(List<String> ids, boolean defaultAllBundles, boolean mayAccessSystemBundle) throws Exception {
+    public List<Bundle> selectBundles(List<String> ids, boolean defaultAllBundles) {
         List<Bundle> bundles = new ArrayList<Bundle>();
         if (ids != null && !ids.isEmpty()) {
             for (String id : ids) {
-                addMatchingBundles(id, bundles, mayAccessSystemBundle);
+                addMatchingBundles(id, bundles);
             }
         } else {
             Collections.addAll(bundles, bundleContext.getBundles());
@@ -52,16 +51,14 @@ public class BundleSelectorImpl implements BundleSelector {
         return bundles;
     }
     
-    public void addMatchingBundles(String id, List<Bundle> bundles, boolean mayAccessSystemBundle) throws Exception {
+    public void addMatchingBundles(String id, List<Bundle> bundles) {
         // id is a number
         Pattern pattern = Pattern.compile("^\\d+$");
         Matcher matcher = pattern.matcher(id);
         
         if (matcher.find()) {
             Bundle bundle = this.getBundleById(id);
-            if (mayAccessSystemBundle || !ShellUtil.isASystemBundle(bundleContext, bundle)) {
-                addBundle(bundle, id, bundles);
-            }
+            addBundle(bundle, id, bundles);
             return;
         }
 
@@ -95,7 +92,7 @@ public class BundleSelectorImpl implements BundleSelector {
         }
     }
 
-    private void addBundle(Bundle bundle, String id, List<Bundle> bundles) throws Exception {
+    private void addBundle(Bundle bundle, String id, List<Bundle> bundles) {
         if (bundle == null) {
             // if the bundle is null here, it's because we didn't find it
             System.err.println("Bundle " + id + " is invalid");

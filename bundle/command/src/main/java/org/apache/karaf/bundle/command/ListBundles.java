@@ -18,6 +18,7 @@ package org.apache.karaf.bundle.command;
 
 import java.util.List;
 
+import org.apache.karaf.bundle.core.BundleState;
 import org.apache.karaf.bundle.core.BundleStateService;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
@@ -134,8 +135,9 @@ public class ListBundles extends OsgiCommandSupport {
 	                }
 	                String line = "[" + id + "] [" + getStateString(bundles[i]) + "]";
 	                for (BundleStateService stateService : bundleStateServices) {
-	                    String state = stateService.getState(bundles[i]);
-	                    line += " [" + getStateString(state, stateService.getName().length()) + "]";
+	                    BundleState state = stateService.getState(bundles[i]);
+	                    String stateSt = state == BundleState.Unknown ? "" : state.toString();
+	                    line += " [" + getStateString(stateSt, stateService.getName().length()) + "]";
 	                }
 	                line += " [" + level + "] " + name;
 	                System.out.println(line);

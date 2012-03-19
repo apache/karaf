@@ -142,8 +142,7 @@
                             org.apache.felix.gogo*;version=${felix.gogo.version},
                             org.apache.felix.service.command;version=${felix.gogo.version};status=provisional;mandatory:=status,
                             org.apache.felix.service.threadio;version=${felix.gogo.version};status=provisional;mandatory:=status,
-                            org.apache.karaf.shell.commands*;version=${project.version},
-                            org.apache.karaf.shell.console*;version=${project.version},
+                            org.apache.karaf.shell.*;version=${project.version},
                             org.fusesource.jansi;version=${jansi.version};-split-package:=first,
                             jline*;version=${jline.version},
                             org.fusesource.hawtjni*;version=1.0;-split-package:=first

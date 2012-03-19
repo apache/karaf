@@ -40,11 +40,6 @@
     <dependencies>
 
         <dependency>
-            <groupId>org.apache.karaf</groupId>
-            <artifactId>org.apache.karaf.util</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>org.apache.aries.blueprint</groupId>
             <artifactId>org.apache.aries.blueprint.api</artifactId>
             <scope>provided</scope>
@@ -120,7 +115,6 @@
                             org.springframework.*
                         </DynamicImport-Package>
                         <Private-Package>
-                            org.apache.karaf.util,
                             org.apache.felix.utils.version,
                             org.apache.felix.utils.manifest,
                             !*
