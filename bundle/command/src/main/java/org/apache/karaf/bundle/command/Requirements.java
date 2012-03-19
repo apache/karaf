@@ -39,7 +39,6 @@ public class Requirements extends BundlesCommand {
     public static final String NONSTANDARD_SERVICE_NAMESPACE = "service";
 
     private static final String EMPTY_MESSAGE = "[EMPTY]";
-    private static final String UNUSED_MESSAGE = "[UNUSED]";
     private static final String UNRESOLVED_MESSAGE = "[UNRESOLVED]";
 
     @Option(name = "--namespace")
