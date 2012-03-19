@@ -16,9 +16,12 @@
  */
 package org.apache.karaf.bundle.core.internal;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.karaf.bundle.core.BundleState;
 import org.apache.karaf.bundle.core.BundleStateService;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleEvent;
@@ -28,57 +31,72 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * TODO: use event instance to receive WAIT topics notifications from blueprint extender
- *
+ * TODO: use event instance to receive WAIT topics notifications from blueprint
+ * extender
  */
 public class BlueprintListener implements org.osgi.service.blueprint.container.BlueprintListener, BundleListener,
-                                            BundleStateService
-{
-
-    public static enum BlueprintState {
-        Unknown,
-        Creating,
-        Created,
-        Destroying,
-        Destroyed,
-        Failure,
-        GracePeriod,
-        Waiting
-    }
+    BundleStateService {
 
     private static final Logger LOG = LoggerFactory.getLogger(BlueprintListener.class);
 
-    private final Map<Long, BlueprintState> states;
+    private final Map<Long, BlueprintEvent> states;
 
     public BlueprintListener() {
-        this.states = new ConcurrentHashMap<Long, BlueprintState>();
+        this.states = new ConcurrentHashMap<Long, BlueprintEvent>();
     }
 
     public String getName() {
         return "Blueprint";
     }
 
-    public String getState(Bundle bundle) {
-        BlueprintState state = states.get(bundle.getBundleId());
-        if (state == null || bundle.getState() != Bundle.ACTIVE || state == BlueprintState.Unknown) {
+    public String getDiag(Bundle bundle) {
+        BlueprintEvent event = this.states.get(bundle.getBundleId());
+        if (event == null) {
             return null;
         }
-        return state.toString();
+        if (event.getType() != BlueprintEvent.FAILURE && event.getType() != BlueprintEvent.GRACE_PERIOD
+            && event.getType() != BlueprintEvent.WAITING) {
+            return null;
+        }
+        StringBuilder message = new StringBuilder();
+        Date date = new Date(event.getTimestamp());
+        SimpleDateFormat df = new SimpleDateFormat();
+        message.append(df.format(date) + "\n");
+        if (event.getCause() != null) {
+            message.append("Exception: ");
+            addMessages(message, event.getCause());
+        }
+        if (event.getDependencies() != null) {
+            message.append("Missing dependencies: ");
+            for (String dep : event.getDependencies()) {
+                message.append(dep + " ");
+            }
+            message.append("\n");
+        }
+        return message.toString();
+    }
+    
+    public void addMessages(StringBuilder message, Throwable ex) {
+        message.append(ex.getMessage());
+        message.append("\n");
+        if (ex.getCause() != null) {
+            addMessages(message, ex.getCause());
+        }
     }
 
-    public BlueprintState getBlueprintState(Bundle bundle) {
-        BlueprintState state = states.get(bundle.getBundleId());
-        if (state == null || bundle.getState() != Bundle.ACTIVE) {
-            state = BlueprintState.Unknown;
-        }
-        return state;
+    public BundleState getState(Bundle bundle) {
+        BlueprintEvent event = states.get(bundle.getBundleId());
+        BundleState state = getState(event);
+        return (bundle.getState() != Bundle.ACTIVE) ? BundleState.Unknown : state;
     }
 
     public void blueprintEvent(BlueprintEvent blueprintEvent) {
-        BlueprintState state = getState(blueprintEvent);
-        LOG.debug("Blueprint app state changed to " + state + " for bundle " + blueprintEvent.getBundle().getBundleId());
-        states.put(blueprintEvent.getBundle().getBundleId(), state);
+        if (LOG.isDebugEnabled()) {
+            BundleState state = getState(blueprintEvent);
+            LOG.debug("Blueprint app state changed to " + state + " for bundle "
+                      + blueprintEvent.getBundle().getBundleId());
+        }
+        states.put(blueprintEvent.getBundle().getBundleId(), blueprintEvent);
     }
 
     public void bundleChanged(BundleEvent event) {
@@ -87,24 +105,28 @@ public class BlueprintListener implements org.osgi.service.blueprint.container.B
         }
     }
 
-    private BlueprintState getState(BlueprintEvent blueprintEvent) {
+    private BundleState getState(BlueprintEvent blueprintEvent) {
+        if (blueprintEvent == null) {
+            return BundleState.Unknown;
+        }
         switch (blueprintEvent.getType()) {
-            case BlueprintEvent.CREATING:
-                return BlueprintState.Creating;
-            case BlueprintEvent.CREATED:
-                return BlueprintState.Created;
-            case BlueprintEvent.DESTROYING:
-                return BlueprintState.Destroying;
-            case BlueprintEvent.DESTROYED:
-                return BlueprintState.Destroyed;
-            case BlueprintEvent.FAILURE:
-                return BlueprintState.Failure;
-            case BlueprintEvent.GRACE_PERIOD:
-                return BlueprintState.GracePeriod;
-            case BlueprintEvent.WAITING:
-                return BlueprintState.Waiting;
-            default:
-                return BlueprintState.Unknown;
+        case BlueprintEvent.CREATING:
+            return BundleState.Starting;
+        case BlueprintEvent.CREATED:
+            return BundleState.Active;
+        case BlueprintEvent.DESTROYING:
+            return BundleState.Stopping;
+        case BlueprintEvent.DESTROYED:
+            return BundleState.Stopped;
+        case BlueprintEvent.FAILURE:
+            return BundleState.Failure;
+        case BlueprintEvent.GRACE_PERIOD:
+            return BundleState.GracePeriod;
+        case BlueprintEvent.WAITING:
+            return BundleState.Waiting;
+        default:
+            return BundleState.Unknown;
         }
     }
+
 }

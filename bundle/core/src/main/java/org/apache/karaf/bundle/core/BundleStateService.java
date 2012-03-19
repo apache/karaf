@@ -22,6 +22,8 @@ public interface BundleStateService {
 
     String getName();
 
-    String getState(Bundle bundle);
+    String getDiag(Bundle bundle);
+    
+    BundleState getState(Bundle bundle);
 
 }

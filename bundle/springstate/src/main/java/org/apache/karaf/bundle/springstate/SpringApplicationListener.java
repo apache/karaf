@@ -19,6 +19,7 @@ package org.apache.karaf.bundle.springstate;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.karaf.bundle.core.BundleState;
 import org.apache.karaf.bundle.core.BundleStateService;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -31,54 +32,51 @@ import org.springframework.osgi.context.event.OsgiBundleApplicationContextListen
 import org.springframework.osgi.context.event.OsgiBundleContextFailedEvent;
 import org.springframework.osgi.context.event.OsgiBundleContextRefreshedEvent;
 import org.springframework.osgi.extender.event.BootstrappingDependencyEvent;
-import org.springframework.osgi.service.importer.event.OsgiServiceDependencyEvent;
-import org.springframework.osgi.service.importer.event.OsgiServiceDependencyWaitStartingEvent;
 
 public class SpringApplicationListener implements OsgiBundleApplicationContextListener,
         BundleListener, BundleStateService {
 
-    public static enum SpringState {
-        Unknown,
-        Waiting,
-        Started,
-        Failed,
-    }
-
     private static final Logger LOG = LoggerFactory.getLogger(SpringApplicationListener.class);
 
-    private final Map<Long, SpringApplicationListener.SpringState> states;
+    private final Map<Long, OsgiBundleApplicationContextEvent> states;
 
     public SpringApplicationListener(BundleContext bundleContext) {
-        this.states = new ConcurrentHashMap<Long, SpringApplicationListener.SpringState>();
+        this.states = new ConcurrentHashMap<Long, OsgiBundleApplicationContextEvent>();
     }
 
     public String getName() {
         return "Spring";
     }
 
-    public String getState(Bundle bundle) {
-        SpringState state = states.get(bundle.getBundleId());
-        if (state == null || bundle.getState() != Bundle.ACTIVE || state == SpringState.Unknown) {
-            return null;
-        }
-        return state.toString();
+    public BundleState getState(Bundle bundle) {
+        OsgiBundleApplicationContextEvent event = states.get(bundle.getBundleId());
+        BundleState state = mapEventToState(event);
+        return (bundle.getState() != Bundle.ACTIVE) ? BundleState.Unknown : state;
+    }
+    
+    public String getDiag(Bundle bundle) {
+        return null;
     }
 
     public void onOsgiApplicationEvent(OsgiBundleApplicationContextEvent event) {
-        SpringState state = null;
-        if (event instanceof BootstrappingDependencyEvent) {
-            OsgiServiceDependencyEvent de = ((BootstrappingDependencyEvent) event).getDependencyEvent();
-            if (de instanceof OsgiServiceDependencyWaitStartingEvent) {
-                state = SpringState.Waiting;
-            }
-        } else if (event instanceof OsgiBundleContextFailedEvent) {
-            state = SpringState.Failed;
-        } else if (event instanceof OsgiBundleContextRefreshedEvent) {
-            state = SpringState.Started;
-        }
-        if (state != null) {
+        if (LOG.isDebugEnabled()) {
+            BundleState state = mapEventToState(event);
             LOG.debug("Spring app state changed to " + state + " for bundle " + event.getBundle().getBundleId());
-            states.put(event.getBundle().getBundleId(), state);
+        }
+        states.put(event.getBundle().getBundleId(), event);
+    }
+
+    private BundleState mapEventToState(OsgiBundleApplicationContextEvent event) {
+        if (event == null) {
+            return BundleState.Unknown;
+        } else if (event instanceof BootstrappingDependencyEvent) {
+            return BundleState.Waiting;
+        } else if (event instanceof OsgiBundleContextFailedEvent) {
+            return BundleState.Failure;
+        } else if (event instanceof OsgiBundleContextRefreshedEvent) {
+            return BundleState.Active;
+        } else {
+            return BundleState.Unknown;
         }
     }
 

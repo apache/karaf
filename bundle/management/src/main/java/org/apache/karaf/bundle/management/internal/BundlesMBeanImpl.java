@@ -18,6 +18,7 @@ package org.apache.karaf.bundle.management.internal;
 
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Collections;
 import java.util.List;
 
 import javax.management.NotCompliantMBeanException;
@@ -31,6 +32,8 @@ import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularDataSupport;
 import javax.management.openmbean.TabularType;
 
+import org.apache.karaf.bundle.core.BundleSelector;
+import org.apache.karaf.bundle.core.BundleStateService;
 import org.apache.karaf.bundle.management.BundlesMBean;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -43,9 +46,19 @@ import org.osgi.framework.wiring.FrameworkWiring;
 public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
 
     private BundleContext bundleContext;
+    private final BundleSelector bundleSelector;
+    private final List<BundleStateService> bundleStateServices;
 
-    public BundlesMBeanImpl() throws NotCompliantMBeanException {
+    public BundlesMBeanImpl(BundleContext bundleContext, BundleSelector bundleSelector, List<BundleStateService> bundleStateServices) throws NotCompliantMBeanException {
         super(BundlesMBean.class);
+        this.bundleContext = bundleContext;
+        this.bundleSelector = bundleSelector;
+        this.bundleStateServices = bundleStateServices;
+    }
+    
+    private List<Bundle> selectBundles(String id) throws Exception {
+        List<String> ids = Collections.singletonList(id);
+        return this.bundleSelector.selectBundles(ids , false);
     }
 
     public TabularData getBundles() throws Exception {
@@ -86,8 +99,7 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
     }
 
     public int getStartLevel(String bundleId) throws Exception {
-        BundlesSelector selector = new BundlesSelector(bundleContext);
-        List<Bundle> bundles = selector.selectBundles(bundleId);
+        List<Bundle> bundles = selectBundles(bundleId);
 
         if (bundles.size() != 1) {
             throw new IllegalArgumentException("Provided bundle Id doesn't return any bundle or more than one bundle selected");
@@ -97,8 +109,7 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
     }
 
     public void setStartLevel(String bundleId, int bundleStartLevel) throws Exception {
-        BundlesSelector selector = new BundlesSelector(bundleContext);
-        List<Bundle> bundles = selector.selectBundles(bundleId);
+        List<Bundle> bundles = selectBundles(bundleId);
 
         for (Bundle bundle : bundles) {
             getBundleStartLevel(bundle).setStartLevel(bundleStartLevel);
@@ -114,8 +125,7 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
     }
 
     public void refresh(String bundleId) throws Exception {
-        BundlesSelector selector = new BundlesSelector(getBundleContext());
-        List<Bundle> bundles = selector.selectBundles(bundleId);
+        List<Bundle> bundles = selectBundles(bundleId);
         getFrameworkWiring().refreshBundles(bundles);
     }
 
@@ -124,9 +134,7 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
     }
 
     public void update(String bundleId, String location) throws Exception {
-
-        BundlesSelector selector = new BundlesSelector(bundleContext);
-        List<Bundle> bundles = selector.selectBundles(bundleId);
+        List<Bundle> bundles = selectBundles(bundleId);
 
         if (location == null) {
             for (Bundle bundle : bundles) {
@@ -148,8 +156,7 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
     }
 
     public void resolve(String bundleId) throws Exception {
-        BundlesSelector selector = new BundlesSelector(getBundleContext());
-        List<Bundle> bundles = selector.selectBundles(bundleId);
+        List<Bundle> bundles = selectBundles(bundleId);
         getFrameworkWiring().resolveBundles(bundles);
     }
 
@@ -158,9 +165,7 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
     }
 
     public void restart(String bundleId) throws Exception {
-
-        BundlesSelector selector = new BundlesSelector(bundleContext);
-        List<Bundle> bundles = selector.selectBundles(bundleId);
+        List<Bundle> bundles = selectBundles(bundleId);
 
         for (Bundle bundle : bundles) {
             bundle.stop();
@@ -182,8 +187,7 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
     }
 
     public void start(String bundleId) throws Exception {
-        BundlesSelector selector = new BundlesSelector(bundleContext);
-        List<Bundle> bundles = selector.selectBundles(bundleId);
+        List<Bundle> bundles = selectBundles(bundleId);
 
         for (Bundle bundle : bundles) {
             bundle.start();
@@ -191,8 +195,7 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
     }
 
     public void stop(String bundleId) throws Exception {
-        BundlesSelector selector = new BundlesSelector(bundleContext);
-        List<Bundle> bundles = selector.selectBundles(bundleId);
+        List<Bundle> bundles = selectBundles(bundleId);
 
         for (Bundle bundle : bundles) {
             bundle.stop();
@@ -200,8 +203,7 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
     }
 
     public void uninstall(String bundleId) throws Exception {
-        BundlesSelector selector = new BundlesSelector(bundleContext);
-        List<Bundle> bundles = selector.selectBundles(bundleId);
+        List<Bundle> bundles = selectBundles(bundleId);
 
         for (Bundle bundle : bundles) {
             bundle.uninstall();
@@ -214,6 +216,22 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
 
     public void setBundleContext(BundleContext bundleContext) {
         this.bundleContext = bundleContext;
+    }
+
+    @Override
+    public String getDiag(long bundleId) {
+        Bundle bundle = bundleContext.getBundle(bundleId);
+        if (bundle == null) {
+            throw new RuntimeException("Bundle with id " + bundleId + " not found");
+        }
+        StringBuilder message = new StringBuilder();
+        for (BundleStateService bundleStateService : bundleStateServices) {
+            String part = bundleStateService.getDiag(bundle);
+            if (part != null) {
+                message.append(bundleStateService.getName() + part);
+            }
+        }
+        return message.toString();
     }
 
 }

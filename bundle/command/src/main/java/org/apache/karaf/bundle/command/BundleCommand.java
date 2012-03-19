@@ -18,7 +18,7 @@ package org.apache.karaf.bundle.command;
 
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
-import org.apache.karaf.util.ShellUtil;
+import org.apache.karaf.shell.util.ShellUtil;
 import org.osgi.framework.Bundle;
 
 /**

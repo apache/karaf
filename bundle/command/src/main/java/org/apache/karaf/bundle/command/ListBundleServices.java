@@ -21,7 +21,7 @@ import java.util.List;
 import org.apache.felix.service.command.Function;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.util.ShellUtil;
+import org.apache.karaf.shell.util.ShellUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
