@@ -16,10 +16,8 @@
  */
 package org.apache.karaf.bundle.springstate;
 
-
 import org.apache.karaf.bundle.core.BundleStateService;
 import org.osgi.framework.BundleContext;
-
 
 public class SpringStateListenerFactory {
 
