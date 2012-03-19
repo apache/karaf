@@ -21,6 +21,8 @@
     <feature name="aries-annotation" description="Aries Annotations" version="${project.version}">
         <bundle dependency="true" start-level="20">mvn:org.apache.commons/commons-jexl/${commons-jexl.version}</bundle>
         <bundle dependency="true" start-level="20">mvn:org.ow2.asm/asm-all/${asm.version}</bundle>
+        <bundle dependency="true" start-level="20">mvn:org.apache.xbean/xbean-bundleutils/${xbean.version}</bundle>
+        <bundle dependency="true" start-level="20">mvn:org.apache.xbean/xbean-finder/${xbean.version}</bundle>
         <bundle start-level="20">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.annotation.api/${aries.blueprint.annotation.api.version}</bundle>
         <bundle start-level="20">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.annotation.impl/${aries.blueprint.annotation.impl.version}</bundle>
         <bundle start-level="20">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.jexl.evaluator/${aries.blueprint.jexl.evaluator.version}</bundle>
