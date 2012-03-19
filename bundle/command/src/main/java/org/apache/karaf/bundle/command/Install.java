@@ -16,7 +16,6 @@
  */
 package org.apache.karaf.bundle.command;
 
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,7 +25,6 @@ import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.MultiException;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleException;
 
 @Command(scope = "bundle", name = "install", description = "Installs one or more bundles.")
 public class Install extends OsgiCommandSupport {
@@ -69,23 +67,6 @@ public class Install extends OsgiCommandSupport {
             System.out.println(sb);
         }
         MultiException.throwIf("Error installing bundles", exceptions);
-        return null;
-    }
-
-    private Bundle install(String location, PrintStream out, PrintStream err) {
-        try {
-            return getBundleContext().installBundle(location, null);
-        } catch (IllegalStateException ex) {
-            err.println(ex.toString());
-        } catch (BundleException ex) {
-            if (ex.getNestedException() != null) {
-                err.println(ex.getNestedException().toString());
-            } else {
-                err.println(ex.toString());
-            }
-        } catch (Exception ex) {
-            err.println(ex.toString());
-        }
         return null;
     }
 

@@ -38,7 +38,6 @@ public class Capabilities extends BundlesCommand {
 
     private static final String EMPTY_MESSAGE = "[EMPTY]";
     private static final String UNUSED_MESSAGE = "[UNUSED]";
-    private static final String UNRESOLVED_MESSAGE = "[UNRESOLVED]";
 
     @Option(name = "--namespace")
     String namespace = "*";
@@ -175,13 +174,13 @@ public class Capabilities extends BundlesCommand {
 
         try
         {
-            ServiceReference[] refs = b.getRegisteredServices();
+            ServiceReference<?>[] refs = b.getRegisteredServices();
 
             if ((refs != null) && (refs.length > 0))
             {
                 matches = true;
                 // Print properties for each service.
-                for (ServiceReference ref : refs)
+                for (ServiceReference<?> ref : refs)
                 {
                     // Print object class with "namespace".
                     System.out.println(
