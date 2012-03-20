@@ -16,22 +16,27 @@
  */
 package org.apache.karaf.bundle.core;
 
-/**
- * Bundle status including framework status.
- * 
- * The combined status will be the worst status from all frameworks this bundle uses.
- * 
- * e.g. On OSGi level the BundleState is Active, on Blueprint level it is Waiting
- * then the status should be Waiting.
- */
-public enum BundleState {
-    Installed,
-    Resolved,
-    Unknown,
-    GracePeriod,
-    Waiting,
-    Starting,
-    Active,
-    Stopping,
-    Failure,
+import java.util.List;
+
+import org.osgi.framework.Bundle;
+
+public interface BundleInfo {
+    long getBundleId();
+    String getSymbolicName();
+    String getName();
+    String getUpdateLocation();
+    String getVersion();
+    
+    /**
+     * Combined bundle state from OSGi and all BundleStateServices
+     * @return
+     */
+    BundleState getState();
+    
+    int getStartLevel();
+    
+    boolean isFragment();
+    
+    List<Bundle> getFragments();
+    List<Bundle> getFragmentHosts();
 }

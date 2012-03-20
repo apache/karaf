@@ -46,7 +46,7 @@ public class BlueprintListener implements org.osgi.service.blueprint.container.B
     }
 
     public String getName() {
-        return "Blueprint";
+        return BundleStateService.NAME_BLUEPRINT;
     }
 
     public String getDiag(Bundle bundle) {
@@ -117,7 +117,7 @@ public class BlueprintListener implements org.osgi.service.blueprint.container.B
         case BlueprintEvent.DESTROYING:
             return BundleState.Stopping;
         case BlueprintEvent.DESTROYED:
-            return BundleState.Stopped;
+            return BundleState.Resolved;
         case BlueprintEvent.FAILURE:
             return BundleState.Failure;
         case BlueprintEvent.GRACE_PERIOD:

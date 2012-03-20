@@ -61,21 +61,6 @@
             <artifactId>org.apache.felix.utils</artifactId>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.osgi</groupId>
-            <artifactId>spring-osgi-core</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.osgi</groupId>
-            <artifactId>spring-osgi-extender</artifactId>
-            <optional>true</optional>
-        </dependency>
         
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -106,18 +91,15 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Export-Package>org.apache.karaf.bundle.core*</Export-Package>
+                        <Export-Package>org.apache.karaf.bundle.core</Export-Package>
                         <Import-Package>
                             org.apache.felix.service.command;status=provisional,
                             *
                         </Import-Package>
-                        <DynamicImport-Package>
-                            org.springframework.*
-                        </DynamicImport-Package>
                         <Private-Package>
+                            org.apache.karaf.bundle.core.internal,
                             org.apache.felix.utils.version,
-                            org.apache.felix.utils.manifest,
-                            !*
+                            org.apache.felix.utils.manifest
                         </Private-Package>
                     </instructions>
                 </configuration>
