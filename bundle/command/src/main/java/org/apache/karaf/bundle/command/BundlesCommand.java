@@ -16,10 +16,9 @@
  */
 package org.apache.karaf.bundle.command;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.karaf.bundle.core.BundleSelector;
+import org.apache.karaf.bundle.core.BundleService;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.apache.karaf.shell.util.ShellUtil;
@@ -32,7 +31,7 @@ public abstract class BundlesCommand extends OsgiCommandSupport {
     
     boolean defaultAllBundles = true;
 
-    BundleSelector bundleSelector;
+    BundleService bundleService;
     
     public BundlesCommand(boolean defaultAllBundles) {
         this.defaultAllBundles = defaultAllBundles;
@@ -44,26 +43,26 @@ public abstract class BundlesCommand extends OsgiCommandSupport {
     }
 
     protected Object doExecute(boolean force) throws Exception {
-        List<Bundle> bundles = bundleSelector.selectBundles(ids, defaultAllBundles);
-        List<Bundle> filteredBundles = filterSystemBundles(bundles, force);
-        doExecute(filteredBundles);
+        List<Bundle> bundles = bundleService.selectBundles(ids, defaultAllBundles);
+        if (!force) {
+            assertNoSystemBundles(bundles);
+        }
+        doExecute(bundles);
         return null;
     }
     
-    private List<Bundle> filterSystemBundles(List<Bundle> bundles, boolean force) {
-        List<Bundle> result = new ArrayList<Bundle>();
+    private void assertNoSystemBundles(List<Bundle> bundles) {
         for (Bundle bundle : bundles) {
-            if (force || !ShellUtil.isASystemBundle(bundleContext, bundle)) {
-                result.add(bundle);
+            if (ShellUtil.isASystemBundle(bundleContext, bundle)) {
+                throw new RuntimeException("Access to system bundle " + bundle.getBundleId() + " denied. You can override with -f");
             }
         }
-        return result;
     }
       
     protected abstract void doExecute(List<Bundle> bundles) throws Exception;
 
-    public void setBundleSelector(BundleSelector bundleSelector) {
-        this.bundleSelector = bundleSelector;
+    public void setBundleService(BundleService bundleSelector) {
+        this.bundleService = bundleSelector;
     }
 
 }

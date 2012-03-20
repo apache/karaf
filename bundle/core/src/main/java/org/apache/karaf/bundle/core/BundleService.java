@@ -19,9 +19,15 @@ package org.apache.karaf.bundle.core;
 import java.util.List;
 
 import org.osgi.framework.Bundle;
+import org.osgi.framework.wiring.BundleRequirement;
 
-public interface BundleSelector {
+public interface BundleService {
+    
+    BundleInfo getInfo(Bundle bundle);
 
     List<Bundle> selectBundles(List<String> ids, boolean defaultAllBundles);
 
+    String getDiag(Bundle bundle);
+    
+    List<BundleRequirement> getUnsatisfiedRquirements(Bundle bundle, String namespace);
 }

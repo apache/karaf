@@ -19,15 +19,12 @@
         <reference-listener ref="mbeanRegistrer" bind-method="registerMBeanServer" unbind-method="unregisterMBeanServer"/>
     </reference>
     
-    <reference id="bundleSelector" interface="org.apache.karaf.bundle.core.BundleSelector" />
+    <reference id="bundleService" interface="org.apache.karaf.bundle.core.BundleService" />
     
-    <reference-list id="bundleStateServices" interface="org.apache.karaf.bundle.core.BundleStateService" />
-
     <!-- Bundles MBean -->
     <bean id="bundlesMBean" class="org.apache.karaf.bundle.management.internal.BundlesMBeanImpl">
         <argument ref="blueprintBundleContext" />
-        <argument ref="bundleSelector" />
-        <argument ref="bundleStateServices" />
+        <argument ref="bundleService" />
     </bean>
 
     <!-- MBean Registrer -->

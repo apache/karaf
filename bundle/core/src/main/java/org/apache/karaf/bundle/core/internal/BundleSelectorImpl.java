@@ -22,12 +22,11 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.karaf.bundle.core.BundleSelector;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 
-public class BundleSelectorImpl implements BundleSelector {
+public class BundleSelectorImpl {
 
     private final BundleContext bundleContext;
     
@@ -35,10 +34,6 @@ public class BundleSelectorImpl implements BundleSelector {
         this.bundleContext = bundleContext;
     }
     
-    /* (non-Javadoc)
-     * @see org.apache.karaf.bundle.core.internal.BundleSelector#selectBundles(java.util.List)
-     */
-    @Override
     public List<Bundle> selectBundles(List<String> ids, boolean defaultAllBundles) {
         List<Bundle> bundles = new ArrayList<Bundle>();
         if (ids != null && !ids.isEmpty()) {

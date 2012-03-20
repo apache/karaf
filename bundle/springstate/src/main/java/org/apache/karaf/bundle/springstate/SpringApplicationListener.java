@@ -45,7 +45,7 @@ public class SpringApplicationListener implements OsgiBundleApplicationContextLi
     }
 
     public String getName() {
-        return "Spring";
+        return BundleStateService.NAME_SPRING_DM;
     }
 
     public BundleState getState(Bundle bundle) {

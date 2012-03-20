@@ -17,8 +17,9 @@
 package org.apache.karaf.bundle.command;
 
 import java.util.Arrays;
+import java.util.Collections;
 
-import org.apache.karaf.bundle.core.internal.BundleSelectorImpl;
+import org.apache.karaf.bundle.core.internal.BundleServiceImpl;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
 
@@ -26,11 +27,12 @@ public class ListServicesTest {
 
     private ListBundleServices listServices;
 
+    @SuppressWarnings("unchecked")
     public ListServicesTest() {
         listServices = new ListBundleServices();
         BundleContext bundleContext = new TestBundleFactory().createBundleContext();
         listServices.setBundleContext(bundleContext);
-        listServices.setBundleSelector(new BundleSelectorImpl(bundleContext));
+        listServices.setBundleService(new BundleServiceImpl(bundleContext, Collections.EMPTY_LIST));
     }
     
     @Test

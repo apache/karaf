@@ -26,12 +26,17 @@
         </command>
         <command>
             <action class="org.apache.karaf.bundle.command.Headers">
-                <property name="bundleSelector" ref="bundleSelector"/>
+                <property name="bundleService" ref="bundleService"/>
             </action>
         </command>
         <command>
             <action class="org.apache.karaf.bundle.command.Info">
-                <property name="bundleSelector" ref="bundleSelector"/>
+                <property name="bundleService" ref="bundleService"/>
+            </action>
+        </command>
+        <command>
+            <action class="org.apache.karaf.bundle.command.Diag">
+                <property name="bundleService" ref="bundleService"/>
             </action>
         </command>
         <command>
@@ -40,17 +45,17 @@
         </command>
         <command>
             <action class="org.apache.karaf.bundle.command.ListBundles">
-                <argument ref="bundleStateServices" />
+                <argument ref="bundleService" />
             </action>
         </command>
         <command>
             <action class="org.apache.karaf.bundle.command.ListBundleServices">
-                <property name="bundleSelector" ref="bundleSelector"/>
+                <property name="bundleService" ref="bundleService"/>
             </action>
         </command>
         <command>
             <action class="org.apache.karaf.bundle.command.Refresh">
-                <property name="bundleSelector" ref="bundleSelector"/>
+                <property name="bundleService" ref="bundleService"/>
             </action>
         </command>
         <command>
@@ -59,43 +64,41 @@
         </command>
         <command>
             <action class="org.apache.karaf.bundle.command.Resolve">
-                <property name="bundleSelector" ref="bundleSelector"/>
+                <property name="bundleService" ref="bundleService"/>
             </action>
         </command>
         <command>
             <action class="org.apache.karaf.bundle.command.Restart">
-                <property name="bundleSelector" ref="bundleSelector"/>
+                <property name="bundleService" ref="bundleService"/>
             </action>
         </command>
         <command>
             <action class="org.apache.karaf.bundle.command.Start">
-                <property name="bundleSelector" ref="bundleSelector"/>
+                <property name="bundleService" ref="bundleService"/>
             </action>
         </command>
         <command>
             <action class="org.apache.karaf.bundle.command.Stop">
-                <property name="bundleSelector" ref="bundleSelector"/>
+                <property name="bundleService" ref="bundleService"/>
             </action>
         </command>
         <command>
             <action class="org.apache.karaf.bundle.command.Uninstall">
-                <property name="bundleSelector" ref="bundleSelector"/>
+                <property name="bundleService" ref="bundleService"/>
             </action>
         </command>
         <command>
             <action class="org.apache.karaf.bundle.command.Capabilities">
-                <property name="bundleSelector" ref="bundleSelector"/>
+                <property name="bundleService" ref="bundleService"/>
             </action>
         </command>
         <command>
             <action class="org.apache.karaf.bundle.command.Requirements">
-                <property name="bundleSelector" ref="bundleSelector"/>
+                <property name="bundleService" ref="bundleService"/>
             </action>
         </command>
     </command-bundle>
     
-    <reference id="bundleSelector" interface="org.apache.karaf.bundle.core.BundleSelector" />
-    
-    <reference-list id="bundleStateServices" interface="org.apache.karaf.bundle.core.BundleStateService" />
+    <reference id="bundleService" interface="org.apache.karaf.bundle.core.BundleService" />
 
 </blueprint>

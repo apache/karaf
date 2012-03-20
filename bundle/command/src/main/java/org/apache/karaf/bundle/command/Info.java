@@ -37,15 +37,8 @@ public class Info extends BundlesCommand {
     }
 
     protected void doExecute(List<Bundle> bundles) throws Exception {
-        if (bundles == null) {
-            Bundle[] allBundles = getBundleContext().getBundles();
-            for (int i = 0; i < allBundles.length; i++) {
-                printInfo(allBundles[i]);
-            }
-        } else {
-            for (Bundle bundle : bundles) {
-                printInfo(bundle);
-            }
+        for (Bundle bundle : bundles) {
+          printInfo(bundle);
         }
     }
 

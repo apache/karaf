@@ -19,12 +19,13 @@
 -->
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
 
-    <bean id="bundleSelector" class="org.apache.karaf.bundle.core.internal.BundleSelectorImpl">
+    <bean id="bundleService" class="org.apache.karaf.bundle.core.internal.BundleServiceImpl">
         <argument ref="blueprintBundleContext"/>
+        <argument ref="bundleStateServices"/>
     </bean>
 
-    <service interface="org.apache.karaf.bundle.core.BundleSelector" ref="bundleSelector"/>
-
+    <service interface="org.apache.karaf.bundle.core.BundleService" ref="bundleService"/>
+    <reference-list id="bundleStateServices" interface="org.apache.karaf.bundle.core.BundleStateService" />
     <bean id="blueprintListener" class="org.apache.karaf.bundle.core.internal.BlueprintListener" />
 
     <service ref="blueprintListener">

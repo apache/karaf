@@ -32,33 +32,34 @@ import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularDataSupport;
 import javax.management.openmbean.TabularType;
 
-import org.apache.karaf.bundle.core.BundleSelector;
-import org.apache.karaf.bundle.core.BundleStateService;
+import org.apache.karaf.bundle.core.BundleInfo;
+import org.apache.karaf.bundle.core.BundleService;
 import org.apache.karaf.bundle.management.BundlesMBean;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.startlevel.BundleStartLevel;
 import org.osgi.framework.wiring.FrameworkWiring;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Bundles MBean implementation.
  */
 public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
+    private Logger LOG = LoggerFactory.getLogger(BundlesMBeanImpl.class);
 
     private BundleContext bundleContext;
-    private final BundleSelector bundleSelector;
-    private final List<BundleStateService> bundleStateServices;
+    private final BundleService bundleService;
 
-    public BundlesMBeanImpl(BundleContext bundleContext, BundleSelector bundleSelector, List<BundleStateService> bundleStateServices) throws NotCompliantMBeanException {
+    public BundlesMBeanImpl(BundleContext bundleContext, BundleService bundleService) throws NotCompliantMBeanException {
         super(BundlesMBean.class);
         this.bundleContext = bundleContext;
-        this.bundleSelector = bundleSelector;
-        this.bundleStateServices = bundleStateServices;
+        this.bundleService = bundleService;
     }
     
     private List<Bundle> selectBundles(String id) throws Exception {
         List<String> ids = Collections.singletonList(id);
-        return this.bundleSelector.selectBundles(ids , false);
+        return this.bundleService.selectBundles(ids , false);
     }
 
     public TabularData getBundles() throws Exception {
@@ -73,26 +74,15 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
 
         for (int i = 0; i < bundles.length; i++) {
             try {
-                int bundleStartLevel = getBundleStartLevel(bundles[i]).getStartLevel();
-                int bundleState = bundles[i].getState();
-                String bundleStateString;
-                if (bundleState == Bundle.ACTIVE)
-                    bundleStateString = "ACTIVE";
-                else if (bundleState == Bundle.INSTALLED)
-                    bundleStateString = "INSTALLED";
-                else if (bundleState == Bundle.RESOLVED)
-                    bundleStateString = "RESOLVED";
-                else if (bundleState == Bundle.STARTING)
-                    bundleStateString = "STARTING";
-                else if (bundleState == Bundle.STOPPING)
-                    bundleStateString = "STOPPING";
-                else bundleStateString = "UNKNOWN";
+                Bundle bundle = bundles[i];
+                BundleInfo info = bundleService.getInfo(bundle);
+                String bundleStateString = info.getState().toString();
                 CompositeData data = new CompositeDataSupport(bundleType,
                         new String[]{"ID", "Name", "Version", "Start Level", "State"},
-                        new Object[]{bundles[i].getBundleId(), bundles[i].getSymbolicName(), bundles[i].getVersion().toString(), bundleStartLevel, bundleStateString});
+                        new Object[]{info.getBundleId(), info.getSymbolicName(), info.getVersion(), info.getStartLevel(), bundleStateString});
                 table.put(data);
             } catch (Exception e) {
-                e.printStackTrace();
+                LOG.error(e.getMessage(), e);
             }
         }
         return table;
@@ -224,14 +214,7 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
         if (bundle == null) {
             throw new RuntimeException("Bundle with id " + bundleId + " not found");
         }
-        StringBuilder message = new StringBuilder();
-        for (BundleStateService bundleStateService : bundleStateServices) {
-            String part = bundleStateService.getDiag(bundle);
-            if (part != null) {
-                message.append(bundleStateService.getName() + part);
-            }
-        }
-        return message.toString();
+        return bundleService.getDiag(bundle);
     }
 
 }
