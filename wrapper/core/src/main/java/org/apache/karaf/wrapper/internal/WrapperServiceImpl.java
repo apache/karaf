@@ -214,7 +214,21 @@ public class WrapperServiceImpl implements WrapperService {
                 copyResourceTo(new File(lib, "libwrapper.so"), "solaris/sparc32/libwrapper.so", false);
             }
         } else if (os.startsWith("HP-UX") || os.startsWith("HPUX")) {
-            // TODO add HP-UX resources
+            mkdir(bin);
+            
+            File file = new File(bin, name + "-wrapper");
+            copyResourceTo(file, "hpux/parisc64/karaf-wrapper", false);
+            chmod(file, "a+x");
+            
+            serviceFile = new File(bin, name + "-service");
+            copyResourceTo(file, "unix/karaf-service", false);
+            chmod(file, "a+x");
+            
+            wrapperConf = new File(etc, name + "-wrapper.conf");
+            copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props);
+            
+            mkdir(lib);
+            copyResourceTo(new File(lib, "libwrapper.sl"), "hpux/parisc64/libwrapper.sl", false);
         } else {
             throw new IllegalStateException("Your operating system '" + os + "' is not currently supported.");
         }
