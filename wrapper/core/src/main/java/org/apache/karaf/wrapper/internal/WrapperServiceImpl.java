@@ -127,8 +127,55 @@ public class WrapperServiceImpl implements WrapperService {
                 mkdir(lib);
                 copyResourceTo(new File(lib, "libwrapper.so"), "linux/libwrapper.so", false);
             }
+        } else if (os.startsWith("AIX")) {
+            String arch = System.getProperty("os.arch");
+            if (arch.equalsIgnoreCase("ppc64")) {
+                mkdir(bin);
+                
+                File file = new File(bin, name + "-wrapper");
+                copyResourceTo(file, "aix/ppc64/karaf-wrapper", false);
+                chmod(file, "a+x");
+                
+                serviceFile = new File(bin, name + "-service");
+                copyResourceTo(file, "unix/karaf-service", false);
+                chmod(file, "a+x");
+                
+                wrapperConf = new File(etc, name + "-wrapper.conf");
+                copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props);
+                
+                mkdir(lib);
+                copyResourceTo(new File(lib, "libwrapper.a"), "aix/ppc64/libwrapper.a", false);
+            } else {
+                mkdir(bin);
+
+                File file = new File(bin, name + "-wrapper");
+                copyResourceTo(file, "aix/ppc32/karaf-wrapper", false);
+                chmod(file, "a+x");
+
+                serviceFile = new File(bin, name + "-service");
+                copyResourceTo(file, "unix/karaf-service", false);
+                chmod(file, "a+x");
+
+                wrapperConf = new File(etc, name + "-wrapper.conf");
+                copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props);
+
+                mkdir(lib);
+                copyResourceTo(new File(lib, "libwrapper.a"), "aix/ppc32/libwrapper.a", false);
+            }
+        } else if (os.startsWith("Solaris") || os.startsWith("SunOS")) {
+            String arch = System.getProperty("os.arch");
+            if (arch.equalsIgnoreCase("sparc")) {
+                // TODO add Solaris Sparc 64 resources
+            } else if (arch.equalsIgnoreCase("x86")) {
+                // TODO add Solaris x86 resources  
+            } else {
+                // TODO add Solaris Sparc 32 resources
+            }
+        } else if (os.startsWith("HP-UX") || os.startsWith("HPUX")) {
+            // TODO add HP-UX resources
         } else {
             throw new IllegalStateException("Your operating system '" + os + "' is not currently supported.");
+            // TODO add custom wrapper installation
         }
 
         // install the wrapper jar to the lib directory
