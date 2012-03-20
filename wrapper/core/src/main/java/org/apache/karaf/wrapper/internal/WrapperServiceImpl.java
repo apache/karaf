@@ -165,17 +165,58 @@ public class WrapperServiceImpl implements WrapperService {
         } else if (os.startsWith("Solaris") || os.startsWith("SunOS")) {
             String arch = System.getProperty("os.arch");
             if (arch.equalsIgnoreCase("sparc")) {
-                // TODO add Solaris Sparc 64 resources
+                mkdir(bin);
+                
+                File file = new File(bin, name + "-wrapper");
+                copyResourceTo(file, "solaris/sparc64/karaf-wrapper", false);
+                chmod(file, "a+x");
+                
+                serviceFile = new File(bin, name + "-service");
+                copyResourceTo(file, "unix/karaf-service", false);
+                chmod(file, "a+x");
+                
+                wrapperConf = new File(etc, name + "-wrapper.conf");
+                copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props);
+                
+                mkdir(lib);
+                copyResourceTo(new File(lib, "libwrapper.so"), "solaris/sparc64/libwrapper.so", false);
             } else if (arch.equalsIgnoreCase("x86")) {
-                // TODO add Solaris x86 resources  
+                mkdir(bin);
+
+                File file = new File(bin, name + "-wrapper");
+                copyResourceTo(file, "solaris/x86/karaf-wrapper", false);
+                chmod(file, "a+x");
+
+                serviceFile = new File(bin, name + "-service");
+                copyResourceTo(file, "unix/karaf-service", false);
+                chmod(file, "a+x");
+
+                wrapperConf = new File(etc, name + "-wrapper.conf");
+                copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props);
+
+                mkdir(lib);
+                copyResourceTo(new File(lib, "libwrapper.so"), "solaris/x86/libwrapper.so", false);
             } else {
-                // TODO add Solaris Sparc 32 resources
+                mkdir(bin);
+
+                File file = new File(bin, name + "-wrapper");
+                copyResourceTo(file, "solaris/sparc32/karaf-wrapper", false);
+                chmod(file, "a+x");
+
+                serviceFile = new File(bin, name + "-service");
+                copyResourceTo(file, "unix/karaf-service", false);
+                chmod(file, "a+x");
+
+                wrapperConf = new File(etc, name + "-wrapper.conf");
+                copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props);
+
+                mkdir(lib);
+                copyResourceTo(new File(lib, "libwrapper.so"), "solaris/sparc32/libwrapper.so", false);
             }
         } else if (os.startsWith("HP-UX") || os.startsWith("HPUX")) {
             // TODO add HP-UX resources
         } else {
             throw new IllegalStateException("Your operating system '" + os + "' is not currently supported.");
-            // TODO add custom wrapper installation
         }
 
         // install the wrapper jar to the lib directory
