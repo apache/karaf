@@ -146,7 +146,42 @@ public class InstallCommand extends OsgiCommandSupport
 				    // TODO: figure out how to hook in the service that it starts up
 				    // when the machine boots up.
                 }
-			} else {
+			} else if (os.startsWith("AIX")) {
+                String arch = System.getProperty("os.arch");
+                if (arch.equalsIgnoreCase("ppc64")) {
+                    mkdir(bin);
+
+                    File file = new File(bin, name + "-wrapper");
+                    copyResourceTo(file, "aix/ppc64/karaf-wrapper", false);
+                    chmod(file, "a+x");
+
+                    serviceFile = new File(bin, name + "-service");
+                    copyResourceTo(file, "unix/karaf-service", false);
+                    chmod(file, "a+x");
+
+                    wrapperConf = new File(etc, name + "-wrapper.conf");
+                    copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props);
+
+                    mkdir(lib);
+                    copyResourceTo(new File(lib, "libwrapper.a"), "aix/ppc64/libwrapper.a", false);
+                } else {
+                    mkdir(bin);
+
+                    File file = new File(bin, name + "-wrapper");
+                    copyResourceTo(file, "aix/ppc64/karaf-wrapper", false);
+                    chmod(file, "a+x");
+
+                    serviceFile = new File(bin, name + "-service");
+                    copyResourceTo(file, "unix/karaf-service", false);
+                    chmod(file, "a+x");
+
+                    wrapperConf = new File(etc, name + "-wrapper.conf");
+                    copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props);
+
+                    mkdir(lib);
+                    copyResourceTo(new File(lib, "libwrapper.a"), "aix/ppc64/libwrapper.a", false);
+                }
+            } else {
 		        System.out.println("Your operating system '"+os+"' is not currently supported.");
 		        return 1;
 			}
