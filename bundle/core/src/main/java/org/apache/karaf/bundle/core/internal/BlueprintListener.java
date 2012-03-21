@@ -63,11 +63,11 @@ public class BlueprintListener implements org.osgi.service.blueprint.container.B
         SimpleDateFormat df = new SimpleDateFormat();
         message.append(df.format(date) + "\n");
         if (event.getCause() != null) {
-            message.append("Exception: ");
+            message.append("Exception: \n");
             addMessages(message, event.getCause());
         }
         if (event.getDependencies() != null) {
-            message.append("Missing dependencies: ");
+            message.append("Missing dependencies: \n");
             for (String dep : event.getDependencies()) {
                 message.append(dep + " ");
             }

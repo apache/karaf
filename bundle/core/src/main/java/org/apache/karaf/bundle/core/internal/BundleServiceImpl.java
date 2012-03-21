@@ -63,7 +63,8 @@ public class BundleServiceImpl implements BundleService {
         for (BundleStateService bundleStateService : stateServices) {
             String part = bundleStateService.getDiag(bundle);
             if (part != null) {
-                message.append(bundleStateService.getName() + part);
+                message.append(bundleStateService.getName() + "\n");
+                message.append(part);
             }
         }
         if (bundle.getState() == Bundle.INSTALLED) {
