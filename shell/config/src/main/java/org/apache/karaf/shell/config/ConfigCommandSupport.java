@@ -162,7 +162,7 @@ public abstract class ConfigCommandSupport extends OsgiCommandSupport {
                 storageFile = new File(new URL((String) val).toURI());
             }
             } catch (Exception e) {
-                throw new IOException(e);
+                throw new IOException(e.getMessage());
             }
         }
         Properties p = new Properties(storageFile);

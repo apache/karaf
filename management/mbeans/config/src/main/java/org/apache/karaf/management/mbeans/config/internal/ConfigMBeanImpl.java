@@ -187,7 +187,7 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
                         storageFile = new File(new URL((String) val).toURI());
                     }
                 } catch (Exception e) {
-                    throw new IOException(e);
+                    throw new IOException(e.getMessage());
                 }
             }
             Properties p = new Properties(storageFile);
