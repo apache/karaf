@@ -34,6 +34,7 @@
 
     <modules>
         <module>kar</module>
+        <module>wrap</module>
     </modules>
 
 </project>
