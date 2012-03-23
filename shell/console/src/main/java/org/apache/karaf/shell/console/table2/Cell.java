@@ -13,36 +13,31 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.apache.karaf.shell.console.table;
+package org.apache.karaf.shell.console.table2;
 
-class StringUtil {
+import java.io.PrintStream;
 
-    /**
-     * Returns length of the string.
-     * 
-     * @param string String.
-     * @return Length.
-     */
-    public static int length(String string) {
-        return string == null ? 0 : string.length();
+
+public class Cell {
+    private Object content;
+    private boolean isHeader;
+    private Col col;
+    
+    public Cell(Object content, boolean isHeader, Col col) {
+        this.isHeader = isHeader;
+        this.content = content;
+        this.col = col;
     }
 
-    /**
-     * Utility method to repeat string.
-     * 
-     * @param string String to repeat.
-     * @param times Number of times.
-     * @return Repeat string.
-     */
-    public static String repeat(String string, int times) {
-        if (times <= 0) {
-            return "";
-        }
-        else if (times % 2 == 0) {
-            return repeat(string+string, times/2);
-        }
-        else {
-           return string + repeat(string+string, times/2);
-        }
+    public boolean isHeader() {
+        return isHeader;
+    }
+
+    public Object getContent() {
+        return content;
+    }
+    
+    public void print(PrintStream out, int size) {
+        out.print("");
     }
 }
