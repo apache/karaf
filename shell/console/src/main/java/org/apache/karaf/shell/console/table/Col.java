@@ -13,11 +13,10 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.apache.karaf.shell.console.table2;
+package org.apache.karaf.shell.console.table;
 
 import java.text.Format;
 
-import org.apache.karaf.shell.console.table.HAlign;
 
 /**
  * Column definition.
