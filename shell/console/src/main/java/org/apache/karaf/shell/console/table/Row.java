@@ -16,52 +16,54 @@
 package org.apache.karaf.shell.console.table;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-/**
- * Row information.
- */
-public class Row extends TableElement {
-
-    /**
-     * List of cells.
-     */
-    private List<Cell> cells = new ArrayList<Cell>();
-
-    /**
-     * Add borders?
-     */
-    private boolean borders;
-
-    public Row(Object[] row) {
-        this(true);
-        for (Object object : row) {
-            addCell(new Cell(object));
+public class Row {
+    private List<Object> data;
+    private List<String> content;
+    
+    Row() {
+        data = new ArrayList<Object>();
+        content = new ArrayList<String>();
+    }
+    
+    Row(List<Col> cols) {
+        this();
+        for (Col col : cols) {
+            data.add(col.getHeader());
         }
     }
 
-    public Row() {
-        this(true);
+    public void addContent(Object ... cellDataAr) {
+        data.addAll(Arrays.asList(cellDataAr));
     }
-
-    public Row(boolean borders) {
-        this.borders = borders;
+    
+    void formatContent(List<Col> cols) {
+        content.clear();
+        int c = 0;
+        for (Col col : cols) {
+            content.add(col.format(data.get(c)));
+            c++;
+        }
     }
-
-    public void addCell(Cell cell) {
-        cells.add(cell);
-    }
-
-    public List<Cell> getCells() {
-        return cells;
-    }
-
-    public boolean isBorders() {
-        return borders;
-    }
-
-    public void addCell(Object value) {
-        addCell(new Cell(value));
+    
+    String getContent(List<Col> cols) {
+        StringBuilder st = new StringBuilder();
+        int c = 0;
+        if (cols.size() != content.size()) {
+            throw new RuntimeException("Number of columns and number of content elements do not match");
+        }
+        //st.append("| ");
+        for (Col col : cols) {
+            st.append(col.getContent(content.get(c)));
+            if (c + 1 < cols.size()) {
+                st.append(" | ");
+            }
+            c++;
+        }
+        //st.append(" |");
+        return st.toString();
     }
 
 }

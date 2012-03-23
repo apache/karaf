@@ -15,55 +15,29 @@
  */
 package org.apache.karaf.shell.console.table;
 
-/**
- * Cell information.
- */
-public class Cell extends TableElement {
+import java.io.PrintStream;
 
-    private String value;
-    private int colSpan;
-    private HAlign align;
 
-    public Cell(Object value) {
-        this(value, 0);
+public class Cell {
+    private Object content;
+    private boolean isHeader;
+    private Col col;
+    
+    public Cell(Object content, boolean isHeader, Col col) {
+        this.isHeader = isHeader;
+        this.content = content;
+        this.col = col;
     }
 
-    public Cell(Object value, HAlign align) {
-        this(value, align, 0);
+    public boolean isHeader() {
+        return isHeader;
     }
 
-    public Cell(Object value, int colSpan) {
-        this(value, null, colSpan);
+    public Object getContent() {
+        return content;
     }
-
-    public Cell(Object value, HAlign align, int colSpan) {
-        this.value = value.toString();
-        this.colSpan = colSpan;
-        this.align = align;
-    }
-
-    public String getValue() {
-        return value;
-    }
-
-    public void setColSpan(int colSpan) {
-        this.colSpan = colSpan;
-    }
-
-    public int getColSpan() {
-        return colSpan;
-    }
-
-    public HAlign getAlign() {
-        return align;
-    }
-
-    public void setAlign(HAlign align) {
-        this.align = align;
-    }
-
-    @Override
-    public String toString() {
-        return "[Cell: " + value +"]";
+    
+    public void print(PrintStream out, int size) {
+        out.print("");
     }
 }

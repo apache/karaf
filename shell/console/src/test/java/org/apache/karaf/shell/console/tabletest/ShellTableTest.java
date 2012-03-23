@@ -15,9 +15,9 @@
  */
 package org.apache.karaf.shell.console.tabletest;
 
-import org.apache.karaf.shell.console.table2.Col;
-import org.apache.karaf.shell.console.table2.Row;
-import org.apache.karaf.shell.console.table2.ShellTable;
+import org.apache.karaf.shell.console.table.Col;
+import org.apache.karaf.shell.console.table.Row;
+import org.apache.karaf.shell.console.table.ShellTable;
 import org.junit.Test;
 
 public class ShellTableTest {
