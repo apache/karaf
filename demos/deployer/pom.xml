@@ -35,6 +35,7 @@
     <modules>
         <module>kar</module>
         <module>wrap</module>
+        <module>bundle</module>
     </modules>
 
 </project>
