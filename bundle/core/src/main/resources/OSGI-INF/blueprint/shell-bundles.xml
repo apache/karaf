@@ -25,7 +25,7 @@
     </bean>
 
     <service interface="org.apache.karaf.bundle.core.BundleService" ref="bundleService"/>
-    <reference-list id="bundleStateServices" interface="org.apache.karaf.bundle.core.BundleStateService" />
+    <reference-list id="bundleStateServices" interface="org.apache.karaf.bundle.core.BundleStateService" availability="optional" />
     <bean id="blueprintListener" class="org.apache.karaf.bundle.core.internal.BlueprintListener" />
 
     <service ref="blueprintListener">
