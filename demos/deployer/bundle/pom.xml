@@ -65,7 +65,7 @@
                         <Import-Package>
                             *
                         </Import-Package>
-                        </instructions>
+                    </instructions>
                 </configuration>
             </plugin>
         </plugins>
