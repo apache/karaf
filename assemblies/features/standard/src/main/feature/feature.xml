@@ -49,9 +49,6 @@
         <bundle start-level="30">mvn:org.ops4j.pax.url/pax-url-obr/${pax.url.version}</bundle>
     </feature>
 
-    <feature name="bundle">
-    </feature>
-
     <feature name="config" description="Provide OSGi ConfigAdmin support" version="${project.version}">
         <bundle start-level="30" start="true">mvn:org.apache.karaf.config/org.apache.karaf.config.core/${project.version}</bundle>
         <bundle start-level="30" start="true">mvn:org.apache.karaf.config/org.apache.karaf.config.command/${project.version}</bundle>
@@ -168,7 +165,7 @@
     </feature>
 
     <feature name="eventadmin" description="OSGi Event Admin service specification for event-based communication" version="${project.version}" resolver="(obr)">
-		<bundle start-level="30">mvn:org.apache.felix/org.apache.felix.eventadmin/${felix.eventadmin.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.eventadmin/${felix.eventadmin.version}</bundle>
     </feature>
 
     <feature name="jasypt-encryption" description="Advanced encryption support for Karaf security" version="${project.version}" resolver="(obr)">
