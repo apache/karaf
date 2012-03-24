@@ -35,15 +35,17 @@
                 <version>${maven-bundle-plugin.version}</version>
                 <extensions>true</extensions>
                 <configuration>
-                    <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-                    <Bundle-Version>${project.version}</Bundle-Version>
-                    <Bundle-Activator>${package}.Activator</Bundle-Activator>
-                    <Export-Package>
-                        ${package}*;version=${project.version}
-                    </Export-Package>
-                    <Import-Package>
-                        *
-                    </Import-Package>
+                    <instructions>
+                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                        <Bundle-Version>${project.version}</Bundle-Version>
+                        <Bundle-Activator>${package}.Activator</Bundle-Activator>
+                        <Export-Package>
+                            ${package}*;version=${project.version}
+                        </Export-Package>
+                        <Import-Package>
+                            *
+                        </Import-Package>
+                    </instructions>
                 </configuration>
             </plugin>
         </plugins>
