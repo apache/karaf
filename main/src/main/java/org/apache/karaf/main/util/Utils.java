@@ -24,15 +24,8 @@ import java.io.IOException;
 import java.net.JarURLConnection;
 import java.net.URI;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 
 public class Utils {
-	public static final Pattern mvnPattern = Pattern
-			.compile("mvn:([^/ ]+)/([^/ ]+)/([^/ ]*)(/([^/ ]+)(/([^/ ]+))?)?");
 
     public static File getKarafHome(Class<?> mainClass, String karafHomeProperty, String karafHomeEnv) throws IOException {
         File rc = null;
@@ -211,85 +204,6 @@ public class Utils {
             }
         }
     }
-
-	/**
-	 * Returns a path for an srtifact. Input: path (no ':') returns path Input:
-	 * mvn:<groupId>/<artifactId>/<version>/<type>/<classifier> converts to
-	 * default repo location path // * Input:
-	 * <groupId>:<artifactId>:<version>:<type>:<classifier> converts to default
-	 * repo location path type and classifier are optional.
-	 * 
-	 * 
-	 * @param name
-	 *            input artifact info
-	 * @return path as supplied or a default maven repo path
-	 */
-	private static String fromMaven(String name) {
-		Matcher m = mvnPattern.matcher(name);
-		if (!m.matches()) {
-			return name;
-		}
-		StringBuilder b = new StringBuilder();
-		b.append(m.group(1));
-		for (int i = 0; i < b.length(); i++) {
-			if (b.charAt(i) == '.') {
-				b.setCharAt(i, '/');
-			}
-		}
-		b.append("/");// groupId
-		String artifactId = m.group(2);
-		String version = m.group(3);
-		String extension = m.group(5);
-		String classifier = m.group(7);
-		b.append(artifactId).append("/");// artifactId
-		b.append(version).append("/");// version
-		b.append(artifactId).append("-").append(version);
-		if (present(classifier)) {
-			b.append("-").append(classifier);
-		}
-        if (present(extension)) {
-            b.append(".").append(extension);
-        } else {
-            b.append(".jar");
-        }
-        return b.toString();
-	}
-	
-	public static boolean present(String part) {
-		return part != null && !part.isEmpty();
-	}
-
-	public static File findFile(List<File> bundleDirs, String name) {
-		for (File bundleDir : bundleDirs) {
-			File file = Utils.findFile(bundleDir, name);
-			if (file != null) {
-				return file;
-			}
-		}
-		return null;
-	}
-
-	public static File findFile(File dir, String name) {
-		name = fromMaven(name);
-		File theFile = new File(dir, name);
-	
-		if (theFile.exists() && !theFile.isDirectory()) {
-			return theFile;
-		}
-		return null;
-	}
-
-	public static void findJars(File dir, ArrayList<File> jars) {
-		for (File file : dir.listFiles()) {
-			if (file.isDirectory()) {
-				findJars(file, jars);
-			} else {
-				if (file.toString().endsWith(".jar")) {
-					jars.add(file);
-				}
-			}
-		}
-	}
 
 	public static String[] convertToMavenUrlsIfNeeded(String location,
 			boolean convertToMavenUrls) {

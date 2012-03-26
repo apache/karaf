@@ -56,6 +56,7 @@ import org.apache.karaf.main.lock.Lock;
 import org.apache.karaf.main.lock.SimpleFileLock;
 import org.apache.karaf.main.util.BootstrapLogManager;
 import org.apache.karaf.main.util.ServerInfoImpl;
+import org.apache.karaf.main.util.SimpleMavenResolver;
 import org.apache.karaf.main.util.StringMap;
 import org.apache.karaf.main.util.SubstHelper;
 import org.apache.karaf.main.util.Utils;
@@ -1084,11 +1085,12 @@ public class Main {
 
         } else if (STARTUP_PROPERTIES_FILE_NAME.equals(configProps.getProperty(PROPERTY_AUTO_START, "").trim())) {
             configProps.remove(PROPERTY_AUTO_START);
+            SimpleMavenResolver resolver = new SimpleMavenResolver(bundleDirs);
             // We should start the bundles in the startup.properties file.
             HashMap<Integer, StringBuffer> levels = new HashMap<Integer, StringBuffer>();
             for (Object o : startupProps.keySet()) {
                 String name = (String) o;
-                File file = findFile(bundleDirs, name);
+                File file = resolver.resolve(name);
 
                 if (file != null) {
                     Integer level;
@@ -1123,73 +1125,6 @@ public class Main {
         }
     }
 
-    private static File findFile(List<File> bundleDirs, String name) {
-        for (File bundleDir : bundleDirs) {
-            File file = findFile(bundleDir, name);
-            if (file != null) {
-                return file;
-            }
-        }
-        return null;
-    }
-
-    private static File findFile(File dir, String name) {
-        name = fromMaven(name);
-        File theFile = new File(dir, name);
-
-        if (theFile.exists() && !theFile.isDirectory()) {
-            return theFile;
-        }
-        return null;
-    }
-
-    private static final Pattern mvnPattern = Pattern.compile("mvn:([^/ ]+)/([^/ ]+)/([^/ ]*)(/([^/ ]+)(/([^/ ]+))?)?");
-
-    /**
-     * Returns a path for an srtifact.
-     * Input: path (no ':') returns path
-     * Input: mvn:<groupId>/<artifactId>/<version>/<type>/<classifier> converts to default repo location path
-     * type and classifier are optional.
-     *
-     *
-     * @param name input artifact info
-     * @return path as supplied or a default maven repo path
-     */
-    static String fromMaven(String name) {
-        Matcher m = mvnPattern.matcher(name);
-        if (!m.matches()) {
-            return name;
-        }
-        StringBuilder b = new StringBuilder();
-        b.append(m.group(1));
-        for (int i = 0; i < b.length(); i++) {
-            if (b.charAt(i) == '.') {
-                b.setCharAt(i, '/');
-            }
-        }
-        b.append("/");//groupId
-        String artifactId = m.group(2);
-        String version = m.group(3);
-        String extension = m.group(5);
-        String classifier = m.group(7);
-        b.append(artifactId).append("/");//artifactId
-        b.append(version).append("/");//version
-        b.append(artifactId).append("-").append(version);
-        if (present(classifier)) {
-            b.append("-").append(classifier);
-        } else {
-            if (present(extension)) {
-                b.append(".").append(extension);
-            } else {
-                b.append(".jar");
-            }
-        }
-        return b.toString();
-    }
-
-    private static boolean present(String part) {
-        return part != null && !part.isEmpty();
-    }
 
     private static void findJars(File dir, ArrayList<File> jars) {
         for (File file : dir.listFiles()) {
