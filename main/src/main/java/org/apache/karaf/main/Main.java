@@ -33,10 +33,8 @@ import java.lang.management.RuntimeMXBean;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.ServerSocket;
-import java.net.Socket;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.security.AccessControlException;
 import java.security.Provider;
 import java.security.Security;
 import java.util.ArrayList;
@@ -45,7 +43,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Random;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.jar.Manifest;
@@ -1388,10 +1385,6 @@ public class Main {
         framework.adapt(FrameworkStartLevel.class).setStartLevel(level);
     }
 
-
-    private Random random = null;
-    private ServerSocket shutdownSocket;
-
     protected void setupShutdown(Properties props) {
         writePid(props);
         try {
@@ -1400,7 +1393,7 @@ public class Main {
             String portFile = props.getProperty(KARAF_SHUTDOWN_PORT_FILE);
             final String shutdown = props.getProperty(KARAF_SHUTDOWN_COMMAND, DEFAULT_SHUTDOWN_COMMAND);
             if (port >= 0) {
-                shutdownSocket = new ServerSocket(port, 1, InetAddress.getByName(host));
+                ServerSocket shutdownSocket = new ServerSocket(port, 1, InetAddress.getByName(host));
                 if (port == 0) {
                     port = shutdownSocket.getLocalPort();
                 }
@@ -1409,7 +1402,7 @@ public class Main {
                     w.write(Integer.toString(port));
                     w.close();
                 }
-                Thread thread = new ShutdownSocketThread(shutdown);
+                Thread thread = new ShutdownSocketThread(shutdown, shutdownSocket, framework);
                 thread.setDaemon(true);
                 thread.start();
             }
@@ -1438,84 +1431,5 @@ public class Main {
         }
     }
 
-    private class ShutdownSocketThread extends Thread {
 
-        private final String shutdown;
-
-        public ShutdownSocketThread(String shutdown) {
-            this.shutdown = shutdown;
-        }
-
-        public void run() {
-            try {
-                while (true) {
-                    // Wait for the next connection
-                    Socket socket = null;
-                    InputStream stream = null;
-                    try {
-                        socket = shutdownSocket.accept();
-                        socket.setSoTimeout(10 * 1000);  // Ten seconds
-                        stream = socket.getInputStream();
-                    } catch (AccessControlException ace) {
-                        LOG.log(Level.WARNING, "Karaf shutdown socket: security exception: "
-                                           + ace.getMessage(), ace);
-                        continue;
-                    } catch (IOException e) {
-                        LOG.log(Level.SEVERE, "Karaf shutdown socket: accept: ", e);
-                        System.exit(1);
-                    }
-
-                    // Read a set of characters from the socket
-                    StringBuilder command = new StringBuilder();
-                    int expected = 1024; // Cut off to avoid DoS attack
-                    while (expected < shutdown.length()) {
-                        if (random == null) {
-                            random = new Random();
-                        }
-                        expected += (random.nextInt() % 1024);
-                    }
-                    while (expected > 0) {
-                        int ch;
-                        try {
-                            ch = stream.read();
-                        } catch (IOException e) {
-                            LOG.log(Level.WARNING, "Karaf shutdown socket:  read: ", e);
-                            ch = -1;
-                        }
-                        if (ch < 32) {  // Control character or EOF terminates loop
-                            break;
-                        }
-                        command.append((char) ch);
-                        expected--;
-                    }
-
-                    // Close the socket now that we are done with it
-                    try {
-                        socket.close();
-                    } catch (IOException e) {
-                        // Ignore
-                    }
-
-                    // Match against our command string
-                    boolean match = command.toString().equals(shutdown);
-                    if (match) {
-                        LOG.log(Level.INFO, "Karaf shutdown socket: received shutdown command. Stopping framework...");
-                        framework.stop();
-                        break;
-                    } else {
-                        LOG.log(Level.WARNING, "Karaf shutdown socket:  Invalid command '" +
-                                           command.toString() + "' received");
-                    }
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                try {
-                    shutdownSocket.close();
-                } catch (IOException e) {
-                    // Ignore
-                }
-            }
-        }
-    }
 }
