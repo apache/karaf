@@ -28,7 +28,6 @@ import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 import java.util.logging.StreamHandler;
 
-import org.apache.karaf.main.Main;
 
 /**
  * Convenience class for configuring java.util.logging to append to
@@ -70,7 +69,7 @@ public class BootstrapLogManager {
                     }
                 }
             }
-            filename = Main.substVars(props.getProperty("log4j.appender.out.file"), "log4j.appender.out.file", null, null);
+            filename = SubstHelper.substVars(props.getProperty("log4j.appender.out.file"), "log4j.appender.out.file", null, null);
             log = new File(filename);
         }
 

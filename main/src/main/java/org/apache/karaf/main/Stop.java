@@ -27,6 +27,7 @@ import java.net.URL;
 import java.util.Enumeration;
 import java.util.Properties;
 
+import org.apache.karaf.main.util.SubstHelper;
 import org.apache.karaf.main.util.Utils;
 
 /**
@@ -55,7 +56,7 @@ public class Stop {
         for (Enumeration e = props.propertyNames(); e.hasMoreElements();) {
             String name = (String) e.nextElement();
             props.setProperty(name,
-                    Main.substVars(props.getProperty(name), name, null, props));
+                    SubstHelper.substVars(props.getProperty(name), name, null, props));
         }
 
         int port = Integer.parseInt(props.getProperty(Main.KARAF_SHUTDOWN_PORT, "0"));
