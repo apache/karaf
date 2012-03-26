@@ -57,6 +57,7 @@ import org.apache.karaf.main.lock.SimpleFileLock;
 import org.apache.karaf.main.util.BootstrapLogManager;
 import org.apache.karaf.main.util.ServerInfoImpl;
 import org.apache.karaf.main.util.StringMap;
+import org.apache.karaf.main.util.SubstHelper;
 import org.apache.karaf.main.util.Utils;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
@@ -274,16 +275,9 @@ public class Main {
         lockDelay = Integer.parseInt(configProps.getProperty(PROPERTY_LOCK_DELAY, Integer.toString(lockDelay)));
         configProps.setProperty(Constants.FRAMEWORK_BEGINNING_STARTLEVEL, Integer.toString(lockStartLevel));
         shutdownTimeout = Integer.parseInt(configProps.getProperty(KARAF_SHUTDOWN_TIMEOUT, Integer.toString(shutdownTimeout)));
-        // Start up the OSGI framework
 
-        String factoryClass = configProps.getProperty(KARAF_FRAMEWORK_FACTORY);
-        if (factoryClass == null) {
-            InputStream is = classLoader.getResourceAsStream("META-INF/services/" + FrameworkFactory.class.getName());
-            BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
-            factoryClass = br.readLine();
-            br.close();
-        }
-        FrameworkFactory factory = (FrameworkFactory) classLoader.loadClass(factoryClass).newInstance();
+        // Start up the OSGI framework
+        FrameworkFactory factory = loadFrameworkFactory(classLoader);
         framework = factory.newFramework(new StringMap(configProps, false));
         framework.init();
         // Process properties
@@ -302,6 +296,18 @@ public class Main {
                 lock(configProps);
             }
         }.start();
+    }
+
+    private FrameworkFactory loadFrameworkFactory(ClassLoader classLoader) throws Exception {
+        String factoryClass = configProps.getProperty(KARAF_FRAMEWORK_FACTORY);
+        if (factoryClass == null) {
+            InputStream is = classLoader.getResourceAsStream("META-INF/services/" + FrameworkFactory.class.getName());
+            BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+            factoryClass = br.readLine();
+            br.close();
+        }
+        FrameworkFactory factory = (FrameworkFactory) classLoader.loadClass(factoryClass).newInstance();
+        return factory;
     }
 
     private void startKarafActivators(ClassLoader classLoader) throws IOException {
@@ -811,7 +817,7 @@ public class Main {
         for (Enumeration e = props.propertyNames(); e.hasMoreElements();) {
             String name = (String) e.nextElement();
             String value = System.getProperty(name, props.getProperty(name));
-            System.setProperty(name, substVars(value, name, null, props));
+            System.setProperty(name, SubstHelper.substVars(value, name, null, props));
         }
     }
 
@@ -857,7 +863,7 @@ public class Main {
         for (Enumeration e = configProps.propertyNames(); e.hasMoreElements();) {
             String name = (String) e.nextElement();
             configProps.setProperty(name,
-                    substVars(configProps.getProperty(name), name, null, configProps));
+                    SubstHelper.substVars(configProps.getProperty(name), name, null, configProps));
         }
 
         return configProps;
@@ -1195,121 +1201,6 @@ public class Main {
                 }
             }
         }
-    }
-
-    private static final String DELIM_START = "${";
-    private static final String DELIM_STOP = "}";
-
-    /**
-     * <p>
-     * This method performs property variable substitution on the
-     * specified value. If the specified value contains the syntax
-     * <tt>${&lt;prop-name&gt;}</tt>, where <tt>&lt;prop-name&gt;</tt>
-     * refers to either a configuration property or a system property,
-     * then the corresponding property value is substituted for the variable
-     * placeholder. Multiple variable placeholders may exist in the
-     * specified value as well as nested variable placeholders, which
-     * are substituted from inner most to outer most. Configuration
-     * properties override system properties.
-     * </p>
-     *
-     * @param val         The string on which to perform property substitution.
-     * @param currentKey  The key of the property being evaluated used to
-     *                    detect cycles.
-     * @param cycleMap    Map of variable references used to detect nested cycles.
-     * @param configProps Set of configuration properties.
-     * @return The value of the specified string after system property substitution.
-     * @throws IllegalArgumentException If there was a syntax error in the
-     *                                  property placeholder syntax or a recursive variable reference.
-     */
-    public static String substVars(String val, String currentKey,
-                                    Map<String, String> cycleMap, Properties configProps)
-            throws IllegalArgumentException {
-        // If there is currently no cycle map, then create
-        // one for detecting cycles for this invocation.
-        if (cycleMap == null) {
-            cycleMap = new HashMap<String, String>();
-        }
-
-        // Put the current key in the cycle map.
-        cycleMap.put(currentKey, currentKey);
-
-        // Assume we have a value that is something like:
-        // "leading ${foo.${bar}} middle ${baz} trailing"
-
-        // Find the first ending '}' variable delimiter, which
-        // will correspond to the first deepest nested variable
-        // placeholder.
-        int stopDelim = val.indexOf(DELIM_STOP);
-
-        // Find the matching starting "${" variable delimiter
-        // by looping until we find a start delimiter that is
-        // greater than the stop delimiter we have found.
-        int startDelim = val.indexOf(DELIM_START);
-        while (stopDelim >= 0) {
-            int idx = val.indexOf(DELIM_START, startDelim + DELIM_START.length());
-            if ((idx < 0) || (idx > stopDelim)) {
-                break;
-            } else if (idx < stopDelim) {
-                startDelim = idx;
-            }
-        }
-
-        // If we do not have a start or stop delimiter, then just
-        // return the existing value.
-        if ((startDelim < 0) && (stopDelim < 0)) {
-            return val;
-        }
-        // At this point, we found a stop delimiter without a start,
-        // so throw an exception.
-        else if (((startDelim < 0) || (startDelim > stopDelim))
-                && (stopDelim >= 0)) {
-            throw new IllegalArgumentException(
-                    "stop delimiter with no start delimiter: "
-                            + val);
-        }
-
-        // At this point, we have found a variable placeholder so
-        // we must perform a variable substitution on it.
-        // Using the start and stop delimiter indices, extract
-        // the first, deepest nested variable placeholder.
-        String variable =
-                val.substring(startDelim + DELIM_START.length(), stopDelim);
-
-        // Verify that this is not a recursive variable reference.
-        if (cycleMap.get(variable) != null) {
-            throw new IllegalArgumentException(
-                    "recursive variable reference: " + variable);
-        }
-
-        // Get the value of the deepest nested variable placeholder.
-        // Try to configuration properties first.
-        String substValue = (configProps != null)
-                ? configProps.getProperty(variable, null)
-                : null;
-        if (substValue == null) {
-            // Ignore unknown property values.
-            substValue = System.getProperty(variable, "");
-        }
-
-        // Remove the found variable from the cycle map, since
-        // it may appear more than once in the value and we don't
-        // want such situations to appear as a recursive reference.
-        cycleMap.remove(variable);
-
-        // Append the leading characters, the substituted value of
-        // the variable, and the trailing characters to get the new
-        // value.
-        val = val.substring(0, startDelim)
-                + substValue
-                + val.substring(stopDelim + DELIM_STOP.length(), val.length());
-
-        // Now perform substitution again, since there could still
-        // be substitutions to make.
-        val = substVars(val, currentKey, cycleMap, configProps);
-
-        // Return the value.
-        return val;
     }
 
     /**
