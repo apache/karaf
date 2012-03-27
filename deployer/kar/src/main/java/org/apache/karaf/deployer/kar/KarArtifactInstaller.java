@@ -18,7 +18,19 @@
  */
 package org.apache.karaf.deployer.kar;
 
-import java.io.BufferedOutputStream;
+import org.apache.felix.fileinstall.ArtifactInstaller;
+import org.apache.karaf.features.Feature;
+import org.apache.karaf.features.FeaturesService;
+import org.apache.karaf.features.Repository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -30,20 +42,6 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
-import org.apache.felix.fileinstall.ArtifactInstaller;
-import org.apache.karaf.features.Feature;
-import org.apache.karaf.features.FeaturesService;
-import org.apache.karaf.features.Repository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.xml.sax.ErrorHandler;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
 
 public class KarArtifactInstaller implements ArtifactInstaller {
 
@@ -262,6 +260,7 @@ public class KarArtifactInstaller implements ArtifactInstaller {
 	private void addToFeaturesRepositories(URI uri)  {
         // URI mvnUri = pathToMvnUri(path);
 		try {
+            featuresService.removeRepository(uri);
 			featuresService.addRepository(uri);
             logger.info("Added feature repository '{}'.", uri);
 		} catch (Exception e) {
