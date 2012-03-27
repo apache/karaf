@@ -309,6 +309,7 @@ public class KarServiceImpl implements KarService {
      */
     private void addToFeaturesRepositories(URI uri) throws Exception {
         try {
+            featuresService.removeRepository(uri);
             featuresService.addRepository(uri);
             LOGGER.info("Added feature repository '{}'", uri);
         } catch (Exception e) {
