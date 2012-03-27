@@ -114,6 +114,7 @@ public class KarArtifactInstallerTest {
 	@Test
 	public void shouldExtractAndRegisterFeaturesFromKar() throws Exception { 
 		// Setup expectations on the features service
+        featuresService.removeRepository( (URI) EasyMock.anyObject() );
         expect(featuresService.listRepositories()).andReturn(new Repository[0]);
 		featuresService.addRepository((URI) EasyMock.anyObject());
 		EasyMock.replay(featuresService);
@@ -131,6 +132,7 @@ public class KarArtifactInstallerTest {
 	@Test
 	public void shouldLogAndNotThrowExceptionIfCannotAddToFeaturesRepository() throws Exception { 
 		// Setup expectations on the features service
+        featuresService.removeRepository( (URI) EasyMock.anyObject() );
 		expect(featuresService.listRepositories()).andReturn(new Repository[0]);
         featuresService.addRepository((URI) EasyMock.anyObject());
 		EasyMock.expectLastCall().andThrow(new Exception("Unable to add to repository."));
@@ -151,6 +153,7 @@ public class KarArtifactInstallerTest {
 		// Setup expectations on the features service: the addRepository 
 		// should only be added once, as the update command should be ignored! 
 		//
+        featuresService.removeRepository( (URI) EasyMock.anyObject() );
         expect(featuresService.listRepositories()).andReturn(new Repository[0]);
 		featuresService.addRepository((URI) EasyMock.anyObject());
 		EasyMock.replay(featuresService);
@@ -169,6 +172,7 @@ public class KarArtifactInstallerTest {
 	@Test
 	public void shouldExtractAndRegisterFeaturesFromZip() throws Exception { 
 		// Setup expectations on the features service
+        featuresService.removeRepository( (URI) EasyMock.anyObject() );
         expect(featuresService.listRepositories()).andReturn(new Repository[0]);
 		featuresService.addRepository((URI) EasyMock.anyObject());
 		EasyMock.replay(featuresService);
