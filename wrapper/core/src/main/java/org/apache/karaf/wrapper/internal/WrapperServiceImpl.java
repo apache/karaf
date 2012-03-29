@@ -65,7 +65,7 @@ public class WrapperServiceImpl implements WrapperService {
         if (os.startsWith("Win")) {
             mkdir(bin);
 
-            copyResourceTo(new File(bin, name + "-wrapper.exec"), "windows/karaf-wrapper.exec", false);
+            copyResourceTo(new File(bin, name + "-wrapper.exe"), "windows/karaf-wrapper.exe", false);
 
             serviceFile = new File(bin, name + "-service.bat");
             wrapperConf = new File(etc, name + "-wrapper.conf");
