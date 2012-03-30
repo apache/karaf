@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.net.JarURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.util.StringTokenizer;
 
 public class Utils {
 
@@ -261,6 +262,49 @@ public class Utils {
 		}
 		return parts;
 	}
+
+    public static String nextLocation(StringTokenizer st) {
+        String retVal = null;
+    
+        if (st.countTokens() > 0) {
+            String tokenList = "\" ";
+            StringBuffer tokBuf = new StringBuffer(10);
+            String tok;
+            boolean inQuote = false;
+            boolean tokStarted = false;
+            boolean exit = false;
+            while ((st.hasMoreTokens()) && (!exit)) {
+                tok = st.nextToken(tokenList);
+                if (tok.equals("\"")) {
+                    inQuote = !inQuote;
+                    if (inQuote) {
+                        tokenList = "\"";
+                    } else {
+                        tokenList = "\" ";
+                    }
+    
+                } else if (tok.equals(" ")) {
+                    if (tokStarted) {
+                        retVal = tokBuf.toString();
+                        tokStarted = false;
+                        tokBuf = new StringBuffer(10);
+                        exit = true;
+                    }
+                } else {
+                    tokStarted = true;
+                    tokBuf.append(tok.trim());
+                }
+            }
+    
+            // Handle case where end of token stream and
+            // still got data
+            if ((!exit) && (tokStarted)) {
+                retVal = tokBuf.toString();
+            }
+        }
+    
+        return retVal;
+    }
 
 
 

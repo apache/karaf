@@ -23,7 +23,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -38,15 +37,12 @@ import java.net.URLClassLoader;
 import java.security.Provider;
 import java.security.Security;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
-import java.util.jar.Manifest;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -58,10 +54,8 @@ import org.apache.karaf.main.util.BootstrapLogManager;
 import org.apache.karaf.main.util.ServerInfoImpl;
 import org.apache.karaf.main.util.SimpleMavenResolver;
 import org.apache.karaf.main.util.StringMap;
-import org.apache.karaf.main.util.SubstHelper;
 import org.apache.karaf.main.util.Utils;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
@@ -198,8 +192,6 @@ public class Main {
     
     public static final String OPTIONALS_PROPERTY = "${optionals}"; // optionals includes
 
-    public static final String KARAF_ACTIVATOR = "Karaf-Activator";
-
     public static final String SECURITY_PROVIDERS = "org.apache.karaf.security.providers";
 
     Logger LOG = Logger.getLogger(this.getClass().getName());
@@ -219,7 +211,7 @@ public class Main {
     private int shutdownTimeout = 5 * 60 * 1000;
     private boolean exiting = false;
     private ShutdownCallback shutdownCallback;
-    private List<BundleActivator> karafActivators = new ArrayList<BundleActivator>();
+    private KarafActivatorManager activatorManager;
 
 
     public Main(String[] args) {
@@ -234,6 +226,12 @@ public class Main {
         karafHome = Utils.getKarafHome(Main.class, Main.PROP_KARAF_HOME, Main.ENV_KARAF_HOME);
         karafBase = Utils.getKarafDirectory(Main.PROP_KARAF_BASE, Main.ENV_KARAF_BASE, karafHome, false, true);
         karafData = Utils.getKarafDirectory(Main.PROP_KARAF_DATA, Main.ENV_KARAF_DATA, new File(karafBase, "data"), true, true);
+        
+        if (Boolean.getBoolean("karaf.restart.clean")) {
+            Utils.deleteDirectory(karafData);
+            karafData = Utils.getKarafDirectory(Main.PROP_KARAF_DATA, Main.ENV_KARAF_DATA, new File(karafBase, "data"), true, true);
+        }
+        
         karafInstances = Utils.getKarafDirectory(Main.PROP_KARAF_INSTANCES, Main.ENV_KARAF_INSTANCES, new File(karafHome, "instances"), false, false);
 
         Package p = Package.getPackage("org.apache.karaf.main");
@@ -244,20 +242,13 @@ public class Main {
         System.setProperty(PROP_KARAF_DATA, karafData.getPath());
         System.setProperty(PROP_KARAF_INSTANCES, karafInstances.getPath());
 
-        // Load system properties.
-        loadSystemProperties(karafBase);
+        PropertiesLoader.loadSystemProperties(karafBase);
 
         updateInstancePid();
 
-        // Read configuration properties.
-        configProps = loadConfigProperties();
+        configProps = PropertiesLoader.loadConfigProperties(karafBase);
         BootstrapLogManager.setProperties(configProps);
         LOG.addHandler(BootstrapLogManager.getDefaultHandler());
-        
-        // Copy framework properties from the system properties.
-        Main.copySystemProperties(configProps);
-
-        ClassLoader classLoader = createClassLoader(configProps);
 
         processSecurityProperties(configProps);
 
@@ -278,6 +269,7 @@ public class Main {
         shutdownTimeout = Integer.parseInt(configProps.getProperty(KARAF_SHUTDOWN_TIMEOUT, Integer.toString(shutdownTimeout)));
 
         // Start up the OSGI framework
+        ClassLoader classLoader = createClassLoader(configProps);
         FrameworkFactory factory = loadFrameworkFactory(classLoader);
         framework = factory.newFramework(new StringMap(configProps, false));
         framework.init();
@@ -290,7 +282,8 @@ public class Main {
         framework.getBundleContext().registerService(ServerInfo.class, serverInfo, null);
 
         // Start custom activators
-        startKarafActivators(classLoader);
+        activatorManager = new KarafActivatorManager(classLoader, framework);
+        activatorManager.startKarafActivators();
         // Start lock monitor
         new Thread() {
             public void run() {
@@ -311,45 +304,7 @@ public class Main {
         return factory;
     }
 
-    private void startKarafActivators(ClassLoader classLoader) throws IOException {
-        Enumeration<URL> urls = classLoader.getResources("META-INF/MANIFEST.MF");
-        while (urls != null && urls.hasMoreElements()) {
-            URL url = urls.nextElement();
-            String className = null;
-            InputStream is = url.openStream();
-            try {
-                Manifest mf = new Manifest(is);
-                className = mf.getMainAttributes().getValue(KARAF_ACTIVATOR);
-                if (className != null) {
-                    BundleActivator activator = (BundleActivator) classLoader.loadClass(className).newInstance();
-                    activator.start(framework.getBundleContext());
-                    karafActivators.add(activator);
-                }
-            } catch (Throwable e) {
-                if (className != null) {
-                    System.err.println("Error starting karaf activator " + className + ": " + e.getMessage());
-                    LOG.log(Level.WARNING, "Error starting karaf activator " + className + " from url " + url, e);
-                }
-            } finally {
-                if (is != null) {
-                    try {
-                        is.close();
-                    } catch (IOException e) {
-                    }
-                }
-            }
-        }
-    }
 
-    private void stopKarafActivators() {
-        for (BundleActivator activator : karafActivators) {
-            try {
-                activator.stop(framework.getBundleContext());
-            } catch (Throwable e) {
-                LOG.log(Level.WARNING, "Error stopping karaf activator " + activator.getClass().getName(), e);
-            }
-        }
-    }
 
     public void awaitShutdown() throws Exception {
         if (framework == null) {
@@ -400,7 +355,7 @@ public class Main {
                 }
                 FrameworkEvent event = framework.waitForStop(step);
                 if (event.getType() != FrameworkEvent.WAIT_TIMEDOUT) {
-                    stopKarafActivators();
+                    activatorManager.stopKarafActivators();
                     return true;
                 }
             }
@@ -491,12 +446,6 @@ public class Main {
         while (true) {
             boolean restart = false;
             System.setProperty("karaf.restart", "false");
-            if (Boolean.getBoolean("karaf.restart.clean")) {
-                File karafHome = Utils.getKarafHome(Main.class, Main.PROP_KARAF_HOME, Main.ENV_KARAF_HOME);
-                File karafBase = Utils.getKarafDirectory(Main.PROP_KARAF_BASE, Main.ENV_KARAF_BASE, karafHome, false, true);
-                File karafData = Utils.getKarafDirectory(Main.PROP_KARAF_DATA, Main.ENV_KARAF_DATA, new File(karafBase, "data"), true, true);
-                Utils.deleteDirectory(karafData);
-            }
             final Main main = new Main(args);
             try {
                 main.launch();
@@ -682,7 +631,7 @@ public class Main {
             if (st.countTokens() > 0) {
                 String location;
                 do {
-                    location = nextLocation(st);
+                    location = Utils.nextLocation(st);
                     if (location != null) {
                         try {
                             String[] parts = Utils.convertToMavenUrlsIfNeeded(location, convertToMavenUrls);
@@ -715,161 +664,6 @@ public class Main {
         return bundles;
     }
 
-    private static String nextLocation(StringTokenizer st) {
-        String retVal = null;
-
-        if (st.countTokens() > 0) {
-            String tokenList = "\" ";
-            StringBuffer tokBuf = new StringBuffer(10);
-            String tok;
-            boolean inQuote = false;
-            boolean tokStarted = false;
-            boolean exit = false;
-            while ((st.hasMoreTokens()) && (!exit)) {
-                tok = st.nextToken(tokenList);
-                if (tok.equals("\"")) {
-                    inQuote = !inQuote;
-                    if (inQuote) {
-                        tokenList = "\"";
-                    } else {
-                        tokenList = "\" ";
-                    }
-
-                } else if (tok.equals(" ")) {
-                    if (tokStarted) {
-                        retVal = tokBuf.toString();
-                        tokStarted = false;
-                        tokBuf = new StringBuffer(10);
-                        exit = true;
-                    }
-                } else {
-                    tokStarted = true;
-                    tokBuf.append(tok.trim());
-                }
-            }
-
-            // Handle case where end of token stream and
-            // still got data
-            if ((!exit) && (tokStarted)) {
-                retVal = tokBuf.toString();
-            }
-        }
-
-        return retVal;
-    }
-
-    /**
-     * <p>
-     * Loads the properties in the system property file associated with the
-     * framework installation into <tt>System.setProperty()</tt>. These properties
-     * are not directly used by the framework in anyway. By default, the system
-     * property file is located in the <tt>conf/</tt> directory of the Felix
-     * installation directory and is called "<tt>system.properties</tt>". The
-     * installation directory of Felix is assumed to be the parent directory of
-     * the <tt>felix.jar</tt> file as found on the system class path property.
-     * The precise file from which to load system properties can be set by
-     * initializing the "<tt>felix.system.properties</tt>" system property to an
-     * arbitrary URL.
-     * </p>
-     *
-     * @param karafBase the karaf base folder
-     */
-    protected static void loadSystemProperties(File karafBase) {
-        // The system properties file is either specified by a system
-        // property or it is in the same directory as the Felix JAR file.
-        // Try to load it from one of these places.
-
-        // See if the property URL was specified as a property.
-        URL propURL;
-        try {
-            File file = new File(new File(karafBase, "etc"), SYSTEM_PROPERTIES_FILE_NAME);
-            propURL = file.toURI().toURL();
-        }
-        catch (MalformedURLException ex) {
-            System.err.print("Main: " + ex);
-            return;
-        }
-
-        // Read the properties file.
-        Properties props = new Properties();
-        InputStream is = null;
-        try {
-            is = propURL.openConnection().getInputStream();
-            props.load(is);
-            is.close();
-        }
-        catch (FileNotFoundException ex) {
-            // Ignore file not found.
-        }
-        catch (Exception ex) {
-            System.err.println(
-                    "Main: Error loading system properties from " + propURL);
-            System.err.println("Main: " + ex);
-            try {
-                if (is != null) is.close();
-            }
-            catch (IOException ex2) {
-                // Nothing we can do.
-            }
-            return;
-        }
-
-        // Perform variable substitution on specified properties.
-        for (Enumeration e = props.propertyNames(); e.hasMoreElements();) {
-            String name = (String) e.nextElement();
-            String value = System.getProperty(name, props.getProperty(name));
-            System.setProperty(name, SubstHelper.substVars(value, name, null, props));
-        }
-    }
-
-    /**
-     * <p>
-     * Loads the configuration properties in the configuration property file
-     * associated with the framework installation; these properties
-     * are accessible to the framework and to bundles and are intended
-     * for configuration purposes. By default, the configuration property
-     * file is located in the <tt>conf/</tt> directory of the Felix
-     * installation directory and is called "<tt>config.properties</tt>".
-     * The installation directory of Felix is assumed to be the parent
-     * directory of the <tt>felix.jar</tt> file as found on the system class
-     * path property. The precise file from which to load configuration
-     * properties can be set by initializing the "<tt>felix.config.properties</tt>"
-     * system property to an arbitrary URL.
-     * </p>
-     *
-     * @return A <tt>Properties</tt> instance or <tt>null</tt> if there was an error.
-     * @throws Exception if something wrong occurs
-     */
-    private Properties loadConfigProperties() throws Exception {
-        // See if the property URL was specified as a property.
-        URL configPropURL;
-
-        try {
-            File etcFolder = new File(karafBase, "etc");
-            if (!etcFolder.exists()) {
-                throw new FileNotFoundException("etc folder not found: " + etcFolder.getAbsolutePath());
-            }
-            File file = new File(etcFolder, CONFIG_PROPERTIES_FILE_NAME);
-            configPropURL = file.toURI().toURL();
-        }
-        catch (MalformedURLException ex) {
-            System.err.print("Main: " + ex);
-            return null;
-        }
-
-
-        Properties configProps = loadPropertiesFile(configPropURL, false);
-
-        // Perform variable substitution for system properties.
-        for (Enumeration e = configProps.propertyNames(); e.hasMoreElements();) {
-            String name = (String) e.nextElement();
-            configProps.setProperty(name,
-                    SubstHelper.substVars(configProps.getProperty(name), name, null, configProps));
-        }
-
-        return configProps;
-    }
-
     private void loadStartupProperties(Properties configProps) throws Exception {
         // The config properties file is either specified by a system
         // property or it is in the conf/ directory of the Felix
@@ -887,7 +681,7 @@ public class Main {
         }
         File file = new File(etcFolder, STARTUP_PROPERTIES_FILE_NAME);
         startupPropURL = file.toURI().toURL();
-        Properties startupProps = loadPropertiesFile(startupPropURL, true);
+        Properties startupProps = PropertiesLoader.loadPropertiesFile(startupPropURL, true);
 
         String defaultRepo = System.getProperty(DEFAULT_REPO, "system");
         if (karafBase.equals(karafHome)) {
@@ -911,7 +705,7 @@ public class Main {
             if (st.countTokens() > 0) {
                 String location;
                 do {
-                    location = nextLocation(st);
+                    location = Utils.nextLocation(st);
                     if (location != null) {
                         File f;
                         if (karafBase.equals(karafHome)) {
@@ -936,89 +730,8 @@ public class Main {
         Main.processConfigurationProperties(configProps, startupProps, bundleDirs);
     }
 
-    protected static Properties loadPropertiesFile(URL configPropURL, boolean failIfNotFound) throws Exception {
-        // Read the properties file.
-        Properties configProps = new Properties();
-        InputStream is = null;
-        try {
-            is = configPropURL.openConnection().getInputStream();
-            configProps.load(is);
-            is.close();
-        } catch (FileNotFoundException ex) {
-            if (failIfNotFound) {
-                throw ex;
-            } else {
-                System.err.println("WARN: " + configPropURL + " is not found, so not loaded");
-            }
-        } catch (Exception ex) {
-            System.err.println("Error loading config properties from " + configPropURL);
-            System.err.println("Main: " + ex);
-            return configProps;
-        } finally {
-            try {
-                if (is != null) {
-                    is.close();
-                }
-            }
-            catch (IOException ex2) {
-                // Nothing we can do.
-            }
-        }
-        String includes = configProps.getProperty(INCLUDES_PROPERTY);
-        if (includes != null) {
-            StringTokenizer st = new StringTokenizer(includes, "\" ", true);
-            if (st.countTokens() > 0) {
-                String location;
-                do {
-                    location = nextLocation(st);
-                    if (location != null) {
-                        URL url = new URL(configPropURL, location);
-                        Properties props = loadPropertiesFile(url, true);
-                        configProps.putAll(props);
-                    }
-                }
-                while (location != null);
-            }
-            configProps.remove(INCLUDES_PROPERTY);
-        }
-        String optionals = configProps.getProperty(OPTIONALS_PROPERTY);
-        if (optionals != null) {
-            StringTokenizer st = new StringTokenizer(optionals, "\" ", true);
-            if (st.countTokens() > 0) {
-                String location;
-                do {
-                    location = nextLocation(st);
-                    if (location != null) {
-                        URL url = new URL(configPropURL, location);
-                        Properties props = loadPropertiesFile(url, false);
-                        configProps.putAll(props);
-                    }
-                } while (location != null);
-            }
-            configProps.remove(OPTIONALS_PROPERTY);
-        }
-        for (Enumeration e = configProps.propertyNames(); e.hasMoreElements();) {
-            Object key = e.nextElement();
-            if (key instanceof String) {
-                String v = configProps.getProperty((String) key);
-                configProps.put(key, v.trim());
-            }
-        }
-        return configProps;
-    }
 
-    protected static void copySystemProperties(Properties configProps) {
-        for (Enumeration e = System.getProperties().propertyNames();
-             e.hasMoreElements();) {
-            String key = (String) e.nextElement();
-            if (key.startsWith("felix.") ||
-                    key.startsWith("karaf.") ||
-                    key.startsWith("org.osgi.framework.")) {
-                configProps.setProperty(key, System.getProperty(key));
-            }
-        }
-    }
-    
+
     private ClassLoader createClassLoader(Properties configProps) throws Exception {
     	String framework = configProps.getProperty(KARAF_FRAMEWORK);
         if (framework == null) {
