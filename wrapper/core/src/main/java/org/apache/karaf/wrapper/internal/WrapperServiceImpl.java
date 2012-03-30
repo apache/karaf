@@ -63,18 +63,34 @@ public class WrapperServiceImpl implements WrapperService {
         File serviceFile = null;
         File wrapperConf = null;
         if (os.startsWith("Win")) {
-            mkdir(bin);
+            String arch = System.getProperty("os.arch");
+            if (arch.equalsIgnoreCase("amd64") || arch.equalsIgnoreCase("x86_64")) {
+                mkdir(bin);
 
-            copyResourceTo(new File(bin, name + "-wrapper.exe"), "windows/karaf-wrapper.exe", false);
+                copyResourceTo(new File(bin, name + "-wrapper.exe"), "windows64/karaf-wrapper.exe", false);
 
-            serviceFile = new File(bin, name + "-service.bat");
-            wrapperConf = new File(etc, name + "-wrapper.conf");
+                serviceFile = new File(bin, name + "-service.bat");
+                wrapperConf = new File(etc, name + "-wrapper.conf");
 
-            copyFilteredResourceTo(wrapperConf, "windows/karaf-wrapper.conf", props);
-            copyFilteredResourceTo(serviceFile, "windows/karaf-service.bat", props);
+                copyFilteredResourceTo(wrapperConf, "windows64/karaf-wrapper.conf", props);
+                copyFilteredResourceTo(serviceFile, "windows64/karaf-service.bat", props);
 
-            mkdir(lib);
-            copyResourceTo(new File(lib, "wrapper.dll"), "windows/wrapper.dll", false);
+                mkdir(lib);
+                copyResourceTo(new File(lib, "wrapper.dll"), "windows64/wrapper.dll", false);
+            } else {
+                mkdir(bin);
+
+                copyResourceTo(new File(bin, name + "-wrapper.exe"), "windows/karaf-wrapper.exe", false);
+
+                serviceFile = new File(bin, name + "-service.bat");
+                wrapperConf = new File(etc, name + "-wrapper.conf");
+
+                copyFilteredResourceTo(wrapperConf, "windows/karaf-wrapper.conf", props);
+                copyFilteredResourceTo(serviceFile, "windows/karaf-service.bat", props);
+
+                mkdir(lib);
+                copyResourceTo(new File(lib, "wrapper.dll"), "windows/wrapper.dll", false);
+            }
         } else if (os.startsWith("Mac OS X")) {
             mkdir(bin);
 
@@ -131,18 +147,18 @@ public class WrapperServiceImpl implements WrapperService {
             String arch = System.getProperty("os.arch");
             if (arch.equalsIgnoreCase("ppc64")) {
                 mkdir(bin);
-                
+
                 File file = new File(bin, name + "-wrapper");
                 copyResourceTo(file, "aix/ppc64/karaf-wrapper", false);
                 chmod(file, "a+x");
-                
+
                 serviceFile = new File(bin, name + "-service");
                 copyResourceTo(file, "unix/karaf-service", false);
                 chmod(file, "a+x");
-                
+
                 wrapperConf = new File(etc, name + "-wrapper.conf");
                 copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props);
-                
+
                 mkdir(lib);
                 copyResourceTo(new File(lib, "libwrapper.a"), "aix/ppc64/libwrapper.a", false);
             } else {
@@ -166,18 +182,18 @@ public class WrapperServiceImpl implements WrapperService {
             String arch = System.getProperty("os.arch");
             if (arch.equalsIgnoreCase("sparc")) {
                 mkdir(bin);
-                
+
                 File file = new File(bin, name + "-wrapper");
                 copyResourceTo(file, "solaris/sparc64/karaf-wrapper", false);
                 chmod(file, "a+x");
-                
+
                 serviceFile = new File(bin, name + "-service");
                 copyResourceTo(file, "unix/karaf-service", false);
                 chmod(file, "a+x");
-                
+
                 wrapperConf = new File(etc, name + "-wrapper.conf");
                 copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props);
-                
+
                 mkdir(lib);
                 copyResourceTo(new File(lib, "libwrapper.so"), "solaris/sparc64/libwrapper.so", false);
             } else if (arch.equalsIgnoreCase("x86")) {
@@ -215,18 +231,18 @@ public class WrapperServiceImpl implements WrapperService {
             }
         } else if (os.startsWith("HP-UX") || os.startsWith("HPUX")) {
             mkdir(bin);
-            
+
             File file = new File(bin, name + "-wrapper");
             copyResourceTo(file, "hpux/parisc64/karaf-wrapper", false);
             chmod(file, "a+x");
-            
+
             serviceFile = new File(bin, name + "-service");
             copyResourceTo(file, "unix/karaf-service", false);
             chmod(file, "a+x");
-            
+
             wrapperConf = new File(etc, name + "-wrapper.conf");
             copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props);
-            
+
             mkdir(lib);
             copyResourceTo(new File(lib, "libwrapper.sl"), "hpux/parisc64/libwrapper.sl", false);
         } else {
