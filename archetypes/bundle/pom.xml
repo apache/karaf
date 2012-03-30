@@ -32,6 +32,7 @@
     <artifactId>karaf-bundle-archetype</artifactId>
     <packaging>maven-archetype</packaging>
     <name>Apache Karaf :: Archetypes :: Bundle Archetype</name>
+    <description>A simple bundle archetype.</description>
 
     <properties>
         <archetype.version>2.2</archetype.version>
