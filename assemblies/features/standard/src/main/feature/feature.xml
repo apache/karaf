@@ -91,6 +91,12 @@
         <bundle start-level="30">mvn:org.eclipse.jetty.aggregate/jetty-all-server/${jetty.version}</bundle>
     </feature>
 
+    <feature name="package" version="${project.version}" resolver="(obr)" description="Package commands and mbeans">
+        <bundle start-level="30">mvn:org.apache.karaf.package/org.apache.karaf.package.core/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.karaf.package/org.apache.karaf.package.command/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.karaf.package/org.apache.karaf.package.management/${project.version}</bundle>
+    </feature>
+
     <feature name="http" version="${project.version}" resolver="(obr)" description="Implementation of the OSGI HTTP Service">
         <details>Allows to publish servlets using pax web and jetty</details>
     	<configfile finalname="/etc/jetty.xml">mvn:org.apache.karaf/apache-karaf/${project.version}/xml/jettyconfig</configfile>
@@ -174,7 +180,6 @@
         <bundle start-level="30">mvn:org.apache.karaf.system/org.apache.karaf.system.management/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.bundle/org.apache.karaf.bundle.management/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.management.mbeans/org.apache.karaf.management.mbeans.services/${project.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.karaf.management.mbeans/org.apache.karaf.management.mbeans.packages/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.jmx/org.apache.aries.jmx.api/${aries.jmx.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.jmx/org.apache.aries.jmx.core/${aries.jmx.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.jmx/org.apache.aries.jmx.blueprint/${aries.jmx.version}</bundle>

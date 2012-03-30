@@ -1,0 +1,20 @@
+h1. Synopsis
+
+${project.name}
+
+${project.description}
+
+Maven URL:
+   [mvn:${project.groupId}/${project.artifactId}/${project.version}]
+
+h1. Description
+
+This bundle provides the low level OSGi shell commands.
+
+The following commands are available:
+* package:exports - List exported packages
+* package:imports - List imported packages
+
+h1. See also
+
+Commands and Using the console sections of the Karaf User Guide

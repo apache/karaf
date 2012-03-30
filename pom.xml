@@ -43,6 +43,7 @@
         <module>bundle</module>
         <module>config</module>
         <module>instance</module>
+        <module>package</module>
         <module>deployer</module>
         <module>shell</module>
         <module>jaas</module>
@@ -350,6 +351,22 @@
             <dependency>
                 <groupId>org.apache.karaf.bundle</groupId>
                 <artifactId>org.apache.karaf.bundle.management</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.karaf.package</groupId>
+                <artifactId>org.apache.karaf.package.core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.package</groupId>
+                <artifactId>org.apache.karaf.package.command</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.package</groupId>
+                <artifactId>org.apache.karaf.package.management</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
