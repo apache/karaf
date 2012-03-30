@@ -32,6 +32,7 @@
     <artifactId>karaf-command-archetype</artifactId>
     <packaging>maven-archetype</packaging>
     <name>Apache Karaf :: Archetypes :: Command Archetype</name>
+    <description>A Karaf command archetype.</description>
 
     <properties>
         <archetype.version>2.2</archetype.version>

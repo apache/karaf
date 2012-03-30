@@ -32,6 +32,7 @@
     <artifactId>karaf-blueprint-archetype</artifactId>
     <packaging>maven-archetype</packaging>
     <name>Apache Karaf :: Archetypes :: Blueprint Archetype</name>
+    <description>An archetype for creating a simple blueprint bundle.</description>
 
     <properties>
         <archetype.version>2.2</archetype.version>
