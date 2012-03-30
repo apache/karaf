@@ -41,8 +41,10 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.BundleListener;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.packageadmin.PackageAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,6 +93,7 @@ public class BundleWatcher implements Runnable, BundleListener {
             }
             if (watchedBundles.size()>0) {
                 File localRepository = getLocalRepository();
+                List<Bundle> updated = new ArrayList<Bundle>();
                 for (Bundle bundle : watchedBundles) {
                     try {
                         File location = getBundleExternalLocation(localRepository, bundle);
@@ -103,6 +106,7 @@ public class BundleWatcher implements Runnable, BundleListener {
                                 logger.info("[Watch] Updating watched bundle: " + bundle.getSymbolicName() + " (" + bundle.getVersion() + ")");
                                 System.out.println("[Watch] Updating watched bundle: " + bundle.getSymbolicName() + " (" + bundle.getVersion() + ")");
                                 bundle.update(is);
+                                updated.add(bundle);
                             } finally {
                                 is.close();
                             }
@@ -111,6 +115,16 @@ public class BundleWatcher implements Runnable, BundleListener {
                         logger.error("Error watching bundle.", ex);
                     } catch (BundleException ex) {
                         logger.error("Error updating bundle.", ex);
+                    }
+                }
+                ServiceReference ref = null;
+                try {
+                    ref = getBundleContext().getServiceReference(PackageAdmin.class.getName());
+                    PackageAdmin pa = (PackageAdmin) getBundleContext().getService(ref);
+                    pa.refreshPackages(updated.toArray(new Bundle[updated.size()]));
+                } finally {
+                    if (ref != null) {
+                        getBundleContext().ungetService(ref);
                     }
                 }
             }
