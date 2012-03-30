@@ -32,6 +32,7 @@
     <artifactId>karaf-assembly-archetype</artifactId>
     <packaging>maven-archetype</packaging>
     <name>Apache Karaf :: Archetypes :: Assembly Archetype</name>
+    <description>An archetype for creating a Karaf assembly.</description>
 
     <properties>
         <archetype.version>2.2</archetype.version>
