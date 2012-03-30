@@ -185,6 +185,7 @@
                         <feature>config</feature>
                         <feature>deployers</feature>
                         <feature>region</feature>
+                        <feature>package</feature>
                     </bootFeatures>
                 </configuration>
             </plugin>
