@@ -21,13 +21,12 @@ package org.apache.karaf.main;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.net.URL;
-import java.util.Enumeration;
 import java.util.Properties;
 
-import org.apache.karaf.main.util.SubstHelper;
 import org.apache.karaf.main.util.Utils;
 
 /**
@@ -35,6 +34,13 @@ import org.apache.karaf.main.util.Utils;
  */
 public class Stop {
 
+    /**
+     * Sends the shutdown command to the running karaf instance. Uses either a shut down port configured in config.properties or
+     * the port from the shutdown port file.
+     * 
+     * @param args
+     * @throws Exception
+     */
     public static void main(String[] args) throws Exception {
         File karafHome = Utils.getKarafHome(Stop.class, Main.PROP_KARAF_HOME, Main.ENV_KARAF_HOME);
         File karafBase = Utils.getKarafDirectory(Main.PROP_KARAF_BASE, Main.ENV_KARAF_BASE, karafHome, false, true);
@@ -45,29 +51,16 @@ public class Stop {
         System.setProperty(Main.PROP_KARAF_DATA, karafData.getPath());
 
         // Load system properties.
-        Main.loadSystemProperties(karafBase);
+        PropertiesLoader.loadSystemProperties(karafBase);
 
-        File file = new File(new File(karafBase, "etc"), Main.CONFIG_PROPERTIES_FILE_NAME);
-        URL configPropURL = file.toURI().toURL();
-        Properties props = Main.loadPropertiesFile(configPropURL, false);
-        Main.copySystemProperties(props);
-
-        // Perform variable substitution for system properties.
-        for (Enumeration e = props.propertyNames(); e.hasMoreElements();) {
-            String name = (String) e.nextElement();
-            props.setProperty(name,
-                    SubstHelper.substVars(props.getProperty(name), name, null, props));
-        }
+        Properties props = PropertiesLoader.loadConfigProperties(karafBase);
 
         int port = Integer.parseInt(props.getProperty(Main.KARAF_SHUTDOWN_PORT, "0"));
         String host = props.getProperty(Main.KARAF_SHUTDOWN_HOST, "localhost");
         String portFile = props.getProperty(Main.KARAF_SHUTDOWN_PORT_FILE);
         String shutdown = props.getProperty(Main.KARAF_SHUTDOWN_COMMAND, Main.DEFAULT_SHUTDOWN_COMMAND);
         if (port == 0 && portFile != null) {
-            BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(portFile)));
-            String portStr = r.readLine();
-            port = Integer.parseInt(portStr);
-            r.close();
+            port = getPortFromShutdownPortFile(portFile);
         }
         if (port > 0) {
             Socket s = new Socket(host, port);
@@ -77,5 +70,14 @@ public class Stop {
             System.err.println("Unable to find port...");
         }
 
+    }
+
+    private static int getPortFromShutdownPortFile(String portFile) throws FileNotFoundException, IOException {
+        int port;
+        BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(portFile)));
+        String portStr = r.readLine();
+        port = Integer.parseInt(portStr);
+        r.close();
+        return port;
     }
 }
