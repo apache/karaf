@@ -17,8 +17,10 @@
 package org.apache.karaf.features.management.codec;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularType;
@@ -98,7 +100,13 @@ public class JmxFeature {
 
      private static TabularData getDependencyIdentifierTable(List<Dependency> features) throws OpenDataException {
         TabularDataSupport table = new TabularDataSupport(FEATURE_IDENTIFIER_TABLE);
+        Set<String> featureSet = new HashSet<String>();
         for (Dependency feature : features) {
+            if (featureSet.contains(feature.getName() + feature.getVersion())) {
+                continue;
+            } else {
+                featureSet.add(feature.getName() + feature.getVersion());
+            }
             String[] itemNames = new String[] { FeaturesServiceMBean.FEATURE_NAME, FeaturesServiceMBean.FEATURE_VERSION };
             Object[] itemValues = new Object[] { feature.getName(), feature.getVersion() };
             CompositeData ident = new CompositeDataSupport(FEATURE_IDENTIFIER, itemNames, itemValues);
