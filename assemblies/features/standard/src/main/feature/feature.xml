@@ -94,7 +94,6 @@
     <feature name="package" version="${project.version}" resolver="(obr)" description="Package commands and mbeans">
         <bundle start-level="30">mvn:org.apache.karaf.package/org.apache.karaf.package.core/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.package/org.apache.karaf.package.command/${project.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.karaf.package/org.apache.karaf.package.management/${project.version}</bundle>
     </feature>
 
     <feature name="http" version="${project.version}" resolver="(obr)" description="Implementation of the OSGI HTTP Service">
@@ -183,6 +182,7 @@
         <bundle start-level="30">mvn:org.apache.aries.jmx/org.apache.aries.jmx.api/${aries.jmx.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.jmx/org.apache.aries.jmx.core/${aries.jmx.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.jmx/org.apache.aries.jmx.blueprint/${aries.jmx.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.jmx/org.apache.aries.jmx.whiteboard/${aries.jmx.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.config/org.apache.karaf.config.management/${project.version}</bundle>
     </feature>
 

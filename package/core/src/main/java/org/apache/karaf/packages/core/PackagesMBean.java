@@ -14,14 +14,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.packages.management;
+package org.apache.karaf.packages.core;
 
 import javax.management.openmbean.TabularData;
 
-public interface PackageMBean {
+/**
+ * Package MBean.
+ */
+public interface PackagesMBean {
 
-    TabularData getExports() throws Exception;
-
-    TabularData getImports() throws Exception;
+    TabularData getExports();
+    TabularData getImports();
 
 }
