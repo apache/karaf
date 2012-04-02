@@ -23,6 +23,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 
 public class PackageVersion {
+
     private String packageName;
     private Version version;
     private List<Bundle> bundles = new ArrayList<Bundle>();
@@ -47,4 +48,5 @@ public class PackageVersion {
     public List<Bundle> getBundles() {
         return this.bundles;
     }
+
 }
