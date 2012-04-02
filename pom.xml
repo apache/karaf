@@ -364,11 +364,6 @@
                 <artifactId>org.apache.karaf.package.command</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <dependency>
-                <groupId>org.apache.karaf.package</groupId>
-                <artifactId>org.apache.karaf.package.management</artifactId>
-                <version>${project.version}</version>
-            </dependency>
 
             <dependency>
                 <groupId>org.apache.karaf.config</groupId>

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.packages.management.internal;
+package org.apache.karaf.packages.core.internal;
 
 import java.util.SortedMap;
 
@@ -23,6 +23,7 @@ import javax.management.StandardMBean;
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.CompositeType;
+import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
 import javax.management.openmbean.TabularData;
@@ -32,23 +33,25 @@ import javax.management.openmbean.TabularType;
 import org.apache.karaf.packages.core.PackageRequirement;
 import org.apache.karaf.packages.core.PackageService;
 import org.apache.karaf.packages.core.PackageVersion;
-import org.apache.karaf.packages.management.PackageMBean;
+import org.apache.karaf.packages.core.PackagesMBean;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PackageMBeanImpl extends StandardMBean implements PackageMBean {
+/**
+ * Bundles MBean implementation.
+ */
+public class Packages extends StandardMBean implements PackagesMBean {
     private Logger log = LoggerFactory.getLogger(this.getClass());
 
     private final PackageService packageService;
 
-    public PackageMBeanImpl(PackageService packageService)
-        throws NotCompliantMBeanException {
-        super(PackageMBean.class);
+    public Packages(PackageService packageService) throws NotCompliantMBeanException {
+        super(PackagesMBean.class);
         this.packageService = packageService;
     }
 
-    public TabularData getExports() throws Exception {
+    public TabularData getExports() {
         try {
             String[] names = new String[] {"Name", "Version", "ID", "Bundle Name"};
             CompositeType bundleType = new CompositeType("PackageExport", "Exported packages", names,
@@ -75,15 +78,18 @@ public class PackageMBeanImpl extends StandardMBean implements PackageMBean {
                 }
             }
             return table;
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             // To avoid the exception gets swallowed by jmx
             log.error(e.getMessage(), e);
             throw e;
+        } catch (OpenDataException e) {
+            log.error(e.getMessage(), e);
+            throw new RuntimeException(e.getMessage(), e);
         }
     }
 
     @Override
-    public TabularData getImports() throws Exception {
+    public TabularData getImports() {
         try {
             String[] names = new String[] {"PackageName", "Filter", "Optional", "ID", "Bundle Name", "Resolvable"};
             CompositeType bundleType = new CompositeType("PackageImports", "Imported packages", 
@@ -110,10 +116,13 @@ public class PackageMBeanImpl extends StandardMBean implements PackageMBean {
                 table.put(comp);
              }
             return table;
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             // To avoid the exception gets swallowed by jmx
             log.error(e.getMessage(), e);
             throw e;
+        } catch (OpenDataException e) {
+            log.error(e.getMessage(), e);
+            throw new RuntimeException(e.getMessage(), e);
         }
     }
 
