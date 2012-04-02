@@ -30,7 +30,7 @@ import jline.Terminal;
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Function;
-import org.apache.karaf.jaas.modules.UserPrincipal;
+import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.fusesource.jansi.AnsiConsole;
 import org.osgi.framework.BundleContext;
 

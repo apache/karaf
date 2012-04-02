@@ -16,6 +16,9 @@ package org.apache.karaf.jaas.modules;
 
 import java.util.List;
 
+import org.apache.karaf.jaas.boot.principal.RolePrincipal;
+import org.apache.karaf.jaas.boot.principal.UserPrincipal;
+
 public interface BackingEngine {
 
 

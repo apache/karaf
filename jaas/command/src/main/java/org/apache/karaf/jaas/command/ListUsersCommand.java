@@ -16,10 +16,10 @@
 package org.apache.karaf.jaas.command;
 
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.jaas.boot.principal.RolePrincipal;
+import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.apache.karaf.jaas.config.JaasRealm;
 import org.apache.karaf.jaas.modules.BackingEngine;
-import org.apache.karaf.jaas.modules.RolePrincipal;
-import org.apache.karaf.jaas.modules.UserPrincipal;
 
 import javax.security.auth.login.AppConfigurationEntry;
 import java.util.List;

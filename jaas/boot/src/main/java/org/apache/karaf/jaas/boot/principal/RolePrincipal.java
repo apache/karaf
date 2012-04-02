@@ -14,15 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.jaas.modules;
+package org.apache.karaf.jaas.boot.principal;
 
 import java.security.Principal;
 
-public class UserPrincipal implements Principal {
+public class RolePrincipal implements Principal {
 
     private final String name;
 
-    public UserPrincipal(String name) {
+    public RolePrincipal(String name) {
         assert name != null;
         this.name = name;
     }
@@ -34,9 +34,9 @@ public class UserPrincipal implements Principal {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof UserPrincipal)) return false;
+        if (!(o instanceof RolePrincipal)) return false;
 
-        UserPrincipal that = (UserPrincipal) o;
+        RolePrincipal that = (RolePrincipal) o;
 
         if (name != null ? !name.equals(that.name) : that.name != null) return false;
 
@@ -50,7 +50,7 @@ public class UserPrincipal implements Principal {
 
     @Override
     public String toString() {
-        return "UserPrincipal[" + name + "]";
+        return "RolePrincipal[" + name + "]";
     }
 
 }

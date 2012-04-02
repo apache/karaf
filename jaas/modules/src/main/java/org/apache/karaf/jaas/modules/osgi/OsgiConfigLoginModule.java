@@ -31,10 +31,10 @@ import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.FailedLoginException;
 import javax.security.auth.login.LoginException;
 
+import org.apache.karaf.jaas.boot.principal.RolePrincipal;
+import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.apache.karaf.jaas.modules.AbstractKarafLoginModule;
 
-import org.apache.karaf.jaas.modules.RolePrincipal;
-import org.apache.karaf.jaas.modules.UserPrincipal;
 import org.osgi.service.cm.Configuration;
 
 public class OsgiConfigLoginModule extends AbstractKarafLoginModule {
