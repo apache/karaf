@@ -19,6 +19,9 @@ package org.apache.karaf.packages.core;
 import java.util.SortedMap;
 
 public interface PackageService {
+
     SortedMap<String, PackageVersion> getExports();
+
     SortedMap<String, PackageRequirement> getImports();
+
 }

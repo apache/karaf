@@ -37,9 +37,6 @@ import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Bundles MBean implementation.
- */
 public class PackageMBeanImpl extends StandardMBean implements PackageMBean {
     private Logger log = LoggerFactory.getLogger(this.getClass());
 

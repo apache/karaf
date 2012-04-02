@@ -18,12 +18,10 @@ package org.apache.karaf.packages.management;
 
 import javax.management.openmbean.TabularData;
 
-/**
- * Package MBean.
- */
 public interface PackageMBean {
 
     TabularData getExports() throws Exception;
+
     TabularData getImports() throws Exception;
 
 }
