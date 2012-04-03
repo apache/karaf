@@ -17,7 +17,10 @@
     limitations under the License.
 
 -->
-<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+    xmlns:ext="http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.0.0">
+
+    <ext:property-placeholder />
 
     <bean id="bundleService" class="org.apache.karaf.bundle.core.internal.BundleServiceImpl">
         <argument ref="blueprintBundleContext"/>
@@ -34,6 +37,17 @@
             <value>org.osgi.framework.BundleListener</value>
             <value>org.apache.karaf.bundle.core.BundleStateService</value>
         </interfaces>
+    </service>
+
+    <bean id="bundlesMBean" class="org.apache.karaf.bundle.core.internal.Bundles">
+        <argument ref="blueprintBundleContext" />
+        <argument ref="bundleService" />
+    </bean>
+
+    <service ref="bundlesMBean" auto-export="interfaces">
+         <service-properties>
+              <entry key="jmx.objectname" value="org.apache.karaf:type=bundle,name=${karaf.name}"/>
+          </service-properties>
     </service>
 
 </blueprint>
