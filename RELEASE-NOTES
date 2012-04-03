@@ -15,6 +15,129 @@
  * limitations under the License.
  */
 
+                    Apache Karaf 2.2.6
+                    ==================
+
+  Overview
+  --------
+
+  This release of Apache Karaf is based off of the 2.2.x series branch, representing an
+ update to Apache Karaf 2.2.5. It contains bug fixes identified in the prior release,
+ and introduces improvements including; improved Windows, AIX, HP-UX, and Solaris support
+ in the service wrapper, three new deployer demos showing how to make an OSGi bundle, a
+ features file, and how to wrap a third party jar into a bundle, and support for ssh public
+ key authentication and agent forwarding. A few new commands also appear in this release
+ including; features:status to indicate feature loaded or not, feature:chooseurl to make
+ it easy to install well known feature files, and a watch command to allow users to watch
+ the output of a karaf command like when using the unix watch mechanism. Several dependencies
+ were also updated, bringing Spring to 3.0.7-RELEASE, eventadmin to 1.2.14, Apache Pom
+ to version 10, the maven bundle plugin to 2.3.7, and fileinstall to 3.2.0.
+  For more detail please see the change log below.
+
+  Changlog
+  --------
+
+** Bug
+    * [KARAF-610] - Can't input the path string completely via karaf shell
+    * [KARAF-669] - Dependency artifacts should be available on the Maven central repo
+    * [KARAF-675] - Longer shell commands affect the shell view when using up and down arrows
+    * [KARAF-811] - Combination of wrap+mvn and instructions doesnt work any more
+    * [KARAF-875] - Unable to define escape the event designator '!' using '\!'
+    * [KARAF-891] - Problem with $ charact in wrap:mvn URL
+    * [KARAF-913] - Omitted @Command on Gogo plugin is hard to debug because of NPE
+    * [KARAF-918] - pax-url prerequisites for a feature are not respected
+    * [KARAF-953] - features.xml dropped into deploy BEFORE karaf is started are not recognised
+    * [KARAF-1018] - using auto-complete (TAB key) on commands that don't take Arguments/Options throws IndexOutOfBoundsException. 
+    * [KARAF-1116] - Scripts fail at resolving java jdk. 
+    * [KARAF-1117] - Log messages appear on stdout when the feature http is installed
+    * [KARAF-1121] - Error when installing feature camel-cxf : jetty.xml is empty
+    * [KARAF-1122] - Feature <configfile/> creates an empty file if the file URL is not resolved
+    * [KARAF-1124] - karaf does not work properly with closing brace in the working directory path
+    * [KARAF-1126] - features-maven-plugin:validate goal raises a NPE if karafConfig configuration is not set
+    * [KARAF-1127] - Boot features failed to startup when karaf started from directory with closing brace; logs also unavailable
+    * [KARAF-1133] - Error executing command 'start' when starting a child instance
+    * [KARAF-1139] - Redeploy kar cause installing old feature
+    * [KARAF-1143] - Karaf (Config Mbean) can not recognize the features when Karaf installation path containing blank space
+    * [KARAF-1144] - When running a single remote command through SSH, the SCOPE variable isn't set
+    * [KARAF-1161] - The shell:new action does not support the creation of arrays
+    * [KARAF-1164] - Archetypes are not valid
+    * [KARAF-1174] - war feature cannot be installed after the cxf
+    * [KARAF-1175] - Duplicate key exception should be handle locally to avoid to affect the whole MBean
+    * [KARAF-1179] - "dev:watch *" doesn't notice new bundles added to the container
+    * [KARAF-1182] - Karaf features-maven-plugin always selects lowest version in range
+    * [KARAF-1199] - dev:watch command issues "[WATCH]" announcements only to the issuing shell
+    * [KARAF-1212] - NPE during update of the FeatureFinder
+    * [KARAF-1215] - Shell scripts are incompatible with /bin/sh on Solaris
+    * [KARAF-1216] - add-features-to-repo goal does not reclaim file handles fast enough
+    * [KARAF-1220] - o.p.karaf.management bundles must stop when its configured keystore is not available
+    * [KARAF-1241] - admin script does not pass on JAVA_OPTS to instance
+    * [KARAF-1243] - Karaf JMX Config MBean behaves in unpredictable ways
+    * [KARAF-1244] - Deployer Transformers Supports Manifest Element without A Supporting Schema
+    * [KARAF-1252] - Features core bundle should not depend to shell and management bundles
+    * [KARAF-1256] - Archetypes should use dynamic variables
+    * [KARAF-1257] - Configuration completers should avoid using getConfiguration method of config admin
+    * [KARAF-1260] - Karaf 2.2.x branch - Console doesn't like it when the console window is to small - no line wrapping for commands
+    * [KARAF-1264] - Dump demo in Karaf 2.2.x can not resolve package org.apache.karaf.diagnostic.demo package.
+    * [KARAF-1265] - Add AIX, HP-UX, Solaris, and "custom" support in the service wrapper
+    * [KARAF-1266] - Minimal distribution doesn't start due to missing management bundle
+    * [KARAF-1268] - Allow multiple commands in karaf script
+    * [KARAF-1279] - IOExceptions used in an incompatible way with Java 5.
+    * [KARAF-1284] - Karaf bundle archetype maven bundle plugin configuration is missing "instructions" tags.
+    * [KARAF-1298] - dev:watch does not work in some cases
+    * [KARAF-1304] - Quick help text for features:info command is erroneous
+
+** Dependency upgrade
+    * [KARAF-1151] - Upgrade to Spring 3.0.7.RELEASE
+    * [KARAF-1154] - Upgrade to eventadmin 1.2.14
+    * [KARAF-1155] - Upgrade to Apache POM 10
+    * [KARAF-1183] - Upgrade to slf4j 1.6.4
+    * [KARAF-1184] - Upgrade to JUnit 4.10
+    * [KARAF-1185] - Upgrade to Pax Logging 1.6.5
+    * [KARAF-1205] - Upgrade to maven-bundle-plugin 2.3.7
+    * [KARAF-1231] - Upgrade to EasyMock 3.1
+    * [KARAF-1232] - Upgrade to Jasypt 1.9.0
+    * [KARAF-1233] - Upgrade to asm 3.3.1
+    * [KARAF-1272] - Upgrade to fileinstall 3.2.0
+
+** Improvement
+    * [KARAF-693] - features:addurl raises "Premature end of file" when network is not available
+    * [KARAF-783] - Improve security docs wrt role policies
+    * [KARAF-916] - use org.apache.aries.jmx.core instead of org.apache.aries.jmx
+    * [KARAF-970] - feature <config/> tag doesn't create the cfg file
+    * [KARAF-999] - local-repo folder shouldn't be used
+    * [KARAF-1010] - Add 64Bit ServiceWrapper to karaf
+    * [KARAF-1072] - Provide man command as an alias to help
+    * [KARAF-1145] - Upgrade to pax-logging 1.6.4
+    * [KARAF-1153] - Jetty feature should also install the jetty-websocket bundle
+    * [KARAF-1191] - Switch back to millis per default on shell:sleep and introduce -s option
+    * [KARAF-1214] - Improvement in Karaf log4j appender docs
+    * [KARAF-1245] - blueprint deployer and spring deployer should get started before features.core bundle
+    * [KARAF-1261] - Jaas commands should allow you to distinguish between to realms that have the same name
+    * [KARAF-1271] - Feature service should log in DEBUG instead of INFO
+    * [KARAF-1280] - Add wrap third party jar example
+    * [KARAF-1283] - Add a simple OSGi bundle demo to deployer examples
+    * [KARAF-1292] - Add a feature demo
+    * [KARAF-1295] - serviceUrl in org.apache.karaf.management.cfg should use 0.0.0.0 but not localhost
+    * [KARAF-1299] - Make sure that all karaf archetype contain a description
+    * [KARAF-1300] - features managment should be more robust if customer features descriptor file has duplicated feature name
+
+** New Feature
+    * [KARAF-32] - Support ssh public key authentication and agent forwarding
+    * [KARAF-798] - Support for relocating karaf.history file
+    * [KARAF-1059] - Karaf command features:status to indicate feature loaded or not
+    * [KARAF-1132] - Introduce new command feature:chooseurl to make it easy to install well known feature files
+    * [KARAF-1196] - implement a 'watch' command so we can watch the output of a karaf command like the unix 'watch' mechanism
+
+** Question
+    * [KARAF-806] - ProxyLoginModule should actually be on the bootclasspath classpath right?
+
+** Task
+    * [KARAF-1274] - Please set svn:ignore to all eclipse's project files
+
+** Test
+    * [KARAF-1195] - FeaturesServiceImplTest intermittently fails on slower machines
+
+
                     Apache Karaf 2.2.5
                     ==================
 
