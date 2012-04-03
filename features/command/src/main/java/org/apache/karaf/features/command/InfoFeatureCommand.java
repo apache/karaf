@@ -28,7 +28,7 @@ import org.apache.karaf.features.Dependency;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
 
-@Command(scope = "feature", name = "info", description = "Shows information about selected information.")
+@Command(scope = "feature", name = "info", description = "Shows information about selected feature.")
 public class InfoFeatureCommand extends FeaturesCommandSupport {
 
     private static final String INDENT = "  ";
