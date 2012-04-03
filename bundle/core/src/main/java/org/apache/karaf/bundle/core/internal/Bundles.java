@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.bundle.management.internal;
+package org.apache.karaf.bundle.core.internal;
 
 import java.io.InputStream;
 import java.net.URL;
@@ -34,7 +34,7 @@ import javax.management.openmbean.TabularType;
 
 import org.apache.karaf.bundle.core.BundleInfo;
 import org.apache.karaf.bundle.core.BundleService;
-import org.apache.karaf.bundle.management.BundlesMBean;
+import org.apache.karaf.bundle.core.BundlesMBean;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.startlevel.BundleStartLevel;
@@ -45,13 +45,13 @@ import org.slf4j.LoggerFactory;
 /**
  * Bundles MBean implementation.
  */
-public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
-    private Logger LOG = LoggerFactory.getLogger(BundlesMBeanImpl.class);
+public class Bundles extends StandardMBean implements BundlesMBean {
+    private Logger LOG = LoggerFactory.getLogger(Bundles.class);
 
     private BundleContext bundleContext;
     private final BundleService bundleService;
 
-    public BundlesMBeanImpl(BundleContext bundleContext, BundleService bundleService) throws NotCompliantMBeanException {
+    public Bundles(BundleContext bundleContext, BundleService bundleService) throws NotCompliantMBeanException {
         super(BundlesMBean.class);
         this.bundleContext = bundleContext;
         this.bundleService = bundleService;
