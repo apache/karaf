@@ -36,7 +36,6 @@
     <modules>
         <module>services</module>
         <module>dev</module>
-        <module>http</module>
         <module>log</module>
         <module>obr</module>
     </modules>

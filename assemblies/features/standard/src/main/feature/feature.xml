@@ -109,8 +109,8 @@
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-spi/${pax.web.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-runtime/${pax.web.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-jetty/${pax.web.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.karaf.shell/org.apache.karaf.shell.http/${project.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.karaf.management.mbeans/org.apache.karaf.management.mbeans.http/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.karaf.http/org.apache.karaf.http.core/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.karaf.http/org.apache.karaf.http.command/${project.version}</bundle>
     </feature>
 
     <feature name="http-whiteboard" description="Provide HTTP Whiteboard pattern support" version="${project.version}" resolver="(obr)">
