@@ -212,22 +212,22 @@ public class KarafPublickeyAuthenticator implements PublickeyAuthenticator {
 
                     int n = getInt(rawKey, pos);
                     pos += 4;
-                    BigInteger p = new BigInteger(1, Arrays.copyOfRange(rawKey, pos, pos + n));
+                    BigInteger p = new BigInteger(1, KarafPublickeyAuthenticator.arraysCopyOfRange(rawKey, pos, pos + n));
                     pos += n;
 
                     n = getInt(rawKey, pos);
                     pos += 4;
-                    BigInteger q = new BigInteger(1, Arrays.copyOfRange(rawKey, pos, pos + n));
+                    BigInteger q = new BigInteger(1, KarafPublickeyAuthenticator.arraysCopyOfRange(rawKey, pos, pos + n));
                     pos += n;
 
                     n = getInt(rawKey, pos);
                     pos += 4;
-                    BigInteger g = new BigInteger(1, Arrays.copyOfRange(rawKey, pos, pos + n));
+                    BigInteger g = new BigInteger(1, KarafPublickeyAuthenticator.arraysCopyOfRange(rawKey, pos, pos + n));
                     pos += n;
 
                     n = getInt(rawKey, pos);
                     pos += 4;
-                    BigInteger y = new BigInteger(1, Arrays.copyOfRange(rawKey, pos, pos + n));
+                    BigInteger y = new BigInteger(1, KarafPublickeyAuthenticator.arraysCopyOfRange(rawKey, pos, pos + n));
                     pos += n;
 
                     if (pos != rawKey.length) {
@@ -241,12 +241,12 @@ public class KarafPublickeyAuthenticator implements PublickeyAuthenticator {
 
                     int n = getInt(rawKey, pos);
                     pos += 4;
-                    BigInteger e = new BigInteger(1, Arrays.copyOfRange(rawKey, pos, pos + n));
+                    BigInteger e = new BigInteger(1, KarafPublickeyAuthenticator.arraysCopyOfRange(rawKey, pos, pos + n));
                     pos += n;
 
                     n = getInt(rawKey, pos);
                     pos += 4;
-                    BigInteger modulus = new BigInteger(1, Arrays.copyOfRange(rawKey, pos, pos + n));
+                    BigInteger modulus = new BigInteger(1, KarafPublickeyAuthenticator.arraysCopyOfRange(rawKey, pos, pos + n));
                     pos += n;
 
                     if (pos != rawKey.length) {
@@ -298,6 +298,16 @@ public class KarafPublickeyAuthenticator implements PublickeyAuthenticator {
             this.parseAuthorizedKeysTimer.cancel();
             this.parseAuthorizedKeysTimer = null;
         }
+    }
+
+    private static byte[] arraysCopyOfRange(byte[] original, int from, int to) {
+        int newLength = to - from;
+        if (newLength < 0)
+            throw new IllegalArgumentException(from + " > " + to);
+        byte[] copy = new byte[newLength];
+        System.arraycopy(original, from, copy, 0,
+                Math.min(original.length - from, newLength));
+        return copy;
     }
 
 }
