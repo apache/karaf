@@ -34,7 +34,6 @@
     <name>Apache Karaf :: Management :: MBeans</name>
 
     <modules>
-        <module>services</module>
         <module>dev</module>
         <module>log</module>
         <module>obr</module>

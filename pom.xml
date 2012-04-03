@@ -44,7 +44,8 @@
         <module>config</module>
         <module>instance</module>
         <module>package</module>
-		<module>http</module>
+        <module>http</module>
+        <module>service</module>
         <module>deployer</module>
         <module>shell</module>
         <module>jaas</module>
@@ -373,6 +374,17 @@
             </dependency>
 
             <dependency>
+                <groupId>org.apache.karaf.service</groupId>
+                <artifactId>org.apache.karaf.service.core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.service</groupId>
+                <artifactId>org.apache.karaf.service.command</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>org.apache.karaf.config</groupId>
                 <artifactId>org.apache.karaf.config.core</artifactId>
                 <version>${project.version}</version>
@@ -575,11 +587,6 @@
                 <version>${project.version}</version>
             </dependency>
 
-            <dependency>
-                <groupId>org.apache.karaf.shell</groupId>
-                <artifactId>org.apache.karaf.shell.services</artifactId>
-                <version>${project.version}</version>
-            </dependency>
             <dependency>
                 <groupId>org.apache.karaf.shell</groupId>
                 <artifactId>org.apache.karaf.shell.log</artifactId>
