@@ -30,7 +30,7 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <groupId>osgi.commons-lang</groupId>
+    <groupId>org.apache.karaf.demos.deployer.wrap</groupId>
     <artifactId>osgi.commons-lang</artifactId>
     <version>2.4</version>
     <packaging>bundle</packaging>
