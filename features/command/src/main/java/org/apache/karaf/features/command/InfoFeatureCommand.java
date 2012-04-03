@@ -30,7 +30,7 @@ import org.apache.karaf.features.FeaturesService;
 /**
  * Utility command to display info about features.
  */
-@Command(scope = "features", name = "info", description = "Shows information about selected information.")
+@Command(scope = "features", name = "info", description = "Shows information about selected feature.")
 public class InfoFeatureCommand extends FeaturesCommandSupport {
 
     @Argument(index = 0, name = "name", description = "The name of the feature", required = true, multiValued = false)
