@@ -44,6 +44,7 @@
         <module>config</module>
         <module>instance</module>
         <module>package</module>
+		<module>http</module>
         <module>deployer</module>
         <module>shell</module>
         <module>jaas</module>
@@ -165,7 +166,7 @@
         <aries.blueprint.core.compatibility.version>0.4.1-SNAPSHOT</aries.blueprint.core.compatibility.version>
         <aries.blueprint.core.version>0.4.1-SNAPSHOT</aries.blueprint.core.version>
         <aries.blueprint.jexl.evaluator.version>0.1.1-SNAPSHOT</aries.blueprint.jexl.evaluator.version>
-        <aries.jmx.version>0.3</aries.jmx.version>
+        <aries.jmx.version>0.3.1-SNAPSHOT</aries.jmx.version>
         <aries.jpa.version>0.3</aries.jpa.version>
         <aries.jndi.api.version>0.3</aries.jndi.api.version>
         <aries.jndi.version>0.3.2-SNAPSHOT</aries.jndi.version>
@@ -366,6 +367,17 @@
             </dependency>
 
             <dependency>
+                <groupId>org.apache.karaf.http</groupId>
+                <artifactId>org.apache.karaf.http.core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.http</groupId>
+                <artifactId>org.apache.karaf.http.command</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>org.apache.karaf.config</groupId>
                 <artifactId>org.apache.karaf.config.core</artifactId>
                 <version>${project.version}</version>
@@ -426,11 +438,6 @@
             <dependency>
                 <groupId>org.apache.karaf.management.mbeans</groupId>
                 <artifactId>org.apache.karaf.management.mbeans.dev</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.karaf.management.mbeans</groupId>
-                <artifactId>org.apache.karaf.management.mbeans.http</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
