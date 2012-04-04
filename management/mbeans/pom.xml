@@ -35,7 +35,6 @@
 
     <modules>
         <module>dev</module>
-        <module>log</module>
         <module>obr</module>
     </modules>
 

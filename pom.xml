@@ -46,6 +46,7 @@
         <module>package</module>
         <module>http</module>
         <module>service</module>
+        <module>log</module>
         <module>deployer</module>
         <module>shell</module>
         <module>jaas</module>
@@ -381,6 +382,17 @@
             <dependency>
                 <groupId>org.apache.karaf.service</groupId>
                 <artifactId>org.apache.karaf.service.command</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.karaf.log</groupId>
+                <artifactId>org.apache.karaf.log.core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.log</groupId>
+                <artifactId>org.apache.karaf.log.command</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
