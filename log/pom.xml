@@ -28,18 +28,14 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <groupId>org.apache.karaf.shell</groupId>
-    <artifactId>shell</artifactId>
+    <groupId>org.apache.karaf.log</groupId>
+    <artifactId>log</artifactId>
     <packaging>pom</packaging>
-    <name>Apache Karaf :: Shell</name>
+    <name>Apache Karaf :: Log</name>
 
     <modules>
-        <module>commands</module>
-        <module>console</module>
-        <module>dev</module>
-        <module>obr</module>
-        <module>ssh</module>
+        <module>core</module>
+        <module>command</module>
     </modules>
 
 </project>
-
