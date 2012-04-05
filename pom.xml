@@ -386,6 +386,17 @@
             </dependency>
 
             <dependency>
+                <groupId>org.apache.karaf.dev</groupId>
+                <artifactId>org.apache.karaf.dev.core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.dev</groupId>
+                <artifactId>org.apache.karaf.dev.command</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>org.apache.karaf.log</groupId>
                 <artifactId>org.apache.karaf.log.core</artifactId>
                 <version>${project.version}</version>
@@ -452,11 +463,6 @@
             <dependency>
                 <groupId>org.apache.karaf.management</groupId>
                 <artifactId>org.apache.karaf.management.server</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.karaf.management.mbeans</groupId>
-                <artifactId>org.apache.karaf.management.mbeans.dev</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -617,11 +623,6 @@
             <dependency>
                 <groupId>org.apache.karaf.shell</groupId>
                 <artifactId>org.apache.karaf.shell.commands</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.karaf.shell</groupId>
-                <artifactId>org.apache.karaf.shell.dev</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
