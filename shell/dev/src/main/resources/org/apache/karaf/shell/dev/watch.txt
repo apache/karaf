@@ -1,3 +1,0 @@
-The watch command can be helpful at development time.  It allows you to configure a set of bundle URLs that will be monitored.  All bundles whose location matches the given URL (which can be a regular expression) will be automatically refreshed in Karaf when the bundle in the Maven repository has been updated.  This avoids the need for manually updating the bundles or even copying bundles to the system folder.  Note that only Maven based URLs and Maven snapshots will actually be updated automatically, so if you run
-  > dev:watch *
-It will actually monitor all Maven bundles including those with a '-SNAPSHOT' in their URL.
