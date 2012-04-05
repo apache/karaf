@@ -54,6 +54,8 @@
                 <include>**/*.bin</include>
                 <include>**/*.jnilib</include>
                 <include>**/*.cert</include>
+                <include>**/*.kar</include>
+                <include>**/*.zip</include>
                 <include>apache-karaf/src/main/release/bin/*/wrapper</include>
             </includes>
             <excludes>
