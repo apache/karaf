@@ -16,8 +16,10 @@
  */
 package org.apache.karaf.features.command;
 
-import org.apache.karaf.shell.console.OsgiCommandSupport;
+import java.net.URI;
+
 import org.apache.karaf.features.FeaturesService;
+import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.osgi.framework.ServiceReference;
 
 public abstract class FeaturesCommandSupport extends OsgiCommandSupport {

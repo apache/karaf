@@ -38,16 +38,18 @@ public class RefreshUrlCommand extends FeaturesCommandSupport {
                 urls.add(repo.getURI().toString());
             }
         }
+        List<Exception> exceptions = new ArrayList<Exception>();
         for (String strUri : urls) {
             try {
                 URI uri = new URI(strUri);
                 admin.removeRepository(uri);
                 admin.addRepository(uri);
             } catch (Exception e) {
-                System.out.println("Could not refresh Feature Repository:\n" + e.getMessage() );
+                exceptions.add(e);
                 //get chance to restore previous, fix for KARAF-4
                 admin.restoreRepository(new URI(strUri));
             }
         }
+        MultiException.throwIf("Unable to add repositories", exceptions);
     }
 }
