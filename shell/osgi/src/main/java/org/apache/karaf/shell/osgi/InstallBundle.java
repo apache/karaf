@@ -20,8 +20,9 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.felix.gogo.commands.Argument;
+import org.apache.karaf.shell.console.MultiException;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
+import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Option;
 import org.apache.felix.gogo.commands.Command;
 import org.osgi.framework.Bundle;
@@ -37,16 +38,13 @@ public class InstallBundle extends OsgiCommandSupport {
     boolean start;
 
     protected Object doExecute() throws Exception {
+        List<Exception> exceptions = new ArrayList<Exception>();
         List<Bundle> bundles = new ArrayList<Bundle>();
-        StringBuffer sb = new StringBuffer();
         for (String url : urls) {
-            Bundle bundle = install(url, System.out, System.err);
-            if (bundle != null) {
-                bundles.add(bundle);
-                if (sb.length() > 0) {
-                    sb.append(", ");
-                }
-                sb.append(bundle.getBundleId());
+            try {
+                bundles.add(getBundleContext().installBundle(url, null));
+            } catch (Exception e) {
+                exceptions.add(new Exception("Unable to install bundle " + url, e));
             }
         }
         if (start) {
@@ -54,15 +52,23 @@ public class InstallBundle extends OsgiCommandSupport {
                 try {
                     bundle.start();
                 } catch (Exception e) {
-                    System.err.println(e.toString());
+                    exceptions.add(new Exception("Unable to start bundle " + bundle.getLocation(), e));
                 }
             }
         }
-        if (sb.toString().indexOf(',') > 0) {
-            System.out.println("Bundle IDs: " + sb.toString());
-        } else if (sb.length() > 0) {
-            System.out.println("Bundle ID: " + sb.toString());
+        if (bundles.size() == 1) {
+            System.out.println("Bundle ID: " + bundles.get(0).getBundleId());
+        } else {
+            StringBuffer sb = new StringBuffer("Bundle IDs: ");
+            for (Bundle bundle : bundles) {
+                if (sb.length() > 0) {
+                    sb.append(", ");
+                }
+                sb.append(bundle.getBundleId());
+            }
+            System.out.println(sb);
         }
+        MultiException.throwIf("Error installing bundles", exceptions);
         return null;
     }
 

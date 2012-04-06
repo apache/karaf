@@ -24,6 +24,7 @@ import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
+import org.apache.karaf.shell.console.MultiException;
 
 @Command(scope = "features", name = "refreshUrl", description = "Reloads the list of available features from the repositories.")
 public class RefreshUrlCommand extends FeaturesCommandSupport {
