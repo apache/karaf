@@ -17,6 +17,7 @@
 package org.apache.karaf.features.command;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.karaf.features.FeaturesService;
@@ -30,13 +31,14 @@ public class AddUrlCommand extends FeaturesCommandSupport {
     List<String> urls;
 
     protected void doExecute(FeaturesService admin) throws Exception {
+        List<Exception> exceptions = new ArrayList<Exception>();
         for (String url : urls) {
             try {
                 admin.addRepository(new URI(url));
             } catch (Exception e) {
-                System.out.println("Could not add Feature Repository:\n" + e );
-                System.out.println("Please verify that the feature repository URL is correct and that your network connection works fine.");
+                exceptions.add(e);
             }
         }
+        MultiException.throwIf("Unable to add repositories", exceptions);
     }
 }
