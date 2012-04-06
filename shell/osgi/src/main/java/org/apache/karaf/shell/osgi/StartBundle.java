@@ -16,8 +16,10 @@
  */
 package org.apache.karaf.shell.osgi;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.karaf.shell.console.MultiException;
 import org.osgi.framework.Bundle;
 import org.apache.felix.gogo.commands.Command;
 
@@ -25,13 +27,15 @@ import org.apache.felix.gogo.commands.Command;
 public class StartBundle extends BundlesCommand {
     
     protected void doExecute(List<Bundle> bundles) throws Exception {
+        List<Exception> exceptions = new ArrayList<Exception>();
         for (Bundle bundle : bundles) {
             try {
                 bundle.start();
             } catch (Exception e) {
-                System.err.println(e.toString());
+                exceptions.add(new Exception("Unable to start bundle " + bundle.getBundleId()));
             }
         }
+        MultiException.throwIf("Error starting bundles", exceptions);
     }
 
 }
