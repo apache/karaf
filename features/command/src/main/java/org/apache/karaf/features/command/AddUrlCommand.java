@@ -23,6 +23,7 @@ import java.util.List;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
+import org.apache.karaf.shell.console.MultiException;
 
 @Command(scope = "features", name = "addUrl", description = "Adds a list of repository URLs to the features service.")
 public class AddUrlCommand extends FeaturesCommandSupport {
