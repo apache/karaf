@@ -32,7 +32,8 @@ public class StopBundle extends BundlesCommand {
             try {
                 bundle.stop();
             } catch (Exception e) {
-                exceptions.add(new Exception("Unable to stop bundle " + bundle.getBundleId()));
+                exceptions.add(new Exception("Unable to stop bundle " + bundle.getBundleId() +
+                        (e.getMessage() != null ? ": " + e.getMessage() : ""), e));
             }
         }
         MultiException.throwIf("Error stopping bundles", exceptions);

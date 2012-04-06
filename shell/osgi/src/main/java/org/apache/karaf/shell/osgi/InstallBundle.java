@@ -16,17 +16,15 @@
  */
 package org.apache.karaf.shell.osgi;
 
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.felix.gogo.commands.Argument;
+import org.apache.felix.gogo.commands.Command;
+import org.apache.felix.gogo.commands.Option;
 import org.apache.karaf.shell.console.MultiException;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
-import org.apache.felix.gogo.commands.Argument;
-import org.apache.felix.gogo.commands.Option;
-import org.apache.felix.gogo.commands.Command;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleException;
 
 @Command(scope = "osgi", name = "install", description = "Installs one or more bundles.")
 public class InstallBundle extends OsgiCommandSupport {
@@ -52,7 +50,8 @@ public class InstallBundle extends OsgiCommandSupport {
                 try {
                     bundle.start();
                 } catch (Exception e) {
-                    exceptions.add(new Exception("Unable to start bundle " + bundle.getLocation(), e));
+                    exceptions.add(new Exception("Unable to start bundle " + bundle.getLocation() +
+                            (e.getMessage() != null ? ": " + e.getMessage() : ""), e));
                 }
             }
         }
@@ -69,23 +68,6 @@ public class InstallBundle extends OsgiCommandSupport {
             System.out.println(sb);
         }
         MultiException.throwIf("Error installing bundles", exceptions);
-        return null;
-    }
-
-    protected Bundle install(String location, PrintStream out, PrintStream err) {
-        try {
-            return getBundleContext().installBundle(location, null);
-        } catch (IllegalStateException ex) {
-            err.println(ex.toString());
-        } catch (BundleException ex) {
-            if (ex.getNestedException() != null) {
-                err.println(ex.getNestedException().toString());
-            } else {
-                err.println(ex.toString());
-            }
-        } catch (Exception ex) {
-            err.println(ex.toString());
-        }
         return null;
     }
 

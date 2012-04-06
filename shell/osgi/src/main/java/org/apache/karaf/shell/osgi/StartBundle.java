@@ -32,7 +32,8 @@ public class StartBundle extends BundlesCommand {
             try {
                 bundle.start();
             } catch (Exception e) {
-                exceptions.add(new Exception("Unable to start bundle " + bundle.getBundleId()));
+                exceptions.add(new Exception("Unable to start bundle " + bundle.getBundleId() +
+                        (e.getMessage() != null ? ": " + e.getMessage() : ""), e));
             }
         }
         MultiException.throwIf("Error starting bundles", exceptions);
