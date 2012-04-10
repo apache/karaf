@@ -1,0 +1,5 @@
+The commands in this subshell can be used to inspect or modify the OSGi framework.
+
+The full list of commands is available below and you can obtain a more detailed help for a given command by using the help command followed by the name of the command:
+  > help osgi:list
+

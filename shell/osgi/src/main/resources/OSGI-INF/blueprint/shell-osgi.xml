@@ -74,6 +74,18 @@
         </command>
     </command-bundle>
 
+    <service auto-export="interfaces">
+        <service-properties>
+            <entry key="name" value="osgi"/>
+            <entry key="description" value="Commands to manage the OSGi framework"/>
+        </service-properties>
+        <bean class="org.apache.karaf.shell.console.commands.BasicSubShell">
+            <property name="name" value="osgi"/>
+            <property name="description" value="Commands to manage the OSGi framework"/>
+            <property name="detailedDescription" value="classpath:/org/apache/karaf/shell/osgi/osgi.txt"/>
+        </bean>
+    </service>
+
     <bean id="blueprintListener" class="org.apache.karaf.shell.osgi.BlueprintListener" />
     <service ref="blueprintListener" interface="org.osgi.service.blueprint.container.BlueprintListener" />
 
