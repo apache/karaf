@@ -88,7 +88,7 @@
     <bean id="subShellHelpProvider" class="org.apache.karaf.shell.console.help.SubShellHelpProvider" init-method="start" destroy-method="stop">
         <property name="context" ref="blueprintBundleContext"/>
     </bean>
-    <service auto-export="interfaces" ranking="-5">
+    <service auto-export="interfaces" ranking="-7">
         <bean class="org.apache.karaf.shell.console.help.SimpleHelpProvider">
             <property name="help">
                 <map>
@@ -97,6 +97,9 @@
                 </map>
             </property>
         </bean>
+    </service>
+    <service auto-export="interfaces" ranking="-5">
+        <bean class="org.apache.karaf.shell.console.help.BrandingHelpProvider"/>
     </service>
 
 
