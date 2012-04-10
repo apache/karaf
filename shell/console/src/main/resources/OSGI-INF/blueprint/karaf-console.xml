@@ -59,9 +59,45 @@
             <property name="blueprintContainer" ref="blueprintContainer"/>
             <property name="blueprintConverter" ref="blueprintConverter"/>
             <property name="actionId" value="help"/>
+            <property name="completers">
+                <list>
+                    <bean class="org.apache.karaf.shell.console.completer.CommandNamesCompleter"/>
+                </list>
+            </property>
         </bean>
     </service>
-    <bean id="help" class="org.apache.karaf.shell.console.HelpAction" activation="lazy" scope="prototype" />
+    <bean id="help" class="org.apache.karaf.shell.console.help.HelpAction" activation="lazy" scope="prototype">
+        <property name="provider" ref="helpSystem"/>
+    </bean>
+    
+    <bean id="helpSystem" class="org.apache.karaf.shell.console.help.HelpSystem" init-method="start" destroy-method="stop">
+        <property name="context" ref="blueprintBundleContext"/>
+    </bean>
+    
+    <service auto-export="interfaces" ranking="-20">
+        <bean class="org.apache.karaf.shell.console.help.CommandListHelpProvider" />
+    </service>
+    <service auto-export="interfaces" ranking="-10">
+        <bean class="org.apache.karaf.shell.console.help.SingleCommandHelpProvider">
+            <property name="io">
+                <reference interface="org.apache.felix.service.threadio.ThreadIO"/>
+            </property>
+        </bean>
+    </service>
+    <service auto-export="interfaces" ref="subShellHelpProvider" ranking="-10"/>
+    <bean id="subShellHelpProvider" class="org.apache.karaf.shell.console.help.SubShellHelpProvider" init-method="start" destroy-method="stop">
+        <property name="context" ref="blueprintBundleContext"/>
+    </bean>
+    <service auto-export="interfaces" ranking="-5">
+        <bean class="org.apache.karaf.shell.console.help.SimpleHelpProvider">
+            <property name="help">
+                <map>
+                    <entry key="%root%"><value><![CDATA[${command-list|}]]></value></entry>
+                    <entry key="all"><value><![CDATA[${command-list|}]]></value></entry>
+                </map>
+            </property>
+        </bean>
+    </service>
 
 
 </blueprint>
