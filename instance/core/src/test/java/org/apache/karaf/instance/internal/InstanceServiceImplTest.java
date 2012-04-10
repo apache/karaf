@@ -102,7 +102,7 @@ public class InstanceServiceImplTest extends TestCase {
         System.setProperty("karaf.base", new File("target/test-classes/").getAbsolutePath());
 
         InstanceSettings settings = new InstanceSettings(8122, 1122, 44444, getName(), null, null, null);
-        Instance instance = service.createInstance(getName(), settings, true);
+        service.createInstance(getName(), settings, true);
 
         service.renameInstance(getName(), getName() + "b", true);
         assertNotNull(service.getInstance(getName() + "b"));
