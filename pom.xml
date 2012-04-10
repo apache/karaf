@@ -52,6 +52,7 @@
         <module>jaas</module>
         <module>client</module>
         <module>management</module>
+        <module>dev</module>
         <module>system</module>
         <module>web</module>
         <module>wrapper</module>
