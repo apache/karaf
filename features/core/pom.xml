@@ -52,6 +52,7 @@
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.compendium</artifactId>
             <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
 
         <dependency>
@@ -65,13 +66,6 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- I think this is here only to get better attributes on the felix gogo/shell imports which appear to be unnecessary anyway ??? -->
-        <dependency>
-            <groupId>org.apache.karaf.shell</groupId>
-            <artifactId>org.apache.karaf.shell.console</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.junit</artifactId>
@@ -82,7 +76,6 @@
             <artifactId>easymock</artifactId>
             <scope>test</scope>
         </dependency>
-        <!-- uncomment for more complete test log output -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-jdk14</artifactId>
@@ -112,18 +105,15 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Export-Package>org.apache.karaf.features;version=${project.version}</Export-Package>
-                        <Import-Package>
-                            !org.apache.karaf.features,
-                            org.apache.aries.blueprint,
-                            org.osgi.service.blueprint.container,
-                            org.osgi.service.blueprint.reflect,
-                            org.osgi.service.event*;resolution:=optional,
-                            *
-                        </Import-Package>
+                        <Export-Package>
+                            org.apache.karaf.features,
+                            org.apache.karaf.features.management,
+                            org.apache.karaf.features.management.codec
+                        </Export-Package>
                         <Private-Package>
                             org.apache.karaf.features.internal,
                             org.apache.karaf.features.internal.model,
+                            org.apache.karaf.features.management.internal,
                             org.apache.felix.utils.version,
                             org.apache.felix.utils.manifest
                         </Private-Package>
