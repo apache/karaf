@@ -183,7 +183,6 @@
         <bundle start-level="30">mvn:org.apache.aries.jmx/org.apache.aries.jmx.core/${aries.jmx.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.jmx/org.apache.aries.jmx.blueprint/${aries.jmx.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.jmx/org.apache.aries.jmx.whiteboard/${aries.jmx.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.karaf.config/org.apache.karaf.config.management/${project.version}</bundle>
     </feature>
 
     <feature name="scheduler" description="Provide a scheduler service in Karaf to fire events" version="${project.version}" resolver="(obr)">

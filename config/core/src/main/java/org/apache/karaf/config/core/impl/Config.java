@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.config.management.internal;
+package org.apache.karaf.config.core.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -25,18 +25,18 @@ import java.util.Map;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 
+import org.apache.karaf.config.core.ConfigMBean;
 import org.apache.karaf.config.core.ConfigRepository;
-import org.apache.karaf.config.management.ConfigMBean;
 import org.osgi.service.cm.Configuration;
 
 /**
  * Implementation of the ConfigMBean.
  */
-public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
+public class Config extends StandardMBean implements ConfigMBean {
 
     private ConfigRepository configRepo;
 
-    public ConfigMBeanImpl() throws NotCompliantMBeanException {
+    public Config() throws NotCompliantMBeanException {
         super(ConfigMBean.class);
     }
 
