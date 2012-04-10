@@ -45,12 +45,12 @@ public class ProcessTest extends TestCase {
         assertNotNull(p);
         System.err.println("Process: " + p.getPid());
         assertNotNull(p.getPid());
-        Thread.currentThread().sleep(1000);
+        Thread.sleep(1000);
         System.err.println("Running: " + p.isRunning());
         assertTrue(p.isRunning());
         System.err.println("Destroying");
         p.destroy();
-        Thread.currentThread().sleep(1000);
+        Thread.sleep(1000);
         System.err.println("Running: " + p.isRunning());
         assertFalse(p.isRunning());
     }
