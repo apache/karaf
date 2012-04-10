@@ -31,7 +31,6 @@ import javax.management.openmbean.TabularData;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeatureEvent;
 import org.apache.karaf.features.FeaturesListener;
-import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
 import org.apache.karaf.features.RepositoryEvent;
 import org.apache.karaf.features.management.FeaturesServiceMBean;
@@ -45,7 +44,7 @@ import org.osgi.framework.ServiceRegistration;
 /**
  * Implementation of {@link FeaturesServiceMBean}.
  */
-public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
+public class FeaturesService extends StandardEmitterMBean implements
     MBeanRegistration, FeaturesServiceMBean {
 
     private ServiceRegistration registration;
@@ -58,9 +57,9 @@ public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
 
 	private MBeanServer server;
 
-    private FeaturesService featuresService;
+    private org.apache.karaf.features.FeaturesService featuresService;
 
-    public FeaturesServiceMBeanImpl() throws NotCompliantMBeanException {
+    public FeaturesService() throws NotCompliantMBeanException {
         super(FeaturesServiceMBean.class);
     }
 
@@ -155,7 +154,7 @@ public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
         this.bundleContext = bundleContext;
     }
 
-    public void setFeaturesService(FeaturesService featuresService) {
+    public void setFeaturesService(org.apache.karaf.features.FeaturesService featuresService) {
         this.featuresService = featuresService;
     }
 

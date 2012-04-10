@@ -58,5 +58,15 @@
                             bind-method="registerRegionsPersistence"
                             unbind-method="unregisterRegionsPersistence" />
     </reference>
+    
+    <bean id="featuresServiceMBean" class="org.apache.karaf.features.management.internal.FeaturesService">
+        <property name="bundleContext" ref="blueprintBundleContext" />
+        <property name="featuresService" ref="featuresService" />
+    </bean>
 
+    <service ref="featuresServiceMBean" auto-export="interfaces">
+        <service-properties>
+            <entry key="jmx.objectname" value="org.apache.karaf:type=feature,name=$(karaf.name)"/>
+        </service-properties>
+    </service>
 </blueprint>
