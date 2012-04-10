@@ -86,20 +86,6 @@
                         <Export-Package>
                             org.apache.karaf.dev.core
                         </Export-Package>
-<!--                         <Import-Package> -->
-<!--                             !junit.framework, -->
-<!--                             !org.cyberneko.html, -->
-<!--                             !org.cyberneko.html.filters, -->
-<!--                             !com.sun.jdmk.comm, -->
-<!--                             !javax.management, -->
-<!--                             !javax.crypto, -->
-<!--                             !javax.crypto.spec, -->
-<!--                             !org.apache.avalon.framework.logger, -->
-<!--                             !org.apache.log, -->
-<!--                             !org.apache.xerces.xni, -->
-<!--                             !org.apache.xerces.xni.parser, -->
-<!--                             !org.objectweb.asm* -->
-<!--                         </Import-Package> -->
                         <Private-Package>
                             org.apache.karaf.dev.core.internal,
                             org.apache.felix.utils.properties
