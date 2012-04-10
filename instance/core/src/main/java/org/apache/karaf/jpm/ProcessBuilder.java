@@ -18,7 +18,6 @@ package org.apache.karaf.jpm;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.*;
 
 /**
  * Interface used to create new processes.

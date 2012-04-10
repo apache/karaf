@@ -30,6 +30,11 @@ import org.apache.karaf.jpm.Process;
 
 public class ProcessImpl implements Process {
 
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -8140632422386086507L;
+
     private int pid;
     //private File input;
     //private File output;
@@ -59,7 +64,7 @@ public class ProcessImpl implements Process {
                 r.readLine(); // skip headers
                 String s = r.readLine();
                 boolean running = s != null && s.length() > 0;
-                int ret = process.waitFor();
+                process.waitFor();
                 return running;
             } catch (InterruptedException e) {
                 throw new InterruptedIOException();
