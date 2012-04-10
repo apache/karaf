@@ -37,6 +37,25 @@
         <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
     </properties>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.apache.karaf.main</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>org.apache.karaf.features.core</artifactId>
+        </dependency>
+    </dependencies>
+
     <build>
         <resources>
             <resource>
@@ -60,15 +79,11 @@
                 <configuration>
                     <instructions>
                         <Export-Package>
-                        	${project.artifactId};version=${project.version},
-                        	${project.artifactId}.common;version=${project.version};-noimport:=true,
+                        	${project.artifactId},
+                        	${project.artifactId}.common
                        	</Export-Package>
-                        <Import-Package>
-                            !${project.artifactId}*,
-                            *
-                        </Import-Package>
                         <Private-Package>
-                            org.apache.karaf.diagnostic.internal
+                            org.apache.karaf.diagnostic.core.internal
                         </Private-Package>
                     </instructions>
                 </configuration>

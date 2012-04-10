@@ -11,7 +11,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.apache.karaf.diagnostic.management.internal;
+package org.apache.karaf.diagnostic.core.internal;
 
 import java.io.File;
 import java.util.List;
@@ -19,16 +19,16 @@ import java.util.List;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 
+import org.apache.karaf.diagnostic.core.DiagnosticDumpMBean;
 import org.apache.karaf.diagnostic.core.DumpDestination;
 import org.apache.karaf.diagnostic.core.DumpProvider;
 import org.apache.karaf.diagnostic.core.common.DirectoryDumpDestination;
 import org.apache.karaf.diagnostic.core.common.ZipDumpDestination;
-import org.apache.karaf.diagnostic.management.DiagnosticDumpMBean;
 
 /**
  * Implementation of diagnostic MBean.
  */
-public class DiagnosticDumpMBeanImpl extends StandardMBean implements 
+public class DiagnosticDump extends StandardMBean implements 
     DiagnosticDumpMBean {
 
     /**
@@ -41,7 +41,7 @@ public class DiagnosticDumpMBeanImpl extends StandardMBean implements
      * 
      * @throws NotCompliantMBeanException
      */
-    public DiagnosticDumpMBeanImpl() throws NotCompliantMBeanException {
+    public DiagnosticDump() throws NotCompliantMBeanException {
         super(DiagnosticDumpMBean.class);
     }
 

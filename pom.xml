@@ -496,17 +496,7 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.karaf.diagnostic</groupId>
-                <artifactId>org.apache.karaf.diagnostic.common</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.karaf.diagnostic</groupId>
                 <artifactId>org.apache.karaf.diagnostic.command</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.karaf.diagnostic</groupId>
-                <artifactId>org.apache.karaf.diagnostic.management</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
