@@ -50,8 +50,16 @@ public class BootDelegationOptionTest {
         Properties prop = new Properties();
         prop.load(new FileInputStream("etc/config.properties"));
         String delegation = prop.get("org.osgi.framework.bootdelegation").toString();
-        assertEquals(
-            "org.apache.karaf.jaas.boot,sun.*,com.sun.*,javax.transaction,javax.transaction.*,sun.*,com.sun.*",
+        assertEquals(new StringBuilder()
+            .append("org.apache.karaf.jaas.boot,")
+            .append("org.apache.karaf.jaas.boot.principal,")
+            .append("sun.*,")
+            .append("com.sun.*,")
+            .append("javax.transaction,")
+            .append("javax.transaction.*,")
+            .append("sun.*,")
+            .append("com.sun.*")
+            .toString(),
             delegation);
     }
 
