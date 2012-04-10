@@ -126,7 +126,7 @@ public class CmdHelpMojo extends AbstractMojo {
             } else {
                 throw new MojoFailureException("classLoader attribute must be 'project' or 'plugin'");
             }
-            List<Class> classes = finder.findAnnotatedClasses(Command.class);
+            List<Class<?>> classes = finder.findAnnotatedClasses(Command.class);
             if (classes.isEmpty()) {
                 throw new MojoFailureException("No command found");
             }
