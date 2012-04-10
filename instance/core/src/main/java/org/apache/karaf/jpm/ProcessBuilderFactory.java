@@ -16,8 +16,6 @@
  */
 package org.apache.karaf.jpm;
 
-import java.lang.*;
-
 import org.apache.karaf.jpm.impl.ProcessBuilderFactoryImpl;
 
 /**
