@@ -64,12 +64,12 @@
         <bundle dependency="true" start-level="30">mvn:commons-collections/commons-collections/${commons-collections.version}</bundle>
         <bundle start-level="30">mvn:org.apache.felix/org.osgi.service.obr/${felix.obr.version}</bundle>
         <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.bundlerepository/${felix.bundlerepository.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.karaf.shell/org.apache.karaf.shell.obr/${project.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.karaf.features/org.apache.karaf.features.obr/${project.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.karaf.management.mbeans/org.apache.karaf.management.mbeans.obr/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.karaf.obr/org.apache.karaf.obr.core/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.karaf.obr/org.apache.karaf.obr.command/${project.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.swissbox/pax-swissbox-lifecycle/${pax.swissbox.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.swissbox/pax-swissbox-tracker/${pax.swissbox.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.url/pax-url-obr/${pax.url.version}</bundle>
+        <bundle start-level="31">mvn:org.apache.karaf.features/org.apache.karaf.features.obr/${project.version}</bundle>
     </feature>
 
     <feature name="config" description="Provide OSGi ConfigAdmin support" version="${project.version}">
