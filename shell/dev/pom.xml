@@ -106,6 +106,7 @@
                             *
                         </Import-Package>
                         <Private-Package>
+                            org.apache.felix.utils.properties,
                             org.apache.felix.utils.version,
                             org.apache.karaf.util,
                             org.ops4j.pax.url.mvn,
