@@ -133,12 +133,12 @@
                     <instructions>
                         <Export-Package>
                             org.apache.karaf.instance.core,
-                            org.apache.karaf.jpm,
                         </Export-Package>
                         <Private-Package>
-                            org.apache.felix.utils.properties,
-                            org.apache.karaf.instance.core.internal,
+                            org.apache.karaf.jpm,
                             org.apache.karaf.jpm.impl,
+                            org.apache.karaf.instance.core.internal,
+                            org.apache.felix.utils.properties
                         </Private-Package>
                     </instructions>
                 </configuration>

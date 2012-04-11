@@ -34,6 +34,7 @@ import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.instance.core.Instance;
 import org.apache.karaf.jpm.Process;
 import org.apache.karaf.jpm.ProcessBuilderFactory;
+import org.apache.karaf.jpm.impl.ProcessBuilderFactoryImpl;
 import org.apache.karaf.jpm.impl.ScriptUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,8 +57,11 @@ public class InstanceImpl implements Instance {
     private Process process;
     private boolean root;
 
+    private final ProcessBuilderFactory processBuilderFactory;
+
     public InstanceImpl(InstanceServiceImpl service, String name, String location, String javaOpts) {
         this(service, name, location, javaOpts, false);
+        
     }
     
     public InstanceImpl(InstanceServiceImpl service, String name, String location, String javaOpts, boolean root) {
@@ -66,6 +70,7 @@ public class InstanceImpl implements Instance {
         this.location = location;
         this.javaOpts = javaOpts;
         this.root = root;
+        this.processBuilderFactory = new ProcessBuilderFactoryImpl();
     }
 
     public void attach(int pid) throws IOException {
@@ -73,7 +78,7 @@ public class InstanceImpl implements Instance {
         if (this.process != null) {
             throw new IllegalStateException("Instances already started");
         }
-        this.process = ProcessBuilderFactory.newInstance().newBuilder().attach(pid);
+        this.process = processBuilderFactory.newBuilder().attach(pid);
     }
 
     public String getName() {
@@ -245,7 +250,7 @@ public class InstanceImpl implements Instance {
                 + " -classpath " + classpath.toString()
                 + " org.apache.karaf.main.Main";
         LOG.debug("Starting instance " + name + " with command: " + command);
-        this.process = ProcessBuilderFactory.newInstance().newBuilder()
+        this.process = processBuilderFactory.newBuilder()
                         .directory(new File(location))
                         .command(command)
                         .start();
