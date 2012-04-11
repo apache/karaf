@@ -89,19 +89,12 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Import-Package>
-                            org.apache.karaf.web,
-                            javax.management,
-                            javax.management.loading,
-                            org.apache.aries.blueprint,
-                            org.osgi.service.blueprint.container,
-                            org.osgi.service.blueprint.reflect,
-                            org.apache.felix.service.command,
-                            org.apache.karaf.shell.commands,
-                            org.apache.karaf.shell.console,
-                            org.osgi.framework,
-                            *
-                        </Import-Package>
+                        <Export-Package>
+                            !org.apache.karaf.web.commands
+                        </Export-Package>
+                        <Private-Package>
+                            org.apache.karaf.web.commands
+                        </Private-Package>
                     </instructions>
                 </configuration>
             </plugin>
