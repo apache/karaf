@@ -33,13 +33,13 @@
         <argument ref="blueprintBundleContext"/>
     </bean>
 
+    <service ref="devService" interface="org.apache.karaf.dev.core.DevService" />
+
     <bean id="devMBean" class="org.apache.karaf.dev.core.internal.Dev">
         <argument ref="devService" />
     </bean>
-    
-    <service ref="devService" interface="org.apache.karaf.dev.core.DevService" />
 
-    <service ref="devMBean" auto-export="interfaces">
+    <service ref="devMBean" interface="org.apache.karaf.dev.core.DevMBean">
         <service-properties>
             <entry key="jmx.objectname" value="org.apache.karaf:type=dev,name=${karaf.name}"/>
         </service-properties>
