@@ -516,11 +516,6 @@
                 <artifactId>org.apache.karaf.system.core</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <dependency>
-                <groupId>org.apache.karaf.system</groupId>
-                <artifactId>org.apache.karaf.system.management</artifactId>
-                <version>${project.version}</version>
-            </dependency>
 
             <dependency>
                 <groupId>org.apache.karaf.web</groupId>
@@ -541,11 +536,6 @@
             <dependency>
                 <groupId>org.apache.karaf.wrapper</groupId>
                 <artifactId>org.apache.karaf.wrapper.core</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.karaf.wrapper</groupId>
-                <artifactId>org.apache.karaf.wrapper.management</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -642,11 +632,6 @@
             <dependency>
                 <groupId>org.apache.karaf.scr</groupId>
                 <artifactId>org.apache.karaf.scr.command</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.karaf.scr</groupId>
-                <artifactId>org.apache.karaf.scr.management</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
