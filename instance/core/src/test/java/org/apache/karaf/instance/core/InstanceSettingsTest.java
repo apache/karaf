@@ -14,13 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.instance;
+package org.apache.karaf.instance.core;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import junit.framework.TestCase;
+
+import org.apache.karaf.instance.core.InstanceSettings;
 import org.junit.Assert;
 
 public class InstanceSettingsTest extends TestCase {

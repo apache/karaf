@@ -14,11 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.instance.management;
+package org.apache.karaf.instance.core;
 
 import javax.management.openmbean.TabularData;
 
-public interface InstanceServiceMBean {
+public interface InstancesMBean {
 
     String INSTANCE_PID = "Pid";
     String INSTANCE_NAME = "Name";

@@ -14,50 +14,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.instance.management.codec;
+package org.apache.karaf.instance.core.management.internal;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 
 import javax.management.openmbean.CompositeData;
-import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.TabularData;
-import javax.management.openmbean.TabularType;
 
 import junit.framework.TestCase;
-import org.apache.karaf.instance.Instance;
-import org.apache.karaf.instance.management.InstanceServiceMBean;
+
+import org.apache.karaf.instance.core.Instance;
+import org.apache.karaf.instance.core.internal.InstanceToTableMapper;
 import org.easymock.EasyMock;
 import org.junit.Assert;
 
-public class JmxInstanceTest extends TestCase {
-    public void testJMXInstanceStatics() {
-        CompositeType it = JmxInstance.INSTANCE;
-        Assert.assertEquals(
-            new HashSet<String>(Arrays.asList(InstanceServiceMBean.INSTANCE)),
-            it.keySet());
-
-        TabularType tt = JmxInstance.INSTANCE_TABLE;
-        Assert.assertEquals("Instances", tt.getTypeName());
-    }
-
+public class InstanceToTableMapperTest extends TestCase {
     public void testJMXInstance() throws Exception {
-        Instance i = EasyMock.createMock(Instance.class);
-        EasyMock.expect(i.getPid()).andReturn(1712);
-        EasyMock.expect(i.getName()).andReturn("MyInstance");
-        EasyMock.expect(i.isRoot()).andReturn(false);
-        EasyMock.expect(i.getSshPort()).andReturn(0);
-        EasyMock.expect(i.getRmiRegistryPort()).andReturn(0);
-        EasyMock.expect(i.getRmiServerPort()).andReturn(0);
-        EasyMock.expect(i.getState()).andThrow(new Exception("gotcha"));
-        EasyMock.expect(i.getLocation()).andReturn("somewhere");
-        EasyMock.expect(i.getJavaOpts()).andReturn("someopts");
-        EasyMock.replay(i);
+        Instance instance = EasyMock.createMock(Instance.class);
+        EasyMock.expect(instance.getPid()).andReturn(1712);
+        EasyMock.expect(instance.getName()).andReturn("MyInstance");
+        EasyMock.expect(instance.isRoot()).andReturn(false);
+        EasyMock.expect(instance.getSshPort()).andReturn(0);
+        EasyMock.expect(instance.getRmiRegistryPort()).andReturn(0);
+        EasyMock.expect(instance.getRmiServerPort()).andReturn(0);
+        EasyMock.expect(instance.getState()).andThrow(new Exception("gotcha"));
+        EasyMock.expect(instance.getLocation()).andReturn("somewhere");
+        EasyMock.expect(instance.getJavaOpts()).andReturn("someopts");
+        EasyMock.replay(instance);
         
-        JmxInstance ji = new JmxInstance(i);
-        TabularData td = JmxInstance.tableFrom(Collections.singletonList(ji));        
+        TabularData td = InstanceToTableMapper.tableFrom(Collections.singletonList(instance));
         Collection<?> keys = (Collection<?>) td.keySet().iterator().next();
         Assert.assertEquals("MyInstance", keys.iterator().next());
         
@@ -74,20 +60,19 @@ public class JmxInstanceTest extends TestCase {
     }
 
     public void testJMXInstance2() throws Exception {
-        Instance i = EasyMock.createMock(Instance.class);
-        EasyMock.expect(i.getPid()).andReturn(1712);
-        EasyMock.expect(i.getName()).andReturn("MyInstance");
-        EasyMock.expect(i.isRoot()).andReturn(true);
-        EasyMock.expect(i.getSshPort()).andReturn(0);
-        EasyMock.expect(i.getRmiRegistryPort()).andReturn(0);
-        EasyMock.expect(i.getRmiServerPort()).andReturn(0);
-        EasyMock.expect(i.getState()).andReturn("Started");
-        EasyMock.expect(i.getLocation()).andReturn(null);
-        EasyMock.expect(i.getJavaOpts()).andReturn(null);
-        EasyMock.replay(i);
+        Instance instance = EasyMock.createMock(Instance.class);
+        EasyMock.expect(instance.getPid()).andReturn(1712);
+        EasyMock.expect(instance.getName()).andReturn("MyInstance");
+        EasyMock.expect(instance.isRoot()).andReturn(true);
+        EasyMock.expect(instance.getSshPort()).andReturn(0);
+        EasyMock.expect(instance.getRmiRegistryPort()).andReturn(0);
+        EasyMock.expect(instance.getRmiServerPort()).andReturn(0);
+        EasyMock.expect(instance.getState()).andReturn("Started");
+        EasyMock.expect(instance.getLocation()).andReturn(null);
+        EasyMock.expect(instance.getJavaOpts()).andReturn(null);
+        EasyMock.replay(instance);
         
-        JmxInstance ji = new JmxInstance(i);
-        TabularData td = JmxInstance.tableFrom(Collections.singletonList(ji));        
+        TabularData td = InstanceToTableMapper.tableFrom(Collections.singletonList(instance));        
         Collection<?> keys = (Collection<?>) td.keySet().iterator().next();
         Assert.assertEquals("MyInstance", keys.iterator().next());
         

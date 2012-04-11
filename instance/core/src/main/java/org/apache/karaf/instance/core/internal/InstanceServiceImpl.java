@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.instance.internal;
+package org.apache.karaf.instance.core.internal;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -29,9 +29,9 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Scanner;
 
-import org.apache.karaf.instance.InstanceSettings;
-import org.apache.karaf.instance.InstanceService;
-import org.apache.karaf.instance.Instance;
+import org.apache.karaf.instance.core.Instance;
+import org.apache.karaf.instance.core.InstanceService;
+import org.apache.karaf.instance.core.InstanceSettings;
 import org.fusesource.jansi.Ansi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -139,7 +139,7 @@ public class InstanceServiceImpl implements InstanceService {
 
     public synchronized Instance createInstance(String name, InstanceSettings settings, boolean printOutput) throws Exception {
         if (instances.get(name) != null) {
-            throw new IllegalArgumentException("Instance '" + name + "' already exists");
+            throw new IllegalArgumentException("Instances '" + name + "' already exists");
         }
         String loc = settings.getLocation() != null ? settings.getLocation() : name;
         File karafBase = new File(loc);
@@ -260,17 +260,17 @@ public class InstanceServiceImpl implements InstanceService {
 
     public synchronized void renameInstance(String oldName, String newName, boolean printOutput) throws Exception {
         if (instances.get(newName) != null) {
-            throw new IllegalArgumentException("Instance " + newName + " already exists");
+            throw new IllegalArgumentException("Instances " + newName + " already exists");
         }
         Instance instance = instances.get(oldName);
         if (instance == null) {
-            throw new IllegalArgumentException("Instance " + oldName + " not found");
+            throw new IllegalArgumentException("Instances " + oldName + " not found");
         }
         if (instance.isRoot()) {
             throw new IllegalArgumentException("Root instance cannot be renamed");
         }
         if (instance.getPid() != 0) {
-            throw new IllegalStateException("Instance not stopped");
+            throw new IllegalStateException("Instances not stopped");
         }
 
         LOGGER.info("Renaming instance {} to {}", oldName, newName);
@@ -316,17 +316,17 @@ public class InstanceServiceImpl implements InstanceService {
 
     public synchronized Instance cloneInstance(String name, String cloneName, InstanceSettings settings, boolean printOutput) throws Exception {
         if (instances.get(cloneName) != null) {
-            throw new IllegalArgumentException("Instance " + cloneName + " already exists");
+            throw new IllegalArgumentException("Instances " + cloneName + " already exists");
         }
         Instance instance = instances.get(name);
         if (instance == null) {
-            throw new IllegalArgumentException("Instance " + name + " not found");
+            throw new IllegalArgumentException("Instances " + name + " not found");
         }
         if (instance.isRoot()) {
             throw new IllegalArgumentException("Root instance cannot be cloned");
         }
         if (instance.getPid() != 0) {
-            throw new IllegalStateException("Instance not stopped");
+            throw new IllegalStateException("Instances not stopped");
         }
 
         LOGGER.info("Cloning instance {} into {}", name, cloneName);
@@ -392,7 +392,7 @@ public class InstanceServiceImpl implements InstanceService {
             storage.setProperty("item." + i + ".pid", Integer.toString(data[i].getPid()));
             storage.setProperty("item." + i + ".opts", data[i].getJavaOpts() != null ? data[i].getJavaOpts() : "");
         }
-        saveStorage(storage, new File(storageLocation, STORAGE_FILE), "Instance Service storage");
+        saveStorage(storage, new File(storageLocation, STORAGE_FILE), "Instances Service storage");
     }
     
     private void copyResourceToDir(File target, String resource, boolean text, boolean printOutput) throws Exception {

@@ -19,7 +19,7 @@ package org.apache.karaf.instance.command;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.instance.Instance;
+import org.apache.karaf.instance.core.Instance;
 
 @Command(scope = "instance", name = "start", description = "Start an existing container instance.")
 public class StartCommand extends InstanceCommandSupport {
