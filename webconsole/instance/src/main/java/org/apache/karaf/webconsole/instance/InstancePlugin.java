@@ -29,10 +29,10 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.karaf.instance.InstanceService;
-import org.apache.karaf.instance.Instance;
-import org.apache.karaf.instance.InstanceSettings;
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
+import org.apache.karaf.instance.core.Instance;
+import org.apache.karaf.instance.core.InstanceService;
+import org.apache.karaf.instance.core.InstanceSettings;
 import org.json.JSONException;
 import org.json.JSONWriter;
 import org.osgi.framework.BundleContext;
