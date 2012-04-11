@@ -28,11 +28,11 @@ import java.util.List;
 /**
  * Implementation of the web MBean.
  */
-public class WebMBeanImpl extends StandardMBean implements WebMBean {
+public class Web extends StandardMBean implements WebMBean {
 
     private WebContainerService webContainerService;
 
-    public WebMBeanImpl() throws NotCompliantMBeanException {
+    public Web() throws NotCompliantMBeanException {
         super(WebMBean.class);
     }
 
@@ -49,7 +49,7 @@ public class WebMBeanImpl extends StandardMBean implements WebMBean {
                         "Start level of the bundle",
                         "Web context path",
                         "Name of the bundle"},
-                new OpenType[]{SimpleType.STRING, SimpleType.STRING, SimpleType.STRING});
+                new OpenType[]{SimpleType.LONG, SimpleType.STRING, SimpleType.STRING, SimpleType.INTEGER, SimpleType.STRING, SimpleType.STRING});
         TabularType tableType = new TabularType("Web Bundles", "Table of web bundles", webType,
                 new String[]{"ID"});
         TabularData table = new TabularDataSupport(tableType);

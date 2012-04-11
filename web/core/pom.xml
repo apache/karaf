@@ -80,16 +80,12 @@
                 <configuration>
                     <instructions>
                         <Export-Package>
-                            org.apache.karaf.web;version=${project.version}
+                            org.apache.karaf.web,
+                            org.apache.karaf.web.management
                         </Export-Package>
-                        <Import-Package>
-                            !org.apache.karaf.web*,
-                            org.ops4j.pax.web*,
-                            org.slf4j,
-                            *
-                        </Import-Package>
                         <Private-Package>
-                            org.apache.karaf.web.internal
+                            org.apache.karaf.web.internal,
+                            org.apache.karaf.web.management.internal
                         </Private-Package>
                     </instructions>
                 </configuration>
