@@ -38,6 +38,9 @@
         <command name="dev/system-property">
             <action class="org.apache.karaf.shell.dev.SystemProperty" />
         </command>
+        <command name="dev/wait-for-service">
+            <action class="org.apache.karaf.shell.dev.WaitForService" />
+        </command>
         <command name="dev/watch">
             <action class="org.apache.karaf.shell.dev.Watch" >
                 <property name="watcher" ref="watcher"/>
