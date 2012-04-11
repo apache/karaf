@@ -19,7 +19,7 @@
 -->
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" default-activation="lazy">
 
-    <reference id="instanceService" interface="org.apache.karaf.instance.InstanceService" />
+    <reference id="instanceService" interface="org.apache.karaf.instance.core.InstanceService" />
 
     <bean id="instancePlugin" class="org.apache.karaf.webconsole.instance.InstancePlugin" init-method="start" destroy-method="stop">
         <property name="instanceService" ref="instanceService" />

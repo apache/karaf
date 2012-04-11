@@ -30,9 +30,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
 
-import org.apache.karaf.instance.InstanceService;
-import org.apache.karaf.instance.Instance;
-import org.apache.karaf.instance.InstanceSettings;
+import org.apache.karaf.instance.core.Instance;
+import org.apache.karaf.instance.core.InstanceService;
+import org.apache.karaf.instance.core.InstanceSettings;
 import org.easymock.EasyMock;
 import org.easymock.IAnswer;
 
