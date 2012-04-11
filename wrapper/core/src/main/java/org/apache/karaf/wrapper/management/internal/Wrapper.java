@@ -26,11 +26,11 @@ import java.io.File;
 /**
  * Implementation of the wrapper MBean.
  */
-public class WrapperMBeanImpl extends StandardMBean implements WrapperMBean {
+public class Wrapper extends StandardMBean implements WrapperMBean {
 
     private WrapperService wrapperService;
 
-    public WrapperMBeanImpl() throws NotCompliantMBeanException {
+    public Wrapper() throws NotCompliantMBeanException {
         super(WrapperMBean.class);
     }
 

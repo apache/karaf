@@ -99,16 +99,14 @@
                 <configuration>
                     <instructions>
                         <Export-Package>
-                            org.apache.karaf.wrapper;version=${project.version}
+                            org.apache.karaf.wrapper,
+                            org.apache.karaf.wrapper.management
                         </Export-Package>
-                        <Import-Package>
-                            !org.apache.karaf.wrapper*,
-                            !org.apache.karaf.main,
-                            !org.tanukisoftware.wrapper,
-                            *
-                        </Import-Package>
                         <Private-Package>
-                            org.apache.karaf.wrapper.internal
+                            org.apache.karaf.wrapper.internal,
+                            org.apache.karaf.wrapper.management.internal,
+                            org.tanukisoftware.wrapper*,
+                            org.apache.karaf.main*
                         </Private-Package>
                     </instructions>
                 </configuration>
