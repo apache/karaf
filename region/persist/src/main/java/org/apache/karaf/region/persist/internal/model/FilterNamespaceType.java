@@ -6,7 +6,7 @@
 //
 
 
-package org.apache.karaf.region.persist.model;
+package org.apache.karaf.region.persist.internal.model;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,20 +17,18 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for filterBundleType complex type.
+ * <p>Java class for filterNamespaceType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="filterBundleType">
+ * &lt;complexType name="filterNamespaceType">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
  *         &lt;element name="attribute" type="{http://karaf.apache.org/xmlns/region/v1.0.0}filterAttributeType" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
- *       &lt;attribute name="id" type="{http://www.w3.org/2001/XMLSchema}long" />
- *       &lt;attribute name="symbolic-name" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="version" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="name" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -39,18 +37,14 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "filterBundleType", propOrder = {
+@XmlType(name = "filterNamespaceType", propOrder = {
     "attribute"
 })
-public class FilterBundleType {
+public class FilterNamespaceType {
 
     protected List<FilterAttributeType> attribute;
-    @XmlAttribute
-    protected Long id;
-    @XmlAttribute(name = "symbolic-name")
-    protected String symbolicName;
-    @XmlAttribute
-    protected String version;
+    @XmlAttribute(required = true)
+    protected String name;
 
     /**
      * Gets the value of the attribute property.
@@ -82,75 +76,27 @@ public class FilterBundleType {
     }
 
     /**
-     * Gets the value of the id property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Long }
-     *     
-     */
-    public Long getId() {
-        return id;
-    }
-
-    /**
-     * Sets the value of the id property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Long }
-     *     
-     */
-    public void setId(Long value) {
-        this.id = value;
-    }
-
-    /**
-     * Gets the value of the symbolicName property.
+     * Gets the value of the name property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getSymbolicName() {
-        return symbolicName;
+    public String getName() {
+        return name;
     }
 
     /**
-     * Sets the value of the symbolicName property.
+     * Sets the value of the name property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setSymbolicName(String value) {
-        this.symbolicName = value;
-    }
-
-    /**
-     * Gets the value of the version property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getVersion() {
-        return version;
-    }
-
-    /**
-     * Sets the value of the version property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setVersion(String value) {
-        this.version = value;
+    public void setName(String value) {
+        this.name = value;
     }
 
 }

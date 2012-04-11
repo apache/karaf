@@ -34,15 +34,15 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import org.apache.karaf.region.persist.RegionsPersistence;
+import org.apache.karaf.region.persist.internal.model.FilterAttributeType;
+import org.apache.karaf.region.persist.internal.model.FilterBundleType;
+import org.apache.karaf.region.persist.internal.model.FilterNamespaceType;
+import org.apache.karaf.region.persist.internal.model.FilterPackageType;
+import org.apache.karaf.region.persist.internal.model.FilterType;
+import org.apache.karaf.region.persist.internal.model.RegionBundleType;
+import org.apache.karaf.region.persist.internal.model.RegionType;
+import org.apache.karaf.region.persist.internal.model.RegionsType;
 import org.apache.karaf.region.persist.internal.util.ManifestHeaderProcessor;
-import org.apache.karaf.region.persist.model.FilterAttributeType;
-import org.apache.karaf.region.persist.model.FilterBundleType;
-import org.apache.karaf.region.persist.model.FilterNamespaceType;
-import org.apache.karaf.region.persist.model.FilterPackageType;
-import org.apache.karaf.region.persist.model.FilterType;
-import org.apache.karaf.region.persist.model.RegionBundleType;
-import org.apache.karaf.region.persist.model.RegionType;
-import org.apache.karaf.region.persist.model.RegionsType;
 import org.eclipse.equinox.region.Region;
 import org.eclipse.equinox.region.RegionDigraph;
 import org.eclipse.equinox.region.RegionFilterBuilder;
@@ -56,7 +56,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @version $Rev:$ $Date:$
+ * @version $Rev$ $Date$
  */
 public class RegionsPersistenceImpl implements RegionsPersistence {
 

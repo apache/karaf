@@ -6,4 +6,4 @@
 //
 
 @javax.xml.bind.annotation.XmlSchema(namespace = "http://karaf.apache.org/xmlns/region/v1.0.0", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
-package org.apache.karaf.region.persist.model;
+package org.apache.karaf.region.persist.internal.model;
