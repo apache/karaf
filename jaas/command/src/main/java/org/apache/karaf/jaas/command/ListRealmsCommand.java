@@ -15,18 +15,18 @@
  */
 package org.apache.karaf.jaas.command;
 
+import java.util.List;
+import javax.security.auth.login.AppConfigurationEntry;
+
 import org.apache.felix.gogo.commands.Command;
 import org.apache.karaf.jaas.boot.ProxyLoginModule;
 import org.apache.karaf.jaas.config.JaasRealm;
 import org.apache.karaf.jaas.modules.BackingEngine;
 
-import javax.security.auth.login.AppConfigurationEntry;
-import java.util.List;
-
 /**
  * @author iocanel
  */
-@Command(scope = "jaas", name = "realms", description = "Lists the modification on the active realm/module.")
+@Command(scope = "jaas", name = "realms", description = "Lists the existing JAAS realms.")
 public class ListRealmsCommand extends JaasCommandSupport {
 
     private static final String REALM_LIST_FORMAT = "%5s %-20s %-80s";
