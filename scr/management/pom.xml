@@ -90,12 +90,6 @@
                         <Export-Package>
                             org.apache.karaf.scr.management
                         </Export-Package>
-                        <Import-Package>
-                            !org.apache.karaf.scr.management,
-                            javax.management,
-                            javax.management.loading,
-                            *
-                        </Import-Package>
                         <Private-Package>
                             org.apache.karaf.scr.management.internal
                         </Private-Package>
