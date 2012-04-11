@@ -94,17 +94,9 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Export-Package>
-                            org.apache.karaf.management;version=${project.version}
-                        </Export-Package>
-                        <Import-Package>
-                            !${project.artifactId}*,
-                            javax.management,
-                            org.apache.aries.blueprint,
-                            org.osgi.service.blueprint.container,
-                            org.osgi.service.blueprint.reflect,
-                            *
-                        </Import-Package>
+                        <Private-Package>
+                            org.apache.karaf.management
+                        </Private-Package>
                     </instructions>
                 </configuration>
             </plugin>
