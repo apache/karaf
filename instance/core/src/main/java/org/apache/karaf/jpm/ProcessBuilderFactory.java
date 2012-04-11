@@ -16,17 +16,10 @@
  */
 package org.apache.karaf.jpm;
 
-import org.apache.karaf.jpm.impl.ProcessBuilderFactoryImpl;
 
 /**
  * Factory for process builders.
  */
-public abstract class ProcessBuilderFactory {
-
-    public static ProcessBuilderFactory newInstance() {
-        return new ProcessBuilderFactoryImpl();
-    }
-
-    public abstract ProcessBuilder newBuilder();
-
+public interface ProcessBuilderFactory {
+    ProcessBuilder newBuilder();
 }

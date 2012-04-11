@@ -19,7 +19,7 @@ package org.apache.karaf.jpm.impl;
 import org.apache.karaf.jpm.ProcessBuilder;
 import org.apache.karaf.jpm.ProcessBuilderFactory;
 
-public class ProcessBuilderFactoryImpl extends ProcessBuilderFactory {
+public class ProcessBuilderFactoryImpl implements ProcessBuilderFactory {
 
     public ProcessBuilder newBuilder() {
         return new ProcessBuilderImpl();

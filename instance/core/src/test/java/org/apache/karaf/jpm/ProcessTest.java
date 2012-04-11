@@ -19,6 +19,8 @@ package org.apache.karaf.jpm;
 import java.io.File;
 
 import junit.framework.TestCase;
+
+import org.apache.karaf.jpm.impl.ProcessBuilderFactoryImpl;
 import org.apache.karaf.jpm.impl.ScriptUtils;
 
 public class ProcessTest extends TestCase {
@@ -40,7 +42,7 @@ public class ProcessTest extends TestCase {
         command.append(60000);
         System.err.println("Executing: " + command.toString());
 
-        ProcessBuilder builder = ProcessBuilderFactory.newInstance().newBuilder();
+        ProcessBuilder builder = new ProcessBuilderFactoryImpl().newBuilder();
         org.apache.karaf.jpm.Process p = builder.command(command.toString()).start();
         assertNotNull(p);
         System.err.println("Process: " + p.getPid());
