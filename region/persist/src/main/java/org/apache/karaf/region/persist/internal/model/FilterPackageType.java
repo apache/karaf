@@ -6,7 +6,7 @@
 //
 
 
-package org.apache.karaf.region.persist.model;
+package org.apache.karaf.region.persist.internal.model;
 
 import java.util.ArrayList;
 import java.util.List;

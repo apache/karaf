@@ -6,7 +6,7 @@
 //
 
 
-package org.apache.karaf.region.persist.model;
+package org.apache.karaf.region.persist.internal.model;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;

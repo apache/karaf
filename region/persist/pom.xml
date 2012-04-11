@@ -108,12 +108,6 @@
                 <configuration>
                     <instructions>
                         <Bundle-Activator>org.apache.karaf.region.persist.internal.Activator</Bundle-Activator>
-                        <Import-Package>
-                            !${project.artifactId}*,
-                            !org.apache.karaf.region;version="${project.version}",
-                            *
-                        </Import-Package>
-                        <Private-Package>org.apache.karaf.region.internal,org.apache.karaf.region.model</Private-Package>
                     </instructions>
                 </configuration>
             </plugin>
@@ -137,7 +131,7 @@
                         </executions>
                         <configuration>
                             <schemaDirectory>src/main/resources/org/apache/karaf/region/persist</schemaDirectory>
-                            <packageName>org.apache.karaf.region.persist.model</packageName>
+                            <packageName>org.apache.karaf.region.persist.internal.model</packageName>
                             <extension>true</extension>
                         </configuration>
                     </plugin>
