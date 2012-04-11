@@ -25,11 +25,11 @@ import javax.management.StandardMBean;
 /**
  * System MBean implementation.
  */
-public class SystemMBeanImpl extends StandardMBean implements SystemMBean {
+public class System extends StandardMBean implements SystemMBean {
 
     private SystemService systemService;
 
-    public SystemMBeanImpl() throws NotCompliantMBeanException {
+    public System() throws NotCompliantMBeanException {
         super(SystemMBean.class);
     }
 

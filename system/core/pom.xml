@@ -75,14 +75,12 @@
                 <configuration>
                     <instructions>
                         <Export-Package>
-                            org.apache.karaf.system;version=${project.version}
+                            org.apache.karaf.system,
+                            org.apache.karaf.system.management
                         </Export-Package>
-                        <Import-Package>
-                            !org.apache.karaf.system*,
-                            *
-                        </Import-Package>
                         <Private-Package>
-                            org.apache.karaf.system.internal
+                            org.apache.karaf.system.internal,
+                            org.apache.karaf.system.management.internal
                         </Private-Package>
                     </instructions>
                 </configuration>
