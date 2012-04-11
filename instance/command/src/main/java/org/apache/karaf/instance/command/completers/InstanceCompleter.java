@@ -18,8 +18,8 @@ package org.apache.karaf.instance.command.completers;
 
 import java.util.List;
 
-import org.apache.karaf.instance.InstanceService;
-import org.apache.karaf.instance.Instance;
+import org.apache.karaf.instance.core.Instance;
+import org.apache.karaf.instance.core.InstanceService;
 import org.apache.karaf.shell.console.completer.StringsCompleter;
 import org.apache.karaf.shell.console.Completer;
 

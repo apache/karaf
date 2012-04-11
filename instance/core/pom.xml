@@ -132,26 +132,12 @@
                 <configuration>
                     <instructions>
                         <Export-Package>
-                            org.apache.karaf.instance;version=${project.version},
-                            org.apache.karaf.jpm;version=${project.version}
+                            org.apache.karaf.instance.core,
+                            org.apache.karaf.jpm,
                         </Export-Package>
-                        <Import-Package>
-                            !org.apache.karaf.instance,
-                            !org.apache.karaf.jpm,
-                            javax.management,
-                            javax.management.loading,
-                            org.apache.aries.blueprint,
-                            org.osgi.service.blueprint.container,
-                            org.osgi.service.blueprint.reflect,
-                            org.apache.felix.service.command,
-                            org.apache.karaf.shell.commands,
-                            org.apache.karaf.shell.console,
-                            *
-                        </Import-Package>
                         <Private-Package>
                             org.apache.felix.utils.properties,
-                            org.apache.karaf.instance.resources*,
-                            org.apache.karaf.instance.internal,
+                            org.apache.karaf.instance.core.internal,
                             org.apache.karaf.jpm.impl,
                         </Private-Package>
                     </instructions>

@@ -18,7 +18,7 @@ package org.apache.karaf.instance.command;
 
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.instance.Instance;
+import org.apache.karaf.instance.core.Instance;
 
 @Command(scope = "instance", name = "list", description = "Lists all existing container instances.")
 public class ListCommand extends InstanceCommandSupport {

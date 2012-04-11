@@ -28,7 +28,7 @@ import org.apache.karaf.shell.commands.Action;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.basic.DefaultActionPreparator;
 import org.apache.karaf.instance.command.ChangeSshPortCommand;
-import org.apache.karaf.instance.internal.InstanceServiceImpl;
+import org.apache.karaf.instance.core.internal.InstanceServiceImpl;
 import org.fusesource.jansi.AnsiConsole;
 
 public class Execute {

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.instance.internal;
+package org.apache.karaf.instance.core.internal;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -26,8 +26,10 @@ import java.util.Arrays;
 import java.util.Properties;
 
 import junit.framework.TestCase;
-import org.apache.karaf.instance.Instance;
-import org.apache.karaf.instance.InstanceSettings;
+
+import org.apache.karaf.instance.core.Instance;
+import org.apache.karaf.instance.core.InstanceSettings;
+import org.apache.karaf.instance.core.internal.InstanceServiceImpl;
 
 public class InstanceServiceImplTest extends TestCase {
 

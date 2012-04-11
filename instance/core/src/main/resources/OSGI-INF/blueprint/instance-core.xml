@@ -18,16 +18,25 @@
 
 -->
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
-           xmlns:ext="http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.0.0"
-           default-activation="lazy">
+    xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
+    xmlns:ext="http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.0.0">
 
-    <bean id="instanceService" class="org.apache.karaf.instance.internal.InstanceServiceImpl" init-method="init">
+    <ext:property-placeholder />
+
+    <bean id="instanceService" class="org.apache.karaf.instance.core.internal.InstanceServiceImpl" init-method="init">
         <property name="storageLocation" value="${karaf.instances}" />
     </bean>
+    
+    <service ref="instanceService" interface="org.apache.karaf.instance.core.InstanceService"/>
 
-    <service ref="instanceService" interface="org.apache.karaf.instance.InstanceService" />
+    <bean id="mbeanImpl" class="org.apache.karaf.instance.core.internal.Instances">
+        <argument ref="instanceService" />
+    </bean>
 
-    <!-- Allow the use of system properties -->
-    <ext:property-placeholder />
+    <service ref="mbeanImpl" auto-export="interfaces">
+        <service-properties>
+            <entry key="jmx.objectname" value="org.apache.karaf:type=instance,name=${karaf.name}"/>
+        </service-properties>
+    </service>
 
 </blueprint>

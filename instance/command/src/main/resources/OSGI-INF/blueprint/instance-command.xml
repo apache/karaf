@@ -127,7 +127,7 @@
         </command>
     </command-bundle>
 
-    <reference id="instanceService" interface="org.apache.karaf.instance.InstanceService" />
+    <reference id="instanceService" interface="org.apache.karaf.instance.core.InstanceService" />
     <reference id="featuresService" interface="org.apache.karaf.features.FeaturesService" />
 
     <bean id="instanceCompleter" class="org.apache.karaf.instance.command.completers.InstanceCompleter">

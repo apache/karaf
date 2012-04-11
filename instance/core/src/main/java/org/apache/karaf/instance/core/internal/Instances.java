@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.instance.management.internal;
+package org.apache.karaf.instance.core.internal;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,25 +24,16 @@ import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import javax.management.openmbean.TabularData;
 
-import org.apache.karaf.instance.management.InstanceServiceMBean;
-import org.apache.karaf.instance.InstanceService;
-import org.apache.karaf.instance.Instance;
-import org.apache.karaf.instance.InstanceSettings;
-import org.apache.karaf.instance.management.codec.JmxInstance;
+import org.apache.karaf.instance.core.Instance;
+import org.apache.karaf.instance.core.InstanceSettings;
+import org.apache.karaf.instance.core.InstancesMBean;
 
-public class InstanceServiceMBeanImpl extends StandardMBean implements InstanceServiceMBean {
+public class Instances extends StandardMBean implements InstancesMBean {
 
-    private InstanceService instanceService;
+    private org.apache.karaf.instance.core.InstanceService instanceService;
 
-    public InstanceServiceMBeanImpl() throws NotCompliantMBeanException {
-        super(InstanceServiceMBean.class);
-    }
-
-    public InstanceService getInstanceService() {
-        return instanceService;
-    }
-
-    public void setInstanceService(InstanceService instanceService) {
+    public Instances(org.apache.karaf.instance.core.InstanceService instanceService) throws NotCompliantMBeanException {
+        super(InstancesMBean.class);
         this.instanceService = instanceService;
     }
 
@@ -99,19 +90,15 @@ public class InstanceServiceMBeanImpl extends StandardMBean implements InstanceS
     }
 
     public TabularData getInstances() throws Exception {
-        List<Instance> allInstances = Arrays.asList(instanceService.getInstances());
-        List<JmxInstance> instances = new ArrayList<JmxInstance>();
-        for (Instance instance : allInstances) {
-            instances.add(new JmxInstance(instance));
-        }
-        TabularData table = JmxInstance.tableFrom(instances);
+        List<Instance> instances = Arrays.asList(instanceService.getInstances());
+        TabularData table = InstanceToTableMapper.tableFrom(instances);
         return table;
     }
 
     private Instance getExistingInstance(String name) {
         Instance i = instanceService.getInstance(name);
         if (i == null) {
-            throw new IllegalArgumentException("Instance '" + name + "' does not exist");
+            throw new IllegalArgumentException("Instances '" + name + "' does not exist");
         }
         return i;
     }

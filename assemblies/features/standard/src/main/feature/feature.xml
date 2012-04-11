@@ -24,7 +24,6 @@
         <bundle start-level="30">mvn:org.apache.karaf.features/org.apache.karaf.features.command/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.instance/org.apache.karaf.instance.core/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.instance/org.apache.karaf.instance.command/${project.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.karaf.instance/org.apache.karaf.instance.management/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.jaas/org.apache.karaf.jaas.modules/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.jaas/org.apache.karaf.jaas.config/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.jaas/org.apache.karaf.jaas.command/${project.version}</bundle>

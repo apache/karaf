@@ -21,8 +21,8 @@ import java.util.Collections;
 
 import junit.framework.TestCase;
 
-import org.apache.karaf.instance.InstanceService;
-import org.apache.karaf.instance.InstanceSettings;
+import org.apache.karaf.instance.core.InstanceService;
+import org.apache.karaf.instance.core.InstanceSettings;
 import org.easymock.EasyMock;
 
 public class CreateCommandTest extends TestCase {

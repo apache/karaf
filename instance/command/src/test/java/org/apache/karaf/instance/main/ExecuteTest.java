@@ -28,9 +28,9 @@ import java.util.Properties;
 
 import junit.framework.TestCase;
 
-import org.apache.karaf.instance.InstanceService;
 import org.apache.karaf.instance.command.InstanceCommandSupport;
-import org.apache.karaf.instance.internal.InstanceServiceImpl;
+import org.apache.karaf.instance.core.InstanceService;
+import org.apache.karaf.instance.core.internal.InstanceServiceImpl;
 import org.easymock.IAnswer;
 import org.easymock.classextension.EasyMock;
 
@@ -142,7 +142,7 @@ public class ExecuteTest extends TestCase {
             
             EasyMock.expect(mockCommand.execute(null)).andAnswer(new IAnswer<Object>() {
                 public Object answer() throws Throwable {
-                    // The Instance Service should be initialized at this point.
+                    // The Instances Service should be initialized at this point.
                     // One way to find this out is by reading out the port number
                     InstanceServiceImpl instanceService = instanceServices.get(0);
                     Field sshField = InstanceServiceImpl.class.getDeclaredField("defaultSshPortStart");

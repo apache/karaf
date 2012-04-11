@@ -16,8 +16,8 @@
  */
 package org.apache.karaf.instance.command;
 
-import org.apache.karaf.instance.InstanceService;
-import org.apache.karaf.instance.Instance;
+import org.apache.karaf.instance.core.Instance;
+import org.apache.karaf.instance.core.InstanceService;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 
 public abstract class InstanceCommandSupport extends OsgiCommandSupport {
@@ -35,7 +35,7 @@ public abstract class InstanceCommandSupport extends OsgiCommandSupport {
     protected Instance getExistingInstance(String name) {
         Instance i = instanceService.getInstance(name);
         if (i == null) {
-            throw new IllegalArgumentException("Instance '" + name + "' does not exist");
+            throw new IllegalArgumentException("Instances '" + name + "' does not exist");
         }
         return i;
     }
