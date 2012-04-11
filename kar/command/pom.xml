@@ -46,6 +46,10 @@
             <groupId>org.apache.karaf.shell</groupId>
             <artifactId>org.apache.karaf.shell.console</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.apache.karaf.main</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -70,13 +74,7 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Import-Package>
-                            org.apache.karaf.kar;version=${project.version},
-                            org.apache.karaf.shell.commands;version=${project.version},
-                            org.apache.karaf.shell.console*;version=${project.version},
-                            org.osgi.service.blueprint
-                        </Import-Package>
-                        <Private-Package>!*</Private-Package>
+                        <Export-Package>!*</Export-Package>
                     </instructions>
                 </configuration>
             </plugin>

@@ -14,11 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.kar.management;
+package org.apache.karaf.kar;
 
 import java.util.List;
 
-public interface KarServiceMBean {
+public interface KarsMBean {
 
     /**
      * List the installed KAR files.

@@ -73,17 +73,8 @@
                 <configuration>
                     <instructions>
                         <Export-Package>
-                            org.apache.karaf.kar;version=${project.version}
+                            org.apache.karaf.kar
                         </Export-Package>
-                        <Import-Package>
-                            !org.apache.karaf.kar,
-                            javax.xml.parsers,
-                            org.apache.karaf.features;version=${project.version},
-                            org.slf4j;resolution:=optional,
-                            org.w3c.dom,
-                            org.xml.sax,
-                            org.osgi.service.blueprint
-                        </Import-Package>
                         <Private-Package>
                             org.apache.karaf.kar.internal
                         </Private-Package>

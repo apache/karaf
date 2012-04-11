@@ -31,5 +31,15 @@
     </bean>
 
     <service ref="karService" interface="org.apache.karaf.kar.KarService"/>
+    
+    <bean id="mbeanImpl" class="org.apache.karaf.kar.internal.Kars">
+        <property name="karService" ref="karService"/>
+    </bean>
+    
+    <service ref="mbeanImpl" interface="org.apache.karaf.kar.KarsMBean">
+        <service-properties>
+            <entry key="jmx.objectname" value="org.apache.karaf:type=kar,name=$[karaf.name]"/>
+        </service-properties>
+    </service>
 
 </blueprint>

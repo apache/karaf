@@ -14,22 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.kar.management.internal;
+package org.apache.karaf.kar.internal;
 
 import org.apache.karaf.kar.KarService;
-import org.apache.karaf.kar.management.KarServiceMBean;
+import org.apache.karaf.kar.KarsMBean;
 
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import java.net.URI;
 import java.util.List;
 
-public class KarServiceMBeanImpl extends StandardMBean implements KarServiceMBean {
+public class Kars extends StandardMBean implements KarsMBean {
     
     private KarService karService;
     
-    public KarServiceMBeanImpl() throws NotCompliantMBeanException {
-        super(KarServiceMBean.class);
+    public Kars() throws NotCompliantMBeanException {
+        super(KarsMBean.class);
     }
     
     public List<String> getKars() throws Exception {
