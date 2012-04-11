@@ -78,6 +78,11 @@
             <artifactId>org.apache.karaf.jaas.boot</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.apache.karaf.util</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.apache.aries.blueprint</groupId>
             <artifactId>org.apache.aries.blueprint.api</artifactId>
             <scope>provided</scope>
@@ -132,6 +137,7 @@
                     <instructions>
                         <Import-Package>
                             !org.apache.karaf.shell.console*,
+                            !org.apache.karaf.util*,
                             !org.apache.felix.gogo.commands*,
                             !org.fusesource.jansi*,
                             !javax.swing,
@@ -154,6 +160,7 @@
                         <Private-Package>
                             org.fusesource.jansi.internal;-split-package:=first,
                             org.apache.felix.gogo.runtime*;-split-package:=first,
+                            org.apache.karaf.util*;-split-package:=first,
                             META-INF.native.*;-split-package:=first
                         </Private-Package>
                         <Bundle-NativeCode>
