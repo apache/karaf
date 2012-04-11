@@ -47,6 +47,7 @@ import org.apache.karaf.shell.commands.CommandException;
 import org.apache.karaf.shell.console.CloseShellException;
 import org.apache.karaf.shell.console.Completer;
 import org.apache.karaf.shell.console.completer.CommandsCompleter;
+import org.apache.karaf.shell.console.util.Branding;
 import org.fusesource.jansi.Ansi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -302,7 +303,7 @@ public class Console implements Runnable
     }
 
     protected void welcome() {
-        Properties props = loadBrandingProperties();
+        Properties props = Branding.loadBrandingProperties();
         String welcome = props.getProperty("welcome");
         if (welcome != null && welcome.length() > 0) {
             session.getConsole().println(welcome);
@@ -310,7 +311,7 @@ public class Console implements Runnable
     }
 
     protected void setSessionProperties() {
-        Properties props = loadBrandingProperties();
+        Properties props = Branding.loadBrandingProperties();
         for (Map.Entry<Object, Object> entry : props.entrySet()) {
             String key = (String) entry.getKey();
             if (key.startsWith("session.")) {
@@ -323,33 +324,6 @@ public class Console implements Runnable
         return new CommandsCompleter(session);
     }
 
-    protected Properties loadBrandingProperties() {
-        Properties props = new Properties();
-        loadProps(props, "org/apache/karaf/shell/console/branding.properties");
-        loadProps(props, "org/apache/karaf/branding/branding.properties");
-        return props;
-    }
-
-    protected void loadProps(Properties props, String resource) {
-        InputStream is = null;
-        try {
-            is = getClass().getClassLoader().getResourceAsStream(resource);
-            if (is != null) {
-                props.load(is);
-            }
-        } catch (IOException e) {
-            // ignore
-        } finally {
-            if (is != null) {
-                try {
-                    is.close();
-                } catch (IOException e) {
-                    // Ignore
-                }
-            }
-        }
-    }
-
     protected String getPrompt() {
         try {
             String prompt;
@@ -358,7 +332,7 @@ public class Console implements Runnable
                 if (p != null) {
                     prompt = p.toString();
                 } else {
-                    Properties properties = loadBrandingProperties();
+                    Properties properties = Branding.loadBrandingProperties();
                     if (properties.getProperty("prompt") != null) {
                         prompt = properties.getProperty("prompt");
                         // we put the PROMPT in ConsoleSession to avoid to read

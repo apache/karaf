@@ -572,13 +572,33 @@ public class DefaultActionPreparator implements ActionPreparator {
 
     // TODO move this to a helper class?
     public static void printFormatted(String prefix, String str, int termWidth, PrintStream out) {
+        printFormatted(prefix, str, termWidth, out, true);
+    }
+
+    public static void printFormatted(String prefix, String str, int termWidth, PrintStream out, boolean prefixFirstLine) {
         int pfxLen = length(prefix);
         int maxwidth = termWidth - pfxLen;
         Pattern wrap = Pattern.compile("(\\S\\S{" + maxwidth + ",}|.{1," + maxwidth + "})(\\s+|$)");
-        Matcher m = wrap.matcher(str);
-        while (m.find()) {
-            out.print(prefix);
-            out.println(m.group());
+        int cur = 0;
+        while (cur >= 0) {
+            int lst = str.indexOf('\n', cur);
+            String s = (lst >= 0) ? str.substring(cur, lst) : str.substring(cur);
+            if (s.length() == 0) {
+                out.println();
+            } else {
+                Matcher m = wrap.matcher(s);
+                while (m.find()) {
+                    if (cur > 0 || prefixFirstLine) {
+                        out.print(prefix);
+                    }
+                    out.println(m.group());
+                }
+            }
+            if (lst >= 0) {
+                cur = lst + 1;
+            } else {
+                break;
+            }
         }
     }
 

@@ -24,4 +24,5 @@ ld = { log:display $args } ;
 lde = { log:display-exception $args } ;
 la = { bundle:list -t 0 $args } ;
 cl = { config:list "(service.pid=$args)" } ;
+help = { *:help $args | more } ;
 man = { help $args } ;
