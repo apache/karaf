@@ -68,6 +68,13 @@ public class GogoPlugin extends AbstractWebConsolePlugin {
     private BundleContext bundleContext;
 
     private CommandProcessor commandProcessor;
+    
+    
+
+    @Override
+    protected boolean isHtmlRequest(HttpServletRequest request) {
+        return false;
+    }
 
     public void setBundleContext(BundleContext bundleContext)
     {

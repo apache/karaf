@@ -35,6 +35,7 @@ import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
+import org.apache.felix.webconsole.WebConsoleConstants;
 import org.json.JSONException;
 import org.json.JSONWriter;
 import org.osgi.framework.BundleContext;
@@ -70,6 +71,12 @@ public class FeaturesPlugin extends AbstractWebConsolePlugin
     // Blueprint lifecycle callback methods
     //
     
+    @Override
+    protected boolean isHtmlRequest(HttpServletRequest request) {
+        return false;
+    }
+
+
     public void start()
     {
         super.activate( bundleContext );
@@ -157,15 +164,14 @@ public class FeaturesPlugin extends AbstractWebConsolePlugin
         }
     }
 
-
+    @Override
     protected void renderContent( HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
 
         // get request info from request attribute
         final PrintWriter pw = response.getWriter();
 
-        String appRoot = ( String ) request
-            .getAttribute( "org.apache.felix.webconsole.wrapper.servlet.OsgiManager.appRoot" );
+        String appRoot = ( String ) request.getAttribute(WebConsoleConstants.ATTR_APP_ROOT);
         final String featuresScriptTag = "<script src='" + appRoot + this.featuresJs
             + "' language='JavaScript'></script>";
         pw.println( featuresScriptTag );
@@ -176,7 +182,7 @@ public class FeaturesPlugin extends AbstractWebConsolePlugin
         pw.println( "// ]]>" );
         pw.println( "</script>" );
 
-        pw.println( "<div id='plugin_content'/>" );
+        pw.println( "<div id='plugin_content'>" );
 
         pw.println( "<script type='text/javascript'>" );
         pw.println( "// <![CDATA[" );
