@@ -33,6 +33,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
+import org.apache.felix.webconsole.WebConsoleConstants;
 import org.json.JSONException;
 import org.json.JSONWriter;
 import org.ops4j.pax.web.service.spi.ServletEvent;
@@ -73,6 +74,12 @@ public class HttpPlugin extends AbstractWebConsolePlugin
     // Blueprint lifecycle callback methods
     //
     
+    @Override
+    protected boolean isHtmlRequest(HttpServletRequest request) {
+        return false;
+    }
+
+
     public void start()
     {
         super.activate( bundleContext );
@@ -111,8 +118,7 @@ public class HttpPlugin extends AbstractWebConsolePlugin
         // get request info from request attribute
         final PrintWriter pw = response.getWriter();
 
-        String appRoot = ( String ) request
-            .getAttribute( "org.apache.felix.webconsole.wrapper.servlet.OsgiManager.appRoot" );
+        String appRoot = (String) request.getAttribute(WebConsoleConstants.ATTR_APP_ROOT);
         final String featuresScriptTag = "<script src='" + appRoot + this.featuresJs
             + "' language='JavaScript'></script>";
         pw.println( featuresScriptTag );

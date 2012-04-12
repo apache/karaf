@@ -30,6 +30,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
+import org.apache.felix.webconsole.WebConsoleConstants;
 import org.apache.karaf.instance.core.Instance;
 import org.apache.karaf.instance.core.InstanceService;
 import org.apache.karaf.instance.core.InstanceSettings;
@@ -51,6 +52,13 @@ public class InstancePlugin extends AbstractWebConsolePlugin {
     private BundleContext bundleContext;
     private InstanceService instanceService;
     private ClassLoader classLoader;
+    
+    
+
+    @Override
+    protected boolean isHtmlRequest(HttpServletRequest request) {
+        return false;
+    }
 
     /**
      * Blueprint lifecycle callback methods
@@ -80,7 +88,7 @@ public class InstancePlugin extends AbstractWebConsolePlugin {
     protected void renderContent(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
         final PrintWriter pw = res.getWriter();
 
-        String appRoot = (String) req.getAttribute("org.apache.felix.webconsole.wrapper.servlet.OsgiManager.appRoot");
+        String appRoot = (String) req.getAttribute(WebConsoleConstants.ATTR_APP_ROOT);
         final String instanceScriptTag = "<script src='" + appRoot + this.instanceJs + "' language='JavaScript'></script>";
         pw.println(instanceScriptTag);
 
