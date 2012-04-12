@@ -30,6 +30,7 @@ import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.FailedLoginException;
 import javax.security.auth.login.LoginContext;
 
+import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.sshd.common.Session;
 import org.apache.sshd.server.PasswordAuthenticator;
 import org.apache.sshd.server.session.ServerSession;
@@ -78,7 +79,7 @@ public class KarafJaasPasswordAuthenticator implements PasswordAuthenticator {
             });
             loginContext.login();
             if (role != null && role.length() > 0) {
-                String clazz = "org.apache.karaf.jaas.modules.RolePrincipal";
+                String clazz = RolePrincipal.class.getName();
                 String name = role;
                 int idx = role.indexOf(':');
                 if (idx > 0) {
