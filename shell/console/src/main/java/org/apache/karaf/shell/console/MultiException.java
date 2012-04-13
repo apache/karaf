@@ -44,6 +44,10 @@ public class MultiException extends Exception {
         }
     }
 
+    public Throwable[] getCauses() {
+        return exceptions.toArray(new Throwable[exceptions.size()]);
+    }
+
     @Override
     public void printStackTrace()
     {
