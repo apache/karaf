@@ -24,20 +24,10 @@
 
     <ext:property-placeholder placeholder-prefix="$[" placeholder-suffix="]" />
 
-    <cm:property-placeholder persistent-id="org.apache.karaf.config">
-        <cm:default-properties>
-            <cm:property name="storage" value="$[karaf.base]/etc/"/>
-        </cm:default-properties>
-    </cm:property-placeholder>
-
     <bean id="configRepo" class="org.apache.karaf.config.core.impl.ConfigRepositoryImpl">
-        <argument value="${storage}"/>
         <argument ref="configAdmin"/>
-        <argument ref="artifactInstallers"/>
     </bean>
     
-    <reference-list id="artifactInstallers" interface="org.apache.felix.fileinstall.ArtifactInstaller" availability="optional" />
-
     <reference id="configAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"  />
 
     <service interface="org.apache.karaf.config.core.ConfigRepository" ref="configRepo"/>

@@ -38,18 +38,6 @@
     </properties>
 
     <dependencies>
-
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.utils</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.fileinstall</artifactId>
-        </dependency>
-
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
@@ -95,9 +83,10 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Export-Package>org.apache.karaf.config.core</Export-Package>
+                        <Export-Package>
+                            org.apache.karaf.config.core
+                        </Export-Package>
                         <Private-Package>
-                            org.apache.felix.utils.properties,
                             org.apache.karaf.config.core.impl
                         </Private-Package>
                     </instructions>

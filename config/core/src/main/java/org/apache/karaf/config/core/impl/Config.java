@@ -109,7 +109,7 @@ public class Config extends StandardMBean implements ConfigMBean {
     public void deleteProperty(String pid, String key) throws Exception {
         Dictionary dictionary = getConfigProperties(pid);
         dictionary.remove(key);
-        configRepo.update(pid, dictionary, false);
+        configRepo.update(pid, dictionary);
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
@@ -123,14 +123,14 @@ public class Config extends StandardMBean implements ConfigMBean {
         } else {
             throw new IllegalStateException("Current value is not a String");
         }
-        configRepo.update(pid, dictionary, false);
+        configRepo.update(pid, dictionary);
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     public void setProperty(String pid, String key, String value) throws Exception {
         Dictionary dictionary = getConfigProperties(pid);
         dictionary.put(key, value);
-        configRepo.update(pid, dictionary, false);
+        configRepo.update(pid, dictionary);
     }
 
     public void setConfigRepo(ConfigRepository configRepo) {

@@ -28,16 +28,6 @@ public interface ConfigRepository {
      * Saves config to storage or ConfigurationAdmin.
      * @param pid
      * @param props
-     * @param bypassStorage
-     * @throws IOException
-     */
-    @SuppressWarnings("rawtypes")
-    void update(String pid, Dictionary props, boolean bypassStorage) throws IOException;
-
-    /**
-     * Saves config to storage or ConfigurationAdmin.
-     * @param pid
-     * @param props
      * @throws IOException
      */
     @SuppressWarnings("rawtypes")
