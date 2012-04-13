@@ -29,10 +29,6 @@ public abstract class ConfigPropertyCommandSupport extends ConfigCommandSupport 
     @Option(name = "-p", aliases = "--pid", description = "The configuration pid", required = false, multiValued = false)
     protected String pid;
 
-    @Option(name = "-b", aliases = { "--bypass-storage" }, multiValued = false, required = false, description = "Do not store the configuration in a properties file, but feed it directly to ConfigAdmin")
-    protected boolean bypassStorage;
-
-
     @SuppressWarnings("rawtypes")
     protected Object doExecute() throws Exception {
         Dictionary props = getEditedProps();
@@ -44,7 +40,7 @@ public abstract class ConfigPropertyCommandSupport extends ConfigCommandSupport 
             }
             propertyAction(props);
             if(requiresUpdate(pid)) {
-                this.configRepository.update(pid, props, bypassStorage);
+                this.configRepository.update(pid, props);
             }
         }
         return null;
