@@ -60,12 +60,12 @@
         <module>exception</module>
         <module>scheduler</module>
         <module>scr</module>
+        <module>diagnostic</module>
         <module>tooling</module>
         <module>assemblies</module>
         <!--module>demos</module-->
         <module>itests</module>
         <module>archetypes</module>
-        <module>diagnostic</module>
         <module>manual</module>
     </modules>
 
