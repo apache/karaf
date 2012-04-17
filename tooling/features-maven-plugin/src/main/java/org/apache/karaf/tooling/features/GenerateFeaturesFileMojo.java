@@ -100,14 +100,14 @@ public class GenerateFeaturesFileMojo extends MojoSupport {
     private String attachmentArtifactClassifier = "features";
 
     /**
-     * Should we generate a <feature> for the current project?
+     * Should we generate a feature for the current project?
      * 
      * @parameter default-value="false"
      */
     private boolean includeProject = false;
 
     /**
-     * Should we generate a <feature> for the current project's <dependency>s?
+     * Should we generate a feature for the current project's dependencies?
      * 
      * @parameter default-value="true"
      */
