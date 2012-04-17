@@ -59,7 +59,7 @@
                             <goal>generate-features-file</goal>
                         </goals>
                         <configuration>
-                            <karafVersion>2.2.6-SNAPSHOT</karafVersion>
+                            <karafVersion>${project.version}</karafVersion>
                         </configuration>
                     </execution>
                 </executions>
