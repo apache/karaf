@@ -98,7 +98,7 @@
                         <!-- Set the blueprint.graceperiod flag to false to allow the bundle to start
                              See the blueprint config file -->
                         <Bundle-SymbolicName>${project.artifactId};blueprint.graceperiod:=false</Bundle-SymbolicName>
-                        <Import-Package>!${project.artifactId}*,*</Import-Package>
+                        <Import-Package>*</Import-Package>
                         <Private-Package>
                             org.apache.karaf.deployer.features,
                             org.apache.karaf.util

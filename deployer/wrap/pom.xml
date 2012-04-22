@@ -83,7 +83,7 @@
                     <instructions>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Export-Package>${project.artifactId}*;version=${project.version}</Export-Package>
-                        <Import-Package>!${project.artifactId}*,*</Import-Package>
+                        <Import-Package>*</Import-Package>
                         <Private-Package>
                             org.apache.karaf.deployer.wrap,
                             org.apache.karaf.util

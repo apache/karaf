@@ -167,7 +167,6 @@
                         </Export-Package>
                         <Import-Package>
                             !org.apache.karaf.admin,
-                            !org.apache.karaf.jpm,
                             javax.management,
                             javax.management.loading,
                             org.apache.felix.service.command,
