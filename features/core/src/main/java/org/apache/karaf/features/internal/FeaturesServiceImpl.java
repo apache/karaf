@@ -210,11 +210,11 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         validateRepository(uri);
         RepositoryImpl repo = null;
         repo = new RepositoryImpl(uri);
+        repositories.put(uri, repo);
+        repo.load();
         if (repo.getName() == null) {
             LOGGER.warn("Feature repository doesn't have a name. The name will be mandatory in the next Karaf version.");
         }
-        repositories.put(uri, repo);
-        repo.load();
         callListeners(new RepositoryEvent(repo, RepositoryEvent.EventType.RepositoryAdded, false));
         features = null;
         return repo;
