@@ -158,6 +158,13 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
      */
     private boolean includeTransitiveDependency;
 
+    /**
+     * The standard behavior is to add dependencies as <code>&lt;bundle&gt;</code> elements to a <code>&lt;feature&gt;</code>
+     * with the same name as the artifactId of the project.  This flag disables that behavior.
+     *
+     * @parameter default-value="true"
+     */
+    private boolean addBundlesToPrimaryFeature;
 
 
     // *************************************************
@@ -326,14 +333,8 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
                     Features includedFeatures = readFeaturesFile(featuresFile);
                     //TODO check for duplicates?
                     features.getFeature().addAll(includedFeatures.getFeature());
-                } else {
-                    Dependency dependency = objectFactory.createDependency();
-                    dependency.setName(artifact.getArtifactId());
-                    //TODO convert to bundles version?
-                    dependency.setVersion(artifact.getVersion());
-                    feature.getFeature().add(dependency);
                 }
-            } else {
+            } else if (addBundlesToPrimaryFeature) {
                 String bundleName = MavenUtil.artifactToMvn(artifact);
                 File bundleFile = resolve(artifact);
                 Manifest manifest = getManifest(bundleFile);
@@ -360,7 +361,6 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
                 if (startLevel != null && bundle.getStartLevel() == 0) {
                     bundle.setStartLevel(startLevel);
                 }
-
             }
         }
 
