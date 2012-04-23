@@ -232,15 +232,6 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
     protected MavenSession session;
 
     /**
-     * Location of filtered dependency file.
-     *
-     * @parameter default=value="${basedir}/target/history/dependencies.xml"
-     * @required
-     * @readonly
-     */
-    private File filteredDependencyCache;
-
-    /**
      * @plexus.requirement role-hint="default"
      * @component
      * @required
@@ -480,6 +471,14 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
      * @parameter default-value="${basedir}/src/main/history/dependencies.xml"
      */
     private File dependencyCache;
+
+    /**
+     * Location of filtered dependency file.
+     *
+     * @parameter default=value="${basedir}/target/history/dependencies.xml"
+     * @readonly
+     */
+    private File filteredDependencyCache;
 
     /**
      * Whether to fail on changed dependencies (default, <code>true</code>) or warn (<code>false</code>). This is parameter is ignored unless
