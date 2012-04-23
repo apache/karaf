@@ -15,7 +15,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<features>
+<features name="test">
     <repository>urn:r1</repository>
     <feature name="f1">
         <config name="c1">
