@@ -124,7 +124,7 @@
                         </Export-Package>
                         <Private-Package>
                             !org.apache.felix.webconsole,
-                            org.apache.felix.webconsole.*,
+                            org.apache.felix.webconsole.*;-split-package:=merge-first,
                         </Private-Package>
                         <Import-Package>
                             org.apache.felix.scr;version=1.0;resolution:=optional,

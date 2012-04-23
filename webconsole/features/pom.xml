@@ -98,7 +98,7 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Import-Package>!${project.artifactId}*,*</Import-Package>
+                        <Import-Package>*</Import-Package>
                         <Embed-Dependency>
                             <!-- Required for JSON data transfer -->
                             <!-- TODO: this needs to be put in a common place for reuse. -->

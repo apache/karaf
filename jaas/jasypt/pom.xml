@@ -132,7 +132,6 @@
                             *
                         </Import-Package>
                         <Private-Package>
-                            org.apache.karaf.jaas.encryption.impl;-split-package:=merge-first,
                             com.ibm.icu*;-split-package:=merge-first
                         </Private-Package>
                     </instructions>
