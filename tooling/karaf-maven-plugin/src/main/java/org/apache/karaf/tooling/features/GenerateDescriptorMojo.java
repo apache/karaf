@@ -78,21 +78,28 @@ import static org.apache.karaf.deployer.kar.KarArtifactInstaller.FEATURE_CLASSIF
 public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
 
     /**
-     * The (optional) input feature.file to extend
+     * An (optional) input feature file to extend.  This is highly recommended as it is the only way to add <code>&lt;feature/&gt;</code>
+     * elements to the individual features that are generated.  Note that this file is filtered using standard Maven
+     * resource interpolation, allowing attributes of the input file to be set with information such as ${project.version}
+     * from the current build.
+     *
+     * When dependencies are processed, if they are duplicated in this file, the dependency here provides the baseline
+     * information and is supplemented by additional information from the dependency.
      *
      * @parameter default-value="${project.basedir}/src/main/feature/feature.xml"
      */
     private File inputFile;
 
     /**
-     * (wrapper) The filtered input file
+     * (wrapper) The filtered input file. This file holds the result of Maven resource interpolation and is generally
+     * not necessary to change, although it may be helpful for debugging.
      *
      * @parameter default-value="${project.build.directory}/feature/filteredInputFeature.xml"
      */
     private File filteredInputFile;
 
     /**
-     * (wrapper) The file to generate
+     * (wrapper) The file to generate.  This file is attached as a project output artifact.
      *
      * @parameter default-value="${project.build.directory}/feature/feature.xml"
      */
@@ -120,21 +127,42 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
     private String attachmentArtifactClassifier = "features";
 
     /**
-     * If false, feature dependencies are added to the assembled feature as dependencies.
-     * If true, feature dependencies xml descriptors are read and their contents added to the features descriptor under assembly.
+     * Specifies whether features dependencies of this project will be included inline of the the
+     * final output (<code>true</code>) or simply referenced as output artifact dependencies (<code>false</code>).
+     * If <code>true</code>, feature dependencies xml descriptors are read and their contents added to the features descriptor under assembly.
+     * If <code>false</code>, feature dependencies are added to the assembled feature as dependencies.
+     * Setting this value to <code>true</code> is especially helpful in multiproject builds where subprojects build their own features
+     * using <code>aggregateFeatures = false</code>, then combined with <code>aggregateFeatures = true</code> in an
+     * aggregation project with explicit dependencies to the child projects.
      *
-     * @parameter default-value="${aggregateFeatures}"
+     * @parameter default-value="false"
      */
     private boolean aggregateFeatures = false;
 
     /**
-     * If present, the bundles added to the feature constructed from the dependencies will be marked with this startlevel.
+     * If present, the bundles added to the feature constructed from the dependencies will be marked with this default
+     * startlevel.  If this parameter is not present, no startlevel attribute will be created. Finer resolution for specific
+     * dependencies can be obtained by specifying the dependency in the file referenced by the <code>inputFile</code> parameter.
      *
      * @parameter
      */
     private Integer startLevel;
 
-    //new
+    /**
+     * Flag indicating whether transitive dependencies should be included (<code>true</code>) or not (<code>false</code>).
+     *
+     * N.B. Note the default value of this is true, but is suboptimal in cases where specific <code>&lt;feature/&gt;</code> dependencies are
+     * provided by the <code>inputFile</code> parameter.
+     *
+     * @parameter default-value="true"
+     */
+    private boolean includeTransitiveDependency;
+
+
+
+    // *************************************************
+    // READ-ONLY MAVEN PLUGIN PARAMETERS
+    // *************************************************
 
     /**
      * (wrapper) The maven project.
@@ -173,14 +201,6 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
     private RepositorySystemSession repoSession;
 
     /**
-     * Flag indicating whether transitive dependencies should be included
-     * (<code>true</code>) or not (<code>false</code>).
-     *
-     * @parameter default-value="true"
-     */
-    private boolean includeTransitiveDependency;
-
-    /**
      * The project's remote repositories to use for the resolution of project dependencies.
      *
      * @parameter default-value="${project.remoteProjectRepositories}"
@@ -197,12 +217,42 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
      */
     private List<RemoteRepository> pluginRepos;
 
+    /**
+     * @component role="org.apache.maven.shared.filtering.MavenResourcesFiltering" role-hint="default"
+     * @required
+     * @readonly
+     */
+    protected MavenResourcesFiltering mavenResourcesFiltering;
+
+    /**
+     * @parameter expression="${session}"
+     * @required
+     * @readonly
+     */
+    protected MavenSession session;
+
+    /**
+     * Location of filtered dependency file.
+     *
+     * @parameter default=value="${basedir}/target/history/dependencies.xml"
+     * @required
+     * @readonly
+     */
+    private File filteredDependencyCache;
+
+    /**
+     * @plexus.requirement role-hint="default"
+     * @component
+     * @required
+     * @readonly
+     */
+    protected MavenFileFilter mavenFileFilter;
+
 
     //dependencies we are interested in
     protected Map<Artifact, String> localDependencies;
     //log of what happened during search
     protected String treeListing;
-
 
     //maven log
     private Log log;
@@ -413,49 +463,50 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
     // dependency change detection
 
     /**
-     * Whether to look for changed dependencies at all
+     * Master switch to look for and log changed dependencies.  If this is set to <code>true</code> and the file referenced by
+     * <code>dependencyCache</code> does not exist, it will be unconditionally generated.  If the file does exist, it is
+     * used to detect changes from previous builds and generate logs of those changes.  In that case,
+     * <code>failOnDependencyChange = true</code> will cause the build to fail.
      *
-     * @parameter
+     * @parameter default-value="false"
      */
     private boolean checkDependencyChange;
 
     /**
-     * Whether to fail on changed dependencies (default, false) or warn (true)
+     * (wrapper) Location of dependency cache.  This file is generated to contain known dependencies and is generally
+     * located in SCM so that it may be used across separate developer builds. This is parameter is ignored unless
+     * <code>checkDependencyChange</code> is set to <code>true</code>.
      *
-     * @parameter
+     * @parameter default-value="${basedir}/src/main/history/dependencies.xml"
      */
-    private boolean warnOnDependencyChange;
+    private File dependencyCache;
 
     /**
-     * Whether to show changed dependencies in log
+     * Whether to fail on changed dependencies (default, <code>true</code>) or warn (<code>false</code>). This is parameter is ignored unless
+     * <code>checkDependencyChange</code> is set to <code>true</code> and <code>dependencyCache</code> exists to compare
+     * against.
      *
-     * @parameter
+     * @parameter default-value="true"
+     */
+    private boolean failOnDependencyChange;
+
+    /**
+     * Copies the contents of dependency change logs that are generated to stdout. This is parameter is ignored unless
+     * <code>checkDependencyChange</code> is set to <code>true</code> and <code>dependencyCache</code> exists to compare
+     * against.
+     *
+     * @parameter default-value="false"
      */
     private boolean logDependencyChanges;
 
     /**
-     * Whether to overwrite src/main/history/dependencies.xml if it has changed
+     * Whether to overwrite the file referenced by <code>dependencyCache</code> if it has changed.  This is parameter is
+     * ignored unless <code>checkDependencyChange</code> is set to <code>true</code>, <code>failOnDependencyChange</code>
+     * is set to <code>false</code> and <code>dependencyCache</code> exists to compare against.
      *
-     * @parameter
+     * @parameter default-value="false"
      */
     private boolean overwriteChangedDependencies;
-
-    /**
-     * (wrapper) Location of existing dependency file.
-     *
-     * @parameter expression="${basedir}/src/main/history/dependencies.xml"
-     * @required
-     */
-    private File dependencyFile;
-
-    /**
-     * Location of filtered dependency file.
-     *
-     * @parameter expression="${basedir}/target/history/dependencies.xml"
-     * @required
-     * @readonly
-     */
-    private File filteredDependencyFile;
 
     //filtering support
     /**
@@ -466,34 +517,12 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
     protected String encoding;
 
     /**
-     * @component role="org.apache.maven.shared.filtering.MavenResourcesFiltering" role-hint="default"
-     * @required
-     * @readonly
-     */
-    protected MavenResourcesFiltering mavenResourcesFiltering;
-
-    /**
-     * @parameter expression="${session}"
-     * @required
-     * @readonly
-     */
-    protected MavenSession session;
-
-    /**
      * Expression preceded with the String won't be interpolated
      * \${foo} will be replaced with ${foo}
      *
      * @parameter expression="${maven.resources.escapeString}"
      */
     protected String escapeString = "\\";
-
-    /**
-     * @plexus.requirement role-hint="default"
-     * @component
-     * @required
-     * @readonly
-     */
-    protected MavenFileFilter mavenFileFilter;
 
     /**
      * System properties.
@@ -536,11 +565,11 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
                 }
             });
 
-            if (dependencyFile.exists()) {
+            if (dependencyCache.exists()) {
                 //filter dependencies file
-                filter(dependencyFile, filteredDependencyFile);
+                filter(dependencyCache, filteredDependencyCache);
                 //read dependency types, convert to dependencies, compare.
-                Features oldfeatures = readFeaturesFile(filteredDependencyFile);
+                Features oldfeatures = readFeaturesFile(filteredDependencyCache);
                 Feature oldFeature = oldfeatures.getFeature().get(0);
 
                 List<Bundle> addedBundles = new ArrayList<Bundle>(feature.getBundle());
@@ -581,14 +610,14 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
                 if (!addedBundles.isEmpty() || !removedBundles.isEmpty() || !addedDependencys.isEmpty() || !removedDependencys.isEmpty()) {
                     saveDependencyChanges(addedBundles, removedBundles, addedDependencys, removedDependencys, objectFactory);
                     if (overwriteChangedDependencies) {
-                        writeDependencies(features, dependencyFile);
+                        writeDependencies(features, dependencyCache);
                     }
                 } else {
                     getLog().info(saveTreeListing());
                 }
 
             } else {
-                writeDependencies(features, dependencyFile);
+                writeDependencies(features, dependencyCache);
             }
 
         }
@@ -596,11 +625,11 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
 
     protected void saveDependencyChanges(Collection<Bundle> addedBundles, Collection<Bundle> removedBundles, Collection<Dependency> addedDependencys, Collection<Dependency> removedDependencys, ObjectFactory objectFactory)
             throws Exception {
-        File addedFile = new File(filteredDependencyFile.getParentFile(), "dependencies.added.xml");
+        File addedFile = new File(filteredDependencyCache.getParentFile(), "dependencies.added.xml");
         Features added = toFeatures(addedBundles, addedDependencys, objectFactory);
         writeDependencies(added,  addedFile);
 
-        File removedFile = new File(filteredDependencyFile.getParentFile(), "dependencies.removed.xml");
+        File removedFile = new File(filteredDependencyCache.getParentFile(), "dependencies.removed.xml");
         Features removed = toFeatures(removedBundles, removedDependencys, objectFactory);
         writeDependencies(removed,  removedFile);
 
@@ -620,13 +649,13 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
                 JaxbUtil.marshal(removed, out);
             }
         }
-        out.write("Delete " + dependencyFile.getAbsolutePath()
+        out.write("Delete " + dependencyCache.getAbsolutePath()
                 + " if you are happy with the dependency changes.");
 
-        if (warnOnDependencyChange) {
-            getLog().warn(out.toString());
-        } else {
+        if (failOnDependencyChange) {
             throw new MojoFailureException(out.toString());
+        } else {
+            getLog().warn(out.toString());
         }
     }
 
@@ -672,7 +701,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
 
 
     protected String saveTreeListing() throws IOException {
-        File treeListFile = new File(filteredDependencyFile.getParentFile(), "treeListing.txt");
+        File treeListFile = new File(filteredDependencyCache.getParentFile(), "treeListing.txt");
         OutputStream os = new FileOutputStream(treeListFile);
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os));
         try {
