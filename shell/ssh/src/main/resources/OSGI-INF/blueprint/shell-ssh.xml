@@ -41,8 +41,8 @@
             <cm:property name="sshHost" value="0.0.0.0"/>
             <cm:property name="sshRealm" value="karaf"/>
             <cm:property name="sshRole" value="$[karaf.admin.role]"/>
-            <cm:property name="hostKey" value="${karaf.base}/etc/host.key"/>
-            <cm:property name="authorizedKeys" value="${karaf.base}/etc/authorized_keys"/>
+            <cm:property name="hostKey" value="$[karaf.base]/etc/host.key"/>
+            <cm:property name="authorizedKeys" value="$[karaf.base]/etc/authorized_keys"/>
             <cm:property name="authMethods" value="password,publickey"/>
         </cm:default-properties>
     </cm:property-placeholder>
