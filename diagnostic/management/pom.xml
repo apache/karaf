@@ -89,7 +89,9 @@
                             javax.management.loading,
                             *
                         </Import-Package>
-                        <Private-Package>org.apache.karaf.diagnostic.management.internal</Private-Package>
+                        <Private-Package>
+                            org.apache.karaf.diagnostic.management.internal;-split-package:=merge-first
+                        </Private-Package>
                         <_versionpolicy>${bnd.version.policy}</_versionpolicy>
                     </instructions>
                 </configuration>

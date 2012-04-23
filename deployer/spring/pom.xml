@@ -101,8 +101,8 @@
                         <Bundle-SymbolicName>${project.artifactId};blueprint.graceperiod:=false</Bundle-SymbolicName>
                         <Import-Package>*</Import-Package>
                         <Private-Package>
-                            org.apache.karaf.deployer.spring,
-                            org.apache.karaf.util
+                            org.apache.karaf.deployer.spring;-split-package:=merge-first,
+                            org.apache.karaf.util;-split-package:=merge-first
                         </Private-Package>
                     </instructions>
                 </configuration>

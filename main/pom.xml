@@ -109,8 +109,8 @@
                         <Import-Package>!*</Import-Package>
                         -->
                         <Private-Package>
-                            org.apache.karaf.main*,
-                            org.osgi.*
+                            org.apache.karaf.main*;-split-package:=merge-first,
+                            org.osgi.*;-split-package:=merge-first
                         </Private-Package>
                     </instructions>
                     <unpackBundle>true</unpackBundle>

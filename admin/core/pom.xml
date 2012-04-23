@@ -175,10 +175,10 @@
                             *
                         </Import-Package>
                         <Private-Package>
-                            org.apache.karaf.admin.bin,
-                            org.apache.karaf.admin.etc,
-                            org.apache.karaf.admin.internal,
-                            org.apache.karaf.jpm.impl,
+                            org.apache.karaf.admin.bin;-split-package:=merge-first,
+                            org.apache.karaf.admin.etc;-split-package:=merge-first,
+                            org.apache.karaf.admin.internal;-split-package:=merge-first,
+                            org.apache.karaf.jpm.impl;-split-package:=merge-first
                         </Private-Package>
                     </instructions>
                 </configuration>

@@ -99,7 +99,6 @@
                     <instructions>
                         <Embed-Dependency>pax-url-mvn</Embed-Dependency>
                         <Import-Package>
-                            !${project.artifactId}*,
                             org.apache.felix.service.command,
                             org.apache.felix.gogo.commands,
                             org.apache.karaf.shell.console,
@@ -107,7 +106,7 @@
                         </Import-Package>
                         <Private-Package>
                             org.apache.felix.utils.version,
-                            org.apache.karaf.util,
+                            org.apache.karaf.util;-split-package:=merge-first,
                             org.ops4j.pax.url.mvn,
                             !*
                         </Private-Package>

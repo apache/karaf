@@ -113,7 +113,7 @@
                             *
                         </Import-Package>
                         <Private-Package>
-                            org.apache.karaf.admin.main
+                            org.apache.karaf.admin.main;-split-package:=merge-first
                         </Private-Package>
                     </instructions>
                 </configuration>

@@ -85,8 +85,8 @@
                         <Export-Package>${project.artifactId}*;version=${project.version}</Export-Package>
                         <Import-Package>*</Import-Package>
                         <Private-Package>
-                            org.apache.karaf.deployer.wrap,
-                            org.apache.karaf.util
+                            org.apache.karaf.deployer.wrap;-split-package:=merge-first,
+                            org.apache.karaf.util;-split-package:=merge-first
                         </Private-Package>
                         <_versionpolicy>${bnd.version.policy}</_versionpolicy>
                     </instructions>

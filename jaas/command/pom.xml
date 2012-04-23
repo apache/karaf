@@ -122,7 +122,6 @@
                     <instructions>
                         <Export-Package>${project.artifactId}*;version=${project.version}</Export-Package>
                         <Import-Package>
-                            !${project.artifactId}*,
                             javax.management,
                             javax.management.loading,
                             org.apache.felix.service.command,

@@ -87,7 +87,9 @@
                         <Import-Package>
                             *
                         </Import-Package>
-                        <Private-Package>org.apache.karaf.features.obr.internal</Private-Package>
+                        <Private-Package>
+                            org.apache.karaf.features.obr.internal;-split-package:=merge-first
+                        </Private-Package>
                     </instructions>
                 </configuration>
             </plugin>

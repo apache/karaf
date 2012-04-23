@@ -121,9 +121,9 @@
                             *
                         </Import-Package>
                         <Private-Package>
-                            org.apache.karaf.features.internal,
-                            org.apache.felix.utils.version,
-                            org.apache.felix.utils.manifest
+                            org.apache.karaf.features.internal;-split-package:=merge-first,
+                            org.apache.felix.utils.version;-split-package:=merge-first,
+                            org.apache.felix.utils.manifest;-split-package:=merge-first
                         </Private-Package>
                     </instructions>
                 </configuration>
