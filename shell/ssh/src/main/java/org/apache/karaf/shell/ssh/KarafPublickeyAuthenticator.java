@@ -127,18 +127,18 @@ public class KarafPublickeyAuthenticator implements PublickeyAuthenticator {
                 if (af.exists()) {
                     Long newModificationDate = Long.valueOf(af.lastModified());
                     if ((this.fileAvailable != null && !this.fileAvailable.booleanValue()) || !newModificationDate.equals(this.lastModificationDate)) {
-                        LOGGER.info("Parsing authorized keys file {}...", KarafPublickeyAuthenticator.this.authorizedKeys);
+                        LOGGER.debug("Parsing authorized keys file {}...", KarafPublickeyAuthenticator.this.authorizedKeys);
                         this.fileAvailable = Boolean.TRUE;
                         this.lastModificationDate = newModificationDate;
                         Map<PublicKey, AuthorizedKey> newKeys = KarafPublickeyAuthenticator.parseAuthorizedKeys(new FileInputStream(af));
                         this.setKeys(newKeys);
-                        LOGGER.info("Successfully parsed {} keys from file {}", newKeys.size(), KarafPublickeyAuthenticator.this.authorizedKeys);
+                        LOGGER.debug("Successfully parsed {} keys from file {}", newKeys.size(), KarafPublickeyAuthenticator.this.authorizedKeys);
                     }
                 } else {
                     if (this.fileAvailable != null && this.fileAvailable.booleanValue()) {
-                        LOGGER.info("Authorized keys file {} disappeared, will recheck every minute", KarafPublickeyAuthenticator.this.authorizedKeys);
+                        LOGGER.debug("Authorized keys file {} disappeared, will recheck every minute", KarafPublickeyAuthenticator.this.authorizedKeys);
                     } else if (this.fileAvailable == null) {
-                        LOGGER.info("Authorized keys file {} does not exist, will recheck every minute", KarafPublickeyAuthenticator.this.authorizedKeys);
+                        LOGGER.debug("Authorized keys file {} does not exist, will recheck every minute", KarafPublickeyAuthenticator.this.authorizedKeys);
                     }
                     this.fileAvailable = Boolean.FALSE;
                     this.lastModificationDate = null;
