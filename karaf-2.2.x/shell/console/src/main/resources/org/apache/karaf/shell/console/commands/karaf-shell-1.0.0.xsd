@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+
+<!-- $Rev: 699828 $ $Date: 2008-09-28 16:35:27 +0200 (Sun, 28 Sep 2008) $ -->
+
+<xsd:schema xmlns="http://karaf.apache.org/xmlns/shell/v1.0.0"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:bp="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+        targetNamespace="http://karaf.apache.org/xmlns/shell/v1.0.0"
+        elementFormDefault="qualified"
+        attributeFormDefault="unqualified">
+
+    <xsd:import namespace="http://www.osgi.org/xmlns/blueprint/v1.0.0"/>
+
+    <xsd:annotation>
+        <xsd:documentation>
+            Defines the configuration elements for Apache Karaf commands support.
+        </xsd:documentation>
+    </xsd:annotation>
+
+    <xsd:element name="command-bundle">
+        <xsd:complexType>
+            <xsd:annotation>
+                <xsd:documentation>
+                    Defines a command bundle.
+                </xsd:documentation>
+            </xsd:annotation>
+            <xsd:sequence>
+                <xsd:choice minOccurs="0" maxOccurs="unbounded">
+					<xsd:element ref="command"/>
+					<xsd:element ref="alias"/>
+                    <xsd:element ref="link"/>
+				</xsd:choice>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="command">
+        <xsd:complexType>
+            <xsd:annotation>
+                <xsd:documentation>
+                    Defines a command.
+                </xsd:documentation>
+            </xsd:annotation>
+            <xsd:sequence>
+                <!--
+                NOTE: Not using an xsd:choice here, as I can't seem to figure out how to get it to properly
+                      validate the min/max of the containted elements.  W/o the xsd:choice the validation
+                      works, though have to define elements in order :-(
+                -->
+                <xsd:element ref="action" minOccurs="1" maxOccurs="1"/>
+                <xsd:element ref="documenter" minOccurs="0" maxOccurs="1"/>
+                <xsd:choice minOccurs="0" maxOccurs="1">
+                    <xsd:element ref="completer"/>
+                    <xsd:element ref="completers"/>
+                </xsd:choice>
+                <xsd:element ref="message-source" minOccurs="0" maxOccurs="1"/>
+            </xsd:sequence>
+            <xsd:attribute name="name" type="xsd:string" use="required"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="link">
+        <xsd:complexType>
+            <xsd:annotation>
+                <xsd:documentation>
+                    Defines a link command.
+                </xsd:documentation>
+            </xsd:annotation>
+            <xsd:attribute name="name" type="xsd:string" use="required"/>
+            <xsd:attribute name="target" type="xsd:string" use="required"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:group name="commandComponentElements">
+        <xsd:annotation>
+            <xsd:documentation>
+                Defines the valid elements for command components.  This is based on beans:beanElements,
+                stripping off the bits which are not valid in the command component context.
+            </xsd:documentation>
+        </xsd:annotation>
+		<xsd:sequence>
+			<xsd:choice minOccurs="0" maxOccurs="unbounded">
+                <xsd:element name="argument" type="bp:Targument"/>
+                <xsd:element name="property" type="bp:Tproperty"/>
+				<!--
+				NOTE: This seems to cause schema validation problems... not really sure why
+				<xsd:any namespace="##other" processContents="strict" minOccurs="0" maxOccurs="unbounded"/>
+				-->
+			</xsd:choice>
+		</xsd:sequence>
+	</xsd:group>
+
+    <xsd:attributeGroup name="commandComponentAttributes">
+        <xsd:annotation>
+            <xsd:documentation>
+                Defines the valid attributes for command components.  This is based on beans:beanAttributes,
+                stripping off the bits which are not valid in the command component context.
+            </xsd:documentation>
+        </xsd:annotation>
+		<xsd:attribute name="class" type="xsd:string"/>
+		<xsd:attribute name="depends-on" type="xsd:string"/>
+		<xsd:attribute name="init-method" type="xsd:string"/>
+		<xsd:attribute name="factory-method" type="xsd:string"/>
+		<xsd:attribute name="factory-bean" type="xsd:string"/>
+		<xsd:anyAttribute namespace="##other" processContents="lax"/>
+	</xsd:attributeGroup>
+
+    <xsd:complexType name="commandComponent" abstract="true">
+        <xsd:annotation>
+            <xsd:documentation>
+                Support for command component elements, which are all basically just beans.
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:group ref="commandComponentElements"/>
+        <xsd:attributeGroup ref="commandComponentAttributes"/>
+    </xsd:complexType>
+
+    <xsd:element name="action">
+        <xsd:complexType>
+            <xsd:annotation>
+                <xsd:documentation>
+                    Defines a command action.
+                </xsd:documentation>
+            </xsd:annotation>
+            <xsd:complexContent>
+                <xsd:extension base="commandComponent"/>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="documenter">
+        <xsd:complexType>
+            <xsd:annotation>
+                <xsd:documentation>
+                    Defines a command documenter.
+                </xsd:documentation>
+            </xsd:annotation>
+            <xsd:complexContent>
+                <xsd:extension base="commandComponent"/>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="completer">
+        <xsd:complexType>
+            <xsd:annotation>
+                <xsd:documentation>
+                    Defines a command completer.
+                </xsd:documentation>
+            </xsd:annotation>
+            <xsd:complexContent>
+                <xsd:extension base="commandComponent"/>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="completers">
+        <xsd:complexType>
+            <xsd:annotation>
+                <xsd:documentation>
+                    Defines a configurable command completer with a set of completers.
+                </xsd:documentation>
+            </xsd:annotation>
+            <xsd:sequence>
+                <xsd:choice minOccurs="1" maxOccurs="unbounded">
+                    <xsd:element name="bean" type="bp:Tbean"/>
+                    <xsd:element name="ref" type="bp:Tref"/>
+                    <xsd:element name="null" type="bp:Tnull"/>
+                </xsd:choice>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="message-source">
+        <xsd:complexType>
+            <xsd:annotation>
+                <xsd:documentation>
+                    Defines a command message source.
+                </xsd:documentation>
+            </xsd:annotation>
+            <xsd:complexContent>
+                <xsd:extension base="commandComponent"/>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="alias">
+        <xsd:complexType>
+            <xsd:annotation>
+                <xsd:documentation>
+                    Defines a command alias.
+                </xsd:documentation>
+            </xsd:annotation>
+            <xsd:attribute name="name" type="xsd:string" use="required"/>
+            <xsd:attribute name="alias" type="xsd:string" use="required"/>
+        </xsd:complexType>
+    </xsd:element>
+
+</xsd:schema>
