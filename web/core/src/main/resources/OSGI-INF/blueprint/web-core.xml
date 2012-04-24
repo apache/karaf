@@ -42,9 +42,10 @@
         <property name="webContainerService" ref="webContainerService"/>
     </bean>
 
-    <service ref="webMBean" interface="org.apache.karaf.web.management.WebMBean">
+    <service ref="webMBean" auto-export="interfaces">
         <service-properties>
             <entry key="jmx.objectname" value="org.apache.karaf:type=web,name=${karaf.name}"/>
         </service-properties>
     </service>
+
 </blueprint>
