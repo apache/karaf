@@ -85,7 +85,6 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Export-Package>${project.artifactId}*;version=${project.version}</Export-Package>
                         <Import-Package>
-                            !${project.artifactId}*,
                             org.apache.felix.service.command;version=${felix.gogo.version};status=provisional;mandatory:=status,
                             org.apache.aries.blueprint,
                             org.osgi.service.blueprint.container,
