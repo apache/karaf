@@ -94,8 +94,8 @@
                         <Export-Package>!*</Export-Package>
                         <Private-Package>
                             org.apache.karaf.bundle.command*,
-                            org.apache.felix.utils.version,
-                            org.apache.felix.utils.manifest,
+                            org.apache.felix.utils.version;-split-package:=merge-first,
+                            org.apache.felix.utils.manifest;-split-package:=merge-first,
                             !*
                         </Private-Package>
                     </instructions>
