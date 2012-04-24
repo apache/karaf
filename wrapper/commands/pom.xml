@@ -75,7 +75,6 @@
                 <configuration>
                     <instructions>
                         <Import-Package>
-                            !org.apache.karaf.wrapper.internal,
                             org.apache.karaf.wrapper,
                             javax.management,
                             javax.management.loading,
