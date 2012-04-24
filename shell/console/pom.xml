@@ -136,13 +136,6 @@
                 <configuration>
                     <instructions>
                         <Import-Package>
-                            !org.apache.karaf.shell.console*,
-                            !org.apache.karaf.util*,
-                            !org.apache.felix.gogo.commands*,
-                            !org.fusesource.jansi*,
-                            !javax.swing,
-                            !jline,
-                            com.sun.jna*;resolution:=optional,
                             org.osgi.service.event;resolution:=optional,
                             org.apache.aries.blueprint, org.osgi.service.blueprint.container, org.osgi.service.blueprint.reflect,
                             org.apache.karaf.branding;resolution:=optional,
