@@ -15,6 +15,45 @@
  * limitations under the License.
  */
 
+                    Apache Karaf 2.2.7
+                    ==================
+
+  Overview
+  --------
+
+  This release of Apache Karaf is considered a high priority update for users of Apache
+ Karaf 2.2.6. An issue in which configuration updates were not being persisted to storage
+ was detected, an update to FileInstall version 3.2.2 was made necessary.
+  In addition to the above other bug fixes have been resolved, including; updating the 
+ features repo pointer for pax-wicket, removing an unnecessary warning on missing repository
+ name when the name is defined however not presently loaded, the SSHD authorized key provider
+ now logs in DEBUG, and SSH now correctly uses the karaf.base variable. A version update
+ to pax web 1.0.9 has also been included in the dependencies.
+  For more detail please see the change log below.
+
+  Changelog
+  ---------
+
+** Bug
+    * [KARAF-1343] - Features repo points to the old pax-wicket app
+    * [KARAF-1360] - Configration update doesn't work
+    * [KARAF-1367] - Remove line number logging from default logging config
+    * [KARAF-1373] - features-maven-plugin, unexpected text in stderr
+    * [KARAF-1374] - Fileinstaller logging by default is not enabled.
+    * [KARAF-1376] - Demo deployer is not sync with Karaf version
+    * [KARAF-1387] - Warning to missing a feature repository name even when the name is defined
+    * [KARAF-1388] - SSHD authorized key provider should log in DEBUG
+    * [KARAF-1389] - SSH doesn't correctly use the karaf.base variable
+
+** Dependency upgrade
+    * [KARAF-1366] - Upgrade to Pax Web 1.0.9
+    * [KARAF-1378] - Upgrade to fileinstall 3.2.2
+
+** Improvement
+    * [KARAF-1328] - jclouds feature repo url has been changed after version 1.0
+    * [KARAF-1368] - Make it easy to enable Karaf PropertiesLoginModule via an optional feature
+
+
                     Apache Karaf 2.2.6
                     ==================
 
@@ -34,8 +73,8 @@
  to version 10, the maven bundle plugin to 2.3.7, and fileinstall to 3.2.0.
   For more detail please see the change log below.
 
-  Changlog
-  --------
+  Changelog
+  ---------
 
 ** Bug
     * [KARAF-610] - Can't input the path string completely via karaf shell
