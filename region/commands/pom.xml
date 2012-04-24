@@ -92,7 +92,6 @@
                 <configuration>
                     <instructions>
                         <Import-Package>
-                            !${project.artifactId}*,
                             *
                         </Import-Package>
                         <Private-Package>!*</Private-Package>
