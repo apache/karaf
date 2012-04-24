@@ -30,7 +30,7 @@
 
     <groupId>org.apache.karaf.features</groupId>
     <artifactId>standard</artifactId>
-    <packaging>pom</packaging>
+    <packaging>feature</packaging>
     <name>Apache Karaf :: Assemblies :: Features :: Standard</name>
     <description>Standard providing core Karaf features</description>
 
@@ -632,6 +632,7 @@
             <plugin>
                 <groupId>org.apache.karaf.tooling</groupId>
                 <artifactId>karaf-maven-plugin</artifactId>
+                <extensions>true</extensions>
                 <configuration>
                     <startLevel>30</startLevel>
                 </configuration>

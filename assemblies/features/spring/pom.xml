@@ -30,7 +30,7 @@
 
     <groupId>org.apache.karaf.features</groupId>
     <artifactId>spring</artifactId>
-    <packaging>pom</packaging>
+    <packaging>feature</packaging>
     <name>Apache Karaf :: Assemblies :: Features :: Spring</name>
     <description>Spring Support</description>
 
@@ -39,6 +39,301 @@
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>standard</artifactId>
+            <version>${project.version}</version>
+            <classifier>features</classifier>
+            <type>xml</type>
+            <scope>provided</scope>
+        </dependency>
+        <!-- spring deps -->
+        <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.aopalliance</artifactId>
+            <version>${aopalliance.bundle.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+            <version>${spring.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-asm</artifactId>
+            <version>${spring.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-expression</artifactId>
+            <version>${spring.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-beans</artifactId>
+            <version>${spring.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-aop</artifactId>
+            <version>${spring.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>${spring.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context-support</artifactId>
+            <version>${spring.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.deployer</groupId>
+            <artifactId>org.apache.karaf.deployer.spring</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- spring-aspects deps -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-aspects</artifactId>
+            <version>${spring.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- spring-dm deps -->
+        <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.cglib</artifactId>
+            <version>${cglib.bundle.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.osgi</groupId>
+            <artifactId>spring-osgi-io</artifactId>
+            <version>${spring.osgi.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.osgi</groupId>
+            <artifactId>spring-osgi-core</artifactId>
+            <version>${spring.osgi.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.osgi</groupId>
+            <artifactId>spring-osgi-extender</artifactId>
+            <version>${spring.osgi.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.osgi</groupId>
+            <artifactId>spring-osgi-annotation</artifactId>
+            <version>${spring.osgi.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.deployer</groupId>
+            <artifactId>org.apache.karaf.deployer.spring</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.bundle</groupId>
+            <artifactId>org.apache.karaf.bundle.springstate</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- spring-dm-web deps -->
+        <dependency>
+            <groupId>org.springframework.osgi</groupId>
+            <artifactId>spring-osgi-web</artifactId>
+            <version>${spring.osgi.version}</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>org.springframework.core</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- spring-instrument deps -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-instrument</artifactId>
+            <version>${spring.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- spring-jdbc deps -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jdbc</artifactId>
+            <version>${spring.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- spring-jms deps -->
+        <dependency>
+            <groupId>org.apache.geronimo.specs</groupId>
+            <artifactId>geronimo-jta_1.1_spec</artifactId>
+            <version>${geronimo.jta-spec.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.geronimo.specs</groupId>
+            <artifactId>geronimo-jms_1.1_spec</artifactId>
+            <version>${geronimo.jms-spec.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jms</artifactId>
+            <version>${spring.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
+            <version>${spring.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- spring-struts deps -->
+        <dependency>
+            <groupId>commons-beanutils</groupId>
+            <artifactId>commons-beanutils</artifactId>
+            <version>${commons-beanutils.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-struts</artifactId>
+            <version>${spring.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- spring-test deps -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <version>${spring.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- spring-orm deps -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-orm</artifactId>
+            <version>${spring.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- spring-oxm deps -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-oxm</artifactId>
+            <version>${spring.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- spring-tx deps -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
+            <version>${spring.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- spring-web deps -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+            <version>${spring.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+            <version>${spring.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- spring-web-portlet deps -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc-portlet</artifactId>
+            <version>${spring.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- gemini-blueprint deps -->
+        <dependency>
+            <groupId>org.eclipse.gemini.blueprint</groupId>
+            <artifactId>gemini-blueprint-io</artifactId>
+            <version>${gemini.blueprint.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.gemini.blueprint</groupId>
+            <artifactId>gemini-blueprint-core</artifactId>
+            <version>${gemini.blueprint.version}</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>org.springframework.core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>org.springframework.aop</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>org.springframework.beans</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>org.springframework.context</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.gemini.blueprint</groupId>
+            <artifactId>gemini-blueprint-extender</artifactId>
+            <version>${gemini.blueprint.version}</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>org.springframework.core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>org.springframework.aop</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>org.springframework.beans</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>org.springframework.context</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
     </dependencies>
 
     <build>
@@ -46,6 +341,7 @@
             <plugin>
                 <groupId>org.apache.karaf.tooling</groupId>
                 <artifactId>karaf-maven-plugin</artifactId>
+                <extensions>true</extensions>
                 <configuration>
                     <startLevel>30</startLevel>
                 </configuration>
