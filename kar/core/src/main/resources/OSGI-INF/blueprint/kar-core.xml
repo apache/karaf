@@ -36,7 +36,7 @@
         <property name="karService" ref="karService"/>
     </bean>
     
-    <service ref="mbeanImpl" interface="org.apache.karaf.kar.KarsMBean">
+    <service ref="mbeanImpl" auto-export="interfaces">
         <service-properties>
             <entry key="jmx.objectname" value="org.apache.karaf:type=kar,name=$[karaf.name]"/>
         </service-properties>
