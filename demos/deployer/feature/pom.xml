@@ -24,13 +24,13 @@
     <parent>
         <groupId>org.apache.karaf.demos</groupId>
         <artifactId>org.apache.karaf.demos.deployer</artifactId>
-        <version>2.2.7-SNAPSHOT</version>
+        <version>2.2.7</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <groupId>org.apache.karaf.demos.deployer.feature</groupId>
     <artifactId>my-feature</artifactId>
-    <version>2.2.7-SNAPSHOT</version>
+    <version>2.2.7</version>
     <packaging>pom</packaging>
     
     <name>Apache Karaf :: Demos :: Deployer :: Feature</name>
@@ -51,7 +51,7 @@
             <plugin>
                 <groupId>org.apache.karaf.tooling</groupId>
                 <artifactId>features-maven-plugin</artifactId>
-                <version>2.2.7-SNAPSHOT</version>
+                <version>2.2.7</version>
                 <executions>
                     <execution>
                         <id>generate-features-file</id>
