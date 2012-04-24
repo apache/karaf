@@ -102,11 +102,11 @@
                         <Export-Package>
                         </Export-Package>
                         <Import-Package>
-                            !org.apache.karaf.bundle.springstate,
                             org.apache.felix.service.command;status=provisional,
-                             *</Import-Package>
+                             *
+                        </Import-Package>
                         <Private-Package>
-                            org.apache.karaf.bundle.springstateservice
+                            org.apache.karaf.bundle.springstate
                         </Private-Package>
                     </instructions>
                 </configuration>
