@@ -104,7 +104,6 @@
                 <configuration>
                     <instructions>
                         <Import-Package>
-                            !${project.artifactId}*,
                             jline;version="[${jline.version}, ${jline.version}]",
                             org.apache.aries.blueprint,
                             org.osgi.service.blueprint.container,

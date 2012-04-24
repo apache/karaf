@@ -104,7 +104,6 @@
                 <configuration>
                     <instructions>
                         <Import-Package>
-                            !${project.artifactId}*,
                             org.apache.aries.blueprint,
                             org.osgi.service.blueprint.container,
                             org.osgi.service.blueprint.reflect,
