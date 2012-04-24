@@ -58,7 +58,6 @@
                     <instructions>
                         <Bundle-Activator>org.apache.karaf.scheduler.core.Activator</Bundle-Activator>
                         <Import-Package>
-                            !${project.artifactId}*,
                             *
                         </Import-Package>
                     </instructions>
