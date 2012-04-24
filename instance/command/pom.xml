@@ -103,9 +103,9 @@
                 <configuration>
                     <instructions>
                         <Private-Package>
-                            org.apache.karaf.instance.main
+                            org.apache.karaf.instance.main,
                             org.apache.karaf.instance.command,
-                            org.apache.karaf.instance.command.completers,
+                            org.apache.karaf.instance.command.completers
                         </Private-Package>
                     </instructions>
                 </configuration>
