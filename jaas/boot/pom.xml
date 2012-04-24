@@ -67,11 +67,12 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Import-Package>!${project.artifactId}*,*</Import-Package>
+                        <Import-Package>*</Import-Package>
                         <Private-Package>!*</Private-Package>
                     </instructions>
                 </configuration>
             </plugin>
         </plugins>
     </build>
+
 </project>

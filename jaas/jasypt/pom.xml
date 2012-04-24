@@ -153,13 +153,12 @@
                 <configuration>
                     <instructions>
                         <Import-Package>
-                            !${project.artifactId}*,
                             org.apache.aries.blueprint,
                             org.osgi.service.blueprint.container,
                             org.osgi.service.blueprint.reflect,
                             *
                         </Import-Package>
-                        <Private-Package>org.apache.karaf.jaas.encryption.impl</Private-Package>
+                        <Private-Package>org.apache.karaf.jaas.jasypt.impl</Private-Package>
                     </instructions>
                 </configuration>
             </plugin>
