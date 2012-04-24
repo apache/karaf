@@ -88,10 +88,9 @@
                         </Export-Package>
                         <Private-Package>
                             org.apache.karaf.dev.core.internal,
-                            org.apache.felix.utils.properties
                             org.apache.felix.utils.manifest,
                             org.apache.felix.utils.version,
-                            org.apache.felix.utils.properties,
+                            org.apache.felix.utils.properties
                         </Private-Package>
                     </instructions>
                 </configuration>
