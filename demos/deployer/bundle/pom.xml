@@ -24,13 +24,13 @@
     <parent>
         <groupId>org.apache.karaf.demos</groupId>
         <artifactId>org.apache.karaf.demos.deployer</artifactId>
-        <version>2.2.8-SNAPSHOT</version>
+        <version>2.2.7</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <groupId>org.apache.karaf.demos.deployer.bundle</groupId>
     <artifactId>my-bundle</artifactId>
-    <version>2.2.8-SNAPSHOT</version>
+    <version>2.2.7</version>
     <packaging>bundle</packaging>
 
     <name>Apache Karaf :: Demos :: Deployer :: Bundle</name>
