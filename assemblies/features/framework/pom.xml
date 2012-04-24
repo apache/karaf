@@ -333,7 +333,7 @@
                     <startLevel>30</startLevel>
                     <!--<checkDependencyChange>true</checkDependencyChange>-->
                     <!--<overwriteChangedDependencies>true</overwriteChangedDependencies>-->
-                    <!--<warnOnDependencyChange>true</warnOnDependencyChange>-->
+                    <!--<failOnDependencyChange>false</failOnDependencyChange>-->
                 </configuration>
                 <executions>
                     <execution>

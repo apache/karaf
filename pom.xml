@@ -67,6 +67,7 @@
         <module>itests</module>
         <module>archetypes</module>
         <module>manual</module>
+        <module>obr</module>
     </modules>
 
     <scm>
