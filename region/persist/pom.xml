@@ -108,11 +108,13 @@
                 <configuration>
                     <instructions>
                         <Bundle-Activator>org.apache.karaf.region.persist.internal.Activator</Bundle-Activator>
+                        <Export-Package>org.apache.karaf.region.persist;version=${project.version};-split-package:=merge-first</Export-Package>
                     </instructions>
                 </configuration>
             </plugin>
         </plugins>
     </build>
+
     <profiles>
         <profile>
             <id>jaxb</id>
