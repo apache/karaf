@@ -24,9 +24,10 @@
         <argument ref="scrService" />
     </bean>
 
-    <service ref="scrsMBean" interface="org.apache.karaf.scr.management.ScrsMBean">
+    <service ref="scrsMBean" auto-export="interfaces">
         <service-properties>
             <entry key="jmx.objectname" value="org.apache.karaf:type=scr,name=${karaf.name}"/>
         </service-properties>
     </service>
+
 </blueprint>
