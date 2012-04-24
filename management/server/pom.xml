@@ -94,6 +94,7 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
+                        <Export-Package>org.apache.karaf.management;version=${project.version};-split-package:=merge-first</Export-Package>
                         <Private-Package>
                             org.apache.karaf.management
                         </Private-Package>
