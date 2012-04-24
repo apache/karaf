@@ -31,7 +31,7 @@
         <property name="wrapperService" ref="wrapperService" />
     </bean>
 
-    <service ref="wrapperMBean" interface="org.apache.karaf.wrapper.management.WrapperMBean">
+    <service ref="wrapperMBean" auto-export="interfaces">
         <service-properties>
             <entry key="jmx.objectname" value="org.apache.karaf:type=wrapper,name=${karaf.name}"/>
         </service-properties>
