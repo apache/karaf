@@ -31,7 +31,7 @@
         <argument ref="packageService" />
     </bean>
 
-    <service interface="org.apache.karaf.packages.core.PackagesMBean" ref="packageMBean">
+    <service ref="packageMBean" auto-export="interfaces">
         <service-properties>
             <entry key="jmx.objectname" value="org.apache.karaf:type=package,name=${karaf.name}"/>
         </service-properties>
