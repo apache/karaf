@@ -61,6 +61,7 @@
         <module>scheduler</module>
         <module>scr</module>
         <module>diagnostic</module>
+        <module>obr</module>
         <module>tooling</module>
         <module>assemblies</module>
         <!--module>demos</module-->
