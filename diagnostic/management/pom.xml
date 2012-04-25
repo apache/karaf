@@ -85,7 +85,6 @@
                             ${project.artifactId}*;version=${project.version}
                         </Export-Package>
                         <Import-Package>
-                            !${project.artifactId}*,
                             javax.management,
                             javax.management.loading,
                             *

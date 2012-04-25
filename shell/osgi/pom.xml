@@ -97,7 +97,6 @@
                 <configuration>
                     <instructions>
                         <Import-Package>
-                            !${project.artifactId}*,
                             org.apache.felix.service.command,
                             org.apache.felix.gogo.commands,
                             org.apache.karaf.shell.console,
@@ -108,7 +107,7 @@
                             org.springframework.*
                         </DynamicImport-Package>
                         <Private-Package>
-                            org.apache.karaf.util,
+                            org.apache.karaf.util;-split-package:=merge-first,
                             org.apache.felix.utils.version,
                             org.apache.felix.utils.manifest,
                             !*

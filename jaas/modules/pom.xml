@@ -106,7 +106,6 @@
                 <configuration>
                     <instructions>
                         <Import-Package>
-                            !${project.artifactId}*,
                             org.apache.karaf.jaas.config,
                             org.apache.aries.blueprint.ext,
                             *

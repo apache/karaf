@@ -97,7 +97,6 @@
                             org.apache.karaf.management;version=${project.version}
                         </Export-Package>
                         <Import-Package>
-                            !${project.artifactId}*,
                             javax.management,
                             *
                         </Import-Package>
