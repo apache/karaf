@@ -509,7 +509,7 @@
 
             <dependency>
                 <groupId>org.apache.karaf.system</groupId>
-                <artifactId>org.apache.karaf.system.commands</artifactId>
+                <artifactId>org.apache.karaf.system.command</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -520,7 +520,7 @@
 
             <dependency>
                 <groupId>org.apache.karaf.web</groupId>
-                <artifactId>org.apache.karaf.web.commands</artifactId>
+                <artifactId>org.apache.karaf.web.command</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -531,7 +531,7 @@
 
             <dependency>
                 <groupId>org.apache.karaf.wrapper</groupId>
-                <artifactId>org.apache.karaf.wrapper.commands</artifactId>
+                <artifactId>org.apache.karaf.wrapper.command</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -547,7 +547,7 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.karaf.region</groupId>
-                <artifactId>org.apache.karaf.region.commands</artifactId>
+                <artifactId>org.apache.karaf.region.command</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

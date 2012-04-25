@@ -35,7 +35,7 @@
 
     <modules>
         <module>core</module>
-        <module>commands</module>
+        <module>command</module>
     </modules>
 
 </project>

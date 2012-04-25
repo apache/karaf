@@ -157,7 +157,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.karaf.system</groupId>
-            <artifactId>org.apache.karaf.system.commands</artifactId>
+            <artifactId>org.apache.karaf.system.command</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.karaf.shell</groupId>

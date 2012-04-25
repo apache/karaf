@@ -34,22 +34,11 @@
 
     <modules>
         <module>core</module>
-        <module>commands</module>
+        <module>command</module>
         <module>persist</module>
     </modules>
 
     <profiles>
-        <profile>
-            <id>default</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <modules>
-                <module>commands</module>
-                <module>persist</module>
-            </modules>
-
-        </profile>
 
         <profile>
             <id>fetch-external</id>
