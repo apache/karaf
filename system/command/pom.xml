@@ -28,7 +28,7 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>org.apache.karaf.system.commands</artifactId>
+    <artifactId>org.apache.karaf.system.command</artifactId>
     <packaging>bundle</packaging>
     <name>Apache Karaf :: System :: Shell Commands</name>
     <description>

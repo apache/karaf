@@ -10,7 +10,7 @@
         (the "License"); you may not use this file except in compliance with
         the License.  You may obtain a copy of the License at
 
-           http://www.apache.org/licenses/LICENSE-2.0
+            http://www.apache.org/licenses/LICENSE-2.0
 
         Unless required by applicable law or agreed to in writing, software
         distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,17 +22,17 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.karaf.web</groupId>
-        <artifactId>web</artifactId>
+        <groupId>org.apache.karaf.wrapper</groupId>
+        <artifactId>wrapper</artifactId>
         <version>3.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>org.apache.karaf.web.commands</artifactId>
+    <artifactId>org.apache.karaf.wrapper.command</artifactId>
     <packaging>bundle</packaging>
-    <name>Apache Karaf :: Web :: Commands</name>
+    <name>Apache Karaf :: Wrapper :: Shell Commands</name>
     <description>
-        This bundle provides Karaf shell commands to manipulate the WebContainer service.
+        This bundle provides Karaf shell commands to manipulate the OS service wrapper.
     </description>
 
     <properties>
@@ -41,28 +41,13 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.apache.karaf.web</groupId>
-            <artifactId>org.apache.karaf.web.core</artifactId>
+            <groupId>org.apache.karaf.wrapper</groupId>
+            <artifactId>org.apache.karaf.wrapper.core</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.karaf.shell</groupId>
             <artifactId>org.apache.karaf.shell.console</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf</groupId>
-            <artifactId>org.apache.karaf.main</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.compendium</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf</groupId>
-            <artifactId>org.apache.karaf.util</artifactId>
             <scope>provided</scope>
         </dependency>
     </dependencies>
@@ -89,12 +74,18 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Export-Package>
-                            !org.apache.karaf.web.commands
-                        </Export-Package>
-                        <Private-Package>
-                            org.apache.karaf.web.commands
-                        </Private-Package>
+                        <Import-Package>
+                            org.apache.karaf.wrapper,
+                            javax.management,
+                            javax.management.loading,
+                            org.apache.aries.blueprint,
+                            org.osgi.service.blueprint.container,
+                            org.osgi.service.blueprint.reflect,
+                            org.apache.felix.service.command,
+                            org.apache.karaf.shell.commands,
+                            org.apache.karaf.shell.console,
+                            *
+                        </Import-Package>
                     </instructions>
                 </configuration>
             </plugin>

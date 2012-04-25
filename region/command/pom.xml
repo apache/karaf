@@ -10,7 +10,7 @@
         (the "License"); you may not use this file except in compliance with
         the License.  You may obtain a copy of the License at
 
-            http://www.apache.org/licenses/LICENSE-2.0
+           http://www.apache.org/licenses/LICENSE-2.0
 
         Unless required by applicable law or agreed to in writing, software
         distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,18 +22,15 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.karaf.wrapper</groupId>
-        <artifactId>wrapper</artifactId>
+        <groupId>org.apache.karaf.region</groupId>
+        <artifactId>region</artifactId>
         <version>3.0.0-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>org.apache.karaf.wrapper.commands</artifactId>
+    <artifactId>org.apache.karaf.region.command</artifactId>
     <packaging>bundle</packaging>
-    <name>Apache Karaf :: Wrapper :: Shell Commands</name>
-    <description>
-        This bundle provides Karaf shell commands to manipulate the OS service wrapper.
-    </description>
+    <name>Apache Karaf :: Region :: Shell Commands</name>
+    <description>This bundle provides Karaf shell commands to manipulate the Region service.</description>
 
     <properties>
         <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
@@ -41,14 +38,34 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.apache.karaf.wrapper</groupId>
-            <artifactId>org.apache.karaf.wrapper.core</artifactId>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.apache.karaf.main</artifactId>
             <scope>provided</scope>
         </dependency>
+
         <dependency>
             <groupId>org.apache.karaf.shell</groupId>
             <artifactId>org.apache.karaf.shell.console</artifactId>
-            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.aries</groupId>
+            <artifactId>org.apache.aries.util</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.equinox</groupId>
+            <artifactId>region</artifactId>
+            <version>1.0.0.v20110506</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.easymock</groupId>
+            <artifactId>easymock</artifactId>
+            <scope>test</scope>
+        </dependency>
+		<dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-jdk14</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -75,17 +92,9 @@
                 <configuration>
                     <instructions>
                         <Import-Package>
-                            org.apache.karaf.wrapper,
-                            javax.management,
-                            javax.management.loading,
-                            org.apache.aries.blueprint,
-                            org.osgi.service.blueprint.container,
-                            org.osgi.service.blueprint.reflect,
-                            org.apache.felix.service.command,
-                            org.apache.karaf.shell.commands,
-                            org.apache.karaf.shell.console,
                             *
                         </Import-Package>
+                        <Private-Package>!*</Private-Package>
                     </instructions>
                 </configuration>
             </plugin>
