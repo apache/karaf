@@ -115,7 +115,6 @@
                 <configuration>
                     <instructions>
                         <Import-Package>
-                            !${project.artifactId}*,
                             javax.management,
                             javax.management.loading,
                             org.apache.felix.service.command,

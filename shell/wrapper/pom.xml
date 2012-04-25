@@ -98,7 +98,6 @@
                 <configuration>
                     <instructions>
                         <Import-Package>
-                            !${project.artifactId}*,
                             !org.apache.karaf.main,
                             !org.tanukisoftware.wrapper,
                             org.apache.felix.service.command,
@@ -107,7 +106,7 @@
                             *
                         </Import-Package>
                         <Private-Package>
-                            org.apache.karaf.util.process
+                            org.apache.karaf.util.process;-split-package:=merge-first
                         </Private-Package>
                     </instructions>
                 </configuration>

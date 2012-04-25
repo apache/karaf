@@ -90,7 +90,6 @@
                 <configuration>
                     <instructions>
                         <Import-Package>
-                            !${project.artifactId}*,
                             org.apache.felix.service.command,
                             org.apache.felix.gogo.commands,
                             org.apache.karaf.shell.console,
@@ -98,7 +97,6 @@
                             org.apache.sshd.server.jaas,
                             *
                         </Import-Package>
-                        <Private-Package>org.apache.karaf.jpm.*</Private-Package>
                     </instructions>
                 </configuration>
             </plugin>

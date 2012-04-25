@@ -64,12 +64,8 @@
                         	${project.artifactId}.common;version=${project.version};-noimport:=true,
                        	</Export-Package>
                         <Import-Package>
-                            !${project.artifactId}*,
                             *
                         </Import-Package>
-                        <Private-Package>
-                            org.apache.karaf.diagnostic.internal
-                        </Private-Package>
                     </instructions>
                 </configuration>
             </plugin>

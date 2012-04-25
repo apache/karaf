@@ -98,7 +98,7 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Import-Package>!${project.artifactId}*,
+                        <Import-Package>
                             jline;version="[${jline.version}, ${jline.version}]",
                             *
                         </Import-Package>

@@ -129,11 +129,10 @@
                 <configuration>
                     <instructions>
                         <Import-Package>
-                            !${project.artifactId}*,
                             *
                         </Import-Package>
                         <Private-Package>
-                            org.apache.karaf.jaas.encryption.impl,
+                            org.apache.karaf.jaas.jasypt.impl,
                             com.ibm.icu*
                         </Private-Package>
                     </instructions>

@@ -87,7 +87,6 @@
                             org.apache.karaf.management.mbeans.config*;version=${project.version}
                         </Export-Package>
                         <Import-Package>
-                            !org.apache.karaf.management.mbeans.config*,
                             javax.management,
                             javax.management.loading,
                             org.apache.karaf.management;version=${project.version},
@@ -95,7 +94,7 @@
                         </Import-Package>
                         <Private-Package>
                             org.apache.karaf.management.mbeans.config.internal,
-                            org.apache.felix.utils.properties,
+                            org.apache.felix.utils.properties;-split-package:=merge-first,
                             !*
                         </Private-Package>
                     </instructions>
