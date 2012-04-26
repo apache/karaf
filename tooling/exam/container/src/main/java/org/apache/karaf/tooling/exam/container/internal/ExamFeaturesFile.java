@@ -36,7 +36,7 @@ public class ExamFeaturesFile {
     public ExamFeaturesFile(String featuresXml) {
         this(featuresXml, Constants.DEFAULT_START_LEVEL);
     }
-    
+
     public ExamFeaturesFile(String extension, int startLevel) {
         featuresXml =
             "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
@@ -46,6 +46,7 @@ public class ExamFeaturesFile {
                     + "<feature name=\"exam\" version=\""
                     + Info.getPaxExamVersion()
                     + "\">\n"
+                    + extension + "\n"
                     + "<bundle start-level='"+startLevel+"'>mvn:org.ops4j.pax.exam/pax-exam-extender-service/"
                     + Info.getPaxExamVersion()
                     + "</bundle>\n"
@@ -61,7 +62,6 @@ public class ExamFeaturesFile {
                     + "<bundle start-level='"+startLevel+"'>mvn:org.apache.geronimo.specs/geronimo-atinject_1.0_spec/" + getInjectionVersion()
                     + "</bundle>\n"
                     + "<bundle start-level='"+startLevel+"'>mvn:org.ops4j.pax.exam/pax-exam-inject/" + Info.getPaxExamVersion() + "</bundle>\n"
-                    + extension + "\n"
                     + "</feature>\n"
                     + "</features>";
     }
