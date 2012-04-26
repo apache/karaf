@@ -93,13 +93,13 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 public class KarafTestContainer implements TestContainer {
-    
+
     private static final Logger LOGGER = LoggerFactory.getLogger(KarafTestContainer.class);
 
     private static final String KARAF_TEST_CONTAINER = "KarafTestContainer.start";
     private static final String EXAM_INVOKER_PROPERTY = "pax.exam.invoker";
     private static final String EXAM_INJECT_PROPERTY = "pax.exam.inject";
-    
+
     private final Runner runner;
     private final RMIRegistry registry;
     private final ExamSystem system;
@@ -184,12 +184,12 @@ public class KarafTestContainer implements TestContainer {
             setupExamProperties(karafHome, subsystem);
             makeScriptsInBinExec(karafBin);
 
-             int startLevel = Constants.DEFAULT_START_LEVEL;
-             ExamBundlesStartLevel examBundlesStartLevel = system.getSingleOption(ExamBundlesStartLevel.class);
-             if (examBundlesStartLevel != null) {
-                 startLevel = examBundlesStartLevel.getStartLevel();
-             }
-            
+            int startLevel = Constants.DEFAULT_START_LEVEL;
+            ExamBundlesStartLevel examBundlesStartLevel = system.getSingleOption(ExamBundlesStartLevel.class);
+            if (examBundlesStartLevel != null) {
+                startLevel = examBundlesStartLevel.getStartLevel();
+            }
+
             ExamFeaturesFile examFeaturesFile;
             if (framework.isUseDeployFolder()) {
                 copyReferencedArtifactsToDeployFolder(deploy, subsystem, fileEndings);
