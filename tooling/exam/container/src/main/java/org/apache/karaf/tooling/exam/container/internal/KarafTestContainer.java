@@ -351,39 +351,53 @@ public class KarafTestContainer implements TestContainer {
         options.addAll(extractFileOptionsBasedOnFeaturesScannerOptions(subsystem));
         options.addAll(configureBootDelegation(subsystem));
         options.addAll(configureSystemBundles(subsystem));
-        HashMap<String, HashMap<String, KarafDistributionConfigurationFileOption>> optionMap = Maps.newHashMap();
+        HashMap<String, HashMap<String, List<KarafDistributionConfigurationFileOption>>> optionMap = Maps.newHashMap();
         for (KarafDistributionConfigurationFileOption option : options) {
             if (!optionMap.containsKey(option.getConfigurationFilePath())) {
                 optionMap.put(option.getConfigurationFilePath(),
-                    new HashMap<String, KarafDistributionConfigurationFileOption>());
+                    new HashMap<String, List<KarafDistributionConfigurationFileOption>>());
             }
-            HashMap<String, KarafDistributionConfigurationFileOption> optionEntries =
+            HashMap<String, List<KarafDistributionConfigurationFileOption>> optionEntries =
                 optionMap.get(option.getConfigurationFilePath());
-            if (optionEntries.containsKey(option.getKey())) {
-                LOGGER.warn("Key: {} occurs twice; value {} overwritten", option.getKey(),
-                    optionEntries.get(option.getKey()).getValue());
+            if (!optionEntries.containsKey(option.getKey())) {
+                optionEntries.put(option.getKey(), new ArrayList<KarafDistributionConfigurationFileOption>());
+            } else {
+                // if special file warn, replace and continue
+                if (!option.getConfigurationFilePath().equals(FeaturesCfg.FILE_PATH)) {
+                    LOGGER.warn("you're trying to add an additional value to a config file; you're current " +
+                            "value will be replaced.");
+                    optionEntries.put(option.getKey(), new ArrayList<KarafDistributionConfigurationFileOption>());
+                }
             }
-            optionEntries.put(option.getKey(), option);
+            optionEntries.get(option.getKey()).add(option);
         }
         Set<String> configFiles = optionMap.keySet();
         for (String configFile : configFiles) {
-            HANDLING: {
-                KarafPropertiesFile karafPropertiesFile = new KarafPropertiesFile(karafHome, configFile);
-                karafPropertiesFile.load();
-                Collection<KarafDistributionConfigurationFileOption> optionsToApply =
-                    optionMap.get(configFile).values();
-                for (KarafDistributionConfigurationFileOption optionToApply : optionsToApply) {
+
+            KarafPropertiesFile karafPropertiesFile = new KarafPropertiesFile(karafHome, configFile);
+            karafPropertiesFile.load();
+            Collection<List<KarafDistributionConfigurationFileOption>> optionsToApply =
+                optionMap.get(configFile).values();
+            boolean store = true;
+            for (List<KarafDistributionConfigurationFileOption> optionListToApply : optionsToApply) {
+                for (KarafDistributionConfigurationFileOption optionToApply : optionListToApply) {
                     if (optionToApply instanceof KarafDistributionConfigurationFilePutOption) {
                         karafPropertiesFile.put(optionToApply.getKey(), optionToApply.getValue());
                     } else if (optionToApply instanceof KarafDistributionConfigurationFileReplacementOption) {
                         karafPropertiesFile
                             .replace(((KarafDistributionConfigurationFileReplacementOption) optionToApply)
                                 .getSource());
-                        break HANDLING; // we don't need to store in that case; only the first one is relevant.
+                        store = false;
+                        break;
                     } else {
                         karafPropertiesFile.extend(optionToApply.getKey(), optionToApply.getValue());
                     }
                 }
+                if (!store) {
+                    break;
+                }
+            }
+            if (store) {
                 karafPropertiesFile.store();
             }
         }
