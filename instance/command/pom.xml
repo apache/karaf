@@ -102,6 +102,15 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
+                        <Export-Package>
+                        	!*
+                        </Export-Package>
+                        <!-- We have to avoid importing instance.core.internal as Execute.java 
+                             accesses the InstanceServiceImpl (but only outside OSGi) -->
+                        <Import-Package>
+                        	!org.apache.karaf.instance.core.internal, 
+                        	*
+                        </Import-Package>
                         <Private-Package>
                             org.apache.karaf.instance.main,
                             org.apache.karaf.instance.command,

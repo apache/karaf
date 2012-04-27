@@ -31,8 +31,8 @@ import junit.framework.TestCase;
 import org.apache.karaf.instance.command.InstanceCommandSupport;
 import org.apache.karaf.instance.core.InstanceService;
 import org.apache.karaf.instance.core.internal.InstanceServiceImpl;
+import org.easymock.EasyMock;
 import org.easymock.IAnswer;
-import org.easymock.classextension.EasyMock;
 
 public class ExecuteTest extends TestCase {
     private String userDir;
