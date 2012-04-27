@@ -35,6 +35,7 @@
     <inceptionYear>2007</inceptionYear>
 
     <modules>
+        <module>osgicore</module>
         <module>util</module>
         <module>main</module>
         <module>features</module>
@@ -304,6 +305,11 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.apache.karaf</groupId>
+                <artifactId>org.osgi.core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.osgi</groupId>
                 <artifactId>org.osgi.core</artifactId>
