@@ -293,7 +293,7 @@
                                 <artifactItem>
                                     <groupId>org.apache.servicemix.specs</groupId>
                                     <artifactId>org.apache.servicemix.specs.activator</artifactId>
-                                    <outputDirectory>target/classes/resources/lib/endorsed</outputDirectory>
+                                    <outputDirectory>target/classes/resources/lib</outputDirectory>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.apache.servicemix.specs</groupId>
