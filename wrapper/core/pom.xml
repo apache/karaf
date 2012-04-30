@@ -43,6 +43,10 @@
     <dependencies>
         <dependency>
             <groupId>org.apache.karaf</groupId>
+            <artifactId>org.osgi.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf</groupId>
             <artifactId>org.apache.karaf.main</artifactId>
         </dependency>
         <dependency>

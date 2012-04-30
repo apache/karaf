@@ -50,7 +50,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.karaf</groupId>
-            <artifactId>org.apache.karaf.main</artifactId>
+            <artifactId>org.osgi.core</artifactId>
         </dependency>
     </dependencies>
 
