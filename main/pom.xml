@@ -39,18 +39,11 @@
     </properties>
 
     <dependencies>
-        <!--
         <dependency>
-            <groupId>org.eclipse</groupId>
-            <artifactId>osgi</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.framework</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        -->
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.osgi.core</artifactId>
+        </dependency>    
+
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.junit</artifactId>
@@ -104,65 +97,13 @@
                         <Export-Package>
                             org.apache.karaf.info
                         </Export-Package>
-                        <!--
                         <Private-Package>
-                            org.apache.felix.*;-split-package:=merge-first,
-                            org.eclipse.*;-split-package:=merge-first,
-                            org.bundles.*;-split-package:=merge-first,
-                            META-INF;-split-package:=merge-first
-                        </Private-Package>
-                        <Import-Package>!*</Import-Package>
-                        -->
-                        <Private-Package>
-                            org.apache.karaf.main*,
-                            org.osgi.*
+                            org.apache.karaf.main*
                         </Private-Package>
                     </instructions>
                     <unpackBundle>true</unpackBundle>
                 </configuration>
             </plugin>
-            <!--
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <artifactSet>
-                                <includes>
-                                    <include>org.eclipse:bundles</include>
-                                    <include>org.apache.felix:org.apache.felix.framework</include>
-                                    <include>${project.groupId}:${project.artifactId}</include>
-                                </includes>
-                            </artifactSet>
-                            <filters>
-                                <filter>
-                                    <artifact>org.eclipse:bundles</artifact>
-                                    <includes>
-                                        <include>org/bundles/**</include>
-                                        <include>org/eclipse/**</include>
-                                        <include>hookconfigurators.properties</include>
-                                    </includes>
-                                </filter>
-                                <filter>
-                                    <artifact>org.apache.felix:org.apache.felix.framework</artifact>
-                                    <includes>
-                                        <include>org/apache/felix/**</include>
-                                    </includes>
-                                </filter>
-                            </filters>
-                            <createSourcesJar>${createSourcesJar}</createSourcesJar>
-                            <promoteTransitiveDependencies>true</promoteTransitiveDependencies>
-                            <createDependencyReducedPom>true</createDependencyReducedPom>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        -->
         </plugins>
     </build>
 
@@ -174,39 +115,6 @@
             </properties>
             <build>
                 <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-dependency-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>unpack-sources</id>
-                                <phase>generate-sources</phase>
-                                <goals>
-                                    <goal>unpack</goal>
-                                </goals>
-                                <configuration>
-                                    <artifactItems>
-                                        <artifactItem>
-                                            <groupId>org.eclipse</groupId>
-                                            <artifactId>osgi</artifactId>
-                                            <classifier>sources</classifier>
-                                        </artifactItem>
-                                        <artifactItem>
-                                            <groupId>org.osgi</groupId>
-                                            <artifactId>org.osgi.core</artifactId>
-                                            <classifier>sources</classifier>
-                                        </artifactItem>
-                                        <artifactItem>
-                                            <groupId>org.osgi</groupId>
-                                            <artifactId>org.apache.felix.framework</artifactId>
-                                            <classifier>sources</classifier>
-                                        </artifactItem>
-                                    </artifactItems>
-                                    <outputDirectory>${project.build.directory}/sources</outputDirectory>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-source-plugin</artifactId>
