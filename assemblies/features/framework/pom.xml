@@ -46,11 +46,6 @@
         </dependency>
         <dependency>
             <groupId>org.apache.karaf</groupId>
-            <artifactId>org.osgi.core</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf</groupId>
             <artifactId>org.apache.karaf.exception</artifactId>
             <scope>runtime</scope>
         </dependency>
