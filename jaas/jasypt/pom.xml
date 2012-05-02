@@ -73,9 +73,8 @@
 
         <!-- 4.2.0 is needed in order to have aries util work correctly within pojosr -->
         <dependency>
-            <groupId>org.osgi</groupId>
+            <groupId>org.apache.karaf</groupId>
             <artifactId>org.osgi.core</artifactId>
-            <version>4.2.0</version>
             <scope>test</scope>
         </dependency>
 
