@@ -55,7 +55,7 @@ public class BootClasspathLibraryOptionTest {
                 foundJarFiles++;
             }
         }
-        assertEquals(3, foundJarFiles);
+        assertEquals(5, foundJarFiles);
     }
 
 }
