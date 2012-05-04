@@ -83,14 +83,7 @@
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-                        <Export-Package>${project.artifactId}*;version=${project.version}</Export-Package>
-                        <Import-Package>
-                            org.apache.felix.service.command;version=${felix.gogo.version};status=provisional;mandatory:=status,
-                            org.apache.aries.blueprint,
-                            org.osgi.service.blueprint.container,
-                            org.osgi.service.blueprint.reflect,
-                            *
-                        </Import-Package>
+                        <Export-Package></Export-Package>
                         <Private-Package>
                             org.apache.karaf.deployer.wrap,
                             org.apache.karaf.util
