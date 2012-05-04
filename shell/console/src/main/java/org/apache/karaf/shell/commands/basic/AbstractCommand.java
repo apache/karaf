@@ -20,11 +20,11 @@ package org.apache.karaf.shell.commands.basic;
 
 import java.util.List;
 
-import org.apache.karaf.shell.commands.Action;
 import org.apache.felix.service.command.CommandSession;
-import org.apache.felix.service.command.Function;
+import org.apache.karaf.shell.commands.Action;
+import org.apache.karaf.shell.commands.CommandWithAction;
 
-public abstract class AbstractCommand implements Function {
+public abstract class AbstractCommand implements CommandWithAction {
 
     public Object execute(CommandSession session, List<Object> arguments) throws Exception {
         Action action = createNewAction();

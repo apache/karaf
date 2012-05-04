@@ -33,15 +33,15 @@ import java.util.Set;
 
 import org.apache.karaf.shell.commands.Action;
 import org.apache.karaf.shell.commands.Argument;
+import org.apache.karaf.shell.commands.CommandWithAction;
 import org.apache.karaf.shell.commands.CompleterValues;
+import org.apache.karaf.shell.commands.HelpOption;
 import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.commands.basic.AbstractCommand;
-import org.apache.karaf.shell.commands.basic.DefaultActionPreparator;
 import org.apache.felix.service.command.CommandSession;
+import org.apache.karaf.shell.console.CommandSessionHolder;
 import org.apache.karaf.shell.console.CompletableFunction;
 import org.apache.karaf.shell.console.Completer;
 import org.apache.karaf.shell.console.NameScoping;
-import org.apache.karaf.shell.console.jline.CommandSessionHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,18 +55,19 @@ public class ArgumentCompleter implements Completer {
     final Completer optionsCompleter;
     final List<Completer> argsCompleters;
     final Map<String, Completer> optionalCompleters;
-    final AbstractCommand function;
+    final CommandWithAction function;
     final Map<Option, Field> fields = new HashMap<Option, Field>();
     final Map<String, Option> options = new HashMap<String, Option>();
     final Map<Integer, Field> arguments = new HashMap<Integer, Field>();
     boolean strict = true;
 
-    public ArgumentCompleter(CommandSession session, AbstractCommand function, String command) {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public ArgumentCompleter(CommandSession session, CommandWithAction function, String command) {
         this.function = function;
         // Command name completer
         commandCompleter = new StringsCompleter(getNames(session, command));
         // Build options completer
-        for (Class type = function.getActionClass(); type != null; type = type.getSuperclass()) {
+        for (Class<?> type = function.getActionClass(); type != null; type = type.getSuperclass()) {
             for (Field field : type.getDeclaredFields()) {
                 Option option = field.getAnnotation(Option.class);
                 if (option != null) {
@@ -90,7 +91,7 @@ public class ArgumentCompleter implements Completer {
                 }
             }
         }
-        options.put(DefaultActionPreparator.HELP.name(), DefaultActionPreparator.HELP);
+        options.put(HelpOption.HELP.name(), HelpOption.HELP);
         optionsCompleter = new StringsCompleter(options.keySet());
         // Build arguments completers
         argsCompleters = new ArrayList<Completer>();
@@ -108,7 +109,7 @@ public class ArgumentCompleter implements Completer {
         } else {
             optionalCompleters = new HashMap<String, Completer>();
             final Map<Integer, Method> methods = new HashMap<Integer, Method>();
-            for (Class type = function.getActionClass(); type != null; type = type.getSuperclass()) {
+            for (Class<?> type = function.getActionClass(); type != null; type = type.getSuperclass()) {
                 for (Method method : type.getDeclaredMethods()) {
                     CompleterValues completerMethod = method.getAnnotation(CompleterValues.class);
                     if (completerMethod != null) {

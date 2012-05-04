@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.karaf.shell.console;
+package org.apache.karaf.shell.console.impl;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -44,8 +44,9 @@ import org.apache.felix.gogo.runtime.threadio.ThreadIOImpl;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Function;
 import org.apache.felix.service.threadio.ThreadIO;
-import org.apache.karaf.shell.console.jline.Console;
-import org.apache.karaf.shell.console.jline.TerminalFactory;
+import org.apache.karaf.shell.console.NameScoping;
+import org.apache.karaf.shell.console.impl.jline.ConsoleImpl;
+import org.apache.karaf.shell.console.impl.jline.TerminalFactory;
 import org.fusesource.jansi.Ansi;
 import org.fusesource.jansi.AnsiConsole;
 
@@ -171,7 +172,7 @@ public class Main {
 
             final TerminalFactory terminalFactory = new TerminalFactory();
             final Terminal terminal = terminalFactory.getTerminal();
-            Console console = createConsole(commandProcessor, in, out, err, terminal);
+            ConsoleImpl console = createConsole(commandProcessor, in, out, err, terminal);
             CommandSession session = console.getSession();
             session.put("USER", user);
             session.put("APPLICATION", application);
@@ -196,7 +197,7 @@ public class Main {
     }
 
     /**
-     * Allow sub classes of main to change the Console implementation used.
+     * Allow sub classes of main to change the ConsoleImpl implementation used.
      * 
      * @param commandProcessor
      * @param in
@@ -206,8 +207,8 @@ public class Main {
      * @return
      * @throws Exception
      */
-    protected Console createConsole(CommandProcessorImpl commandProcessor, InputStream in, PrintStream out, PrintStream err, Terminal terminal) throws Exception {
-        return new Console(commandProcessor, in, out, err, terminal, null);
+    protected ConsoleImpl createConsole(CommandProcessorImpl commandProcessor, InputStream in, PrintStream out, PrintStream err, Terminal terminal) throws Exception {
+        return new ConsoleImpl(commandProcessor, in, out, err, terminal, null);
     }
 
     /**

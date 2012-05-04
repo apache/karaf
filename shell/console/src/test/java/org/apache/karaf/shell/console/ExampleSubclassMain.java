@@ -18,7 +18,8 @@ package org.apache.karaf.shell.console;
 
 import jline.Terminal;
 import org.apache.felix.gogo.runtime.CommandProcessorImpl;
-import org.apache.karaf.shell.console.jline.Console;
+import org.apache.karaf.shell.console.impl.Main;
+import org.apache.karaf.shell.console.impl.jline.ConsoleImpl;
 
 import java.io.InputStream;
 import java.io.PrintStream;
@@ -42,8 +43,8 @@ public class ExampleSubclassMain extends Main  {
     }
 
     @Override
-    protected Console createConsole(CommandProcessorImpl commandProcessor, InputStream in, PrintStream out, PrintStream err, Terminal terminal) throws Exception {
-        return new Console(commandProcessor, in, out, err, terminal, null) {
+    protected ConsoleImpl createConsole(CommandProcessorImpl commandProcessor, InputStream in, PrintStream out, PrintStream err, Terminal terminal) throws Exception {
+        return new ConsoleImpl(commandProcessor, in, out, err, terminal, null) {
 
             /**
              * If you don't overwrite, then karaf will use the welcome message found in the

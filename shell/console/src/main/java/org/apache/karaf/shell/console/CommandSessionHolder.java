@@ -1,4 +1,4 @@
-package org.apache.karaf.shell.console.jline;
+package org.apache.karaf.shell.console;
 
 import org.apache.felix.service.command.CommandSession;
 

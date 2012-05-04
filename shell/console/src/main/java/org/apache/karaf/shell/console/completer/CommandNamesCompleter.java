@@ -27,8 +27,8 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import org.apache.felix.gogo.runtime.CommandSessionImpl;
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
+import org.apache.karaf.shell.console.CommandSessionHolder;
 import org.apache.karaf.shell.console.Completer;
-import org.apache.karaf.shell.console.jline.CommandSessionHolder;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceEvent;
@@ -67,6 +67,7 @@ public class CommandNamesCompleter implements Completer {
         return res;
     }
 
+    @SuppressWarnings("unchecked")
     protected void checkData() {
         if (commands.isEmpty()) {
             Set<String> names = new HashSet<String>((Set<String>) session.get(CommandSessionImpl.COMMANDS));

@@ -21,6 +21,7 @@ package org.apache.karaf.shell.console;
 /**
  * Exception thrown to indicate the console to close.
  */
+@SuppressWarnings("serial")
 public class CloseShellException extends Exception {
 
 }

@@ -137,20 +137,25 @@
                     <instructions>
                         <Import-Package>
                             org.osgi.service.event;resolution:=optional,
-                            org.apache.aries.blueprint, org.osgi.service.blueprint.container, org.osgi.service.blueprint.reflect,
                             org.apache.karaf.branding;resolution:=optional,
                             *
                         </Import-Package>
                         <Export-Package>
+                        	org.apache.karaf.shell.commands*,
+                        	org.apache.karaf.shell.console,
+                        	org.apache.karaf.shell.console.commands,
+                        	org.apache.karaf.shell.console.completer,
+                        	org.apache.karaf.shell.console.table,
+                        	org.apache.karaf.shell.util,
                             org.apache.felix.gogo*;version=${felix.gogo.version},
                             org.apache.felix.service.command;version=${felix.gogo.version};status=provisional;mandatory:=status,
                             org.apache.felix.service.threadio;version=${felix.gogo.version};status=provisional;mandatory:=status,
-                            org.apache.karaf.shell.*;version=${project.version},
                             org.fusesource.jansi;version=${jansi.version};-split-package:=first,
                             jline*;version=${jline.version},
                             org.fusesource.hawtjni*;version=1.0;-split-package:=first
                         </Export-Package>
                         <Private-Package>
+                        	org.apache.karaf.shell.console.impl*,
                             org.fusesource.jansi.internal;-split-package:=first,
                             org.apache.felix.gogo.runtime*;-split-package:=first,
                             org.apache.karaf.util*;-split-package:=first,
@@ -162,10 +167,10 @@
                             *
                         </Bundle-NativeCode>
                         <Bundle-Activator>
-                            org.apache.karaf.shell.console.jline.Activator
+                            org.apache.karaf.shell.console.impl.jline.Activator
                         </Bundle-Activator>
                         <Main-Class>
-                            org.apache.karaf.shell.console.Main
+                            org.apache.karaf.shell.console.impl.Main
                         </Main-Class>
                         <Export-Service>
                             org.apache.felix.service.threadio.ThreadIO,

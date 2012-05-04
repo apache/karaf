@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.karaf.shell.console.jline;
+package org.apache.karaf.shell.console.impl.jline;
 
 import java.io.CharArrayWriter;
 import java.io.File;
@@ -45,24 +45,22 @@ import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Converter;
 import org.apache.karaf.shell.commands.CommandException;
 import org.apache.karaf.shell.console.CloseShellException;
+import org.apache.karaf.shell.console.CommandSessionHolder;
 import org.apache.karaf.shell.console.Completer;
+import org.apache.karaf.shell.console.Console;
+import org.apache.karaf.shell.console.SessionProperties;
 import org.apache.karaf.shell.console.completer.CommandsCompleter;
-import org.apache.karaf.shell.console.util.Branding;
 import org.fusesource.jansi.Ansi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Console implements Runnable
+public class ConsoleImpl implements Console
 {
 
     public static final String SHELL_INIT_SCRIPT = "karaf.shell.init.script";
     public static final String PROMPT = "PROMPT";
     public static final String DEFAULT_PROMPT = "\u001B[1m${USER}\u001B[0m@${APPLICATION}> ";
-    public static final String PRINT_STACK_TRACES = "karaf.printStackTraces";
-    public static final String LAST_EXCEPTION = "karaf.lastException";
-    public static final String IGNORE_INTERRUPTS = "karaf.ignoreInterrupts";
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(Console.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConsoleImpl.class);
 
     protected CommandSession session;
     private ConsoleReader reader;
@@ -79,7 +77,7 @@ public class Console implements Runnable
     private PrintStream err;
     private Thread thread;
 
-    public Console(CommandProcessor processor,
+    public ConsoleImpl(CommandProcessor processor,
                    InputStream in,
                    PrintStream out,
                    PrintStream err,
@@ -148,7 +146,6 @@ public class Console implements Runnable
 
     public void run()
     {
-        ThreadLocal<CommandSessionHolder> consoleState = new ThreadLocal<CommandSessionHolder>();
         thread = Thread.currentThread();
         CommandSessionHolder.setSession(session);
         running = true;
@@ -199,7 +196,7 @@ public class Console implements Runnable
             } else {
                 LOGGER.info("Exception caught while executing command", t);
             }
-		    session.put(LAST_EXCEPTION, t);
+		    session.put(SessionProperties.LAST_EXCEPTION, t);
 		    if (t instanceof CommandException) {
 		        session.getConsole().println(((CommandException) t).getNiceHelp());
 		    } else if (t instanceof CommandNotFoundException) {
@@ -212,7 +209,7 @@ public class Console implements Runnable
 		            .fg(Ansi.Color.DEFAULT).toString();
 		        session.getConsole().println(str);
 		    }
-		    if ( getBoolean(PRINT_STACK_TRACES)) {
+		    if ( getBoolean(SessionProperties.PRINT_STACK_TRACES)) {
 		        session.getConsole().print(Ansi.ansi().fg(Ansi.Color.RED).toString());
 		        t.printStackTrace(session.getConsole());
 		        session.getConsole().print(Ansi.ansi().fg(Ansi.Color.DEFAULT).toString());
@@ -453,12 +450,12 @@ public class Console implements Runnable
                         {
                             return;
                         }
-                        else if (c == 4 && !getBoolean(IGNORE_INTERRUPTS))
+                        else if (c == 4 && !getBoolean(SessionProperties.IGNORE_INTERRUPTS))
                         {
                             err.println("^D");
                             return;
                         }
-                        else if (c == 3 && !getBoolean(IGNORE_INTERRUPTS))
+                        else if (c == 3 && !getBoolean(SessionProperties.IGNORE_INTERRUPTS))
                         {
                             err.println("^C");
                             reader.getCursorBuffer().clear();

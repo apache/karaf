@@ -24,18 +24,18 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.karaf.shell.commands.basic.AbstractCommand;
+import org.apache.karaf.shell.commands.CommandWithAction;
 import org.apache.felix.gogo.runtime.Closure;
 import org.apache.felix.gogo.runtime.CommandProxy;
 import org.apache.felix.gogo.runtime.CommandSessionImpl;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Function;
+import org.apache.karaf.shell.console.CommandSessionHolder;
 import org.apache.karaf.shell.console.Completer;
-import org.apache.karaf.shell.console.jline.CommandSessionHolder;
 
 /**
  * Like the {@link org.apache.karaf.shell.console.completer.CommandsCompleter} but does not use OSGi but is
- * instead used from the non-OSGi {@link org.apache.karaf.shell.console.Main}
+ * instead used from the non-OSGi {@link org.apache.karaf.shell.console.impl.Main}
  */
 public class CommandsCompleter implements Completer {
 
@@ -62,6 +62,7 @@ public class CommandsCompleter implements Completer {
         return res;
     }
 
+    @SuppressWarnings("unchecked")
     protected synchronized void checkData() {
         // Copy the set to avoid concurrent modification exceptions
         // TODO: fix that in gogo instead
@@ -78,8 +79,8 @@ public class CommandsCompleter implements Completer {
             for (String command : names) {
                 Function function = (Function) session.get(command);
                 function = unProxy(function);
-                if (function instanceof AbstractCommand) {
-                    completers.add(new ArgumentCompleter(session, (AbstractCommand) function, command));
+                if (function instanceof CommandWithAction) {
+                    completers.add(new ArgumentCompleter(session, (CommandWithAction) function, command));
                 }
                 commands.add(command);
             }
@@ -91,8 +92,9 @@ public class CommandsCompleter implements Completer {
      *
      * @return the aliases set
      */
+    @SuppressWarnings("unchecked")
     private Set<String> getAliases() {
-        Set<String> vars = (Set<String>) session.get(null);
+        Set<String> vars = ((Set<String>) session.get(null));
         Set<String> aliases = new HashSet<String>();
         for (String var : vars) {
             Object content = session.get(var);

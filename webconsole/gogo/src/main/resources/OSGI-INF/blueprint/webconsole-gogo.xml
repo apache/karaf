@@ -21,9 +21,12 @@
 
     <reference id="commandProcessor" interface="org.apache.felix.service.command.CommandProcessor" />
 
+	<reference id="consoleFactory" interface="org.apache.karaf.shell.console.ConsoleFactory"/>
+
     <bean id="gogoPlugin" class="org.apache.karaf.webconsole.gogo.GogoPlugin" init-method="start" destroy-method="stop">
         <property name="commandProcessor" ref="commandProcessor" />
         <property name="bundleContext" ref="blueprintBundleContext" />
+        <property name="consoleFactory" ref="consoleFactory"/>
     </bean>
 
     <service ref="gogoPlugin" interface="javax.servlet.Servlet" >

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.karaf.shell.console.jline;
+package org.apache.karaf.shell.console.impl.jline;
 
 import java.io.InputStream;
 import java.io.PrintStream;

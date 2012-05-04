@@ -38,7 +38,7 @@
     </properties>
 
     <dependencies>
-        <dependency>
+    	<dependency>
             <groupId>org.apache.karaf.jaas</groupId>
             <artifactId>org.apache.karaf.jaas.config</artifactId>
         </dependency>

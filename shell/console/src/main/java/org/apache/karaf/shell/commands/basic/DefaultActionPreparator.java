@@ -36,6 +36,7 @@ import org.apache.karaf.shell.commands.Action;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.CommandException;
+import org.apache.karaf.shell.commands.HelpOption;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.commands.converter.DefaultConverter;
 import org.apache.karaf.shell.commands.converter.GenericType;
@@ -44,36 +45,6 @@ import org.apache.karaf.shell.console.NameScoping;
 import org.fusesource.jansi.Ansi;
 
 public class DefaultActionPreparator implements ActionPreparator {
-
-    public static final Option HELP = new Option() {
-        public String name() {
-            return "--help";
-        }
-
-        public String[] aliases() {
-            return new String[]{};
-        }
-
-        public String description() {
-            return "Display this help message";
-        }
-
-        public boolean required() {
-            return false;
-        }
-
-        public boolean multiValued() {
-            return false;
-        }
-
-        public String valueToShowInHelp() {
-            return Option.DEFAULT_STRING;
-        }
-
-        public Class<? extends Annotation> annotationType() {
-            return Option.class;
-        }
-    };
 
     public boolean prepare(Action action, CommandSession session, List<Object> params) throws Exception {
         Map<Option, Field> options = new HashMap<Option, Field>();
@@ -147,7 +118,7 @@ public class DefaultActionPreparator implements ActionPreparator {
         for (Iterator<Object> it = params.iterator(); it.hasNext(); ) {
             Object param = it.next();
             // Check for help
-            if (HELP.name().equals(param) || Arrays.asList(HELP.aliases()).contains(param)) {
+            if (HelpOption.HELP.name().equals(param) || Arrays.asList(HelpOption.HELP.aliases()).contains(param)) {
                 printUsage(session, action, options, arguments, System.out);
                 return false;
             }
@@ -424,7 +395,7 @@ public class DefaultActionPreparator implements ActionPreparator {
                 }
             });
             Set<Option> options = new HashSet<Option>(optionsMap.keySet());
-            options.add(HELP);
+            options.add(HelpOption.HELP);
             boolean globalScope = NameScoping.isGlobalScope(session, command.scope());
             if (command != null && (command.description() != null || command.name() != null)) {
                 out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("DESCRIPTION").a(Ansi.Attribute.RESET));

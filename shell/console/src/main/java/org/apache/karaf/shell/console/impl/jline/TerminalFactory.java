@@ -16,19 +16,32 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.karaf.shell.console.jline;
+package org.apache.karaf.shell.console.impl.jline;
 
-import java.util.List;
+import jline.NoInterruptUnixTerminal;
+import jline.Terminal;
 
-public class CompleterAsCompletor implements jline.console.completer.Completer {
+public class TerminalFactory {
 
-    private final org.apache.karaf.shell.console.Completer completer;
+    private Terminal term;
 
-    public CompleterAsCompletor(org.apache.karaf.shell.console.Completer completer) {
-        this.completer = completer;
+    public synchronized Terminal getTerminal() throws Exception {
+        if (term == null) {
+            init();
+        }
+        return term;
     }
 
-    public int complete(String buffer, int cursor, List candidates) {
-        return completer.complete(buffer, cursor, candidates);
+    public void init() throws Exception {
+        jline.TerminalFactory.registerFlavor(jline.TerminalFactory.Flavor.UNIX, NoInterruptUnixTerminal.class);
+        term = jline.TerminalFactory.create();
     }
+
+    public synchronized void destroy() throws Exception {
+        if (term != null) {
+            term.restore();
+            term = null;
+        }
+    }
+
 }
