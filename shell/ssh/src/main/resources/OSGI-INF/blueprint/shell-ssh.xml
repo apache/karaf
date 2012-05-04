@@ -24,9 +24,13 @@
            default-activation="lazy">
 
     <type-converters>
-        <bean class="org.apache.karaf.shell.ssh.ShellFactoryImpl" factory-method="getConverter" />
+        <bean class="org.apache.karaf.shell.ssh.ShellFactoryImpl" factory-method="getConverter" >
+        	
+        </bean>
         <bean class="org.apache.karaf.shell.ssh.UserAuthFactoriesFactory" factory-method="getConverter" />
     </type-converters>
+    
+    <reference id="consoleFactory" interface="org.apache.karaf.shell.console.ConsoleFactory" />
 
     <ext:property-placeholder placeholder-prefix="$[" placeholder-suffix="]">
         <ext:default-properties>
@@ -76,7 +80,8 @@
         <property name="host" value="${sshHost}"/>
         <property name="shellFactory">
             <bean class="org.apache.karaf.shell.ssh.ShellFactoryImpl">
-                <property name="commandProcessor" ref="commandProcessor"/>
+            	<argument ref="commandProcessor"/>
+            	<argument ref="consoleFactory"/>
             </bean>
         </property>
         <property name="commandFactory">

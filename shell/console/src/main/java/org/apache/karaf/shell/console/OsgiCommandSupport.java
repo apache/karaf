@@ -31,7 +31,7 @@ import org.osgi.framework.ServiceReference;
 public abstract class OsgiCommandSupport extends AbstractAction implements Action, BundleContextAware {
 
     protected BundleContext bundleContext;
-    protected List<ServiceReference> usedReferences;
+    protected List<ServiceReference<?>> usedReferences;
 
     @Override
     public Object execute(CommandSession session) throws Exception {
@@ -77,7 +77,7 @@ public abstract class OsgiCommandSupport extends AbstractAction implements Actio
         T t = getBundleContext().getService(reference);
         if (t != null) {
             if (usedReferences == null) {
-                usedReferences = new ArrayList<ServiceReference>();
+                usedReferences = new ArrayList<ServiceReference<?>>();
             }
             usedReferences.add(reference);
         }
@@ -86,7 +86,7 @@ public abstract class OsgiCommandSupport extends AbstractAction implements Actio
 
     protected void ungetServices() {
         if (usedReferences != null) {
-            for (ServiceReference ref : usedReferences) {
+            for (ServiceReference<?> ref : usedReferences) {
                 getBundleContext().ungetService(ref);
             }
         }

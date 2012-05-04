@@ -23,6 +23,7 @@ import org.fusesource.jansi.Ansi;
 /**
  * Base class for exceptions thrown when executing commands.
  */
+@SuppressWarnings("serial")
 public class CommandException extends Exception {
 
     private String help;

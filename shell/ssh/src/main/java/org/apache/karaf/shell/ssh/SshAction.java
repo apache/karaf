@@ -27,7 +27,7 @@ import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.BlueprintContainerAware;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
-import org.apache.karaf.shell.console.jline.Console;
+import org.apache.karaf.shell.console.SessionProperties;
 import org.apache.sshd.ClientChannel;
 import org.apache.sshd.ClientSession;
 import org.apache.sshd.SshClient;
@@ -104,8 +104,8 @@ public class SshAction
             future.await();
             sshSession = future.getSession();
 
-            Object oldIgnoreInterrupts = this.session.get(Console.IGNORE_INTERRUPTS);
-            this.session.put( Console.IGNORE_INTERRUPTS, Boolean.TRUE );
+            Object oldIgnoreInterrupts = this.session.get(SessionProperties.IGNORE_INTERRUPTS);
+            this.session.put( SessionProperties.IGNORE_INTERRUPTS, Boolean.TRUE );
 
             try {
                 System.out.println("Connected");
@@ -141,7 +141,7 @@ public class SshAction
                 channel.open();
                 channel.waitFor(ClientChannel.CLOSED, 0);
             } finally {
-                session.put( Console.IGNORE_INTERRUPTS, oldIgnoreInterrupts );
+                session.put( SessionProperties.IGNORE_INTERRUPTS, oldIgnoreInterrupts );
                 sshSession.close(false);
             }
         } finally {

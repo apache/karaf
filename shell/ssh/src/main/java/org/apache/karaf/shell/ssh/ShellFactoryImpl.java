@@ -25,16 +25,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.security.PrivilegedAction;
-import java.util.List;
 import java.util.Map;
+
 import javax.security.auth.Subject;
 
 import jline.Terminal;
+
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
-import org.apache.felix.service.command.Function;
-import org.apache.karaf.shell.console.jline.Console;
+import org.apache.karaf.shell.console.Console;
+import org.apache.karaf.shell.console.ConsoleFactory;
 import org.apache.sshd.common.Factory;
 import org.apache.sshd.server.Command;
 import org.apache.sshd.server.Environment;
@@ -44,24 +44,25 @@ import org.apache.sshd.server.session.ServerSession;
 import org.osgi.service.blueprint.container.ReifiedType;
 
 /**
- * SSHD {@link org.apache.sshd.server.Command} factory which provides access to Shell.
- *
+ * SSHD {@link org.apache.sshd.server.Command} factory which provides access to
+ * Shell.
+ * 
  * @version $Rev: 731517 $ $Date: 2009-01-05 11:25:19 +0100 (Mon, 05 Jan 2009) $
  */
-public class ShellFactoryImpl implements Factory<Command>
-{
+public class ShellFactoryImpl implements Factory<Command> {
     private CommandProcessor commandProcessor;
+    private ConsoleFactory consoleFactory;
 
-    public void setCommandProcessor(CommandProcessor commandProcessor) {
+    public ShellFactoryImpl(CommandProcessor commandProcessor, ConsoleFactory consoleFactory) {
         this.commandProcessor = commandProcessor;
+        this.consoleFactory = consoleFactory;
     }
 
     public Command create() {
         return new ShellImpl();
     }
 
-    public class ShellImpl implements Command, SessionAware
-    {
+    public class ShellImpl implements Command, SessionAware {
         private InputStream in;
 
         private OutputStream out;
@@ -96,55 +97,27 @@ public class ShellFactoryImpl implements Factory<Command>
 
         public void start(final Environment env) throws IOException {
             try {
+                final Subject subject = ShellImpl.this.session != null ? ShellImpl.this.session
+                        .getAttribute(KarafJaasPasswordAuthenticator.SUBJECT_ATTRIBUTE_KEY) : null;
                 final Terminal terminal = new SshTerminal(env);
-                Console console = new Console(commandProcessor,
-                                              in,
-                                              new PrintStream(new LfToCrLfFilterOutputStream(out), true),
-                                              new PrintStream(new LfToCrLfFilterOutputStream(err), true),
-                                              terminal,
-                                              new Runnable() {
-                                                  public void run() {
-                                                      destroy();
-                                                  }
-                                              });
+                Runnable destroyCallback = new Runnable() {
+                    public void run() {
+                        destroy();
+                    }
+                };
+                Console console = consoleFactory.createAndStart(subject, commandProcessor, in,
+                        lfToCrLfPrintStream(out), lfToCrLfPrintStream(err), terminal, destroyCallback);
                 final CommandSession session = console.getSession();
-                session.put("APPLICATION", System.getProperty("karaf.name", "root"));
-                for (Map.Entry<String,String> e : env.getEnv().entrySet()) {
+                for (Map.Entry<String, String> e : env.getEnv().entrySet()) {
                     session.put(e.getKey(), e.getValue());
                 }
-                session.put("#LINES", new Function() {
-                    public Object execute(CommandSession session, List<Object> arguments) throws Exception {
-                        return Integer.toString(terminal.getHeight());
-                    }
-                });
-                session.put("#COLUMNS", new Function() {
-                    public Object execute(CommandSession session, List<Object> arguments) throws Exception {
-                        return Integer.toString(terminal.getWidth());
-                    }
-                });
-                session.put(".jline.terminal", terminal);
-                new Thread(console) {
-                    @Override
-                    public void run() {
-                        Subject subject = ShellImpl.this.session != null ? ShellImpl.this.session.getAttribute(KarafJaasPasswordAuthenticator.SUBJECT_ATTRIBUTE_KEY) : null;
-                        if (subject != null) {
-                            Subject.doAs(subject, new PrivilegedAction<Object>() {
-                                public Object run() {
-                                    doRun();
-                                    return null;
-                                }
-                            });
-                        } else {
-                            doRun();
-                        }
-                    }
-                    protected void doRun() {
-                        super.run();
-                    }
-                }.start();
             } catch (Exception e) {
                 throw (IOException) new IOException("Unable to start shell").initCause(e);
             }
+        }
+
+        private PrintStream lfToCrLfPrintStream(OutputStream stream) {
+            return new PrintStream(new LfToCrLfFilterOutputStream(stream), true);
         }
 
         public void destroy() {
@@ -216,6 +189,5 @@ public class ShellFactoryImpl implements Factory<Command>
         }
 
     }
-
 
 }

@@ -27,13 +27,12 @@ import java.util.List;
  * A completer for file names
  */
 public class FileCompleter implements Completer {
-    private final CommandSession session;
     private FileNameCompleter completor = new FileNameCompleter();
 
     public FileCompleter(CommandSession session) {
-        this.session = session;
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public int complete(String buffer, int cursor, List candidates) {
         return completor.complete(buffer, cursor, candidates);
     }

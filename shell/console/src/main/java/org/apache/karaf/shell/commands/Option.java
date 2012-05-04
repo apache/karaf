@@ -18,12 +18,10 @@
  */
 package org.apache.karaf.shell.commands;
 
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.lang.annotation.ElementType;
-import org.apache.karaf.shell.console.Completer;
-import org.apache.karaf.shell.console.completer.NullCompleter;
 
 /**
  * Used to mark an optional named command line option who's name typically starts with "--"

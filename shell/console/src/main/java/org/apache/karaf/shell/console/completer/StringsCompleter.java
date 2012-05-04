@@ -68,6 +68,7 @@ public class StringsCompleter
         return strings;
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public int complete(String buffer, final int cursor, final List candidates) {
         // buffer could be null
         assert candidates != null;

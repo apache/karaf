@@ -27,25 +27,31 @@
     </ext:property-placeholder>
 
     <reference id="commandProcessor" interface="org.apache.felix.service.command.CommandProcessor">
-        <reference-listener ref="consoleFactory"
+<!--         <reference-listener ref="consoleFactory"
                             bind-method="registerCommandProcessor"
                             unbind-method="unregisterCommandProcessor"/>
+                             -->
     </reference>
 
-    <bean id="consoleFactory" class="org.apache.karaf.shell.console.jline.ConsoleFactory">
-        <property name="start" value="$[karaf.startLocalConsole]"/>
-        <property name="bundleContext" ref="blueprintBundleContext"/>
-        <property name="terminalFactory" ref="terminalFactory"/>
+    <bean id="consoleFactoryService" class="org.apache.karaf.shell.console.impl.jline.ConsoleFactoryService">
+    </bean>    
+    <service interface="org.apache.karaf.shell.console.ConsoleFactory" ref="consoleFactoryService" />
+
+    <bean id="consoleFactory" class="org.apache.karaf.shell.console.impl.jline.LocalConsoleManager" destroy-method="stop">
+        <argument value="$[karaf.startLocalConsole]"/>
+        <argument ref="blueprintBundleContext"/>
+        <argument ref="terminalFactory"/>
+        <argument ref="consoleFactoryService"/>
+        <argument ref="commandProcessor"/>
     </bean>
 
-    <bean id="converters" class="org.apache.karaf.shell.console.Converters">
+    <bean id="converters" class="org.apache.karaf.shell.console.impl.Converters">
         <argument ref="blueprintBundleContext"/>
     </bean>
     <service ref="converters" interface="org.apache.felix.service.command.Converter"/>
 
-    <bean id="terminalFactory" class="org.apache.karaf.shell.console.jline.TerminalFactory"
+    <bean id="terminalFactory" class="org.apache.karaf.shell.console.impl.jline.TerminalFactory"
           destroy-method="destroy"/>
-
     <service>
         <interfaces>
             <value>org.apache.felix.service.command.Function</value>
@@ -66,30 +72,31 @@
             </property>
         </bean>
     </service>
-    <bean id="help" class="org.apache.karaf.shell.console.help.HelpAction" activation="lazy" scope="prototype">
+
+    <bean id="help" class="org.apache.karaf.shell.console.impl.help.HelpAction" activation="lazy" scope="prototype">
         <property name="provider" ref="helpSystem"/>
     </bean>
     
-    <bean id="helpSystem" class="org.apache.karaf.shell.console.help.HelpSystem" init-method="start" destroy-method="stop">
+    <bean id="helpSystem" class="org.apache.karaf.shell.console.impl.help.HelpSystem" destroy-method="stop">
         <property name="context" ref="blueprintBundleContext"/>
     </bean>
     
     <service auto-export="interfaces" ranking="-20">
-        <bean class="org.apache.karaf.shell.console.help.CommandListHelpProvider" />
+        <bean class="org.apache.karaf.shell.console.impl.help.CommandListHelpProvider" />
     </service>
     <service auto-export="interfaces" ranking="-10">
-        <bean class="org.apache.karaf.shell.console.help.SingleCommandHelpProvider">
+        <bean class="org.apache.karaf.shell.console.impl.help.SingleCommandHelpProvider">
             <property name="io">
                 <reference interface="org.apache.felix.service.threadio.ThreadIO"/>
             </property>
         </bean>
     </service>
     <service auto-export="interfaces" ref="subShellHelpProvider" ranking="-10"/>
-    <bean id="subShellHelpProvider" class="org.apache.karaf.shell.console.help.SubShellHelpProvider" init-method="start" destroy-method="stop">
+    <bean id="subShellHelpProvider" class="org.apache.karaf.shell.console.impl.help.SubShellHelpProvider" init-method="start" destroy-method="stop">
         <property name="context" ref="blueprintBundleContext"/>
     </bean>
     <service auto-export="interfaces" ranking="-5">
-        <bean class="org.apache.karaf.shell.console.help.SimpleHelpProvider">
+        <bean class="org.apache.karaf.shell.console.impl.help.SimpleHelpProvider">
             <property name="help">
                 <map>
                     <entry key="%root%"><value><![CDATA[${command-list|}]]></value></entry>
@@ -98,6 +105,5 @@
             </property>
         </bean>
     </service>
-
 
 </blueprint>

@@ -20,11 +20,21 @@ package org.apache.karaf.shell.commands.basic;
 
 import java.util.List;
 
-import org.apache.karaf.shell.commands.Action;
 import org.apache.felix.service.command.CommandSession;
+import org.apache.karaf.shell.commands.Action;
 
 public interface ActionPreparator {
 
+    /**
+     * Check if the arguments are valid for the action and inject the arguments into the fields
+     * of the action
+     * 
+     * @param action
+     * @param session
+     * @param arguments
+     * @return
+     * @throws Exception
+     */
     boolean prepare(Action action, CommandSession session, List<Object> arguments) throws Exception;
 
 }

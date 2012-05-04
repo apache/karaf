@@ -34,13 +34,16 @@ import java.io.PrintWriter;
 import java.net.URL;
 import java.util.zip.GZIPOutputStream;
 
+import javax.security.auth.Subject;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
-import org.apache.karaf.shell.console.jline.Console;
+import org.apache.karaf.jaas.boot.principal.UserPrincipal;
+import org.apache.karaf.shell.console.Console;
+import org.apache.karaf.shell.console.ConsoleFactory;
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
@@ -69,6 +72,8 @@ public class GogoPlugin extends AbstractWebConsolePlugin {
 
     private CommandProcessor commandProcessor;
     
+    private ConsoleFactory consoleFactory;
+    
     
 
     @Override
@@ -86,9 +91,14 @@ public class GogoPlugin extends AbstractWebConsolePlugin {
         this.commandProcessor = commandProcessor;
     }
 
+    public void setConsoleFactory(ConsoleFactory consoleFactory) {
+        this.consoleFactory = consoleFactory;
+    }
+    
     /*
     * Blueprint lifecycle callback methods
     */
+
 
     public void start()
     {
@@ -192,7 +202,6 @@ public class GogoPlugin extends AbstractWebConsolePlugin {
     public class SessionTerminal implements Runnable {
 
         private Terminal terminal;
-        private Console console;
         private PipedOutputStream in;
         private PipedInputStream out;
         private boolean closed;
@@ -205,18 +214,15 @@ public class GogoPlugin extends AbstractWebConsolePlugin {
                 in = new PipedOutputStream();
                 out = new PipedInputStream();
                 PrintStream pipedOut = new PrintStream(new PipedOutputStream(out), true);
-
-                console = new Console(commandProcessor,
+                
+                final Subject subject = new Subject();
+                subject.getPrincipals().add(new UserPrincipal("karaf"));
+                consoleFactory.createAndStart(subject, commandProcessor,
                                       new PipedInputStream(in),
                                       pipedOut,
                                       pipedOut,
                                       new WebTerminal(TERM_WIDTH, TERM_HEIGHT),
                                       null);
-                CommandSession session = console.getSession();
-                session.put("APPLICATION", System.getProperty("karaf.name", "root"));
-                session.put("USER", "karaf");
-                session.put("COLUMNS", Integer.toString(TERM_WIDTH));
-                session.put("LINES", Integer.toString(TERM_HEIGHT));
             } catch (IOException e) {
                 e.printStackTrace();
                 throw e;
@@ -224,7 +230,6 @@ public class GogoPlugin extends AbstractWebConsolePlugin {
                 e.printStackTrace();
                 throw (IOException) new IOException().initCause(e);
             }
-            new Thread(console).start();
             new Thread(this).start();
         }
 

@@ -38,6 +38,7 @@ public class AggregateCompleter implements Completer
         this.completers = completers;
     }
 
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public int complete(final String buffer, final int cursor, final List candidates) {
         // buffer could be null
         assert candidates != null;
@@ -73,6 +74,7 @@ public class AggregateCompleter implements Completer
 
         public int cursor;
 
+        @SuppressWarnings({ "unchecked", "rawtypes" })
         public Completion(final List candidates) {
             assert candidates != null;
 

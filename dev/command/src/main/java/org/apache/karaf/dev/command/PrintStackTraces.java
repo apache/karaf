@@ -19,7 +19,7 @@ package org.apache.karaf.dev.command;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
-import org.apache.karaf.shell.console.jline.Console;
+import org.apache.karaf.shell.console.SessionProperties;
 
 /**
  * Command for showing the full tree of bundles that have been used to resolve
@@ -32,7 +32,7 @@ public class PrintStackTraces extends OsgiCommandSupport {
     boolean print = true;
 
     protected Object doExecute() throws Exception {
-        session.put(Console.PRINT_STACK_TRACES, Boolean.valueOf(print));
+        session.put(SessionProperties.PRINT_STACK_TRACES, Boolean.valueOf(print));
         return null;
     }
 

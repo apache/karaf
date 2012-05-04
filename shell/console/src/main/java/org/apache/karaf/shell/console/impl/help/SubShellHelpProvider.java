@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.shell.console.help;
+package org.apache.karaf.shell.console.impl.help;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

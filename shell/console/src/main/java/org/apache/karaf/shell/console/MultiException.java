@@ -21,6 +21,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings("serial")
 public class MultiException extends Exception {
 
     private List<Exception> exceptions = new ArrayList<Exception>();

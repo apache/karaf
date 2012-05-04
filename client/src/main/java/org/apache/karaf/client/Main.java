@@ -20,7 +20,7 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 
 import jline.Terminal;
-import org.apache.karaf.shell.console.jline.TerminalFactory;
+import org.apache.karaf.shell.console.impl.jline.TerminalFactory;
 import org.apache.sshd.ClientChannel;
 import org.apache.sshd.ClientSession;
 import org.apache.sshd.SshClient;

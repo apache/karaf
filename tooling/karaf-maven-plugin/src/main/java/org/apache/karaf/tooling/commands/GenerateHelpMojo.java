@@ -40,8 +40,10 @@ import java.util.TreeSet;
 import org.apache.karaf.shell.commands.Action;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.HelpOption;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.commands.basic.ActionPreparator;
+import org.apache.karaf.shell.console.SessionProperties;
 import org.apache.karaf.shell.console.commands.BlueprintCommand;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -248,7 +250,7 @@ public class GenerateHelpMojo extends AbstractMojo {
                     }
                 });
                 Set<Option> options = new HashSet<Option>(optionsMap.keySet());
-                if (includeHelpOption) options.add(HELP);
+                if (includeHelpOption) options.add(HelpOption.HELP);
 
                 out.println("<section>");
                 out.print("  <title>");
@@ -379,7 +381,7 @@ public class GenerateHelpMojo extends AbstractMojo {
                     }
                 });
                 Set<Option> options = new HashSet<Option>(optionsMap.keySet());
-                if (includeHelpOption) options.add(HELP);
+                if (includeHelpOption) options.add(HelpOption.HELP);
 
                 out.println("h1. " + command.scope() + ":" + command.name());
                 out.println();
