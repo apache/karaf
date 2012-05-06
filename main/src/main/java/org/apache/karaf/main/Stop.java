@@ -19,15 +19,11 @@
 package org.apache.karaf.main;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.util.Properties;
-
-import org.apache.karaf.main.util.Utils;
 
 /**
  * Main class used to stop the root Karaf instance
@@ -42,29 +38,13 @@ public class Stop {
      * @throws Exception
      */
     public static void main(String[] args) throws Exception {
-        File karafHome = Utils.getKarafHome(Stop.class, Main.PROP_KARAF_HOME, Main.ENV_KARAF_HOME);
-        File karafBase = Utils.getKarafDirectory(Main.PROP_KARAF_BASE, Main.ENV_KARAF_BASE, karafHome, false, true);
-        File karafData = Utils.getKarafDirectory(Main.PROP_KARAF_DATA, Main.ENV_KARAF_DATA, new File(karafBase.getPath(), "data"), true, true);
-
-        System.setProperty(Main.PROP_KARAF_HOME, karafHome.getPath());
-        System.setProperty(Main.PROP_KARAF_BASE, karafBase.getPath());
-        System.setProperty(Main.PROP_KARAF_DATA, karafData.getPath());
-
-        // Load system properties.
-        PropertiesLoader.loadSystemProperties(karafBase);
-
-        Properties props = PropertiesLoader.loadConfigProperties(karafBase);
-
-        int port = Integer.parseInt(props.getProperty(Main.KARAF_SHUTDOWN_PORT, "0"));
-        String host = props.getProperty(Main.KARAF_SHUTDOWN_HOST, "localhost");
-        String portFile = props.getProperty(Main.KARAF_SHUTDOWN_PORT_FILE);
-        String shutdown = props.getProperty(Main.KARAF_SHUTDOWN_COMMAND, Main.DEFAULT_SHUTDOWN_COMMAND);
-        if (port == 0 && portFile != null) {
-            port = getPortFromShutdownPortFile(portFile);
+        ConfigProperties config = new ConfigProperties();
+        if (config.shutdownPort == 0 && config.portFile != null) {
+            config.shutdownPort = getPortFromShutdownPortFile(config.portFile);
         }
-        if (port > 0) {
-            Socket s = new Socket(host, port);
-            s.getOutputStream().write(shutdown.getBytes());
+        if (config.shutdownPort > 0) {
+            Socket s = new Socket(config.shutdownHost, config.shutdownPort);
+            s.getOutputStream().write(config.shutdownCommand.getBytes());
             s.close();
         } else {
             System.err.println("Unable to find port...");

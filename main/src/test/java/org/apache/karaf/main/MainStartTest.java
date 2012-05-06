@@ -18,24 +18,22 @@
  */
 package org.apache.karaf.main;
 
+import static org.ops4j.pax.tinybundles.core.TinyBundles.withBnd;
+
 import java.io.File;
 
 import junit.framework.Assert;
 
 import org.apache.karaf.main.util.Utils;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.ops4j.pax.tinybundles.core.TinyBundles;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.framework.launch.Framework;
 
-import static org.ops4j.pax.tinybundles.core.TinyBundles.withBnd;
-
 public class MainStartTest {
 
 	@Test
-    @Ignore("Unit test for KARAF-334 disabled for now")
     public void testAutoStart() throws Exception {
         File basedir = new File(getClass().getClassLoader().getResource("foo").getPath()).getParentFile();
         File home = new File(basedir, "test-karaf-home");
@@ -44,23 +42,23 @@ public class MainStartTest {
         Utils.deleteDirectory(data);
 
 		String[] args = new String[0];
-		String fileMVNbundle = new File(home, "bundles/pax-url-mvn.jar").toURI().toURL().toExternalForm();
-		String mvnUrl = "mvn:org.bundles/org.bundles.compendium/4.2.0";
 		System.setProperty("karaf.home", home.toString());
 		System.setProperty("karaf.data", data.toString());
-		System.setProperty("karaf.auto.start.1", "\""+fileMVNbundle+"|unused\"");
-		System.setProperty("karaf.auto.start.2", "\""+mvnUrl+"|unused\"");
-		System.setProperty("karaf.maven.convert", "false");
 
 		Main main = new Main(args);
 		main.launch();
 		Framework framework = main.getFramework();
 		Bundle[] bundles = framework.getBundleContext().getBundles();
 		Assert.assertEquals(3, bundles.length);
-		Assert.assertEquals(fileMVNbundle, bundles[1].getLocation());
-		Assert.assertEquals(mvnUrl, bundles[2].getLocation());
-		Assert.assertEquals(Bundle.ACTIVE, bundles[1].getState());
-		Assert.assertEquals(Bundle.ACTIVE, bundles[2].getState());
+		
+		// Give the framework some time to start the bundles
+		Thread.sleep(1000);
+
+		Bundle bundle1 = framework.getBundleContext().getBundle("mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.api/0.3.1");
+		Assert.assertEquals(Bundle.ACTIVE, bundle1.getState());
+
+		Bundle bundle2 = framework.getBundleContext().getBundle("pax-url-mvn.jar");
+		Assert.assertEquals(Bundle.ACTIVE, bundle2.getState());
 
         main.destroy();
 	}
@@ -77,7 +75,6 @@ public class MainStartTest {
 		System.setProperty("karaf.home", home.toString());
 		System.setProperty("karaf.data", data.toString());
         System.setProperty("karaf.framework.factory", "org.apache.felix.framework.FrameworkFactory");
-
 
         Main main = new Main(args);
         main.launch();
