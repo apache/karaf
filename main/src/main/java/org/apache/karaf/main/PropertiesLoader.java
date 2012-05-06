@@ -19,6 +19,7 @@
 package org.apache.karaf.main;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,6 +33,10 @@ import org.apache.karaf.main.util.SubstHelper;
 import org.apache.karaf.main.util.Utils;
 
 public class PropertiesLoader {
+
+    private static final String INCLUDES_PROPERTY = "${includes}"; // mandatory includes
+    
+    private static final String OPTIONALS_PROPERTY = "${optionals}"; // optionals includes
 
     /**
      * <p>
@@ -51,16 +56,10 @@ public class PropertiesLoader {
      * @return A <tt>Properties</tt> instance or <tt>null</tt> if there was an error.
      * @throws Exception if something wrong occurs
      */
-    static Properties loadConfigProperties(File karafBase) throws Exception {
+    static Properties loadConfigProperties(File file) throws Exception {
         // See if the property URL was specified as a property.
         URL configPropURL;
-
         try {
-            File etcFolder = new File(karafBase, "etc");
-            if (!etcFolder.exists()) {
-                throw new FileNotFoundException("etc folder not found: " + etcFolder.getAbsolutePath());
-            }
-            File file = new File(etcFolder, Main.CONFIG_PROPERTIES_FILE_NAME);
             configPropURL = file.toURI().toURL();
         }
         catch (MalformedURLException ex) {
@@ -68,8 +67,8 @@ public class PropertiesLoader {
             return null;
         }
 
-
         Properties configProps = loadPropertiesFile(configPropURL, false);
+        copySystemProperties(configProps);
 
         // Perform variable substitution for system properties.
         for (Enumeration<?> e = configProps.propertyNames(); e.hasMoreElements();) {
@@ -78,7 +77,6 @@ public class PropertiesLoader {
                     SubstHelper.substVars(configProps.getProperty(name), name, null, configProps));
         }
 
-        copySystemProperties(configProps);
         return configProps;
     }
     
@@ -97,48 +95,18 @@ public class PropertiesLoader {
      * </p>
      *
      * @param karafBase the karaf base folder
+     * @throws IOException 
      */
-    static void loadSystemProperties(File karafBase) {
-        // The system properties file is either specified by a system
-        // property or it is in the same directory as the Felix JAR file.
-        // Try to load it from one of these places.
-    
-        // See if the property URL was specified as a property.
-        URL propURL;
-        try {
-            File file = new File(new File(karafBase, "etc"), Main.SYSTEM_PROPERTIES_FILE_NAME);
-            propURL = file.toURI().toURL();
-        }
-        catch (MalformedURLException ex) {
-            System.err.print("Main: " + ex);
-            return;
-        }
-    
-        // Read the properties file.
+    static void loadSystemProperties(File file) throws IOException {
         Properties props = new Properties();
-        InputStream is = null;
         try {
-            is = propURL.openConnection().getInputStream();
+            InputStream is = new FileInputStream(file);
             props.load(is);
             is.close();
-        }
-        catch (FileNotFoundException ex) {
-            // Ignore file not found.
-        }
-        catch (Exception ex) {
-            System.err.println(
-                    "Main: Error loading system properties from " + propURL);
-            System.err.println("Main: " + ex);
-            try {
-                if (is != null) is.close();
-            }
-            catch (IOException ex2) {
-                // Nothing we can do.
-            }
-            return;
+        } catch (Exception e1) {
+            // Ignore
         }
     
-        // Perform variable substitution on specified properties.
         for (Enumeration<?> e = props.propertyNames(); e.hasMoreElements();) {
             String name = (String) e.nextElement();
             String value = System.getProperty(name, props.getProperty(name));
@@ -158,8 +126,16 @@ public class PropertiesLoader {
         }
     }
     
-    static Properties loadPropertiesFile(URL configPropURL, boolean failIfNotFound) throws Exception {
-        // Read the properties file.
+    static Properties loadPropertiesOrFail(File configFile) {
+        try {
+            URL configPropURL = configFile.toURI().toURL();
+            return loadPropertiesFile(configPropURL, true);
+        } catch (Exception e) {
+            throw new RuntimeException("Error loading properties from " + configFile, e);
+        }
+    }
+    
+    private static Properties loadPropertiesFile(URL configPropURL, boolean failIfNotFound) throws Exception {
         Properties configProps = new Properties();
         InputStream is = null;
         try {
@@ -186,7 +162,15 @@ public class PropertiesLoader {
                 // Nothing we can do.
             }
         }
-        String includes = configProps.getProperty(Main.INCLUDES_PROPERTY);
+        loadIncludes(INCLUDES_PROPERTY, true, configPropURL, configProps);
+        loadIncludes(OPTIONALS_PROPERTY, false, configPropURL, configProps);
+        trimValues(configProps);
+        return configProps;
+    }
+
+    private static void loadIncludes(String propertyName, boolean mandatory, URL configPropURL, Properties configProps)
+            throws MalformedURLException, Exception {
+        String includes = (String) configProps.get(propertyName);
         if (includes != null) {
             StringTokenizer st = new StringTokenizer(includes, "\" ", true);
             if (st.countTokens() > 0) {
@@ -195,30 +179,17 @@ public class PropertiesLoader {
                     location = Utils.nextLocation(st);
                     if (location != null) {
                         URL url = new URL(configPropURL, location);
-                        Properties props = loadPropertiesFile(url, true);
+                        Properties props = loadPropertiesFile(url, mandatory);
                         configProps.putAll(props);
                     }
                 }
                 while (location != null);
             }
-            configProps.remove(Main.INCLUDES_PROPERTY);
         }
-        String optionals = configProps.getProperty(Main.OPTIONALS_PROPERTY);
-        if (optionals != null) {
-            StringTokenizer st = new StringTokenizer(optionals, "\" ", true);
-            if (st.countTokens() > 0) {
-                String location;
-                do {
-                    location = Utils.nextLocation(st);
-                    if (location != null) {
-                        URL url = new URL(configPropURL, location);
-                        Properties props = loadPropertiesFile(url, false);
-                        configProps.putAll(props);
-                    }
-                } while (location != null);
-            }
-            configProps.remove(Main.OPTIONALS_PROPERTY);
-        }
+        configProps.remove(propertyName);
+    }
+
+    private static void trimValues(Properties configProps) {
         for (Enumeration<?> e = configProps.propertyNames(); e.hasMoreElements();) {
             Object key = e.nextElement();
             if (key instanceof String) {
@@ -226,6 +197,5 @@ public class PropertiesLoader {
                 configProps.put(key, v.trim());
             }
         }
-        return configProps;
     }
 }

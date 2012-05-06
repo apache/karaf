@@ -19,6 +19,7 @@
 package org.apache.karaf.main.util;
 
 import java.io.File;
+import java.net.URI;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -26,7 +27,7 @@ import java.util.regex.Pattern;
 /**
  * Resolves local maven artifacts and raw file paths
  */
-public class SimpleMavenResolver {
+public class SimpleMavenResolver implements ArtifactResolver {
     private static final Pattern mvnPattern = Pattern.compile("mvn:([^/ ]+)/([^/ ]+)/([^/ ]*)(/([^/ ]+)(/([^/ ]+))?)?");
     private final List<File> mavenRepos;
 
@@ -46,21 +47,21 @@ public class SimpleMavenResolver {
      * If artifactUri does not match the Syntax the local file that corresponds to the path is returned
      * 
      * @param artifactUri Maven artifact URI
-     * @return file referenced by the URI
+     * @return resolved URI
      */
-    public File resolve(String artifactUri) {
+    public URI resolve(URI artifactUri) {
         for (File bundleDir : mavenRepos) {
             File file = findFile(bundleDir, artifactUri);
             if (file != null) {
-                return file;
+                return file.toURI();
             }
         }
-        return null;
+        throw new RuntimeException("Could not resolve " + artifactUri);
     }
 
-    private static File findFile(File dir, String name) {
-        name = fromMaven(name);
-        File theFile = new File(dir, name);
+    private static File findFile(File dir, URI mvnUri) {
+        String path = fromMaven(mvnUri);
+        File theFile = new File(dir, path);
 
         if (theFile.exists() && !theFile.isDirectory()) {
             return theFile;
@@ -80,10 +81,10 @@ public class SimpleMavenResolver {
      * @param name input artifact info
      * @return path as supplied or a default maven repo path
      */
-    private static String fromMaven(String name) {
-        Matcher m = mvnPattern.matcher(name);
+    private static String fromMaven(URI name) {
+        Matcher m = mvnPattern.matcher(name.toString());
         if (!m.matches()) {
-            return name;
+            return name.toString();
         }
         StringBuilder b = new StringBuilder();
         b.append(m.group(1));
