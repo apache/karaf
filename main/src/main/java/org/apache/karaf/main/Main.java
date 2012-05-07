@@ -32,6 +32,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.karaf.info.ServerInfo;
@@ -167,10 +168,9 @@ public class Main {
             try {
                 main.launch();
             } catch (Throwable ex) {
+                main.LOG.log(Level.SEVERE, "Could not launch framework", ex);
                 main.destroy();
                 main.setExitCode(-1);
-                System.err.println("Could not create framework: " + ex);
-                ex.printStackTrace();
             }
             try {
                 main.awaitShutdown();
@@ -206,6 +206,8 @@ public class Main {
 
     public void launch() throws Exception {
         config = new ConfigProperties();
+        Lock lock = createLock();
+        lockManager = new LockManager(lock, new KarafLockCallback(), config.lockDelay);
         InstanceHelper.updateInstancePid(config.karafHome, config.karafBase);
         BootstrapLogManager.setProperties(config.props);
         LOG.addHandler(BootstrapLogManager.getDefaultHandler());
@@ -235,8 +237,6 @@ public class Main {
         activatorManager = new KarafActivatorManager(classLoader, framework);
         activatorManager.startKarafActivators();
         
-        Lock lock = createLock();
-        lockManager = new LockManager(lock, new KarafLockCallback(), config.lockDelay);
         setStartLevel(config.lockStartLevel);
         lockManager.startLockMonitor();
     }
@@ -441,7 +441,9 @@ public class Main {
             }
             return false;
         } finally {
-            lockManager.stopLockMonitor();
+            if (lockManager != null) {
+                lockManager.stopLockMonitor();
+            }
         }
     }
     
