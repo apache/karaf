@@ -14,23 +14,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.shell.shell;
+package org.apache.karaf.shell.commands.impl;
 
+import jline.console.history.History;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.console.AbstractAction;
+import org.fusesource.jansi.Ansi;
 
 /**
- * A command to clear the console buffer
+ * History command
  */
-@Command(scope = "shell", name = "clear", description = "Clears the console buffer.")
-public class ClearAction extends AbstractAction {
+@Command(scope = "shell", name="history", description="Prints command history.")
+public class HistoryAction extends AbstractAction {
 
-	protected Object doExecute() throws Exception {
-		System.out.print("\33[2J");
-		System.out.flush();
-		System.out.print("\33[1;1H");
-		System.out.flush();
-		return null;
-	}	
+    @Override
+    protected Object doExecute() throws Exception {
+        History history = (History) session.get(".jline.history");
 
+        for (History.Entry element : history) {
+            System.out.println(
+                    Ansi.ansi()
+                        .a("  ")
+                        .a(Ansi.Attribute.INTENSITY_BOLD).render("%3d", element.index()).a(Ansi.Attribute.INTENSITY_BOLD_OFF)
+                        .a("  ")
+                        .a(element.value())
+                        .toString());
+        }
+        return null;
+    }
 }

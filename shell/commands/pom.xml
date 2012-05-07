@@ -101,21 +101,12 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Import-Package>
-                            org.apache.aries.blueprint,
-                            org.osgi.service.blueprint.container,
-                            org.osgi.service.blueprint.reflect,
-                            org.apache.felix.service.command,
-                            org.apache.karaf.shell.commands,
-                            org.apache.karaf.shell.console,
-                            *
-                        </Import-Package>
                         <Export-Package>
-                            org.apache.karaf.shell.shell*
+                        	!org.apache.karaf.shell.commands.impl*
                         </Export-Package>
                         <Private-Package>
                             org.apache.karaf.util.process;-split-package:=merge-first,
-                            !*
+                            org.apache.karaf.shell.commands.impl*
                         </Private-Package>
                     </instructions>
                 </configuration>
