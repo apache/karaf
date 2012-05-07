@@ -14,15 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.shell.shell;
+package org.apache.karaf.shell.commands.impl;
 
-import java.io.IOException;
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URL;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 
 import org.apache.karaf.shell.commands.Argument;
@@ -30,48 +30,48 @@ import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.AbstractAction;
 
-/**
- * Concatenate and print files and/or URLs.
- *
- * @version $Rev: 593392 $ $Date: 2007-11-09 03:14:15 +0100 (Fri, 09 Nov 2007) $
- */
-@Command(scope = "shell", name = "cat", description = "Displays the content of a file or URL.")
-public class CatAction extends AbstractAction {
+@Command(scope = "shell", name = "head", description = "Displays the first lines of a file.")
+public class HeadAction extends AbstractAction {
 
-    @Option(name = "-n", aliases = {}, description = "Number the output lines, starting at 1.", required = false, multiValued = false)
-    private boolean displayLineNumbers;
+    private static final int DEFAULT_NUMBER_OF_LINES = 10;
 
-    @Argument(index = 0, name = "paths or urls", description = "A list of file paths or urls to display separated by whitespace (use - for STDIN)", required = true, multiValued = true)
+    @Option(name = "-n", aliases = {}, description = "The number of lines to display, starting at 1.", required = false, multiValued = false)
+    private int numberOfLines;
+
+    @Argument(index = 0, name = "paths or urls", description = "A list of file paths or urls to display separated by whitespaces.", required = false, multiValued = true)
     private List<String> paths;
 
     protected Object doExecute() throws Exception {
-        //
-        // Support "-" if length is one, and read from io.in
-        // This will help test command pipelines.
-        //
-        if (paths.size() == 1 && "-".equals(paths.get(0))) {
-            log.info("Printing STDIN");
-            cat(new BufferedReader(new InputStreamReader(System.in)));
-        }
-        else {
+        //If no paths provided assume standar input
+        if (paths == null || paths.size() == 0) {
+            if (log.isDebugEnabled()) {
+                log.debug("Heading STDIN");
+            }
+
+            head(new BufferedReader(new InputStreamReader(System.in)));
+        } else {
             for (String filename : paths) {
                 BufferedReader reader;
 
                 // First try a URL
                 try {
                     URL url = new URL(filename);
-                    log.info("Printing URL: " + url);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Heading URL: " + url);
+                    }
                     reader = new BufferedReader(new InputStreamReader(url.openStream()));
                 }
                 catch (MalformedURLException ignore) {
                     // They try a file
                     File file = new File(filename);
-                    log.info("Printing file: " + file);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Heading file: " + file);
+                    }
                     reader = new BufferedReader(new FileReader(file));
                 }
 
                 try {
-                    cat(reader);
+                    head(reader);
                 }
                 finally {
                     try {
@@ -82,20 +82,20 @@ public class CatAction extends AbstractAction {
                 }
             }
         }
-
         return null;
     }
 
-    private void cat(final BufferedReader reader) throws IOException
-    {
+    private void head(final BufferedReader reader) throws IOException {
         String line;
         int lineno = 1;
 
-        while ((line = reader.readLine()) != null) {
-            if (displayLineNumbers) {
-                System.out.print(String.format("%6d  ", lineno++));
-            }
+        if (numberOfLines < 1) {
+            numberOfLines = DEFAULT_NUMBER_OF_LINES;
+        }
+
+        while ((line = reader.readLine()) != null && lineno <= numberOfLines) {
             System.out.println(line);
+            lineno++;
         }
     }
 }

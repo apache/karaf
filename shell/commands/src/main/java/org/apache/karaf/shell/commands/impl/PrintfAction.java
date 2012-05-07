@@ -14,32 +14,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.shell.shell;
+package org.apache.karaf.shell.commands.impl;
 
-import jline.console.history.History;
+import java.util.Collection;
+
+import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.console.AbstractAction;
-import org.fusesource.jansi.Ansi;
 
-/**
- * History command
- */
-@Command(scope = "shell", name="history", description="Prints command history.")
-public class HistoryAction extends AbstractAction {
+@Command(scope = "shell", name = "printf", description = "Formats and prints arguments.")
+public class PrintfAction extends AbstractAction {
 
-    @Override
+    @Argument(index = 0, name = "format", description = "The format pattern to use", required = true, multiValued = false)
+    private String format;
+
+    @Argument(index = 1, name = "arguments", description = "The arguments for the given format pattern", required = true, multiValued = true)
+    private Collection<Object> arguments = null;
+
     protected Object doExecute() throws Exception {
-        History history = (History) session.get(".jline.history");
-
-        for (History.Entry element : history) {
-            System.out.println(
-                    Ansi.ansi()
-                        .a("  ")
-                        .a(Ansi.Attribute.INTENSITY_BOLD).render("%3d", element.index()).a(Ansi.Attribute.INTENSITY_BOLD_OFF)
-                        .a("  ")
-                        .a(element.value())
-                        .toString());
-        }
+        System.out.printf(format, arguments.toArray());
         return null;
     }
 }

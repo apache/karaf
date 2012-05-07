@@ -21,69 +21,69 @@
 
     <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
         <command>
-            <action class="org.apache.karaf.shell.shell.CatAction"/>
+            <action class="org.apache.karaf.shell.commands.impl.CatAction"/>
         </command>
         <command>
-            <action class="org.apache.karaf.shell.shell.ClearAction"/>
+            <action class="org.apache.karaf.shell.commands.impl.ClearAction"/>
         </command>
         <command>
-            <action class="org.apache.karaf.shell.shell.EachAction"/>
+            <action class="org.apache.karaf.shell.commands.impl.EachAction"/>
         </command>
         <command>
-            <action class="org.apache.karaf.shell.shell.EchoAction"/>
+            <action class="org.apache.karaf.shell.commands.impl.EchoAction"/>
         </command>
         <command>
-            <action class="org.apache.karaf.shell.shell.ExecuteAction"/>
+            <action class="org.apache.karaf.shell.commands.impl.ExecuteAction"/>
         </command>
         <command>
-            <action class="org.apache.karaf.shell.shell.GrepAction"/>
+            <action class="org.apache.karaf.shell.commands.impl.GrepAction"/>
         </command>
         <command>
-            <action class="org.apache.karaf.shell.shell.HistoryAction"/>
+            <action class="org.apache.karaf.shell.commands.impl.HistoryAction"/>
         </command>
         <command>
-            <action class="org.apache.karaf.shell.shell.HeadAction"/>
+            <action class="org.apache.karaf.shell.commands.impl.HeadAction"/>
         </command>
         <command>
-            <action class="org.apache.karaf.shell.shell.IfAction"/>
+            <action class="org.apache.karaf.shell.commands.impl.IfAction"/>
         </command>
         <command>
-            <action class="org.apache.karaf.shell.shell.InfoAction">
+            <action class="org.apache.karaf.shell.commands.impl.InfoAction">
                 <property name="infoProviders" ref="infoProviders"/>
             </action>
         </command>
         <command>
-            <action class="org.apache.karaf.shell.shell.JavaAction"/>
+            <action class="org.apache.karaf.shell.commands.impl.JavaAction"/>
         </command>
         <command>
-            <action class="org.apache.karaf.shell.shell.MoreAction"/>
+            <action class="org.apache.karaf.shell.commands.impl.MoreAction"/>
         </command>
         <command>
-            <action class="org.apache.karaf.shell.shell.NewAction"/>
+            <action class="org.apache.karaf.shell.commands.impl.NewAction"/>
         </command>
         <command>
-            <action class="org.apache.karaf.shell.shell.LogoutAction"/>
+            <action class="org.apache.karaf.shell.commands.impl.LogoutAction"/>
         </command>
         <command>
-            <action class="org.apache.karaf.shell.shell.PrintfAction"/>
+            <action class="org.apache.karaf.shell.commands.impl.PrintfAction"/>
         </command>
         <command>
-            <action class="org.apache.karaf.shell.shell.SleepAction"/>
+            <action class="org.apache.karaf.shell.commands.impl.SleepAction"/>
         </command>
         <command>
-            <action class="org.apache.karaf.shell.shell.SortAction"/>
+            <action class="org.apache.karaf.shell.commands.impl.SortAction"/>
         </command>
         <command>
-            <action class="org.apache.karaf.shell.shell.SourceAction"/>
+            <action class="org.apache.karaf.shell.commands.impl.SourceAction"/>
         </command>
         <command>
-            <action class="org.apache.karaf.shell.shell.TacAction"/>
+            <action class="org.apache.karaf.shell.commands.impl.TacAction"/>
         </command>
         <command>
-            <action class="org.apache.karaf.shell.shell.TailAction"/>
+            <action class="org.apache.karaf.shell.commands.impl.TailAction"/>
         </command>
         <command>
-            <action class="org.apache.karaf.shell.shell.WatchAction">
+            <action class="org.apache.karaf.shell.commands.impl.WatchAction">
                 <property name="commandProcessor" ref="commandProcessor"/>
             </action>
             <completers>
@@ -100,13 +100,13 @@
         <argument ref="blueprintBundleContext" />
         <argument value="32" />
         <argument>
-            <bean class="org.apache.karaf.shell.shell.info.InfoBundleTrackerCustomizer">
+            <bean class="org.apache.karaf.shell.commands.impl.info.InfoBundleTrackerCustomizer">
                 <argument ref="blueprintBundleContext" />
             </bean>
         </argument>
     </bean>
 
-    <reference-list id="infoProviders" interface="org.apache.karaf.shell.shell.info.InfoProvider"
+    <reference-list id="infoProviders" interface="org.apache.karaf.shell.commands.impl.info.InfoProvider"
         availability="optional">
     </reference-list>
 

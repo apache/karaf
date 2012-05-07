@@ -16,29 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.karaf.shell.shell;
-
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.util.Arrays;
+package org.apache.karaf.shell.commands.impl;
 
 import junit.framework.TestCase;
-import org.apache.karaf.shell.commands.basic.DefaultActionPreparator;
 
-public class GrepTest extends TestCase {
+import org.apache.karaf.shell.commands.impl.InfoAction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-    public void testGrep() throws Exception {
-        InputStream input = System.in;
-        try {
-            ByteArrayInputStream bais = new ByteArrayInputStream("1\n2\n3\n4\n5\n6\n7\n8\n9\n".getBytes());
-            System.setIn(bais);
+public class InfoTest extends TestCase {
 
-            GrepAction grep = new GrepAction();
-            DefaultActionPreparator preparator = new DefaultActionPreparator();
-            preparator.prepare(grep, null, Arrays.<Object>asList("-C", "100", "2"));
-            grep.doExecute();
-        } finally {
-            System.setIn(input);
-        }
+    private static final transient Logger LOGGER = LoggerFactory.getLogger(TestCase.class);
+
+    public void testUptime() throws Exception {
+        InfoAction infoAction = new InfoAction();
+        // uptime 30 seconds
+        assertEquals("30.000 seconds", infoAction.printDuration(30 * 1000));
+        // uptime 2 minutes
+        assertEquals("2 minutes", infoAction.printDuration(2 * 60 * 1000));
+        // uptime 2 hours
+        assertEquals("2 hours", infoAction.printDuration(2 * 3600 * 1000));
+        // update 2 days and 2 hours
+        assertEquals("2 days 2 hours", infoAction.printDuration(50 * 3600 * 1000));
     }
+
 }

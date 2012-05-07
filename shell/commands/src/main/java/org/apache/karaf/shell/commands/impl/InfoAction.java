@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.shell.shell;
+package org.apache.karaf.shell.commands.impl;
 
 import java.lang.management.ClassLoadingMXBean;
 import java.lang.management.GarbageCollectorMXBean;
@@ -34,8 +34,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.karaf.shell.shell.info.InfoProvider;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.InfoProvider;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.fusesource.jansi.Ansi;
 

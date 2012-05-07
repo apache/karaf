@@ -1,6 +1,8 @@
-package org.apache.karaf.shell.shell.info;
+package org.apache.karaf.shell.commands.impl.info;
 
 import java.util.Properties;
+
+import org.apache.karaf.shell.commands.InfoProvider;
 
 public class PojoInfoProvider implements InfoProvider {
 

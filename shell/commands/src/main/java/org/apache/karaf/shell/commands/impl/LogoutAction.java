@@ -14,25 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.shell.shell;
+package org.apache.karaf.shell.commands.impl;
 
-import java.util.Collection;
-
-import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.console.AbstractAction;
+import org.apache.karaf.shell.console.CloseShellException;
 
-@Command(scope = "shell", name = "printf", description = "Formats and prints arguments.")
-public class PrintfAction extends AbstractAction {
-
-    @Argument(index = 0, name = "format", description = "The format pattern to use", required = true, multiValued = false)
-    private String format;
-
-    @Argument(index = 1, name = "arguments", description = "The arguments for the given format pattern", required = true, multiValued = true)
-    private Collection<Object> arguments = null;
+@Command(scope = "shell", name = "logout", description = "Disconnects shell from current session.")
+public class LogoutAction extends AbstractAction {
 
     protected Object doExecute() throws Exception {
-        System.out.printf(format, arguments.toArray());
-        return null;
+        log.info("Disconnecting from current session...");
+        throw new CloseShellException();
     }
+
 }

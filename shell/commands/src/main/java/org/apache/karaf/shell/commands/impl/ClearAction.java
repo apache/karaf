@@ -14,18 +14,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.shell.shell;
+package org.apache.karaf.shell.commands.impl;
 
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.console.AbstractAction;
-import org.apache.karaf.shell.console.CloseShellException;
 
-@Command(scope = "shell", name = "logout", description = "Disconnects shell from current session.")
-public class LogoutAction extends AbstractAction {
+/**
+ * A command to clear the console buffer
+ */
+@Command(scope = "shell", name = "clear", description = "Clears the console buffer.")
+public class ClearAction extends AbstractAction {
 
-    protected Object doExecute() throws Exception {
-        log.info("Disconnecting from current session...");
-        throw new CloseShellException();
-    }
+	protected Object doExecute() throws Exception {
+		System.out.print("\33[2J");
+		System.out.flush();
+		System.out.print("\33[1;1H");
+		System.out.flush();
+		return null;
+	}	
 
 }

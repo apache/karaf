@@ -16,11 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.karaf.shell.shell;
+package org.apache.karaf.shell.commands.impl;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Collections;
+
+import org.apache.karaf.shell.commands.impl.SortAction;
 
 import junit.framework.TestCase;
 
