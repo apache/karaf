@@ -39,7 +39,7 @@ public abstract class BundleCommand extends OsgiCommandSupport {
             System.err.println("Bundle " + id + " not found");
             return null;
         }
-        if (force || ShellUtil.isASystemBundle(bundleContext, bundle)) {
+        if (force || !ShellUtil.isASystemBundle(bundleContext, bundle)) {
             doExecute(bundle);
         } else {
             System.err.println("Access to system bundle " + id + " is discouraged. You may override with -f");
