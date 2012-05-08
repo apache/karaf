@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.shell.console.table;
+package org.apache.karaf.shell.table;
 
 import java.io.PrintStream;
 import java.util.ArrayList;

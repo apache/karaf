@@ -22,16 +22,16 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.karaf.package</groupId>
-        <artifactId>package</artifactId>
+        <groupId>org.apache.karaf.shell</groupId>
+        <artifactId>shell</artifactId>
         <version>3.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>org.apache.karaf.package.command</artifactId>
+    <artifactId>org.apache.karaf.shell.help</artifactId>
     <packaging>bundle</packaging>
-    <name>Apache Karaf :: Package :: Commands</name>
-    <description>Provides shell commands to list package exports and imports</description>
+    <name>Apache Karaf :: Shell :: Help System</name>
+    <description>This bundles provides the karaf help system</description>
 
     <properties>
         <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
@@ -39,18 +39,29 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.fusesource.jansi</groupId>
+            <artifactId>jansi</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.apache.karaf.shell</groupId>
             <artifactId>org.apache.karaf.shell.console</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.karaf.shell</groupId>
-            <artifactId>org.apache.karaf.shell.table</artifactId>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.gogo.runtime</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.karaf.package</groupId>
-            <artifactId>org.apache.karaf.package.core</artifactId>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.apache.karaf.util</artifactId>
+            <scope>provided</scope>
         </dependency>
-
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>org.apache.karaf</groupId>
             <artifactId>org.osgi.core</artifactId>
@@ -63,13 +74,8 @@
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-jdk14</artifactId>
+            <artifactId>slf4j-simple</artifactId>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.utils</artifactId>
-            <scope>provided</scope>
         </dependency>
     </dependencies>
 
@@ -95,12 +101,13 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Export-Package>!*</Export-Package>
+                        <Export-Package>
+                        	!org.apache.karaf.shell.commands.impl*
+                        </Export-Package>
                         <Private-Package>
-                            org.apache.karaf.packages.command*,
-                            org.apache.felix.utils.version;-split-package:=merge-first,
-                            org.apache.felix.utils.manifest;-split-package:=merge-first,
-                            !*
+                            org.apache.karaf.util.process;-split-package:=merge-first,
+                            org.apache.karaf.util;-split-package:=merge-first,
+                            org.apache.karaf.shell.help.impl*
                         </Private-Package>
                     </instructions>
                 </configuration>

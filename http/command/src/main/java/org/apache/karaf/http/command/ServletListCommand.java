@@ -22,8 +22,8 @@ import org.apache.karaf.http.core.ServletInfo;
 import org.apache.karaf.http.core.ServletService;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
-import org.apache.karaf.shell.console.table.Col;
-import org.apache.karaf.shell.console.table.ShellTable;
+import org.apache.karaf.shell.table.Col;
+import org.apache.karaf.shell.table.ShellTable;
 
 @Command(scope = "http", name = "list", description = "Lists details for servlets.")
 public class ServletListCommand extends OsgiCommandSupport {

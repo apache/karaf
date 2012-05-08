@@ -26,12 +26,7 @@
         </ext:default-properties>
     </ext:property-placeholder>
 
-    <reference id="commandProcessor" interface="org.apache.felix.service.command.CommandProcessor">
-<!--         <reference-listener ref="consoleFactory"
-                            bind-method="registerCommandProcessor"
-                            unbind-method="unregisterCommandProcessor"/>
-                             -->
-    </reference>
+    <reference id="commandProcessor" interface="org.apache.felix.service.command.CommandProcessor" />
 
     <bean id="consoleFactoryService" class="org.apache.karaf.shell.console.impl.jline.ConsoleFactoryService">
     </bean>    
@@ -52,58 +47,5 @@
 
     <bean id="terminalFactory" class="org.apache.karaf.shell.console.impl.jline.TerminalFactory"
           destroy-method="destroy"/>
-    <service>
-        <interfaces>
-            <value>org.apache.felix.service.command.Function</value>
-            <value>org.apache.karaf.shell.console.CompletableFunction</value>
-        </interfaces>
-        <service-properties>
-            <entry key="osgi.command.scope" value="*"/>
-            <entry key="osgi.command.function" value="help"/>
-        </service-properties>
-        <bean class="org.apache.karaf.shell.console.commands.BlueprintCommand">
-            <property name="blueprintContainer" ref="blueprintContainer"/>
-            <property name="blueprintConverter" ref="blueprintConverter"/>
-            <property name="actionId" value="help"/>
-            <property name="completers">
-                <list>
-                    <bean class="org.apache.karaf.shell.console.completer.CommandNamesCompleter"/>
-                </list>
-            </property>
-        </bean>
-    </service>
-
-    <bean id="help" class="org.apache.karaf.shell.console.impl.help.HelpAction" activation="lazy" scope="prototype">
-        <property name="provider" ref="helpSystem"/>
-    </bean>
-    
-    <bean id="helpSystem" class="org.apache.karaf.shell.console.impl.help.HelpSystem" destroy-method="stop">
-        <property name="context" ref="blueprintBundleContext"/>
-    </bean>
-    
-    <service auto-export="interfaces" ranking="-20">
-        <bean class="org.apache.karaf.shell.console.impl.help.CommandListHelpProvider" />
-    </service>
-    <service auto-export="interfaces" ranking="-10">
-        <bean class="org.apache.karaf.shell.console.impl.help.SingleCommandHelpProvider">
-            <property name="io">
-                <reference interface="org.apache.felix.service.threadio.ThreadIO"/>
-            </property>
-        </bean>
-    </service>
-    <service auto-export="interfaces" ref="subShellHelpProvider" ranking="-10"/>
-    <bean id="subShellHelpProvider" class="org.apache.karaf.shell.console.impl.help.SubShellHelpProvider" init-method="start" destroy-method="stop">
-        <property name="context" ref="blueprintBundleContext"/>
-    </bean>
-    <service auto-export="interfaces" ranking="-5">
-        <bean class="org.apache.karaf.shell.console.impl.help.SimpleHelpProvider">
-            <property name="help">
-                <map>
-                    <entry key="%root%"><value><![CDATA[${command-list|}]]></value></entry>
-                    <entry key="all"><value><![CDATA[${command-list|}]]></value></entry>
-                </map>
-            </property>
-        </bean>
-    </service>
 
 </blueprint>

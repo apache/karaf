@@ -13,11 +13,11 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.apache.karaf.shell.console.tabletest;
+package org.apache.karaf.shell.tabletest;
 
-import org.apache.karaf.shell.console.table.Col;
-import org.apache.karaf.shell.console.table.Row;
-import org.apache.karaf.shell.console.table.ShellTable;
+import org.apache.karaf.shell.table.Col;
+import org.apache.karaf.shell.table.Row;
+import org.apache.karaf.shell.table.ShellTable;
 import org.junit.Test;
 
 public class ShellTableTest {

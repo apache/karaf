@@ -106,6 +106,7 @@
                         </Export-Package>
                         <Private-Package>
                             org.apache.karaf.util.process;-split-package:=merge-first,
+                            org.apache.karaf.util;-split-package:=merge-first,
                             org.apache.karaf.shell.commands.impl*
                         </Private-Package>
                     </instructions>

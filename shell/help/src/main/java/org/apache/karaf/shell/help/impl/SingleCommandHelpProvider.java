@@ -15,44 +15,48 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.shell.console.impl.help;
+package org.apache.karaf.shell.help.impl;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import java.util.Map;
+import java.util.Set;
 
-import jline.Terminal;
+import org.apache.felix.gogo.runtime.CommandSessionImpl;
 import org.apache.felix.service.command.CommandSession;
-import org.apache.karaf.shell.commands.basic.DefaultActionPreparator;
+import org.apache.felix.service.threadio.ThreadIO;
 import org.apache.karaf.shell.console.HelpProvider;
 
-public class SimpleHelpProvider implements HelpProvider {
+public class SingleCommandHelpProvider implements HelpProvider {
+
+    private ThreadIO io;
     
-    private Map<String, String> help;
-
-    public Map<String, String> getHelp() {
-        return help;
-    }
-
-    public void setHelp(Map<String, String> help) {
-        this.help = help;
+    public SingleCommandHelpProvider(ThreadIO io) {
+        this.io = io;
     }
 
     public String getHelp(CommandSession session, String path) {
         if (path.indexOf('|') > 0) {
-            if (path.startsWith("simple|")) {
-                path = path.substring("simple|".length());
+            if (path.startsWith("command|")) {
+                path = path.substring("command|".length());
             } else {
                 return null;
             }
         }
-        String str = help.get(path);
-        if (str != null) {
-            Terminal term = (Terminal) session.get(".jline.terminal");
+        @SuppressWarnings("unchecked")
+        Set<String> names = (Set<String>) session.get(CommandSessionImpl.COMMANDS);
+        if (path != null && names.contains(path)) {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            DefaultActionPreparator.printFormatted("", str, term != null ? term.getWidth() : 80, new PrintStream(baos, true));
-            str = baos.toString();
+            io.setStreams(new ByteArrayInputStream(new byte[0]), new PrintStream(baos, true), new PrintStream(baos, true));
+            try {
+                session.execute(path + " --help");
+            } catch (Throwable t) {
+                t.printStackTrace();
+            } finally {
+                io.close();
+            }
+            return baos.toString();
         }
-        return str;
+        return null;
     }
 }

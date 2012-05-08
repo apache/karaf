@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.shell.console.impl.help;
+package org.apache.karaf.shell.help.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,33 +27,29 @@ import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.shell.console.HelpProvider;
 import org.apache.karaf.util.InterpolationHelper;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTracker;
 
 public class HelpSystem implements HelpProvider {
 
     private BundleContext context;
-    private ServiceTracker tracker;
 
-    public void setContext(BundleContext context) {
+    public HelpSystem(BundleContext context) {
         this.context = context;
     }
 
-    public void start() {
-        tracker = new ServiceTracker(context, HelpProvider.class.getName(), null);
-        tracker.open();
-    }
-    
-    public void stop() {
-        tracker.close();
-    }
-    
+    @SuppressWarnings("unchecked")
     public synchronized List<HelpProvider> getProviders() {
-        ServiceReference[] refs = tracker.getServiceReferences();
+        ServiceReference<HelpProvider> [] refs = null;
+        try {
+            refs = context.getServiceReferences(HelpProvider.class, null).toArray(new ServiceReference[]{});
+        } catch (InvalidSyntaxException e) {
+            throw new RuntimeException(e);
+        }
         Arrays.sort(refs);
         List<HelpProvider> providers = new ArrayList<HelpProvider>();
         for (int i = refs.length - 1; i >= 0; i--) {
-            providers.add((HelpProvider) tracker.getService(refs[i]));
+            providers.add(context.getService(refs[i]));
         }
         return providers;
     }
@@ -68,18 +64,22 @@ public class HelpSystem implements HelpProvider {
         InterpolationHelper.performSubstitution(props, new InterpolationHelper.SubstitutionCallback() {
             public String getValue(final String key) {
                 for (HelpProvider hp : providers) {
-                    String help = hp.getHelp(session, key);
-                    if (help != null) {
-                        if (help.endsWith("\n")) {
-                            help = help.substring(0, help.length()  -1);
-                        }
-                        return help;
+                    String result = hp.getHelp(session, key);
+                    if (result != null) {
+                        return removeNewLine(result);
                     }
                 }
                 return null;
             }
         });
         return props.get("data");
+    }
+    
+    private String removeNewLine(String help) {
+        if (help != null && help.endsWith("\n")) {
+            help = help.substring(0, help.length()  -1);
+        }
+        return help;
     }
     
 }
