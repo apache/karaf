@@ -22,8 +22,8 @@ import org.apache.karaf.packages.core.PackageService;
 import org.apache.karaf.packages.core.PackageVersion;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
-import org.apache.karaf.shell.console.table.Col;
-import org.apache.karaf.shell.console.table.ShellTable;
+import org.apache.karaf.shell.table.Col;
+import org.apache.karaf.shell.table.ShellTable;
 import org.osgi.framework.Bundle;
 
 @Command(scope = "package", name = "exports", description = "Lists exported packages and the bundles that export them")

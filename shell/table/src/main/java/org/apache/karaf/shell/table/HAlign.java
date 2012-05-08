@@ -13,9 +13,9 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.apache.karaf.shell.console.table;
+package org.apache.karaf.shell.table;
 
-import static org.apache.karaf.shell.console.table.StringUtil.*;
+import static org.apache.karaf.shell.table.StringUtil.*;
 
 /**
  * Enumeration type which contains all possible horizontal alignments.

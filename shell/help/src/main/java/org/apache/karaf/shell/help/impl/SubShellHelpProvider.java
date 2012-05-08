@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.shell.console.impl.help;
+package org.apache.karaf.shell.help.impl;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -63,7 +63,7 @@ public class SubShellHelpProvider implements HelpProvider {
                 return null;
             }
         }
-        for (ServiceReference ref : tracker.getServiceReferences()) {
+        for (ServiceReference<?> ref : tracker.getServiceReferences()) {
             if (path.equals(ref.getProperty("name"))) {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 printSubShellHelp(session, ref.getBundle(), (SubShell) tracker.getService(ref), new PrintStream(baos, true));
@@ -75,17 +75,17 @@ public class SubShellHelpProvider implements HelpProvider {
 
     private void printSubShellHelp(CommandSession session, Bundle bundle, SubShell subShell, PrintStream out) {
         Terminal term = session != null ? (Terminal) session.get(".jline.terminal") : null;
-        out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("SUBSHELL").a(Ansi.Attribute.RESET));
+        out.println(Ansi.ansi().bold().a("SUBSHELL").boldOff());
         out.print("        ");
         if (subShell.getName() != null) {
-            out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a(subShell.getName()).a(Ansi.Attribute.RESET));
+            out.println(Ansi.ansi().bold().a(subShell.getName()).boldOff());
             out.println();
         }
         out.print("\t");
         out.println(subShell.getDescription());
         out.println();
         if (subShell.getDetailedDescription() != null) {
-            out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("DETAILS").a(Ansi.Attribute.RESET));
+            out.println(Ansi.ansi().bold().a("DETAILS").boldOff());
             String desc = loadDescription(bundle, subShell.getDetailedDescription());
             while (desc.endsWith("\n")) {
                 desc = desc.substring(0, desc.length()  -1);

@@ -22,16 +22,16 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.karaf.package</groupId>
-        <artifactId>package</artifactId>
+        <groupId>org.apache.karaf.shell</groupId>
+        <artifactId>shell</artifactId>
         <version>3.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>org.apache.karaf.package.command</artifactId>
+    <artifactId>org.apache.karaf.shell.table</artifactId>
     <packaging>bundle</packaging>
-    <name>Apache Karaf :: Package :: Commands</name>
-    <description>Provides shell commands to list package exports and imports</description>
+    <name>Apache Karaf :: Shell :: Table</name>
+    <description>Table support for the command line</description>
 
     <properties>
         <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
@@ -39,21 +39,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.apache.karaf.shell</groupId>
-            <artifactId>org.apache.karaf.shell.console</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.shell</groupId>
-            <artifactId>org.apache.karaf.shell.table</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.package</groupId>
-            <artifactId>org.apache.karaf.package.core</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.karaf</groupId>
-            <artifactId>org.osgi.core</artifactId>
+            <groupId>org.fusesource.jansi</groupId>
+            <artifactId>jansi</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -63,45 +50,18 @@
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-jdk14</artifactId>
+            <artifactId>slf4j-simple</artifactId>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.utils</artifactId>
-            <scope>provided</scope>
         </dependency>
     </dependencies>
 
     <build>
-        <resources>
-            <resource>
-                <directory>${project.basedir}/src/main/resources</directory>
-                <includes>
-                    <include>**/*</include>
-                </includes>
-            </resource>
-            <resource>
-                <directory>${project.basedir}/src/main/resources</directory>
-                <filtering>true</filtering>
-                <includes>
-                    <include>**/*.info</include>
-                </includes>
-            </resource>
-        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Export-Package>!*</Export-Package>
-                        <Private-Package>
-                            org.apache.karaf.packages.command*,
-                            org.apache.felix.utils.version;-split-package:=merge-first,
-                            org.apache.felix.utils.manifest;-split-package:=merge-first,
-                            !*
-                        </Private-Package>
                     </instructions>
                 </configuration>
             </plugin>
