@@ -16,6 +16,8 @@
  */
 package org.apache.karaf.bundle.core.internal;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
@@ -42,15 +44,17 @@ public class BlueprintListener implements org.osgi.service.blueprint.container.B
     private final Map<Long, BlueprintEvent> states;
 
     public BlueprintListener() {
-        this.states = new ConcurrentHashMap<Long, BlueprintEvent>();
+        states = new ConcurrentHashMap<Long, BlueprintEvent>();
     }
 
+    @Override
     public String getName() {
         return BundleStateService.NAME_BLUEPRINT;
     }
 
+    @Override
     public String getDiag(Bundle bundle) {
-        BlueprintEvent event = this.states.get(bundle.getBundleId());
+        BlueprintEvent event = states.get(bundle.getBundleId());
         if (event == null) {
             return null;
         }
@@ -75,21 +79,24 @@ public class BlueprintListener implements org.osgi.service.blueprint.container.B
         }
         return message.toString();
     }
-    
+
     public void addMessages(StringBuilder message, Throwable ex) {
         message.append(ex.getMessage());
         message.append("\n");
-        if (ex.getCause() != null) {
-            addMessages(message, ex.getCause());
-        }
+        StringWriter errorWriter = new StringWriter();
+        ex.printStackTrace(new PrintWriter(errorWriter));
+        message.append(errorWriter.toString());
+        message.append("\n");
     }
 
+    @Override
     public BundleState getState(Bundle bundle) {
         BlueprintEvent event = states.get(bundle.getBundleId());
         BundleState state = getState(event);
         return (bundle.getState() != Bundle.ACTIVE) ? BundleState.Unknown : state;
     }
 
+    @Override
     public void blueprintEvent(BlueprintEvent blueprintEvent) {
         if (LOG.isDebugEnabled()) {
             BundleState state = getState(blueprintEvent);
@@ -99,6 +106,7 @@ public class BlueprintListener implements org.osgi.service.blueprint.container.B
         states.put(blueprintEvent.getBundle().getBundleId(), blueprintEvent);
     }
 
+    @Override
     public void bundleChanged(BundleEvent event) {
         if (event.getType() == BundleEvent.UNINSTALLED) {
             states.remove(event.getBundle().getBundleId());
