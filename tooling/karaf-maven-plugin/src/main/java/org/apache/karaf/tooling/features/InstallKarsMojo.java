@@ -18,10 +18,25 @@
  */
 package org.apache.karaf.tooling.features;
 
-import java.io.*;
+import static java.lang.String.format;
+
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.net.URI;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.stream.XMLStreamException;
@@ -31,15 +46,13 @@ import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
 import org.apache.karaf.features.internal.model.Bundle;
-import org.apache.karaf.features.internal.model.Features;
 import org.apache.karaf.features.internal.model.Feature;
+import org.apache.karaf.features.internal.model.Features;
 import org.apache.karaf.features.internal.model.JaxbUtil;
 import org.apache.karaf.kar.internal.KarServiceImpl;
 import org.apache.karaf.tooling.utils.MojoSupport;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
-import org.apache.maven.artifact.repository.metadata.*;
-import org.apache.maven.artifact.repository.metadata.io.xpp3.MetadataXpp3Writer;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.sonatype.aether.RepositorySystem;
@@ -128,7 +141,7 @@ public class InstallKarsMojo extends MojoSupport {
      */
     private List<String> installedFeatures;
 
-    //Aether support
+    // Aether support
     /**
      * The entry point to Aether, i.e. the component doing all the work.
      *
@@ -160,6 +173,7 @@ public class InstallKarsMojo extends MojoSupport {
      */
     private List<Feature> localRepoFeatures = new ArrayList<Feature>();
 
+    @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         systemDirectory.mkdirs();
         system = systemDirectory.toURI();
@@ -251,8 +265,8 @@ public class InstallKarsMojo extends MojoSupport {
             }
         }
 
-        //install bundles listed in startup properties that weren't in kars into the system dir
-        for (String key : (Set<String>) startupProperties.keySet()) {
+        // install bundles listed in startup properties that weren't in kars into the system dir
+        for (String key : startupProperties.keySet()) {
             String path = MavenUtil.pathFromMaven(key);
             File target = new File(system.resolve(path));
             if (!target.exists()) {
@@ -260,7 +274,7 @@ public class InstallKarsMojo extends MojoSupport {
             }
         }
 
-        //install bundles listed in install features not in system into local-repo
+        // install bundles listed in install features not in system into local-repo
         for (Feature feature : localRepoFeatures) {
             for (Bundle bundle : feature.getBundle()) {
                 if (!bundle.isDependency()) {
@@ -363,9 +377,11 @@ public class InstallKarsMojo extends MojoSupport {
         private static final String FEATURES_REPOSITORIES = "featuresRepositories";
         private static final String FEATURES_BOOT = "featuresBoot";
 
+        @Override
         public void validateRepository(URI uri) throws Exception {
         }
 
+        @Override
         public void addRepository(URI uri) throws Exception {
             if (dontAddToStartup) {
                 getLog().info("Adding feature repository to system: " + uri);
@@ -431,32 +447,39 @@ public class InstallKarsMojo extends MojoSupport {
             return features;
         }
 
+        @Override
         public void removeRepository(URI url) {
         }
 
+        @Override
         public void restoreRepository(URI url) throws Exception {
         }
 
+        @Override
         public Repository[] listRepositories() {
             return new Repository[0];
         }
 
+        @Override
         public void installFeature(String name) throws Exception {
         }
 
+        @Override
         public void installFeature(String name, String version) throws Exception {
         }
 
+        @Override
         public void installFeature(String name, String version, EnumSet<Option> options) throws Exception {
         }
 
+        @Override
         public void installFeature(org.apache.karaf.features.Feature feature, EnumSet<Option> options) throws Exception {
             List<String> comment = Arrays.asList(new String[]{"", "# feature: " + feature.getName() + " version: " + feature.getVersion()});
             for (BundleInfo bundle : feature.getBundles()) {
                 String location = bundle.getLocation();
                 String startLevel = Integer.toString(bundle.getStartLevel() == 0 ? defaultStartLevel : bundle.getStartLevel());
                 if (startupProperties.containsKey(location)) {
-                    int oldStartLevel = Integer.decode((String) startupProperties.get(location));
+                    int oldStartLevel = Integer.decode(startupProperties.get(location));
                     if (oldStartLevel > bundle.getStartLevel()) {
                         startupProperties.put(location, startLevel);
                     }
@@ -471,31 +494,40 @@ public class InstallKarsMojo extends MojoSupport {
             }
         }
 
-        public void installFeatures(Set<org.apache.karaf.features.Feature> features, EnumSet<Option> options) throws Exception {
+        @Override
+        public void installFeatures(Set<org.apache.karaf.features.Feature> features, EnumSet<Option> options)
+            throws Exception {
         }
 
+        @Override
         public void uninstallFeature(String name) throws Exception {
         }
 
+        @Override
         public void uninstallFeature(String name, String version) throws Exception {
         }
 
+        @Override
         public Feature[] listFeatures() throws Exception {
             return new Feature[0];
         }
 
+        @Override
         public Feature[] listInstalledFeatures() {
             return new Feature[0];
         }
 
+        @Override
         public boolean isInstalled(org.apache.karaf.features.Feature f) {
             return false;
         }
 
+        @Override
         public org.apache.karaf.features.Feature getFeature(String name, String version) throws Exception {
             return null;
         }
 
+        @Override
         public org.apache.karaf.features.Feature getFeature(String name) throws Exception {
             return null;
         }
@@ -508,7 +540,7 @@ public class InstallKarsMojo extends MojoSupport {
         private Map<String, String> storage;
 
         public CommentProperties() {
-            this.layout = (Map<String, Layout>) getField("layout");
+            layout = (Map<String, Layout>) getField("layout");
             storage = (Map<String, String>) getField("storage");
         }
 
@@ -542,13 +574,13 @@ public class InstallKarsMojo extends MojoSupport {
             for (String line : valueLines) {
                 value.append(line);
             }
-            this.layout.put(key, new Layout(commentLines, valueLines));
+            layout.put(key, new Layout(commentLines, valueLines));
             return storage.put(key, unescapeJava(value.toString()));
         }
 
         public String put(String key, List<String> commentLines, String value) {
             commentLines = new ArrayList<String>(commentLines);
-            this.layout.put(key, new Layout(commentLines, null));
+            layout.put(key, new Layout(commentLines, null));
             return storage.put(key, value);
         }
 
@@ -572,12 +604,12 @@ public class InstallKarsMojo extends MojoSupport {
         /**
          * The list of possible key/value separators
          */
-        private static final char[] SEPARATORS = new char[]{'=', ':'};
+        private static final char[] SEPARATORS = new char[]{ '=', ':' };
 
         /**
          * The white space characters used as key/value separators.
          */
-        private static final char[] WHITE_SPACE = new char[]{' ', '\t', '\f'};
+        private static final char[] WHITE_SPACE = new char[]{ ' ', '\t', '\f' };
 
         /**
          * Escape the separators in the key.
