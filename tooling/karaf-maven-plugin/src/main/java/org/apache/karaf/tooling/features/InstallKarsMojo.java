@@ -325,7 +325,7 @@ public class InstallKarsMojo extends MojoSupport {
         }
     }
 
-    private void install(byte[] buffer, String key, File target) {
+    private void install(byte[] buffer, String key, File target) throws MojoFailureException {
         File source = resolve(key);
         target.getParentFile().mkdirs();
         try {
@@ -350,7 +350,7 @@ public class InstallKarsMojo extends MojoSupport {
         return "compile".equals(artifact.getScope()) || "runtime".equals(artifact.getScope());
     }
 
-    public File resolve(String id) {
+    public File resolve(String id) throws MojoFailureException {
         id = MavenUtil.mvnToAether(id);
         ArtifactRequest request = new ArtifactRequest();
         request.setArtifact(new DefaultArtifact(id));
@@ -364,7 +364,7 @@ public class InstallKarsMojo extends MojoSupport {
             result = repoSystem.resolveArtifact(repoSession, request);
         } catch (ArtifactResolutionException e) {
             getLog().warn("could not resolve " + id, e);
-            return null;
+            throw new MojoFailureException(format("Couldn't resolve artifact %s", id), e);
         }
 
         getLog().debug("Resolved artifact " + id + " to " +
