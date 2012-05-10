@@ -15,7 +15,6 @@
  */
 package org.apache.karaf.shell.table;
 
-import java.text.Format;
 
 
 /**
@@ -30,18 +29,17 @@ public class Col {
 
     /**
      * Maximum size of this column. The default -1 means the column
-     * may grow indefinately
+     * may grow indefinitely
      */
-    private int maxSize = -1;
+    int maxSize = -1;
     
-    private int size = 0;
-
+    int size = 0;
     
     /**
      * Alignment
      */
     private HAlign align = HAlign.left;
-    
+
     public Col(String header) {
         this.header = header;
     }
@@ -95,20 +93,16 @@ public class Col {
         return header;
     }
 
-    int getMaxSize() {
-        return maxSize;
-    }
-
-    Format getFormat() {
-        return null;
-    }
-
-    int getSize() {
-        return this.size;
-    }
-
     String getContent(String content) {
-        return this.align.position(content, this.size);
+        return this.align.position(cut(content, this.size), this.size);
+    }
+
+    private String cut(String content, int size) {
+        if (content.length() <= size) {
+            return content;
+        } else {
+            return content.substring(0, Math.max(0, size - 1));
+        }
     }
 
 }

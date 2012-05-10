@@ -48,21 +48,21 @@ public class Row {
         }
     }
     
-    String getContent(List<Col> cols) {
+    String getContent(List<Col> cols, String separator) {
         StringBuilder st = new StringBuilder();
         int c = 0;
         if (cols.size() != content.size()) {
             throw new RuntimeException("Number of columns and number of content elements do not match");
         }
-        //st.append("| ");
+
         for (Col col : cols) {
             st.append(col.getContent(content.get(c)));
             if (c + 1 < cols.size()) {
-                st.append(" | ");
+                st.append(separator);
             }
             c++;
         }
-        //st.append(" |");
+
         return st.toString();
     }
 
