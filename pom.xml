@@ -163,24 +163,24 @@
         <felix.scr.version>1.6.0</felix.scr.version>
         <felix.scr.annotation.version>1.6.0</felix.scr.annotation.version>
 
-        <aries.application.version>0.3</aries.application.version>
-        <aries.blueprint.annotation.api.version>0.3.3-SNAPSHOT</aries.blueprint.annotation.api.version>
-        <aries.blueprint.annotation.impl.version>0.3.3-SNAPSHOT</aries.blueprint.annotation.impl.version>
-        <aries.blueprint.api.version>0.3.1</aries.blueprint.api.version>
-        <aries.blueprint.cm.version>0.3.3-SNAPSHOT</aries.blueprint.cm.version>
-        <aries.blueprint.core.compatibility.version>0.4.1-SNAPSHOT</aries.blueprint.core.compatibility.version>
-        <aries.blueprint.core.version>0.4.1-SNAPSHOT</aries.blueprint.core.version>
-        <aries.blueprint.jexl.evaluator.version>0.1.1-SNAPSHOT</aries.blueprint.jexl.evaluator.version>
-        <aries.jmx.version>0.3.1-SNAPSHOT</aries.jmx.version>
-        <aries.jpa.version>0.3</aries.jpa.version>
-        <aries.jndi.api.version>0.3</aries.jndi.api.version>
-        <aries.jndi.version>0.3.2-SNAPSHOT</aries.jndi.version>
-        <aries.proxy.api.version>0.4</aries.proxy.api.version>
-        <aries.proxy.impl.version>0.4.1-SNAPSHOT</aries.proxy.impl.version>
-        <aries.quiesce.api.version>0.3</aries.quiesce.api.version>
-        <aries.quiesce.manager.version>0.3.1</aries.quiesce.manager.version>
-        <aries.transaction.version>0.3</aries.transaction.version>
-        <aries.util.version>0.5-SNAPSHOT</aries.util.version>
+        <aries.application.version>1.0.0-SNAPSHOT</aries.application.version>
+        <aries.blueprint.annotation.api.version>1.0.0-SNAPSHOT</aries.blueprint.annotation.api.version>
+        <aries.blueprint.annotation.impl.version>1.0.0-SNAPSHOT</aries.blueprint.annotation.impl.version>
+        <aries.blueprint.api.version>1.0.0-SNAPSHOT</aries.blueprint.api.version>
+        <aries.blueprint.cm.version>1.0.0-SNAPSHOT</aries.blueprint.cm.version>
+        <aries.blueprint.core.compatibility.version>1.0.0-SNAPSHOT</aries.blueprint.core.compatibility.version>
+        <aries.blueprint.core.version>1.0.0-SNAPSHOT</aries.blueprint.core.version>
+        <aries.blueprint.jexl.evaluator.version>1.0.0-SNAPSHOT</aries.blueprint.jexl.evaluator.version>
+        <aries.jmx.version>1.0.0-SNAPSHOT</aries.jmx.version>
+        <aries.jpa.version>1.0.0-SNAPSHOT</aries.jpa.version>
+        <aries.jndi.api.version>1.0.0-SNAPSHOT</aries.jndi.api.version>
+        <aries.jndi.version>1.0.0-SNAPSHOT</aries.jndi.version>
+        <aries.proxy.api.version>1.0.0-SNAPSHOT</aries.proxy.api.version>
+        <aries.proxy.impl.version>1.0.0-SNAPSHOT</aries.proxy.impl.version>
+        <aries.quiesce.api.version>1.0.0-SNAPSHOT</aries.quiesce.api.version>
+        <aries.quiesce.manager.version>1.0.0-SNAPSHOT</aries.quiesce.manager.version>
+        <aries.transaction.version>1.0.0-SNAPSHOT</aries.transaction.version>
+        <aries.util.version>1.0.0-SNAPSHOT</aries.util.version>
 
         <gemini.blueprint.version>1.0.0.RELEASE</gemini.blueprint.version>
         <jansi.version>1.8</jansi.version>
@@ -1354,7 +1354,23 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.aries.jmx</groupId>
-                <artifactId>org.apache.aries.jmx.blueprint</artifactId>
+                <artifactId>org.apache.aries.jmx.whiteboard</artifactId>
+                <version>${aries.jmx.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.aries.jmx</groupId>
+                <artifactId>org.apache.aries.jmx.blueprint.api</artifactId>
+                <version>${aries.jmx.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-api</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.aries.jmx</groupId>
+                <artifactId>org.apache.aries.jmx.blueprint.core</artifactId>
                 <version>${aries.jmx.version}</version>
                 <exclusions>
                     <exclusion>
