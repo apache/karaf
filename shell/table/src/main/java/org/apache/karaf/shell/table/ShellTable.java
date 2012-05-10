@@ -24,9 +24,27 @@ import java.util.List;
 public class ShellTable {
     private List<Col> cols = new ArrayList<Col>();
     private List<Row> rows = new ArrayList<Row>();
+    boolean showHeaders = true;
+    private String separator = " | ";
+    private int size;
     
     public ShellTable() {
         
+    }
+    
+    public ShellTable noHeaders() {
+        this.showHeaders = false;
+        return this;
+    }
+    
+    public ShellTable separator(String separator) {
+        this.separator = separator;
+        return this;
+    }
+    
+    public ShellTable size(int size) {
+        this.size = size;
+        return this;
     }
     
     public ShellTable column(Col colunmn) {
@@ -46,13 +64,37 @@ public class ShellTable {
         for (Row row : rows) {
             row.formatContent(cols);
         }
-
-        String headerLine = headerRow.getContent(cols);
-        out.println(headerLine);
-        out.println(underline(headerLine.length()));
-        for (Row row : rows) {
-            out.println(row.getContent(cols));
+        
+        if (size > 0) {
+            tryGrowToMaxSize();
         }
+
+        if (showHeaders) {
+            String headerLine = headerRow.getContent(cols, separator);
+            out.println(headerLine);
+            out.println(underline(headerLine.length()));
+        }
+
+        for (Row row : rows) {
+            out.println(row.getContent(cols, separator));
+        }
+    }
+
+    private void tryGrowToMaxSize() {
+        int currentSize = 0;
+        for (Col col : cols) {
+            currentSize += col.size + separator.length();
+        }
+        currentSize -= separator.length();
+        int sizeToGrow = size - currentSize;
+
+        for (Col col : cols) {
+            if (col.maxSize == -1) {
+                col.size = Math.max(0, col.size + sizeToGrow);
+                return;
+            }
+        }
+
     }
 
     private String underline(int length) {

@@ -15,6 +15,12 @@
  */
 package org.apache.karaf.shell.tabletest;
 
+import java.io.PrintStream;
+import java.io.StringWriter;
+
+import junit.framework.Assert;
+
+import org.apache.commons.io.output.WriterOutputStream;
 import org.apache.karaf.shell.table.Col;
 import org.apache.karaf.shell.table.Row;
 import org.apache.karaf.shell.table.ShellTable;
@@ -28,15 +34,82 @@ public class ShellTableTest {
         table.column(new Col("id").alignRight().maxSize(5));
         table.column(new Col("Name").maxSize(20));
         table.column(new Col("Centered").alignCenter());
-        
+
         table.addRow().addContent(1, "Test", "Description");
         table.addRow().addContent(20, "My name", "Description");
-        
+
         Row row = table.addRow();
         row.addContent(123456789);
         row.addContent("A very long text that should be cut");
         row.addContent("A very long text that should not be cut");
-        
-        table.print(System.out);
+
+        StringWriter writer = new StringWriter();
+        PrintStream out = new PrintStream(new WriterOutputStream(writer));
+        table.print(out);
+        out.flush();
+        String expected = 
+                "   id | Name                 |                Centered                \r\n" + 
+                "----------------------------------------------------------------------\r\n" + 
+                "    1 | Test                 |               Description              \r\n" + 
+                "   20 | My name              |               Description              \r\n" + 
+                "12345 | A very long text tha | A very long text that should not be cut\r\n";
+        Assert.assertEquals(expected, writer.getBuffer().toString());
+    }
+
+    @Test
+    public void testGrow() {
+        ShellTable table = new ShellTable().size(10);
+        table.column(new Col("1"));
+        table.column(new Col("2"));
+
+        table.addRow().addContent("1", "2");
+
+        StringWriter writer = new StringWriter();
+        PrintStream out = new PrintStream(new WriterOutputStream(writer));
+        table.print(out);
+        out.flush();
+        String expected = 
+                "1      | 2\r\n" + 
+        		"----------\r\n" + 
+        		"1      | 2\r\n";
+        Assert.assertEquals(expected, writer.getBuffer().toString());
+    }
+
+    @Test
+    public void testShrink() {
+        ShellTable table = new ShellTable().size(10);
+        table.column(new Col("1").maxSize(5));
+        table.column(new Col("2").alignRight());
+
+        table.addRow().addContent("quite long", "and here an even longer text");
+
+        StringWriter writer = new StringWriter();
+        PrintStream out = new PrintStream(new WriterOutputStream(writer));
+        table.print(out);
+        out.flush();
+        String expected = //
+                  "1     |  2\r\n" //
+                + "----------\r\n" //
+                + "quite |  a\r\n";
+        Assert.assertEquals(expected, writer.getBuffer().toString());
+    }
+    
+    @Test
+    public void testTooSmall() {
+        ShellTable table = new ShellTable().size(2);
+        table.column(new Col("1").maxSize(5));
+        table.column(new Col("2").alignRight());
+
+        table.addRow().addContent("quite long", "and here an even longer text");
+
+        StringWriter writer = new StringWriter();
+        PrintStream out = new PrintStream(new WriterOutputStream(writer));
+        table.print(out);
+        out.flush();
+        String expected = //
+                  "1     | \r\n" + // 
+                  "--------\r\n" + //
+                  "quite | \r\n";
+        Assert.assertEquals(expected, writer.getBuffer().toString());
     }
 }
