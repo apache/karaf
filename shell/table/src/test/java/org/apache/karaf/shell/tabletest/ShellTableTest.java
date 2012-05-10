@@ -48,12 +48,12 @@ public class ShellTableTest {
         table.print(out);
         out.flush();
         String expected = 
-                "   id | Name                 |                Centered                \r\n" + 
-                "----------------------------------------------------------------------\r\n" + 
-                "    1 | Test                 |               Description              \r\n" + 
-                "   20 | My name              |               Description              \r\n" + 
-                "12345 | A very long text tha | A very long text that should not be cut\r\n";
-        Assert.assertEquals(expected, writer.getBuffer().toString());
+                "   id | Name                 |                Centered                \n" + 
+                "----------------------------------------------------------------------\n" + 
+                "    1 | Test                 |               Description              \n" + 
+                "   20 | My name              |               Description              \n" + 
+                "12345 | A very long text tha | A very long text that should not be cut\n";
+        Assert.assertEquals(expected, getString(writer));
     }
 
     @Test
@@ -69,10 +69,10 @@ public class ShellTableTest {
         table.print(out);
         out.flush();
         String expected = 
-                "1      | 2\r\n" + 
-        		"----------\r\n" + 
-        		"1      | 2\r\n";
-        Assert.assertEquals(expected, writer.getBuffer().toString());
+                "1      | 2\n" + 
+        		"----------\n" + 
+        		"1      | 2\n";
+        Assert.assertEquals(expected, getString(writer));
     }
 
     @Test
@@ -88,12 +88,12 @@ public class ShellTableTest {
         table.print(out);
         out.flush();
         String expected = //
-                  "1     |  2\r\n" //
-                + "----------\r\n" //
-                + "quite |  a\r\n";
-        Assert.assertEquals(expected, writer.getBuffer().toString());
+                  "1     |  2\n" //
+                + "----------\n" //
+                + "quite |  a\n";
+        Assert.assertEquals(expected, getString(writer));
     }
-    
+
     @Test
     public void testTooSmall() {
         ShellTable table = new ShellTable().size(2);
@@ -107,9 +107,14 @@ public class ShellTableTest {
         table.print(out);
         out.flush();
         String expected = //
-                  "1     | \r\n" + // 
-                  "--------\r\n" + //
-                  "quite | \r\n";
-        Assert.assertEquals(expected, writer.getBuffer().toString());
+                  "1     | \n" + // 
+                  "--------\n" + //
+                  "quite | \n";
+        Assert.assertEquals(expected, getString(writer));
     }
+    
+    private String getString(StringWriter writer) {
+        return writer.getBuffer().toString().replace("\r\n", "\n");
+    }
+
 }
