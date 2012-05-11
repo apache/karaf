@@ -141,7 +141,6 @@
                         	org.apache.karaf.shell.console,
                         	org.apache.karaf.shell.console.commands,
                         	org.apache.karaf.shell.console.completer,
-                        	org.apache.karaf.shell.console.table,
                         	org.apache.karaf.shell.util,
                             org.apache.felix.gogo*;version=${felix.gogo.version},
                             org.apache.felix.service.command;version=${felix.gogo.version};status=provisional;mandatory:=status,
@@ -154,7 +153,6 @@
                         	org.apache.karaf.shell.console.impl*,
                             org.fusesource.jansi.internal;-split-package:=first,
                             org.apache.felix.gogo.runtime*;-split-package:=first,
-                            org.apache.karaf.util*;-split-package:=first,
                             META-INF.native.*;-split-package:=first
                         </Private-Package>
                         <Bundle-NativeCode>

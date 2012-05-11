@@ -16,20 +16,34 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.karaf.shell.console.help;
+package org.apache.felix.gogo.commands;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.annotation.ElementType;
 
-import junit.framework.TestCase;
-import org.apache.karaf.shell.commands.basic.DefaultActionPreparator;
+/**
+ * Represents a positional argument on a command line (as opposed to an optional named {@link Option}
+ */
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.FIELD})
+@Deprecated
+public @interface Argument
+{
+    public static final String DEFAULT_STRING= "DEFAULT";
 
-public class TestFormatting extends TestCase {
-    
-    public void testFormat() throws Exception {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        DefaultActionPreparator.printFormatted("  ",
-                "  This is a test with a long paragraph\n\n  with an indented paragraph\nAnd another one\n", 20, new PrintStream(baos, true));
-        System.err.println(baos.toString());
-    }
+    String DEFAULT = "##default";
+
+    String name() default DEFAULT;
+
+    String description() default "";
+
+    boolean required() default false;
+
+    int index() default 0;
+
+    boolean multiValued() default false;
+
+    String valueToShowInHelp() default DEFAULT_STRING;
 }
