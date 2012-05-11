@@ -17,13 +17,9 @@
  */
 package org.apache.karaf.shell.help.impl;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
 import java.util.Map;
 
-import jline.Terminal;
 import org.apache.felix.service.command.CommandSession;
-import org.apache.karaf.shell.commands.basic.DefaultActionPreparator;
 import org.apache.karaf.shell.console.HelpProvider;
 
 public class SimpleHelpProvider implements HelpProvider {
@@ -47,12 +43,6 @@ public class SimpleHelpProvider implements HelpProvider {
             }
         }
         String str = help.get(path);
-        if (str != null) {
-            Terminal term = (Terminal) session.get(".jline.terminal");
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            DefaultActionPreparator.printFormatted("", str, term != null ? term.getWidth() : 80, new PrintStream(baos, true));
-            str = baos.toString();
-        }
         return str;
     }
 }

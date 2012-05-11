@@ -63,18 +63,18 @@ public class SimpleCommand extends AbstractCommand {
     }
 
 
-    public static ServiceRegistration export(BundleContext context, Class<? extends Action> actionClass)
+    public static ServiceRegistration<Function> export(BundleContext context, Class<? extends Action> actionClass)
     {
         Command cmd = actionClass.getAnnotation(Command.class);
         if (cmd == null)
         {
             throw new IllegalArgumentException("Action class is not annotated with @Command");
         }
-        Hashtable props = new Hashtable();
+        Hashtable<String, String> props = new Hashtable<String, String>();
         props.put("bundles.command.scope", cmd.scope());
         props.put("bundles.command.function", cmd.name());
         SimpleCommand command = new SimpleCommand(actionClass);
-        return context.registerService(Function.class.getName(), command, props);
+        return context.registerService(Function.class, command, props);
     }
 
 }

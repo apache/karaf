@@ -27,10 +27,12 @@ import java.io.StringWriter;
 import java.net.URL;
 
 import jline.Terminal;
+
 import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.shell.commands.basic.DefaultActionPreparator;
 import org.apache.karaf.shell.console.HelpProvider;
 import org.apache.karaf.shell.console.SubShell;
+import org.apache.karaf.shell.util.IndentFormatter;
 import org.fusesource.jansi.Ansi;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -90,7 +92,7 @@ public class SubShellHelpProvider implements HelpProvider {
             while (desc.endsWith("\n")) {
                 desc = desc.substring(0, desc.length()  -1);
             }
-            DefaultActionPreparator.printFormatted("        ", desc, term != null ? term.getWidth() : 80, out);
+            IndentFormatter.printFormatted("        ", desc, term != null ? term.getWidth() : 80, out);
         }
         out.println();
         out.println("${command-list|" + subShell.getName() + ":}");

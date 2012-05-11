@@ -20,7 +20,6 @@ package org.apache.karaf.tooling.commands;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.Writer;
@@ -42,16 +41,14 @@ import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.HelpOption;
 import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.commands.basic.ActionPreparator;
-import org.apache.karaf.shell.console.SessionProperties;
-import org.apache.karaf.shell.console.commands.BlueprintCommand;
+import org.apache.karaf.shell.commands.meta.ActionMetaData;
+import org.apache.karaf.shell.commands.meta.ActionMetaDataFactory;
+import org.apache.karaf.shell.util.ShellUtil;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 import org.apache.xbean.finder.ClassFinder;
-import org.apache.felix.service.command.CommandSession;
-import org.fusesource.jansi.Ansi;
 
 /**
  * Generates help documentation for Karaf commands
@@ -137,8 +134,10 @@ public class GenerateHelpMojo extends AbstractMojo {
 
             for (Class clazz : classes) {
                 try {
-                    String help = new HelpPrinter(clazz).printHelp(format, includeHelpOption);
-                    Command cmd = (Command) clazz.getAnnotation(Command.class);
+                    Action action = (Action) clazz.newInstance();
+                    ActionMetaData meta = new ActionMetaDataFactory().create(action.getClass());
+                    String help = printHelp(action, meta, format, includeHelpOption);
+                    Command cmd = meta.getCommand();
                     File output = null;
 
                     // skip the *-help command
@@ -200,297 +199,229 @@ public class GenerateHelpMojo extends AbstractMojo {
         }
     }
 
-    public static class HelpPrinter extends BlueprintCommand {
-
-        private final Class<Action> actionClass;
-
-        public HelpPrinter(Class<Action> actionClass) {
-            this.actionClass = actionClass;
+    public String printHelp(Action action, ActionMetaData meta, String format, boolean includeHelpOption) throws Exception {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PrintStream newout = new PrintStream(baos);
+        
+        if (FORMAT_DOCBX.equals(format)) {
+            printUsageDocBook(action, meta, newout, includeHelpOption);
+        } else {
+            printUsageConf(action, meta, newout, includeHelpOption);
         }
 
-        public String printHelp(String format, boolean includeHelpOption) throws Exception {
-            PrintStream oldout = System.out;
-            try {
-                Action action = actionClass.newInstance();
-                CommandSession session = new DummyCommandSession();
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                PrintStream newout = new PrintStream(baos);
-                System.setOut(newout);
-                ActionPreparator preparator;
-                if (FORMAT_DOCBX.equals(format)) {
-                    preparator = new DocbxPreparator(includeHelpOption);
-                } else {
-                    preparator = new ConfPreparator(includeHelpOption);
-                }
-                preparator.prepare(action, session, Collections.<Object>singletonList("--help"));
-                newout.close();
-                baos.close();
-                return baos.toString();
-            } finally {
-                System.setOut(oldout);
-            }
-        }
-
-        protected class DocbxPreparator extends BlueprintActionPreparator {
-
-            boolean includeHelpOption;
-
-            DocbxPreparator(boolean includeHelpOption) {
-                this.includeHelpOption = includeHelpOption;
-            }
-
-            @Override
-            protected void printUsage(CommandSession session, Action action, Map<Option,Field> optionsMap, Map<Argument,Field> argsMap, PrintStream out)
-            {
-                Command command = action.getClass().getAnnotation(Command.class);
-                List<Argument> arguments = new ArrayList<Argument>(argsMap.keySet());
-                Collections.sort(arguments, new Comparator<Argument>() {
-                    public int compare(Argument o1, Argument o2) {
-                        return Integer.valueOf(o1.index()).compareTo(Integer.valueOf(o2.index()));
-                    }
-                });
-                Set<Option> options = new HashSet<Option>(optionsMap.keySet());
-                if (includeHelpOption) options.add(HelpOption.HELP);
-
-                out.println("<section>");
-                out.print("  <title>");
-                out.print(command.scope());
-                out.print(":");
-                out.print(command.name());
-                out.println("</title>");
-                out.println("  <section>");
-                out.println("    <title>Description</title>");
-                out.println("    <para>");
-                out.println(command.description());
-                out.println("    </para>");
-                out.println("  </section>");
-
-                StringBuffer syntax = new StringBuffer();
-                syntax.append(String.format("%s:%s", command.scope(), command.name()));
-                if (options.size() > 0) {
-                    syntax.append(" [options]");
-                }
-                if (arguments.size() > 0) {
-                    syntax.append(' ');
-                    for (Argument argument : arguments) {
-                        syntax.append(String.format(argument.required() ? "%s " : "[%s] ", argument.name()));
-                    }
-                }
-                out.println("  <section>");
-                out.println("    <title>Syntax</title>");
-                out.println("    <para>");
-                out.println(syntax.toString());
-                out.println("    </para>");
-                out.println("  </section>");
-
-                if (arguments.size() > 0)
-                {
-                    out.println("  <section>");
-                    out.println("    <title>Arguments</title>");
-                    out.println("    <informaltable>");
-                    for (Argument argument : arguments)
-                    {
-                        out.println("    <tr>");
-                        out.println("      <td>" + argument.name() + "</td>");
-                        String description = argument.description();
-                        if (!argument.required()) {
-                            try {
-                                argsMap.get(argument).setAccessible(true);
-                                Object o = argsMap.get(argument).get(action);
-                                if (o != null
-                                        && (!(o instanceof Boolean) || ((Boolean) o))
-                                        && (!(o instanceof Number) || ((Number) o).doubleValue() != 0.0)) {
-                                    description += " (defaults to " + o.toString() + ")";
-                                }
-                            } catch (Exception e) {
-                                // Ignore
-                            }
-                        }
-                        out.println("      <td>" + description + "</td>");
-                        out.println("    </tr>");
-                    }
-
-                    out.println("    </informaltable>");
-                    out.println("  </section>");
-                }
-                if (options.size() > 0)
-                {
-                    out.println("  <section>");
-                    out.println("    <title>Options</title>");
-                    out.println("    <informaltable>");
-
-                    for (Option option : options)
-                    {
-                        String opt = option.name();
-                        String description = option.description();
-                        for (String alias : option.aliases())
-                        {
-                            opt += ", " + alias;
-                        }
-                        try {
-                            optionsMap.get(option).get(action);
-                            Object o = optionsMap.get(option).get(action);
-                            if (o != null
-                                    && (!(o instanceof Boolean) || ((Boolean) o))
-                                    && (!(o instanceof Number) || ((Number) o).doubleValue() != 0.0)) {
-                                description += " (defaults to " + o.toString() + ")";
-                            }
-
-                        } catch (Exception e) {
-
-                        }
-                        out.println("    <tr>");
-                        out.println("      <td>" + opt + "</td>");
-                        out.println("      <td>" + description + "</td>");
-                        out.println("    </tr>");
-                    }
-
-                    out.println("    </informaltable>");
-                    out.println("  </section>");
-
-                    if (command.detailedDescription() != null
-                            && command.detailedDescription().trim().length() > 0) {
-                        out.println("<section>");
-                        out.println("   <title>Details</title>");
-                        String description = loadDescription(action.getClass(), command.detailedDescription());
-                        out.println("   <para>");
-
-                    }
-                }
-                out.println("</section>");
-            }
-
-        }
-
-        protected class ConfPreparator extends BlueprintActionPreparator {
-
-            boolean includeHelpOption;
-
-            ConfPreparator(boolean includeHelpOption) {
-                this.includeHelpOption = includeHelpOption;
-            }
-
-            @Override
-            protected void printUsage(CommandSession session, Action action, Map<Option, Field> optionsMap, Map<Argument,Field> argsMap, PrintStream out)
-            {
-                Command command = action.getClass().getAnnotation(Command.class);
-                List<Argument> arguments = new ArrayList<Argument>(argsMap.keySet());
-                Collections.sort(arguments, new Comparator<Argument>() {
-                    public int compare(Argument o1, Argument o2) {
-                        return Integer.valueOf(o1.index()).compareTo(Integer.valueOf(o2.index()));
-                    }
-                });
-                Set<Option> options = new HashSet<Option>(optionsMap.keySet());
-                if (includeHelpOption) options.add(HelpOption.HELP);
-
-                out.println("h1. " + command.scope() + ":" + command.name());
-                out.println();
-
-                out.println("h2. Description");
-                out.println(command.description());
-                out.println();
-
-                StringBuffer syntax = new StringBuffer();
-                syntax.append(String.format("%s:%s", command.scope(), command.name()));
-                if (options.size() > 0) {
-                    syntax.append(" \\[options\\]");
-                }
-                if (arguments.size() > 0) {
-                    syntax.append(' ');
-                    for (Argument argument : arguments) {
-                        syntax.append(String.format(argument.required() ? "%s " : "\\[%s\\] ", argument.name()));
-                    }
-                }
-                out.println("h2. Syntax");
-                out.println(syntax.toString());
-                out.println();
-
-                if (arguments.size() > 0)
-                {
-                    out.println("h2. Arguments");
-                    out.println("|| Name || Description ||");
-                    for (Argument argument : arguments)
-                    {
-                        String description = argument.description();
-                        if (!argument.required()) {
-                            try {
-                                argsMap.get(argument).setAccessible(true);
-                                Object o = argsMap.get(argument).get(action);
-                                if (o != null
-                                        && (!(o instanceof Boolean) || ((Boolean) o))
-                                        && (!(o instanceof Number) || ((Number) o).doubleValue() != 0.0)) {
-                                    description += " (defaults to " + o.toString() + ")";
-                                }
-                            } catch (Throwable t) {
-                                // Ignore
-                            }
-                        }
-                        out.println("| " + argument.name() + " | " + description + " |");
-                    }
-                    out.println();
-                }
-                if (options.size() > 0)
-                {
-                    out.println("h2. Options");
-                    out.println("|| Name || Description ||");
-                    for (Option option : options)
-                    {
-                        String opt = option.name();
-                        String desc = option.description();
-                        for (String alias : option.aliases())
-                        {
-                            opt += ", " + alias;
-                        }
-                        try {
-                            optionsMap.get(option).setAccessible(true);
-                            Object o = optionsMap.get(option).get(action);
-                            if (o != null
-                                    && (!(o instanceof Boolean) || ((Boolean) o))
-                                    && (!(o instanceof Number) || ((Number) o).doubleValue() != 0.0)) {
-                                desc += " (defaults to " + o.toString() + ")";
-                            }
-                        } catch (Throwable t) {
-                            // Ignore
-                        }
-                        out.println("| " + opt + " | " + desc + " |");
-                    }
-                    out.println();
-                }
-                if (command.detailedDescription().length() > 0) {
-                    out.println("h2. Details");
-                    String desc = loadDescription(action.getClass(), command.detailedDescription());
-                    out.println(desc);
-                }
-                out.println();
-            }
-
-        }
-
-        protected static class DummyCommandSession implements CommandSession {
-            public Object convert(Class<?> type, Object instance) {
-                return null;
-            }
-            public CharSequence format(Object target, int level) {
-                return null;
-            }
-            public void put(String name, Object value) {
-            }
-            public Object get(String name) {
-                return null;
-            }
-            public PrintStream getConsole() {
-                return null;
-            }
-            public InputStream getKeyboard() {
-                return null;
-            }
-            public void close() {
-            }
-            public Object execute(CharSequence commandline) throws Exception {
-                return null;
-            }
-        }
-
+        meta.printUsage(action, newout, false, 80);
+        newout.close();
+        baos.close();
+        return baos.toString();
     }
 
+    private void printUsageConf(Action action, ActionMetaData actionMeta, PrintStream out, boolean includeHelpOption) {
+        Map<Option, Field> optionsMap = actionMeta.getOptions();
+        Map<Argument, Field> argsMap = actionMeta.getArguments();
+        Command command = action.getClass().getAnnotation(Command.class);
+        List<Argument> arguments = new ArrayList<Argument>(argsMap.keySet());
+        Collections.sort(arguments, new Comparator<Argument>() {
+            public int compare(Argument o1, Argument o2) {
+                return Integer.valueOf(o1.index()).compareTo(Integer.valueOf(o2.index()));
+            }
+        });
+        Set<Option> options = new HashSet<Option>(optionsMap.keySet());
+        if (includeHelpOption)
+            options.add(HelpOption.HELP);
+
+        out.println("<section>");
+        out.print("  <title>");
+        out.print(command.scope());
+        out.print(":");
+        out.print(command.name());
+        out.println("</title>");
+        out.println("  <section>");
+        out.println("    <title>Description</title>");
+        out.println("    <para>");
+        out.println(command.description());
+        out.println("    </para>");
+        out.println("  </section>");
+
+        StringBuffer syntax = new StringBuffer();
+        syntax.append(String.format("%s:%s", command.scope(), command.name()));
+        if (options.size() > 0) {
+            syntax.append(" [options]");
+        }
+        if (arguments.size() > 0) {
+            syntax.append(' ');
+            for (Argument argument : arguments) {
+                syntax.append(String.format(argument.required() ? "%s " : "[%s] ", argument.name()));
+            }
+        }
+        out.println("  <section>");
+        out.println("    <title>Syntax</title>");
+        out.println("    <para>");
+        out.println(syntax.toString());
+        out.println("    </para>");
+        out.println("  </section>");
+
+        if (arguments.size() > 0) {
+            out.println("  <section>");
+            out.println("    <title>Arguments</title>");
+            out.println("    <informaltable>");
+            for (Argument argument : arguments) {
+                out.println("    <tr>");
+                out.println("      <td>" + argument.name() + "</td>");
+                String description = argument.description();
+                if (!argument.required()) {
+                    try {
+                        argsMap.get(argument).setAccessible(true);
+                        Object o = argsMap.get(argument).get(action);
+                        if (o != null && (!(o instanceof Boolean) || ((Boolean) o))
+                                && (!(o instanceof Number) || ((Number) o).doubleValue() != 0.0)) {
+                            description += " (defaults to " + o.toString() + ")";
+                        }
+                    } catch (Exception e) {
+                        // Ignore
+                    }
+                }
+                out.println("      <td>" + description + "</td>");
+                out.println("    </tr>");
+            }
+
+            out.println("    </informaltable>");
+            out.println("  </section>");
+        }
+        if (options.size() > 0) {
+            out.println("  <section>");
+            out.println("    <title>Options</title>");
+            out.println("    <informaltable>");
+
+            for (Option option : options) {
+                String opt = option.name();
+                String description = option.description();
+                for (String alias : option.aliases()) {
+                    opt += ", " + alias;
+                }
+                try {
+                    optionsMap.get(option).get(action);
+                    Object o = optionsMap.get(option).get(action);
+                    if (o != null && (!(o instanceof Boolean) || ((Boolean) o))
+                            && (!(o instanceof Number) || ((Number) o).doubleValue() != 0.0)) {
+                        description += " (defaults to " + o.toString() + ")";
+                    }
+
+                } catch (Exception e) {
+
+                }
+                out.println("    <tr>");
+                out.println("      <td>" + opt + "</td>");
+                out.println("      <td>" + description + "</td>");
+                out.println("    </tr>");
+            }
+
+            out.println("    </informaltable>");
+            out.println("  </section>");
+
+            if (command.detailedDescription() != null && command.detailedDescription().trim().length() > 0) {
+                out.println("<section>");
+                out.println("   <title>Details</title>");
+                String description = loadDescription(action.getClass(), command.detailedDescription());
+                out.println("   <para>");
+
+            }
+        }
+        out.println("</section>");
+    }
+
+    private void printUsageDocBook(Action action, ActionMetaData actionMeta, PrintStream out, boolean includeHelpOption) {
+        Map<Option, Field> optionsMap = actionMeta.getOptions();
+        Map<Argument, Field> argsMap = actionMeta.getArguments();
+        Command command = actionMeta.getCommand();
+        List<Argument> arguments = new ArrayList<Argument>(argsMap.keySet());
+        Collections.sort(arguments, new Comparator<Argument>() {
+            public int compare(Argument o1, Argument o2) {
+                return Integer.valueOf(o1.index()).compareTo(Integer.valueOf(o2.index()));
+            }
+        });
+        Set<Option> options = new HashSet<Option>(optionsMap.keySet());
+        if (includeHelpOption)
+            options.add(HelpOption.HELP);
+
+        out.println("h1. " + command.scope() + ":" + command.name());
+        out.println();
+
+        out.println("h2. Description");
+        out.println(command.description());
+        out.println();
+
+        StringBuffer syntax = new StringBuffer();
+        syntax.append(String.format("%s:%s", command.scope(), command.name()));
+        if (options.size() > 0) {
+            syntax.append(" \\[options\\]");
+        }
+        if (arguments.size() > 0) {
+            syntax.append(' ');
+            for (Argument argument : arguments) {
+                syntax.append(String.format(argument.required() ? "%s " : "\\[%s\\] ", argument.name()));
+            }
+        }
+        out.println("h2. Syntax");
+        out.println(syntax.toString());
+        out.println();
+
+        if (arguments.size() > 0) {
+            out.println("h2. Arguments");
+            out.println("|| Name || Description ||");
+            for (Argument argument : arguments) {
+                String description = argument.description();
+                if (!argument.required()) {
+                    try {
+                        argsMap.get(argument).setAccessible(true);
+                        Object o = argsMap.get(argument).get(action);
+                        if (o != null && (!(o instanceof Boolean) || ((Boolean) o))
+                                && (!(o instanceof Number) || ((Number) o).doubleValue() != 0.0)) {
+                            description += " (defaults to " + o.toString() + ")";
+                        }
+                    } catch (Throwable t) {
+                        // Ignore
+                    }
+                }
+                out.println("| " + argument.name() + " | " + description + " |");
+            }
+            out.println();
+        }
+        if (options.size() > 0) {
+            out.println("h2. Options");
+            out.println("|| Name || Description ||");
+            for (Option option : options) {
+                String opt = option.name();
+                String desc = option.description();
+                for (String alias : option.aliases()) {
+                    opt += ", " + alias;
+                }
+                try {
+                    optionsMap.get(option).setAccessible(true);
+                    Object o = optionsMap.get(option).get(action);
+                    if (o != null && (!(o instanceof Boolean) || ((Boolean) o))
+                            && (!(o instanceof Number) || ((Number) o).doubleValue() != 0.0)) {
+                        desc += " (defaults to " + o.toString() + ")";
+                    }
+                } catch (Throwable t) {
+                    // Ignore
+                }
+                out.println("| " + opt + " | " + desc + " |");
+            }
+            out.println();
+        }
+        if (command.detailedDescription().length() > 0) {
+            out.println("h2. Details");
+            String desc = loadDescription(action.getClass(), command.detailedDescription());
+            out.println(desc);
+        }
+        out.println();
+    }
+
+    private String loadDescription(Class clazz, String desc) {
+        if (desc.startsWith("classpath:")) {
+            desc = ShellUtil.loadClassPathResource(clazz, desc.substring("classpath:".length()));
+        }
+        return desc;
+    }
+            
 }

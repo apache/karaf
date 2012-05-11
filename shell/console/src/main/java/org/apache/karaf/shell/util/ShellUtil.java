@@ -19,6 +19,10 @@
 package org.apache.karaf.shell.util;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -177,6 +181,34 @@ public class ShellUtil {
             }
             if ("no".equals(str)) {
                 return false;
+            }
+        }
+    }
+
+    public static String loadClassPathResource(Class<?> clazz, String path) {
+        InputStream is = clazz.getResourceAsStream(path);
+        if (is == null) {
+            is = clazz.getClassLoader().getResourceAsStream(path);
+        }
+        if (is == null) {
+            return "Unable to load description from " + path;
+        }
+        
+        try {
+            Reader r = new InputStreamReader(is);
+            StringWriter sw = new StringWriter();
+            int c;
+            while ((c = r.read()) != -1) {
+                sw.append((char) c);
+            }
+            return sw.toString();
+        } catch (IOException e) {
+            return "Unable to load description from " + path;
+        } finally {
+            try {
+                is.close();
+            } catch (IOException e) {
+                // Ignore
             }
         }
     }
