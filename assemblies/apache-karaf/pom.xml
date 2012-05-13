@@ -64,7 +64,6 @@
             <type>xml</type>
             <scope>runtime</scope>
         </dependency>
-        <!--
         <dependency>
             <groupId>org.apache.karaf.demos</groupId>
             <artifactId>org.apache.karaf.demos.branding</artifactId>
@@ -100,7 +99,6 @@
             <type>kar</type>
             <scope>runtime</scope>
         </dependency>
-        -->
     </dependencies>
 
     <build>
