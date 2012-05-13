@@ -702,11 +702,6 @@
               <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.karaf.tooling</groupId>
-                <artifactId>org.apache.karaf.tooling.testing</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.framework</artifactId>
                 <version>${felix.framework.version}</version>
