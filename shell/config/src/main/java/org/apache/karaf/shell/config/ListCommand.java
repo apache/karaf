@@ -27,7 +27,7 @@ import org.apache.felix.gogo.commands.Command;
 @Command(scope = "config", name = "list", description = "Lists existing configurations.")
 public class ListCommand extends ConfigCommandSupport {
 
-    @Argument(index = 0, name = "query", description = "Specify a LDAP query", required = false, multiValued = false)
+    @Argument(index = 0, name = "query", description = "Query in LDAP syntax. Example: \"(service.pid=org.apache.karaf.log)\"", required = false, multiValued = false)
     String query;
 
     protected void doExecute(ConfigurationAdmin admin) throws Exception {
