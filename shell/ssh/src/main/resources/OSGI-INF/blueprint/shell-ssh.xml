@@ -34,7 +34,7 @@
 
     <ext:property-placeholder placeholder-prefix="$[" placeholder-suffix="]">
         <ext:default-properties>
-            <ext:property name="startRemoteShell" value="true" />
+            <ext:property name="karaf.startRemoteShell" value="true" />
             <ext:property name="karaf.admin.role" value="admin" />
         </ext:default-properties>
     </ext:property-placeholder>
