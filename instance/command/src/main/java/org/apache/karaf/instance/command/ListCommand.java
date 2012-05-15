@@ -16,9 +16,10 @@
  */
 package org.apache.karaf.instance.command;
 
-import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.instance.core.Instance;
+import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Option;
+import org.apache.karaf.shell.table.ShellTable;
 
 @Command(scope = "instance", name = "list", description = "Lists all existing container instances.")
 public class ListCommand extends InstanceCommandSupport {
@@ -31,51 +32,44 @@ public class ListCommand extends InstanceCommandSupport {
 
     protected Object doExecute() throws Exception {
         Instance[] instances = getInstanceService().getInstances();
-        if (javaOpts) {
-            System.out.println("  SSH Port   RMI Ports          State       Pid  JavaOpts");
-        } else if (location) {
-            System.out.println("  SSH Port   RMI Ports          State       Pid  Location");
-        } else {
-            System.out.println("  SSH Port   RMI Ports          State       Pid  Name");
-        }
+        ShellTable table = new ShellTable();
+        table.column("SSH Port").alignRight();
+        table.column("RMI Registry").alignRight();
+        table.column("RMI Server").alignRight();
+        table.column("State");
+        table.column("PID");
+        table.column(getRightColumnHeader());
         for (Instance instance : instances) {
-            StringBuilder sb = new StringBuilder();
-            sb.append('[');
-            String s = Integer.toString(instance.getSshPort());
-            for (int i = s.length(); i < 8; i++) {
-                sb.append(' ');
-            }
-            sb.append(s);
-            sb.append("] [");
-            String rmiRegistry = Integer.toString(instance.getRmiRegistryPort());
-            String rmiServer = Integer.toString(instance.getRmiServerPort());
-            sb.append(rmiRegistry).append("/").append(rmiServer);
-            for (int i = (rmiRegistry.length() + rmiServer.length() + 1); i < 15; i++) {
-                sb.append(' ');
-            }
-            sb.append("] [");
-            String state = instance.getState();
-            while (state.length() < "starting".length()) {
-                state += " ";
-            }
-            sb.append(state);
-            sb.append("] [");
-            s = Integer.toString(instance.getPid());
-            for (int i = s.length(); i < 5; i++) {
-                sb.append(' ');
-            }
-            sb.append(s);
-            sb.append("] ");
-            if (javaOpts) {
-                sb.append(instance.getJavaOpts());
-            } else if (location) {
-                sb.append(instance.getLocation());
-            } else {
-                sb.append(instance.getName());
-            }
-            System.out.println(sb.toString());
+            table.addRow().addContent(
+                    instance.getSshPort(),
+                    instance.getRmiRegistryPort(),
+                    instance.getRmiServerPort(),
+                    instance.getState(),
+                    instance.getPid(),
+                    getRightColumnValue(instance));
         }
+        table.print(System.out);
         return null;
+    }
+
+    private String getRightColumnHeader() {
+        if (javaOpts) {
+            return "JavaOpts";
+        } else if (location) {
+            return "Location";
+        } else {
+            return "Name";
+        }
+    }
+
+    private String getRightColumnValue(Instance instance) {
+        if (javaOpts) {
+            return instance.getJavaOpts();
+        } else if (location) {
+            return instance.getLocation();
+        } else {
+            return instance.getName();
+        }
     }
 
 }
