@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -233,7 +234,7 @@ public class InstanceServiceImpl implements InstanceService {
 
     void addFeaturesFromSettings(File featuresCfg, InstanceSettings settings) throws IOException {
         Properties p = loadStorage(featuresCfg);
-
+        appendToPropList(p, "featuresBoot", Collections.singletonList("ssh"));
         appendToPropList(p, "featuresBoot", settings.getFeatures());
         appendToPropList(p, "featuresRepositories", settings.getFeatureURLs());
         saveStorage(p, featuresCfg, "Features Configuration");
