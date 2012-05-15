@@ -20,9 +20,12 @@ package org.apache.karaf.main;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.security.Provider;
@@ -228,7 +231,14 @@ public class Main {
 
         // If we have a clean state, install everything
         if (framework.getBundleContext().getBundles().length == 1) {
-            installAndStartBundles(resolver);
+            FrameworkStartLevel sl = framework.adapt(FrameworkStartLevel.class);
+            sl.setInitialBundleStartLevel(config.defaultBundleStartlevel);
+
+            LOG.info("Installing and starting initial bundles");
+            File startupPropsFile = new File(config.etcFolder, STARTUP_PROPERTIES_FILE_NAME);
+            List<BundleInfo> bundles = readBundlesFromStartupProperties(startupPropsFile);        
+            installAndStartBundles(resolver, framework.getBundleContext(), bundles);
+            LOG.info("All initial bundles installed and set to start");
         }
 
         ServerInfo serverInfo = new ServerInfoImpl(args, config);
@@ -285,35 +295,40 @@ public class Main {
             System.err.println("Unable to register security provider: " + t);
         }
     }
-
-    private void installAndStartBundles(ArtifactResolver resolver) {
-        FrameworkStartLevel sl = framework.adapt(FrameworkStartLevel.class);
-        sl.setInitialBundleStartLevel(config.defaultBundleStartlevel);
-        BundleContext context = framework.getBundleContext();
-        File startupPropsFile = new File(config.etcFolder, STARTUP_PROPERTIES_FILE_NAME);
+    
+    public List<BundleInfo> readBundlesFromStartupProperties(File startupPropsFile) {
         Properties startupProps = PropertiesLoader.loadPropertiesOrFail(startupPropsFile);
-
-        LOG.info("Installing initial bundles");
-        
         Enumeration<Object> keyIt = startupProps.keys();
+        List<BundleInfo> bundeList = new ArrayList<BundleInfo>();
         while (keyIt.hasMoreElements()) {
-            String mvnUrl = (String) keyIt.nextElement();
-            String startlevelSt = startupProps.getProperty(mvnUrl).trim();
+            String key = (String) keyIt.nextElement();
             try {
-                Integer level = new Integer(startlevelSt);
-                URI resolvedURI = resolver.resolve(new URI(mvnUrl));
-                Bundle b = context.installBundle(mvnUrl, resolvedURI.toURL().openStream());
-                b.adapt(BundleStartLevel.class).setStartLevel(level);
+                BundleInfo bi = new BundleInfo();
+                bi.uri = new URI(key);
+                String startlevelSt = startupProps.getProperty(key).trim();
+                bi.startLevel = new Integer(startlevelSt);
+                bundeList.add(bi);
+            } catch (Exception e) {
+                throw new RuntimeException("Error loading startup bundle list from " + startupPropsFile + " at " + key, e);
+            }
+        }
+        return bundeList; 
+    }
+
+    private void installAndStartBundles(ArtifactResolver resolver, BundleContext context, List<BundleInfo> bundles) {
+        for (BundleInfo bundleInfo : bundles) {
+            try {
+                URI resolvedURI = resolver.resolve(bundleInfo.uri);
+                Bundle b = context.installBundle(bundleInfo.uri.toString(), resolvedURI.toURL().openStream());
+                b.adapt(BundleStartLevel.class).setStartLevel(bundleInfo.startLevel);
                 if (isNotFragment(b)) {
                     b.start();
                 }
-            } catch (Exception ex) {
+            } catch (Exception  e) {
                 throw new RuntimeException("Error installing bundle listed in " + STARTUP_PROPERTIES_FILE_NAME
-                        + " with url: " + mvnUrl + " and startlevel: " + startlevelSt, ex);
+                        + " with url: " + bundleInfo.uri + " and startlevel: " + bundleInfo.startLevel, e);
             }
         }
-        
-        LOG.info("All initial bundles started");
     }
 
     private boolean isNotFragment(Bundle b) {
