@@ -49,7 +49,7 @@ public class InstanceServiceImplTest extends TestCase {
             }
             
             InstanceSettings s = new InstanceSettings(8122, 1122, 44444, null, null, null, Arrays.asList("test"));
-            as.handleFeatures(f, s);
+            as.addFeaturesFromSettings(f, s);
             
             Properties p2 = new Properties();
             InputStream is = new FileInputStream(f);
