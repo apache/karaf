@@ -89,6 +89,12 @@
                     <include>**/*.info</include>
                 </includes>
             </resource>
+            <resource>
+                <directory>${project.build.directory}/generated-resources</directory>
+                <includes>
+                    <include>**/*.*</include>
+                </includes>
+            </resource>
         </resources>
         <plugins>
             <plugin>
@@ -102,7 +108,7 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${project.build.outputDirectory}/org/apache/karaf/instance/</outputDirectory>
+                            <outputDirectory>${project.build.directory}/generated-resources/org/apache/karaf/instance/</outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>${project.basedir}/../../assemblies/features/framework/src/main/resources</directory>

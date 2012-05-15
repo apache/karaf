@@ -406,9 +406,10 @@ public class InstanceServiceImpl implements InstanceService {
                 println(Ansi.ansi().a("Creating file: ").a(Ansi.Attribute.INTENSITY_BOLD).a(outFile.getPath()).a(Ansi.Attribute.RESET).toString());
             }
 
-            InputStream is = getClass().getClassLoader().getResourceAsStream("org/apache/karaf/instance/resources/" + resource);
+            String sourcePath = "org/apache/karaf/instance/resources/" + resource;
+            InputStream is = getClass().getClassLoader().getResourceAsStream(sourcePath);
             if (is == null) {
-                throw new IOException("Unable to find resource " + resource);
+                throw new IOException("Unable to find resource " + sourcePath + " on classpath");
             }
             try {
                 if( text ) {
