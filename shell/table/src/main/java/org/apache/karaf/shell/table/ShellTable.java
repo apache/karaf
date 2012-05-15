@@ -52,6 +52,10 @@ public class ShellTable {
         return this;
     }
     
+    public Col column(String header) {
+        return new Col(header);
+    }
+    
     public Row addRow() {
         Row row = new Row();
         rows.add(row);
