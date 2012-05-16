@@ -171,6 +171,10 @@ public class Main {
             try {
                 main.launch();
             } catch (Throwable ex) {
+                // Also log to sytem.err in case logging is not yet initialized
+                System.err.println("Could not launch framework: " + ex);
+                ex.printStackTrace();
+
                 main.LOG.log(Level.SEVERE, "Could not launch framework", ex);
                 main.destroy();
                 main.setExitCode(-1);
@@ -229,10 +233,11 @@ public class Main {
         framework.init();
         framework.start();
 
+        FrameworkStartLevel sl = framework.adapt(FrameworkStartLevel.class);
+        sl.setInitialBundleStartLevel(config.defaultBundleStartlevel);
+
         // If we have a clean state, install everything
         if (framework.getBundleContext().getBundles().length == 1) {
-            FrameworkStartLevel sl = framework.adapt(FrameworkStartLevel.class);
-            sl.setInitialBundleStartLevel(config.defaultBundleStartlevel);
 
             LOG.info("Installing and starting initial bundles");
             File startupPropsFile = new File(config.etcFolder, STARTUP_PROPERTIES_FILE_NAME);
