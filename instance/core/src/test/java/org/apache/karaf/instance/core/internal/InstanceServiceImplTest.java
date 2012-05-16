@@ -59,7 +59,7 @@ public class InstanceServiceImplTest extends TestCase {
                 is.close();
             }
             assertEquals(2, p2.size());
-            assertEquals("abc,def,test", p2.get("featuresBoot"));
+            assertEquals("abc,def,ssh,test", p2.get("featuresBoot"));
             assertEquals("somescheme://xyz", p2.get("featuresRepositories"));
         } finally {
             f.delete();
