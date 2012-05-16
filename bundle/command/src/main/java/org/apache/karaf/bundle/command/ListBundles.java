@@ -42,8 +42,7 @@ public class ListBundles extends OsgiCommandSupport {
 
     private BundleService bundleService;
 
-    public ListBundles(BundleService bundleService) {
-        super();
+    public void setBundleService(BundleService bundleService) {
         this.bundleService = bundleService;
     }
 
