@@ -22,6 +22,7 @@ import org.apache.karaf.bundle.core.BundleState;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
+import org.apache.karaf.shell.table.ShellTable;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.startlevel.FrameworkStartLevel;
 
@@ -39,6 +40,9 @@ public class ListBundles extends OsgiCommandSupport {
 
     @Option(name = "-t", valueToShowInHelp = "", description = "Specifies the bundle threshold; bundles with a start-level less than this value will not get printed out.", required = false, multiValued = false)
     int bundleLevelThreshold = -1;
+    
+    @Option(name= "--table", description = "Show bundles using a shell table")
+    boolean newLayout;
 
     private BundleService bundleService;
 
@@ -61,9 +65,9 @@ public class ListBundles extends OsgiCommandSupport {
             System.out.println("START LEVEL " + fsl.getStartLevel() + " , List Threshold: " + bundleLevelThreshold);
         }
 
+        if (!newLayout) {
         // Print column headers.
-        String levelHeader = (fsl == null) ? "" : "  Level ";
-        System.out.println("   ID   State       " + levelHeader + getNameHeader());
+        System.out.println("   ID   State         Level " + getNameHeader());
 
         for (int i = 0; i < bundles.length; i++) {
             Bundle bundle = bundles[i];
@@ -73,25 +77,45 @@ public class ListBundles extends OsgiCommandSupport {
                 // Show bundle version if not showing location.
                 String version = info.getVersion();
                 name = (!showLoc && !showUpdate && (version != null)) ? name + " (" + version + ")" : name;
+                name += printFragments(info) + printHosts(info);
                 String line = String.format("[%4d] [%10s] [%5d] %s", info.getBundleId(),
                                             getStateString(info.getState()), info.getStartLevel(), name);
-                System.out.print(line);
-                printFragments(info);
-                printHosts(info);
-                System.out.println();
+                System.out.println(line);
             }
+        }
+        
+        } else {
+        
+        ShellTable table = new ShellTable();
+        table.column("ID").alignRight();
+        table.column("State");
+        table.column("Lvl").alignRight();
+        table.column("Version");
+        table.column(getNameHeader());
+        
+        for (int i = 0; i < bundles.length; i++) {
+            Bundle bundle = bundles[i];
+            BundleInfo info = this.bundleService.getInfo(bundle);
+            if (info.getStartLevel() >= bundleLevelThreshold) {
+                String name = getNameToShow(info) + printFragments(info) + printHosts(info);
+                String version = info.getVersion();
+                table.addRow().addContent(info.getBundleId(), getStateString(info.getState()), 
+                        info.getStartLevel(), version, name);
+            }
+        }
+        table.print(System.out);
         }
         return null;
     }
 
     private String getNameHeader() {
-        String msg = " Name";
+        String msg = "Name";
         if (showLoc) {
-            msg = " Location";
+            msg = "Location";
         } else if (showSymbolic) {
-            msg = " Symbolic name";
+            msg = "Symbolic name";
         } else if (showUpdate) {
-            msg = " Update location";
+            msg = "Update location";
         }
         return msg;
     }
@@ -109,26 +133,32 @@ public class ListBundles extends OsgiCommandSupport {
         }
     }
 
-    private void printHosts(BundleInfo info) {
-        if (info.getFragmentHosts().size() > 0) {
-            System.out.print(" Hosts: ");
-            boolean first = true;
-            for (Bundle host : info.getFragmentHosts()) {
-                System.out.print((first ? "" : ", ") + host.getBundleId());
-                first = false;
-            }
+    private String printHosts(BundleInfo info) {
+        if (info.getFragmentHosts().size() <= 0) {
+            return "";
         }
+        StringBuilder builder = new StringBuilder();
+        builder.append(", Hosts: ");
+        boolean first = true;
+        for (Bundle host : info.getFragmentHosts()) {
+            builder.append((first ? "" : ", ") + host.getBundleId());
+            first = false;
+        }
+        return builder.toString();
     }
 
-    private void printFragments(BundleInfo info) {
-        if (info.getFragments().size() > 0) {
-            System.out.print(" Fragments: ");
-            boolean first = true;
-            for (Bundle host : info.getFragments()) {
-                System.out.print((first ? "" : ", ") + host.getBundleId());
-                first = false;
-            }
+    private String printFragments(BundleInfo info) {
+        if (info.getFragments().size() <= 0) {
+            return "";
         }
+        StringBuilder builder = new StringBuilder();
+        builder.append(", Fragments: ");
+        boolean first = true;
+        for (Bundle host : info.getFragments()) {
+            builder.append((first ? "" : ", ") + host.getBundleId());
+            first = false;
+        }
+        return builder.toString();
     }
 
     private String getStateString(BundleState state) {
