@@ -16,21 +16,13 @@
  */
 package org.apache.karaf.log.command;
 
-import org.apache.karaf.log.core.LogService;
 import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.console.OsgiCommandSupport;
 
 /**
  * Clear the last log entries.
  */
 @Command(scope = "log", name = "clear", description = "Clear log entries.")
-public class ClearLog extends OsgiCommandSupport {
-
-    protected LogService logService;
-    
-    public ClearLog(LogService logService) {
-        this.logService = logService;
-    }
+public class ClearLog extends LogCommandSupport {
    
     protected Object doExecute() throws Exception {
         logService.clearEvents();

@@ -17,22 +17,28 @@
 package org.apache.karaf.dev.command;
 
 import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 
 /**
  * Base class for a dev: command that takes a bundle id as an argument
  *
  * It also provides convient access to the PackageAdmin service
  */
-public abstract class AbstractBundleCommand extends OsgiCommandSupport {
+public abstract class AbstractBundleCommand extends DevCommandSupport {
 
     @Argument(index = 0, name = "id", description = "The bundle ID", required = true)
     Long id;
+    
+    protected BundleContext bundleContext;
+
+    public void setBundleContext(BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
+    }
 
     @Override
     protected Object doExecute() throws Exception {
-        Bundle bundle = getBundleContext().getBundle(id);
+        Bundle bundle = bundleContext.getBundle(id);
         if (bundle == null) {
             System.err.println("Bundle ID " + id + " is invalid");
             return null;

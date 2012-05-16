@@ -19,18 +19,16 @@ package org.apache.karaf.log.command;
 import java.io.PrintStream;
 
 import org.apache.karaf.log.core.LogEventFormatter;
-import org.apache.karaf.log.core.LogService;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.ops4j.pax.logging.spi.PaxLoggingEvent;
 
 /**
  * Displays the last log entries
  */
 @Command(scope = "log", name = "display", description = "Displays log entries.")
-public class DisplayLog extends OsgiCommandSupport {
+public class DisplayLog extends LogCommandSupport {
 
     @Option(name = "-n", aliases = {}, description="Number of entries to display", required = false, multiValued = false)
     protected int entries;
@@ -44,12 +42,9 @@ public class DisplayLog extends OsgiCommandSupport {
     @Argument(index = 0, name = "logger", description = "The name of the logger. This can be ROOT, ALL, or the name of a logger specified in the org.ops4j.pax.logger.cfg file.", required = false, multiValued = false)
     String logger;
 
-    protected final LogService logService;
-
-    protected final LogEventFormatter formatter;
+    protected LogEventFormatter formatter;
     
-    public DisplayLog(LogService logService, LogEventFormatter formatter) {
-        this.logService = logService;
+    public void setFormatter(LogEventFormatter formatter) {
         this.formatter = formatter;
     }
 

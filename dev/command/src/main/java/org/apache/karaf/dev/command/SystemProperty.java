@@ -16,17 +16,15 @@
  */
 package org.apache.karaf.dev.command;
 
-import org.apache.karaf.dev.core.DevService;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.console.OsgiCommandSupport;
 
 /**
  * Command that allow access to system properties easily.
  */
 @Command(scope = "dev", name = "system-property", description = "Get or set a system property.")
-public class SystemProperty extends OsgiCommandSupport {
+public class SystemProperty extends DevCommandSupport {
 
     @Option(name = "-p", aliases = { "--persistent" }, description = "Persist the new value to the etc/system.properties file")
     boolean persistent;
@@ -36,12 +34,6 @@ public class SystemProperty extends OsgiCommandSupport {
 
     @Argument(index = 1, name = "value", required = false, description = "New value for the system property")
     String value;
-
-    private DevService devService;
-    
-    public SystemProperty(DevService devService) {
-        this.devService = devService;
-    }
 
     @Override
     protected Object doExecute() throws Exception {

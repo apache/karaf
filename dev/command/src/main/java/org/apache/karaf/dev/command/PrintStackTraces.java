@@ -18,7 +18,7 @@ package org.apache.karaf.dev.command;
 
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.console.OsgiCommandSupport;
+import org.apache.karaf.shell.console.AbstractAction;
 import org.apache.karaf.shell.console.SessionProperties;
 
 /**
@@ -26,7 +26,7 @@ import org.apache.karaf.shell.console.SessionProperties;
  * a given bundle.
  */
 @Command(scope = "dev", name = "stack-traces-print", description = "Prints the full stack trace in the console when the execution of a command throws an exception.")
-public class PrintStackTraces extends OsgiCommandSupport {
+public class PrintStackTraces extends AbstractAction {
 
     @Argument(name = "print", description="Print stack traces or not", required = false, multiValued = false)
     boolean print = true;

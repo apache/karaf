@@ -20,8 +20,6 @@ import java.io.PrintStream;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import org.apache.karaf.log.core.LogEventFormatter;
-import org.apache.karaf.log.core.LogService;
 import org.apache.karaf.shell.commands.Command;
 import org.ops4j.pax.logging.spi.PaxAppender;
 import org.ops4j.pax.logging.spi.PaxLoggingEvent;
@@ -29,10 +27,6 @@ import org.ops4j.pax.logging.spi.PaxLoggingEvent;
 @Command(scope = "log", name = "tail", description = "Continuously display log entries.")
 public class LogTail extends DisplayLog {
 	
-    public LogTail(LogService logService, LogEventFormatter formatter) {
-        super(logService, formatter);
-    }
-
     protected Object doExecute() throws Exception {
         final PrintStream out = System.out;
 
