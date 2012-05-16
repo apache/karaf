@@ -81,36 +81,30 @@ public class SimpleMavenResolver implements ArtifactResolver {
      * @param name input artifact info
      * @return path as supplied or a default maven repo path
      */
-    private static String fromMaven(URI name) {
+    static String fromMaven(URI name) {
         Matcher m = mvnPattern.matcher(name.toString());
         if (!m.matches()) {
             return name.toString();
         }
-        StringBuilder b = new StringBuilder();
-        b.append(m.group(1));
-        for (int i = 0; i < b.length(); i++) {
-            if (b.charAt(i) == '.') {
-                b.setCharAt(i, '/');
-            }
-        }
-        b.append("/");//groupId
+        StringBuilder path = new StringBuilder();
+        path.append(m.group(1).replace(".", "/"));
+        path.append("/");//groupId
         String artifactId = m.group(2);
         String version = m.group(3);
         String extension = m.group(5);
         String classifier = m.group(7);
-        b.append(artifactId).append("/");//artifactId
-        b.append(version).append("/");//version
-        b.append(artifactId).append("-").append(version);
+        path.append(artifactId).append("/");//artifactId
+        path.append(version).append("/");//version
+        path.append(artifactId).append("-").append(version);
         if (present(classifier)) {
-            b.append("-").append(classifier);
-        } else {
-            if (present(extension)) {
-                b.append(".").append(extension);
-            } else {
-                b.append(".jar");
-            }
+            path.append("-").append(classifier);
         }
-        return b.toString();
+        if (present(extension)) {
+            path.append(".").append(extension);
+        } else {
+            path.append(".jar");
+        }
+        return path.toString();
     }
 
     private static boolean present(String part) {
