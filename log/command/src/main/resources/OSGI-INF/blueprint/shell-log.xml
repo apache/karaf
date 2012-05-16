@@ -24,28 +24,28 @@
     <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
         <command>
             <action class="org.apache.karaf.log.command.DisplayLog">
-                <argument ref="logService" />
-                <argument ref="formatter"/>
+                <property name="logService" ref="logService" />
+                <property name="formatter" ref="formatter"/>
             </action>
         </command>
         <command>
             <action class="org.apache.karaf.log.command.DisplayException">
-                <argument ref="logService" />
+                <property name="logService" ref="logService" />
             </action>
         </command>
         <command>
             <action class="org.apache.karaf.log.command.ClearLog">
-                <argument ref="logService" />
+                <property name="logService" ref="logService" />
             </action>
         </command>
         <command>
             <action class="org.apache.karaf.log.command.GetLogLevel">
-                <argument ref="logService" />
+                <property name="logService" ref="logService" />
             </action>
         </command>
         <command>
             <action class="org.apache.karaf.log.command.SetLogLevel" >
-                <argument ref="logService" />
+                <property name="logService" ref="logService" />
             </action>
             <completers>
             	<ref component-id="logLevelCompleter"/>
@@ -54,8 +54,8 @@
         </command>
         <command>
             <action class="org.apache.karaf.log.command.LogTail">
-                <argument ref="logService" />
-                <argument ref="formatter"/>                
+                <property name="logService" ref="logService" />
+                <property name="formatter" ref="formatter"/>
             </action>
         </command>
     </command-bundle>

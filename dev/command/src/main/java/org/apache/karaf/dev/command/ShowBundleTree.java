@@ -31,7 +31,6 @@ import org.apache.felix.utils.version.VersionRange;
 import org.apache.felix.utils.version.VersionTable;
 import org.apache.karaf.dev.command.bundletree.Node;
 import org.apache.karaf.dev.command.bundletree.Tree;
-import org.apache.karaf.dev.core.DevService;
 import org.apache.karaf.shell.commands.Command;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
@@ -53,12 +52,6 @@ public class ShowBundleTree extends AbstractBundleCommand {
     private static final Logger LOGGER = LoggerFactory.getLogger(ShowBundleTree.class);
 
     private Tree<Bundle> tree;
-
-    private final DevService devService;
-    
-    public ShowBundleTree(DevService devService) {
-        this.devService = devService;
-    }
 
     @Override
     protected void doExecute(Bundle bundle) throws Exception {

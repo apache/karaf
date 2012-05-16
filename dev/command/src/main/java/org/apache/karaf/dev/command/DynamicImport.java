@@ -16,7 +16,6 @@
  */
 package org.apache.karaf.dev.command;
 
-import org.apache.karaf.dev.core.DevService;
 import org.apache.karaf.shell.commands.Command;
 import org.osgi.framework.Bundle;
 
@@ -26,11 +25,6 @@ import org.osgi.framework.Bundle;
  */
 @Command(scope = "dev", name = "dynamic-import", description = "Enables/disables dynamic-import for a given bundle.")
 public class DynamicImport extends AbstractBundleCommand {
-    private final DevService devService;
-    
-    public DynamicImport(DevService devService) {
-        this.devService = devService;
-    }
 
     @Override
     protected void doExecute(Bundle bundle) throws Exception {

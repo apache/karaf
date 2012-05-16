@@ -16,28 +16,20 @@
  */
 package org.apache.karaf.log.command;
 
-import org.apache.karaf.log.core.LogService;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.console.OsgiCommandSupport;
 
 /**
  * Set the log level for a given logger
  */
 @Command(scope = "log", name = "set", description = "Sets the log level.")
-public class SetLogLevel extends OsgiCommandSupport {
+public class SetLogLevel extends LogCommandSupport {
     
     @Argument(index = 0, name = "level", description = "The log level to set (TRACE, DEBUG, INFO, WARN, ERROR) or DEFAULT to unset", required = true, multiValued = false)
     String level;
 
     @Argument(index = 1, name = "logger", description = "Logger name or ROOT (default)", required = false, multiValued = false)
     String logger;
-
-    private LogService logService;
-    
-    public SetLogLevel(LogService logService) {
-        this.logService = logService;
-    }
 
     protected Object doExecute() throws Exception {
         logService.setLevelSt(logger, level);

@@ -16,18 +16,16 @@
  */
 package org.apache.karaf.dev.command;
 
-import org.apache.karaf.dev.core.DevService;
 import org.apache.karaf.dev.core.FrameworkType;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.console.OsgiCommandSupport;
 
 /**
  * Command for enabling/disabling debug logging on the OSGi framework
  */
 @Command(scope = "dev", name = "framework", description = "OSGi Framework options.")
-public class FrameworkOptions extends OsgiCommandSupport {
+public class FrameworkOptions extends DevCommandSupport {
 
     @Option(name = "-debug", aliases={"--enable-debug"}, description="Enable debug for the OSGi framework", required = false, multiValued = false)
     boolean debug;
@@ -37,12 +35,6 @@ public class FrameworkOptions extends OsgiCommandSupport {
 
     @Argument(name = "framework", required = false, description = "Name of the OSGi framework to use")
     String framework;
-    
-    private DevService devService;
-    
-    public FrameworkOptions(DevService devService) {
-        this.devService = devService;
-    }
 
     @Override
     protected Object doExecute() throws Exception {

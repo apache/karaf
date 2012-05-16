@@ -22,12 +22,12 @@ import org.apache.karaf.dev.core.BundleWatcher;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.console.OsgiCommandSupport;
+import org.apache.karaf.shell.console.AbstractAction;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 
 @Command(scope = "dev", name = "watch", description = "Watches and updates bundles", detailedDescription = "Watches the local maven repo for changes in snapshot jars and redploys changed jars")
-public class Watch extends OsgiCommandSupport {
+public class Watch extends AbstractAction {
 
     @Argument(index = 0, name = "urls", description = "The bundle IDs or URLs", required = false, multiValued = true)
     List<String> urls;
@@ -47,10 +47,10 @@ public class Watch extends OsgiCommandSupport {
     @Option(name = "--list", description = "Displays the watch list", required = false, multiValued = false)
     protected boolean list;
 
-    private BundleWatcher watcher;
-    
-    public Watch(BundleWatcher watcher) {
-        this.watcher = watcher;
+    private BundleWatcher bundleWatcher;
+
+    public void setBundleWatcher(BundleWatcher bundleWatcher) {
+        this.bundleWatcher = bundleWatcher;
     }
 
     @Override
@@ -62,34 +62,34 @@ public class Watch extends OsgiCommandSupport {
 
         if (interval > 0) {
             System.out.println("Setting watch interval to " + interval + " ms");
-            watcher.setInterval(interval);
+            bundleWatcher.setInterval(interval);
         }
         if (stop) {
             System.out.println("Stopping watch");
-            watcher.stop();
+            bundleWatcher.stop();
         }
         if (urls != null) {
             if (remove) {
                 for (String url : urls) {
-                    watcher.remove(url);
+                    bundleWatcher.remove(url);
                 }
             } else {
                 for (String url : urls) {
-                    watcher.add(url);
+                    bundleWatcher.add(url);
                 }
             }
         }
         if (start) {
             System.out.println("Starting watch");
-            watcher.start();
+            bundleWatcher.start();
         }
 
         if (list) { //List the watched bundles.
             String format = "%-40s %6s %-80s";
             System.out.println(String.format(format, "URL", "ID", "Bundle Name"));
-            for (String url : watcher.getWatchURLs()) {
+            for (String url : bundleWatcher.getWatchURLs()) {
 
-                List<Bundle> bundleList = watcher.getBundlesByURL(url);
+                List<Bundle> bundleList = bundleWatcher.getBundlesByURL(url);
                 if (bundleList != null && bundleList.size() > 0) {
                     for (Bundle bundle : bundleList) {
                         System.out.println(String.format(format, url, bundle.getBundleId(), bundle.getHeaders().get(Constants.BUNDLE_NAME)));
@@ -99,10 +99,10 @@ public class Watch extends OsgiCommandSupport {
                 }
             }
         } else {
-            List<String> urls = watcher.getWatchURLs();
+            List<String> urls = bundleWatcher.getWatchURLs();
             if (urls != null && urls.size()>0) {
                 System.out.println("Watched URLs/IDs: ");
-                for (String url : watcher.getWatchURLs()) {
+                for (String url : bundleWatcher.getWatchURLs()) {
                     System.out.println(url);
                 }
             } else {
