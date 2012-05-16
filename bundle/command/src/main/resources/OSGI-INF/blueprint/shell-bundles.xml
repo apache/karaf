@@ -45,7 +45,7 @@
         </command>
         <command>
             <action class="org.apache.karaf.bundle.command.ListBundles">
-                <argument ref="bundleService" />
+                <property name="bundleService" ref="bundleService"/>
             </action>
         </command>
         <command>
