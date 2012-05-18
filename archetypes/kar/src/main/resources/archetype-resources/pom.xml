@@ -35,7 +35,7 @@
                     <aggregateFeatures>true</aggregateFeatures>
                     <resolver>(obr)</resolver>
                     <checkDependencyChange>true</checkDependencyChange>
-                    <warnOnDependencyChange>true</warnOnDependencyChange>
+                    <failOnDependencyChange>false</failOnDependencyChange>
                     <logDependencyChanges>true</logDependencyChanges>
                     <overwriteChangedDependencies>true</overwriteChangedDependencies>
                 </configuration>
