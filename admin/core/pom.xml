@@ -123,6 +123,7 @@
                                     <includes>
                                         <include>*.properties</include>
                                         <include>*.cfg</include>
+                                        <include>authorized_keys</include>
                                     </includes>
                                     <excludes>
                                         <exclude>org.apache.karaf.shell.cfg</exclude>

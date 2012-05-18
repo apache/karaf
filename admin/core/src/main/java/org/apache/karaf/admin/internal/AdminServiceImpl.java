@@ -165,6 +165,7 @@ public class AdminServiceImpl implements AdminService {
         mkdir(karafBase, "deploy");
         mkdir(karafBase, "data");
 
+        copyResourceToDir(karafBase, "etc/authorized_keys", true);
         copyResourceToDir(karafBase, "etc/config.properties", true);
         copyResourceToDir(karafBase, "etc/jre.properties", true);
         copyResourceToDir(karafBase, "etc/custom.properties", true);

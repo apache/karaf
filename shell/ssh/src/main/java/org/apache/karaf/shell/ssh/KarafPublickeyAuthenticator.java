@@ -18,13 +18,12 @@
  */
 package org.apache.karaf.shell.ssh;
 
-import org.apache.mina.util.Base64;
-import org.apache.sshd.server.PublickeyAuthenticator;
-import org.apache.sshd.server.session.ServerSession;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.LineNumberReader;
 import java.math.BigInteger;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -34,7 +33,17 @@ import java.security.interfaces.RSAPublicKey;
 import java.security.spec.DSAPublicKeySpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.RSAPublicKeySpec;
-import java.util.*;
+import java.util.Comparator;
+import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.TreeMap;
+
+import org.apache.mina.util.Base64;
+import org.apache.sshd.server.PublickeyAuthenticator;
+import org.apache.sshd.server.session.ServerSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A public key authenticator, which reads an OpenSSL2 <code>authorized_keys</code> file.
@@ -198,6 +207,9 @@ public class KarafPublickeyAuthenticator implements PublickeyAuthenticator {
             String line;
 
             while ((line = reader.readLine()) != null) {
+                if (line.length() == 0 || line.startsWith("#")) {
+                    continue;
+                }
                 String[] tokens = line.split("[ \\t]+", 3);
                 if (tokens.length != 3) {
                     throw new IOException("Authorized keys file line " + reader.getLineNumber() + " does not contain 3 tokens.");
