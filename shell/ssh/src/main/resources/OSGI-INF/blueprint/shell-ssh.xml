@@ -65,6 +65,7 @@
     </command-bundle>
 
     <bean id="sshClient" class="org.apache.sshd.SshClient" factory-method="setUpDefaultClient" scope="prototype">
+        <property name="agentFactory" ref="agentFactory" />
     </bean>
 
     <bean id="userAuthFactoriesFactory" class="org.apache.karaf.shell.ssh.UserAuthFactoriesFactory">
@@ -97,7 +98,13 @@
         <property name="userAuthFactories">
             <bean factory-ref="userAuthFactoriesFactory" factory-method="getFactories"/>
         </property>
+        <property name="agentFactory" ref="agentFactory" />
     </bean>
+
+    <bean id="agentFactory" class="org.apache.karaf.shell.ssh.KarafAgentFactory" />
+    <reference-list id="agents" interface="org.apache.sshd.agent.SshAgent" availability="optional" activation="eager">
+        <reference-listener ref="agentFactory" bind-method="registerAgent" unbind-method="unregisterAgent" />
+    </reference-list>
 
     <bean id="keyPairProvider" class="org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider">
         <property name="path" value="${hostKey}"/>

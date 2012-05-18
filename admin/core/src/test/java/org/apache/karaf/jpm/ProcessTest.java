@@ -31,7 +31,7 @@ public class ProcessTest extends TestCase {
                 .getCanonicalPath();
         System.err.println(javaPath);
         StringBuilder command = new StringBuilder();
-        command.append(javaPath);
+        command.append("\"").append(javaPath).append("\"");
         command.append(" -Dprop=\"key\"");
         command.append(" -classpath ");
         String clRes = getClass().getName().replace('.', '/') + ".class";
