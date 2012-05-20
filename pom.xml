@@ -150,7 +150,7 @@
         <pax.logging.version>1.6.7</pax.logging.version>
         <pax.runner.version>1.6.2</pax.runner.version>
         <pax.url.version>1.2.8</pax.url.version>
-        <pax.web.version>1.0.11-SNAPSHOT</pax.web.version>
+        <pax.web.version>1.0.11</pax.web.version>
         <pax.tinybundles.version>1.3.0</pax.tinybundles.version>
         <plexus.utils.version>2.1</plexus.utils.version>
         <servicemix.specs.version>1.9.0</servicemix.specs.version>
