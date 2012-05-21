@@ -386,6 +386,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
             is = new BufferedInputStream(new FileInputStream(file));
         } catch (Exception e) {
             getLogger().warn("Error while opening artifact", e);
+            return null;
         }
 
         try {
