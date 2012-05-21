@@ -48,4 +48,40 @@
     <bean id="terminalFactory" class="org.apache.karaf.shell.console.impl.jline.TerminalFactory"
           destroy-method="destroy"/>
 
+    <service>
+        <interfaces>
+            <value>org.apache.felix.service.command.Function</value>
+            <value>org.apache.karaf.shell.console.CompletableFunction</value>
+        </interfaces>
+        <service-properties>
+            <entry key="osgi.command.scope" value="*"/>
+            <entry key="osgi.command.function" value="help"/>
+        </service-properties>
+        <bean class="org.apache.karaf.shell.console.commands.BlueprintCommand">
+            <property name="blueprintContainer" ref="blueprintContainer"/>
+            <property name="blueprintConverter" ref="blueprintConverter"/>
+            <property name="actionId" value="help"/>
+        </bean>
+    </service>
+
+    <bean id="help" class="org.apache.karaf.shell.console.HelpAction" activation="lazy" scope="prototype" />
+
+    <service>
+        <interfaces>
+            <value>org.apache.felix.service.command.Function</value>
+            <value>org.apache.karaf.shell.console.CompletableFunction</value>
+        </interfaces>
+        <service-properties>
+            <entry key="osgi.command.scope" value="*"/>
+            <entry key="osgi.command.function" value="exit"/>
+        </service-properties>
+        <bean class="org.apache.karaf.shell.console.commands.BlueprintCommand">
+            <property name="blueprintContainer" ref="blueprintContainer"/>
+            <property name="blueprintConverter" ref="blueprintConverter"/>
+            <property name="actionId" value="exit"/>
+        </bean>
+    </service>
+
+    <bean id="exit" class="org.apache.karaf.shell.console.ExitAction" activation="lazy" scope="prototype" />
+
 </blueprint>

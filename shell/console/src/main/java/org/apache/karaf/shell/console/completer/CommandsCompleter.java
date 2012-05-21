@@ -42,6 +42,7 @@ public class CommandsCompleter implements Completer {
     private CommandSession session;
     private final List<Completer> completers = new ArrayList<Completer>();
     private final Set<String> commands = new HashSet<String>();
+    private String subshell = null;
 
     public CommandsCompleter() {
         this(CommandSessionHolder.getSession());
@@ -66,10 +67,13 @@ public class CommandsCompleter implements Completer {
     protected synchronized void checkData() {
         // Copy the set to avoid concurrent modification exceptions
         // TODO: fix that in gogo instead
+        // get the current sub-shell
+        String currentSubshell = (String) session.get("SUBSHELL");
         Set<String> names = new HashSet<String>((Set<String>) session.get(CommandSessionImpl.COMMANDS));
-        if (!names.equals(commands)) {
+        if (!names.equals(commands) && ((subshell == null) || !currentSubshell.equals(subshell))) {
             commands.clear();
             completers.clear();
+            subshell = currentSubshell;
 
             // get command aliases
             Set<String> aliases = this.getAliases();
@@ -80,7 +84,12 @@ public class CommandsCompleter implements Completer {
                 Function function = (Function) session.get(command);
                 function = unProxy(function);
                 if (function instanceof CommandWithAction) {
-                    completers.add(new ArgumentCompleter(session, (CommandWithAction) function, command));
+                    if (command.startsWith(subshell)) {
+                        if (subshell.length() > 1 && command.length() > subshell.length()) {
+                            command = command.substring(subshell.length() + 1);
+                        }
+                        completers.add(new ArgumentCompleter(session, (CommandWithAction) function, command));
+                    }
                 }
                 commands.add(command);
             }

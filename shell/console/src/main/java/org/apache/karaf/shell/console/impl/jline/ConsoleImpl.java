@@ -59,8 +59,12 @@ public class ConsoleImpl implements Console
 
     public static final String SHELL_INIT_SCRIPT = "karaf.shell.init.script";
     public static final String PROMPT = "PROMPT";
-    public static final String DEFAULT_PROMPT = "\u001B[1m${USER}\u001B[0m@${APPLICATION}> ";
-    private static final Logger LOGGER = LoggerFactory.getLogger(ConsoleImpl.class);
+    public static final String DEFAULT_PROMPT = "\u001B[1m${USER}\u001B[0m@${APPLICATION}(${SUBSHELL})> ";
+    public static final String PRINT_STACK_TRACES = "karaf.printStackTraces";
+    public static final String LAST_EXCEPTION = "karaf.lastException";
+    public static final String IGNORE_INTERRUPTS = "karaf.ignoreInterrupts";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Console.class);
 
     protected CommandSession session;
     private ConsoleReader reader;
@@ -92,6 +96,7 @@ public class ConsoleImpl implements Console
         this.consoleInput = new ConsoleInputStream();
         this.session = processor.createSession(this.consoleInput, this.out, this.err);
         this.session.put("SCOPE", "shell:bundle:*");
+        this.session.put("SUBSHELL", "");
         this.closeCallback = closeCallback;
 
         reader = new ConsoleReader(this.consoleInput,
