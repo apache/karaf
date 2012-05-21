@@ -16,7 +16,15 @@
  */
 package org.apache.karaf.admin.internal;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
 import java.util.Enumeration;
@@ -28,7 +36,6 @@ import org.apache.karaf.admin.Instance;
 import org.apache.karaf.jpm.Process;
 import org.apache.karaf.jpm.ProcessBuilderFactory;
 import org.apache.karaf.jpm.impl.ScriptUtils;
-import org.fusesource.jansi.Ansi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -273,8 +280,9 @@ public class InstanceImpl implements Instance {
             }
             classpath.append(jar.getCanonicalPath());
         }
-        String command = new File(System.getProperty("java.home"), ScriptUtils.isWindows() ? "bin\\java.exe" : "bin/java").getCanonicalPath()
-                + " " + javaOpts 
+        String command = "\""
+                + new File(System.getProperty("java.home"), ScriptUtils.isWindows() ? "bin\\java.exe" : "bin/java").getCanonicalPath()
+                + "\" " + javaOpts
                 + " " + karafOpts
                 + " -Djava.util.logging.config.file=\"" + new File(location, "etc/java.util.logging.properties").getCanonicalPath() + "\""
                 + " -Djava.endorsed.dirs=\"" + new File(new File(new File(System.getProperty("java.home"), "jre"), "lib"), "endorsed") + System.getProperty("path.separator") + new File(new File(System.getProperty("java.home"), "lib"), "endorsed") + System.getProperty("path.separator") + new File(libDir, "endorsed").getCanonicalPath() + "\""
