@@ -40,28 +40,69 @@ public class ExamFeaturesFile {
     public ExamFeaturesFile(String extension, int startLevel) {
         featuresXml =
             "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                    + "<features xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\" name=\"pax-exam-features-"
+                    + "<features name=\"pax-exam-features-"
                     + Info.getPaxExamVersion()
                     + "\">\n"
                     + "<feature name=\"exam\" version=\""
                     + Info.getPaxExamVersion()
                     + "\">\n"
                     + extension + "\n"
-                    + "<bundle start-level='"+startLevel+"'>mvn:org.ops4j.pax.exam/pax-exam-extender-service/"
+                    + "<bundle start-level='" + startLevel + "'>mvn:org.ops4j.base/ops4j-base-lang/"
+                    + Info.getOps4jBaseVersion()
+                    + "</bundle>\n"
+                    + "<bundle start-level='" + startLevel + "'>mvn:org.ops4j.base/ops4j-base-monitors/"
+                    + Info.getOps4jBaseVersion()
+                    + "</bundle>\n"
+                    + "<bundle start-level='" + startLevel + "'>mvn:org.ops4j.base/ops4j-base-net/"
+                    + Info.getOps4jBaseVersion()
+                    + "</bundle>\n"
+                    + "<bundle start-level='" + startLevel + "'>mvn:org.ops4j.base/ops4j-base-store/"
+                    + Info.getOps4jBaseVersion()
+                    + "</bundle>\n"
+                    + "<bundle start-level='" + startLevel + "'>mvn:org.ops4j.base/ops4j-base-io/"
+                    + Info.getOps4jBaseVersion()
+                    + "</bundle>\n"
+                    + "<bundle start-level='" + startLevel + "'>mvn:org.ops4j.base/ops4j-base-spi/"
+                    + Info.getOps4jBaseVersion()
+                    + "</bundle>\n"
+                    + "<bundle start-level='" + startLevel + "'>mvn:org.ops4j.base/ops4j-base-util-property/"
+                    + Info.getOps4jBaseVersion()
+                    + "</bundle>\n"
+                    + "<bundle start-level='" + startLevel + "'>mvn:org.ops4j.pax.swissbox/pax-swissbox-core/"
+                    + Info.getPaxSwissboxVersion()
+                    + "</bundle>\n"
+                    + "<bundle start-level='" + startLevel + "'>mvn:org.ops4j.pax.swissbox/pax-swissbox-extender/"
+                    + Info.getPaxSwissboxVersion()
+                    + "</bundle>\n"
+                    + "<bundle start-level='" + startLevel + "'>mvn:org.ops4j.pax.swissbox/pax-swissbox-lifecycle/"
+                    + Info.getPaxSwissboxVersion()
+                    + "</bundle>\n"
+                    + "<bundle start-level='" + startLevel + "'>mvn:org.ops4j.pax.swissbox/pax-swissbox-framework/"
+                    + Info.getPaxSwissboxVersion()
+                    + "</bundle>\n"
+                    + "<bundle start-level='" + startLevel + "'>mvn:org.ops4j.pax.exam/pax-exam/"
                     + Info.getPaxExamVersion()
                     + "</bundle>\n"
-                    + "<bundle start-level='"+startLevel+"'>mvn:org.ops4j.pax.exam/pax-exam-container-rbc/"
+                    + "<bundle start-level='" + startLevel + "'>mvn:org.ops4j.pax.exam/pax-exam-extender-service/"
                     + Info.getPaxExamVersion()
                     + "</bundle>\n"
-                    + "<bundle start-level='"+startLevel+"'>wrap:mvn:junit/junit/" + getJunitVersion() + "</bundle>\n"
-                    + "<bundle start-level='"+startLevel+"'>mvn:org.ops4j.pax.exam/pax-exam-invoker-junit/" + Info.getPaxExamVersion()
+                    + "<bundle start-level='" + startLevel + "'>mvn:org.ops4j.pax.exam/pax-exam-container-rbc/"
+                    + Info.getPaxExamVersion()
                     + "</bundle>\n"
-                    + "<bundle start-level='"+startLevel+"'>mvn:org.apache.karaf.tooling.exam/org.apache.karaf.tooling.exam.options/"
+                    + "<bundle start-level='" + startLevel + "'>wrap:mvn:junit/junit/" + getJunitVersion()
+                    + "</bundle>\n"
+                    + "<bundle start-level='" + startLevel + "'>mvn:org.ops4j.pax.exam/pax-exam-invoker-junit/"
+                    + Info.getPaxExamVersion()
+                    + "</bundle>\n"
+                    + "<bundle start-level='" + startLevel
+                    + "'>mvn:org.apache.karaf.tooling.exam/org.apache.karaf.tooling.exam.options/"
                     + getOptionsVersion()
                     + "</bundle>\n"
-                    + "<bundle start-level='"+startLevel+"'>mvn:org.apache.geronimo.specs/geronimo-atinject_1.0_spec/" + getInjectionVersion()
+                    + "<bundle start-level='" + startLevel
+                    + "'>mvn:org.apache.geronimo.specs/geronimo-atinject_1.0_spec/" + getInjectionVersion()
                     + "</bundle>\n"
-                    + "<bundle start-level='"+startLevel+"'>mvn:org.ops4j.pax.exam/pax-exam-inject/" + Info.getPaxExamVersion() + "</bundle>\n"
+                    + "<bundle start-level='" + startLevel + "'>mvn:org.ops4j.pax.exam/pax-exam-inject/"
+                    + Info.getPaxExamVersion() + "</bundle>\n"
                     + "</feature>\n"
                     + "</features>";
     }
