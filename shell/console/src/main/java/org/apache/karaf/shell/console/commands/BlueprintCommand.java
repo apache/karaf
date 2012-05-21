@@ -41,6 +41,7 @@ public class
     protected BlueprintContainer blueprintContainer;
     protected Converter blueprintConverter;
     protected String actionId;
+    protected String shell;
     protected List<Completer> completers;
     protected Map<String,Completer> optionalCompleters;
 
@@ -54,6 +55,10 @@ public class
 
     public void setActionId(String actionId) {
         this.actionId = actionId;
+    }
+    
+    public void setShell(String shell) {
+        this.shell = shell;
     }
 
     public List<Completer> getCompleters() {
