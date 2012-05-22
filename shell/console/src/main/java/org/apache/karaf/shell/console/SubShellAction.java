@@ -18,9 +18,6 @@
 package org.apache.karaf.shell.console;
 
 
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.console.AbstractAction;
 
 /**
  * Switch to a sub-shell.
