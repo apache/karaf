@@ -80,9 +80,12 @@ public class CommandsCompleter implements Completer {
             commands.clear();
             completers.clear();
 
-            // get command aliases
-            Set<String> aliases = this.getAliases();
-            completers.add(new StringsCompleter(aliases));
+            
+            if (subshell == null || subshell.length() == 0) {
+                // Add aliases if we are not in a subshell
+                Set<String> aliases = this.getAliases();
+                completers.add(new StringsCompleter(aliases));
+            }
 
             // add argument completers for each command
             for (String command : names) {
