@@ -65,11 +65,13 @@ import org.apache.karaf.tooling.exam.options.KarafDistributionConfigurationFileE
 import org.apache.karaf.tooling.exam.options.KarafDistributionConfigurationFileOption;
 import org.apache.karaf.tooling.exam.options.KarafDistributionConfigurationFilePutOption;
 import org.apache.karaf.tooling.exam.options.KarafDistributionConfigurationFileReplacementOption;
+import org.apache.karaf.tooling.exam.options.KarafExamSystemConfigurationOption;
 import org.apache.karaf.tooling.exam.options.KeepRuntimeFolderOption;
 import org.apache.karaf.tooling.exam.options.LogLevelOption;
 import org.apache.karaf.tooling.exam.options.configs.CustomProperties;
 import org.apache.karaf.tooling.exam.options.configs.FeaturesCfg;
 import org.ops4j.pax.exam.ExamSystem;
+import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.RelativeTimeout;
 import org.ops4j.pax.exam.TestAddress;
 import org.ops4j.pax.exam.TestContainer;
@@ -126,12 +128,20 @@ public class KarafTestContainer implements TestContainer {
         try {
             String name = system.createID(KARAF_TEST_CONTAINER);
 
+            KarafExamSystemConfigurationOption[] internalConfigurationOptions =
+                system.getOptions(KarafExamSystemConfigurationOption.class);
+            Option invokerConfiguration = systemProperty("pax.exam.invoker").value("junit");
+            if (internalConfigurationOptions != null && internalConfigurationOptions.length != 0) {
+                invokerConfiguration =
+                    systemProperty("pax.exam.invoker").value(internalConfigurationOptions[0].getInvoker());
+            }
+
             ExamSystem subsystem = system.fork(
                 options(
                     systemProperty(RMI_HOST_PROPERTY).value(registry.getHost()),
                     systemProperty(RMI_PORT_PROPERTY).value("" + registry.getPort()),
                     systemProperty(RMI_NAME_PROPERTY).value(name),
-                    systemProperty(EXAM_INVOKER_PROPERTY).value("junit"),
+                    invokerConfiguration,
                     systemProperty(EXAM_INJECT_PROPERTY).value("true"),
                     editConfigurationFileExtend("etc/system.properties", "jline.shutdownhook", "true")
                 ));

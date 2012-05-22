@@ -46,6 +46,13 @@ public final class KarafDistributionOption {
     }
 
     /**
+     * Provides an option to configure the internals of the PaxExamKaraf subsystem runner.
+     */
+    public static Option useOwnKarafExamSystemConfiguration(String invoker) {
+        return new KarafExamSystemConfigurationOption(invoker);
+    }
+
+    /**
      * The karaf pax-logging configuration is typically not a file manipulated very often. Therefore we take the freedom
      * of adding a console logger and changing the log level directly. IF you like to configure the file manually (or
      * had so in your distribution) add this option to avoid any automatic modifications to this file!
@@ -53,7 +60,7 @@ public final class KarafDistributionOption {
     public static Option doNotModifyLogConfiguration() {
         return new DoNotModifyLogOption();
     }
-    
+
     /**
      * This option allows to configure the start level of the bundles in the exam features descriptor.
      */
@@ -73,7 +80,8 @@ public final class KarafDistributionOption {
      * Configures which distribution options to use. Relevant are the frameworkURL, the frameworkName and the Karaf
      * version since all of those params are relevant to decide which wrapper configurations to use.
      */
-    public static KarafDistributionBaseConfigurationOption karafDistributionConfiguration(String frameworkURL, String name,
+    public static KarafDistributionBaseConfigurationOption karafDistributionConfiguration(String frameworkURL,
+            String name,
             String karafVersion) {
         return new KarafDistributionConfigurationOption(frameworkURL, name, karafVersion);
     }
