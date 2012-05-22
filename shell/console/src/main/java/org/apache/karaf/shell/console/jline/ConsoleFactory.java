@@ -160,7 +160,7 @@ public class ConsoleFactory {
             InputStream is = url.openStream();
             ObjectInputStream r = new ObjectInputStream(is);
             KeyPair keyPair = (KeyPair) r.readObject();
-            local.addIdentity(keyPair, "user");
+            local.addIdentity(keyPair, "karaf");
             String agentId = "local:" + user;
             Hashtable properties = new Hashtable();
             properties.put("id", agentId);
