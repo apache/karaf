@@ -81,6 +81,10 @@
                             org.slf4j.impl;-split-package:=merge-first,
                             META-INF;-split-package:=merge-first
                         </Private-Package>
+                        <Include-Resource>
+                            ../shell/console/src/main/resources/karaf.key,
+                            {maven-resources}
+                        </Include-Resource>
                         <Import-Package>!*</Import-Package>
                     </instructions>
                     <unpackBundle>true</unpackBundle>
