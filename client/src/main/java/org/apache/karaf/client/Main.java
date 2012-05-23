@@ -130,6 +130,7 @@ public class Main {
  				channel = session.createChannel("shell");
                 channel.setIn(new NoCloseInputStream(System.in));
                 ((ChannelShell) channel).setupSensibleDefaultPty();
+                ((ChannelShell) channel).setAgentForwarding(true);
             }
             channel.setOut(AnsiConsole.wrapOutputStream(System.out));
             channel.setErr(AnsiConsole.wrapOutputStream(System.err));

@@ -167,6 +167,7 @@ public class SshAction
                     channel = sshSession.createChannel("shell");
                     channel.setIn(new NoCloseInputStream(System.in));
                     ((ChannelShell) channel).setupSensibleDefaultPty();
+                    ((ChannelShell) channel).setAgentForwarding(true);
                 }
                 channel.setOut(new NoCloseOutputStream(System.out));
                 channel.setErr(new NoCloseOutputStream(System.err));

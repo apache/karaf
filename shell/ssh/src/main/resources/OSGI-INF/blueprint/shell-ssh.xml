@@ -90,8 +90,8 @@
             </bean>
         </property>
         <property name="keyPairProvider" ref="keyPairProvider"/>
-        <property name="passwordAuthenticator" ref="passwordAuthenticator"/>
-        <property name="publickeyAuthenticator" ref="publickeyAuthenticator"/>
+        <property name="passwordAuthenticator" ref="authenticator"/>
+        <property name="publickeyAuthenticator" ref="authenticator"/>
         <property name="fileSystemFactory">
             <bean class="org.apache.karaf.shell.ssh.KarafFileSystemFactory"/>
         </property>
@@ -109,17 +109,9 @@
     <bean id="keyPairProvider" class="org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider">
         <property name="path" value="${hostKey}"/>
     </bean>
-    <bean id="passwordAuthenticator" class="org.apache.karaf.shell.ssh.KarafJaasPasswordAuthenticator">
+    <bean id="authenticator" class="org.apache.karaf.shell.ssh.KarafJaasAuthenticator">
         <property name="realm" value="${sshRealm}"/>
         <property name="role" value="${sshRole}"/>
-    </bean>
-
-    <bean id="publickeyAuthenticator" class="org.apache.karaf.shell.ssh.KarafPublickeyAuthenticator"
-            init-method="startTimer" destroy-method="stopTimer">
-        <property name="authorizedKeys" value="${authorizedKeys}"/>
-        <property name="active">
-            <bean factory-ref="userAuthFactoriesFactory" factory-method="isPublickeyEnabled"/>
-        </property>
     </bean>
 
     <bean id="sshServerFactory" class="org.apache.karaf.shell.ssh.SshServerFactory" init-method="start"
