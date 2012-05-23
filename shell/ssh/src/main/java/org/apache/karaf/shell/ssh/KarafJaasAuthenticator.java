@@ -20,6 +20,7 @@ package org.apache.karaf.shell.ssh;
 
 import java.io.IOException;
 import java.security.Principal;
+import java.security.PublicKey;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
@@ -31,16 +32,18 @@ import javax.security.auth.login.FailedLoginException;
 import javax.security.auth.login.LoginContext;
 
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
+import org.apache.karaf.jaas.modules.publickey.PublickeyCallback;
 import org.apache.sshd.common.Session;
 import org.apache.sshd.server.PasswordAuthenticator;
+import org.apache.sshd.server.PublickeyAuthenticator;
 import org.apache.sshd.server.session.ServerSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class KarafJaasPasswordAuthenticator implements PasswordAuthenticator {
+public class KarafJaasAuthenticator implements PasswordAuthenticator, PublickeyAuthenticator {
 
     public static final Session.AttributeKey<Subject> SUBJECT_ATTRIBUTE_KEY = new Session.AttributeKey<Subject>();
-    private final Logger LOGGER = LoggerFactory.getLogger(KarafJaasPasswordAuthenticator.class);
+    private final Logger LOGGER = LoggerFactory.getLogger(KarafJaasAuthenticator.class);
 
     private String realm;
     private String role;
@@ -71,6 +74,51 @@ public class KarafJaasPasswordAuthenticator implements PasswordAuthenticator {
                             ((NameCallback) callback).setName(username);
                         } else if (callback instanceof PasswordCallback) {
                             ((PasswordCallback) callback).setPassword(password.toCharArray());
+                        } else {
+                            throw new UnsupportedCallbackException(callback);
+                        }
+                    }
+                }
+            });
+            loginContext.login();
+            if (role != null && role.length() > 0) {
+                String clazz = RolePrincipal.class.getName();
+                String name = role;
+                int idx = role.indexOf(':');
+                if (idx > 0) {
+                    clazz = role.substring(0, idx);
+                    name = role.substring(idx + 1);
+                }
+                boolean found = false;
+                for (Principal p : subject.getPrincipals()) {
+                    if (p.getClass().getName().equals(clazz)
+                            && p.getName().equals(name)) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    throw new FailedLoginException("User does not have the required role " + role);
+                }
+            }
+            session.setAttribute(SUBJECT_ATTRIBUTE_KEY, subject);
+            return true;
+        } catch (Exception e) {
+            LOGGER.debug("User authentication failed with " + e.getMessage(), e);
+            return false;
+        }
+    }
+
+    public boolean authenticate(final String username, final PublicKey key, final ServerSession session) {
+        try {
+            Subject subject = new Subject();
+            LoginContext loginContext = new LoginContext(realm, subject, new CallbackHandler() {
+                public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
+                    for (Callback callback : callbacks) {
+                        if (callback instanceof NameCallback) {
+                            ((NameCallback) callback).setName(username);
+                        } else if (callback instanceof PublickeyCallback) {
+                            ((PublickeyCallback) callback).setPublicKey(key);
                         } else {
                             throw new UnsupportedCallbackException(callback);
                         }

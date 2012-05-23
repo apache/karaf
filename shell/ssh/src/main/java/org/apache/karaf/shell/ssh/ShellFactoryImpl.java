@@ -98,7 +98,7 @@ public class ShellFactoryImpl implements Factory<Command> {
         public void start(final Environment env) throws IOException {
             try {
                 final Subject subject = ShellImpl.this.session != null ? ShellImpl.this.session
-                        .getAttribute(KarafJaasPasswordAuthenticator.SUBJECT_ATTRIBUTE_KEY) : null;
+                        .getAttribute(KarafJaasAuthenticator.SUBJECT_ATTRIBUTE_KEY) : null;
                 final Terminal terminal = new SshTerminal(env);
                 Runnable destroyCallback = new Runnable() {
                     public void run() {

@@ -27,11 +27,8 @@ import org.apache.karaf.shell.commands.Command;
 @Command(scope = "instance", name = "connect", description = "Connects to an existing container instance.")
 public class ConnectCommand extends InstanceCommandSupport {
 
-    @Option(name="-u", aliases={"--username"}, description="Remote user name (Default: karaf)", required = false, multiValued = false)
-    private String username = "karaf";
-
-    @Option(name="-p", aliases={"--password"}, description="Remote user password (Default: karaf)", required = false, multiValued = false)
-    private String password = "karaf";
+    @Option(name="-u", aliases={"--username"}, description="Remote user name", required = false, multiValued = false)
+    private String username;
 
     @Argument(index = 0, name="name", description="The name of the container instance", required = true, multiValued = false)
     private String instance = null;
@@ -53,7 +50,11 @@ public class ConnectCommand extends InstanceCommandSupport {
         }
 
         int port = getExistingInstance(instance).getSshPort();
-        session.execute("ssh -l " + username + " -P " + password + " -p " + port + " localhost " + cmdStr);
+        if (username != null) {
+            session.execute("ssh -l " + username + " -p " + port + " localhost " + cmdStr);
+        } else {
+            session.execute("ssh -p " + port + " localhost " + cmdStr);
+        }
         return null;
     }
 

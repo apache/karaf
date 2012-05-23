@@ -43,8 +43,18 @@
     </cm:property-placeholder>
 
     <jaas:config name="karaf">
-        <jaas:module className="org.apache.karaf.jaas.modules.properties.PropertiesLoginModule" flags="required">
+        <jaas:module className="org.apache.karaf.jaas.modules.properties.PropertiesLoginModule" flags="sufficient">
             users = $[karaf.base]/etc/users.properties
+            detailed.login.exception = ${detailed.login.exception}
+            encryption.name = ${encryption.name}
+            encryption.enabled = ${encryption.enabled}
+            encryption.prefix = ${encryption.prefix}
+            encryption.suffix = ${encryption.suffix}
+            encryption.algorithm = ${encryption.algorithm}
+            encryption.encoding = ${encryption.encoding}
+        </jaas:module>
+        <jaas:module className="org.apache.karaf.jaas.modules.publickey.PublickeyLoginModule" flags="sufficient">
+            users = $[karaf.base]/etc/keys.properties
             detailed.login.exception = ${detailed.login.exception}
             encryption.name = ${encryption.name}
             encryption.enabled = ${encryption.enabled}

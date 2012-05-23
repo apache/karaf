@@ -204,7 +204,7 @@
         <servicemix.specs.version>2.0-SNAPSHOT</servicemix.specs.version>
         <spring.osgi.version>1.2.1</spring.osgi.version>
         <spring.version>3.1.1.RELEASE</spring.version>
-        <sshd.version>0.6.0</sshd.version>
+        <sshd.version>0.7.0-SNAPSHOT</sshd.version>
         <xbean.version>3.8</xbean.version>
         <javax.mail.version>1.4.4</javax.mail.version>
 

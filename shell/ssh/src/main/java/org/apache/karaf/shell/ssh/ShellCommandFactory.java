@@ -85,7 +85,7 @@ public class ShellCommandFactory implements CommandFactory {
             try {
                 final CommandSession session = commandProcessor.createSession(in, new PrintStream(out), new PrintStream(err));
                 session.put("SCOPE", "shell:osgi:*");
-                Subject subject = this.session != null ? this.session.getAttribute(KarafJaasPasswordAuthenticator.SUBJECT_ATTRIBUTE_KEY) : null;
+                Subject subject = this.session != null ? this.session.getAttribute(KarafJaasAuthenticator.SUBJECT_ATTRIBUTE_KEY) : null;
                 if (subject != null) {
                     try {
                         Subject.doAs(subject, new PrivilegedExceptionAction<Object>() {
