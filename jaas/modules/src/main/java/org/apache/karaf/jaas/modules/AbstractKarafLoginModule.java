@@ -14,17 +14,17 @@
  */
 package org.apache.karaf.jaas.modules;
 
-import org.apache.karaf.jaas.modules.encryption.EncryptionSupport;
-import org.osgi.framework.BundleContext;
-
-import javax.security.auth.Subject;
-import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.login.LoginException;
-import javax.security.auth.spi.LoginModule;
 import java.security.Principal;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import javax.security.auth.Subject;
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.login.LoginException;
+import javax.security.auth.spi.LoginModule;
+
+import org.apache.karaf.jaas.modules.encryption.EncryptionSupport;
+import org.osgi.framework.BundleContext;
 
 
 /**

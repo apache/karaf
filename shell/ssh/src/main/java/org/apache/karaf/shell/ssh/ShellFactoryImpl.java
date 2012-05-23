@@ -126,7 +126,7 @@ public class ShellFactoryImpl implements Factory<Command>
                 new Thread(console) {
                     @Override
                     public void run() {
-                        Subject subject = ShellImpl.this.session != null ? ShellImpl.this.session.getAttribute(KarafJaasPasswordAuthenticator.SUBJECT_ATTRIBUTE_KEY) : null;
+                        Subject subject = ShellImpl.this.session != null ? ShellImpl.this.session.getAttribute(KarafJaasAuthenticator.SUBJECT_ATTRIBUTE_KEY) : null;
                         if (subject != null) {
                             Subject.doAs(subject, new PrivilegedAction<Object>() {
                                 public Object run() {

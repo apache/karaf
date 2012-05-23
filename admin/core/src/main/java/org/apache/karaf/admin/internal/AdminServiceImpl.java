@@ -165,7 +165,6 @@ public class AdminServiceImpl implements AdminService {
         mkdir(karafBase, "deploy");
         mkdir(karafBase, "data");
 
-        copyResourceToDir(karafBase, "etc/authorized_keys", true);
         copyResourceToDir(karafBase, "etc/config.properties", true);
         copyResourceToDir(karafBase, "etc/jre.properties", true);
         copyResourceToDir(karafBase, "etc/custom.properties", true);
@@ -177,6 +176,7 @@ public class AdminServiceImpl implements AdminService {
         copyResourceToDir(karafBase, "etc/org.ops4j.pax.url.mvn.cfg", true);
         copyResourceToDir(karafBase, "etc/startup.properties", true);
         copyResourceToDir(karafBase, "etc/users.properties", true);
+        copyResourceToDir(karafBase, "etc/keys.properties", true);
 
         HashMap<String, String> props = new HashMap<String, String>();
         props.put("${SUBST-KARAF-NAME}", name);

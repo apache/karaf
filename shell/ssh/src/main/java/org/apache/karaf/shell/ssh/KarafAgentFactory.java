@@ -76,19 +76,23 @@ public class KarafAgentFactory implements SshAgentFactory {
     }
 
     public void registerAgent(SshAgent agent, Map<String, ?> properties) {
-        Object id = properties.get("id");
-        if (id == null) {
-            throw new IllegalStateException("Local agent can't be registered with no 'id' property");
+        if (agent != null) {
+            Object id = properties.get("id");
+            if (id == null) {
+                throw new IllegalStateException("Local agent can't be registered with no 'id' property");
+            }
+            locals.put(id.toString(), agent);
         }
-        locals.put(id.toString(), agent);
     }
 
     public void unregisterAgent(SshAgent agent, Map<String, ?> properties) {
-        Object id = properties.get("id");
-        if (id == null) {
-            throw new IllegalStateException("Local agent can't be registered with no 'id' property");
+        if (agent != null) {
+            Object id = properties.get("id");
+            if (id == null) {
+                throw new IllegalStateException("Local agent can't be unregistered with no 'id' property");
+            }
+            locals.remove(id.toString());
         }
-        locals.remove(id.toString());
     }
 
 }
