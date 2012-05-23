@@ -55,6 +55,9 @@ public abstract class AbstractKarafLoginModule implements LoginModule {
     private EncryptionSupport encryptionSupport;
 
     public boolean commit() throws LoginException {
+        if (principals.isEmpty()) {
+            return false;
+        }
         RolePolicy policy = RolePolicy.getPolicy(rolePolicy);
         if (policy != null && roleDiscriminator != null) {
             policy.handleRoles(subject, principals, roleDiscriminator);
