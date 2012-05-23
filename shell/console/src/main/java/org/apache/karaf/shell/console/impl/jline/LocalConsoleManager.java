@@ -18,6 +18,11 @@
  */
 package org.apache.karaf.shell.console.impl.jline;
 
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.net.URL;
+import java.security.KeyPair;
+import java.util.Hashtable;
 import javax.security.auth.Subject;
 
 import jline.Terminal;
@@ -26,9 +31,16 @@ import org.apache.felix.service.command.CommandProcessor;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.apache.karaf.shell.console.Console;
 import org.apache.karaf.shell.console.ConsoleFactory;
+import org.apache.sshd.agent.SshAgent;
+import org.apache.sshd.agent.local.AgentImpl;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LocalConsoleManager {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(LocalConsoleManager.class);
 
     private ConsoleFactory consoleFactory;
     private BundleContext bundleContext;
@@ -36,6 +48,8 @@ public class LocalConsoleManager {
     private Console console;
     private boolean start;
     private CommandProcessor commandProcessor;
+    private ServiceRegistration registration;
+    private SshAgent local;
 
     public LocalConsoleManager(boolean start, 
             BundleContext bundleContext, 
@@ -67,10 +81,34 @@ public class LocalConsoleManager {
                 }
             }
         };
+        String agentId = startAgent("karaf");
         this.console = consoleFactory.createLocalAndStart(subject, this.commandProcessor, terminal, callback);
+        this.console.getSession().put(SshAgent.SSH_AUTHSOCKET_ENV_NAME, agentId);
+    }
+
+    protected String startAgent(String user) {
+        try {
+            local = new AgentImpl();
+            URL url = bundleContext.getBundle().getResource("karaf.key");
+            InputStream is = url.openStream();
+            ObjectInputStream r = new ObjectInputStream(is);
+            KeyPair keyPair = (KeyPair) r.readObject();
+            local.addIdentity(keyPair, "karaf");
+            String agentId = "local:" + user;
+            Hashtable properties = new Hashtable();
+            properties.put("id", agentId);
+            registration = bundleContext.registerService(SshAgent.class.getName(), local, properties);
+            return agentId;
+        } catch (Throwable e) {
+            LOGGER.warn("Error starting ssh agent for local console", e);
+            return null;
+        }
     }
 
     public void stop() throws Exception {
+        if (registration != null) {
+            registration.unregister();
+        }
         if (console != null) {
             console.close();
         }

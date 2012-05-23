@@ -16,18 +16,24 @@
  */
 package org.apache.karaf.client;
 
-import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.net.URL;
+import java.security.KeyPair;
 
 import jline.Terminal;
 import org.apache.karaf.shell.console.impl.jline.TerminalFactory;
 import org.apache.sshd.ClientChannel;
 import org.apache.sshd.ClientSession;
 import org.apache.sshd.SshClient;
+import org.apache.sshd.agent.SshAgent;
+import org.apache.sshd.agent.local.AgentImpl;
+import org.apache.sshd.agent.local.LocalAgentFactory;
 import org.apache.sshd.client.channel.ChannelShell;
 import org.apache.sshd.client.future.ConnectFuture;
 import org.apache.sshd.common.RuntimeSshException;
-
 import org.apache.sshd.common.util.NoCloseInputStream;
 import org.fusesource.jansi.AnsiConsole;
 import org.slf4j.impl.SimpleLogger;
@@ -41,7 +47,6 @@ public class Main {
         String host = "localhost";
         int port = 8101;
         String user = "karaf";
-        String password = "karaf";
         StringBuilder sb = new StringBuilder();
         int level = 1;
         int retryAttempts = 0;
@@ -55,8 +60,6 @@ public class Main {
                     host = args[++i];
                 } else if (args[i].equals("-u")) {
                     user = args[++i];
-                } else if (args[i].equals("-p")) {
-                    password = args[++i];
                 } else if (args[i].equals("-v")) {
                     level++;
                 } else if (args[i].equals("-r")) {
@@ -68,7 +71,6 @@ public class Main {
                     System.out.println("  -a [port]     specify the port to connect to");
                     System.out.println("  -h [host]     specify the host to connect to");
                     System.out.println("  -u [user]     specify the user name");
-                    System.out.println("  -p [password] specify the password");
                     System.out.println("  --help        shows this help message");
                     System.out.println("  -v            raise verbosity");
                     System.out.println("  -r [attempts] retry connection establishment (up to attempts times)");
@@ -90,8 +92,12 @@ public class Main {
 
         SshClient client = null;
         Terminal terminal = null;
+        SshAgent agent = null;
         try {
+            agent = startAgent(user);
             client = SshClient.setUpDefaultClient();
+            client.setAgentFactory(new LocalAgentFactory(agent));
+            client.getProperties().put(SshAgent.SSH_AUTHSOCKET_ENV_NAME, "local");
             client.start();
             int retries = 0;
             ClientSession session = null;
@@ -109,8 +115,11 @@ public class Main {
                     }
                 }
             } while (session == null);
-            if (!session.authPassword(user, password).await().isSuccess()) {
-                throw new Exception("Authentication failure");
+            if (!session.authAgent(user).await().isSuccess()) {
+                String password = readLine("Password: ");
+                if (!session.authPassword(user, password).await().isSuccess()) {
+                    throw new Exception("Authentication failure");
+                }
             }
             ClientChannel channel;
 			if (sb.length() > 0) {
@@ -121,6 +130,7 @@ public class Main {
  				channel = session.createChannel("shell");
                 channel.setIn(new NoCloseInputStream(System.in));
                 ((ChannelShell) channel).setupSensibleDefaultPty();
+                ((ChannelShell) channel).setAgentForwarding(true);
             }
             channel.setOut(AnsiConsole.wrapOutputStream(System.out));
             channel.setErr(AnsiConsole.wrapOutputStream(System.err));
@@ -144,6 +154,39 @@ public class Main {
             } catch (Throwable t) { }
         }
         System.exit(0);
+    }
+
+    protected static SshAgent startAgent(String user) {
+        try {
+            SshAgent local = new AgentImpl();
+            URL url = Main.class.getClassLoader().getResource("karaf.key");
+            InputStream is = url.openStream();
+            ObjectInputStream r = new ObjectInputStream(is);
+            KeyPair keyPair = (KeyPair) r.readObject();
+            local.addIdentity(keyPair, "karaf");
+            return local;
+        } catch (Throwable e) {
+            System.err.println("Error starting ssh agent for: " + e.getMessage());
+            return null;
+        }
+    }
+
+    public static String readLine(String msg) throws IOException {
+        StringBuffer sb = new StringBuffer();
+        System.err.print(msg);
+        System.err.flush();
+        for (;;) {
+            int c = System.in.read();
+            if (c < 0) {
+                return null;
+            }
+            System.err.print((char) c);
+            if (c == '\r' || c == '\n') {
+                break;
+            }
+            sb.append((char) c);
+        }
+        return sb.toString();
     }
 
 }

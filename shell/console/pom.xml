@@ -93,6 +93,10 @@
             <artifactId>org.apache.felix.gogo.runtime</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.sshd</groupId>
+            <artifactId>sshd-core</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
