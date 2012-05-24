@@ -225,25 +225,14 @@ public class InstanceImpl implements Instance {
         String karafOpts = System.getProperty("karaf.opts", "");  
         
         File libDir = new File(System.getProperty("karaf.home"), "lib");
-        File[] jars = libDir.listFiles(new FilenameFilter() {
-            public boolean accept(File dir, String name) {
-                return name.endsWith(".jar");
-            }
-        });
-        StringBuilder classpath = new StringBuilder();
-        for (File jar : jars) {
-            if (classpath.length() > 0) {
-                classpath.append(System.getProperty("path.separator"));
-            }
-            classpath.append(jar.getCanonicalPath());
-        }
-        String command = "\""
-                + new File(System.getProperty("java.home"), ScriptUtils.isWindows() ? "bin\\java.exe" : "bin/java").getCanonicalPath()
-                + "\" " + javaOpts
-                + " " + karafOpts
+        String classpath = createClasspathFromAllJars(libDir);
+        String endorsedDirs = getSubDirs(libDir, "endorsed");
+        String extDirs = getSubDirs(libDir, "ext");
+
+        String command = "\"" + ScriptUtils.getJavaCommandPath() + "\" " + javaOpts + " " + karafOpts
                 + " -Djava.util.logging.config.file=\"" + new File(location, "etc/java.util.logging.properties").getCanonicalPath() + "\""
-                + " -Djava.endorsed.dirs=\"" + new File(new File(new File(System.getProperty("java.home"), "jre"), "lib"), "endorsed") + System.getProperty("path.separator") + new File(new File(System.getProperty("java.home"), "lib"), "endorsed") + System.getProperty("path.separator") + new File(libDir, "endorsed").getCanonicalPath() + "\""
-                + " -Djava.ext.dirs=\"" + new File(new File(new File(System.getProperty("java.home"), "jre"), "lib"), "ext") + System.getProperty("path.separator") + new File(new File(System.getProperty("java.home"), "lib"), "ext") + System.getProperty("path.separator") + new File(libDir, "ext").getCanonicalPath() + "\""
+                + " -Djava.endorsed.dirs=\"" + endorsedDirs + "\""
+                + " -Djava.ext.dirs=\"" + extDirs + "\""
                 + " -Dkaraf.home=\"" + System.getProperty("karaf.home") + "\""
                 + " -Dkaraf.base=\"" + new File(location).getCanonicalPath() + "\""
                 + " -Dkaraf.startLocalConsole=false"
@@ -256,6 +245,29 @@ public class InstanceImpl implements Instance {
                         .command(command)
                         .start();
         this.service.saveState();
+    }
+
+    private String getSubDirs(File libDir, String subDir) throws IOException {
+        File jreLibDir = new File(new File(System.getProperty("java.home"), "jre"), "lib");
+        File javaLibDir = new File(System.getProperty("java.home"), "lib");
+        String sep = System.getProperty("path.separator");
+        return new File(jreLibDir, subDir) + sep + new File(javaLibDir, subDir) + sep + new File(libDir, subDir).getCanonicalPath();
+    }
+
+    private String createClasspathFromAllJars(File libDir) throws IOException {
+        File[] jars = libDir.listFiles(new FilenameFilter() {
+            public boolean accept(File dir, String name) {
+                return name.endsWith(".jar");
+            }
+        });
+        StringBuilder classpath = new StringBuilder();
+        for (File jar : jars) {
+            if (classpath.length() > 0) {
+                classpath.append(System.getProperty("path.separator"));
+            }
+            classpath.append(jar.getCanonicalPath());
+        }
+        return classpath.toString();
     }
 
     public synchronized void stop() throws Exception {
