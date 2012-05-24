@@ -168,7 +168,7 @@ public class InfoAction extends OsgiCommandSupport {
             long minutes = (long) ((uptime - hours) * 60);
             String s = fmtI.format(hours) + (hours > 1 ? " hours" : " hour");
             if (minutes != 0) {
-                s += " " + fmtI.format(minutes) + (minutes > 1 ? " minutes" : "minute");
+                s += " " + fmtI.format(minutes) + (minutes > 1 ? " minutes" : " minute");
             }
             return s;
         }
@@ -177,7 +177,7 @@ public class InfoAction extends OsgiCommandSupport {
         long hours = (long) ((uptime - days) * 24);
         String s = fmtI.format(days) + (days > 1 ? " days" : " day");
         if (hours != 0) {
-            s += " " + fmtI.format(hours) + (hours > 1 ? " hours" : "hour");
+            s += " " + fmtI.format(hours) + (hours > 1 ? " hours" : " hour");
         }
         return s;
     }
