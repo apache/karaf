@@ -121,4 +121,8 @@ public class ScriptUtils {
         return windows;
     }
 
+    public static String getJavaCommandPath() throws IOException {
+        return new File(System.getProperty("java.home"), isWindows() ? "bin\\java.exe" : "bin/java").getCanonicalPath();
+    }
+
 }
