@@ -132,7 +132,7 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
                                     Set<Feature> features = new HashSet<Feature>(Arrays.asList(repo.getFeatures()));
                                     Set<Feature> autoInstallFeatures = new HashSet<Feature>();
                                     for(Feature feature:features) {
-                                        if(feature.getInstall().equals(Feature.DEFAULT_INSTALL_MODE)){
+                                        if(feature.getInstall() != null && feature.getInstall().equals(Feature.DEFAULT_INSTALL_MODE)){
                                             autoInstallFeatures.add(feature);
                                         }
                                     }
