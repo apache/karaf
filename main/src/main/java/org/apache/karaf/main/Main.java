@@ -20,12 +20,9 @@ package org.apache.karaf.main;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.security.Provider;
@@ -241,9 +238,23 @@ public class Main {
 
             LOG.info("Installing and starting initial bundles");
             File startupPropsFile = new File(config.etcFolder, STARTUP_PROPERTIES_FILE_NAME);
-            List<BundleInfo> bundles = readBundlesFromStartupProperties(startupPropsFile);        
-            installAndStartBundles(resolver, framework.getBundleContext(), bundles);
-            LOG.info("All initial bundles installed and set to start");
+            if (startupPropsFile.exists()) {
+                LOG.info("Installing and starting bundles from " + startupPropsFile);
+                List<BundleInfo> bundles = readBundlesFromStartupProperties(startupPropsFile);        
+                installAndStartBundles(resolver, framework.getBundleContext(), bundles);
+            }
+            
+            if (config.startupFeatureUri != null) {
+                LOG.info("Installing and starting bundles from startup feature uri " + config.startupFeatureUri + ", name " + config.startupFeatureName);
+                URI resolvedStartupFeatureUri = resolver.resolve(config.startupFeatureUri);
+                List<BundleInfo> bundles = new FeatureReader().readBundles(resolvedStartupFeatureUri, config.startupFeatureName);
+                installAndStartBundles(resolver, framework.getBundleContext(), bundles);
+            }
+            int numBundles = framework.getBundleContext().getBundles().length -1;
+            if (numBundles == 0) {
+                throw new RuntimeException("No bundles loaded. You either need a etc/startup.properties or set " + ConfigProperties.KARAF_STARTUP_FEATURE_URI + " in config.properties");
+            }
+            LOG.info(numBundles + " initial bundles installed and set to start");
         }
 
         ServerInfo serverInfo = new ServerInfoImpl(args, config);
