@@ -7,7 +7,10 @@ import org.apache.karaf.features.command.FeatureFinder;
 import org.apache.karaf.shell.console.Completer;
 import org.apache.karaf.shell.console.completer.StringsCompleter;
 
-public class FeatureRepoNameCompleter implements Completer {
+/**
+ * Shows the list of feature repos that can be installed with their short name
+ */
+public class AvailableRepoNameCompleter implements Completer {
 
     FeatureFinder featureFinder;
 
@@ -15,7 +18,7 @@ public class FeatureRepoNameCompleter implements Completer {
         this.featureFinder = featureFinder;
     }
 
-    public int complete(final String buffer, final int cursor, final List candidates) {
+    public int complete(final String buffer, final int cursor, @SuppressWarnings("rawtypes") final List candidates) {
         StringsCompleter delegate = new StringsCompleter(Arrays.asList(featureFinder.getNames()));
         return delegate.complete(buffer, cursor, candidates);
     }

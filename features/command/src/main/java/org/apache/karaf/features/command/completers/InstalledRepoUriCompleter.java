@@ -18,10 +18,10 @@ package org.apache.karaf.features.command.completers;
 
 import java.util.List;
 
+import org.apache.karaf.shell.console.completer.StringsCompleter;
+import org.apache.karaf.shell.console.Completer;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
-import org.apache.karaf.shell.console.Completer;
-import org.apache.karaf.shell.console.completer.StringsCompleter;
 
 /**
  * {@link jline.Completor} for Feature Repository URLs.
@@ -30,7 +30,7 @@ import org.apache.karaf.shell.console.completer.StringsCompleter;
  *
  */
 
-public class FeatureRepositoryNameCompleter implements Completer {
+public class InstalledRepoUriCompleter implements Completer {
 
     private FeaturesService featuresService;
 
@@ -38,11 +38,11 @@ public class FeatureRepositoryNameCompleter implements Completer {
         this.featuresService = featuresService;
     }
 
-    public int complete(final String buffer, final int cursor, final List candidates) {
+    public int complete(final String buffer, final int cursor, @SuppressWarnings("rawtypes") final List candidates) {
         StringsCompleter delegate = new StringsCompleter();
         try {
             for (Repository repository : featuresService.listRepositories()) {
-                delegate.getStrings().add(repository.getName());
+                delegate.getStrings().add(repository.getURI().toString());
             }
         } catch (Exception e) {
             // Ignore
