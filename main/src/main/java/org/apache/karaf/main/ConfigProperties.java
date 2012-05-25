@@ -95,6 +95,10 @@ public class ConfigProperties {
     private static final String KARAF_SHUTDOWN_COMMAND = "karaf.shutdown.command";
 
     private static final String KARAF_SHUTDOWN_PID_FILE = "karaf.shutdown.pid.file";
+    
+    static final String KARAF_STARTUP_FEATURE_URI = "karaf.startup.feature.uri";
+    
+    private static final String KARAF_STARTUP_FEATURE_NAME = "karaf.startup.feature.name";
 
     private static final String DEFAULT_SHUTDOWN_COMMAND = "SHUTDOWN";
 
@@ -133,6 +137,8 @@ public class ConfigProperties {
     String includes;
     String optionals;
     File etcFolder;
+    URI startupFeatureUri;
+    String startupFeatureName;
     
     public ConfigProperties() throws Exception {
         this.karafHome = Utils.getKarafHome(ConfigProperties.class, PROP_KARAF_HOME, ENV_KARAF_HOME);
@@ -183,6 +189,10 @@ public class ConfigProperties {
         this.shutdownHost = props.getProperty(KARAF_SHUTDOWN_HOST, "localhost");
         this.portFile = props.getProperty(KARAF_SHUTDOWN_PORT_FILE);
         this.shutdownCommand = props.getProperty(KARAF_SHUTDOWN_COMMAND, DEFAULT_SHUTDOWN_COMMAND);
+        if (props.getProperty(KARAF_STARTUP_FEATURE_URI) != null) {
+            this.startupFeatureUri = new URI(props.getProperty(KARAF_STARTUP_FEATURE_URI));
+        }
+        this.startupFeatureName = props.getProperty(KARAF_STARTUP_FEATURE_NAME, "framework");
     }
     
     private String getProperyOrFail(String propertyName) {
