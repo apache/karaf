@@ -224,6 +224,24 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         if (!repositories.containsKey(uri)) {
             internalAddRepository(uri);
             saveState();
+        } else {
+            refreshRepository(uri);
+        }
+    }
+    
+    /**
+     * Refreshes the url.
+     * @param url
+     * @throws Exception
+     */
+    protected void refreshRepository(URI uri) throws Exception {
+        try {
+            removeRepository(uri);
+            addRepository(uri);
+        } catch (Exception e) {
+            //get chance to restore previous, fix for KARAF-4
+            restoreRepository(uri);
+            throw new Exception("Unable to refresh features repository " + uri, e);
         }
     }
 

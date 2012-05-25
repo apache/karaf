@@ -21,30 +21,22 @@
 
     <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
         <command>
-            <action class="org.apache.karaf.features.command.AddUrlCommand"/>
+            <action class="org.apache.karaf.features.command.RepoListCommand"/>
         </command>
         <command>
-            <action class="org.apache.karaf.features.command.ListUrlCommand"/>
-        </command>
-        <command>
-            <action class="org.apache.karaf.features.command.ListRepositoriesCommand"/>
-        </command>
-        <command>
-            <action class="org.apache.karaf.features.command.RemoveUrlCommand"/>
-            <completers>
-                <ref component-id="featureUrlCompleter" />
-            </completers>
-        </command>
-        <command>
-             <action class="org.apache.karaf.features.command.RemoveRepositoryCommand"/>
+             <action class="org.apache.karaf.features.command.RepoRemoveCommand"/>
              <completers>
-                 <ref component-id="featureRepositoryNameCompleter" />
+                 <ref component-id="installedRepoNameCompleter" />
              </completers>
          </command>
         <command>
-            <action class="org.apache.karaf.features.command.RefreshUrlCommand"/>
+            <action class="org.apache.karaf.features.command.RepoAddCommand">
+                <property name="featureFinder" ref="featureFinder" />
+                <property name="featuresService" ref="featuresService" />
+            </action>
             <completers>
-                <ref component-id="featureUrlCompleter" />
+                <ref component-id="availableRepoNameCompleter" />
+                <null/>
             </completers>
         </command>
         <command>
@@ -74,19 +66,9 @@
                 <ref component-id="allFeatureCompleter" />
             </completers>
         </command>
-        <command>
-            <action class="org.apache.karaf.features.command.ChooseUrlCommand">
-                <property name="featureFinder" ref="featureFinder" />
-                <property name="featuresService" ref="featuresService" />
-            </action>
-            <completers>
-                <ref component-id="featureRepoCompleter" />
-                <null/>
-            </completers>
-        </command>
     </command-bundle>
 
-    <bean id="featureRepoCompleter" class="org.apache.karaf.features.command.completers.FeatureRepoNameCompleter">
+    <bean id="availableRepoNameCompleter" class="org.apache.karaf.features.command.completers.AvailableRepoNameCompleter">
         <property name="featureFinder" ref="featureFinder" />
     </bean>
 
@@ -113,11 +95,11 @@
         <property name="featuresService" ref="featuresService" />
     </bean>
 
-    <bean id="featureUrlCompleter" class="org.apache.karaf.features.command.completers.FeatureRepositoryCompleter">
+    <bean id="installedRepoUriCompleter" class="org.apache.karaf.features.command.completers.InstalledRepoUriCompleter">
         <property name="featuresService" ref="featuresService" />
     </bean>
     
-    <bean id="featureRepositoryNameCompleter" class="org.apache.karaf.features.command.completers.FeatureRepositoryNameCompleter">
+    <bean id="installedRepoNameCompleter" class="org.apache.karaf.features.command.completers.InstalledRepoNameCompleter">
         <property name="featuresService" ref="featuresService"/>
     </bean>
 

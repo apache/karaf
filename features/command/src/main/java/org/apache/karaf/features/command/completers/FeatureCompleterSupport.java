@@ -37,7 +37,7 @@ public abstract class FeatureCompleterSupport implements Completer {
         this.featuresService = featuresService;
     }
 
-    public int complete(final String buffer, final int cursor, final List candidates) {
+    public int complete(final String buffer, final int cursor, @SuppressWarnings("rawtypes") final List candidates) {
         StringsCompleter delegate = new StringsCompleter();
         try {
             for (Feature feature : featuresService.listFeatures()) {

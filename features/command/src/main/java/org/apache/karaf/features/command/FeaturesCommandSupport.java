@@ -16,7 +16,6 @@
  */
 package org.apache.karaf.features.command;
 
-import java.net.URI;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.osgi.framework.ServiceReference;
@@ -24,8 +23,7 @@ import org.osgi.framework.ServiceReference;
 public abstract class FeaturesCommandSupport extends OsgiCommandSupport {
 
     protected Object doExecute() throws Exception {
-        // Get repository instance service.
-        ServiceReference ref = getBundleContext().getServiceReference(FeaturesService.class.getName());
+        ServiceReference<FeaturesService> ref = getBundleContext().getServiceReference(FeaturesService.class);
         if (ref == null) {
             System.out.println("FeaturesService service is unavailable.");
             return null;
@@ -43,25 +41,6 @@ public abstract class FeaturesCommandSupport extends OsgiCommandSupport {
             getBundleContext().ungetService(ref);
         }
         return null;
-    }
-
-
-	/**
-	 * Refreshes the url.
-	 * @param admin
-	 * @param url
-	 * @throws Exception
-	 */
-	protected void refreshUrl(FeaturesService admin,String url) throws Exception {
-        try {
-            URI uri = new URI(url);
-            admin.removeRepository(uri);
-            admin.addRepository(uri);
-        } catch (Exception e) {
-            //get chance to restore previous, fix for KARAF-4
-            admin.restoreRepository(new URI(url));
-            throw new Exception("Unable to refresh features repository " + url, e);
-        }
     }
 
     protected abstract void doExecute(FeaturesService admin) throws Exception;

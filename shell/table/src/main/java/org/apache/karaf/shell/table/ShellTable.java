@@ -27,6 +27,7 @@ public class ShellTable {
     boolean showHeaders = true;
     private String separator = " | ";
     private int size;
+    private String emptyTableText;
     
     public ShellTable() {
         
@@ -64,6 +65,16 @@ public class ShellTable {
         return row;
     }
     
+    /**
+     * Set text to display if there are no rows in the table
+     * @param text 
+     * @return
+     */
+    public ShellTable emptyTableText(String text) {
+        this.emptyTableText = text;
+        return this;
+    }
+
     public void print(PrintStream out)  {
         Row headerRow = new Row(cols);
         headerRow.formatContent(cols);
@@ -83,6 +94,10 @@ public class ShellTable {
 
         for (Row row : rows) {
             out.println(row.getContent(cols, separator));
+        }
+
+        if (rows.size() == 0 && emptyTableText != null) {
+            out.println(emptyTableText);
         }
     }
 

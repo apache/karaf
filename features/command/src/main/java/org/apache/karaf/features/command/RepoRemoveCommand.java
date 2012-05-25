@@ -23,15 +23,15 @@ import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
 
-@Command(scope = "feature", name = "repository-remove", description = "Removes the specified repository features service.")
-public class RemoveRepositoryCommand extends FeaturesCommandSupport {
+@Command(scope = "feature:repo", name = "remove", description = "Removes the specified repository features service.")
+public class RepoRemoveCommand extends FeaturesCommandSupport {
 
-    @Argument(index = 0, name = "repository", description = "Name of the repository to remove.", required = true, multiValued = false)
+    @Argument(index = 0, name = "repository", description = "Name or url of the repository to remove.", required = true, multiValued = false)
     private String repository;
 
-    protected void doExecute(FeaturesService admin) throws Exception {
+    protected void doExecute(FeaturesService featuresService) throws Exception {
     	URI uri = null;
-    	for (Repository r :admin.listRepositories()) {
+    	for (Repository r : featuresService.listRepositories()) {
     		if (r.getName().equals(repository)) {
     			uri = r.getURI();
     			break;
@@ -39,9 +39,9 @@ public class RemoveRepositoryCommand extends FeaturesCommandSupport {
     	}
 
     	if (uri == null) {
-    		System.out.println("Repository '" + repository + "' not found.") ;
-    	} else {
-    		admin.removeRepository(uri);
+    	    uri = new URI(repository);
     	}
+
+    	featuresService.removeRepository(uri);
     }
 }

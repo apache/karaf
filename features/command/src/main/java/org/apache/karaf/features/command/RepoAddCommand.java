@@ -23,13 +23,13 @@ import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.console.AbstractAction;
 
-@Command(scope = "feature", name = "url-choose", description = "Add a repository url for well known features.")
-public class ChooseUrlCommand extends AbstractAction {
+@Command(scope = "feature:repo", name = "add", description = "Add a repository for well known features.")
+public class RepoAddCommand extends AbstractAction {
 
-    @Argument(index = 0, name = "Feature name", description = "The name of the feature", required = true, multiValued = false)
-    private String name;
+    @Argument(index = 0, name = "Feature name or uri", description = "Shortcut name of the feature repository or the full URI", required = true, multiValued = false)
+    private String nameOrUrl;
     
-    @Argument(index = 1, name = "Feature version", description = "The version of the feature", required = false, multiValued = false)
+    @Argument(index = 1, name = "Feature version", description = "The version of the feature if using the feature name. Should be empty if using the uri", required = false, multiValued = false)
     private String version;
     
     private FeatureFinder featureFinder;
@@ -45,9 +45,9 @@ public class ChooseUrlCommand extends AbstractAction {
 
     protected Object doExecute() throws Exception {
         String effectiveVersion = (version == null) ? "LATEST" : version;
-        URI uri = featureFinder.getUriFor(name, effectiveVersion);
+        URI uri = featureFinder.getUriFor(nameOrUrl, effectiveVersion);
         if (uri == null) {
-            throw new RuntimeException("No feature found for name " + name + " and version " + version);
+            featuresService.addRepository(new URI(nameOrUrl));
         }
         System.out.println("Adding feature url " + uri);
         featuresService.addRepository(uri);

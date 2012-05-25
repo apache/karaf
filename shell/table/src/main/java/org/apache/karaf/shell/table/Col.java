@@ -80,6 +80,9 @@ public class Col {
     }
 
     String format(Object cellData) {
+        if (cellData == null) {
+            cellData = "";
+        }
         String fullContent = String.format("%s", cellData);
         if (fullContent.length() == 0) {
             return "";
