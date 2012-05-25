@@ -23,7 +23,7 @@ import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.console.AbstractAction;
 
-@Command(scope = "feature:repo", name = "add", description = "Add a repository for well known features.")
+@Command(scope = "feature", name = "repo-add", description = "Add a repository for well known features.")
 public class RepoAddCommand extends AbstractAction {
 
     @Argument(index = 0, name = "Feature name or uri", description = "Shortcut name of the feature repository or the full URI", required = true, multiValued = false)
