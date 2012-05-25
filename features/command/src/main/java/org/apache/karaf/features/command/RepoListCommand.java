@@ -27,7 +27,7 @@ import org.apache.karaf.shell.console.MultiException;
 import org.apache.karaf.shell.table.Row;
 import org.apache.karaf.shell.table.ShellTable;
 
-@Command(scope = "feature:repo", name = "list", description = "Displays a list of all defined repositories.")
+@Command(scope = "feature", name = "repo-list", description = "Displays a list of all defined repositories.")
 public class RepoListCommand extends FeaturesCommandSupport {
 
     @Option(name="-r", description="Reload all feature urls")

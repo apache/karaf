@@ -23,7 +23,7 @@ import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
 
-@Command(scope = "feature:repo", name = "remove", description = "Removes the specified repository features service.")
+@Command(scope = "feature", name = "repo-remove", description = "Removes the specified repository features service.")
 public class RepoRemoveCommand extends FeaturesCommandSupport {
 
     @Argument(index = 0, name = "repository", description = "Name or url of the repository to remove.", required = true, multiValued = false)
