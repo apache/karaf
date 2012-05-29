@@ -87,7 +87,7 @@ public class Diag extends BundlesCommand {
                 for (Bundle bundle : pVer.bundles) {
                     System.out.print(bundle.getBundleId() + " ");
                 }
-                System.out.println("\n");
+                System.out.println();
             }
         }
         System.out.println();
