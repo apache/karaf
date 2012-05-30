@@ -31,7 +31,7 @@
 
     <groupId>org.apache.karaf.features</groupId>
     <artifactId>standard</artifactId>
-    <packaging>feature</packaging>
+    <packaging>pom</packaging>
     <name>Apache Karaf :: Assemblies :: Features :: Standard</name>
     <description>Standard providing core Karaf features</description>
 
@@ -632,7 +632,6 @@
             <plugin>
                 <groupId>org.apache.karaf.tooling</groupId>
                 <artifactId>karaf-maven-plugin</artifactId>
-                <extensions>true</extensions>
                 <configuration>
                     <startLevel>30</startLevel>
                 </configuration>
@@ -645,6 +644,28 @@
                         </goals>
                         <configuration>
                             <addBundlesToPrimaryFeature>false</addBundlesToPrimaryFeature>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-artifacts</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>attach-artifact</goal>
+                        </goals>
+                        <configuration>
+                            <artifacts>
+                                <artifact>
+                                    <file>target/feature/feature.xml</file>
+									<classifier>features</classifier>
+                                    <type>xml</type>
+                                </artifact>
+                            </artifacts>
                         </configuration>
                     </execution>
                 </executions>
