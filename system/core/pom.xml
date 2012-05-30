@@ -50,6 +50,16 @@
             <artifactId>slf4j-api</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+        	<groupId>org.apache.felix</groupId>
+        	<artifactId>org.apache.felix.utils</artifactId>
+        	<scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -80,7 +90,8 @@
                         </Export-Package>
                         <Private-Package>
                             org.apache.karaf.system.internal,
-                            org.apache.karaf.system.management.internal
+                            org.apache.karaf.system.management.internal,
+                            org.apache.felix.utils.properties
                         </Private-Package>
                     </instructions>
                 </configuration>
