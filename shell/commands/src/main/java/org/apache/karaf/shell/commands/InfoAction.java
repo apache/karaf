@@ -27,8 +27,10 @@ import java.lang.reflect.Method;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -126,11 +128,22 @@ public class InfoAction extends OsgiCommandSupport {
                 properties.get(provider.getName()).putAll(provider.getProperties());
             }
 
-            for (String section : properties.keySet()) {
-                System.out.println(section);
+            List<String> sections = new ArrayList<String>(properties.keySet());
+            Collections.sort(sections);
+            for (String section : sections) {
+                List<Object> keys = new ArrayList<Object>(properties.get(section).keySet());
+                if (keys.size() > 0) {
+                    System.out.println(section);
 
-                for (Object key : properties.get(section).keySet()) {
-                    printValue(String.valueOf(key), maxNameLen, String.valueOf(properties.get(section).get(key)));
+                    Collections.sort(keys, new Comparator<Object>() {
+                        public int compare(Object o1, Object o2) {
+                            return String.valueOf(o1).compareTo(String.valueOf(o2));
+                        }
+                    });
+
+                    for (Object key : keys) {
+                        printValue(String.valueOf(key), maxNameLen, String.valueOf(properties.get(section).get(key)));
+                    }
                 }
             }
         }
