@@ -30,7 +30,7 @@
 
     <groupId>org.apache.karaf.features</groupId>
     <artifactId>enterprise</artifactId>
-    <packaging>feature</packaging>
+    <packaging>pom</packaging>
     <name>Apache Karaf :: Assemblies :: Features :: Enterprise</name>
 
     <properties>
@@ -216,7 +216,6 @@
             <plugin>
                 <groupId>org.apache.karaf.tooling</groupId>
                 <artifactId>karaf-maven-plugin</artifactId>
-                <extensions>true</extensions>
                 <configuration>
                 </configuration>
                 <executions>
@@ -228,6 +227,28 @@
                         </goals>
                         <configuration>
                             <addBundlesToPrimaryFeature>false</addBundlesToPrimaryFeature>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-artifacts</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>attach-artifact</goal>
+                        </goals>
+                        <configuration>
+                            <artifacts>
+                                <artifact>
+                                    <file>target/feature/feature.xml</file>
+                                    <classifier>features</classifier>
+                                    <type>xml</type>
+                                </artifact>
+                            </artifacts>
                         </configuration>
                     </execution>
                 </executions>
