@@ -29,7 +29,6 @@ import java.net.URL;
 import jline.Terminal;
 
 import org.apache.felix.service.command.CommandSession;
-import org.apache.karaf.shell.commands.basic.DefaultActionPreparator;
 import org.apache.karaf.shell.console.HelpProvider;
 import org.apache.karaf.shell.console.SubShell;
 import org.apache.karaf.shell.util.IndentFormatter;
@@ -65,7 +64,12 @@ public class SubShellHelpProvider implements HelpProvider {
                 return null;
             }
         }
-        for (ServiceReference<?> ref : tracker.getServiceReferences()) {
+        @SuppressWarnings("rawtypes")
+        ServiceReference[] refs = tracker.getServiceReferences();
+        if (refs == null) {
+            return null;
+        }
+        for (ServiceReference<?> ref : refs) {
             if (path.equals(ref.getProperty("name"))) {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 printSubShellHelp(session, ref.getBundle(), (SubShell) tracker.getService(ref), new PrintStream(baos, true));
