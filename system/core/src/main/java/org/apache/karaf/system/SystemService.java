@@ -68,4 +68,15 @@ public interface SystemService {
      */
     int getStartLevel() throws Exception;
 
+    /**
+     * Get the name of the current Karaf instance
+     * @return instance name
+     */
+    String getName();
+    
+    /**
+     * Set the name of the Karaf instance 
+     * @param name new instance name
+     */
+    void setName(String name);
 }

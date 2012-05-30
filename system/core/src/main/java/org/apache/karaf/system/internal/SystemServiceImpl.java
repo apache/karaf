@@ -16,9 +16,13 @@
 */
 package org.apache.karaf.system.internal;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
+import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.system.SystemService;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -138,6 +142,30 @@ public class SystemServiceImpl implements SystemService {
             }
         }
         return sleep;
+    }
+
+    @Override
+    public String getName() {
+        return bundleContext.getProperty("karaf.name");
+    }
+
+    @Override
+    public void setName(String name) {
+        try {
+            String karafBase = bundleContext.getProperty("karaf.base");
+            File etcDir = new File(karafBase, "etc");
+            File syspropsFile = new File(etcDir, "system.properties");
+            FileInputStream fis = new FileInputStream(syspropsFile);
+            Properties props = new Properties();
+            props.load(fis);
+            fis.close();
+            props.setProperty("karaf.name", name);
+            FileOutputStream fos = new FileOutputStream(syspropsFile);
+            props.store(fos, "");
+            fos.close();
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
     }
 
 }

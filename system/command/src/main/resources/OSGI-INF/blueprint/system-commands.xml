@@ -30,6 +30,11 @@
                 <property name="systemService" ref="systemService"/>
             </action>
         </command>
+        <command>
+            <action class="org.apache.karaf.system.commands.Name">
+                <property name="systemService" ref="systemService"/>
+            </action>
+        </command>
     </command-bundle>
 
     <reference id="systemService" interface="org.apache.karaf.system.SystemService"/>
