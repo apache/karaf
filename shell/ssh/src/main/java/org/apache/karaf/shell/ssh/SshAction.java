@@ -23,6 +23,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.List;
 
+import jline.Terminal;
+
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 import org.apache.felix.gogo.commands.Option;
@@ -140,6 +142,7 @@ public class SshAction
                 } else {
                     channel = sshSession.createChannel("shell");
                     channel.setIn(new NoCloseInputStream(System.in));
+                    ((ChannelShell) channel).setPtyColumns(getTermWidth());
                     ((ChannelShell) channel).setupSensibleDefaultPty();
                 }
                 channel.setOut(new NoCloseOutputStream(System.out));
@@ -155,6 +158,11 @@ public class SshAction
         }
 
         return null;
+    }
+
+    private int getTermWidth() {
+        Terminal term = (Terminal) session.get(".jline.terminal");
+        return term != null ? term.getWidth() : 80;
     }
 
     public String readLine(String msg) throws IOException {
