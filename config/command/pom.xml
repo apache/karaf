@@ -91,6 +91,15 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
+                <configuration>
+                    <instructions>
+                        <Import-Package>
+                            org.osgi.service.cm;version="[1.3,2)",
+                            *
+                        </Import-Package>
+                        <Private-Package>!*</Private-Package>
+                    </instructions>
+                </configuration>
             </plugin>
         </plugins>
     </build>
