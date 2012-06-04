@@ -35,6 +35,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
+
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.ConfigFileInfo;
 
@@ -299,6 +300,14 @@ public class Feature implements org.apache.karaf.features.Feature {
      */
     public void setVersion(String value) {
         this.version = value;
+    }
+
+    /**
+     * Since version has a default value ("0.0.0"), returns
+     * whether or not the version has been set.
+     */
+    public boolean hasVersion() {
+        return this.version != null;
     }
 
     /**

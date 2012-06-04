@@ -309,7 +309,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
             feature = objectFactory.createFeature();
             feature.setName(project.getArtifactId());
         }
-        if (feature.getVersion() == null) {
+        if (!feature.hasVersion()) {
             feature.setVersion(project.getArtifact().getBaseVersion());
         }
         if (feature.getDescription() == null) {
