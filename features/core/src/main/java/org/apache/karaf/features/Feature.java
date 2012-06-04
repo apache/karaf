@@ -36,6 +36,8 @@ public interface Feature {
 
     String getVersion();
 
+    boolean hasVersion();
+
     String getResolver();
 
     String getInstall();

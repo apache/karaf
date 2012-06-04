@@ -140,8 +140,15 @@ public class ExtendedFeature implements Feature
         return 0;
     }
 
+    public boolean hasVersion() {
+        return this.feature.hasVersion();
+    }
+
+
     @Override
     public String getRegion() {
         return feature.getRegion();
     }
+
+    
 }
