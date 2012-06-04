@@ -190,7 +190,7 @@
         <maven.version>2.0.9</maven.version>
         <mina.version>2.0.4</mina.version>
         <osgi.version>4.3.0</osgi.version>
-        <osgi.compendium.version>4.2.0</osgi.compendium.version>
+        <osgi.compendium.version>4.3.0</osgi.compendium.version>
         <pax.exam.version>2.4.0</pax.exam.version>
         <pax.logging.version>1.6.7</pax.logging.version>
         <pax.runner.version>1.7.5</pax.runner.version>

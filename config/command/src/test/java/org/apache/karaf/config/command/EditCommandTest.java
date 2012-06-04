@@ -69,7 +69,7 @@ public class EditCommandTest extends TestCase {
         replay(admin);
         
         // the ConfigAdmin service returns a Dictionary for an existing PID
-        Properties props = new Properties();
+        Dictionary props = new Properties();
         expect(config.getProperties()).andReturn(props);
         replay(config);
         

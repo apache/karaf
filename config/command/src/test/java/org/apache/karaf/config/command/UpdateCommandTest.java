@@ -21,6 +21,7 @@ import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
 
+import java.util.Dictionary;
 import java.util.Properties;
 
 import junit.framework.TestCase;
@@ -61,7 +62,7 @@ public class UpdateCommandTest extends TestCase {
     }
 
     public void testupdateOnNewFactoryPid() throws Exception {
-        Properties props = new Properties();
+        Dictionary props = new Properties();
 
         session.put(ConfigCommandSupport.PROPERTY_CONFIG_PID, PID);
         session.put(ConfigCommandSupport.PROPERTY_CONFIG_PROPS, props);

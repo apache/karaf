@@ -92,6 +92,10 @@
                 <configuration>
                     <instructions>
                         <Export-Package>!*</Export-Package>
+                        <Import-Package>
+                            org.osgi.service.cm;version="[1.3,2)",
+                            *
+                        </Import-Package>
                         <Private-Package>
                             org.apache.karaf.dev.command,
                             org.apache.karaf.dev.command.bundletree,
