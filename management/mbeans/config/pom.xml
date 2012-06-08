@@ -90,6 +90,7 @@
                             javax.management,
                             javax.management.loading,
                             org.apache.karaf.management;version=${project.version},
+                            org.osgi.service.cm;version="[1.3,2)",
                             *
                         </Import-Package>
                         <Private-Package>

@@ -16,7 +16,7 @@
  */
 package org.apache.karaf.shell.config;
 
-
+import java.util.Dictionary;
 import java.util.Properties;
 
 import junit.framework.TestCase;
@@ -75,7 +75,7 @@ public class UpdateCommandTest extends TestCase {
 
         Configuration configFac = createMock(Configuration.class);
         expect(admin.createFactoryConfiguration(PID.substring(0, PID.indexOf('-')), null)).andReturn(configFac);
-        configFac.update(props);
+        configFac.update((Dictionary) props);
         expect(configFac.getBundleLocation()).andReturn(null);
         replay(admin);
         replay(configNew);
