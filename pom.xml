@@ -148,7 +148,7 @@
         <aries.transaction.manager.version>0.3.1-SNAPSHOT</aries.transaction.manager.version>
         <aries.transaction.wrappers.version>0.3</aries.transaction.wrappers.version>
         <aries.util.version>0.3.1-SNAPSHOT</aries.util.version>
-        <jansi.version>1.8</jansi.version>
+        <jansi.version>1.9</jansi.version>
         <jline.version>2.6</jline.version>
         <jsw.version>3.2.3</jsw.version>
         <log4j.version>1.2.16</log4j.version>
