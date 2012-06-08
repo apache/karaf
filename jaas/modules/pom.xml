@@ -108,6 +108,7 @@
                         <Import-Package>
                             org.apache.karaf.jaas.config,
                             org.apache.aries.blueprint.ext,
+                            org.osgi.service.cm;version="[1.3,2)",
                             *
                         </Import-Package>
                         <Private-Package>
