@@ -132,9 +132,9 @@
         <felix.eventadmin-plugin.version>1.0.2</felix.eventadmin-plugin.version>
         <felix.obr.version>1.0.2</felix.obr.version>
         <aries.application.version>0.3</aries.application.version>
-        <aries.blueprint.version>0.3.2-SNAPSHOT</aries.blueprint.version>
+        <aries.blueprint.version>0.3.2</aries.blueprint.version>
         <aries.jmx.api.version>0.3</aries.jmx.api.version>
-        <aries.jmx.core.version>0.3.1-SNAPSHOT</aries.jmx.core.version>
+        <aries.jmx.core.version>0.3.1</aries.jmx.core.version>
         <aries.jmx.blueprint.version>0.3</aries.jmx.blueprint.version>
         <aries.jpa.version>0.3</aries.jpa.version>
         <aries.jndi.version>0.3</aries.jndi.version>
@@ -146,9 +146,10 @@
         <aries.transaction.version>0.3</aries.transaction.version>
         <jansi.version>1.9</jansi.version>
         <aries.transaction.blueprint.version>0.3</aries.transaction.blueprint.version>
-        <aries.transaction.manager.version>0.3.1-SNAPSHOT</aries.transaction.manager.version>
+        <aries.transaction.manager.version>0.3.1</aries.transaction.manager.version>
         <aries.transaction.wrappers.version>0.3</aries.transaction.wrappers.version>
         <aries.util.version>0.3.1-SNAPSHOT</aries.util.version>
+        <aries.util.version>0.3.1</aries.util.version>
         <jline.version>2.6</jline.version>
         <jsw.version>3.2.3</jsw.version>
         <log4j.version>1.2.16</log4j.version>
