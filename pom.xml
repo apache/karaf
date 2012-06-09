@@ -132,14 +132,23 @@
         <felix.eventadmin-plugin.version>1.0.2</felix.eventadmin-plugin.version>
         <felix.obr.version>1.0.2</felix.obr.version>
         <aries.application.version>0.3</aries.application.version>
-        <aries.blueprint.version>0.3.1</aries.blueprint.version>
-        <aries.jmx.version>0.3</aries.jmx.version>
+        <aries.blueprint.version>0.3.2-SNAPSHOT</aries.blueprint.version>
+        <aries.jmx.api.version>0.3</aries.jmx.api.version>
+        <aries.jmx.core.version>0.3.1-SNAPSHOT</aries.jmx.core.version>
+        <aries.jmx.blueprint.version>0.3</aries.jmx.blueprint.version>
         <aries.jpa.version>0.3</aries.jpa.version>
         <aries.jndi.version>0.3</aries.jndi.version>
+        <aries.jndi.core.version>0.3</aries.jndi.core.version>
+        <aries.jndi.rmi.version>0.3</aries.jndi.rmi.version>
+        <aries.jndi.url.version>0.3</aries.jndi.url.version>
+        <aries.jndi.legacy.version>0.3</aries.jndi.legacy.version>
         <aries.proxy.version>0.3</aries.proxy.version>
         <aries.transaction.version>0.3</aries.transaction.version>
-        <aries.util.version>0.3</aries.util.version>
         <jansi.version>1.9</jansi.version>
+        <aries.transaction.blueprint.version>0.3</aries.transaction.blueprint.version>
+        <aries.transaction.manager.version>0.3.1-SNAPSHOT</aries.transaction.manager.version>
+        <aries.transaction.wrappers.version>0.3</aries.transaction.wrappers.version>
+        <aries.util.version>0.3.1-SNAPSHOT</aries.util.version>
         <jline.version>2.6</jline.version>
         <jsw.version>3.2.3</jsw.version>
         <log4j.version>1.2.16</log4j.version>
@@ -898,17 +907,17 @@
             <dependency>
                 <groupId>org.apache.aries.jmx</groupId>
                 <artifactId>org.apache.aries.jmx.api</artifactId>
-                <version>${aries.jmx.version}</version>
+                <version>${aries.jmx.api.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.aries.jmx</groupId>
                 <artifactId>org.apache.aries.jmx.core</artifactId>
-                <version>${aries.jmx.version}</version>
+                <version>${aries.jmx.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.aries.jmx</groupId>
                 <artifactId>org.apache.aries.jmx.blueprint</artifactId>
-                <version>${aries.jmx.version}</version>
+                <version>${aries.jmx.blueprint.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.aries.jndi</groupId>
