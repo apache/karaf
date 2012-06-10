@@ -57,6 +57,7 @@ public class WatchAction extends AbstractAction {
             executorService.scheduleAtFixedRate(watchTask, 0, interval, TimeUnit.SECONDS);
             try {
                 session.getKeyboard().read();
+                watchTask.abort();
             } finally {
                 executorService.shutdownNow();
                 watchTask.close();
@@ -73,6 +74,7 @@ public class WatchAction extends AbstractAction {
         CommandSession session;
         ByteArrayOutputStream byteArrayOutputStream = null;
         PrintStream printStream = null;
+        boolean doDisplay = true;
 
         public WatchTask(CommandProcessor processor, String command) {
             this.processor = processor;
@@ -81,16 +83,18 @@ public class WatchAction extends AbstractAction {
 
         public void run() {
             try {
-                 byteArrayOutputStream = new ByteArrayOutputStream();
+                byteArrayOutputStream = new ByteArrayOutputStream();
                 printStream = new PrintStream(byteArrayOutputStream);
                 session = commandProcessor.createSession(null, printStream, printStream);
                 String output = "";
                 session.execute(command);
                 output = byteArrayOutputStream.toString();
-                System.out.print("\33[2J");
-                System.out.print("\33[1;1H");
-                System.out.print(output);
-                System.out.flush();
+                if (doDisplay) {
+                    System.out.print("\33[2J");
+                    System.out.print("\33[1;1H");
+                    System.out.print(output);
+                    System.out.flush();
+                }
                 byteArrayOutputStream.close();
                 session.close();
             } catch (Exception e) {
@@ -98,6 +102,9 @@ public class WatchAction extends AbstractAction {
             }
         }
 
+        public void abort() {
+            doDisplay = false;
+        }
         public void close() throws IOException {
             if (this.session != null) {
                 this.session.close();
