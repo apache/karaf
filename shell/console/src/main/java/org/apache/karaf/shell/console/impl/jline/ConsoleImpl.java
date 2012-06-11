@@ -251,10 +251,6 @@ public class ConsoleImpl implements Console
             } else {
                 reader.getHistory().replace(command);
             }
-            // append the subshell if present
-            if (session.get("SUBSHELL") != null && ((String) session.get("SUBSHELL")).trim().length() > 0 && !command.equals("exit")) {
-                command = session.get("SUBSHELL") + ":" + command;
-            }
 		    try {
 		        new Parser(command).program();
 		        loop = false;
