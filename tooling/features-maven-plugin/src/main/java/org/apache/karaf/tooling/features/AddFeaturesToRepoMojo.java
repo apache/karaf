@@ -50,7 +50,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 /**
- * Generates the features XML file
+ * Add Features necessary bundles into system folder Repo
  *
  * @version $Revision$
  * @goal add-features-to-repo
