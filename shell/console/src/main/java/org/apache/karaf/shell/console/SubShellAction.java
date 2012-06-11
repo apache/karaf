@@ -28,6 +28,7 @@ public class SubShellAction extends AbstractAction {
     
     public Object doExecute() throws Exception {
         session.put("SUBSHELL", subShell);
+        session.put("SCOPE", subShell + ":" + session.get("SCOPE"));
         return null;
     }
     
