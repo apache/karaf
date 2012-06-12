@@ -120,7 +120,6 @@
                         <Import-Package>
                             org.osgi.service.event;resolution:=optional,
                             org.apache.karaf.branding;resolution:=optional,
-                            org.osgi.service.cm;version="[1.3,2)",
                             *
                         </Import-Package>
                         <Export-Package>

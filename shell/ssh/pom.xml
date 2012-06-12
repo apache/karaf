@@ -95,7 +95,6 @@
                             org.apache.karaf.shell.console,
                             org.apache.sshd.server.keyprovider,
                             org.apache.sshd.server.jaas,
-                            org.osgi.service.cm;version="[1.3,2)",
                             *
                         </Import-Package>
                     </instructions>
