@@ -126,7 +126,7 @@
                                     </includes>
                                     <excludes>
                                         <exclude>org.apache.karaf.shell.cfg</exclude>
-                                        <exclude>org.ops4j.pax.url.mvn.cfg</exclude>
+                                        <exclude>org.apache.karaf.management.cfg</exclude>
                                         <exclude>system.properties</exclude>
                                     </excludes>
                                 </resource>
