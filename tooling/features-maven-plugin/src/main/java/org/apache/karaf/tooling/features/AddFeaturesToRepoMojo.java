@@ -78,7 +78,7 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
     private List<String> features;
 
     /**
-     * @parameter
+     * @parameter expression="${project.build.directory}/features-repo"
      */
     private File repository;
 
