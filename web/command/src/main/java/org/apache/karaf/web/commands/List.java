@@ -18,8 +18,11 @@ package org.apache.karaf.web.commands;
 
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
+import org.apache.karaf.shell.table.Col;
+import org.apache.karaf.shell.table.ShellTable;
 import org.apache.karaf.web.WebBundle;
 import org.apache.karaf.web.WebContainerService;
+
 
 @Command(scope = "web", name = "list", description = "Lists details for war bundles.")
 public class List extends OsgiCommandSupport {
@@ -31,22 +34,28 @@ public class List extends OsgiCommandSupport {
     }
     
     public Object doExecute() throws Exception {
+    	ShellTable table = new ShellTable();
+        table.column(new Col("ID"));
+        table.column(new Col("State"));
+        table.column(new Col("Web-State"));
+        table.column(new Col("Level"));
+        table.column(new Col("Web-ContextPath"));
+        table.column(new Col("Name"));
+        
         java.util.List<WebBundle> webBundles = webContainerService.list();
         if (webBundles != null && !webBundles.isEmpty()) {
-            String headers = String.format("%d4 %s6 %s6 %s6 %s4 %s30 %s30", "ID", "State", "Web-State", "Level", "Web-ContextPath", "Name");
-            System.out.println(headers);
             for (WebBundle webBundle : webBundles) {
-                String display = String.format("%d4 %s6 %s6 %s6 %d4 %s30 %s30",
+            	table.addRow().addContent(
                         webBundle.getBundleId(),
                         webBundle.getState(),
                         webBundle.getWebState(),
                         webBundle.getLevel(),
                         webBundle.getContextPath(),
                         webBundle.getName());
-                System.out.println(display);
             }
             
-        }        
+        }
+        table.print(System.out);
         return null;
     }
     
