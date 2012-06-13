@@ -32,12 +32,16 @@ import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Function;
 import org.apache.karaf.shell.console.CommandSessionHolder;
 import org.apache.karaf.shell.console.Completer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Like the {@link org.apache.karaf.shell.console.completer.CommandsCompleter} but does not use OSGi but is
  * instead used from the non-OSGi {@link org.apache.karaf.shell.console.impl.Main}
  */
 public class CommandsCompleter implements Completer {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CommandsCompleter.class);
 
     private CommandSession session;
     private final List<Completer> completers = new ArrayList<Completer>();
@@ -96,7 +100,11 @@ public class CommandsCompleter implements Completer {
                         if (subshell.length() > 1 && command.length() > subshell.length()) {
                             command = command.substring(subshell.length() + 1);
                         }
-                        completers.add(new ArgumentCompleter(session, (CommandWithAction) function, command));
+                        try {
+                            completers.add(new ArgumentCompleter(session, (CommandWithAction) function, command));
+                        } catch (Throwable t) {
+                            LOGGER.debug("Unable to create completers for command '" + command + "'", t);
+                        }
                     }
                 }
                 commands.add(command);
