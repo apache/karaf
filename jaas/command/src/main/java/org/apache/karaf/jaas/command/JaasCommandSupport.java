@@ -82,6 +82,8 @@ public abstract class JaasCommandSupport extends OsgiCommandSupport {
      * @return
      */
     public AppConfigurationEntry findEntryByRealmAndName(JaasRealm realm, String moduleName) {
+        if (realm == null || moduleName == null)
+            return null;
         AppConfigurationEntry appConfigurationEntry = null;
         if (realm != null) {
 
