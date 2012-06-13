@@ -81,7 +81,6 @@ public class KarArtifactInstaller implements ArtifactInstaller {
 	public void install(File file) throws Exception {
 		// Check to see if this file has already been extracted. For example, on restart of Karaf,
 		// we don't necessarily want to re-extract all the Karaf Archives!
-		//
 		if (alreadyExtracted(file)) {
 			logger.info("Ignoring '{}'; timestamp indicates it's already been deployed.", file);
 			return;
@@ -89,7 +88,10 @@ public class KarArtifactInstaller implements ArtifactInstaller {
 
         logger.info("Installing KAR file {}", file);
 
-		ZipFile zipFile = new ZipFile(file);
+        File karFile = new File(localRepoPath, file.getName());
+        copy(file.toURI(), karFile);
+
+		ZipFile zipFile = new ZipFile(karFile);
 
         List<URI> featuresRepositoriesInKar = new ArrayList<URI>();
 
@@ -119,6 +121,37 @@ public class KarArtifactInstaller implements ArtifactInstaller {
 		updateTimestamp(file);
 	}
 
+
+    /**
+     * Create a destination file using a source URL.
+     *
+     * @param url the source URL.
+     * @param file the destination file
+     * @throws Exception in case of copy failure
+     */
+    private void copy(URI url, File file) throws Exception {
+        InputStream is = null;
+        FileOutputStream fos = null;
+        try {
+            is = url.toURL().openStream();
+            fos = new FileOutputStream(file);
+            byte[] buffer = new byte[8192];
+            int count = is.read(buffer);
+            while (count >= 0) {
+                fos.write(buffer, 0, count);
+                count = is.read(buffer);
+            }
+        } finally {
+            if (is != null) {
+                is.close();
+            }
+            if (fos != null) {
+                fos.flush();
+                fos.close();
+            }
+        }
+    }
+
     private void installFeatures(List<URI> featuresRepositories) {
         for (Repository repository : featuresService.listRepositories()) {
             for (URI karFeatureRepoUri : featuresRepositories) {
@@ -129,6 +162,26 @@ public class KarArtifactInstaller implements ArtifactInstaller {
                                 featuresService.installFeature(feature, EnumSet.noneOf(FeaturesService.Option.class));
                             } catch (Exception e) {
                                 logger.warn("Unable to install Kar feature {}", feature.getName() + "/" + feature.getVersion(), e);
+                            }
+                        }
+                    } catch (Exception e) {
+                        logger.warn("Can't get features for KAR {}", karFeatureRepoUri, e);
+                    }
+                }
+            }
+        }
+    }
+
+    private void uninstallFeatures(List<URI> featuresRepositories) {
+        for (Repository repository : featuresService.listRepositories()) {
+            for (URI karFeatureRepoUri : featuresRepositories) {
+                if (repository.getURI().equals(karFeatureRepoUri)) {
+                    try {
+                        for (Feature feature : repository.getFeatures()) {
+                            try {
+                                featuresService.uninstallFeature(feature.getName(), feature.getVersion());
+                            } catch (Exception e) {
+                                logger.warn("Unable to uninstall Kar feature {}", feature.getName() + "/" + feature.getVersion(), e);
                             }
                         }
                     } catch (Exception e) {
@@ -183,16 +236,55 @@ public class KarArtifactInstaller implements ArtifactInstaller {
     }
 
     public void uninstall(File file) throws Exception {
+        logger.debug("Looking for KAR entries to purge the local repository");
+        File karFile = new File(localRepoPath, file.getName());
+        List<URI> featuresRepositories = new ArrayList<URI>();
+        ZipFile zipFile = new ZipFile(karFile);
+        Enumeration<ZipEntry> entries = (Enumeration<ZipEntry>) zipFile.entries();
+        while (entries.hasMoreElements()) {
+            ZipEntry entry = entries.nextElement();
+            String repoEntryName = getRepoEntryName(entry);
+            if (repoEntryName != null) {
+                File toDelete = new File(localRepoPath + File.separator + repoEntryName);
+                if (isFeaturesRepository(toDelete)) {
+                    featuresRepositories.add(toDelete.toURI());
+                } else {
+                    if (toDelete.isFile() && toDelete.exists()) {
+                        toDelete.delete();
+                    }
+                }
+            }
+            if (entry.getName().startsWith("resource")) {
+                String resourceEntryName = entry.getName().substring("resource/".length());
+                File toDelete = new File(base + File.separator + resourceEntryName);
+                if (toDelete.isFile() && toDelete.exists()) {
+                    toDelete.delete();
+                }
+            }
+        }
+        zipFile.close();
+
+        uninstallFeatures(featuresRepositories);
+        for (URI featuresRepository : featuresRepositories) {
+            featuresService.removeRepository(featuresRepository);
+            File toDelete = new File(featuresRepository);
+            if (toDelete.exists() && toDelete.isFile()) {
+                toDelete.delete();
+            }
+        }
+
+        karFile.delete();
+
         File timestamp = getArchiveTimestampFile(file);
         if (timestamp.exists()) {
             logger.debug("Removing the timestamp file");
             timestamp.delete();
         }
-		logger.warn("Karaf archive '{}' has been removed; however, its feature URLs have not been deregistered, and its bundles are still available in '{}'.", file, localRepoPath);
 	}
 
 	public void update(File file) throws Exception {
 		logger.warn("Karaf archive '{}' has been updated; redeploying.", file);
+        uninstall(file);
 		install(file);
 	}
 
