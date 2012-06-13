@@ -51,14 +51,12 @@ public class KarArtifactInstaller implements ArtifactInstaller {
 
     public void uninstall(File file) throws Exception {
         LOGGER.info("Uninstalling KAR {}", file.getName());
-        karService.uninstall(file.getName());
-        LOGGER.warn("KAR {} has been removed; however, its feature URLs have not been deregistered, " +
-                "and its bundles are still available in the system repository.", file.getName());
+        karService.uninstall(file.getName(), true);
 	}
 
 	public void update(File file) throws Exception {
         LOGGER.warn("Karaf archive {}' has been updated; redeploying.", file);
-        karService.uninstall(file.getName());
+        karService.uninstall(file.getName(), true);
         karService.install(file.toURI());
 	}
 
