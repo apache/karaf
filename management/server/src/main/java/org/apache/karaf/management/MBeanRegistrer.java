@@ -16,8 +16,9 @@
  */
 package org.apache.karaf.management;
 
+import java.util.HashSet;
 import java.util.Map;
-
+import java.util.Set;
 import javax.management.JMException;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
@@ -27,6 +28,7 @@ public class MBeanRegistrer {
     private MBeanServer mbeanServer;
 
     private Map<Object, String> mbeans;
+    private Set<String> registered = new HashSet<String>();
 
     public void setMbeans(Map<Object, String> mbeans) {
         this.mbeans = mbeans;
@@ -49,20 +51,26 @@ public class MBeanRegistrer {
         registerMBeans();
     }
 
+    public void destroy() throws Exception {
+        unregisterMBeans();
+    }
+
     protected void registerMBeans() throws JMException {
         if (mbeanServer != null && mbeans != null) {
             for (Map.Entry<Object, String> entry : mbeans.entrySet()) {
                 String value = parseProperty(entry.getValue());
                 mbeanServer.registerMBean(entry.getKey(), new ObjectName(value));
+                registered.add(value);
             }
         }
     }
 
     protected void unregisterMBeans() throws JMException {
         if (mbeanServer != null && mbeans != null) {
-            for (Map.Entry<Object, String> entry : mbeans.entrySet()) {
-                String value = parseProperty(entry.getValue());
-                mbeanServer.unregisterMBean(new ObjectName(value));
+            while (!registered.isEmpty()) {
+                String name = registered.iterator().next();
+                mbeanServer.unregisterMBean(new ObjectName(name));
+                registered.remove(name);
             }
         }
     }
