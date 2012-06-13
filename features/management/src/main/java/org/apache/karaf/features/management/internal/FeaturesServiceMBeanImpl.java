@@ -18,13 +18,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.List;
-
 import javax.management.MBeanNotificationInfo;
 import javax.management.MBeanRegistration;
 import javax.management.MBeanServer;
 import javax.management.NotCompliantMBeanException;
 import javax.management.Notification;
-import javax.management.NotificationBroadcasterSupport;
 import javax.management.ObjectName;
 import javax.management.openmbean.TabularData;
 
@@ -71,15 +69,30 @@ public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
     }
 
     public void postRegister(Boolean registrationDone) {
-        registration = bundleContext.registerService(FeaturesListener.class.getName(),
-            getFeaturesListener(), new Hashtable());
+        registerService();
     }
 
-    public void preDeregister() throws Exception {
-        registration.unregister();
+    public void preDeregister() {
+        unregisterService();
     }
 
     public void postDeregister() {
+    }
+
+    public void registerService() {
+        unregisterService();
+        registration = bundleContext.registerService(FeaturesListener.class.getName(),
+                getFeaturesListener(), new Hashtable());
+    }
+
+    public void unregisterService() {
+        if (registration != null) {
+            try {
+                registration.unregister();
+            } finally {
+                registration = null;
+            }
+        }
     }
 
     /**

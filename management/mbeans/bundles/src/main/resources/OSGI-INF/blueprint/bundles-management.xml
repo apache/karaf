@@ -25,7 +25,7 @@
     </bean>
 
     <!-- MBean Registrer -->
-    <bean id="mbeanRegistrer" class="org.apache.karaf.management.MBeanRegistrer">
+    <bean id="mbeanRegistrer" class="org.apache.karaf.management.MBeanRegistrer" init-method="init" destroy-method="destroy">
         <property name="mbeans">
             <map>
                 <entry value="org.apache.karaf:type=bundles,name=${karaf.name}" key-ref="bundlesMBean"/>
