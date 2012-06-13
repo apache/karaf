@@ -31,17 +31,20 @@ import org.apache.felix.gogo.runtime.CommandProxy;
 import org.apache.felix.gogo.runtime.CommandSessionImpl;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Function;
-import org.apache.karaf.shell.console.CompletableFunction;
 import org.apache.karaf.shell.console.Completer;
+import org.apache.karaf.shell.console.jline.CommandSessionHolder;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.apache.karaf.shell.console.jline.CommandSessionHolder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Like the {@link org.apache.karaf.shell.console.completer.CommandsCompleter} but does not use OSGi but is
  * instead used from the non-OSGi {@link org.apache.karaf.shell.console.Main}
  */
 public class CommandsCompleter implements Completer {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CommandsCompleter.class);
 
     private CommandSession session;
     private final List<Completer> completers = new ArrayList<Completer>();
@@ -83,7 +86,11 @@ public class CommandsCompleter implements Completer {
                 Function function = (Function) session.get(command);
                 function = unProxy(function);
                 if (function instanceof AbstractCommand) {
-                    completers.add(new ArgumentCompleter(session, (AbstractCommand) function, command));
+                    try {
+                        completers.add(new ArgumentCompleter(session, (AbstractCommand) function, command));
+                    } catch (Throwable t) {
+                        LOGGER.debug("Unable to create completers for command '" + command + "'", t);
+                    }
                 }
                 commands.add(command);
             }
