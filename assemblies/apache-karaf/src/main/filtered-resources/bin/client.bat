@@ -85,7 +85,6 @@ if "%KARAF_DATA%" == "" (
 )
 
 set DEFAULT_JAVA_OPTS=
-set DEFAULT_JAVA_DEBUG_OPTS=-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005
 
 rem Support for loading native libraries
 set PATH=%PATH%;%KARAF_BASE%\lib;%KARAF_HOME%\lib
@@ -102,14 +101,6 @@ if not "%JAVA%" == "" goto :Check_JAVA_END
 :Check_JAVA_END
 
 if "%JAVA_OPTS%" == "" set JAVA_OPTS=%DEFAULT_JAVA_OPTS%
-
-if "%KARAF_DEBUG%" == "" goto :KARAF_DEBUG_END
-    rem Use the defaults if JAVA_DEBUG_OPTS was not set
-    if "%JAVA_DEBUG_OPTS%" == "" set JAVA_DEBUG_OPTS=%DEFAULT_JAVA_DEBUG_OPTS%
-    
-    set "JAVA_OPTS=%JAVA_DEBUG_OPTS% %JAVA_OPTS%"
-    call :warn Enabling Java debug options: %JAVA_DEBUG_OPTS%
-:KARAF_DEBUG_END
 
 set CLASSPATH=%KARAF_HOME%\lib\bin\karaf-client.jar
 set CLASSPATH=%CLASSPATH%;%KARAF_HOME%\system\org\apache\sshd\sshd-core\${sshd.version}\sshd-core-${sshd.version}.jar

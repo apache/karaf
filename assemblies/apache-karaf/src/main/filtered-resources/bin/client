@@ -219,24 +219,6 @@ detectJVM() {
    # echo "JVM vendor is $JVM_VENDOR"
 }
 
-setupDebugOptions() {
-    if [ "x$JAVA_OPTS" = "x" ]; then
-        JAVA_OPTS="$DEFAULT_JAVA_OPTS"
-    fi
-    export JAVA_OPTS
-
-    # Set Debug options if enabled
-    if [ "x$KARAF_DEBUG" != "x" ]; then
-        # Use the defaults if JAVA_DEBUG_OPTS was not set
-        if [ "x$JAVA_DEBUG_OPTS" = "x" ]; then
-            JAVA_DEBUG_OPTS="$DEFAULT_JAVA_DEBUG_OPTS"
-        fi
-
-        JAVA_OPTS="$JAVA_DEBUG_OPTS $JAVA_OPTS"
-        warn "Enabling Java debug options: $JAVA_DEBUG_OPTS"
-    fi
-}
-
 setupDefaults() {
     DEFAULT_JAVA_OPTS="-Xms$JAVA_MIN_MEM -Xmx$JAVA_MAX_MEM "
 
@@ -268,13 +250,6 @@ setupDefaults() {
     CLASSPATH="$CLASSPATH:$KARAF_HOME/system/org/apache/mina/mina-core/${mina.version}/mina-core-${mina.version}.jar"
     CLASSPATH="$CLASSPATH:$KARAF_HOME/system/org/apache/karaf/shell/org.apache.karaf.shell.console/${project.version}/org.apache.karaf.shell.console-${project.version}.jar"
 
-    DEFAULT_JAVA_DEBUG_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005"
-
-    ##
-    ## TODO: Move to conf/profiler/yourkit.{sh|cmd}
-    ##
-    # Uncomment to enable YourKit profiling
-    #DEFAULT_JAVA_DEBUG_OPTS="-Xrunyjpagent"
 }
 
 init() {
@@ -304,9 +279,6 @@ init() {
 
     # Setup default options
     setupDefaults
-
-    # Install debug options
-    setupDebugOptions
 
 }
 
