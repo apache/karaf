@@ -40,6 +40,13 @@ if [ "x$JAVA_MAX_MEM" = "x" ]; then
     export JAVA_MAX_MEM
 fi
 
+#
+# Check the mode that initiated the script
+#
+if [ "x$1" != "x" ]; then
+    MODE=$1
+fi
+
 warn() {
     echo "${PROGNAME}: $*"
 }
@@ -227,6 +234,13 @@ setupDebugOptions() {
 
     # Set Debug options if enabled
     if [ "x$KARAF_DEBUG" != "x" ]; then
+        # Ignore DEBUG in case of stop or client mode
+        if [ "x$MODE" = "xstop" ]; then
+            return
+        fi
+        if [ "x$MODE" = "xclient" ]; then
+            return
+        fi
         # Use the defaults if JAVA_DEBUG_OPTS was not set
         if [ "x$JAVA_DEBUG_OPTS" = "x" ]; then
             JAVA_DEBUG_OPTS="$DEFAULT_JAVA_DEBUG_OPTS"
