@@ -30,7 +30,7 @@
         <property name="providers" ref="providers" />
     </bean>
 
-    <bean id="mbeanRegister" class="org.apache.karaf.management.MBeanRegistrer">
+    <bean id="mbeanRegister" class="org.apache.karaf.management.MBeanRegistrer" init-method="init" destroy-method="destroy">
         <property name="mbeans">
             <map>
                 <entry value="org.apache.karaf:type=diagnostic,name=${karaf.name}"
