@@ -120,11 +120,11 @@ public class KarServiceImpl implements KarService {
         
         zipFile.close();
     }
-    
+
     public void uninstall(String karName) throws Exception {
         uninstall(karName, false);
     }
-    
+
     public void uninstall(String karName, boolean clean) throws Exception {
         File karStorage = new File(storage);
         File karFile = new File(karStorage, karName);
@@ -132,29 +132,43 @@ public class KarServiceImpl implements KarService {
         if (!karFile.exists()) {
             throw new IllegalArgumentException("The KAR " + karName + " is not installed");
         }
-        
+
         if (clean) {
             LOGGER.debug("Looking for KAR entries to purge the local repository");
+            List<URI> featuresRepositories = new ArrayList<URI>();
             ZipFile zipFile = new ZipFile(karFile);
             Enumeration<ZipEntry> entries = (Enumeration<ZipEntry>) zipFile.entries();
             while (entries.hasMoreElements()) {
                 ZipEntry entry = entries.nextElement();
                 String repoEntryName = getRepoEntryName(entry);
                 if (repoEntryName != null) {
-                    File toDelete = new File(base + File.separator + repoEntryName);
-                    if (toDelete.exists()) {
-                        toDelete.delete();
+                    File toDelete = new File(localRepo + File.separator + repoEntryName);
+                    if (isFeaturesRepository(toDelete)) {
+                        featuresRepositories.add(toDelete.toURI());
+                    } else {
+                        if (toDelete.isFile() && toDelete.exists()) {
+                            toDelete.delete();
+                        }
                     }
                 }
                 if (entry.getName().startsWith("resource")) {
                     String resourceEntryName = entry.getName().substring("resource/".length());
                     File toDelete = new File(base + File.separator + resourceEntryName);
-                    if (toDelete.exists()) {
+                    if (toDelete.isFile() && toDelete.exists()) {
                         toDelete.delete();
                     }
                 }
             }
             zipFile.close();
+
+            uninstallFeatures(featuresRepositories);
+            for (URI featuresRepository : featuresRepositories) {
+                featuresService.removeRepository(featuresRepository);
+                File toDelete = new File(featuresRepository);
+                if (toDelete.exists() && toDelete.isFile()) {
+                    toDelete.delete();
+                }
+            }
         }
         
         karFile.delete();
@@ -332,6 +346,31 @@ public class KarServiceImpl implements KarService {
                                 featuresService.installFeature(feature, EnumSet.noneOf(FeaturesService.Option.class));
                             } catch (Exception e) {
                                 LOGGER.warn("Unable to install Kar feature {}", feature.getName() + "/" + feature.getVersion(), e);
+                            }
+                        }
+                    } catch (Exception e) {
+                        LOGGER.warn("Can't get features for KAR {}", karFeatureRepoUri, e);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Uninstall all features contained in the list of features XML.
+     *
+     * @param featuresRepositories the list of features XML.
+     */
+    private void uninstallFeatures(List<URI> featuresRepositories) {
+        for (Repository repository : featuresService.listRepositories()) {
+            for (URI karFeatureRepoUri : featuresRepositories) {
+                if (repository.getURI().equals(karFeatureRepoUri)) {
+                    try {
+                        for (Feature feature : repository.getFeatures()) {
+                            try {
+                                featuresService.uninstallFeature(feature.getName(), feature.getVersion());
+                            } catch (Exception e) {
+                                LOGGER.warn("Unable to uninstall Kar feature {}", feature.getName() + "/" + feature.getVersion(), e);
                             }
                         }
                     } catch (Exception e) {
