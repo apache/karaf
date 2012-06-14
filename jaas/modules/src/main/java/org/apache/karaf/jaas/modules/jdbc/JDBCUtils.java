@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package org.apache.karaf.jaas.modules.jdbc;
 
 import org.osgi.framework.BundleContext;
@@ -21,9 +20,6 @@ import org.osgi.framework.ServiceReference;
 
 import javax.naming.InitialContext;
 
-/**
- * @author iocanel
- */
 public final class JDBCUtils {
 
     public static final String DATASOURCE = "datasource";

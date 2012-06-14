@@ -26,14 +26,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-
-/**
- * <p>
- * Abstract JAAS login module extended by all Karaf Login Modules.
- * </p>
- *
- * @author iocanel, jbonofre
- */
 public abstract class AbstractKarafLoginModule implements LoginModule {
 
     protected Set<Principal> principals = new HashSet<Principal>();

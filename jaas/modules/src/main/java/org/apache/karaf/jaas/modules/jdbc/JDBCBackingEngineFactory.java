@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package org.apache.karaf.jaas.modules.jdbc;
 
 import org.apache.karaf.jaas.modules.BackingEngine;
@@ -26,9 +25,6 @@ import org.slf4j.LoggerFactory;
 import javax.sql.DataSource;
 import java.util.Map;
 
-/**
- * @author iocanel
- */
 public class JDBCBackingEngineFactory implements BackingEngineFactory {
 
     private final Logger logger = LoggerFactory.getLogger(JDBCBackingEngineFactory.class);

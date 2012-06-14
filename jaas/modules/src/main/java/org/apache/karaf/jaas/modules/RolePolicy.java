@@ -12,7 +12,6 @@
  *  limitations under the License.
  *  under the License.
  */
-
 package org.apache.karaf.jaas.modules;
 
 import java.security.Principal;
@@ -23,10 +22,6 @@ import java.util.Map;
 import java.util.Set;
 import javax.security.auth.Subject;
 
-/**
- *
- * @author iocanel
- */
 public enum RolePolicy {
 
     PREFIXED_ROLES("prefix") {

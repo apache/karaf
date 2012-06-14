@@ -14,13 +14,6 @@
  */
 package org.apache.karaf.jaas.modules;
 
-/**
- * <p>
- * Interface describing the password encryption service.
- * </>
- * 
- * @author jbonofre
- */
 public interface Encryption {
     
     /**

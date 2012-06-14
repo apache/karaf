@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package org.apache.karaf.jaas.modules.properties;
 
 import org.apache.karaf.jaas.modules.BackingEngine;
@@ -27,9 +26,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
-/**
- * @author iocanel
- */
 public class PropertiesBackingEngineFactory implements BackingEngineFactory {
 
     private final Logger logger = LoggerFactory.getLogger(PropertiesBackingEngineFactory.class);

@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package org.apache.karaf.jaas.command;
 
 import org.apache.felix.gogo.commands.Command;
@@ -24,11 +23,6 @@ import javax.security.auth.login.AppConfigurationEntry;
 import java.util.LinkedList;
 import java.util.Queue;
 
-/**
- * Executes all the pending commands of the active realm/module.
- *
- * @author iocanel
- */
 @Command(scope = "jaas", name = "update", description = "Update JAAS realm.")
 public class UpdateCommand extends JaasCommandSupport {
 

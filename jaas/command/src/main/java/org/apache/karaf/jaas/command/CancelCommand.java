@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package org.apache.karaf.jaas.command;
 
 import org.apache.felix.gogo.commands.Command;
@@ -21,9 +20,6 @@ import org.apache.karaf.jaas.modules.BackingEngine;
 
 import java.util.LinkedList;
 
-/**
- * @author iocanel
- */
 @Command(scope = "jaas", name = "cancel", description = "Cancel the modification of a JAAS realm.")
 public class CancelCommand extends JaasCommandSupport {
 

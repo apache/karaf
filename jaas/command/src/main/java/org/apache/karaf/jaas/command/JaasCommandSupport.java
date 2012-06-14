@@ -13,9 +13,9 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package org.apache.karaf.jaas.command;
 
+import org.apache.karaf.jaas.boot.ProxyLoginModule;
 import org.apache.karaf.jaas.config.JaasRealm;
 import org.apache.karaf.jaas.modules.BackingEngine;
 import org.apache.karaf.jaas.modules.BackingEngineService;
@@ -25,9 +25,6 @@ import javax.security.auth.login.AppConfigurationEntry;
 import java.util.List;
 import java.util.Queue;
 
-/**
- * @author iocanel
- */
 public abstract class JaasCommandSupport extends OsgiCommandSupport {
 
     public static final String JAAS_REALM = "JaasCommand.REALM";
@@ -91,14 +88,15 @@ public abstract class JaasCommandSupport extends OsgiCommandSupport {
 
             AppConfigurationEntry[] entries = realm.getEntries();
 
-            //If no moduleName provided and a there is a single module in the realm.
+            // if no moduleName provided and a there is a single module in the realm.
             if (entries != null && entries.length == 1 && moduleName == null) {
                 return entries[0];
             }
 
-            for (AppConfigurationEntry entry : entries) {
-                if (moduleName.equals(entry.getLoginModuleName())) {
-                    return entry;
+            for (int i = 0; i < entries.length; i++) {
+                String currentModuleName = (String) entries[i].getOptions().get(ProxyLoginModule.PROPERTY_MODULE);
+                if (currentModuleName.equals(moduleName)) {
+                    return entries[i];
                 }
             }
 

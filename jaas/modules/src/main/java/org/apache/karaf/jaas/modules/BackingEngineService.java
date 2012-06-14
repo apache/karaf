@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package org.apache.karaf.jaas.modules;
 
 import org.apache.karaf.jaas.boot.ProxyLoginModule;
@@ -21,9 +20,6 @@ import org.apache.karaf.jaas.boot.ProxyLoginModule;
 import javax.security.auth.login.AppConfigurationEntry;
 import java.util.List;
 
-/**
- * @author iocanel
- */
 public class BackingEngineService {
 
     private List<BackingEngineFactory> engineFactories;

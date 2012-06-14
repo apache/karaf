@@ -23,13 +23,6 @@ import java.io.StringWriter;
 
 import junit.framework.TestCase;
 
-/**
- * <p>
- * Unit tests on <code>Properties</code>.
- * </p>
- * 
- * @author jbonofre
- */
 public class PropertiesTest extends TestCase {
 
     private final static String TEST_PROPERTIES_FILE = "test.properties";

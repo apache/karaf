@@ -36,9 +36,6 @@ import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Map;
 
-/**
- * @author iocanel
- */
 public class JDBCLoginModule extends AbstractKarafLoginModule {
 
     private final Logger logger = LoggerFactory.getLogger(PropertiesLoginModule.class);

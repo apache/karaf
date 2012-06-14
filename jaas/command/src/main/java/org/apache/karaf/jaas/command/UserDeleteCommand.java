@@ -13,18 +13,12 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package org.apache.karaf.jaas.command;
 
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 import org.apache.karaf.jaas.modules.BackingEngine;
 
-/**
- * Deletes a user of the active realm/module.
- *
- * @author iocanel
- */
 @Command(scope = "jaas", name = "userdel", description = "Delete a user.")
 public class UserDeleteCommand extends JaasCommandSupport {
 
