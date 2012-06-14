@@ -12,7 +12,6 @@
  *  limitations under the License.
  *  under the License.
  */
-
 package org.apache.karaf.jaas.modules;
 
 import java.security.Principal;
@@ -20,10 +19,6 @@ import java.security.acl.Group;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
-/**
- *
- * @author iocanel
- */
 public class GroupPrincipal implements Group {
 
     private String name;

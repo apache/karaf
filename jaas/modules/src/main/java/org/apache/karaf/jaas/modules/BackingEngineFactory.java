@@ -17,9 +17,6 @@ package org.apache.karaf.jaas.modules;
 
 import java.util.Map;
 
-/**
- * @author iocanel
- */
 public interface BackingEngineFactory {
 
     /**

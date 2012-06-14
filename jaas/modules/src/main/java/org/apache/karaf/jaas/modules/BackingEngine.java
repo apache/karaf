@@ -16,11 +16,7 @@ package org.apache.karaf.jaas.modules;
 
 import java.util.List;
 
-/**
- * @author iocanel
- */
 public interface BackingEngine {
-
 
     /**
      * Create a new User.

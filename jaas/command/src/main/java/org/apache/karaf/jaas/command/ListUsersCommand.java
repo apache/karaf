@@ -24,9 +24,6 @@ import org.apache.karaf.jaas.modules.BackingEngine;
 import org.apache.karaf.jaas.modules.RolePrincipal;
 import org.apache.karaf.jaas.modules.UserPrincipal;
 
-/**
- * @author iocanel
- */
 @Command(scope = "jaas", name = "users", description = "Lists the users of the active realm/module.")
 public class ListUsersCommand extends JaasCommandSupport {
 

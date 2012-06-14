@@ -23,15 +23,6 @@ import org.apache.karaf.jaas.boot.ProxyLoginModule;
 import org.apache.karaf.jaas.config.JaasRealm;
 import org.apache.karaf.jaas.modules.BackingEngine;
 
-/**
- * @author iocanel
- */
-
-/**
- * Lists the commands the are in the command queue, for the active realm/module.
- *
- * @author iocanel
- */
 @Command(scope = "jaas", name = "pending", description = "Lists the modification on the active realm/module.")
 public class ListPendingCommand extends JaasCommandSupport {
 

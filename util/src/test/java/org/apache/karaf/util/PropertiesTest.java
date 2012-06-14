@@ -23,23 +23,12 @@ import java.io.StringWriter;
 
 import junit.framework.TestCase;
 
-/**
- * <p>
- * Unit tests on <code>Properties</code>.
- * </p>
- * 
- * @author jbonofre
- */
 public class PropertiesTest extends TestCase {
 
     private final static String TEST_PROPERTIES_FILE = "test.properties";
     
     private Properties properties;
-    
-    /*
-     * (non-Javadoc)
-     * @see junit.framework.TestCase#setUp()
-     */
+
     public void setUp() throws Exception {
         properties = new Properties();
         properties.load(this.getClass().getClassLoader().getResourceAsStream(TEST_PROPERTIES_FILE));
