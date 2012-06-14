@@ -23,7 +23,7 @@ import javax.security.auth.login.AppConfigurationEntry;
 import java.util.LinkedList;
 import java.util.Queue;
 
-@Command(scope = "jaas", name = "update", description = "Update JAAS realm.")
+@Command(scope = "jaas", name = "update", description = "Update JAAS realm")
 public class UpdateCommand extends JaasCommandSupport {
 
     @Override
@@ -32,14 +32,14 @@ public class UpdateCommand extends JaasCommandSupport {
         AppConfigurationEntry entry = (AppConfigurationEntry) session.get(JAAS_ENTRY);
 
         if (realm == null || entry == null) {
-            System.err.println("No JAAS Realm / Module has been selected.");
+            System.err.println("No JAAS Realm/Module has been selected");
             return null;
         }
 
         BackingEngine engine = backingEngineService.get(entry);
 
         if (engine == null) {
-            System.err.println(String.format("Failed to resolve backing engine for realm:%s and moudle:%s", realm.getName(), entry.getLoginModuleName()));
+            System.err.println(String.format("Failed to resolve backing engine for realm %s and module %s", realm.getName(), entry.getLoginModuleName()));
             return null;
         }
 
@@ -51,7 +51,7 @@ public class UpdateCommand extends JaasCommandSupport {
         Queue<? extends JaasCommandSupport> commands = (Queue<? extends JaasCommandSupport>) session.get(JAAS_CMDS);
 
         if (commands == null || commands.isEmpty()) {
-            System.err.println("No JAAS command in queue.");
+            System.err.println("No JAAS command in queue");
             return null;
         }
 

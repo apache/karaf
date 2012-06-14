@@ -23,7 +23,7 @@ import org.apache.karaf.jaas.boot.ProxyLoginModule;
 import org.apache.karaf.jaas.config.JaasRealm;
 import org.apache.karaf.jaas.modules.BackingEngine;
 
-@Command(scope = "jaas", name = "pending", description = "Lists the modification on the active realm/module.")
+@Command(scope = "jaas", name = "pending", description = "List the modification on the active realm/module")
 public class ListPendingCommand extends JaasCommandSupport {
 
     @Override
@@ -34,17 +34,17 @@ public class ListPendingCommand extends JaasCommandSupport {
 
         if (realm != null && entry != null) {
             String moduleClass = (String) entry.getOptions().get(ProxyLoginModule.PROPERTY_MODULE);
-            System.out.println(String.format("Jaas Realm:%s Jaas Module:%s", realm.getName(), moduleClass));
+            System.out.println(String.format("JAAS Realm %s / JAAS Module %s", realm.getName(), moduleClass));
 
             if (commandQueue != null && !commandQueue.isEmpty()) {
                 for (JaasCommandSupport command : commandQueue) {
                     System.out.println(command);
                 }
             } else {
-                System.err.println("No JAAS command in queue.");
+                System.err.println("No JAAS command in queue");
             }
         } else {
-            System.err.println("No JAAS Realm / Module has been selected.");
+            System.err.println("No JAAS Realm/Module has been selected");
         }
         return null;
     }

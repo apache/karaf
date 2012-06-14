@@ -24,16 +24,16 @@ import javax.security.auth.login.AppConfigurationEntry;
 import java.util.LinkedList;
 import java.util.Queue;
 
-@Command(scope = "jaas", name = "manage", description = "Manage user and roles of a Jaas Realm.")
+@Command(scope = "jaas", name = "manage", description = "Manage user and roles of a JAAS Realm")
 public class ManageRealmCommand extends JaasCommandSupport {
 
-    @Option(name = "--realm", description = "Jaas Realm", required = false, multiValued = false)
+    @Option(name = "--realm", description = "JAAS Realm", required = false, multiValued = false)
     String realmName;
 
-    @Option(name = "--index", description = "Realm Index", required = false, multiValued = false)
+    @Option(name = "--index", description = "JAAS Realm Index", required = false, multiValued = false)
     int index;
 
-    @Option(name = "--module", aliases = {}, description = "Realm Module", required = false, multiValued = false)
+    @Option(name = "--module", aliases = {}, description = "JAAS Realm Module", required = false, multiValued = false)
     String moduleName;
 
     @Option(name = "--force", aliases = {}, description = "Force the management of this realm, even if another one was under management", required = false, multiValued = false)
@@ -49,9 +49,9 @@ public class ManageRealmCommand extends JaasCommandSupport {
         AppConfigurationEntry oldEntry = (AppConfigurationEntry) this.session.get(JAAS_ENTRY);
 
         if (oldRealm != null && !oldRealm.getName().equals(realmName) && !force) {
-            System.err.println("Another realm is being edited.  Cancel / update first, or use the --force option");
+            System.err.println("Another realm is being edited. Cancel/update first, or use the --force option.");
         } else if (oldEntry != null && !oldEntry.getLoginModuleName().equals(moduleName) && !force) {
-            System.err.println("Another module is being edited.  Cancel / update first, or use the --force option");
+            System.err.println("Another module is being edited. Cancel/update first, or use the --force option.");
         } else {
 
             JaasRealm realm = findRealmByNameOrIndex(realmName, index);
@@ -72,10 +72,10 @@ public class ManageRealmCommand extends JaasCommandSupport {
                     this.session.put(JAAS_ENTRY, entry);
                     this.session.put(JAAS_CMDS, commands);
                 } else {
-                    System.err.println(String.format("Could not find module: %s in realm:%s", moduleName, realmName));
+                    System.err.println(String.format("Could not find module %s in realm %s", moduleName, realmName));
                 }
             } else {
-                System.err.println(String.format("Could not find realm:%s", realmName));
+                System.err.println(String.format("Could not find realm %s", realmName));
             }
         }
         return null;

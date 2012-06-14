@@ -19,7 +19,7 @@ import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 import org.apache.karaf.jaas.modules.BackingEngine;
 
-@Command(scope = "jaas", name = "roledel", description = "Delete a role from a user.")
+@Command(scope = "jaas", name = "roledel", description = "Delete a role from a user")
 public class RoleDeleteCommand extends JaasCommandSupport {
 
     @Argument(index = 0, name = "username", description = "User Name", required = true, multiValued = false)

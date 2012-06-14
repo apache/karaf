@@ -20,12 +20,12 @@ import org.apache.karaf.jaas.modules.BackingEngine;
 
 import java.util.LinkedList;
 
-@Command(scope = "jaas", name = "cancel", description = "Cancel the modification of a JAAS realm.")
+@Command(scope = "jaas", name = "cancel", description = "Cancel the modification of a JAAS realm")
 public class CancelCommand extends JaasCommandSupport {
 
     @Override
     protected Object doExecute() throws Exception {
-        //Cleanup the session
+        // cleanup the session
         session.put(JAAS_REALM, null);
         session.put(JAAS_ENTRY, null);
         session.put(JAAS_CMDS, new LinkedList<JaasCommandSupport>());

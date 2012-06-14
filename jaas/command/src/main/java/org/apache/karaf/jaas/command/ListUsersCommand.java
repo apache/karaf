@@ -24,7 +24,7 @@ import org.apache.karaf.jaas.modules.BackingEngine;
 import org.apache.karaf.jaas.modules.RolePrincipal;
 import org.apache.karaf.jaas.modules.UserPrincipal;
 
-@Command(scope = "jaas", name = "users", description = "Lists the users of the active realm/module.")
+@Command(scope = "jaas", name = "users", description = "List the users of the active realm/module")
 public class ListUsersCommand extends JaasCommandSupport {
 
     private static final String OUTPUT_FORMAT = "%-20s %-20s";
@@ -35,14 +35,14 @@ public class ListUsersCommand extends JaasCommandSupport {
         AppConfigurationEntry entry = (AppConfigurationEntry) session.get(JAAS_ENTRY);
 
         if (realm == null || entry == null) {
-            System.err.println("No JAAS Realm / Module has been selected.");
+            System.err.println("No JAAS Realm/Module has been selected");
             return null;
         }
 
         BackingEngine engine = backingEngineService.get(entry);
 
         if (engine == null) {
-            System.err.println(String.format("Failed to resolve backing engine for realm: %s and module: %s", realm.getName(), entry.getLoginModuleName()));
+            System.err.println(String.format("Failed to resolve backing engine for realm %s and module %s", realm.getName(), entry.getLoginModuleName()));
             return null;
         }
 

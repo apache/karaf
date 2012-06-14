@@ -53,7 +53,7 @@ public abstract class JaasCommandSupport extends OsgiCommandSupport {
                 commandQueue.add(this);
             }
         } else {
-            System.err.println("No JAAS Realm / Module has been selected.");
+            System.err.println("No JAAS Realm / Module has been selected");
         }
         return null;
     }
