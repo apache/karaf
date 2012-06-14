@@ -20,12 +20,9 @@ package org.apache.karaf.main;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.security.Provider;
@@ -213,10 +210,10 @@ public class Main {
 
     public void launch() throws Exception {
         config = new ConfigProperties();
+        BootstrapLogManager.setProperties(config.props);
         Lock lock = createLock();
         lockManager = new LockManager(lock, new KarafLockCallback(), config.lockDelay);
         InstanceHelper.updateInstancePid(config.karafHome, config.karafBase);
-        BootstrapLogManager.setProperties(config.props);
         LOG.addHandler(BootstrapLogManager.getDefaultHandler());
 
         for (String provider : config.securityProviders) {
@@ -283,7 +280,7 @@ public class Main {
     }
 
     private Lock createLock() {
-        if (config.useLock) {
+        if (!config.useLock) {
             return new NoLock();
         }
         try {
@@ -463,6 +460,7 @@ public class Main {
         } finally {
             if (lockManager != null) {
                 lockManager.stopLockMonitor();
+                lockManager.unlock();
             }
         }
     }
