@@ -37,13 +37,6 @@ import org.apache.karaf.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * <p>
- * JAAS Login module for user / password, based on two properties files.
- * </p>
- *
- * @author gnodet, jbonofre
- */
 public class PropertiesLoginModule extends AbstractKarafLoginModule {
 
     private final Logger LOG = LoggerFactory.getLogger(PropertiesLoginModule.class);

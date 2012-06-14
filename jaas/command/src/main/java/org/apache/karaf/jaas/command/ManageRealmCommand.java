@@ -13,10 +13,8 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package org.apache.karaf.jaas.command;
 
-import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 import org.apache.felix.gogo.commands.Option;
 import org.apache.karaf.jaas.config.JaasRealm;
@@ -26,9 +24,6 @@ import javax.security.auth.login.AppConfigurationEntry;
 import java.util.LinkedList;
 import java.util.Queue;
 
-/**
- * @author iocanel
- */
 @Command(scope = "jaas", name = "manage", description = "Manage user and roles of a Jaas Realm.")
 public class ManageRealmCommand extends JaasCommandSupport {
 

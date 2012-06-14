@@ -386,8 +386,6 @@ public class ArgumentCompleter implements Completer {
 
     /**
      *  The result of a delimited buffer.
-     *
-     *  @author  <a href="mailto:mwp1@cornell.edu">Marc Prud'hommeaux</a>
      */
     public static class ArgumentList {
         private String[] arguments;

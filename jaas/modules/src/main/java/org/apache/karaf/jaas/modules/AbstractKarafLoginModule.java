@@ -26,14 +26,6 @@ import javax.security.auth.spi.LoginModule;
 import org.apache.karaf.jaas.modules.encryption.EncryptionSupport;
 import org.osgi.framework.BundleContext;
 
-
-/**
- * <p>
- * Abstract JAAS login module extended by all Karaf Login Modules.
- * </p>
- *
- * @author iocanel, jbonofre
- */
 public abstract class AbstractKarafLoginModule implements LoginModule {
 
     protected Set<Principal> principals = new HashSet<Principal>();
