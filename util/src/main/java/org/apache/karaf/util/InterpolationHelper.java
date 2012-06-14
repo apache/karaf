@@ -16,19 +16,14 @@
  */
 package org.apache.karaf.util;
 
-
 import java.util.HashMap;
 import java.util.Map;
 
 import org.osgi.framework.BundleContext;
 
 /**
- * <p>
  * Enhancement of the standard <code>Properties</code>
  * managing the maintain of comments, etc.
- * </p>
- *
- * @author gnodet, jbonofre
  */
 public class InterpolationHelper {
 
