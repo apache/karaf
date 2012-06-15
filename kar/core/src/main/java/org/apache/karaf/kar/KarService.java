@@ -16,8 +16,10 @@
  */
 package org.apache.karaf.kar;
 
+import java.io.PrintStream;
 import java.net.URI;
 import java.util.List;
+import java.util.Set;
 
 /**
  * The service managing KAR.
@@ -57,5 +59,16 @@ public interface KarService {
      * @throws Exception in case of listing failure.
      */
     List<String> list() throws Exception;
+    
+    /**
+     * Create a kar from the given feature and repo names.
+     * Each named feature including all transitive deps will be added.
+     * For each named repo all features in the repo and their transitive deps will be added.
+     * 
+     * @param repoName
+     * @param features 
+     * @param console
+     */
+    void create(String repoName, Set<String> features, PrintStream console);
     
 }

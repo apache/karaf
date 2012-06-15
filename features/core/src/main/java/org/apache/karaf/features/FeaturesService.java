@@ -52,6 +52,8 @@ public interface FeaturesService {
     void restoreRepository(URI uri) throws Exception;
 
     Repository[] listRepositories();
+    
+    Repository getRepository(String repoName);
 
     void installFeature(String name) throws Exception;
     

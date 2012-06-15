@@ -18,10 +18,38 @@
  */
 package org.apache.karaf.kar.internal;
 
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.jar.JarEntry;
+import java.util.jar.JarOutputStream;
+import java.util.jar.Manifest;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.apache.karaf.features.BundleInfo;
+import org.apache.karaf.features.ConfigFileInfo;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
 import org.apache.karaf.kar.KarService;
+import org.ops4j.pax.url.mvn.Parser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -29,23 +57,12 @@ import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
-
 /**
  * Implementation of the KAR service.
  */
 public class KarServiceImpl implements KarService {
+
+    private static final String MANIFEST_ATTR_KARAF_FEATURE_START = "Karaf-Feature-Start";
 
     public static final Logger LOGGER = LoggerFactory.getLogger(KarServiceImpl.class);
 
@@ -97,6 +114,7 @@ public class KarServiceImpl implements KarService {
         
         List<URI> featuresRepositoriesInKar = new ArrayList<URI>();
         
+        @SuppressWarnings("unchecked")
         Enumeration<ZipEntry> entries = (Enumeration<ZipEntry>) zipFile.entries();
         while (entries.hasMoreElements()) {
             ZipEntry entry = entries.nextElement();
@@ -110,6 +128,7 @@ public class KarServiceImpl implements KarService {
                     featuresRepositoriesInKar.add(extract.toURI());
                 }
             }
+
             if (entry.getName().startsWith("resource")) {
                 String resourceEntryName = entry.getName().substring("resource/".length());
                 extract(zipFile, entry, resourceEntryName, base);
@@ -137,6 +156,7 @@ public class KarServiceImpl implements KarService {
             LOGGER.debug("Looking for KAR entries to purge the local repository");
             List<URI> featuresRepositories = new ArrayList<URI>();
             ZipFile zipFile = new ZipFile(karFile);
+            @SuppressWarnings("unchecked")
             Enumeration<ZipEntry> entries = (Enumeration<ZipEntry>) zipFile.entries();
             while (entries.hasMoreElements()) {
                 ZipEntry entry = entries.nextElement();
@@ -196,12 +216,7 @@ public class KarServiceImpl implements KarService {
         try {
             is = url.toURL().openStream();
             fos = new FileOutputStream(file);
-            byte[] buffer = new byte[8192];
-            int count = is.read(buffer);
-            while (count >= 0) {
-                fos.write(buffer, 0, count);
-                count = is.read(buffer);
-            }
+            copyStream(is,  fos);
         } finally {
             if (is != null) {
                 is.close();
@@ -354,6 +369,92 @@ public class KarServiceImpl implements KarService {
                 }
             }
         }
+    }
+    
+    @Override
+    public void create(String repoName, Set<String> features, PrintStream console) {
+        FileOutputStream fos = null;
+        JarOutputStream jos = null;
+        try {
+            String karPath = base + File.separator + "data" + File.separator + "kar" + File.separator + repoName + ".kar";
+            File karFile = new File(karPath);
+            karFile.getParentFile().mkdirs();
+            fos = new FileOutputStream(karFile);
+            String manifestSt = "Manifest-Version: 1.0\n" +
+                MANIFEST_ATTR_KARAF_FEATURE_START +": true\n";
+            InputStream manifestIs = new ByteArrayInputStream(manifestSt.getBytes("UTF-8"));
+            Manifest manifest = new Manifest(manifestIs);
+            jos = new JarOutputStream(new BufferedOutputStream(fos, 100000), manifest);
+            
+            Map<URI, Integer> locationMap = new HashMap<URI, Integer>();
+
+            Repository repo = featuresService.getRepository(repoName);
+            copyResourceToJar(jos, repo.getURI(), locationMap, console);
+            
+            for (Feature feature : repo.getFeatures()) {
+                List<BundleInfo> bundles = feature.getBundles();
+                for (BundleInfo bundleInfo : bundles) {
+                    URI location = new URI(bundleInfo.getLocation());
+                    copyResourceToJar(jos, location, locationMap, console);
+                }
+                List<ConfigFileInfo> configFiles = feature.getConfigurationFiles();
+                for (ConfigFileInfo configFileInfo : configFiles) {
+                    URI location = new URI(configFileInfo.getLocation());
+                    copyResourceToJar(jos, location, locationMap, console);
+                }
+            }
+            
+            console.println("Kar file created : " + karPath);
+        } catch (Exception e) {
+            throw new RuntimeException("Error creating kar " + e.getMessage(), e);
+        } finally {
+            if (jos != null) {
+                try {
+                    jos.close();
+                } catch (IOException e) {
+                    LOGGER.warn("Error closing jar stream", e);
+                }
+            }
+            if (fos != null) {
+                try {
+                    fos.close();
+                } catch (IOException e) {
+                    LOGGER.warn("Error closing jar file stream", e);
+                }
+            }
+        }
+        
+    }
+
+    private void copyResourceToJar(JarOutputStream jos, URI location, Map<URI, Integer> locationMap, PrintStream console) {
+        if (locationMap.containsKey(location)) {
+            return;
+        }
+        try {
+            console.println("Adding " + location);
+            String noPrefixLocation = location.toString().substring(location.toString().lastIndexOf(":") + 1);
+            Parser parser = new Parser(noPrefixLocation);
+            InputStream is = location.toURL().openStream();
+            String path = "repository/" + parser.getArtifactPath();
+            jos.putNextEntry(new JarEntry(path));
+            copyStream(is, jos);
+            is.close();
+            locationMap.put(location, 1);
+        } catch (Exception e) {
+            LOGGER.error("Error adding " + location, e);
+        }
+    }
+    
+    public static long copyStream(InputStream input, OutputStream output)
+            throws IOException {
+        byte[] buffer = new byte[10000];
+        long count = 0;
+        int n = 0;
+        while (-1 != (n = input.read(buffer))) {
+            output.write(buffer, 0, n);
+            count += n;
+        }
+        return count;
     }
 
     /**

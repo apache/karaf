@@ -517,8 +517,15 @@ public class FeaturesServiceTest extends TestCase {
         pw.close();
 
         URI uri = tmp.toURI();
+        
+        BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
+        
+        bundleContext.getDataFile((String) EasyMock.anyObject());
+        EasyMock.expectLastCall().andReturn(File.createTempFile("test", "test")); 
+        EasyMock.replay(bundleContext);
 
         FeaturesServiceImpl svc = new FeaturesServiceImpl();
+        svc.setBundleContext(bundleContext);
         svc.addRepository(uri);
 
         Feature feature = svc.getFeature("f2", "[0.1,0.3)");
