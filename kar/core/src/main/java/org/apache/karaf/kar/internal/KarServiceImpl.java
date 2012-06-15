@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
@@ -113,6 +114,7 @@ public class KarServiceImpl implements KarService {
         ZipFile zipFile = new ZipFile(karFile);
         
         List<URI> featuresRepositoriesInKar = new ArrayList<URI>();
+        boolean shouldInstallFeatures = true;
         
         @SuppressWarnings("unchecked")
         Enumeration<ZipEntry> entries = (Enumeration<ZipEntry>) zipFile.entries();
@@ -128,6 +130,17 @@ public class KarServiceImpl implements KarService {
                     featuresRepositoriesInKar.add(extract.toURI());
                 }
             }
+            
+            if ("meta-inf/manifest.mf".equals(entry.getName().toLowerCase())) {
+                InputStream is = zipFile.getInputStream(entry);
+                Manifest manifest = new Manifest(is);
+                Attributes attr = manifest.getMainAttributes();
+                String featureStartSt = (String)attr.get(new Attributes.Name(MANIFEST_ATTR_KARAF_FEATURE_START));
+                if ("true".equals(featureStartSt)) {
+                    shouldInstallFeatures = false;
+                }
+                is.close();
+            }
 
             if (entry.getName().startsWith("resource")) {
                 String resourceEntryName = entry.getName().substring("resource/".length());
@@ -135,7 +148,9 @@ public class KarServiceImpl implements KarService {
             }
         }
         
-        installFeatures(featuresRepositoriesInKar);
+        if (shouldInstallFeatures) {
+            installFeatures(featuresRepositoriesInKar);
+        }
         
         zipFile.close();
     }
