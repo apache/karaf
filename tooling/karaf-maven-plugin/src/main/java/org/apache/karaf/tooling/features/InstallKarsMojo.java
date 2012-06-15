@@ -431,6 +431,10 @@ public class InstallKarsMojo extends MojoSupport {
             }
         }
 
+        @Override
+        public void addRepository(URI uri, boolean install) throws Exception {
+        }
+
         private String retrieveProperty(Properties properties, String key) {
             return properties.containsKey(key) && properties.get(key) != null ?  properties.get(key) + "," : "";
         }
@@ -454,11 +458,15 @@ public class InstallKarsMojo extends MojoSupport {
         }
 
         @Override
-        public void removeRepository(URI url) {
+        public void removeRepository(URI uri) {
         }
 
         @Override
-        public void restoreRepository(URI url) throws Exception {
+        public void removeRepository(URI uri, boolean install) {
+        }
+
+        @Override
+        public void restoreRepository(URI uri) throws Exception {
         }
 
         @Override
