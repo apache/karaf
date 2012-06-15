@@ -130,8 +130,16 @@ public class FeaturesService extends StandardEmitterMBean implements
         featuresService.addRepository(new URI(uri));
     }
 
+    public void addRepository(String uri, boolean install) throws Exception {
+        featuresService.addRepository(new URI(uri), install);
+    }
+
     public void removeRepository(String uri) throws Exception {
         featuresService.removeRepository(new URI(uri));
+    }
+
+    public void removeRepository(String uri, boolean uninstall) throws Exception {
+        featuresService.removeRepository(new URI(uri), uninstall);
     }
 
     public void installFeature(String name) throws Exception {
