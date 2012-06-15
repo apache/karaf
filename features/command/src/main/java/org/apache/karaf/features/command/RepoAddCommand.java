@@ -21,9 +21,10 @@ import java.net.URI;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.AbstractAction;
 
-@Command(scope = "feature", name = "repo-add", description = "Add a repository for well known features.")
+@Command(scope = "feature", name = "repo-add", description = "Add a features repository")
 public class RepoAddCommand extends AbstractAction {
 
     @Argument(index = 0, name = "Feature name or uri", description = "Shortcut name of the feature repository or the full URI", required = true, multiValued = false)
@@ -31,6 +32,9 @@ public class RepoAddCommand extends AbstractAction {
     
     @Argument(index = 1, name = "Feature version", description = "The version of the feature if using the feature name. Should be empty if using the uri", required = false, multiValued = false)
     private String version;
+
+    @Option(name = "-i", aliases = { "--install" }, description = "Install all features contained in the repository", required = false, multiValued = false)
+    private boolean install;
     
     private FeatureFinder featureFinder;
     private FeaturesService featuresService;
@@ -47,10 +51,10 @@ public class RepoAddCommand extends AbstractAction {
         String effectiveVersion = (version == null) ? "LATEST" : version;
         URI uri = featureFinder.getUriFor(nameOrUrl, effectiveVersion);
         if (uri == null) {
-            featuresService.addRepository(new URI(nameOrUrl));
+            uri = new URI(nameOrUrl);
         }
         System.out.println("Adding feature url " + uri);
-        featuresService.addRepository(uri);
+        featuresService.addRepository(uri, install);
         return null;
     }
 

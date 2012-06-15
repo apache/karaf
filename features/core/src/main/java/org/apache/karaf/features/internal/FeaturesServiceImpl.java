@@ -94,7 +94,6 @@ import static java.lang.String.format;
  * Adding a repository url will load the features contained in this repository and
  * create dummy sub shells.  When invoked, these commands will prompt the user for
  * installing the needed bundles.
- *
  */
 public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
 
@@ -170,7 +169,6 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         listeners.remove(listener);
     }
 
-
     /**
      * Returns a RegionsPersistence service.
      * @param timeout
@@ -214,30 +212,66 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
     }
 
     /**
-     * Validate repository.
+     * Validate a features repository XML.
+     *
+     * @param uri the features repository URI.
      */
     public void validateRepository(URI uri) throws Exception {
         FeatureValidationUtil.validate(uri);
     }
 
+    /**
+     * Add a features repository.
+     *
+     * @param uri the features repository URI.
+     * @throws Exception in case of adding failure.
+     */
     public void addRepository(URI uri) throws Exception {
+        this.addRepository(uri, false);
+    }
+
+    /**
+     * Add a features repository.
+     *
+     * @param uri the features repository URI.
+     * @param install if true, install all features contained in the features repository.
+     * @throws Exception in case of adding failure.
+     */
+    public void addRepository(URI uri, boolean install) throws Exception {
         if (!repositories.containsKey(uri)) {
-            internalAddRepository(uri);
+            RepositoryImpl repositoryImpl = this.internalAddRepository(uri);
             saveState();
+            if (install) {
+                for (Feature f : repositoryImpl.getFeatures()) {
+                    installFeature(f.getName(), f.getVersion());
+                }
+            }
         } else {
-            refreshRepository(uri);
+            refreshRepository(uri, install);
         }
     }
     
     /**
-     * Refreshes the url.
-     * @param url
-     * @throws Exception
+     * Refresh a features repository.
+     *
+     * @param uri the features repository URI.
+     * @throws Exception in case of refresh failure.
      */
     protected void refreshRepository(URI uri) throws Exception {
+        this.refreshRepository(uri, false);
+    }
+
+    /**
+     * Refresh a features repository.
+     *
+     * @param uri the features repository URI.
+     * @param install if true, install all features in the features repository.
+     * @throws Exception in case of refresh failure.
+     */
+    protected void refreshRepository(URI uri, boolean install) throws Exception {
         try {
-            removeRepository(uri);
-            addRepository(uri);
+            removeRepository(uri, install);
+            addRepository(uri, install);
         } catch (Exception e) {
             //get chance to restore previous, fix for KARAF-4
             restoreRepository(uri);
@@ -245,6 +279,13 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         }
     }
 
+    /**
+     * Add a features repository into the internal container.
+     *
+     * @param uri the features repository URI.
+     * @return the internal <code>RepositoryImpl</code> representation.
+     * @throws Exception in case of adding failure.
+     */
     protected RepositoryImpl internalAddRepository(URI uri) throws Exception {
         validateRepository(uri);
         RepositoryImpl repo = new RepositoryImpl(uri);
@@ -256,55 +297,99 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         
     }
 
-    public void removeRepository(URI uri) {
+    /**
+     * Remove a features repository.
+     *
+     * @param uri the features repository URI.
+     * @throws Exception in case of remove failure.
+     */
+    public void removeRepository(URI uri) throws Exception {
+        this.removeRepository(uri, false);
+    }
+
+    /**
+     * Remove a features repository.
+     *
+     * @param uri the features repository URI.
+     * @param uninstall if true, uninstall all features from the features repository.
+     * @throws Exception in case of remove failure.
+     */
+    public void removeRepository(URI uri, boolean uninstall) throws Exception {
         if (repositories.containsKey(uri)) {
+            if (uninstall) {
+                RepositoryImpl repositoryImpl = repositories.get(uri);
+                for (Feature feature : repositoryImpl.getFeatures()) {
+                    this.uninstallFeature(feature.getName(), feature.getVersion());
+                }
+            }
             internalRemoveRepository(uri);
             saveState();
         }
     }
 
-    public void internalRemoveRepository(URI uri) {
+    /**
+     * Remove a features repository from the internal container.
+     *
+     * @param uri the features repository URI.
+     */
+    protected void internalRemoveRepository(URI uri) {
         Repository repo = repositories.remove(uri);
         this.repo.set(repo);
         callListeners(new RepositoryEvent(repo, RepositoryEvent.EventType.RepositoryRemoved, false));
         features = null;
     }
-    
+
+    /**
+     * Restore a features repository.
+     *
+     * @param uri the features repository URI.
+     * @throws Exception in case of restore failure.
+     */
     public void restoreRepository(URI uri) throws Exception {
     	repositories.put(uri, (RepositoryImpl)repo.get());
     	callListeners(new RepositoryEvent(repo.get(), RepositoryEvent.EventType.RepositoryAdded, false));
         features = null;
     }
 
+    /**
+     * Get the list of features repository.
+     *
+     * @return the list of features repository.
+     */
     public Repository[] listRepositories() {
         Collection<RepositoryImpl> repos = repositories.values();
         return repos.toArray(new Repository[repos.size()]);
     }
 
-    public void installAllFeatures(URI uri) throws Exception {
-        RepositoryImpl repo = internalAddRepository(uri);
-        for (Feature f : repo.getFeatures()) {
-            installFeature(f.getName(), f.getVersion());
-        }
-        internalRemoveRepository(uri);            
-    }
-
-    public void uninstallAllFeatures(URI uri) throws Exception {
-        RepositoryImpl repo = internalAddRepository(uri);
-        for (Feature f : repo.getFeatures()) {
-            uninstallFeature(f.getName(), f.getVersion());
-        }
-        internalRemoveRepository(uri);            
-    }
-
+    /**
+     * Install a feature identified by a name.
+     *
+     * @param name the name of the feature.
+     * @throws Exception in case of install failure.
+     */
     public void installFeature(String name) throws Exception {
     	installFeature(name, org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION);
     }
 
+    /**
+     * Install a feature identified by a name and a version.
+     *
+     * @param name the name of the feature.
+     * @param version the version of the feature.
+     * @throws Exception in case of install failure.
+     */
     public void installFeature(String name, String version) throws Exception {
         installFeature(name, version, EnumSet.noneOf(Option.class));
     }
 
+    /**
+     * Install a feature identified by a name and a version, including a set of options.
+     *
+     * @param name the name of the feature.
+     * @param version the version of the feature.
+     * @param options the installation options.
+     * @throws Exception in case of install failure.
+     */
     public void installFeature(String name, String version, EnumSet<Option> options) throws Exception {
         Feature f = getFeature(name, version);
         if (f == null) {
@@ -314,10 +399,24 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         installFeature(f, options);
     }
 
-    public void installFeature(Feature f, EnumSet<Option> options) throws Exception {
-        installFeatures(Collections.singleton(f), options);
+    /**
+     * Install a feature including a set of options.
+     *
+     * @param feature the <code>Feature</code> to install.
+     * @param options the installation options set.
+     * @throws Exception in case of install failure.
+     */
+    public void installFeature(Feature feature, EnumSet<Option> options) throws Exception {
+        installFeatures(Collections.singleton(feature), options);
     }
 
+    /**
+     * Install a set of features, including a set of options.
+     *
+     * @param features a set of <code>Feature</code>.
+     * @param options the installation options set.
+     * @throws Exception in case of install failure.
+     */
     public void installFeatures(Set<Feature> features, EnumSet<Option> options) throws Exception {
         InstallationState state = new InstallationState();
         InstallationState failure = new InstallationState();
@@ -399,24 +498,30 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         }
     }
 
-	private void startBundle(InstallationState state, Bundle b)
-			throws Exception {
+    /**
+     * Start a bundle.
+     *
+     * @param state the current bundle installation state.
+     * @param bundle the bundle to start.
+     * @throws Exception in case of start failure.
+     */
+	private void startBundle(InstallationState state, Bundle bundle) throws Exception {
 		// do not start fragment bundles
-		Dictionary d = b.getHeaders();
+		Dictionary d = bundle.getHeaders();
 		String fragmentHostHeader = (String) d.get(Constants.FRAGMENT_HOST);
 		if (fragmentHostHeader == null || fragmentHostHeader.trim().length() == 0) {
 		    // do not start bundles that are persistently stopped
-		    if (state.installed.contains(b)
-		            || (b.getState() != Bundle.STARTING && b.getState() != Bundle.ACTIVE
-		                    && b.adapt(BundleStartLevel.class).isPersistentlyStarted())) {
+		    if (state.installed.contains(bundle)
+		            || (bundle.getState() != Bundle.STARTING && bundle.getState() != Bundle.ACTIVE
+		                    && bundle.adapt(BundleStartLevel.class).isPersistentlyStarted())) {
 		    	// do no start bundles when user request it
-		    	Long bundleId = b.getBundleId();
+		    	Long bundleId = bundle.getBundleId();
 		    	BundleInfo bundleInfo = state.bundleInfos.get(bundleId);
 		        if (bundleInfo == null || bundleInfo.isStart()) {
 		            try {
-		                b.start();
+		                bundle.start();
 		            } catch (BundleException be) {
-		                String msg = format("Could not start bundle %s in feature(s) %s: %s", b.getLocation(), getFeaturesContainingBundleList(b), be.getMessage());
+		                String msg = format("Could not start bundle %s in feature(s) %s: %s", bundle.getLocation(), getFeaturesContainingBundleList(bundle), be.getMessage());
 		                throw new Exception(msg, be);
 		            }
 		    	}
@@ -424,8 +529,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
 		}
 	}
 
-	private void cleanUpOnFailure(InstallationState state,
-			InstallationState failure, boolean noCleanIfFailure) {
+	private void cleanUpOnFailure(InstallationState state, InstallationState failure, boolean noCleanIfFailure) {
 		// cleanup on error
 		if (!noCleanIfFailure) {
 		    // Uninstall everything

@@ -41,11 +41,15 @@ public interface FeaturesService {
      */
     void validateRepository(URI uri) throws Exception;
 
-    void addRepository(URI url) throws Exception;
+    void addRepository(URI uri) throws Exception;
 
-    void removeRepository(URI url);
+    void addRepository(URI uri, boolean install) throws Exception;
+
+    void removeRepository(URI uri) throws Exception;
+
+    void removeRepository(URI uri, boolean uninstall) throws Exception;
     
-    void restoreRepository(URI url) throws Exception;
+    void restoreRepository(URI uri) throws Exception;
 
     Repository[] listRepositories();
 

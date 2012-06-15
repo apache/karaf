@@ -20,6 +20,7 @@ import java.net.URI;
 
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
 
@@ -28,6 +29,9 @@ public class RepoRemoveCommand extends FeaturesCommandSupport {
 
     @Argument(index = 0, name = "repository", description = "Name or url of the repository to remove.", required = true, multiValued = false)
     private String repository;
+
+    @Option(name = "-u", aliases = { "--uninstall-all" }, description = "Uninstall all features from the repository", required = false, multiValued = false)
+    private boolean uninstall;
 
     protected void doExecute(FeaturesService featuresService) throws Exception {
     	URI uri = null;
@@ -42,6 +46,6 @@ public class RepoRemoveCommand extends FeaturesCommandSupport {
     	    uri = new URI(repository);
     	}
 
-    	featuresService.removeRepository(uri);
+    	featuresService.removeRepository(uri, uninstall);
     }
 }
