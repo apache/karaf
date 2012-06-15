@@ -18,14 +18,6 @@
  */
 package org.apache.karaf.deployer.kar;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import java.io.File;
-import java.net.URI;
-
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
 import org.easymock.EasyMock;
@@ -34,185 +26,151 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.File;
+import java.net.URI;
+
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 public class KarArtifactInstallerTest {
-	private KarArtifactInstaller karArtifactInstaller;
-	private FeaturesService featuresService;
+    private KarArtifactInstaller karArtifactInstaller;
+    private FeaturesService featuresService;
 
-	private URI goodKarFile;
-	private URI zipFileWithKarafManifest;
-	private URI zipFileWithoutKarafManifest;
-	private URI badZipFile;
-	
-	@Before
-	public void setUp() throws Exception {
-		featuresService = createMock(FeaturesService.class);
+    private URI goodKarFile;
+    private URI zipFileWithKarafManifest;
+    private URI zipFileWithoutKarafManifest;
+    private URI badZipFile;
 
-		karArtifactInstaller = new KarArtifactInstaller();
+    @Before
+    public void setUp() throws Exception {
+        featuresService = createMock(FeaturesService.class);
 
-		karArtifactInstaller.setFeaturesService(featuresService);
-		karArtifactInstaller.setBasePath("./target");
-		karArtifactInstaller.setLocalRepoPath("./target/local-repo");
+        karArtifactInstaller = new KarArtifactInstaller();
 
-		karArtifactInstaller.init();
-		
-		goodKarFile = getClass().getClassLoader().getResource("goodKarFile.kar").toURI();
-		zipFileWithKarafManifest = getClass().getClassLoader().getResource("karFileAsZip.zip").toURI();
-		zipFileWithoutKarafManifest = getClass().getClassLoader().getResource("karFileAsZipNoManifest.zip").toURI();
-		badZipFile = getClass().getClassLoader().getResource("badZipFile.zip").toURI();
-	}
-	
-	@After
-	public void destroy() throws Exception { 
-		karArtifactInstaller.destroy();
-		karArtifactInstaller.deleteLocalRepository();
-	}
-	
-	
-	
-	@Test
-	public void shouldHandleKarFile() throws Exception {
-		assertTrue(karArtifactInstaller.canHandle(new File(goodKarFile)));
-	}
-	
-	@Test
-	public void shouldHandleZipFileWithKarafManifest() throws Exception {
-		assertTrue(karArtifactInstaller.canHandle(new File(zipFileWithKarafManifest)));
-	}
+        karArtifactInstaller.setFeaturesService(featuresService);
+        karArtifactInstaller.setBasePath("./target");
+        karArtifactInstaller.setLocalRepoPath("./target/local-repo");
 
-	@Test
-	public void shouldIgnoreZipFileWithoutKarafManifest() throws Exception { 		
-		assertFalse(karArtifactInstaller.canHandle(new File(zipFileWithoutKarafManifest)));
-	}
+        karArtifactInstaller.init();
 
-	@Test
-	public void shouldIgnoreBadZipFile() throws Exception { 		
-		assertFalse(karArtifactInstaller.canHandle(new File(badZipFile)));
-	}
+        goodKarFile = getClass().getClassLoader().getResource("goodKarFile.kar").toURI();
+        zipFileWithKarafManifest = getClass().getClassLoader().getResource("karFileAsZip.zip").toURI();
+        zipFileWithoutKarafManifest = getClass().getClassLoader().getResource("karFileAsZipNoManifest.zip").toURI();
+        badZipFile = getClass().getClassLoader().getResource("badZipFile.zip").toURI();
+    }
 
-	@Test 
-	public void shouldRecognizeGoodFeaturesFile() throws Exception
-	{
-		File goodFeaturesXml = new File(new URI(getClass().getClassLoader().getResource("goodKarFile/org/foo/goodFeaturesXml.xml").getFile()).getPath());
-		Assert.assertTrue(karArtifactInstaller.isFeaturesRepository(goodFeaturesXml));
-	}
-	
-	@Test 
-	public void shouldRejectNonFeaturesXMLFile() throws Exception
-	{
-		File goodFeaturesXml = new File(getClass().getClassLoader().getResource("badFeaturesXml.xml").toURI());
-		Assert.assertFalse(karArtifactInstaller.isFeaturesRepository(goodFeaturesXml));
-	}
-	
-	
-	@Test 
-	public void shouldRejectMalformedXMLFile() throws Exception
-	{
-		File malformedXml = new File(getClass().getClassLoader().getResource("malformedXml.xml").toURI());
-		Assert.assertFalse(karArtifactInstaller.isFeaturesRepository(malformedXml));
-	}
-	
-	@Test
-	public void shouldExtractAndRegisterFeaturesFromKar() throws Exception { 
-		// Setup expectations on the features service
-        featuresService.removeRepository( (URI) EasyMock.anyObject() );
+    @After
+    public void destroy() throws Exception {
+        karArtifactInstaller.destroy();
+        karArtifactInstaller.deleteLocalRepository();
+    }
+
+    @Test
+    public void shouldHandleKarFile() throws Exception {
+        assertTrue(karArtifactInstaller.canHandle(new File(goodKarFile)));
+    }
+
+    @Test
+    public void shouldHandleZipFileWithKarafManifest() throws Exception {
+        assertTrue(karArtifactInstaller.canHandle(new File(zipFileWithKarafManifest)));
+    }
+
+    @Test
+    public void shouldIgnoreZipFileWithoutKarafManifest() throws Exception {
+        assertFalse(karArtifactInstaller.canHandle(new File(zipFileWithoutKarafManifest)));
+    }
+
+    @Test
+    public void shouldIgnoreBadZipFile() throws Exception {
+        assertFalse(karArtifactInstaller.canHandle(new File(badZipFile)));
+    }
+
+    @Test
+    public void shouldRecognizeGoodFeaturesFile() throws Exception {
+        File goodFeaturesXml = new File(new URI(getClass().getClassLoader().getResource("goodKarFile/org/foo/goodFeaturesXml.xml").getFile()).getPath());
+        Assert.assertTrue(karArtifactInstaller.isFeaturesRepository(goodFeaturesXml));
+    }
+
+    @Test
+    public void shouldRejectNonFeaturesXMLFile() throws Exception {
+        File goodFeaturesXml = new File(getClass().getClassLoader().getResource("badFeaturesXml.xml").toURI());
+        Assert.assertFalse(karArtifactInstaller.isFeaturesRepository(goodFeaturesXml));
+    }
+
+
+    @Test
+    public void shouldRejectMalformedXMLFile() throws Exception {
+        File malformedXml = new File(getClass().getClassLoader().getResource("malformedXml.xml").toURI());
+        Assert.assertFalse(karArtifactInstaller.isFeaturesRepository(malformedXml));
+    }
+
+    @Test
+    public void shouldExtractAndRegisterFeaturesFromKar() throws Exception {
+        // Setup expectations on the features service
+        featuresService.removeRepository((URI) EasyMock.anyObject());
         expect(featuresService.listRepositories()).andReturn(new Repository[0]);
-		featuresService.addRepository((URI) EasyMock.anyObject());
-		EasyMock.replay(featuresService);
-		
-		// Test
-		//
-		File goodKarFile = new File(new URI(getClass().getClassLoader().getResource("goodKarFile.kar").getFile()).getPath());
-		karArtifactInstaller.install(goodKarFile);
-		
-		// Verify expectations.
-		//
-		EasyMock.verify(featuresService);
-	}
-	
-	@Test
-	public void shouldLogAndNotThrowExceptionIfCannotAddToFeaturesRepository() throws Exception { 
-		// Setup expectations on the features service
-        featuresService.removeRepository( (URI) EasyMock.anyObject() );
-		expect(featuresService.listRepositories()).andReturn(new Repository[0]);
         featuresService.addRepository((URI) EasyMock.anyObject());
-		EasyMock.expectLastCall().andThrow(new Exception("Unable to add to repository."));
-		EasyMock.replay(featuresService);
-		
-		// Test
-		//
-		File goodKarFile = new File(new URI(getClass().getClassLoader().getResource("goodKarFile.kar").getFile()).getPath());
-		karArtifactInstaller.install(goodKarFile);
-		
-		// Verify expectations.
-		//
-		EasyMock.verify(featuresService);
-	}	
-	
-	@Test
-	public void shouldIgnoreUpdateIfFileHasNotChanged() throws Exception { 
-		// Setup expectations on the features service: the addRepository 
-		// should only be added once, as the update command should be ignored! 
-		//
-        featuresService.removeRepository( (URI) EasyMock.anyObject() );
+        EasyMock.replay(featuresService);
+
+        // Test
+        //
+        File goodKarFile = new File(new URI(getClass().getClassLoader().getResource("goodKarFile.kar").getFile()).getPath());
+        karArtifactInstaller.install(goodKarFile);
+
+        // Verify expectations.
+        //
+        EasyMock.verify(featuresService);
+    }
+
+    @Test
+    public void shouldLogAndNotThrowExceptionIfCannotAddToFeaturesRepository() throws Exception {
+        // Setup expectations on the features service
+        featuresService.removeRepository((URI) EasyMock.anyObject());
         expect(featuresService.listRepositories()).andReturn(new Repository[0]);
-		featuresService.addRepository((URI) EasyMock.anyObject());
-		EasyMock.replay(featuresService);
-		
-		// Test
-		//
-		File goodKarFile = new File(new URI(getClass().getClassLoader().getResource("goodKarFile.kar").getFile()).getPath());
-		karArtifactInstaller.install(goodKarFile);
-		karArtifactInstaller.update(goodKarFile);
-		
-		// Verify expectations.
-		//
-		EasyMock.verify(featuresService);
-	}		
-	
-	@Test
-	public void shouldExtractAndRegisterFeaturesFromZip() throws Exception { 
-		// Setup expectations on the features service
-        featuresService.removeRepository( (URI) EasyMock.anyObject() );
+        featuresService.addRepository((URI) EasyMock.anyObject());
+        EasyMock.expectLastCall().andThrow(new Exception("Unable to add to repository."));
+        EasyMock.replay(featuresService);
+
+        // Test
+        //
+        File goodKarFile = new File(new URI(getClass().getClassLoader().getResource("goodKarFile.kar").getFile()).getPath());
+        karArtifactInstaller.install(goodKarFile);
+
+        // Verify expectations.
+        //
+        EasyMock.verify(featuresService);
+    }
+
+    @Test
+    public void shouldExtractAndRegisterFeaturesFromZip() throws Exception {
+        // Setup expectations on the features service
+        featuresService.removeRepository((URI) EasyMock.anyObject());
         expect(featuresService.listRepositories()).andReturn(new Repository[0]);
-		featuresService.addRepository((URI) EasyMock.anyObject());
-		EasyMock.replay(featuresService);
-		
-		// Test
-		//
-		File karFileAsZip = new File(new URI(getClass().getClassLoader().getResource("karFileAsZip.zip").getFile()).getPath());
-		karArtifactInstaller.install(karFileAsZip);
-		
-		// Verify expectations.
-		//
-		EasyMock.verify(featuresService);
-	}
-	
-	@Test (expected = java.io.IOException.class) 
-	public void shouldThrowExceptionIfFileDoesNotExist() throws Exception
-	{
-		File nonExistantFile = new File("DoesNotExist");
-		karArtifactInstaller.install(nonExistantFile);
-	}	
-	
-	@Test
-	public void uninstallShouldDoNothing() throws Exception
-	{
-		EasyMock.replay(featuresService);
-		
-		// Test
-		//
-		File karFileAsZip = new File(getClass().getClassLoader().getResource("karFileAsZip.zip").getFile());
-		karArtifactInstaller.uninstall(karFileAsZip);
-		
-		// Verify expectations.
-		//
-		EasyMock.verify(featuresService);
-	}
+        featuresService.addRepository((URI) EasyMock.anyObject());
+        EasyMock.replay(featuresService);
+
+        // Test
+        //
+        File karFileAsZip = new File(new URI(getClass().getClassLoader().getResource("karFileAsZip.zip").getFile()).getPath());
+        karArtifactInstaller.install(karFileAsZip);
+
+        // Verify expectations.
+        //
+        EasyMock.verify(featuresService);
+    }
+
+    @Test(expected = java.io.IOException.class)
+    public void shouldThrowExceptionIfFileDoesNotExist() throws Exception {
+        File nonExistantFile = new File("DoesNotExist");
+        karArtifactInstaller.install(nonExistantFile);
+    }
 
     @Test
     public void testPathToMvnUri() throws Exception {
         URI uri = KarArtifactInstaller.pathToMvnUri("org/apache/geronimo/features/org.apache.geronimo.transaction.kar/3.1.1-SNAPSHOT/org.apache.geronimo.transaction.kar-3.1.1-SNAPSHOT-features.xml");
         assert "mvn:org.apache.geronimo.features/org.apache.geronimo.transaction.kar/3.1.1-SNAPSHOT/xml/features".equals(uri.toString());
     }
-			
+
 }
