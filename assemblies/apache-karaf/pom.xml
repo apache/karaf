@@ -184,6 +184,7 @@
                         <feature>deployers</feature>
                         <feature>region</feature>
                         <feature>package</feature>
+                        <feature>kar</feature>
                     </bootFeatures>
                 </configuration>
             </plugin>
