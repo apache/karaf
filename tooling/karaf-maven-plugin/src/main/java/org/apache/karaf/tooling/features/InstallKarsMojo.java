@@ -545,6 +545,12 @@ public class InstallKarsMojo extends MojoSupport {
         public org.apache.karaf.features.Feature getFeature(String name) throws Exception {
             return null;
         }
+
+        @Override
+        public Repository getRepository(String repoName) {
+            // TODO Auto-generated method stub
+            return null;
+        }
     }
 
     // when FELIX-2887 is ready we can use plain Properties again

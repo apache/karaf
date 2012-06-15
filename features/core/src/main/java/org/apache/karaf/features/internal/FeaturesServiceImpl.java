@@ -360,6 +360,16 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         Collection<RepositoryImpl> repos = repositories.values();
         return repos.toArray(new Repository[repos.size()]);
     }
+    
+    @Override
+    public Repository getRepository(String repoName) {
+        for (Repository repo : this.repositories.values()) {
+            if (repoName.equals(repo.getName())) {
+                return repo;
+            }
+        }
+        return null;
+    }
 
     /**
      * Install a feature identified by a name.
@@ -506,10 +516,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
      * @throws Exception in case of start failure.
      */
 	private void startBundle(InstallationState state, Bundle bundle) throws Exception {
-		// do not start fragment bundles
-		Dictionary d = bundle.getHeaders();
-		String fragmentHostHeader = (String) d.get(Constants.FRAGMENT_HOST);
-		if (fragmentHostHeader == null || fragmentHostHeader.trim().length() == 0) {
+		if (!isFragment(bundle)) {
 		    // do not start bundles that are persistently stopped
 		    if (state.installed.contains(bundle)
 		            || (bundle.getState() != Bundle.STARTING && bundle.getState() != Bundle.ACTIVE
@@ -527,6 +534,13 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
 		    	}
 		    }
 		}
+	}
+	
+	private boolean isFragment(Bundle b) {
+	    @SuppressWarnings("rawtypes")
+        Dictionary d = b.getHeaders();
+        String fragmentHostHeader = (String) d.get(Constants.FRAGMENT_HOST);
+        return fragmentHostHeader != null && fragmentHostHeader.trim().length() > 0;
 	}
 
 	private void cleanUpOnFailure(InstallationState state, InstallationState failure, boolean noCleanIfFailure) {
@@ -572,11 +586,47 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
             System.out.println("Installing feature " + feature.getName() + " " + feature.getVersion());
         }
         for (Dependency dependency : feature.getDependencies()) {
-            VersionRange range = org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION.equals(dependency.getVersion())
-                        ? VersionRange.ANY_VERSION : new VersionRange(dependency.getVersion(), true, true);
-            Feature fi = null;
-            for (Feature f : installed.keySet()) {
-                if (f.getName().equals(dependency.getName())) {
+            installFeatureDependency(dependency, state, verbose);
+        }
+        installFeatureConfigs(feature, verbose);
+        Set<Long> bundles = new TreeSet<Long>();
+        
+        for (BundleInfo bInfo : resolve(feature)) {
+            Bundle b = installBundleIfNeeded(state, bInfo, feature.getStartLevel(), verbose);
+            bundles.add(b.getBundleId());
+            state.bundleInfos.put(b.getBundleId(), bInfo);
+            String region = feature.getRegion();
+            if (region != null && state.installed.contains(b)) {
+                RegionsPersistence regionsPersistence = getRegionsPersistence(regionsPersistenceTimeout);
+                if (regionsPersistence != null) {
+                    regionsPersistence.install(b, region);
+                } else {
+                    throw new Exception("Unable to find RegionsPersistence service, while installing "+ feature.getName());
+                }
+            }
+        }
+        state.features.put(feature, bundles);
+    }
+
+    private void installFeatureDependency(Dependency dependency, InstallationState state, boolean verbose)
+            throws Exception {
+        VersionRange range = org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION.equals(dependency.getVersion())
+                    ? VersionRange.ANY_VERSION : new VersionRange(dependency.getVersion(), true, true);
+        Feature fi = null;
+        for (Feature f : installed.keySet()) {
+            if (f.getName().equals(dependency.getName())) {
+                Version v = VersionTable.getVersion(f.getVersion());
+                if (range.contains(v)) {
+                    if (fi == null || VersionTable.getVersion(fi.getVersion()).compareTo(v) < 0) {
+                        fi = f;
+                    }
+                }
+            }
+        }
+        if (fi == null) {
+            Map<String, Feature> avail = getFeatures().get(dependency.getName());
+            if (avail != null) {
+                for (Feature f : avail.values()) {
                     Version v = VersionTable.getVersion(f.getVersion());
                     if (range.contains(v)) {
                         if (fi == null || VersionTable.getVersion(fi.getVersion()).compareTo(v) < 0) {
@@ -585,25 +635,15 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
                     }
                 }
             }
-            if (fi == null) {
-                Map<String, Feature> avail = getFeatures().get(dependency.getName());
-                if (avail != null) {
-                    for (Feature f : avail.values()) {
-                        Version v = VersionTable.getVersion(f.getVersion());
-                        if (range.contains(v)) {
-                            if (fi == null || VersionTable.getVersion(fi.getVersion()).compareTo(v) < 0) {
-                                fi = f;
-                            }
-                        }
-                    }
-                }
-            }
-            if (fi == null) {
-                throw new Exception("No feature named '" + dependency.getName()
-                        + "' with version '" + dependency.getVersion() + "' available");
-            }
-            doInstallFeature(state, fi, verbose);
         }
+        if (fi == null) {
+            throw new Exception("No feature named '" + dependency.getName()
+                    + "' with version '" + dependency.getVersion() + "' available");
+        }
+        doInstallFeature(state, fi, verbose);
+    }
+    
+    private void installFeatureConfigs(Feature feature, boolean verbose) throws IOException, InvalidSyntaxException {
         for (String config : feature.getConfigurations().keySet()) {
             Dictionary<String,String> props = new Hashtable<String, String>(feature.getConfigurations().get(config));
             String[] pid = parsePid(config);
@@ -619,26 +659,8 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
             }
         }
         for (ConfigFileInfo configFile : feature.getConfigurationFiles()) {
-        	installConfigurationFile(configFile.getLocation(), configFile.getFinalname(), configFile.isOverride()
-        			,verbose);
+            installConfigurationFile(configFile.getLocation(), configFile.getFinalname(), configFile.isOverride(), verbose);
         }
-        Set<Long> bundles = new TreeSet<Long>();
-        String region = feature.getRegion();
-
-        for (BundleInfo bInfo : resolve(feature)) {
-            Bundle b = installBundleIfNeeded(state, bInfo, feature.getStartLevel(), verbose);
-            bundles.add(b.getBundleId());
-            state.bundleInfos.put(b.getBundleId(), bInfo);
-            if (region != null && state.installed.contains(b)) {
-                RegionsPersistence regionsPersistence = getRegionsPersistence(regionsPersistenceTimeout);
-                if (regionsPersistence != null) {
-                    regionsPersistence.install(b, region);
-                } else {
-                    throw new Exception("Unable to find RegionsPersistence service, while installing "+ feature.getName());
-                }
-            }
-        }
-        state.features.put(feature, bundles);
     }
 
     private String createConfigurationKey(String pid, String factoryPid) {
@@ -658,6 +680,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         }
         // Else, find the resolver
         String filter = "(&(" + Constants.OBJECTCLASS + "=" + Resolver.class.getName() + ")(name=" + resolver + "))";
+        @SuppressWarnings({ "rawtypes", "unchecked" })
         ServiceTracker tracker = new ServiceTracker(bundleContext, FrameworkUtil.createFilter(filter), null);
         tracker.open();
         try {
@@ -1296,7 +1319,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
 
     protected Map<Feature, Set<Long>> loadMap(Properties props, String prefix) {
         Map<Feature, Set<Long>> map = new HashMap<Feature, Set<Long>>();
-        for (Enumeration e = props.propertyNames(); e.hasMoreElements();) {
+        for (@SuppressWarnings("rawtypes") Enumeration e = props.propertyNames(); e.hasMoreElements();) {
             String key = (String) e.nextElement();
             if (key.startsWith(prefix)) {
                 String val = (String) props.get(key);

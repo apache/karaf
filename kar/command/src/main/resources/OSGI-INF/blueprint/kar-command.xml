@@ -36,6 +36,11 @@
                 <ref component-id="karCompleter"/>
             </completers>
         </command>
+        <command>
+            <action class="org.apache.karaf.kar.command.CreateKarCommand">
+                <property name="karService" ref="karService"/>
+            </action>
+        </command>
     </command-bundle>
 
     <reference id="karService" interface="org.apache.karaf.kar.KarService"/>
