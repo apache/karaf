@@ -148,7 +148,6 @@
         <aries.transaction.blueprint.version>0.3</aries.transaction.blueprint.version>
         <aries.transaction.manager.version>0.3.1</aries.transaction.manager.version>
         <aries.transaction.wrappers.version>0.3</aries.transaction.wrappers.version>
-        <aries.util.version>0.3.1-SNAPSHOT</aries.util.version>
         <aries.util.version>0.3.1</aries.util.version>
         <jline.version>2.7</jline.version>
         <jsw.version>3.2.3</jsw.version>
