@@ -20,22 +20,26 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.felix.gogo.commands.Option;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 import org.apache.karaf.shell.console.MultiException;
 
-@Command(scope = "features", name = "addUrl", description = "Adds a list of repository URLs to the features service.")
+@Command(scope = "features", name = "addUrl", description = "Adds a list of repository URLs to the features service")
 public class AddUrlCommand extends FeaturesCommandSupport {
 
     @Argument(index = 0, name = "urls", description = "One or more repository URLs separated by whitespaces", required = true, multiValued = true)
     List<String> urls;
 
+    @Option(name = "-i", aliases = { "--install-all" }, description = "Install all features contained in the repository URLs", required = false, multiValued = false)
+    boolean install;
+
     protected void doExecute(FeaturesService admin) throws Exception {
         List<Exception> exceptions = new ArrayList<Exception>();
         for (String url : urls) {
             try {
-                admin.addRepository(new URI(url));
+                admin.addRepository(new URI(url), install);
             } catch (Exception e) {
                 exceptions.add(e);
             }

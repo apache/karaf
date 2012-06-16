@@ -23,6 +23,7 @@ package org.apache.karaf.tooling.features;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.lang.Exception;
 import java.net.URI;
 import java.util.Collection;
 import java.util.EnumSet;
@@ -126,7 +127,14 @@ public class InstallKarsMojo extends MojoSupport {
             }
         }
 
+        public void addRepository(URI url, boolean install) throws Exception {
+            addRepository(url);
+        }
+
         public void removeRepository(URI url) {
+        }
+
+        public void removeRepository(URI url, boolean uninstall) {
         }
 
         public void restoreRepository(URI url) throws Exception {

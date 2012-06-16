@@ -16,65 +16,12 @@
  */
 package org.apache.karaf.features.internal;
 
-import static java.lang.String.format;
-
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Dictionary;
-import java.util.EnumSet;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.jar.JarInputStream;
-import java.util.jar.Manifest;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.apache.felix.utils.manifest.Clause;
 import org.apache.felix.utils.manifest.Parser;
 import org.apache.felix.utils.version.VersionRange;
 import org.apache.felix.utils.version.VersionTable;
-import org.apache.karaf.features.BundleInfo;
-import org.apache.karaf.features.ConfigFileInfo;
-import org.apache.karaf.features.Feature;
-import org.apache.karaf.features.FeatureEvent;
-import org.apache.karaf.features.FeaturesListener;
-import org.apache.karaf.features.FeaturesService;
-import org.apache.karaf.features.Repository;
-import org.apache.karaf.features.RepositoryEvent;
-import org.apache.karaf.features.Resolver;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleException;
-import org.osgi.framework.Constants;
-import org.osgi.framework.FrameworkEvent;
-import org.osgi.framework.FrameworkListener;
-import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.Version;
+import org.apache.karaf.features.*;
+import org.osgi.framework.*;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.packageadmin.PackageAdmin;
@@ -83,6 +30,18 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.jar.JarInputStream;
+import java.util.jar.Manifest;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import static java.lang.String.format;
 
 /**
@@ -90,7 +49,6 @@ import static java.lang.String.format;
  * Adding a repository url will load the features contained in this repository and
  * create dummy sub shells.  When invoked, these commands will prompt the user for
  * installing the needed bundles.
- *
  */
 public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
 
@@ -194,18 +152,50 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
 
     /**
      * Validate repository.
+     *
+     * @param uri the features repository URI.
      */
     public void validateRepository(URI uri) throws Exception {
         FeatureValidationUtil.validate(uri);
     }
 
+    /**
+     * Register a features repository.
+     * @param uri the features repository URI.
+     * @throws Exception in case of adding failure.
+     */
     public void addRepository(URI uri) throws Exception {
+        addRepository(uri, false);
+    }
+
+    /**
+     * Register a features repository.
+     *
+     * @param uri
+     * @param install
+     * @throws Exception
+     */
+    public void addRepository(URI uri, boolean install) throws Exception {
         if (!repositories.containsKey(uri)) {
-            internalAddRepository(uri);
+            RepositoryImpl repository = internalAddRepository(uri);
             saveState();
+            if (install) {
+                for (Feature feature : repository.getFeatures()) {
+                    installFeature(feature, EnumSet.noneOf(Option.class));
+                }
+            }
+        } else {
+            refreshRepository(uri, install);
         }
     }
 
+    /**
+     * Add a features repository into the internal registry.
+     *
+     * @param uri the features repository URI.
+     * @return the internal <code>RepositoryImpl</code> representation.
+     * @throws Exception in case of adding failure.
+     */
     protected RepositoryImpl internalAddRepository(URI uri) throws Exception {
         validateRepository(uri);
         RepositoryImpl repo = null;
@@ -218,54 +208,118 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         callListeners(new RepositoryEvent(repo, RepositoryEvent.EventType.RepositoryAdded, false));
         features = null;
         return repo;
-        
+
     }
 
-    public void removeRepository(URI uri) {
+    /**
+     * Refresh a features repository.
+     *
+     * @param uri the features repository URI.
+     * @throws Exception in case of refresh failure.
+     */
+    protected void refreshRepository(URI uri) throws Exception {
+        this.refreshRepository(uri, false);
+    }
+
+    /**
+     * Refresh a features repository.
+     *
+     * @param uri     the features repository URI.
+     * @param install if true, install all features in the features repository.
+     * @throws Exception in case of refresh failure.
+     */
+    protected void refreshRepository(URI uri, boolean install) throws Exception {
+        try {
+            removeRepository(uri, install);
+            addRepository(uri, install);
+        } catch (Exception e) {
+            //get chance to restore previous, fix for KARAF-4
+            restoreRepository(uri);
+            throw new Exception("Unable to refresh features repository " + uri, e);
+        }
+    }
+
+    /**
+     * Remove a features repository.
+     *
+     * @param uri the features repository URI.
+     * @throws Exception in case of remove failure.
+     */
+    public void removeRepository(URI uri) throws Exception {
+        this.removeRepository(uri, false);
+    }
+
+    /**
+     * Remove a features repository.
+     *
+     * @param uri       the features repository URI.
+     * @param uninstall if true, uninstall all features from the features repository.
+     * @throws Exception in case of remove failure.
+     */
+    public void removeRepository(URI uri, boolean uninstall) throws Exception {
         if (repositories.containsKey(uri)) {
+            if (uninstall) {
+                RepositoryImpl repositoryImpl = repositories.get(uri);
+                for (Feature feature : repositoryImpl.getFeatures()) {
+                    this.uninstallFeature(feature.getName(), feature.getVersion());
+                }
+            }
             internalRemoveRepository(uri);
             saveState();
         }
     }
 
+    /**
+     * Remove a features repository from the internal registry.
+     *
+     * @param uri the features repository URI.
+     */
     public void internalRemoveRepository(URI uri) {
         Repository repo = repositories.remove(uri);
         this.repo.set(repo);
         callListeners(new RepositoryEvent(repo, RepositoryEvent.EventType.RepositoryRemoved, false));
         features = null;
     }
-    
+
+    /**
+     * Restore a features repository.
+     *
+     * @param uri the features repository URI.
+     * @throws Exception in case of restore failure.
+     */
     public void restoreRepository(URI uri) throws Exception {
-    	repositories.put(uri, (RepositoryImpl)repo.get());
-    	callListeners(new RepositoryEvent(repo.get(), RepositoryEvent.EventType.RepositoryAdded, false));
+        repositories.put(uri, (RepositoryImpl) repo.get());
+        callListeners(new RepositoryEvent(repo.get(), RepositoryEvent.EventType.RepositoryAdded, false));
         features = null;
     }
 
+    /**
+     * List the features repositories.
+     *
+     * @return the list of features repositories.
+     */
     public Repository[] listRepositories() {
         Collection<RepositoryImpl> repos = repositories.values();
         return repos.toArray(new Repository[repos.size()]);
     }
 
-    public void installAllFeatures(URI uri) throws Exception {
-        RepositoryImpl repo = internalAddRepository(uri);
-        for (Feature f : repo.getFeatures()) {
-            installFeature(f.getName(), f.getVersion());
-        }
-        internalRemoveRepository(uri);            
-    }
-
-    public void uninstallAllFeatures(URI uri) throws Exception {
-        RepositoryImpl repo = internalAddRepository(uri);
-        for (Feature f : repo.getFeatures()) {
-            uninstallFeature(f.getName(), f.getVersion());
-        }
-        internalRemoveRepository(uri);            
-    }
-
+    /**
+     * Install a feature identified by a name.
+     *
+     * @param name the name of the feature.
+     * @throws Exception in case of installation failure.
+     */
     public void installFeature(String name) throws Exception {
-    	installFeature(name, FeatureImpl.DEFAULT_VERSION);
+        installFeature(name, FeatureImpl.DEFAULT_VERSION);
     }
 
+    /**
+     * Install a feature identified by a name and a version.
+     *
+     * @param name the name of the feature.
+     * @param version the version of the feature.
+     * @throws Exception in case of installation failure.
+     */
     public void installFeature(String name, String version) throws Exception {
         installFeature(name, version, EnumSet.noneOf(Option.class));
     }
@@ -274,7 +328,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         Feature f = getFeature(name, version);
         if (f == null) {
             throw new Exception("No feature named '" + name
-            		+ "' with version '" + version + "' available");
+                    + "' with version '" + version + "' available");
         }
         installFeature(f, options);
     }
@@ -291,13 +345,13 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
             // Install everything
             for (Feature f : features) {
                 InstallationState s = new InstallationState();
-            	try {
+                try {
                     doInstallFeature(s, f, verbose);
                     state.bundleInfos.putAll(s.bundleInfos);
                     state.bundles.addAll(s.bundles);
                     state.features.putAll(s.features);
                     state.installed.addAll(s.installed);
-            	} catch (Exception e) {
+                } catch (Exception e) {
                     failure.bundles.addAll(s.bundles);
                     failure.features.putAll(s.features);
                     failure.installed.addAll(s.installed);
@@ -306,7 +360,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
                     } else {
                         throw e;
                     }
-            	}
+                }
             }
             // Find bundles to refresh
             boolean print = options.contains(Option.PrintBundlesToRefresh);
@@ -344,18 +398,18 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
                     // do not start bundles that are persistently stopped
                     if (state.installed.contains(b)
                             || (b.getState() != Bundle.STARTING && b.getState() != Bundle.ACTIVE
-                                    && getStartLevel().isBundlePersistentlyStarted(b))) {
-                    	// do no start bundles when user request it
-                    	Long bundleId = b.getBundleId();
-                    	BundleInfo bundleInfo = state.bundleInfos.get(bundleId);
+                            && getStartLevel().isBundlePersistentlyStarted(b))) {
+                        // do no start bundles when user request it
+                        Long bundleId = b.getBundleId();
+                        BundleInfo bundleInfo = state.bundleInfos.get(bundleId);
                         if (bundleInfo == null || bundleInfo.isStart()) {
-	                        try {
-	                            b.start();
-	                        } catch (BundleException be) {
-	                            String msg = format("Could not start bundle %s in feature(s) %s: %s", b.getLocation(), getFeaturesContainingBundleList(b), be.getMessage());
-	                            throw new Exception(msg, be);
-	                        }
-                    	}
+                            try {
+                                b.start();
+                            } catch (BundleException be) {
+                                String msg = format("Could not start bundle %s in feature(s) %s: %s", b.getLocation(), getFeaturesContainingBundleList(b), be.getMessage());
+                                throw new Exception(msg, be);
+                            }
+                        }
                     }
                 }
             }
@@ -424,7 +478,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         }
         for (Feature dependency : feature.getDependencies()) {
             VersionRange range = FeatureImpl.DEFAULT_VERSION.equals(dependency.getVersion())
-                        ? VersionRange.ANY_VERSION : new VersionRange(dependency.getVersion(), true, true);
+                    ? VersionRange.ANY_VERSION : new VersionRange(dependency.getVersion(), true, true);
             Feature fi = null;
             for (Feature f : installed.keySet()) {
                 if (f.getName().equals(dependency.getName())) {
@@ -456,7 +510,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
             doInstallFeature(state, fi, verbose);
         }
         for (String config : feature.getConfigurations().keySet()) {
-            Dictionary<String,String> props = new Hashtable<String, String>(feature.getConfigurations().get(config));
+            Dictionary<String, String> props = new Hashtable<String, String>(feature.getConfigurations().get(config));
             String[] pid = parsePid(config);
             Configuration cfg = findExistingConfiguration(configAdmin, pid[0], pid[1]);
             if (cfg == null) {
@@ -470,8 +524,8 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
             }
         }
         for (ConfigFileInfo configFile : feature.getConfigurationFiles()) {
-        	installConfigurationFile(configFile.getLocation(), 
-        			configFile.getFinalname(), configFile.isOverride(), verbose);
+            installConfigurationFile(configFile.getLocation(),
+                    configFile.getFinalname(), configFile.isOverride(), verbose);
         }
         Set<Long> bundles = new TreeSet<Long>();
         for (BundleInfo bInfo : resolve(feature)) {
@@ -490,7 +544,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         String resolver = feature.getResolver();
         // If no resolver is specified, we expect a list of uris
         if (resolver == null || resolver.length() == 0) {
-        	return feature.getBundles();
+            return feature.getBundles();
         }
         boolean optional = false;
         if (resolver.startsWith("(") && resolver.endsWith(")")) {
@@ -569,7 +623,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         }
         // Second pass: for each bundle, check if there is any unresolved optional package that could be resolved
         Map<Bundle, List<Clause>> imports = new HashMap<Bundle, List<Clause>>();
-        for (Iterator<Bundle> it = bundles.iterator(); it.hasNext();) {
+        for (Iterator<Bundle> it = bundles.iterator(); it.hasNext(); ) {
             Bundle b = it.next();
             String importsStr = (String) b.getHeaders().get(Constants.IMPORT_PACKAGE);
             List<Clause> importsList = getOptionalImports(importsStr);
@@ -592,10 +646,10 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
                 exports.addAll(Arrays.asList(exportsList));
             }
         }
-        for (Iterator<Bundle> it = bundles.iterator(); it.hasNext();) {
+        for (Iterator<Bundle> it = bundles.iterator(); it.hasNext(); ) {
             Bundle b = it.next();
             List<Clause> importsList = imports.get(b);
-            for (Iterator<Clause> itpi = importsList.iterator(); itpi.hasNext();) {
+            for (Iterator<Clause> itpi = importsList.iterator(); itpi.hasNext(); ) {
                 Clause pi = itpi.next();
                 boolean matching = false;
                 for (Clause pe : exports) {
@@ -656,7 +710,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
             is.mark(256 * 1024);
             JarInputStream jar = new JarInputStream(is);
             Manifest m = jar.getManifest();
-            if(m == null) {
+            if (m == null) {
                 throw new BundleException("Manifest not present in the first entry of the zip " + bundleLocation);
             }
             String sn = m.getMainAttributes().getValue(Constants.BUNDLE_SYMBOLICNAME);
@@ -695,7 +749,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
                 System.out.println("Installing bundle " + bundleLocation);
             }
             Bundle b = getBundleContext().installBundle(bundleLocation, is);
-            
+
             // Define the startLevel for the bundle when defined
             int ibsl = bundleInfo.getStartLevel();
             if (ibsl > 0) {
@@ -709,34 +763,34 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
             is.close();
         }
     }
-    
+
     public void installConfigurationFile(String fileLocation, String finalname, boolean override, boolean verbose) throws IOException {
-    	LOGGER.debug("Checking configuration file " + fileLocation);
+        LOGGER.debug("Checking configuration file " + fileLocation);
         if (verbose) {
             System.out.println("Checking configuration file " + fileLocation);
         }
-    	
-    	String basePath = System.getProperty("karaf.base");
-    	
-    	if (finalname.indexOf("${") != -1) {
-    		//remove any placeholder or variable part, this is not valid.
-    		int marker = finalname.indexOf("}");
-    		finalname = finalname.substring(marker+1);
-    	}
-    	
-    	finalname = basePath + File.separator + finalname;
-    	
-    	File file = new File(finalname); 
-    	if (file.exists() && !override) {
-    		LOGGER.debug("configFile already exist, don't override it");
-    		return;
-    	}
+
+        String basePath = System.getProperty("karaf.base");
+
+        if (finalname.indexOf("${") != -1) {
+            //remove any placeholder or variable part, this is not valid.
+            int marker = finalname.indexOf("}");
+            finalname = finalname.substring(marker + 1);
+        }
+
+        finalname = basePath + File.separator + finalname;
+
+        File file = new File(finalname);
+        if (file.exists() && !override) {
+            LOGGER.debug("configFile already exist, don't override it");
+            return;
+        }
 
         InputStream is = null;
         FileOutputStream fop = null;
         try {
             is = new BufferedInputStream(new URL(fileLocation).openStream());
-            
+
             if (!file.exists()) {
                 File parentFile = file.getParentFile();
                 if (parentFile != null) {
@@ -746,10 +800,10 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
             }
 
             fop = new FileOutputStream(file);
-        
+
             int bytesRead = 0;
             byte[] buffer = new byte[1024];
-            
+
             while ((bytesRead = is.read(buffer)) != -1) {
                 fop.write(buffer, 0, bytesRead);
             }
@@ -757,17 +811,17 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
             LOGGER.error(e.getMessage());
             throw e;
         } catch (MalformedURLException e) {
-        	LOGGER.error(e.getMessage());
+            LOGGER.error(e.getMessage());
             throw e;
-		} finally {
-			if (is != null)
-				is.close();
+        } finally {
+            if (is != null)
+                is.close();
             if (fop != null) {
-			    fop.flush();
-			    fop.close();
+                fop.flush();
+                fop.close();
             }
-		}
-            
+        }
+
     }
 
     public void uninstallFeature(String name) throws Exception {
@@ -793,12 +847,12 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         }
         uninstallFeature(name, versions.get(0));
     }
-    
+
     public void uninstallFeature(String name, String version) throws Exception {
-    	Feature feature = getFeature(name, version);
+        Feature feature = getFeature(name, version);
         if (feature == null || !installed.containsKey(feature)) {
-            throw new Exception("Feature named '" + name 
-            		+ "' with version '" + version + "' is not installed");
+            throw new Exception("Feature named '" + name
+                    + "' with version '" + version + "' is not installed");
         }
         // Grab all the bundles installed by this feature
         // and remove all those who will still be in use.
@@ -821,7 +875,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
     public Feature[] listFeatures() throws Exception {
         Collection<Feature> features = new ArrayList<Feature>();
         for (Map<String, Feature> featureWithDifferentVersion : getFeatures().values()) {
-			for (Feature f : featureWithDifferentVersion.values()) {
+            for (Feature f : featureWithDifferentVersion.values()) {
                 features.add(f);
             }
         }
@@ -878,11 +932,11 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
 
     protected Map<String, Map<String, Feature>> getFeatures() throws Exception {
         if (features == null) {
-        	//the outer map's key is feature name, the inner map's key is feature version       
+            //the outer map's key is feature name, the inner map's key is feature version
             Map<String, Map<String, Feature>> map = new HashMap<String, Map<String, Feature>>();
             // Two phase load:
             // * first load dependent repositories
-            for (;;) {
+            for (; ; ) {
                 boolean newRepo = false;
                 for (Repository repo : listRepositories()) {
                     for (URI uri : repo.getRepositories()) {
@@ -899,13 +953,13 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
             // * then load all features
             for (Repository repo : repositories.values()) {
                 for (Feature f : repo.getFeatures()) {
-                	if (map.get(f.getName()) == null) {
-                		Map<String, Feature> versionMap = new HashMap<String, Feature>();
-                		versionMap.put(f.getVersion(), f);
-                		map.put(f.getName(), versionMap);
-                	} else {
-                		map.get(f.getName()).put(f.getVersion(), f);
-                	}
+                    if (map.get(f.getName()) == null) {
+                        Map<String, Feature> versionMap = new HashMap<String, Feature>();
+                        versionMap.put(f.getVersion(), f);
+                        map.put(f.getName(), versionMap);
+                    } else {
+                        map.get(f.getName()).put(f.getVersion(), f);
+                    }
                 }
             }
             features = map;
@@ -931,9 +985,9 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
             if (uris != null) {
                 for (URI uri : uris) {
                     try {
-                    	internalAddRepository(uri);
+                        internalAddRepository(uri);
                     } catch (Exception e) {
-                        LOGGER.warn(format("Unable to add features repository %s at startup", uri), e);    
+                        LOGGER.warn(format("Unable to add features repository %s at startup", uri), e);
                     }
                 }
             }
@@ -1086,11 +1140,11 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
             }
             Set<URI> repositories = loadSet(props, "repositories.");
             for (URI repo : repositories) {
-            	try {
-            		internalAddRepository(repo);
-            	} catch (Exception e) {
-            		LOGGER.warn(format("Unable to add features repository %s at startup", repo), e);
-            	}
+                try {
+                    internalAddRepository(repo);
+                } catch (Exception e) {
+                    LOGGER.warn(format("Unable to add features repository %s at startup", repo), e);
+                }
             }
             installed = loadMap(props, "features.");
             for (Feature f : installed.keySet()) {
@@ -1135,7 +1189,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
 
     protected Map<Feature, Set<Long>> loadMap(Properties props, String prefix) {
         Map<Feature, Set<Long>> map = new HashMap<Feature, Set<Long>>();
-        for (Enumeration e = props.propertyNames(); e.hasMoreElements();) {
+        for (Enumeration e = props.propertyNames(); e.hasMoreElements(); ) {
             String key = (String) e.nextElement();
             if (key.startsWith(prefix)) {
                 String val = (String) props.get(key);
@@ -1160,9 +1214,9 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
     protected Set<Long> readValue(String val) {
         Set<Long> set = new HashSet<Long>();
         if (val != null && val.length() != 0) {
-        	for (String str : val.split(",")) {
-        		set.add(Long.parseLong(str));
-        	}
+            for (String str : val.split(",")) {
+                set.add(Long.parseLong(str));
+            }
         }
         return set;
     }
@@ -1185,10 +1239,10 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         }
     }
 
-    static Pattern fuzzyVersion  = Pattern.compile("(\\d+)(\\.(\\d+)(\\.(\\d+))?)?([^a-zA-Z0-9](.*))?",
-                                                   Pattern.DOTALL);
+    static Pattern fuzzyVersion = Pattern.compile("(\\d+)(\\.(\\d+)(\\.(\\d+))?)?([^a-zA-Z0-9](.*))?",
+            Pattern.DOTALL);
     static Pattern fuzzyModifier = Pattern.compile("(\\d+[.-])*(.*)",
-                                                   Pattern.DOTALL);
+            Pattern.DOTALL);
 
     /**
      * Clean up version parameters. Other builders use more fuzzy definitions of
@@ -1246,7 +1300,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         }
     }
 
-    public Set<Feature> getFeaturesContainingBundle (Bundle bundle) throws Exception {
+    public Set<Feature> getFeaturesContainingBundle(Bundle bundle) throws Exception {
         Set<Feature> features = new HashSet<Feature>();
         for (Map<String, Feature> featureMap : this.getFeatures().values()) {
             for (Feature f : featureMap.values()) {
@@ -1266,7 +1320,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         StringBuilder buffer = new StringBuilder();
         Iterator<Feature> iter = features.iterator();
         while (iter.hasNext()) {
-            Feature feature= iter.next();
+            Feature feature = iter.next();
             buffer.append(feature.getId());
             if (iter.hasNext()) {
                 buffer.append(", ");
