@@ -43,7 +43,11 @@ public interface FeaturesService {
 
     void addRepository(URI url) throws Exception;
 
-    void removeRepository(URI url);
+    void addRepository(URI url, boolean install) throws Exception;
+
+    void removeRepository(URI url) throws Exception;
+
+    void removeRepository(URI url, boolean uninstall) throws Exception;
     
     void restoreRepository(URI url) throws Exception;
 

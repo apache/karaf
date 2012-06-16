@@ -21,17 +21,21 @@ import java.util.List;
 
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
+import org.apache.felix.gogo.commands.Option;
 import org.apache.karaf.features.FeaturesService;
 
-@Command(scope = "features", name = "removeUrl", description = "Removes the given list of repository URLs from the features service.")
+@Command(scope = "features", name = "removeUrl", description = "Removes the given list of repository URLs from the features service")
 public class RemoveUrlCommand extends FeaturesCommandSupport {
 
     @Argument(index = 0, name = "urls", description = "One or more repository URLs separated by whitespaces", required = true, multiValued = true)
     List<String> urls;
 
+    @Option(name = "-u", aliases = { "--uninstall-all"}, description = "Uninstall all features contained in the repository URLs", required = false, multiValued = false)
+    boolean uninstall;
+
     protected void doExecute(FeaturesService admin) throws Exception {
         for (String url : urls) {
-            admin.removeRepository(new URI(url));
+            admin.removeRepository(new URI(url), uninstall);
         }
     }
 }
