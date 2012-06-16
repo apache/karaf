@@ -242,8 +242,8 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
             RepositoryImpl repositoryImpl = this.internalAddRepository(uri);
             saveState();
             if (install) {
-                for (Feature f : repositoryImpl.getFeatures()) {
-                    installFeature(f.getName(), f.getVersion());
+                for (Feature feature : repositoryImpl.getFeatures()) {
+                    installFeature(feature, EnumSet.noneOf(Option.class));
                 }
             }
         } else {
