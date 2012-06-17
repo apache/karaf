@@ -167,7 +167,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.karaf.wrapper</groupId>
-            <artifactId>org.apache.karaf.wrapper.commands</artifactId>
+            <artifactId>org.apache.karaf.wrapper.command</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
