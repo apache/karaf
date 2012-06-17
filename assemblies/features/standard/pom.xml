@@ -263,7 +263,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.karaf.region</groupId>
-            <artifactId>org.apache.karaf.region.commands</artifactId>
+            <artifactId>org.apache.karaf.region.command</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
