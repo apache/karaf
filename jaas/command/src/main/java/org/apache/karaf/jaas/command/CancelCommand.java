@@ -20,7 +20,7 @@ import org.apache.karaf.jaas.modules.BackingEngine;
 
 import java.util.LinkedList;
 
-@Command(scope = "jaas", name = "cancel", description = "Cancel the modification of a JAAS realm.")
+@Command(scope = "jaas", name = "cancel", description = "Cancel the modification on a JAAS Realm")
 public class CancelCommand extends JaasCommandSupport {
 
     @Override
