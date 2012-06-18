@@ -15,6 +15,7 @@
  */
 package org.apache.karaf.jaas.command;
 
+import org.apache.karaf.jaas.boot.ProxyLoginModule;
 import org.apache.karaf.jaas.config.JaasRealm;
 import org.apache.karaf.jaas.modules.BackingEngine;
 import org.apache.karaf.jaas.modules.BackingEngineService;
@@ -52,50 +53,51 @@ public abstract class JaasCommandSupport extends OsgiCommandSupport {
                 commandQueue.add(this);
             }
         } else {
-            System.err.println("No JAAS Realm / Module has been selected.");
+            System.err.println("No JAAS Realm / Module has been selected");
         }
         return null;
     }
 
 
     /**
-     * Returns the Jaas Realm named as realmName.
+     * Returns the JAAS Realm named as realmName.
      *
-     * @param realmName
-     * @return
+     * @param realmName the name of the JAAS Realm.
+     * @return the corresponding <code>JaasRealm</code>.
      */
-    public JaasRealm findRealmByNameOrIndex(String realmName, int index) {
-        JaasRealm realm = null;
+    public JaasRealm findRealm(String realmName) {
         if (realms != null) {
-            for (int i=1; i <= realms.size();i++) {
-                if (realms.get(i-1).getName().equals(realmName) || index == i)
-                    return realms.get(i-1);
+            for (JaasRealm realm : realms) {
+                if (realm.getName().equals(realmName)) {
+                    return realm;
+                }
             }
         }
-        return realm;
+        return null;
     }
 
     /**
-     * Returns the Jaas Module entry of the specified realm, named as moduleName.
+     * Returns the JAAS Module entry of the specified realm, identified by the given name.
      *
-     * @param moduleName
-     * @return
+     * @param realm the JAAS realm.
+     * @param moduleName the JAAS module name.
+     * @return the corresponding <code>AppConfigurationEntry</code>.
      */
-    public AppConfigurationEntry findEntryByRealmAndName(JaasRealm realm, String moduleName) {
-        if (realm == null || moduleName == null)
-            return null;
+    public AppConfigurationEntry findLoginModule(JaasRealm realm, String moduleName) {
+
         AppConfigurationEntry appConfigurationEntry = null;
         if (realm != null) {
 
             AppConfigurationEntry[] entries = realm.getEntries();
 
-            //If no moduleName provided and a there is a single module in the realm.
+            // if no moduleName provided and a there is a single module in the realm.
             if (entries != null && entries.length == 1 && moduleName == null) {
                 return entries[0];
             }
 
             for (AppConfigurationEntry entry : entries) {
-                if (moduleName.equals(entry.getLoginModuleName())) {
+                String moduleClass = (String) entry.getOptions().get(ProxyLoginModule.PROPERTY_MODULE);
+                if (moduleName.equals(entry.getLoginModuleName()) || moduleName.equals(moduleClass)) {
                     return entry;
                 }
             }

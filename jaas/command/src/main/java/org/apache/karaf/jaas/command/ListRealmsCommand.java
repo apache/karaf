@@ -19,14 +19,13 @@ import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.jaas.boot.ProxyLoginModule;
 import org.apache.karaf.jaas.config.JaasRealm;
 import org.apache.karaf.jaas.modules.BackingEngine;
+import org.apache.karaf.shell.table.ShellTable;
 
 import javax.security.auth.login.AppConfigurationEntry;
 import java.util.List;
 
-@Command(scope = "jaas", name = "realm-list", description = "Lists the existing JAAS realms.")
+@Command(scope = "jaas", name = "realm-list", description = "List JAAS realms")
 public class ListRealmsCommand extends JaasCommandSupport {
-
-    private static final String REALM_LIST_FORMAT = "%5s %-20s %-80s";
 
     @Override
     protected Object doExecute(BackingEngine engine) throws Exception {
@@ -35,9 +34,12 @@ public class ListRealmsCommand extends JaasCommandSupport {
 
     protected Object doExecute() throws Exception {
         List<JaasRealm> realms = getRealms();
+
+        ShellTable table = new ShellTable();
+        table.column("Realm Name");
+        table.column("Login Module Class Name");
+
         if (realms != null && realms.size() > 0) {
-            System.out.println(String.format(REALM_LIST_FORMAT, "Index","Realm", "Module Class"));
-            int index = 1;
             for (JaasRealm realm : realms) {
                 String realmName = realm.getName();
                 AppConfigurationEntry[] entries = realm.getEntries();
@@ -45,15 +47,14 @@ public class ListRealmsCommand extends JaasCommandSupport {
                 if (entries != null && entries.length > 0) {
                     for (int i = 0; i < entries.length; i++) {
                         String moduleClass = (String) entries[i].getOptions().get(ProxyLoginModule.PROPERTY_MODULE);
-                        System.out.println(String.format(REALM_LIST_FORMAT, index++, realmName, moduleClass));
+                        table.addRow().addContent(realmName, moduleClass);
                     }
-                } else {
-                    System.out.println(String.format(REALM_LIST_FORMAT, realmName, "No module found for realm."));
                 }
             }
-        } else {
-            System.err.println("No realm found");
         }
+
+        table.print(System.out);
+
         return null;
     }
 
