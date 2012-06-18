@@ -15,6 +15,7 @@
  */
 package org.apache.karaf.jaas.command;
 
+import org.apache.karaf.jaas.boot.ProxyLoginModule;
 import org.apache.karaf.jaas.config.JaasRealm;
 import org.apache.karaf.jaas.modules.BackingEngine;
 import org.apache.karaf.jaas.modules.BackingEngineService;
@@ -93,7 +94,8 @@ public abstract class JaasCommandSupport extends OsgiCommandSupport {
             }
 
             for (AppConfigurationEntry entry : entries) {
-                if (moduleName.equals(entry.getLoginModuleName())) {
+                String moduleClass = (String) entry.getOptions().get(ProxyLoginModule.PROPERTY_MODULE);
+                if (moduleName.equals(entry.getLoginModuleName()) || moduleName.equals(moduleClass)) {
                     return entry;
                 }
             }
