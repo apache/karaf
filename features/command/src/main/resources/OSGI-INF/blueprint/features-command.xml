@@ -102,5 +102,11 @@
     <bean id="installedRepoNameCompleter" class="org.apache.karaf.features.command.completers.InstalledRepoNameCompleter">
         <property name="featuresService" ref="featuresService"/>
     </bean>
+    
+    <service ref="installedRepoNameCompleter" interface="org.apache.karaf.shell.console.Completer">
+        <service-properties>
+            <entry key="name" value="installedRepoNameCompleter"/>
+        </service-properties>
+    </service>
 
 </blueprint>

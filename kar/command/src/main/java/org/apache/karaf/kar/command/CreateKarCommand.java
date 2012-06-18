@@ -16,7 +16,7 @@
  */
 package org.apache.karaf.kar.command;
 
-import java.util.Set;
+import java.util.List;
 
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
@@ -27,8 +27,8 @@ public class CreateKarCommand extends KarCommandSupport {
     @Argument(index = 0, name = "repoName", description = "Repository name. The kar will contain all features of the named repository by default", required = true, multiValued = false)
     private String repoName;
     
-    @Argument(index = 1, name = "features", description = "Names of the features to include. If set then only these features will be added", required = false, multiValued = false)
-    private Set<String> features;
+    @Argument(index = 1, name = "features", description = "Names of the features to include. If set then only these features will be added", required = false, multiValued = true)
+    private List<String> features;
     
     public Object doExecute() throws Exception {
         this.getKarService().create(repoName, features, System.out);

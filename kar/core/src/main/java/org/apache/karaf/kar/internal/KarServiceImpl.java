@@ -26,11 +26,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -46,6 +49,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.ConfigFileInfo;
+import org.apache.karaf.features.Dependency;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
@@ -387,58 +391,102 @@ public class KarServiceImpl implements KarService {
     }
     
     @Override
-    public void create(String repoName, Set<String> features, PrintStream console) {
+    public void create(String repoName, List<String> features, PrintStream console) {
         FileOutputStream fos = null;
         JarOutputStream jos = null;
         try {
-            String karPath = base + File.separator + "data" + File.separator + "kar" + File.separator + repoName + ".kar";
+            Repository repo = featuresService.getRepository(repoName);
+            if (repo == null) {
+                throw new RuntimeException("Could not find a repository with name " + repoName);
+            }
+            String karPath = storage + File.separator + repoName + ".kar";
             File karFile = new File(karPath);
             karFile.getParentFile().mkdirs();
             fos = new FileOutputStream(karFile);
-            String manifestSt = "Manifest-Version: 1.0\n" +
-                MANIFEST_ATTR_KARAF_FEATURE_START +": true\n";
-            InputStream manifestIs = new ByteArrayInputStream(manifestSt.getBytes("UTF-8"));
-            Manifest manifest = new Manifest(manifestIs);
+            Manifest manifest = createNonAutoStartManifest();
             jos = new JarOutputStream(new BufferedOutputStream(fos, 100000), manifest);
             
             Map<URI, Integer> locationMap = new HashMap<URI, Integer>();
-
-            Repository repo = featuresService.getRepository(repoName);
             copyResourceToJar(jos, repo.getURI(), locationMap, console);
-            
+        
+            Map<String, Feature> featureMap = new HashMap<String, Feature>();
             for (Feature feature : repo.getFeatures()) {
-                List<BundleInfo> bundles = feature.getBundles();
-                for (BundleInfo bundleInfo : bundles) {
-                    URI location = new URI(bundleInfo.getLocation());
-                    copyResourceToJar(jos, location, locationMap, console);
-                }
-                List<ConfigFileInfo> configFiles = feature.getConfigurationFiles();
-                for (ConfigFileInfo configFileInfo : configFiles) {
-                    URI location = new URI(configFileInfo.getLocation());
-                    copyResourceToJar(jos, location, locationMap, console);
-                }
+                featureMap.put(feature.getName(), feature);
+            }
+            
+            Set<Feature> featuresToCopy = getFeatures(featureMap, features, 1);
+            
+            for (Feature feature : featuresToCopy) {
+                console.println("Adding feature " + feature.getName());
+                copyFeatureToJar(jos, feature, locationMap, console);
             }
             
             console.println("Kar file created : " + karPath);
         } catch (Exception e) {
-            throw new RuntimeException("Error creating kar " + e.getMessage(), e);
+            throw new RuntimeException("Error creating kar: " + e.getMessage(), e);
         } finally {
-            if (jos != null) {
-                try {
-                    jos.close();
-                } catch (IOException e) {
-                    LOGGER.warn("Error closing jar stream", e);
-                }
-            }
-            if (fos != null) {
-                try {
-                    fos.close();
-                } catch (IOException e) {
-                    LOGGER.warn("Error closing jar file stream", e);
-                }
-            }
+            closeStream(jos);
+            closeStream(fos);
         }
         
+    }
+
+    private Set<Feature> getFeatures(Map<String, Feature> featureMap, List<String> features, int depth) {
+        Set<Feature> featureSet = new HashSet<Feature>();
+        if (depth > 5) {
+            // Break after some recursions to avoid endless loops 
+            return featureSet;
+        }
+        if (features == null) {
+            featureSet.addAll(featureMap.values());
+            return featureSet;
+        }
+        for (String featureName : features) {
+            Feature feature = featureMap.get(featureName);
+            if (feature == null) {
+                System.out.println("Feature " + featureName + " not found in repository.");
+                //throw new RuntimeException();
+            } else {
+                featureSet.add(feature);
+                List<Dependency> deps = feature.getDependencies();
+                List<String> depNames = new ArrayList<String>();
+                for (Dependency dependency : deps) {
+                    depNames.add(dependency.getName());
+                }
+                featureSet.addAll(getFeatures(featureMap, depNames, depth ++));
+            }
+        }
+        return featureSet;
+    }
+
+    private Manifest createNonAutoStartManifest() throws UnsupportedEncodingException, IOException {
+        String manifestSt = "Manifest-Version: 1.0\n" +
+            MANIFEST_ATTR_KARAF_FEATURE_START +": true\n";
+        InputStream manifestIs = new ByteArrayInputStream(manifestSt.getBytes("UTF-8"));
+        Manifest manifest = new Manifest(manifestIs);
+        return manifest;
+    }
+
+    private void closeStream(OutputStream os) {
+        if (os != null) {
+            try {
+                os.close();
+            } catch (IOException e) {
+                LOGGER.warn("Error closing stream", e);
+            }
+        }
+    }
+
+    private void copyFeatureToJar(JarOutputStream jos, Feature feature, Map<URI, Integer> locationMap, PrintStream console)
+        throws URISyntaxException {
+        for (BundleInfo bundleInfo : feature.getBundles()) {
+            URI location = new URI(bundleInfo.getLocation());
+            copyResourceToJar(jos, location, locationMap, console);
+        }
+        for (ConfigFileInfo configFileInfo : feature.getConfigurationFiles()) {
+            URI location = new URI(configFileInfo.getLocation());
+            copyResourceToJar(jos, location, locationMap, console);
+        }
     }
 
     private void copyResourceToJar(JarOutputStream jos, URI location, Map<URI, Integer> locationMap, PrintStream console) {
@@ -446,7 +494,6 @@ public class KarServiceImpl implements KarService {
             return;
         }
         try {
-            console.println("Adding " + location);
             String noPrefixLocation = location.toString().substring(location.toString().lastIndexOf(":") + 1);
             Parser parser = new Parser(noPrefixLocation);
             InputStream is = location.toURL().openStream();
@@ -497,32 +544,16 @@ public class KarServiceImpl implements KarService {
         }
     }
 
-    public FeaturesService getFeaturesService() {
-        return featuresService;
-    }
-
     public void setFeaturesService(FeaturesService featuresService) {
         this.featuresService = featuresService;
-    }
-
-    public String getStorage() {
-        return storage;
     }
 
     public void setStorage(String storage) {
         this.storage = storage;
     }
 
-    public String getBase() {
-        return base;
-    }
-
     public void setBase(String base) {
         this.base = base;
-    }
-
-    public String getLocalRepo() {
-        return localRepo;
     }
 
     public void setLocalRepo(String localRepo) {
