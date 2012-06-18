@@ -201,7 +201,7 @@
         <pax.tinybundle.version>1.0.0</pax.tinybundle.version>
         <servlet.api.version>3.0</servlet.api.version>
         <slf4j.version>1.6.4</slf4j.version>
-        <servicemix.specs.version>2.0-SNAPSHOT</servicemix.specs.version>
+        <servicemix.specs.version>2.0.0</servicemix.specs.version>
         <spring.osgi.version>1.2.1</spring.osgi.version>
         <spring.version>3.1.1.RELEASE</spring.version>
         <sshd.version>0.7.0-SNAPSHOT</sshd.version>
