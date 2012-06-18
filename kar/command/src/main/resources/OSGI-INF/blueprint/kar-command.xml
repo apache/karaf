@@ -17,6 +17,14 @@
     -->
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" default-activation="lazy">
 
+    <reference id="karService" interface="org.apache.karaf.kar.KarService"/>
+    
+    <bean id="karCompleter" class="org.apache.karaf.kar.command.completers.KarCompleter">
+        <property name="karService" ref="karService"/>
+    </bean>
+
+    <reference id="installedRepoNameCompleter" interface="org.apache.karaf.shell.console.Completer" filter="(name=installedRepoNameCompleter)"/>
+
     <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
         <command>
             <action class="org.apache.karaf.kar.command.ListKarCommand">
@@ -40,13 +48,10 @@
             <action class="org.apache.karaf.kar.command.CreateKarCommand">
                 <property name="karService" ref="karService"/>
             </action>
+            <completers>
+                <ref component-id="installedRepoNameCompleter"/>
+            </completers>
         </command>
     </command-bundle>
-
-    <reference id="karService" interface="org.apache.karaf.kar.KarService"/>
-
-    <bean id="karCompleter" class="org.apache.karaf.kar.command.completers.KarCompleter">
-        <property name="karService" ref="karService"/>
-    </bean>
 
 </blueprint>

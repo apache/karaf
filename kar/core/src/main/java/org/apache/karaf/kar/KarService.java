@@ -19,7 +19,6 @@ package org.apache.karaf.kar;
 import java.io.PrintStream;
 import java.net.URI;
 import java.util.List;
-import java.util.Set;
 
 /**
  * The service managing KAR.
@@ -69,6 +68,6 @@ public interface KarService {
      * @param features 
      * @param console
      */
-    void create(String repoName, Set<String> features, PrintStream console);
+    void create(String repoName, List<String> features, PrintStream console);
     
 }
