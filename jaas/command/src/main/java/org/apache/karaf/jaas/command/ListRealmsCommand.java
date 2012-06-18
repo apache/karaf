@@ -23,7 +23,7 @@ import org.apache.karaf.jaas.boot.ProxyLoginModule;
 import org.apache.karaf.jaas.config.JaasRealm;
 import org.apache.karaf.jaas.modules.BackingEngine;
 
-@Command(scope = "jaas", name = "realms", description = "Lists the existing JAAS realms.")
+@Command(scope = "jaas", name = "realms", description = "List JAAS Realms")
 public class ListRealmsCommand extends JaasCommandSupport {
 
     private static final String REALM_LIST_FORMAT = "%5s %-20s %-80s";
@@ -48,7 +48,7 @@ public class ListRealmsCommand extends JaasCommandSupport {
                         System.out.println(String.format(REALM_LIST_FORMAT, index++, realmName, moduleClass));
                     }
                 } else {
-                    System.out.println(String.format(REALM_LIST_FORMAT, realmName, "No module found for realm."));
+                    System.out.println(String.format(REALM_LIST_FORMAT, realmName, "No JAAS Login Module found for JAAS Realm"));
                 }
             }
         } else {
