@@ -24,19 +24,19 @@ import javax.security.auth.login.AppConfigurationEntry;
 import java.util.LinkedList;
 import java.util.Queue;
 
-@Command(scope = "jaas", name = "manage", description = "Manage user and roles of a Jaas Realm.")
+@Command(scope = "jaas", name = "manage", description = "Manage user and roles of a JAAS Realm")
 public class ManageRealmCommand extends JaasCommandSupport {
 
-    @Option(name = "--realm", description = "Jaas Realm", required = false, multiValued = false)
+    @Option(name = "--realm", description = "Realm Name", required = false, multiValued = false)
     String realmName;
 
     @Option(name = "--index", description = "Realm Index", required = false, multiValued = false)
     int index;
 
-    @Option(name = "--module", aliases = {}, description = "Realm Module", required = false, multiValued = false)
+    @Option(name = "--module", aliases = {}, description = "Login Module Class Name", required = false, multiValued = false)
     String moduleName;
 
-    @Option(name = "--force", aliases = {}, description = "Force the management of this realm, even if another one was under management", required = false, multiValued = false)
+    @Option(name = "-f", aliases = { "--force" }, description = "Force the management of this realm, even if another one was under management", required = false, multiValued = false)
     boolean force;
 
     @Override
@@ -67,15 +67,14 @@ public class ManageRealmCommand extends JaasCommandSupport {
                         commands = new LinkedList<JaasCommandSupport>();
                     }
 
-
                     this.session.put(JAAS_REALM, realm);
                     this.session.put(JAAS_ENTRY, entry);
                     this.session.put(JAAS_CMDS, commands);
                 } else {
-                    System.err.println(String.format("Could not find module: %s in realm:%s", moduleName, realmName));
+                    System.err.println(String.format("Could not find module %s in realm %s", moduleName, realmName));
                 }
             } else {
-                System.err.println(String.format("Could not find realm:%s", realmName));
+                System.err.println(String.format("Could not find realm %s", realmName));
             }
         }
         return null;
