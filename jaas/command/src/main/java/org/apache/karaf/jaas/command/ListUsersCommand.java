@@ -20,14 +20,13 @@ import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.apache.karaf.jaas.config.JaasRealm;
 import org.apache.karaf.jaas.modules.BackingEngine;
+import org.apache.karaf.shell.table.ShellTable;
 
 import javax.security.auth.login.AppConfigurationEntry;
 import java.util.List;
 
-@Command(scope = "jaas", name = "user-list", description = "Lists the users of the active realm/module.")
+@Command(scope = "jaas", name = "user-list", description = "List the users of the selected JAAS realm/login module")
 public class ListUsersCommand extends JaasCommandSupport {
-
-    private static final String OUTPUT_FORMAT = "%-20s %-20s";
 
     @Override
     protected Object doExecute() throws Exception {
@@ -35,14 +34,14 @@ public class ListUsersCommand extends JaasCommandSupport {
         AppConfigurationEntry entry = (AppConfigurationEntry) session.get(JAAS_ENTRY);
 
         if (realm == null || entry == null) {
-            System.err.println("No JAAS Realm / Module has been selected.");
+            System.err.println("No JAAS Realm/Login Module has been selected");
             return null;
         }
 
         BackingEngine engine = backingEngineService.get(entry);
 
         if (engine == null) {
-            System.err.println(String.format("Failed to resolve backing engine for realm:%s and moudle:%s", realm.getName(), entry.getLoginModuleName()));
+            System.err.println("Can't get the list of users (no backing engine service found)");
             return null;
         }
 
@@ -52,7 +51,10 @@ public class ListUsersCommand extends JaasCommandSupport {
     @Override
     protected Object doExecute(BackingEngine engine) throws Exception {
         List<UserPrincipal> users = engine.listUsers();
-        System.out.println(String.format(OUTPUT_FORMAT, "User Name", "Role"));
+
+        ShellTable table = new ShellTable();
+        table.column("User Name");
+        table.column("Role");
 
         for (UserPrincipal user : users) {
             String userName = user.getName();
@@ -61,13 +63,16 @@ public class ListUsersCommand extends JaasCommandSupport {
             if (roles != null && roles.size() >= 1) {
                 for (RolePrincipal role : roles) {
                     String roleName = role.getName();
-                    System.out.println(String.format(OUTPUT_FORMAT, userName, roleName));
+                    table.addRow().addContent(userName, roleName);
                 }
             } else {
-                System.out.println(String.format(OUTPUT_FORMAT, userName, ""));
+                table.addRow().addContent(userName, "");
             }
 
         }
+
+        table.print(System.out);
+
         return null;
     }
 

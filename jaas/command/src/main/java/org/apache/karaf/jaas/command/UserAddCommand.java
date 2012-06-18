@@ -19,7 +19,7 @@ import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.jaas.modules.BackingEngine;
 
-@Command(scope = "jaas", name = "user-add", description = "Add a user.")
+@Command(scope = "jaas", name = "user-add", description = "Add a user")
 public class UserAddCommand extends JaasCommandSupport {
 
     @Argument(index = 0, name = "username", description = "User Name", required = true, multiValued = false)
@@ -27,7 +27,6 @@ public class UserAddCommand extends JaasCommandSupport {
 
     @Argument(index = 1, name = "password", description = "Password", required = true, multiValued = false)
     private String password;
-
 
     /**
      * Execute the RoleAddCommand in the given Excecution Context.
