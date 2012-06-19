@@ -50,7 +50,7 @@ public class InstanceToTableMapper {
     }
 
     private static CompositeType createRowType() throws OpenDataException {
-        String desc = "This type describes Karaf instances";
+        String desc = "This type describes Karaf instance";
         OpenType<?>[] itemTypes = new OpenType[] {SimpleType.INTEGER, SimpleType.STRING, SimpleType.BOOLEAN,
                                                   SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.INTEGER,
                                                   SimpleType.STRING, SimpleType.STRING, SimpleType.STRING};

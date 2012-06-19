@@ -149,7 +149,7 @@ public class InstanceServiceImpl implements InstanceService {
 
     public synchronized Instance createInstance(String name, InstanceSettings settings, boolean printOutput) throws Exception {
         if (instances.get(name) != null) {
-            throw new IllegalArgumentException("Instances '" + name + "' already exists");
+            throw new IllegalArgumentException("Instance '" + name + "' already exists");
         }
         String loc = settings.getLocation() != null ? settings.getLocation() : name;
         File karafBase = new File(loc);
@@ -269,17 +269,17 @@ public class InstanceServiceImpl implements InstanceService {
 
     public synchronized void renameInstance(String oldName, String newName, boolean printOutput) throws Exception {
         if (instances.get(newName) != null) {
-            throw new IllegalArgumentException("Instances " + newName + " already exists");
+            throw new IllegalArgumentException("Instance " + newName + " already exists");
         }
         Instance instance = instances.get(oldName);
         if (instance == null) {
-            throw new IllegalArgumentException("Instances " + oldName + " not found");
+            throw new IllegalArgumentException("Instance " + oldName + " not found");
         }
         if (instance.isRoot()) {
             throw new IllegalArgumentException("Root instance cannot be renamed");
         }
         if (instance.getPid() != 0) {
-            throw new IllegalStateException("Instances not stopped");
+            throw new IllegalStateException("Instance not stopped");
         }
 
         logInfo("Renaming instance %s to %s", printOutput, oldName, newName);
@@ -318,17 +318,17 @@ public class InstanceServiceImpl implements InstanceService {
 
     public synchronized Instance cloneInstance(String name, String cloneName, InstanceSettings settings, boolean printOutput) throws Exception {
         if (instances.get(cloneName) != null) {
-            throw new IllegalArgumentException("Instances " + cloneName + " already exists");
+            throw new IllegalArgumentException("Instance " + cloneName + " already exists");
         }
         Instance instance = instances.get(name);
         if (instance == null) {
-            throw new IllegalArgumentException("Instances " + name + " not found");
+            throw new IllegalArgumentException("Instance " + name + " not found");
         }
         if (instance.isRoot()) {
             throw new IllegalArgumentException("Root instance cannot be cloned");
         }
         if (instance.getPid() != 0) {
-            throw new IllegalStateException("Instances not stopped");
+            throw new IllegalStateException("Instance not stopped");
         }
 
         logInfo("Cloning instance %s into %s", printOutput, name, cloneName);
