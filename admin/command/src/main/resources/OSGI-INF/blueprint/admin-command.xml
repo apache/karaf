@@ -80,6 +80,15 @@
                 <null />
             </completers>
         </command>
+        <command name="admin/clone">
+            <action class="org.apache.karaf.admin.command.CloneCommand">
+                <property name="adminService" ref="adminService" />
+            </action>
+            <completers>
+                <ref component-id="instanceCompleter" />
+                <null />
+            </completers>
+        </command>
         <command name="admin/change-ssh-port">
             <action class="org.apache.karaf.admin.command.ChangeSshPortCommand">
                 <property name="adminService" ref="adminService" />

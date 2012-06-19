@@ -37,6 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class AdminServiceImpl implements AdminService {
+
     public static final String STORAGE_FILE = "instance.properties";
     public static final String BACKUP_EXTENSION = ".bak";
     private static final String FEATURES_CFG = "etc/org.apache.karaf.features.cfg";
@@ -303,6 +304,64 @@ public class AdminServiceImpl implements AdminService {
         saveState();
     }
 
+    public synchronized Instance cloneInstance(String name, String cloneName, InstanceSettings settings) throws Exception {
+        if (instances.get(cloneName) != null) {
+            throw new IllegalArgumentException("Instance " + cloneName + " already exists");
+        }
+        Instance instance = instances.get(name);
+        if (instance == null) {
+            throw new IllegalArgumentException("Instance " + name + " not found");
+        }
+        if (instance.isRoot()) {
+            throw new IllegalArgumentException("Root instance cannot be cloned");
+        }
+        if (instance.getPid() != 0) {
+            throw new IllegalArgumentException("Instance not stopped");
+        }
+
+        // define the clone instance location
+        String cloneLocationPath = settings.getLocation() != null ? settings.getLocation() : name;
+        File cloneLocation = new File(cloneLocationPath);
+        if (!cloneLocation.isAbsolute()) {
+            cloneLocation = new File(storageLocation, cloneLocationPath);
+        }
+        // copy instance directory
+        String locationPath = instance.getLocation();
+        File location = new File(locationPath);
+        copy(location, cloneLocation);
+        // create the properties map including the instance name, location, ssh and rmi port numbers
+        HashMap<String, String> props = new HashMap<String, String>();
+        props.put(name, cloneName);
+        props.put(locationPath, cloneLocationPath);
+        if (settings.getSshPort() > 0)
+            props.put(new Integer(instance.getSshPort()).toString(), new Integer(settings.getSshPort()).toString());
+        if (settings.getRmiRegistryPort() > 0)
+            props.put(new Integer(instance.getRmiRegistryPort()).toString(), new Integer(settings.getRmiRegistryPort()).toString());
+        if (settings.getRmiServerPort() > 0)
+            props.put(new Integer(instance.getRmiServerPort()).toString(), new Integer(settings.getRmiServerPort()).toString());
+        // filtering clone files
+        filterResource(cloneLocation, "etc/customer.properties", props);
+        filterResource(cloneLocation, "etc/org.apache.karaf.management.cfg", props);
+        filterResource(cloneLocation, "etc/org.apache.karaf.shell.cfg", props);
+        filterResource(cloneLocation, "etc/org.ops4j.pax.logging.cfg", props);
+        filterResource(cloneLocation, "etc/system.properties", props);
+        filterResource(cloneLocation, "bin/karaf", props);
+        filterResource(cloneLocation, "bin/start", props);
+        filterResource(cloneLocation, "bin/stop", props);
+        filterResource(cloneLocation, "bin/karaf.bat", props);
+        filterResource(cloneLocation, "bin/start.bat", props);
+        filterResource(cloneLocation, "bin/stop.bat", props);
+        // create and add the clone instance in the registry
+        String javaOpts = settings.getJavaOpts();
+        if (javaOpts == null || javaOpts.length() == 0) {
+            javaOpts = "-server -Xmx512M -Dcom.sun.management.jmxremote";
+        }
+        Instance cloneInstance = new InstanceImpl(this, name, cloneLocation.toString(), settings.getJavaOpts());
+        instances.put(name, instance);
+        saveState();
+        return cloneInstance;
+    }
+
     synchronized void saveState() throws IOException {
         Properties storage = new Properties();
         Instance[] data = getInstances();
@@ -457,6 +516,28 @@ public class AdminServiceImpl implements AdminService {
         int status = p.waitFor();
         //handler.stop();
         return status;
+    }
+
+    private void copy(File source, File destination) throws Exception {
+        if (source.isDirectory()) {
+            if (!destination.exists()) {
+                destination.mkdirs();
+            }
+            String[] children = source.list();
+            for (String child : children) {
+                copy(new File(source, child), new File(destination, child));
+            }
+        } else {
+            InputStream in = new FileInputStream(source);
+            OutputStream out = new FileOutputStream(destination);
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = in.read(buffer)) > 0) {
+                out.write(buffer, 0, length);
+            }
+            in.close();
+            out.close();
+        }
     }
 
 }

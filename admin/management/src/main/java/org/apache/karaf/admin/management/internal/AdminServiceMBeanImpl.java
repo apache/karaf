@@ -98,6 +98,18 @@ public class AdminServiceMBeanImpl extends StandardMBean implements AdminService
         adminService.renameInstance(originalName, newName);
     }
 
+    public void cloneInstance(String name, String cloneName, int sshPort, int rmiRegistryPort, int rmiServerPort, String location, String javaOpts) throws Exception {
+        if ("".equals(location)) {
+            location = null;
+        }
+        if ("".equals(javaOpts)) {
+            javaOpts = null;
+        }
+
+        InstanceSettings settings = new InstanceSettings(sshPort, rmiRegistryPort, rmiServerPort, location, javaOpts, null, null);
+        adminService.cloneInstance(name, cloneName, settings);
+    }
+
     public TabularData getInstances() throws Exception {
         List<Instance> allInstances = Arrays.asList(adminService.getInstances());
         List<JmxInstance> instances = new ArrayList<JmxInstance>();
