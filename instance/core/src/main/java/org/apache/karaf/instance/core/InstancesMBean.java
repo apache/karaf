@@ -43,6 +43,7 @@ public interface InstancesMBean {
     void startInstance(String name, String opts) throws Exception;
     void stopInstance(String name) throws Exception;
     void renameInstance(String originalName, String newName) throws Exception;
+    void cloneInstance(String name, String cloneName, int sshPort, int rmiRegistryPort, int rmiServerPort, String location, String javaOpts) throws Exception;
 
     // Attributes
     TabularData getInstances() throws Exception;
