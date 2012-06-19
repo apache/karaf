@@ -64,6 +64,12 @@
             <type>xml</type>
             <scope>runtime</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>demos</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -102,7 +108,6 @@
                             <groupId>org.apache.karaf</groupId>
                             <artifactId>demos</artifactId>
                             <version>${project.version}</version>
-                            
                         </artifactItem>
                     </artifactItems>
                     <outputDirectory>${project.build.directory}/demos/demos</outputDirectory>
