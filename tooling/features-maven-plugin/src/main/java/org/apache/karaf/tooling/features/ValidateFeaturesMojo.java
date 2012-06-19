@@ -17,25 +17,12 @@
  */
 package org.apache.karaf.tooling.features;
 
-import static org.apache.karaf.tooling.features.ManifestUtils.getExports;
-import static org.apache.karaf.tooling.features.ManifestUtils.getMandatoryImports;
-import static org.apache.karaf.tooling.features.ManifestUtils.matches;
-
-import java.io.*;
-import java.net.URI;
-import java.net.URL;
-import java.util.*;
-import java.util.jar.JarInputStream;
-import java.util.jar.Manifest;
-import java.util.zip.ZipException;
-import java.util.zip.ZipFile;
-
+import org.apache.felix.utils.manifest.Clause;
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.Repository;
 import org.apache.karaf.features.internal.FeatureValidationUtil;
 import org.apache.karaf.features.internal.RepositoryImpl;
-import org.apache.felix.utils.manifest.Clause;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.repository.DefaultArtifactRepository;
@@ -49,6 +36,17 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.shared.dependency.tree.DependencyNode;
 import org.apache.maven.shared.dependency.tree.DependencyTreeBuilder;
 import org.apache.maven.shared.dependency.tree.traversal.DependencyNodeVisitor;
+
+import java.io.*;
+import java.net.URI;
+import java.net.URL;
+import java.util.*;
+import java.util.jar.JarInputStream;
+import java.util.jar.Manifest;
+import java.util.zip.ZipException;
+import java.util.zip.ZipFile;
+
+import static org.apache.karaf.tooling.features.ManifestUtils.*;
 
 /**
  * Validates a features XML file
@@ -288,11 +286,11 @@ public class ValidateFeaturesMojo extends MojoSupport {
     private void readProvidedBundles() throws Exception {
         DependencyNode tree = dependencyTreeBuilder.buildDependencyTree(project, localRepo, factory, artifactMetadataSource, new ArtifactFilter() {
 
-                    public boolean include(Artifact artifact) {
-                        return true;
-                    }
+            public boolean include(Artifact artifact) {
+                return true;
+            }
 
-                }, collector);
+        }, collector);
         tree.accept(new DependencyNodeVisitor() {
             public boolean endVisit(DependencyNode node) {
                 // we want the next sibling too
@@ -351,11 +349,13 @@ public class ValidateFeaturesMojo extends MojoSupport {
      */
     private void analyzeExports(Repository repository) throws Exception {
         for (Feature feature : repository.getFeatures()) {
+            info("    scanning feature %s for exports", feature.getName());
             Set<Clause> exports = new HashSet<Clause>();
             for (String bundle : getBundleLocations(feature)) {
                 exports.addAll(getExports(getManifest(bundle, bundles.get(bundle))));
             }
-            info("    scanning feature %s for exports", feature.getName());
+            // add the dependency feature exports
+            exports.addAll(getDependencyFeatureExports(feature));
             featureExports.put(feature.getName(), exports);
         }
     }
@@ -406,6 +406,27 @@ public class ValidateFeaturesMojo extends MojoSupport {
         }
     }
 
+    private Set<Clause> getDependencyFeatureExports(Feature feature) throws Exception {
+        Set<Clause> exports = new HashSet<Clause>();
+
+        for (Feature dependency : feature.getDependencies()) {
+            if (featureExports.containsKey(dependency.getName())) {
+                exports.addAll(featureExports.get(dependency.getName()));
+            } else {
+                validateImportsExports(dependency);
+                exports.addAll(featureExports.get(dependency.getName()));
+            }
+            exports.addAll(getDependencyFeatureExports(dependency));
+        }
+
+        // add the export of the feature
+        for (String bundle : getBundleLocations(feature)) {
+            Manifest meta = manifests.get(bundles.get(bundle));
+            exports.addAll(getExports(meta));
+        }
+        return exports;
+    }
+
     /*
      * Validate if all imports for a feature are being matched with exports
      */
@@ -413,12 +434,13 @@ public class ValidateFeaturesMojo extends MojoSupport {
         Map<Clause, String> imports = new HashMap<Clause, String>();
         Set<Clause> exports = new HashSet<Clause>();
         for (Feature dependency : feature.getDependencies()) {
-            if (featureExports.containsKey(dependency.getName())) {
-                exports.addAll(featureExports.get(dependency.getName()));
-            } else {
+            if (!featureExports.containsKey(dependency.getName())) {
                 validateImportsExports(features.get(dependency.getName(), dependency.getVersion()));
             }
         }
+        // add the exports for dependency feature
+        exports.addAll(getDependencyFeatureExports(feature));
+
         for (String bundle : getBundleLocations(feature)) {
             Manifest meta = manifests.get(bundles.get(bundle));
             exports.addAll(getExports(meta));
