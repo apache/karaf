@@ -22,6 +22,8 @@ public interface AdminService {
 
     void renameInstance(String name, String newName) throws Exception;
 
+    Instance cloneInstance(String name, String cloneName, InstanceSettings settings) throws Exception;
+
     Instance[] getInstances();
 
     Instance getInstance(String name);    
