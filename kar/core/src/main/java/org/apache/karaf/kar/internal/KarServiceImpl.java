@@ -140,7 +140,7 @@ public class KarServiceImpl implements KarService {
                 Manifest manifest = new Manifest(is);
                 Attributes attr = manifest.getMainAttributes();
                 String featureStartSt = (String)attr.get(new Attributes.Name(MANIFEST_ATTR_KARAF_FEATURE_START));
-                if ("true".equals(featureStartSt)) {
+                if ("false".equals(featureStartSt)) {
                     shouldInstallFeatures = false;
                 }
                 is.close();
@@ -461,7 +461,7 @@ public class KarServiceImpl implements KarService {
 
     private Manifest createNonAutoStartManifest() throws UnsupportedEncodingException, IOException {
         String manifestSt = "Manifest-Version: 1.0\n" +
-            MANIFEST_ATTR_KARAF_FEATURE_START +": true\n";
+            MANIFEST_ATTR_KARAF_FEATURE_START +": false\n";
         InputStream manifestIs = new ByteArrayInputStream(manifestSt.getBytes("UTF-8"));
         Manifest manifest = new Manifest(manifestIs);
         return manifest;
