@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <!--
 
@@ -25,37 +28,41 @@
         <groupId>org.apache.karaf.demos</groupId>
         <artifactId>demos</artifactId>
         <version>3.0.0-SNAPSHOT</version>
-        <relativePath>../../../../../../../pom.xml</relativePath>
+        <relativePath>../../../../../../../../pom.xml</relativePath>
     </parent>
 
-    <artifactId>dump</artifactId>
-    <packaging>bundle</packaging>
-    <name>Apache Karaf :: Demos :: Demo Dump provider</name>
+    <groupId>org.apache.karaf.demos</groupId>
+    <artifactId>my-kar</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>Apache Karaf :: Demos :: Deployer :: Kar</name>
 
     <dependencies>
         <dependency>
-            <groupId>org.apache.karaf.diagnostic</groupId>
-            <artifactId>org.apache.karaf.diagnostic.core</artifactId>
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+            <version>3.2.1</version>
+            <scope>runtime</scope>
         </dependency>
     </dependencies>
 
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <configuration>
-                    <instructions>
-                        <Import-Package>
-                            org.apache.karaf.diagnostic.core,
-                            *
-                        </Import-Package>
-                        <Private-Package>!*</Private-Package>
-                        <Export-Package>
-                            org.apache.karaf.diagnostic.demo
-                        </Export-Package>
-                    </instructions>
-                </configuration>
+                <groupId>org.apache.karaf.tooling</groupId>
+                <artifactId>karaf-maven-plugin</artifactId>
+                <version>3.0.0-SNAPSHOT</version>
+                <executions>
+                    <execution>
+                        <id>package</id>
+                        <goals>
+                            <goal>features-create-kar</goal>
+                        </goals>
+                        <configuration>
+                            <featuresFile>src/main/resources/features.xml</featuresFile>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

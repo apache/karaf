@@ -64,41 +64,6 @@
             <type>xml</type>
             <scope>runtime</scope>
         </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.demos</groupId>
-            <artifactId>org.apache.karaf.demos.branding</artifactId>
-            <version>${project.version}</version>
-            <type>kar</type>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.demos</groupId>
-            <artifactId>org.apache.karaf.demos.command.custom</artifactId>
-            <version>${project.version}</version>
-            <type>kar</type>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.demos</groupId>
-            <artifactId>org.apache.karaf.demos.deployer</artifactId>
-            <version>${project.version}</version>
-            <type>kar</type>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.demos</groupId>
-            <artifactId>org.apache.karaf.demos.dump</artifactId>
-            <version>${project.version}</version>
-            <type>kar</type>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.demos</groupId>
-            <artifactId>org.apache.karaf.demos.web</artifactId>
-            <version>${project.version}</version>
-            <type>kar</type>
-            <scope>runtime</scope>
-        </dependency>
     </dependencies>
 
     <build>
@@ -113,8 +78,36 @@
                     <include>NOTICE</include>
                 </includes>
             </resource>
+            <resource>
+                <directory>${project.build.directory}/demos</directory>
+                <filtering>false</filtering>
+            </resource>
         </resources>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <artifactItems>
+                        <artifactItem>
+                            <groupId>org.apache.karaf</groupId>
+                            <artifactId>demos</artifactId>
+                            <version>${project.version}</version>
+                            
+                        </artifactItem>
+                    </artifactItems>
+                    <outputDirectory>${project.build.directory}/demos/demos</outputDirectory>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
@@ -147,9 +140,9 @@
                         <configuration>
                             <artifacts>
                                 <artifact>
-                                  <file>src/main/resources/extra/jetty.xml</file>
-                                  <type>xml</type>
-                                  <classifier>jettyconfig</classifier>
+                                    <file>src/main/resources/extra/jetty.xml</file>
+                                    <type>xml</type>
+                                    <classifier>jettyconfig</classifier>
                                 </artifact>
                             </artifacts>
                         </configuration>

@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<features>
-
-    <feature name="my-kar" version="1.0">
-        <bundle>mvn:commons-collections/commons-collections/3.2.1</bundle>
-    </feature>
-
-</features>

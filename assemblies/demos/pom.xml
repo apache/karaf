@@ -22,42 +22,39 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.karaf.demos</groupId>
-        <artifactId>demos</artifactId>
+        <groupId>org.apache.karaf.assemblies</groupId>
+        <artifactId>assemblies</artifactId>
         <version>3.0.0-SNAPSHOT</version>
-        <relativePath>../../../../../../../pom.xml</relativePath>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>dump</artifactId>
-    <packaging>bundle</packaging>
-    <name>Apache Karaf :: Demos :: Demo Dump provider</name>
+    <groupId>org.apache.karaf</groupId>
+    <artifactId>demos</artifactId>
+    <packaging>jar</packaging>
+    <name>Apache Karaf :: Assemblies :: Demos</name>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.apache.karaf.diagnostic</groupId>
-            <artifactId>org.apache.karaf.diagnostic.core</artifactId>
-        </dependency>
-    </dependencies>
+    <properties>
+        <appendedResourcesDirectory>${basedir}/../etc/appended-resources</appendedResourcesDirectory>
+    </properties>
 
     <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <configuration>
-                    <instructions>
-                        <Import-Package>
-                            org.apache.karaf.diagnostic.core,
-                            *
-                        </Import-Package>
-                        <Private-Package>!*</Private-Package>
-                        <Export-Package>
-                            org.apache.karaf.diagnostic.demo
-                        </Export-Package>
-                    </instructions>
-                </configuration>
-            </plugin>
-        </plugins>
+        <resources>
+            <resource>
+                <directory>${project.basedir}/../../demos</directory>
+                <filtering>false</filtering>
+                <excludes>
+                    <exclude>**/target/**</exclude>
+                    <exclude>**/README.txt</exclude>
+                </excludes>
+            </resource>
+            <resource>
+                <directory>${project.basedir}/../../demos</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/README.txt</include>
+                </includes>
+            </resource>
+        </resources>
     </build>
 
 </project>
