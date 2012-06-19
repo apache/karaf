@@ -76,7 +76,7 @@ public class InstanceImpl implements Instance {
     public void attach(int pid) throws IOException {
         checkProcess();
         if (this.process != null) {
-            throw new IllegalStateException("Instances already started");
+            throw new IllegalStateException("Instance already started");
         }
         this.process = processBuilderFactory.newBuilder().attach(pid);
     }
@@ -122,7 +122,7 @@ public class InstanceImpl implements Instance {
     public void changeSshPort(int port) throws Exception {
         checkProcess();
         if (this.process != null) {
-            throw new IllegalStateException("Instances not stopped");
+            throw new IllegalStateException("Instance not stopped");
         }
         this.changeConfiguration(new File(location, "etc/org.apache.karaf.shell.cfg"),
                 "sshPort", Integer.toString(port));
@@ -140,7 +140,7 @@ public class InstanceImpl implements Instance {
     public void changeRmiRegistryPort(int port) throws Exception {
         checkProcess();
         if (this.process != null) {
-            throw new IllegalStateException("Instances not stopped");
+            throw new IllegalStateException("Instance not stopped");
         }
         this.changeConfiguration(new File(location, "etc/org.apache.karaf.management.cfg"),
                 "rmiRegistryPort", Integer.toString(port));
@@ -158,7 +158,7 @@ public class InstanceImpl implements Instance {
     public void changeRmiServerPort(int port) throws Exception {
         checkProcess();
         if (this.process != null) {
-            throw new IllegalStateException("Instances not stopped");
+            throw new IllegalStateException("Instance not stopped");
         }
         this.changeConfiguration(new File(location, "etc/org.apache.karaf.management.cfg"),
                 "rmiServerPort", Integer.toString(port));
@@ -214,7 +214,7 @@ public class InstanceImpl implements Instance {
     public synchronized void start(String javaOpts) throws Exception {
         checkProcess();
         if (this.process != null) {
-            throw new IllegalStateException("Instances already started");
+            throw new IllegalStateException("Instance already started");
         }
         if (javaOpts == null || javaOpts.length() == 0) {
             javaOpts = this.javaOpts;
@@ -273,7 +273,7 @@ public class InstanceImpl implements Instance {
     public synchronized void stop() throws Exception {
         checkProcess();
         if (this.process == null) {
-            throw new IllegalStateException("Instances not started");
+            throw new IllegalStateException("Instance not started");
         }
         // Try a clean shutdown
         cleanShutdown();
@@ -285,7 +285,7 @@ public class InstanceImpl implements Instance {
     public synchronized void destroy() throws Exception {
         checkProcess();
         if (this.process != null) {
-            throw new IllegalStateException("Instances not stopped");
+            throw new IllegalStateException("Instance not stopped");
         }
         deleteFile(new File(location));
         this.service.forget(name);
