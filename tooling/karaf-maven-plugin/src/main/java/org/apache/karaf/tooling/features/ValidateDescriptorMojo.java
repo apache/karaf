@@ -17,21 +17,6 @@
  */
 package org.apache.karaf.tooling.features;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintStream;
-import java.net.URI;
-import java.net.URL;
-import java.util.*;
-import java.util.jar.JarInputStream;
-import java.util.jar.Manifest;
-import java.util.zip.ZipException;
-import java.util.zip.ZipFile;
-
 import org.apache.felix.utils.manifest.Clause;
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Dependency;
@@ -54,13 +39,20 @@ import org.apache.maven.shared.dependency.tree.DependencyNode;
 import org.apache.maven.shared.dependency.tree.DependencyTreeBuilder;
 import org.apache.maven.shared.dependency.tree.traversal.DependencyNodeVisitor;
 
-import static org.apache.karaf.tooling.features.ManifestUtils.getExports;
-import static org.apache.karaf.tooling.features.ManifestUtils.getMandatoryImports;
-import static org.apache.karaf.tooling.features.ManifestUtils.matches;
+import java.io.*;
+import java.net.URI;
+import java.net.URL;
+import java.util.*;
+import java.util.jar.JarInputStream;
+import java.util.jar.Manifest;
+import java.util.zip.ZipException;
+import java.util.zip.ZipFile;
+
+import static org.apache.karaf.tooling.features.ManifestUtils.*;
 
 /**
  * Validates a features XML file
- * 
+ *
  * @version $Revision:$
  * @goal features-validate-descriptor
  * @execute phase="process-resources"
@@ -97,21 +89,21 @@ public class ValidateDescriptorMojo extends MojoSupport {
 
     /**
      * The file to generate
-     * 
+     *
      * @parameter default-value="${project.build.directory}/classes/features.xml"
      */
     private File file;
 
     /**
      * Karaf config.properties
-     * 
+     *
      * @parameter default-value="config.properties"
      */
     private String karafConfig;
-    
+
     /**
      * which JRE version to parse from config.properties to get the JRE exported packages
-     * 
+     *
      * @parameter default-value="jre-1.5"
      */
     private String jreVersion;
@@ -124,21 +116,23 @@ public class ValidateDescriptorMojo extends MojoSupport {
     private String karafVersion;
 
     /**
-     *  The repositories which are included from the plugin config   
-     *  @parameter 
+     * The repositories which are included from the plugin config
+     *
+     * @parameter
      */
-     private List<String> repositories;   
-     
-     /**
-      * skip non maven protocols or not skip
-      * @parameter default-value="false"
-      */
-     private boolean skipNonMavenProtocols = false;
-    
+    private List<String> repositories;
+
+    /**
+     * skip non maven protocols or not skip
+     *
+     * @parameter default-value="false"
+     */
+    private boolean skipNonMavenProtocols = false;
+
     /*
-     * A map to cache the mvn: uris and the artifacts that correspond with them if it's mvn protocol
-     * or just uris itself if it's non mvn protocol
-     */
+    * A map to cache the mvn: uris and the artifacts that correspond with them if it's mvn protocol
+    * or just uris itself if it's non mvn protocol
+    */
     private Map<String, Object> bundles = new HashMap<String, Object>();
 
     /*
@@ -180,8 +174,9 @@ public class ValidateDescriptorMojo extends MojoSupport {
 
     /**
      * Checks feature repository with XML Schema.
+     *
      * @param repository Repository object.
-     * @param uri Display URI.
+     * @param uri        Display URI.
      */
     private void schemaCheck(Repository repository, URI uri) {
         try {
@@ -189,7 +184,7 @@ public class ValidateDescriptorMojo extends MojoSupport {
             FeatureValidationUtil.validate(repository.getURI());
         } catch (Exception e) {
             error("Failed to validate repository %s. Schema validation fails. Fix errors to continue validation",
-                e, uri);
+                    e, uri);
         }
     }
 
@@ -245,7 +240,7 @@ public class ValidateDescriptorMojo extends MojoSupport {
         info(" - read %s", file.getAbsolutePath());
 
         features.add(repository.getFeatures());
-        
+
         // add the repositories from the plugin configuration
         if (repositories != null) {
             for (String uri : repositories) {
@@ -260,7 +255,7 @@ public class ValidateDescriptorMojo extends MojoSupport {
 
         for (URI uri : repository.getRepositories()) {
             Artifact artifact = (Artifact) resolve(uri.toString());
-            Repository dependency  = new RepositoryImpl(new File(localRepo.getBasedir(), localRepo.pathOf(artifact)).toURI());
+            Repository dependency = new RepositoryImpl(new File(localRepo.getBasedir(), localRepo.pathOf(artifact)).toURI());
 
             schemaCheck(dependency, uri);
             getLog().info(String.format(" - adding %d known features from %s", dependency.getFeatures().length, uri));
@@ -344,10 +339,10 @@ public class ValidateDescriptorMojo extends MojoSupport {
 
         String packages = (String) properties.get(jreVersion);
         for (String pkg : packages.split(";")) {
-            systemExports .add(pkg.trim());
+            systemExports.add(pkg.trim());
         }
         for (String pkg : packages.split(",")) {
-            systemExports .add(pkg.trim());
+            systemExports.add(pkg.trim());
         }
     }
 
@@ -357,11 +352,13 @@ public class ValidateDescriptorMojo extends MojoSupport {
      */
     private void analyzeExports(Repository repository) throws Exception {
         for (Feature feature : repository.getFeatures()) {
+            info("    scanning feature %s for exports", feature.getName());
             Set<Clause> exports = new HashSet<Clause>();
             for (String bundle : getBundleLocations(feature)) {
                 exports.addAll(getExports(getManifest(bundle, bundles.get(bundle))));
             }
-            info("    scanning feature %s for exports", feature.getName());
+            // add the dependency feature exports
+            exports.addAll(getDependencyFeatureExports(feature));
             featureExports.put(feature.getName(), exports);
         }
     }
@@ -412,6 +409,27 @@ public class ValidateDescriptorMojo extends MojoSupport {
         }
     }
 
+    private Set<Clause> getDependencyFeatureExports(Feature feature) throws Exception {
+        Set<Clause> exports = new HashSet<Clause>();
+
+        for (Dependency dependency : feature.getDependencies()) {
+            if (featureExports.containsKey(dependency.getName())) {
+                exports.addAll(featureExports.get(dependency.getName()));
+            } else {
+                validateImportsExports(features.get(dependency.getName(), dependency.getVersion()));
+                exports.addAll(featureExports.get(dependency.getName()));
+            }
+            exports.addAll(getDependencyFeatureExports(features.get(dependency.getName(), dependency.getVersion())));
+        }
+
+        // add the export of the feature
+        for (String bundle : getBundleLocations(feature)) {
+            Manifest meta = manifests.get(bundles.get(bundle));
+            exports.addAll(getExports(meta));
+        }
+        return exports;
+    }
+
     /*
      * Validate if all imports for a feature are being matched with exports
      */
@@ -419,17 +437,17 @@ public class ValidateDescriptorMojo extends MojoSupport {
         Map<Clause, String> imports = new HashMap<Clause, String>();
         Set<Clause> exports = new HashSet<Clause>();
         for (Dependency dependency : feature.getDependencies()) {
-            if (featureExports.containsKey(dependency.getName())) {
-                exports.addAll(featureExports.get(dependency.getName()));
-            } else {
+            if (!featureExports.containsKey(dependency.getName())) {
                 validateImportsExports(features.get(dependency.getName(), dependency.getVersion()));
             }
         }
+        // add the exports for dependency feature
+        exports.addAll(getDependencyFeatureExports(feature));
         for (String bundle : getBundleLocations(feature)) {
             Manifest meta = manifests.get(bundles.get(bundle));
             exports.addAll(getExports(meta));
             for (Clause clause : getMandatoryImports(meta)) {
-                imports.put(clause, bundle);   
+                imports.put(clause, bundle);
             }
         }
 
@@ -459,18 +477,18 @@ public class ValidateDescriptorMojo extends MojoSupport {
             warn("Failed to validate feature %s", feature.getName());
             for (Clause entry : requirements) {
                 warn("No export found to match %s (imported by %s)",
-                     entry, imports.get(entry));
+                        entry, imports.get(entry));
             }
             throw new Exception(String.format("%d unresolved imports in feature %s",
-                                              requirements.size(), feature.getName()));
+                    requirements.size(), feature.getName()));
         }
         info("    OK: imports resolved for %s", feature.getName());
         featureExports.put(feature.getName(), exports);
-    }    
+    }
 
     /*
-     * Check if the artifact is an OSGi bundle
-     */
+    * Check if the artifact is an OSGi bundle
+    */
     private boolean isBundle(String bundle, Object artifact) {
         if (artifact instanceof Artifact && "bundle".equals(((Artifact) artifact).getArtifactHandler().getPackaging())) {
             return true;
@@ -491,8 +509,8 @@ public class ValidateDescriptorMojo extends MojoSupport {
     /*
      * Extract the META-INF/MANIFEST.MF file from an artifact
      */
-    private Manifest getManifest(String bundle, Object artifact) throws ArtifactResolutionException, ArtifactNotFoundException, 
-                                                           ZipException, IOException {
+    private Manifest getManifest(String bundle, Object artifact) throws ArtifactResolutionException, ArtifactNotFoundException,
+            ZipException, IOException {
         ZipFile file = null;
         if (!(artifact instanceof Artifact)) {
             //not resolved as mvn artifact, so it's non-mvn protocol, just use the CustomBundleURLStreamHandlerFactory
@@ -500,7 +518,7 @@ public class ValidateDescriptorMojo extends MojoSupport {
             InputStream is = null;
             try {
                 is = new BufferedInputStream(new URL(bundle).openStream());
-            } catch (Exception e){
+            } catch (Exception e) {
                 getLog().warn("Error while opening artifact", e);
             }
 
@@ -508,10 +526,10 @@ public class ValidateDescriptorMojo extends MojoSupport {
                 is.mark(256 * 1024);
                 JarInputStream jar = new JarInputStream(is);
                 Manifest m = jar.getManifest();
-                if(m == null) {
+                if (m == null) {
                     throw new IOException("Manifest not present in the first entry of the zip");
                 }
-                
+
                 return m;
             } finally {
                 if (is != null) { // just in case when we did not open bundle
@@ -534,7 +552,7 @@ public class ValidateDescriptorMojo extends MojoSupport {
             try {
                 System.setErr(new PrintStream(new ByteArrayOutputStream()));
                 Manifest manifest = new Manifest(file.getInputStream(file.getEntry("META-INF/MANIFEST.MF")));
-                return manifest; 
+                return manifest;
             } finally {
                 System.setErr(original);
             }
@@ -555,7 +573,7 @@ public class ValidateDescriptorMojo extends MojoSupport {
             }
             String repo = bundle.substring(0, bundle.indexOf(MVN_REPO_SEPARATOR));
             ArtifactRepository repository = new DefaultArtifactRepository(artifact.getArtifactId() + "-repo", repo,
-                                                                          new DefaultRepositoryLayout());
+                    new DefaultRepositoryLayout());
             List<ArtifactRepository> repos = new LinkedList<ArtifactRepository>();
             repos.add(repository);
             resolver.resolve(artifact, repos, localRepo);
@@ -582,21 +600,21 @@ public class ValidateDescriptorMojo extends MojoSupport {
             uri = uri.split(MVN_REPO_SEPARATOR)[1];
         }
         String[] elements = uri.split("/");
-        
+
         switch (elements.length) {
-        case 5:
-            return factory.createArtifactWithClassifier(elements[0], elements[1], elements[2], elements[3], elements[4]);
-        case 3:
-            return factory.createArtifact(elements[0], elements[1], elements[2], Artifact.SCOPE_PROVIDED, "jar");
-        default:
-            return null;
+            case 5:
+                return factory.createArtifactWithClassifier(elements[0], elements[1], elements[2], elements[3], elements[4]);
+            case 3:
+                return factory.createArtifact(elements[0], elements[1], elements[2], Artifact.SCOPE_PROVIDED, "jar");
+            default:
+                return null;
         }
-        
+
     }
-    
+
     /*
-     * see if bundle url is start with mvn protocol
-     */
+    * see if bundle url is start with mvn protocol
+    */
     private boolean isMavenProtocol(String bundle) {
         return bundle.startsWith(MVN_URI_PREFIX);
     }
@@ -635,11 +653,11 @@ public class ValidateDescriptorMojo extends MojoSupport {
      * Convenience collection for holding features
      */
     private class Features {
-        
+
         private List<Feature> features = new LinkedList<Feature>();
-        
+
         public void add(Feature feature) {
-           features.add(feature); 
+            features.add(feature);
         }
 
         public Feature get(String name, String version) throws Exception {
@@ -649,13 +667,13 @@ public class ValidateDescriptorMojo extends MojoSupport {
                 }
             }
             throw new Exception(String.format("Unable to find definition for feature %s (version %s)",
-                                              name, version));
+                    name, version));
         }
 
         public void add(Feature[] array) {
             for (Feature feature : array) {
                 add(feature);
-            }   
+            }
         }
     }
 }
