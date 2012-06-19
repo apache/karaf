@@ -89,6 +89,19 @@ public class Instances extends StandardMBean implements InstancesMBean {
         instanceService.renameInstance(originalName, newName, false);
     }
 
+    public void cloneInstance(String name, String cloneName, int sshPort, int rmiRegistryPort, int rmiServerPort, String location, String javaOpts) throws Exception {
+        if ("".equals(location)) {
+            location = null;
+        }
+        if ("".equals(javaOpts)) {
+            javaOpts = null;
+        }
+
+        InstanceSettings settings = new InstanceSettings(sshPort, rmiRegistryPort, rmiServerPort, location, javaOpts, null, null);
+
+        instanceService.cloneInstance(name, cloneName, settings, false);
+    }
+
     public TabularData getInstances() throws Exception {
         List<Instance> instances = Arrays.asList(instanceService.getInstances());
         TabularData table = InstanceToTableMapper.tableFrom(instances);
