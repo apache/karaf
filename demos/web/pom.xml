@@ -28,78 +28,135 @@
         <groupId>org.apache.karaf.demos</groupId>
         <artifactId>demos</artifactId>
         <version>3.0.0-SNAPSHOT</version>
+        <relativePath>../../../../../../../pom.xml</relativePath>
     </parent>
 
-    <artifactId>org.apache.karaf.demos.web</artifactId>
-    <packaging>pom</packaging>
+    <artifactId>web</artifactId>
+    <packaging>war</packaging>
     <name>Apache Karaf :: Demos :: Web</name>
 
-    <modules>
-        <module>src/main/resources/resources/demos/web</module>
-        <!--<module>branding-package</module>-->
-    </modules>
+    <properties>
+        <jetty.port>8080</jetty.port>
+        <maven-jetty-plugin.version>6.1.26</maven-jetty-plugin.version>
+        <geronimo.servlet.version>1.1.2</geronimo.servlet.version>
+
+        <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.osgi.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.jaas</groupId>
+            <artifactId>org.apache.karaf.jaas.boot</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>apache-karaf</artifactId>
+            <type>zip</type>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.geronimo.specs</groupId>
+            <artifactId>geronimo-servlet_2.5_spec</artifactId>
+            <version>${geronimo.servlet.version}</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
     <build>
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-                <filtering>false</filtering>
-                <excludes>
-                    <exclude>**/target/**</exclude>
-                </excludes>
-            </resource>
-            <resource>
-                <directory>src/main/filtered-resources</directory>
-                <filtering>true</filtering>
-                <includes>
-                    <include>**/*</include>
-                </includes>
-            </resource>
-        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-                <!--<configuration>-->
-                    <!--<resources>-->
-                        <!--<resource>src/main/resources</resource>-->
-                    <!--</resources>-->
-                <!--</configuration>-->
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <configuration>
+                    <warSourceDirectory>src/main/webapp/</warSourceDirectory>
+                    <webResources>
+                        <resource>
+                            <directory>target/karaf</directory>
+                        </resource>
+                    </webResources>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.mortbay.jetty</groupId>
+                <artifactId>maven-jetty-plugin</artifactId>
+                <version>${maven-jetty-plugin.version}</version>
+                <configuration>
+                    <connectors>
+                        <connector implementation="org.mortbay.jetty.nio.SelectChannelConnector">
+                            <port>${jetty.port}</port>
+                            <maxIdleTime>60000</maxIdleTime>
+                        </connector>
+                    </connectors>
+                    <systemProperties>
+                        <!-- enable easy connection to JConsole -->
+                        <systemProperty>
+                            <name>com.sun.management.jmxremote</name>
+                            <value/>
+                        </systemProperty>
+                    </systemProperties>
+                    <scanIntervalSeconds>10</scanIntervalSeconds>
+                    <webAppSourceDirectory>${project.build.directory}/${project.build.finalName}</webAppSourceDirectory>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>process-resources</id>
-                        <phase>process-resources</phase>
+                        <id>unpack-unix</id>
+                        <phase>generate-resources</phase>
                         <goals>
-                            <goal>resources</goal>
+                            <goal>unpack</goal>
                         </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.apache.karaf</groupId>
+                                    <artifactId>apache-karaf</artifactId>
+                                    <type>zip</type>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${project.build.directory}/karaf/WEB-INF</outputDirectory>
+                                    <excludes>**/lib/*,**/*.txt,**/bin/*,**/demos/**,**/lib,**/bin,**/demos</excludes>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.apache.karaf.tooling</groupId>
-                <artifactId>karaf-maven-plugin</artifactId>
-                <version>${project.version}</version>
-                <configuration>
-                    <startLevel>60</startLevel>
-                    <!--<checkDependencyChange>true</checkDependencyChange>-->
-                    <!--<overwriteChangedDependencies>true</overwriteChangedDependencies>-->
-                    <!--<failOnDependencyChange>false</failOnDependencyChange>-->
-                </configuration>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>compile</id>
-                        <phase>compile</phase>
+                        <id>copy-karaf</id>
+                        <phase>process-resources</phase>
                         <goals>
-                            <goal>features-generate-descriptor</goal>
+                            <goal>run</goal>
                         </goals>
-                    </execution>
-                    <execution>
-                        <id>package</id>
-                        <goals>
-                            <goal>features-create-kar</goal>
-                        </goals>
+                        <configuration>
+                            <tasks>
+                                <move todir="${project.build.directory}/karaf/WEB-INF/karaf">
+                                    <fileset
+                                            dir="${project.build.directory}/karaf/WEB-INF/apache-karaf-${project.version}"/>
+                                </move>
+                            </tasks>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
         </plugins>
     </build>
+
 </project>

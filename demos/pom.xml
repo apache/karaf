@@ -38,9 +38,7 @@
         <module>branding</module>
         <module>command</module>
         <module>dump</module>
-        <!-- Disabling this for the moment as the build fails at the my-kar.pom 
         <module>deployer</module>
-        -->
     </modules>
 
 </project>

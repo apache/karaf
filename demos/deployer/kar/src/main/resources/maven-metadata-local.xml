@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata modelVersion="1.1.0">
+  <groupId>org.apache.karaf.demos</groupId>
+  <artifactId>my-kar</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+  <versioning>
+    <snapshot>
+      <localCopy>true</localCopy>
+    </snapshot>
+    <lastUpdated>20120618135212</lastUpdated>
+    <snapshotVersions>
+      <snapshotVersion>
+        <classifier>features</classifier>
+        <extension>xml</extension>
+        <value>1.0.0-SNAPSHOT</value>
+        <updated>20120618135212</updated>
+      </snapshotVersion>
+    </snapshotVersions>
+  </versioning>
+</metadata>
