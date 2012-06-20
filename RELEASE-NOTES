@@ -15,6 +15,61 @@
  * limitations under the License.
  */
 
+                    Apache Karaf 2.2.8
+                    ==================
+
+  Overview
+  --------
+
+  This release of Apache Karaf is based off of the 2.2.x series branch, representing an
+ update to Apache Karaf 2.2.7. It contains bug fixes identified in the prior release,
+ and introduces improvements including; A command that can not be loaded no longer breaks
+ the whole completion, removing a KAR now uninstalls the shipped features, and SSH keystore 
+ is now compatible with IBM JDK. Several dependences were also updated, bringing ServiceMix
+ Specs to version 2.0, pax-logging to 1.6.7, Jansi to 1.9, JLine to 2.7, Felix Utils to 1.2.0,
+ Felix FileInstall to 3.2.4, and sshd to 0.7.0. 
+  For more detail please see the change log below.
+
+  Changelog
+  ---------
+
+** Bug
+    * [KARAF-536] - Backspace no longer works in Putty after using 'connect' command to connect to other instance, and commands are printed in only 2 columns.
+    * [KARAF-1162] - A command that can not be loaded breaks the whole completion
+    * [KARAF-1202] - log:tail spins with debug on
+    * [KARAF-1293] - feature level start-level not completely finished....
+    * [KARAF-1392] - Removing a KAR should uninstall the shipped features
+    * [KARAF-1394] - Custom login modules not seen with Equinox
+    * [KARAF-1416] - Blueprint archetype instructions is missing
+    * [KARAF-1430] - Default child instance config is not the same as the root instance
+    * [KARAF-1493] - Upgrade to Pax Web 1.0.11
+    * [KARAF-1496] - Bad login when using sufficient modules but when the first fail
+    * [KARAF-1513] - SSH keystore incompatible if generated with IBM JDK
+    * [KARAF-1529] - command-watch messes the output when used with commands that take longer than the interval
+    * [KARAF-1538] - Exceptions when unregistering jmx means during a restart
+    * [KARAF-1564] - karaf feature validate plugin should support to load the exports packages from dependency features
+
+** Dependency upgrade
+    * [KARAF-1458] - Upgrade to ServiceMix Specs 2.0
+    * [KARAF-1490] - upgrade to pax-logging 1.6.7
+    * [KARAF-1498] - Upgrade blueprint, jmx and util bundles to next minor release
+    * [KARAF-1520] - Upgrade to Jansi 1.9
+    * [KARAF-1534] - Upgrade to JLine 2.7
+    * [KARAF-1535] - Upgrade to Felix Utils 1.2.0
+    * [KARAF-1536] - Upgrade to Felix FileInstall 3.2.4
+    * [KARAF-1568] - Upgrade to sshd 0.7.0
+
+** Improvement
+    * [KARAF-1396] - config:list command description should be enhanced
+    * [KARAF-1410] - Error in stop script if KARAF_DEBUG is enabled
+    * [KARAF-1499] - InfoAction shell command should sort the properties from InfoProvider instances
+    * [KARAF-1500] - Forgot a space between hours and minutes in InfoAction.java
+    * [KARAF-1521] - add-features-to-repo goal should define a correct default value for repository
+
+** Task
+    * [KARAF-1445] - more svn:ignore are needed
+
+
                     Apache Karaf 2.2.7
                     ==================
 
