@@ -168,7 +168,7 @@
         <spring.osgi.version>1.2.1</spring.osgi.version>
         <spring2.version>2.5.6.SEC02</spring2.version>
         <spring.version>3.0.7.RELEASE</spring.version>
-        <sshd.version>0.5.0</sshd.version>
+        <sshd.version>0.7.0</sshd.version>
         <xbean.version>3.7</xbean.version>
         <javax.mail.version>1.4.4</javax.mail.version>
 
