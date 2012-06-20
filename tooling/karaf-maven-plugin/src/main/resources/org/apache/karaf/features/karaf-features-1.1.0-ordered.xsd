@@ -17,9 +17,9 @@
 
 -->
 <xs:schema elementFormDefault="qualified"
-    targetNamespace="http://karaf.apache.org/xmlns/features/v1.0.0"
-    xmlns:tns="http://karaf.apache.org/xmlns/features/v1.0.0"
-    xmlns:xs="http://www.w3.org/2001/XMLSchema">
+           targetNamespace="http://karaf.apache.org/xmlns/features/v1.1.0"
+           xmlns:tns="http://karaf.apache.org/xmlns/features/v1.1.0"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
     <xs:annotation>
         <xs:documentation><![CDATA[
@@ -31,28 +31,28 @@ Karaf features mechanism. For documentation please visit the
     <xs:complexType name="features">
         <xs:annotation>
             <xs:documentation><![CDATA[
-Root element of Feature definition. It contains optional attribute which allow
-for naming the repository. This name will be used in shell to display source repository
-of given feature.
+Root element of Feature definition. It contains an required attribute for
+designating from which repository this feature should be loaded. The Karaf
+shell will show the repository name when displaying information about the feature.
             ]]></xs:documentation>
         </xs:annotation>
-        <xs:sequence>
-            <xs:element name="repository" type="xs:anyURI" minOccurs="0" maxOccurs="unbounded">
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="repository" type="xs:anyURI">
                 <xs:annotation>
                     <xs:documentation><![CDATA[
 Additional repositories where dependencies are stored.
                     ]]></xs:documentation>
                 </xs:annotation>
             </xs:element>
-            <xs:element name="feature" type="tns:feature" minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="feature" type="tns:feature">
                 <xs:annotation>
                     <xs:documentation><![CDATA[
 Feature definition.
                     ]]></xs:documentation>
                 </xs:annotation>
             </xs:element>
-        </xs:sequence>
-        <xs:attribute name="name" type="xs:string" />
+        </xs:choice>
+        <xs:attribute name="name" type="xs:string" use="required"/>
     </xs:complexType>
 
     <xs:complexType name="feature">
@@ -61,28 +61,35 @@ Feature definition.
 Definition of the Feature.
             ]]></xs:documentation>
         </xs:annotation>
-        <xs:sequence>
-            <!-- Tags with info -->
-            <xs:element name="details" type="xs:string" minOccurs="0" maxOccurs="unbounded">
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="details" minOccurs="0" type="xs:string">
                 <xs:annotation>
                     <xs:documentation><![CDATA[
-The text information that will be displayed with the features:info commands.
+The help text shown for this feature when using feature:info console command.
                     ]]>
                     </xs:documentation>
                 </xs:annotation>
             </xs:element>
-            <xs:element name="config" type="tns:config"  minOccurs="0" maxOccurs="unbounded"/>
-            <xs:element name="configfile" type="tns:configFile"  minOccurs="0" maxOccurs="unbounded"/>
-            <xs:element name="feature" type="tns:dependency"  minOccurs="0" maxOccurs="unbounded"/>
-            <xs:element name="bundle" type="tns:bundle"  minOccurs="0" maxOccurs="unbounded"/>
-        </xs:sequence>
+            <xs:element name="config" type="tns:config" />
+            <xs:element name="configfile" type="tns:configFile" />
+            <xs:element name="feature" type="tns:dependency" />
+            <xs:element name="bundle" type="tns:bundle" />
+        </xs:choice>
         <xs:attribute name="name" type="tns:featureName" use="required" />
         <xs:attribute name="version" type="xs:string" default="0.0.0" />
         <xs:attribute name="description" type="xs:string" />
         <xs:attribute name="resolver" type="tns:resolver">
             <xs:annotation>
                 <xs:documentation><![CDATA[
-Karaf allows for using dynamic resolvers.
+Optional alternative resolver to use for determining the list of bundles to install for a given feature.
+                ]]>
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="install" type="tns:install">
+            <xs:annotation>
+                <xs:documentation><![CDATA[
+Marks if the feaute will be automatically started when thrown to the deploy folder.
                 ]]>
                 </xs:documentation>
             </xs:annotation>
@@ -109,7 +116,8 @@ Deployable element to install.
                 <xs:attribute name="start-level" type="xs:int">
                     <xs:annotation>
                         <xs:documentation><![CDATA[
-Bundle start level set to OSGi framework.
+Set this attribute to have an OSGi start level for this bundle different
+from the default start level defined in the Karaf's config.properties.
                         ]]>
                         </xs:documentation>
                     </xs:annotation>
@@ -117,7 +125,7 @@ Bundle start level set to OSGi framework.
                 <xs:attribute name="start" type="xs:boolean" default="true">
                     <xs:annotation>
                         <xs:documentation><![CDATA[
-This switch allows you to install the bundle in resolved state rather than the default active state.
+If false, leaves bundle in resolved state rather than the default active state.
                         ]]>
                         </xs:documentation>
                     </xs:annotation>
@@ -125,7 +133,7 @@ This switch allows you to install the bundle in resolved state rather than the d
                 <xs:attribute name="dependency" type="xs:boolean">
                     <xs:annotation>
                         <xs:documentation><![CDATA[
-Mark this bundle as dependency for the resolver.
+Mark this bundle as a dependency for the resolver.
                         ]]>
                         </xs:documentation>
                     </xs:annotation>
@@ -137,7 +145,7 @@ Mark this bundle as dependency for the resolver.
     <xs:complexType name="dependency">
         <xs:annotation>
             <xs:documentation><![CDATA[
-Dependency of the feature.
+Dependency of feature.
             ]]></xs:documentation>
         </xs:annotation>
         <xs:simpleContent>
@@ -151,7 +159,8 @@ Dependency of the feature.
         <xs:annotation>
             <xs:documentation><![CDATA[
 Configuration entries which should be created during feature installation. This
-configuration may be used with OSGi Configuration Admin.
+configuration may be used with OSGi Configuration Admin. The element content is
+read in as a properties file.
             ]]></xs:documentation>
         </xs:annotation>
         <xs:simpleContent>
@@ -172,14 +181,14 @@ Additional configuration files which should be created during feature installati
                 <xs:attribute name="finalname" type="xs:string" use="required">
                     <xs:annotation>
                         <xs:documentation><![CDATA[
-Name of file where given deployable element should be stored.
+The final destination path and name for the configuration file.
                         ]]></xs:documentation>
                     </xs:annotation>
                 </xs:attribute>
                 <xs:attribute name="override" type="xs:boolean">
                     <xs:annotation>
                         <xs:documentation><![CDATA[
-Flag to specify if an already existing final with name of filename should be overridden
+If the configFile already exists at the finalname location, whether or not to replace it.
                         ]]></xs:documentation>
                     </xs:annotation>
                 </xs:attribute>
@@ -191,7 +200,7 @@ Flag to specify if an already existing final with name of filename should be ove
     <xs:simpleType name="featureName">
         <xs:annotation>
             <xs:documentation><![CDATA[
-Feature name should be a non-empty string.
+Feature name should be non empty string.
             ]]></xs:documentation>
         </xs:annotation>
         <xs:restriction base="xs:string">
@@ -202,7 +211,7 @@ Feature name should be a non-empty string.
     <xs:simpleType name="resolver">
         <xs:annotation>
             <xs:documentation><![CDATA[
-Resolver to use. Karaf will look for an  OSGi service which has the following properties:
+Resolver to use. Karaf will look for OSGi service which have following properties:
 objectClass: org.apache.karaf.features.Resolver
 name: the value
             ]]></xs:documentation>
@@ -211,7 +220,18 @@ name: the value
             <xs:minLength value="1" />
         </xs:restriction>
     </xs:simpleType>
-
+    <xs:simpleType name="install">
+        <xs:annotation>
+            <xs:documentation><![CDATA[
+Installation mode. Can be either manual or auto. Specifies whether the feature should be automatically installed when
+dropped inside the deploy folder. Note: This attribute doesn't affect feature descriptors that are installed from the
+command line or as part of the org.apache.karaf.features.cfg.
+            ]]></xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:minLength value="1" />
+        </xs:restriction>
+    </xs:simpleType>
     <xs:element name="features" type="tns:features" />
 
 </xs:schema>
