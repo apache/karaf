@@ -44,6 +44,8 @@
             <cm:property name="hostKey" value="$[karaf.base]/etc/host.key"/>
             <cm:property name="authorizedKeys" value="$[karaf.base]/etc/authorized_keys"/>
             <cm:property name="authMethods" value="password,publickey"/>
+            <cm:property name="keySize" value="1024"/>
+            <cm:property name="algorithm" value="DSA"/>
         </cm:default-properties>
     </cm:property-placeholder>
 
@@ -101,6 +103,8 @@
 
     <bean id="keyPairProvider" class="org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider">
         <property name="path" value="${hostKey}"/>
+        <property name="keySize" value="${keySize}"/>
+        <property name="algorithm" value="${algorithm}"/>
     </bean>
     <bean id="passwordAuthenticator" class="org.apache.karaf.shell.ssh.KarafJaasPasswordAuthenticator">
         <property name="realm" value="${sshRealm}"/>
