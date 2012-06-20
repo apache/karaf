@@ -23,6 +23,8 @@
         <AD id="sshHost" type="String" default="0.0.0.0" name="%sshHost.name" description="%sshHost.description"/>
         <AD id="sshRealm" type="String" default="karaf" name="%sshRealm.name" description="%sshRealm.description"/>
         <AD id="hostKey" type="String" default="${karaf.base}/etc/host.key" name="%hostKey.name" description="%hostKey.description"/>
+        <AD id="keySize" type="integer" default="1024" name="%keySize.name" description="%keySize.description"/>
+        <AD id="algorithm" type="String" default="DSA" name="%algorithm.name" description="%algorithm.description"/>
     </OCD>
     <Designate pid="org.apache.karaf.shell">
         <Object ocdref="org.apache.karaf.shell"/>
