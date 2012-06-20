@@ -87,6 +87,23 @@ Karaf allow using dynamic resolvers.
                 </xs:documentation>
             </xs:annotation>
         </xs:attribute>
+        <xs:attribute name="install" type="tns:install">
+            <xs:annotation>
+                <xs:documentation><![CDATA[
+If true, marks that the feature should start automatically when placed in the deploy folder.
+                ]]>
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="start-level" type="xs:int">
+            <xs:annotation>
+                <xs:documentation><![CDATA[
+Set this attribute to have an OSGi start level for this feature different
+from the default start level defined in Karaf's config.properties.
+                ]]>
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
     </xs:complexType>
 
     <xs:complexType name="bundle">
@@ -196,6 +213,18 @@ Feature name should be non empty string.
 Resolver to use. Karaf will look for OSGi servie which have following properties:
 objectClass: org.apache.karaf.features.Resolver
 name: the value
+            ]]></xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:minLength value="1" />
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="install">
+        <xs:annotation>
+            <xs:documentation><![CDATA[
+Installation mode. Can be either manual or auto. Specifies whether the feature should be automatically installed when
+dropped inside the deploy folder. Note: This attribute doesn't affect feature descriptors that are installed from the
+command line or as part of the org.apache.karaf.features.cfg.
             ]]></xs:documentation>
         </xs:annotation>
         <xs:restriction base="xs:string">
