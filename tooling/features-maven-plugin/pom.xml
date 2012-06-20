@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache.karaf.tooling</groupId>
         <artifactId>tooling</artifactId>
-        <version>2.2.9-SNAPSHOT</version>
+        <version>2.2.8</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
