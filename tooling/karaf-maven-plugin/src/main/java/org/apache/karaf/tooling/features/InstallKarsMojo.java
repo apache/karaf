@@ -577,33 +577,6 @@ public class InstallKarsMojo extends MojoSupport {
             }
         }
 
-        public String put(String key, List<String> commentLines, List<String> valueLines) {
-            commentLines = new ArrayList<String>(commentLines);
-            valueLines = new ArrayList<String>(valueLines);
-            String escapedKey = escapeKey(key);
-            int lastLine = valueLines.size() - 1;
-            if (valueLines.isEmpty()) {
-                valueLines.add(escapedKey + "=");
-            } else if (!valueLines.get(0).trim().startsWith(escapedKey)) {
-                valueLines.set(0, escapedKey + " = " + escapeJava(valueLines.get(0)) + (0 < lastLine ? "\\" : ""));
-            }
-            for (int i = 1; i < valueLines.size(); i++) {
-                valueLines.set(i, escapeJava(valueLines.get(i)) + (i < lastLine ? "\\" : ""));
-            }
-            StringBuilder value = new StringBuilder();
-            for (String line : valueLines) {
-                value.append(line);
-            }
-            layout.put(key, new Layout(commentLines, valueLines));
-            return storage.put(key, unescapeJava(value.toString()));
-        }
-
-        public String put(String key, List<String> commentLines, String value) {
-            commentLines = new ArrayList<String>(commentLines);
-            layout.put(key, new Layout(commentLines, null));
-            return storage.put(key, value);
-        }
-
         public String put(String key, String comment, String value) {
             return put(key, Collections.singletonList(comment), value);
         }
