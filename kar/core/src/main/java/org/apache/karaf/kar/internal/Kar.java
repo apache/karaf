@@ -1,0 +1,189 @@
+package org.apache.karaf.kar.internal;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.jar.Attributes;
+import java.util.jar.JarInputStream;
+import java.util.jar.Manifest;
+import java.util.zip.ZipEntry;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * Representation of a Karaf Kar archive
+ * 
+ * A Kar archive is a jar file with a special structure that can be used
+ * to deploy feature repositories, maven repo contents and resources for the
+ * karaf installation.
+ * 
+ * meta-inf/Manifest: 
+ *   Karaf-Feature-Start: (true|false) Controls if the features in the feature repos should be started on deploy
+ *   Karaf-Feature-Repos: (uri)* If present then only the given feature repo urls are added to karaf if it is not
+ *      present then the karaf file is scanned for repo files
+ *      
+ * repository/
+ *   Everything below this directory is treated as a maven repository. On deploy the contents
+ *   will be copied to a directory below data. This directory will then be added to the 
+ *   maven repos of pax url maven
+ *   
+ * resource/
+ *   Everything below this directory will be copied to the karaf base dir on deploy
+ * 
+ */
+public class Kar {
+    public static final Logger LOGGER = LoggerFactory.getLogger(KarServiceImpl.class);
+    public static final String MANIFEST_ATTR_KARAF_FEATURE_START = "Karaf-Feature-Start";
+    public static final String MANIFEST_ATTR_KARAF_FEATURE_REPOS = "Karaf-Feature-Repos";
+    private final URI karUri;
+    private boolean shouldInstallFeatures;
+    private List<URI> featureRepos;
+
+    public Kar(URI karUri) {
+        this.karUri = karUri;
+    }
+
+    /**
+     * Extract a kar from a given URI into a repository dir and resource dir
+     * and populate shouldInstallFeatures and featureRepos
+     * 
+     * @param karUri uri to read the kar from
+     * @param repoDir directory to write the repository contents of the kar to
+     * @param resourceDir directory to write the resource contents of the kar to
+     */
+    public void extract(File repoDir, File resourceDir) {
+        InputStream is = null;
+        JarInputStream zipIs = null;
+        FeatureDetector featureDetector = new FeatureDetector();
+        this.featureRepos = new ArrayList<URI>();
+        this.shouldInstallFeatures = true;
+
+        try {
+            is = karUri.toURL().openStream();
+            repoDir.mkdirs();
+
+            if (!repoDir.isDirectory()) {
+                throw new RuntimeException("The KAR file " + karUri + " is already installed");
+            }
+
+            LOGGER.debug("Uncompress the KAR file {} into directory {}", karUri, repoDir);
+            zipIs = new JarInputStream(is);
+            boolean scanForRepos = true;
+
+            Manifest manifest = zipIs.getManifest();
+            if (manifest != null) {
+                Attributes attr = manifest.getMainAttributes();
+                String featureStartSt = (String)attr
+                    .get(new Attributes.Name(MANIFEST_ATTR_KARAF_FEATURE_START));
+                if ("false".equals(featureStartSt)) {
+                    shouldInstallFeatures = false;
+                }
+                String featureReposAttr = (String)attr
+                    .get(new Attributes.Name(MANIFEST_ATTR_KARAF_FEATURE_REPOS));
+                if (featureReposAttr != null) {
+                    featureRepos.add(new URI(featureReposAttr));
+                    scanForRepos = false;
+                }
+            }
+
+            ZipEntry entry = zipIs.getNextEntry();
+            while (entry != null) {
+                if (entry.getName().startsWith("repository")) {
+                    String path = entry.getName().substring("repository/".length());
+                    File destFile = new File(repoDir, path);
+                    extract(zipIs, entry, destFile);
+                    if (scanForRepos && featureDetector.isFeaturesRepository(destFile)) {
+                        featureRepos.add(destFile.toURI());
+                    }
+                }
+
+                if (entry.getName().startsWith("resource")) {
+                    String path = entry.getName().substring("resource/".length());
+                    File destFile = new File(resourceDir, path);
+                    extract(zipIs, entry, destFile);
+                }
+                entry = zipIs.getNextEntry();
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error extracting kar file " + karUri + " into dir " + repoDir + ": " + e.getMessage(), e);
+        } finally {
+            closeStream(zipIs);
+            closeStream(is);
+        }
+    }
+
+    /**
+     * Extract an entry from a KAR file
+     * 
+     * @param is
+     * @param zipEntry
+     * @param dest
+     * @return
+     * @throws Exception
+     */
+    private static File extract(InputStream is, ZipEntry zipEntry, File dest) throws Exception {
+        if (zipEntry.isDirectory()) {
+            LOGGER.debug("Creating directory {}", dest.getName());
+            dest.mkdirs();
+        } else {
+            dest.getParentFile().mkdirs();
+            FileOutputStream out = new FileOutputStream(dest);
+            copyStream(is, out);
+            out.close();
+        }
+        return dest;
+    }
+
+    private static void closeStream(InputStream is) {
+        if (is != null) {
+            try {
+                is.close();
+            } catch (IOException e) {
+                LOGGER.warn("Error closing stream", e);
+            }
+        }
+    }
+
+    static long copyStream(InputStream input, OutputStream output) throws IOException {
+        byte[] buffer = new byte[10000];
+        long count = 0;
+        int n = 0;
+        while (-1 != (n = input.read(buffer))) {
+            output.write(buffer, 0, n);
+            count += n;
+        }
+        return count;
+    }
+    
+
+    public String getKarName() {
+        try {
+            String karName = new File(karUri.toURL().getFile()).getName();
+            karName = karName.substring(0, karName.lastIndexOf("."));
+            return karName;
+        } catch (MalformedURLException e) {
+            throw new RuntimeException("Invalid kar URI " + karUri, e);
+        }
+    }
+    
+    public URI getKarUri() {
+        return karUri;
+    }
+
+    public boolean isShouldInstallFeatures() {
+        return shouldInstallFeatures;
+    }
+
+    public List<URI> getFeatureRepos() {
+        return featureRepos;
+    } 
+
+    
+}

@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.kar;
 
+import java.io.File;
 import java.io.PrintStream;
 import java.net.URI;
 import java.util.List;
@@ -26,30 +27,35 @@ import java.util.List;
 public interface KarService {
 
     /**
-     * Install KAR from a given URL.
+     * Install KAR from a given URI
+     * 
+     * Resources will be copied to the karaf base dir
+     * Repository contents will be copied to a subdir in the 
+     * karaf data directory
      *
-     * @param url the KAR URL.
+     * @param karUri Uri of the kar to be installed
      * @throws Exception in case of installation failure.
      */
-    void install(URI url) throws Exception;
+    void install(URI karUri) throws Exception;
+    
+    /**
+     * Install a kar with manually given repository and 
+     * resource directories.
+     * 
+     * @param karUri Uri of the kar to be installed
+     * @param repoDir destination for the repository contents of the kar
+     * @param resourceDir destination for the resource contents of the kar
+     * @throws Exception
+     */
+    void install(URI karUri, File repoDir, File resourceDir) throws Exception;
 
     /**
-     * Uninstall the given KAR.
-     * NB: the system folder is not cleaned.
+     * Uninstall the given KAR
      *
-     * @param name the name of the KAR.
-     * @throws Exception in case of uninstall failure.
+     * @param name the name of the KAR
+     * @throws Exception in case of failure
      */
     void uninstall(String name) throws Exception;
-
-    /**
-     * Uninstall the given KAR and, eventually, cleanup the repository from the KAR content.
-     *
-     * @param name the name of the KAR.
-     * @param clean true to cleanup the repository folder, false else.
-     * @throws Exception in case of uninstall failure.
-     */
-    void uninstall(String name, boolean clean) throws Exception;
 
     /**
      * List the KAR stored in the data folder.
@@ -69,5 +75,6 @@ public interface KarService {
      * @param console
      */
     void create(String repoName, List<String> features, PrintStream console);
+
     
 }

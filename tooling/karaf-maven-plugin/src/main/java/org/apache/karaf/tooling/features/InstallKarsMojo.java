@@ -49,7 +49,7 @@ import org.apache.karaf.features.internal.model.Bundle;
 import org.apache.karaf.features.internal.model.Feature;
 import org.apache.karaf.features.internal.model.Features;
 import org.apache.karaf.features.internal.model.JaxbUtil;
-import org.apache.karaf.kar.internal.KarServiceImpl;
+import org.apache.karaf.kar.internal.Kar;
 import org.apache.karaf.tooling.utils.MojoSupport;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
@@ -194,29 +194,27 @@ public class InstallKarsMojo extends MojoSupport {
                 startupPropertiesFile.getParentFile().mkdirs();
             }
         }
-        KarServiceImpl karService = new KarServiceImpl();
+
         FeaturesService featuresService = new OfflineFeaturesService();
-        karService.setFeaturesService(featuresService);
-        karService.setBase(workDirectory);
-        try {
-            karService.init();
-        } catch (Exception e) {
-            throw new MojoExecutionException("Can't init the KAR service", e);
-        }
 
         Collection<Artifact> dependencies = project.getDependencyArtifacts();
         StringBuilder buf = new StringBuilder();
         byte[] buffer = new byte[4096];
         for (Artifact artifact : dependencies) {
             dontAddToStartup = "runtime".equals(artifact.getScope());
-            karService.setLocalRepo(system.getPath());
             if ("kar".equals(artifact.getType()) && acceptScope(artifact)) {
                 File file = artifact.getFile();
                 try {
-                    karService.install(file.toURI());
+                    Kar kar = new Kar(file.toURI());
+                    kar.extract(new File(system.getPath()), new File(workDirectory));
+                    for (URI repoUri : kar.getFeatureRepos()) {
+                        featuresService.removeRepository(repoUri);
+                        featuresService.addRepository(repoUri);
+                    }
                 } catch (Exception e) {
-                    buf.append("Could not install kar: ").append(artifact.toString()).append("\n");
-                    buf.append(e.getMessage()).append("\n\n");
+                    throw new RuntimeException("Could not install kar: " + artifact.toString() + "\n", e);
+                    //buf.append("Could not install kar: ").append(artifact.toString()).append("\n");
+                    //buf.append(e.getMessage()).append("\n\n");
                 }
             }
             if ("features".equals(artifact.getClassifier()) && acceptScope(artifact)) {

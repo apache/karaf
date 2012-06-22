@@ -50,14 +50,21 @@ public class KarArtifactInstaller implements ArtifactInstaller {
 	}
 
     public void uninstall(File file) throws Exception {
-        LOGGER.info("Uninstalling KAR {}", file.getName());
-        karService.uninstall(file.getName(), true);
+        String karName = getKarName(file);
+        LOGGER.info("Uninstalling KAR {}", karName);
+        karService.uninstall(karName);
 	}
 
 	public void update(File file) throws Exception {
         LOGGER.warn("Karaf archive {}' has been updated; redeploying.", file);
-        karService.uninstall(file.getName(), true);
+        karService.uninstall(getKarName(file));
         karService.install(file.toURI());
+	}
+	
+	private String getKarName(File karFile) {
+	    String karName = karFile.getName();
+        karName = karName.substring(0, karName.lastIndexOf("."));
+        return karName;
 	}
 
     public boolean canHandle(File file) {

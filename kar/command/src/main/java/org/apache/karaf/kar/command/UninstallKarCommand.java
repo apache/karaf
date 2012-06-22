@@ -18,7 +18,6 @@ package org.apache.karaf.kar.command;
 
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Option;
 
 @Command(scope = "kar", name = "uninstall", description = "Uninstall a KAR file.")
 public class UninstallKarCommand extends KarCommandSupport {
@@ -26,11 +25,8 @@ public class UninstallKarCommand extends KarCommandSupport {
     @Argument(index = 0, name = "name", description = "The name of the KAR file to uninstall.", required = true, multiValued = false)
     private String name;
 
-    @Option(name = "-c", aliases = { "--clean" }, description = "Uninstall features and cleanup the system repository from the KAR content", required = false, multiValued = false)
-    private boolean clean = false;
-    
     public Object doExecute() throws Exception {
-        this.getKarService().uninstall(name, clean);
+        this.getKarService().uninstall(name);
         return null;
     }
     

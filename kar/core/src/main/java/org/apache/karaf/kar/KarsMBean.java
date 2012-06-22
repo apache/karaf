@@ -44,13 +44,4 @@ public interface KarsMBean {
      */
     void uninstall(String name) throws Exception;
 
-    /**
-     * Uninstall a KAR file and clean the system repository with the KAR content.
-     *
-     * @param name the KAR name.
-     * @param clean true to cleanup the system repository, false else.
-     * @throws Exception in case of uninstall failure.
-     */
-    void uninstall(String name, boolean clean) throws Exception;
-
 }
