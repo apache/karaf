@@ -45,6 +45,11 @@
                 <excludes>
                     <exclude>**/target/**</exclude>
                     <exclude>**/README.txt</exclude>
+                    <exclude>**/.project</exclude>
+                    <exclude>**/.classpath</exclude>
+                    <exclude>**/.settings/**</exclude>
+                    <exclude>**/*.iws</exclude>
+                    <exclude>**/*.iwl</exclude>
                 </excludes>
             </resource>
             <resource>
