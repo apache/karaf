@@ -39,6 +39,20 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.utils</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.ops4j.pax.url</groupId>
             <artifactId>pax-url-aether</artifactId>
         </dependency>
@@ -80,7 +94,8 @@
                             org.apache.karaf.kar
                         </Export-Package>
                         <Private-Package>
-                            org.apache.karaf.kar.internal
+                            org.apache.karaf.kar.internal,
+                            org.apache.felix.utils.properties
                         </Private-Package>
                     </instructions>
                 </configuration>

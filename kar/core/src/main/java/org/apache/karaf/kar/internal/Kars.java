@@ -43,10 +43,6 @@ public class Kars extends StandardMBean implements KarsMBean {
     public void uninstall(String name) throws Exception {
         karService.uninstall(name);
     }
-    
-    public void uninstall(String name, boolean clean) throws Exception {
-        karService.uninstall(name, clean);
-    }
 
     public KarService getKarService() {
         return karService;

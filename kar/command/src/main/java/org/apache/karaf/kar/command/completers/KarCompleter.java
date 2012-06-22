@@ -29,7 +29,7 @@ public class KarCompleter implements Completer {
     
     private KarService karService;
     
-    public int complete(String buffer, int cursor, List candidates) {
+    public int complete(String buffer, int cursor, @SuppressWarnings("rawtypes") List candidates) {
         StringsCompleter delegate = new StringsCompleter();
         try {
             for (String karName : karService.list()) {

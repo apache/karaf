@@ -20,14 +20,18 @@
            default-activation="lazy">
 
     <ext:property-placeholder placeholder-prefix="$[" placeholder-suffix="]" />
+    
+    <reference id="featuresService" interface="org.apache.karaf.features.FeaturesService"/>
+    <reference id="configAdmin" interface="org.osgi.service.cm.ConfigurationAdmin" />
 
-    <bean id="karService" class="org.apache.karaf.kar.internal.KarServiceImpl" init-method="init">
-        <property name="base" value="$[karaf.base]"/>
-        <property name="storage" value="$[karaf.data]/kar"/>
-        <property name="localRepo" value="$[karaf.base]/system"/>
-        <property name="featuresService">
-            <reference interface="org.apache.karaf.features.FeaturesService"/>
-        </property>
+    <bean id="karService" class="org.apache.karaf.kar.internal.KarServiceImpl">
+        <argument value="$[karaf.base]" />
+        <argument ref="featuresService" />
+        <argument ref="mavenRepoManager"/>
+    </bean>
+    
+    <bean id="mavenRepoManager" class="org.apache.karaf.kar.internal.MavenRepoManager">
+        <argument value="$[karaf.base]" />
     </bean>
 
     <service ref="karService" interface="org.apache.karaf.kar.KarService"/>

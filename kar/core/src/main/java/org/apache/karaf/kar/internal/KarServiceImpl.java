@@ -19,9 +19,11 @@
 package org.apache.karaf.kar.internal;
 
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -31,21 +33,14 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.ConfigFileInfo;
@@ -57,297 +52,139 @@ import org.apache.karaf.kar.KarService;
 import org.ops4j.pax.url.mvn.Parser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.xml.sax.ErrorHandler;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
 
 /**
  * Implementation of the KAR service.
  */
 public class KarServiceImpl implements KarService {
+    private static final String FEATURE_CONFIG_FILE = "features.cfg";
+    private static final Logger LOGGER = LoggerFactory.getLogger(KarServiceImpl.class);
 
-    private static final String MANIFEST_ATTR_KARAF_FEATURE_START = "Karaf-Feature-Start";
-
-    public static final Logger LOGGER = LoggerFactory.getLogger(KarServiceImpl.class);
-
-    private String storage = "./target/data/kar"; // ${KARAF.DATA}/kar
-    private String base = "./";
-    private String localRepo = "./target/local-repo"; // ${KARAF.BASE}/system
+    private File storage;
+    private File base;
     private FeaturesService featuresService;
-    
-    private DocumentBuilderFactory dbf;
+    private final MavenRepoManager mavenRepoManager;
 
-    /**
-     * Init method.
-     *
-     * @throws Exception in case of init failure.
-     */
-    public void init() throws Exception {
-        dbf = DocumentBuilderFactory.newInstance();
-        dbf.setNamespaceAware(true);
-        
-        File karStorageDir = new File(storage);
-        if (!karStorageDir.exists()) {
-            LOGGER.debug("Create the KAR storage directory");
-            karStorageDir.mkdirs();
-        }
-        if (!karStorageDir.isDirectory()) {
+    public KarServiceImpl(String karafBase, FeaturesService featuresService, MavenRepoManager mavenRepoManager) {
+        this.base = new File(karafBase);
+        this.storage = new File(this.base, "data" + File.separator + "kar");
+        this.featuresService = featuresService;
+        this.mavenRepoManager = mavenRepoManager;
+        this.storage.mkdirs();
+        if (!storage.isDirectory()) {
             throw new IllegalStateException("KAR storage " + storage + " is not a directory");
         }
     }
     
-    public void install(URI url) throws Exception {
-        File file = new File(url.toURL().getFile());
-        String karName = file.getName();
-        
-        LOGGER.debug("Installing KAR {} from {}", karName, url);
-        
-        LOGGER.debug("Check if the KAR file already exists in the storage directory");
-        File karStorage = new File(storage);
-        File karFile = new File(karStorage, karName);
-        
-        if (karFile.exists()) {
-            LOGGER.warn("The KAR file " + karName + " is already installed. Override it.");
+    @Override
+    public void install(URI karUri) throws Exception {
+        String karName = new Kar(karUri).getKarName();
+        LOGGER.debug("Installing KAR {} from {}", karName, karUri);
+        File karDir = new File(storage, karName);
+        install(karUri, karDir, base);
+    }
+    
+    @Override
+    public void install(URI karUri, File repoDir, File resourceDir) throws Exception {
+        Kar kar = new Kar(karUri);
+        kar.extract(repoDir, resourceDir);
+        writeToFile(kar.getFeatureRepos(), new File(repoDir, FEATURE_CONFIG_FILE));
+        for (URI uri : kar.getFeatureRepos()) {
+            addToFeaturesRepositories(uri);
         }
-        
-        LOGGER.debug("Copy the KAR file from {} to {}", url, karFile.getParent());
-        copy(url, karFile);
-        
-        LOGGER.debug("Uncompress the KAR file {} into the system repository", karName);
-        ZipFile zipFile = new ZipFile(karFile);
-        
-        List<URI> featuresRepositoriesInKar = new ArrayList<URI>();
-        boolean shouldInstallFeatures = true;
-        
-        @SuppressWarnings("unchecked")
-        Enumeration<ZipEntry> entries = (Enumeration<ZipEntry>) zipFile.entries();
-        while (entries.hasMoreElements()) {
-            ZipEntry entry = entries.nextElement();
-
-            String repoEntryName = getRepoEntryName(entry);
-
-            if (repoEntryName != null) {
-                File extract = extract(zipFile, entry, repoEntryName, localRepo);
-                if (isFeaturesRepository(extract)) {
-                    addToFeaturesRepositories(extract.toURI());
-                    featuresRepositoriesInKar.add(extract.toURI());
-                }
-            }
-            
-            if ("meta-inf/manifest.mf".equals(entry.getName().toLowerCase())) {
-                InputStream is = zipFile.getInputStream(entry);
-                Manifest manifest = new Manifest(is);
-                Attributes attr = manifest.getMainAttributes();
-                String featureStartSt = (String)attr.get(new Attributes.Name(MANIFEST_ATTR_KARAF_FEATURE_START));
-                if ("false".equals(featureStartSt)) {
-                    shouldInstallFeatures = false;
-                }
-                is.close();
-            }
-
-            if (entry.getName().startsWith("resource")) {
-                String resourceEntryName = entry.getName().substring("resource/".length());
-                extract(zipFile, entry, resourceEntryName, base);
-            }
+        if (kar.isShouldInstallFeatures()) {
+            installFeatures(kar.getFeatureRepos());
         }
-        
-        if (shouldInstallFeatures) {
-            installFeatures(featuresRepositoriesInKar);
+
+        if (mavenRepoManager != null) {
+            mavenRepoManager.addRepo(repoDir.toURI());
         }
-        
-        zipFile.close();
     }
 
+
+    private List<URI> readFromFile(File repoListFile) {
+        ArrayList<URI> uriList = new ArrayList<URI>();
+        FileReader fr = null;
+        try {
+            fr = new FileReader(repoListFile);
+            BufferedReader br = new BufferedReader(fr);
+            String line;
+            while ((line = br.readLine()) != null) {
+                uriList.add(new URI(line));
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error reading repo list from file " + repoListFile.getAbsolutePath(), e);
+        } finally {
+            try {
+                fr.close();
+            } catch (IOException e) {
+                LOGGER.warn("Error closing reader for file " + repoListFile, e);
+            }
+        }
+        return uriList;
+    }
+    
+    private void writeToFile(List<URI> featuresRepositoriesInKar, File repoListFile) {
+        FileOutputStream fos = null;
+        PrintStream ps = null;
+        try {
+            fos = new FileOutputStream(repoListFile);
+            ps = new PrintStream(fos);
+            for (URI uri : featuresRepositoriesInKar) {
+                ps.println(uri);
+            }
+            ps.close();
+            fos.close();
+        } catch (Exception e) {
+            throw new RuntimeException("Error writing feature repo list to file " + repoListFile.getAbsolutePath(), e);
+        } finally {
+            closeStream(ps);
+            closeStream(fos);
+        }
+    }
+
+    private void deleteRecursively(File dir) {
+        if (dir.isDirectory()) {
+            File[] children = dir.listFiles();
+            for (File child : children) {
+                deleteRecursively(child);
+            }
+        }
+        dir.delete();
+    }
+
+    @Override
     public void uninstall(String karName) throws Exception {
-        uninstall(karName, false);
-    }
+        File karDir = new File(storage, karName);
 
-    public void uninstall(String karName, boolean clean) throws Exception {
-        File karStorage = new File(storage);
-        File karFile = new File(karStorage, karName);
-        
-        if (!karFile.exists()) {
+        if (!karDir.exists()) {
             throw new IllegalArgumentException("The KAR " + karName + " is not installed");
         }
 
-        if (clean) {
-            LOGGER.debug("Looking for KAR entries to purge the local repository");
-            List<URI> featuresRepositories = new ArrayList<URI>();
-            ZipFile zipFile = new ZipFile(karFile);
-            @SuppressWarnings("unchecked")
-            Enumeration<ZipEntry> entries = (Enumeration<ZipEntry>) zipFile.entries();
-            while (entries.hasMoreElements()) {
-                ZipEntry entry = entries.nextElement();
-                String repoEntryName = getRepoEntryName(entry);
-                if (repoEntryName != null) {
-                    File toDelete = new File(localRepo + File.separator + repoEntryName);
-                    if (isFeaturesRepository(toDelete)) {
-                        featuresRepositories.add(toDelete.toURI());
-                    } else {
-                        if (toDelete.isFile() && toDelete.exists()) {
-                            toDelete.delete();
-                        }
-                    }
-                }
-                if (entry.getName().startsWith("resource")) {
-                    String resourceEntryName = entry.getName().substring("resource/".length());
-                    File toDelete = new File(base + File.separator + resourceEntryName);
-                    if (toDelete.isFile() && toDelete.exists()) {
-                        toDelete.delete();
-                    }
-                }
-            }
-            zipFile.close();
-
-            uninstallFeatures(featuresRepositories);
-            for (URI featuresRepository : featuresRepositories) {
-                featuresService.removeRepository(featuresRepository);
-                File toDelete = new File(featuresRepository);
-                if (toDelete.exists() && toDelete.isFile()) {
-                    toDelete.delete();
-                }
-            }
+        List<URI> featuresRepositories = readFromFile(new File(karDir, FEATURE_CONFIG_FILE));
+        uninstallFeatures(featuresRepositories);
+        for (URI featuresRepository : featuresRepositories) {
+            featuresService.removeRepository(featuresRepository);
         }
         
-        karFile.delete();
+        // Creating the URI before deleting the dir to get a "/" at the end 
+        URI karURI = karDir.toURI();
+        mavenRepoManager.removeRepo(karURI);
+        deleteRecursively(karDir);
     }
     
+    @Override
     public List<String> list() throws Exception {
-        File karStorage = new File(storage);
         List<String> kars = new ArrayList<String>();
-        for (File kar : karStorage.listFiles()) {
-            kars.add(kar.getName());
+        for (File kar : storage.listFiles()) {
+            if (kar.isDirectory()) {
+                kars.add(kar.getName());
+            }
         }
         return kars;
     }
 
-    /**
-     * Create a destination file using a source URL.
-     * 
-     * @param url the source URL. 
-     * @param file the destination file
-     * @throws Exception in case of copy failure
-     */
-    private void copy(URI url, File file) throws Exception {
-        InputStream is = null;
-        FileOutputStream fos = null;
-        try {
-            is = url.toURL().openStream();
-            fos = new FileOutputStream(file);
-            copyStream(is,  fos);
-        } finally {
-            if (is != null) {
-                is.close();
-            }
-            if (fos != null) {
-                fos.flush();
-                fos.close();
-            }
-        }
-    }
 
-    /**
-     * Get the entry name filtering the repository  folder.
-     *
-     * @param entry the "normal" entry name.
-     * @return the entry with the repository folder filtered.
-     */
-    private String getRepoEntryName(ZipEntry entry) {
-        String entryName = entry.getName();
-        if (entryName.startsWith("repository")) {
-            return entryName.substring("repository/".length());
-        }
-        if (entryName.startsWith("META-INF") || entryName.startsWith("resources")) {
-            return null;
-        }
-        return entryName;
-    }
-
-    /**
-     * Extract an entry from a KAR file.
-     * 
-     * @param zipFile the KAR file (zip file).
-     * @param zipEntry the entry in the KAR file.
-     * @param repoEntryName the target extract name.
-     * @param base the base directory where to extract the file.
-     * @return the extracted file.
-     * @throws Exception in the extraction fails.
-     */
-    private File extract(ZipFile zipFile, ZipEntry zipEntry, String repoEntryName, String base) throws Exception {
-        File extract;
-        if (zipEntry.isDirectory()) {
-            extract = new File(base + File.separator + repoEntryName);
-            LOGGER.debug("Creating directory {}", extract.getName());
-            extract.mkdirs();
-        } else {
-            extract = new File(base + File.separator + repoEntryName);
-            extract.getParentFile().mkdirs();
-            
-            InputStream in = zipFile.getInputStream(zipEntry);
-            FileOutputStream out = new FileOutputStream(extract);
-            
-            byte[] buffer = new byte[8192];
-            int count = in.read(buffer);
-            int totalBytes = 0;
-            
-            while (count >= 0) {
-                out.write(buffer, 0, count);
-                totalBytes += count;
-                count = in.read(buffer);
-            }
-
-            LOGGER.debug("Extracted {} bytes to {}", totalBytes, extract);
-
-            in.close();
-            out.flush();
-            out.close();
-        }
-        return extract;
-    }
-
-    /**
-     * Check if a file is a features XML.
-     *
-     * @param artifact the file to check.
-     * @return true if the artifact is a features XML, false else.
-     */
-    private boolean isFeaturesRepository(File artifact) {
-        try {
-            if (artifact.isFile() && artifact.getName().endsWith(".xml")) {
-                Document doc = parse(artifact);
-                String name = doc.getDocumentElement().getLocalName();
-                String uri  = doc.getDocumentElement().getNamespaceURI();
-                if ("features".equals(name) && (uri == null || "".equals(uri) || uri.startsWith("http://karaf.apache.org/xmlns/features/v"))) {
-                    return true;
-                }
-            }
-        } catch (Exception e) {
-            LOGGER.debug("File '{}' is not a features file.", artifact.getName(), e);
-        }
-        return false;
-    }
-
-    /**
-     * Parse a features XML.
-     *
-     * @param artifact the features XML to parse.
-     * @return the parsed document.
-     * @throws Exception in case of parsing failure.
-     */
-    private Document parse(File artifact) throws Exception {
-        DocumentBuilder db = dbf.newDocumentBuilder();
-        db.setErrorHandler(new ErrorHandler() {
-            public void warning(SAXParseException exception) throws SAXException {
-            }
-            public void error(SAXParseException exception) throws SAXException {
-            }
-            public void fatalError(SAXParseException exception) throws SAXException {
-                throw exception;
-            }
-        });
-        return db.parse(artifact);
-    }
 
     /**
      * Add an URI to the list of features repositories.
@@ -403,7 +240,7 @@ public class KarServiceImpl implements KarService {
             File karFile = new File(karPath);
             karFile.getParentFile().mkdirs();
             fos = new FileOutputStream(karFile);
-            Manifest manifest = createNonAutoStartManifest();
+            Manifest manifest = createNonAutoStartManifest(repo.getURI());
             jos = new JarOutputStream(new BufferedOutputStream(fos, 100000), manifest);
             
             Map<URI, Integer> locationMap = new HashMap<URI, Integer>();
@@ -459,9 +296,10 @@ public class KarServiceImpl implements KarService {
         return featureSet;
     }
 
-    private Manifest createNonAutoStartManifest() throws UnsupportedEncodingException, IOException {
+    private Manifest createNonAutoStartManifest(URI repoUri) throws UnsupportedEncodingException, IOException {
         String manifestSt = "Manifest-Version: 1.0\n" +
-            MANIFEST_ATTR_KARAF_FEATURE_START +": false\n";
+            Kar.MANIFEST_ATTR_KARAF_FEATURE_START +": false\n" +
+            Kar.MANIFEST_ATTR_KARAF_FEATURE_REPOS + ": " + repoUri.toString() + "\n";
         InputStream manifestIs = new ByteArrayInputStream(manifestSt.getBytes("UTF-8"));
         Manifest manifest = new Manifest(manifestIs);
         return manifest;
@@ -499,24 +337,12 @@ public class KarServiceImpl implements KarService {
             InputStream is = location.toURL().openStream();
             String path = "repository/" + parser.getArtifactPath();
             jos.putNextEntry(new JarEntry(path));
-            copyStream(is, jos);
+            Kar.copyStream(is, jos);
             is.close();
             locationMap.put(location, 1);
         } catch (Exception e) {
             LOGGER.error("Error adding " + location, e);
         }
-    }
-    
-    public static long copyStream(InputStream input, OutputStream output)
-            throws IOException {
-        byte[] buffer = new byte[10000];
-        long count = 0;
-        int n = 0;
-        while (-1 != (n = input.read(buffer))) {
-            output.write(buffer, 0, n);
-            count += n;
-        }
-        return count;
     }
 
     /**
@@ -542,22 +368,6 @@ public class KarServiceImpl implements KarService {
                 }
             }
         }
-    }
-
-    public void setFeaturesService(FeaturesService featuresService) {
-        this.featuresService = featuresService;
-    }
-
-    public void setStorage(String storage) {
-        this.storage = storage;
-    }
-
-    public void setBase(String base) {
-        this.base = base;
-    }
-
-    public void setLocalRepo(String localRepo) {
-        this.localRepo = localRepo;
     }
 
 }
