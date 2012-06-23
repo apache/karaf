@@ -18,8 +18,10 @@ package org.apache.karaf.wrapper.commands;
 
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
+import org.apache.karaf.shell.console.AbstractAction;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.apache.karaf.wrapper.WrapperService;
+import org.apache.karaf.wrapper.internal.WrapperServiceImpl;
 import org.fusesource.jansi.Ansi;
 
 import java.io.File;
@@ -28,7 +30,7 @@ import java.io.File;
  * Installs the Karaf instance as a service in your operating system.
  */
 @Command(scope = "wrapper", name = "install", description = "Install the container as a system service in the OS.")
-public class Install extends OsgiCommandSupport {
+public class Install extends AbstractAction {
 
     @Option(name = "-n", aliases = {"--name"}, description = "The service name that will be used when installing the service. (Default: karaf)", required = false, multiValued = false)
     private String name = "karaf";
@@ -42,7 +44,7 @@ public class Install extends OsgiCommandSupport {
     @Option(name = "-s", aliases = {"--start-type"}, description = "Mode in which the service is installed. AUTO_START or DEMAND_START (Default: AUTO_START)", required = false, multiValued = false)
     private String startType = "AUTO_START";
 
-    private WrapperService wrapperService;
+    private WrapperService wrapperService = new WrapperServiceImpl();
 
     public void setWrapperService(WrapperService wrapperService) {
         this.wrapperService = wrapperService;

@@ -114,6 +114,9 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <installedFeatures>
+                        <feature>wrapper</feature>
+                    </installedFeatures>
                     <bootFeatures>
                         <feature>framework</feature>
                     </bootFeatures>
