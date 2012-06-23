@@ -28,7 +28,7 @@ import java.util.Scanner;
 import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
 
-import org.apache.karaf.shell.console.OsgiCommandSupport;
+import org.apache.karaf.shell.console.AbstractAction;
 import org.apache.felix.gogo.commands.Option;
 import org.apache.felix.gogo.commands.Command;
 import org.fusesource.jansi.Ansi;
@@ -39,7 +39,7 @@ import org.fusesource.jansi.Ansi;
  * @version $Rev: 603634 $ $Date: 2007-12-12 16:07:16 +0100 (Wed, 12 Dec 2007) $
  */
 @Command(scope = "wrapper", name = "install", description = "Install the container as a system service in the OS.")
-public class InstallCommand extends OsgiCommandSupport {
+public class InstallCommand extends AbstractAction {
     @Option(name = "-n", aliases = {"--name"}, description = "The service name that will be used when installing the service. (Default: karaf)", required = false, multiValued = false)
     private String name = "karaf";
 
