@@ -75,6 +75,8 @@
                 <configuration>
                     <instructions>
                         <Import-Package>
+                            !org.apache.karaf.main,
+                            !org.tanukisoftware*,
                             org.apache.karaf.wrapper,
                             javax.management,
                             javax.management.loading,
@@ -86,6 +88,9 @@
                             org.apache.karaf.shell.console,
                             *
                         </Import-Package>
+                        <Private-Package>
+                            org.apache.karaf.wrapper.internal
+                        </Private-Package>
                     </instructions>
                 </configuration>
             </plugin>
