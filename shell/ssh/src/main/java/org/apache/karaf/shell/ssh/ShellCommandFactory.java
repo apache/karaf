@@ -25,18 +25,28 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
+import java.util.Map;
 import javax.security.auth.Subject;
 
+import org.apache.felix.gogo.commands.CommandException;
+import org.apache.felix.gogo.runtime.CommandNotFoundException;
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
+import org.apache.felix.service.command.Converter;
+import org.apache.karaf.shell.console.jline.Console;
 import org.apache.sshd.server.Command;
 import org.apache.sshd.server.CommandFactory;
 import org.apache.sshd.server.Environment;
 import org.apache.sshd.server.ExitCallback;
 import org.apache.sshd.server.SessionAware;
 import org.apache.sshd.server.session.ServerSession;
+import org.fusesource.jansi.Ansi;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ShellCommandFactory implements CommandFactory {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ShellCommandFactory.class);
 
     private CommandProcessor commandProcessor;
 
@@ -85,20 +95,65 @@ public class ShellCommandFactory implements CommandFactory {
             try {
                 final CommandSession session = commandProcessor.createSession(in, new PrintStream(out), new PrintStream(err));
                 session.put("SCOPE", "shell:osgi:*");
-                Subject subject = this.session != null ? this.session.getAttribute(KarafJaasPasswordAuthenticator.SUBJECT_ATTRIBUTE_KEY) : null;
-                if (subject != null) {
-                    try {
-                        Subject.doAs(subject, new PrivilegedExceptionAction<Object>() {
-                            public Object run() throws Exception {
-                                session.execute(command);
-                                return null;
-                            }
-                        });
-                    } catch (PrivilegedActionException e) {
-                        throw e.getException();
+                session.put("APPLICATION", System.getProperty("karaf.name", "root"));
+                for (Map.Entry<String,String> e : env.getEnv().entrySet()) {
+                    session.put(e.getKey(), e.getValue());
+                }
+                try {
+                    Subject subject = this.session != null ? this.session.getAttribute(KarafJaasPasswordAuthenticator.SUBJECT_ATTRIBUTE_KEY) : null;
+                    Object result;
+                    if (subject != null) {
+                        try {
+                            result = Subject.doAs(subject, new PrivilegedExceptionAction<Object>() {
+                                public Object run() throws Exception {
+                                    return session.execute(command);
+                                }
+                            });
+                        } catch (PrivilegedActionException e) {
+                            throw e.getException();
+                        }
+                    } else {
+                        result = session.execute(command);
                     }
-                } else {
-                    session.execute(command);
+                    if (result != null)
+                    {
+                        session.getConsole().println(session.format(result, Converter.INSPECT));
+                    }
+                } catch (Throwable t) {
+                    try {
+                        if (t instanceof CommandNotFoundException) {
+                            LOGGER.debug("Unknown command entered", t);
+                        } else {
+                            LOGGER.info("Exception caught while executing command", t);
+                        }
+                        session.put(Console.LAST_EXCEPTION, t);
+                        if (t instanceof CommandException) {
+                            session.getConsole().println(((CommandException) t).getNiceHelp());
+                        } else if (t instanceof CommandNotFoundException) {
+                            String str = Ansi.ansi()
+                                    .fg(Ansi.Color.RED)
+                                    .a("Command not found: ")
+                                    .a(Ansi.Attribute.INTENSITY_BOLD)
+                                    .a(((CommandNotFoundException) t).getCommand())
+                                    .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
+                                    .fg(Ansi.Color.DEFAULT).toString();
+                            session.getConsole().println(str);
+                        }
+                        if ( getBoolean(session, Console.PRINT_STACK_TRACES)) {
+                            session.getConsole().print(Ansi.ansi().fg(Ansi.Color.RED).toString());
+                            t.printStackTrace(session.getConsole());
+                            session.getConsole().print(Ansi.ansi().fg(Ansi.Color.DEFAULT).toString());
+                        }
+                        else if (!(t instanceof CommandException) && !(t instanceof CommandNotFoundException)) {
+                            session.getConsole().print(Ansi.ansi().fg(Ansi.Color.RED).toString());
+                            session.getConsole().println("Error executing command: "
+                                    + (t.getMessage() != null ? t.getMessage() : t.getClass().getName()));
+                            session.getConsole().print(Ansi.ansi().fg(Ansi.Color.DEFAULT).toString());
+                        }
+                        session.getConsole().flush();
+                    } catch (Exception ignore) {
+                        // ignore
+                    }
                 }
             } catch (Exception e) {
                 throw (IOException) new IOException("Unable to start shell").initCause(e);
@@ -110,6 +165,20 @@ public class ShellCommandFactory implements CommandFactory {
 
         public void destroy() {
 		}
+
+        protected boolean getBoolean(CommandSession session, String name) {
+            Object s = session.get(name);
+            if (s == null) {
+                s = System.getProperty(name);
+            }
+            if (s == null) {
+                return false;
+            }
+            if (s instanceof Boolean) {
+                return (Boolean) s;
+            }
+            return Boolean.parseBoolean(s.toString());
+        }
 
     }
 
