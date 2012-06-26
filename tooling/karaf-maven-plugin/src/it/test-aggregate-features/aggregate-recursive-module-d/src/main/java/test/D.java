@@ -17,19 +17,14 @@
  * under the License.
  */
 
-import org.custommonkey.xmlunit.*;
-import java.io.*;
-import java.lang.*;
+package test.d;
 
-Reader r = new FileReader(new File(basedir, "control.xml"));
+import test.a.*;
+import test.c.*;
 
-// load the features file pushed to the repository
-File generated = new File( localRepositoryPath, "test/test-basic-generation/1.0-SNAPSHOT/test-basic-generation-1.0-SNAPSHOT-features.xml" );
-if (generated.exists()) {
-    try {
-        XMLAssert.assertXMLEqual(r, new FileReader(generated));
-        return true;
-    } catch (Throwable ignored) { }
+public class D
+{
+    public String createStringWithDependencies() {
+        return A.ASTRING + " " + C.createStringWithDependencies() + " " + "D-string";
+    }
 }
-
-return false;
