@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <!--
   ~ Licensed to the Apache Software Foundation (ASF) under one
   ~ or more contributor license agreements.  See the NOTICE file
@@ -22,7 +23,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>test</groupId>
-    <artifactId>test-basic-generation</artifactId>
+    <artifactId>test-type-classifier</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>bundle</packaging>
 
@@ -50,6 +51,8 @@
                             <goal>features-generate-descriptor</goal>
                         </goals>
                         <configuration>
+                            <attachmentArtifactType>zazzle</attachmentArtifactType>
+                            <attachmentArtifactClassifier>fershizzle</attachmentArtifactClassifier>
                         </configuration>
                     </execution>
                 </executions>
