@@ -316,6 +316,11 @@
                         <artifactId>org.osgi.compendium</artifactId>
                         <version>${osgi.compendium.version}</version>
                     </dependency>
+                    <dependency>
+                        <groupId>org.apache.felix</groupId>
+                        <artifactId>org.apache.felix.bundlerepository</artifactId>
+                        <version>${felix.bundlerepository.version}</version>
+                    </dependency>
                 </dependencies>
             </plugin>
             <plugin>
