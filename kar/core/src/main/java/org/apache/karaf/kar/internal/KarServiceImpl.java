@@ -63,13 +63,11 @@ public class KarServiceImpl implements KarService {
     private File storage;
     private File base;
     private FeaturesService featuresService;
-    private final MavenRepoManager mavenRepoManager;
 
-    public KarServiceImpl(String karafBase, FeaturesService featuresService, MavenRepoManager mavenRepoManager) {
+    public KarServiceImpl(String karafBase, FeaturesService featuresService) {
         this.base = new File(karafBase);
         this.storage = new File(this.base, "data" + File.separator + "kar");
         this.featuresService = featuresService;
-        this.mavenRepoManager = mavenRepoManager;
         this.storage.mkdirs();
         if (!storage.isDirectory()) {
             throw new IllegalStateException("KAR storage " + storage + " is not a directory");
@@ -96,9 +94,6 @@ public class KarServiceImpl implements KarService {
             installFeatures(kar.getFeatureRepos());
         }
 
-        if (mavenRepoManager != null) {
-            mavenRepoManager.addRepo(repoDir.toURI());
-        }
     }
 
 
@@ -167,9 +162,6 @@ public class KarServiceImpl implements KarService {
             featuresService.removeRepository(featuresRepository);
         }
         
-        // Creating the URI before deleting the dir to get a "/" at the end 
-        URI karURI = karDir.toURI();
-        mavenRepoManager.removeRepo(karURI);
         deleteRecursively(karDir);
     }
     

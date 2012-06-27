@@ -27,13 +27,8 @@
     <bean id="karService" class="org.apache.karaf.kar.internal.KarServiceImpl">
         <argument value="$[karaf.base]" />
         <argument ref="featuresService" />
-        <argument ref="mavenRepoManager"/>
     </bean>
     
-    <bean id="mavenRepoManager" class="org.apache.karaf.kar.internal.MavenRepoManager">
-        <argument value="$[karaf.base]" />
-    </bean>
-
     <service ref="karService" interface="org.apache.karaf.kar.KarService"/>
     
     <bean id="mbeanImpl" class="org.apache.karaf.kar.internal.Kars">
