@@ -86,7 +86,12 @@
             </resource>
             <resource>
                 <directory>${project.build.directory}/demos</directory>
-                <filtering>false</filtering>
+                <filtering>true</filtering>
+                <excludes>
+                    <exclude>**/*.i??</exclude>
+                    <exclude>**/.target</exclude>
+                    <exclude>**/.classpath</exclude>
+                </excludes>
             </resource>
         </resources>
         <plugins>
