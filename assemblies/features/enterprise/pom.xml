@@ -67,12 +67,6 @@
         <!-- jpa deps -->
         <dependency>
             <groupId>org.apache.geronimo.specs</groupId>
-            <artifactId>geronimo-jta_1.1_spec</artifactId>
-            <version>${geronimo.jta-spec.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.geronimo.specs</groupId>
             <artifactId>geronimo-jpa_2.0_spec</artifactId>
             <version>${geronimo.jpa-spec.version}</version>
             <scope>provided</scope>
@@ -109,12 +103,6 @@
         </dependency>
 
         <!-- jndi deps -->
-        <dependency>
-            <groupId>org.apache.aries</groupId>
-            <artifactId>org.apache.aries.util</artifactId>
-            <version>${aries.util.version}</version>
-            <scope>provided</scope>
-        </dependency>
         <dependency>
             <groupId>org.apache.aries.jndi</groupId>
             <artifactId>org.apache.aries.jndi.api</artifactId>

@@ -97,12 +97,6 @@
             <version>${spring.version}</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.deployer</groupId>
-            <artifactId>org.apache.karaf.deployer.spring</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
 
         <!-- spring-aspects deps -->
         <dependency>
@@ -210,12 +204,6 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-jms</artifactId>
-            <version>${spring.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-tx</artifactId>
             <version>${spring.version}</version>
             <scope>provided</scope>
         </dependency>
