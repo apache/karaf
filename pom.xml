@@ -197,7 +197,7 @@
         <pax.base.version>1.3.0</pax.base.version>
         <pax.url.version>1.4.3-SNAPSHOT</pax.url.version>
         <pax.web.version>2.0.0</pax.web.version>
-        <pax.swissbox.version>1.5.0</pax.swissbox.version>
+        <pax.swissbox.version>1.5.1</pax.swissbox.version>
         <pax.tinybundle.version>1.0.0</pax.tinybundle.version>
         <servlet.api.version>3.0</servlet.api.version>
         <slf4j.version>1.6.6</slf4j.version>
