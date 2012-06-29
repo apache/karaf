@@ -33,7 +33,6 @@ import org.apache.felix.gogo.runtime.CommandNotFoundException;
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Converter;
-import org.apache.karaf.shell.console.Console;
 import org.apache.karaf.shell.console.impl.jline.ConsoleImpl;
 import org.apache.sshd.server.Command;
 import org.apache.sshd.server.CommandFactory;
