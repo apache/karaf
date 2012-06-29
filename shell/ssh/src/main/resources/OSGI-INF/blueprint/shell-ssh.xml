@@ -69,9 +69,18 @@
             </action>
         </command>
     </command-bundle>
+    
+    <bean id="knownHostsManager" class="org.apache.karaf.shell.ssh.KnownHostsManager">
+    	<argument value="$[user.home]/.sshkaraf/known_hosts"/>
+    </bean>
+    
+    <bean id="serverKeyVerifier" class="org.apache.karaf.shell.ssh.ServerKeyVerifierImpl">
+		<argument ref="knownHostsManager"/>
+    </bean>
 
     <bean id="sshClient" class="org.apache.sshd.SshClient" factory-method="setUpDefaultClient" scope="prototype">
         <property name="agentFactory" ref="agentFactory" />
+        <property name="serverKeyVerifier" ref="serverKeyVerifier" />
     </bean>
 
     <bean id="userAuthFactoriesFactory" class="org.apache.karaf.shell.ssh.UserAuthFactoriesFactory">
