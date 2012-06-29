@@ -40,7 +40,7 @@ public class ServerKeyVerifierImpl implements ServerKeyVerifier {
 		try {
 			knownKey = knownHostsManager.getKnownKey(remoteAddress, serverKey.getAlgorithm());
 		} catch (InvalidKeySpecException e) {
-			System.out.println("Invalid key stored for host " + remoteAddress + ". Terminating session.");
+			System.err.println("Invalid key stored for host " + remoteAddress + ". Terminating session.");
 			return false;
 		}
 		if (knownKey == null) {
@@ -51,7 +51,7 @@ public class ServerKeyVerifierImpl implements ServerKeyVerifier {
 		
 		boolean verifed = (knownKey.equals(serverKey));
 		if (!verifed) {
-			System.out.println("Server key for host " + remoteAddress + " does not match the stored key !! Terminating session.");
+			System.err.println("Server key for host " + remoteAddress + " does not match the stored key !! Terminating session.");
 		}
 		return verifed;
 	}
