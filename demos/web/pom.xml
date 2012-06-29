@@ -28,7 +28,7 @@
         <groupId>org.apache.karaf.demos</groupId>
         <artifactId>demos</artifactId>
         <version>3.0.0-SNAPSHOT</version>
-        <relativePath>../../../../../../../pom.xml</relativePath>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>web</artifactId>
