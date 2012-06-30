@@ -27,7 +27,6 @@ import jline.Terminal;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.console.BlueprintContainerAware;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.apache.karaf.shell.console.SessionProperties;
 import org.apache.sshd.ClientChannel;
@@ -38,14 +37,11 @@ import org.apache.sshd.client.channel.ChannelShell;
 import org.apache.sshd.client.future.ConnectFuture;
 import org.apache.sshd.common.util.NoCloseInputStream;
 import org.apache.sshd.common.util.NoCloseOutputStream;
-import org.osgi.service.blueprint.container.BlueprintContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Command(scope = "ssh", name = "ssh", description = "Connects to a remote SSH server")
-public class SshAction
-    extends OsgiCommandSupport implements BlueprintContainerAware
-{
+public class SshAction extends OsgiCommandSupport {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     @Option(name="-l", aliases={"--username"}, description = "The user name for remote login", required = false, multiValued = false)
@@ -53,6 +49,9 @@ public class SshAction
 
     @Option(name="-p", aliases={"--port"}, description = "The port to use for SSH connection", required = false, multiValued = false)
     private int port = 22;
+    
+    @Option(name="-q", description = "Quiet Mode. Do not ask for confirmations", required = false, multiValued = false)
+    private boolean quiet;
 
     @Argument(index = 0, name = "hostname", description = "The host name to connect to via SSH", required = true, multiValued = false)
     private String hostname;
@@ -60,21 +59,15 @@ public class SshAction
     @Argument(index = 1, name = "command", description = "Optional command to execute", required = false, multiValued = true)
     private List<String> command;
 
-    private BlueprintContainer container;
-
 	private ClientSession sshSession;
-    private String sshClientId;
 
-    public void setBlueprintContainer(final BlueprintContainer container) {
-        assert container != null;
-        this.container = container;
-    }
+	private SshClientFactory sshClientFactory;
 
-    public void setSshClientId(String sshClientId) {
-        this.sshClientId = sshClientId;
-    }
+    public void setSshClientFactory(SshClientFactory sshClientFactory) {
+		this.sshClientFactory = sshClientFactory;
+	}
 
-    @Override
+	@Override
     protected Object doExecute() throws Exception {
 
         if (hostname.indexOf('@') >= 0) {
@@ -98,8 +91,7 @@ public class SshAction
             }
         }
 
-        // Create the client from prototype
-        SshClient client = (SshClient) container.getComponentInstance(sshClientId);
+        SshClient client = sshClientFactory.create(quiet);
         log.debug("Created client: {}", client);
         client.start();
 

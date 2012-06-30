@@ -56,9 +56,7 @@
     <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
         <command>
             <action class="org.apache.karaf.shell.ssh.SshAction">
-                <property name="sshClientId">
-                    <bp:idref component-id="sshClient"/>
-                </property>
+                <property name="sshClientFactory" ref="sshClientFactory" />
             </action>
         </command>
         <command>
@@ -70,17 +68,9 @@
         </command>
     </command-bundle>
     
-    <bean id="knownHostsManager" class="org.apache.karaf.shell.ssh.KnownHostsManager">
-    	<argument value="$[user.home]/.sshkaraf/known_hosts"/>
-    </bean>
-    
-    <bean id="serverKeyVerifier" class="org.apache.karaf.shell.ssh.ServerKeyVerifierImpl">
-		<argument ref="knownHostsManager"/>
-    </bean>
-
-    <bean id="sshClient" class="org.apache.sshd.SshClient" factory-method="setUpDefaultClient" scope="prototype">
-        <property name="agentFactory" ref="agentFactory" />
-        <property name="serverKeyVerifier" ref="serverKeyVerifier" />
+    <bean id="sshClientFactory" class="org.apache.karaf.shell.ssh.SshClientFactory">
+        <argument ref="agentFactory" />
+        <argument value="$[user.home]/.sshkaraf/known_hosts"/>
     </bean>
 
     <bean id="userAuthFactoriesFactory" class="org.apache.karaf.shell.ssh.UserAuthFactoriesFactory">

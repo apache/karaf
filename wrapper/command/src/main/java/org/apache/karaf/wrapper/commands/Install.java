@@ -16,15 +16,14 @@
  */
 package org.apache.karaf.wrapper.commands;
 
+import java.io.File;
+
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.AbstractAction;
-import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.apache.karaf.wrapper.WrapperService;
 import org.apache.karaf.wrapper.internal.WrapperServiceImpl;
 import org.fusesource.jansi.Ansi;
-
-import java.io.File;
 
 /**
  * Installs the Karaf instance as a service in your operating system.
