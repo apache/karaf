@@ -18,6 +18,7 @@
  */
 package org.apache.karaf.shell.ssh;
 
+import java.io.IOException;
 import java.net.SocketAddress;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
@@ -27,10 +28,11 @@ import org.apache.sshd.client.ServerKeyVerifier;
 
 public class ServerKeyVerifierImpl implements ServerKeyVerifier {
     private final KnownHostsManager knownHostsManager;
+	private final boolean quiet;
 
-	public ServerKeyVerifierImpl(KnownHostsManager knownHostsManager) {
+	public ServerKeyVerifierImpl(KnownHostsManager knownHostsManager, boolean quiet) {
 		this.knownHostsManager = knownHostsManager;
-    	
+		this.quiet = quiet;
 	}
 
 	@Override
@@ -44,9 +46,21 @@ public class ServerKeyVerifierImpl implements ServerKeyVerifier {
 			return false;
 		}
 		if (knownKey == null) {
-			System.out.println("Connecting to this server for the first time. Storing the server key.");
-			knownHostsManager.storeKeyForHost(remoteAddress, serverKey);
-			return true;
+			boolean confirm;
+			if (!quiet) {
+				System.out.println("Connecting to unknown server. Add this server to known hosts ? (y/n)");
+				confirm = getConfirmation();
+			} else {
+				System.out.println("Connecting to unknown server. Automatically adding to known hosts.");
+				confirm = true;
+			}
+			if (confirm) {
+				knownHostsManager.storeKeyForHost(remoteAddress, serverKey);
+				System.out.println("Storing the server key in known_hosts.");
+			} else {
+				System.out.println("Aborting connection");
+			}
+			return confirm;
 		}
 		
 		boolean verifed = (knownKey.equals(serverKey));
@@ -54,6 +68,19 @@ public class ServerKeyVerifierImpl implements ServerKeyVerifier {
 			System.err.println("Server key for host " + remoteAddress + " does not match the stored key !! Terminating session.");
 		}
 		return verifed;
+	}
+
+	private boolean getConfirmation() {
+		int ch;
+		try {
+			do {
+				ch = System.in.read();
+			} while (ch != 'y' && ch != 'n');
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		boolean confirm = ch == 'y';
+		return confirm;
 	}
 
 

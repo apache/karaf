@@ -52,7 +52,7 @@ public class ServerKeyVerifierImplTest {
 		EasyMock.expectLastCall();
 		EasyMock.replay(knowHostsManager);
 
-		ServerKeyVerifierImpl verifier = new ServerKeyVerifierImpl(knowHostsManager);		
+		ServerKeyVerifierImpl verifier = new ServerKeyVerifierImpl(knowHostsManager, true);		
 		boolean verified = verifier.verifyServerKey(null, address, validServerKey);
 		Assert.assertTrue("Key should be verified as the key is new", verified);
 	}
@@ -66,7 +66,7 @@ public class ServerKeyVerifierImplTest {
 		EasyMock.expect(knowHostsManager.getKnownKey(address, ALGORITHM)).andReturn(validServerKey);
 		EasyMock.replay(knowHostsManager);
 
-		ServerKeyVerifierImpl verifier = new ServerKeyVerifierImpl(knowHostsManager);		
+		ServerKeyVerifierImpl verifier = new ServerKeyVerifierImpl(knowHostsManager, true);		
 		boolean verified = verifier.verifyServerKey(null, address, validServerKey);
 		Assert.assertTrue("Key should be verified as the key is known and matches the key we verify", verified);
 	}
@@ -81,7 +81,7 @@ public class ServerKeyVerifierImplTest {
 		EasyMock.expect(knowHostsManager.getKnownKey(address, ALGORITHM)).andReturn(otherServerKey);
 		EasyMock.replay(knowHostsManager);
 
-		ServerKeyVerifierImpl verifier = new ServerKeyVerifierImpl(knowHostsManager);		
+		ServerKeyVerifierImpl verifier = new ServerKeyVerifierImpl(knowHostsManager, true);		
 		boolean verified = verifier.verifyServerKey(null, address, validServerKey);
 		Assert.assertFalse("Key should not be verified as the key is known and does not match the key we verify", verified);
 	}
