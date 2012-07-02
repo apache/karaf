@@ -26,8 +26,11 @@ public interface BundleService {
     BundleInfo getInfo(Bundle bundle);
 
     List<Bundle> selectBundles(List<String> ids, boolean defaultAllBundles);
-
+    
+    List<Bundle> getBundlesByURL(String urlFilter);
+    
     String getDiag(Bundle bundle);
     
     List<BundleRequirement> getUnsatisfiedRquirements(Bundle bundle, String namespace);
+
 }

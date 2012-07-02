@@ -174,5 +174,50 @@ public class BundleSelectorImpl {
         }
         return result;
     }
+    
+    public List<Bundle> getBundlesByURL(String url) {
+        List<Bundle> bundleList = new ArrayList<Bundle>();
+        try {
+            Long id = Long.parseLong(url);
+            Bundle bundle = bundleContext.getBundle(id);
+            if (bundle != null) {
+                bundleList.add(bundle);
+            }
+        } catch (NumberFormatException e) {
+            for (int i = 0; i < bundleContext.getBundles().length; i++) {
+                Bundle bundle = bundleContext.getBundles()[i];
+                if (isMavenSnapshotUrl(bundle.getLocation()) && wildCardMatch(bundle.getLocation(), url)) {
+                    bundleList.add(bundle);
+                }
+            }
+        }
+        return bundleList;
+    }
+
+    private boolean isMavenSnapshotUrl(String url) {
+        return url.startsWith("mvn:") && url.contains("SNAPSHOT");
+    }
+
+    /**
+     * Matches text using a pattern containing wildcards.
+     * 
+     * @param text
+     * @param pattern
+     * @return
+     */
+    private boolean wildCardMatch(String text, String pattern) {
+        String[] cards = pattern.split("\\*");
+        for (String card : cards) {
+            int idx = text.indexOf(card);
+            // Card not detected in the text.
+            if (idx == -1) {
+                return false;
+            }
+
+            // Move ahead, towards the right of the text.
+            text = text.substring(idx + card.length());
+        }
+        return true;
+    }
 
 }

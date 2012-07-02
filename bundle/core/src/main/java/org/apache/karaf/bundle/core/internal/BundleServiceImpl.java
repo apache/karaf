@@ -108,4 +108,9 @@ public class BundleServiceImpl implements BundleService {
         return false;
     }
 
+    @Override
+    public List<Bundle> getBundlesByURL(String urlFilter) {
+        return new BundleSelectorImpl(bundleContext).getBundlesByURL(urlFilter);
+    }
+
 }
