@@ -19,11 +19,17 @@
 
     <reference id="configurationAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"/>
     <reference id="packageAdmin" interface="org.osgi.service.packageadmin.PackageAdmin"/>
+    <reference id="bundleService" interface="org.apache.karaf.bundle.core.BundleService"/>
 
     <bean id="watcher" class="org.apache.karaf.dev.core.internal.BundleWatcherImpl" init-method="start" destroy-method="stop">
         <argument ref="blueprintBundleContext"/>
-        <argument ref="configurationAdmin"/>
         <argument ref="packageAdmin"/>
+        <argument ref="mavenConfigService"/>
+        <argument ref="bundleService"/>
+    </bean>
+
+    <bean id="mavenConfigService" class="org.apache.karaf.dev.core.internal.MavenConfigService">
+        <argument ref="configurationAdmin"/>
     </bean>
     
     <service ref="watcher" interface="org.apache.karaf.dev.core.BundleWatcher"/>

@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -31,20 +30,14 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.karaf.bundle.core.BundleService;
 import org.apache.karaf.dev.core.BundleWatcher;
-import org.ops4j.pax.url.maven.commons.MavenConfiguration;
-import org.ops4j.pax.url.maven.commons.MavenConfigurationImpl;
-import org.ops4j.pax.url.maven.commons.MavenRepositoryURL;
 import org.ops4j.pax.url.mvn.Parser;
-import org.ops4j.pax.url.mvn.ServiceConstants;
-import org.ops4j.util.property.DictionaryPropertyResolver;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.BundleListener;
-import org.osgi.service.cm.Configuration;
-import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,8 +51,9 @@ public class BundleWatcherImpl implements Runnable, BundleListener, BundleWatche
     private final Logger logger = LoggerFactory.getLogger(BundleWatcherImpl.class);
 
     private BundleContext bundleContext;
-    private ConfigurationAdmin configurationAdmin;
     private final PackageAdmin packageAdmin;
+	private final BundleService bundleService;
+	private final MavenConfigService localRepoDetector;
 
     private AtomicBoolean running = new AtomicBoolean(false);
     private long interval = 1000L;
@@ -70,10 +64,11 @@ public class BundleWatcherImpl implements Runnable, BundleListener, BundleWatche
      * Constructor
      */
     @SuppressWarnings("deprecation")
-    public BundleWatcherImpl(BundleContext bundleContext, ConfigurationAdmin configurationAdmin, PackageAdmin packageAdmin) {
+    public BundleWatcherImpl(BundleContext bundleContext, PackageAdmin packageAdmin, MavenConfigService mavenConfigService, BundleService bundleService) {
         this.bundleContext = bundleContext;
-        this.configurationAdmin = configurationAdmin;
         this.packageAdmin = packageAdmin;
+		this.localRepoDetector = mavenConfigService;
+        this.bundleService = bundleService;
     }
 
     /* (non-Javadoc)
@@ -95,13 +90,13 @@ public class BundleWatcherImpl implements Runnable, BundleListener, BundleWatche
                 oldCounter = counter.get();
                 watchedBundles.clear();
                 for (String bundleURL : watchURLs) {
-                    for (Bundle bundle : getBundlesByURL(bundleURL)) {
+                    for (Bundle bundle : bundleService.getBundlesByURL(bundleURL)) {
                         watchedBundles.add(bundle);
                     }
                 }
             }
             if (watchedBundles.size() > 0) {
-                File localRepository = getLocalRepository();
+                File localRepository = this.localRepoDetector.getLocalRepository();
                 List<Bundle> updated = new ArrayList<Bundle>();
                 for (Bundle bundle : watchedBundles) {
                     try {
@@ -183,87 +178,6 @@ public class BundleWatcherImpl implements Runnable, BundleListener, BundleWatche
         return null;
     }
 
-    private File getLocalRepository() {
-        // Attempt to retrieve local repository location from MavenConfiguration
-        MavenConfiguration configuration = retrieveMavenConfiguration();
-        if (configuration != null) {
-            MavenRepositoryURL localRepositoryURL = configuration.getLocalRepository();
-            if (localRepositoryURL != null) {
-                return localRepositoryURL.getFile().getAbsoluteFile();
-            }
-        }
-        // If local repository not found assume default.
-        String localRepo = System.getProperty("user.home") + File.separator + ".m2" + File.separator + "repository";
-        return new File(localRepo).getAbsoluteFile();
-    }
-
-    private MavenConfiguration retrieveMavenConfiguration() {
-        MavenConfiguration mavenConfiguration = null;
-        try {
-            Configuration configuration = configurationAdmin.getConfiguration(ServiceConstants.PID);
-            if (configuration != null) {
-                Dictionary dictonary = configuration.getProperties();
-                if (dictonary != null) {
-                    DictionaryPropertyResolver resolver = new DictionaryPropertyResolver(dictonary);
-                    mavenConfiguration = new MavenConfigurationImpl(resolver, ServiceConstants.PID);
-                }
-            }
-        } catch (IOException e) {
-            logger.error("Error retrieving maven configuration", e);
-        }
-        return mavenConfiguration;
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.karaf.dev.core.internal.BundleWatcher#getBundlesByURL(java.lang.String)
-     */
-    @Override
-    public List<Bundle> getBundlesByURL(String url) {
-        List<Bundle> bundleList = new ArrayList<Bundle>();
-        try {
-            Long id = Long.parseLong(url);
-            Bundle bundle = bundleContext.getBundle(id);
-            if (bundle != null) {
-                bundleList.add(bundle);
-            }
-        } catch (NumberFormatException e) {
-            for (int i = 0; i < bundleContext.getBundles().length; i++) {
-                Bundle bundle = bundleContext.getBundles()[i];
-                if (isMavenSnapshotUrl(bundle.getLocation()) && wildCardMatch(bundle.getLocation(), url)) {
-                    bundleList.add(bundle);
-                }
-            }
-        }
-        return bundleList;
-    }
-
-    private boolean isMavenSnapshotUrl(String url) {
-        return url.startsWith("mvn:") && url.contains("SNAPSHOT");
-    }
-
-    /**
-     * Matches text using a pattern containing wildcards.
-     * 
-     * @param text
-     * @param pattern
-     * @return
-     */
-    private boolean wildCardMatch(String text, String pattern) {
-        String[] cards = pattern.split("\\*");
-        // Iterate over the cards.
-        for (String card : cards) {
-            int idx = text.indexOf(card);
-            // Card not detected in the text.
-            if (idx == -1) {
-                return false;
-            }
-
-            // Move ahead, towards the right of the text.
-            text = text.substring(idx + card.length());
-        }
-        return true;
-    }
-
     public void start() {
         bundleContext.addBundleListener(this);
         // start the watch thread
@@ -310,5 +224,10 @@ public class BundleWatcherImpl implements Runnable, BundleListener, BundleWatche
     public boolean isRunning() {
         return running.get();
     }
+
+	@Override
+	public List<Bundle> getBundlesByURL(String urlFilter) {
+		return bundleService.getBundlesByURL(urlFilter);
+	}
 
 }
