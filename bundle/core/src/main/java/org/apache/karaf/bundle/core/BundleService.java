@@ -17,6 +17,7 @@
 package org.apache.karaf.bundle.core;
 
 import java.util.List;
+import java.util.Map;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.wiring.BundleRequirement;
@@ -32,5 +33,13 @@ public interface BundleService {
     String getDiag(Bundle bundle);
     
     List<BundleRequirement> getUnsatisfiedRquirements(Bundle bundle, String namespace);
+    
+    Map<String, Bundle> getWiredBundles(Bundle bundle);
+    
+    boolean isDynamicImport(Bundle bundle);
+
+    void enableDynamicImports(Bundle bundle);
+
+    void disableDynamicImports(Bundle bundle);
 
 }

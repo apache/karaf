@@ -14,8 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.dev.command;
+package org.apache.karaf.bundle.command;
 
+import org.apache.karaf.bundle.core.BundleService;
 import org.apache.karaf.shell.commands.Command;
 import org.osgi.framework.Bundle;
 
@@ -23,17 +24,22 @@ import org.osgi.framework.Bundle;
  * Command for enabling/disabling debug logging on a bundle and calculating the difference in
  * wired imports.
  */
-@Command(scope = "dev", name = "dynamic-import", description = "Enables/disables dynamic-import for a given bundle.")
-public class DynamicImport extends AbstractBundleCommand {
+@Command(scope = "bundle", name = "dynamic-import", description = "Enables/disables dynamic-import for a given bundle.")
+public class DynamicImport extends BundleCommand {
+    BundleService bundleService;
+
+    public void setBundleService(BundleService bundleService) {
+        this.bundleService = bundleService;
+    }
 
     @Override
     protected void doExecute(Bundle bundle) throws Exception {
-        if (devService.isDynamicImport(bundle)) {
+        if (bundleService.isDynamicImport(bundle)) {
             System.out.printf("Disabling dynamic imports on bundle %s%n", bundle);
-            devService.disableDynamicImports(bundle);
+            bundleService.disableDynamicImports(bundle);
         } else {
             System.out.printf("Enabling dynamic imports on bundle %s%n", bundle);
-            devService.enableDynamicImports(bundle);
+            bundleService.enableDynamicImports(bundle);
         }
     }
 

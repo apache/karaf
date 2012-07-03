@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.dev.core.internal;
+package org.apache.karaf.bundle.core.internal;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -31,7 +31,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.karaf.bundle.core.BundleService;
-import org.apache.karaf.dev.core.BundleWatcher;
+import org.apache.karaf.bundle.core.BundleWatcher;
 import org.ops4j.pax.url.mvn.Parser;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
