@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.dev.command;
+package org.apache.karaf.shell.commands.impl;
 
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
@@ -25,13 +25,14 @@ import org.apache.karaf.shell.console.SessionProperties;
  * Command for showing the full tree of bundles that have been used to resolve
  * a given bundle.
  */
-@Command(scope = "dev", name = "stack-traces-print", description = "Prints the full stack trace in the console when the execution of a command throws an exception.")
+@Command(scope = "shell", name = "stack-traces-print", description = "Prints the full stack trace in the console when the execution of a command throws an exception.")
 public class PrintStackTraces extends AbstractAction {
 
     @Argument(name = "print", description="Print stack traces or not", required = false, multiValued = false)
     boolean print = true;
 
     protected Object doExecute() throws Exception {
+        System.out.println("Printing of stacktraces set to " + print);
         session.put(SessionProperties.PRINT_STACK_TRACES, Boolean.valueOf(print));
         return null;
     }
