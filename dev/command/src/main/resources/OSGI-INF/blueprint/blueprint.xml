@@ -26,9 +26,6 @@
             </action>
         </command>
         <command>
-            <action class="org.apache.karaf.dev.command.PrintStackTraces" />
-        </command>
-        <command>
             <action class="org.apache.karaf.dev.command.SystemProperty" >
                 <property name="devService" ref="devService"/>
             </action>

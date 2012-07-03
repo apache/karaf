@@ -62,6 +62,9 @@
             <action class="org.apache.karaf.shell.commands.impl.NewAction"/>
         </command>
         <command>
+            <action class="org.apache.karaf.shell.commands.impl.PrintStackTraces" />
+        </command>
+        <command>
             <action class="org.apache.karaf.shell.commands.impl.LogoutAction"/>
         </command>
         <command>
