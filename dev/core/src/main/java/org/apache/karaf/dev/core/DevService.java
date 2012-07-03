@@ -13,9 +13,6 @@
  */
 package org.apache.karaf.dev.core;
 
-import java.util.Map;
-
-import org.osgi.framework.Bundle;
 
 
 public interface DevService {
@@ -52,12 +49,5 @@ public interface DevService {
      * @param key
      */
     String setSystemProperty(String key, String value, boolean persist);
-    
-    boolean isDynamicImport(Bundle bundle);
 
-    void enableDynamicImports(Bundle bundle);
-
-    void disableDynamicImports(Bundle bundle);
-    
-    Map<String, Bundle> getWiredBundles(Bundle bundle);
 }

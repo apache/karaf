@@ -19,6 +19,9 @@
 -->
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
 
+    <reference id="bundleService" interface="org.apache.karaf.bundle.core.BundleService" />
+    <reference id="bundleWatcher" interface="org.apache.karaf.bundle.core.BundleWatcher"/>
+
     <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
         <command>
             <action class="org.apache.karaf.bundle.command.StartLevel">
@@ -97,8 +100,23 @@
                 <property name="bundleService" ref="bundleService"/>
             </action>
         </command>
+        <command>
+            <action class="org.apache.karaf.bundle.command.ShowBundleTree">
+                <property name="bundleService" ref="bundleService"/>
+                <property name="bundleContext" ref="blueprintBundleContext" />
+            </action>
+        </command>
+        <command>
+            <action class="org.apache.karaf.bundle.command.DynamicImport">
+                <property name="bundleService" ref="bundleService"/>
+                <property name="bundleContext" ref="blueprintBundleContext" />
+            </action> 
+        </command>
+        <command>
+            <action class="org.apache.karaf.bundle.command.Watch" >
+                <property name="bundleWatcher" ref="bundleWatcher"/>
+            </action>
+        </command>
     </command-bundle>
     
-    <reference id="bundleService" interface="org.apache.karaf.bundle.core.BundleService" />
-
 </blueprint>

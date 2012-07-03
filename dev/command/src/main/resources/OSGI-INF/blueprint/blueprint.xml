@@ -21,21 +21,9 @@
 
     <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
         <command>
-            <action class="org.apache.karaf.dev.command.ShowBundleTree">
-                <property name="devService" ref="devService"/>
-                <property name="bundleContext" ref="blueprintBundleContext" />
-            </action>
-        </command>
-        <command>
             <action class="org.apache.karaf.dev.command.FrameworkOptions" >
                 <property name="devService" ref="devService"/>
             </action>
-        </command>
-        <command>
-            <action class="org.apache.karaf.dev.command.DynamicImport">
-                <property name="devService" ref="devService"/>
-                <property name="bundleContext" ref="blueprintBundleContext" />
-            </action> 
         </command>
         <command>
             <action class="org.apache.karaf.dev.command.PrintStackTraces" />
@@ -45,14 +33,8 @@
                 <property name="devService" ref="devService"/>
             </action>
         </command>
-        <command>
-            <action class="org.apache.karaf.dev.command.Watch" >
-                <property name="bundleWatcher" ref="bundleWatcher"/>
-            </action>
-        </command>
     </command-bundle>
     
     <reference id="devService" interface="org.apache.karaf.dev.core.DevService"/>
-    <reference id="bundleWatcher" interface="org.apache.karaf.dev.core.BundleWatcher"/>
 
 </blueprint>

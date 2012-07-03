@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.dev.command;
+package org.apache.karaf.bundle.command;
 
 import static java.lang.String.format;
 
@@ -29,8 +29,9 @@ import org.apache.felix.utils.manifest.Clause;
 import org.apache.felix.utils.manifest.Parser;
 import org.apache.felix.utils.version.VersionRange;
 import org.apache.felix.utils.version.VersionTable;
-import org.apache.karaf.dev.command.bundletree.Node;
-import org.apache.karaf.dev.command.bundletree.Tree;
+import org.apache.karaf.bundle.command.bundletree.Node;
+import org.apache.karaf.bundle.command.bundletree.Tree;
+import org.apache.karaf.bundle.core.BundleService;
 import org.apache.karaf.shell.commands.Command;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
@@ -46,12 +47,15 @@ import org.slf4j.LoggerFactory;
  * Command for showing the full tree of bundles that have been used to resolve
  * a given bundle.
  */
-@Command(scope = "dev", name = "tree-show", description = "Shows the tree of bundles based on the wiring information.")
-public class ShowBundleTree extends AbstractBundleCommand {
-
+@Command(scope = "bundle", name = "tree-show", description = "Shows the tree of bundles based on the wiring information.")
+public class ShowBundleTree extends BundleCommand {
     private static final Logger LOGGER = LoggerFactory.getLogger(ShowBundleTree.class);
-
+    private BundleService bundleService;
     private Tree<Bundle> tree;
+
+    public void setBundleService(BundleService bundleService) {
+        this.bundleService = bundleService;
+    }
 
     @Override
     protected void doExecute(Bundle bundle) throws Exception {
@@ -220,7 +224,7 @@ public class ShowBundleTree extends AbstractBundleCommand {
     private void createNode(Node<Bundle> node) {
         Bundle bundle = node.getValue();
         Collection<Bundle> exporters = new HashSet<Bundle>();
-        exporters.addAll(devService.getWiredBundles(bundle).values());
+        exporters.addAll(bundleService.getWiredBundles(bundle).values());
 
         for (Bundle exporter : exporters) {
             if (node.hasAncestor(exporter)) {                

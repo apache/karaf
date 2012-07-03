@@ -14,11 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.dev.command;
+package org.apache.karaf.bundle.command;
 
 import java.util.List;
 
-import org.apache.karaf.dev.core.BundleWatcher;
+import org.apache.karaf.bundle.core.BundleWatcher;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
@@ -26,7 +26,7 @@ import org.apache.karaf.shell.console.AbstractAction;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 
-@Command(scope = "dev", name = "watch", description = "Watches and updates bundles", detailedDescription = "Watches the local maven repo for changes in snapshot jars and redploys changed jars")
+@Command(scope = "bundle", name = "watch", description = "Watches and updates bundles", detailedDescription = "Watches the local maven repo for changes in snapshot jars and redploys changed jars")
 public class Watch extends AbstractAction {
 
     @Argument(index = 0, name = "urls", description = "The bundle IDs or URLs", required = false, multiValued = true)

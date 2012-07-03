@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.dev.command.bundletree;
+package org.apache.karaf.bundle.command.bundletree;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -28,8 +28,8 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Set;
 
-import org.apache.karaf.dev.command.bundletree.Node;
-import org.apache.karaf.dev.command.bundletree.Tree;
+import org.apache.karaf.bundle.command.bundletree.Node;
+import org.apache.karaf.bundle.command.bundletree.Tree;
 import org.junit.Test;
 
 /**

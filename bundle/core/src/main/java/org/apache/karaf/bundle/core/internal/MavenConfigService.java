@@ -1,4 +1,4 @@
-package org.apache.karaf.dev.core.internal;
+package org.apache.karaf.bundle.core.internal;
 
 import java.io.File;
 import java.io.IOException;
@@ -7,7 +7,7 @@ import java.util.Dictionary;
 import org.ops4j.pax.url.maven.commons.MavenConfiguration;
 import org.ops4j.pax.url.maven.commons.MavenConfigurationImpl;
 import org.ops4j.pax.url.maven.commons.MavenRepositoryURL;
-import org.ops4j.pax.url.wrap.ServiceConstants;
+import org.ops4j.pax.url.mvn.ServiceConstants;
 import org.ops4j.util.property.DictionaryPropertyResolver;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
