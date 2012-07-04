@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.dev.command;
+package org.apache.karaf.system.commands;
 
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
@@ -23,8 +23,8 @@ import org.apache.karaf.shell.commands.Option;
 /**
  * Command that allow access to system properties easily.
  */
-@Command(scope = "dev", name = "system-property", description = "Get or set a system property.")
-public class SystemProperty extends DevCommandSupport {
+@Command(scope = "systen", name = "property", description = "Get or set a system property.")
+public class SystemProperty extends AbstractSystemAction {
 
     @Option(name = "-p", aliases = { "--persistent" }, description = "Persist the new value to the etc/system.properties file")
     boolean persistent;
@@ -38,7 +38,7 @@ public class SystemProperty extends DevCommandSupport {
     @Override
     protected Object doExecute() throws Exception {
         if (value != null) {
-            return devService.setSystemProperty(key, value, persistent);
+            return systemService.setSystemProperty(key, value, persistent);
         } else {
             return System.getProperty(key);
         }

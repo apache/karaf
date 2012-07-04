@@ -53,7 +53,6 @@
         <module>jaas</module>
         <module>client</module>
         <module>management</module>
-        <module>dev</module>
         <module>system</module>
         <module>web</module>
         <module>wrapper</module>
@@ -390,17 +389,6 @@
             <dependency>
                 <groupId>org.apache.karaf.service</groupId>
                 <artifactId>org.apache.karaf.service.command</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.karaf.dev</groupId>
-                <artifactId>org.apache.karaf.dev.core</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.karaf.dev</groupId>
-                <artifactId>org.apache.karaf.dev.command</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

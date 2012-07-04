@@ -33,8 +33,6 @@
         <bundle start-level="30">mvn:org.apache.karaf.log/org.apache.karaf.log.command/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.service/org.apache.karaf.service.core/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.service/org.apache.karaf.service.command/${project.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.karaf.dev/org.apache.karaf.dev.core/${project.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.karaf.dev/org.apache.karaf.dev.command/${project.version}</bundle>
     </feature>
 
     <feature name="aries-annotation" description="Aries Annotations" version="${project.version}">

@@ -79,4 +79,31 @@ public interface SystemService {
      * @param name new instance name
      */
     void setName(String name);
+    
+    /**
+     * Get the current OSGi framework in use.
+     *
+     * @return the name of the OSGi framework in use.
+     * @throws Exception
+     */
+    FrameworkType getFramework();
+    
+    /**
+     * change OSGi framework
+     *
+     * @param framework to use.
+     */
+    void setFramework(FrameworkType framework);
+    
+    /**
+     * Enable or diable debgging
+     * @param debug enable if true
+     */
+    void setFrameworkDebug(boolean debug);
+
+    /**
+     * Set a system property and persist to etc/system.properties
+     * @param key
+     */
+    String setSystemProperty(String key, String value, boolean persist);
 }

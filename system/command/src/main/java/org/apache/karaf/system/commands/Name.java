@@ -18,23 +18,15 @@ package org.apache.karaf.system.commands;
 
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.console.OsgiCommandSupport;
-import org.apache.karaf.system.SystemService;
 
 /**
  * Command to shut down Karaf container.
  */
 @Command(scope = "system", name = "name", description = "Show or change Karaf instance name.")
-public class Name extends OsgiCommandSupport {
+public class Name extends AbstractSystemAction {
 
     @Argument(name = "name", index = 0, description = "New name for the instance", required = false, multiValued = false)
     String name;
-
-    private SystemService systemService;
-
-    public void setSystemService(SystemService systemService) {
-        this.systemService = systemService;
-    }
 
     protected Object doExecute() throws Exception {
         if (name == null) {

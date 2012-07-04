@@ -29,4 +29,25 @@ public interface SystemMBean {
     void setStartLevel(int startLevel) throws Exception;
     int getStartLevel() throws Exception;
 
+    /**
+     * Get the current OSGi framework in use.
+     *
+     * @return the name of the OSGi framework in use.
+     * @throws Exception
+     */
+    String getFramework();
+
+    /**
+     * change OSGi framework
+     *
+     * @param framework to use.
+     */
+    void setFramework(String framework);
+    
+    /**
+     * Enable or diable debgging
+     * @param debug enable if true
+     */
+    void setFrameworkDebug(boolean debug);
+
 }

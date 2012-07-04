@@ -19,12 +19,13 @@ package org.apache.karaf.system.internal;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
 import org.apache.felix.utils.properties.Properties;
+import org.apache.karaf.system.FrameworkType;
 import org.apache.karaf.system.SystemService;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.startlevel.FrameworkStartLevel;
 import org.slf4j.Logger;
@@ -67,13 +68,8 @@ public class SystemServiceImpl implements SystemService {
         new Thread() {
             public void run() {
                 try {
-                    if (sleep > 0) {
-                        LOGGER.info("Shutdown in " + sleep / 1000 / 60 + " minute(s)");
-                        System.err.println("Shutdown in " + sleep / 1000 / 60 + " minutes(s)");
-                    }
-                    Thread.sleep(sleep);
-                    Bundle bundle = getBundleContext().getBundle(0);
-                    bundle.stop();
+                    sleepWithMsg(sleep, "Shutdown in " + sleep / 1000 / 60 + " minute(s)");
+                    getBundleContext().getBundle(0).stop();
                 } catch (Exception e) {
                     LOGGER.error("Halt error", e);
                 }
@@ -85,11 +81,7 @@ public class SystemServiceImpl implements SystemService {
         new Thread() {
             public void run() {
                 try {
-                    if (sleep > 0) {
-                        LOGGER.info("Reboot in " + sleep / 1000 / 60 + " minute(s)");
-                        System.err.println("Reboot in " + sleep / 1000 / 60 + " minute(s)");
-                    }
-                    Thread.sleep(sleep);
+                    sleepWithMsg(sleep, "Reboot in " + sleep / 1000 / 60 + " minute(s)");
                     System.setProperty("karaf.restart", "true");
                     System.setProperty("karaf.restart.clean", Boolean.toString(clean));
                     bundleContext.getBundle(0).stop();
@@ -98,6 +90,15 @@ public class SystemServiceImpl implements SystemService {
                 }
             }
         }.start();
+    }
+    
+    private void sleepWithMsg(final long sleep, String msg)
+            throws InterruptedException {
+        if (sleep > 0) {
+            LOGGER.info(msg);
+            System.err.println(msg);
+        }
+        Thread.sleep(sleep);
     }
 
     public void setStartLevel(int startLevel) throws Exception {
@@ -166,6 +167,63 @@ public class SystemServiceImpl implements SystemService {
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
+    }
+    
+    public FrameworkType getFramework() {
+        if (bundleContext.getBundle(0).getSymbolicName().contains("felix")) {
+            return FrameworkType.felix;
+        } else {
+            return FrameworkType.equinox;
+        }
+    }
+
+    private Properties loadProps() throws IOException {
+        return new Properties(new File(System.getProperty("karaf.base"), "etc/config.properties"));
+    }
+
+    public void setFramework(FrameworkType framework) {
+        if (framework == null) {
+            return;
+        }
+        try {
+            Properties properties = loadProps();
+            properties.put("karaf.framework", framework.name());
+            properties.save();
+        } catch (IOException e) {
+            throw new RuntimeException("Error settting framework: " + e.getMessage(), e);
+        }
+    }
+
+    public void setFrameworkDebug(boolean debug) {
+        try {
+            Properties properties = loadProps();
+            if (debug) {
+                properties.put("felix.log.level", "4");
+                properties.put("osgi.debug", "etc/equinox-debug.properties");
+            } else {
+                properties.remove("felix.log.level");
+                properties.remove("osgi.debug");
+            }
+            // TODO populate the equinox-debug.properties file with the one provided in shell/dev module
+            properties.save();
+        } catch (IOException e) {
+            throw new RuntimeException("Error settting framework debugging: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public String setSystemProperty(String key, String value, boolean persist) {
+        if (persist) {
+            try {
+                String base = System.getProperty("karaf.base");
+                Properties props = new Properties(new File(base, "etc/system.properties"));
+                props.put(key, value);
+                props.save();
+            } catch (IOException e) {
+                throw new RuntimeException("Error persisting system property", e);
+            }
+        }
+        return System.setProperty(key, value);
     }
 
 }

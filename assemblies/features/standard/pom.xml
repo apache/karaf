@@ -125,18 +125,6 @@
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.dev</groupId>
-            <artifactId>org.apache.karaf.dev.core</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.dev</groupId>
-            <artifactId>org.apache.karaf.dev.command</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
 
         <!-- aries-annotation deps -->
         <dependency>

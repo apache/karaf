@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.system.management.internal;
 
+import org.apache.karaf.system.FrameworkType;
 import org.apache.karaf.system.SystemService;
 import org.apache.karaf.system.management.SystemMBean;
 
@@ -63,6 +64,21 @@ public class System extends StandardMBean implements SystemMBean {
 
     public int getStartLevel() throws Exception {
         return systemService.getStartLevel();
+    }
+
+    @Override
+    public String getFramework() {
+        return this.systemService.getFramework().toString();
+    }
+    
+    @Override
+    public void setFramework(String framework) {
+        this.systemService.setFramework(FrameworkType.valueOf(framework.toLowerCase()));
+    }
+
+    @Override
+    public void setFrameworkDebug(boolean debug) {
+        this.systemService.setFrameworkDebug(debug);
     }
 
 }

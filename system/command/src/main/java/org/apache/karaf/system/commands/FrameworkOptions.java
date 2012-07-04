@@ -14,18 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.dev.command;
+package org.apache.karaf.system.commands;
 
-import org.apache.karaf.dev.core.FrameworkType;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
+import org.apache.karaf.system.FrameworkType;
 
 /**
  * Command for enabling/disabling debug logging on the OSGi framework
  */
-@Command(scope = "dev", name = "framework", description = "OSGi Framework options.")
-public class FrameworkOptions extends DevCommandSupport {
+@Command(scope = "system", name = "framework", description = "OSGi Framework options.")
+public class FrameworkOptions extends AbstractSystemAction {
 
     @Option(name = "-debug", aliases={"--enable-debug"}, description="Enable debug for the OSGi framework", required = false, multiValued = false)
     boolean debug;
@@ -40,23 +40,23 @@ public class FrameworkOptions extends DevCommandSupport {
     protected Object doExecute() throws Exception {
 
         if (!debug^nodebug && framework == null) {
-            System.out.printf("Current OSGi framework is %s%n", devService.getFramework().name());
+            System.out.printf("Current OSGi framework is %s%n", systemService.getFramework().name());
             return null;
         }
         if (framework != null) {
             FrameworkType frameworkType = FrameworkType.valueOf(framework);
-            devService.setFramework(frameworkType);
+            systemService.setFramework(frameworkType);
             System.out.println("Changed OSGi framework to " + frameworkType.toString().toLowerCase() + ". Karaf needs to be restarted to make the change effective");
         }
         if (debug) {
-            FrameworkType frameworkType = devService.getFramework();
+            FrameworkType frameworkType = systemService.getFramework();
             System.out.printf("Enabling debug for OSGi framework (%s)%n", frameworkType.name());
-            devService.setFrameworkDebug(true);
+            systemService.setFrameworkDebug(true);
         }
         if (nodebug) {
-            FrameworkType frameworkType = devService.getFramework();
+            FrameworkType frameworkType = systemService.getFramework();
             System.out.printf("Disabling debug for OSGi framework (%s)%n", frameworkType.name());
-            devService.setFrameworkDebug(false);
+            systemService.setFrameworkDebug(false);
         }
 
         return null;
