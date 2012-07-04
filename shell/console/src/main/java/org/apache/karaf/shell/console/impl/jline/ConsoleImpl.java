@@ -38,19 +38,17 @@ import jline.Terminal;
 import jline.UnsupportedTerminal;
 import jline.console.ConsoleReader;
 import jline.console.history.PersistentHistory;
-import org.apache.felix.gogo.runtime.CommandNotFoundException;
 import org.apache.felix.gogo.runtime.Parser;
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Converter;
-import org.apache.karaf.shell.commands.CommandException;
 import org.apache.karaf.shell.console.CloseShellException;
 import org.apache.karaf.shell.console.CommandSessionHolder;
 import org.apache.karaf.shell.console.Completer;
 import org.apache.karaf.shell.console.Console;
 import org.apache.karaf.shell.console.SessionProperties;
 import org.apache.karaf.shell.console.completer.CommandsCompleter;
-import org.fusesource.jansi.Ansi;
+import org.apache.karaf.shell.util.ShellUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -183,7 +181,7 @@ public class ConsoleImpl implements Console
             }
             catch (Throwable t)
             {
-                logException(t);
+                ShellUtil.logException(session, t);
             }
         }
         close();
@@ -193,42 +191,6 @@ public class ConsoleImpl implements Console
             closeCallback.run();
         }
     }
-
-	private void logException(Throwable t) {
-		try {
-            if (t instanceof CommandNotFoundException) {
-                LOGGER.debug("Unknown command entered", t);
-            } else {
-                LOGGER.info("Exception caught while executing command", t);
-            }
-		    session.put(SessionProperties.LAST_EXCEPTION, t);
-		    if (t instanceof CommandException) {
-		        session.getConsole().println(((CommandException) t).getNiceHelp());
-		    } else if (t instanceof CommandNotFoundException) {
-		        String str = Ansi.ansi()
-		            .fg(Ansi.Color.RED)
-		            .a("Command not found: ")
-		            .a(Ansi.Attribute.INTENSITY_BOLD)
-		            .a(((CommandNotFoundException) t).getCommand())
-		            .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
-		            .fg(Ansi.Color.DEFAULT).toString();
-		        session.getConsole().println(str);
-		    }
-		    if ( getBoolean(SessionProperties.PRINT_STACK_TRACES)) {
-		        session.getConsole().print(Ansi.ansi().fg(Ansi.Color.RED).toString());
-		        t.printStackTrace(session.getConsole());
-		        session.getConsole().print(Ansi.ansi().fg(Ansi.Color.DEFAULT).toString());
-		    }
-		    else if (!(t instanceof CommandException) && !(t instanceof CommandNotFoundException)) {
-		        session.getConsole().print(Ansi.ansi().fg(Ansi.Color.RED).toString());
-		        session.getConsole().println("Error executing command: "
-		                + (t.getMessage() != null ? t.getMessage() : t.getClass().getName()));
-		        session.getConsole().print(Ansi.ansi().fg(Ansi.Color.DEFAULT).toString());
-		    }
-		} catch (Exception ignore) {
-		        // ignore
-		}
-	}
 
 	private String readAndParseCommand() throws IOException {
 		String command = null;
@@ -289,20 +251,6 @@ public class ConsoleImpl implements Console
             }
         }
 	}
-
-    protected boolean getBoolean(String name) {
-        Object s = session.get(name);
-        if (s == null) {
-            s = System.getProperty(name);
-        }
-        if (s == null) {
-            return false;
-        }
-        if (s instanceof Boolean) {
-            return (Boolean) s;
-        }
-        return Boolean.parseBoolean(s.toString());
-    }
 
     protected void welcome() {
         Properties props = Branding.loadBrandingProperties();
@@ -455,12 +403,12 @@ public class ConsoleImpl implements Console
                         {
                             return;
                         }
-                        else if (c == 4 && !getBoolean(SessionProperties.IGNORE_INTERRUPTS))
+                        else if (c == 4 && !ShellUtil.getBoolean(session, SessionProperties.IGNORE_INTERRUPTS))
                         {
                             err.println("^D");
                             return;
                         }
-                        else if (c == 3 && !getBoolean(SessionProperties.IGNORE_INTERRUPTS))
+                        else if (c == 3 && !ShellUtil.getBoolean(session, SessionProperties.IGNORE_INTERRUPTS))
                         {
                             err.println("^C");
                             reader.getCursorBuffer().clear();

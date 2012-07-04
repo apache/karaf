@@ -71,6 +71,11 @@
             <groupId>org.apache.sshd</groupId>
             <artifactId>sshd-core</artifactId>
         </dependency>
+        
+        <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.apache.karaf.util</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -106,6 +111,9 @@
                             org.apache.sshd.server.jaas,
                             *
                         </Import-Package>
+                        <Private-Package>
+                            org.apache.karaf.util
+                        </Private-Package>
                     </instructions>
                 </configuration>
             </plugin>

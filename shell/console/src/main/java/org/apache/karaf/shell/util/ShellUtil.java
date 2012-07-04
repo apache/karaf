@@ -27,7 +27,11 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 
+import org.apache.felix.gogo.runtime.CommandNotFoundException;
 import org.apache.felix.service.command.CommandSession;
+import org.apache.karaf.shell.commands.CommandException;
+import org.apache.karaf.shell.console.SessionProperties;
+import org.fusesource.jansi.Ansi;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -211,6 +215,56 @@ public class ShellUtil {
                 // Ignore
             }
         }
+    }
+
+    public static boolean getBoolean(CommandSession session, String name) {
+        Object s = session.get(name);
+        if (s == null) {
+            s = System.getProperty(name);
+        }
+        if (s == null) {
+            return false;
+        }
+        if (s instanceof Boolean) {
+            return (Boolean) s;
+        }
+        return Boolean.parseBoolean(s.toString());
+    }
+
+    public static void logException(CommandSession session, Throwable t) {
+    	try {
+            if (t instanceof CommandNotFoundException) {
+                LOGGER.debug("Unknown command entered", t);
+            } else {
+                LOGGER.info("Exception caught while executing command", t);
+            }
+    	    session.put(SessionProperties.LAST_EXCEPTION, t);
+    	    if (t instanceof CommandException) {
+    	        session.getConsole().println(((CommandException) t).getNiceHelp());
+    	    } else if (t instanceof CommandNotFoundException) {
+    	        String str = Ansi.ansi()
+    	            .fg(Ansi.Color.RED)
+    	            .a("Command not found: ")
+    	            .a(Ansi.Attribute.INTENSITY_BOLD)
+    	            .a(((CommandNotFoundException) t).getCommand())
+    	            .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
+    	            .fg(Ansi.Color.DEFAULT).toString();
+    	        session.getConsole().println(str);
+    	    }
+    	    if ( getBoolean(session, SessionProperties.PRINT_STACK_TRACES)) {
+    	        session.getConsole().print(Ansi.ansi().fg(Ansi.Color.RED).toString());
+    	        t.printStackTrace(session.getConsole());
+    	        session.getConsole().print(Ansi.ansi().fg(Ansi.Color.DEFAULT).toString());
+    	    }
+    	    else if (!(t instanceof CommandException) && !(t instanceof CommandNotFoundException)) {
+    	        session.getConsole().print(Ansi.ansi().fg(Ansi.Color.RED).toString());
+    	        session.getConsole().println("Error executing command: "
+    	                + (t.getMessage() != null ? t.getMessage() : t.getClass().getName()));
+    	        session.getConsole().print(Ansi.ansi().fg(Ansi.Color.DEFAULT).toString());
+    	    }
+    	} catch (Exception ignore) {
+    	        // ignore
+    	}
     }
 
 }
