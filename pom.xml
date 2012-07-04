@@ -142,7 +142,7 @@
         <aries.jndi.rmi.version>0.3</aries.jndi.rmi.version>
         <aries.jndi.url.version>0.3</aries.jndi.url.version>
         <aries.jndi.legacy.version>0.3</aries.jndi.legacy.version>
-        <aries.proxy.version>0.3</aries.proxy.version>
+        <aries.proxy.version>0.3.1</aries.proxy.version>
         <aries.transaction.version>0.3</aries.transaction.version>
         <jansi.version>1.9</jansi.version>
         <aries.transaction.blueprint.version>0.3</aries.transaction.blueprint.version>
