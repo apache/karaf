@@ -19,14 +19,12 @@ package org.apache.karaf.system.commands;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.console.OsgiCommandSupport;
-import org.apache.karaf.system.SystemService;
 
 /**
  * Command to shut down Karaf container.
  */
 @Command(scope = "system", name = "shutdown", description = "Shutdown Karaf.")
-public class Shutdown extends OsgiCommandSupport {
+public class Shutdown extends AbstractSystemAction {
 
     @Option(name = "-f", aliases = "--force", description = "Force the shutdown without confirmation message.", required = false, multiValued = false)
     boolean force = false;
@@ -45,12 +43,6 @@ public class Shutdown extends OsgiCommandSupport {
             " is the minute of the hour (in two digits). Second, it can be in the format +m, in which m is the number of minutes" +
             " to wait. The word now is an alias for +0.", required = false, multiValued = false)
     String time;
-
-    private SystemService systemService;
-
-    public void setSystemService(SystemService systemService) {
-        this.systemService = systemService;
-    }
 
     protected Object doExecute() throws Exception {
 
