@@ -21,7 +21,7 @@
 <features name="karaf-enterprise-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.0.0">
 
     <feature name="transaction" description="OSGi Transaction Manager" version="${aries.transaction.version}" resolver="(obr)">
-        <details>The Aries JTA</details>
+        <details>JTA implementation provided by Apache Aries Transaction ${aries.transaction.version}</details>
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.transaction/org.apache.aries.transaction.blueprint/${aries.transaction.blueprint.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.transaction/org.apache.aries.transaction.manager/${aries.transaction.manager.version}</bundle>
@@ -29,6 +29,7 @@
     </feature>
 
     <feature name="jpa" description="OSGi Persistence Container" version="${aries.jpa.version}" resolver="(obr)">
+        <details>JPA implementation provided by Apache Aries JPA ${aries.jpa.version}</details>
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jpa_2.0_spec/${geronimo.jpa-spec.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries/org.apache.aries.util/${aries.util.version}</bundle>
@@ -39,6 +40,7 @@
     </feature>
 
     <feature name="jndi" description="OSGi Service Registry JNDI access" version="${aries.jndi.version}" resolver="(obr)">
+        <details>JNDI support provided by Apache Aries JNDI ${aries.jndi.version}</details>
         <bundle start-level="30">mvn:org.apache.aries/org.apache.aries.util/${aries.util.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.jndi/org.apache.aries.jndi.api/${aries.jndi.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.jndi/org.apache.aries.jndi.core/${aries.jndi.core.version}</bundle>
@@ -47,7 +49,8 @@
         <bundle start-level="30">mvn:org.apache.aries.jndi/org.apache.aries.jndi.legacy.support/${aries.jndi.legacy.version}</bundle>
     </feature>
 
-    <feature name="application-without-isolation" version="${aries.application.version}">
+    <feature name="application-without-isolation" description="Provide EBA archive support" version="${aries.application.version}">
+        <details>Support of the Aries EBA archives</details>
         <!-- pre-requisites-->
         <bundle dependency="true" start-level="20">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint/${aries.blueprint.version}</bundle>
         <bundle dependency="true" start-level="20">mvn:org.apache.aries.proxy/org.apache.aries.proxy/${aries.proxy.version}</bundle>

@@ -18,7 +18,7 @@
 -->
 <features name="karaf-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.0.0">
 
-    <feature name="karaf-framework" version="${project.version}" resolver="(obr)">
+    <feature name="karaf-framework" description="Karaf core feature" version="${project.version}" resolver="(obr)">
         <bundle start-level="5">mvn:org.ops4j.pax.url/pax-url-mvn/${pax.url.version}</bundle>
         <bundle start-level="5">mvn:org.ops4j.pax.url/pax-url-wrap/${pax.url.version}</bundle>
         <bundle start-level="8">mvn:org.ops4j.pax.logging/pax-logging-api/${pax.logging.version}</bundle>
@@ -47,7 +47,7 @@
         <bundle start-level="30">mvn:org.apache.aries.jmx/org.apache.aries.jmx.blueprint/${aries.jmx.blueprint.version}</bundle>
     </feature>
 
-    <feature name="spring" version="${spring2.version}" resolver="(obr)">
+    <feature name="spring" description="Spring 2 support" version="${spring2.version}" resolver="(obr)">
         <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.aopalliance/${aopalliance.bundle.version}</bundle>
         <bundle start-level="30">mvn:org.springframework/spring-core/${spring2.version}</bundle>
         <bundle start-level="30">mvn:org.springframework/spring-beans/${spring2.version}</bundle>
@@ -56,14 +56,14 @@
         <bundle start-level="30">mvn:org.springframework/spring-context-support/${spring2.version}</bundle>
     </feature>
 
-    <feature name="spring-web" version="${spring2.version}" resolver="(obr)">
+    <feature name="spring-web" description="Spring 2 Web support" version="${spring2.version}" resolver="(obr)">
     	<feature version="${spring2.version}">spring</feature>
     	<feature version="${project.version}">http</feature>
     	<bundle start-level="30">mvn:org.springframework/spring-web/${spring2.version}</bundle>
 		<bundle start-level="30">mvn:org.springframework/spring-webmvc/${spring2.version}</bundle>
     </feature>
 
-    <feature name="spring" version="${spring.version}" resolver="(obr)">
+    <feature name="spring" description="Spring support" version="${spring.version}" resolver="(obr)">
         <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.aopalliance/${aopalliance.bundle.version}</bundle>
         <bundle start-level="30">mvn:org.springframework/spring-core/${spring.version}</bundle>
         <bundle start-level="30">mvn:org.springframework/spring-asm/${spring.version}</bundle>
@@ -74,12 +74,12 @@
         <bundle start-level="30">mvn:org.springframework/spring-context-support/${spring.version}</bundle>
     </feature>
 
-    <feature name="spring-aspects" version="${spring.version}" resolver="(obr)">
+    <feature name="spring-aspects" description="Spring AOP support" version="${spring.version}" resolver="(obr)">
         <feature version="${spring.version}">spring</feature>
         <bundle start-level="30">mvn:org.springframework/spring-aspects/${spring.version}</bundle>
     </feature>
 
-    <feature name="spring-dm" version="${spring.osgi.version}" resolver="(obr)">
+    <feature name="spring-dm" description="Spring DM support" version="${spring.osgi.version}" resolver="(obr)">
         <feature version="[2.5.6,4)">spring</feature>
         <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.cglib/${cglib.bundle.version}</bundle>
         <bundle start-level="30">mvn:org.springframework.osgi/spring-osgi-io/${spring.osgi.version}</bundle>
@@ -89,24 +89,24 @@
         <bundle start-level="30">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.spring/${project.version}</bundle>
     </feature>
 
-    <feature name="spring-dm-web" version="${spring.osgi.version}" resolver="(obr)">
+    <feature name="spring-dm-web" description="Spring DM Web support" version="${spring.osgi.version}" resolver="(obr)">
     	<feature version="${spring.osgi.version}">spring-dm</feature>
     	<feature version="[2.5.6,4)">spring-web</feature>
     	<feature version="${project.version}">http</feature>
 		<bundle start-level="30">mvn:org.springframework.osgi/spring-osgi-web/${spring.osgi.version}</bundle>
     </feature>
 
-    <feature name="spring-instrument" version="${spring.version}" resolver="(obr)">
+    <feature name="spring-instrument" description="Spring Instrument support" version="${spring.version}" resolver="(obr)">
         <feature version="${spring.version}">spring</feature>
         <bundle start-level="30">mvn:org.springframework/spring-instrument/${spring.version}</bundle>
     </feature>
 
-    <feature name="spring-jdbc" version="${spring.version}" resolver="(obr)">
+    <feature name="spring-jdbc" description="Spring JDBC support" version="${spring.version}" resolver="(obr)">
         <feature version="${spring.version}">spring-tx</feature>
         <bundle start-level="30">mvn:org.springframework/spring-jdbc/${spring.version}</bundle>
     </feature>
 
-    <feature name="spring-jms" version="${spring.version}" resolver="(obr)">
+    <feature name="spring-jms" description="Spring JMS support" version="${spring.version}" resolver="(obr)">
         <feature version="${spring.version}">spring-web</feature>
         <bundle start-level="10">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
         <bundle start-level="10">mvn:org.apache.geronimo.specs/geronimo-jms_1.1_spec/${geronimo.jms-spec.version}</bundle>
@@ -114,49 +114,49 @@
         <bundle start-level="30">mvn:org.springframework/spring-tx/${spring.version}</bundle>
     </feature>
 
-    <feature name="spring-struts" version="${spring.version}" resolver="(obr)">
+    <feature name="spring-struts" description="Spring Struts support" version="${spring.version}" resolver="(obr)">
         <feature version="${spring.version}">spring-web</feature>
         <bundle dependency="true" start-level="30">mvn:commons-beanutils/commons-beanutils/${commons-beanutils.version}</bundle>
         <bundle start-level="30">mvn:org.springframework/spring-struts/${spring.version}</bundle>
     </feature>
 
-    <feature name="spring-test" version="${spring.version}" resolver="(obr)">
+    <feature name="spring-test" description="Spring Test support" version="${spring.version}" resolver="(obr)">
         <feature version="${spring.version}">spring</feature>
         <bundle start-level="30">mvn:org.springframework/spring-test/${spring.version}</bundle>
     </feature>
 
-    <feature name="spring-orm" version="${spring.version}" resolver="(obr)">
+    <feature name="spring-orm" description="Spring ORM support" version="${spring.version}" resolver="(obr)">
         <feature version="${spring.version}">spring-jdbc</feature>
         <bundle start-level="30">mvn:org.springframework/spring-orm/${spring.version}</bundle>
     </feature>
 
-    <feature name="spring-oxm" version="${spring.version}" resolver="(obr)">
+    <feature name="spring-oxm" description="Spring OXM support" version="${spring.version}" resolver="(obr)">
         <feature version="${spring.version}">spring</feature>
         <bundle start-level="30">mvn:org.springframework/spring-oxm/${spring.version}</bundle>
     </feature>
 
-    <feature name="spring-tx" version="${spring.version}" resolver="(obr)">
+    <feature name="spring-tx" description="Spring Transaction (TX) support" version="${spring.version}" resolver="(obr)">
         <feature version="${spring.version}">spring</feature>
         <bundle start-level="30">mvn:org.springframework/spring-tx/${spring.version}</bundle>
     </feature>
 
-    <feature name="spring-web" version="${spring.version}" resolver="(obr)">
+    <feature name="spring-web" description="Spring Web support" version="${spring.version}" resolver="(obr)">
     	<feature version="${spring.version}">spring</feature>
     	<feature version="${project.version}">http</feature>
     	<bundle start-level="30">mvn:org.springframework/spring-web/${spring.version}</bundle>
 		<bundle start-level="30">mvn:org.springframework/spring-webmvc/${spring.version}</bundle>
     </feature>
 
-    <feature name="spring-web-portlet" version="${spring.version}" resolver="(obr)">
+    <feature name="spring-web-portlet" description="Spring Web Portlet support" version="${spring.version}" resolver="(obr)">
         <feature version="${spring.version}">spring-web</feature>
         <bundle start-level="30">mvn:org.springframework/spring-webmvc-portlet/${spring.version}</bundle>
     </feature>
 
-    <feature name="wrapper" version="${project.version}">
+    <feature name="wrapper" description="Provide OS integration" version="${project.version}">
         <bundle>mvn:org.apache.karaf.shell/org.apache.karaf.shell.wrapper/${project.version}</bundle>
     </feature>
 
-    <feature name="obr" version="${project.version}">
+    <feature name="obr" description="Provide OSGi Bundle Repository (OBR) support" version="${project.version}">
         <bundle start-level="30">mvn:org.apache.felix/org.osgi.service.obr/${felix.obr.version}</bundle>
         <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.bundlerepository/${felix.bundlerepository.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.shell/org.apache.karaf.shell.obr/${project.version}</bundle>
@@ -165,11 +165,11 @@
         <bundle start-level="30">mvn:org.ops4j.pax.url/pax-url-obr/${pax.url.version}</bundle>
     </feature>
 
-    <feature name="config" version="${project.version}">
+    <feature name="config" description="Provide OSGi ConfigAdmin support" version="${project.version}">
         <bundle start-level="30">mvn:org.apache.karaf.shell/org.apache.karaf.shell.config/${project.version}</bundle>
     </feature>
 
-    <feature name="jetty" version="${jetty.version}" resolver="(obr)">
+    <feature name="jetty" description="Provide Jetty engine support" version="${jetty.version}" resolver="(obr)">
         <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.activation-api-1.1/${servicemix.specs.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-servlet_2.5_spec/${geronimo.servlet.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:javax.mail/mail/${javax.mail.version}</bundle>
@@ -191,7 +191,7 @@
         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-websocket/${jetty.version}</bundle>
     </feature>
 
-    <feature name="http" version="${project.version}" resolver="(obr)">
+    <feature name="http" description="Implementation of the OSGi HTTP service" version="${project.version}" resolver="(obr)">
         <configfile finalname="/etc/jetty.xml">mvn:org.apache.karaf/apache-karaf/${project.version}/xml/jettyconfig</configfile>
         <config name="org.ops4j.pax.web">
             org.osgi.service.http.port=8181
@@ -210,7 +210,7 @@
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-extender-whiteboard/${pax.web.version}</bundle>
     </feature>
 
-    <feature name="war" version="${project.version}" resolver="(obr)">
+    <feature name="war" description="Turn Karaf as a full WebContainer" version="${project.version}" resolver="(obr)">
         <config name="org.ops4j.pax.url.war">
             org.ops4j.pax.url.war.importPaxLoggingPackages=true
         </config>
@@ -223,11 +223,11 @@
         <bundle start-level="30">mvn:org.ops4j.pax.url/pax-url-war/${pax.url.version}</bundle>
     </feature>
 
-    <feature name="kar" version="${project.version}">
+    <feature name="kar" description="Provide KAR (KARaf archive) support" version="${project.version}">
         <bundle start-level="30">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.kar/${project.version}</bundle>
     </feature>
 
-    <feature name="webconsole-base" version="${project.version}">
+    <feature name="webconsole-base" description="Base support of the Karaf WebConsole" version="${project.version}">
         <config name="org.apache.karaf.webconsole">
             realm=karaf
             role=${karaf.admin.role}
@@ -238,7 +238,7 @@
         <bundle start-level="30">mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.console/${project.version}</bundle>
     </feature>
 
-    <feature name="webconsole" version="${project.version}">
+    <feature name="webconsole" description="Karaf WebConsole for administration and monitoring" version="${project.version}">
         <feature version="${project.version}">webconsole-base</feature>
         <bundle start-level="30">mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.admin/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.features/${project.version}</bundle>
@@ -246,7 +246,7 @@
 		<bundle start-level="30">mvn:org.apache.felix/org.apache.felix.webconsole.plugins.event/${felix.eventadmin-plugin.version}</bundle>
     </feature>
 
-    <feature name="ssh" version="${project.version}">
+    <feature name="ssh" description="Provide a SSHd server on Karaf" version="${project.version}">
         <config name="org.apache.karaf.shell">
             sshPort=8101
             sshHost=0.0.0.0
@@ -258,7 +258,7 @@
         <bundle start-level="30">mvn:org.apache.karaf.shell/org.apache.karaf.shell.ssh/${project.version}</bundle>
     </feature>
 
-    <feature name="management" version="${project.version}">
+    <feature name="management" description="Provide a JMX MBeanServer and a set of MBeans in Karaf" version="${project.version}">
         <bundle start-level="30">mvn:org.apache.karaf.management/org.apache.karaf.management.server/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.jmx/org.apache.aries.jmx.api/${aries.jmx.api.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.jmx/org.apache.aries.jmx.core/${aries.jmx.core.version}</bundle>
@@ -272,11 +272,11 @@
         <bundle start-level="30">mvn:org.apache.karaf.management.mbeans/org.apache.karaf.management.mbeans.dev/${project.version}</bundle>
     </feature>
 
-    <feature name="eventadmin" version="${project.version}">
+    <feature name="eventadmin" description="OSGi Event Admin service specification for event-based communication" version="${project.version}">
 		<bundle start-level='30'>mvn:org.apache.felix/org.apache.felix.eventadmin/${felix.eventadmin.version}</bundle>
     </feature>
 
-    <feature name="jasypt-encryption" version="${project.version}" resolver="(obr)">
+    <feature name="jasypt-encryption" description="Advanced encryption support for Karaf security" version="${project.version}" resolver="(obr)">
         <bundle dependency="true" start-level="30">mvn:commons-codec/commons-codec/${commons-codec.version}</bundle>
         <bundle dependency='true' start-level="30">mvn:commons-lang/commons-lang/${commons-lang.version}</bundle>
         <bundle dependency='true' start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jasypt/${jasypt.bundle.version}</bundle>
