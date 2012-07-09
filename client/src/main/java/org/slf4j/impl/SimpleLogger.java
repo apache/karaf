@@ -23,7 +23,7 @@ import org.slf4j.helpers.MessageFormatter;
  * A simple logger that can be controlled from the ssh client
  */
 public class SimpleLogger extends MarkerIgnoringBase {
-
+    private static final long serialVersionUID = 1L;
     public static final int ERROR = 0;
     public static final int WARN = 1;
     public static final int INFO = 2;

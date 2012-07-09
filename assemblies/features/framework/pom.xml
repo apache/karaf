@@ -70,6 +70,18 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- Client deps -->
+        <dependency>
+            <groupId>jline</groupId>
+            <artifactId>jline</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
         <!-- listed in source feature.xml with explicit startlevel -->
         <dependency>
             <groupId>biz.aQute</groupId>
@@ -334,6 +346,16 @@
                                     <groupId>org.apache.felix</groupId>
                                     <artifactId>org.apache.felix.framework</artifactId>
                                     <outputDirectory>target/classes/resources/system/org/apache/felix/org.apache.felix.framework/${felix.framework.version}</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>jline</groupId>
+                                    <artifactId>jline</artifactId>
+                                    <outputDirectory>target/classes/resources/system/jline/jline/${jline.version}</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.slf4j</groupId>
+                                    <artifactId>slf4j-api</artifactId>
+                                    <outputDirectory>target/classes/resources/system/org/slf4j/slf4j-api/${slf4j.version}</outputDirectory>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>

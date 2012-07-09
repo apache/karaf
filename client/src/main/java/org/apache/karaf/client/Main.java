@@ -23,8 +23,10 @@ import java.io.ObjectInputStream;
 import java.net.URL;
 import java.security.KeyPair;
 
+import jline.NoInterruptUnixTerminal;
 import jline.Terminal;
-import org.apache.karaf.shell.console.impl.jline.TerminalFactory;
+import jline.TerminalFactory;
+
 import org.apache.sshd.ClientChannel;
 import org.apache.sshd.ClientSession;
 import org.apache.sshd.SshClient;
@@ -44,90 +46,30 @@ import org.slf4j.impl.SimpleLogger;
 public class Main {
 
     public static void main(String[] args) throws Exception {
-        String host = "localhost";
-        int port = 8101;
-        String user = "karaf";
-        StringBuilder sb = new StringBuilder();
-        int level = 1;
-        int retryAttempts = 0;
-        int retryDelay = 2;
-
-        for (int i = 0; i < args.length; i++) {
-            if (args[i].charAt(0) == '-') {
-                if (args[i].equals("-a")) {
-                    port = Integer.parseInt(args[++i]);
-                } else if (args[i].equals("-h")) {
-                    host = args[++i];
-                } else if (args[i].equals("-u")) {
-                    user = args[++i];
-                } else if (args[i].equals("-v")) {
-                    level++;
-                } else if (args[i].equals("-r")) {
-                    retryAttempts = Integer.parseInt(args[++i]);
-                } else if (args[i].equals("-d")) {
-                    retryDelay = Integer.parseInt(args[++i]);
-                } else if (args[i].equals("--help")) {
-                    System.out.println("Apache Karaf client");
-                    System.out.println("  -a [port]     specify the port to connect to");
-                    System.out.println("  -h [host]     specify the host to connect to");
-                    System.out.println("  -u [user]     specify the user name");
-                    System.out.println("  --help        shows this help message");
-                    System.out.println("  -v            raise verbosity");
-                    System.out.println("  -r [attempts] retry connection establishment (up to attempts times)");
-                    System.out.println("  -d [delay]    intra-retry delay (defaults to 2 seconds)");
-                    System.out.println("  [commands]    commands to run");
-                    System.out.println("If no commands are specified, the client will be put in an interactive mode");
-                    System.exit(0);
-                } else {
-                    System.err.println("Unknown option: " + args[i]);
-                    System.err.println("Run with --help for usage");
-                    System.exit(1);
-                }
-            } else {
-                sb.append(args[i]);
-                sb.append(' ');
-            }
-        }
-        SimpleLogger.setLevel(level);
+        ClientConfig config = new ClientConfig(args);
+        SimpleLogger.setLevel(config.getLevel());
 
         SshClient client = null;
         Terminal terminal = null;
-        SshAgent agent = null;
         try {
-            agent = startAgent(user);
             client = SshClient.setUpDefaultClient();
-            client.setAgentFactory(new LocalAgentFactory(agent));
-            client.getProperties().put(SshAgent.SSH_AUTHSOCKET_ENV_NAME, "local");
+            setupAgent(config.getUser(), client);
             client.start();
-            int retries = 0;
-            ClientSession session = null;
-            do {
-                ConnectFuture future = client.connect(host, port);
-                future.await();
-                try { 
-                    session = future.getSession();
-                } catch (RuntimeSshException ex) {
-                    if (retries++ < retryAttempts) {
-                        Thread.sleep(retryDelay * 1000);
-                        System.out.println("retrying (attempt " + retries + ") ...");
-                    } else {
-                        throw ex;
-                    }
-                }
-            } while (session == null);
-            if (!session.authAgent(user).await().isSuccess()) {
+            ClientSession session = connectWithRetries(client, config);
+            if (!session.authAgent(config.getUser()).await().isSuccess()) {
                 String password = readLine("Password: ");
-                if (!session.authPassword(user, password).await().isSuccess()) {
+                if (!session.authPassword(config.getUser(), password).await().isSuccess()) {
                     throw new Exception("Authentication failure");
                 }
             }
             ClientChannel channel;
-			if (sb.length() > 0) {
-                channel = session.createChannel("exec", sb.append("\n").toString());
+            if (config.getCommand().length() > 0) {
+                channel = session.createChannel("exec", config.getCommand() + "\n");
                 channel.setIn(new ByteArrayInputStream(new byte[0]));
-			} else {
-                terminal = new TerminalFactory().getTerminal();
- 				channel = session.createChannel("shell");
+            } else {
+                TerminalFactory.registerFlavor(TerminalFactory.Flavor.UNIX, NoInterruptUnixTerminal.class);
+                terminal = TerminalFactory.create();
+                channel = session.createChannel("shell");
                 channel.setIn(new NoCloseInputStream(System.in));
                 ((ChannelShell) channel).setupSensibleDefaultPty();
                 ((ChannelShell) channel).setAgentForwarding(true);
@@ -137,7 +79,7 @@ public class Main {
             channel.open();
             channel.waitFor(ClientChannel.CLOSED, 0);
         } catch (Throwable t) {
-            if (level > 1) {
+            if (config.getLevel() > SimpleLogger.WARN) {
                 t.printStackTrace();
             } else {
                 System.err.println(t.getMessage());
@@ -156,22 +98,50 @@ public class Main {
         System.exit(0);
     }
 
-    protected static SshAgent startAgent(String user) {
+    private static void setupAgent(String user, SshClient client) {
+        SshAgent agent;
+        URL builtInPrivateKey = Main.class.getClassLoader().getResource("karaf.key");
+        agent = startAgent(user, builtInPrivateKey);
+        client.setAgentFactory(new LocalAgentFactory(agent));
+        client.getProperties().put(SshAgent.SSH_AUTHSOCKET_ENV_NAME, "local");
+    }
+
+    private static ClientSession connectWithRetries(SshClient client, ClientConfig config)
+            throws Exception, InterruptedException {
+        ClientSession session = null;
+        int retries = 0;
+        do {
+            ConnectFuture future = client.connect(config.getHost(), config.getPort());
+            future.await();
+            try { 
+                session = future.getSession();
+            } catch (RuntimeSshException ex) {
+                if (retries++ < config.getRetryAttempts()) {
+                    Thread.sleep(config.getRetryDelay() * 1000);
+                    System.out.println("retrying (attempt " + retries + ") ...");
+                } else {
+                    throw ex;
+                }
+            }
+        } while (session == null);
+        return session;
+    }
+
+    private static SshAgent startAgent(String user, URL privateKeyUrl) {
         try {
-            SshAgent local = new AgentImpl();
-            URL url = Main.class.getClassLoader().getResource("karaf.key");
-            InputStream is = url.openStream();
+            SshAgent agent = new AgentImpl();
+            InputStream is = privateKeyUrl.openStream();
             ObjectInputStream r = new ObjectInputStream(is);
             KeyPair keyPair = (KeyPair) r.readObject();
-            local.addIdentity(keyPair, "karaf");
-            return local;
+            agent.addIdentity(keyPair, user);
+            return agent;
         } catch (Throwable e) {
             System.err.println("Error starting ssh agent for: " + e.getMessage());
             return null;
         }
     }
 
-    public static String readLine(String msg) throws IOException {
+    private static String readLine(String msg) throws IOException {
         StringBuffer sb = new StringBuffer();
         System.err.print(msg);
         System.err.flush();
