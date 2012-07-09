@@ -29,9 +29,9 @@
     </parent>
 
     <artifactId>org.apache.karaf.client</artifactId>
-    <packaging>bundle</packaging>
     <name>Apache Karaf :: Client</name>
     <description>Karaf client to connect remotely to a running Karaf instance.</description>
+    <packaging>jar</packaging>
 
     <properties>
         <appendedResourcesDirectory>${basedir}/../etc/appended-resources</appendedResourcesDirectory>
@@ -39,99 +39,17 @@
 
     <dependencies>
         <dependency>
+            <groupId>jline</groupId>
+            <artifactId>jline</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.apache.sshd</groupId>
             <artifactId>sshd-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.karaf.shell</groupId>
-            <artifactId>org.apache.karaf.shell.console</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <scope>provided</scope>
         </dependency>
     </dependencies>
-
-    <build>
-        <resources>
-            <resource>
-                <directory>${project.basedir}/src/main/resources</directory>
-                <filtering>true</filtering>
-            </resource>
-        </resources>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <configuration>
-                    <instructions>
-                        <_donotcopy>(CVS|.svn|config.properties)</_donotcopy>
-                        <Main-Class>org.apache.karaf.client.Main</Main-Class>
-                        <Bundle-Name>Apache Karaf Shell Client</Bundle-Name>
-                        <Bundle-Description>Shell client bundle for Apache Karaf.</Bundle-Description>
-                        <Private-Package>
-                            org.apache.karaf.client;-split-package:=merge-first,
-                            org.slf4j;-split-package:=merge-first,
-                            org.slf4j.spi;-split-package:=merge-first,
-                            org.slf4j.helpers;-split-package:=merge-first,
-                            org.slf4j.impl;-split-package:=merge-first,
-                            META-INF;-split-package:=merge-first
-                        </Private-Package>
-                        <Include-Resource>
-                            ../shell/console/src/main/resources/karaf.key,
-                            {maven-resources}
-                        </Include-Resource>
-                        <Import-Package>!*</Import-Package>
-                    </instructions>
-                    <unpackBundle>true</unpackBundle>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <artifactSet>
-                                <includes>
-                                    <include>${project.groupId}:${project.artifactId}</include>
-                                    <include>org.slf4j:slf4j-api</include>
-                                    <include>org.slf4j:slf4j-nop</include>
-                                </includes>
-                            </artifactSet>
-                            <filters>
-                                <filter>
-                                    <artifact>org.slf4j:slf4j-api</artifact>
-                                    <excludes>
-                                        <exclude>org/slf4j/**</exclude>
-                                    </excludes>
-                                </filter>
-                                <filter>
-                                    <artifact>org.slf4j:slf4j-nop</artifact>
-                                    <excludes>
-                                        <exclude>org/slf4j/**</exclude>
-                                    </excludes>
-                                </filter>
-                            </filters>
-                            <createSourcesJar>${createSourcesJar}</createSourcesJar>
-                            <promoteTransitiveDependencies>true</promoteTransitiveDependencies>
-                            <createDependencyReducedPom>true</createDependencyReducedPom>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
-    
 
 </project>
