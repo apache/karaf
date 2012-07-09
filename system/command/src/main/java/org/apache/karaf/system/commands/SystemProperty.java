@@ -23,7 +23,7 @@ import org.apache.karaf.shell.commands.Option;
 /**
  * Command that allow access to system properties easily.
  */
-@Command(scope = "systen", name = "property", description = "Get or set a system property.")
+@Command(scope = "system", name = "property", description = "Get or set a system property.")
 public class SystemProperty extends AbstractSystemAction {
 
     @Option(name = "-p", aliases = { "--persistent" }, description = "Persist the new value to the etc/system.properties file")
