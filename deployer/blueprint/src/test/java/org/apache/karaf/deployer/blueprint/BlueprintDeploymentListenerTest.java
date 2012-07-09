@@ -25,11 +25,15 @@ import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.jar.JarInputStream;
+import java.util.zip.ZipEntry;
+
 import javax.xml.transform.dom.DOMSource;
 
 import junit.framework.TestCase;
 
 public class BlueprintDeploymentListenerTest extends TestCase {
+	
+	private static final String BLUEPRINT_ENTRY = "OSGI-INF/blueprint/";
 
     public void testPackagesExtraction() throws Exception {
         BlueprintDeploymentListener l = new BlueprintDeploymentListener();
@@ -56,4 +60,60 @@ public class BlueprintDeploymentListenerTest extends TestCase {
         }
     }
 
+    // KARAF-1617
+    public void testAppendDescriptorFileExtension() throws Exception {
+    	final String expectedFileName = "test-fileextension";
+        File f = File.createTempFile("smx", ".jar");
+        try {
+        	ZipEntry zipEntry = null;
+            OutputStream os = new FileOutputStream(f);
+			BlueprintTransformer.transform(getClass().getClassLoader().getResource(expectedFileName), os);
+            os.close();
+            InputStream is = new FileInputStream(f);
+            JarInputStream jar = new JarInputStream(is);
+            while(true) {
+                zipEntry = jar.getNextEntry();
+                if( null == zipEntry) {
+                    break;
+                }
+                if ( zipEntry.getName() != null && zipEntry.getName().contains(expectedFileName)) {
+                	break;
+                }
+            }
+            is.close();
+            assertNotNull("blueprint service descriptor JAR file entry",zipEntry);
+        	assertEquals(BLUEPRINT_ENTRY+expectedFileName+".xml",zipEntry.getName());
+        } finally {
+            f.delete();
+        }
+        
+    }
+
+    public void testAppendNotTwiceDescriptorFileExtension() throws Exception {
+    	final String expectedFileName = "test.xml";
+        File f = File.createTempFile("smx", ".jar");
+        try {
+        	ZipEntry zipEntry = null;
+            OutputStream os = new FileOutputStream(f);
+			BlueprintTransformer.transform(getClass().getClassLoader().getResource(expectedFileName), os);
+            os.close();
+            InputStream is = new FileInputStream(f);
+            JarInputStream jar = new JarInputStream(is);
+            while(true) {
+                zipEntry = jar.getNextEntry();
+                if( null == zipEntry) {
+                    break;
+                }
+                if ( zipEntry.getName() != null && zipEntry.getName().contains(expectedFileName)) {
+                	break;
+                }
+            }
+            is.close();
+            assertNotNull("blueprint service descriptor JAR file entry",zipEntry);
+        	assertEquals(BLUEPRINT_ENTRY+expectedFileName,zipEntry.getName());
+        } finally {
+            f.delete();
+        }
+        
+    }
 }
