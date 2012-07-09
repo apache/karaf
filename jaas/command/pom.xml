@@ -38,6 +38,11 @@
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <scope>provided</scope>
+        </dependency>
     	<dependency>
             <groupId>org.apache.karaf.jaas</groupId>
             <artifactId>org.apache.karaf.jaas.config</artifactId>

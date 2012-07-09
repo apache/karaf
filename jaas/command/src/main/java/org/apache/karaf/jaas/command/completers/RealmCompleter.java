@@ -8,8 +8,6 @@ import java.util.List;
 
 public class RealmCompleter implements Completer {
 
-    private final StringsCompleter delegate = new StringsCompleter();
-
     private List<JaasRealm> realms;
 
     public int complete(String buffer, int cursor, List<String> candidates) {

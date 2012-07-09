@@ -37,6 +37,7 @@ public class ManageRealmCommand extends JaasCommandSupport {
     @Option(name = "-f", aliases = { "--force" }, description = "Force the management of this realm, even if another one was under management", required = false, multiValued = false)
     boolean force;
 
+    @SuppressWarnings("unchecked")
     @Override
     protected Object doExecute() throws Exception {
         JaasRealm oldRealm = (JaasRealm) this.session.get(JAAS_REALM);
