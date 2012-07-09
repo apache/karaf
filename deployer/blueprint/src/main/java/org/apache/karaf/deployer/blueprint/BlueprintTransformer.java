@@ -109,6 +109,10 @@ public class BlueprintTransformer {
         e = new ZipEntry("OSGI-INF/blueprint/");
         out.putNextEntry(e);
         out.closeEntry();
+        // check .xml file extension
+        if( !name.endsWith(".xml")) {
+            name +=".xml";
+        }
         e = new ZipEntry("OSGI-INF/blueprint/" + name);
         out.putNextEntry(e);
         // Copy the new DOM
