@@ -30,6 +30,7 @@ public class ListPendingCommand extends JaasCommandSupport {
     protected Object doExecute() throws Exception {
         JaasRealm realm = (JaasRealm) session.get(JAAS_REALM);
         AppConfigurationEntry entry = (AppConfigurationEntry) session.get(JAAS_ENTRY);
+        @SuppressWarnings("unchecked")
         Queue<JaasCommandSupport> commandQueue = (Queue<JaasCommandSupport>) session.get(JAAS_CMDS);
 
         if (realm != null && entry != null) {

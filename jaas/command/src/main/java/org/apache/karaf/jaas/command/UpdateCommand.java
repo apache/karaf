@@ -48,6 +48,7 @@ public class UpdateCommand extends JaasCommandSupport {
 
     @Override
     protected Object doExecute(BackingEngine engine) throws Exception {
+        @SuppressWarnings("unchecked")
         Queue<? extends JaasCommandSupport> commands = (Queue<? extends JaasCommandSupport>) session.get(JAAS_CMDS);
 
         if (commands == null || commands.isEmpty()) {
