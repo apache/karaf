@@ -17,6 +17,7 @@
 package org.apache.karaf.client;
 
 import java.io.ByteArrayInputStream;
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -128,16 +129,29 @@ public class Main {
     }
 
     private static SshAgent startAgent(String user, URL privateKeyUrl) {
+        InputStream is = null;
         try {
             SshAgent agent = new AgentImpl();
-            InputStream is = privateKeyUrl.openStream();
+            is = privateKeyUrl.openStream();
             ObjectInputStream r = new ObjectInputStream(is);
             KeyPair keyPair = (KeyPair) r.readObject();
+            is.close();
             agent.addIdentity(keyPair, user);
             return agent;
         } catch (Throwable e) {
+            close(is);
             System.err.println("Error starting ssh agent for: " + e.getMessage());
             return null;
+        }
+    }
+
+    private static void close(Closeable is) {
+        if (is != null) {
+            try {
+                is.close();
+            } catch (IOException e1) {
+                // Ignore
+            }
         }
     }
 
