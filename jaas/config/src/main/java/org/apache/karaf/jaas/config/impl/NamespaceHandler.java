@@ -43,6 +43,7 @@ public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHan
         }
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public Set<Class> getManagedClasses() {
         return new HashSet<Class>(Arrays.asList(
                 Config.class,
@@ -70,28 +71,13 @@ public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHan
         String name = element.getAttribute("name");
         bean.addProperty("bundleContext", createRef(context, "blueprintBundleContext"));
         bean.addProperty("name", createValue(context, name));
-        String rank = element.getAttribute("rank");
-        if (rank != null && rank.length() > 0) {
-            bean.addProperty("rank", createValue(context, rank));
-        }
+        addOptionalStringProperty(bean, element, "rank", context);
         NodeList childElements = element.getElementsByTagNameNS(element.getNamespaceURI(), "module");
         if (childElements != null && childElements.getLength() > 0) {
             MutableCollectionMetadata children = context.createMetadata(MutableCollectionMetadata.class);
             for (int i = 0; i < childElements.getLength(); ++i) {
-                Element childElement = (Element) childElements.item(i);
-                MutableBeanMetadata md = context.createMetadata(MutableBeanMetadata.class);
-                md.setRuntimeClass(Module.class);
-                md.addProperty("className", createValue(context, childElement.getAttribute("className")));
-                if (childElement.getAttribute("name") != null) {
-                    md.addProperty("name", createValue(context, childElement.getAttribute("name")));
-                }
-                if (childElement.getAttribute("flags") != null) {
-                    md.addProperty("flags", createValue(context, childElement.getAttribute("flags")));
-                }
-                String options = getTextValue(childElement);
-                if (options != null && options.length() > 0) {
-                    md.addProperty("options", createValue(context, options));
-                }
+                Element moduleElement = (Element) childElements.item(i);
+                MutableBeanMetadata md = parseModule(context, moduleElement);
                 children.addValue(md);
             }
             bean.addProperty("modules", children);
@@ -105,38 +91,47 @@ public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHan
         return service;
     }
 
+    private MutableBeanMetadata parseModule(ParserContext context,
+            Element moduleElement) {
+        MutableBeanMetadata md = context.createMetadata(MutableBeanMetadata.class);
+        md.setRuntimeClass(Module.class);
+        md.addProperty("className", createValue(context, moduleElement.getAttribute("className")));
+        if (moduleElement.getAttribute("name") != null) {
+            md.addProperty("name", createValue(context, moduleElement.getAttribute("name")));
+        }
+        if (moduleElement.getAttribute("flags") != null) {
+            md.addProperty("flags", createValue(context, moduleElement.getAttribute("flags")));
+        }
+        String options = getTextValue(moduleElement);
+        if (options != null && options.length() > 0) {
+            md.addProperty("options", createValue(context, options));
+        }
+        return md;
+    }
+
     public ComponentMetadata parseKeystore(Element element, ParserContext context) {
         MutableBeanMetadata bean = context.createMetadata(MutableBeanMetadata.class);
         bean.setRuntimeClass(ResourceKeystoreInstance.class);
         // Parse name
         String name = element.getAttribute("name");
         bean.addProperty("name", createValue(context, name));
-        // Parse rank
-        String rank = element.getAttribute("rank");
-        if (rank != null && rank.length() > 0) {
-            bean.addProperty("rank", createValue(context, rank));
-        }
-        // Parse path
-        String path = element.getAttribute("path");
-        if (path != null && path.length() > 0) {
-            bean.addProperty("path", createValue(context, path));
-        }
-        // Parse keystorePassword
-        String keystorePassword = element.getAttribute("keystorePassword");
-        if (keystorePassword != null && keystorePassword.length() > 0) {
-            bean.addProperty("keystorePassword", createValue(context, keystorePassword));
-        }
-        // Parse keyPasswords
-        String keyPasswords = element.getAttribute("keyPasswords");
-        if (keyPasswords != null && keyPasswords.length() > 0) {
-            bean.addProperty("keyPasswords", createValue(context, keyPasswords));
-        }
+        addOptionalStringProperty(bean, element, "rank", context);
+        addOptionalStringProperty(bean, element, "path", context);
+        addOptionalStringProperty(bean, element, "keystorePassword", context);
+        addOptionalStringProperty(bean, element, "keyPasswords", context);
         // Publish Config
         MutableServiceMetadata service = context.createMetadata(MutableServiceMetadata.class);
         service.setId(name);
         service.setServiceComponent(bean);
         service.addInterface(KeystoreInstance.class.getName());
         return service;
+    }
+
+    private void addOptionalStringProperty(MutableBeanMetadata bean, Element element, String propName, ParserContext context) {
+        String value = element.getAttribute(propName);
+        if (value != null && value.length() > 0 ) {
+            bean.addProperty(propName, createValue(context, value));
+        }
     }
 
     private ValueMetadata createValue(ParserContext context, String value) {
