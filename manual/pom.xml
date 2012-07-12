@@ -191,16 +191,6 @@
                         <version>${project.version}</version>
                     </dependency>
                     <dependency>
-                        <groupId>org.apache.karaf.dev</groupId>
-                        <artifactId>org.apache.karaf.dev.core</artifactId>
-                        <version>${project.version}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.apache.karaf.dev</groupId>
-                        <artifactId>org.apache.karaf.dev.command</artifactId>
-                        <version>${project.version}</version>
-                    </dependency>
-                    <dependency>
                         <groupId>org.apache.karaf.log</groupId>
                         <artifactId>org.apache.karaf.log.core</artifactId>
                         <version>${project.version}</version>
