@@ -37,6 +37,7 @@
         <module>boot</module>
         <module>config</module>
         <module>modules</module>
+        <module>karafrealm</module>
         <module>jasypt</module>
         <module>command</module>
     </modules>
