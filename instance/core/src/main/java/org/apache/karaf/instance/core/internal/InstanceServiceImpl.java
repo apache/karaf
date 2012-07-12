@@ -334,7 +334,7 @@ public class InstanceServiceImpl implements InstanceService {
         logInfo("Cloning instance %s into %s", printOutput, name, cloneName);
         
         // define the clone instance location
-        String cloneLocationPath = settings.getLocation() != null ? settings.getLocation() : name;
+        String cloneLocationPath = settings.getLocation() != null ? settings.getLocation() : cloneName;
         File cloneLocation = new File(cloneLocationPath);
         if (!cloneLocation.isAbsolute()) {
             cloneLocation = new File(storageLocation, cloneLocationPath);
@@ -354,7 +354,7 @@ public class InstanceServiceImpl implements InstanceService {
         if (settings.getRmiServerPort() > 0)
             props.put(new Integer(instance.getRmiServerPort()).toString(), new Integer(settings.getRmiServerPort()).toString());
         // filtering clone files
-        filterResource(cloneLocation, "etc/customer.properties", props);
+        filterResource(cloneLocation, "etc/custom.properties", props);
         filterResource(cloneLocation, "etc/org.apache.karaf.management.cfg", props);
         filterResource(cloneLocation, "etc/org.apache.karaf.shell.cfg", props);
         filterResource(cloneLocation, "etc/org.ops4j.pax.logging.cfg", props);
@@ -370,8 +370,8 @@ public class InstanceServiceImpl implements InstanceService {
         if (javaOpts == null || javaOpts.length() == 0) {
             javaOpts = "-server -Xmx512M -Dcom.sun.management.jmxremote";
         }
-        Instance cloneInstance = new InstanceImpl(this, name, cloneLocation.toString(), settings.getJavaOpts());
-        instances.put(name, instance);
+        Instance cloneInstance = new InstanceImpl(this, cloneName, cloneLocation.toString(), settings.getJavaOpts());
+        instances.put(cloneName, cloneInstance);
         saveState();
         return cloneInstance;
     }
