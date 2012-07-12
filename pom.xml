@@ -1821,7 +1821,10 @@
                             <excludeSubProjects>false</excludeSubProjects>
                             <excludes>
                                 <exclude>**/target/**/*</exclude>
+                                <!-- GIT files -->
+                                <exclude>**/.git/**/*</exclude>
                                 <!-- IDEA files -->
+                                <exclude>**/.idea/**/*</exclude>
                                 <exclude>**/*.iml</exclude>
                                 <exclude>**/*.ipr</exclude>
                                 <exclude>**/*.iws</exclude>
@@ -1829,8 +1832,17 @@
                                 <exclude>**/.*</exclude>
                                 <exclude>**/eclipse-classes/**/*</exclude>
                                 <exclude>**/dependency-reduced-pom.xml</exclude>
-                                <!--RAT doesn't seem to recognize MIT style licenses-->
-                                <exclude>manual/src/styles/print.css</exclude>
+                                <!-- resources file -->
+                                <exclude>**/bundle.info</exclude>
+                                <exclude>**/goal.txt</exclude>
+                                <exclude>**/grep.txt</exclude>
+                                <exclude>**/edit.txt</exclude>
+                                <exclude>**/foo</exclude>
+                                <exclude>**/org.ops4j.pax.exam.TestContainerFactory</exclude>
+                                <!--manual resources -->
+                                <exclude>manual/**/*.css</exclude>
+                                <exclude>manual/**/*.ssp</exclude>
+                                <exclude>manual/**/*.conf</exclude>
                             </excludes>
                         </configuration>
                     </plugin>

@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <!--
 
     Licensed to the Apache Software Foundation (ASF) under one or more
@@ -17,7 +16,6 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-
 <features name="${project.artifactId}-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.0.0">
 
     <feature name='${project.artifactId}' description='${project.name}' version='${project.version}' resolver="${resolver}">
