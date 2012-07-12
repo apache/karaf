@@ -18,7 +18,6 @@
 #set( $symbol_dollar = '$' )
 #set( $symbol_escape = '\' )
 #set( $cmd =  $command.toLowerCase())
-
 package ${package};
 
 import org.apache.felix.gogo.commands.Command;
