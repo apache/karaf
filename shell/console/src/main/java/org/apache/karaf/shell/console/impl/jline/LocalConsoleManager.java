@@ -82,8 +82,9 @@ public class LocalConsoleManager {
             }
         };
         String agentId = startAgent("karaf");
-        this.console = consoleFactory.createLocalAndStart(subject, this.commandProcessor, terminal, callback);
+        this.console = consoleFactory.createLocal(this.commandProcessor, terminal, callback);
         this.console.getSession().put(SshAgent.SSH_AUTHSOCKET_ENV_NAME, agentId);
+        consoleFactory.startConsoleAs(console, subject);
     }
 
     protected String startAgent(String user) {

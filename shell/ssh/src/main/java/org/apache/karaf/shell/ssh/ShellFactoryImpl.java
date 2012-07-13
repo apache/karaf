@@ -105,12 +105,13 @@ public class ShellFactoryImpl implements Factory<Command> {
                         destroy();
                     }
                 };
-                Console console = consoleFactory.createAndStart(subject, commandProcessor, in,
+                Console console = consoleFactory.create(commandProcessor, in,
                         lfToCrLfPrintStream(out), lfToCrLfPrintStream(err), terminal, destroyCallback);
                 final CommandSession session = console.getSession();
                 for (Map.Entry<String, String> e : env.getEnv().entrySet()) {
                     session.put(e.getKey(), e.getValue());
                 }
+                consoleFactory.startConsoleAs(console, subject);
             } catch (Exception e) {
                 throw (IOException) new IOException("Unable to start shell").initCause(e);
             }

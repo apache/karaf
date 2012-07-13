@@ -24,6 +24,7 @@ import java.security.Principal;
 import java.security.PrivilegedAction;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 
 import javax.security.auth.Subject;
@@ -39,10 +40,8 @@ import org.apache.karaf.shell.console.ConsoleFactory;
 public class ConsoleFactoryService implements ConsoleFactory {
     
     @Override
-    public Console createLocalAndStart(Subject user, CommandProcessor processor, final Terminal terminal,
-            Runnable closeCallback) throws Exception {
-        return createAndStart(user, 
-                processor, 
+    public Console createLocal(CommandProcessor processor, final Terminal terminal, Runnable closeCallback) {
+        return create(processor, 
                 StreamWrapUtil.reWrapIn(terminal, System.in), 
                 StreamWrapUtil.reWrap(System.out), 
                 StreamWrapUtil.reWrap(System.err), 
@@ -51,12 +50,10 @@ public class ConsoleFactoryService implements ConsoleFactory {
     }
 
     @Override
-    public Console createAndStart(Subject subject, CommandProcessor processor, InputStream in, PrintStream out, PrintStream err, final Terminal terminal,
-            Runnable closeCallback) throws Exception {
+    public Console create(CommandProcessor processor, InputStream in, PrintStream out, PrintStream err, final Terminal terminal,
+            Runnable closeCallback) {
         ConsoleImpl console = new ConsoleImpl(processor, in, out, err, terminal, closeCallback);
         CommandSession session = console.getSession();
-        String userName = getFirstPrincipalName(subject);
-        session.put("USER", userName);
         session.put("APPLICATION", System.getProperty("karaf.name", "root"));
         session.put("#LINES", new Function() {
             public Object execute(CommandSession session, List<Object> arguments) throws Exception {
@@ -69,8 +66,17 @@ public class ConsoleFactoryService implements ConsoleFactory {
             }
         });
         session.put(".jline.terminal", terminal);
-        startConsoleAs(console, subject);
+        addSystemProperties(session);
         return console;
+    }
+
+    private void addSystemProperties(CommandSession session) {
+        Properties sysProps = System.getProperties();
+        Iterator<Object> it = sysProps.keySet().iterator();
+        while (it.hasNext()) {
+            String key = (String) it.next();
+            session.put(key, System.getProperty(key));
+        }
     }
     
     private String getFirstPrincipalName(Subject user) {
@@ -86,11 +92,15 @@ public class ConsoleFactoryService implements ConsoleFactory {
         return null;
     }
 
-    private void startConsoleAs(final Console console, final Subject subject) {
+    @Override
+    public void startConsoleAs(final Console console, final Subject subject) {
         new Thread(console) {
             @Override
             public void run() {
                 if (subject != null) {
+                    CommandSession session = console.getSession();
+                    String userName = getFirstPrincipalName(subject);
+                    session.put("USER", userName);
                     Subject.doAs(subject, new PrivilegedAction<Object>() {
                         public Object run() {
                             doRun();

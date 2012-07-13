@@ -28,14 +28,7 @@ import jline.Terminal;
 import org.apache.felix.service.command.CommandProcessor;
 
 public interface ConsoleFactory {
-    Console createAndStart(Subject user,
-            CommandProcessor processor,
-            InputStream in,
-            PrintStream out,
-            PrintStream err,
-            final Terminal term,
-            Runnable closeCallback) throws Exception;
-
-    Console createLocalAndStart(Subject user, CommandProcessor processor, Terminal terminal, Runnable closeCallback)
-            throws Exception;
+    Console create(CommandProcessor processor, InputStream in, PrintStream out, PrintStream err, final Terminal term, Runnable closeCallback);
+    Console createLocal(CommandProcessor processor, Terminal terminal, Runnable closeCallback);
+    void startConsoleAs(Console console, Subject subject);
 }
