@@ -78,8 +78,12 @@ final class StreamWrapUtil {
         }
     }
 
-    static InputStream reWrapIn(Terminal terminal, InputStream stream) throws IOException {
-        return terminal.wrapInIfNeeded(unwrapBIS(stream));
+    static InputStream reWrapIn(Terminal terminal, InputStream stream) {
+        try {
+            return terminal.wrapInIfNeeded(unwrapBIS(stream));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     static PrintStream reWrap(PrintStream stream) {

@@ -84,7 +84,7 @@ public class ConsoleImpl implements Console
                    PrintStream out,
                    PrintStream err,
                    Terminal term,
-                   Runnable closeCallback) throws Exception
+                   Runnable closeCallback)
     {
         this.in = in;
         this.out = out;
@@ -97,9 +97,13 @@ public class ConsoleImpl implements Console
         this.session.put("SUBSHELL", "");
         this.closeCallback = closeCallback;
 
-        reader = new ConsoleReader(this.consoleInput,
-                                   this.out,
-                                   this.terminal);
+        try {
+            reader = new ConsoleReader(this.consoleInput,
+                                       this.out,
+                                       this.terminal);
+        } catch (IOException e) {
+            throw new RuntimeException("Error opening console reader", e);
+        }
 
 		final File file = getHistoryFile();
 		

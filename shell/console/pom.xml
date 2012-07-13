@@ -40,24 +40,12 @@
     <dependencies>
         <dependency>
             <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.fusesource.jansi</groupId>
-            <artifactId>jansi</artifactId>
+            <artifactId>slf4j-api</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>jline</groupId>
             <artifactId>jline</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.fusesource.jansi</groupId>
-                    <artifactId>jansi</artifactId>
-                </exclusion>
-            </exclusions>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.karaf</groupId>
@@ -141,6 +129,7 @@
                             *
                         </Import-Package>
                         <Export-Package>
+                        	org.apache.felix.gogo.commands,
                         	org.apache.karaf.shell.commands*,
                         	org.apache.karaf.shell.console,
                         	org.apache.karaf.shell.console.commands,
@@ -149,23 +138,13 @@
                             org.apache.felix.gogo*;version=${felix.gogo.version},
                             org.apache.felix.service.command;version=${felix.gogo.version};status=provisional;mandatory:=status,
                             org.apache.felix.service.threadio;version=${felix.gogo.version};status=provisional;mandatory:=status,
-                            org.fusesource.jansi;version=${jansi.version};-split-package:=first,
-                            jline*;version=${jline.version},
-                            org.fusesource.hawtjni*;version=1.0;-split-package:=first
                         </Export-Package>
                         <Private-Package>
                         	org.apache.karaf.shell.console.impl*,
-                            org.fusesource.jansi.internal;-split-package:=first,
-                            org.apache.felix.gogo.runtime*;-split-package:=first,
-                            META-INF.native.*;-split-package:=first
+                        	org.apache.felix.gogo.runtime*;-split-package:=first
                         </Private-Package>
-                        <Bundle-NativeCode>
-                            META-INF/native/windows32/jansi.dll;osname=Win32;processor=x86,
-                            META-INF/native/windows64/jansi.dll;osname=Win32;processor=x86-64,
-                            *
-                        </Bundle-NativeCode>
                         <Bundle-Activator>
-                            org.apache.karaf.shell.console.impl.jline.Activator
+                            org.apache.felix.gogo.runtime.activator.Activator
                         </Bundle-Activator>
                         <Main-Class>
                             org.apache.karaf.shell.console.impl.Main

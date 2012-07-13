@@ -40,7 +40,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.felix.service.command.CommandProcessor;
-import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.apache.karaf.shell.console.Console;
 import org.apache.karaf.shell.console.ConsoleFactory;
@@ -217,12 +216,13 @@ public class GogoPlugin extends AbstractWebConsolePlugin {
                 
                 final Subject subject = new Subject();
                 subject.getPrincipals().add(new UserPrincipal("karaf"));
-                consoleFactory.createAndStart(subject, commandProcessor,
+                Console console = consoleFactory.create(commandProcessor,
                                       new PipedInputStream(in),
                                       pipedOut,
                                       pipedOut,
                                       new WebTerminal(TERM_WIDTH, TERM_HEIGHT),
                                       null);
+                consoleFactory.startConsoleAs(console, subject);
             } catch (IOException e) {
                 e.printStackTrace();
                 throw e;
