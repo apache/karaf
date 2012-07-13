@@ -179,7 +179,7 @@
         <aries.quiesce.api.version>1.0.1-SNAPSHOT</aries.quiesce.api.version>
         <aries.quiesce.manager.version>1.0.0-SNAPSHOT</aries.quiesce.manager.version>
         <aries.transaction.version>1.0.0-SNAPSHOT</aries.transaction.version>
-        <aries.util.version>1.0.0-SNAPSHOT</aries.util.version>
+        <aries.util.version>1.0.0</aries.util.version>
 
         <gemini.blueprint.version>1.0.0.RELEASE</gemini.blueprint.version>
         <jansi.version>1.9</jansi.version>
