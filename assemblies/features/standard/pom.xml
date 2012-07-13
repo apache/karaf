@@ -79,11 +79,6 @@
         </dependency>
         <dependency>
             <groupId>org.apache.karaf.jaas</groupId>
-            <artifactId>org.apache.karaf.jaas.karafrealm</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.jaas</groupId>
             <artifactId>org.apache.karaf.jaas.config</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
