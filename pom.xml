@@ -173,7 +173,7 @@
         <aries.jmx.api.version>1.0.0</aries.jmx.api.version>
         <aries.jmx.version>1.0.0-SNAPSHOT</aries.jmx.version>
         <aries.jpa.version>1.0.0-SNAPSHOT</aries.jpa.version>
-        <aries.jndi.api.version>1.0.0-SNAPSHOT</aries.jndi.api.version>
+        <aries.jndi.api.version>1.0.0</aries.jndi.api.version>
         <aries.jndi.version>1.0.0-SNAPSHOT</aries.jndi.version>
         <aries.proxy.api.version>1.0.0-SNAPSHOT</aries.proxy.api.version>
         <aries.proxy.impl.version>1.0.0-SNAPSHOT</aries.proxy.impl.version>
