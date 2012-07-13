@@ -411,11 +411,6 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.karaf.jaas</groupId>
-                <artifactId>org.apache.karaf.jaas.karafrealm</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.karaf.jaas</groupId>
                 <artifactId>org.apache.karaf.jaas.modules</artifactId>
                 <version>${project.version}</version>
             </dependency>
