@@ -198,6 +198,9 @@ public class KarafPublickeyAuthenticator implements PublickeyAuthenticator {
             String line;
 
             while ((line = reader.readLine()) != null) {
+            	if (line.startsWith("#")) {
+            		continue; //skip # lines might be comment
+            	}
                 String[] tokens = line.split("[ \\t]+", 3);
                 if (tokens.length != 3) {
                     throw new IOException("Authorized keys file line " + reader.getLineNumber() + " does not contain 3 tokens.");
