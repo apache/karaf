@@ -80,7 +80,7 @@
         <dependency>
             <groupId>org.apache.aries.jpa</groupId>
             <artifactId>org.apache.aries.jpa.api</artifactId>
-            <version>${aries.jpa.version}</version>
+            <version>${aries.jpa.api.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
