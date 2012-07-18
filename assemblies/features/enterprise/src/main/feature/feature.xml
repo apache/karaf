@@ -45,7 +45,7 @@
         <details>JNDI support provided by Apache Aries JNDI ${aries.jndi.version}</details>
         <bundle start-level='30'>mvn:org.apache.aries/org.apache.aries.util/${aries.util.version}</bundle>
         <bundle start-level='30'>mvn:org.apache.aries.jndi/org.apache.aries.jndi.api/${aries.jndi.api.version}</bundle>
-        <bundle start-level='30'>mvn:org.apache.aries.jndi/org.apache.aries.jndi.core/${aries.jndi.version}</bundle>
+        <bundle start-level='30'>mvn:org.apache.aries.jndi/org.apache.aries.jndi.core/${aries.jndi.core.version}</bundle>
         <bundle start-level='30'>mvn:org.apache.aries.jndi/org.apache.aries.jndi.rmi/${aries.jndi.version}</bundle>
         <bundle start-level='30'>mvn:org.apache.aries.jndi/org.apache.aries.jndi.url/${aries.jndi.version}</bundle>
         <bundle start-level='30'>mvn:org.apache.aries.jndi/org.apache.aries.jndi.legacy.support/${aries.jndi.version}</bundle>
