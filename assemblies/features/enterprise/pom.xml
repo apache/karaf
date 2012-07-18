@@ -112,7 +112,7 @@
         <dependency>
             <groupId>org.apache.aries.jndi</groupId>
             <artifactId>org.apache.aries.jndi.core</artifactId>
-            <version>${aries.jndi.version}</version>
+            <version>${aries.jndi.core.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
