@@ -29,12 +29,12 @@ public interface ManagementCfg {
     /**
      * Port of the registry for the exported RMI service
      */
-    static final ConfigurationPointer RMI_REGISTRY_PORT = new CustomPropertiesPointer("1099");
+    static final ConfigurationPointer RMI_REGISTRY_PORT = new CustomPropertiesPointer("rmiRegistryPort");
 
     /**
      * Port of the registry for the exported RMI service
      */
-    static final ConfigurationPointer RMI_SERVER_PORT = new CustomPropertiesPointer("44444");
+    static final ConfigurationPointer RMI_SERVER_PORT = new CustomPropertiesPointer("rmiServerPort");
 
     static class CustomPropertiesPointer extends ConfigurationPointer {
 
