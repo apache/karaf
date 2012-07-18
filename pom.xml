@@ -1330,7 +1330,7 @@
             <dependency>
                 <groupId>org.apache.aries.jmx</groupId>
                 <artifactId>org.apache.aries.jmx.api</artifactId>
-                <version>${aries.jmx.version}</version>
+                <version>${aries.jmx.api.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.aries.jmx</groupId>
