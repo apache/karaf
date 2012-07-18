@@ -5,3 +5,4 @@
 .settings
 target
 eclipse-classes
+atlassian-ide-plugin.xml
