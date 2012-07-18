@@ -178,7 +178,7 @@
         <aries.jndi.api.version>1.0.0</aries.jndi.api.version>
         <aries.jndi.core.version>1.0.0</aries.jndi.core.version>
         <aries.jndi.version>1.0.0-SNAPSHOT</aries.jndi.version>
-        <aries.proxy.api.version>1.0.0-SNAPSHOT</aries.proxy.api.version>
+        <aries.proxy.api.version>1.0.0</aries.proxy.api.version>
         <aries.proxy.impl.version>1.0.0-SNAPSHOT</aries.proxy.impl.version>
         <aries.quiesce.api.version>1.0.1-SNAPSHOT</aries.quiesce.api.version>
         <aries.quiesce.manager.version>1.0.0-SNAPSHOT</aries.quiesce.manager.version>
