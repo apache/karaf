@@ -312,12 +312,6 @@ public class AdminServiceImpl implements AdminService {
         if (instance == null) {
             throw new IllegalArgumentException("Instance " + name + " not found");
         }
-        if (instance.isRoot()) {
-            throw new IllegalArgumentException("Root instance cannot be cloned");
-        }
-        if (instance.getPid() != 0) {
-            throw new IllegalArgumentException("Instance not stopped");
-        }
 
         // define the clone instance location
         String cloneLocationPath = settings.getLocation() != null ? settings.getLocation() : cloneName;
@@ -525,7 +519,8 @@ public class AdminServiceImpl implements AdminService {
             }
             String[] children = source.list();
             for (String child : children) {
-                copy(new File(source, child), new File(destination, child));
+                if (!child.contains("instances") && !child.contains("lib"))
+                    copy(new File(source, child), new File(destination, child));
             }
         } else {
             InputStream in = new FileInputStream(source);
