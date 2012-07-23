@@ -33,6 +33,7 @@ import org.apache.karaf.shell.console.Console;
 import org.apache.karaf.shell.console.ConsoleFactory;
 import org.apache.sshd.agent.SshAgent;
 import org.apache.sshd.agent.local.AgentImpl;
+import org.fusesource.jansi.Ansi;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
@@ -84,7 +85,14 @@ public class LocalConsoleManager {
         String agentId = startAgent("karaf");
         this.console = consoleFactory.createLocal(this.commandProcessor, terminal, callback);
         this.console.getSession().put(SshAgent.SSH_AUTHSOCKET_ENV_NAME, agentId);
-        consoleFactory.startConsoleAs(console, subject);
+        BundleWatcher watcher = new BundleWatcher(bundleContext, System.out, new Runnable() {
+            
+            @Override
+            public void run() {
+                consoleFactory.startConsoleAs(console, subject);
+            }
+        });
+        new Thread(watcher).start();
     }
 
     protected String startAgent(String user) {
