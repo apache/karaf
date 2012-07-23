@@ -133,7 +133,7 @@
                             *
                         </Import-Package>
                         <Export-Package>
-                        	org.apache.felix.gogo.commands,
+                        	org.apache.felix.gogo.commands;version=${felix.gogo.version},
                         	org.apache.karaf.shell.commands*,
                         	org.apache.karaf.shell.console,
                         	org.apache.karaf.shell.console.commands,
