@@ -53,6 +53,12 @@
     </dependencies>
 
 	<build>
+        <resources>
+            <resource>
+                <directory>${project.basedir}/src/main/key</directory>
+                <filtering>false</filtering>
+            </resource>
+        </resources>
 		<plugins>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>

@@ -167,8 +167,8 @@
         <aries.blueprint.annotation.impl.version>1.0.0-SNAPSHOT</aries.blueprint.annotation.impl.version>
         <aries.blueprint.api.version>1.0.0</aries.blueprint.api.version>
         <aries.blueprint.cm.version>1.0.0-SNAPSHOT</aries.blueprint.cm.version>
-        <aries.blueprint.core.compatibility.version>1.0.0-SNAPSHOT</aries.blueprint.core.compatibility.version>
-        <aries.blueprint.core.version>1.0.0-SNAPSHOT</aries.blueprint.core.version>
+        <aries.blueprint.core.compatibility.version>1.0.1-SNAPSHOT</aries.blueprint.core.compatibility.version>
+        <aries.blueprint.core.version>1.0.1-SNAPSHOT</aries.blueprint.core.version>
         <aries.blueprint.jexl.evaluator.version>1.0.0-SNAPSHOT</aries.blueprint.jexl.evaluator.version>
         <aries.jmx.api.version>1.0.0</aries.jmx.api.version>
         <aries.jmx.blueprint.api.version>1.0.0</aries.jmx.blueprint.api.version>

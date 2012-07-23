@@ -90,6 +90,10 @@
     <build>
         <resources>
             <resource>
+                <directory>${project.basedir}/../../client/src/main/key</directory>
+                <filtering>false</filtering>
+            </resource>
+            <resource>
                 <directory>${project.basedir}/src/main/resources</directory>
                 <includes>
                     <include>**/*</include>
