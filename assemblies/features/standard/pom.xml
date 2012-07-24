@@ -524,25 +524,16 @@
         <dependency>
             <groupId>org.apache.aries.jmx</groupId>
             <artifactId>org.apache.aries.jmx.api</artifactId>
-            <version>${aries.jmx.api.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.aries.jmx</groupId>
             <artifactId>org.apache.aries.jmx.core</artifactId>
-            <version>${aries.jmx.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.aries.jmx</groupId>
-            <artifactId>org.apache.aries.jmx.blueprint</artifactId>
-            <version>${aries.jmx.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.aries.jmx</groupId>
             <artifactId>org.apache.aries.jmx.whiteboard</artifactId>
-            <version>${aries.jmx.version}</version>
             <scope>provided</scope>
         </dependency>
 
