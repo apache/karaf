@@ -454,6 +454,17 @@
             </dependency>
 
             <dependency>
+                <groupId>org.apache.karaf.obr</groupId>
+                <artifactId>org.apache.karaf.obr.command</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.obr</groupId>
+                <artifactId>org.apache.karaf.obr.core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>org.apache.karaf.management</groupId>
                 <artifactId>org.apache.karaf.management.server</artifactId>
                 <version>${project.version}</version>
@@ -585,17 +596,22 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.karaf.jaas</groupId>
+                <artifactId>org.apache.karaf.jaas.command</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.jaas</groupId>
                 <artifactId>org.apache.karaf.jaas.config</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.karaf.jaas</groupId>
-                <artifactId>org.apache.karaf.jaas.modules</artifactId>
+                <artifactId>org.apache.karaf.jaas.jasypt</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.karaf.jaas</groupId>
-                <artifactId>org.apache.karaf.jaas.command</artifactId>
+                <artifactId>org.apache.karaf.jaas.modules</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -624,12 +640,29 @@
                 <artifactId>org.apache.karaf.webconsole.gogo</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.webconsole</groupId>
+                <artifactId>org.apache.karaf.webconsole.http</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.karaf.scheduler</groupId>
+                <artifactId>org.apache.karaf.scheduler.core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>org.apache.karaf.scr</groupId>
                 <artifactId>org.apache.karaf.scr.command</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.scr</groupId>
+                <artifactId>org.apache.karaf.scr.management</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>org.apache.karaf.demos</groupId>
                 <artifactId>web</artifactId>
@@ -640,6 +673,7 @@
                 <artifactId>org.apache.karaf.tooling.exam.container</artifactId>
                 <version>${project.version}</version>
             </dependency>
+
             <dependency>
                 <groupId>org.apache.karaf</groupId>
                 <artifactId>apache-karaf</artifactId>
@@ -691,6 +725,13 @@
               <classifier>features</classifier>
               <version>${project.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>javax.mail</groupId>
+                <artifactId>mail</artifactId>
+                <version>${javax.mail.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.framework</artifactId>
@@ -712,6 +753,11 @@
                         <artifactId>org.osgi.compendium</artifactId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>org.osgi.service.obr</artifactId>
+                <version>${felix.obr.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.osgi</groupId>
@@ -788,6 +834,11 @@
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.webconsole</artifactId>
                 <version>${felix.webconsole.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>org.apache.felix.webconsole.plugins.event</artifactId>
+                <version>${felix.eventadmin-plugin.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>
@@ -943,6 +994,13 @@
                     </exclusion>
                 </exclusions>
             </dependency>
+
+            <dependency>
+                <groupId>org.eclipse.equinox</groupId>
+                <artifactId>region</artifactId>
+                <version>${equinox.region.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>org.eclipse.gemini.blueprint</groupId>
                 <artifactId>gemini-blueprint-io</artifactId>
@@ -958,6 +1016,7 @@
                 <artifactId>gemini-blueprint-extender</artifactId>
                 <version>${gemini.blueprint.version}</version>
             </dependency>
+
             <dependency>
                 <groupId>org.apache.servicemix.bundles</groupId>
                 <artifactId>org.apache.servicemix.bundles.ant</artifactId>
@@ -979,6 +1038,7 @@
                 <artifactId>jetty-all-server</artifactId>
                 <version>${jetty.version}</version>
             </dependency>
+
             <dependency>
                 <groupId>org.apache.geronimo.specs</groupId>
                 <artifactId>geronimo-annotation_1.1_spec</artifactId>
@@ -989,6 +1049,12 @@
                 <artifactId>geronimo-jaspic_1.0_spec</artifactId>
                 <version>${geronimo.jaspic-spec.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.apache.geronimo.specs</groupId>
+                <artifactId>geronimo-jta_1.1_spec</artifactId>
+                <version>${geronimo.jta-spec.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>log4j</groupId>
                 <artifactId>log4j</artifactId>
@@ -1048,6 +1114,7 @@
                 <artifactId>slf4j-simple</artifactId>
                 <version>${slf4j.version}</version>
             </dependency>
+
             <dependency>
                 <groupId>org.ops4j.pax.logging</groupId>
                 <artifactId>pax-logging-api</artifactId>
@@ -1064,6 +1131,44 @@
                     </exclusion>
                 </exclusions>
             </dependency>
+
+            <dependency>
+                <groupId>org.ops4j.pax.swissbox</groupId>
+                <artifactId>pax-swissbox-bnd</artifactId>
+                <version>${pax.swissbox.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ops4j.pax.swissbox</groupId>
+                <artifactId>pax-swissbox-lifecycle</artifactId>
+                <version>${pax.swissbox.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ops4j.pax.swissbox</groupId>
+                <artifactId>pax-swissbox-property</artifactId>
+                <version>${pax.swissbox.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ops4j.pax.swissbox</groupId>
+                <artifactId>pax-swissbox-tracker</artifactId>
+                <version>${pax.swissbox.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.ops4j.pax.url</groupId>
+                <artifactId>pax-url-commons</artifactId>
+                <version>${pax.url.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ops4j.pax.url</groupId>
+                <artifactId>pax-url-obr</artifactId>
+                <version>${pax.url.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ops4j.pax.url</groupId>
+                <artifactId>pax-url-war</artifactId>
+                <version>${pax.url.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
@@ -1234,11 +1339,6 @@
                 <groupId>org.apache.geronimo.specs</groupId>
                 <artifactId>geronimo-atinject_1.0_spec</artifactId>
                 <version>${injection.bundle.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.ops4j.pax.swissbox</groupId>
-                <artifactId>pax-swissbox-bnd</artifactId>
-                <version>${pax.swissbox.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.ops4j.pax.tinybundles</groupId>
