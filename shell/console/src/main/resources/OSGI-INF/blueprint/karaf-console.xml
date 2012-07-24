@@ -34,6 +34,7 @@
 
     <bean id="consoleFactory" class="org.apache.karaf.shell.console.impl.jline.LocalConsoleManager" destroy-method="stop">
         <argument value="$[karaf.startLocalConsole]"/>
+        <argument value="$[org.osgi.framework.startlevel.beginning]"/>
         <argument ref="blueprintBundleContext"/>
         <argument ref="terminalFactory"/>
         <argument ref="consoleFactoryService"/>

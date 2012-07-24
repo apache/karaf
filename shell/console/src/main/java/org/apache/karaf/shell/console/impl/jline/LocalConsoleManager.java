@@ -23,6 +23,7 @@ import java.io.ObjectInputStream;
 import java.net.URL;
 import java.security.KeyPair;
 import java.util.Hashtable;
+
 import javax.security.auth.Subject;
 
 import jline.Terminal;
@@ -33,7 +34,6 @@ import org.apache.karaf.shell.console.Console;
 import org.apache.karaf.shell.console.ConsoleFactory;
 import org.apache.sshd.agent.SshAgent;
 import org.apache.sshd.agent.local.AgentImpl;
-import org.fusesource.jansi.Ansi;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
@@ -48,16 +48,19 @@ public class LocalConsoleManager {
     private TerminalFactory terminalFactory;
     private Console console;
     private boolean start;
+    private final int defaultStartLevel;
     private CommandProcessor commandProcessor;
     private ServiceRegistration registration;
     private SshAgent local;
 
     public LocalConsoleManager(boolean start, 
+            String defaultStartLevel,
             BundleContext bundleContext, 
             TerminalFactory terminalFactory, 
             ConsoleFactory consoleFactory,
             CommandProcessor commandProcessor) throws Exception {
         this.start = start;
+        this.defaultStartLevel = Integer.parseInt(defaultStartLevel);
         this.bundleContext = bundleContext;
         this.terminalFactory = terminalFactory;
         this.consoleFactory = consoleFactory;
@@ -85,7 +88,7 @@ public class LocalConsoleManager {
         String agentId = startAgent("karaf");
         this.console = consoleFactory.createLocal(this.commandProcessor, terminal, callback);
         this.console.getSession().put(SshAgent.SSH_AUTHSOCKET_ENV_NAME, agentId);
-        BundleWatcher watcher = new BundleWatcher(bundleContext, System.out, new Runnable() {
+        BundleWatcher watcher = new BundleWatcher(bundleContext, defaultStartLevel, System.out, new Runnable() {
             
             @Override
             public void run() {

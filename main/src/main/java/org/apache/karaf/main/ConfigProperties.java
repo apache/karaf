@@ -184,6 +184,7 @@ public class ConfigProperties {
         String prop = props.getProperty(SECURITY_PROVIDERS);
         this.securityProviders = (prop != null) ? prop.split(",") : new String[] {};
         this.defaultStartLevel = Integer.parseInt(props.getProperty(Constants.FRAMEWORK_BEGINNING_STARTLEVEL));
+        System.setProperty(Constants.FRAMEWORK_BEGINNING_STARTLEVEL, Integer.toString(this.defaultStartLevel));
         this.lockStartLevel = Integer.parseInt(props.getProperty(PROPERTY_LOCK_LEVEL, Integer.toString(lockStartLevel)));                
         this.lockDelay = Integer.parseInt(props.getProperty(PROPERTY_LOCK_DELAY, Integer.toString(lockDelay)));
         this.props.setProperty(Constants.FRAMEWORK_BEGINNING_STARTLEVEL, Integer.toString(lockStartLevel));
