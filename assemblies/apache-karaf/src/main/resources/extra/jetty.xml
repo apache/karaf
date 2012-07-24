@@ -27,24 +27,30 @@ DTD Configure//EN" "http://jetty.mortbay.org/configure.dtd">
     <!-- One of each type!                                           -->
     <!-- =========================================================== -->
 
-    <!-- Use this connector for many frequently idle connections
-         and for threadless continuations.
+    <!-- 
+         !!WARNING!! We use a blocking instead of a selector connector here to 
+         make the default configuration avoid the jetty issue 357318. If you're 
+         sure that the JDK/JRE you're usign does not face that issue feel free 
+         to change that back but please make sure that you've read the Jetty
+         bug and make sure that it does not affect you first! !! WARNING!!
     -->
     <Call name="addConnector">
-      <Arg>
-          <New class="org.eclipse.jetty.server.nio.SelectChannelConnector">
-            <Set name="host"><Property name="jetty.host" /></Set>
-            <Set name="port"><Property name="jetty.port" default="8181"/></Set>
-            <Set name="maxIdleTime">300000</Set>
-            <Set name="Acceptors">2</Set>
-            <Set name="statsOn">false</Set>
-            <Set name="confidentialPort">8443</Set>
-	    <Set name="lowResourcesConnections">20000</Set>
-	    <Set name="lowResourcesMaxIdleTime">5000</Set>
-          </New>
-      </Arg>
+        <Arg>
+            <New class="org.eclipse.jetty.server.nio.BlockingChannelConnector">
+                <Set name="host">
+                    <Property name="jetty.host" />
+                </Set>
+                <Set name="port">
+                    <Property name="jetty.port" default="8181"/>
+                </Set>
+                <Set name="maxIdleTime">300000</Set>
+                <Set name="Acceptors">2</Set>
+                <Set name="statsOn">false</Set>
+                <Set name="confidentialPort">8443</Set>
+            </New>
+        </Arg>
     </Call>
-	
+
 	<!-- =========================================================== -->
     <!-- Configure Authentication Realms                             -->
     <!-- Realms may be configured for the entire server here, or     -->
