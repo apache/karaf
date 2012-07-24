@@ -1051,6 +1051,11 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.geronimo.specs</groupId>
+                <artifactId>geronimo-jpa_2.0_spec</artifactId>
+                <version>${geronimo.jpa-spec.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.geronimo.specs</groupId>
                 <artifactId>geronimo-jta_1.1_spec</artifactId>
                 <version>${geronimo.jta-spec.version}</version>
             </dependency>
@@ -1355,6 +1360,53 @@
                 <artifactId>servlet-api</artifactId>
                 <version>${servlet.api.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>org.apache.aries.application</groupId>
+                <artifactId>org.apache.aries.application.api</artifactId>
+                <version>${aries.application.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.aries.application</groupId>
+                <artifactId>org.apache.aries.application.default.local.platform</artifactId>
+                <version>${aries.application.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.aries.application</groupId>
+                <artifactId>org.apache.aries.application.deployment.management</artifactId>
+                <version>${aries.application.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.aries.application</groupId>
+                <artifactId>org.apache.aries.application.install</artifactId>
+                <version>${aries.application.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.aries.application</groupId>
+                <artifactId>org.apache.aries.application.management</artifactId>
+                <version>${aries.application.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.aries.application</groupId>
+                <artifactId>org.apache.aries.application.modeller</artifactId>
+                <version>${aries.application.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.aries.application</groupId>
+                <artifactId>org.apache.aries.application.utils</artifactId>
+                <version>${aries.application.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.aries.application</groupId>
+                <artifactId>org.apache.aries.application.resolver.obr</artifactId>
+                <version>${aries.application.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.aries.application</groupId>
+                <artifactId>org.apache.aries.application.runtime</artifactId>
+                <version>${aries.application.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>org.apache.aries.blueprint</groupId>
                 <artifactId>org.apache.aries.blueprint.annotation.api</artifactId>
@@ -1476,9 +1528,57 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.aries.jndi</groupId>
+                <artifactId>org.apache.aries.jndi.legacy.support</artifactId>
+                <version>${aries.jndi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.aries.jndi</groupId>
                 <artifactId>org.apache.aries.jndi.url</artifactId>
                 <version>${aries.jndi.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.apache.aries.jndi</groupId>
+                <artifactId>org.apache.aries.jndi.rmi</artifactId>
+                <version>${aries.jndi.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.aries.transaction</groupId>
+                <artifactId>org.apache.aries.transaction.blueprint</artifactId>
+                <version>${aries.transaction.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.aries.transaction</groupId>
+                <artifactId>org.apache.aries.transaction.manager</artifactId>
+                <version>${aries.transaction.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.aries.transaction</groupId>
+                <artifactId>org.apache.aries.transaction.wrappers</artifactId>
+                <version>${aries.transaction.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.aries.jpa</groupId>
+                <artifactId>org.apache.aries.jpa.api</artifactId>
+                <version>${aries.jpa.api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.aries.jpa</groupId>
+                <artifactId>org.apache.aries.jpa.blueprint.aries</artifactId>
+                <version>${aries.jpa.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.aries.jpa</groupId>
+                <artifactId>org.apache.aries.jpa.container</artifactId>
+                <version>${aries.jpa.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.aries.jpa</groupId>
+                <artifactId>org.apache.aries.jpa.container.context</artifactId>
+                <version>${aries.jpa.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.gogo.runtime</artifactId>
