@@ -177,7 +177,8 @@
         <aries.blueprint.jexl.evaluator.version>1.0.0-SNAPSHOT</aries.blueprint.jexl.evaluator.version>
         <aries.jmx.version>1.0.0</aries.jmx.version>
         <aries.jpa.api.version>1.0.0</aries.jpa.api.version>
-        <aries.jpa.version>1.0.0-SNAPSHOT</aries.jpa.version>
+        <aries.jpa.version>1.0.0</aries.jpa.version>
+        <aries.jpa.blueprint.version>1.0.0-SNAPSHOT</aries.jpa.blueprint.version>
         <aries.jndi.version>1.0.0</aries.jndi.version>
         <aries.jndi.url.version>1.0.0-SNAPSHOT</aries.jndi.url.version>
         <aries.proxy.version>1.0.0</aries.proxy.version>
@@ -1647,7 +1648,7 @@
             <dependency>
                 <groupId>org.apache.aries.jpa</groupId>
                 <artifactId>org.apache.aries.jpa.blueprint.aries</artifactId>
-                <version>${aries.jpa.version}</version>
+                <version>${aries.jpa.blueprint.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.aries.jpa</groupId>
