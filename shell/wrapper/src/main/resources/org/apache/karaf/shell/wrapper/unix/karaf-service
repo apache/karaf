@@ -319,7 +319,7 @@ checkUser() {
 
         # Still want to change users, recurse.  This means that the user will only be
         #  prompted for a password once.
-        su -m $RUN_AS_USER -c "$REALPATH $1"
+        su -m $RUN_AS_USER -s /bin/sh -c "$REALPATH $1"
 
         # Now that we are the original user again, we may need to clean up the lock file.
         if [ "X$LOCKPROP" != "X" ]
