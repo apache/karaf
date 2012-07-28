@@ -35,9 +35,20 @@
     <name>Apache Karaf :: Demos :: Command :: Extend Console</name>
 
     <dependencies>
+    
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.gogo.runtime</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    
         <dependency>
             <groupId>org.apache.karaf.shell</groupId>
             <artifactId>org.apache.karaf.shell.console</artifactId>
+        </dependency>
+        <dependency>
+        	<artifactId>org.osgi.core</artifactId>
+			<groupId>org.apache.karaf</groupId>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
