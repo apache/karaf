@@ -17,6 +17,12 @@
 # limitations under the License.
 # ------------------------------------------------------------------------
 
+# If not set, try to determine the JAVA_HOME using the JDK and fall back to JRE
+if [ -x readlink ]; then
+  [ -z $JAVA_HOME ] && export JAVA_HOME="$(readlink -f /usr/bin/javac | sed 's:/bin/javac::')"
+  [ -z $JAVA_HOME ] && export JAVA_HOME="$(readlink -f /usr/bin/java | sed 's:/bin/java::')"
+fi
+
 # Application
 APP_NAME="${name}"
 APP_LONG_NAME="${displayName}"
