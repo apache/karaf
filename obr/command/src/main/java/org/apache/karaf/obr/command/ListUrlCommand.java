@@ -19,19 +19,26 @@ package org.apache.karaf.obr.command;
 import org.apache.felix.bundlerepository.Repository;
 import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.table.ShellTable;
 
 @Command(scope = "obr", name = "url-list", description = "Displays the repository URLs currently associated with the OBR service.")
 public class ListUrlCommand extends ObrCommandSupport {
 
     protected void doExecute(RepositoryAdmin admin) {
+
+        ShellTable table = new ShellTable();
+        table.column("Index");
+        table.column("OBR URL");
+        table.emptyTableText("No OBR repository URL");
+
         Repository[] repos = admin.listRepositories();
-        if ((repos != null) && (repos.length > 0)) {
+        if (repos != null) {
             for (int i = 0; i < repos.length; i++) {
-                System.out.println(repos[i].getURI());
+                table.addRow().addContent(i, repos[i].getURI());
             }
-        } else {
-            System.out.println("No repository URLs are set.");
         }
+
+        table.print(System.out);
     }
 
 }

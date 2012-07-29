@@ -24,6 +24,7 @@ import org.apache.karaf.shell.commands.Action;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.felix.service.command.CommandSession;
+import org.apache.karaf.shell.table.ShellTable;
 
 @Command(scope = "obr", name = "list", description = "Lists OBR bundles, optionally providing the given packages.")
 public class ListCommand implements Action {
@@ -64,16 +65,20 @@ public class ListCommand implements Action {
             maxVersion = Math.max(maxVersion, emptyIfNull(resource.getVersion()).length());
         }
 
-        String formatHeader = "  %-" + maxPName + "s  %-" + maxSName + "s   %-" + maxVersion + "s";
-        String formatLine = "[%-" + maxPName + "s] [%-" + maxSName + "s] [%-" + maxVersion + "s]";
-        System.out.println(String.format(formatHeader, "NAME", "SYMBOLIC NAME", "VERSION"));
+        ShellTable table = new ShellTable();
+        table.column("Name");
+        table.column("Symbolic Name");
+        table.column("Version");
+        table.emptyTableText("No matching bundles");
+
         for (Resource resource : resources) {
-            System.out.println(String.format(formatLine, emptyIfNull(resource.getPresentationName()), emptyIfNull(resource.getSymbolicName()), emptyIfNull(resource.getVersion())));
+            table.addRow().addContent(emptyIfNull(resource.getPresentationName()),
+                    emptyIfNull(resource.getSymbolicName()),
+                    emptyIfNull(resource.getVersion()));
         }
 
-        if (resources == null || resources.length == 0) {
-            System.out.println("No matching bundles.");
-        }
+        table.print(System.out);
+
         return null;
     }
 
