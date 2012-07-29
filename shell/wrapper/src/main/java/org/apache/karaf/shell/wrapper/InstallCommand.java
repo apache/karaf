@@ -81,10 +81,9 @@ public class InstallCommand extends AbstractAction {
                     copyResourceTo(new File(bin, name + "-wrapper.exe"), "windows64/karaf-wrapper.exe", false);
 
                     serviceFile = new File(bin, name + "-service.bat");
-
                     wrapperConf = new File(etc, name + "-wrapper.conf");
-                    copyFilteredResourceTo(wrapperConf, "windows64/karaf-wrapper.conf", props);
 
+                    copyFilteredResourceTo(wrapperConf, "windows64/karaf-wrapper.conf", props);
                     copyFilteredResourceTo(serviceFile, "windows64/karaf-service.bat", props);
 
                     mkdir(lib);
@@ -95,10 +94,9 @@ public class InstallCommand extends AbstractAction {
                     copyResourceTo(new File(bin, name + "-wrapper.exe"), "windows/karaf-wrapper.exe", false);
 
                     serviceFile = new File(bin, name + "-service.bat");
-
                     wrapperConf = new File(etc, name + "-wrapper.conf");
-                    copyFilteredResourceTo(wrapperConf, "windows/karaf-wrapper.conf", props);
 
+                    copyFilteredResourceTo(wrapperConf, "windows/karaf-wrapper.conf", props);
                     copyFilteredResourceTo(serviceFile, "windows/karaf-service.bat", props);
 
                     mkdir(lib);
@@ -172,8 +170,8 @@ public class InstallCommand extends AbstractAction {
                     chmod(file, "a+x");
 
                     serviceFile = new File(bin, name + "-service");
-                    copyResourceTo(file, "unix/karaf-service", false);
-                    chmod(file, "a+x");
+                    copyFilteredResourceTo(serviceFile, "unix/karaf-service", props);
+                    chmod(serviceFile, "a+x");
 
                     wrapperConf = new File(etc, name + "-wrapper.conf");
                     copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props);
@@ -188,8 +186,8 @@ public class InstallCommand extends AbstractAction {
                     chmod(file, "a+x");
 
                     serviceFile = new File(bin, name + "-service");
-                    copyResourceTo(file, "unix/karaf-service", false);
-                    chmod(file, "a+x");
+                    copyFilteredResourceTo(serviceFile, "unix/karaf-service", props);
+                    chmod(serviceFile, "a+x");
 
                     wrapperConf = new File(etc, name + "-wrapper.conf");
                     copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props);
@@ -207,8 +205,8 @@ public class InstallCommand extends AbstractAction {
                     chmod(file, "a+x");
 
                     serviceFile = new File(bin, name + "-service");
-                    copyResourceTo(file, "unix/karaf-service", false);
-                    chmod(file, "a+x");
+                    copyFilteredResourceTo(serviceFile, "unix/karaf-service", props);
+                    chmod(serviceFile, "a+x");
 
                     wrapperConf = new File(etc, name + "-wrapper.conf");
                     copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props);
@@ -223,8 +221,8 @@ public class InstallCommand extends AbstractAction {
                     chmod(file, "a+x");
 
                     serviceFile = new File(bin, name + "-service");
-                    copyResourceTo(file, "unix/karaf-service", false);
-                    chmod(file, "a+x");
+                    copyFilteredResourceTo(serviceFile, "unix/karaf-service", props);
+                    chmod(serviceFile, "a+x");
 
                     wrapperConf = new File(etc, name + "-wrapper.conf");
                     copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props);
@@ -239,8 +237,8 @@ public class InstallCommand extends AbstractAction {
                     chmod(file, "a+x");
 
                     serviceFile = new File(bin, name + "-service");
-                    copyResourceTo(file, "unix/karaf-service", false);
-                    chmod(file, "a+x");
+                    copyFilteredResourceTo(serviceFile, "unix/karaf-service", props);
+                    chmod(serviceFile, "a+x");
 
                     wrapperConf = new File(etc, name + "-wrapper.conf");
                     copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props);
@@ -256,8 +254,8 @@ public class InstallCommand extends AbstractAction {
                 chmod(file, "a+x");
 
                 serviceFile = new File(bin, name + "-service");
-                copyResourceTo(file, "unix/karaf-service", false);
-                chmod(file, "a+x");
+                copyFilteredResourceTo(serviceFile, "unix/karaf-service", props);
+                chmod(serviceFile, "a+x");
 
                 wrapperConf = new File(etc, name + "-wrapper.conf");
                 copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props);
