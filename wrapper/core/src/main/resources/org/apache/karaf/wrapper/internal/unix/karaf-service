@@ -17,6 +17,9 @@
 # limitations under the License.
 # ------------------------------------------------------------------------
 
+# JAVA_HOME
+[ -x /bin/readlink ] && [ -z $JAVA_HOME ] && export JAVA_HOME=$(/bin/readlink -f /usr/bin/javac | sed "s:/bin/javac::")
+
 # Application
 APP_NAME="${name}"
 APP_LONG_NAME="${displayName}"
