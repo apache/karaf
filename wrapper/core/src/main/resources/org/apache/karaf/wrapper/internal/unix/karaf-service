@@ -17,8 +17,11 @@
 # limitations under the License.
 # ------------------------------------------------------------------------
 
-# JAVA_HOME
-[ -x /bin/readlink ] && [ -z $JAVA_HOME ] && export JAVA_HOME=$(/bin/readlink -f /usr/bin/javac | sed "s:/bin/javac::")
+# JAVA_HOME, trying the JDK first and fallback to JRE
+if [ -x readlink ]; then
+  [ -z $JAVA_HOME ] && export JAVA_HOME="$(readlink -f /usr/bin/javac | sed 's:/bin/javac::')"
+  [ -z $JAVA_HOME ] && export JAVA_HOME="$(readlink -f /usr/bin/java | sed 's:/bin/java::')"
+fi
 
 # Application
 APP_NAME="${name}"
