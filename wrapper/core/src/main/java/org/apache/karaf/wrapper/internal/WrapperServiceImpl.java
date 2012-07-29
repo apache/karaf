@@ -118,8 +118,8 @@ public class WrapperServiceImpl implements WrapperService {
                 chmod(file, "a+x");
 
                 serviceFile = new File(bin, name + "-service");
-                copyResourceTo(file, "unix/karaf-service", false);
-                chmod(file, "a+x");
+                copyFilteredResourceTo(serviceFile, "linux/karaf-service", props);
+                chmod(serviceFile, "a+x");
 
                 wrapperConf = new File(etc, name + "-wrapper.conf");
                 copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props);
@@ -134,7 +134,7 @@ public class WrapperServiceImpl implements WrapperService {
                 chmod(file, "a+x");
 
                 serviceFile = new File(bin, name + "-service");
-                copyFilteredResourceTo(serviceFile, "unix/karaf-service", props);
+                copyFilteredResourceTo(serviceFile, "linux/karaf-service", props);
                 chmod(serviceFile, "a+x");
 
                 wrapperConf = new File(etc, name + "-wrapper.conf");
@@ -153,8 +153,8 @@ public class WrapperServiceImpl implements WrapperService {
                 chmod(file, "a+x");
 
                 serviceFile = new File(bin, name + "-service");
-                copyResourceTo(file, "unix/karaf-service", false);
-                chmod(file, "a+x");
+                copyFilteredResourceTo(serviceFile, "unix/karaf-service", props);
+                chmod(serviceFile, "a+x");
 
                 wrapperConf = new File(etc, name + "-wrapper.conf");
                 copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props);
@@ -169,8 +169,8 @@ public class WrapperServiceImpl implements WrapperService {
                 chmod(file, "a+x");
 
                 serviceFile = new File(bin, name + "-service");
-                copyResourceTo(file, "unix/karaf-service", false);
-                chmod(file, "a+x");
+                copyFilteredResourceTo(serviceFile, "unix/karaf-service", props);
+                chmod(serviceFile, "a+x");
 
                 wrapperConf = new File(etc, name + "-wrapper.conf");
                 copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props);
@@ -188,8 +188,8 @@ public class WrapperServiceImpl implements WrapperService {
                 chmod(file, "a+x");
 
                 serviceFile = new File(bin, name + "-service");
-                copyResourceTo(file, "unix/karaf-service", false);
-                chmod(file, "a+x");
+                copyFilteredResourceTo(serviceFile, "unix/karaf-service", props);
+                chmod(serviceFile, "a+x");
 
                 wrapperConf = new File(etc, name + "-wrapper.conf");
                 copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props);
@@ -204,8 +204,8 @@ public class WrapperServiceImpl implements WrapperService {
                 chmod(file, "a+x");
 
                 serviceFile = new File(bin, name + "-service");
-                copyResourceTo(file, "unix/karaf-service", false);
-                chmod(file, "a+x");
+                copyFilteredResourceTo(serviceFile, "unix/karaf-service", props);
+                chmod(serviceFile, "a+x");
 
                 wrapperConf = new File(etc, name + "-wrapper.conf");
                 copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props);
@@ -220,8 +220,8 @@ public class WrapperServiceImpl implements WrapperService {
                 chmod(file, "a+x");
 
                 serviceFile = new File(bin, name + "-service");
-                copyResourceTo(file, "unix/karaf-service", false);
-                chmod(file, "a+x");
+                copyFilteredResourceTo(serviceFile, "unix/karaf-service", props);
+                chmod(serviceFile, "a+x");
 
                 wrapperConf = new File(etc, name + "-wrapper.conf");
                 copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props);
@@ -237,8 +237,8 @@ public class WrapperServiceImpl implements WrapperService {
             chmod(file, "a+x");
 
             serviceFile = new File(bin, name + "-service");
-            copyResourceTo(file, "unix/karaf-service", false);
-            chmod(file, "a+x");
+            copyFilteredResourceTo(serviceFile, "unix/karaf-service", props);
+            chmod(serviceFile, "a+x");
 
             wrapperConf = new File(etc, name + "-wrapper.conf");
             copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props);
