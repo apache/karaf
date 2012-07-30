@@ -47,7 +47,7 @@
         <bundle start-level='30'>mvn:org.apache.aries.jndi/org.apache.aries.jndi.api/${aries.jndi.version}</bundle>
         <bundle start-level='30'>mvn:org.apache.aries.jndi/org.apache.aries.jndi.core/${aries.jndi.version}</bundle>
         <bundle start-level='30'>mvn:org.apache.aries.jndi/org.apache.aries.jndi.rmi/${aries.jndi.version}</bundle>
-        <bundle start-level='30'>mvn:org.apache.aries.jndi/org.apache.aries.jndi.url/${aries.jndi.url.version}</bundle>
+        <bundle start-level='30'>mvn:org.apache.aries.jndi/org.apache.aries.jndi.url/${aries.jndi.version}</bundle>
         <bundle start-level='30'>mvn:org.apache.aries.jndi/org.apache.aries.jndi.legacy.support/${aries.jndi.version}</bundle>
     </feature>
 
