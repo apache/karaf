@@ -164,7 +164,6 @@
 
         <aries.application.version>1.0.0</aries.application.version>
         <aries.application.management.version>1.0.0-SNAPSHOT</aries.application.management.version>
-        <aries.application.modeller.version>1.0.0-SNAPSHOT</aries.application.modeller.version>
         <aries.application.deployment.version>1.0.0-SNAPSHOT</aries.application.deployment.version>
         <aries.blueprint.annotation.api.version>1.0.0</aries.blueprint.annotation.api.version>
         <aries.blueprint.annotation.impl.version>1.0.0-SNAPSHOT</aries.blueprint.annotation.impl.version>
@@ -1467,7 +1466,7 @@
             <dependency>
                 <groupId>org.apache.aries.application</groupId>
                 <artifactId>org.apache.aries.application.modeller</artifactId>
-                <version>${aries.application.modeller.version}</version>
+                <version>${aries.application.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.aries.application</groupId>
