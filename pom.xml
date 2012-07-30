@@ -176,8 +176,6 @@
         <aries.jpa.version>1.0.0</aries.jpa.version>
         <aries.jndi.version>1.0.0</aries.jndi.version>
         <aries.proxy.version>1.0.0</aries.proxy.version>
-        <aries.quiesce.api.version>1.0.0</aries.quiesce.api.version>
-        <aries.quiesce.manager.version>1.0.0-SNAPSHOT</aries.quiesce.manager.version>
         <aries.transaction.version>1.0.0</aries.transaction.version>
         <aries.transaction.blueprint.version>1.0.0-SNAPSHOT</aries.transaction.blueprint.version>
         <aries.util.version>1.0.0</aries.util.version>
@@ -1539,16 +1537,6 @@
                 <groupId>org.apache.aries.proxy</groupId>
                 <artifactId>org.apache.aries.proxy.impl</artifactId>
                 <version>${aries.proxy.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.aries.quiesce</groupId>
-                <artifactId>org.apache.aries.quiesce.api</artifactId>
-                <version>${aries.quiesce.api.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.aries.quiesce</groupId>
-                <artifactId>org.apache.aries.quiesce.manager</artifactId>
-                <version>${aries.quiesce.manager.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.aries</groupId>
