@@ -179,8 +179,8 @@
         <aries.proxy.version>1.0.0</aries.proxy.version>
         <aries.quiesce.api.version>1.0.0</aries.quiesce.api.version>
         <aries.quiesce.manager.version>1.0.0-SNAPSHOT</aries.quiesce.manager.version>
-        <aries.transaction.version>1.0.0-SNAPSHOT</aries.transaction.version>
-        <aries.transaction.manager.version>1.0.0</aries.transaction.manager.version>
+        <aries.transaction.version>1.0.0</aries.transaction.version>
+        <aries.transaction.blueprint.version>1.0.0-SNAPSHOT</aries.transaction.blueprint.version>
         <aries.util.version>1.0.0</aries.util.version>
 
         <gemini.blueprint.version>1.0.0.RELEASE</gemini.blueprint.version>
@@ -1622,12 +1622,12 @@
             <dependency>
                 <groupId>org.apache.aries.transaction</groupId>
                 <artifactId>org.apache.aries.transaction.blueprint</artifactId>
-                <version>${aries.transaction.version}</version>
+                <version>${aries.transaction.blueprint.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.aries.transaction</groupId>
                 <artifactId>org.apache.aries.transaction.manager</artifactId>
-                <version>${aries.transaction.manager.version}</version>
+                <version>${aries.transaction.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.aries.transaction</groupId>
