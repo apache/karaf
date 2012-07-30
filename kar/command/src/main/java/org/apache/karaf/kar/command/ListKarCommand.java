@@ -17,14 +17,22 @@
 package org.apache.karaf.kar.command;
 
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.table.ShellTable;
 
 @Command(scope = "kar", name = "list", description = "List the installed KAR files.")
 public class ListKarCommand extends KarCommandSupport {
     
     public Object doExecute() throws Exception {
+
+        ShellTable table = new ShellTable();
+        table.column("KAR Name");
+
         for (String karName : this.getKarService().list()) {
-           System.out.println(karName);
+            table.addRow().addContent(karName);
         }
+
+        table.print(System.out);
+
         return null;
     }
     
