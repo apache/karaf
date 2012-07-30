@@ -18,19 +18,34 @@ package org.apache.karaf.shell.obr;
 
 import java.util.List;
 
+import org.apache.felix.bundlerepository.Repository;
 import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
+import org.apache.felix.gogo.commands.Option;
 
 @Command(scope = "obr", name = "removeUrl", description = "Removes a list of repository URLs from the OBR service.")
 public class RemoveUrlCommand extends ObrCommandSupport {
 
-    @Argument(index = 0, name = "urls", description = "Repository URLs to remove from OBR service", required = true, multiValued = true)
-    List<String> urls;
+    @Option(name = "-i", aliases = { "--index" }, description = "Use index to identify URL", required = false, multiValued = false)
+    boolean useIndex;
+
+    @Argument(index = 0, name = "ids", description = "Repository URLs (or indexes if you use -i) to remove from OBR service", required = true, multiValued = true)
+    List<String> ids;
 
     protected void doExecute(RepositoryAdmin admin) throws Exception {
-        for (String url : urls) {
-            admin.removeRepository(url);
+        for (String id : ids) {
+            if (useIndex) {
+                Repository[] repos = admin.listRepositories();
+                int index = Integer.parseInt(id);
+                if (index >= 0 && index < repos.length) {
+                    admin.removeRepository(repos[index].getURI());
+                } else {
+                    System.err.println("Invalid index");
+                }
+            } else {
+                admin.removeRepository(id);
+            }
         }
         persistRepositoryList(admin);
     }
