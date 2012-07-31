@@ -31,7 +31,7 @@ import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.shell.console.AbstractAction;
 
-@Command(scope = "shell", name = "command-watch", description = "Watches & refreshes the output of a command")
+@Command(scope = "shell", name = "watch", description = "Watches & refreshes the output of a command")
 public class WatchAction extends AbstractAction {
 
     @Option(name = "-n", aliases = {"--interval"}, description = "The interval between executions of the command in seconds", required = false, multiValued = false)
