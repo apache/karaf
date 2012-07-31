@@ -25,6 +25,7 @@ lde = { log:display-exception $args } ;
 la = { osgi:list -t 0 $args } ;
 cl = { config:list "(service.pid=$args)" } ;
 man = { help $args } ;
+watch = { shell:command-watch $args } ;
 
 // system:* aliases
 system:shutdown = { osgi:shutdown $args } ;
