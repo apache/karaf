@@ -30,7 +30,6 @@
 
     <groupId>org.apache.karaf.demos.deployer.wrap</groupId>
     <artifactId>osgi.commons-lang</artifactId>
-    <version>2.4</version>
     <packaging>bundle</packaging>
     <name>Apache Karaf :: Demos :: Deployer :: Wrap Bundle osgi.commons-lang</name>
     <description>This OSGi bundle simply wraps commons-lang-2.4.jar artifact.</description>
@@ -85,7 +84,7 @@
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>manual</Bundle-SymbolicName>
-                        <Export-Package>*</Export-Package>
+                        <Export-Package>*;-split-package:=merge-first</Export-Package>
                         <Import-Package />
                         <_versionpolicy>[$(version;==;$(@)),$(version;+;$(@)))</_versionpolicy>
                         <_removeheaders>Ignore-Package,Include-Resource,Private-Package,Embed-Dependency</_removeheaders>
