@@ -121,8 +121,11 @@ public class LocalConsoleManager {
         if (registration != null) {
             registration.unregister();
         }
+        // The bundle is stopped
+        // so close the console and remove the callback so that the
+        // osgi framework isn't stopped
         if (console != null) {
-            console.close();
+            console.close(false);
         }
     }
 
