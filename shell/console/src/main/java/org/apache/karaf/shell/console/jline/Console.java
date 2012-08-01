@@ -26,7 +26,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.InterruptedIOException;
 import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.io.Reader;
 import java.util.Map;
 import java.util.Properties;
@@ -38,7 +37,6 @@ import java.util.regex.Pattern;
 import jline.Terminal;
 import jline.UnsupportedTerminal;
 import jline.console.ConsoleReader;
-import jline.console.history.FileHistory;
 import jline.console.history.PersistentHistory;
 import org.apache.felix.gogo.commands.CommandException;
 import org.apache.felix.gogo.runtime.CommandNotFoundException;
@@ -133,8 +131,11 @@ public class Console implements Runnable
         return session;
     }
 
-    public void close() {
+    public void close(boolean closedByUser) {
         //System.err.println("Closing");
+        if (!running) {
+            return;
+        }
         if (reader.getHistory() instanceof PersistentHistory) {
             try {
                 ((PersistentHistory) reader.getHistory()).flush();
@@ -145,6 +146,9 @@ public class Console implements Runnable
         running = false;
         CommandSessionHolder.unset();
         pipe.interrupt();
+        if (closedByUser && closeCallback != null) {
+            closeCallback.run();
+        }
     }
 
     public void run()
@@ -180,7 +184,7 @@ public class Console implements Runnable
                 logException(t);
             }
         }
-        close();
+        close(true);
         //System.err.println("Exiting console...");
         if (closeCallback != null)
         {
