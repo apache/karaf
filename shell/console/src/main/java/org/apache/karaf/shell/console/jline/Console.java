@@ -132,8 +132,11 @@ public class Console implements Runnable
         return session;
     }
 
-    public void close() {
+    public void close(boolean closedByUser) {
         //System.err.println("Closing");
+        if (!running) {
+            return;
+        }
         if (reader.getHistory() instanceof PersistentHistory) {
             try {
                 ((PersistentHistory) reader.getHistory()).flush();
@@ -144,6 +147,9 @@ public class Console implements Runnable
         running = false;
         CommandSessionHolder.unset();
         pipe.interrupt();
+        if (closedByUser && closeCallback != null) {
+            closeCallback.run();
+        }
     }
 
     public void run()
@@ -179,7 +185,7 @@ public class Console implements Runnable
                 logException(t);
             }
         }
-        close();
+        close(true);
         //System.err.println("Exiting console...");
         if (closeCallback != null)
         {
