@@ -137,8 +137,11 @@ public class ConsoleImpl implements Console
         return session;
     }
 
-    public void close() {
+    public void close(boolean closedByUser) {
         //System.err.println("Closing");
+        if (!running) {
+            return;
+        }
         if (reader.getHistory() instanceof PersistentHistory) {
             try {
                 ((PersistentHistory) reader.getHistory()).flush();
@@ -149,6 +152,10 @@ public class ConsoleImpl implements Console
         running = false;
         CommandSessionHolder.unset();
         pipe.interrupt();
+        if (closedByUser && closeCallback != null)
+        {
+            closeCallback.run();
+        }
     }
 
     public void run()
@@ -188,12 +195,7 @@ public class ConsoleImpl implements Console
                 ShellUtil.logException(session, t);
             }
         }
-        close();
-        //System.err.println("Exiting console...");
-        if (closeCallback != null)
-        {
-            closeCallback.run();
-        }
+        close(true);
     }
 
 	private String readAndParseCommand() throws IOException {

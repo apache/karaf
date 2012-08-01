@@ -24,6 +24,6 @@ public interface Console extends Runnable {
 
     CommandSession getSession();
 
-    void close();
+    void close(boolean closedByUser);
 
 }
