@@ -35,7 +35,7 @@ public class PostgreSQLJDBCLockIntegrationTest extends BaseJDBCLockIntegrationTe
     public void setUp() throws Exception {
         password = "secret";
         driver = "org.postgresql.Driver";
-        url = "jdbc:derby://127.0.0.1:5432/test";
+        url = "jdbc:postgresql://127.0.0.1:5432/test";
         
         super.setUp();
     }
@@ -48,7 +48,7 @@ public class PostgreSQLJDBCLockIntegrationTest extends BaseJDBCLockIntegrationTe
     @Test
     public void initShouldCreateTheDatabaseIfItNotExists() throws Exception {
         String database = "test" + System.currentTimeMillis();
-        url = "jdbc:derby://127.0.0.1:5432/" + database;
+        url = "jdbc:postgresql://127.0.0.1:5432/" + database;
         props.put("karaf.lock.jdbc.url", url);
         lock = createLock(props);
         lock.lock();
