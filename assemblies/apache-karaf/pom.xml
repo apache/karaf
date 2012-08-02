@@ -288,11 +288,23 @@
         </dependency>
         <dependency>
             <groupId>org.apache.aries.blueprint</groupId>
-            <artifactId>org.apache.aries.blueprint</artifactId>
+            <artifactId>org.apache.aries.blueprint.api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.aries.blueprint</groupId>
+            <artifactId>org.apache.aries.blueprint.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.aries.blueprint</groupId>
+            <artifactId>org.apache.aries.blueprint.cm</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.aries.proxy</groupId>
-            <artifactId>org.apache.aries.proxy</artifactId>
+            <artifactId>org.apache.aries.proxy.api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.aries.proxy</groupId>
+            <artifactId>org.apache.aries.proxy.impl</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.aries</groupId>
@@ -308,7 +320,11 @@
         </dependency>
         <dependency>
             <groupId>org.apache.aries.jmx</groupId>
-            <artifactId>org.apache.aries.jmx.blueprint</artifactId>
+            <artifactId>org.apache.aries.jmx.blueprint.api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.aries.jmx</groupId>
+            <artifactId>org.apache.aries.jmx.blueprint.core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.geronimo.specs</groupId>
