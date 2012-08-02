@@ -38,7 +38,7 @@ public class PostgreSQLJDBCLockTest extends BaseJDBCLockTest {
     public void setUp() throws Exception {
         password = "secret";
         driver = "org.postgresql.Driver";
-        url = "jdbc:derby://127.0.0.1:5432/test";
+        url = "jdbc:postgresql://127.0.0.1:5432/test";
         
         super.setUp();
     }
@@ -48,7 +48,7 @@ public class PostgreSQLJDBCLockTest extends BaseJDBCLockTest {
             @Override
             Connection doCreateConnection(String driver, String url, String username, String password) {
                 assertEquals(this.driver, driver);
-                assertEquals(this.url + ";create=true", url);
+                assertEquals(this.url, url);
                 assertEquals(this.user, username);
                 assertEquals(this.password, password);
                 return connection;
@@ -69,7 +69,7 @@ public class PostgreSQLJDBCLockTest extends BaseJDBCLockTest {
             @Override
             Connection doCreateConnection(String driver, String url, String username, String password) {
                 assertEquals(this.driver, driver);
-                assertEquals(this.url + ";create=true", url);
+                assertEquals(this.url, url);
                 assertEquals(this.user, username);
                 assertEquals(this.password, password);
                 return connection;
