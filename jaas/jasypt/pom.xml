@@ -55,13 +55,27 @@
 
         <dependency>
             <groupId>org.apache.aries.blueprint</groupId>
-            <artifactId>org.apache.aries.blueprint</artifactId>
+            <artifactId>org.apache.aries.blueprint.core</artifactId>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
+            <groupId>org.apache.aries.blueprint</groupId>
+            <artifactId>org.apache.aries.blueprint.cm</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.configadmin</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Force osgi 4.2 so that blueprint bundle tracker works correctly -->
+        <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
+            <version>4.2.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -74,7 +88,7 @@
         <dependency>
             <groupId>com.googlecode.pojosr</groupId>
             <artifactId>de.kalpatec.pojosr.framework</artifactId>
-            <version>0.1.4</version>
+            <version>0.1.6</version>
             <scope>test</scope>
         </dependency>
 
@@ -86,7 +100,7 @@
 
         <dependency>
             <groupId>org.apache.aries.proxy</groupId>
-            <artifactId>org.apache.aries.proxy</artifactId>
+            <artifactId>org.apache.aries.proxy.impl</artifactId>
             <scope>test</scope>
         </dependency>
 

@@ -272,7 +272,9 @@
                 org/apache/aries/blueprint/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}
             </outputFileNameMapping>
             <includes>
-                <include>org.apache.aries.blueprint:org.apache.aries.blueprint</include>
+                <include>org.apache.aries.blueprint:org.apache.aries.blueprint.api</include>
+                <include>org.apache.aries.blueprint:org.apache.aries.blueprint.core</include>
+                <include>org.apache.aries.blueprint:org.apache.aries.blueprint.cm</include>
             </includes>
         </dependencySet>
         <dependencySet>
@@ -283,7 +285,8 @@
                 org/apache/aries/proxy/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}
             </outputFileNameMapping>
             <includes>
-                <include>org.apache.aries.proxy:org.apache.aries.proxy</include>
+                <include>org.apache.aries.proxy:org.apache.aries.proxy.api</include>
+                <include>org.apache.aries.proxy:org.apache.aries.proxy.impl</include>
             </includes>
         </dependencySet>
         <dependencySet>
