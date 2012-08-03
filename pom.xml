@@ -135,6 +135,7 @@
         <aries.application.api.version>1.0.0</aries.application.api.version>
         <aries.application.management.version>1.0.0-SNAPSHOT</aries.application.management.version>
         <aries.blueprint.version>1.0.0</aries.blueprint.version>
+        <aries.blueprint.api.version>1.0.0</aries.blueprint.api.version>
         <aries.jmx.api.version>1.0.0</aries.jmx.api.version>
         <aries.jmx.core.version>1.0.0</aries.jmx.core.version>
         <aries.jmx.blueprint.api.version>1.0.0</aries.jmx.blueprint.api.version>
