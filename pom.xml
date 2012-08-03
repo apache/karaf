@@ -177,7 +177,7 @@
         <aries.jndi.version>1.0.0</aries.jndi.version>
         <aries.proxy.version>1.0.0</aries.proxy.version>
         <aries.transaction.version>1.0.0</aries.transaction.version>
-        <aries.transaction.blueprint.version>1.0.0-SNAPSHOT</aries.transaction.blueprint.version>
+        <aries.transaction.blueprint.version>1.0.0</aries.transaction.blueprint.version>
         <aries.util.version>1.0.0</aries.util.version>
 
         <gemini.blueprint.version>1.0.0.RELEASE</gemini.blueprint.version>
