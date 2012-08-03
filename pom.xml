@@ -140,6 +140,7 @@
         <aries.jmx.blueprint.api.version>1.0.0</aries.jmx.blueprint.api.version>
         <aries.jmx.blueprint.core.version>1.0.0</aries.jmx.blueprint.core.version>
         <aries.jpa.version>1.0.0</aries.jpa.version>
+        <aries.jpa.api.version>1.0.0</aries.jpa.api.version>
         <aries.jndi.version>1.0.0</aries.jndi.version>
         <aries.jndi.api.version>1.0.0</aries.jndi.api.version>
         <aries.proxy.api.version>1.0.0</aries.proxy.api.version>
