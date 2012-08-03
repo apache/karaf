@@ -141,6 +141,7 @@
         <aries.jmx.blueprint.core.version>1.0.0</aries.jmx.blueprint.core.version>
         <aries.jpa.version>1.0.0</aries.jpa.version>
         <aries.jndi.version>1.0.0</aries.jndi.version>
+        <aries.jndi.api.version>1.0.0</aries.jndi.api.version>
         <aries.proxy.api.version>1.0.0</aries.proxy.api.version>
         <aries.proxy.impl.version>1.0.0</aries.proxy.impl.version>
         <aries.transaction.version>1.0.0</aries.transaction.version>
@@ -953,7 +954,7 @@
             <dependency>
                 <groupId>org.apache.aries.jndi</groupId>
                 <artifactId>org.apache.aries.jndi.api</artifactId>
-                <version>${aries.jndi.version}</version>
+                <version>${aries.jndi.api.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.aries.jndi</groupId>
