@@ -142,8 +142,8 @@
         <aries.jpa.api.version>1.0.0</aries.jpa.api.version>
         <aries.jndi.version>1.0.0</aries.jndi.version>
         <aries.jndi.api.version>1.0.0</aries.jndi.api.version>
+        <aries.proxy.version>1.0.0</aries.proxy.version>
         <aries.proxy.api.version>1.0.0</aries.proxy.api.version>
-        <aries.proxy.impl.version>1.0.0</aries.proxy.impl.version>
         <aries.transaction.version>1.0.0</aries.transaction.version>
         <aries.util.version>1.0.0</aries.util.version>
         <jansi.version>1.9</jansi.version>
@@ -924,7 +924,7 @@
             <dependency>
                 <groupId>org.apache.aries.proxy</groupId>
                 <artifactId>org.apache.aries.proxy.impl</artifactId>
-                <version>${aries.proxy.impl.version}</version>
+                <version>${aries.proxy.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.aries</groupId>
