@@ -62,7 +62,7 @@
         <!-- commom -->
         <bundle start-level="30">mvn:org.apache.aries.application/org.apache.aries.application.resolver.obr/${aries.application.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.application/org.apache.aries.application.install/${aries.application.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.aries.application/org.apache.aries.application.api/${aries.application.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.application/org.apache.aries.application.api/${aries.application.api.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.application/org.apache.aries.application.management/${aries.application.management.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.application/org.apache.aries.application.utils/${aries.application.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.application/org.apache.aries.application.modeller/${aries.application.version}</bundle>
