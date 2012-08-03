@@ -149,7 +149,6 @@
         <aries.proxy.api.version>1.0.0</aries.proxy.api.version>
         <aries.proxy.impl.version>1.0.0</aries.proxy.impl.version>
         <aries.transaction.version>1.0.0</aries.transaction.version>
-        <aries.transaction.blueprint.version>1.0.0</aries.transaction.blueprint.version>
         <aries.util.version>1.0.0</aries.util.version>
         <jansi.version>1.9</jansi.version>
         <jline.version>2.7</jline.version>
