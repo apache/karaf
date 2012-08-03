@@ -44,9 +44,9 @@
         <bundle start-level="30">mvn:org.apache.karaf.features/org.apache.karaf.features.management/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.management/org.apache.karaf.management.server/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.jmx/org.apache.aries.jmx.api/${aries.jmx.api.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.aries.jmx/org.apache.aries.jmx.core/${aries.jmx.core.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.aries.jmx/org.apache.aries.jmx.blueprint.api/${aries.jmx.blueprint.api.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.aries.jmx/org.apache.aries.jmx.blueprint.core/${aries.jmx.blueprint.core.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.jmx/org.apache.aries.jmx.core/${aries.jmx.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.jmx/org.apache.aries.jmx.blueprint.api/${aries.jmx.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.jmx/org.apache.aries.jmx.blueprint.core/${aries.jmx.version}</bundle>
     </feature>
 
     <feature name="spring" description="Spring 2 support" version="${spring2.version}" resolver="(obr)">
@@ -263,9 +263,9 @@
     <feature name="management" description="Provide a JMX MBeanServer and a set of MBeans in Karaf" version="${project.version}">
         <bundle start-level="30">mvn:org.apache.karaf.management/org.apache.karaf.management.server/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.jmx/org.apache.aries.jmx.api/${aries.jmx.api.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.aries.jmx/org.apache.aries.jmx.core/${aries.jmx.core.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.aries.jmx/org.apache.aries.jmx.blueprint.api/${aries.jmx.blueprint.api.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.aries.jmx/org.apache.aries.jmx.blueprint.core/${aries.jmx.blueprint.core.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.jmx/org.apache.aries.jmx.core/${aries.jmx.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.jmx/org.apache.aries.jmx.blueprint.api/${aries.jmx.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.jmx/org.apache.aries.jmx.blueprint.core/${aries.jmx.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.management.mbeans/org.apache.karaf.management.mbeans.system/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.management.mbeans/org.apache.karaf.management.mbeans.bundles/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.management.mbeans/org.apache.karaf.management.mbeans.services/${project.version}</bundle>

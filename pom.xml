@@ -137,9 +137,7 @@
         <aries.blueprint.version>1.0.0</aries.blueprint.version>
         <aries.blueprint.api.version>1.0.0</aries.blueprint.api.version>
         <aries.jmx.api.version>1.0.0</aries.jmx.api.version>
-        <aries.jmx.core.version>1.0.0</aries.jmx.core.version>
-        <aries.jmx.blueprint.api.version>1.0.0</aries.jmx.blueprint.api.version>
-        <aries.jmx.blueprint.core.version>1.0.0</aries.jmx.blueprint.core.version>
+        <aries.jmx.version>1.0.0</aries.jmx.version>
         <aries.jpa.version>1.0.0</aries.jpa.version>
         <aries.jpa.api.version>1.0.0</aries.jpa.api.version>
         <aries.jndi.version>1.0.0</aries.jndi.version>
@@ -941,17 +939,17 @@
             <dependency>
                 <groupId>org.apache.aries.jmx</groupId>
                 <artifactId>org.apache.aries.jmx.core</artifactId>
-                <version>${aries.jmx.core.version}</version>
+                <version>${aries.jmx.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.aries.jmx</groupId>
                 <artifactId>org.apache.aries.jmx.blueprint.api</artifactId>
-                <version>${aries.jmx.blueprint.api.version}</version>
+                <version>${aries.jmx.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.aries.jmx</groupId>
                 <artifactId>org.apache.aries.jmx.blueprint.core</artifactId>
-                <version>${aries.jmx.blueprint.core.version}</version>
+                <version>${aries.jmx.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.aries.jndi</groupId>
