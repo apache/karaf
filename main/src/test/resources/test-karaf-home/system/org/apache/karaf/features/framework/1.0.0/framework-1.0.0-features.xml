@@ -17,6 +17,6 @@
 -->
 <features xmlns="http://karaf.apache.org/xmlns/features/v1.0.0" name="framework-3.0.0-SNAPSHOT">
     <feature description="Karaf core feature" version="3.0.0-SNAPSHOT" name="framework">
-        <bundle start-level="10">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.api/0.3.1</bundle>
+        <bundle start-level="10">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.api/1.0.0</bundle>
     </feature>
 </features>

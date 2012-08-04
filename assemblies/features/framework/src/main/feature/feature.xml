@@ -38,9 +38,9 @@
         <bundle start="true" start-level="20">mvn:org.apache.aries.proxy/org.apache.aries.proxy.api/${aries.proxy.version}</bundle>
         <bundle start="true" start-level="20">mvn:org.apache.aries.proxy/org.apache.aries.proxy.impl/${aries.proxy.version}</bundle>
         <bundle start="true" start-level="20">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.api/${aries.blueprint.api.version}</bundle>
-        <bundle start="true" start-level="20">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.cm/${aries.blueprint.cm.version}</bundle>
-        <bundle start="true" start-level="20">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.core.compatibility/${aries.blueprint.core.compatibility.version}</bundle>
-        <bundle start="true" start-level="20">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.core/${aries.blueprint.core.version}</bundle>
+        <bundle start="true" start-level="20">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.cm/${aries.blueprint.version}</bundle>
+        <bundle start="true" start-level="20">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.core.compatibility/${aries.blueprint.version}</bundle>
+        <bundle start="true" start-level="20">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.core/${aries.blueprint.version}</bundle>
         <bundle start="true" start-level="24">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.spring/${project.version}</bundle>
         <bundle start="true" start-level="24">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.blueprint/${project.version}</bundle>
         <bundle start="true" start-level="24">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.wrap/${project.version}</bundle>
