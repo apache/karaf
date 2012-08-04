@@ -172,6 +172,7 @@
         <aries.jmx.version>1.0.0</aries.jmx.version>
         <aries.jmx.api.version>1.0.0</aries.jmx.api.version>
         <aries.jpa.version>1.0.0</aries.jpa.version>
+        <aries.jpa.api.version>1.0.0</aries.jpa.api.version>
         <aries.jndi.version>1.0.0</aries.jndi.version>
         <aries.proxy.version>1.0.0</aries.proxy.version>
         <aries.transaction.version>1.0.0</aries.transaction.version>
@@ -1623,7 +1624,7 @@
             <dependency>
                 <groupId>org.apache.aries.jpa</groupId>
                 <artifactId>org.apache.aries.jpa.api</artifactId>
-                <version>${aries.jpa.version}</version>
+                <version>${aries.jpa.api.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.aries.jpa</groupId>
