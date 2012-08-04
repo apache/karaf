@@ -25,7 +25,7 @@
     <feature name='transaction' description='OSGi Transaction Manager' version='${aries.transaction.version}' resolver='(obr)'>
         <details>JTA implementation provided by Apache Aries Transaction ${aries.transaction.version}</details>
         <bundle dependency='true' start-level='30'>mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
-        <bundle start-level='30'>mvn:org.apache.aries.transaction/org.apache.aries.transaction.blueprint/${aries.transaction.blueprint.version}</bundle>
+        <bundle start-level='30'>mvn:org.apache.aries.transaction/org.apache.aries.transaction.blueprint/${aries.transaction.version}</bundle>
         <bundle start-level='30'>mvn:org.apache.aries.transaction/org.apache.aries.transaction.manager/${aries.transaction.version}</bundle>
         <bundle start-level='30'>mvn:org.apache.aries.transaction/org.apache.aries.transaction.wrappers/${aries.transaction.version}</bundle>
     </feature>
