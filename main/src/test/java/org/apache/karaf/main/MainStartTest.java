@@ -54,7 +54,7 @@ public class MainStartTest {
 		// Give the framework some time to start the bundles
 		Thread.sleep(1000);
 
-		Bundle bundle1 = framework.getBundleContext().getBundle("mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.api/0.3.1");
+		Bundle bundle1 = framework.getBundleContext().getBundle("mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.api/1.0.0");
 		Assert.assertEquals(Bundle.ACTIVE, bundle1.getState());
 
 		Bundle bundle2 = framework.getBundleContext().getBundle("pax-url-mvn.jar");

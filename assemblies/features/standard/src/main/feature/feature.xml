@@ -41,8 +41,8 @@
         <bundle dependency="true" start-level="20">mvn:org.apache.xbean/xbean-bundleutils/${xbean.version}</bundle>
         <bundle dependency="true" start-level="20">mvn:org.apache.xbean/xbean-finder/${xbean.version}</bundle>
         <bundle start-level="20">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.annotation.api/${aries.blueprint.annotation.api.version}</bundle>
-        <bundle start-level="20">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.annotation.impl/${aries.blueprint.annotation.impl.version}</bundle>
-        <bundle start-level="20">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.jexl.evaluator/${aries.blueprint.jexl.evaluator.version}</bundle>
+        <bundle start-level="20">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.annotation.impl/${aries.blueprint.annotation.version}</bundle>
+        <bundle start-level="20">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.jexl.evaluator/${aries.blueprint.version}</bundle>
     </feature>
 
     <!-- NB: this file is not the one really used. This file is used by the karaf-maven-plugin to define the start-level of bundles in the generated feature.xml -->

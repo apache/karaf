@@ -165,13 +165,10 @@
         <aries.application.version>1.0.0</aries.application.version>
         <aries.application.api.version>1.0.0</aries.application.api.version>
         <aries.application.management.version>1.0.0-SNAPSHOT</aries.application.management.version>
+        <aries.blueprint.annotation.version>1.0.0</aries.blueprint.annotation.version>
         <aries.blueprint.annotation.api.version>1.0.0</aries.blueprint.annotation.api.version>
-        <aries.blueprint.annotation.impl.version>1.0.0</aries.blueprint.annotation.impl.version>
+        <aries.blueprint.version>1.0.0</aries.blueprint.version>
         <aries.blueprint.api.version>1.0.0</aries.blueprint.api.version>
-        <aries.blueprint.cm.version>1.0.0</aries.blueprint.cm.version>
-        <aries.blueprint.core.compatibility.version>1.0.0</aries.blueprint.core.compatibility.version>
-        <aries.blueprint.core.version>1.0.0</aries.blueprint.core.version>
-        <aries.blueprint.jexl.evaluator.version>1.0.0</aries.blueprint.jexl.evaluator.version>
         <aries.jmx.version>1.0.0</aries.jmx.version>
         <aries.jpa.version>1.0.0</aries.jpa.version>
         <aries.jndi.version>1.0.0</aries.jndi.version>
@@ -1489,7 +1486,7 @@
             <dependency>
                 <groupId>org.apache.aries.blueprint</groupId>
                 <artifactId>org.apache.aries.blueprint.annotation.impl</artifactId>
-                <version>${aries.blueprint.annotation.impl.version}</version>
+                <version>${aries.blueprint.annotation.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.slf4j</groupId>
@@ -1505,22 +1502,22 @@
             <dependency>
                 <groupId>org.apache.aries.blueprint</groupId>
                 <artifactId>org.apache.aries.blueprint.cm</artifactId>
-                <version>${aries.blueprint.cm.version}</version>
+                <version>${aries.blueprint.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.aries.blueprint</groupId>
                 <artifactId>org.apache.aries.blueprint.core.compatibility</artifactId>
-                <version>${aries.blueprint.core.compatibility.version}</version>
+                <version>${aries.blueprint.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.aries.blueprint</groupId>
                 <artifactId>org.apache.aries.blueprint.core</artifactId>
-                <version>${aries.blueprint.core.version}</version>
+                <version>${aries.blueprint.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.aries.blueprint</groupId>
                 <artifactId>org.apache.aries.blueprint.jexl.evaluator</artifactId>
-                <version>${aries.blueprint.jexl.evaluator.version}</version>
+                <version>${aries.blueprint.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>commons-logging</groupId>
