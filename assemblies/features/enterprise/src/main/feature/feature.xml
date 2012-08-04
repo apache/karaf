@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 
 <!--
 
@@ -6,19 +6,19 @@
     contributor license agreements.  See the NOTICE file distributed with
     this work for additional information regarding copyright ownership.
     The ASF licenses this file to You under the Apache License, Version 2.0
-    (the "License"); you may not use this file except in compliance with
+    (the 'License'); you may not use this file except in compliance with
     the License.  You may obtain a copy of the License at
 
        http://www.apache.org/licenses/LICENSE-2.0
 
     Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
+    distributed under the License is distributed on an 'AS IS' BASIS,
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
 
-<features name="enterprise-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.0.0">
+<features name='enterprise-${project.version}' xmlns='http://karaf.apache.org/xmlns/features/v1.0.0'>
 
     <!-- NB: this file is not the one really used. This file is used by the karaf-maven-plugin to define the start-level of bundles in the generated feature.xml -->
 
@@ -51,10 +51,16 @@
         <bundle start-level='30'>mvn:org.apache.aries.jndi/org.apache.aries.jndi.legacy.support/${aries.jndi.version}</bundle>
     </feature>
 
-    <feature name="application-without-isolation" description="Provide EBA archive support" version="${aries.application.version}">
+    <feature name='application-without-isolation' description='Provide EBA archive support' version='${aries.application.version}'>
         <details>Support of the Aries EBA archives</details>
         <!-- pre-requisites-->
-        <feature version="${project.version}">obr</feature>
+        <bundle dependency='true' start-level='20'>mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.api/${aries.blueprint.api.version}</bundle>
+        <bundle dependency='true' start-level='20'>mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.core/${aries.blueprint.version}</bundle>
+        <bundle dependency='true' start-level='20'>mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.cm/${aries.blueprint.version}</bundle>
+        <bundle dependency='true' start-level='20'>mvn:org.apache.aries.proxy/org.apache.aries.proxy.api/${aries.proxy.api.version}</bundle>
+        <bundle dependency='true' start-level='20'>mvn:org.apache.aries.proxy/org.apache.aries.proxy.impl/${aries.proxy.version}</bundle>
+        <bundle dependency='true' start-level='20'>mvn:org.apache.aries/org.apache.aries.util/${aries.util.version}</bundle>
+        <feature version='${project.version}'>obr</feature>
         <!-- common -->
         <bundle start-level='30'>mvn:org.apache.aries.application/org.apache.aries.application.resolver.obr/${aries.application.version}</bundle>
         <bundle start-level='30'>mvn:org.apache.aries.application/org.apache.aries.application.install/${aries.application.version}</bundle>
@@ -63,6 +69,7 @@
         <bundle start-level='30'>mvn:org.apache.aries.application/org.apache.aries.application.utils/${aries.application.version}</bundle>
         <bundle start-level='30'>mvn:org.apache.aries.application/org.apache.aries.application.modeller/${aries.application.version}</bundle>
         <bundle start-level='30'>mvn:org.apache.aries.application/org.apache.aries.application.default.local.platform/${aries.application.version}</bundle>
+        <bundle start-level='30'>mvn:org.apache.aries.application/org.apache.aries.application.resolver.noop/${aries.application.version}</bundle>
         <bundle start-level='30'>mvn:org.apache.aries.application/org.apache.aries.application.deployment.management/${aries.application.version}</bundle>
         <!-- without isolation -->
         <bundle start-level='30'>mvn:org.apache.aries.application/org.apache.aries.application.runtime/${aries.application.version}</bundle>
