@@ -32,9 +32,6 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.junit.Test;
 
-/**
- * @version $Rev:$ $Date:$
- */
 public class BundleToArtifactTest extends MojoSupport {
 
     public BundleToArtifactTest() throws NoSuchFieldException, IllegalAccessException {

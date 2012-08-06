@@ -20,9 +20,6 @@
 
 package org.apache.karaf.features;
 
-/**
- * @version $Rev:$ $Date:$
- */
 public interface Dependency {
 
     String getName();

@@ -31,9 +31,6 @@ import org.apache.karaf.features.internal.model.JaxbUtil;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
-/**
- * @version $Rev:$ $Date:$
- */
 public class GenerateDescriptorMojoTest {
 
     @Test

@@ -47,7 +47,6 @@ import org.codehaus.plexus.archiver.jar.JarArchiver;
 /**
  * assembles a kar archive
  *
- * @version $Revision: 1.1 $
  * @goal features-create-kar
  * @phase package
  * @requiresDependencyResolution runtime

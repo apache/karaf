@@ -32,9 +32,6 @@ import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * @version $Rev:$ $Date:$
- */
 public class Activator implements BundleActivator {
 
     private static final Logger log = LoggerFactory.getLogger(Activator.class);

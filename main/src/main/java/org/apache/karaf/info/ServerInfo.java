@@ -23,9 +23,6 @@ package org.apache.karaf.info;
 import java.io.File;
 import java.net.URI;
 
-/**
- * @version $Rev:$ $Date:$
- */
 public interface ServerInfo {
     
     File getHomeDirectory();

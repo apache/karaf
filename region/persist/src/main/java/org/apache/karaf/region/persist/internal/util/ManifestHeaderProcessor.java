@@ -31,9 +31,6 @@ import java.util.regex.Pattern;
 
 import org.osgi.framework.Constants;
 
-/**
- * @version $Rev:$ $Date:$
- */
 public class ManifestHeaderProcessor
 {
   public static final String NESTED_FILTER_ATTRIBUTE = "org.apache.aries.application.filter.attribute";

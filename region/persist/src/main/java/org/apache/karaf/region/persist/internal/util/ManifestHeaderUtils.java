@@ -23,9 +23,6 @@ package org.apache.karaf.region.persist.internal.util;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @version $Rev:$ $Date:$
- */
 public class ManifestHeaderUtils {
 
      /**
