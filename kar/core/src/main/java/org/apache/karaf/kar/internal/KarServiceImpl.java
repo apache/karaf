@@ -236,7 +236,7 @@ public class KarServiceImpl implements KarService {
             jos = new JarOutputStream(new BufferedOutputStream(fos, 100000), manifest);
             
             Map<URI, Integer> locationMap = new HashMap<URI, Integer>();
-            copyResourceToJar(jos, repo.getURI(), locationMap, console);
+            copyResourceToJar(jos, repo.getURI(), locationMap);
         
             Map<String, Feature> featureMap = new HashMap<String, Feature>();
             for (Feature feature : repo.getFeatures()) {
@@ -246,11 +246,13 @@ public class KarServiceImpl implements KarService {
             Set<Feature> featuresToCopy = getFeatures(featureMap, features, 1);
             
             for (Feature feature : featuresToCopy) {
-                console.println("Adding feature " + feature.getName());
-                copyFeatureToJar(jos, feature, locationMap, console);
+                if (console != null)
+                    console.println("Adding feature " + feature.getName());
+                copyFeatureToJar(jos, feature, locationMap);
             }
-            
-            console.println("Kar file created : " + karPath);
+
+            if (console != null)
+                console.println("Kar file created : " + karPath);
         } catch (Exception e) {
             throw new RuntimeException("Error creating kar: " + e.getMessage(), e);
         } finally {
@@ -307,19 +309,19 @@ public class KarServiceImpl implements KarService {
         }
     }
 
-    private void copyFeatureToJar(JarOutputStream jos, Feature feature, Map<URI, Integer> locationMap, PrintStream console)
+    private void copyFeatureToJar(JarOutputStream jos, Feature feature, Map<URI, Integer> locationMap)
         throws URISyntaxException {
         for (BundleInfo bundleInfo : feature.getBundles()) {
             URI location = new URI(bundleInfo.getLocation());
-            copyResourceToJar(jos, location, locationMap, console);
+            copyResourceToJar(jos, location, locationMap);
         }
         for (ConfigFileInfo configFileInfo : feature.getConfigurationFiles()) {
             URI location = new URI(configFileInfo.getLocation());
-            copyResourceToJar(jos, location, locationMap, console);
+            copyResourceToJar(jos, location, locationMap);
         }
     }
 
-    private void copyResourceToJar(JarOutputStream jos, URI location, Map<URI, Integer> locationMap, PrintStream console) {
+    private void copyResourceToJar(JarOutputStream jos, URI location, Map<URI, Integer> locationMap) {
         if (locationMap.containsKey(location)) {
             return;
         }

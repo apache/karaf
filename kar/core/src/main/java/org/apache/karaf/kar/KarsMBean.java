@@ -29,6 +29,15 @@ public interface KarsMBean {
     List<String> getKars() throws Exception;
 
     /**
+     * Create a kar file for a list of feature repos
+     *
+     * @param repoName the name of features repository
+     * @param features the features to include in the kar
+     * @throws Exception in case of creation failure
+     */
+    void create(String repoName, List<String> features) throws Exception;
+
+    /**
      * Install a KAR file from the given URL.
      *
      * @param url the JAR URL.

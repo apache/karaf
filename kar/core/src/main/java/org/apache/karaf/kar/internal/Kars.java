@@ -35,6 +35,10 @@ public class Kars extends StandardMBean implements KarsMBean {
     public List<String> getKars() throws Exception {
         return karService.list();
     }
+
+    public void create(String repoName, List<String> features) throws Exception {
+        karService.create(repoName, features, null);
+    }
     
     public void install(String url) throws Exception {
         karService.install(new URI(url));
