@@ -119,6 +119,8 @@ public class ConfigProperties {
     private static final String PROPERTY_LOCK_CLASS_DEFAULT = SimpleFileLock.class.getName();
 
     private static final String SECURITY_PROVIDERS = "org.apache.karaf.security.providers";
+    
+    private static final String KARAF_STARTUP_MESSAGE = "karaf.startup.message";
 
     /**
      * If a lock should be used before starting the runtime
@@ -151,6 +153,7 @@ public class ConfigProperties {
     String includes;
     String optionals;
     File etcFolder;
+    String startupMessage;
     
     public ConfigProperties() throws Exception {
         this.karafHome = Utils.getKarafHome(ConfigProperties.class, PROP_KARAF_HOME, ENV_KARAF_HOME);
@@ -202,6 +205,7 @@ public class ConfigProperties {
         this.shutdownHost = props.getProperty(KARAF_SHUTDOWN_HOST, "localhost");
         this.portFile = props.getProperty(KARAF_SHUTDOWN_PORT_FILE);
         this.shutdownCommand = props.getProperty(KARAF_SHUTDOWN_COMMAND, DEFAULT_SHUTDOWN_COMMAND);
+        this.startupMessage = props.getProperty(KARAF_STARTUP_MESSAGE, "Apache Karaf starting up. Press Enter to open the shell now...");
     }
     
     private String getProperyOrFail(String propertyName) {

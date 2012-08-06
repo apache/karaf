@@ -210,6 +210,7 @@ public class Main {
 
     public void launch() throws Exception {
         config = new ConfigProperties();
+        System.out.println(config.startupMessage);
         BootstrapLogManager.setProperties(config.props);
         Lock lock = createLock();
         lockManager = new LockManager(lock, new KarafLockCallback(), config.lockDelay);
@@ -250,6 +251,8 @@ public class Main {
         activatorManager.startKarafActivators();
         
         setStartLevel(config.lockStartLevel);
+        // Progress bar
+        new StartupListener(framework.getBundleContext());
         lockManager.startLockMonitor();
     }
     

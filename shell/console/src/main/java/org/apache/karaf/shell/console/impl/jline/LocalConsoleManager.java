@@ -88,13 +88,13 @@ public class LocalConsoleManager {
         String agentId = startAgent("karaf");
         this.console = consoleFactory.createLocal(this.commandProcessor, terminal, callback);
         this.console.getSession().put(SshAgent.SSH_AUTHSOCKET_ENV_NAME, agentId);
-        BundleWatcher watcher = new BundleWatcher(bundleContext, defaultStartLevel, System.out, new Runnable() {
+        DelayedStarted watcher = new DelayedStarted(new Runnable() {
             
             @Override
             public void run() {
                 consoleFactory.startConsoleAs(console, subject);
             }
-        });
+        }, bundleContext, System.in);
         new Thread(watcher).start();
     }
 
