@@ -38,6 +38,8 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 
+import javax.swing.text.html.Option;
+
 /**
  * Installs kar dependencies into a server-under-construction in target/assembly
  *
@@ -145,6 +147,9 @@ public class InstallKarsMojo extends MojoSupport {
         }
 
         public void installFeature(String name) throws Exception {
+        }
+
+        public void installFeature(String name, EnumSet<Option> options) throws Exception {
         }
 
         public void installFeature(String name, String version) throws Exception {
