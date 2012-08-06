@@ -16,6 +16,7 @@ package org.apache.karaf.features.management.internal;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.Hashtable;
 import java.util.List;
 
@@ -24,7 +25,6 @@ import javax.management.MBeanRegistration;
 import javax.management.MBeanServer;
 import javax.management.NotCompliantMBeanException;
 import javax.management.Notification;
-import javax.management.NotificationBroadcasterSupport;
 import javax.management.ObjectName;
 import javax.management.openmbean.TabularData;
 
@@ -146,8 +146,30 @@ public class FeaturesService extends StandardEmitterMBean implements
         featuresService.installFeature(name);
     }
 
+    public void installFeature(String name, boolean noClean, boolean noRefresh) throws Exception {
+        EnumSet<org.apache.karaf.features.FeaturesService.Option> options = EnumSet.noneOf(org.apache.karaf.features.FeaturesService.Option.class);
+        if (noClean) {
+            options.add(org.apache.karaf.features.FeaturesService.Option.NoCleanIfFailure);
+        }
+        if (noRefresh) {
+            options.add(org.apache.karaf.features.FeaturesService.Option.NoAutoRefreshBundles);
+        }
+        featuresService.installFeature(name, options);
+    }
+
     public void installFeature(String name, String version) throws Exception {
         featuresService.installFeature(name, version);
+    }
+
+    public void installFeature(String name, String version, boolean noClean, boolean noRefresh) throws Exception {
+        EnumSet<org.apache.karaf.features.FeaturesService.Option> options = EnumSet.noneOf(org.apache.karaf.features.FeaturesService.Option.class);
+        if (noClean) {
+            options.add(org.apache.karaf.features.FeaturesService.Option.NoCleanIfFailure);
+        }
+        if (noRefresh) {
+            options.add(org.apache.karaf.features.FeaturesService.Option.NoAutoRefreshBundles);
+        }
+        featuresService.installFeature(name, version, options);
     }
 
     public void uninstallFeature(String name) throws Exception {
