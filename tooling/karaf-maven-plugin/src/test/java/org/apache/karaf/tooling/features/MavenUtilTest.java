@@ -30,9 +30,6 @@ import static org.apache.karaf.tooling.features.MavenUtil.pathFromAether;
 import static org.apache.karaf.tooling.features.MavenUtil.pathFromMaven;
 import static org.junit.Assert.assertEquals;
 
-/**
- * @version $Rev:$ $Date:$
- */
 public class MavenUtilTest {
 
     @Test

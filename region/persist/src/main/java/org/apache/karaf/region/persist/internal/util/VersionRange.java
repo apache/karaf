@@ -25,9 +25,6 @@ import java.util.regex.Pattern;
 
 import org.osgi.framework.Version;
 
-/**
- * @version $Rev:$ $Date:$
- */
 public final class VersionRange {
 
     /** A string representation of the version. */

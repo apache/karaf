@@ -25,9 +25,6 @@ import java.net.URI;
 
 import org.apache.karaf.info.ServerInfo;
 
-/**
- * @version $Rev:$ $Date:$
- */
 public class ServerInfoImpl implements ServerInfo {
 
     private final File base;

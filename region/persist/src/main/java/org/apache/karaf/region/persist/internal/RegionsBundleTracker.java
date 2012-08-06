@@ -30,9 +30,6 @@ import org.osgi.util.tracker.BundleTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * @version $Rev:$ $Date:$
- */
 public class RegionsBundleTracker {
     private static final Logger log = LoggerFactory.getLogger(RegionsBundleTracker.class);
 

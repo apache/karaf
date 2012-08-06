@@ -38,7 +38,6 @@ import org.apache.maven.plugin.MojoFailureException;
 /**
  * Package a server archive from an assembled server
  *
- * @version $Revision: 1.1 $
  * @goal instance-create-archive
  * @phase package
  * @requiresDependencyResolution runtime

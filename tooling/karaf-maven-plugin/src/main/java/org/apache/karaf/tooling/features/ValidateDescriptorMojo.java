@@ -53,7 +53,6 @@ import static org.apache.karaf.tooling.features.ManifestUtils.*;
 /**
  * Validates a features XML file
  *
- * @version $Revision:$
  * @goal features-validate-descriptor
  * @execute phase="process-resources"
  * @requiresDependencyResolution runtime
