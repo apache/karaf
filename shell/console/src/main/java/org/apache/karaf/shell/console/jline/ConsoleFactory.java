@@ -28,7 +28,6 @@ import java.security.KeyPair;
 import java.security.PrivilegedExceptionAction;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import javax.security.auth.Subject;
 
 import jline.Terminal;
@@ -40,11 +39,7 @@ import org.apache.sshd.agent.SshAgent;
 import org.apache.sshd.agent.local.AgentImpl;
 import org.fusesource.jansi.AnsiConsole;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.framework.FrameworkEvent;
-import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.framework.startlevel.FrameworkStartLevel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,10 +47,10 @@ public class ConsoleFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConsoleFactory.class);
 
-    private BundleContext bundleContext;
+    BundleContext bundleContext;
     private CommandProcessor commandProcessor;
     private TerminalFactory terminalFactory;
-    private Console console;
+    Console console;
     private boolean start;
     private ServiceRegistration registration;
     private SshAgent local;
@@ -156,56 +151,7 @@ public class ConsoleFactory {
         session.put(".jline.terminal", terminal);
         session.put(SshAgent.SSH_AUTHSOCKET_ENV_NAME, agentId);
 
-        new DelayedStarted(unwrappedIn).start();
-    }
-
-    class DelayedStarted extends Thread implements FrameworkListener {
-        final AtomicBoolean started = new AtomicBoolean(false);
-        final InputStream in;
-        DelayedStarted(InputStream in) {
-            super("Karaf Shell Console Thread");
-            this.in = in;
-            int defaultStartLevel = Integer.parseInt(System.getProperty(Constants.FRAMEWORK_BEGINNING_STARTLEVEL));
-            int startLevel = bundleContext.getBundle(0).adapt(FrameworkStartLevel.class).getStartLevel();
-            if (startLevel >= defaultStartLevel) {
-                started.set(true);
-            } else {
-                bundleContext.addFrameworkListener(this);
-                frameworkEvent(new FrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, bundleContext.getBundle(), null));
-            }
-        }
-
-        public void run() {
-            try {
-                while (!started.get()) {
-                    if (in.available() == 0) {
-                        Thread.sleep(10);
-                    }
-                    while (in.available() > 0) {
-                        char ch = (char) in.read();
-                        if (ch == '\r' || ch == '\n') {
-                            started.set(true);
-                            break;
-                        }
-                    }
-                }
-            } catch (Throwable t) {
-                // Ignore
-            }
-            System.setProperty("karaf.console.started", "true");
-            System.out.println();
-            bundleContext.removeFrameworkListener(this);
-            console.run();
-        }
-        public void frameworkEvent(FrameworkEvent event) {
-            if (event.getType() == FrameworkEvent.STARTLEVEL_CHANGED) {
-                int defaultStartLevel = Integer.parseInt(System.getProperty(Constants.FRAMEWORK_BEGINNING_STARTLEVEL));
-                int startLevel = bundleContext.getBundle(0).adapt(FrameworkStartLevel.class).getStartLevel();
-                if (startLevel >= defaultStartLevel) {
-                    started.set(true);
-                }
-            }
-        }
+        new DelayedStarted(this.console, bundleContext, unwrappedIn).start();
     }
 
     protected String startAgent(String user) {

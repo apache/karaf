@@ -48,16 +48,12 @@ import java.util.regex.Pattern;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkEvent;
-import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.ServiceReference;
-import org.osgi.framework.SynchronousBundleListener;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
-import org.osgi.framework.startlevel.FrameworkStartLevel;
 import org.osgi.service.startlevel.StartLevel;
 
 /**
@@ -298,61 +294,6 @@ public class Main {
                 lock(configProps);
             }
         }.start();
-    }
-
-    private static class StartupListener implements FrameworkListener, SynchronousBundleListener {
-        private final BundleContext context;
-        private StartupListener(BundleContext context) {
-            this.context = context;
-            context.addBundleListener(this);
-            context.addFrameworkListener(this);
-        }
-        public synchronized void bundleChanged(BundleEvent bundleEvent) {
-            Bundle[] bundles = context.getBundles();
-            int numActive = 0;
-            int numBundles = bundles.length;
-            for (Bundle bundle : bundles) {
-                if (bundle.getHeaders().get(Constants.FRAGMENT_HOST) != null) {
-                    numBundles--;
-                } else if (bundle.getState() == Bundle.ACTIVE) {
-                    numActive ++;
-                }
-            }
-            boolean started = Boolean.parseBoolean(System.getProperty("karaf.console.started", "false"));
-            if (!started) {
-                update(numActive, numBundles);
-            }
-        }
-        public synchronized void frameworkEvent(FrameworkEvent frameworkEvent) {
-            if (frameworkEvent.getType() == FrameworkEvent.STARTLEVEL_CHANGED) {
-                int defStartLevel = Integer.parseInt(System.getProperty(Constants.FRAMEWORK_BEGINNING_STARTLEVEL));
-                int startLevel = context.getBundle(0).adapt(FrameworkStartLevel.class).getStartLevel();
-                if (startLevel >= defStartLevel) {
-                    context.removeBundleListener(this);
-                    context.removeFrameworkListener(this);
-                }
-            }
-        }
-        public void update(int done, int total) {
-            int percent = (done * 100) / total;
-            StringBuilder sb = new StringBuilder();
-            sb.append(String.format("\r%3d%% [", percent));
-            for (int i = 0; i < 100; i++) {
-                if (i < percent) {
-                    sb.append('=');
-                } else if (i == percent) {
-                    sb.append('>');
-                } else {
-                    sb.append(' ');
-                }
-            }
-            sb.append(']');
-            System.out.print(sb.toString());
-            System.out.flush();
-            if (done == total) {
-                System.out.println();
-            }
-        }
     }
 
     private void startKarafActivators(ClassLoader classLoader) throws IOException {
