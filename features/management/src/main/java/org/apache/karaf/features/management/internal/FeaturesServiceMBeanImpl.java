@@ -14,10 +14,7 @@
 package org.apache.karaf.features.management.internal;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Hashtable;
-import java.util.List;
+import java.util.*;
 import javax.management.MBeanNotificationInfo;
 import javax.management.MBeanRegistration;
 import javax.management.MBeanServer;
@@ -148,16 +145,38 @@ public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
         featuresService.removeRepository(new URI(uri));
     }
 
-    public void installFeature(String name) throws Exception {
-        featuresService.installFeature(name);
-    }
-
     public void removeRepository(String uri, boolean uninstall) throws Exception {
         featuresService.removeRepository(new URI(uri), uninstall);
     }
 
+    public void installFeature(String name) throws Exception {
+        featuresService.installFeature(name);
+    }
+
+    public void installFeature(String name, boolean noClean, boolean noRefresh) throws Exception {
+        EnumSet<FeaturesService.Option> options = EnumSet.noneOf(FeaturesService.Option.class);
+        if (noClean) {
+            options.add(FeaturesService.Option.NoCleanIfFailure);
+        }
+        if (noRefresh) {
+            options.add(FeaturesService.Option.NoAutoRefreshBundles);
+        }
+        featuresService.installFeature(name, options);
+    }
+
     public void installFeature(String name, String version) throws Exception {
         featuresService.installFeature(name, version);
+    }
+
+    public void installFeature(String name, String version, boolean noClean, boolean noRefresh) throws Exception {
+        EnumSet<FeaturesService.Option> options = EnumSet.noneOf(FeaturesService.Option.class);
+        if (noClean) {
+            options.add(FeaturesService.Option.NoCleanIfFailure);
+        }
+        if (noRefresh) {
+            options.add(FeaturesService.Option.NoAutoRefreshBundles);
+        }
+        featuresService.installFeature(name, version, options);
     }
 
     public void uninstallFeature(String name) throws Exception {

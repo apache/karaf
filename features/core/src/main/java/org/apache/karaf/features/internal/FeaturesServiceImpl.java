@@ -314,6 +314,17 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
     }
 
     /**
+     * Install a feature identified by a name, including installation options.
+     *
+     * @param name the name of the feature.
+     * @param options the installation options.
+     * @throws Exception in case of installation failure.
+     */
+    public void installFeature(String name, EnumSet<Option> options) throws Exception {
+        installFeature(name, FeatureImpl.DEFAULT_VERSION, options);
+    }
+
+    /**
      * Install a feature identified by a name and a version.
      *
      * @param name the name of the feature.
