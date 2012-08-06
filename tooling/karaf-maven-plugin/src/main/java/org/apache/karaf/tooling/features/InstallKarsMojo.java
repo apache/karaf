@@ -477,6 +477,10 @@ public class InstallKarsMojo extends MojoSupport {
         }
 
         @Override
+        public void installFeature(String name, EnumSet<Option> options) throws Exception {
+        }
+
+        @Override
         public void installFeature(String name, String version) throws Exception {
         }
 

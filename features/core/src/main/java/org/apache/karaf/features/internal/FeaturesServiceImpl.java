@@ -382,6 +382,17 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
     }
 
     /**
+     * Install a feature identified by a name, including a set of options.
+     *
+     * @param name the name of the feature.
+     * @param options the installation options.
+     * @throws Exception in case of install failure.
+     */
+    public void installFeature(String name, EnumSet<Option> options) throws Exception {
+        installFeature(name, org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION, options);
+    }
+
+    /**
      * Install a feature identified by a name and a version.
      *
      * @param name the name of the feature.
