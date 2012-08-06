@@ -30,6 +30,9 @@ import org.apache.karaf.instance.core.InstancesMBean;
 
 public class Instances extends StandardMBean implements InstancesMBean {
 
+    static final String DEBUG_OPTS = " -Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005";
+    static final String DEFAULT_OPTS = "-server -Xmx512M -Dcom.sun.management.jmxremote";
+
     private org.apache.karaf.instance.core.InstanceService instanceService;
 
     public Instances(org.apache.karaf.instance.core.InstanceService instanceService) throws NotCompliantMBeanException {
@@ -77,8 +80,40 @@ public class Instances extends StandardMBean implements InstancesMBean {
         getExistingInstance(name).destroy();
     }
 
+    public void startInstance(String name) throws Exception {
+        getExistingInstance(name).start(null);
+    }
+
     public void startInstance(String name, String opts) throws Exception {
         getExistingInstance(name).start(opts);
+    }
+
+    public void startInstance(String name, String opts, boolean wait, boolean debug) throws Exception {
+        Instance child = getExistingInstance(name);
+        String options = opts;
+        if (options == null) {
+            options = child.getJavaOpts();
+        }
+        if (options == null) {
+            options = DEFAULT_OPTS;
+        }
+        if (debug) {
+            options += DEBUG_OPTS;
+        }
+        if (wait) {
+            String state = child.getState();
+            if (Instance.STOPPED.equals(state)) {
+                child.start(opts);
+            }
+            if (!Instance.STARTED.equals(state)) {
+                do {
+                    Thread.sleep(500);
+                    state = child.getState();
+                } while (Instance.STARTING.equals(state));
+            }
+        } else {
+            child.start(opts);
+        }
     }
 
     public void stopInstance(String name) throws Exception {
@@ -87,6 +122,10 @@ public class Instances extends StandardMBean implements InstancesMBean {
 
     public void renameInstance(String originalName, String newName) throws Exception {
         instanceService.renameInstance(originalName, newName, false);
+    }
+
+    public void renameInstance(String originalName, String newName, boolean verbose) throws Exception {
+        instanceService.renameInstance(originalName, newName, verbose);
     }
 
     public void cloneInstance(String name, String cloneName, int sshPort, int rmiRegistryPort, int rmiServerPort, String location, String javaOpts) throws Exception {
