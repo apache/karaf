@@ -25,6 +25,10 @@ import org.apache.felix.gogo.commands.Command;
 public class RestartBundle extends BundlesCommand {
 
     protected void doExecute(List<Bundle> bundles) throws Exception {
+        if (bundles.isEmpty()) {
+            System.err.println("No bundles specified.");
+            return;
+        }
         for (Bundle bundle : bundles) {
             try {
                 bundle.stop();
