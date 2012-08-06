@@ -41,6 +41,7 @@ public interface AdminServiceMBean {
     void changeJavaOpts(String name, String javaopts) throws Exception;
     void destroyInstance(String name) throws Exception;
     void startInstance(String name, String opts) throws Exception;
+    void startInstance(String name, String opts, boolean wait) throws Exception;
     void stopInstance(String name) throws Exception;
     void renameInstance(String originalName, String newName) throws Exception;
     void cloneInstance(String name, String cloneName, int sshPort, int rmiRegistryPort, int rmiServerPort, String location, String javaOpts) throws Exception;
