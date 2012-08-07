@@ -40,7 +40,9 @@ public interface AdminServiceMBean {
     void changeRmiServerPort(String name, int port) throws Exception;
     void changeJavaOpts(String name, String javaopts) throws Exception;
     void destroyInstance(String name) throws Exception;
+    void startInstance(String name) throws Exception;
     void startInstance(String name, String opts) throws Exception;
+    void startInstance(String name, String opts, boolean wait) throws Exception;
     void stopInstance(String name) throws Exception;
     void renameInstance(String originalName, String newName) throws Exception;
 

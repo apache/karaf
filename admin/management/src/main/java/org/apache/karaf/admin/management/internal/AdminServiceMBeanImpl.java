@@ -86,8 +86,30 @@ public class AdminServiceMBeanImpl extends StandardMBean implements AdminService
         getExistingInstance(name).destroy();
     }
 
+    public void startInstance(String name) throws Exception {
+        getExistingInstance(name).start(null);
+    }
+
     public void startInstance(String name, String opts) throws Exception {
         getExistingInstance(name).start(opts);
+    }
+
+    public void startInstance(String name, String opts, boolean wait) throws Exception {
+        Instance child = getExistingInstance(name);
+        if (wait) {
+            String state = child.getState();
+            if (Instance.STOPPED.equals(state)) {
+                child.start(opts);
+            }
+            if (!Instance.STARTED.equals(state)) {
+                do {
+                    Thread.sleep(500);
+                    state = child.getState();
+                } while (Instance.STARTING.equals(state));
+            }
+        } else {
+            child.start(opts);
+        }
     }
 
     public void stopInstance(String name) throws Exception {
