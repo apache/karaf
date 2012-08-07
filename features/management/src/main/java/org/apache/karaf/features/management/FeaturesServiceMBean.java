@@ -30,7 +30,11 @@ public interface FeaturesServiceMBean {
 
     void installFeature(String name) throws Exception;
 
+    void installFeature(String name, boolean noClean, boolean noRefresh) throws Exception;
+
     void installFeature(String name, String version) throws Exception;
+
+    void installFeature(String name, String version, boolean noClean, boolean noRefresh) throws Exception;
 
     void uninstallFeature(String name) throws Exception;
 
