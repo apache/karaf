@@ -67,7 +67,6 @@ import static org.apache.karaf.deployer.kar.KarArtifactInstaller.FEATURE_CLASSIF
  * Generates the features XML file
  * NB this requires a recent maven-install-plugin such as 2.3.1
  *
- * @version $Revision$
  * @goal features-generate-descriptor
  * @phase compile
  * @requiresDependencyResolution runtime

@@ -17,7 +17,6 @@
  */
 package org.apache.karaf.tooling.utils;
 
-
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -52,9 +51,6 @@ import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.project.MavenProjectHelper;
 import org.apache.maven.project.ProjectBuildingException;
 
-/**
- * @version $Revision$
- */
 public abstract class MojoSupport extends AbstractMojo {
 
     /**

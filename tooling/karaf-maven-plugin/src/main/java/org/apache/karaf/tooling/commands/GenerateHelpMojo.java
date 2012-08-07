@@ -53,7 +53,6 @@ import org.apache.xbean.finder.ClassFinder;
 /**
  * Generates help documentation for Karaf commands
  *
- * @version $Revision$
  * @goal commands-generate-help
  * @phase generate-resources
  * @execute phase="generate-resources"

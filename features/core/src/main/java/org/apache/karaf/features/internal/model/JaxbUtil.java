@@ -16,8 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-
 package org.apache.karaf.features.internal.model;
 
 import java.io.ByteArrayInputStream;
@@ -44,9 +42,6 @@ import org.xml.sax.XMLFilter;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLFilterImpl;
 
-/**
- * @version $Rev$ $Date$
- */
 public class JaxbUtil {
 
     public static final XMLInputFactory XMLINPUT_FACTORY = XMLInputFactory.newInstance();

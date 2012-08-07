@@ -66,7 +66,6 @@ import org.sonatype.aether.util.artifact.DefaultArtifact;
 /**
  * Installs kar dependencies into a server-under-construction in target/assembly
  *
- * @version $Revision$
  * @goal install-kars
  * @phase process-resources
  * @requiresDependencyResolution runtime

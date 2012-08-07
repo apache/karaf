@@ -16,8 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-
 package org.apache.karaf.main;
 
 import java.io.File;
@@ -25,9 +23,6 @@ import java.net.URI;
 
 import org.apache.karaf.info.ServerInfo;
 
-/**
- * @version $Rev: 1209819 $ $Date: 2011-12-03 02:35:52 +0100 (Sa, 03 Dez 2011) $
- */
 public class ServerInfoImpl implements ServerInfo {
 
     private final String[] args;

@@ -30,8 +30,6 @@ import org.apache.karaf.shell.console.AbstractAction;
  * <p>By default looks for static main(String[]) to execute, but
  * you can specify a different static method that takes a String[]
  * to execute instead.
- *
- * @version $Rev: 593392 $ $Date: 2007-11-09 03:14:15 +0100 (Fri, 09 Nov 2007) $
  */
 @Command(scope = "shell", name = "java", description = "Executes a Java standard application.")
 public class JavaAction extends AbstractAction {

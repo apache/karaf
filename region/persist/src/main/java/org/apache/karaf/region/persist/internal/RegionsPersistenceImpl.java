@@ -16,8 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-
 package org.apache.karaf.region.persist.internal;
 
 import java.io.File;
@@ -55,9 +53,6 @@ import org.osgi.framework.wiring.BundleRevision;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * @version $Rev$ $Date$
- */
 public class RegionsPersistenceImpl implements RegionsPersistence {
 
     private static final Logger log = LoggerFactory.getLogger(RegionsPersistenceImpl.class);
