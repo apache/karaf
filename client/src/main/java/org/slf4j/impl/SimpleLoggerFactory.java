@@ -25,8 +25,6 @@ import org.slf4j.ILoggerFactory;
 /**
  * An implementation of {@link ILoggerFactory} which always returns
  * {@link SimpleLogger} instances.
- * 
- * @author Ceki G&uuml;lc&uuml;
  */
 public class SimpleLoggerFactory implements ILoggerFactory {
 

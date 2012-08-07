@@ -53,7 +53,6 @@ import org.xml.sax.SAXException;
 /**
  * Generates the features XML file
  *
- * @version $Revision$
  * @goal features-add-to-repository
  * @phase compile
  * @execute phase="compile"

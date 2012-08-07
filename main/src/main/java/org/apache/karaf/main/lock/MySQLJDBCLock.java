@@ -21,13 +21,10 @@ package org.apache.karaf.main.lock;
 import java.sql.Connection;
 import java.util.Properties;
 
-
 /**
  * Represents an exclusive lock on a database,
  * used to avoid multiple Karaf instances attempting
  * to become master.
- * 
- * @version $Revision: $
  */
 public class MySQLJDBCLock extends DefaultJDBCLock {
 

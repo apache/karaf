@@ -25,8 +25,6 @@ import org.apache.karaf.util.process.PumpStreamHandler;
 
 /**
  * Execute system processes.
- *
- * @version $Rev: 593392 $ $Date: 2007-11-09 03:14:15 +0100 (Fri, 09 Nov 2007) $
  */
 @Command(scope = "shell", name = "exec", description = "Executes system processes.")
 public class ExecuteAction extends AbstractAction {

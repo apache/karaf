@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.karaf.shell.ssh;
 
 import java.io.Closeable;
@@ -46,8 +45,6 @@ import org.osgi.service.blueprint.container.ReifiedType;
 /**
  * SSHD {@link org.apache.sshd.server.Command} factory which provides access to
  * Shell.
- * 
- * @version $Rev: 731517 $ $Date: 2009-01-05 11:25:19 +0100 (Mon, 05 Jan 2009) $
  */
 public class ShellFactoryImpl implements Factory<Command> {
     private CommandProcessor commandProcessor;

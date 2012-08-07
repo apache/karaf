@@ -16,8 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-
 package org.apache.karaf.tooling.features;
 
 import java.util.LinkedHashMap;
@@ -52,9 +50,6 @@ import org.sonatype.aether.util.graph.transformer.JavaEffectiveScopeCalculator;
 
 import static org.apache.karaf.deployer.kar.KarArtifactInstaller.FEATURE_CLASSIFIER;
 
-/**
- * @version $Rev:ision$
- */
 public class DependencyHelper {
 
     /**
