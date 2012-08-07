@@ -86,6 +86,10 @@ public class AdminServiceMBeanImpl extends StandardMBean implements AdminService
         getExistingInstance(name).destroy();
     }
 
+    public void startInstance(String name) throws Exception {
+        getExistingInstance(name).start(null);
+    }
+
     public void startInstance(String name, String opts) throws Exception {
         getExistingInstance(name).start(opts);
     }
