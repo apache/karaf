@@ -16,25 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.karaf.util.process;
 
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.IOException;
 
-//
-// Based on Apache Ant 1.6.5
-//
-
 /**
  * Copies all data from an input stream to an output stream.
- *
- * @version $Rev: 705608 $ $Date: 2008-10-17 15:28:45 +0200 (Fri, 17 Oct 2008) $
  */
-public class StreamPumper
-    implements Runnable
-{
+public class StreamPumper implements Runnable {
+
     private InputStream in;
 
     private OutputStream out;
