@@ -26,8 +26,6 @@ import java.util.Properties;
  * Represents an exclusive lock on a database,
  * used to avoid multiple Karaf instances attempting
  * to become master.
- * 
- * @version $Revision: $
  */
 public class OracleJDBCLock extends DefaultJDBCLock {
     

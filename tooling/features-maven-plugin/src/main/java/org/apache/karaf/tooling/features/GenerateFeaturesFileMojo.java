@@ -57,8 +57,7 @@ import org.apache.maven.plugin.MojoFailureException;
 
 /**
  * Generates the features XML file
- * 
- * @version $Revision: 1.1 $
+ *
  * @goal generate-features-file
  * @phase compile
  * @execute phase="compile"

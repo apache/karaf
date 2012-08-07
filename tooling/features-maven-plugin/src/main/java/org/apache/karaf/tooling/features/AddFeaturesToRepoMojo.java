@@ -52,7 +52,6 @@ import org.xml.sax.SAXException;
 /**
  * Add Features necessary bundles into system folder Repo
  *
- * @version $Revision$
  * @goal add-features-to-repo
  * @phase compile
  * @execute phase="compile"

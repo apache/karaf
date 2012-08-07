@@ -41,8 +41,6 @@ import org.apache.karaf.shell.console.AbstractAction;
 
 /**
  * Sort lines of text
- *
- * @version $Rev: 722776 $ $Date: 2008-12-03 05:59:59 +0100 (Wed, 03 Dec 2008) $
  */
 @Command(scope = "shell", name = "sort", description = "Writes sorted concatenation of all files to standard output.")
 public class SortAction extends AbstractAction {

@@ -54,11 +54,9 @@ import org.apache.maven.shared.dependency.tree.DependencyTreeBuilder;
 import org.apache.maven.shared.dependency.tree.DependencyTreeBuilderException;
 import org.apache.maven.shared.dependency.tree.traversal.DependencyNodeVisitor;
 
-
 /**
  * Generates the features XML file
- * 
- * @version $Revision: 1.1 $
+ *
  * @goal generate-features-xml
  * @phase compile
  * @execute phase="compile"

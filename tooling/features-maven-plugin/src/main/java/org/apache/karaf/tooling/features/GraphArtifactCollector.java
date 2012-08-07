@@ -42,10 +42,8 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.OverConstrainedVersionException;
 import org.apache.maven.artifact.versioning.VersionRange;
 
-/**
- * @version $Revision: 1.1 $
- */
 public class GraphArtifactCollector implements ArtifactCollector {
+
     public ArtifactResolutionResult collect(
             Set artifacts,
             Artifact originatingArtifact,

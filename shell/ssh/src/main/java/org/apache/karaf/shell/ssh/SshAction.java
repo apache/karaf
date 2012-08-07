@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.karaf.shell.ssh;
 
 import java.io.ByteArrayInputStream;
@@ -44,13 +43,10 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Connect to a SSH server.
- *
- * @version $Rev: 721244 $ $Date: 2008-11-27 18:19:56 +0100 (Thu, 27 Nov 2008) $
  */
 @Command(scope = "ssh", name = "ssh", description = "Connects to a remote SSH server")
-public class SshAction
-    extends OsgiCommandSupport implements BlueprintContainerAware
-{
+public class SshAction extends OsgiCommandSupport implements BlueprintContainerAware {
+
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     @Option(name="-l", aliases={"--username"}, description = "The user name for remote login", required = false, multiValued = false)

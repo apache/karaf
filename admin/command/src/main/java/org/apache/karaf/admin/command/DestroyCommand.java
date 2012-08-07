@@ -21,12 +21,10 @@ import org.apache.felix.gogo.commands.Command;
 
 /**
  * Destroy an existing Karaf instance
- *
- * @version $Rev: 679826 $ $Date: 2008-07-25 17:00:12 +0200 (Fri, 25 Jul 2008) $
  */
 @Command(scope = "admin", name = "destroy", description = "Destroys an existing container instance.")
-public class DestroyCommand extends AdminCommandSupport
-{
+public class DestroyCommand extends AdminCommandSupport {
+
     @Argument(index = 0, name = "name", description="The name of the container instance to destroy", required = true, multiValued = false)
     private String instance = null;
 
