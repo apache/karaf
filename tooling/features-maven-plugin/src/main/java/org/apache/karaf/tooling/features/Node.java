@@ -22,10 +22,8 @@ import java.util.HashSet;
 
 import org.apache.maven.artifact.Artifact;
 
-/**
- * @version $Revision: 1.1 $
-*/
 public class Node {
+
     private Set children = new HashSet();
     private Set parents = new HashSet();
     private Artifact artifact;

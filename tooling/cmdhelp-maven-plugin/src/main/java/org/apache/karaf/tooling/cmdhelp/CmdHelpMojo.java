@@ -54,7 +54,6 @@ import org.fusesource.jansi.Ansi;
 /**
  * Generates help (in scalate or docbook format) for Karaf commands
  *
- * @version $Revision$
  * @goal cmdhelp
  * @phase generate-resources
  * @execute phase="generate-resources"

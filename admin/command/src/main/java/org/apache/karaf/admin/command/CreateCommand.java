@@ -25,11 +25,8 @@ import org.apache.karaf.admin.InstanceSettings;
 import org.apache.karaf.features.command.completers.AllFeatureCompleter;
 import org.apache.karaf.features.command.completers.FeatureRepositoryCompleter;
 
-
 /**
- * Creates a new Karaf instance 
- *
- * @version $Rev: 679826 $ $Date: 2008-07-25 17:00:12 +0200 (Fri, 25 Jul 2008) $
+ * Creates a new Karaf instance
  */
 @Command(scope = "admin", name = "create", description = "Creates a new container instance.")
 public class CreateCommand extends AdminCommandSupport

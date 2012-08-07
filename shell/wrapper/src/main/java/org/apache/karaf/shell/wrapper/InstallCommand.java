@@ -35,11 +35,10 @@ import org.fusesource.jansi.Ansi;
 
 /**
  * Installs this Karaf instance as a service in your operating systems.
- *
- * @version $Rev: 603634 $ $Date: 2007-12-12 16:07:16 +0100 (Wed, 12 Dec 2007) $
  */
 @Command(scope = "wrapper", name = "install", description = "Install the container as a system service in the OS.")
 public class InstallCommand extends AbstractAction {
+
     @Option(name = "-n", aliases = {"--name"}, description = "The service name that will be used when installing the service. (Default: karaf)", required = false, multiValued = false)
     private String name = "karaf";
 

@@ -16,8 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-
 package org.apache.karaf.tooling.features;
 
 import java.lang.reflect.Field;
@@ -31,9 +29,6 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.junit.Test;
 
-/**
- * @version $Rev:$ $Date:$
- */
 public class BundleToArtifactTest extends MojoSupport {
 
     public BundleToArtifactTest() throws NoSuchFieldException, IllegalAccessException {

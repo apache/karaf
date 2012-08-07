@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.karaf.shell.ssh;
 
 import org.apache.sshd.SshServer;
@@ -30,12 +29,10 @@ import org.osgi.service.blueprint.container.BlueprintContainer;
 
 /**
  * Start a SSH server.
- *
- * @version $Rev: 720411 $ $Date: 2008-11-25 05:32:43 +0100 (Tue, 25 Nov 2008) $
  */
 @Command(scope = "ssh", name = "sshd", description = "Creates a SSH server")
-public class SshServerAction extends OsgiCommandSupport implements BlueprintContainerAware
-{
+public class SshServerAction extends OsgiCommandSupport implements BlueprintContainerAware {
+
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     @Option(name="-p", aliases={ "--port" }, description = "The port to setup the SSH server (Default: 8101)", required = false, multiValued = false)

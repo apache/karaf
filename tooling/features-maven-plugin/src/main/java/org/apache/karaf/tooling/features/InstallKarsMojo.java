@@ -16,8 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-
 package org.apache.karaf.tooling.features;
 
 import java.io.File;
@@ -43,7 +41,6 @@ import javax.swing.text.html.Option;
 /**
  * Installs kar dependencies into a server-under-construction in target/assembly
  *
- * @version $Revision: 1.1 $
  * @goal install-kars
  * @phase process-resources
  * @execute phase="process-resources"
