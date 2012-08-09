@@ -24,14 +24,20 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.HashMap;
 import java.util.List;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
 
 import junit.framework.TestCase;
 
 import org.apache.felix.utils.manifest.Clause;
+import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Feature;
 import org.easymock.EasyMock;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
 import org.osgi.framework.FrameworkListener;
 
 /**
@@ -163,6 +169,56 @@ public class FeaturesServiceImplTest extends TestCase {
             assertTrue("Feature ssh should be installed", impl.isInstalled(impl.getFeature("ssh", "1.0.0")));
         } catch (Exception e) {
             fail(String.format("Service should not throw start-up exception but log the error instead: %s", e));
+        }
+    }
+
+    /**
+     * This test ensures that every feature get installed only once, even if it appears multiple times in the list
+     * of transitive feature dependencies (KARAF-1600)
+     */
+    public void testNoDuplicateFeaturesInstallation() throws Exception {
+        final List<Feature> installed = new LinkedList<Feature>();
+
+        final FeaturesServiceImpl impl = new FeaturesServiceImpl() {
+            // override methods which refers to bundle context to avoid mocking everything
+            @Override
+            protected boolean loadState() {
+                return true;
+            }
+
+            @Override
+            protected void saveState() {
+
+            }
+
+            @Override
+            protected void doInstallFeature(InstallationState state, Feature feature, boolean verbose) throws Exception {
+                installed.add(feature);
+
+                super.doInstallFeature(state, feature, verbose);
+            }
+
+            @Override
+            protected Bundle installBundleIfNeeded(InstallationState state, BundleInfo bundleInfo, int defaultStartLevel, boolean verbose) throws IOException, BundleException {
+                // let's return a mock bundle and bundle id to keep the features service happy
+                Bundle bundle = createNiceMock(Bundle.class);
+                expect(bundle.getBundleId()).andReturn(10l).anyTimes();
+                replay(bundle);
+                return bundle;
+            }
+        };
+        impl.addRepository(getClass().getResource("repo2.xml").toURI());
+
+        try {
+            impl.installFeature("all");
+
+            // copying the features to a set to filter out the duplicates
+            Set<Feature> noduplicates = new HashSet<Feature>();
+            noduplicates.addAll(installed);
+
+            assertEquals("Every feature should only have been installed once", installed.size(), noduplicates.size());
+        } catch (Exception e) {
+            fail(String.format("Service should not throw any exceptions: %s", e));
         }
     }
 

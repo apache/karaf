@@ -651,7 +651,11 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
             throw new Exception("No feature named '" + dependency.getName()
                     + "' with version '" + dependency.getVersion() + "' available");
         }
-        doInstallFeature(state, fi, verbose);
+        if (state.features.containsKey(fi)) {
+            LOGGER.debug("Feature {} with version {} is already being installed", fi.getName(), fi.getVersion());
+        } else {
+            doInstallFeature(state, fi, verbose);
+        }
     }
     
     private void installFeatureConfigs(Feature feature, boolean verbose) throws IOException, InvalidSyntaxException {
@@ -718,11 +722,11 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
     protected Set<Bundle> findBundlesToRefresh(InstallationState state) {
         Set<Bundle> bundles = new HashSet<Bundle>();
         bundles.addAll(findBundlesWithOptionalPackagesToRefresh(state));
-        bundles.addAll(findBundlesWithFramentsToRefresh(state));
+        bundles.addAll(findBundlesWithFragmentsToRefresh(state));
         return bundles;
     }
 
-    protected Set<Bundle> findBundlesWithFramentsToRefresh(InstallationState state) {
+    protected Set<Bundle> findBundlesWithFragmentsToRefresh(InstallationState state) {
         Set<Bundle> bundles = new HashSet<Bundle>();
         Set<Bundle> oldBundles = new HashSet<Bundle>(state.bundles);
         oldBundles.removeAll(state.installed);
