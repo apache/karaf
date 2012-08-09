@@ -143,6 +143,7 @@
                             </sources>
                         </configuration>
                     </execution>
+					<!--
                     <execution>
                         <id>attach-artifacts</id>
                         <phase>install</phase>
@@ -158,6 +159,7 @@
                             </artifacts>
                         </configuration>
                     </execution>
+					-->
                 </executions>
             </plugin>
             <plugin>
