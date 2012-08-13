@@ -65,7 +65,8 @@ public class KarArtifactInstaller implements ArtifactInstaller {
         dbf.setNamespaceAware(true);
 
         timestampPath = localRepoPath + File.separator + ".timestamps";
-        if (new File(timestampPath).mkdirs()) {
+        File timestampFile = new File(timestampPath);
+        if (!timestampFile.exists() && !timestampFile.mkdirs()) {
             logger.warn("Unable to create directory for Karaf Archive timestamps. Results may vary...");
         }
 
