@@ -74,7 +74,7 @@ class StartupListener implements FrameworkListener, SynchronousBundleListener {
                 long startTimeSeconds = (System.currentTimeMillis() - this.startTime) / 1000;
                 BundleStats stats = getBundleStats();
                 String message = "Karaf started in " + startTimeSeconds + "s. Bundle stats: " + stats.numActive 
-                        + " active , " + stats.numTotal + " total";
+                        + " active, " + stats.numTotal + " total";
                 log.info(message);
                 if (!isConsoleStarted()) {
                     showProgressBar(100, 100);
