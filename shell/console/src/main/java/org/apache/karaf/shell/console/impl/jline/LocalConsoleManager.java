@@ -88,14 +88,20 @@ public class LocalConsoleManager {
         String agentId = startAgent("karaf");
         this.console = consoleFactory.createLocal(this.commandProcessor, terminal, callback);
         this.console.getSession().put(SshAgent.SSH_AUTHSOCKET_ENV_NAME, agentId);
-        DelayedStarted watcher = new DelayedStarted(new Runnable() {
-            
-            @Override
+        
+        Runnable consoleStarter = new Runnable() {
             public void run() {
                 consoleFactory.startConsoleAs(console, subject);
             }
-        }, bundleContext, System.in);
-        new Thread(watcher).start();
+        };
+        
+        boolean delayconsole = Boolean.parseBoolean(System.getProperty("karaf.delay.console"));
+        if (delayconsole) {
+            DelayedStarted watcher = new DelayedStarted(consoleStarter, bundleContext, System.in);
+            new Thread(watcher).start();
+        } else {
+            consoleStarter.run();
+        }
     }
 
     protected String startAgent(String user) {

@@ -55,8 +55,6 @@ class DelayedStarted extends Thread implements FrameworkListener {
 
         // Signal to the main module that it can stop displaying the startup progress
         System.setProperty(SYSTEM_PROP_KARAF_CONSOLE_STARTED, "true");
-
-        System.out.println();
         this.bundleContext.removeFrameworkListener(this);
         console.run();
     }
