@@ -171,6 +171,7 @@
         <aries.blueprint.api.version>1.0.0</aries.blueprint.api.version>
         <aries.jmx.version>1.0.0</aries.jmx.version>
         <aries.jmx.api.version>1.0.0</aries.jmx.api.version>
+        <aries.jmx.blueprint.core.version>1.0.1</aries.jmx.blueprint.core.version>
         <aries.jpa.version>1.0.0</aries.jpa.version>
         <aries.jpa.api.version>1.0.0</aries.jpa.api.version>
         <aries.jndi.version>1.0.0</aries.jndi.version>
@@ -1572,7 +1573,7 @@
             <dependency>
                 <groupId>org.apache.aries.jmx</groupId>
                 <artifactId>org.apache.aries.jmx.blueprint.core</artifactId>
-                <version>${aries.jmx.version}</version>
+                <version>${aries.jmx.blueprint.core.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.slf4j</groupId>
