@@ -23,6 +23,7 @@ import org.apache.karaf.shell.console.impl.jline.ConsoleImpl;
 
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.util.Properties;
 
 /**
  * This class is mostly here so that folks can see an example of how you can extend the Karaf Main shell.  Also
@@ -55,7 +56,7 @@ public class ExampleSubclassMain extends Main  {
              * <ul>
              */
             @Override
-            protected void welcome() {
+            protected void welcome(Properties brandingProps) {
                 session.getConsole().println("===============================================");
                 session.getConsole().println(" Example Shell ");
                 session.getConsole().println("===============================================");
@@ -79,7 +80,7 @@ public class ExampleSubclassMain extends Main  {
              * <ul>
              */
             @Override
-            protected void setSessionProperties() {
+            protected void setSessionProperties(Properties brandingProps) {
                 // we won't add any session properties.
             }
 

@@ -164,8 +164,9 @@ public class ConsoleImpl implements Console
         CommandSessionHolder.setSession(session);
         running = true;
         pipe.start();
-        welcome();
-        setSessionProperties();
+        Properties brandingProps = Branding.loadBrandingProperties();
+        welcome(brandingProps);
+        setSessionProperties(brandingProps);
         String scriptFileName = System.getProperty(SHELL_INIT_SCRIPT);
         executeScript(scriptFileName);
         while (running) {
@@ -258,17 +259,15 @@ public class ConsoleImpl implements Console
         }
 	}
 
-    protected void welcome() {
-        Properties props = Branding.loadBrandingProperties();
-        String welcome = props.getProperty("welcome");
+    protected void welcome(Properties brandingProps) {
+        String welcome = brandingProps.getProperty("welcome");
         if (welcome != null && welcome.length() > 0) {
             session.getConsole().println(welcome);
         }
     }
 
-    protected void setSessionProperties() {
-        Properties props = Branding.loadBrandingProperties();
-        for (Map.Entry<Object, Object> entry : props.entrySet()) {
+    protected void setSessionProperties(Properties brandingProps) {
+        for (Map.Entry<Object, Object> entry : brandingProps.entrySet()) {
             String key = (String) entry.getKey();
             if (key.startsWith("session.")) {
                 session.put(key.substring("session.".length()), entry.getValue());
