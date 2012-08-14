@@ -449,7 +449,7 @@ public class AddToRepositoryMojo extends MojoSupport {
                         continue;
                     }
                     Element e = (Element) nodes.item(i);
-                    repositories.add(e.getTextContent());
+                    repositories.add(e.getTextContent().trim());
                 }
             } catch (SAXException e) {
                 throw (IOException) new IOException().initCause(e);
