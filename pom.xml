@@ -170,7 +170,7 @@
         <spring.version>3.0.7.RELEASE</spring.version>
         <sshd.version>0.7.0</sshd.version>
         <xbean.version>3.11.1</xbean.version>
-        <javax.mail.version>1.4.4</javax.mail.version>
+        <javax.mail.version>1.4.5</javax.mail.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <appendedResourcesDirectory>${basedir}/etc/appended-resources</appendedResourcesDirectory>
