@@ -15,6 +15,83 @@
  * limitations under the License.
  */
 
+                    Apache karaf 2.2.9
+                    ==================
+
+  Overview
+  --------
+
+  This release of Apache Karaf is based off of the 2.2.x series branch, representing an 
+ update to Apache Karaf 2.2.8. It contains bug fixes identified in the prior release, 
+ and introduces improvements including; An update to fix a NullPointerException when using 
+ JDK 6 update 33 or JDK 7 update5, a new JDBC lock implementation for Postgres, a fix for 
+ using version with the wrap protocol, and renaming command-watch to watch. Several 
+ dependences were also updated, bringing Felix Framework to 3.2.2, pax-logging to 1.6.9, 
+ slf4j to 1.6.6, xbean to 3.11.1, aries proxy to 0.3.1, and a multitude of updates to maven 
+ plugins.
+  For more detail please see the change log below.
+
+  Changelog
+  ---------
+
+** Bug
+    * [KARAF-643] - KarArtifactInstaller::init has incorrect warning logic
+    * [KARAF-1050] - "osgi:start xxx" doesn't print anything
+    * [KARAF-1066] - make features xml parser more forgiving
+    * [KARAF-1547] - NullpointerException when running commands on jdk 6 update 33 or jdk 7 update 5
+    * [KARAF-1573] - Potential ZipFile leak at KarArtifactInstaller.install()
+    * [KARAF-1585] - Installing using wrap protocol fails when specifying bundle version
+    * [KARAF-1587] - When executing a command through the client, no error is printed in the console in case of errors
+    * [KARAF-1591] - Upgrade to XBean 3.11.1
+    * [KARAF-1609] - command-watch info does not work
+    * [KARAF-1614] - upgrade to aries.proxy 0.3.1
+    * [KARAF-1617] - Blueprint deployer in combination with maven URL deployer creates wrong OSGi/blueprint/ file
+    * [KARAF-1624] - Rat checks fail
+    * [KARAF-1647] - Comment line in SSH Keyfile cause failures in reading keyfile
+    * [KARAF-1666] - Default configuration for jetty.xml could create problems
+    * [KARAF-1675] - Wrapper service requires a shell
+    * [KARAF-1680] - org.apache.karaf:apache-karaf:2.2.8:xml:features artifact is not available, for building custom Karaf
+    * [KARAF-1683] - "no matching cipher found" error connecting via SSH to wrapper Karaf service - on Ubuntu
+    * [KARAF-1697] - Jenkins build fail
+    * [KARAF-1699] - MBeans should support the same flags as the commands
+    * [KARAF-1702] - Stopping the console bundle should not shutdown the osgi framework
+
+** Dependency upgrade
+    * [KARAF-1577] - Upgrade to slf4j 1.6.6
+    * [KARAF-1578] - Upgrade to pax-logging 1.6.9
+    * [KARAF-1601] - Upgrade to maven-antrun-plugin 1.7
+    * [KARAF-1603] - Upgrade to maven-surefire-plugin 2.12
+    * [KARAF-1604] - Upgrade to maven-assembly-plugin 2.3
+    * [KARAF-1606] - Upgrade to maven-compiler-plugin 2.5.1
+    * [KARAF-1608] - Upgrade to maven-dependency-plugin 2.4
+    * [KARAF-1610] - Upgrade to maven-eclipse-plugin 2.9
+    * [KARAF-1611] - Upgrade to maven-enforcer-plugin 1.1
+    * [KARAF-1612] - Upgrade to maven-enforcer-plugin 1.1
+    * [KARAF-1613] - Upgrade to maven-jar-plugin 2.4
+    * [KARAF-1615] - Upgrade to maven-javadoc-plugin 2.8.1
+    * [KARAF-1616] - Upgrade to maven-release-plugin 2.3.2
+    * [KARAF-1619] - Upgrade to maven-remote-resources-plugin 1.3
+    * [KARAF-1620] - Upgrade to maven-shade-plugin 1.7
+    * [KARAF-1621] - Upgrade to maven-site-plugin 3.1
+    * [KARAF-1622] - Upgrade to maven-war-plugin 2.2
+    * [KARAF-1623] - Upgrade to apache-rat-plugin 0.8
+    * [KARAF-1639] - Upgrade to Felix Framework 3.2.2
+    * [KARAF-1642] - Upgrade to exec-maven-plugin 1.2.1
+    * [KARAF-1719] - Upgrade to javax.mail 1.4.5
+    * [KARAF-1727] - Upgrade to Felix BundleRepository 1.6.6
+
+** Improvement
+    * [KARAF-447] - Add JDBC lock implementation for PostgreSQL
+    * [KARAF-1574] - When two karaf containers are started locally, an exception is displayed at startup.  A nicer message would be better.
+    * [KARAF-1575] - Features provided by karaf do not have any description
+    * [KARAF-1586] - wrapper:install command should be usable outside OSGi too
+    * [KARAF-1600] - Avoid duplicate feature and bundle resolution when installing cascading features
+    * [KARAF-1657] - org.ops4j.pax.url.mvn.proxySupport=false
+    * [KARAF-1693] - Rename command-watch to watch
+    * [KARAF-1700] - update manual to reflect JDBC Lock updates
+    * [KARAF-1710] - Remove @version headers from source
+
+
                     Apache Karaf 2.2.8
                     ==================
 
