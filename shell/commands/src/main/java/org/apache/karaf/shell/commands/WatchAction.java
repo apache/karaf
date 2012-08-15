@@ -86,6 +86,7 @@ public class WatchAction extends AbstractAction {
                 byteArrayOutputStream = new ByteArrayOutputStream();
                 printStream = new PrintStream(byteArrayOutputStream);
                 session = commandProcessor.createSession(null, printStream, printStream);
+                session.put("SCOPE", "shell:osgi:*");
                 String output = "";
                 session.execute(command);
                 output = byteArrayOutputStream.toString();
