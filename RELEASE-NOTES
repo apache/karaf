@@ -78,7 +78,7 @@
     * [KARAF-1639] - Upgrade to Felix Framework 3.2.2
     * [KARAF-1642] - Upgrade to exec-maven-plugin 1.2.1
     * [KARAF-1719] - Upgrade to javax.mail 1.4.5
-    * [KARAF-1727] - Upgrade to Felix BundleRepository 1.6.6
+    * [KARAF-1727] - Reverted Upgrade to Felix BundleRepository 1.6.6
 
 ** Improvement
     * [KARAF-447] - Add JDBC lock implementation for PostgreSQL
