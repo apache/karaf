@@ -119,7 +119,7 @@
         <geronimo.servlet.version>1.1.2</geronimo.servlet.version>
         <easymock.version>3.1</easymock.version>
         <equinox.version>3.6.2.R36x_v20110210</equinox.version>
-        <felix.bundlerepository.version>1.6.4</felix.bundlerepository.version>
+        <felix.bundlerepository.version>1.6.6</felix.bundlerepository.version>
         <felix.configadmin.version>1.2.8</felix.configadmin.version>
         <felix.fileinstall.version>3.2.4</felix.fileinstall.version>
         <felix.framework.version>3.2.2</felix.framework.version>
