@@ -17,7 +17,7 @@
 -->
 <features xmlns="http://karaf.apache.org/xmlns/features/v1.0.0">
     <feature name="spring" version="2.5.6.SEC02" resolver="(obr)">
-        <bundle dependency='true'>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.aopalliance/1.0_4</bundle>
+        <bundle dependency='true'>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.aopalliance/1.0_6</bundle>
         <bundle>mvn:org.springframework/spring-core/2.5.6.SEC02</bundle>
         <bundle>mvn:org.springframework/spring-beans/2.5.6.SEC02</bundle>
         <bundle>mvn:org.springframework/spring-aop/2.5.6.SEC02</bundle>
