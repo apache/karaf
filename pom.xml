@@ -117,7 +117,7 @@
     </prerequisites>
 
     <properties>
-        <aopalliance.bundle.version>1.0_5</aopalliance.bundle.version>
+        <aopalliance.bundle.version>1.0_6</aopalliance.bundle.version>
         <asm.version>4.0</asm.version>
         <cglib.bundle.version>2.1_3_7</cglib.bundle.version>
         <commons-beanutils.version>1.8.3</commons-beanutils.version>

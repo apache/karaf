@@ -17,7 +17,7 @@
 -->
 <features name="karaf-2.0.0">
     <feature name="spring" version="3.0.3.RELEASE">
-        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.aopalliance/1.0_3</bundle>
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.aopalliance/1.0_6</bundle>
         <bundle>mvn:org.springframework/spring-core/3.0.3.RELEASE</bundle>
         <bundle>mvn:org.springframework/spring-asm/3.0.3.RELEASE</bundle>
         <bundle>mvn:org.springframework/spring-expression/3.0.3.RELEASE</bundle>
