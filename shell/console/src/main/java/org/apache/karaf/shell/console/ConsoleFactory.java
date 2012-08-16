@@ -30,5 +30,5 @@ import org.apache.felix.service.command.CommandProcessor;
 public interface ConsoleFactory {
     Console create(CommandProcessor processor, InputStream in, PrintStream out, PrintStream err, final Terminal term, Runnable closeCallback);
     Console createLocal(CommandProcessor processor, Terminal terminal, Runnable closeCallback);
-    void startConsoleAs(Console console, Subject subject);
+    void startConsoleAs(Console console, Subject subject, String threadName);
 }

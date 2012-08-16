@@ -91,7 +91,7 @@ public class LocalConsoleManager {
         
         Runnable consoleStarter = new Runnable() {
             public void run() {
-                consoleFactory.startConsoleAs(console, subject);
+                consoleFactory.startConsoleAs(console, subject, "Local");
             }
         };
         
