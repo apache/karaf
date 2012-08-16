@@ -35,9 +35,15 @@
     <name>Apache Karaf :: Demos :: Command :: Extend Console</name>
 
     <dependencies>
+		<dependency>
+		    <groupId>org.osgi</groupId>
+		    <artifactId>org.osgi.core</artifactId>
+		    <scope>provided</scope>
+		</dependency>
         <dependency>
             <groupId>org.apache.karaf.shell</groupId>
             <artifactId>org.apache.karaf.shell.console</artifactId>
+		    <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
