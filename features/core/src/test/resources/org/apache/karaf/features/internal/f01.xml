@@ -28,7 +28,7 @@
     </feature>
     <feature name="spring-dm" version="1.2.0">
         <feature version="3.0.3.RELEASE">spring</feature>
-        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.cglib/2.1_3_4</bundle>
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.cglib/2.2.2_1</bundle>
         <bundle>mvn:org.springframework.osgi/spring-osgi-io/1.2.0</bundle>
         <bundle>mvn:org.springframework.osgi/spring-osgi-core/1.2.0</bundle>
         <bundle>mvn:org.springframework.osgi/spring-osgi-extender/1.2.0</bundle>

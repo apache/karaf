@@ -48,7 +48,7 @@
     </feature>
     <feature name="spring-dm" version="1.2.1" resolver="(obr)">
         <feature version="[2.5.6,4)">spring</feature>
-        <bundle dependency='true'>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.cglib/2.1_3_6</bundle>
+        <bundle dependency='true'>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.cglib/2.2.2_1</bundle>
         <bundle>mvn:org.springframework.osgi/spring-osgi-io/1.2.1</bundle>
         <bundle>mvn:org.springframework.osgi/spring-osgi-core/1.2.1</bundle>
         <bundle>mvn:org.springframework.osgi/spring-osgi-extender/1.2.1</bundle>
