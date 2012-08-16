@@ -20,14 +20,20 @@
 
 package org.apache.karaf.tooling.features;
 
+import static org.junit.Assert.*;
+
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.util.List;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
+
+import org.apache.karaf.features.internal.model.Feature;
 import org.apache.karaf.features.internal.model.Features;
 import org.apache.karaf.features.internal.model.JaxbUtil;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
@@ -45,4 +51,25 @@ public class GenerateDescriptorMojoTest {
         assert s.indexOf("repository") > -1;
         assert s.indexOf("http://karaf.apache.org/xmlns/features/v1.0.0") > -1;
     }
+    
+
+    /** FIXME xmlns 1.1.0 validation */
+    @Ignore
+    @Test
+    public void testAttributes() throws Exception {
+
+        InputStream in = getClass().getClassLoader().getResourceAsStream("input-features-1.1.0.xml");
+        Features featuresRoot = JaxbUtil.unmarshal(in, false);
+        
+        List<Feature> featuresList = featuresRoot.getFeature();
+        
+        assertEquals(featuresList.size(), 1);
+        
+        Feature feature = featuresList.get(0);
+
+        assertEquals(feature.getInstall(), "auto");
+
+
+    }
+    
 }
