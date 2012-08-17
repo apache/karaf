@@ -189,6 +189,8 @@ public class Main {
     public static final String SECURITY_PROVIDERS = "org.apache.karaf.security.providers";
 
     public static final String KARAF_STARTUP_MESSAGE = "karaf.startup.message";
+    
+    private static final String KARAF_DELAY_CONSOLE = "karaf.delay.console";
 
     Logger LOG = Logger.getLogger(this.getClass().getName());
 
@@ -246,7 +248,12 @@ public class Main {
         // Copy framework properties from the system properties.
         Main.copySystemProperties(configProps);
 
-        System.out.println(configProps.getProperty(KARAF_STARTUP_MESSAGE, "Apache Karaf starting up..."));
+        boolean delayConsoleStart = Boolean.parseBoolean(configProps.getProperty(KARAF_DELAY_CONSOLE, "false"));
+        System.setProperty(KARAF_DELAY_CONSOLE, new Boolean(delayConsoleStart).toString());
+
+        if (delayConsoleStart) {
+        	System.out.println(configProps.getProperty(KARAF_STARTUP_MESSAGE, "Apache Karaf starting up. Press Enter to open shell now ..."));
+        }
 
         ClassLoader classLoader = createClassLoader(configProps);
 
@@ -286,8 +293,11 @@ public class Main {
         framework.start();
         // Start custom activators
         startKarafActivators(classLoader);
-        // Progress bar
-        new StartupListener(framework.getBundleContext());
+        
+        if (delayConsoleStart) {
+            // Progress bar
+            new StartupListener(framework.getBundleContext());
+        }
         // Start lock monitor
         new Thread() {
             public void run() {

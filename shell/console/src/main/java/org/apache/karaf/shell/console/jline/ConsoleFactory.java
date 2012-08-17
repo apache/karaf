@@ -151,7 +151,12 @@ public class ConsoleFactory {
         session.put(".jline.terminal", terminal);
         session.put(SshAgent.SSH_AUTHSOCKET_ENV_NAME, agentId);
 
-        new DelayedStarted(this.console, bundleContext, unwrappedIn).start();
+        boolean delayconsole = Boolean.parseBoolean(System.getProperty("karaf.delay.console"));
+        if (delayconsole) {
+            new DelayedStarted(this.console, bundleContext, unwrappedIn).start();
+        } else {
+            this.console.run();
+        }
     }
 
     protected String startAgent(String user) {
