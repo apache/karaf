@@ -108,7 +108,7 @@ public class ShellFactoryImpl implements Factory<Command> {
                 for (Map.Entry<String, String> e : env.getEnv().entrySet()) {
                     session.put(e.getKey(), e.getValue());
                 }
-                consoleFactory.startConsoleAs(console, subject);
+                consoleFactory.startConsoleAs(console, subject, "ssh");
             } catch (Exception e) {
                 throw (IOException) new IOException("Unable to start shell").initCause(e);
             }

@@ -34,6 +34,7 @@ import jline.Terminal;
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Function;
+import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.apache.karaf.shell.console.Console;
 import org.apache.karaf.shell.console.ConsoleFactory;
 
@@ -79,27 +80,14 @@ public class ConsoleFactoryService implements ConsoleFactory {
         }
     }
     
-    private String getFirstPrincipalName(Subject user) {
-        if (user != null) {
-            Set<Principal> principals = user.getPrincipals();
-            if (principals != null) {
-                Iterator<Principal> it = principals.iterator();
-                if (it.hasNext()) {
-                    return it.next().getName();
-                }
-            }
-        }
-        return null;
-    }
-
     @Override
-    public void startConsoleAs(final Console console, final Subject subject) {
-        new Thread(console) {
+    public void startConsoleAs(final Console console, final Subject subject, String consoleType) {
+        final String userName = getUserName(subject);
+        new Thread(console, "Karaf Console " + consoleType + " user " + userName) {
             @Override
             public void run() {
                 if (subject != null) {
                     CommandSession session = console.getSession();
-                    String userName = getFirstPrincipalName(subject);
                     session.put("USER", userName);
                     Subject.doAs(subject, new PrivilegedAction<Object>() {
                         public Object run() {
@@ -115,5 +103,13 @@ public class ConsoleFactoryService implements ConsoleFactory {
                 super.run();
             }
         }.start();
+    }
+
+    private String getUserName(final Subject subject) {
+        if (subject != null && subject.getPrincipals().iterator().hasNext()) {
+            return subject.getPrincipals(UserPrincipal.class).iterator().next().getName();
+        } else {
+            return null;
+        }
     }
 }

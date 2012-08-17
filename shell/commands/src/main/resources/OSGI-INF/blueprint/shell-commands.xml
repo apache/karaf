@@ -86,6 +86,9 @@
             <action class="org.apache.karaf.shell.commands.impl.TailAction"/>
         </command>
         <command>
+            <action class="org.apache.karaf.shell.commands.impl.ThreadsAction"/>
+        </command>
+        <command>
             <action class="org.apache.karaf.shell.commands.impl.WatchAction">
                 <property name="commandProcessor" ref="commandProcessor"/>
             </action>

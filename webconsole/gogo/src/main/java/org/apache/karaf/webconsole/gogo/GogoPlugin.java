@@ -222,7 +222,7 @@ public class GogoPlugin extends AbstractWebConsolePlugin {
                                       pipedOut,
                                       new WebTerminal(TERM_WIDTH, TERM_HEIGHT),
                                       null);
-                consoleFactory.startConsoleAs(console, subject);
+                consoleFactory.startConsoleAs(console, subject, "Web");
             } catch (IOException e) {
                 e.printStackTrace();
                 throw e;
