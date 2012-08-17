@@ -51,25 +51,5 @@ public class GenerateDescriptorMojoTest {
         assert s.indexOf("repository") > -1;
         assert s.indexOf("http://karaf.apache.org/xmlns/features/v1.0.0") > -1;
     }
-    
-
-    /** FIXME xmlns 1.1.0 validation */
-    @Ignore
-    @Test
-    public void testAttributes() throws Exception {
-
-        InputStream in = getClass().getClassLoader().getResourceAsStream("input-features-1.1.0.xml");
-        Features featuresRoot = JaxbUtil.unmarshal(in, false);
-        
-        List<Feature> featuresList = featuresRoot.getFeature();
-        
-        assertEquals(featuresList.size(), 1);
-        
-        Feature feature = featuresList.get(0);
-
-        assertEquals(feature.getInstall(), "auto");
-
-
-    }
-    
+   
 }
