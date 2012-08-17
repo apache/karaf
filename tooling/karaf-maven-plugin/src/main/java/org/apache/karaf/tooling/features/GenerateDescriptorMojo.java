@@ -294,18 +294,6 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
         }
     }
     
-    private void ensureInstallMode(Feature feature){
-    	if( feature == null ){
-    		return;
-    	}
-    	if("auto".equalsIgnoreCase(installMode)){
-            feature.setInstall("auto");
-            return;
-    	}
-    	// default
-        feature.setInstall("manual");
-    }
-
     /*
      * Write all project dependencies as feature
      */
@@ -344,9 +332,9 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
         if (resolver != null) {
             feature.setResolver(resolver);
         }
-        
-        ensureInstallMode(feature);
-        
+        if (installMode != null) {
+            feature.setInstall(installMode);
+        }
         if (project.getDescription() != null && feature.getDetails() == null) {
             feature.setDetails(project.getDescription());
         }

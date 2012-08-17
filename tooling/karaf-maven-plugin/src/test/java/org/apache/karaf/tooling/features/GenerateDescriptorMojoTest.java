@@ -40,16 +40,40 @@ import org.xml.sax.SAXException;
 public class GenerateDescriptorMojoTest {
 
     @Test
-    public void testReadXml() throws JAXBException, SAXException, ParserConfigurationException, XMLStreamException {
-        InputStream in = getClass().getClassLoader().getResourceAsStream("input-features.xml");
+    public void testReadXml0() throws JAXBException, SAXException, ParserConfigurationException, XMLStreamException {
+    	
+        InputStream in = getClass().getClassLoader().getResourceAsStream("input-features-1.0.0.xml");
+        
         Features featuresRoot = JaxbUtil.unmarshal(in, false);
+        
         assert featuresRoot.getRepository().size() == 1;
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        
         JaxbUtil.marshal(featuresRoot, baos);
+        
         String s = new String(baos.toByteArray());
         assert s.indexOf("repository") > -1;
         assert s.indexOf("http://karaf.apache.org/xmlns/features/v1.0.0") > -1;
+        
     }
-   
+    
+    @Test
+    public void testReadXml1() throws Exception {
+
+        InputStream in = getClass().getClassLoader().getResourceAsStream("input-features-1.1.0.xml");
+        
+        Features featuresRoot = JaxbUtil.unmarshal(in, false);
+        
+        List<Feature> featuresList = featuresRoot.getFeature();
+        
+        assertEquals(featuresList.size(), 1);
+        
+        Feature feature = featuresList.get(0);
+
+        assertEquals(feature.getInstall(), "auto");
+
+
+    }
+    
 }

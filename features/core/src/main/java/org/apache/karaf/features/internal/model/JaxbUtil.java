@@ -35,6 +35,7 @@ import javax.xml.parsers.SAXParserFactory;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.transform.sax.SAXSource;
 
+import org.apache.karaf.features.internal.FeaturesNamespace;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -122,7 +123,7 @@ public class JaxbUtil {
      * compatible to the new format
      */
     public static class NoSourceAndNamespaceFilter extends XMLFilterImpl {
-        private static final String FEATURES_NAMESPACE = "http://karaf.apache.org/xmlns/features/v1.0.0";
+    	
         private static final InputSource EMPTY_INPUT_SOURCE = new InputSource(new ByteArrayInputStream(new byte[0]));
 
         public NoSourceAndNamespaceFilter(XMLReader xmlReader) {
@@ -135,22 +136,15 @@ public class JaxbUtil {
         }
 
         @Override
-        public void startElement(String uri, String localName, String qname, Attributes atts) throws SAXException {
-            if ("".equals(uri)) {
-                super.startElement(FEATURES_NAMESPACE, localName, qname, atts);
-            } else {
-                super.startElement(uri, localName, qname, atts);
-            }
+        public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
+        	super.startElement(FeaturesNamespace.URI_CURRENT, localName, qName, atts);
         }
 
         @Override
         public void endElement(String uri, String localName, String qName) throws SAXException {
-            if ("".equals(uri)) {
-                super.endElement(FEATURES_NAMESPACE, localName, qName);
-            } else {
-                super.endElement(uri, localName, qName);
-            }
+        	super.endElement(FeaturesNamespace.URI_CURRENT, localName, qName);
         }
+        
     }
 
 
