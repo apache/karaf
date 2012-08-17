@@ -105,6 +105,7 @@
                     <instructions>
                         <Import-Package>
                             org.apache.aries.blueprint,
+			    org.apache.felix.webconsole*;version="[3,5)",
                             org.osgi.service.blueprint.container,
                             org.osgi.service.blueprint.reflect,
                             *
