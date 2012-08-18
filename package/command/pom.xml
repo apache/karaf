@@ -52,6 +52,12 @@
         </dependency>
 
         <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.gogo.runtime</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
             <groupId>org.apache.karaf</groupId>
             <artifactId>org.osgi.core</artifactId>
             <scope>provided</scope>
