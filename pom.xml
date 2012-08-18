@@ -1986,7 +1986,7 @@
                                     <pluginExecutionFilter>
                                         <groupId>org.apache.felix</groupId>
                                         <artifactId>maven-bundle-plugin</artifactId>
-                                        <versionRange>[2.3.7,)</versionRange>
+                                        <versionRange>[0,)</versionRange>
                                         <goals>
                                             <goal>cleanVersions</goal>
                                         </goals>
@@ -1999,7 +1999,7 @@
                                     <pluginExecutionFilter>
                                         <groupId>org.apache.maven.plugins</groupId>
                                         <artifactId>maven-dependency-plugin</artifactId>
-                                        <versionRange>[2.4,)</versionRange>
+                                        <versionRange>[0,)</versionRange>
                                         <goals>
                                             <goal>copy</goal>
                                             <goal>unpack</goal>
@@ -2013,7 +2013,7 @@
                                     <pluginExecutionFilter>
                                         <groupId>org.apache.karaf.tooling</groupId>
                                         <artifactId>karaf-maven-plugin</artifactId>
-                                        <versionRange>[3.0.0,)</versionRange>
+                                        <versionRange>[0,)</versionRange>
                                         <goals>
                                             <goal>commands-generate-help</goal>
                                         </goals>
@@ -2026,7 +2026,7 @@
                                     <pluginExecutionFilter>
                                         <groupId>org.fusesource.scalate</groupId>
                                         <artifactId>maven-scalate-plugin</artifactId>
-                                        <versionRange>[1.4.0,)</versionRange>
+                                        <versionRange>[0,)</versionRange>
                                         <goals>
                                             <goal>sitegen</goal>
                                         </goals>
@@ -2039,7 +2039,7 @@
                                     <pluginExecutionFilter>
                                         <groupId>org.apache.servicemix.tooling</groupId>
                                         <artifactId>depends-maven-plugin</artifactId>
-                                        <versionRange>[1.2,)</versionRange>
+                                        <versionRange>[0,)</versionRange>
                                         <goals>
                                             <goal>generate-depends-file</goal>
                                         </goals>
