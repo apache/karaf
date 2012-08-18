@@ -30,6 +30,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
 
+import org.apache.karaf.features.internal.FeaturesNamespaces;
 import org.apache.karaf.features.internal.model.Feature;
 import org.apache.karaf.features.internal.model.Features;
 import org.apache.karaf.features.internal.model.JaxbUtil;
@@ -45,16 +46,18 @@ public class GenerateDescriptorMojoTest {
         InputStream in = getClass().getClassLoader().getResourceAsStream("input-features-1.0.0.xml");
         
         Features featuresRoot = JaxbUtil.unmarshal(in, false);
-        
-        assert featuresRoot.getRepository().size() == 1;
+
+        assertEquals(featuresRoot.getRepository().size(), 1);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         
         JaxbUtil.marshal(featuresRoot, baos);
         
-        String s = new String(baos.toByteArray());
-        assert s.indexOf("repository") > -1;
-        assert s.indexOf("http://karaf.apache.org/xmlns/features/v1.0.0") > -1;
+        String text = new String(baos.toByteArray());
+        
+        assertTrue(text.contains("repository"));
+        
+        assertTrue(text.contains(FeaturesNamespaces.URI_CURRENT));
         
     }
     
