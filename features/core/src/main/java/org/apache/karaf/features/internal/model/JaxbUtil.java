@@ -35,7 +35,7 @@ import javax.xml.parsers.SAXParserFactory;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.transform.sax.SAXSource;
 
-import org.apache.karaf.features.internal.FeaturesNamespace;
+import org.apache.karaf.features.internal.FeaturesNamespaces;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -137,12 +137,12 @@ public class JaxbUtil {
 
         @Override
         public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
-        	super.startElement(FeaturesNamespace.URI_CURRENT, localName, qName, atts);
+        	super.startElement(FeaturesNamespaces.URI_CURRENT, localName, qName, atts);
         }
 
         @Override
         public void endElement(String uri, String localName, String qName) throws SAXException {
-        	super.endElement(FeaturesNamespace.URI_CURRENT, localName, qName);
+        	super.endElement(FeaturesNamespaces.URI_CURRENT, localName, qName);
         }
         
     }

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-@javax.xml.bind.annotation.XmlSchema(namespace = FeaturesNamespace.URI_CURRENT, elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
+@javax.xml.bind.annotation.XmlSchema(namespace = FeaturesNamespaces.URI_CURRENT, elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
 package org.apache.karaf.features.internal.model;
-import org.apache.karaf.features.internal.FeaturesNamespace;
+import org.apache.karaf.features.internal.FeaturesNamespaces;
 
