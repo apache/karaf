@@ -39,10 +39,6 @@ import org.xml.sax.SAXException;
  */
 public class FeatureValidationUtil {
 
-    public static final QName FEATURES_0_0 = new QName("features");
-    public static final QName FEATURES_1_0 = new QName("http://karaf.apache.org/xmlns/features/v1.0.0", "features");
-    public static final QName FEATURES_1_1 = new QName("http://karaf.apache.org/xmlns/features/v1.1.0", "features");
-
     private static final Logger log = LoggerFactory.getLogger(FeatureValidationUtil.class);
 
     /**
@@ -56,12 +52,12 @@ public class FeatureValidationUtil {
 
         QName name = new QName(doc.getDocumentElement().getNamespaceURI(), doc.getDocumentElement().getLocalName());
 
-        if (FEATURES_0_0.equals(name)) {
+        if (FeaturesNamespaces.FEATURES_0_0_0.equals(name)) {
             log.warn("Old style feature file without namespace found (URI: {}). This format is deprecated and support for it will soon be removed", uri);
             return;
-        } else if (FEATURES_1_0.equals(name)) {
+        } else if (FeaturesNamespaces.FEATURES_1_0_0.equals(name)) {
             validate(doc, "/org/apache/karaf/features/karaf-features-1.0.0.xsd");
-        } else if (FEATURES_1_1.equals(name)) {
+        } else if (FeaturesNamespaces.FEATURES_1_1_0.equals(name)) {
             validate(doc, "/org/apache/karaf/features/karaf-features-1.1.0.xsd");
         } else {
             throw new IllegalArgumentException("Unrecognized root element: " + name);

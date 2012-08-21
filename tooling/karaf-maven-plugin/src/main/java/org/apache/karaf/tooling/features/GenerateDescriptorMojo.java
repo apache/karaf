@@ -149,6 +149,21 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
     private Integer startLevel;
 
     /**
+     * Installation mode. If present, generate "feature.install" attribute:
+     * 
+     * <a href="https://github.com/apache/karaf/blob/trunk/features/core/src/main/resources/org/apache/karaf/features/karaf-features-1.1.0.xsd">
+     * Installation mode.
+     * </a>
+     *
+     * Can be either manual or auto. Specifies whether the feature should be automatically installed when
+     * dropped inside the deploy folder. Note: This attribute doesn't affect feature descriptors that are installed from the
+     * command line or as part of the org.apache.karaf.features.cfg.
+     *
+     * @parameter
+     */
+    private String installMode;
+
+    /**
      * Flag indicating whether transitive dependencies should be included (<code>true</code>) or not (<code>false</code>).
      * <p/>
      * N.B. Note the default value of this is true, but is suboptimal in cases where specific <code>&lt;feature/&gt;</code> dependencies are
@@ -278,7 +293,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
             throw new MojoExecutionException("Unable to create features.xml file: " + e, e);
         }
     }
-
+    
     /*
      * Write all project dependencies as feature
      */
@@ -316,6 +331,9 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
         }
         if (resolver != null) {
             feature.setResolver(resolver);
+        }
+        if (installMode != null) {
+            feature.setInstall(installMode);
         }
         if (project.getDescription() != null && feature.getDetails() == null) {
             feature.setDetails(project.getDescription());
