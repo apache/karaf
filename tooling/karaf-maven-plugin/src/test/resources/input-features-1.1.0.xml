@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one or more
+    contributor license agreements.  See the NOTICE file distributed with
+    this work for additional information regarding copyright ownership.
+    The ASF licenses this file to You under the Apache License, Version 2.0
+    (the "License"); you may not use this file except in compliance with
+    the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<features xmlns="http://karaf.apache.org/xmlns/features/v1.1.0" name="testing">
+
+    <repository>http://testing-feature.org</repository>
+
+    <feature install="auto" name="testing-feature" version="1.0.0" description="some testing feature">
+        <bundle start-level="30">mvn:org.apache.karaf.features/org.apache.karaf.features.core/2.2.8</bundle>
+        <bundle start-level="30">mvn:org.apache.karaf.features/org.apache.karaf.features.command/2.2.8</bundle>
+    </feature>
+
+</features>
