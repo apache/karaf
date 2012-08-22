@@ -132,7 +132,7 @@ public class ExportsCommand extends PackageCommandSupport {
                 columns.add(target.getSymbolicName());
             }
 
-            columns.add("No active exported packages.");
+            columns.add("No active exported packages. This command only works on started bundles, use osgi:headers instead");
             if (imports) {
                 columns.add("");
             }
