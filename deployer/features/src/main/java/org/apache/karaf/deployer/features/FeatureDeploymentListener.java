@@ -21,6 +21,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
@@ -127,6 +128,7 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
                         URL url = (URL) featuresUrlEnumeration.nextElement();
                         try {
                             featuresService.addRepository(url.toURI());
+                            URI needRemovedRepo = null;
                             for (Repository repo : featuresService.listRepositories()) {
                                 if (repo.getURI().equals(url.toURI())) {
                                     Set<Feature> features = new HashSet<Feature>(Arrays.asList(repo.getFeatures()));
@@ -137,9 +139,24 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
                                         }
                                     }
                                     featuresService.installFeatures(autoInstallFeatures, EnumSet.noneOf(FeaturesService.Option.class));
+                                } else {
+                                    //remove older out-of-data feature repo
+                                    if (repo.getURI().toString().contains(FEATURE_PATH)) {
+                                        String featureFileName = repo.getURI().toString();
+                                        featureFileName = featureFileName.substring(featureFileName.lastIndexOf('/') + 1);
+                                        String newFeatureFileName = url.toURI().toString();
+                                        newFeatureFileName = newFeatureFileName.substring(newFeatureFileName.lastIndexOf('/') + 1);
+                                        if (featureFileName.equals(newFeatureFileName)) {
+                                            needRemovedRepo = repo.getURI();
+                                        }
+                                    }
                                 }
+
                             }
                             urls.add(url);
+                            if (needRemovedRepo != null) {
+                                featuresService.removeRepository(needRemovedRepo);
+                            }
                         } catch (Exception e) {
                             logger.error("Unable to install features", e);
                         }
