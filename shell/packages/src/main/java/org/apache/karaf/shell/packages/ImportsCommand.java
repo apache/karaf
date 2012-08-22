@@ -104,7 +104,7 @@ public class ImportsCommand extends PackageCommandSupport {
                 out.println(": " + p);
             }
         } else {
-            out.println(getBundleName(target) + ": No active imported packages.");
+            out.println(getBundleName(target) + ": No active imported packages. This command only works on started bundles, use osgi:headers instead");
         }
     }
 
