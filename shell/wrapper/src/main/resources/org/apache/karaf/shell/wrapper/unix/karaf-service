@@ -18,9 +18,9 @@
 # ------------------------------------------------------------------------
 
 # If not set, try to determine the JAVA_HOME using the JDK and fall back to JRE
-if [ -x readlink ]; then
-  [ -z $JAVA_HOME ] && export JAVA_HOME="$(readlink -f /usr/bin/javac | sed 's:/bin/javac::')"
-  [ -z $JAVA_HOME ] && export JAVA_HOME="$(readlink -f /usr/bin/java | sed 's:/bin/java::')"
+if [ -x /bin/readlink ]; then
+  [ -z $JAVA_HOME ] && [ -x /usr/bin/javac ] && export JAVA_HOME="$(readlink -f /usr/bin/javac | sed 's:/bin/javac::')"
+  [ -z $JAVA_HOME ] && [ -x /usr/bin/java ] && export JAVA_HOME="$(readlink -f /usr/bin/java | sed 's:/bin/java::')"
 fi
 
 # Application
