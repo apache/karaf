@@ -29,7 +29,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
 
-import org.apache.karaf.features.internal.FeaturesNamespaces;
+import org.apache.karaf.features.FeaturesNamespaces;
 import org.apache.karaf.features.internal.model.Features;
 import org.apache.karaf.features.internal.model.Feature;
 import org.apache.karaf.features.internal.model.JaxbUtil;
