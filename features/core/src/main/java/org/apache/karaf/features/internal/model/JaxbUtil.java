@@ -35,7 +35,7 @@ import javax.xml.parsers.SAXParserFactory;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.transform.sax.SAXSource;
 
-import org.apache.karaf.features.internal.FeaturesNamespaces;
+import org.apache.karaf.features.FeaturesNamespaces;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
