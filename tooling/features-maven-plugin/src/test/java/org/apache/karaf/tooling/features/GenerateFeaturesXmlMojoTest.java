@@ -16,7 +16,14 @@
  */
 package org.apache.karaf.tooling.features;
 
+import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
+import java.io.StringWriter;
+
+import org.apache.karaf.tooling.features.GenerateFeaturesXmlMojo.Feature;
 import org.apache.maven.artifact.Artifact;
+import org.codehaus.plexus.util.FileUtils;
 import org.easymock.EasyMock;
 
 import static org.easymock.EasyMock.*;
@@ -28,6 +35,14 @@ import junit.framework.TestCase;
  */
 public class GenerateFeaturesXmlMojoTest extends TestCase {
     
+    private GenerateFeaturesXmlMojo mojo;
+    
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        mojo = new GenerateFeaturesXmlMojo();
+    }
+
     public void testToString() throws Exception {
         Artifact artifact = EasyMock.createMock(Artifact.class);
 
@@ -39,6 +54,38 @@ public class GenerateFeaturesXmlMojoTest extends TestCase {
         replay(artifact);
         
         assertEquals("org.apache.karaf.test/test-artifact/1.2.3", GenerateFeaturesXmlMojo.toString(artifact));
+    } 
+
+    public void testInstallMode() throws Exception {
+    	
+        Artifact artifact = EasyMock.createMock(Artifact.class);
+
+        expect(artifact.getGroupId()).andReturn("org.apache.karaf.test").anyTimes();
+        expect(artifact.getArtifactId()).andReturn("test-artifact").anyTimes();
+        expect(artifact.getBaseVersion()).andReturn("1.2.3").anyTimes();
+        expect(artifact.getVersion()).andReturn("1.2.3").anyTimes();
+        expect(artifact.getType()).andReturn("jar").anyTimes();
+        
+        replay(artifact);
+        
+        mojo.installMode="auto";
+        
+        Feature feature = mojo.new Feature(artifact);
+        
+        ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+        
+        PrintStream out = new PrintStream(byteStream);
+        
+		feature.write(out);
+		
+		String source = byteStream.toString("UTF-8");
+		
+		System.out.println(source);
+		
+		String target = FileUtils.fileRead("./src/test/resources/features-01.xml", "UTF-8");
+		
+		assertTrue(target.contains(source));
+        
     } 
 
 }
