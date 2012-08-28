@@ -155,7 +155,7 @@ public class ConsoleFactory {
         if (delayconsole) {
             new DelayedStarted(this.console, bundleContext, unwrappedIn).start();
         } else {
-            this.console.run();
+            new Thread(this.console, "Karaf Shell Console Thread").start();
         }
     }
 
