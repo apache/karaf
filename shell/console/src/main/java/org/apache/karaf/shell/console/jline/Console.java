@@ -143,6 +143,7 @@ public class Console implements Runnable
                 // ignore
             }
         }
+        reader.shutdown();
         running = false;
         CommandSessionHolder.unset();
         pipe.interrupt();
@@ -185,11 +186,6 @@ public class Console implements Runnable
             }
         }
         close(true);
-        //System.err.println("Exiting console...");
-        if (closeCallback != null)
-        {
-            closeCallback.run();
-        }
     }
 
     private void logException(Throwable t) {
