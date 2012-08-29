@@ -12,6 +12,7 @@ h1. Description
 This bundle provides the low level OSGi shell commands.
 
 The following commands are available:
+* bundle:classes - Displays a list of classes contained in the bundle
 * bundle:headers - Display OSGi headers of a given bundle.
 * bundle:info - Display detailed information of a given bundle.
 * bundle:install - Install one or more bundles.

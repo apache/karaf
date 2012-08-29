@@ -28,6 +28,11 @@
             </action>
         </command>
         <command>
+            <action class="org.apache.karaf.bundle.command.Classes">
+                <property name="bundleService" ref="bundleService"/>
+            </action>
+        </command>
+        <command>
             <action class="org.apache.karaf.bundle.command.Headers">
                 <property name="bundleService" ref="bundleService"/>
             </action>
