@@ -104,6 +104,7 @@
                 <configuration>
                     <instructions>
                         <Import-Package>
+                            org.apache.felix.webconsole*;version="[3,5)",
                             jline;version="[${jline.version}, ${jline.version}]",
                             *
                         </Import-Package>
