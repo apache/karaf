@@ -63,7 +63,7 @@
         <dependency>
             <groupId>commons-fileupload</groupId>
             <artifactId>commons-fileupload</artifactId>
-            <version>1.1.1</version>
+            <version>1.2.2</version>
             <scope>provided</scope>
             <optional>true</optional>
         </dependency>
