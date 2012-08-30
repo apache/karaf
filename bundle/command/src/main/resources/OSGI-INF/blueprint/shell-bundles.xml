@@ -33,6 +33,11 @@
             </action>
         </command>
         <command>
+            <action class="org.apache.karaf.bundle.command.FindClass">
+                <property name="bundleContext" ref="blueprintBundleContext" />
+            </action>
+        </command>
+        <command>
             <action class="org.apache.karaf.bundle.command.Headers">
                 <property name="bundleService" ref="bundleService"/>
             </action>
