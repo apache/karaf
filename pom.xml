@@ -107,7 +107,7 @@
         <commons-beanutils.version>1.8.3</commons-beanutils.version>
         <commons-codec.version>1.6</commons-codec.version>
         <commons-collections.version>3.2.1</commons-collections.version>
-        <commons-fileupload.version>1.1.1</commons-fileupload.version>
+        <commons-fileupload.version>1.2.2</commons-fileupload.version>
         <commons-lang.version>2.6</commons-lang.version>
         <icu4j.version>4.8.1.1</icu4j.version>
         <jasypt.bundle.version>1.9.0_1</jasypt.bundle.version>
