@@ -171,7 +171,7 @@
         <sshd.version>0.7.0</sshd.version>
         <xbean.version>3.11.1</xbean.version>
         <javax.mail.version>1.4.5</javax.mail.version>
-
+        <http.feature.version>[2,3)</http.feature.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <appendedResourcesDirectory>${basedir}/etc/appended-resources</appendedResourcesDirectory>
         <bnd.version.policy>[$(version;==;$(@)),$(version;+;$(@)))</bnd.version.policy>

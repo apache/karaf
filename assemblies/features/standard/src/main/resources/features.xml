@@ -58,7 +58,7 @@
 
     <feature name="spring-web" description="Spring 2 Web support" version="${spring2.version}" resolver="(obr)">
     	<feature version="${spring2.version}">spring</feature>
-    	<feature version="${project.version}">http</feature>
+    	<feature version="${http.feature.version}">http</feature>
     	<bundle start-level="30">mvn:org.springframework/spring-web/${spring2.version}</bundle>
 		<bundle start-level="30">mvn:org.springframework/spring-webmvc/${spring2.version}</bundle>
     </feature>
@@ -92,7 +92,7 @@
     <feature name="spring-dm-web" description="Spring DM Web support" version="${spring.osgi.version}" resolver="(obr)">
     	<feature version="${spring.osgi.version}">spring-dm</feature>
     	<feature version="[2.5.6,4)">spring-web</feature>
-    	<feature version="${project.version}">http</feature>
+    	<feature version="${http.feature.version}">http</feature>
 		<bundle start-level="30">mvn:org.springframework.osgi/spring-osgi-web/${spring.osgi.version}</bundle>
     </feature>
 
@@ -142,7 +142,7 @@
 
     <feature name="spring-web" description="Spring Web support" version="${spring.version}" resolver="(obr)">
     	<feature version="${spring.version}">spring</feature>
-    	<feature version="${project.version}">http</feature>
+    	<feature version="${http.feature.version}">http</feature>
     	<bundle start-level="30">mvn:org.springframework/spring-web/${spring.version}</bundle>
 		<bundle start-level="30">mvn:org.springframework/spring-webmvc/${spring.version}</bundle>
     </feature>
@@ -206,7 +206,7 @@
     </feature>
 
     <feature name="http-whiteboard" description="Provide HTTP Whiteboard pattern support" version="${project.version}" resolver="(obr)">
-        <feature>http</feature>
+        <feature version="${http.feature.version}">http</feature>
         <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-extender-whiteboard/${pax.web.version}</bundle>
     </feature>
 
@@ -232,7 +232,7 @@
             realm=karaf
             role=${karaf.admin.role}
         </config>
-        <feature>http</feature>
+        <feature version="${http.feature.version}">http</feature>
         <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.metatype/${felix.metatype.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.branding/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.console/${project.version}</bundle>
