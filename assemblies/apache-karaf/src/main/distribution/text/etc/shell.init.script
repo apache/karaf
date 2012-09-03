@@ -40,6 +40,7 @@ bundle:install = { osgi:install $args };
 bundle:uninstall = { osgi:uninstall $args } ;
 bundle:start = { osgi:start $args } ;
 bundle:stop = { osgi:stop $args } ;
+bundle:classes = { osgi:classes $args } ;
 bundle:find-class = { osgi:find-class $args } ;
 bundle:headers = { osgi:headers $args } ;
 bundle:info = { osgi:info $args } ;
