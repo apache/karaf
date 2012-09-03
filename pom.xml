@@ -206,7 +206,8 @@
         <sshd.version>0.7.0</sshd.version>
         <xbean.version>3.11.1</xbean.version>
         <javax.mail.version>1.4.5</javax.mail.version>
-
+        <http.feature.version>[3,4)</http.feature.version>      
+  
         <!-- Furter used maven plugin versions; e.g. in the docs -->
         <plugin.depends.version>1.2</plugin.depends.version>
 
