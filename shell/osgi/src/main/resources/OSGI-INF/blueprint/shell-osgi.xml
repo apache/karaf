@@ -26,6 +26,9 @@
         <command name="osgi/headers">
             <action class="org.apache.karaf.shell.osgi.Headers"/>
         </command>
+        <command name="osgi/find-class">
+            <action class="org.apache.karaf.shell.osgi.FindClass"/>
+        </command>
         <command name="osgi/info">
             <action class="org.apache.karaf.shell.osgi.Info"/>
         </command>
