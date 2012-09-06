@@ -22,21 +22,24 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.karaf</groupId>
-        <artifactId>karaf</artifactId>
+        <groupId>org.apache.karaf.tooling</groupId>
+        <artifactId>tooling</artifactId>
         <version>2.3.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <groupId>org.apache.karaf.tooling</groupId>
-    <artifactId>tooling</artifactId>
+    <groupId>org.apache.karaf.tooling.exam</groupId>
+    <artifactId>exam</artifactId>
     <packaging>pom</packaging>
-    <name>Apache Karaf :: Tooling</name>
+    <name>Apache Karaf :: Tooling :: Exam Testing Framework</name>
+
+    <properties>
+        <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
+    </properties>
 
     <modules>
-        <module>features-maven-plugin</module>
-        <module>cmdhelp-maven-plugin</module>
-        <module>exam</module>
+        <module>options</module>
+        <module>container</module>
     </modules>
 
 </project>
