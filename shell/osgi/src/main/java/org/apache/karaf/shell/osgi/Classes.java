@@ -16,13 +16,13 @@
  */
 package org.apache.karaf.shell.osgi;
 
+import java.util.Collection;
+import java.util.List;
+
 import org.apache.felix.gogo.commands.Command;
 import org.apache.felix.gogo.commands.Option;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.wiring.BundleWiring;
-
-import java.util.Collection;
-import java.util.List;
 
 @Command(scope = "osgi", name = "classes", description = "Displays list of classes contained in bundles")
 public class Classes extends BundlesCommand {
@@ -37,7 +37,7 @@ public class Classes extends BundlesCommand {
     }
 
     protected void printResources(Bundle bundle) {
-        BundleWiring wiring = bundle.adapt(BundleWiring.class);
+        BundleWiring wiring = (BundleWiring) bundle.adapt(BundleWiring.class);
         if (wiring != null) {
             Collection<String> resources = null;
             if (displayAllFiles) {
