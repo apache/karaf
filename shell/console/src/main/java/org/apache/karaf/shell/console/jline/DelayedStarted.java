@@ -26,7 +26,7 @@ class DelayedStarted extends Thread implements FrameworkListener {
 		this.bundleContext = bundleContext;
         this.in = in;
         int defaultStartLevel = Integer.parseInt(System.getProperty(Constants.FRAMEWORK_BEGINNING_STARTLEVEL));
-        int startLevel = bundleContext.getBundle(0).adapt(FrameworkStartLevel.class).getStartLevel();
+        int startLevel = ((FrameworkStartLevel) this.bundleContext.getBundle(0).adapt(FrameworkStartLevel.class)).getStartLevel();
         if (startLevel >= defaultStartLevel) {
             started.set(true);
         } else {
@@ -64,7 +64,7 @@ class DelayedStarted extends Thread implements FrameworkListener {
     public void frameworkEvent(FrameworkEvent event) {
         if (event.getType() == FrameworkEvent.STARTLEVEL_CHANGED) {
             int defaultStartLevel = Integer.parseInt(System.getProperty(Constants.FRAMEWORK_BEGINNING_STARTLEVEL));
-            int startLevel = this.bundleContext.getBundle(0).adapt(FrameworkStartLevel.class).getStartLevel();
+            int startLevel = ((FrameworkStartLevel) this.bundleContext.getBundle(0).adapt(FrameworkStartLevel.class)).getStartLevel();
             if (startLevel >= defaultStartLevel) {
                 started.set(true);
             }

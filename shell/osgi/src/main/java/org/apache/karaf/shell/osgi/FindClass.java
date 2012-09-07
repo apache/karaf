@@ -16,13 +16,13 @@
  */
 package org.apache.karaf.shell.osgi;
 
+import java.util.Collection;
+
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.wiring.BundleWiring;
-
-import java.util.Collection;
 
 @Command(scope = "osgi", name = "find-class", description = "Locates a specified class in any deployed bundle")
 public class FindClass extends OsgiCommandSupport {
@@ -39,7 +39,7 @@ public class FindClass extends OsgiCommandSupport {
         Bundle[] bundles = bundleContext.getBundles();
         String filter = "*" + className + "*";
         for (Bundle bundle : bundles) {
-            BundleWiring wiring = bundle.adapt(BundleWiring.class);
+            BundleWiring wiring = (BundleWiring) bundle.adapt(BundleWiring.class);
             if (wiring != null) {
                 Collection<String> resources = wiring.listResources("/", filter, BundleWiring.LISTRESOURCES_RECURSE);
                 if (resources.size() > 0) {
