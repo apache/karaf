@@ -19,6 +19,7 @@ import org.ops4j.pax.exam.junit.ExamReactorStrategy;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
 import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(JUnit4TestRunner.class)
@@ -29,7 +30,7 @@ public class KarafBundleCommandsTest extends KarafTestSupport {
     public void testBundleCapabilitiesCommand() throws Exception {
         String allCapabilitiesOutput = executeCommand("bundle:capabilities");
         System.out.println(allCapabilitiesOutput);
-        assertTrue(!allCapabilitiesOutput.isEmpty());
+        assertFalse(allCapabilitiesOutput.isEmpty());
         String jmxWhiteboardBundleCapabilitiesOutput = executeCommand("bundle:capabilities 74");
         System.out.println(jmxWhiteboardBundleCapabilitiesOutput);
         assertTrue(jmxWhiteboardBundleCapabilitiesOutput.contains("osgi.wiring.bundle; org.apache.aries.jmx.whiteboard 1.0.0 [UNUSED]"));
@@ -39,7 +40,7 @@ public class KarafBundleCommandsTest extends KarafTestSupport {
     public void testBundleClassesCommand() throws Exception {
         String allClassesOutput = executeCommand("bundle:classes");
         System.out.println(allClassesOutput);
-        assertTrue(!allClassesOutput.isEmpty());
+        assertFalse(allClassesOutput.isEmpty());
         String jmxWhiteboardBundleClassesOutput = executeCommand("bundle:classes 74");
         System.out.println(jmxWhiteboardBundleClassesOutput);
         assertTrue(jmxWhiteboardBundleClassesOutput.contains("org/apache/aries/jmx/whiteboard/Activator$MBeanTracker.class"));
@@ -49,14 +50,14 @@ public class KarafBundleCommandsTest extends KarafTestSupport {
     public void testBundleDiagCommand() throws Exception {
         String allDiagOutput = executeCommand("bundle:diag");
         System.out.println(allDiagOutput);
-        assertTrue(!allDiagOutput.isEmpty());
+        assertFalse(allDiagOutput.isEmpty());
     }
 
     @Test
     public void testBundleFindClassCommand() throws Exception {
         String findClassOutput = executeCommand("bundle:find-class jmx");
         System.out.println(findClassOutput);
-        assertTrue(!findClassOutput.isEmpty());
+        assertFalse(findClassOutput.isEmpty());
     }
 
     @Test
@@ -78,14 +79,14 @@ public class KarafBundleCommandsTest extends KarafTestSupport {
         System.out.println(executeCommand("bundle:install mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.commons-lang/2.4_6"));
         String bundleListOutput = executeCommand("bundle:list -l | grep -i commons-lang");
         System.out.println(bundleListOutput);
-        assertTrue(!bundleListOutput.isEmpty());
+        assertFalse(bundleListOutput.isEmpty());
     }
 
     @Test
     public void testBundleShowTreeCommand() throws Exception {
         String bundleTreeOutput = executeCommand("bundle:tree-show 69");
         System.out.println(bundleTreeOutput);
-        assertTrue(!bundleTreeOutput.isEmpty());
+        assertFalse(bundleTreeOutput.isEmpty());
     }
 
 }
