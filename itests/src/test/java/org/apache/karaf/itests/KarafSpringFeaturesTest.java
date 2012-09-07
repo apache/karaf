@@ -20,7 +20,7 @@ import org.ops4j.pax.exam.junit.ExamReactorStrategy;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
 import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
 @RunWith(JUnit4TestRunner.class)
 @ExamReactorStrategy(AllConfinedStagedReactorFactory.class)
@@ -30,49 +30,49 @@ public class KarafSpringFeaturesTest extends KarafTestSupport {
     public void installSpringFeature() throws Exception {
         executeCommand("feature:install spring");
         String springFeatureStatus = executeCommand("feature:list -i | grep spring");
-        assertTrue("spring feature is not installed", !springFeatureStatus.isEmpty());
+        assertFalse("spring feature is not installed", springFeatureStatus.isEmpty());
     }
 
     @Test
     public void installSpringAspectsFeature() throws Exception {
         executeCommand("feature:install spring-aspects");
         String springAspectsFeatureStatus = executeCommand("feature:list -i | grep spring-aspects");
-        assertTrue("spring-aspects feature is not installed", !springAspectsFeatureStatus.isEmpty());
+        assertFalse("spring-aspects feature is not installed", springAspectsFeatureStatus.isEmpty());
     }
 
     @Test
     public void installSpringDmFeature() throws Exception {
         executeCommand("feature:install spring-dm");
         String springDmFeatureStatus = executeCommand("feature:list -i | grep spring-dm");
-        assertTrue("spring-dm feature is not installed", !springDmFeatureStatus.isEmpty());
+        assertFalse("spring-dm feature is not installed", springDmFeatureStatus.isEmpty());
     }
 
     @Test
     public void installSpringDmWebFeature() throws Exception {
         executeCommand("feature:install spring-dm-web");
         String springDmWebFeatureStatus = executeCommand("feature:list -i | grep spring-dm-web");
-        assertTrue("spring-dm-web feature is not installed", !springDmWebFeatureStatus.isEmpty());
+        assertFalse("spring-dm-web feature is not installed", springDmWebFeatureStatus.isEmpty());
     }
 
     @Test
     public void installSpringInstrumentFeature() throws Exception {
         executeCommand("feature:install spring-instrument");
         String springInstrumentFeatureStatus = executeCommand("feature:list -i | grep spring-instrument");
-        assertTrue("spring-instrument feature is not installed", !springInstrumentFeatureStatus.isEmpty());
+        assertFalse("spring-instrument feature is not installed", springInstrumentFeatureStatus.isEmpty());
     }
 
     @Test
     public void installSpringJdbcFeature() throws Exception {
         executeCommand("feature:install spring-jdbc");
         String springJdbcFeatureStatus = executeCommand("feature:list -i | grep spring-jdbc");
-        assertTrue("spring-jdbc feature is not installed", !springJdbcFeatureStatus.isEmpty());
+        assertFalse("spring-jdbc feature is not installed", springJdbcFeatureStatus.isEmpty());
     }
 
     @Test
     public void installSpringJmsFeature() throws Exception {
         executeCommand("feature:install spring-jms");
         String springJmsFeatureStatus = executeCommand("feature:list -i | grep spring-jms");
-        assertTrue("spring-jms feature is not installed", !springJmsFeatureStatus.isEmpty());
+        assertFalse("spring-jms feature is not installed", springJmsFeatureStatus.isEmpty());
     }
 
     @Test
@@ -81,42 +81,42 @@ public class KarafSpringFeaturesTest extends KarafTestSupport {
     public void installSpringStrutsFeature() throws Exception {
         executeCommand("feature:install spring-struts");
         String springStrutsFeatureStatus = executeCommand("feature:list -i | grep spring-struts");
-        assertTrue("spring-struts feature is not installed", !springStrutsFeatureStatus.isEmpty());
+        assertFalse("spring-struts feature is not installed", springStrutsFeatureStatus.isEmpty());
     }
 
     @Test
     public void installSpringTestFeature() throws Exception {
         executeCommand("feature:install spring-test");
         String springTestFeatureStatus = executeCommand("feature:list -i | grep spring-test");
-        assertTrue("spring-test feature is not installed", !springTestFeatureStatus.isEmpty());
+        assertFalse("spring-test feature is not installed", springTestFeatureStatus.isEmpty());
     }
 
     @Test
     public void installSpringOrmFeature() throws Exception {
         executeCommand("feature:install spring-orm");
         String springOrmFeatureStatus = executeCommand("feature:list -i | grep spring-orm");
-        assertTrue("spring-orm feature is not installed", !springOrmFeatureStatus.isEmpty());
+        assertFalse("spring-orm feature is not installed", springOrmFeatureStatus.isEmpty());
     }
 
     @Test
     public void installSpringOxmFeature() throws Exception {
         executeCommand("feature:install spring-oxm");
         String springOxmFeatureStatus = executeCommand("feature:list -i | grep spring-oxm");
-        assertTrue("spring-oxm feature is not installed", !springOxmFeatureStatus.isEmpty());
+        assertFalse("spring-oxm feature is not installed", springOxmFeatureStatus.isEmpty());
     }
 
     @Test
     public void installSpringTxFeature() throws Exception {
         executeCommand("feature:install spring-tx");
         String springTxFeatureStatus = executeCommand("feature:list -i | grep spring-tx");
-        assertTrue("spring-tx feature is not installed", !springTxFeatureStatus.isEmpty());
+        assertFalse("spring-tx feature is not installed", springTxFeatureStatus.isEmpty());
     }
 
     @Test
     public void installSpringWebFeature() throws Exception {
         executeCommand("feature:install spring-web");
         String springWebFeatureStatus = executeCommand("feature:list -i | grep spring-web");
-        assertTrue("spring-web feature is not installed", !springWebFeatureStatus.isEmpty());
+        assertFalse("spring-web feature is not installed", springWebFeatureStatus.isEmpty());
     }
 
     @Test
@@ -125,14 +125,14 @@ public class KarafSpringFeaturesTest extends KarafTestSupport {
     public void installSpringWebPortletFeature() throws Exception {
         executeCommand("feature:install spring-web-portlet");
         String springWebPortletFeatureStatus = executeCommand("feature:list -i | grep spring-web-portlet");
-        assertTrue("spring-web-portlet feature is not installed", !springWebPortletFeatureStatus.isEmpty());
+        assertFalse("spring-web-portlet feature is not installed", springWebPortletFeatureStatus.isEmpty());
     }
 
     @Test
     public void installGeminiBlueprintFeature() throws Exception {
         executeCommand("feature:install gemini-blueprint");
         String geminiBlueprintFeatureStatus = executeCommand("feature:list -i | grep gemini-blueprint");
-        assertTrue("gemini-blueprint feature is not installed", !geminiBlueprintFeatureStatus.isEmpty());
+        assertFalse("gemini-blueprint feature is not installed", geminiBlueprintFeatureStatus.isEmpty());
     }
 
 }

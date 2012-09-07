@@ -19,7 +19,7 @@ import org.ops4j.pax.exam.junit.ExamReactorStrategy;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
 import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
 @RunWith(JUnit4TestRunner.class)
 @ExamReactorStrategy(AllConfinedStagedReactorFactory.class)
@@ -29,28 +29,28 @@ public class KarafEnterpriseFeaturesTest extends KarafTestSupport {
     public void installTransactionFeature() throws Exception {
         executeCommand("feature:install transaction");
         String transactionFeatureStatus = executeCommand("feature:list -i | grep transaction");
-        assertTrue("transaction feature is not installed", !transactionFeatureStatus.isEmpty());
+        assertFalse("transaction feature is not installed", transactionFeatureStatus.isEmpty());
     }
 
     @Test
     public void installJpaFeature() throws Exception {
         executeCommand("feature:install jpa");
         String jpaFeatureStatus = executeCommand("feature:list -i | grep jpa");
-        assertTrue("jpa feature is not installed", !jpaFeatureStatus.isEmpty());
+        assertFalse("jpa feature is not installed", jpaFeatureStatus.isEmpty());
     }
 
     @Test
     public void installJndiFeature() throws Exception {
         executeCommand("feature:install jndi");
         String jndiFeatureStatus = executeCommand("feature:list -i | grep jndi");
-        assertTrue("jndi feature is not installed", !jndiFeatureStatus.isEmpty());
+        assertFalse("jndi feature is not installed", jndiFeatureStatus.isEmpty());
     }
 
     @Test
     public void installApplicationWithoutIsolationFeature() throws Exception {
         executeCommand("feature:install application-without-isolation");
         String applicationWithoutIsolationFeatureStatus = executeCommand("feature:list -i | grep application-without-isolation");
-        assertTrue("application-without-isolation feature is not installed", !applicationWithoutIsolationFeatureStatus.isEmpty());
+        assertFalse("application-without-isolation feature is not installed", applicationWithoutIsolationFeatureStatus.isEmpty());
     }
 
 }
