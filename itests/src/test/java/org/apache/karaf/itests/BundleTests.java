@@ -19,15 +19,42 @@ import org.ops4j.pax.exam.junit.ExamReactorStrategy;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
 import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
 
+import javax.management.MBeanServerConnection;
+import javax.management.ObjectName;
+import javax.management.openmbean.TabularDataSupport;
+import javax.management.remote.JMXConnector;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(JUnit4TestRunner.class)
 @ExamReactorStrategy(AllConfinedStagedReactorFactory.class)
-public class KarafBundleCommandsTest extends KarafTestSupport {
+public class BundleTests extends KarafTestSupport {
 
     @Test
-    public void testBundleCapabilitiesCommand() throws Exception {
+    public void listCommand() throws Exception {
+        String listOutput = executeCommand("bundle:list -t 0");
+        System.out.println(listOutput);
+        assertFalse(listOutput.isEmpty());
+    }
+
+    @Test
+    public void listViaMBean() throws Exception {
+        JMXConnector connector = null;
+        try {
+            connector = getJMXConnector();
+            MBeanServerConnection connection = connector.getMBeanServerConnection();
+            ObjectName name = new ObjectName("org.apache.karaf:type=bundle,name=root");
+            TabularDataSupport value = (TabularDataSupport) connection.getAttribute(name, "Bundles");
+            assertTrue(value.size() > 0);
+        } finally {
+            if (connector != null)
+                connector.close();
+        }
+    }
+
+    @Test
+    public void capabilitiesCommand() throws Exception {
         String allCapabilitiesOutput = executeCommand("bundle:capabilities");
         System.out.println(allCapabilitiesOutput);
         assertFalse(allCapabilitiesOutput.isEmpty());
@@ -37,7 +64,7 @@ public class KarafBundleCommandsTest extends KarafTestSupport {
     }
 
     @Test
-    public void testBundleClassesCommand() throws Exception {
+    public void classesCommand() throws Exception {
         String allClassesOutput = executeCommand("bundle:classes");
         System.out.println(allClassesOutput);
         assertFalse(allClassesOutput.isEmpty());
@@ -47,35 +74,35 @@ public class KarafBundleCommandsTest extends KarafTestSupport {
     }
 
     @Test
-    public void testBundleDiagCommand() throws Exception {
+    public void diagCommand() throws Exception {
         String allDiagOutput = executeCommand("bundle:diag");
         System.out.println(allDiagOutput);
         assertFalse(allDiagOutput.isEmpty());
     }
 
     @Test
-    public void testBundleFindClassCommand() throws Exception {
+    public void findClassCommand() throws Exception {
         String findClassOutput = executeCommand("bundle:find-class jmx");
         System.out.println(findClassOutput);
         assertFalse(findClassOutput.isEmpty());
     }
 
     @Test
-    public void testBundleHeadersCommand() throws Exception {
+    public void headersCommand() throws Exception {
         String headersOutput = executeCommand("bundle:headers 74");
         System.out.println(headersOutput);
         assertTrue(headersOutput.contains("Bundle-Activator = org.apache.aries.jmx.whiteboard.Activator"));
     }
 
     @Test
-    public void testBundleInfoCommand() throws Exception {
+    public void infoCommand() throws Exception {
         String infoOutput = executeCommand("bundle:info 69");
         System.out.println(infoOutput);
         assertTrue(infoOutput.contains("This bundle starts the Karaf embedded MBean server"));
     }
 
     @Test
-    public void testBundleInstallCommand() throws Exception {
+    public void installCommand() throws Exception {
         System.out.println(executeCommand("bundle:install mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.commons-lang/2.4_6"));
         String bundleListOutput = executeCommand("bundle:list -l | grep -i commons-lang");
         System.out.println(bundleListOutput);
@@ -83,7 +110,7 @@ public class KarafBundleCommandsTest extends KarafTestSupport {
     }
 
     @Test
-    public void testBundleShowTreeCommand() throws Exception {
+    public void showTreeCommand() throws Exception {
         String bundleTreeOutput = executeCommand("bundle:tree-show 69");
         System.out.println(bundleTreeOutput);
         assertFalse(bundleTreeOutput.isEmpty());
