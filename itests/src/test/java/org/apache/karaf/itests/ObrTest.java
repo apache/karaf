@@ -20,9 +20,17 @@ import org.ops4j.pax.exam.junit.ExamReactorStrategy;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
 import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
 
+import javax.management.MBeanServerConnection;
+import javax.management.ObjectName;
+import javax.management.openmbean.TabularData;
+import javax.management.remote.JMXConnector;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+
 @RunWith(JUnit4TestRunner.class)
 @ExamReactorStrategy(AllConfinedStagedReactorFactory.class)
-public class KarafObrCommandsTest extends KarafTestSupport {
+public class ObrTest extends KarafTestSupport {
 
     @Before
     public void installObrFeature() throws Exception {
@@ -33,6 +41,23 @@ public class KarafObrCommandsTest extends KarafTestSupport {
     public void listCommands() throws Exception {
         System.out.println(executeCommand("obr:url-list"));
         System.out.println(executeCommand("obr:list"));
+    }
+
+    @Test
+    public void listsViaMBean() throws Exception {
+        JMXConnector connector = null;
+        try {
+            connector = this.getJMXConnector();
+            MBeanServerConnection connection = connector.getMBeanServerConnection();
+            ObjectName name = new ObjectName("org.apache.karaf:type=obr,name=root");
+            List<String> urls = (List<String>) connection.getAttribute(name, "Urls");
+            assertEquals(0, urls.size());
+            TabularData bundles = (TabularData) connection.getAttribute(name, "Bundles");
+            assertEquals(0, bundles.size());
+        } finally {
+            if (connector != null)
+                connector.close();
+        }
     }
 
 }
