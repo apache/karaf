@@ -20,11 +20,17 @@ import org.ops4j.pax.exam.junit.ExamReactorStrategy;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
 import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
 
+import javax.management.MBeanServerConnection;
+import javax.management.ObjectName;
+import javax.management.openmbean.TabularData;
+import javax.management.remote.JMXConnector;
+
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
 @RunWith(JUnit4TestRunner.class)
 @ExamReactorStrategy(AllConfinedStagedReactorFactory.class)
-public class KarafWebCommandsTest extends KarafTestSupport {
+public class WebTest extends KarafTestSupport {
 
     @Before
     public void installWarFeature() throws Exception {
@@ -32,10 +38,25 @@ public class KarafWebCommandsTest extends KarafTestSupport {
     }
 
     @Test
-    public void list() throws Exception {
+    public void listCommand() throws Exception {
         String listOutput = executeCommand("web:list");
         System.out.println(listOutput);
         assertFalse(listOutput.isEmpty());
+    }
+
+    @Test
+    public void listViaMBean() throws Exception {
+        JMXConnector connector = null;
+        try {
+            connector = this.getJMXConnector();
+            MBeanServerConnection connection = connector.getMBeanServerConnection();
+            ObjectName name = new ObjectName("org.apache.karaf:type=web,name=root");
+            TabularData webBundles = (TabularData) connection.getAttribute(name, "WebBundles");
+            assertEquals(0, webBundles.size());
+        } finally {
+            if (connector != null)
+                connector.close();
+        }
     }
 
 }
