@@ -26,11 +26,18 @@ import static org.junit.Assert.assertTrue;
 @ExamReactorStrategy(AllConfinedStagedReactorFactory.class)
 public class KarafFeatureCommandsTest extends KarafTestSupport {
 
-    /*
+    @Test
     public void testBootFeatures() throws Exception {
-
+        String featureListOutput = executeCommand("feature:list -i");
+        System.out.println(featureListOutput);
+        assertTrue(featureListOutput.contains("standard"));
+        assertTrue(featureListOutput.contains("config"));
+        assertTrue(featureListOutput.contains("region"));
+        assertTrue(featureListOutput.contains("package"));
+        assertTrue(featureListOutput.contains("kar"));
+        assertTrue(featureListOutput.contains("ssh"));
+        assertTrue(featureListOutput.contains("management"));
     }
-    */
 
     @Test
     public void testFeatureListCommand() throws Exception {
