@@ -23,10 +23,10 @@ import static org.junit.Assert.assertTrue;
 
 @RunWith(JUnit4TestRunner.class)
 @ExamReactorStrategy(AllConfinedStagedReactorFactory.class)
-public class KarafJaasCommandsTest extends KarafTestSupport {
+public class JaasTest extends KarafTestSupport {
 
     @Test
-    public void realmList() throws Exception {
+    public void realmListCommand() throws Exception {
         String listRealmsOutput = executeCommand("jaas:realm-list");
         System.out.println(listRealmsOutput);
         assertTrue(listRealmsOutput.contains("PropertiesLoginModule"));
