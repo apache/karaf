@@ -23,10 +23,10 @@ import static org.junit.Assert.assertTrue;
 
 @RunWith(JUnit4TestRunner.class)
 @ExamReactorStrategy(AllConfinedStagedReactorFactory.class)
-public class KarafRegionCommandsTest extends KarafTestSupport {
+public class RegionTest extends KarafTestSupport {
 
     @Test
-    public void info() throws Exception {
+    public void infoCommand() throws Exception {
         String infoOutput = executeCommand("region:info");
         System.out.println(infoOutput);
         assertTrue(infoOutput.contains("org.eclipse.equinox.region.kernel"));
@@ -34,7 +34,7 @@ public class KarafRegionCommandsTest extends KarafTestSupport {
     }
 
     @Test
-    public void addRegion() throws Exception {
+    public void addRegionCommand() throws Exception {
         System.out.println(executeCommand("region:addregion itest"));
         String infoOutput = executeCommand("region:info");
         System.out.println(infoOutput);
