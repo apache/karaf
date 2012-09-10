@@ -56,6 +56,11 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.apache.karaf.util</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.bundlerepository</artifactId>
         </dependency>
@@ -123,7 +128,8 @@
                         <Private-Package>
                             org.apache.karaf.features.internal,
                             org.apache.felix.utils.version;-split-package:=merge-first,
-                            org.apache.felix.utils.manifest;-split-package:=merge-first
+                            org.apache.felix.utils.manifest;-split-package:=merge-first,
+                            org.apache.karaf.util.collections;-split-package:=merge-first
                         </Private-Package>
                     </instructions>
                 </configuration>
