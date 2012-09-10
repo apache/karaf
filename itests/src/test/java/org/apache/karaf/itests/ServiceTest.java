@@ -19,17 +19,38 @@ import org.ops4j.pax.exam.junit.ExamReactorStrategy;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
 import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
 
+import javax.management.MBeanServerConnection;
+import javax.management.ObjectName;
+import javax.management.openmbean.TabularData;
+import javax.management.remote.JMXConnector;
+
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(JUnit4TestRunner.class)
 @ExamReactorStrategy(AllConfinedStagedReactorFactory.class)
-public class KarafServiceCommandsTest extends KarafTestSupport {
+public class ServiceTest extends KarafTestSupport {
 
     @Test
-    public void list() throws Exception {
+    public void listCommand() throws Exception {
         String listOutput = executeCommand("service:list");
         System.out.println(listOutput);
         assertFalse(listOutput.isEmpty());
+    }
+
+    @Test
+    public void listViaMBean() throws Exception {
+        JMXConnector connector = null;
+        try {
+            connector = this.getJMXConnector();
+            MBeanServerConnection connection = connector.getMBeanServerConnection();
+            ObjectName name = new ObjectName("org.apache.karaf:type=service,name=root");
+            TabularData services = (TabularData) connection.getAttribute(name, "Services");
+            assertTrue(services.size() > 0);
+        } finally {
+            if (connector != null)
+                connector.close();
+        }
     }
 
 }
