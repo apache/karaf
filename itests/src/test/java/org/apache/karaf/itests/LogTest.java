@@ -20,19 +20,41 @@ import org.ops4j.pax.exam.junit.ExamReactorStrategy;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
 import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
 
+import javax.management.Attribute;
+import javax.management.MBeanServerConnection;
+import javax.management.ObjectName;
+import javax.management.remote.JMXConnector;
+
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(JUnit4TestRunner.class)
 @ExamReactorStrategy(AllConfinedStagedReactorFactory.class)
-public class KarafLogCommandsTest extends KarafTestSupport {
+public class LogTest extends KarafTestSupport {
 
     @Test
-    @Ignore
     public void setDebugAndDisplay() throws Exception {
         System.out.println(executeCommand("log:set DEBUG"));
         String displayOutput = executeCommand("log:display");
         System.out.println(displayOutput);
         assertTrue(displayOutput.contains("DEBUG"));
+    }
+
+    @Test
+    public void setDebugViaMBean() throws Exception {
+        JMXConnector connector = null;
+        try {
+            connector = this.getJMXConnector();
+            MBeanServerConnection connection = connector.getMBeanServerConnection();
+            ObjectName name = new ObjectName("org.apache.karaf:type=log,name=root");
+            Attribute attribute = new Attribute("Level", "DEBUG");
+            connection.setAttribute(name, attribute);
+            String logLevel = (String) connection.getAttribute(name, "Level");
+            assertEquals("DEBUG", logLevel);
+        } finally {
+            if (connector != null)
+                connector.close();
+        }
     }
 
     @Test
