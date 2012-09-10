@@ -25,6 +25,10 @@ import org.osgi.framework.*;
 import org.osgi.util.tracker.ServiceTracker;
 
 import javax.inject.Inject;
+import javax.management.MBeanServerConnection;
+import javax.management.remote.JMXConnector;
+import javax.management.remote.JMXConnectorFactory;
+import javax.management.remote.JMXServiceURL;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -187,6 +191,15 @@ public class KarafTestSupport {
      */
     private static Collection<ServiceReference> asCollection(ServiceReference[] references) {
         return references != null ? Arrays.asList(references) : Collections.<ServiceReference>emptyList();
+    }
+
+    public JMXConnector getJMXConnector() throws Exception {
+        JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:1099/karaf-root");
+        Hashtable env = new Hashtable();
+        String[] credentials = new String[]{ "karaf", "karaf" };
+        env.put("jmx.remote.credentials", credentials);
+        JMXConnector connector = JMXConnectorFactory.connect(url, env);
+        return connector;
     }
 
 }
