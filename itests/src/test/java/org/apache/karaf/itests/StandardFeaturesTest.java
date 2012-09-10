@@ -24,7 +24,7 @@ import static org.junit.Assert.assertFalse;
 
 @RunWith(JUnit4TestRunner.class)
 @ExamReactorStrategy(AllConfinedStagedReactorFactory.class)
-public class KarafStandardFeaturesTest extends KarafTestSupport {
+public class StandardFeaturesTest extends KarafTestSupport {
 
     @Test
     public void testBootFeatures() throws Exception {
