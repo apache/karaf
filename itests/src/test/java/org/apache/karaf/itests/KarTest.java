@@ -19,13 +19,35 @@ import org.ops4j.pax.exam.junit.ExamReactorStrategy;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
 import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
 
+import javax.management.MBeanServerConnection;
+import javax.management.ObjectName;
+import javax.management.remote.JMXConnector;
+import java.util.List;
+
+import static org.junit.Assert.assertTrue;
+
 @RunWith(JUnit4TestRunner.class)
 @ExamReactorStrategy(AllConfinedStagedReactorFactory.class)
-public class KarafKarCommandsTest extends KarafTestSupport {
+public class KarTest extends KarafTestSupport {
 
     @Test
-    public void karList() throws Exception {
+    public void listCommand() throws Exception {
         System.out.println(executeCommand("kar:list"));
+    }
+
+    @Test
+    public void listViaMBean() throws Exception {
+        JMXConnector connector = null;
+        try {
+            connector = this.getJMXConnector();
+            MBeanServerConnection connection = connector.getMBeanServerConnection();
+            ObjectName name = new ObjectName("org.apache.karaf:type=kar,name=root");
+            List<String> kars = (List<String>) connection.getAttribute(name, "Kars");
+            assertTrue(kars.size() == 0);
+        } finally {
+            if (connector != null)
+                connector.close();
+        }
     }
 
 }
