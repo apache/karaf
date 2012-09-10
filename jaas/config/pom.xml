@@ -44,6 +44,11 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.apache.karaf.util</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <scope>provided</scope>
@@ -89,7 +94,10 @@
                     <instructions>
                         <Export-Package>${project.artifactId};version=${project.version}</Export-Package>
                         <Import-Package>!${project.artifactId},*</Import-Package>
-                        <Private-Package>${project.artifactId}.impl</Private-Package>
+                        <Private-Package>
+                            ${project.artifactId}.impl;-split-package:=merge-first,
+                            org.apache.karaf.util.collections
+                        </Private-Package>
                     </instructions>
                 </configuration>
             </plugin>
