@@ -19,15 +19,21 @@ import org.ops4j.pax.exam.junit.ExamReactorStrategy;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
 import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
 
+import javax.management.MBeanServerConnection;
+import javax.management.ObjectName;
+import javax.management.openmbean.TabularData;
+import javax.management.openmbean.TabularDataSupport;
+import javax.management.remote.JMXConnector;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(JUnit4TestRunner.class)
 @ExamReactorStrategy(AllConfinedStagedReactorFactory.class)
-public class KarafFeatureCommandsTest extends KarafTestSupport {
+public class FeatureTest extends KarafTestSupport {
 
     @Test
-    public void testBootFeatures() throws Exception {
+    public void bootFeatures() throws Exception {
         String featureListOutput = executeCommand("feature:list -i");
         System.out.println(featureListOutput);
         assertTrue(featureListOutput.contains("standard"));
@@ -40,7 +46,7 @@ public class KarafFeatureCommandsTest extends KarafTestSupport {
     }
 
     @Test
-    public void testFeatureListCommand() throws Exception {
+    public void listCommand() throws Exception {
         String featureListOutput = executeCommand("feature:list");
         System.out.println(featureListOutput);
         assertFalse(featureListOutput.isEmpty());
@@ -50,7 +56,22 @@ public class KarafFeatureCommandsTest extends KarafTestSupport {
     }
 
     @Test
-    public void testFeatureInstallUninstallCommand() throws Exception {
+    public void listViaMBean() throws Exception {
+        JMXConnector connector = null;
+        try {
+            connector = this.getJMXConnector();
+            MBeanServerConnection connection = connector.getMBeanServerConnection();
+            ObjectName name = new ObjectName("org.apache.karaf:type=feature,name=root");
+            TabularData features = (TabularData) connection.getAttribute(name, "Features");
+            assertTrue(features.size() > 0);
+        } finally {
+            if (connector != null)
+                connector.close();
+        }
+    }
+
+    @Test
+    public void installUninstallCommand() throws Exception {
         String featureInstallOutput = executeCommand("feature:install -v eventadmin");
         System.out.println(featureInstallOutput);
         assertFalse(featureInstallOutput.isEmpty());
@@ -64,7 +85,22 @@ public class KarafFeatureCommandsTest extends KarafTestSupport {
     }
 
     @Test
-    public void testRepoAddRemoveCommand() throws Exception {
+    public void installUninstallViaMBean() throws Exception {
+        JMXConnector connector = null;
+        try {
+            connector = this.getJMXConnector();
+            MBeanServerConnection connection = connector.getMBeanServerConnection();
+            ObjectName name = new ObjectName("org.apache.karaf:type=feature,name=root");
+            connection.invoke(name, "installFeature", new Object[] { "eventadmin" }, new String[]{ "java.lang.String" });
+            connection.invoke(name, "uninstallFeature", new Object[] { "eventadmin" }, new String[]{ "java.lang.String" });
+        } finally {
+            if (connector != null)
+                connector.close();
+        }
+    }
+
+    @Test
+    public void repoAddRemoveCommand() throws Exception {
         System.out.println(executeCommand("feature:repo-add mvn:org.apache.karaf.cellar/apache-karaf-cellar/2.2.4/xml/features"));
         String repoListOutput = executeCommand("feature:repo-list");
         System.out.println(repoListOutput);
@@ -73,6 +109,21 @@ public class KarafFeatureCommandsTest extends KarafTestSupport {
         repoListOutput = executeCommand("feature:repo-list");
         System.out.println(repoListOutput);
         assertFalse(repoListOutput.contains("apache-karaf-cellar"));
+    }
+
+    @Test
+    public void repoAddRemoveViaMBean() throws Exception {
+        JMXConnector connector = null;
+        try {
+            connector = this.getJMXConnector();
+            MBeanServerConnection connection = connector.getMBeanServerConnection();
+            ObjectName name = new ObjectName("org.apache.karaf:type=feature,name=root");
+            connection.invoke(name, "addRepository", new Object[] { "mvn:org.apache.karaf.cellar/apache-karaf-cellar/2.2.4/xml/features" }, new String[]{ "java.lang.String" });
+            connection.invoke(name, "removeRepository", new Object[] { "mvn:org.apache.karaf.cellar/apache-karaf-cellar/2.2.4/xml/features" }, new String[]{ "java.lang.String" });
+        } finally {
+            if (connector != null)
+                connector.close();
+        }
     }
 
 }
