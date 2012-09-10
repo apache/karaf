@@ -24,7 +24,7 @@ import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 import java.util.List;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 @RunWith(JUnit4TestRunner.class)
 @ExamReactorStrategy(AllConfinedStagedReactorFactory.class)
@@ -43,7 +43,7 @@ public class KarTest extends KarafTestSupport {
             MBeanServerConnection connection = connector.getMBeanServerConnection();
             ObjectName name = new ObjectName("org.apache.karaf:type=kar,name=root");
             List<String> kars = (List<String>) connection.getAttribute(name, "Kars");
-            assertTrue(kars.size() == 0);
+            assertEquals(0, kars.size());
         } finally {
             if (connector != null)
                 connector.close();
