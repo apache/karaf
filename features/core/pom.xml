@@ -67,6 +67,11 @@
         </dependency>
 
         <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.apache.karaf.util</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.junit</artifactId>
             <scope>test</scope>
@@ -118,7 +123,8 @@
                             org.apache.karaf.features.internal.model,
                             org.apache.karaf.features.management.internal,
                             org.apache.felix.utils.version,
-                            org.apache.felix.utils.manifest
+                            org.apache.felix.utils.manifest,
+                            org.apache.karaf.util.collections
                         </Private-Package>
                     </instructions>
                 </configuration>

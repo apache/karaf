@@ -20,8 +20,6 @@ import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
-
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocketFactory;
@@ -29,6 +27,7 @@ import javax.net.ssl.SSLSocketFactory;
 import org.apache.karaf.jaas.config.KeystoreInstance;
 import org.apache.karaf.jaas.config.KeystoreIsLocked;
 import org.apache.karaf.jaas.config.KeystoreManager;
+import org.apache.karaf.util.collections.CopyOnWriteArrayIdentityList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +38,7 @@ public class OsgiKeystoreManager implements KeystoreManager {
 
     private final static transient Logger logger = LoggerFactory.getLogger(OsgiKeystoreManager.class);
 
-    private List<KeystoreInstance> keystores = new CopyOnWriteArrayList<KeystoreInstance>();
+    private List<KeystoreInstance> keystores = new CopyOnWriteArrayIdentityList<KeystoreInstance>();
 
     public void register(KeystoreInstance keystore, Map<String, ?> properties) {
         keystores.add(keystore);

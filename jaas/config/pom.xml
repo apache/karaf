@@ -44,6 +44,11 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.apache.karaf.util</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <scope>provided</scope>
@@ -100,7 +105,10 @@
                             org.osgi.service.blueprint.reflect,
                             *
                         </Import-Package>
-                        <Private-Package>${project.artifactId}.impl</Private-Package>
+                        <Private-Package>
+                            ${project.artifactId}.impl,
+                            org.apache.karaf.util.collections
+                        </Private-Package>
                     </instructions>
                 </configuration>
             </plugin>

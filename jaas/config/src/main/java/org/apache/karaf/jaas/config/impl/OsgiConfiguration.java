@@ -18,15 +18,15 @@ package org.apache.karaf.jaas.config.impl;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
 import javax.security.auth.login.AppConfigurationEntry;
 import javax.security.auth.login.Configuration;
 
 import org.apache.karaf.jaas.config.JaasRealm;
+import org.apache.karaf.util.collections.CopyOnWriteArrayIdentityList;
 
 public class OsgiConfiguration extends Configuration {
 
-    private final List<JaasRealm> realms = new CopyOnWriteArrayList<JaasRealm>();
+    private final List<JaasRealm> realms = new CopyOnWriteArrayIdentityList<JaasRealm>();
 
     public void init() {
         Configuration.setConfiguration(this);
