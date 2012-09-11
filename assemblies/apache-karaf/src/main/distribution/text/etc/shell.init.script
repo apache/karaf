@@ -54,6 +54,7 @@ package:import = { packages:imports $args } ;
 
 // feature:* aliases
 feature:add-url = { features:addurl $args } ;
+feature:repo-add = { features:addurl $args } ;
 feature:refresh-url = { features:refreshurl $args } ;
 feature:info = { features:info $args } ;
 feature:remove-repository = { features:removerepository $args } ;
