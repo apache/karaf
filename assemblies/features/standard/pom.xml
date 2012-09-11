@@ -32,7 +32,7 @@
     <name>Apache Karaf :: Assemblies :: Features :: Standard</name>
 
     <properties>
-      <appendedResourcesDirectory>${basedir}/../../../etc/appended-resources</appendedResourcesDirectory>
+        <appendedResourcesDirectory>${basedir}/../../../etc/appended-resources</appendedResourcesDirectory>
     </properties>
 
     <build>
