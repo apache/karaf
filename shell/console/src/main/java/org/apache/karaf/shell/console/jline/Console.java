@@ -326,7 +326,12 @@ public class Console implements Runnable
 
     protected Properties loadBrandingProperties() {
         Properties props = new Properties();
-        loadProps(props, "org/apache/karaf/shell/console/branding.properties");
+        if (terminal.getClass().getName().endsWith("SshTerminal")) {
+            //it's a ssh client, so load branding seperately
+            loadProps(props, "org/apache/karaf/shell/console/branding-ssh.properties");
+        } else {
+            loadProps(props, "org/apache/karaf/shell/console/branding.properties");
+        }
         loadProps(props, "org/apache/karaf/branding/branding.properties");
         return props;
     }
