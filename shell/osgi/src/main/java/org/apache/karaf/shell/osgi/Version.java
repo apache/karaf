@@ -14,18 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.management.mbeans.system;
+package org.apache.karaf.shell.osgi;
 
-/**
- * System MBean.
- */
-public interface SystemMBean {
+import org.apache.felix.gogo.commands.Command;
+import org.apache.karaf.shell.console.OsgiCommandSupport;
 
-    String getName();
-    void setName(String name);
+@Command(scope = "osgi", name = "version", description = "Display the instance version.")
+public class Version extends OsgiCommandSupport {
 
-    String getVersion();
-
-    void shutdown() throws Exception;
+    public Object doExecute() throws Exception {
+        System.out.println(System.getProperty("karaf.version"));
+        return null;
+    }
 
 }
