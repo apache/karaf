@@ -36,6 +36,11 @@
             </action>
         </command>
         <command>
+            <action class="org.apache.karaf.system.commands.Version">
+                <property name="systemService" ref="systemService"/>
+            </action>
+        </command>
+        <command>
             <action class="org.apache.karaf.system.commands.FrameworkOptions" >
                 <property name="systemService" ref="systemService"/>
             </action>

@@ -94,4 +94,9 @@ public class System extends StandardMBean implements SystemMBean {
         this.systemService.setName(name);
     }
 
+    @Override
+    public String getVersion() {
+        return this.systemService.getVersion();
+    }
+
 }

@@ -146,6 +146,11 @@ public class SystemServiceImpl implements SystemService {
     }
 
     @Override
+    public String getVersion() {
+        return System.getProperty("karaf.version");
+    }
+
+    @Override
     public String getName() {
         return bundleContext.getProperty("karaf.name");
     }

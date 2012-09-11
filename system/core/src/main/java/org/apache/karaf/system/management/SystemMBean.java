@@ -64,4 +64,11 @@ public interface SystemMBean {
      */
     void setName(String name) throws Exception;
 
+    /**
+     * Get the version of the current Karaf instance.
+     *
+     * @return the current Karaf instance version.
+     */
+    String getVersion();
+
 }

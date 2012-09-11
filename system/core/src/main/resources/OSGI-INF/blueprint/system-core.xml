@@ -37,4 +37,5 @@
             <entry key="jmx.objectname" value="org.apache.karaf:type=system,name=${karaf.name}"/>
         </service-properties>
     </service>
+
 </blueprint>
