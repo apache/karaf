@@ -81,4 +81,17 @@ public class System extends StandardMBean implements SystemMBean {
         this.systemService.setFrameworkDebug(debug);
     }
 
+    @Override
+    public String getName() {
+        return this.systemService.getName();
+    }
+
+    @Override
+    public void setName(String name) throws Exception {
+        if (name == null || name.trim().isEmpty()) {
+            throw new IllegalArgumentException("Instance name can't be null or empty");
+        }
+        this.systemService.setName(name);
+    }
+
 }
