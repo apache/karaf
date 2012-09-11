@@ -32,7 +32,8 @@
     <name>Apache Karaf :: Assemblies :: Features :: Standard</name>
 
     <properties>
-      <appendedResourcesDirectory>${basedir}/../../../etc/appended-resources</appendedResourcesDirectory>
+        <appendedResourcesDirectory>${basedir}/../../../etc/appended-resources</appendedResourcesDirectory>
+        <struts.bundle.version>1.3.10_1-SNAPSHOT</struts.bundle.version>
     </properties>
 
     <build>
