@@ -76,8 +76,6 @@ public class SpringFeaturesTest extends KarafTestSupport {
     }
 
     @Test
-    @Ignore
-    // TODO fix the spring-struts feature
     public void installSpringStrutsFeature() throws Exception {
         executeCommand("feature:install spring-struts");
         String springStrutsFeatureStatus = executeCommand("feature:list -i | grep spring-struts");
