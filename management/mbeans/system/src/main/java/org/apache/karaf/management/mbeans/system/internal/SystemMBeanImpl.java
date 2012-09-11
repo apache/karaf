@@ -59,6 +59,10 @@ public class SystemMBeanImpl extends StandardMBean implements SystemMBean {
         }
     }
 
+    public String getVersion() {
+        return System.getProperty("karaf.version");
+    }
+
     public void shutdown() throws Exception {
         bundleContext.getBundle(0).stop();
     }

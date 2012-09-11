@@ -81,6 +81,9 @@
         <command name="osgi/uninstall">
             <action class="org.apache.karaf.shell.osgi.UninstallBundle"/>
         </command>
+        <command name="osgi/version">
+            <action class="org.apache.karaf.shell.osgi.Version"/>
+        </command>
     </command-bundle>
 
     <service auto-export="interfaces">
