@@ -42,6 +42,12 @@
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.utils</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -78,6 +84,7 @@
                         </Import-Package>
                         <Private-Package>
                             org.apache.karaf.management.mbeans.system.internal,
+                            org.apache.felix.utils*,
                             !*
                         </Private-Package>
                     </instructions>

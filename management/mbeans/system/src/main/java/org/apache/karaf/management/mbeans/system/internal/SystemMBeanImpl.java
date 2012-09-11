@@ -16,11 +16,15 @@
  */
 package org.apache.karaf.management.mbeans.system.internal;
 
+import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.management.mbeans.system.SystemMBean;
 import org.osgi.framework.BundleContext;
 
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 
 /**
  * System MBean implementation.
@@ -31,6 +35,28 @@ public class SystemMBeanImpl extends StandardMBean implements SystemMBean {
 
     public SystemMBeanImpl() throws NotCompliantMBeanException {
         super(SystemMBean.class);
+    }
+
+    public String getName() {
+        return bundleContext.getProperty("karaf.name");
+    }
+
+    public void setName(String name) {
+        try {
+            String karafBase = bundleContext.getProperty("karaf.base");
+            File etcDir = new File(karafBase, "etc");
+            File syspropsFile = new File(etcDir, "system.properties");
+            FileInputStream fis = new FileInputStream(syspropsFile);
+            Properties props = new Properties();
+            props.load(fis);
+            fis.close();
+            props.setProperty("karaf.name", name);
+            FileOutputStream fos = new FileOutputStream(syspropsFile);
+            props.store(fos, "");
+            fos.close();
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
     }
 
     public void shutdown() throws Exception {

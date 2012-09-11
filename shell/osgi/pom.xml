@@ -116,8 +116,7 @@
                         </DynamicImport-Package>
                         <Private-Package>
                             org.apache.karaf.util;-split-package:=merge-first,
-                            org.apache.felix.utils.version,
-                            org.apache.felix.utils.manifest,
+                            org.apache.felix.utils*,
                             !*
                         </Private-Package>
                     </instructions>
