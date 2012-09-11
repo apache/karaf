@@ -298,7 +298,7 @@ public class Console implements Runnable
     }
 
     protected void welcome() {
-        Properties props = Branding.loadBrandingProperties();
+        Properties props = Branding.loadBrandingProperties(terminal);
         String welcome = props.getProperty("welcome");
         if (welcome != null && welcome.length() > 0) {
             session.getConsole().println(welcome);
@@ -306,7 +306,7 @@ public class Console implements Runnable
     }
 
     protected void setSessionProperties() {
-        Properties props = Branding.loadBrandingProperties();
+        Properties props = Branding.loadBrandingProperties(terminal);
         for (Map.Entry<Object, Object> entry : props.entrySet()) {
             String key = (String) entry.getKey();
             if (key.startsWith("session.")) {
@@ -327,7 +327,7 @@ public class Console implements Runnable
                 if (p != null) {
                     prompt = p.toString();
                 } else {
-                    Properties properties = Branding.loadBrandingProperties();
+                    Properties properties = Branding.loadBrandingProperties(terminal);
                     if (properties.getProperty("prompt") != null) {
                         prompt = properties.getProperty("prompt");
                         // we put the PROMPT in ConsoleSession to avoid to read
