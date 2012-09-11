@@ -164,7 +164,7 @@ public class ConsoleImpl implements Console
         CommandSessionHolder.setSession(session);
         running = true;
         pipe.start();
-        Properties brandingProps = Branding.loadBrandingProperties();
+        Properties brandingProps = Branding.loadBrandingProperties(terminal);
         welcome(brandingProps);
         setSessionProperties(brandingProps);
         String scriptFileName = System.getProperty(SHELL_INIT_SCRIPT);
@@ -287,7 +287,7 @@ public class ConsoleImpl implements Console
                 if (p != null) {
                     prompt = p.toString();
                 } else {
-                    Properties properties = Branding.loadBrandingProperties();
+                    Properties properties = Branding.loadBrandingProperties(terminal);
                     if (properties.getProperty("prompt") != null) {
                         prompt = properties.getProperty("prompt");
                         // we put the PROMPT in ConsoleSession to avoid to read

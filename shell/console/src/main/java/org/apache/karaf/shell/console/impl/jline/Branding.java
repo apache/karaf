@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+import jline.Terminal;
+
 public final class Branding {
     
     private Branding() { }
@@ -33,6 +35,19 @@ public final class Branding {
         return props;
     }
 
+    public static Properties loadBrandingProperties(Terminal terminal) {
+        Properties props = new Properties();
+        if (terminal != null && terminal.getClass().getName().endsWith("SshTerminal")) {
+            //it's a ssh client, so load branding seperately
+            loadProps(props, "org/apache/karaf/shell/console/branding-ssh.properties");
+        } else {
+            loadProps(props, "org/apache/karaf/shell/console/branding.properties");
+        }
+
+        loadProps(props, "org/apache/karaf/branding/branding.properties");
+        return props;
+    }
+    
     protected static void loadProps(Properties props, String resource) {
         InputStream is = null;
         try {
