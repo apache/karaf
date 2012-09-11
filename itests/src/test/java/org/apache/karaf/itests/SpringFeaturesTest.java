@@ -118,8 +118,6 @@ public class SpringFeaturesTest extends KarafTestSupport {
     }
 
     @Test
-    @Ignore
-    // TODO fix the spring-web-portlet feature
     public void installSpringWebPortletFeature() throws Exception {
         executeCommand("feature:install spring-web-portlet");
         String springWebPortletFeatureStatus = executeCommand("feature:list -i | grep spring-web-portlet");

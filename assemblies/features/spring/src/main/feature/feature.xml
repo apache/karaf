@@ -111,6 +111,7 @@
 
     <feature name="spring-web-portlet" description="Spring Web Portlet support" version="${spring.version}" resolver="(obr)">
         <feature version="${spring.version}">spring-web</feature>
+        <bundle dependency="true" start-level="30">mvn:javax.portlet/portlet-api/${portlet-api.version}</bundle>
         <bundle start-level="30">mvn:org.springframework/spring-webmvc-portlet/${spring.version}</bundle>
     </feature>
 
