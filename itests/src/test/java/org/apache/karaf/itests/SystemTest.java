@@ -38,6 +38,21 @@ public class SystemTest extends KarafTestSupport {
     }
 
     @Test
+    public void nameViaMBean() throws Exception {
+        JMXConnector connector = null;
+        try {
+            connector = this.getJMXConnector();
+            MBeanServerConnection connection = connector.getMBeanServerConnection();
+            ObjectName name = new ObjectName("org.apache.karaf:type=system,name=root");
+            String currentName = (String) connection.getAttribute(name, "Name");
+            assertEquals("root", currentName);
+        } finally {
+            if (connector != null)
+                connector.close();
+        }
+    }
+
+    @Test
     public void frameworkCommand() throws Exception {
         String frameworkOutput = executeCommand("system:framework");
         System.out.println(frameworkOutput);

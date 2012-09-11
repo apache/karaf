@@ -33,7 +33,7 @@ public class Name extends AbstractSystemAction {
             System.out.println(systemService.getName());
         } else {
             systemService.setName(name);
-            System.out.println("Karaf instance name changed to " + name + ". Restart of karaf needed for this to take effect.");
+            System.out.println("Instance name changed to " + name + ". Restart needed for this to take effect.");
         }
         return null;
     }
