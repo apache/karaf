@@ -53,6 +53,28 @@ public class SystemTest extends KarafTestSupport {
     }
 
     @Test
+    public void versionCommand() throws Exception {
+        String versionOutput = executeCommand("system:version");
+        System.out.println(versionOutput);
+        assertTrue(versionOutput.contains("3"));
+    }
+
+    @Test
+    public void versionViaMBean() throws Exception {
+        JMXConnector connector = null;
+        try {
+            connector = this.getJMXConnector();
+            MBeanServerConnection connection = connector.getMBeanServerConnection();
+            ObjectName name = new ObjectName("org.apache.karaf:type=system,name=root");
+            String version = (String) connection.getAttribute(name, "Version");
+            assertTrue(version.contains("3"));
+        } finally {
+            if (connector != null)
+                connector.close();
+        }
+    }
+
+    @Test
     public void frameworkCommand() throws Exception {
         String frameworkOutput = executeCommand("system:framework");
         System.out.println(frameworkOutput);
