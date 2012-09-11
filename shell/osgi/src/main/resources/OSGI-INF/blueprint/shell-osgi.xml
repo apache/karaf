@@ -51,6 +51,9 @@
         <command name="osgi/ls">
             <action class="org.apache.karaf.shell.osgi.ListServices"/>
         </command>
+        <command name="osgi/name">
+            <action class="org.apache.karaf.shell.osgi.Name"/>
+        </command>
         <command name="osgi/refresh">
             <action class="org.apache.karaf.shell.osgi.RefreshBundle"/>
         </command>

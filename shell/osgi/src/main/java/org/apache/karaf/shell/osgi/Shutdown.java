@@ -28,7 +28,7 @@ import java.util.GregorianCalendar;
 /**
  * Command to shut down Karaf
  */
-@Command(scope = "osgi", name = "shutdown", description = "Shuts the framework down.")
+@Command(scope = "osgi", name = "shutdown", description = "Shutdown the framework down.")
 public class Shutdown extends OsgiCommandSupport {
 
     @Option(name = "-f", aliases = "--force", description = "Force the shutdown without confirmation message.", required = false, multiValued = false)

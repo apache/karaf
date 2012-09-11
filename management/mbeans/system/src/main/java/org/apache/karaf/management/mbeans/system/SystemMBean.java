@@ -21,6 +21,9 @@ package org.apache.karaf.management.mbeans.system;
  */
 public interface SystemMBean {
 
+    String getName();
+    void setName(String name);
+
     void shutdown() throws Exception;
 
 }
