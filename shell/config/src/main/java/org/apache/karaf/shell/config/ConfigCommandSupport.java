@@ -26,8 +26,8 @@ import java.util.Enumeration;
 import java.util.List;
 
 import org.apache.felix.fileinstall.ArtifactInstaller;
+import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
-import org.apache.karaf.util.Properties;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
