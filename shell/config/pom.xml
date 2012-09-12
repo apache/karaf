@@ -42,9 +42,10 @@
             <groupId>org.apache.karaf.shell</groupId>
             <artifactId>org.apache.karaf.shell.console</artifactId>
         </dependency>
+
         <dependency>
-            <groupId>org.apache.karaf</groupId>
-            <artifactId>org.apache.karaf.util</artifactId>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.utils</artifactId>
         </dependency>
 
         <dependency>
@@ -106,7 +107,7 @@
                             *
                         </Import-Package>
                         <Private-Package>
-                            org.apache.karaf.util;-split-package:=merge-first,
+                            org.apache.felix.utils*;-split-package:=merge-first,
                             !*
                         </Private-Package>
                     </instructions>

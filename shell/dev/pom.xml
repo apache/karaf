@@ -40,8 +40,8 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.karaf</groupId>
-            <artifactId>org.apache.karaf.util</artifactId>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.utils</artifactId>
         </dependency>
 
         <dependency>
@@ -111,9 +111,7 @@
                             *
                         </Import-Package>
                         <Private-Package>
-                            org.apache.felix.utils.properties,
-                            org.apache.felix.utils.version,
-                            org.apache.karaf.util;-split-package:=merge-first,
+                            org.apache.felix.utils*;-split-package:=merge-first,
                             org.ops4j.pax.url.mvn,
                             !*
                         </Private-Package>
