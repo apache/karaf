@@ -48,17 +48,15 @@
     <reference id="configAdmin" interface="org.osgi.service.cm.ConfigurationAdmin" />
 
     <reference id="mvnUrlHandler" interface="org.osgi.service.url.URLStreamHandlerService" filter="(url.handler.protocol=mvn)" />
-    <reference id="blueprintUrlHandler" interface="org.osgi.service.url.URLStreamHandlerService" filter="(url.handler.protocol=blueprint)" />
-    <reference id="springUrlHandler" interface="org.osgi.service.url.URLStreamHandlerService" filter="(url.handler.protocol=spring)" />
 
     <service ref="featuresService" interface="org.apache.karaf.features.FeaturesService" />
 
-    <reference id="regionsPersistence" availability="optional" interface="org.apache.karaf.region.persist.RegionsPersistence" >
+    <reference id="regionsPersistence" availability="optional" interface="org.apache.karaf.region.persist.RegionsPersistence">
         <reference-listener ref="featuresService"
                             bind-method="registerRegionsPersistence"
                             unbind-method="unregisterRegionsPersistence" />
     </reference>
-    
+
     <bean id="featuresServiceMBean" class="org.apache.karaf.features.management.internal.FeaturesService">
         <property name="bundleContext" ref="blueprintBundleContext" />
         <property name="featuresService" ref="featuresService" />
