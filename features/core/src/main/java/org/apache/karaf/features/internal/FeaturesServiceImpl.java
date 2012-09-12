@@ -74,6 +74,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.FrameworkUtil;
@@ -83,6 +84,7 @@ import org.osgi.framework.startlevel.BundleStartLevel;
 import org.osgi.framework.wiring.FrameworkWiring;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.url.URLStreamHandlerService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -844,7 +846,10 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         String bundleLocation = bundleInfo.getLocation();
         LOGGER.debug("Checking " + bundleLocation);
         try {
-            is = new BufferedInputStream(new URL(bundleLocation).openStream());
+            String protocol = bundleLocation.substring(0, bundleLocation.indexOf(":"));
+            waitForUrlHandler(protocol);
+            URL bundleUrl = new URL(bundleLocation);
+            is = new BufferedInputStream(bundleUrl.openStream());
         } catch (RuntimeException e) {
             LOGGER.error(e.getMessage());
             throw e;
@@ -1472,5 +1477,26 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
             }
         }
         return buffer.toString();
+    }
+
+    /**
+     * Will wait for the {@link URLStreamHandlerService} service for the specified protocol to be registered.
+     * @param protocol
+     */
+    private void waitForUrlHandler(String protocol) {
+        try {
+            Filter filter = bundleContext.createFilter("(&(" + Constants.OBJECTCLASS + "=" + URLStreamHandlerService.class.getName() + ")(url.handler.protocol=" + protocol + "))");
+            ServiceTracker urlHandlerTracker = new ServiceTracker(bundleContext, filter, null);
+            try {
+                urlHandlerTracker.open();
+                urlHandlerTracker.waitForService(30000);
+            } catch (InterruptedException e) {
+                LOGGER.debug("Interrupted while waiting for URL handler for protocol {}.", protocol);
+            } finally {
+                urlHandlerTracker.close();
+            }
+        } catch (InvalidSyntaxException ex) {
+            LOGGER.error("Error creating filter for service tracker.", ex);
+        }
     }
 }
