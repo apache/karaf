@@ -14,6 +14,7 @@
  */
 package org.apache.karaf.jaas.modules;
 
+import org.apache.karaf.jaas.boot.principal.RolePolicy;
 import org.apache.karaf.jaas.modules.encryption.EncryptionSupport;
 import org.osgi.framework.BundleContext;
 
