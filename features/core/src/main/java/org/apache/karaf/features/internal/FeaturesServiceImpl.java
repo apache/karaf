@@ -114,13 +114,11 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
     private String boot;
     AtomicBoolean bootFeaturesInstalled = new AtomicBoolean();
     private List<FeaturesListener> listeners = new CopyOnWriteArrayIdentityList<FeaturesListener>();
-    private Queue<RegionsPersistence> regionsPersistenceQueue = new LinkedList<RegionsPersistence>();
-    private CountDownLatch regionsPersistenceLatch = new CountDownLatch(1);
     private ThreadLocal<Repository> repo = new ThreadLocal<Repository>();
     private EventAdminListener eventAdminListener;
     private final Object refreshLock = new Object();
     private long refreshTimeout = 5000;
-    private long regionsPersistenceTimeout = 5000;
+    private RegionsPersistence regionsPersistence;
 
     public FeaturesServiceImpl() {
     }
@@ -157,6 +155,14 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         this.refreshTimeout = refreshTimeout;
     }
 
+    public RegionsPersistence getRegionsPersistence() {
+        return regionsPersistence;
+    }
+
+    public void setRegionsPersistence(RegionsPersistence regionsPersistence) {
+        this.regionsPersistence = regionsPersistence;
+    }
+
     public void registerListener(FeaturesListener listener) {
         listeners.add(listener);
         for (Repository repository : listRepositories()) {
@@ -169,33 +175,6 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
 
     public void unregisterListener(FeaturesListener listener) {
         listeners.remove(listener);
-    }
-
-    /**
-     * Returns a RegionsPersistence service.
-     * @param timeout
-     * @return
-     */
-    protected RegionsPersistence getRegionsPersistence(long timeout) {
-        if (!regionsPersistenceQueue.isEmpty()) {
-            return regionsPersistenceQueue.peek();
-        } else {
-            try {
-                regionsPersistenceLatch.await(timeout, TimeUnit.MILLISECONDS);
-            } catch (InterruptedException e) {
-                LOGGER.warn("Interrupted while waittng for RegionsPersistence service",e);
-            }
-            return regionsPersistenceQueue.peek();
-        }
-    }
-
-    public void registerRegionsPersistence(RegionsPersistence regionsPersistence) {
-        regionsPersistenceQueue.add(regionsPersistence);
-        regionsPersistenceLatch.countDown();
-    }
-
-    public void unregisterRegionsPersistence(RegionsPersistence regionsPersistence) {
-        regionsPersistenceQueue.remove(regionsPersistence);
     }
 
     public void setUrls(String uris) throws URISyntaxException {
@@ -610,7 +589,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
             state.bundleInfos.put(b.getBundleId(), bInfo);
             String region = feature.getRegion();
             if (region != null && state.installed.contains(b)) {
-                RegionsPersistence regionsPersistence = getRegionsPersistence(regionsPersistenceTimeout);
+                RegionsPersistence regionsPersistence = getRegionsPersistence();
                 if (regionsPersistence != null) {
                     regionsPersistence.install(b, region);
                 } else {
