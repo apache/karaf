@@ -24,6 +24,7 @@ import javax.security.auth.login.LoginException;
 import javax.security.auth.spi.LoginModule;
 
 import org.apache.karaf.jaas.modules.encryption.EncryptionSupport;
+import org.apache.karaf.jaas.boot.principal.RolePolicy;
 import org.osgi.framework.BundleContext;
 
 public abstract class AbstractKarafLoginModule implements LoginModule {

@@ -21,8 +21,8 @@ import javax.security.auth.login.AppConfigurationEntry;
 import org.apache.felix.gogo.commands.Command;
 import org.apache.karaf.jaas.config.JaasRealm;
 import org.apache.karaf.jaas.modules.BackingEngine;
-import org.apache.karaf.jaas.modules.RolePrincipal;
-import org.apache.karaf.jaas.modules.UserPrincipal;
+import org.apache.karaf.jaas.boot.principal.RolePrincipal;
+import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 
 @Command(scope = "jaas", name = "users", description = "List the users of the selected JAAS Realm/Login Module")
 public class ListUsersCommand extends JaasCommandSupport {

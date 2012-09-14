@@ -30,10 +30,10 @@ import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.FailedLoginException;
 import javax.security.auth.login.LoginException;
 
+import org.apache.karaf.jaas.boot.principal.RolePrincipal;
+import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.jaas.modules.AbstractKarafLoginModule;
-import org.apache.karaf.jaas.modules.RolePrincipal;
-import org.apache.karaf.jaas.modules.UserPrincipal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
