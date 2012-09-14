@@ -1474,8 +1474,8 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
             } finally {
                 urlHandlerTracker.close();
             }
-        } catch (InvalidSyntaxException ex) {
-            LOGGER.error("Error creating filter for service tracker.", ex);
+        } catch (Exception ex) {
+            LOGGER.error("Error creating service tracker.", ex);
         }
     }
 }
