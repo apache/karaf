@@ -81,7 +81,7 @@ public class KarafJaasAuthenticator implements PasswordAuthenticator, PublickeyA
             });
             loginContext.login();
             if (role != null && role.length() > 0) {
-                String clazz = "org.apache.karaf.jaas.modules.RolePrincipal";
+                String clazz = "org.apache.karaf.jaas.boot.principal.RolePrincipal";
                 String name = role;
                 int idx = role.indexOf(':');
                 if (idx > 0) {
@@ -126,7 +126,7 @@ public class KarafJaasAuthenticator implements PasswordAuthenticator, PublickeyA
             });
             loginContext.login();
             if (role != null && role.length() > 0) {
-                String clazz = "org.apache.karaf.jaas.modules.RolePrincipal";
+                String clazz = "org.apache.karaf.jaas.boot.principal.RolePrincipal";
                 String name = role;
                 int idx = role.indexOf(':');
                 if (idx > 0) {

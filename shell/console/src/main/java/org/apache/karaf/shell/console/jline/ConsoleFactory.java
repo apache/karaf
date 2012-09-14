@@ -34,7 +34,7 @@ import jline.Terminal;
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Function;
-import org.apache.karaf.jaas.modules.UserPrincipal;
+import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.apache.sshd.agent.SshAgent;
 import org.apache.sshd.agent.local.AgentImpl;
 import org.fusesource.jansi.AnsiConsole;
