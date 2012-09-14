@@ -71,6 +71,10 @@
             <artifactId>pax-exam-container-rbc-client</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.ops4j.pax.url</groupId>
+            <artifactId>pax-url-mvn</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.ops4j.base</groupId>
             <artifactId>ops4j-base-lang</artifactId>
         </dependency>
