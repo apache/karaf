@@ -65,9 +65,8 @@
         <module>tooling</module>
         <module>assemblies</module>
         <module>demos</module>
-        <module>itests</module>
         <module>archetypes</module>
-        <module>manual</module>
+        <module>itests</module>
     </modules>
 
     <scm>
@@ -2171,6 +2170,12 @@
             </properties>
         </profile>
         <profile>
+            <id>manual</id>
+            <modules>
+                <module>manual</module>
+            </modules>
+        </profile>
+        <profile>
             <id>rat</id>
             <build>
                 <plugins>
@@ -2221,6 +2226,9 @@
         </profile>
         <profile>
             <id>release</id>
+            <modules>
+                <module>manual</module>
+            </modules>
             <build>
                 <plugins>
                     <!-- We want to deploy the artifact to a staging location for perusal -->
