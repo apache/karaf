@@ -49,10 +49,9 @@
         <module>assemblies</module>
         <module>demos</module>
         <module>tooling</module>
-        <module>itests</module>
         <module>archetypes</module>
         <module>diagnostic</module>
-        <module>manual</module>
+        <module>itests</module>
     </modules>
 
     <scm>
