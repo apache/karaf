@@ -16,9 +16,14 @@
  */
 package org.apache.karaf.features.command;
 
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import org.apache.karaf.features.Conditional;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
@@ -32,6 +37,8 @@ import org.apache.karaf.features.FeaturesService;
 public class InfoFeatureCommand extends FeaturesCommandSupport {
 
     private static final String INDENT = "  ";
+    private static final String FEATURE_CONTENT = "Feature";
+    private static final String CONDITIONAL_CONTENT = "Conditional(%s)";
 
 	@Argument(index = 0, name = "name", description = "The name of the feature", required = true, multiValued = false)
     private String name;
@@ -47,6 +54,9 @@ public class InfoFeatureCommand extends FeaturesCommandSupport {
 
     @Option(name = "-b", aliases={"--bundle"}, description="Display bundles info", required = false, multiValued = false)
     private boolean bundle;
+
+    @Option(name = "--conditional", description="Display conditional info", required = false, multiValued = false)
+    private boolean conditional;
 
     @Option(name = "-t", aliases={"--tree"}, description="Display feature tree", required = false, multiValued = false)
     private boolean tree;
@@ -66,10 +76,11 @@ public class InfoFeatureCommand extends FeaturesCommandSupport {
         }
 
         // default behavior
-        if (!config && !dependency && !bundle) {
+        if (!config && !dependency && !bundle && !conditional) {
             config = true;
             dependency = true;
             bundle = true;
+            conditional = true;
         }
 
         System.out.println("Feature " + feature.getName() + " " + feature.getVersion());
@@ -84,16 +95,20 @@ public class InfoFeatureCommand extends FeaturesCommandSupport {
         }
 
         if (config) {
-            displayConfigInformation(feature);
-            displayConfigFileInformation(feature);
+            displayConfigInformation(feature, FEATURE_CONTENT);
+            displayConfigFileInformation(feature, FEATURE_CONTENT);
         }
 
         if (dependency) {
-            displayDependencyInformation(feature);
+            displayDependencyInformation(feature, FEATURE_CONTENT);
         }
 
         if (bundle) {
-            displayBundleInformation(feature);
+            displayBundleInformation(feature, FEATURE_CONTENT);
+        }
+
+        if(conditional) {
+           displayConditionalInfo(feature);
         }
 
         if (tree) {
@@ -116,12 +131,12 @@ public class InfoFeatureCommand extends FeaturesCommandSupport {
 		}
 	}
 
-	private void displayBundleInformation(Feature feature) {
+	private void displayBundleInformation(Feature feature, String contentType) {
         List<BundleInfo> bundleInfos = feature.getBundles();
         if (bundleInfos.isEmpty()) {
-            System.out.println("Feature has no bundles.");
+            System.out.println(contentType + " has no bundles.");
         } else {
-            System.out.println("Feature contains followed bundles:");
+            System.out.println(contentType + " contains followed bundles:");
             for (BundleInfo featureBundle : bundleInfos) {
                 int startLevel = featureBundle.getStartLevel();
                 StringBuilder sb = new StringBuilder();
@@ -134,36 +149,36 @@ public class InfoFeatureCommand extends FeaturesCommandSupport {
         }
     }
 
-    private void displayDependencyInformation(Feature feature) {
+    private void displayDependencyInformation(Feature feature, String contentType) {
         List<Dependency> dependencies = feature.getDependencies();
         if (dependencies.isEmpty()) {
-            System.out.println("Feature has no dependencies.");
+            System.out.println(contentType + " has no dependencies.");
         } else {
-            System.out.println("Feature depends on:");
+            System.out.println(contentType + " depends on:");
             for (Dependency featureDependency : dependencies) {
                 System.out.println(INDENT + featureDependency.getName() + " " + featureDependency.getVersion());
             }
         }
     }
 
-    private void displayConfigInformation(Feature feature) {
+    private void displayConfigInformation(Feature feature, String contentType) {
         Map<String, Map<String, String>> configurations = feature.getConfigurations();
         if (configurations.isEmpty()) {
-            System.out.println("Feature has no configuration");
+            System.out.println(contentType + " has no configuration");
         } else {
-            System.out.println("Feature configuration:");
+            System.out.println(contentType + " configuration:");
             for (String name : configurations.keySet()) {
                 System.out.println(INDENT + name);
             }
         }
     }
     
-    private void displayConfigFileInformation(Feature feature) {
+    private void displayConfigFileInformation(Feature feature, String contentType) {
     	List<ConfigFileInfo> configurationFiles = feature.getConfigurationFiles();
     	if (configurationFiles.isEmpty()) {
-    		System.out.println("Feature has no configuration files");
+    		System.out.println(contentType + " has no configuration files");
     	} else {
-    		System.out.println("Feature configuration files: ");
+    		System.out.println(contentType + " configuration files: ");
     		for (ConfigFileInfo configFileInfo : configurationFiles) {
 				System.out.println(INDENT + configFileInfo.getFinalname());
 			}
@@ -193,9 +208,23 @@ public class InfoFeatureCommand extends FeaturesCommandSupport {
 
         if (resolved != null) {
             if (bundle) {
+                List<String> bundleLocation = new LinkedList<String>();
                 List<BundleInfo> bundles = resolved.getBundles();
-                for (int i = 0, j = bundles.size(); i < j; i++) {
-                    System.out.println(prefix + " " + (i+1 == j ? "\\" : "+") + " " + bundles.get(i).getLocation());
+                for (BundleInfo bundleInfo : bundles) {
+                    bundleLocation.add(bundleInfo.getLocation());
+                }
+
+                if (conditional) {
+                    for (Conditional cond : resolved.getConditional()) {
+                        List<? extends Dependency> condition = cond.getCondition();
+                        List<BundleInfo> conditionalBundles = cond.getBundles();
+                        for (BundleInfo bundleInfo : conditionalBundles) {
+                            bundleLocation.add(bundleInfo.getLocation() + "(condition:"+condition+")");
+                        }
+                    }
+                }
+                for (int i = 0, j = bundleLocation.size(); i < j; i++) {
+                    System.out.println(prefix + " " + (i + 1 == j ? "\\" : "+") + " " + bundleLocation.get(i));
                 }
             }
             prefix += "   ";
@@ -204,9 +233,57 @@ public class InfoFeatureCommand extends FeaturesCommandSupport {
                 Dependency toDisplay =  dependencies.get(i);
                 unresolved += displayFeatureTree(admin, toDisplay.getName(), toDisplay.getVersion(), prefix +1);
             }
+
+            if (conditional) {
+                for (Conditional cond : resolved.getConditional()) {
+                    List<Dependency> conditionDependencies = cond.getDependencies();
+                    for (int i = 0, j = conditionDependencies.size(); i < j; i++) {
+                        Dependency toDisplay =  dependencies.get(i);
+                        unresolved += displayFeatureTree(admin, toDisplay.getName(), toDisplay.getVersion(), prefix +1);
+                    }
+                }
+            }
         }
 
         return unresolved;
+    }
+
+    private void displayConditionalInfo(Feature feature) {
+        List<? extends Conditional> conditionals = feature.getConditional();
+        if (conditionals.isEmpty()) {
+            System.out.println("Feature has no conditionals.");
+        } else {
+            System.out.println("Feature contains followed conditionals:");
+            for (Conditional featureConditional : conditionals) {
+                String conditionDescription = getConditionDescription(featureConditional);
+                Feature wrappedConditional = featureConditional.asFeature(feature.getName(), feature.getVersion());
+                if (config) {
+                    displayConfigInformation(wrappedConditional, String.format(CONDITIONAL_CONTENT, conditionDescription));
+                    displayConfigFileInformation(wrappedConditional, String.format(CONDITIONAL_CONTENT, conditionDescription));
+                }
+
+                if (dependency) {
+                    displayDependencyInformation(wrappedConditional, String.format(CONDITIONAL_CONTENT, conditionDescription));
+                }
+
+                if (bundle) {
+                    displayBundleInformation(wrappedConditional, String.format(CONDITIONAL_CONTENT, conditionDescription));
+                }
+            }
+        }
+    }
+
+    private String getConditionDescription(Conditional cond) {
+        StringBuffer sb = new StringBuffer();
+        Iterator<? extends Dependency> di = cond.getCondition().iterator();
+        while (di.hasNext()) {
+            Dependency dep = di.next();
+            sb.append(dep.getName()).append("/").append(dep.getVersion());
+            if (di.hasNext()) {
+                sb.append(" ");
+            }
+        }
+        return sb.toString();
     }
 
 }

@@ -15,21 +15,18 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<features name="test" xmlns="http://karaf.apache.org/xmlns/features/v1.1.0">
-    <repository>urn:r1</repository>
-    <feature name="f1" region="foo">
-        <config name="c1">
-            k=v
-        </config>
-        <bundle>b1</bundle>
-        <bundle>b2</bundle>
-    </feature>
-    <feature name="f2">
-        <feature>f1</feature>
-        <bundle>b3</bundle>
-    </feature>
-    <feature name="f3">
-    	<configfile finalname="cf1" override="true">cfloc</configfile>
-    	<bundle>b4</bundle> 
+<features name="karaf" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0">
+    <feature name="spring" version="2.5.6.SEC02" resolver="(obr)">
+        <bundle dependency='true'>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.aopalliance/1.0_4</bundle>
+        <bundle>mvn:org.springframework/spring-core/2.5.6.SEC02</bundle>
+        <bundle>mvn:org.springframework/spring-beans/2.5.6.SEC02</bundle>
+        <bundle>mvn:org.springframework/spring-aop/2.5.6.SEC02</bundle>
+        <bundle>mvn:org.springframework/spring-context/2.5.6.SEC02</bundle>
+        <bundle>mvn:org.springframework/spring-context-support/2.5.6.SEC02</bundle>
+        <conditional>
+            <condition>http</condition>
+            <bundle>mvn:org.springframework/spring-web/2.5.6.SEC02</bundle>
+        </conditional>
     </feature>
 </features>
+
