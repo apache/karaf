@@ -119,10 +119,10 @@ public class JaxbUtil {
 
     /**
      * Provides an empty inputsource for the entity resolver.
-     * Converts all elements with empty namespace to the features namespace to make old feature files 
+     * Converts all elements to the features namespace to make old feature files
      * compatible to the new format
      */
-    public static class NoSourceAndNamespaceFilter extends XMLFilterImpl {
+    public static class NoSourceAndNamespaceFilter extends XMLFilterImpl {        
         private static final InputSource EMPTY_INPUT_SOURCE = new InputSource(new ByteArrayInputStream(new byte[0]));
 
         public NoSourceAndNamespaceFilter(XMLReader xmlReader) {

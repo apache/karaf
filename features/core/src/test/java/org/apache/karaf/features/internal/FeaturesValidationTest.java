@@ -44,6 +44,11 @@ public class FeaturesValidationTest {
 
     @Test
     public void testNs12() throws Exception {
+        FeatureValidationUtil.validate(getClass().getResource("f06.xml").toURI());
+    }
+
+    @Test
+    public void testNs13() throws Exception {
         try {
             FeatureValidationUtil.validate(getClass().getResource("f05.xml").toURI());
             fail("Validation should have failed");

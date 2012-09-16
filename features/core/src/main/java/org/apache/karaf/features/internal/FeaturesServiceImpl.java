@@ -59,6 +59,7 @@ import org.apache.felix.utils.manifest.Parser;
 import org.apache.felix.utils.version.VersionRange;
 import org.apache.felix.utils.version.VersionTable;
 import org.apache.karaf.features.BundleInfo;
+import org.apache.karaf.features.Conditional;
 import org.apache.karaf.features.ConfigFileInfo;
 import org.apache.karaf.features.Dependency;
 import org.apache.karaf.features.Feature;
@@ -429,6 +430,20 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
                 InstallationState s = new InstallationState();
             	try {
                     doInstallFeature(s, f, verbose);
+                    doInstallFeatureConditionals(s, f, verbose);
+                    state.bundleInfos.putAll(s.bundleInfos);
+                    state.bundles.addAll(s.bundles);
+                    state.features.putAll(s.features);
+                    state.installed.addAll(s.installed);
+
+                    //Check if current feature satisfies the conditionals of existing features
+                    for (Feature installedFeautre : listInstalledFeatures()) {
+                        for (Conditional conditional : installedFeautre.getConditional()) {
+                            if (dependenciesSatisfied(conditional.getCondition(), state)) {
+                                doInstallFeatureConditionals(s, installedFeautre, verbose);
+                            }
+                        }
+                    }
                     state.bundleInfos.putAll(s.bundleInfos);
                     state.bundles.addAll(s.bundles);
                     state.features.putAll(s.features);
@@ -473,6 +488,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
             }
             // Start all bundles
             for (Bundle b : state.bundles) {
+                LOGGER.info("Starting bundle: {}", b.getSymbolicName());
                 startBundle(state, b);
             }
             // Clean up for batch
@@ -567,7 +583,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
 
     protected static class InstallationState {
         final Set<Bundle> installed = new HashSet<Bundle>();
-        final List<Bundle> bundles = new ArrayList<Bundle>();
+        final Set<Bundle> bundles = new HashSet<Bundle>();
         final Map<Long, BundleInfo> bundleInfos = new HashMap<Long, BundleInfo>();
         final Map<Feature, Set<Long>> features = new HashMap<Feature, Set<Long>>();
     }
@@ -600,34 +616,25 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         state.features.put(feature, bundles);
     }
 
+    protected void doInstallFeatureConditionals(InstallationState state, Feature feature,  boolean verbose) throws Exception {
+        InstallationState failure = new InstallationState();
+        //Check conditions of the current feature.
+        for (Conditional conditional : feature.getConditional()) {
+
+            if (dependenciesSatisfied(conditional.getCondition(), state)) {
+                InstallationState s = new InstallationState();
+                doInstallFeature(s, conditional.asFeature(feature.getName(), feature.getVersion()), verbose);
+                state.bundleInfos.putAll(s.bundleInfos);
+                state.bundles.addAll(s.bundles);
+                state.features.putAll(s.features);
+                state.installed.addAll(s.installed);
+            }
+        }
+    }
+
     private void installFeatureDependency(Dependency dependency, InstallationState state, boolean verbose)
             throws Exception {
-        VersionRange range = org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION.equals(dependency.getVersion())
-                    ? VersionRange.ANY_VERSION : new VersionRange(dependency.getVersion(), true, true);
-        Feature fi = null;
-        for (Feature f : installed.keySet()) {
-            if (f.getName().equals(dependency.getName())) {
-                Version v = VersionTable.getVersion(f.getVersion());
-                if (range.contains(v)) {
-                    if (fi == null || VersionTable.getVersion(fi.getVersion()).compareTo(v) < 0) {
-                        fi = f;
-                    }
-                }
-            }
-        }
-        if (fi == null) {
-            Map<String, Feature> avail = getFeatures().get(dependency.getName());
-            if (avail != null) {
-                for (Feature f : avail.values()) {
-                    Version v = VersionTable.getVersion(f.getVersion());
-                    if (range.contains(v)) {
-                        if (fi == null || VersionTable.getVersion(fi.getVersion()).compareTo(v) < 0) {
-                            fi = f;
-                        }
-                    }
-                }
-            }
-        }
+        Feature fi = getFeatureForDependency(dependency);
         if (fi == null) {
             throw new Exception("No feature named '" + dependency.getName()
                     + "' with version '" + dependency.getVersion() + "' available");
@@ -986,6 +993,12 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         // and remove all those who will still be in use.
         // This gives this list of bundles to uninstall.
         Set<Long> bundles = installed.remove(feature);
+
+        //Also remove bundles installed as conditionals
+        for (Conditional conditional : feature.getConditional()) {
+            bundles.addAll(installed.remove(conditional.asFeature(feature.getName(),feature.getVersion())));
+        }
+
         for (Set<Long> b : installed.values()) {
             bundles.removeAll(b);
         }
@@ -1456,6 +1469,60 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
             }
         }
         return buffer.toString();
+    }
+
+    /**
+     * Returns the {@link Feature} that matches the {@link Dependency}.
+     * @param dependency
+     * @return
+     * @throws Exception
+     */
+    private Feature getFeatureForDependency(Dependency dependency) throws Exception {
+        VersionRange range = org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION.equals(dependency.getVersion())
+                ? VersionRange.ANY_VERSION : new VersionRange(dependency.getVersion(), true, true);
+        Feature fi = null;
+        for (Feature f : installed.keySet()) {
+            if (f.getName().equals(dependency.getName())) {
+                Version v = VersionTable.getVersion(f.getVersion());
+                if (range.contains(v)) {
+                    if (fi == null || VersionTable.getVersion(fi.getVersion()).compareTo(v) < 0) {
+                        fi = f;
+                    }
+                }
+            }
+        }
+        if (fi == null) {
+            Map<String, Feature> avail = getFeatures().get(dependency.getName());
+            if (avail != null) {
+                for (Feature f : avail.values()) {
+                    Version v = VersionTable.getVersion(f.getVersion());
+                    if (range.contains(v)) {
+                        if (fi == null || VersionTable.getVersion(fi.getVersion()).compareTo(v) < 0) {
+                            fi = f;
+                        }
+                    }
+                }
+            }
+        }
+        return fi;
+    }
+
+    /**
+     * Estimates if the {@link List} of {@link Dependency} is satisfied.
+     * The method will look into {@link Feature}s that are already installed or now being installed (if {@link InstallationState} is provided (not null)).
+     * @param dependencies
+     * @param state
+     * @return
+     */
+    private boolean dependenciesSatisfied(List<? extends Dependency> dependencies, InstallationState state) throws Exception {
+       boolean satisfied = true;
+       for (Dependency dep : dependencies) {
+           Feature f = getFeatureForDependency(dep);
+           if (f != null && !isInstalled(f) && (state != null && !state.features.keySet().contains(f))) {
+               satisfied = false;
+           }
+       }
+       return satisfied;
     }
 
     /**

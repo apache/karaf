@@ -103,6 +103,7 @@ public class FeaturesServiceTest extends TestCase {
         reset(bundleContext, installedBundle);
 
         expect(bundleContext.createFilter(EasyMock.<String>anyObject())).andReturn(null).anyTimes();
+        expect(installedBundle.getSymbolicName()).andReturn(name).anyTimes();
         expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
         expect(bundleContext.installBundle(isA(String.class),
                                            isA(InputStream.class))).andReturn(installedBundle);
@@ -160,6 +161,7 @@ public class FeaturesServiceTest extends TestCase {
 
         // Installs f1 and 0.1
         expect(bundleContext.createFilter(EasyMock.<String>anyObject())).andReturn(null).anyTimes();
+        expect(installedBundle.getSymbolicName()).andReturn(name).anyTimes();
         expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
         expect(bundleContext.installBundle(isA(String.class),
                                            isA(InputStream.class))).andReturn(installedBundle);
@@ -297,6 +299,7 @@ public class FeaturesServiceTest extends TestCase {
 
         // Then installs f1
         expect(bundleContext.createFilter(EasyMock.<String>anyObject())).andReturn(null).anyTimes();
+        expect(installedBundle.getSymbolicName()).andReturn(name).anyTimes();
         expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
         expect(bundleContext.installBundle(isA(String.class),
                                            isA(InputStream.class))).andReturn(installedBundle);
@@ -566,6 +569,7 @@ public class FeaturesServiceTest extends TestCase {
 
         // uninstalls first feature name = f2, version = 0.1
         expect(bundleContext.createFilter(EasyMock.<String>anyObject())).andReturn(null).anyTimes();
+        expect(installedBundle.getSymbolicName()).andReturn("mybundle").anyTimes();
         expect(bundleContext.getBundle(12345)).andReturn(installedBundle);
         installedBundle.uninstall();
 
@@ -618,6 +622,8 @@ public class FeaturesServiceTest extends TestCase {
         installedBundle2.start();
 
         expect(bundleContext.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
+        expect(installedBundle1.getSymbolicName()).andReturn("bundle1").anyTimes();
+        expect(installedBundle2.getSymbolicName()).andReturn("bundle2").anyTimes();
 
         replay(bundleContext, installedBundle1, installedBundle2);
 
@@ -661,6 +667,7 @@ public class FeaturesServiceTest extends TestCase {
         expect(installedBundle1.getBundleId()).andReturn(12345L);
         expect(installedBundle1.getBundleId()).andReturn(12345L);
         expect(installedBundle1.getBundleId()).andReturn(12345L);
+        expect(installedBundle1.getSymbolicName()).andReturn("bundle1").anyTimes();
         installedBundle1.uninstall();
 
         expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
@@ -669,6 +676,7 @@ public class FeaturesServiceTest extends TestCase {
         expect(installedBundle2.getBundleId()).andReturn(54321L);
         expect(installedBundle2.getBundleId()).andReturn(54321L);
         expect(installedBundle2.getHeaders()).andReturn(new Hashtable()).anyTimes();
+        expect(installedBundle2.getSymbolicName()).andReturn("bundle2").anyTimes();
         installedBundle2.start();
 
         expect(bundleContext.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();

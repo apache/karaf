@@ -16,7 +16,7 @@
       See the License for the specific language governing permissions and
       limitations under the License.
 -->
-<features name="standard-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.0.0">
+<features name="standard-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0">
 
     <feature name="standard" description="Karaf standard feature" version="${project.version}">
         <bundle start-level="30">mvn:org.apache.karaf.shell/org.apache.karaf.shell.console/${project.version}</bundle>
@@ -33,6 +33,13 @@
         <bundle start-level="30">mvn:org.apache.karaf.log/org.apache.karaf.log.command/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.service/org.apache.karaf.service.core/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.service/org.apache.karaf.service.command/${project.version}</bundle>
+        <conditional>
+            <condition>webconsole</condition>
+            <bundle start-level="30">mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.instance/${project.version}</bundle>
+            <bundle start-level="30">mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.features/${project.version}</bundle>
+            <bundle start-level="30">mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.gogo/${project.version}</bundle>
+            <bundle start-level="30">mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.http/${project.version}</bundle>
+        </conditional>
     </feature>
 
     <feature name="aries-annotation" description="Aries Annotations" version="${project.version}">
@@ -136,7 +143,7 @@
         <bundle start-level="30">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.kar/${project.version}</bundle>
     </feature>
 
-    <feature name="webconsole-base" description="Base support of the Karaf WebConsole" version="${project.version}" resolver="(obr)">
+    <feature name="webconsole" description="Base support of the Karaf WebConsole" version="${project.version}" resolver="(obr)">
         <config name="org.apache.karaf.webconsole">
             realm=karaf
         </config>
@@ -144,15 +151,12 @@
         <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.metatype/${felix.metatype.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.branding/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.console/${project.version}</bundle>
-    </feature>
+        <!-- Normally this should be part of the eventadmin feature. This is a workaround to a console error. -->
+        <conditional>
+            <condition>eventadmin</condition>
+            <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.webconsole.plugins.event/${felix.eventadmin-plugin.version}</bundle>
+        </conditional>
 
-    <feature name="webconsole" description="Karaf WebConsole for administration and monitoring" version="${project.version}" resolver="(obr)">
-        <feature version="${project.version}">webconsole-base</feature>
-        <bundle start-level="30">mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.instance/${project.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.features/${project.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.gogo/${project.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.http/${project.version}</bundle>
-		<bundle start-level="30">mvn:org.apache.felix/org.apache.felix.webconsole.plugins.event/${felix.eventadmin-plugin.version}</bundle>
     </feature>
 
     <feature name="ssh" description="Provide a SSHd server on Karaf" version="${project.version}">
@@ -196,7 +200,10 @@
         <bundle dependency="true" start-level="30">mvn:org.apache.felix/org.apache.felix.metatype/${felix.metatype.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.felix/org.apache.felix.scr/${felix.scr.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.scr/org.apache.karaf.scr.command/${project.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.karaf.scr/org.apache.karaf.scr.management/${project.version}</bundle>
+        <conditional>
+            <condition>management</condition>
+            <bundle start-level="30">mvn:org.apache.karaf.scr/org.apache.karaf.scr.management/${project.version}</bundle>
+        </conditional>
     </feature>
 
 </features>

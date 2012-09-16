@@ -40,6 +40,10 @@ import org.xml.sax.SAXException;
  */
 public class FeatureValidationUtil {
 
+    public static final QName FEATURES_0_0 = new QName("features");
+    public static final QName FEATURES_1_0 = new QName("http://karaf.apache.org/xmlns/features/v1.0.0", "features");
+    public static final QName FEATURES_1_1 = new QName("http://karaf.apache.org/xmlns/features/v1.1.0", "features");
+    public static final QName FEATURES_1_2 = new QName("http://karaf.apache.org/xmlns/features/v1.2.0", "features");
     private static final Logger LOGGER = LoggerFactory.getLogger(FeatureValidationUtil.class);
 
     /**
@@ -60,7 +64,10 @@ public class FeatureValidationUtil {
             validate(doc, "/org/apache/karaf/features/karaf-features-1.0.0.xsd");
         } else if (FeaturesNamespaces.FEATURES_1_1_0.equals(name)) {
             validate(doc, "/org/apache/karaf/features/karaf-features-1.1.0.xsd");
-        } else {
+        } else if (FeaturesNamespaces.FEATURES_1_2_0.equals(name)) {
+            validate(doc, "/org/apache/karaf/features/karaf-features-1.2.0.xsd");
+        }
+        else {
             throw new IllegalArgumentException("Unrecognized root element: " + name);
         }
     }
