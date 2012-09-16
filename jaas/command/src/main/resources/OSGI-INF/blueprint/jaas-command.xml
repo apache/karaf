@@ -19,11 +19,15 @@
 -->
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
 
-    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.0.0">
+    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
         <command name="jaas/manage">
             <action class="org.apache.karaf.jaas.command.ManageRealmCommand">
                 <property name="realms" ref="realms"/>
             </action>
+            <optional-completers>
+                <entry key="--realm" value-ref="realmCompleter"/>
+                <entry key="--module" value-ref="moduleClassNameCompleter"/>
+            </optional-completers>
         </command>
         <command name="jaas/update">
             <action class="org.apache.karaf.jaas.command.UpdateCommand">
@@ -71,4 +75,14 @@
     <!-- Backing Engine Factories -->
     <reference-list id="engineFactories" interface="org.apache.karaf.jaas.modules.BackingEngineFactory"
                     availability="optional"/>
+
+    <!-- Completers -->
+    <bean id="realmCompleter" class="org.apache.karaf.jaas.command.completers.RealmCompleter">
+        <property name="realms" ref="realms"/>
+    </bean>
+
+    <bean id="moduleClassNameCompleter" class="org.apache.karaf.jaas.command.completers.LoginModuleNameCompleter">
+        <property name="realms" ref="realms"/>
+    </bean>
+
 </blueprint>
