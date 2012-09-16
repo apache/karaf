@@ -26,6 +26,8 @@
             </action>
             <completers>
                 <ref component-id="realmCompleter" />
+                <ref component-id="moduleClassNameCompleter" />
+                <null/>
             </completers>
         </command>
         <command>
@@ -77,6 +79,10 @@
 
     <!-- Completers -->
     <bean id="realmCompleter" class="org.apache.karaf.jaas.command.completers.RealmCompleter">
+        <property name="realms" ref="realms"/>
+    </bean>
+
+    <bean id="moduleClassNameCompleter" class="org.apache.karaf.jaas.command.completers.LoginModuleNameCompleter">
         <property name="realms" ref="realms"/>
     </bean>
 
