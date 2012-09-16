@@ -88,7 +88,6 @@ public abstract class JaasCommandSupport extends OsgiCommandSupport {
 
         AppConfigurationEntry appConfigurationEntry = null;
         if (realm != null) {
-
             AppConfigurationEntry[] entries = realm.getEntries();
 
             // if no moduleName provided and a there is a single module in the realm.
@@ -98,7 +97,7 @@ public abstract class JaasCommandSupport extends OsgiCommandSupport {
 
             for (AppConfigurationEntry entry : entries) {
                 String moduleClass = (String) entry.getOptions().get(ProxyLoginModule.PROPERTY_MODULE);
-                if (moduleName.equals(entry.getLoginModuleName()) || moduleName.equals(moduleClass)) {
+                if (moduleName != null && (moduleName.equals(entry.getLoginModuleName()) || moduleName.equals(moduleClass))) {
                     return entry;
                 }
             }
