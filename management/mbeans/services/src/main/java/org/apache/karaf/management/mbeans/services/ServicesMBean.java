@@ -23,9 +23,60 @@ import javax.management.openmbean.TabularData;
  */
 public interface ServicesMBean {
 
+    /**
+     * Get the list of services.
+     *
+     * @return the list of services.
+     * @throws Exception
+     */
+    TabularData getServices() throws Exception;
+
+    /**
+     * Get the list of services, eventually currently in use.
+     *
+     * @param inUse true to list only the services in use, false else.
+     * @return the list of services.
+     * @throws Exception
+     */
+    TabularData getServices(boolean inUse) throws Exception;
+
+    /**
+     * Get the list of services provided by a given bundle.
+     *
+     * @param bundleId the bundle ID.
+     * @return the list of services provided by the given bundle.
+     * @throws Exception
+     */
+    TabularData getServices(long bundleId) throws Exception;
+
+    /**
+     * Get the list of services provided by a given bundle and eventually in use.
+     *
+     * @param bundleId the bundle ID.
+     * @param inUse true to list only the services in use, false else.
+     * @return the list of services.
+     * @throws Exception
+     */
+    TabularData getServices(long bundleId, boolean inUse) throws Exception;
+
+    /**
+     * @deprecated use the Services attribute instead
+     */
     TabularData list() throws Exception;
+
+    /**
+     * @deprecated use getServices() instead
+     */
     TabularData list(boolean inUse) throws Exception;
+
+    /**
+     * @deprecated use getServices() instead
+     */
     TabularData list(long bundleId) throws Exception;
+
+    /**
+     * @deprecated use getServices() instead
+     */
     TabularData list(long bundleId, boolean inUse) throws Exception;
 
 }
