@@ -25,8 +25,13 @@ public interface ConfigMBean {
     /**
      * Get the list of all configuration PIDs.
      *
-     * @return the list of all configuration PIDs.
+     * @return the list of configuration PIDs.
      * @throws Exception
+     */
+    List<String> getConfigs() throws Exception;
+
+    /**
+     * @deprecated use getConfigs() instead.
      */
     List<String> list() throws Exception;
 
@@ -47,20 +52,30 @@ public interface ConfigMBean {
     void delete(String pid) throws Exception;
 
     /**
-     * Get the list of properties for a configuration PID.
+     * Get the list of properties for a given configuration PID.
      *
      * @param pid the configuration PID.
-     * @return the list of properties.
+     * @return the list of properties associated to the PID.
      * @throws Exception
+     */
+    Map<String, String> listProperties(String pid) throws Exception;
+
+    /**
+     * @deprecated used listProperties() instead.
      */
     Map<String, String> proplist(String pid) throws Exception;
 
     /**
-     * Remove the configuration property identified by the given key.
+     * Delete the configuration property identified by the given key.
      *
      * @param pid the configuration PID.
      * @param key the property key.
      * @throws Exception
+     */
+    void deleteProperty(String pid, String key) throws Exception;
+
+    /**
+     * @deprecated use deleteProperty() instead.
      */
     void propdel(String pid, String key) throws Exception;
 
@@ -72,6 +87,11 @@ public interface ConfigMBean {
      * @param value the value to append to the current property value.
      * @throws Exception
      */
+    void appendProperty(String pid, String key, String value) throws Exception;
+
+    /**
+     * @deprecated use appendProperty() instead.
+     */
     void propappend(String pid, String key, String value) throws Exception;
 
     /**
@@ -81,6 +101,11 @@ public interface ConfigMBean {
      * @param key the property key.
      * @param value the property value.
      * @throws Exception
+     */
+    void setProperty(String pid, String key, String value) throws Exception;
+
+    /**
+     * @deprecated use setProperty() instead.
      */
     void propset(String pid, String key, String value) throws Exception;
 

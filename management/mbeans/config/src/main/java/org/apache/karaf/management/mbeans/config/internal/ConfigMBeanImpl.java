@@ -66,13 +66,20 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
         super(ConfigMBean.class);
     }
 
-    public List<String> list() throws Exception {
+    public List<String> getConfigs() throws Exception {
         Configuration[] configurations = configurationAdmin.listConfigurations(null);
         List<String> pids = new ArrayList<String>();
         for (int i = 0; i < configurations.length; i++) {
             pids.add(configurations[i].getPid());
         }
         return pids;
+    }
+
+    /**
+     * @deprecated used getConfigs() instead.
+     */
+    public List<String> list() throws Exception {
+        return getConfigs();
     }
 
     public void create(String pid) throws Exception {
@@ -91,7 +98,7 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
         }
     }
 
-    public Map<String, String> proplist(String pid) throws Exception {
+    public Map<String, String> listProperties(String pid) throws Exception {
         Configuration configuration = configurationAdmin.getConfiguration(pid);
         if (configuration == null) {
             throw new IllegalArgumentException("Configuration PID " + pid + " doesn't exist");
@@ -111,7 +118,14 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
         return propertiesMap;
     }
 
-    public void propdel(String pid, String key) throws Exception {
+    /**
+     * @deprecated use listProperties() instead.
+     */
+    public Map<String, String> proplist(String pid) throws Exception {
+        return listProperties(pid);
+    }
+
+    public void deleteProperty(String pid, String key) throws Exception {
         Configuration configuration = configurationAdmin.getConfiguration(pid);
         if (configuration == null) {
             throw new IllegalArgumentException("Configuration PID " + pid + " doesn't exist");
@@ -126,7 +140,14 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
         store(pid, dictionary, false);
     }
 
-    public void propappend(String pid, String key, String value) throws Exception {
+    /**
+     * @deprecated use deleteProperty() instead.
+     */
+    public void propdel(String pid, String key) throws Exception {
+        deleteProperty(pid, key);
+    }
+
+    public void appendProperty(String pid, String key, String value) throws Exception {
         Configuration configuration = configurationAdmin.getConfiguration(pid);
         if (configuration == null) {
             throw new IllegalArgumentException("Configuration PID " + pid + " doesn't exist");
@@ -148,7 +169,14 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
         store(pid, dictionary, false);
     }
 
-    public void propset(String pid, String key, String value) throws Exception {
+    /**
+     * @deprecated use appendProperty() instead.
+     */
+    public void propappend(String pid, String key, String value) throws Exception {
+        appendProperty(pid, key, value);
+    }
+
+    public void setProperty(String pid, String key, String value) throws Exception {
         Configuration configuration = configurationAdmin.getConfiguration(pid);
         if (configuration == null) {
             throw new IllegalArgumentException("Configuration PID " + pid + " doesn't exist");
@@ -161,6 +189,13 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
 
         dictionary.put(key, value);
         store(pid, dictionary, false);
+    }
+
+    /**
+     * @deprecated use setProperty() instead.
+     */
+    public void propset(String pid, String key, String value) throws Exception {
+        setProperty(pid, key, value);
     }
 
     /**
