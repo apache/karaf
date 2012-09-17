@@ -39,11 +39,11 @@ public class PackagesMBeanImpl extends StandardMBean implements PackagesMBean {
         super(PackagesMBean.class);
     }
 
-    public List<String> exportedPackages() throws Exception {
-        return exportedPackages(-1);
+    public List<String> getExports() throws Exception {
+        return getExports(-1);
     }
 
-    public List<String> exportedPackages(long bundleId) throws Exception {
+    public List<String> getExports(long bundleId) throws Exception {
         List<String> exportPackages = new ArrayList<String>();
         ServiceReference ref = bundleContext.getServiceReference(PackageAdmin.class.getName());
         if (ref == null) {
@@ -73,11 +73,11 @@ public class PackagesMBeanImpl extends StandardMBean implements PackagesMBean {
         return exportPackages;
     }
 
-    public List<String> importedPackages() throws Exception {
-        return importedPackages(-1);
+    public List<String> getImports() throws Exception {
+        return getImports(-1);
     }
 
-    public List<String> importedPackages(long bundleId) throws Exception {
+    public List<String> getImports(long bundleId) throws Exception {
         List<String> importPackages = new ArrayList<String>();
         ServiceReference ref = bundleContext.getServiceReference(PackageAdmin.class.getName());
         if (ref == null) {
@@ -104,6 +104,34 @@ public class PackagesMBeanImpl extends StandardMBean implements PackagesMBean {
         }
 
         return importPackages;
+    }
+
+    /**
+     * @deprecated use getExports() instead.
+     */
+    public List<String> exportedPackages() throws Exception {
+        return getExports();
+    }
+
+    /**
+     * @deprecated use getExports()
+     */
+    public List<String> exportedPackages(long bundleId) throws Exception {
+        return getExports(bundleId);
+    }
+
+    /**
+     * @deprecated use getImports() instead.
+     */
+    public List<String> importedPackages() throws Exception {
+        return getImports();
+    }
+
+    /**
+     * @deprecated use getImports() instead.
+     */
+    public List<String> importedPackages(long bundleId) throws Exception {
+        return getImports(bundleId);
     }
 
     public BundleContext getBundleContext() {

@@ -16,18 +16,64 @@
  */
 package org.apache.karaf.management.mbeans.packages;
 
-import javax.management.openmbean.TabularData;
 import java.util.List;
 
-/**
- * Packages MBean
- */
 public interface PackagesMBean {
 
+    /**
+     * Get the exported packages.
+     *
+     * @return the list of exported packages.
+     * @throws Exception
+     */
+    List<String> getExports() throws Exception;
+
+    /**
+     * Get the exported packages of a given bundle.
+     *
+     * @param bundleId the bundle ID.
+     * @return the exported packages of the bundle.
+     * @throws Exception
+     */
+    List<String> getExports(long bundleId) throws Exception;
+
+    /**
+     * Get the imported packages.
+     *
+     * @return the list of imported packages.
+     * @throws Exception
+     */
+    List<String> getImports() throws Exception;
+
+    /**
+     * Get the imported packages of a given bundle.
+     *
+     * @param bundleId the bundle ID.
+     * @return the list of imported packages of the bundle.
+     * @throws Exception
+     */
+    List<String> getImports(long bundleId) throws Exception;
+
+    /* for backward compatibility */
+
+    /**
+     * @deprecated use getExports() instead
+     */
     List<String> exportedPackages() throws Exception;
+
+    /**
+     * @deprecated use getExports() instead
+     */
     List<String> exportedPackages(long bundleId) throws Exception;
 
+    /**
+     * @deprecated use getImports(bundleId) instead
+     */
     List<String> importedPackages() throws Exception;
+
+    /**
+     * @deprecated use getImports(bundleId) instead
+     */
     List<String> importedPackages(long bundleId) throws Exception;
 
 }
