@@ -64,6 +64,7 @@
             </excludes>
             <outputDirectory>/etc/</outputDirectory>
             <lineEnding>unix</lineEnding>
+            <fileMode>664</fileMode>
         </fileSet>
 
         <fileSet>
