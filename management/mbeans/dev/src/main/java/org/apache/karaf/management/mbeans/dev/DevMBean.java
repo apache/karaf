@@ -13,8 +13,6 @@
  */
 package org.apache.karaf.management.mbeans.dev;
 
-import java.util.List;
-
 /**
  * MBean providing dev actions.
  */
@@ -23,6 +21,7 @@ public interface DevMBean {
     /**
      * Get the current OSGi framework in use.
      *
+     * @deprecated use SystemMBean#getFramework() instead.
      * @return the name of the OSGi framework in use.
      * @throws Exception
      */
@@ -31,6 +30,7 @@ public interface DevMBean {
     /**
      * OSGi framework options.
      *
+     * @deprecated use SystemMBean#setFrameworkDebug() instead.
      * @param debug enable debug of the OSGi framework to use.
      * @param framework name of the OSGI framework to use.
      * @throws Exception
@@ -40,6 +40,7 @@ public interface DevMBean {
     /**
      * Restart Karaf, with eventually a cleanup.
      *
+     * @deprecated use SystemMBean#reboot() instead.
      * @param clean if true, Karaf is cleanup, false else.
      * @throws Exception
      */

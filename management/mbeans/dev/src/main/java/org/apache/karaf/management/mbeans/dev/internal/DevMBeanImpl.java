@@ -55,24 +55,19 @@ public class DevMBeanImpl extends StandardMBean implements DevMBean {
     public void frameworkOptions(boolean debug, String framework) throws Exception {
         Properties properties = new Properties(new File(System.getProperty("karaf.base"), "etc/config.properties"));
         if (framework != null) {
-            // swtich the framework is use
+            // switch the framework is use
             if (!framework.equalsIgnoreCase("felix") && !framework.equalsIgnoreCase("equinox")) {
                 throw new IllegalArgumentException("Unsupported framework " + framework);
             }
             properties.put("karaf.framework", framework.toLowerCase());
         }
-        if (framework == null) {
-            if (bundleContext.getBundle(0).getSymbolicName().contains("felix")) {
-                framework = "felix";
-            } else {
-                framework = "equinox";
-            }
-        }
-        if (framework.equals("felix")) {
+        if (debug) {
             properties.put("felix.log.level", "4");
-        } else {
             properties.put("osgi.debug", "etc/equinox-debug.properties");
             // TODO populate the equinox-debug.properties file with the one provided in shell/dev module
+        } else {
+            properties.remove("felix.log.level");
+            properties.remove("osgi.debug");
         }
         properties.save();
     }
