@@ -41,7 +41,7 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
         super(BundlesMBean.class);
     }
 
-    public TabularData list() throws Exception {
+    public TabularData getBundles() throws Exception {
         ServiceReference startLevelReference = bundleContext.getServiceReference(StartLevel.class.getName());
         StartLevel startLevel = null;
         if (startLevelReference != null) {
@@ -88,6 +88,13 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
         bundleContext.ungetService(startLevelReference);
 
         return table;
+    }
+
+    /**
+     * @deprecated use getBundles() instead.
+     */
+    public TabularData list() throws Exception {
+        return getBundles();
     }
 
     public int getStartLevel(String bundleId) throws Exception {
