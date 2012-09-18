@@ -74,6 +74,7 @@
             <lineEnding>dos</lineEnding>
             <excludes>
                 <exclude>**/target/**</exclude>
+                <exclude>**/*.iml</exclude>
             </excludes>
         </fileSet>
 
