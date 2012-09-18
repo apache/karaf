@@ -62,18 +62,20 @@
             <directory>target/classes/etc</directory>
             <outputDirectory>/etc/</outputDirectory>
             <lineEnding>unix</lineEnding>
-            <fileMode>0664</fileMode>
+            <fileMode>0644</fileMode>
         </fileSet>
         <!-- Copy over the examples -->
         <fileSet>
             <directory>target/classes/demos</directory>
             <outputDirectory>/demos/</outputDirectory>
             <lineEnding>unix</lineEnding>
+            <fileMode>0644</fileMode>
         </fileSet>
         <fileSet>
             <directory>../../demos</directory>
             <outputDirectory>/demos/</outputDirectory>
             <lineEnding>unix</lineEnding>
+            <fileMode>0644</fileMode>
             <excludes>
                 <exclude>**/target/**</exclude>
                 <exclude>**/*.iml</exclude>
