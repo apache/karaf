@@ -129,6 +129,7 @@
                 <include>org.apache.servicemix.specs:org.apache.servicemix.specs.jaxp-api-1.4</include>
                 <include>org.apache.servicemix.specs:org.apache.servicemix.specs.jaxb-api-2.2</include>
                 <include>org.apache.servicemix.specs:org.apache.servicemix.specs.jaxws-api-2.2</include>
+                <include>org.apache.servicemix.specs:org.apache.servicemix.specs.saaj-api-1.3</include>
             </includes>
         </dependencySet>
 
