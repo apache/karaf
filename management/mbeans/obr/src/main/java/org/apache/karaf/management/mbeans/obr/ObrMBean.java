@@ -24,13 +24,71 @@ import java.util.List;
  */
 public interface ObrMBean {
 
+    /**
+     * Get the URLs registered in the OBR service.
+     *
+     * @return the list of URLs in the OBR service.
+     * @throws Exception
+     */
+    List<String> getUrls() throws Exception;
+
+    /**
+     * @deprecated use getUrls() instead.
+     */
     List<String> listUrls() throws Exception;
+
+    /**
+     * Add a new URL in the OBR service.
+     *
+     * @param url the URL to add in the OBR service
+     * @throws Exception
+     */
     void addUrl(String url) throws Exception;
+
+    /**
+     * Remove an URL from the OBR service.
+     *
+     * @param url the URL to remove from the OBR service.
+     * @throws Exception
+     */
     void removeUrl(String url) throws Exception;
+
+    /**
+     * Refresh an URL in the OBR service.
+     *
+     * @param url the URL to refresh in the OBR service.
+     * @throws Exception
+     */
     void refreshUrl(String url) throws Exception;
 
+    /**
+     * Get the bundles available in the OBR service.
+     *
+     * @return the list of bundles available in the OBR service.
+     * @throws Exception
+     */
+    TabularData getBundles() throws Exception;
+
+    /**
+     * @deprecated use getBundles() instead.
+     */
     TabularData list() throws Exception;
+
+    /**
+     * Deploy a bundle available in the OBR service.
+     *
+     * @param bundle the bundle to deploy.
+     * @throws Exception
+     */
     void deploy(String bundle) throws Exception;
+
+    /**
+     * Deploy a bundle available in the OBR service and eventually start it.
+     *
+     * @param bundle the bundle to deploy.
+     * @param start true to start the bundle, false else.
+     * @throws Exception
+     */
     void deploy(String bundle, boolean start) throws Exception;
 
 }

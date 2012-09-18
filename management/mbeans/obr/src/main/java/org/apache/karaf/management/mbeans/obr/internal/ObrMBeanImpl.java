@@ -43,13 +43,20 @@ public class ObrMBeanImpl extends StandardMBean implements ObrMBean {
         super(ObrMBean.class);
     }
 
-    public List<String> listUrls() throws Exception {
+    public List<String> getUrls() throws Exception {
         Repository[] repositories = repositoryAdmin.listRepositories();
         List<String> urls = new ArrayList<String>();
         for (int i = 0; i < repositories.length; i++) {
             urls.add(repositories[i].getURI());
         }
         return urls;
+    }
+
+    /**
+     * @deprecated use getUrls() instead.
+     */
+    public List<String> listUrls() throws Exception {
+        return getUrls();
     }
 
     public void addUrl(String url) throws Exception {
@@ -64,7 +71,7 @@ public class ObrMBeanImpl extends StandardMBean implements ObrMBean {
         repositoryAdmin.addRepository(url);
     }
 
-    public TabularData list() throws Exception {
+    public TabularData getBundles() throws Exception {
         CompositeType bundleType = new CompositeType("OBR Resource", "Bundle available in the OBR",
                 new String[]{"presentationname", "symbolicname", "version"},
                 new String[]{"Presentation Name", "Symbolic Name", "Version"},
@@ -86,6 +93,13 @@ public class ObrMBeanImpl extends StandardMBean implements ObrMBean {
         }
 
         return table;
+    }
+
+    /**
+     * @deprecated use getBundles() instead.
+     */
+    public TabularData list() throws Exception {
+        return getBundles();
     }
 
     public void deploy(String bundle) throws Exception {
