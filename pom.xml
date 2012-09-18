@@ -1367,6 +1367,11 @@
                 <version>${servicemix.specs.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.apache.servicemix.specs</groupId>
+                <artifactId>org.apache.servicemix.specs.saaj-api-1.3</artifactId>
+                <version>${servicemix.specs.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.apache.sshd</groupId>
                 <artifactId>sshd-core</artifactId>
                 <version>${sshd.version}</version>
