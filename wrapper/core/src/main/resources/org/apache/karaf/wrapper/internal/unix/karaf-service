@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------
 
 # JAVA_HOME, trying the JDK first and fallback to JRE
-if [ `whichlink readlink` ]; then
+if [ `which readlink` ]; then
   [ -z $JAVA_HOME ] && [ -x /usr/bin/javac ] && export JAVA_HOME="$(readlink -f /usr/bin/javac | sed 's:/bin/javac::')"
   [ -z $JAVA_HOME ] && [ -x /usr/bin/java ] && export JAVA_HOME="$(readlink -f /usr/bin/java | sed 's:/bin/java::')"
 fi
