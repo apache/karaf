@@ -62,6 +62,7 @@
             <directory>target/classes/etc</directory>
             <outputDirectory>/etc/</outputDirectory>
             <lineEnding>unix</lineEnding>
+            <fileMode>0664</fileMode>
         </fileSet>
         <!-- Copy over the examples -->
         <fileSet>
