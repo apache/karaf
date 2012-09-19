@@ -290,4 +290,11 @@
         <bundle start-level="30">mvn:org.apache.karaf.jaas/org.apache.karaf.jaas.jasypt/${project.version}</bundle>
     </feature>
 
+    <feature name="scr" description="Declarative Service support" version="${project.version}" resolver="(obr)">
+        <feature>eventadmin</feature>
+        <bundle dependency="true" start-level="30">mvn:org.apache.felix/org.apache.felix.metatype/${felix.metatype.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.felix/org.apache.felix.scr/${felix.scr.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.karaf.shell/org.apache.karaf.shell.scr/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.karaf.management.mbeans/org.apache.karaf.management.mbeans.scr/${project.version}</bundle>
+    </feature>
 </features>

@@ -103,6 +103,7 @@
     <properties>
         <aopalliance.bundle.version>1.0_6</aopalliance.bundle.version>
         <asm.bundle.version>3.3.1_1</asm.bundle.version>
+        <bndlib.version>1.50.0</bndlib.version>
         <cglib.bundle.version>2.2.2_1</cglib.bundle.version>
         <commons-beanutils.version>1.8.3</commons-beanutils.version>
         <commons-codec.version>1.6</commons-codec.version>
@@ -134,6 +135,7 @@
         <felix.eventadmin.version>1.2.14</felix.eventadmin.version>
         <felix.eventadmin-plugin.version>1.0.2</felix.eventadmin-plugin.version>
         <felix.obr.version>1.0.2</felix.obr.version>
+        <felix.scr.version>1.6.0</felix.scr.version>
         <aries.application.version>1.0.0</aries.application.version>
         <aries.application.api.version>1.0.0</aries.application.api.version>
         <aries.application.management.version>1.0.0</aries.application.management.version>
@@ -581,6 +583,16 @@
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.eventadmin</artifactId>
                 <version>${felix.eventadmin.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>org.apache.felix.scr</artifactId>
+                <version>${felix.scr.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>biz.aQute</groupId>
+                <artifactId>bndlib</artifactId>
+                <version>${bndlib.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>

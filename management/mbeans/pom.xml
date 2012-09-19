@@ -42,6 +42,7 @@
         <module>dev</module>
         <module>log</module>
         <module>obr</module>
+        <module>scr</module>
         <module>web</module>
     </modules>
 
