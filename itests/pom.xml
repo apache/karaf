@@ -49,6 +49,12 @@
             <artifactId>apache-karaf</artifactId>
             <version>${project.version}</version>
             <type>tar.gz</type>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.karaf</groupId>
+                    <artifactId>org.apache.karaf.client</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
