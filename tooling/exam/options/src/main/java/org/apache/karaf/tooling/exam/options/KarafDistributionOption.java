@@ -94,7 +94,7 @@ public final class KarafDistributionOption {
      * @return the exam option.
      */
     public static KarafDistributionBaseConfigurationOption karafDistributionConfiguration(String frameworkUrl, String name, String karafVersion) {
-        return new KarafDistributionBaseConfigurationOption(frameworkUrl, name, karafVersion);
+        return new KarafDistributionConfigurationOption(frameworkUrl, name, karafVersion);
     }
 
     /**
@@ -104,7 +104,7 @@ public final class KarafDistributionOption {
      * @return the exam option.
      */
     public static KarafDistributionBaseConfigurationOption karafDistributionConfiguration() {
-        return new KarafDistributionBaseConfigurationOption();
+        return new KarafDistributionConfigurationOption();
     }
 
     /**
