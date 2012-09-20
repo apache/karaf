@@ -85,7 +85,17 @@ if "%KARAF_DATA%" == "" (
 )        
 
 set LOCAL_CLASSPATH=%CLASSPATH%
-set DEFAULT_JAVA_OPTS=-server -Xms%JAVA_MIN_MEM% -Xmx%JAVA_MAX_MEM% -Dderby.system.home="%KARAF_DATA%\derby" -Dderby.storage.fileSyncTransactionLog=true -Dcom.sun.management.jmxremote
+
+set JAVA_MODE=-server
+if not exist "%JAVA_HOME%\bin\server\jvm.dll" (
+    if not exist "%JAVA_HOME%\jre\bin\server\jvm.dll" (
+        echo WARNING: Running karaf on a Java HotSpot Client VM because server-mode is not available.
+        echo Install Java Developer Kit to fix this.
+        echo For more details see http://java.sun.com/products/hotspot/whitepaper.html#client
+        set JAVA_MODE=-client
+    )
+)
+set DEFAULT_JAVA_OPTS=%JAVA_MODE% -Xms%JAVA_MIN_MEM% -Xmx%JAVA_MAX_MEM% -Dderby.system.home="%KARAF_DATA%\derby" -Dderby.storage.fileSyncTransactionLog=true -Dcom.sun.management.jmxremote
 
 rem Check some easily accessible MIN/MAX params for JVM mem usage
 if not "%JAVA_PERM_MEM%" == "" (
