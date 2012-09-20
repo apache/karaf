@@ -16,12 +16,36 @@
  */
 package org.apache.karaf.packages.core;
 
+import java.util.List;
 import java.util.SortedMap;
 
 public interface PackageService {
 
+	/**
+	 * Gets the simplified package exports of a bundle. This does not show the 
+	 * package versions.
+	 * 
+	 * @param bundleId
+	 * @return
+	 */
+    List<String> getExports(long bundleId);
+
+    List<String> getImports(long bundleId);
+
+	/**
+	 * Gets a map of all exported packages with their version and the bundles that exprot them
+	 * The key is in the form packagename:version.
+	 * 
+	 * @return 
+	 */
     SortedMap<String, PackageVersion> getExports();
 
+    /**
+     * Gets a map of all package imports. 
+     * The key is the import filter.
+     *  
+     * @return
+     */
     SortedMap<String, PackageRequirement> getImports();
 
 }
