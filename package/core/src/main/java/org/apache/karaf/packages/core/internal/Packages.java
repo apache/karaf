@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.packages.core.internal;
 
+import java.util.List;
 import java.util.SortedMap;
 
 import javax.management.NotCompliantMBeanException;
@@ -125,5 +126,16 @@ public class Packages extends StandardMBean implements PackagesMBean {
             throw new RuntimeException(e.getMessage(), e);
         }
     }
+
+	@Override
+	public List<String> getExports(long bundleId) {
+		return packageService.getExports(bundleId);
+		
+	}
+
+	@Override
+	public List<String> getImports(long bundleId) {
+		return packageService.getImports(bundleId);
+	}
 
 }

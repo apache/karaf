@@ -52,6 +52,10 @@ public class PackageRequirement {
     }
 
     public String getPackageName() {
+        return getPackageName(filter);
+    }
+    
+    public static String getPackageName(String filter) {
         Matcher matcher = packagePattern.matcher(filter);
         matcher.matches();
         return matcher.group(1);

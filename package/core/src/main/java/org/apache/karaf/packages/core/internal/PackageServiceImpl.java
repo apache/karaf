@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.packages.core.internal;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
@@ -63,6 +64,7 @@ public class PackageServiceImpl implements PackageService {
         return packageVersionMap;
     }
 
+    @Override
     public SortedMap<String, PackageRequirement> getImports() {
         Bundle[] bundles = bundleContext.getBundles();
         SortedMap<String, PackageRequirement> filterMap = new TreeMap<String, PackageRequirement>();
@@ -99,5 +101,34 @@ public class PackageServiceImpl implements PackageService {
         }
         return false;
     }
+
+	@Override
+	public List<String> getExports(long bundleId) {
+		Bundle bundle = bundleContext.getBundle(bundleId);
+        BundleRevision rev = bundle.adapt(BundleRevision.class);
+        List<BundleCapability> caps = rev.getDeclaredCapabilities(BundleRevision.PACKAGE_NAMESPACE);
+        List<String> exports = new ArrayList<String>();
+        for (BundleCapability cap : caps) {
+            Map<String, Object> attr = cap.getAttributes();
+            String packageName = (String)attr.get(BundleRevision.PACKAGE_NAMESPACE);
+            exports.add(packageName);
+        }
+		return exports ;
+	}
+
+	@Override
+	public List<String> getImports(long bundleId) {
+		Bundle bundle = bundleContext.getBundle(bundleId);
+        BundleRevision rev = bundle.adapt(BundleRevision.class);
+        List<BundleRequirement> reqs = rev.getDeclaredRequirements(BundleRevision.PACKAGE_NAMESPACE);
+        List<String> imports = new ArrayList<String>();
+        for (BundleRequirement req : reqs) {
+            Map<String, String> attr = req.getDirectives();
+            String filter = attr.get("filter");
+            String name = PackageRequirement.getPackageName(filter);
+            imports.add(name);
+        }
+		return imports;
+	}
 
 }
