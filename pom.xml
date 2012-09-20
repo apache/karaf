@@ -110,7 +110,7 @@
         <commons-collections.version>3.2.1</commons-collections.version>
         <commons-compress.version>1.4.1</commons-compress.version>
         <commons-fileupload.version>1.2.2</commons-fileupload.version>
-        <commons-io.version>1.3.2</commons-io.version>
+        <commons-io.version>2.4</commons-io.version>
         <commons-lang.version>2.6</commons-lang.version>
         <icu4j.version>4.8.1.1</icu4j.version>
         <injection.bundle.version>1.0</injection.bundle.version>
@@ -1118,7 +1118,7 @@
                 <version>${commons-compress.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.commons</groupId>
+                <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
                 <version>${commons-io.version}</version>
             </dependency>
