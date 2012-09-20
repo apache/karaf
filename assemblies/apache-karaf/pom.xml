@@ -591,31 +591,6 @@
                             <assemblyId />
                         </configuration>
                     </execution>
-                    <execution>
-                        <id>unix-src</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <configuration>
-                            <descriptors>
-                                <descriptor>src/main/descriptors/unix-src.xml</descriptor>
-                            </descriptors>
-                            <tarLongFileMode>gnu</tarLongFileMode>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>windows-src</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <configuration>
-                            <descriptors>
-                                <descriptor>src/main/descriptors/windows-src.xml</descriptor>
-                            </descriptors>
-                        </configuration>
-                    </execution>
                 </executions>
             </plugin>
             <plugin>
@@ -638,7 +613,7 @@
                                 <feature>config</feature>
                                 <feature>ssh</feature>
                                 <feature>management</feature>
-				<feature>wrapper</feature>
+				                <feature>wrapper</feature>
                             </features>
                             <includeMvnBasedDescriptors>true</includeMvnBasedDescriptors>
                             <repository>target/features-repo</repository>
@@ -705,7 +680,7 @@
         </profile>
 
         <profile>
-            <id>assembly-src</id>
+            <id>src</id>
             <build>
                 <plugins>
                     <plugin>
