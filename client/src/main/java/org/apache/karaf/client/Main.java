@@ -47,6 +47,7 @@ public class Main {
         String host = "localhost";
         int port = 8101;
         String user = "karaf";
+        String password = null;
         StringBuilder sb = new StringBuilder();
         int level = 1;
         int retryAttempts = 0;
@@ -64,6 +65,8 @@ public class Main {
                     level++;
                 } else if (args[i].equals("-r")) {
                     retryAttempts = Integer.parseInt(args[++i]);
+                } else if (args[i].equals("-p")) {
+                    password = args[++i];
                 } else if (args[i].equals("-d")) {
                     retryDelay = Integer.parseInt(args[++i]);
                 } else if (args[i].equals("--help")) {
@@ -71,6 +74,8 @@ public class Main {
                     System.out.println("  -a [port]     specify the port to connect to");
                     System.out.println("  -h [host]     specify the host to connect to");
                     System.out.println("  -u [user]     specify the user name");
+                    System.out.println("  -p [password] specify the password (optional, if not provided, the password is prompted)");
+                    System.out.println("                NB: this option is deprecated and will be removed in next Karaf version");
                     System.out.println("  --help        shows this help message");
                     System.out.println("  -v            raise verbosity");
                     System.out.println("  -r [attempts] retry connection establishment (up to attempts times)");
@@ -116,7 +121,9 @@ public class Main {
                 }
             } while (session == null);
             if (!session.authAgent(user).await().isSuccess()) {
-                String password = readLine("Password: ");
+                if (password == null) {
+                    password = readLine("Password: ");
+                }
                 if (!session.authPassword(user, password).await().isSuccess()) {
                     throw new Exception("Authentication failure");
                 }
