@@ -164,7 +164,8 @@ public class Content {
         return Collections.<ConfigFileInfo>unmodifiableList(getConfigfile());
     }
 
-    protected void interpolation(Properties properties) {
+    @SuppressWarnings("rawtypes")
+	protected void interpolation(Properties properties) {
         for (Enumeration e = properties.propertyNames(); e.hasMoreElements(); ) {
             String key = (String) e.nextElement();
             String val = properties.getProperty(key);

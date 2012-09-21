@@ -19,22 +19,16 @@ package org.apache.karaf.features.internal;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.util.List;
 import org.apache.karaf.features.Repository;
 import org.apache.karaf.features.internal.model.Features;
 import org.apache.karaf.features.internal.model.JaxbUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The repository implementation.
  */
 public class RepositoryImpl implements Repository {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RepositoryImpl.class);
-    private int unnamedRepoId = 0;
     private URI uri;
-    private List<URI> repositories;
     private boolean valid;
     private Features features;
 

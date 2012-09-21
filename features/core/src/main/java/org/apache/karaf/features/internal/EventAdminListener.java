@@ -33,15 +33,15 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 public class EventAdminListener implements FeaturesListener {
 
-    private final ServiceTracker tracker;
+    private final ServiceTracker<EventAdmin, EventAdmin> tracker;
 
     public EventAdminListener(BundleContext context) {
-        tracker = new ServiceTracker(context, EventAdmin.class.getName(), null);
+        tracker = new ServiceTracker<EventAdmin, EventAdmin>(context, EventAdmin.class.getName(), null);
         tracker.open();
     }
 
     public void featureEvent(FeatureEvent event) {
-        EventAdmin eventAdmin = (EventAdmin) tracker.getService();
+        EventAdmin eventAdmin = tracker.getService();
         if (eventAdmin == null) {
             return;
         }
@@ -66,7 +66,7 @@ public class EventAdminListener implements FeaturesListener {
     }
 
     public void repositoryEvent(RepositoryEvent event) {
-        EventAdmin eventAdmin = (EventAdmin) tracker.getService();
+        EventAdmin eventAdmin = tracker.getService();
         if (eventAdmin == null) {
             return;
         }

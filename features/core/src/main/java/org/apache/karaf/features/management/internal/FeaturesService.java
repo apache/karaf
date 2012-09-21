@@ -47,15 +47,13 @@ import org.osgi.framework.ServiceRegistration;
 public class FeaturesService extends StandardEmitterMBean implements
     MBeanRegistration, FeaturesServiceMBean {
 
-    private ServiceRegistration registration;
+    private ServiceRegistration<FeaturesListener> registration;
 
     private BundleContext bundleContext;
 
 	private ObjectName objectName;
 
 	private volatile long sequenceNumber = 0;
-
-	private MBeanServer server;
 
     private org.apache.karaf.features.FeaturesService featuresService;
 
@@ -65,13 +63,12 @@ public class FeaturesService extends StandardEmitterMBean implements
 
     public ObjectName preRegister(MBeanServer server, ObjectName name) throws Exception {
         objectName = name;
-        this.server = server;
         return name;
     }
 
     public void postRegister(Boolean registrationDone) {
-        registration = bundleContext.registerService(FeaturesListener.class.getName(),
-            getFeaturesListener(), new Hashtable());
+        registration = bundleContext.registerService(FeaturesListener.class, 
+        		getFeaturesListener(), new Hashtable<String, String>());
     }
 
     public void preDeregister() throws Exception {
