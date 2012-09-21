@@ -48,16 +48,16 @@ public class Http extends StandardMBean implements HttpMBean {
     public TabularData getServlets() {
         try {
             CompositeType servletType = new CompositeType("Servlet", "HTTP Servlet",
-                new String[]{"ID", "Servlet", "Servlet Name", "State", "Alias", "URL"},
-                new String[]{"ID of the servlet", "Class name of the servlet", "Servlet Name", "Current state of the servlet", "Aliases of the servlet", "URL of the servlet"},
+                new String[]{"Bundle-ID", "Servlet", "Servlet Name", "State", "Alias", "URL"},
+                new String[]{"ID of the bundle that registered the servlet", "Class name of the servlet", "Servlet Name", "Current state of the servlet", "Aliases of the servlet", "URL of the servlet"},
                 new OpenType[]{SimpleType.LONG, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING});
-            TabularType tableType = new TabularType("Servlets", "Table of all HTTP servlets", servletType, new String[]{"ID"});
+            TabularType tableType = new TabularType("Servlets", "Table of all HTTP servlets", servletType, new String[]{"Bundle-ID", "Servlet Name", "State"});
             TabularData table = new TabularDataSupport(tableType);
             List<ServletInfo> servletInfos = servletService.getServlets();
             for (ServletInfo info : servletInfos) {
             
                 CompositeData data = new CompositeDataSupport(servletType,
-                        new String[]{"ID", "Servlet", "Servlet Name", "State", "Alias", "URL"},
+                        new String[]{"Bundle-ID", "Servlet", "Servlet Name", "State", "Alias", "URL"},
                         new Object[]{info.getBundle().getBundleId(), info.getClassName(), info.getName(), info.getStateString(), info.getAlias(), Arrays.toString(info.getUrls())});
                 table.put(data);
             
