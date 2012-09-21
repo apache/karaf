@@ -19,5 +19,3 @@
 
 @javax.xml.bind.annotation.XmlSchema(namespace = "http://karaf.apache.org/xmlns/features/v1.2.0", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
 package org.apache.karaf.features.internal.model;
-
-import org.apache.karaf.features.FeaturesNamespaces;

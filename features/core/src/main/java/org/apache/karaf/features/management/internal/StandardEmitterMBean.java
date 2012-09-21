@@ -19,7 +19,8 @@ public class StandardEmitterMBean extends StandardMBean implements NotificationE
 
     private final NotificationBroadcasterSupport emitter;
 
-    public StandardEmitterMBean(Class mbeanInterface) throws NotCompliantMBeanException {
+    @SuppressWarnings("rawtypes")
+	public StandardEmitterMBean(Class mbeanInterface) throws NotCompliantMBeanException {
         super(mbeanInterface);
         this.emitter = new NotificationBroadcasterSupport() {
             @Override
