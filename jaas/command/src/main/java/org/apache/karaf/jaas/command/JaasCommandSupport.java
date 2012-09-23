@@ -59,53 +59,6 @@ public abstract class JaasCommandSupport extends OsgiCommandSupport {
         return null;
     }
 
-
-    /**
-     * Returns the JAAS Realm named as realmName.
-     *
-     * @param realmName the name of the JAAS Realm.
-     * @return the corresponding <code>JaasRealm</code>.
-     */
-    public JaasRealm findRealm(String realmName) {
-        if (realms != null) {
-            for (JaasRealm realm : realms) {
-                if (realm.getName().equals(realmName)) {
-                    return realm;
-                }
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Returns the JAAS Module entry of the specified realm, identified by the given name.
-     *
-     * @param realm the JAAS realm.
-     * @param moduleName the JAAS module name.
-     * @return the corresponding <code>AppConfigurationEntry</code>.
-     */
-    public AppConfigurationEntry findLoginModule(JaasRealm realm, String moduleName) {
-
-        AppConfigurationEntry appConfigurationEntry = null;
-        if (realm != null) {
-            AppConfigurationEntry[] entries = realm.getEntries();
-
-            // if no moduleName provided and a there is a single module in the realm.
-            if (entries != null && entries.length == 1 && moduleName == null) {
-                return entries[0];
-            }
-
-            for (AppConfigurationEntry entry : entries) {
-                String moduleClass = (String) entry.getOptions().get(ProxyLoginModule.PROPERTY_MODULE);
-                if (moduleName != null && (moduleName.equals(entry.getLoginModuleName()) || moduleName.equals(moduleClass))) {
-                    return entry;
-                }
-            }
-
-        }
-        return appConfigurationEntry;
-    }
-
     public List<JaasRealm> getRealms() {
         return realms;
     }
