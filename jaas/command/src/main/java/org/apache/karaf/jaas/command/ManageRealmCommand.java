@@ -17,11 +17,13 @@ package org.apache.karaf.jaas.command;
 
 import org.apache.felix.gogo.commands.Command;
 import org.apache.felix.gogo.commands.Option;
+import org.apache.karaf.jaas.boot.ProxyLoginModule;
 import org.apache.karaf.jaas.config.JaasRealm;
 import org.apache.karaf.jaas.modules.BackingEngine;
 
 import javax.security.auth.login.AppConfigurationEntry;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 
 @Command(scope = "jaas", name = "manage", description = "Manage users and roles of a JAAS Realm")
@@ -36,12 +38,12 @@ public class ManageRealmCommand extends JaasCommandSupport {
     @Option(name = "--module", aliases = {}, description = "Login Module Class Name", required = false, multiValued = false)
     String moduleName;
 
-    @Option(name = "-f", aliases = { "--force" }, description = "Force the management of this realm, even if another one was under management", required = false, multiValued = false)
+    @Option(name = "-f", aliases = {"--force"}, description = "Force the management of this realm, even if another one was under management", required = false, multiValued = false)
     boolean force;
 
     @Override
     protected Object doExecute() throws Exception {
-        if (realmName == null && index <= 0 ) {
+        if (realmName == null && index <= 0) {
             System.err.println("A valid realm or the realm index need to be specified");
             return null;
         }
@@ -54,28 +56,77 @@ public class ManageRealmCommand extends JaasCommandSupport {
             System.err.println("Another JAAS Login Module is being edited. Cancel/update first, or use the --force option.");
         } else {
 
-            JaasRealm realm = findRealmByNameOrIndex(realmName, index);
+            JaasRealm realm = null;
+            AppConfigurationEntry entry = null;
 
-            if (realm != null) {
-                AppConfigurationEntry entry = findEntryByRealmAndName(realm, moduleName);
+            if (index > 0) {
+                // user provided the index, get the realm AND entry from the index
+                List<JaasRealm> realms = getRealms();
+                if (realms != null && realms.size() > 0) {
+                    int i = 1;
+                    for (JaasRealm r : realms) {
+                        AppConfigurationEntry[] entries = r.getEntries();
 
-                if (entry != null) {
-                    Queue<JaasCommandSupport> commands = null;
-
-                    commands = (Queue<JaasCommandSupport>) this.session.get(JAAS_CMDS);
-                    if (commands == null) {
-                        commands = new LinkedList<JaasCommandSupport>();
+                        if (entries != null) {
+                            for (int j = 0; j < entries.length; j++) {
+                                if (i == index) {
+                                    realm = r;
+                                    entry = entries[j];
+                                    break;
+                                }
+                                i++;
+                            }
+                        }
                     }
-
-                    this.session.put(JAAS_REALM, realm);
-                    this.session.put(JAAS_ENTRY, entry);
-                    this.session.put(JAAS_CMDS, commands);
-                } else {
-                    System.err.println(String.format("Could not find JAAS Login Module %s in JAAS Realm %s", moduleName, realmName));
                 }
             } else {
-                System.err.println(String.format("Could not find JAAS Realm %s", realmName));
+                List<JaasRealm> realms = getRealms();
+                if (realms != null && realms.size() > 0) {
+                    for (JaasRealm r : realms) {
+                        if (r.getName().equals(realmName)) {
+                            realm = r;
+                            break;
+                        }
+                    }
+
+                }
+                AppConfigurationEntry[] entries = realm.getEntries();
+                if (entries != null) {
+                    for (AppConfigurationEntry e : entries) {
+                        String moduleClass = (String) e.getOptions().get(ProxyLoginModule.PROPERTY_MODULE);
+                        if (moduleName == null) {
+                            entry = e;
+                            break;
+                        } else {
+                            if (moduleName.equals(e.getLoginModuleName()) || moduleName.equals(moduleClass)) {
+                                entry = e;
+                                break;
+                            }
+                        }
+                    }
+                }
             }
+
+            if (realm == null) {
+                System.err.println("JAAS realm has not been found.");
+                return null;
+            }
+
+            if (entry == null) {
+                System.err.println("JAAS module has not been found.");
+                return null;
+            }
+
+            Queue<JaasCommandSupport> commands = null;
+
+            commands = (Queue<JaasCommandSupport>) this.session.get(JAAS_CMDS);
+            if (commands == null) {
+                commands = new LinkedList<JaasCommandSupport>();
+            }
+
+            this.session.put(JAAS_REALM, realm);
+            this.session.put(JAAS_ENTRY, entry);
+            this.session.put(JAAS_CMDS, commands);
         }
         return null;
     }
