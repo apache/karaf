@@ -15,7 +15,6 @@
  */
 package org.apache.karaf.jaas.command;
 
-import org.apache.karaf.jaas.boot.ProxyLoginModule;
 import org.apache.karaf.jaas.config.JaasRealm;
 import org.apache.karaf.jaas.modules.BackingEngine;
 import org.apache.karaf.jaas.modules.BackingEngineService;
@@ -58,53 +57,6 @@ public abstract class JaasCommandSupport extends OsgiCommandSupport {
         return null;
     }
 
-
-    /**
-     * Returns the Jaas Realm named as realmName.
-     *
-     * @param realmName
-     * @return
-     */
-    public JaasRealm findRealmByNameOrIndex(String realmName, int index) {
-        JaasRealm realm = null;
-        if (realms != null) {
-            for (int i=1; i <= realms.size();i++) {
-                if (realms.get(i-1).getName().equals(realmName) || index == i)
-                    return realms.get(i-1);
-            }
-        }
-        return realm;
-    }
-
-    /**
-     * Returns the Jaas Module entry of the specified realm, named as moduleName.
-     *
-     * @param moduleName
-     * @return
-     */
-    public AppConfigurationEntry findEntryByRealmAndName(JaasRealm realm, String moduleName) {
-        AppConfigurationEntry appConfigurationEntry = null;
-        if (realm != null) {
-
-            AppConfigurationEntry[] entries = realm.getEntries();
-
-            //If no moduleName provided and a there is a single module in the realm.
-            if (entries != null && entries.length == 1 && moduleName == null) {
-                return entries[0];
-            }
-
-            for (AppConfigurationEntry entry : entries) {
-                String moduleClass = (String) entry.getOptions().get(ProxyLoginModule.PROPERTY_MODULE);
-                if (moduleName.equals(entry.getLoginModuleName()) || moduleName.equals(moduleClass)) {
-                    return entry;
-                }
-            }
-
-        }
-        return appConfigurationEntry;
-    }
-
-
     public List<JaasRealm> getRealms() {
         return realms;
     }
@@ -120,4 +72,5 @@ public abstract class JaasCommandSupport extends OsgiCommandSupport {
     public void setBackingEngineService(BackingEngineService backingEngineService) {
         this.backingEngineService = backingEngineService;
     }
+
 }
