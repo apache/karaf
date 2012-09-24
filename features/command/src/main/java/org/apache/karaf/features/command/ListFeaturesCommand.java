@@ -16,7 +16,10 @@
  */
 package org.apache.karaf.features.command;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.apache.karaf.features.Feature;
@@ -32,6 +35,9 @@ public class ListFeaturesCommand extends FeaturesCommandSupport {
     @Option(name = "-i", aliases = {"--installed"}, description = "Display a list of all installed features only", required = false, multiValued = false)
     boolean onlyInstalled;
 
+    @Option(name = "-o", aliases = {"--ordered"}, description = "Display a list using alphabetical order ", required = false, multiValued = false)
+    boolean ordered;
+
     protected void doExecute(FeaturesService featuresService) throws Exception {
         boolean needsLegend = false;
         
@@ -45,7 +51,11 @@ public class ListFeaturesCommand extends FeaturesCommandSupport {
 
         List<Repository> repos = Arrays.asList(featuresService.listRepositories());
         for (Repository r : repos) {
-            for (Feature f : r.getFeatures()) {
+            List<Feature> features = Arrays.asList(r.getFeatures());
+            if (ordered) {
+                Collections.sort(features, new FeatureComparator());
+            }
+            for (Feature f : features) {
                 if (onlyInstalled && !featuresService.isInstalled(f)) {
                     // Filter out not installed features if we only want to see the installed ones
                     continue;
@@ -72,6 +82,12 @@ public class ListFeaturesCommand extends FeaturesCommandSupport {
 
     private boolean isInstalledViaDeployDir(String st) {
         return (st == null || st.length() <= 1) ? false : (st.charAt(st.length() - 1) == '*');
+    }
+
+    class FeatureComparator implements Comparator<Feature> {
+        public int compare(Feature o1, Feature o2) {
+            return o1.getName().toLowerCase().compareTo( o2.getName().toLowerCase() );
+        }
     }
 
 }
