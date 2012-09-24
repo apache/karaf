@@ -142,11 +142,11 @@
                             <goal>run</goal>
                         </goals>
                         <configuration>
-                            <tasks>
+                            <target>
                                 <move todir="${project.build.directory}/karaf/WEB-INF/karaf">
                                     <fileset dir="${project.build.directory}/karaf/WEB-INF/apache-karaf-${project.version}" />
                                 </move>
-                            </tasks>
+                            </target>
                         </configuration>
                     </execution>
                 </executions>
