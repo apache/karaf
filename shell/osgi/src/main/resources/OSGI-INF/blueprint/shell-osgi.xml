@@ -51,6 +51,9 @@
         <command name="osgi/ls">
             <action class="org.apache.karaf.shell.osgi.ListServices"/>
         </command>
+        <command name="osgi/bundle-services">
+            <action class="org.apache.karaf.shell.osgi.ListBundleServices"/>
+        </command>
         <command name="osgi/name">
             <action class="org.apache.karaf.shell.osgi.Name"/>
         </command>
