@@ -53,6 +53,7 @@ bundle:info = { osgi:info $args } ;
 bundle:refresh = { osgi:refresh $args } ;
 bundle:resolve = { osgi:resolve $args } ;
 bundle:restart = { osgi:restart $args } ;
+bundle:services = { osgi:bundle-services $args } ;
 bundle:start-level = { osgi:start-level $args } ;
 bundle:tree-show = { dev:show-tree $args } ;
 bundle:update = { osgi:update $args } ;
