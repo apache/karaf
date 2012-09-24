@@ -24,6 +24,8 @@ import org.apache.karaf.features.Repository;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 @Command(scope = "features", name = "list", description = "Lists all existing features available from the defined repositories.")
@@ -32,6 +34,8 @@ public class ListFeaturesCommand extends FeaturesCommandSupport {
     @Option(name = "-i", aliases = {"--installed"}, description = "Display a list of all installed features only", required = false, multiValued = false)
     boolean installed;
 
+    @Option(name = "-o", aliases = {"--ordered"}, description = "Display a list using alphabetical order ", required = false, multiValued = false)
+    boolean ordered;
     private static final String STATE = "State";
     private static final String INSTALLED = "installed  ";
     private static final String UNINSTALLED = "uninstalled";
@@ -97,6 +101,9 @@ public class ListFeaturesCommand extends FeaturesCommandSupport {
 
         // Print the feature data.
         boolean needsLegend = false;
+        if (ordered) {
+            Collections.sort(features, new FeatureComparator());
+        }
         for (Feature f : features) {
 
             sb.setLength(0);
@@ -148,6 +155,14 @@ public class ListFeaturesCommand extends FeaturesCommandSupport {
             System.out.println("* Installed via deploy directory");
         }
 
+    }
+    
+    class FeatureComparator implements Comparator<Feature>
+    {
+        public int compare(Feature o1, Feature o2)
+        {
+            return o1.getName().toLowerCase().compareTo( o2.getName().toLowerCase() );
+        }
     }
 
 }
