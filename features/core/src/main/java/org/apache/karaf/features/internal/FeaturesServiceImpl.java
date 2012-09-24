@@ -43,11 +43,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Queue;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
@@ -98,7 +95,7 @@ import static java.lang.String.format;
  * create dummy sub shells.  When invoked, these commands will prompt the user for
  * installing the needed bundles.
  */
-public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
+public class FeaturesServiceImpl implements FeaturesService {
 
     public static final String CONFIG_KEY = "org.apache.karaf.features.configKey";
     public static String VERSION_PREFIX = "version=";
@@ -117,7 +114,6 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
     private List<FeaturesListener> listeners = new CopyOnWriteArrayIdentityList<FeaturesListener>();
     private ThreadLocal<Repository> repo = new ThreadLocal<Repository>();
     private EventAdminListener eventAdminListener;
-    private final Object refreshLock = new Object();
     private long refreshTimeout = 5000;
     private RegionsPersistence regionsPersistence;
 
@@ -617,7 +613,6 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
     }
 
     protected void doInstallFeatureConditionals(InstallationState state, Feature feature,  boolean verbose) throws Exception {
-        InstallationState failure = new InstallationState();
         //Check conditions of the current feature.
         for (Conditional conditional : feature.getConditional()) {
 
@@ -1109,8 +1104,6 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
     }
 
     public void start() throws Exception {
-        // Register FrameworkEventListener
-        bundleContext.addFrameworkListener(this);
         // Register EventAdmin listener
         EventAdminListener listener = null;
         try {
@@ -1188,26 +1181,26 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
     }
 
     public void stop() throws Exception {
-        bundleContext.removeFrameworkListener(this);
         uris = new HashSet<URI>(repositories.keySet());
         while (!repositories.isEmpty()) {
             internalRemoveRepository(repositories.keySet().iterator().next());
         }
     }
 
-    public void frameworkEvent(FrameworkEvent event) {
-        if (event.getType() == FrameworkEvent.PACKAGES_REFRESHED) {
-            synchronized (refreshLock) {
-                refreshLock.notifyAll();
-            }
-        }
-    }
-
     protected void refreshPackages(Collection<Bundle> bundles) throws InterruptedException {
+    	final Object refreshLock = new Object();
         FrameworkWiring wiring = bundleContext.getBundle().adapt(FrameworkWiring.class);
         if (wiring != null) {
             synchronized (refreshLock) {
-                wiring.refreshBundles(bundles, this);
+                wiring.refreshBundles(bundles, new FrameworkListener() {
+					public void frameworkEvent(FrameworkEvent event) {
+						if (event.getType() == FrameworkEvent.PACKAGES_REFRESHED) {
+				            synchronized (refreshLock) {
+				                refreshLock.notifyAll();
+				            }
+				        }
+					}
+				});
                 refreshLock.wait(refreshTimeout);
             }
         }
@@ -1532,7 +1525,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
     private void waitForUrlHandler(String protocol) {
         try {
             Filter filter = bundleContext.createFilter("(&(" + Constants.OBJECTCLASS + "=" + URLStreamHandlerService.class.getName() + ")(url.handler.protocol=" + protocol + "))");
-            ServiceTracker urlHandlerTracker = new ServiceTracker(bundleContext, filter, null);
+            ServiceTracker<URLStreamHandlerService, URLStreamHandlerService> urlHandlerTracker = new ServiceTracker<URLStreamHandlerService, URLStreamHandlerService>(bundleContext, filter, null);
             try {
                 urlHandlerTracker.open();
                 urlHandlerTracker.waitForService(30000);
