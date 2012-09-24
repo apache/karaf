@@ -49,7 +49,6 @@
                 <configuration>
                     <instructions>
                         <Import-Package>
-                            !org.apache.karaf.region.persist;version="${project.version}",
                             *
                         </Import-Package>
                         <Export-Package>org.apache.karaf.region.persist;version="${project.version}"</Export-Package>
