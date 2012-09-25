@@ -33,7 +33,7 @@ import java.net.URL;
 import java.net.URLConnection;
 
 import org.apache.karaf.tooling.exam.options.KarafDistributionOption;
-import org.apache.karaf.tooling.exam.regression.supports.MyServlet;
+import org.apache.karaf.tooling.exam.regression.supports.EchoServlet;
 import org.apache.karaf.tooling.exam.regression.supports.ServletActivator;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -49,6 +49,9 @@ import org.osgi.framework.Constants;
 public class KarafWithBundleTest {
     @Test
     public void testService() throws Exception {
+        // Give Servicetracker some time to install the servlet
+        Thread.sleep(1000);
+        System.out.println("Trying to get url");
         URL url = new URL("http://localhost:9080/test/services");
         URLConnection conn = url.openConnection();
         conn.setDoOutput(true);
@@ -71,13 +74,13 @@ public class KarafWithBundleTest {
                 .versionAsInProject()).useDeployFolder(false).unpackDirectory(new File("target/paxexam/unpack/")),
             keepRuntimeFolder(),
             scanFeatures(maven().groupId("org.apache.karaf.features").artifactId("standard").type("xml")
-                .classifier("features").versionAsInProject(), "war").start(),
+                .classifier("features").versionAsInProject(), "http").start(),
             // set the system property for pax web
             KarafDistributionOption.editConfigurationFilePut("etc/org.ops4j.pax.web.cfg", "org.osgi.service.http.port",
                 "9080"),
             // create bundle to install
             streamBundle(bundle()
-                .add(MyServlet.class)
+                .add(EchoServlet.class)
                 .add(ServletActivator.class)
                 .set(Constants.BUNDLE_SYMBOLICNAME, "MyBundleTest")
                 .set(Constants.BUNDLE_ACTIVATOR, ServletActivator.class.getName())
