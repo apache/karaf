@@ -161,12 +161,7 @@ public class ConsoleFactory {
 
     protected String startAgent(String user) {
         try {
-            local = new AgentImpl();
-            URL url = bundleContext.getBundle().getResource("karaf.key");
-            InputStream is = url.openStream();
-            ObjectInputStream r = new ObjectInputStream(is);
-            KeyPair keyPair = (KeyPair) r.readObject();
-            local.addIdentity(keyPair, "karaf");
+            local = SshAgentLoader.load(bundleContext);
             String agentId = "local:" + user;
             Hashtable properties = new Hashtable();
             properties.put("id", agentId);
@@ -207,4 +202,22 @@ public class ConsoleFactory {
             return stream;
         }
     }
+
+    static class SshAgentLoader {
+        static SshAgent load(BundleContext bundleContext) {
+            try {
+                SshAgent agent = new AgentImpl();
+                URL url = bundleContext.getBundle().getResource("karaf.key");
+                InputStream is = url.openStream();
+                ObjectInputStream r = new ObjectInputStream(is);
+                KeyPair keyPair = (KeyPair) r.readObject();
+                agent.addIdentity(keyPair, "karaf");
+                return agent;
+            } catch (Throwable e) {
+                LOGGER.warn("Error starting ssh agent for local console", e);
+                return null;
+            }
+        }
+    }
+
 }
