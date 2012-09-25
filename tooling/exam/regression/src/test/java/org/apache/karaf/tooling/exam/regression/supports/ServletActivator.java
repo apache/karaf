@@ -24,6 +24,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
+import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,52 +32,48 @@ public class ServletActivator implements BundleActivator {
 
     private static final transient Logger LOG = LoggerFactory.getLogger(ServletActivator.class);
 
-    private static boolean registerService;
+    private HttpServiceTracker tracker;
 
-    /**
-     * HttpService reference.
-     */
-    private ServiceReference httpServiceRef;
-
-    /**
-     * Called when the OSGi framework starts our bundle
-     */
     @Override
     public void start(BundleContext bc) throws Exception {
-        registerServlet(bc);
+        tracker = new HttpServiceTracker(bc);
+        tracker.open();
     }
 
-    /**
-     * Called when the OSGi framework stops our bundle
-     */
     @Override
     public void stop(BundleContext bc) throws Exception {
-        if (httpServiceRef != null) {
-            bc.ungetService(httpServiceRef);
-            httpServiceRef = null;
-        }
+        tracker.close();
     }
 
-    protected void registerServlet(BundleContext bundleContext) throws Exception {
-        httpServiceRef = bundleContext.getServiceReference(HttpService.class.getName());
+    class HttpServiceTracker extends ServiceTracker<HttpService, HttpService> {
 
-        if (httpServiceRef != null && !registerService) {
-            LOG.info("Register the servlet service");
-            final HttpService httpService = (HttpService) bundleContext.getService(httpServiceRef);
-            if (httpService != null) {
-                // create a default context to share between registrations
-                final HttpContext httpContext = httpService.createDefaultHttpContext();
-                // register the hello world servlet
-                final Dictionary<String, String> initParams = new Hashtable<String, String>();
-                initParams.put("servlet-name", "TestServlet");
-                httpService.registerServlet(
-                    "/test/services", // alias
-                    new MyServlet(), // register servlet
-                    initParams, // init params
-                    httpContext // http context
-                    );
-                registerService = true;
-            }
+        private static final String ALIAS = "/test/services";
+
+        public HttpServiceTracker(BundleContext context) {
+            super(context, HttpService.class, null);
         }
+
+        @Override
+        public HttpService addingService(ServiceReference<HttpService> reference) {
+            HttpService httpService = context.getService(reference);
+            final HttpContext httpContext = httpService.createDefaultHttpContext();
+            final Dictionary<String, String> initParams = new Hashtable<String, String>();
+            initParams.put("servlet-name", "TestServlet");
+            try {
+                httpService.registerServlet(ALIAS, new EchoServlet(), initParams, httpContext);
+                LOG.info("Servlet registered successfully");
+            } catch (Exception e) {
+                LOG.error(e.getMessage(), e);
+            }
+            return super.addingService(reference);
+        }
+
+        @Override
+        public void removedService(ServiceReference<HttpService> reference, HttpService service) {
+            HttpService httpService = context.getService(reference);
+            httpService.unregister(ALIAS);
+            super.removedService(reference, service);
+        }
+
     }
 }
