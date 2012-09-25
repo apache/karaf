@@ -31,10 +31,15 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Dictionary;
+import java.util.Hashtable;
+
+import javax.inject.Inject;
 
 import org.apache.karaf.tooling.exam.options.KarafDistributionOption;
 import org.apache.karaf.tooling.exam.regression.supports.EchoServlet;
 import org.apache.karaf.tooling.exam.regression.supports.ServletActivator;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Option;
@@ -42,15 +47,47 @@ import org.ops4j.pax.exam.junit.Configuration;
 import org.ops4j.pax.exam.junit.ExamReactorStrategy;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
 import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
+import org.ops4j.pax.web.service.spi.ServletEvent;
+import org.ops4j.pax.web.service.spi.ServletListener;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 
 @RunWith(JUnit4TestRunner.class)
 @ExamReactorStrategy(AllConfinedStagedReactorFactory.class)
 public class KarafWithBundleTest {
+    @Inject
+    protected BundleContext bundleContext;
+
+    private ServletListener webListener;
+
+    @Before
+    public void registerListener() {
+        final Object me = this;
+        webListener = new ServletListener() {
+
+            @Override
+            public void servletEvent(ServletEvent event) {
+                System.out.println(event);
+                if (event.getType() == ServletEvent.DEPLOYED && EchoServlet.ALIAS.equals(event.getAlias())) {
+                    synchronized (me) {
+                        me.notify();
+                    }
+                }
+            }
+        };
+        Dictionary<String, ?> properties = new Hashtable<String, String>();
+        bundleContext.registerService(ServletListener.class, webListener, properties);
+    }
+
+    private void waitForServlet() throws InterruptedException {
+        synchronized (this) {
+            wait(1000);
+        }
+    }
+
     @Test
     public void testService() throws Exception {
-        // Give Servicetracker some time to install the servlet
-        Thread.sleep(1000);
+        waitForServlet();
         System.out.println("Trying to get url");
         URL url = new URL("http://localhost:9080/test/services");
         URLConnection conn = url.openConnection();

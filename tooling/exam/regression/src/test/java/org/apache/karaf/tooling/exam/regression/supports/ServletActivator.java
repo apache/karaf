@@ -46,9 +46,7 @@ public class ServletActivator implements BundleActivator {
     }
 
     class HttpServiceTracker extends ServiceTracker<HttpService, HttpService> {
-
-        private static final String ALIAS = "/test/services";
-
+        
         public HttpServiceTracker(BundleContext context) {
             super(context, HttpService.class, null);
         }
@@ -60,7 +58,7 @@ public class ServletActivator implements BundleActivator {
             final Dictionary<String, String> initParams = new Hashtable<String, String>();
             initParams.put("servlet-name", "TestServlet");
             try {
-                httpService.registerServlet(ALIAS, new EchoServlet(), initParams, httpContext);
+                httpService.registerServlet(EchoServlet.ALIAS, new EchoServlet(), initParams, httpContext);
                 LOG.info("Servlet registered successfully");
             } catch (Exception e) {
                 LOG.error(e.getMessage(), e);
@@ -71,7 +69,7 @@ public class ServletActivator implements BundleActivator {
         @Override
         public void removedService(ServiceReference<HttpService> reference, HttpService service) {
             HttpService httpService = context.getService(reference);
-            httpService.unregister(ALIAS);
+            httpService.unregister(EchoServlet.ALIAS);
             super.removedService(reference, service);
         }
 
