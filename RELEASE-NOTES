@@ -15,6 +15,223 @@
  * limitations under the License.
  */
 
+                    Apache Karaf 2.3.0
+                    ==================
+
+  Overview
+  --------
+
+  This release of Apache Karaf sets the stage for the 3.0.x line, introducing OSGi rev 4.3 
+support, new commands, features, improvements, and a mulititude of dependency updates. At 
+Karaf's core you'll find Equinox 3.8.0.v20120529-1548 and Apache Felix framework 4.0.3. New 
+additions such as Karaf-pax-exam, commands back ported from Karaf 3.x, and command aliases 
+to help make migrating betwen 2.3.x and 3.x easier.
+  For more detail please see the change log below.
+
+  Changelog
+  ---------
+
+** Bug
+    * [KARAF-536] - Backspace no longer works in Putty after using 'connect' command to connect to other instance, and commands are printed in only 2 columns.
+    * [KARAF-643] - KarArtifactInstaller::init has incorrect warning logic
+    * [KARAF-1040] - Commands should not catch exceptions but should rethrow them
+    * [KARAF-1050] - "osgi:start xxx" doesn't print anything
+    * [KARAF-1066] - make features xml parser more forgiving
+    * [KARAF-1162] - A command that can not be loaded breaks the whole completion
+    * [KARAF-1202] - log:tail spins with debug on
+    * [KARAF-1293] - feature level start-level not completely finished....
+    * [KARAF-1305] - Error with Basic HTTP Authentication when using karaf realm
+    * [KARAF-1343] - Features repo points to the old pax-wicket app
+    * [KARAF-1360] - Configration update doesn't work
+    * [KARAF-1363] - Upgrade Jetty when bugfix for the Loggging to stderr bug is available
+    * [KARAF-1373] - features-maven-plugin, unexpected text in stderr
+    * [KARAF-1374] - Fileinstaller logging by default is not enabled.
+    * [KARAF-1376] - Demo deployer is not sync with Karaf version
+    * [KARAF-1387] - Warning to missing a feature repository name even when the name is defined
+    * [KARAF-1388] - SSHD authorized key provider should log in DEBUG
+    * [KARAF-1389] - SSH doesn't correctly use the karaf.base variable
+    * [KARAF-1392] - Removing a KAR should uninstall the shipped features
+    * [KARAF-1394] - Custom login modules not seen with Equinox
+    * [KARAF-1416] - Blueprint archetype instructions is missing
+    * [KARAF-1430] - Default child instance config is not the same as the root instance
+    * [KARAF-1491] - Admin service not able to start child instances when the JDK path contains a space on OS X
+    * [KARAF-1496] - Bad login when using sufficient modules but when the first fail
+    * [KARAF-1513] - SSH keystore incompatible if generated with IBM JDK
+    * [KARAF-1529] - command-watch messes the output when used with commands that take longer than the interval
+    * [KARAF-1538] - Exceptions when unregistering jmx means during a restart
+    * [KARAF-1541] - jaas:realm-manage raises a NullPointerException
+    * [KARAF-1547] - NullpointerException when running commands on jdk 6 update 33 or jdk 7 update 5
+    * [KARAF-1554] - Integration test failure on FeatureTest around osgi compareTo method
+    * [KARAF-1564] - karaf feature validate plugin should support to load the exports packages from dependency features
+    * [KARAF-1566] - instance:clone set the source instance in error
+    * [KARAF-1569] - aries.util.version is defined twice in pom.xml
+    * [KARAF-1573] - Potential ZipFile leak at KarArtifactInstaller.install()
+    * [KARAF-1585] - Installing using wrap protocol fails when specifying bundle version
+    * [KARAF-1587] - When executing a command through the client, no error is printed in the console in case of errors
+    * [KARAF-1591] - Upgrade to XBean 3.11.1
+    * [KARAF-1609] - command-watch info does not work
+    * [KARAF-1614] - upgrade to aries.proxy 0.3.1
+    * [KARAF-1617] - Blueprint deployer in combination with maven URL deployer creates wrong OSGi/blueprint/ file
+    * [KARAF-1624] - Rat checks fail
+    * [KARAF-1666] - Default configuration for jetty.xml could create problems
+    * [KARAF-1675] - Wrapper service requires a shell
+    * [KARAF-1680] - org.apache.karaf:apache-karaf:2.2.8:xml:features artifact is not available, for building custom Karaf
+    * [KARAF-1683] - "no matching cipher found" error connecting via SSH to wrapper Karaf service - on Ubuntu
+    * [KARAF-1695] - startup fails on Windows with only JRE installed
+    * [KARAF-1697] - Jenkins build fail
+    * [KARAF-1699] - MBeans should support the same flags as the commands
+    * [KARAF-1702] - Stopping the console bundle should not shutdown the osgi framework
+    * [KARAF-1706] - Features bundle versions are not consistent
+    * [KARAF-1736] - Feature spring-struts can't be installed
+    * [KARAF-1746] - karaf github contributions rules
+    * [KARAF-1751] - Spring feature dependencies specified too tightly
+    * [KARAF-1754] - updating features.xml in auto deploy folder results in duplication
+    * [KARAF-1756] - No SSH connection possible on Debian 6.0.5
+    * [KARAF-1763] - shutdown command doesn't work correctly
+    * [KARAF-1766] - Web Console Missing Metatype Import
+    * [KARAF-1791] - Add minimal distribution
+    * [KARAF-1797] - NPE thrown from OsgiConfiguration.unregister
+    * [KARAF-1809] - Feature spring-web-portlet can't be installed
+    * [KARAF-1821] - Some etc files are executable whereas it should not be
+    * [KARAF-1822] - BundlesMBean should use bundles attribute instead of list() operation
+    * [KARAF-1824] - tooling-exam contains reference to wrong commons-io artifact
+    * [KARAF-1825] - SystemMBean should provide startLevel attribute
+    * [KARAF-1826] - ConfigMBean should use configs attribute instead of list() operation
+    * [KARAF-1827] - Build the manual within specific profiles
+    * [KARAF-1830] - ObrMBean should use attribute for bundles and URLs instead of list operations
+    * [KARAF-1831] - PackagesMBean should use attributes for imported/exported packages instead of operations
+    * [KARAF-1832] - ServicesMBean should use attribute instead of list() operation
+    * [KARAF-1839] - system bundle also should export javax.xml.ws.spi.http package
+    * [KARAF-1840] - should also endorse saaj-api
+    * [KARAF-1845] - Minimal distribution doesn't start
+    * [KARAF-1852] - Osgi packages are exported with wrong versions
+    * [KARAF-1858] - itests look stuck (use 100% CPU)
+
+** Dependency upgrade
+    * [KARAF-681] - Upgrade to Pax URL 1.3.4
+    * [KARAF-770] - Upgrade to Eclipse Equinox 3.7.1
+    * [KARAF-854] - Upgrade to Felix Framework 4.0.1
+    * [KARAF-855] - Add support for OSGi R4.3
+    * [KARAF-903] - Upgrade to Pax Web 1.1.2
+    * [KARAF-961] - Update Mina SSHD to version 0.6.0
+    * [KARAF-966] - Update xbean to 3.8
+    * [KARAF-1346] - Upgrade to Mina 2.0.4
+    * [KARAF-1378] - Upgrade to fileinstall 3.2.2
+    * [KARAF-1425] - Upgrade to pax-web 1.1.3
+    * [KARAF-1431] - Upgrade to Pax URL 1.3.5
+    * [KARAF-1458] - Upgrade to ServiceMix Specs 2.0
+    * [KARAF-1490] - upgrade to pax-logging 1.6.7
+    * [KARAF-1498] - Upgrade blueprint, jmx and util bundles to next minor release
+    * [KARAF-1517] - Upgrade to OSGi Compendium 4.3.0
+    * [KARAF-1520] - Upgrade to Jansi 1.9
+    * [KARAF-1531] - Upgrade to Felix ConfigAdmin 1.4.0
+    * [KARAF-1534] - Upgrade to JLine 2.7
+    * [KARAF-1535] - Upgrade to Felix Utils 1.2.0
+    * [KARAF-1536] - Upgrade to Felix FileInstall 3.2.4
+    * [KARAF-1568] - Upgrade to sshd 0.7.0
+    * [KARAF-1577] - Upgrade to slf4j 1.6.6
+    * [KARAF-1578] - Upgrade to pax-logging 1.6.9
+    * [KARAF-1579] - Upgrade to commons-compress 1.4.1
+    * [KARAF-1582] - Upgrade to Felix BundleRepository 1.6.6
+    * [KARAF-1601] - Upgrade to maven-antrun-plugin 1.7
+    * [KARAF-1603] - Upgrade to maven-surefire-plugin 2.12
+    * [KARAF-1604] - Upgrade to maven-assembly-plugin 2.3
+    * [KARAF-1606] - Upgrade to maven-compiler-plugin 2.5.1
+    * [KARAF-1608] - Upgrade to maven-dependency-plugin 2.4
+    * [KARAF-1610] - Upgrade to maven-eclipse-plugin 2.9
+    * [KARAF-1611] - Upgrade to maven-enforcer-plugin 1.1
+    * [KARAF-1612] - Upgrade to maven-enforcer-plugin 1.1
+    * [KARAF-1613] - Upgrade to maven-jar-plugin 2.4
+    * [KARAF-1615] - Upgrade to maven-javadoc-plugin 2.8.1
+    * [KARAF-1616] - Upgrade to maven-release-plugin 2.3.2
+    * [KARAF-1619] - Upgrade to maven-remote-resources-plugin 1.3
+    * [KARAF-1620] - Upgrade to maven-shade-plugin 1.7
+    * [KARAF-1621] - Upgrade to maven-site-plugin 3.1
+    * [KARAF-1622] - Upgrade to maven-war-plugin 2.2
+    * [KARAF-1623] - Upgrade to apache-rat-plugin 0.8
+    * [KARAF-1634] - Upgrade to Felix Framework 4.0.3
+    * [KARAF-1636] - Upgrade to Equinox 3.8
+    * [KARAF-1642] - Upgrade to exec-maven-plugin 1.2.1
+    * [KARAF-1670] - Uprade Aries Application Management to 1.0.0
+    * [KARAF-1672] - Upgrade Aries Application Deployment 1.0.0
+    * [KARAF-1703] - Upgrade to aries 1.0.x
+    * [KARAF-1719] - Upgrade to javax.mail 1.4.5
+    * [KARAF-1732] - Upgrade to ServiceMix Ant bundle 1.8.4_1
+    * [KARAF-1733] - Upgrade to ServiceMix aopalliance bundle  1.0_6
+    * [KARAF-1737] - Upgrade to ServiceMix cglib bundle 2.2.2_1
+    * [KARAF-1740] - Upgrade to Jetty 7.6.5.v20120716
+    * [KARAF-1745] - Upgrade to Felix WebConsole 4.0.0
+    * [KARAF-1747] - Update to jline 2.8
+    * [KARAF-1769] - Upgrade to pax-logging 1.6.10
+    * [KARAF-1773] - Upgrade to pax-logging 1.6.10
+    * [KARAF-1781] - Upgrade to Mina 2.0.5
+    * [KARAF-1787] - Upgrade to commons-fileupload 1.2.2
+    * [KARAF-1788] - Upgrade to commons-io 2.4
+    * [KARAF-1859] - Upgrade to ServiceMix Specs 2.1
+
+
+** Improvement
+    * [KARAF-447] - Add JDBC lock implementation for PostgreSQL
+    * [KARAF-1023] - Add karaf activators for jars in the lib folder
+    * [KARAF-1045] - Improved help system
+    * [KARAF-1048] - make pom.xml eclipse 3.7 m2e friendly
+    * [KARAF-1118] - Enable install of CXF into karaf with a simple command
+    * [KARAF-1181] - Add tab completer to the help command
+    * [KARAF-1368] - Make it easy to enable Karaf PropertiesLoginModule via an optional feature
+    * [KARAF-1383] - Fix warning messages during bundle build
+    * [KARAF-1396] - config:list command description should be enhanced
+    * [KARAF-1410] - Error in stop script if KARAF_DEBUG is enabled
+    * [KARAF-1499] - InfoAction shell command should sort the properties from InfoProvider instances
+    * [KARAF-1500] - Forgot a space between hours and minutes in InfoAction.java
+    * [KARAF-1521] - add-features-to-repo goal should define a correct default value for repository
+    * [KARAF-1558] - Instance clone should be able to clone the root instance
+    * [KARAF-1562] - Improve message displayed when the JAAS login module doesn't have a backing engine
+    * [KARAF-1574] - When two karaf containers are started locally, an exception is displayed at startup.  A nicer message would be better.
+    * [KARAF-1575] - Features provided by karaf do not have any description
+    * [KARAF-1586] - wrapper:install command should be usable outside OSGi too
+    * [KARAF-1600] - Avoid duplicate feature and bundle resolution when installing cascading features
+    * [KARAF-1640] - Make sure the local console is fully working before the user can type commands
+    * [KARAF-1657] - org.ops4j.pax.url.mvn.proxySupport=false
+    * [KARAF-1676] - OBR URL's in Karaf have no simple identifier
+    * [KARAF-1693] - Rename command-watch to watch
+    * [KARAF-1700] - update manual to reflect JDBC Lock updates
+    * [KARAF-1710] - Remove @version headers from source
+    * [KARAF-1749] - The command packages:imports should work on unresolved bundles
+    * [KARAF-1752] - hard coded features uri in features deployer feature discovery
+    * [KARAF-1753] - Port SCR Components Karaf 2.3
+    * [KARAF-1757] - Welcome message incorrect during ssh session or using bin/client.
+    * [KARAF-1798] - Use exam framework for our itests and increase tests coverage
+    * [KARAF-1810] - Provide alias for feature:repo-add in Karaf 2.x
+    * [KARAF-1811] - Remove section about console colors from manual
+    * [KARAF-1812] - Use Felix properties and remove org.apache.karaf.util.Properties
+    * [KARAF-1813] - Add osgi:name and name attribute in SystemMBean
+    * [KARAF-1828] - Build src distributions within specific profiles
+    * [KARAF-1829] - Upgrade to Spring 2.5.6.SEC03
+    * [KARAF-1833] - Reintroduce the -p option in the client
+    * [KARAF-1834] - Make KarafTestSupport available externally
+    * [KARAF-1844] - Add command aliases for migration purpose between 2.3.x and 3.x
+    * [KARAF-1850] - feature:list should use alphabetical order
+
+** New Feature
+    * [KARAF-866] - New dev:wait-for-service command to wait for a given osgi service
+    * [KARAF-908] - Provide a way to access system properties easily in the shell
+    * [KARAF-1334] - Use the new servicemix spec to allow the use of both the JRE implementations and implementations from bundles
+    * [KARAF-1475] - Support SSH agent forwarding and use the agent authentication when connecting to other instances
+    * [KARAF-1546] - Add -i/--install-all option to feature:add-url
+    * [KARAF-1557] - Merge instance clone command on 2.3.x branch
+    * [KARAF-1777] - backport the new command bundle:classes
+    * [KARAF-1778] - backport new command bundle:find-class
+    * [KARAF-1792] - Add karaf-pax-exam
+    * [KARAF-1806] - Add version attribute in the SystemMBean
+    * [KARAF-1856] - Merge bundle:diag command
+    * [KARAF-1857] - Merge bundle:services command
+
+** Task
+    * [KARAF-1415] - Support Jetty 7.6
+    * [KARAF-1445] - more svn:ignore are needed
+
+
+
                     Apache Karaf 2.2.6
                     ==================
 
