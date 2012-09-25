@@ -20,12 +20,10 @@ package org.apache.karaf.shell.console.impl.jline;
 
 import java.io.InputStream;
 import java.io.PrintStream;
-import java.security.Principal;
 import java.security.PrivilegedAction;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
-import java.util.Set;
 
 import javax.security.auth.Subject;
 

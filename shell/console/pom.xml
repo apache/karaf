@@ -130,6 +130,7 @@
                         <Import-Package>
                             org.osgi.service.event;resolution:=optional,
                             org.apache.karaf.branding;resolution:=optional,
+                            org.apache.sshd.agent*;resolution:=optional,
                             *
                         </Import-Package>
                         <Export-Package>
