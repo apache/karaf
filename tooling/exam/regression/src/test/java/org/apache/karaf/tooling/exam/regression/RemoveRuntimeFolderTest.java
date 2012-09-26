@@ -18,7 +18,6 @@
 package org.apache.karaf.tooling.exam.regression;
 
 import static org.apache.karaf.tooling.exam.options.KarafDistributionOption.karafDistributionConfiguration;
-import static org.apache.karaf.tooling.exam.options.KarafDistributionOption.keepRuntimeFolder;
 import static org.ops4j.pax.exam.CoreOptions.maven;
 
 import java.io.File;
@@ -34,23 +33,25 @@ import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
 
 @RunWith(JUnit4TestRunner.class)
 @ExamReactorStrategy(AllConfinedStagedReactorFactory.class)
-public class KeepFolderTest {
+public class RemoveRuntimeFolderTest {
 
-    private File runtimeFolder;
+    private static File runtimeFolder;
 
     @Configuration
     public Option[] config() {
         return new Option[]{
             karafDistributionConfiguration().frameworkUrl(
                 maven().groupId("org.apache.karaf").artifactId("apache-karaf").type("zip")
-                    .versionAsInProject()).unpackDirectory(new File("target/paxexam/unpack/")), keepRuntimeFolder() };
+                    .versionAsInProject())
+                    // unpackDirectory seems to be necessary to make sure the working directory is set like we use below
+                    .unpackDirectory(new File("target/paxexam/unpack/")) };
     }
 
     @Test
     public void test() throws Exception {
         runtimeFolder = new File(".").getAbsoluteFile().getParentFile();
         Assert.assertTrue("Runtime folder should exist while test runs", runtimeFolder.exists());
-        System.out.println("Please check manually that the folder " + runtimeFolder.getAbsolutePath() + " still exists after this test");
+        System.out.println("Please check manually that the folder " + runtimeFolder.getAbsolutePath() + " is deleted after this test");
     }
-    
+
 }
