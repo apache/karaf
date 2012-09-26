@@ -17,11 +17,16 @@
 
 package org.apache.karaf.tooling.exam.regression;
 
-import static junit.framework.Assert.assertTrue;
 import static org.apache.karaf.tooling.exam.options.KarafDistributionOption.editConfigurationFilePut;
 import static org.apache.karaf.tooling.exam.options.KarafDistributionOption.karafDistributionConfiguration;
 import static org.ops4j.pax.exam.CoreOptions.maven;
 
+import javax.inject.Inject;
+
+import junit.framework.Assert;
+
+import org.apache.karaf.system.FrameworkType;
+import org.apache.karaf.system.SystemService;
 import org.apache.karaf.tooling.exam.options.configs.CustomProperties;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,6 +39,9 @@ import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
 @RunWith(JUnit4TestRunner.class)
 @ExamReactorStrategy(AllConfinedStagedReactorFactory.class)
 public class EquinoxFrameworkTest {
+    
+    @Inject
+    SystemService systemService;
 
     @Configuration
     public Option[] config() {
@@ -45,33 +53,7 @@ public class EquinoxFrameworkTest {
 
     @Test
     public void test() throws Exception {
-        System.out.println("===========================================");
-        System.out.println("===========================================");
-        System.out.println("===========================================");
-        System.out.println("===========================================");
-        System.out.println("===========================================");
-        System.out.println("===========================================");
-        System.out.println("===========================================");
-        System.out.println("===========================================");
-        System.out.println("===========================================");
-        System.out.println("===========================================");
-        System.out.println("===========================================");
-        assertTrue(true);
+        Assert.assertEquals(FrameworkType.equinox, systemService.getFramework());
     }
 
-    @Test
-    public void test2() throws Exception {
-        System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXxx");
-        System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXxx");
-        System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXxx");
-        System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXxx");
-        System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXxx");
-        System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXxx");
-        System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXxx");
-        System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXxx");
-        System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXxx");
-        System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXxx");
-        System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXxx");
-        assertTrue(true);
-    }
 }
