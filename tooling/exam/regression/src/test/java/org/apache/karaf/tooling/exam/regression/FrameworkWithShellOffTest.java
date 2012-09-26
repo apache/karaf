@@ -17,10 +17,13 @@
 
 package org.apache.karaf.tooling.exam.regression;
 
-import static junit.framework.Assert.assertTrue;
 import static org.apache.karaf.tooling.exam.options.KarafDistributionOption.configureConsole;
 import static org.apache.karaf.tooling.exam.options.KarafDistributionOption.karafDistributionConfiguration;
 import static org.ops4j.pax.exam.CoreOptions.maven;
+
+import javax.inject.Inject;
+
+import junit.framework.Assert;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,10 +32,13 @@ import org.ops4j.pax.exam.junit.Configuration;
 import org.ops4j.pax.exam.junit.ExamReactorStrategy;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
 import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
+import org.osgi.framework.BundleContext;
 
 @RunWith(JUnit4TestRunner.class)
 @ExamReactorStrategy(AllConfinedStagedReactorFactory.class)
 public class FrameworkWithShellOffTest {
+    @Inject
+    BundleContext bc;
 
     @Configuration
     public Option[] config() {
@@ -44,33 +50,8 @@ public class FrameworkWithShellOffTest {
 
     @Test
     public void test() throws Exception {
-        System.out.println("===========================================");
-        System.out.println("===========================================");
-        System.out.println("===========================================");
-        System.out.println("===========================================");
-        System.out.println("===========================================");
-        System.out.println("===========================================");
-        System.out.println("===========================================");
-        System.out.println("===========================================");
-        System.out.println("===========================================");
-        System.out.println("===========================================");
-        System.out.println("===========================================");
-        assertTrue(true);
+        Assert.assertEquals("false", bc.getProperty("karaf.startLocalConsole"));
+        Assert.assertEquals("false", bc.getProperty("karaf.startRemoteShell"));
     }
 
-    @Test
-    public void test2() throws Exception {
-        System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXxx");
-        System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXxx");
-        System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXxx");
-        System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXxx");
-        System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXxx");
-        System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXxx");
-        System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXxx");
-        System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXxx");
-        System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXxx");
-        System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXxx");
-        System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXxx");
-        assertTrue(true);
-    }
 }
