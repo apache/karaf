@@ -25,32 +25,29 @@ import static org.junit.Assert.assertFalse;
 @ExamReactorStrategy(AllConfinedStagedReactorFactory.class)
 public class EnterpriseFeaturesTest extends KarafTestSupport {
 
+    private void installAndAssertFeature(String feature) throws Exception {
+        featureService.installFeature(feature);
+        assertFeatureInstalled(feature);
+    }
+
     @Test
     public void installTransactionFeature() throws Exception {
-        executeCommand("feature:install transaction");
-        String transactionFeatureStatus = executeCommand("feature:list -i | grep transaction");
-        assertFalse("transaction feature is not installed", transactionFeatureStatus.isEmpty());
+        installAndAssertFeature("transaction");
     }
 
     @Test
     public void installJpaFeature() throws Exception {
-        executeCommand("feature:install jpa");
-        String jpaFeatureStatus = executeCommand("feature:list -i | grep jpa");
-        assertFalse("jpa feature is not installed", jpaFeatureStatus.isEmpty());
+        installAndAssertFeature("jpa");
     }
 
     @Test
     public void installJndiFeature() throws Exception {
-        executeCommand("feature:install jndi");
-        String jndiFeatureStatus = executeCommand("feature:list -i | grep jndi");
-        assertFalse("jndi feature is not installed", jndiFeatureStatus.isEmpty());
+        installAndAssertFeature("jndi");
     }
 
     @Test
     public void installApplicationWithoutIsolationFeature() throws Exception {
-        executeCommand("feature:install application-without-isolation");
-        String applicationWithoutIsolationFeatureStatus = executeCommand("feature:list -i | grep application-without-isolation");
-        assertFalse("application-without-isolation feature is not installed", applicationWithoutIsolationFeatureStatus.isEmpty());
+        installAndAssertFeature("application-without-isolation");
     }
 
 }
