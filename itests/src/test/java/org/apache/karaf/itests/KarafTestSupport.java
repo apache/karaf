@@ -66,8 +66,8 @@ public class KarafTestSupport {
     @Configuration
     public Option[] config() {
         return new Option[]{
-            karafDistributionConfiguration().frameworkUrl(maven().groupId("org.apache.karaf").artifactId("apache-karaf").versionAsInProject().type("tar.gz"))
-                    .karafVersion(MavenUtils.getArtifactVersion("org.apache.karaf", "apache-karaf")).name("Apache Karaf").unpackDirectory(new File("target/exam")),
+            karafDistributionConfiguration().frameworkUrl(maven().groupId("org.apache.karaf").artifactId("apache-karaf").versionAsInProject().type("zip"))
+                    .name("Apache Karaf").unpackDirectory(new File("target/exam")),
                 keepRuntimeFolder(),
                 logLevel(LogLevelOption.LogLevel.ERROR) };
     }
