@@ -85,6 +85,11 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.apache.karaf.system</groupId>
+            <artifactId>org.apache.karaf.system.core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.compendium</artifactId>
             <version>${osgi.compendium.version}</version>
