@@ -40,10 +40,18 @@
     <dependencies>
 
         <dependency>
-            <groupId>org.ops4j.pax.url</groupId>
-            <artifactId>pax-url-aether</artifactId>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>apache-karaf</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+            <type>zip</type>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.karaf</groupId>
+                    <artifactId>org.apache.karaf.client</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
-
         <dependency>
             <groupId>org.apache.karaf</groupId>
             <artifactId>apache-karaf</artifactId>
@@ -67,6 +75,7 @@
             <groupId>org.apache.karaf.tooling.exam</groupId>
             <artifactId>org.apache.karaf.tooling.exam.container</artifactId>
             <version>${project.version}</version>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
