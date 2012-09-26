@@ -13,14 +13,11 @@
  */
 package org.apache.karaf.itests;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.ExamReactorStrategy;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
 import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
-
-import static org.junit.Assert.assertFalse;
 
 @RunWith(JUnit4TestRunner.class)
 @ExamReactorStrategy(AllConfinedStagedReactorFactory.class)
@@ -28,104 +25,73 @@ public class StandardFeaturesTest extends KarafTestSupport {
 
     @Test
     public void testBootFeatures() throws Exception {
-        // standard feature
-        String standardFeatureStatus = executeCommand("feature:list -i | grep standard");
-        assertFalse("standard feature is not installed", standardFeatureStatus.isEmpty());
-        // config feature
-        String configFeatureStatus = executeCommand("feature:list -i | grep config");
-        assertFalse("config feature is not installed", configFeatureStatus.isEmpty());
-        // region feature
-        String regionFeatureStatus = executeCommand("feature:list -i | grep region");
-        assertFalse("region feature is not installed", regionFeatureStatus.isEmpty());
-        // package feature
-        String packageFeatureStatus = executeCommand("feature:list -i | grep package");
-        assertFalse("package feature is not installed", packageFeatureStatus.isEmpty());
-        // kar feature
-        String karFeatureStatus = executeCommand("feature:list -i | grep kar");
-        assertFalse("kar feature is not installed", karFeatureStatus.isEmpty());
-        // ssh feature
-        String sshFeatureStatus = executeCommand("feature:list -i | grep ssh");
-        assertFalse("ssh feature is not installed", sshFeatureStatus.isEmpty());
-        // management feature
-        String managementFeatureStatus = executeCommand("feature:list -i | grep management");
-        assertFalse("management feature is not installed", managementFeatureStatus.isEmpty());
+        assertFeatureInstalled("standard");
+        assertFeatureInstalled("config");
+        assertFeatureInstalled("region");
+        assertFeatureInstalled("package");
+        assertFeatureInstalled("kar");
+        assertFeatureInstalled("ssh");
+        assertFeatureInstalled("management");
+    }
+
+    private void installAndAssertFeature(String feature) throws Exception {
+        featureService.installFeature(feature);
+        assertFeatureInstalled(feature);
     }
 
     @Test
     public void installWrapperFeature() throws Exception {
-        executeCommand("feature:install wrapper");
-        String wrapperFeatureStatus = executeCommand("feature:list -i | grep wrapper");
-        assertFalse("wrapper feature is not installed", wrapperFeatureStatus.isEmpty());
+        installAndAssertFeature("wrapper");
     }
 
     @Test
     public void installObrFeature() throws Exception {
-        executeCommand("feature:install obr");
-        String obrFeatureStatus = executeCommand("feature:list -i | grep obr");
-        assertFalse("obr feature is not installed", obrFeatureStatus.isEmpty());
+        installAndAssertFeature("obr");
     }
 
     @Test
     public void installJettyFeature() throws Exception {
-        executeCommand("feature:install jetty");
-        String jettyFeatureStatus = executeCommand("feature:list -i | grep jetty");
-        assertFalse("jetty feature is not installed", jettyFeatureStatus.isEmpty());
+        installAndAssertFeature("jetty");
     }
 
     @Test
     public void installHttpFeature() throws Exception {
-        executeCommand("feature:install http");
-        String httpFeatureStatus = executeCommand("feature:list -i | grep http");
-        assertFalse("http feature is not installed", httpFeatureStatus.isEmpty());
+        installAndAssertFeature("http");
     }
 
     @Test
     public void installHttpWhiteboardFeature() throws Exception {
-        executeCommand("feature:install http-whiteboard");
-        String httpWhiteboardFeatureStatus = executeCommand("feature:list -i | grep http-whiteboard");
-        assertFalse("http-whiteboard feature is not installed", httpWhiteboardFeatureStatus.isEmpty());
+        installAndAssertFeature("http-whiteboard");
     }
 
     @Test
     public void installWarFeature() throws Exception {
-        executeCommand("feature:install war");
-        String warFeatureStatus = executeCommand("feature:list -i | grep war");
-        assertFalse("war feature is not installed", warFeatureStatus.isEmpty());
+        installAndAssertFeature("war");
     }
 
     @Test
     public void installWebConsoleFeature() throws Exception {
-        executeCommand("feature:install webconsole");
-        String webConsoleFeatureStatus = executeCommand("feature:list -i | grep webconsole");
-        assertFalse("webconsole feature is not installed", webConsoleFeatureStatus.isEmpty());
+        installAndAssertFeature("webconsole");
     }
 
     @Test
     public void installSchedulerFeature() throws Exception {
-        executeCommand("feature:install scheduler");
-        String schedulerFeatureStatus = executeCommand("feature:list -i | grep scheduler");
-        assertFalse("scheduler feature is not installed", schedulerFeatureStatus.isEmpty());
+        installAndAssertFeature("scheduler");
     }
 
     @Test
     public void installEventAdminFeature() throws Exception {
-        executeCommand("feature:install eventadmin");
-        String eventAdminFeatureStatus = executeCommand("feature:list -i | grep eventadmin");
-        assertFalse("eventadmin feature is not installed", eventAdminFeatureStatus.isEmpty());
+        installAndAssertFeature("eventadmin");
     }
 
     @Test
     public void installJasyptEncryptionFeature() throws Exception {
-        executeCommand("feature:install jasypt-encryption");
-        String jasyptEncryptionFeatureStatus = executeCommand("feature:list -i | grep jasypt-encryption");
-        assertFalse("jasypt-encryption feature is not installed", jasyptEncryptionFeatureStatus.isEmpty());
+        installAndAssertFeature("jasypt-encryption");
     }
 
     @Test
     public void installScrFeature() throws Exception {
-        executeCommand("feature:install scr");
-        String scrFeatureStatus = executeCommand("feature:list -i | grep scr");
-        assertFalse("scr feature is not installed", scrFeatureStatus.isEmpty());
+        installAndAssertFeature("scr");
     }
 
 }
