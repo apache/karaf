@@ -579,7 +579,7 @@ public class FeaturesServiceImpl implements FeaturesService {
 
     protected static class InstallationState {
         final Set<Bundle> installed = new HashSet<Bundle>();
-        final Set<Bundle> bundles = new HashSet<Bundle>();
+        final Set<Bundle> bundles = new TreeSet<Bundle>();
         final Map<Long, BundleInfo> bundleInfos = new HashMap<Long, BundleInfo>();
         final Map<Feature, Set<Long>> features = new HashMap<Feature, Set<Long>>();
     }

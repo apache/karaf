@@ -73,6 +73,8 @@ public class FeaturesServiceTest extends TestCase {
 
         BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
         Bundle installedBundle = EasyMock.createMock(Bundle.class);
+        // required since the sorted set uses it
+        expect(installedBundle.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
 
         expect(bundleContext.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
 
@@ -101,6 +103,9 @@ public class FeaturesServiceTest extends TestCase {
         verify(bundleContext, installedBundle);
 
         reset(bundleContext, installedBundle);
+
+        // required since the sorted set uses it
+        expect(installedBundle.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
 
         expect(bundleContext.createFilter(EasyMock.<String>anyObject())).andReturn(null).anyTimes();
         expect(installedBundle.getSymbolicName()).andReturn(name).anyTimes();
@@ -146,7 +151,9 @@ public class FeaturesServiceTest extends TestCase {
         BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
         Bundle installedBundle = EasyMock.createMock(Bundle.class);
         Bundle framework = EasyMock.createMock(Bundle.class);
+        expect(installedBundle.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
 
+        // required since the sorted set uses it
         expect(bundleContext.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
 
         replay(bundleContext, installedBundle, framework);
@@ -154,10 +161,13 @@ public class FeaturesServiceTest extends TestCase {
         FeaturesServiceImpl svc = new FeaturesServiceImpl();
         svc.setBundleContext(bundleContext);
         svc.addRepository(uri);
-        
+
         verify(bundleContext, installedBundle, framework);
 
         reset(bundleContext, installedBundle, framework);
+
+        // required since the sorted set uses it
+        expect(installedBundle.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
 
         // Installs f1 and 0.1
         expect(bundleContext.createFilter(EasyMock.<String>anyObject())).andReturn(null).anyTimes();
@@ -284,6 +294,9 @@ public class FeaturesServiceTest extends TestCase {
         BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
         Bundle installedBundle = EasyMock.createMock(Bundle.class);
         Bundle framework = EasyMock.createMock(Bundle.class);
+
+        // required since the sorted set uses it
+        expect(installedBundle.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
 
         // Installs feature f1 with dependency on f2
         // so will install f2 first
@@ -466,6 +479,9 @@ public class FeaturesServiceTest extends TestCase {
         Bundle framework = EasyMock.createMock(Bundle.class);
         Bundle installedBundle = EasyMock.createMock(Bundle.class);
 
+        // required since the sorted set uses it
+        expect(installedBundle.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
+
         // Installs feature f1 with dependency on f2
         expect(bundleContext.createFilter(EasyMock.<String>anyObject())).andReturn(null).anyTimes();
         expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
@@ -556,6 +572,9 @@ public class FeaturesServiceTest extends TestCase {
         Bundle installedBundle = EasyMock.createMock(Bundle.class);
         Bundle framework = EasyMock.createMock(Bundle.class);
 
+        // required since the sorted set uses it
+        expect(installedBundle.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
+
         // Installs feature f1 with dependency on f2
         expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
         expect(bundleContext.installBundle(isA(String.class),
@@ -604,6 +623,10 @@ public class FeaturesServiceTest extends TestCase {
         BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
         Bundle installedBundle1 = EasyMock.createMock(Bundle.class);
         Bundle installedBundle2 = EasyMock.createMock(Bundle.class);
+
+        // required since the sorted set uses it
+        expect(installedBundle1.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
+        expect(installedBundle2.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
 
         // Installs feature f1 and f2
         expect(bundleContext.createFilter(EasyMock.<String>anyObject())).andReturn(null).anyTimes();
@@ -660,6 +683,10 @@ public class FeaturesServiceTest extends TestCase {
         Bundle installedBundle1 = EasyMock.createMock(Bundle.class);
         Bundle installedBundle2 = EasyMock.createMock(Bundle.class);
 
+        // required since the sorted set uses it
+        expect(installedBundle1.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
+        expect(installedBundle2.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
+
         // Installs feature f1 and f2
         expect(bundleContext.createFilter(EasyMock.<String>anyObject())).andReturn(null).anyTimes();
         expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
@@ -715,6 +742,10 @@ public class FeaturesServiceTest extends TestCase {
         BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
         Bundle installedBundle1 = EasyMock.createMock(Bundle.class);
         Bundle installedBundle2 = EasyMock.createMock(Bundle.class);
+
+        // required since the sorted set uses it
+        expect(installedBundle1.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
+        expect(installedBundle2.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
 
         // Installs feature f1 and f2
         expect(bundleContext.createFilter(EasyMock.<String>anyObject())).andReturn(null).anyTimes();
@@ -773,6 +804,10 @@ public class FeaturesServiceTest extends TestCase {
         BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
         Bundle installedBundle1 = EasyMock.createMock(Bundle.class);
         Bundle installedBundle2 = EasyMock.createMock(Bundle.class);
+
+        // required since the sorted set uses it
+        expect(installedBundle1.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
+        expect(installedBundle2.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
 
         // Installs feature f1 and f2
         expect(bundleContext.createFilter(EasyMock.<String>anyObject())).andReturn(null).anyTimes();
@@ -839,6 +874,10 @@ public class FeaturesServiceTest extends TestCase {
         Bundle installedBundle1 = EasyMock.createMock(Bundle.class);
         Bundle installedBundle2 = EasyMock.createMock(Bundle.class);
 
+        // required since the sorted set uses it
+        expect(installedBundle1.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
+        expect(installedBundle2.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
+
         // Installs feature f1
         expect(bundleContext.createFilter(EasyMock.<String>anyObject())).andReturn(null).anyTimes();
         expect(installedBundle1.getBundleId()).andReturn(12345L);
@@ -903,6 +942,8 @@ public class FeaturesServiceTest extends TestCase {
 
         BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
         Bundle bundle = EasyMock.createMock(Bundle.class);
+        // required since the sorted set uses it
+        expect(bundle.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
         expect(bundleContext.getBundle()).andReturn(bundle);
         expect(bundle.adapt(FrameworkWiring.class)).andReturn(null);
         expect(bundleContext.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
