@@ -16,9 +16,12 @@
  */
 package org.apache.karaf.tooling.exam.regression;
 
-import static junit.framework.Assert.assertTrue;
 import static org.apache.karaf.tooling.exam.options.KarafDistributionOption.karafDistributionConfiguration;
 import static org.ops4j.pax.exam.CoreOptions.maven;
+
+import javax.inject.Inject;
+
+import junit.framework.Assert;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,48 +30,38 @@ import org.ops4j.pax.exam.junit.Configuration;
 import org.ops4j.pax.exam.junit.ExamReactorStrategy;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
 import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 
 @RunWith(JUnit4TestRunner.class)
 @ExamReactorStrategy(AllConfinedStagedReactorFactory.class)
 public class Backward224Test {
+    @Inject
+    private BundleContext ctx;
+
+    private static final String version = "2.2.4";
 
     @Configuration
     public Option[] config() {
         return new Option[]{ karafDistributionConfiguration().frameworkUrl(
-            maven().groupId("org.apache.karaf").artifactId("apache-karaf").type("zip").version("2.2.4"))
-            .karafVersion("2.2.4").name("Apache Karaf") };
+            maven().groupId("org.apache.karaf").artifactId("apache-karaf").type("zip").version(version))
+            .karafVersion(version).name("Apache Karaf") };
     }
 
     @Test
     public void test() throws Exception {
-        System.out.println("===========================================");
-        System.out.println("===========================================");
-        System.out.println("===========================================");
-        System.out.println("===========================================");
-        System.out.println("===========================================");
-        System.out.println("===========================================");
-        System.out.println("===========================================");
-        System.out.println("===========================================");
-        System.out.println("===========================================");
-        System.out.println("===========================================");
-        System.out.println("===========================================");
-        assertTrue(true);
+        Bundle shellBundle = getShellBundle();
+        Assert.assertEquals(version, shellBundle.getVersion().toString());
     }
 
-    @Test
-    public void test2() throws Exception {
-        System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXxx");
-        System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXxx");
-        System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXxx");
-        System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXxx");
-        System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXxx");
-        System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXxx");
-        System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXxx");
-        System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXxx");
-        System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXxx");
-        System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXxx");
-        System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXxx");
-        assertTrue(true);
+    private Bundle getShellBundle() {
+        Bundle[] bundles = ctx.getBundles();
+        for (Bundle bundle : bundles) {
+            if ("org.apache.karaf.shell.osgi".equals(bundle.getSymbolicName())) {
+                return bundle;
+            }
+        }
+        throw new RuntimeException("Shell bundle not found");
     }
 
 }
