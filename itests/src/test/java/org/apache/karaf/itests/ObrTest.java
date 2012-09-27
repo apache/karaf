@@ -50,6 +50,7 @@ public class ObrTest extends KarafTestSupport {
             connector = this.getJMXConnector();
             MBeanServerConnection connection = connector.getMBeanServerConnection();
             ObjectName name = new ObjectName("org.apache.karaf:type=obr,name=root");
+            @SuppressWarnings("unchecked")
             List<String> urls = (List<String>) connection.getAttribute(name, "Urls");
             assertEquals(0, urls.size());
             TabularData bundles = (TabularData) connection.getAttribute(name, "Bundles");

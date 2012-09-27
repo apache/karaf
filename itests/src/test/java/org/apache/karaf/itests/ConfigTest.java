@@ -43,6 +43,7 @@ public class ConfigTest extends KarafTestSupport {
         assertFalse(configListOutput.isEmpty());
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void configsViaMBean() throws Exception {
         JMXConnector connector = null;
