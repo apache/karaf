@@ -16,6 +16,8 @@
  */
 package org.apache.karaf.features.internal;
 
+import static java.lang.String.format;
+
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -23,7 +25,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -36,16 +37,13 @@ import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 import java.util.regex.Matcher;
@@ -57,7 +55,6 @@ import org.apache.felix.utils.version.VersionRange;
 import org.apache.felix.utils.version.VersionTable;
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Conditional;
-import org.apache.karaf.features.ConfigFileInfo;
 import org.apache.karaf.features.Dependency;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeatureEvent;
@@ -76,18 +73,14 @@ import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.Version;
 import org.osgi.framework.startlevel.BundleStartLevel;
 import org.osgi.framework.wiring.FrameworkWiring;
-import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.url.URLStreamHandlerService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static java.lang.String.format;
 
 /**
  * The Features service implementation.
@@ -96,44 +89,25 @@ import static java.lang.String.format;
  * installing the needed bundles.
  */
 public class FeaturesServiceImpl implements FeaturesService {
-
-    public static final String CONFIG_KEY = "org.apache.karaf.features.configKey";
-    public static String VERSION_PREFIX = "version=";
-
     private static final Logger LOGGER = LoggerFactory.getLogger(FeaturesServiceImpl.class);
 
-    private BundleContext bundleContext;
-    private ConfigurationAdmin configAdmin;
+    private final BundleContext bundleContext;
+    private final FeatureConfigInstaller configManager;
+
     private long resolverTimeout = 5000;
     private Set<URI> uris;
     private Map<URI, RepositoryImpl> repositories = new HashMap<URI, RepositoryImpl>();
     private Map<String, Map<String, Feature>> features;
     private Map<Feature, Set<Long>> installed = new HashMap<Feature, Set<Long>>();
-    private String boot;
-    AtomicBoolean bootFeaturesInstalled = new AtomicBoolean();
     private List<FeaturesListener> listeners = new CopyOnWriteArrayIdentityList<FeaturesListener>();
     private ThreadLocal<Repository> repo = new ThreadLocal<Repository>();
     private EventAdminListener eventAdminListener;
     private long refreshTimeout = 5000;
     private RegionsPersistence regionsPersistence;
 
-    public FeaturesServiceImpl() {
-    }
-
-    public BundleContext getBundleContext() {
-        return bundleContext;
-    }
-
-    public void setBundleContext(BundleContext bundleContext) {
-        this.bundleContext = bundleContext;
-    }
-
-    public ConfigurationAdmin getConfigAdmin() {
-        return configAdmin;
-    }
-
-    public void setConfigAdmin(ConfigurationAdmin configAdmin) {
-        this.configAdmin = configAdmin;
+    public FeaturesServiceImpl(BundleContext bundleContext, ConfigurationAdmin configAdmin) {
+		this.bundleContext = bundleContext;
+		this.configManager = new FeatureConfigInstaller(configAdmin);
     }
 
     public long getResolverTimeout() {
@@ -183,10 +157,6 @@ public class FeaturesServiceImpl implements FeaturesService {
                 this.uris.add(new URI(value));
             }
         }
-    }
-
-    public void setBoot(String boot) {
-        this.boot = boot;
     }
 
     /**
@@ -433,10 +403,10 @@ public class FeaturesServiceImpl implements FeaturesService {
                     state.installed.addAll(s.installed);
 
                     //Check if current feature satisfies the conditionals of existing features
-                    for (Feature installedFeautre : listInstalledFeatures()) {
-                        for (Conditional conditional : installedFeautre.getConditional()) {
+                    for (Feature installedFeature : listInstalledFeatures()) {
+                        for (Conditional conditional : installedFeature.getConditional()) {
                             if (dependenciesSatisfied(conditional.getCondition(), state)) {
-                                doInstallFeatureConditionals(s, installedFeautre, verbose);
+                                doInstallFeatureConditionals(s, installedFeature, verbose);
                             }
                         }
                     }
@@ -592,7 +562,7 @@ public class FeaturesServiceImpl implements FeaturesService {
         for (Dependency dependency : feature.getDependencies()) {
             installFeatureDependency(dependency, state, verbose);
         }
-        installFeatureConfigs(feature, verbose);
+        configManager.installFeatureConfigs(feature, verbose);
         Set<Long> bundles = new TreeSet<Long>();
         
         for (BundleInfo bInfo : resolve(feature)) {
@@ -641,30 +611,6 @@ public class FeaturesServiceImpl implements FeaturesService {
         }
     }
     
-    private void installFeatureConfigs(Feature feature, boolean verbose) throws IOException, InvalidSyntaxException {
-        for (String config : feature.getConfigurations().keySet()) {
-            Dictionary<String,String> props = new Hashtable<String, String>(feature.getConfigurations().get(config));
-            String[] pid = parsePid(config);
-            Configuration cfg = findExistingConfiguration(configAdmin, pid[0], pid[1]);
-            if (cfg == null) {
-                cfg = createConfiguration(configAdmin, pid[0], pid[1]);
-                String key = createConfigurationKey(pid[0], pid[1]);
-                props.put(CONFIG_KEY, key);
-                if (cfg.getBundleLocation() != null) {
-                    cfg.setBundleLocation(null);
-                }
-                cfg.update(props);
-            }
-        }
-        for (ConfigFileInfo configFile : feature.getConfigurationFiles()) {
-            installConfigurationFile(configFile.getLocation(), configFile.getFinalname(), configFile.isOverride(), verbose);
-        }
-    }
-
-    private String createConfigurationKey(String pid, String factoryPid) {
-        return factoryPid == null ? pid : pid + "-" + factoryPid;
-    }
-
     protected List<BundleInfo> resolve(Feature feature) throws Exception {
         String resolver = feature.getResolver();
         // If no resolver is specified, we expect a list of uris
@@ -877,7 +823,7 @@ public class FeaturesServiceImpl implements FeaturesService {
             if (verbose) {
                 System.out.println("Installing bundle " + bundleLocation);
             }
-            Bundle b = getBundleContext().installBundle(bundleLocation, is);
+            Bundle b = bundleContext.installBundle(bundleLocation, is);
             
             // Define the startLevel for the bundle when defined
             int ibsl = bundleInfo.getStartLevel();
@@ -895,64 +841,7 @@ public class FeaturesServiceImpl implements FeaturesService {
         }
     }
     
-    public void installConfigurationFile(String fileLocation, String finalname, boolean override, boolean verbose) throws IOException {
-    	LOGGER.debug("Checking configuration file " + fileLocation);
-        if (verbose) {
-            System.out.println("Checking configuration file " + fileLocation);
-        }
-    	
-    	String basePath = System.getProperty("karaf.base");
-    	
-    	if (finalname.indexOf("${") != -1) {
-    		//remove any placeholder or variable part, this is not valid.
-    		int marker = finalname.indexOf("}");
-    		finalname = finalname.substring(marker+1);
-    	}
-    	
-    	finalname = basePath + File.separator + finalname;
-    	
-    	File file = new File(finalname); 
-    	if (file.exists() && !override) {
-    		LOGGER.debug("configFile already exist, don't override it");
-    		return;
-    	}
 
-        InputStream is = null;
-        FileOutputStream fop = null;
-        try {
-            is = new BufferedInputStream(new URL(fileLocation).openStream());
-
-            if (!file.exists()) {
-                File parentFile = file.getParentFile();
-                if (parentFile != null)
-                    parentFile.mkdirs();
-                file.createNewFile();
-            }
-
-            fop = new FileOutputStream(file);
-        
-            int bytesRead;
-            byte[] buffer = new byte[1024];
-            
-            while ((bytesRead = is.read(buffer)) != -1) {
-                fop.write(buffer, 0, bytesRead);
-            }
-        } catch (RuntimeException e) {
-            LOGGER.error(e.getMessage());
-            throw e;
-        } catch (MalformedURLException e) {
-        	LOGGER.error(e.getMessage());
-            throw e;
-		} finally {
-			if (is != null)
-				is.close();
-            if (fop != null) {
-			    fop.flush();
-			    fop.close();
-            }
-		}
-            
-    }
 
     public void uninstallFeature(String name) throws Exception {
         List<String> versions = new ArrayList<String>();
@@ -998,7 +887,7 @@ public class FeaturesServiceImpl implements FeaturesService {
             bundles.removeAll(b);
         }
         for (long bundleId : bundles) {
-            Bundle b = getBundleContext().getBundle(bundleId);
+            Bundle b = bundleContext.getBundle(bundleId);
             if (b != null) {
                 b.uninstall();
             }
@@ -1103,9 +992,8 @@ public class FeaturesServiceImpl implements FeaturesService {
         return features;
     }
 
-    public void start() throws Exception {
-        // Register EventAdmin listener
-        EventAdminListener listener = null;
+    private void registerEventAdminListener() {
+		EventAdminListener listener = null;
         try {
             getClass().getClassLoader().loadClass("org.bundles.service.event.EventAdmin");
             listener = new EventAdminListener(bundleContext);
@@ -1114,7 +1002,9 @@ public class FeaturesServiceImpl implements FeaturesService {
             LOGGER.debug("EventAdmin package is not available, just don't use it");
         }
         this.eventAdminListener = listener;
-        // Load State
+	}
+
+	private void initState() {
         if (!loadState()) {
             if (uris != null) {
                 for (URI uri : uris) {
@@ -1127,57 +1017,11 @@ public class FeaturesServiceImpl implements FeaturesService {
             }
             saveState();
         }
-        // Install boot features
-        if (boot != null && !bootFeaturesInstalled.get()) {
-            new Thread() {
-                public void run() {
-                    // splitting the features
-                    String[] list = boot.split(",");
-                    Set<Feature> features = new LinkedHashSet<Feature>();
-                    for (String f : list) {
-                        f = f.trim();
-                        if (f.length() > 0) {
-                            String featureVersion = null;
-
-                            // first we split the parts of the feature string to gain access to the version info
-                            // if specified
-                            String[] parts = f.split(";");
-                            String featureName = parts[0];
-                            for (String part : parts) {
-                                // if the part starts with "version=" it contains the version info
-                                if (part.startsWith(VERSION_PREFIX)) {
-                                    featureVersion = part.substring(VERSION_PREFIX.length());
-                                }
-                            }
-
-                            if (featureVersion == null) {
-                                // no version specified - use default version
-                                featureVersion = org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION;
-                            }
-
-                            try {
-                                // try to grab specific feature version
-                                Feature feature = getFeature(featureName, featureVersion);
-                                if (feature != null) {
-                                    features.add(feature);
-                                } else {
-                                    LOGGER.error("Error installing boot feature " + f + ": feature not found");
-                                }
-                            } catch (Exception e) {
-                                LOGGER.error("Error installing boot feature " + f, e);
-                            }
-                        }
-                    }
-                    try {
-                        installFeatures(features, EnumSet.of(Option.NoCleanIfFailure, Option.ContinueBatchOnFailure));
-                    } catch (Exception e) {
-                        LOGGER.error("Error installing boot features", e);
-                    }
-                    bootFeaturesInstalled.set(true);
-                    saveState();
-                }
-            }.start();
-        }
+	}
+    
+    public void start() throws Exception {
+        registerEventAdminListener();
+        initState();
     }
 
     public void stop() throws Exception {
@@ -1206,49 +1050,12 @@ public class FeaturesServiceImpl implements FeaturesService {
         }
     }
 
-    protected String[] parsePid(String pid) {
-        int n = pid.indexOf('-');
-        if (n > 0) {
-            String factoryPid = pid.substring(n + 1);
-            pid = pid.substring(0, n);
-            return new String[]{pid, factoryPid};
-        } else {
-            return new String[]{pid, null};
-        }
-    }
-
-    protected Configuration createConfiguration(ConfigurationAdmin configurationAdmin,
-                                                String pid, String factoryPid) throws IOException, InvalidSyntaxException {
-        if (factoryPid != null) {
-            return configurationAdmin.createFactoryConfiguration(pid, null);
-        } else {
-            return configurationAdmin.getConfiguration(pid, null);
-        }
-    }
-
-    protected Configuration findExistingConfiguration(ConfigurationAdmin configurationAdmin,
-                                                      String pid, String factoryPid) throws IOException, InvalidSyntaxException {
-        String filter;
-        if (factoryPid == null) {
-            filter = "(" + Constants.SERVICE_PID + "=" + pid + ")";
-        } else {
-            String key = createConfigurationKey(pid, factoryPid);
-            filter = "(" + CONFIG_KEY + "=" + key + ")";
-        }
-        Configuration[] configurations = configurationAdmin.listConfigurations(filter);
-        if (configurations != null && configurations.length > 0) {
-            return configurations[0];
-        }
-        return null;
-    }
-
     protected void saveState() {
         try {
             File file = bundleContext.getDataFile("FeaturesServiceState.properties");
             Properties props = new Properties();
             saveSet(props, "repositories.", repositories.keySet());
             saveMap(props, "features.", installed);
-            props.put("bootFeaturesInstalled", Boolean.toString(bootFeaturesInstalled.get()));
             OutputStream os = new FileOutputStream(file);
             try {
                 props.store(new FileOutputStream(file), "FeaturesService State");
@@ -1285,7 +1092,6 @@ public class FeaturesServiceImpl implements FeaturesService {
             for (Feature f : installed.keySet()) {
                 callListeners(new FeatureEvent(f, FeatureEvent.EventType.FeatureInstalled, true));
             }
-            bootFeaturesInstalled.set(Boolean.parseBoolean((String) props.get("bootFeaturesInstalled")));
             return true;
         } catch (Exception e) {
             LOGGER.error("Error loading FeaturesService state", e);
@@ -1525,6 +1331,9 @@ public class FeaturesServiceImpl implements FeaturesService {
     private void waitForUrlHandler(String protocol) {
         try {
             Filter filter = bundleContext.createFilter("(&(" + Constants.OBJECTCLASS + "=" + URLStreamHandlerService.class.getName() + ")(url.handler.protocol=" + protocol + "))");
+            if (filter == null) {
+                return;
+            }
             ServiceTracker<URLStreamHandlerService, URLStreamHandlerService> urlHandlerTracker = new ServiceTracker<URLStreamHandlerService, URLStreamHandlerService>(bundleContext, filter, null);
             try {
                 urlHandlerTracker.open();
