@@ -20,7 +20,7 @@ import java.io.File;
 import java.util.List;
 
 /**
- * Runner implementation starting Karaf based distributions no unix based systems like linux, mac, ...
+ * Runner implementation starting karaf based distributions no unix based systems like linux, mac, ...
  */
 public class NixRunner extends BaseScriptRunner {
 

@@ -24,7 +24,7 @@ import org.osgi.framework.Version;
 public final class KarafManipulatorFactory {
 
     private KarafManipulatorFactory() {
-        // Not required for a final class
+        // not required for a final class
     }
 
     public static KarafManipulator createManipulator(String karafVersion) {

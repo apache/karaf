@@ -27,32 +27,32 @@ public class EnterpriseFeaturesTest extends KarafTestSupport {
 
     @Test
     public void testTransactionFeature() throws Exception {
-        System.out.println(executeCommand("feature:install transaction"));
-        String transactionFeatureStatus = executeCommand("feature:list | grep transaction");
+        System.out.println(executeCommand("features:install transaction"));
+        String transactionFeatureStatus = executeCommand("features:list | grep transaction");
         System.out.println(transactionFeatureStatus);
         assertFalse("transaction feature is not installed", transactionFeatureStatus.isEmpty());
     }
 
     @Test
     public void testJpaFeature() throws Exception {
-        System.out.println(executeCommand("feature:install jpa"));
-        String jpaFeatureStatus = executeCommand("feature:list | grep jpa");
+        System.out.println(executeCommand("features:install jpa"));
+        String jpaFeatureStatus = executeCommand("features:list | grep jpa");
         System.out.println(jpaFeatureStatus);
         assertFalse("jpa feature is not installed", jpaFeatureStatus.isEmpty());
     }
 
     @Test
     public void testJndiFeature() throws Exception {
-        System.out.println(executeCommand("feature:install jndi"));
-        String jndiFeatureStatus = executeCommand("feature:list | grep jndi");
+        System.out.println(executeCommand("features:install jndi"));
+        String jndiFeatureStatus = executeCommand("features:list | grep jndi");
         System.out.println(jndiFeatureStatus);
         assertFalse("jndi feature is not installed", jndiFeatureStatus.isEmpty());
     }
 
     @Test
     public void testApplicationWithoutIsolationFeature() throws Exception {
-        System.out.println(executeCommand("feature:install application-without-isolation"));
-        String applicationWithoutIsolationFeatureStatus = executeCommand("feature:list | grep application-without-isolation");
+        System.out.println(executeCommand("features:install application-without-isolation"));
+        String applicationWithoutIsolationFeatureStatus = executeCommand("features:list | grep application-without-isolation");
         System.out.println(applicationWithoutIsolationFeatureStatus);
         assertFalse("application-without-isolation feature is not installed", applicationWithoutIsolationFeatureStatus.isEmpty());
     }

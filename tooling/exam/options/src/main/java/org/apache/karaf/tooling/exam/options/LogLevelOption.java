@@ -19,8 +19,8 @@ package org.apache.karaf.tooling.exam.options;
 import org.ops4j.pax.exam.Option;
 
 /**
- * While the log-level could also be configured using the config options in the configuration files we also provide
- * a more easy option here.
+ * While the log-level could also be configured using the config options in the configuration files we also provide a
+ * more easy option here.
  */
 public class LogLevelOption implements Option {
 
@@ -31,7 +31,6 @@ public class LogLevelOption implements Option {
     private LogLevel logLevel;
 
     public LogLevelOption() {
-
     }
 
     public LogLevelOption(LogLevel logLevel) {

@@ -16,9 +16,6 @@
  */
 package org.apache.karaf.tooling.exam.container.internal;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.karaf.tooling.exam.container.internal.runner.KarafJavaRunner;
 import org.apache.karaf.tooling.exam.container.internal.runner.NixRunner;
 import org.apache.karaf.tooling.exam.container.internal.runner.WindowsRunner;
@@ -31,6 +28,9 @@ import org.ops4j.pax.exam.TestContainer;
 import org.ops4j.pax.exam.TestContainerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class KarafTestContainerFactory implements TestContainerFactory {
 
@@ -48,8 +48,7 @@ public class KarafTestContainerFactory implements TestContainerFactory {
      * {@inheritDoc}
      */
     @Override
-    public TestContainer[] create(ExamSystem system)
-    {
+    public TestContainer[] create(ExamSystem system) {
         List<TestContainer> containers = new ArrayList<TestContainer>();
         KarafDistributionKitConfigurationOption[] kitOptions =
                 system.getOptions(KarafDistributionKitConfigurationOption.class);

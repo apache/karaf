@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Abstract implementation of the script runner containing the entire self repeating code.
+ * Abstract implementation of the script runner containging the entire self repeating code.
  */
 public abstract class BaseScriptRunner implements Runner {
 

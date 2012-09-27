@@ -19,8 +19,8 @@ package org.apache.karaf.tooling.exam.options.configs;
 import org.apache.karaf.tooling.exam.options.ConfigurationPointer;
 
 /**
- * Pre-configured property file pointers to the most commonly used properties in /etc/config.properties and
- * /etc/custom.properties
+ * Pre configured property file pointers to the most commonly used properties in /etc/config.properties and
+ * /etc/custom.properties.
  */
 public interface CustomProperties {
 
@@ -31,7 +31,8 @@ public interface CustomProperties {
      */
     static final ConfigurationPointer KARAF_FRAMEWORK = new CustomPropertiesPointer("karaf.framework");
 
-    static final ConfigurationPointer SYSTEM_PACKAGES_EXTRA = new CustomPropertiesPointer("org.osgi.framework.system.packages.extra");
+    static final ConfigurationPointer SYSTEM_PACKAGES_EXTRA = new CustomPropertiesPointer(
+            "org.osgi.framework.system.packages.extra");
 
     static final ConfigurationPointer BOOTDELEGATION = new CustomPropertiesPointer("org.osgi.framework.bootdelegation");
 

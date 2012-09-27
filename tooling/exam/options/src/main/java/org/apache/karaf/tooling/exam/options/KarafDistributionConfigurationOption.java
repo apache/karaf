@@ -19,8 +19,8 @@ package org.apache.karaf.tooling.exam.options;
 import org.ops4j.pax.exam.options.MavenUrlReference;
 
 /**
- * Option describing the Karaf distribution to use. Without this option, no Karaf based distribution can be used in
- * exam tests.
+ * Option describing the karaf distribution to use. Without this option no karaf based distribution can be used in exam
+ * tests.
  */
 public class KarafDistributionConfigurationOption extends KarafDistributionBaseConfigurationOption {
 
@@ -32,12 +32,13 @@ public class KarafDistributionConfigurationOption extends KarafDistributionBaseC
         super(base);
     }
 
-    public KarafDistributionConfigurationOption(MavenUrlReference frameworkUrlReference, String name, String karafVersion) {
-        super(frameworkUrlReference, name, karafVersion);
+    public KarafDistributionConfigurationOption(MavenUrlReference frameworkURLReference, String name,
+                                                String karafVersion) {
+        super(frameworkURLReference, name, karafVersion);
     }
 
-    public KarafDistributionConfigurationOption(String frameworkUrl, String name, String karafVersion) {
-        super(frameworkUrl, name, karafVersion);
+    public KarafDistributionConfigurationOption(String frameworkURL, String name, String karafVersion) {
+        super(frameworkURL, name, karafVersion);
     }
 
 }

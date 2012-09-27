@@ -19,7 +19,7 @@ package org.apache.karaf.tooling.exam.options.configs;
 import org.apache.karaf.tooling.exam.options.ConfigurationPointer;
 
 /**
- * Pre-configured property file pointers to the most commonly used properties in /etc/config.properties and
+ * Pre configured property file pointers to the most commonly used properties in /etc/config.properties and
  * /etc/org.ops4j.pax.web.cfg.
  */
 public interface WebCfg {

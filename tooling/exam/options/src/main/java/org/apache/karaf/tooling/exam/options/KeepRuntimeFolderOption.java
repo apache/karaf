@@ -19,7 +19,7 @@ package org.apache.karaf.tooling.exam.options;
 import org.ops4j.pax.exam.Option;
 
 /**
- * By default, pax-exam deletes the test directories after a test is over. If you want to keep those
+ * Per default the folder pax-exam is deleting the test directories after a test is over. If you want to keep those
  * directories (for later evaluation) simply set this option.
  */
 public class KeepRuntimeFolderOption implements Option {

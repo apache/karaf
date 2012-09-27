@@ -16,35 +16,8 @@
  */
 package org.apache.karaf.tooling.exam.container.internal;
 
-import static org.apache.karaf.tooling.exam.options.KarafDistributionOption.editConfigurationFileExtend;
-import static org.ops4j.pax.exam.CoreOptions.options;
-import static org.ops4j.pax.exam.CoreOptions.systemProperty;
-import static org.ops4j.pax.exam.rbc.Constants.RMI_HOST_PROPERTY;
-import static org.ops4j.pax.exam.rbc.Constants.RMI_NAME_PROPERTY;
-import static org.ops4j.pax.exam.rbc.Constants.RMI_PORT_PROPERTY;
-
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileFilter;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Properties;
-import java.util.Queue;
-import java.util.Set;
-import java.util.UUID;
-
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
@@ -56,33 +29,12 @@ import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.karaf.tooling.exam.container.internal.adaptions.KarafManipulator;
 import org.apache.karaf.tooling.exam.container.internal.adaptions.KarafManipulatorFactory;
 import org.apache.karaf.tooling.exam.container.internal.runner.Runner;
-import org.apache.karaf.tooling.exam.options.DoNotModifyLogOption;
-import org.apache.karaf.tooling.exam.options.ExamBundlesStartLevel;
-import org.apache.karaf.tooling.exam.options.KarafDistributionBaseConfigurationOption;
-import org.apache.karaf.tooling.exam.options.KarafDistributionConfigurationConsoleOption;
-import org.apache.karaf.tooling.exam.options.KarafDistributionConfigurationFileExtendOption;
-import org.apache.karaf.tooling.exam.options.KarafDistributionConfigurationFileOption;
-import org.apache.karaf.tooling.exam.options.KarafDistributionConfigurationFilePutOption;
-import org.apache.karaf.tooling.exam.options.KarafDistributionConfigurationFileReplacementOption;
-import org.apache.karaf.tooling.exam.options.KarafExamSystemConfigurationOption;
-import org.apache.karaf.tooling.exam.options.KeepRuntimeFolderOption;
-import org.apache.karaf.tooling.exam.options.LogLevelOption;
+import org.apache.karaf.tooling.exam.options.*;
 import org.apache.karaf.tooling.exam.options.configs.CustomProperties;
 import org.apache.karaf.tooling.exam.options.configs.FeaturesCfg;
-import org.ops4j.pax.exam.ExamSystem;
-import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.RelativeTimeout;
-import org.ops4j.pax.exam.TestAddress;
-import org.ops4j.pax.exam.TestContainer;
-import org.ops4j.pax.exam.TimeoutException;
+import org.ops4j.pax.exam.*;
 import org.ops4j.pax.exam.container.remote.RBCRemoteTarget;
-import org.ops4j.pax.exam.options.BootClasspathLibraryOption;
-import org.ops4j.pax.exam.options.BootDelegationOption;
-import org.ops4j.pax.exam.options.ProvisionOption;
-import org.ops4j.pax.exam.options.ServerModeOption;
-import org.ops4j.pax.exam.options.SystemPackageOption;
-import org.ops4j.pax.exam.options.SystemPropertyOption;
-import org.ops4j.pax.exam.options.UrlReference;
+import org.ops4j.pax.exam.options.*;
 import org.ops4j.pax.exam.options.extra.FeaturesScannerProvisionOption;
 import org.ops4j.pax.exam.options.extra.VMOption;
 import org.ops4j.pax.exam.rbc.client.RemoteBundleContextClient;
@@ -90,8 +42,15 @@ import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.*;
+
+import static org.apache.karaf.tooling.exam.options.KarafDistributionOption.editConfigurationFileExtend;
+import static org.ops4j.pax.exam.CoreOptions.options;
+import static org.ops4j.pax.exam.CoreOptions.systemProperty;
+import static org.ops4j.pax.exam.rbc.Constants.*;
 
 public class KarafTestContainer implements TestContainer {
 
@@ -148,7 +107,7 @@ public class KarafTestContainer implements TestContainer {
 
             System.setProperty("java.protocol.handler.pkgs", "org.ops4j.pax.url");
 
-            URL sourceDistribution = new URL(framework.getFrameworkUrl());
+            URL sourceDistribution = new URL(framework.getFrameworkURL());
 
             KeepRuntimeFolderOption[] keepRuntimeFolder = subsystem.getOptions(KeepRuntimeFolderOption.class);
             if (keepRuntimeFolder != null && keepRuntimeFolder.length != 0) {
@@ -173,9 +132,9 @@ public class KarafTestContainer implements TestContainer {
             ArrayList<String> javaOpts = Lists.newArrayList();
             appendVmSettingsFromSystem(javaOpts, subsystem);
             String[] javaEndorsedDirs =
-                    new String[]{ javaHome + "/jre/lib/endorsed", javaHome + "/lib/endorsed", karafHome + "/lib/endorsed" };
+                    new String[]{javaHome + "/jre/lib/endorsed", javaHome + "/lib/endorsed", karafHome + "/lib/endorsed"};
             String[] javaExtDirs =
-                    new String[]{ javaHome + "/jre/lib/ext", javaHome + "/lib/ext", javaHome + "/lib/ext" };
+                    new String[]{javaHome + "/jre/lib/ext", javaHome + "/lib/ext", javaHome + "/lib/ext"};
             String[] karafOpts = new String[]{};
             ArrayList<String> opts =
                     Lists.newArrayList("-Dkaraf.startLocalConsole=" + shouldLocalConsoleBeStarted(subsystem),
@@ -185,7 +144,7 @@ public class KarafTestContainer implements TestContainer {
             String main = "org.apache.karaf.main.Main";
             String options = "";
             String[] environment = new String[]{};
-            String[] fileEndings = new String[]{ "jar", "war", "zip", "kar", "xml" };
+            String[] fileEndings = new String[]{"jar", "war", "zip", "kar", "xml"};
 
             updateLogProperties(karafHome, subsystem);
             updateUserSetProperties(karafHome, subsystem);
@@ -223,8 +182,7 @@ public class KarafTestContainer implements TestContainer {
             if (subsystem.getOptions(ServerModeOption.class).length == 0) {
                 waitForState(org.apache.karaf.tooling.exam.container.internal.Constants.SYSTEM_BUNDLE,
                         Bundle.ACTIVE, subsystem.getTimeout());
-            }
-            else {
+            } else {
                 LOGGER
                         .info("System runs in Server Mode. Which means, no Test facility bundles available on target system.");
             }
@@ -245,7 +203,7 @@ public class KarafTestContainer implements TestContainer {
             FileUtils.copyURLToFile(
                     new URL(libraryUrl.getURL()),
                     createFileNameWithRandomPrefixFromUrlAtTarget(libraryUrl.getURL(), new File(karafHome + "/lib"),
-                            new String[]{ "jar" }));
+                            new String[]{"jar"}));
         }
     }
 
@@ -529,8 +487,7 @@ public class KarafTestContainer implements TestContainer {
                 extractZipDistribution(sourceDistribution, targetFolder);
             } else if (sourceDistribution.getFile().indexOf(".tar.gz") > 0) {
                 extractTarGzDistribution(sourceDistribution, targetFolder);
-            }
-            else {
+            } else {
                 throw new IllegalStateException(
                         "Unknow packaging of distribution; only zip or tar.gz could be handled.");
             }
@@ -614,8 +571,7 @@ public class KarafTestContainer implements TestContainer {
                 if (runner != null) {
                     runner.shutdown();
                 }
-            }
-            else {
+            } else {
                 throw new RuntimeException("Container never came up");
             }
         } finally {
@@ -660,6 +616,7 @@ public class KarafTestContainer implements TestContainer {
 
     @Override
     public String toString() {
-        return "KarafTestContainer{" + framework.getFrameworkUrl() + "}";
+        return "KarafTestContainer{" + framework.getFrameworkURL() + "}";
     }
+
 }
