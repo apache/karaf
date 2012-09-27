@@ -42,6 +42,7 @@ public class KarTest extends KarafTestSupport {
             connector = this.getJMXConnector();
             MBeanServerConnection connection = connector.getMBeanServerConnection();
             ObjectName name = new ObjectName("org.apache.karaf:type=kar,name=root");
+            @SuppressWarnings("unchecked")
             List<String> kars = (List<String>) connection.getAttribute(name, "Kars");
             assertEquals(0, kars.size());
         } finally {

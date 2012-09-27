@@ -16,12 +16,14 @@
  */
 package org.apache.karaf.itests;
 
+import static org.apache.karaf.tooling.exam.options.KarafDistributionOption.karafDistributionConfiguration;
+import static org.ops4j.pax.exam.CoreOptions.maven;
+
 import javax.inject.Inject;
+
 import junit.framework.Assert;
-import org.apache.felix.service.command.CommandProcessor;
-import org.apache.felix.service.command.CommandSession;
+
 import org.apache.karaf.features.FeaturesService;
-import org.apache.karaf.tooling.exam.options.configs.FeaturesCfg;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Option;
@@ -29,23 +31,12 @@ import org.ops4j.pax.exam.TestProbeBuilder;
 import org.ops4j.pax.exam.junit.Configuration;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
 import org.ops4j.pax.exam.junit.ProbeBuilder;
-import org.ops4j.pax.exam.util.Filter;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
-import org.osgi.service.blueprint.container.BlueprintContainer;
-
-
-import static org.apache.karaf.tooling.exam.options.KarafDistributionOption.editConfigurationFileExtend;
-import static org.apache.karaf.tooling.exam.options.KarafDistributionOption.karafDistributionConfiguration;
-import static org.junit.Assert.assertNotNull;
-import static org.ops4j.pax.exam.CoreOptions.maven;
 
 @RunWith(JUnit4TestRunner.class)
 public class ConditionalFeaturesTest {
-
-    @Inject
-    private CommandProcessor cp;
 
     @Inject
     private FeaturesService featuresService;
