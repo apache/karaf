@@ -22,8 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Option describing the Karaf distribution to use. This option uses the specified scripts to run the environment
- * depending on the platform. If a platform is defined and run on another platform, it is ignored.
+ * Option describing the karaf distribution to use; This option uses the specified scripts to run the environment
+ * depending on the platform. If a platform is defined and run on another platform it is simply ignored.
  */
 public class KarafDistributionKitConfigurationOption extends KarafDistributionBaseConfigurationOption {
 
@@ -35,23 +35,26 @@ public class KarafDistributionKitConfigurationOption extends KarafDistributionBa
     private List<String> makeExec = new ArrayList<String>();
     private String exec;
 
-    public KarafDistributionKitConfigurationOption(KarafDistributionBaseConfigurationOption base, Platform platform) {
+    public KarafDistributionKitConfigurationOption(KarafDistributionBaseConfigurationOption base,
+                                                   Platform platform) {
         super(base);
         setPlatform(platform);
     }
 
-    public KarafDistributionKitConfigurationOption(MavenUrlReference frameworkUrlReference, String name, String karafVersion, Platform platform) {
-        super(frameworkUrlReference, name, karafVersion);
+    public KarafDistributionKitConfigurationOption(MavenUrlReference frameworkURLReference, String name,
+                                                   String karafVersion, Platform platform) {
+        super(frameworkURLReference, name, karafVersion);
         setPlatform(platform);
     }
 
-    public KarafDistributionKitConfigurationOption(MavenUrlReference frameworkUrlReference, Platform platform) {
-        super(frameworkUrlReference);
+    public KarafDistributionKitConfigurationOption(MavenUrlReference frameworkURLReference, Platform platform) {
+        super(frameworkURLReference);
         setPlatform(platform);
     }
 
-    public KarafDistributionKitConfigurationOption(String frameworkUrl, String name, String karafVersion, Platform platform) {
-        super(frameworkUrl, name, karafVersion);
+    public KarafDistributionKitConfigurationOption(String frameworkURL, String name, String karafVersion,
+                                                   Platform platform) {
+        super(frameworkURL, name, karafVersion);
         setPlatform(platform);
     }
 

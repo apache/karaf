@@ -16,14 +16,14 @@
  */
 package org.apache.karaf.tooling.exam.container.internal.runner;
 
+import org.ops4j.io.Pipe;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
-import org.ops4j.io.Pipe;
 
 public class InternalRunner {
 
@@ -78,7 +78,7 @@ public class InternalRunner {
                 }
             }
         } catch (IllegalStateException ignore) {
-            // ignore
+            // just ignore
         }
     }
 
@@ -87,12 +87,10 @@ public class InternalRunner {
      */
     public void waitForExit() {
         synchronized (m_frameworkProcess) {
-            try
-            {
+            try {
                 m_frameworkProcess.waitFor();
                 shutdown();
-            } catch (Throwable e)
-            {
+            } catch (Throwable e) {
                 shutdown();
             }
         }
@@ -102,7 +100,6 @@ public class InternalRunner {
      * Create helper thread to safely shutdown the external framework process
      *
      * @param process framework process
-     *
      * @return stream handler
      */
     private Thread createShutdownHook(final Process process) {
@@ -111,21 +108,16 @@ public class InternalRunner {
         final Pipe inPipe = new Pipe(process.getOutputStream(), System.in).start("In pipe");
 
         return new Thread(
-                new Runnable()
-                {
+                new Runnable() {
                     @Override
-                    public void run()
-                    {
+                    public void run() {
                         inPipe.stop();
                         outPipe.stop();
                         errPipe.stop();
 
-                        try
-                        {
+                        try {
                             process.destroy();
-                        }
-                        catch (Exception e)
-                        {
+                        } catch (Exception e) {
                             // ignore if already shutting down
                         }
                     }

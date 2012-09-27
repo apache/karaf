@@ -19,8 +19,8 @@ package org.apache.karaf.tooling.exam.options;
 import java.io.File;
 
 /**
- * If you don't want to replace (or extend) values in a file, but rather simply replace a configuration file
- * "brute force", this option is the one to use. It removes the original file and replaces it with the one
+ * If you do not want to replace (or extend) values in a file but rather simply want to replace a configuration file
+ * "brute force" this option is the one of your choice. It simply removes the original file and replaces it with the one
  * configured here.
  */
 public class KarafDistributionConfigurationFileReplacementOption extends KarafDistributionConfigurationFileOption {

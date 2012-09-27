@@ -16,14 +16,14 @@
  */
 package org.apache.karaf.tooling.exam.container.internal;
 
+import org.ops4j.net.FreePort;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-
-import org.ops4j.net.FreePort;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Graceful RMI registry creation/reuse. Tries to reuse an existing one but is fine with creating one on another port.
@@ -43,7 +43,9 @@ public class RMIRegistry {
     private Integer m_altTo;
     private static final int TREASURE = 30;
 
-    public RMIRegistry(Integer defaultPort, Integer alternativeRangeFrom, Integer alternativeRangeTo) {
+    public RMIRegistry(Integer defaultPort, Integer alternativeRangeFrom, Integer alternativeRangeTo)
+
+    {
         try {
             m_host = InetAddress.getLocalHost().getHostName();
         } catch (UnknownHostException e) {
@@ -61,27 +63,31 @@ public class RMIRegistry {
      * @return this for fluent API. Or IllegalStateException if a port has not been detected successfully.
      */
     public synchronized RMIRegistry selectGracefully() {
+        // if( ( m_port = select( m_defaultPort ) ) == UNSELECTED ) {
         int alternativePort = new FreePort(m_altMin, m_altTo).getPort();
         if ((m_port = select(alternativePort)) == UNSELECTED) {
             throw new IllegalStateException("No port found for RMI at all. Even though " + alternativePort
                     + " should have worked. Thats.. not. good. at. all.");
         }
         printTakenStatus();
+        // }
+
         return this;
     }
 
     private void printTakenStatus() {
+
         int in_use = m_port - m_altMin + 1; // the one we just took
         int max = m_altTo - m_altMin;
         String info =
                 "Currently " + in_use + " out of " + max + " ports are in use. Port range is from " + m_altMin + " up to "
                         + m_altTo;
+
         if (in_use + TREASURE > max) {
             LOG.warn("--------------");
             LOG.warn("BEWARE !!! " + info);
             LOG.warn("--------------");
-        }
-        else {
+        } else {
             LOG.debug(info);
         }
     }
@@ -91,20 +97,20 @@ public class RMIRegistry {
      * possible 2. make a new one at that port otherwise. Must also be validated.
      *
      * @param port to select.
-     *
      * @return input port if successful or UNSELECTED
      */
     private Integer select(int port) {
         if (reuseRegistry(port)) {
             LOG.debug("Reuse Registry on " + port);
             return port;
-        }
-        else if (createNewRegistry(port)) {
+
+        } else if (createNewRegistry(port)) {
             LOG.debug("Created Registry on " + port);
             return port;
         }
         // fail
         return UNSELECTED;
+
     }
 
     private boolean createNewRegistry(int port) {
@@ -114,8 +120,9 @@ public class RMIRegistry {
             return verifyRegistry(registry);
 
         } catch (Exception e) {
-            // ignore
+            //
         }
+
         return false;
     }
 
@@ -129,6 +136,7 @@ public class RMIRegistry {
             // exception? then its not a fine registry.
         }
         return false;
+
     }
 
     private boolean verifyRegistry(Registry reg) {

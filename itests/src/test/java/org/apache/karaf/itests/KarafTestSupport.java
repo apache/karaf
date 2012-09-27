@@ -64,7 +64,7 @@ public class KarafTestSupport {
                 karafDistributionConfiguration().frameworkUrl(maven().groupId("org.apache.karaf").artifactId("apache-karaf").versionAsInProject().type("tar.gz"))
                         .karafVersion(MavenUtils.getArtifactVersion("org.apache.karaf", "apache-karaf")).name("Apache Karaf").unpackDirectory(new File("target/exam")),
                 keepRuntimeFolder(),
-                logLevel(LogLevelOption.LogLevel.ERROR) };
+                logLevel(LogLevelOption.LogLevel.ERROR)};
     }
 
     /**
@@ -196,7 +196,7 @@ public class KarafTestSupport {
     public JMXConnector getJMXConnector() throws Exception {
         JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:1099/karaf-root");
         Hashtable env = new Hashtable();
-        String[] credentials = new String[]{ "karaf", "karaf" };
+        String[] credentials = new String[]{"karaf", "karaf"};
         env.put("jmx.remote.credentials", credentials);
         JMXConnector connector = JMXConnectorFactory.connect(url, env);
         return connector;

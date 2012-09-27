@@ -16,12 +16,12 @@
  */
 package org.apache.karaf.tooling.exam.container.internal;
 
+import org.apache.karaf.tooling.exam.options.KarafDistributionBaseConfigurationOption;
+import org.apache.karaf.tooling.exam.options.KarafDistributionConfigurationOption;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.Properties;
-
-import org.apache.karaf.tooling.exam.options.KarafDistributionBaseConfigurationOption;
-import org.apache.karaf.tooling.exam.options.KarafDistributionConfigurationOption;
 
 /**
  * Extends the {@link KarafDistributionConfigurationOption} to add functionality to store those values also in a
@@ -34,7 +34,8 @@ public class InternalKarafDistributionConfigurationOption extends KarafDistribut
 
     private File distributionInfo;
 
-    public InternalKarafDistributionConfigurationOption(KarafDistributionBaseConfigurationOption distributionConfigurationOption, File distributionInfo) {
+    public InternalKarafDistributionConfigurationOption(
+            KarafDistributionBaseConfigurationOption distributionConfigurationOption, File distributionInfo) {
         super(distributionConfigurationOption);
         this.distributionInfo = distributionInfo;
     }

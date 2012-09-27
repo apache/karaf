@@ -17,10 +17,10 @@
 package org.apache.karaf.tooling.exam.options;
 
 /**
- * This option allows to configure each configuration file based on the <code>karaf.home</code> location.
- * The value is "put", which means it is either replaced or added.
- *
- * If you want to extend a value (e.g. make a=b to a=b,c) please use the
+ * This option allows to configure each configuration fille based on the karaf.home location. The value is "put". Which
+ * means it is either replaced or added.
+ * <p/>
+ * If you like to extend an option (e.g. make a=b to a=b,c) please make use of the
  * {@link KarafDistributionConfigurationFileExtendOption}.
  */
 public class KarafDistributionConfigurationFilePutOption extends KarafDistributionConfigurationFileOption {

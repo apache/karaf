@@ -34,7 +34,6 @@ public class CommandLineBuilder {
      * Appends an array of strings to command line.
      *
      * @param segments array to append
-     *
      * @return CommandLineBuilder for fluent api
      */
     public CommandLineBuilder append(final String[] segments) {
@@ -51,12 +50,11 @@ public class CommandLineBuilder {
      * Appends a string to command line.
      *
      * @param segment string to append
-     *
      * @return CommandLineBuilder for fluent api
      */
     public CommandLineBuilder append(final String segment) {
         if (segment != null && !segment.isEmpty()) {
-            return append(new String[]{ segment });
+            return append(new String[]{segment});
         }
         return this;
     }

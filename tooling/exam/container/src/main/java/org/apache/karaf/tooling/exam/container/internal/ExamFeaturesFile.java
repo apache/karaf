@@ -14,16 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.karaf.tooling.exam.container.internal;
+
+import org.apache.commons.io.FileUtils;
+import org.ops4j.pax.exam.Info;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
-
-import org.apache.commons.io.FileUtils;
-import org.ops4j.pax.exam.Info;
 
 public class ExamFeaturesFile {
 
@@ -148,4 +147,5 @@ public class ExamFeaturesFile {
         karafPropertiesFile.extend("featuresBoot", ",exam");
         karafPropertiesFile.store();
     }
+
 }

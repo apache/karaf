@@ -62,10 +62,8 @@ public class KarafJavaRunner implements Runner {
 
             private String buildCmdSeparatedString(final String[] splitted) {
                 final StringBuilder together = new StringBuilder();
-                for (String path : splitted)
-                {
-                    if (together.length() != 0)
-                    {
+                for (String path : splitted) {
+                    if (together.length() != 0) {
                         together.append(File.pathSeparator);
                     }
                     together.append(path);
@@ -73,10 +71,8 @@ public class KarafJavaRunner implements Runner {
                 return together.toString();
             }
 
-            private String getJavaExecutable(final String javaHome)
-            {
-                if (javaHome == null)
-                {
+            private String getJavaExecutable(final String javaHome) {
+                if (javaHome == null) {
                     throw new IllegalStateException("JAVA_HOME is not set.");
                 }
                 return javaHome + "/bin/java";
