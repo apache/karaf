@@ -57,7 +57,7 @@ public class FeaturesServiceImplTest extends TestCase {
         org.apache.karaf.features.internal.model.Feature feature = new org.apache.karaf.features.internal.model.Feature("transaction");
         versions.put("1.0.0", feature);
         features.put("transaction", versions);
-        final FeaturesServiceImpl impl = new FeaturesServiceImpl() {
+        final FeaturesServiceImpl impl = new FeaturesServiceImpl(null, null) {
             protected Map<String,Map<String,Feature>> getFeatures() throws Exception {
                 return features;
             };
@@ -72,7 +72,7 @@ public class FeaturesServiceImplTest extends TestCase {
         org.apache.karaf.features.internal.model.Feature feature = new org.apache.karaf.features.internal.model.Feature("transaction");
         versions.put("1.0.0", feature);
         features.put("transaction", versions);
-        final FeaturesServiceImpl impl = new FeaturesServiceImpl() {
+        final FeaturesServiceImpl impl = new FeaturesServiceImpl(null, null) {
             protected Map<String,Map<String,Feature>> getFeatures() throws Exception {
                 return features;
             };
@@ -86,7 +86,7 @@ public class FeaturesServiceImplTest extends TestCase {
         Map<String, Feature> versions = new HashMap<String, Feature>();
         versions.put("1.0.0", new org.apache.karaf.features.internal.model.Feature("transaction"));
         features.put("transaction", versions);
-        final FeaturesServiceImpl impl = new FeaturesServiceImpl() {
+        final FeaturesServiceImpl impl = new FeaturesServiceImpl(null, null) {
             protected Map<String,Map<String,Feature>> getFeatures() throws Exception {
                 return features;
             };
@@ -100,7 +100,7 @@ public class FeaturesServiceImplTest extends TestCase {
         versions.put("1.0.0", new org.apache.karaf.features.internal.model.Feature("transaction", "1.0.0"));
         versions.put("2.0.0", new org.apache.karaf.features.internal.model.Feature("transaction", "2.0.0"));
         features.put("transaction", versions);
-        final FeaturesServiceImpl impl = new FeaturesServiceImpl() {
+        final FeaturesServiceImpl impl = new FeaturesServiceImpl(null, null) {
             protected Map<String,Map<String,Feature>> getFeatures() throws Exception {
                 return features;
             };
@@ -115,8 +115,7 @@ public class FeaturesServiceImplTest extends TestCase {
         bundleContext.addFrameworkListener(EasyMock.<FrameworkListener>anyObject());
         bundleContext.removeFrameworkListener(EasyMock.<FrameworkListener>anyObject());
         replay(bundleContext);
-        FeaturesServiceImpl service = new FeaturesServiceImpl();
-        service.setBundleContext(bundleContext);
+        FeaturesServiceImpl service = new FeaturesServiceImpl(bundleContext, null);
         try {
             service.setUrls("mvn:inexistent/features/1.0/xml/features");
             service.start();
@@ -141,7 +140,7 @@ public class FeaturesServiceImplTest extends TestCase {
         versions2.put("1.0.0", new org.apache.karaf.features.internal.model.Feature("ssh", "1.0.0"));
         features.put("ssh", versions2);
 
-        final FeaturesServiceImpl impl = new FeaturesServiceImpl() {
+        final FeaturesServiceImpl impl = new FeaturesServiceImpl(bundleContext, null) {
             protected Map<String,Map<String,Feature>> getFeatures() throws Exception {
                 return features;
             };
@@ -155,15 +154,13 @@ public class FeaturesServiceImplTest extends TestCase {
             protected void saveState() {
             }
         };
-        impl.setBundleContext(bundleContext);
+       
+        BootFeaturesInstaller bootFeatures = new BootFeaturesInstaller(impl, "transaction;version=1.2,ssh;version=1.0.0");
 
         try {
             Thread.currentThread().setContextClassLoader(new URLClassLoader(new URL[0]));
-            impl.setBoot("transaction;version=1.2,ssh;version=1.0.0");
             impl.start();
-            while (!impl.bootFeaturesInstalled.get()) {
-                Thread.sleep(10L);
-            }
+            bootFeatures.installBootFeatures();
             assertFalse("Feature transaction 1.0.0 should not be installed", impl.isInstalled(impl.getFeature("transaction", "1.0.0")));
             assertFalse("Feature transaction 2.0.0 should not be installed", impl.isInstalled(impl.getFeature("transaction", "2.0.0")));
             assertTrue("Feature ssh should be installed", impl.isInstalled(impl.getFeature("ssh", "1.0.0")));
@@ -179,7 +176,7 @@ public class FeaturesServiceImplTest extends TestCase {
     public void testNoDuplicateFeaturesInstallation() throws Exception {
         final List<Feature> installed = new LinkedList<Feature>();
 
-        final FeaturesServiceImpl impl = new FeaturesServiceImpl() {
+        final FeaturesServiceImpl impl = new FeaturesServiceImpl(null, null) {
             // override methods which refers to bundle context to avoid mocking everything
             @Override
             protected boolean loadState() {
@@ -223,7 +220,7 @@ public class FeaturesServiceImplTest extends TestCase {
     }
 
     public void testGetOptionalImportsOnly() {
-        FeaturesServiceImpl service = new FeaturesServiceImpl();
+        FeaturesServiceImpl service = new FeaturesServiceImpl(null, null);
 
         List<Clause> result = service.getOptionalImports("org.apache.karaf,org.apache.karaf.optional;resolution:=optional");
         assertEquals("One optional import expected", 1, result.size());
