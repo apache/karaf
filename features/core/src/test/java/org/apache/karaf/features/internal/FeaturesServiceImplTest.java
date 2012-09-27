@@ -16,29 +16,29 @@
  */
 package org.apache.karaf.features.internal;
 
-import static org.easymock.EasyMock.*;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.HashSet;
 
 import junit.framework.TestCase;
 
 import org.apache.felix.utils.manifest.Clause;
-import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Feature;
+import org.apache.karaf.features.FeaturesService;
 import org.easymock.EasyMock;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
-import org.osgi.framework.FrameworkListener;
 
 /**
  * Test cases for {@link FeaturesServiceImpl}
@@ -110,12 +110,11 @@ public class FeaturesServiceImplTest extends TestCase {
     }
 
     public void testStartDoesNotFailWithOneInvalidUri()  {
-        BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
-        expect(bundleContext.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
-        bundleContext.addFrameworkListener(EasyMock.<FrameworkListener>anyObject());
-        bundleContext.removeFrameworkListener(EasyMock.<FrameworkListener>anyObject());
-        replay(bundleContext);
-        FeaturesServiceImpl service = new FeaturesServiceImpl(bundleContext, null);
+        BundleManager bundleManager = EasyMock.createMock(BundleManager.class);
+        expect(bundleManager.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
+        expect(bundleManager.createAndRegisterEventAdminListener()).andReturn(null);
+        replay(bundleManager);
+        FeaturesServiceImpl service = new FeaturesServiceImpl(bundleManager, null);
         try {
             service.setUrls("mvn:inexistent/features/1.0/xml/features");
             service.start();
@@ -127,8 +126,12 @@ public class FeaturesServiceImplTest extends TestCase {
     /**
      * This test checks KARAF-388 which allows you to specify version of boot feature.
      */
+    @SuppressWarnings("unchecked")
     public void testStartDoesNotFailWithNonExistentVersion()  {
-        BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
+        BundleManager bundleManager = EasyMock.createMock(BundleManager.class);
+        expect(bundleManager.createAndRegisterEventAdminListener()).andReturn(null);
+        bundleManager.refreshBundles(EasyMock.anyObject(InstallationState.class), EasyMock.anyObject(EnumSet.class));
+        EasyMock.expectLastCall().anyTimes();
 
         final Map<String, Map<String, Feature>> features = new HashMap<String, Map<String,Feature>>();
         Map<String, Feature> versions = new HashMap<String, Feature>();
@@ -140,7 +143,7 @@ public class FeaturesServiceImplTest extends TestCase {
         versions2.put("1.0.0", new org.apache.karaf.features.internal.model.Feature("ssh", "1.0.0"));
         features.put("ssh", versions2);
 
-        final FeaturesServiceImpl impl = new FeaturesServiceImpl(bundleContext, null) {
+        final FeaturesServiceImpl impl = new FeaturesServiceImpl(bundleManager, null) {
             protected Map<String,Map<String,Feature>> getFeatures() throws Exception {
                 return features;
             };
@@ -156,7 +159,7 @@ public class FeaturesServiceImplTest extends TestCase {
         };
        
         BootFeaturesInstaller bootFeatures = new BootFeaturesInstaller(impl, "transaction;version=1.2,ssh;version=1.0.0");
-
+        replay(bundleManager);
         try {
             Thread.currentThread().setContextClassLoader(new URLClassLoader(new URL[0]));
             impl.start();
@@ -167,6 +170,7 @@ public class FeaturesServiceImplTest extends TestCase {
         } catch (Exception e) {
             fail(String.format("Service should not throw start-up exception but log the error instead: %s", e));
         }
+        
     }
 
     /**
@@ -176,7 +180,14 @@ public class FeaturesServiceImplTest extends TestCase {
     public void testNoDuplicateFeaturesInstallation() throws Exception {
         final List<Feature> installed = new LinkedList<Feature>();
 
-        final FeaturesServiceImpl impl = new FeaturesServiceImpl(null, null) {
+        BundleManager bundleLoader = new BundleManager(null, null) {
+            @Override
+            long installBundleIfNeeded(InstallationState state, String bundleLocation, int startLevel, String regionName, boolean verbose) throws IOException, BundleException {
+                return 10l;
+            }
+        };
+
+        final FeaturesServiceImpl impl = new FeaturesServiceImpl(bundleLoader, null) {
             // override methods which refers to bundle context to avoid mocking everything
             @Override
             protected boolean loadState() {
@@ -195,14 +206,6 @@ public class FeaturesServiceImplTest extends TestCase {
                 super.doInstallFeature(state, feature, verbose);
             }
 
-            @Override
-            protected Bundle installBundleIfNeeded(InstallationState state, BundleInfo bundleInfo, int defaultStartLevel, boolean verbose) throws IOException, BundleException {
-                // let's return a mock bundle and bundle id to keep the features service happy
-                Bundle bundle = createNiceMock(Bundle.class);
-                expect(bundle.getBundleId()).andReturn(10l).anyTimes();
-                replay(bundle);
-                return bundle;
-            }
         };
         impl.addRepository(getClass().getResource("repo2.xml").toURI());
 
@@ -220,13 +223,13 @@ public class FeaturesServiceImplTest extends TestCase {
     }
 
     public void testGetOptionalImportsOnly() {
-        FeaturesServiceImpl service = new FeaturesServiceImpl(null, null);
+        BundleManager bundleManager = new BundleManager(null, null, 0l);
 
-        List<Clause> result = service.getOptionalImports("org.apache.karaf,org.apache.karaf.optional;resolution:=optional");
+        List<Clause> result = bundleManager.getOptionalImports("org.apache.karaf,org.apache.karaf.optional;resolution:=optional");
         assertEquals("One optional import expected", 1, result.size());
         assertEquals("org.apache.karaf.optional", result.get(0).getName());
 
-        result = service.getOptionalImports(null);
+        result = bundleManager.getOptionalImports(null);
         assertNotNull(result);
         assertEquals("No optional imports expected", 0, result.size());
     }
