@@ -19,13 +19,13 @@ import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class FeatureConfigInstaller {
+public class FeatureConfigInstaller {
 	private static final Logger LOGGER = LoggerFactory.getLogger(FeaturesServiceImpl.class);
     private static final String CONFIG_KEY = "org.apache.karaf.features.configKey";
 
     private final ConfigurationAdmin configAdmin;
     
-    FeatureConfigInstaller(ConfigurationAdmin configAdmin) {
+    public FeatureConfigInstaller(ConfigurationAdmin configAdmin) {
 		this.configAdmin = configAdmin;
 	}
 

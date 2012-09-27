@@ -37,12 +37,18 @@ http://www.osgi.org/xmlns/blueprint-ext/v1.0.0 http://aries.apache.org/schemas/b
         <ext:location>file:$(karaf.base)/etc/org.apache.karaf.features.cfg</ext:location>
     </ext:property-placeholder>
 
+	<bean id="bundleManager" class="org.apache.karaf.features.internal.BundleManager">
+		<argument ref="blueprintBundleContext" />
+		<argument ref="regionsPersistence"/>
+	</bean>
+	<bean id="configInstaller" class="org.apache.karaf.features.internal.FeatureConfigInstaller">
+		<argument ref="configAdmin" />
+	</bean>
     <bean id="featuresService" class="org.apache.karaf.features.internal.FeaturesServiceImpl" init-method="start" destroy-method="stop">
-    	<argument ref="blueprintBundleContext" />
-    	<argument ref="configAdmin" />
+    	<argument ref="bundleManager" />
+    	<argument ref="configInstaller" />
         <property name="urls" value="$[featuresRepositories]" />
         <property name="resolverTimeout" value="$[resolverTimeout]" />
-        <property name="regionsPersistence" ref="regionsPersistence" />
     </bean>
     
     <bean id="bootFeaturesInstaller" class="org.apache.karaf.features.internal.BootFeaturesInstaller" init-method="start">

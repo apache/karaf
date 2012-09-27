@@ -35,6 +35,8 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.jar.JarInputStream;
 
 import junit.framework.TestCase;
+
+import org.apache.karaf.features.internal.BundleManager;
 import org.apache.karaf.features.internal.FeaturesServiceImpl;
 import org.easymock.EasyMock;
 import org.junit.Assert;
@@ -80,7 +82,7 @@ public class FeaturesServiceTest extends TestCase {
 
         replay(bundleContext, installedBundle);
 
-        FeaturesServiceImpl svc = new FeaturesServiceImpl(bundleContext, null);
+        FeaturesServiceImpl svc = new FeaturesServiceImpl(new BundleManager(bundleContext));
         svc.addRepository(uri);
         
         Repository[] repositories = svc.listRepositories();
@@ -157,7 +159,7 @@ public class FeaturesServiceTest extends TestCase {
 
         replay(bundleContext, installedBundle, framework);
 
-        FeaturesServiceImpl svc = new FeaturesServiceImpl(bundleContext, null);
+        FeaturesServiceImpl svc = new FeaturesServiceImpl(new BundleManager(bundleContext));
         svc.addRepository(uri);
 
         verify(bundleContext, installedBundle, framework);
@@ -250,13 +252,13 @@ public class FeaturesServiceTest extends TestCase {
         URI uri = tmp.toURI();
 
         // loads the state
-        BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
+        BundleManager bundleManager = EasyMock.createMock(BundleManager.class);
 
-        expect(bundleContext.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
+        expect(bundleManager.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
 
-        replay(bundleContext);
+        replay(bundleManager);
 
-        FeaturesServiceImpl svc = new FeaturesServiceImpl(bundleContext, null);
+        FeaturesServiceImpl svc = new FeaturesServiceImpl(bundleManager);
 
         // Adds Repository
         svc.addRepository(uri);                                                     
@@ -335,7 +337,7 @@ public class FeaturesServiceTest extends TestCase {
 
         replay(bundleContext, installedBundle, framework);
 
-        FeaturesServiceImpl svc = new FeaturesServiceImpl(bundleContext, null);
+        FeaturesServiceImpl svc = new FeaturesServiceImpl(new BundleManager(bundleContext));
         svc.addRepository(uri);
 
         svc.installFeature("f1", "0.1");
@@ -370,7 +372,7 @@ public class FeaturesServiceTest extends TestCase {
 
         BundleContext bundleContext = prepareBundleContextForInstallUninstall();
 
-        FeaturesServiceImpl svc = new FeaturesServiceImpl(bundleContext, null);
+        FeaturesServiceImpl svc = new FeaturesServiceImpl(new BundleManager(bundleContext));
         svc.addRepository(uri);
 
         svc.installFeature("f1", "0.1");
@@ -404,7 +406,7 @@ public class FeaturesServiceTest extends TestCase {
 
         BundleContext bundleContext = prepareBundleContextForInstallUninstall();
 
-        FeaturesServiceImpl svc = new FeaturesServiceImpl(bundleContext, null);
+        FeaturesServiceImpl svc = new FeaturesServiceImpl(new BundleManager(bundleContext));
         svc.addRepository(uri);
 
         svc.installFeature("f1", "0.1");
@@ -437,7 +439,7 @@ public class FeaturesServiceTest extends TestCase {
 
         BundleContext bundleContext = prepareBundleContextForInstallUninstall();
 
-        FeaturesServiceImpl svc = new FeaturesServiceImpl(bundleContext, null);
+        FeaturesServiceImpl svc = new FeaturesServiceImpl(new BundleManager(bundleContext));
         svc.addRepository(uri);
 
         svc.installFeature("f1", "0.1");
@@ -501,7 +503,7 @@ public class FeaturesServiceTest extends TestCase {
 
         replay(bundleContext, installedBundle, framework);
 
-        FeaturesServiceImpl svc = new FeaturesServiceImpl(bundleContext, null);
+        FeaturesServiceImpl svc = new FeaturesServiceImpl(new BundleManager(bundleContext));
         svc.addRepository(uri);
 
         svc.installFeature("f2", "0.1");
@@ -539,7 +541,7 @@ public class FeaturesServiceTest extends TestCase {
         EasyMock.expectLastCall().andReturn(File.createTempFile("test", "test")); 
         EasyMock.replay(bundleContext);
 
-        FeaturesServiceImpl svc = new FeaturesServiceImpl(bundleContext, null);
+        FeaturesServiceImpl svc = new FeaturesServiceImpl(new BundleManager(bundleContext));
         svc.addRepository(uri);
 
         Feature feature = svc.getFeature("f2", "[0.1,0.3)");
@@ -641,7 +643,7 @@ public class FeaturesServiceTest extends TestCase {
 
         replay(bundleContext, installedBundle1, installedBundle2);
 
-        FeaturesServiceImpl svc = new FeaturesServiceImpl(bundleContext, null);
+        FeaturesServiceImpl svc = new FeaturesServiceImpl(new BundleManager(bundleContext));
         svc.addRepository(uri);
 
         svc.installFeatures(new CopyOnWriteArraySet<Feature>(Arrays.asList(svc.listFeatures())),
@@ -700,7 +702,7 @@ public class FeaturesServiceTest extends TestCase {
 
         replay(bundleContext, installedBundle1, installedBundle2);
 
-        FeaturesServiceImpl svc = new FeaturesServiceImpl(bundleContext, null);
+        FeaturesServiceImpl svc = new FeaturesServiceImpl(new BundleManager(bundleContext));
         svc.addRepository(uri);
 
         svc.installFeatures(new CopyOnWriteArraySet<Feature>(Arrays.asList(svc.listFeatures())),
@@ -755,7 +757,7 @@ public class FeaturesServiceTest extends TestCase {
 
         replay(bundleContext, installedBundle1, installedBundle2);
 
-        FeaturesServiceImpl svc = new FeaturesServiceImpl(bundleContext, null);
+        FeaturesServiceImpl svc = new FeaturesServiceImpl(new BundleManager(bundleContext));
         svc.addRepository(uri);
 
         try {
@@ -817,7 +819,7 @@ public class FeaturesServiceTest extends TestCase {
 
         replay(bundleContext, installedBundle1, installedBundle2);
 
-        FeaturesServiceImpl svc = new FeaturesServiceImpl(bundleContext, null);
+        FeaturesServiceImpl svc = new FeaturesServiceImpl(new BundleManager(bundleContext));
         svc.addRepository(uri);
 
         try {
@@ -900,7 +902,7 @@ public class FeaturesServiceTest extends TestCase {
 
         replay(wiring, framework, bundleContext, installedBundle1, installedBundle2);
 
-        FeaturesServiceImpl svc = new FeaturesServiceImpl(bundleContext, null);
+        FeaturesServiceImpl svc = new FeaturesServiceImpl(new BundleManager(bundleContext));
         svc.addRepository(uri);
 
         List<Feature> features = Arrays.asList(svc.listFeatures());
@@ -934,7 +936,7 @@ public class FeaturesServiceTest extends TestCase {
         expect(bundle.adapt(FrameworkWiring.class)).andReturn(null);
         expect(bundleContext.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
 
-        FeaturesServiceImpl svc = new FeaturesServiceImpl(bundleContext, null);
+        FeaturesServiceImpl svc = new FeaturesServiceImpl(new BundleManager(bundleContext));
         try {
             svc.addRepository(uri);
             fail("exception expected");
@@ -966,7 +968,7 @@ public class FeaturesServiceTest extends TestCase {
         expect(bundleContext.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
         replay(bundleContext);
 
-        FeaturesServiceImpl svc = new FeaturesServiceImpl(bundleContext, null);
+        FeaturesServiceImpl svc = new FeaturesServiceImpl(new BundleManager(bundleContext));
         svc.addRepository(uri);
         Feature feature = svc.getFeature("f1");
         Assert.assertNotNull("No feature named fi found", feature);        
