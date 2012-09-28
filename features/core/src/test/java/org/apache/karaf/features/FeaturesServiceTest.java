@@ -16,6 +16,13 @@
  */
 package org.apache.karaf.features;
 
+import static org.easymock.EasyMock.eq;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.isA;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.reset;
+import static org.easymock.EasyMock.verify;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -23,16 +30,12 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Dictionary;
 import java.util.EnumSet;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.jar.JarInputStream;
 
 import junit.framework.TestCase;
 
@@ -42,13 +45,9 @@ import org.easymock.EasyMock;
 import org.junit.Assert;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.wiring.FrameworkWiring;
 import org.osgi.service.blueprint.container.BlueprintContainer;
 import org.slf4j.LoggerFactory;
-
-import static org.easymock.EasyMock.*;
 
 public class FeaturesServiceTest extends TestCase {
 
@@ -253,18 +252,14 @@ public class FeaturesServiceTest extends TestCase {
 
         // loads the state
         BundleManager bundleManager = EasyMock.createMock(BundleManager.class);
-
         expect(bundleManager.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
 
         replay(bundleManager);
-
         FeaturesServiceImpl svc = new FeaturesServiceImpl(bundleManager);
+        EasyMock.verify(bundleManager);
 
-        // Adds Repository
         svc.addRepository(uri);                                                     
-        
-        // Removes Repository
-        svc.removeRepository(uri);        
+        svc.removeRepository(uri);
     }
 
     // Tests install of a Repository that includes a feature
@@ -830,85 +825,6 @@ public class FeaturesServiceTest extends TestCase {
             fail("Call should have thrown an exception");
         } catch (MalformedURLException e) {
         }
-
-//        verify(preferencesService, prefs, repositoriesNode, featuresNode, bundleContext, installedBundle1, installedBundle2);
-    }
-
-    public void testInstallFeatureWithHostToRefresh() throws Exception {
-        String bundle1 = getJarUrl(BlueprintContainer.class);
-        String bundle2 = getJarUrl(LoggerFactory.class);
-
-        File tmp = File.createTempFile("karaf", ".feature");
-        PrintWriter pw = new PrintWriter(new FileWriter(tmp));
-        pw.println("<features name=\"test\" xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
-        pw.println("  <feature name='f1'>");
-        pw.println("    <bundle>" + bundle1 + "</bundle>");
-        pw.println("    <bundle>" + bundle2 + "</bundle>");
-        pw.println("  </feature>");
-        pw.println("</features>");
-        pw.close();
-
-        URI uri = tmp.toURI();
-
-        JarInputStream j = new JarInputStream(new URL(bundle1).openStream());
-        Dictionary<String,String> headers = new Hashtable();
-        for (Map.Entry e : j.getManifest().getMainAttributes().entrySet()) {
-            headers.put(e.getKey().toString(), e.getValue().toString());
-        }
-
-        // loads the state
-        BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
-        Bundle framework = EasyMock.createMock(Bundle.class);
-        FrameworkWiring wiring = EasyMock.createMock(FrameworkWiring.class);
-        Bundle installedBundle1 = EasyMock.createMock(Bundle.class);
-        Bundle installedBundle2 = EasyMock.createMock(Bundle.class);
-
-        // required since the sorted set uses it
-        expect(installedBundle1.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
-        expect(installedBundle2.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
-
-        // Installs feature f1
-        expect(bundleContext.createFilter(EasyMock.<String>anyObject())).andReturn(null).anyTimes();
-        expect(installedBundle1.getBundleId()).andReturn(12345L);
-        expect(installedBundle1.getBundleId()).andReturn(12345L);
-        expect(installedBundle1.getBundleId()).andReturn(12345L);
-        expect(installedBundle1.getSymbolicName()).andReturn(headers.get(Constants.BUNDLE_SYMBOLICNAME)).anyTimes();
-        expect(installedBundle1.getHeaders()).andReturn(headers).anyTimes();
-        expect(bundleContext.getBundles()).andReturn(new Bundle[] { installedBundle1 });
-
-        expect(bundleContext.installBundle(eq(bundle2), isA(InputStream.class))).andReturn(installedBundle2);
-        expect(bundleContext.getBundles()).andReturn(new Bundle[] { installedBundle1, installedBundle2 });
-        expect(installedBundle2.getBundleId()).andReturn(54321L);
-        expect(installedBundle2.getBundleId()).andReturn(54321L);
-        expect(installedBundle2.getBundleId()).andReturn(54321L);
-        expect(installedBundle2.getSymbolicName()).andReturn("fragment").anyTimes();
-        Dictionary d = new Hashtable();
-        d.put(Constants.FRAGMENT_HOST, headers.get(Constants.BUNDLE_SYMBOLICNAME));
-        expect(installedBundle2.getHeaders()).andReturn(d).anyTimes();
-
-        expect(installedBundle1.getState()).andReturn(Bundle.ACTIVE);
-        expect(installedBundle1.getState()).andReturn(Bundle.ACTIVE);
-        expect(installedBundle2.getState()).andReturn(Bundle.INSTALLED);
-        expect(installedBundle2.getState()).andReturn(Bundle.INSTALLED);
-
-        //
-        // This is the real test to make sure the host is actually refreshed
-        //
-        expect(bundleContext.getBundle()).andReturn(framework).anyTimes();
-        expect(framework.adapt(FrameworkWiring.class)).andReturn(wiring).anyTimes();
-        wiring.refreshBundles(eq(Collections.singleton(installedBundle1)), (FrameworkListener) anyObject());
-
-        expect(bundleContext.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
-
-        replay(wiring, framework, bundleContext, installedBundle1, installedBundle2);
-
-        FeaturesServiceImpl svc = new FeaturesServiceImpl(new BundleManager(bundleContext));
-        svc.addRepository(uri);
-
-        List<Feature> features = Arrays.asList(svc.listFeatures());
-        Collections.reverse(features);
-        svc.installFeatures(new CopyOnWriteArraySet<Feature>(features),
-                            EnumSet.noneOf(FeaturesService.Option.class));
 
 //        verify(preferencesService, prefs, repositoriesNode, featuresNode, bundleContext, installedBundle1, installedBundle2);
     }

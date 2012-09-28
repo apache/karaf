@@ -1,9 +1,26 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.karaf.features.internal;
 
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -62,24 +79,14 @@ public class BundleManager {
         this.refreshTimeout = refreshTimeout;
     }
     
-    long installBundleIfNeeded(InstallationState state, String bundleLocation, int startLevel, String regionName, boolean verbose) throws IOException, BundleException {
-        Bundle b = doInstallBundleIfNeeded(state, bundleLocation, startLevel, verbose);
-        installToRegion(state, regionName, b);
-        return b.getBundleId();
+    public BundleInstallerResult installBundleIfNeeded(String bundleLocation, int startLevel, String regionName) throws IOException, BundleException {
+        BundleInstallerResult result = doInstallBundleIfNeeded(bundleLocation, startLevel);
+        installToRegion(regionName, result.bundle, result.isNew);
+        return result;
     }
 
-    private Bundle doInstallBundleIfNeeded(InstallationState state, String bundleLocation, int startLevel, boolean verbose) throws IOException, BundleException {
-        InputStream is;
-        LOGGER.debug("Checking " + bundleLocation);
-        try {
-            String protocol = bundleLocation.substring(0, bundleLocation.indexOf(":"));
-            waitForUrlHandler(protocol);
-            URL bundleUrl = new URL(bundleLocation);
-            is = new BufferedInputStream(bundleUrl.openStream());
-        } catch (RuntimeException e) {
-            LOGGER.error(e.getMessage());
-            throw e;
-        }
+    private BundleInstallerResult doInstallBundleIfNeeded(String bundleLocation, int startLevel) throws IOException, BundleException {
+        InputStream is = getInputStreamForBundle(bundleLocation);
         try {
             is.mark(256 * 1024);
             JarInputStream jar = new JarInputStream(is);
@@ -98,19 +105,10 @@ public class BundleManager {
             }
             String vStr = m.getMainAttributes().getValue(Constants.BUNDLE_VERSION);
             Version v = vStr == null ? Version.emptyVersion : Version.parseVersion(vStr);
-            for (Bundle b : bundleContext.getBundles()) {
-                if (b.getSymbolicName() != null && b.getSymbolicName().equals(sn)) {
-                    vStr = (String) b.getHeaders().get(Constants.BUNDLE_VERSION);
-                    Version bv = vStr == null ? Version.emptyVersion : Version.parseVersion(vStr);
-                    if (v.equals(bv)) {
-                        LOGGER.debug("Found installed bundle: " + b);
-                        if (verbose) {
-                            System.out.println("Found installed bundle: " + b);
-                        }
-                        state.bundles.add(b);
-                        return b;
-                    }
-                }
+            Bundle existingBundle = findInstalled(sn, v);
+            if (existingBundle != null) {
+                LOGGER.debug("Found installed bundle: " + existingBundle);
+                return new BundleInstallerResult(existingBundle, false);
             }
             try {
                 is.reset();
@@ -119,25 +117,49 @@ public class BundleManager {
                 is = new BufferedInputStream(new URL(bundleLocation).openStream());
             }
             LOGGER.debug("Installing bundle " + bundleLocation);
-            if (verbose) {
-                System.out.println("Installing bundle " + bundleLocation);
-            }
             Bundle b = bundleContext.installBundle(bundleLocation, is);
             
             if (startLevel > 0) {
                 b.adapt(BundleStartLevel.class).setStartLevel(startLevel);
             }
 
-            state.bundles.add(b);
-            state.installed.add(b);
-            return b;
+            return new BundleInstallerResult(b, true);
         } finally {
             is.close();
         }
     }
+
+    private Bundle findInstalled(String symbolicName, Version version) {
+        String vStr;
+        for (Bundle b : bundleContext.getBundles()) {
+            if (b.getSymbolicName() != null && b.getSymbolicName().equals(symbolicName)) {
+                vStr = (String) b.getHeaders().get(Constants.BUNDLE_VERSION);
+                Version bv = vStr == null ? Version.emptyVersion : Version.parseVersion(vStr);
+                if (version.equals(bv)) {
+                    return b;
+                }
+            }
+        }
+        return null;
+    }
+
+    private InputStream getInputStreamForBundle(String bundleLocation) throws MalformedURLException, IOException {
+        InputStream is;
+        LOGGER.debug("Checking " + bundleLocation);
+        try {
+            String protocol = bundleLocation.substring(0, bundleLocation.indexOf(":"));
+            waitForUrlHandler(protocol);
+            URL bundleUrl = new URL(bundleLocation);
+            is = new BufferedInputStream(bundleUrl.openStream());
+        } catch (RuntimeException e) {
+            LOGGER.error(e.getMessage());
+            throw e;
+        }
+        return is;
+    }
     
-    private void installToRegion(InstallationState state, String region, Bundle b) throws BundleException {
-        if (region != null && state.installed.contains(b)) {
+    private void installToRegion(String region, Bundle b, boolean isNew) throws BundleException {
+        if (region != null && isNew) {
             if (regionsPersistence != null) {
                 regionsPersistence.install(b, region);
             } else {
@@ -372,5 +394,17 @@ public class BundleManager {
                 }
             }
         }
+    }
+    
+    public static class BundleInstallerResult {
+        Bundle bundle;
+        boolean isNew;
+
+        public BundleInstallerResult(Bundle bundle, boolean isNew) {
+            super();
+            this.bundle = bundle;
+            this.isNew = isNew;
+        }
+
     }
 }

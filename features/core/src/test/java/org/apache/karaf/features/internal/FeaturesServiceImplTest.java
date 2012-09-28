@@ -26,6 +26,7 @@ import java.net.URLClassLoader;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -35,10 +36,9 @@ import junit.framework.TestCase;
 
 import org.apache.felix.utils.manifest.Clause;
 import org.apache.karaf.features.Feature;
-import org.apache.karaf.features.FeaturesService;
+import org.apache.karaf.features.internal.BundleManager.BundleInstallerResult;
 import org.easymock.EasyMock;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleException;
 
 /**
  * Test cases for {@link FeaturesServiceImpl}
@@ -172,22 +172,29 @@ public class FeaturesServiceImplTest extends TestCase {
         }
         
     }
+    
+    public Bundle createDummyBundle(long id, String symbolicName) {
+        Bundle bundle = EasyMock.createNiceMock(Bundle.class);
+        expect(bundle.getBundleId()).andReturn(id).anyTimes();
+        expect(bundle.getSymbolicName()).andReturn(symbolicName);
+        expect(bundle.getHeaders()).andReturn(new Hashtable<String, String>());
+        replay(bundle);
+        return bundle;
+    }
 
     /**
      * This test ensures that every feature get installed only once, even if it appears multiple times in the list
      * of transitive feature dependencies (KARAF-1600)
      */
+    @SuppressWarnings("unchecked")
     public void testNoDuplicateFeaturesInstallation() throws Exception {
         final List<Feature> installed = new LinkedList<Feature>();
-
-        BundleManager bundleLoader = new BundleManager(null, null) {
-            @Override
-            long installBundleIfNeeded(InstallationState state, String bundleLocation, int startLevel, String regionName, boolean verbose) throws IOException, BundleException {
-                return 10l;
-            }
-        };
-
-        final FeaturesServiceImpl impl = new FeaturesServiceImpl(bundleLoader, null) {
+        BundleManager bundleManager = EasyMock.createMock(BundleManager.class);
+        expect(bundleManager.installBundleIfNeeded(EasyMock.anyObject(String.class), EasyMock.anyInt(), EasyMock.anyObject(String.class)))
+            .andReturn(new BundleInstallerResult(createDummyBundle(1l, ""), true)).anyTimes();
+        bundleManager.refreshBundles(EasyMock.anyObject(InstallationState.class), EasyMock.anyObject(EnumSet.class));
+        EasyMock.expectLastCall();
+        final FeaturesServiceImpl impl = new FeaturesServiceImpl(bundleManager, null) {
             // override methods which refers to bundle context to avoid mocking everything
             @Override
             protected boolean loadState() {
@@ -207,19 +214,15 @@ public class FeaturesServiceImplTest extends TestCase {
             }
 
         };
+        replay(bundleManager);
         impl.addRepository(getClass().getResource("repo2.xml").toURI());
+        impl.installFeature("all");
 
-        try {
-            impl.installFeature("all");
+        // copying the features to a set to filter out the duplicates
+        Set<Feature> noduplicates = new HashSet<Feature>();
+        noduplicates.addAll(installed);
 
-            // copying the features to a set to filter out the duplicates
-            Set<Feature> noduplicates = new HashSet<Feature>();
-            noduplicates.addAll(installed);
-
-            assertEquals("Every feature should only have been installed once", installed.size(), noduplicates.size());
-        } catch (Exception e) {
-            fail(String.format("Service should not throw any exceptions: %s", e));
-        }
+        assertEquals("Every feature should only have been installed once", installed.size(), noduplicates.size());
     }
 
     public void testGetOptionalImportsOnly() {
