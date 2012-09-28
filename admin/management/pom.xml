@@ -96,7 +96,6 @@
                             javax.management.loading,
                             org.apache.felix.service.command,
                             org.apache.felix.gogo.commands,
-                            org.apache.karaf.shell.console,
                             *
                         </Import-Package>
                         <Private-Package>org.apache.karaf.admin.management.internal</Private-Package>
