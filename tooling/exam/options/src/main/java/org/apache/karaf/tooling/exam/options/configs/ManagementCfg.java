@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.karaf.tooling.exam.options.configs;
 
 import org.apache.karaf.tooling.exam.options.ConfigurationPointer;
@@ -24,6 +23,7 @@ import org.apache.karaf.tooling.exam.options.ConfigurationPointer;
  * /etc/org.apache.karaf.management.cfg.
  */
 public interface ManagementCfg {
+
     static final String FILE_PATH = "etc/org.apache.karaf.management.cfg";
 
     /**
@@ -43,4 +43,5 @@ public interface ManagementCfg {
         }
 
     }
+
 }

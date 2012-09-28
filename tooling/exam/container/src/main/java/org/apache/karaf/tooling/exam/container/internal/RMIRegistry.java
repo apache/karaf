@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.karaf.tooling.exam.container.internal;
 
 import java.net.InetAddress;
@@ -60,11 +59,10 @@ public class RMIRegistry {
     /**
      * This will make sure a registry exists and is valid m_port. If its not available or does not work for some reason,
      * it will select another port. This should really not happen usually. But it can.
-     * 
+     *
      * @return this for fluent API. Or IllegalStateException if a port has not been detected successfully.
      */
-    public synchronized RMIRegistry selectGracefully()
-    {
+    public synchronized RMIRegistry selectGracefully() {
         // if( ( m_port = select( m_defaultPort ) ) == UNSELECTED ) {
         int alternativePort = new FreePort(m_altMin, m_altTo).getPort();
         if ((m_port = select(alternativePort)) == UNSELECTED) {
@@ -77,21 +75,19 @@ public class RMIRegistry {
         return this;
     }
 
-    private void printTakenStatus()
-    {
+    private void printTakenStatus() {
 
         int in_use = m_port - m_altMin + 1; // the one we just took
         int max = m_altTo - m_altMin;
         String info =
-            "Currently " + in_use + " out of " + max + " ports are in use. Port range is from " + m_altMin + " up to "
-                    + m_altTo;
+                "Currently " + in_use + " out of " + max + " ports are in use. Port range is from " + m_altMin + " up to "
+                        + m_altTo;
 
         if (in_use + TREASURE > max) {
             LOG.warn("--------------");
             LOG.warn("BEWARE !!! " + info);
             LOG.warn("--------------");
-        }
-        else {
+        } else {
             LOG.debug(info);
         }
     }
@@ -99,19 +95,16 @@ public class RMIRegistry {
     /**
      * This contains basically two paths: 1. check if the given port already is valid rmi registry. Use that one if
      * possible 2. make a new one at that port otherwise. Must also be validated.
-     * 
+     *
      * @param port to select.
-     * 
      * @return input port if successful or UNSELECTED
      */
-    private Integer select(int port)
-    {
+    private Integer select(int port) {
         if (reuseRegistry(port)) {
             LOG.debug("Reuse Registry on " + port);
             return port;
 
-        }
-        else if (createNewRegistry(port)) {
+        } else if (createNewRegistry(port)) {
             LOG.debug("Created Registry on " + port);
             return port;
         }
@@ -120,8 +113,7 @@ public class RMIRegistry {
 
     }
 
-    private boolean createNewRegistry(int port)
-    {
+    private boolean createNewRegistry(int port) {
         try {
             Registry registry = LocateRegistry.createRegistry(port);
 
@@ -134,8 +126,7 @@ public class RMIRegistry {
         return false;
     }
 
-    private boolean reuseRegistry(int port)
-    {
+    private boolean reuseRegistry(int port) {
         Registry reg = null;
         try {
             reg = LocateRegistry.getRegistry(port);
@@ -148,8 +139,7 @@ public class RMIRegistry {
 
     }
 
-    private boolean verifyRegistry(Registry reg)
-    {
+    private boolean verifyRegistry(Registry reg) {
         if (reg != null) {
             // test:
             try {
@@ -167,13 +157,12 @@ public class RMIRegistry {
         return false;
     }
 
-    public String getHost()
-    {
+    public String getHost() {
         return m_host;
     }
 
-    public int getPort()
-    {
+    public int getPort() {
         return m_port;
     }
+
 }

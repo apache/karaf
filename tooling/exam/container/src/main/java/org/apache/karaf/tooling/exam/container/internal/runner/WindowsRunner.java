@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.karaf.tooling.exam.container.internal.runner;
 
 import java.io.File;
@@ -32,9 +31,10 @@ public class WindowsRunner extends BaseScriptRunner {
     @Override
     protected CommandLineBuilder createCommandLine(String[] environment, File karafBase) {
         CommandLineBuilder commandLine = new CommandLineBuilder()
-            .append("cmd.exe")
-            .append("/c")
-            .append(new File(karafBase, exec).getAbsolutePath());
+                .append("cmd.exe")
+                .append("/c")
+                .append(new File(karafBase, exec).getAbsolutePath());
         return commandLine;
     }
+
 }

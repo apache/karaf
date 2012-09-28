@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.karaf.tooling.exam.options;
 
 import java.util.ArrayList;
@@ -37,13 +36,13 @@ public class KarafDistributionKitConfigurationOption extends KarafDistributionBa
     private String exec;
 
     public KarafDistributionKitConfigurationOption(KarafDistributionBaseConfigurationOption base,
-            Platform platform) {
+                                                   Platform platform) {
         super(base);
         setPlatform(platform);
     }
 
     public KarafDistributionKitConfigurationOption(MavenUrlReference frameworkURLReference, String name,
-            String karafVersion, Platform platform) {
+                                                   String karafVersion, Platform platform) {
         super(frameworkURLReference, name, karafVersion);
         setPlatform(platform);
     }
@@ -54,7 +53,7 @@ public class KarafDistributionKitConfigurationOption extends KarafDistributionBa
     }
 
     public KarafDistributionKitConfigurationOption(String frameworkURL, String name, String karafVersion,
-            Platform platform) {
+                                                   Platform platform) {
         super(frameworkURL, name, karafVersion);
         setPlatform(platform);
     }

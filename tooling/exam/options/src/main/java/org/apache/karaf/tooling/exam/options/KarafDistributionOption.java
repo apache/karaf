@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.karaf.tooling.exam.options;
 
 import static java.lang.String.format;
@@ -81,8 +80,8 @@ public final class KarafDistributionOption {
      * version since all of those params are relevant to decide which wrapper configurations to use.
      */
     public static KarafDistributionBaseConfigurationOption karafDistributionConfiguration(String frameworkURL,
-            String name,
-            String karafVersion) {
+                                                                                          String name,
+                                                                                          String karafVersion) {
         return new KarafDistributionConfigurationOption(frameworkURL, name, karafVersion);
     }
 
@@ -97,7 +96,7 @@ public final class KarafDistributionOption {
     /**
      * This option allows to configure each configuration fille based on the karaf.home location. The value is "put".
      * Which means it is either replaced or added.
-     *
+     * <p/>
      * If you like to extend an option (e.g. make a=b to a=b,c) please make use of the
      * {@link KarafDistributionConfigurationFileExtendOption}.
      */
@@ -108,7 +107,7 @@ public final class KarafDistributionOption {
     /**
      * This option allows to configure each configuration fille based on the karaf.home location. The value is "put".
      * Which means it is either replaced or added.
-     *
+     * <p/>
      * If you like to extend an option (e.g. make a=b to a=b,c) please make use of the
      * {@link KarafDistributionConfigurationFileExtendOption}.
      */
@@ -123,7 +122,7 @@ public final class KarafDistributionOption {
      * specific values.
      */
     public static Option[] editConfigurationFilePut(final String configurationFilePath,
-            File source, String... keysToUseFromSource) {
+                                                    File source, String... keysToUseFromSource) {
         return createOptionListFromFile(source, new FileOptionFactory() {
             @Override
             public Option createOption(String key, String value) {
@@ -137,7 +136,7 @@ public final class KarafDistributionOption {
     }
 
     private static Option[] createOptionListFromFile(File source, FileOptionFactory optionFactory,
-            String... keysToUseFromSource) {
+                                                     String... keysToUseFromSource) {
         Properties props = new Properties();
         try {
             props.load(new FileInputStream(source));
@@ -147,7 +146,7 @@ public final class KarafDistributionOption {
             throw new IllegalStateException(e);
         }
         List<Option> options =
-            new ArrayList<Option>();
+                new ArrayList<Option>();
         if (keysToUseFromSource == null || keysToUseFromSource.length == 0) {
             Set<Object> keySet = props.keySet();
             for (Object key : keySet) {
@@ -167,7 +166,7 @@ public final class KarafDistributionOption {
      * This option allows to extend configurations in each configuration file based on the karaf.home location. The
      * value extends the current value (e.g. a=b to a=a,b) instead of replacing it. If there is no current value it is
      * added.
-     *
+     * <p/>
      * If you would like to have add or replace functionality please use the
      * {@link KarafDistributionConfigurationFilePutOption} instead.
      */
@@ -179,7 +178,7 @@ public final class KarafDistributionOption {
      * This option allows to extend configurations in each configuration file based on the karaf.home location. The
      * value extends the current value (e.g. a=b to a=a,b) instead of replacing it. If there is no current value it is
      * added.
-     *
+     * <p/>
      * If you would like to have add or replace functionality please use the
      * {@link KarafDistributionConfigurationFilePutOption} instead.
      */
@@ -194,7 +193,7 @@ public final class KarafDistributionOption {
      * specific values.
      */
     public static Option[] editConfigurationFileExtend(final String configurationFilePath, File source,
-            String... keysToUseFromSource) {
+                                                       String... keysToUseFromSource) {
         return createOptionListFromFile(source, new FileOptionFactory() {
             @Override
             public Option createOption(String key, String value) {
@@ -240,7 +239,7 @@ public final class KarafDistributionOption {
      */
     public static Option debugConfiguration(String port, boolean hold) {
         return new VMOption(format("-Xrunjdwp:transport=dt_socket,server=y,suspend=%s,address=%s", hold ? "y" : "n",
-            port));
+                port));
     }
 
 }

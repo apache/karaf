@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.karaf.tooling.exam.options;
 
 import org.ops4j.pax.exam.Option;
@@ -23,7 +22,7 @@ import org.ops4j.pax.exam.Option;
  * This option allows to configure the start level of the bundles in the exam features descriptor.
  */
 public class ExamBundlesStartLevel implements Option {
-    
+
     private final int startLevel;
 
     /**
@@ -36,4 +35,5 @@ public class ExamBundlesStartLevel implements Option {
     public int getStartLevel() {
         return startLevel;
     }
+
 }

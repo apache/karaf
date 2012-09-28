@@ -45,7 +45,7 @@ public class KarafDistributionBaseConfigurationOption implements Option {
     }
 
     public KarafDistributionBaseConfigurationOption(MavenUrlReference frameworkURLReference, String name,
-            String karafVersion) {
+                                                    String karafVersion) {
         frameworkURL = null;
         this.frameworkURLReference = frameworkURLReference;
         this.name = name;

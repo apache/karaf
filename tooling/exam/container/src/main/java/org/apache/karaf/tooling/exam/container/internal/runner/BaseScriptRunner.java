@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.karaf.tooling.exam.container.internal.runner;
 
 import java.io.File;
@@ -38,8 +37,8 @@ public abstract class BaseScriptRunner implements Runner {
 
     @Override
     public void exec(final String[] environment, final File karafBase, String javaHome, String[] javaOpts,
-            String[] javaEndorsedDirs, String[] javaExtDirs, String karafHome,
-            String karafData, String[] karafOpts, String[] opts, String[] classPath, String main, String options) {
+                     String[] javaEndorsedDirs, String[] javaExtDirs, String karafHome,
+                     String karafData, String[] karafOpts, String[] opts, String[] classPath, String main, String options) {
         makeEnvironmentExecutable(karafBase);
         startSystem(environment, karafBase);
     }

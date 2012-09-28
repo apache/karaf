@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.karaf.tooling.exam.options.configs;
 
 import org.apache.karaf.tooling.exam.options.ConfigurationPointer;
@@ -33,7 +32,7 @@ public interface CustomProperties {
     static final ConfigurationPointer KARAF_FRAMEWORK = new CustomPropertiesPointer("karaf.framework");
 
     static final ConfigurationPointer SYSTEM_PACKAGES_EXTRA = new CustomPropertiesPointer(
-        "org.osgi.framework.system.packages.extra");
+            "org.osgi.framework.system.packages.extra");
 
     static final ConfigurationPointer BOOTDELEGATION = new CustomPropertiesPointer("org.osgi.framework.bootdelegation");
 
@@ -44,4 +43,5 @@ public interface CustomProperties {
         }
 
     }
+
 }

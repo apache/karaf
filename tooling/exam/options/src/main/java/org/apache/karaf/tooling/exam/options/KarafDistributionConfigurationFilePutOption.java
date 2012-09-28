@@ -14,14 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.karaf.tooling.exam.options;
-
 
 /**
  * This option allows to configure each configuration fille based on the karaf.home location. The value is "put". Which
  * means it is either replaced or added.
- *
+ * <p/>
  * If you like to extend an option (e.g. make a=b to a=b,c) please make use of the
  * {@link KarafDistributionConfigurationFileExtendOption}.
  */
