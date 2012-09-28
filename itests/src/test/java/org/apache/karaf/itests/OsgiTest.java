@@ -56,7 +56,7 @@ public class OsgiTest extends KarafTestSupport {
 
     @Test
     public void classesCommand() throws Exception {
-        String classesOutput = executeCommand("osgi:classes");
+        String classesOutput = executeCommand("osgi:classes --force 10");
         System.out.println(classesOutput);
         assertFalse(classesOutput.isEmpty());
         classesOutput = executeCommand("osgi:classes --force 10");
