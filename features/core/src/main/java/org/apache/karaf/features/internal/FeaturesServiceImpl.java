@@ -54,6 +54,7 @@ import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
 import org.apache.karaf.features.RepositoryEvent;
 import org.apache.karaf.features.Resolver;
+import org.apache.karaf.features.internal.BundleManager.BundleInstallerResult;
 import org.apache.karaf.util.collections.CopyOnWriteArrayIdentityList;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
@@ -78,7 +79,7 @@ public class FeaturesServiceImpl implements FeaturesService {
 
     private long resolverTimeout = 5000;
     private Set<URI> uris;
-    private Map<URI, RepositoryImpl> repositories = new HashMap<URI, RepositoryImpl>();
+    private Map<URI, Repository> repositories = new HashMap<URI, Repository>();
     private Map<String, Map<String, Feature>> features;
     private Map<Feature, Set<Long>> installed = new HashMap<Feature, Set<Long>>();
     private List<FeaturesListener> listeners = new CopyOnWriteArrayIdentityList<FeaturesListener>();
@@ -133,6 +134,7 @@ public class FeaturesServiceImpl implements FeaturesService {
      * @param uri the features repository URI.
      */
     public void validateRepository(URI uri) throws Exception {
+        
         FeatureValidationUtil.validate(uri);
     }
 
@@ -155,7 +157,7 @@ public class FeaturesServiceImpl implements FeaturesService {
      */
     public void addRepository(URI uri, boolean install) throws Exception {
         if (!repositories.containsKey(uri)) {
-            RepositoryImpl repositoryImpl = this.internalAddRepository(uri);
+            Repository repositoryImpl = this.internalAddRepository(uri);
             saveState();
             if (install) {
                 for (Feature feature : repositoryImpl.getFeatures()) {
@@ -202,7 +204,7 @@ public class FeaturesServiceImpl implements FeaturesService {
      * @return the internal <code>RepositoryImpl</code> representation.
      * @throws Exception in case of adding failure.
      */
-    protected RepositoryImpl internalAddRepository(URI uri) throws Exception {
+    protected Repository internalAddRepository(URI uri) throws Exception {
         validateRepository(uri);
         RepositoryImpl repo = new RepositoryImpl(uri);
         repositories.put(uri, repo);
@@ -233,7 +235,7 @@ public class FeaturesServiceImpl implements FeaturesService {
     public void removeRepository(URI uri, boolean uninstall) throws Exception {
         if (repositories.containsKey(uri)) {
             if (uninstall) {
-                RepositoryImpl repositoryImpl = repositories.get(uri);
+                Repository repositoryImpl = repositories.get(uri);
                 for (Feature feature : repositoryImpl.getFeatures()) {
                     this.uninstallFeature(feature.getName(), feature.getVersion());
                 }
@@ -262,7 +264,7 @@ public class FeaturesServiceImpl implements FeaturesService {
      * @throws Exception in case of restore failure.
      */
     public void restoreRepository(URI uri) throws Exception {
-    	repositories.put(uri, (RepositoryImpl)repo.get());
+    	repositories.put(uri, repo.get());
     	callListeners(new RepositoryEvent(repo.get(), RepositoryEvent.EventType.RepositoryAdded, false));
         features = null;
     }
@@ -273,7 +275,7 @@ public class FeaturesServiceImpl implements FeaturesService {
      * @return the list of features repository.
      */
     public Repository[] listRepositories() {
-        Collection<RepositoryImpl> repos = repositories.values();
+        Collection<Repository> repos = repositories.values();
         return repos.toArray(new Repository[repos.size()]);
     }
     
@@ -504,9 +506,21 @@ public class FeaturesServiceImpl implements FeaturesService {
         
         for (BundleInfo bInfo : resolve(feature)) {
             int startLevel = getBundleStartLevel(bInfo.getStartLevel(),feature.getStartLevel());
-            long bundleId = bundleManager.installBundleIfNeeded(state, bInfo.getLocation(), startLevel, feature.getRegion(), verbose);
-            bundles.add(bundleId);
-            state.bundleInfos.put(bundleId, bInfo);
+            BundleInstallerResult result = bundleManager.installBundleIfNeeded(bInfo.getLocation(), startLevel, feature.getRegion());
+            state.bundles.add(result.bundle);
+            if (result.isNew) {
+                state.installed.add(result.bundle);
+            }
+            if (verbose) {
+                if (result.isNew) {
+                    System.out.println("Found installed bundle: " + result.bundle);
+                } else {
+                    System.out.println("Installing bundle " + bInfo.getLocation());
+                }
+            }
+
+            bundles.add(result.bundle.getBundleId());
+            state.bundleInfos.put(result.bundle.getBundleId(), bInfo);
 
         }
         state.features.put(feature, bundles);
