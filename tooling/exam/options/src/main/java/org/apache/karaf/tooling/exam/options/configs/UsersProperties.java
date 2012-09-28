@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.karaf.tooling.exam.options.configs;
 
 import org.apache.karaf.tooling.exam.options.ConfigurationPointer;
@@ -24,6 +23,7 @@ import org.apache.karaf.tooling.exam.options.ConfigurationPointer;
  * /etc/users.properties.
  */
 public interface UsersProperties {
+
     static final String FILE_PATH = "etc/users.properties";
 
     static final ConfigurationPointer KARAF_USER = new CustomPropertiesPointer("karaf");
@@ -35,4 +35,5 @@ public interface UsersProperties {
         }
 
     }
+
 }

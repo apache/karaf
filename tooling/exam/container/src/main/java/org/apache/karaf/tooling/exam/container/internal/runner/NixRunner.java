@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.karaf.tooling.exam.container.internal.runner;
 
 import java.io.File;
@@ -32,8 +31,8 @@ public class NixRunner extends BaseScriptRunner {
     @Override
     protected CommandLineBuilder createCommandLine(String[] environment, File karafBase) {
         CommandLineBuilder commandLine = new CommandLineBuilder()
-            .append("/bin/sh")
-            .append(new File(karafBase, exec).getAbsolutePath());
+                .append("/bin/sh")
+                .append(new File(karafBase, exec).getAbsolutePath());
         return commandLine;
     }
 

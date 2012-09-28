@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.karaf.tooling.exam.container.internal;
 
 import java.util.ArrayList;
@@ -49,30 +48,29 @@ public class KarafTestContainerFactory implements TestContainerFactory {
      * {@inheritDoc}
      */
     @Override
-    public TestContainer[] create(ExamSystem system)
-    {
+    public TestContainer[] create(ExamSystem system) {
         List<TestContainer> containers = new ArrayList<TestContainer>();
         KarafDistributionKitConfigurationOption[] kitOptions =
-            system.getOptions(KarafDistributionKitConfigurationOption.class);
+                system.getOptions(KarafDistributionKitConfigurationOption.class);
         for (KarafDistributionKitConfigurationOption kitOption : kitOptions) {
             if (kitOption.getPlatform().equals(Platform.WINDOWS)) {
                 if (IS_WINDOWS_OS) {
                     containers.add(new KarafTestContainer(system, m_rmiRegistry, kitOption, new WindowsRunner(kitOption
-                        .getMakeExec(), kitOption.getExec())));
+                            .getMakeExec(), kitOption.getExec())));
                     continue;
                 }
                 LOGGER.info("Ignore windows settings on non windows platforms");
             } else {
                 if (!IS_WINDOWS_OS) {
                     containers.add(new KarafTestContainer(system, m_rmiRegistry, kitOption, new NixRunner(kitOption
-                        .getMakeExec(), kitOption.getExec())));
+                            .getMakeExec(), kitOption.getExec())));
                     continue;
                 }
                 LOGGER.info("Ignore non windows settings on windows platforms");
             }
         }
         KarafDistributionBaseConfigurationOption[] options =
-            system.getOptions(KarafDistributionConfigurationOption.class);
+                system.getOptions(KarafDistributionConfigurationOption.class);
         for (KarafDistributionBaseConfigurationOption testContainer : options) {
             containers.add(new KarafTestContainer(system, m_rmiRegistry, testContainer, new KarafJavaRunner()));
         }

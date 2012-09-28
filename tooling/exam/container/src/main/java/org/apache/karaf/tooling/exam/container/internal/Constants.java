@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.karaf.tooling.exam.container.internal;
 
 public interface Constants {
@@ -22,7 +21,7 @@ public interface Constants {
     static final String FEATURES_CFG_LOCATION = "/etc/org.apache.karaf.features.cfg";
 
     static final int SYSTEM_BUNDLE = 0;
-    
+
     static final int DEFAULT_START_LEVEL = 5;
 
 }

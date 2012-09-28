@@ -48,12 +48,12 @@ public class InternalKarafDistributionConfigurationOption extends KarafDistribut
         }
         if (!distributionInfo.exists()) {
             throw new IllegalStateException(
-                "Either distribution.info or the property itself has to define a karaf version.");
+                    "Either distribution.info or the property itself has to define a karaf version.");
         }
         String retrieveProperty = retrieveProperty(KARAF_VERSION);
         if (retrieveProperty == null || retrieveProperty.length() == 0) {
             throw new IllegalStateException(
-                "Either distribution.info or the property itself has to define a karaf version.");
+                    "Either distribution.info or the property itself has to define a karaf version.");
         }
         return retrieveProperty;
     }
@@ -66,12 +66,12 @@ public class InternalKarafDistributionConfigurationOption extends KarafDistribut
         }
         if (!distributionInfo.exists()) {
             throw new IllegalStateException(
-                "Either distribution.info or the property itself has to define a name for the distribution..");
+                    "Either distribution.info or the property itself has to define a name for the distribution..");
         }
         String retrieveProperty = retrieveProperty(NAME);
         if (retrieveProperty == null || retrieveProperty.length() == 0) {
             throw new IllegalStateException(
-                "Either distribution.info or the property itself has to define a name for the distribution..");
+                    "Either distribution.info or the property itself has to define a name for the distribution..");
         }
         return retrieveProperty;
     }

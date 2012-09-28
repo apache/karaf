@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.karaf.tooling.exam.options;
 
 import org.ops4j.pax.exam.options.MavenUrlReference;
@@ -34,7 +33,7 @@ public class KarafDistributionConfigurationOption extends KarafDistributionBaseC
     }
 
     public KarafDistributionConfigurationOption(MavenUrlReference frameworkURLReference, String name,
-            String karafVersion) {
+                                                String karafVersion) {
         super(frameworkURLReference, name, karafVersion);
     }
 
