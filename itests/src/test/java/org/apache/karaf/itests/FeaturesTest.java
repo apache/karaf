@@ -33,10 +33,10 @@ public class FeaturesTest extends KarafTestSupport {
 
     @Test
     public void listCommand() throws Exception {
-        String listOutput = executeCommand("feature:list");
+        String listOutput = executeCommand("features:list");
         System.out.println(listOutput);
         assertFalse(listOutput.isEmpty());
-        listOutput = executeCommand("feature:list -i");
+        listOutput = executeCommand("features:list -i");
         System.out.println(listOutput);
         assertFalse(listOutput.isEmpty());
     }
@@ -91,7 +91,7 @@ public class FeaturesTest extends KarafTestSupport {
         String repoListOutput = executeCommand("features:listurl");
         System.out.println(repoListOutput);
         assertTrue(repoListOutput.contains("apache-karaf-cellar"));
-        System.out.println(executeCommand("features:remove mvn:org.apache.karaf.cellar/apache-karaf-cellar/2.2.4/xml/features"));
+        System.out.println(executeCommand("features:removeurl mvn:org.apache.karaf.cellar/apache-karaf-cellar/2.2.4/xml/features"));
         repoListOutput = executeCommand("features:listurl");
         System.out.println(repoListOutput);
         assertFalse(repoListOutput.contains("apache-karaf-cellar"));
@@ -103,7 +103,7 @@ public class FeaturesTest extends KarafTestSupport {
         try {
             connector = this.getJMXConnector();
             MBeanServerConnection connection = connector.getMBeanServerConnection();
-            ObjectName name = new ObjectName("org.apache.karaf:type=featurels,name=root");
+            ObjectName name = new ObjectName("org.apache.karaf:type=features,name=root");
             connection.invoke(name, "addRepository", new Object[] { "mvn:org.apache.karaf.cellar/apache-karaf-cellar/2.2.4/xml/features" }, new String[]{ "java.lang.String" });
             connection.invoke(name, "removeRepository", new Object[] { "mvn:org.apache.karaf.cellar/apache-karaf-cellar/2.2.4/xml/features" }, new String[]{ "java.lang.String" });
         } finally {
