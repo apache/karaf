@@ -93,7 +93,7 @@ public class AdminTest extends KarafTestSupport {
     public void renameCommand() throws Exception {
         System.out.println(executeCommand("admin:create itest"));
         System.out.println(executeCommand("admin:rename itest new_itest"));
-        String instanceListOutput = executeCommand("instance:list");
+        String instanceListOutput = executeCommand("admin:list");
         System.out.println(instanceListOutput);
         assertTrue(instanceListOutput.contains("new_itest"));
     }
