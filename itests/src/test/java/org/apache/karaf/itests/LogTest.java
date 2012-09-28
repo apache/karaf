@@ -50,7 +50,7 @@ public class LogTest extends KarafTestSupport {
             Attribute attribute = new Attribute("Level", "DEBUG");
             connection.setAttribute(name, attribute);
             String logLevel = (String) connection.getAttribute(name, "Level");
-            assertEquals("DEBUG", logLevel);
+            assertEquals("Level: DEBUG", logLevel);
         } finally {
             if (connector != null)
                 connector.close();
