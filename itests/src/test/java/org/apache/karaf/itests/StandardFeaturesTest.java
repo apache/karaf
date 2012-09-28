@@ -19,214 +19,136 @@ import org.ops4j.pax.exam.junit.ExamReactorStrategy;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
 import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
 
-import static org.junit.Assert.assertFalse;
-
 @RunWith(JUnit4TestRunner.class)
 @ExamReactorStrategy(AllConfinedStagedReactorFactory.class)
 public class StandardFeaturesTest extends KarafTestSupport {
 
     @Test
     public void testBootFeatures() throws Exception {
-        // config
-        String configFeatureStatus = executeCommand("features:list -i | grep config");
-        System.out.println(configFeatureStatus);
-        assertFalse("config feature is not installed", configFeatureStatus.isEmpty());
-        // ssh
-        String sshFeatureStatus = executeCommand("features:list -i | grep ssh");
-        System.out.println(sshFeatureStatus);
-        assertFalse("ssh feature is not installed", sshFeatureStatus.isEmpty());
-        // management
-        String managementFeatureStatus = executeCommand("features:list -i | grep management");
-        System.out.println(managementFeatureStatus);
-        assertFalse("management feature is not installed", managementFeatureStatus.isEmpty());
-        // kar
-        String karFeatureStatus = executeCommand("features:list -i | grep \"kar \"");
-        System.out.println(karFeatureStatus);
-        assertFalse("kar feature is not installed", karFeatureStatus.isEmpty());
+        assertFeatureInstalled("config");
+        assertFeatureInstalled("ssh");
+        assertFeatureInstalled("management");
+        assertFeatureInstalled("kar");
+    }
+
+    private void installAndAssertFeature(String feature) throws Exception {
+        featuresService.installFeature(feature);
+        assertFeatureInstalled(feature);
     }
 
     @Test
     public void testSpringFeature() throws Exception {
-        System.out.println(executeCommand("features:install spring"));
-        String springFeatureStatus = executeCommand("features:list -i | grep spring");
-        System.out.println(springFeatureStatus);
-        assertFalse("spring feature is not installed", springFeatureStatus.isEmpty());
+        installAndAssertFeature("spring");
     }
 
     @Test
     public void testSpringAspectsFeature() throws Exception {
-        System.out.println(executeCommand("features:install spring-aspects"));
-        String springAspectsFeatureStatus = executeCommand("features:list -i | grep spring-aspects");
-        System.out.println(springAspectsFeatureStatus);
-        assertFalse("spring-aspects feature is not installed", springAspectsFeatureStatus.isEmpty());
+        installAndAssertFeature("spring-aspects");
     }
 
     @Test
     public void testSpringDmFeature() throws Exception {
-        System.out.println(executeCommand("features:install spring-dm"));
-        String springDmFeatureStatus = executeCommand("features:list -i | grep spring-dm");
-        System.out.println(springDmFeatureStatus);
-        assertFalse("spring-dm feature is not installed", springDmFeatureStatus.isEmpty());
+        installAndAssertFeature("spring-dm");
     }
 
     @Test
     public void testSpringDmWebFeature() throws Exception {
-        System.out.println(executeCommand("features:install spring-dm-web"));
-        String springDmWebFeatureStatus = executeCommand("features:list -i | grep spring-dm-web");
-        System.out.println(springDmWebFeatureStatus);
-        assertFalse("spring-dm-web feature is not installed", springDmWebFeatureStatus.isEmpty());
+        installAndAssertFeature("spring-dm-web");
     }
 
     @Test
     public void testSpringInstrumentFeature() throws Exception {
-        System.out.println(executeCommand("features:install spring-instrument"));
-        String springInstrumentFeatureStatus = executeCommand("features:list -i | grep spring-instrument");
-        System.out.println(springInstrumentFeatureStatus);
-        assertFalse("spring-instrument feature is not installed", springInstrumentFeatureStatus.isEmpty());
+        installAndAssertFeature("spring-instrument");
     }
 
     @Test
     public void testSpringJdbcFeature() throws Exception {
-        System.out.println(executeCommand("features:install spring-jdbc"));
-        String springJdbcFeatureStatus = executeCommand("features:list -i | grep spring-jdbc");
-        System.out.println(springJdbcFeatureStatus);
-        assertFalse("spring-jdbc feature is not installed", springJdbcFeatureStatus.isEmpty());
+        installAndAssertFeature("spring-jdbc");
     }
 
     @Test
     public void testSpringJmsFeature() throws Exception {
-        System.out.println(executeCommand("features:install spring-jms"));
-        String springJmsFeatureStatus = executeCommand("features:list -i | grep spring-jms");
-        System.out.println(springJmsFeatureStatus);
-        assertFalse("spring-jms feature is not installed", springJmsFeatureStatus.isEmpty());
+        installAndAssertFeature("spring-jms");
     }
 
     @Test
     public void testSpringStrutsFeature() throws Exception {
-        System.out.println(executeCommand("features:install spring-struts"));
-        String springStrutsFeatureStatus = executeCommand("features:list -i | grep spring-struts");
-        System.out.println(springStrutsFeatureStatus);
-        assertFalse("spring-struts feature is not installed", springStrutsFeatureStatus.isEmpty());
+        installAndAssertFeature("spring-struts");
     }
 
     @Test
     public void testSpringTestFeature() throws Exception {
-        System.out.println(executeCommand("features:install spring-test"));
-        String springTestFeatureStatus = executeCommand("features:list -i | grep spring-test");
-        System.out.println(springTestFeatureStatus);
-        assertFalse("spring-test feature is not installed", springTestFeatureStatus.isEmpty());
+        installAndAssertFeature("spring-test");
     }
 
     @Test
     public void testSpringOrmFeature() throws Exception {
-        System.out.println(executeCommand("features:install spring-orm"));
-        String springOrmFeatureStatus = executeCommand("features:list -i | grep spring-orm");
-        System.out.println(springOrmFeatureStatus);
-        assertFalse("spring-orm feature is not installed", springOrmFeatureStatus.isEmpty());
+        installAndAssertFeature("spring-orm");
     }
 
     @Test
     public void testSpringOxmFeature() throws Exception {
-        System.out.println(executeCommand("features:install spring-oxm"));
-        String springOxmFeatureStatus = executeCommand("features:list -i | grep spring-oxm");
-        System.out.println(springOxmFeatureStatus);
-        assertFalse("spring-oxm feature is not installed", springOxmFeatureStatus.isEmpty());
+        installAndAssertFeature("spring-oxm");
     }
 
     @Test
     public void testSpringTxFeature() throws Exception {
-        System.out.println(executeCommand("features:install spring-tx"));
-        String springTxFeatureStatus = executeCommand("features:list -i | grep spring-tx");
-        System.out.println(springTxFeatureStatus);
-        assertFalse("spring-tx feature is not installed", springTxFeatureStatus.isEmpty());
+        installAndAssertFeature("spring-tx");
     }
 
     @Test
     public void testSpringWebFeature() throws Exception {
-        System.out.println(executeCommand("features:install spring-web"));
-        String springWebFeatureStatus = executeCommand("features:list -i | grep spring-web");
-        System.out.println(springWebFeatureStatus);
-        assertFalse("spring-web feature is not installed", springWebFeatureStatus.isEmpty());
+        installAndAssertFeature("spring-web");
     }
 
     @Test
     public void testSpringWebPortletFeature() throws Exception {
-        System.out.println(executeCommand("features:install spring-web-portlet"));
-        String springWebPortletFeatureStatus = executeCommand("features:list -i | grep spring-web-portlet");
-        System.out.println(springWebPortletFeatureStatus);
-        assertFalse("spring-web-portlet feature is not installed", springWebPortletFeatureStatus.isEmpty());
+        installAndAssertFeature("spring-web-portlet");
     }
 
     @Test
     public void testWrapperFeature() throws Exception {
-        System.out.println(executeCommand("features:install wrapper"));
-        String wrapperFeatureStatus = executeCommand("features:list -i | grep wrapper");
-        System.out.println(wrapperFeatureStatus);
-        assertFalse("wrapper feature is not installed", wrapperFeatureStatus.isEmpty());
+        installAndAssertFeature("wrapper");
     }
 
     @Test
     public void testObrFeature() throws Exception {
-        System.out.println(executeCommand("features:install obr"));
-        String obrFeatureStatus = executeCommand("features:list -i | grep obr");
-        System.out.println(obrFeatureStatus);
-        assertFalse("obr feature is not installed", obrFeatureStatus.isEmpty());
+        installAndAssertFeature("obr");
     }
 
     @Test
     public void testJettyFeature() throws Exception {
-        System.out.println(executeCommand("features:install jetty"));
-        String jettyFeatureStatus = executeCommand("features:list -i | grep jetty");
-        System.out.println(jettyFeatureStatus);
-        assertFalse("jetty feature is not installed", jettyFeatureStatus.isEmpty());
+        installAndAssertFeature("jetty");
     }
 
     @Test
     public void testHttpFeature() throws Exception {
-        System.out.println(executeCommand("features:install http"));
-        String httpFeatureStatus = executeCommand("features:list -i | grep http");
-        System.out.println(httpFeatureStatus);
-        assertFalse("http feature is not installed", httpFeatureStatus.isEmpty());
+        installAndAssertFeature("http");
     }
 
     @Test
     public void testHttpWhiteboardFeature() throws Exception {
-        System.out.println(executeCommand("features:install http-whiteboard"));
-        String httpWhiteboardFeatureStatus = executeCommand("features:list -i | grep http-whiteboard");
-        System.out.println(httpWhiteboardFeatureStatus);
-        assertFalse("http-whiteboard feature is not installed", httpWhiteboardFeatureStatus.isEmpty());
+        installAndAssertFeature("http-whiteboard");
     }
 
     @Test
     public void testWarFeature() throws Exception {
-        System.out.println(executeCommand("features:install war"));
-        String warFeatureStatus = executeCommand("features:list -i | grep war");
-        System.out.println(warFeatureStatus);
-        assertFalse("war feature is not installed", warFeatureStatus.isEmpty());
+        installAndAssertFeature("war");
     }
 
     @Test
     public void testWebconsoleFeature() throws Exception {
-        System.out.println(executeCommand("features:install webconsole"));
-        String webconsoleFeatureStatus = executeCommand("features:list -i | grep webconsole");
-        System.out.println(webconsoleFeatureStatus);
-        assertFalse("webconsole feature is not installed", webconsoleFeatureStatus.isEmpty());
+        installAndAssertFeature("webconsole");
     }
 
     @Test
     public void testEventadminFeature() throws Exception {
-        System.out.println(executeCommand("features:install eventadmin"));
-        String eventadminFeatureStatus = executeCommand("features:list -i | grep eventadmin");
-        System.out.println(eventadminFeatureStatus);
-        assertFalse("eventadmin feature is not installed", eventadminFeatureStatus.isEmpty());
+        installAndAssertFeature("eventadmin");
     }
 
     @Test
     public void testJasyptEncryptionFeature() throws Exception {
-        System.out.println(executeCommand("features:install jasypt-encryption"));
-        String jasyptEncryptionFeatureStatus = executeCommand("features:list -i | grep jasypt-encryption");
-        System.out.println(jasyptEncryptionFeatureStatus);
-        assertFalse("jasypt-encryption feature is not installed", jasyptEncryptionFeatureStatus.isEmpty());
+        installAndAssertFeature("jasypt-encryption");
     }
 
 }

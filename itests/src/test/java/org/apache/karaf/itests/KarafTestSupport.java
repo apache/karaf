@@ -15,7 +15,10 @@ package org.apache.karaf.itests;
 
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
+import org.apache.karaf.features.Feature;
+import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.tooling.exam.options.LogLevelOption;
+import org.junit.Assert;
 import org.ops4j.pax.exam.MavenUtils;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.TestProbeBuilder;
@@ -25,7 +28,6 @@ import org.osgi.framework.*;
 import org.osgi.util.tracker.ServiceTracker;
 
 import javax.inject.Inject;
-import javax.management.MBeanServerConnection;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
@@ -51,6 +53,9 @@ public class KarafTestSupport {
 
     @Inject
     protected BundleContext bundleContext;
+
+    @Inject
+    protected FeaturesService featuresService;
 
     @ProbeBuilder
     public TestProbeBuilder probeConfiguration(TestProbeBuilder probe) {
@@ -200,6 +205,16 @@ public class KarafTestSupport {
         env.put("jmx.remote.credentials", credentials);
         JMXConnector connector = JMXConnectorFactory.connect(url, env);
         return connector;
+    }
+
+    public void assertFeatureInstalled(String featureName) {
+        Feature[] features = featuresService.listInstalledFeatures();
+        for (Feature feature : features) {
+            if (featureName.equals(feature.getName())) {
+                return;
+            }
+        }
+        Assert.fail("Feature " + featureName + " should be installed but is not");
     }
 
 }
