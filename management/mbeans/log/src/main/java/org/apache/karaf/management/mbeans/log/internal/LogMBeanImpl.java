@@ -44,11 +44,11 @@ public class LogMBeanImpl extends StandardMBean implements LogMBean {
         super(LogMBean.class);
     }
 
-    public void set(String level) throws Exception {
-        set(level, null);
+    public void setLevel(String level) throws Exception {
+        setLevel(level, null);
     }
 
-    public void set(String level, String logger) throws Exception {
+    public void setLevel(String level, String logger) throws Exception {
         if (ROOT_LOGGER.equalsIgnoreCase(logger)) {
             logger = null;
         }
@@ -103,11 +103,11 @@ public class LogMBeanImpl extends StandardMBean implements LogMBean {
         cfg.update(props);
     }
 
-    public String get() throws Exception {
-        return get(null);
+    public String getLevel() throws Exception {
+        return getLevel(null);
     }
 
-    public String get(String logger) throws Exception {
+    public String getLevel(String logger) throws Exception {
         ConfigurationAdmin cfgAdmin = getConfigAdmin();
         Configuration cfg = cfgAdmin.getConfiguration(CONFIGURATION_PID, null);
         Dictionary props = cfg.getProperties();
@@ -125,7 +125,7 @@ public class LogMBeanImpl extends StandardMBean implements LogMBean {
                 prop = LOGGER_PREFIX + logger;
             }
             val = (String) props.get(prop);
-            val = getLevel(val);
+            val = getLevelValue(val);
             if (val != null || logger == null) {
                 break;
             }
@@ -138,6 +138,22 @@ public class LogMBeanImpl extends StandardMBean implements LogMBean {
         }
         String st = "Level: " + val;
         return st;
+    }
+
+    public void set(String level) throws Exception {
+        setLevel(level);
+    }
+
+    public void set(String logger, String level) throws Exception {
+        setLevel(logger, level);
+    }
+
+    public String get() throws Exception {
+        return getLevel();
+    }
+
+    public String get(String logger) throws Exception {
+        return getLevel(logger);
     }
 
     private boolean checkIfFromRequestedLog(PaxLoggingEvent event, String logger) {
@@ -155,7 +171,7 @@ public class LogMBeanImpl extends StandardMBean implements LogMBean {
         return sb.toString();
     }
 
-    private String getLevel(String prop) {
+    private String getLevelValue(String prop) {
         if (prop == null) {
             return null;
         } else {

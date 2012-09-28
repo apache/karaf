@@ -23,10 +23,58 @@ import java.util.List;
  */
 public interface LogMBean {
 
+    /**
+     * Set the level of the root logger.
+     *
+     * @param level the new level value (INFO, ERROR, etc).
+     * @throws Exception
+     */
+    void setLevel(String level) throws Exception;
+
+    /**
+     * Set the level of a given logger.
+     *
+     * @param level the new level value (INFO, ERROR, etc).
+     * @param logger the target logger where to change the level.
+     * @throws Exception
+     */
+    void setLevel(String level, String logger) throws Exception;
+
+    /**
+     * Get the level of the root logger.
+     *
+     * @return the value of the level (INFO, ERROR, etc).
+     * @throws Exception
+     */
+    String getLevel() throws Exception;
+
+    /**
+     * Get the level of a given logger.
+     *
+     * @param logger the target logger.
+     * @return the level of the logger.
+     * @throws Exception
+     */
+    String getLevel(String logger) throws Exception;
+
+    /**
+     * @deprecated please, use setLevel() instead.
+     */
     void set(String level) throws Exception;
+
+    /**
+     * @deprecated please, use setLevel() instead.
+     */
     void set(String level, String logger) throws Exception;
 
+    /**
+     * @deprecated please, use getLevel() instead.
+     */
     String get() throws Exception;
+
+    /**
+     * @deprecated please, use getLevel() instead.
+     */
     String get(String logger) throws Exception;
 
 }
