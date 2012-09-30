@@ -21,6 +21,7 @@ import static java.lang.String.format;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
@@ -770,19 +771,28 @@ public class FeaturesServiceImpl implements FeaturesService {
     }
 
     protected void saveState() {
+        OutputStream os = null;
         try {
             File file = bundleManager.getDataFile("FeaturesServiceState.properties");
             Properties props = new Properties();
             saveSet(props, "repositories.", repositories.keySet());
             saveMap(props, "features.", installed);
-            OutputStream os = new FileOutputStream(file);
-            try {
-                props.store(new FileOutputStream(file), "FeaturesService State");
-            } finally {
-                os.close();
-            }
+            os = new FileOutputStream(file);
+            props.store(new FileOutputStream(file), "FeaturesService State");
         } catch (Exception e) {
             LOGGER.error("Error persisting FeaturesService state", e);
+        } finally {
+            closeStream(os);
+        }
+    }
+
+    private void closeStream(OutputStream os) {
+        if (os != null) {
+            try {
+                os.close();
+            } catch (IOException e) {
+                // Ignore
+            }
         }
     }
 
