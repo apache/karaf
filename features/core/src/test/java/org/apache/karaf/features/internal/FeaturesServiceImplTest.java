@@ -18,88 +18,85 @@ package org.apache.karaf.features.internal;
 
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import junit.framework.TestCase;
-
 import org.apache.felix.utils.manifest.Clause;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.internal.BundleManager.BundleInstallerResult;
 import org.easymock.EasyMock;
-import org.osgi.framework.Bundle;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * Test cases for {@link FeaturesServiceImpl}
  */
-public class FeaturesServiceImplTest extends TestCase {
+public class FeaturesServiceImplTest extends TestBase {
     
     File dataFile;
 
-    protected void setUp() throws IOException {
+    @Before
+    public void setUp() throws IOException {
         dataFile = File.createTempFile("features", null, null);
     }
 
+    @Test
     public void testGetFeature() throws Exception {
-        final Map<String, Map<String, Feature>> features = new HashMap<String, Map<String,Feature>>();
-        Map<String, Feature> versions = new HashMap<String, Feature>();
-        org.apache.karaf.features.internal.model.Feature feature = new org.apache.karaf.features.internal.model.Feature("transaction");
-        versions.put("1.0.0", feature);
-        features.put("transaction", versions);
+        Feature transactionFeature = feature("transaction", "1.0.0");
+        final Map<String, Map<String, Feature>> features = features(transactionFeature);
         final FeaturesServiceImpl impl = new FeaturesServiceImpl(null, null) {
             protected Map<String,Map<String,Feature>> getFeatures() throws Exception {
                 return features;
             };
         };
         assertNotNull(impl.getFeature("transaction", org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION));
-        assertSame(feature, impl.getFeature("transaction", org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION));
+        assertSame(transactionFeature, impl.getFeature("transaction", org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION));
     }
     
+    @Test
     public void testGetFeatureStripVersion() throws Exception {
-        final Map<String, Map<String, Feature>> features = new HashMap<String, Map<String,Feature>>();
-        Map<String, Feature> versions = new HashMap<String, Feature>();
-        org.apache.karaf.features.internal.model.Feature feature = new org.apache.karaf.features.internal.model.Feature("transaction");
-        versions.put("1.0.0", feature);
-        features.put("transaction", versions);
         final FeaturesServiceImpl impl = new FeaturesServiceImpl(null, null) {
             protected Map<String,Map<String,Feature>> getFeatures() throws Exception {
-                return features;
+                return features(feature("transaction", "1.0.0"));
             };
         };
-        assertNotNull(impl.getFeature("transaction", "  1.0.0  "));
-        assertSame(feature, impl.getFeature("transaction", "  1.0.0   "));
+        Feature feature = impl.getFeature("transaction", "  1.0.0  ");
+        assertNotNull(feature);
+        assertSame("transaction", feature.getName());
     }
     
+    @Test
     public void testGetFeatureNotAvailable() throws Exception {
-        final Map<String, Map<String, Feature>> features = new HashMap<String, Map<String,Feature>>();
-        Map<String, Feature> versions = new HashMap<String, Feature>();
-        versions.put("1.0.0", new org.apache.karaf.features.internal.model.Feature("transaction"));
-        features.put("transaction", versions);
         final FeaturesServiceImpl impl = new FeaturesServiceImpl(null, null) {
             protected Map<String,Map<String,Feature>> getFeatures() throws Exception {
-                return features;
+                return features(feature("transaction", "1.0.0"));
             };
         };
         assertNull(impl.getFeature("activemq", org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION));
     }
     
+    @Test
     public void testGetFeatureHighestAvailable() throws Exception {
-        final Map<String, Map<String, Feature>> features = new HashMap<String, Map<String,Feature>>();
-        Map<String, Feature> versions = new HashMap<String, Feature>();
-        versions.put("1.0.0", new org.apache.karaf.features.internal.model.Feature("transaction", "1.0.0"));
-        versions.put("2.0.0", new org.apache.karaf.features.internal.model.Feature("transaction", "2.0.0"));
-        features.put("transaction", versions);
+        final Map<String, Map<String, Feature>> features = features(
+                feature("transaction", "1.0.0"),
+                feature("transaction", "2.0.0")
+        );
         final FeaturesServiceImpl impl = new FeaturesServiceImpl(null, null) {
             protected Map<String,Map<String,Feature>> getFeatures() throws Exception {
                 return features;
@@ -109,6 +106,7 @@ public class FeaturesServiceImplTest extends TestCase {
         assertSame("2.0.0", impl.getFeature("transaction", org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION).getVersion());
     }
 
+    @Test
     public void testStartDoesNotFailWithOneInvalidUri()  {
         BundleManager bundleManager = EasyMock.createMock(BundleManager.class);
         expect(bundleManager.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
@@ -126,22 +124,19 @@ public class FeaturesServiceImplTest extends TestCase {
     /**
      * This test checks KARAF-388 which allows you to specify version of boot feature.
      */
+    @Test
     @SuppressWarnings("unchecked")
     public void testStartDoesNotFailWithNonExistentVersion()  {
         BundleManager bundleManager = EasyMock.createMock(BundleManager.class);
         expect(bundleManager.createAndRegisterEventAdminListener()).andReturn(null);
-        bundleManager.refreshBundles(EasyMock.anyObject(InstallationState.class), EasyMock.anyObject(EnumSet.class));
+        bundleManager.refreshBundles(EasyMock.anyObject(Set.class), EasyMock.anyObject(Set.class), EasyMock.anyObject(EnumSet.class));
         EasyMock.expectLastCall().anyTimes();
 
-        final Map<String, Map<String, Feature>> features = new HashMap<String, Map<String,Feature>>();
-        Map<String, Feature> versions = new HashMap<String, Feature>();
-        versions.put("1.0.0", new org.apache.karaf.features.internal.model.Feature("transaction", "1.0.0"));
-        versions.put("2.0.0", new org.apache.karaf.features.internal.model.Feature("transaction", "2.0.0"));
-        features.put("transaction", versions);
-
-        Map<String, Feature> versions2 = new HashMap<String, Feature>();
-        versions2.put("1.0.0", new org.apache.karaf.features.internal.model.Feature("ssh", "1.0.0"));
-        features.put("ssh", versions2);
+        final Map<String, Map<String, Feature>> features = features(
+                feature("transaction", "1.0.0"),
+                feature("transaction", "2.0.0"),
+                feature("ssh", "1.0.0")
+        );
 
         final FeaturesServiceImpl impl = new FeaturesServiceImpl(bundleManager, null) {
             protected Map<String,Map<String,Feature>> getFeatures() throws Exception {
@@ -173,26 +168,18 @@ public class FeaturesServiceImplTest extends TestCase {
         
     }
     
-    public Bundle createDummyBundle(long id, String symbolicName) {
-        Bundle bundle = EasyMock.createNiceMock(Bundle.class);
-        expect(bundle.getBundleId()).andReturn(id).anyTimes();
-        expect(bundle.getSymbolicName()).andReturn(symbolicName);
-        expect(bundle.getHeaders()).andReturn(new Hashtable<String, String>());
-        replay(bundle);
-        return bundle;
-    }
-
     /**
      * This test ensures that every feature get installed only once, even if it appears multiple times in the list
      * of transitive feature dependencies (KARAF-1600)
      */
+    @Test
     @SuppressWarnings("unchecked")
     public void testNoDuplicateFeaturesInstallation() throws Exception {
         final List<Feature> installed = new LinkedList<Feature>();
         BundleManager bundleManager = EasyMock.createMock(BundleManager.class);
         expect(bundleManager.installBundleIfNeeded(EasyMock.anyObject(String.class), EasyMock.anyInt(), EasyMock.anyObject(String.class)))
-            .andReturn(new BundleInstallerResult(createDummyBundle(1l, ""), true)).anyTimes();
-        bundleManager.refreshBundles(EasyMock.anyObject(InstallationState.class), EasyMock.anyObject(EnumSet.class));
+            .andReturn(new BundleInstallerResult(createDummyBundle(1l, "", headers()), true)).anyTimes();
+        bundleManager.refreshBundles(EasyMock.anyObject(Set.class), EasyMock.anyObject(Set.class), EasyMock.anyObject(EnumSet.class));
         EasyMock.expectLastCall();
         final FeaturesServiceImpl impl = new FeaturesServiceImpl(bundleManager, null) {
             // override methods which refers to bundle context to avoid mocking everything
@@ -225,6 +212,7 @@ public class FeaturesServiceImplTest extends TestCase {
         assertEquals("Every feature should only have been installed once", installed.size(), noduplicates.size());
     }
 
+    @Test
     public void testGetOptionalImportsOnly() {
         BundleManager bundleManager = new BundleManager(null, null, 0l);
 
