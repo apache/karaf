@@ -192,19 +192,19 @@ public class BundleManager {
         }
     }
     
-    protected Set<Bundle> findBundlesToRefresh(InstallationState state) {
+    protected Set<Bundle> findBundlesToRefresh(Set<Bundle> existing, Set<Bundle> installed) {
         Set<Bundle> bundles = new HashSet<Bundle>();
-        bundles.addAll(findBundlesWithOptionalPackagesToRefresh(state));
-        bundles.addAll(findBundlesWithFragmentsToRefresh(state));
+        bundles.addAll(findBundlesWithOptionalPackagesToRefresh(existing, installed));
+        bundles.addAll(findBundlesWithFragmentsToRefresh(existing, installed));
         return bundles;
     }
 
-    protected Set<Bundle> findBundlesWithFragmentsToRefresh(InstallationState state) {
+    protected Set<Bundle> findBundlesWithFragmentsToRefresh(Set<Bundle> existing, Set<Bundle> installed) {
         Set<Bundle> bundles = new HashSet<Bundle>();
-        Set<Bundle> oldBundles = new HashSet<Bundle>(state.bundles);
-        oldBundles.removeAll(state.installed);
+        Set<Bundle> oldBundles = new HashSet<Bundle>(existing);
+        oldBundles.removeAll(installed);
         if (!oldBundles.isEmpty()) {
-            for (Bundle b : state.installed) {
+            for (Bundle b : installed) {
                 String hostHeader = (String) b.getHeaders().get(Constants.FRAGMENT_HOST);
                 if (hostHeader != null) {
                     Clause[] clauses = Parser.parseHeader(hostHeader);
@@ -230,10 +230,10 @@ public class BundleManager {
         return bundles;
     }
 
-    protected Set<Bundle> findBundlesWithOptionalPackagesToRefresh(InstallationState state) {
+    protected Set<Bundle> findBundlesWithOptionalPackagesToRefresh(Set<Bundle> existing, Set<Bundle> installed) {
         // First pass: include all bundles contained in these features
-        Set<Bundle> bundles = new HashSet<Bundle>(state.bundles);
-        bundles.removeAll(state.installed);
+        Set<Bundle> bundles = new HashSet<Bundle>(existing);
+        bundles.removeAll(installed);
         if (bundles.isEmpty()) {
             return bundles;
         }
@@ -255,7 +255,7 @@ public class BundleManager {
         // Third pass: compute a list of packages that are exported by our bundles and see if
         //             some exported packages can be wired to the optional imports
         List<Clause> exports = new ArrayList<Clause>();
-        for (Bundle b : state.installed) {
+        for (Bundle b : installed) {
             String exportsStr = (String) b.getHeaders().get(Constants.EXPORT_PACKAGE);
             if (exportsStr != null) {
                 Clause[] exportsList = Parser.parseHeader(exportsStr);
@@ -335,7 +335,7 @@ public class BundleManager {
         }
     }
     
-    void uninstallBundles(Set<Long> bundles) throws BundleException, InterruptedException {
+    public void uninstallBundles(Set<Long> bundles) throws BundleException, InterruptedException {
         for (long bundleId : bundles) {
             Bundle b = bundleContext.getBundle(bundleId);
             if (b != null) {
@@ -367,11 +367,11 @@ public class BundleManager {
         return new ServiceTracker(bundleContext, FrameworkUtil.createFilter(filter), null);
     }
 
-    void refreshBundles(InstallationState state, EnumSet<Option> options) {
+    public void refreshBundles(Set<Bundle> existing, Set<Bundle> installed, EnumSet<Option> options) {
         boolean print = options.contains(Option.PrintBundlesToRefresh);
         boolean refresh = !options.contains(Option.NoAutoRefreshBundles);
         if (print || refresh) {
-            Set<Bundle> bundlesToRefresh = findBundlesToRefresh(state);
+            Set<Bundle> bundlesToRefresh = findBundlesToRefresh(existing, installed);
             StringBuilder sb = new StringBuilder();
             for (Bundle b : bundlesToRefresh) {
                 if (sb.length() > 0) {

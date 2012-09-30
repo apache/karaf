@@ -22,6 +22,11 @@ import static org.easymock.EasyMock.isA;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.reset;
 import static org.easymock.EasyMock.verify;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -35,21 +40,25 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-import junit.framework.TestCase;
-
 import org.apache.karaf.features.internal.BundleManager;
+import org.apache.karaf.features.internal.BundleManager.BundleInstallerResult;
 import org.apache.karaf.features.internal.FeaturesServiceImpl;
+import org.apache.karaf.features.internal.TestBase;
 import org.easymock.EasyMock;
 import org.junit.Assert;
+import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
 import org.osgi.framework.wiring.FrameworkWiring;
 import org.osgi.service.blueprint.container.BlueprintContainer;
 import org.slf4j.LoggerFactory;
 
-public class FeaturesServiceTest extends TestCase {
+public class FeaturesServiceTest extends TestBase {
 
     File dataFile;
 
@@ -57,6 +66,7 @@ public class FeaturesServiceTest extends TestCase {
         dataFile = File.createTempFile("features", null, null);
     }
 
+    @Test
     public void testInstallFeature() throws Exception {
 
         String name = getJarUrl(BlueprintContainer.class);
@@ -72,19 +82,38 @@ public class FeaturesServiceTest extends TestCase {
 
         URI uri = tmp.toURI();
 
-        BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
-        Bundle installedBundle = EasyMock.createMock(Bundle.class);
-        // required since the sorted set uses it
-        expect(installedBundle.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
-
-        expect(bundleContext.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
-
-        replay(bundleContext, installedBundle);
-
-        FeaturesServiceImpl svc = new FeaturesServiceImpl(new BundleManager(bundleContext));
-        svc.addRepository(uri);
+        BundleManager bundleManager = EasyMock.createMock(BundleManager.class);
+        Bundle installedBundle = createDummyBundle(12345L, name, headers());
+        FeaturesServiceImpl svc = testAddRepository(name, tmp, uri, bundleManager, installedBundle);
         
+        reset(bundleManager);
+        
+        expect(bundleManager.installBundleIfNeeded(eq(name), eq(0), eq((String)null))).andReturn(new BundleInstallerResult(installedBundle, true));
+        TreeSet<Bundle> existing = new TreeSet<Bundle>(Arrays.asList(installedBundle));
+        bundleManager.refreshBundles(eq(existing), eq(existing), eq(EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles)));
+        EasyMock.expectLastCall();
+        expect(bundleManager.getDataFile(EasyMock.anyObject(String.class))).andReturn(tmp);
+        
+        replay(bundleManager);
+        svc.installFeature("f1", org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION, EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
+        verify(bundleManager);
+        
+        Feature[] installed = svc.listInstalledFeatures();
+        assertEquals(1, installed.length);
+        assertEquals("f1", installed[0].getName());
+    }
+
+    private FeaturesServiceImpl testAddRepository(String name, File tmp, URI uri, BundleManager bundleManager,
+            Bundle installedBundle) throws IOException, BundleException, Exception {
+        expect(bundleManager.getDataFile(EasyMock.anyObject(String.class))).andReturn(tmp);
+        expect(bundleManager.installBundleIfNeeded(eq(name), eq(0), eq((String)null))).andReturn(new BundleInstallerResult(installedBundle, true)).anyTimes();
+
+        replay(bundleManager);
+        FeaturesServiceImpl svc = new FeaturesServiceImpl(bundleManager);
+        svc.addRepository(uri);
         Repository[] repositories = svc.listRepositories();
+        verify(bundleManager);
+
         assertNotNull(repositories);
         assertEquals(1, repositories.length);
         assertNotNull(repositories[0]);
@@ -99,37 +128,11 @@ public class FeaturesServiceTest extends TestCase {
         assertEquals(1, features[0].getBundles().size());
         assertEquals(name, features[0].getBundles().get(0).getLocation());
         assertTrue(features[0].getBundles().get(0).isStart());
-
-        verify(bundleContext, installedBundle);
-
-        reset(bundleContext, installedBundle);
-
-        // required since the sorted set uses it
-        expect(installedBundle.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
-
-        expect(bundleContext.createFilter(EasyMock.<String>anyObject())).andReturn(null).anyTimes();
-        expect(installedBundle.getSymbolicName()).andReturn(name).anyTimes();
-        expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
-        expect(bundleContext.installBundle(isA(String.class),
-                                           isA(InputStream.class))).andReturn(installedBundle);
-        expect(installedBundle.getBundleId()).andReturn(12345L);
-        expect(installedBundle.getBundleId()).andReturn(12345L);
-        expect(installedBundle.getBundleId()).andReturn(12345L);
-        expect(bundleContext.getBundle(12345L)).andReturn(installedBundle);
-        expect(installedBundle.getHeaders()).andReturn(new Hashtable());
-        installedBundle.start();
-
-        expect(bundleContext.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
-
-        replay(bundleContext, installedBundle);
-
-        svc.installFeature("f1", org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION, EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
-        
-        Feature[] installed = svc.listInstalledFeatures();
-        assertEquals(1, installed.length);
-        assertEquals("f1", installed[0].getName());
+        return svc;
     }
 
+    @SuppressWarnings("unchecked")
+    @Test
     public void testUninstallFeature() throws Exception {
 
         String name = getJarUrl(BlueprintContainer.class);
@@ -148,64 +151,20 @@ public class FeaturesServiceTest extends TestCase {
 
         URI uri = tmp.toURI();
         
-        BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
-        Bundle installedBundle = EasyMock.createMock(Bundle.class);
-        Bundle framework = EasyMock.createMock(Bundle.class);
-        expect(installedBundle.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
+        Bundle installedBundle = createDummyBundle(12345L, name, headers());
 
-        // required since the sorted set uses it
-        expect(bundleContext.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
-
-        replay(bundleContext, installedBundle, framework);
-
-        FeaturesServiceImpl svc = new FeaturesServiceImpl(new BundleManager(bundleContext));
+        BundleManager bundleManager = EasyMock.createMock(BundleManager.class);
+        expect(bundleManager.getDataFile(EasyMock.anyObject(String.class))).andReturn(tmp).anyTimes();
+        expect(bundleManager.installBundleIfNeeded(name, 0, null)).andReturn(new BundleInstallerResult(installedBundle, true));
+        expect(bundleManager.installBundleIfNeeded(name, 0, null)).andReturn(new BundleInstallerResult(installedBundle, false));
+        bundleManager.refreshBundles(EasyMock.anyObject(Set.class), EasyMock.anyObject(Set.class), EasyMock.anyObject(EnumSet.class));
+        EasyMock.expectLastCall().anyTimes();
+        bundleManager.uninstallBundles(EasyMock.anyObject(Set.class));
+        EasyMock.expectLastCall().times(2);
+        
+        replay(bundleManager);
+        FeaturesServiceImpl svc = new FeaturesServiceImpl(bundleManager);
         svc.addRepository(uri);
-
-        verify(bundleContext, installedBundle, framework);
-
-        reset(bundleContext, installedBundle, framework);
-
-        // required since the sorted set uses it
-        expect(installedBundle.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
-
-        // Installs f1 and 0.1
-        expect(bundleContext.createFilter(EasyMock.<String>anyObject())).andReturn(null).anyTimes();
-        expect(installedBundle.getSymbolicName()).andReturn(name).anyTimes();
-        expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
-        expect(bundleContext.installBundle(isA(String.class),
-                                           isA(InputStream.class))).andReturn(installedBundle);
-        expect(installedBundle.getBundleId()).andReturn(12345L);
-        expect(installedBundle.getBundleId()).andReturn(12345L);
-        expect(installedBundle.getBundleId()).andReturn(12345L);
-        expect(bundleContext.getBundle(12345L)).andReturn(installedBundle);
-        expect(installedBundle.getHeaders()).andReturn(new Hashtable());
-        installedBundle.start();
-
-        // Installs f1 and 0.2
-        expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
-        expect(bundleContext.installBundle(isA(String.class),
-                                           isA(InputStream.class))).andReturn(installedBundle);
-        expect(installedBundle.getBundleId()).andReturn(123456L);
-        expect(installedBundle.getBundleId()).andReturn(123456L);
-        expect(installedBundle.getBundleId()).andReturn(123456L);
-        expect(bundleContext.getBundle(123456L)).andReturn(installedBundle);
-        expect(installedBundle.getHeaders()).andReturn(new Hashtable());
-        installedBundle.start();
-
-        // UnInstalls f1 and 0.1
-        expect(bundleContext.getBundle(12345)).andReturn(installedBundle);
-        installedBundle.uninstall();
-
-        // UnInstalls f1 and 0.2
-        expect(bundleContext.getBundle(123456)).andReturn(installedBundle);
-        installedBundle.uninstall();
-
-        expect(bundleContext.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
-
-        expect(bundleContext.getBundle()).andReturn(framework).anyTimes();
-        expect(framework.adapt(FrameworkWiring.class)).andReturn(null).anyTimes();
-
-        replay(bundleContext, installedBundle, framework);
 
         try {
             svc.uninstallFeature("f1");
@@ -229,6 +188,7 @@ public class FeaturesServiceTest extends TestCase {
     }    
     
     // Tests Add and Remove Repository
+    @Test
     public void testAddAndRemoveRepository() throws Exception {
 
         String name = getJarUrl(BlueprintContainer.class);
@@ -266,6 +226,7 @@ public class FeaturesServiceTest extends TestCase {
     // with a feature dependency
     // The dependant feature is in the same repository
     // Tests uninstall of features
+    @Test
     public void testInstallFeatureWithDependantFeatures() throws Exception {
 
         String name = getJarUrl(BlueprintContainer.class);
@@ -301,7 +262,7 @@ public class FeaturesServiceTest extends TestCase {
         expect(installedBundle.getBundleId()).andReturn(12345L);
         expect(installedBundle.getBundleId()).andReturn(12345L);
         expect(bundleContext.getBundle(12345L)).andReturn(installedBundle);
-        expect(installedBundle.getHeaders()).andReturn(new Hashtable());
+        expect(installedBundle.getHeaders()).andReturn(new Hashtable<String, String>());
         installedBundle.start();
 
         // Then installs f1
@@ -314,7 +275,7 @@ public class FeaturesServiceTest extends TestCase {
         expect(installedBundle.getBundleId()).andReturn(1234L);
         expect(installedBundle.getBundleId()).andReturn(1234L);
         expect(bundleContext.getBundle(1234L)).andReturn(installedBundle);
-        expect(installedBundle.getHeaders()).andReturn(new Hashtable()).anyTimes();
+        expect(installedBundle.getHeaders()).andReturn(new Hashtable<String, String>()).anyTimes();
         installedBundle.start();
 
         // uninstalls first feature name = f1, version = 0.1
@@ -344,6 +305,7 @@ public class FeaturesServiceTest extends TestCase {
     }
 
     // Tests install of a Repository that includes a feature with a feature dependency
+    @Test
     public void testInstallFeatureWithDependantFeaturesAndVersionWithoutPreinstall() throws Exception {
 
         String name = getJarUrl(BlueprintContainer.class);
@@ -378,6 +340,7 @@ public class FeaturesServiceTest extends TestCase {
     }
 
     // Tests install of a Repository that includes a feature with a feature dependency
+    @Test
     public void testInstallFeatureWithDependantFeaturesAndNoVersionWithoutPreinstall() throws Exception {
 
         String name = getJarUrl(BlueprintContainer.class);
@@ -411,6 +374,7 @@ public class FeaturesServiceTest extends TestCase {
         svc.uninstallFeature("f2", "0.2");
     }
 
+    @Test
     public void testInstallFeatureWithDependantFeaturesAndRangeWithoutPreinstall() throws Exception {
 
         String name = getJarUrl(BlueprintContainer.class);
@@ -444,6 +408,7 @@ public class FeaturesServiceTest extends TestCase {
         svc.uninstallFeature("f2", "0.2");
     }
 
+    @Test
     public void testInstallFeatureWithDependantFeaturesAndRangeWithPreinstall() throws Exception {
 
         String name = getJarUrl(BlueprintContainer.class);
@@ -479,7 +444,7 @@ public class FeaturesServiceTest extends TestCase {
                                            isA(InputStream.class))).andReturn(installedBundle);
         expect(installedBundle.getBundleId()).andReturn(12345L).anyTimes();
         expect(bundleContext.getBundle(12345L)).andReturn(installedBundle).anyTimes();
-        expect(installedBundle.getHeaders()).andReturn(new Hashtable()).anyTimes();
+        expect(installedBundle.getHeaders()).andReturn(new Hashtable<String, String>()).anyTimes();
         installedBundle.start();
 
         expect(bundleContext.getBundles()).andReturn(new Bundle[] { installedBundle });
@@ -509,6 +474,7 @@ public class FeaturesServiceTest extends TestCase {
         svc.uninstallFeature("f2", "0.1");
     }
 
+    @Test
     public void testGetFeaturesShouldHandleDifferentVersionPatterns() throws Exception {
 
         String name = getJarUrl(BlueprintContainer.class);
@@ -571,7 +537,7 @@ public class FeaturesServiceTest extends TestCase {
         expect(installedBundle.getBundleId()).andReturn(12345L);
         expect(installedBundle.getBundleId()).andReturn(12345L);
         expect(bundleContext.getBundle(12345L)).andReturn(installedBundle);
-        expect(installedBundle.getHeaders()).andReturn(new Hashtable());
+        expect(installedBundle.getHeaders()).andReturn(new Hashtable<String, String>());
         installedBundle.start();
 
         // uninstalls first feature name = f2, version = 0.1
@@ -589,6 +555,7 @@ public class FeaturesServiceTest extends TestCase {
         return bundleContext;
     }
 
+    @Test
     public void testInstallBatchFeatureWithContinueOnFailureNoClean() throws Exception {
         String bundle1 = getJarUrl(BlueprintContainer.class);
         String bundle2 = getJarUrl(LoggerFactory.class);
@@ -629,7 +596,7 @@ public class FeaturesServiceTest extends TestCase {
         expect(installedBundle2.getBundleId()).andReturn(54321L);
         expect(installedBundle2.getBundleId()).andReturn(54321L);
         expect(installedBundle2.getBundleId()).andReturn(54321L);
-        expect(installedBundle2.getHeaders()).andReturn(new Hashtable()).anyTimes();
+        expect(installedBundle2.getHeaders()).andReturn(new Hashtable<String, String>()).anyTimes();
         installedBundle2.start();
 
         expect(bundleContext.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
@@ -647,6 +614,7 @@ public class FeaturesServiceTest extends TestCase {
 //        verify(preferencesService, prefs, repositoriesNode, featuresNode, bundleContext, installedBundle1, installedBundle2);
     }
 
+    @Test
     public void testInstallBatchFeatureWithContinueOnFailureClean() throws Exception {
         String bundle1 = getJarUrl(BlueprintContainer.class);
         String bundle2 = getJarUrl(LoggerFactory.class);
@@ -689,7 +657,7 @@ public class FeaturesServiceTest extends TestCase {
         expect(installedBundle2.getBundleId()).andReturn(54321L);
         expect(installedBundle2.getBundleId()).andReturn(54321L);
         expect(installedBundle2.getBundleId()).andReturn(54321L);
-        expect(installedBundle2.getHeaders()).andReturn(new Hashtable()).anyTimes();
+        expect(installedBundle2.getHeaders()).andReturn(new Hashtable<String, String>()).anyTimes();
         expect(installedBundle2.getSymbolicName()).andReturn("bundle2").anyTimes();
         installedBundle2.start();
 
@@ -706,6 +674,7 @@ public class FeaturesServiceTest extends TestCase {
 //        verify(preferencesService, prefs, repositoriesNode, featuresNode, bundleContext, installedBundle1, installedBundle2);
     }
 
+    @Test
     public void testInstallBatchFeatureWithoutContinueOnFailureNoClean() throws Exception {
         String bundle1 = getJarUrl(BlueprintContainer.class);
         String bundle2 = getJarUrl(LoggerFactory.class);
@@ -767,6 +736,7 @@ public class FeaturesServiceTest extends TestCase {
 //        verify(preferencesService, prefs, repositoriesNode, featuresNode, bundleContext, installedBundle1, installedBundle2);
     }
 
+    @Test
     public void testInstallBatchFeatureWithoutContinueOnFailureClean() throws Exception {
         String bundle1 = getJarUrl(BlueprintContainer.class);
         String bundle2 = getJarUrl(LoggerFactory.class);
@@ -832,6 +802,7 @@ public class FeaturesServiceTest extends TestCase {
     /**
      * This test checks schema validation of submited uri.
      */
+    @Test
     public void testSchemaValidation() throws Exception {
         File tmp = File.createTempFile("karaf", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
@@ -864,6 +835,7 @@ public class FeaturesServiceTest extends TestCase {
     /**
      * This test checks feature service behavior with old, non namespaced descriptor.
      */
+    @Test
     public void testLoadOldFeatureFile() throws Exception {
         String bundle1 = getJarUrl(BlueprintContainer.class);
         String bundle2 = getJarUrl(LoggerFactory.class);
@@ -892,7 +864,7 @@ public class FeaturesServiceTest extends TestCase {
         Assert.assertEquals(2, bundles.size());
     }
 
-    private String getJarUrl(Class cl) {
+    private String getJarUrl(Class<?> cl) {
         String name = cl.getName();
         name = name.replace(".", "/")  + ".class";
         name = getClass().getClassLoader().getResource(name).toString();

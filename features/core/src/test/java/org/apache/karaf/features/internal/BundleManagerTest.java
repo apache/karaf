@@ -16,11 +16,10 @@
  */
 package org.apache.karaf.features.internal;
 
-import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Set;
 
 import junit.framework.Assert;
@@ -31,39 +30,45 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 
-public class BundleManagerTest {
-
-    public Bundle createDummyBundle(long id, String symbolicName, Dictionary<String,String> headers) {
-        Bundle bundle = EasyMock.createNiceMock(Bundle.class);
-        expect(bundle.getBundleId()).andReturn(id).anyTimes();
-        expect(bundle.getSymbolicName()).andReturn(symbolicName);
-        expect(bundle.getHeaders()).andReturn(headers).anyTimes();
-        replay(bundle);
-        return bundle;
-    }
+public class BundleManagerTest extends TestBase {
     
     @Test
     public void testfindBundlestoRefreshWithHostToRefresh() throws Exception {
-        Bundle hostBundle = createDummyBundle(12345l, "Host", new Hashtable<String, String>());
-        
-        Hashtable<String, String> d = new Hashtable<String, String>();
-        d.put(Constants.FRAGMENT_HOST, "Host");
-        Bundle fragmentBundle = createDummyBundle(54321l, "fragment", d);
+        Bundle hostBundle = createDummyBundle(12345l, "Host", headers());
+        Bundle fragmentBundle = createDummyBundle(54321l, "fragment", headers(Constants.FRAGMENT_HOST, "Host"));
 
         BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
         BundleManager bundleManager = new BundleManager(bundleContext);
 
         // Host was already installed, fragment is new
-        InstallationState state = new InstallationState();
-        state.bundles.add(hostBundle);
-        state.bundles.add(fragmentBundle);
-        state.installed.add(fragmentBundle);
+        Set<Bundle> existing = new HashSet<Bundle>(Arrays.asList(hostBundle, fragmentBundle));
+        Set<Bundle> installed = new HashSet<Bundle>(Arrays.asList(fragmentBundle));
         
         replay(bundleContext);
-        Set<Bundle> bundles = bundleManager.findBundlesToRefresh(state);
+        Set<Bundle> bundles = bundleManager.findBundlesWithFragmentsToRefresh(existing, installed);
         EasyMock.verify(bundleContext);
 
         Assert.assertEquals(1, bundles.size());
         Assert.assertEquals(hostBundle, bundles.iterator().next());
-    } 
+    }
+    
+    @Test
+    public void testfindBundlestoRefreshWithOptionalPackages() throws Exception {
+        Bundle exporterBundle = createDummyBundle(12345l, "exporter", headers(Constants.EXPORT_PACKAGE, "org.my.package"));
+        Bundle importerBundle = createDummyBundle(54321l, "importer", headers(Constants.IMPORT_PACKAGE, "org.my.package;resolution:=optional"));
+
+        BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
+        BundleManager bundleManager = new BundleManager(bundleContext);
+
+        // Importer was already installed, exporter is new
+        Set<Bundle> existing = new HashSet<Bundle>(Arrays.asList(importerBundle, exporterBundle));
+        Set<Bundle> installed = new HashSet<Bundle>(Arrays.asList(exporterBundle));
+        
+        replay(bundleContext);
+        Set<Bundle> bundles = bundleManager.findBundlesWithOptionalPackagesToRefresh(existing, installed);
+        EasyMock.verify(bundleContext);
+
+        Assert.assertEquals(1, bundles.size());
+        Assert.assertEquals(importerBundle, bundles.iterator().next());
+    }
 }

@@ -395,7 +395,7 @@ public class FeaturesServiceImpl implements FeaturesService {
                     }
             	}
             }
-            bundleManager.refreshBundles(state, options);
+            bundleManager.refreshBundles(state.bundles, state.installed, options);
             // Start all bundles
             for (Bundle b : state.bundles) {
                 LOGGER.info("Starting bundle: {}", b.getSymbolicName());
