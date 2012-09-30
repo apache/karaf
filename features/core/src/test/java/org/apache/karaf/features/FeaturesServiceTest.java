@@ -50,6 +50,7 @@ import org.apache.karaf.features.internal.FeaturesServiceImpl;
 import org.apache.karaf.features.internal.TestBase;
 import org.easymock.EasyMock;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -62,7 +63,8 @@ public class FeaturesServiceTest extends TestBase {
 
     File dataFile;
 
-    protected void setUp() throws IOException {
+    @Before
+    public void setUp() throws IOException {
         dataFile = File.createTempFile("features", null, null);
     }
 
