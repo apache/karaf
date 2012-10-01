@@ -18,6 +18,7 @@ package org.apache.karaf.features.internal;
 
 import static java.lang.String.format;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -405,12 +406,8 @@ public class FeaturesServiceImpl implements FeaturesService {
             // Clean up for batch
             if (!options.contains(Option.NoCleanIfFailure)) {
                 failure.installed.removeAll(state.bundles);
-                for (Bundle b : failure.installed) {
-                    try {
-                        b.uninstall();
-                    } catch (Exception e2) {
-                        // Ignore
-                    }
+                if (failure.installed.size()>0) {
+                    bundleManager.uninstall(failure.installed);
                 }
             }
             for (Feature f : features) {
@@ -465,20 +462,11 @@ public class FeaturesServiceImpl implements FeaturesService {
 	private void cleanUpOnFailure(InstallationState state, InstallationState failure, boolean noCleanIfFailure) {
 		// cleanup on error
 		if (!noCleanIfFailure) {
-		    // Uninstall everything
-		    for (Bundle b : state.installed) {
-		        try {
-		            b.uninstall();
-		        } catch (Exception e2) {
-		            // Ignore
-		        }
-		    }
-		    for (Bundle b : failure.installed) {
-		        try {
-		            b.uninstall();
-		        } catch (Exception e2) {
-		            // Ignore
-		        }
+		    HashSet<Bundle> uninstall = new HashSet<Bundle>();
+		    uninstall.addAll(state.installed);
+		    uninstall.addAll(failure.installed);
+		    if (uninstall.size() > 0) {
+		        bundleManager.uninstall(uninstall);
 		    }
 		} else {
 		    // Force start of bundles so that they are flagged as persistently started
@@ -643,7 +631,7 @@ public class FeaturesServiceImpl implements FeaturesService {
         for (Set<Long> b : installed.values()) {
             bundles.removeAll(b);
         }
-        bundleManager.uninstallBundles(bundles);
+        bundleManager.uninstallById(bundles);
         callListeners(new FeatureEvent(feature, FeatureEvent.EventType.FeatureUninstalled, false));
         saveState();
     }
@@ -782,17 +770,7 @@ public class FeaturesServiceImpl implements FeaturesService {
         } catch (Exception e) {
             LOGGER.error("Error persisting FeaturesService state", e);
         } finally {
-            closeStream(os);
-        }
-    }
-
-    private void closeStream(OutputStream os) {
-        if (os != null) {
-            try {
-                os.close();
-            } catch (IOException e) {
-                // Ignore
-            }
+            close(os);
         }
     }
 
@@ -807,7 +785,7 @@ public class FeaturesServiceImpl implements FeaturesService {
             try {
                 props.load(is);
             } finally {
-                is.close();
+                close(is);
             }
             Set<URI> repositories = loadSet(props, "repositories.");
             for (URI repo : repositories) {
@@ -826,6 +804,16 @@ public class FeaturesServiceImpl implements FeaturesService {
             LOGGER.error("Error loading FeaturesService state", e);
         }
         return false;
+    }
+
+    private void close(Closeable closeable) {
+        if (closeable != null) {
+            try {
+                closeable.close();
+            } catch (IOException e) {
+                // Ignore
+            }
+        }
     }
 
     protected void saveSet(Properties props, String prefix, Set<URI> set) {

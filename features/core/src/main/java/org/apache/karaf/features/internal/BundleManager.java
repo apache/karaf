@@ -147,8 +147,11 @@ public class BundleManager {
         InputStream is;
         LOGGER.debug("Checking " + bundleLocation);
         try {
-            String protocol = bundleLocation.substring(0, bundleLocation.indexOf(":"));
-            waitForUrlHandler(protocol);
+            int protocolIndex = bundleLocation.indexOf(":");
+            if (protocolIndex != -1) {
+                String protocol = bundleLocation.substring(0, protocolIndex);
+                waitForUrlHandler(protocol);
+            }
             URL bundleUrl = new URL(bundleLocation);
             is = new BufferedInputStream(bundleUrl.openStream());
         } catch (RuntimeException e) {
@@ -335,7 +338,18 @@ public class BundleManager {
         }
     }
     
-    public void uninstallBundles(Set<Long> bundles) throws BundleException, InterruptedException {
+
+    public void uninstall(Set<Bundle> bundles) {
+        for (Bundle b : bundles) {
+            try {
+                b.uninstall();
+            } catch (Exception e2) {
+                // Ignore
+            }
+        }
+    }
+    
+    public void uninstallById(Set<Long> bundles) throws BundleException, InterruptedException {
         for (long bundleId : bundles) {
             Bundle b = bundleContext.getBundle(bundleId);
             if (b != null) {
@@ -407,4 +421,5 @@ public class BundleManager {
         }
 
     }
+
 }
