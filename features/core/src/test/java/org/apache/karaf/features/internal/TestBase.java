@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.features.internal;
 
+import static java.util.Arrays.asList;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
 
@@ -89,6 +90,14 @@ public class TestBase {
     
     public Set<Long> setOf(Long ... elements) {
         return new HashSet<Long>(Arrays.asList(elements));
+    }
+    
+    public Set<String> setOf(String ... elements) {
+        return new HashSet<String>(asList(elements));
+    }
+    
+    public Set<Feature> setOf(Feature ... elements) {
+        return new HashSet<Feature>(Arrays.asList(elements));
     }
 
     @SuppressWarnings("unchecked")
