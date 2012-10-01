@@ -26,7 +26,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.InterruptedIOException;
 import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.io.Reader;
 import java.util.Map;
 import java.util.Properties;
@@ -38,7 +37,6 @@ import java.util.regex.Pattern;
 import jline.Terminal;
 import jline.UnsupportedTerminal;
 import jline.console.ConsoleReader;
-import jline.console.history.FileHistory;
 import jline.console.history.PersistentHistory;
 import org.apache.felix.gogo.commands.CommandException;
 import org.apache.felix.gogo.runtime.CommandNotFoundException;
@@ -85,6 +83,7 @@ public class Console implements Runnable
                    PrintStream out,
                    PrintStream err,
                    Terminal term,
+                   String encoding,
                    Runnable closeCallback) throws Exception
     {
         this.in = in;
@@ -97,9 +96,11 @@ public class Console implements Runnable
         this.session.put("SCOPE", "shell:osgi:*");
         this.closeCallback = closeCallback;
 
-        reader = new ConsoleReader(this.consoleInput,
+        reader = new ConsoleReader(null,
+                                   this.consoleInput,
                                    this.out,
-                                   this.terminal);
+                                   this.terminal,
+                                   encoding);
 
         final File file = getHistoryFile();
         try {

@@ -20,6 +20,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
+import java.nio.charset.Charset;
+import java.util.Locale;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -125,6 +127,12 @@ public class Main {
                 new Thread(in).start();
                 channel.setIn(in);
                 ((ChannelShell) channel).setupSensibleDefaultPty();
+                String ctype = System.getenv("LC_CTYPE");
+                if (ctype == null) {
+                    ctype = Locale.getDefault().toString() + "."
+                                + System.getProperty("input.encoding", Charset.defaultCharset().name());
+                }
+                ((ChannelShell) channel).setEnv("LC_CTYPE", ctype);
             }
             channel.setOut(AnsiConsole.wrapOutputStream(System.out));
             channel.setErr(AnsiConsole.wrapOutputStream(System.err));

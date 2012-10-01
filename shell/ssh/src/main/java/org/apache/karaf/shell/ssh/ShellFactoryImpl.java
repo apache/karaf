@@ -94,11 +94,16 @@ public class ShellFactoryImpl implements Factory<Command> {
         public void start(final Environment env) throws IOException {
             try {
                 final Terminal terminal = new SshTerminal(env);
+                String encoding = env.getEnv().get("LC_CTYPE");
+                if (encoding != null && encoding.indexOf('.') > 0) {
+                    encoding = encoding.substring(encoding.indexOf('.') + 1);
+                }
                 Console console = new Console(commandProcessor,
                                               in,
                                               new PrintStream(new LfToCrLfFilterOutputStream(out), true),
                                               new PrintStream(new LfToCrLfFilterOutputStream(err), true),
                                               terminal,
+                                              encoding,
                                               new Runnable() {
                                                   public void run() {
                                                       destroy();

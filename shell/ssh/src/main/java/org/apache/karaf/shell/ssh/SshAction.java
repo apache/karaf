@@ -140,6 +140,10 @@ public class SshAction extends OsgiCommandSupport implements BlueprintContainerA
                     channel.setIn(new NoCloseInputStream(System.in));
                     ((ChannelShell) channel).setPtyColumns(getTermWidth());
                     ((ChannelShell) channel).setupSensibleDefaultPty();
+                    Object ctype = session.get("LC_CTYPE");
+                    if (ctype != null) {
+                        ((ChannelShell) channel).setEnv("LC_CTYPE", ctype.toString());
+                    }
                 }
                 channel.setOut(new NoCloseOutputStream(System.out));
                 channel.setErr(new NoCloseOutputStream(System.err));
