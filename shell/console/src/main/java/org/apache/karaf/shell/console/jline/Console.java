@@ -84,6 +84,7 @@ public class Console implements Runnable
                    PrintStream out,
                    PrintStream err,
                    Terminal term,
+                   String encoding,
                    Runnable closeCallback) throws Exception
     {
         this.in = in;
@@ -96,9 +97,11 @@ public class Console implements Runnable
         this.session.put("SCOPE", "shell:osgi:*");
         this.closeCallback = closeCallback;
 
-        reader = new ConsoleReader(this.consoleInput,
+        reader = new ConsoleReader(null,
+                                   this.consoleInput,
                                    this.out,
-                                   this.terminal);
+                                   this.terminal,
+                                   encoding);
 
         final File file = getHistoryFile();
         try {
