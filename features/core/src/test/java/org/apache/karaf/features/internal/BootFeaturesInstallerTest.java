@@ -38,6 +38,26 @@ public class BootFeaturesInstallerTest extends TestBase {
         Assert.assertEquals(asList(setOf("test1", "test2", "test3")), installer.parseBootFeatures("test1, test2, test3"));
     }
     
+    @Test
+    public void testDefaultBootFeatures() throws Exception  {
+        FeaturesServiceImpl impl = EasyMock.createMock(FeaturesServiceImpl.class);
+        Feature configFeature = feature("config", "1.0.0");
+        Feature standardFeature = feature("standard", "1.0.0");
+        Feature regionFeature = feature("region", "1.0.0");
+        expect(impl.listInstalledFeatures()).andStubReturn(new Feature[]{});
+        expect(impl.getFeature("config", "0.0.0")).andReturn(configFeature);
+        expect(impl.getFeature("standard", "0.0.0")).andReturn(standardFeature);
+        expect(impl.getFeature("region", "0.0.0")).andReturn(regionFeature);
+
+        impl.installFeatures(setOf(configFeature, standardFeature, regionFeature), EnumSet.of(Option.NoCleanIfFailure, Option.ContinueBatchOnFailure));
+        EasyMock.expectLastCall();
+        
+        replay(impl);
+        BootFeaturesInstaller bootFeatures = new BootFeaturesInstaller(impl , "config,standard,region");
+        bootFeatures.installBootFeatures();
+        EasyMock.verify(impl);        
+    }
+
     /**
      * This test checks KARAF-388 which allows you to specify version of boot feature.
      * @throws Exception 
