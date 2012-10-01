@@ -25,6 +25,7 @@ import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.security.KeyPair;
+import java.nio.charset.Charset;
 import java.security.PrivilegedExceptionAction;
 import java.util.Hashtable;
 import java.util.List;
@@ -129,11 +130,19 @@ public class ConsoleFactory {
                 }
             }
         };
+        String ctype = System.getenv("LC_CTYPE");
+        String encoding = ctype;
+        if (encoding != null && encoding.indexOf('.') > 0) {
+            encoding = encoding.substring(encoding.indexOf('.') + 1);
+        } else {
+            encoding = System.getProperty("input.encoding", Charset.defaultCharset().name());
+        }
         this.console = new Console(commandProcessor,
                                    in,
                                    wrap(out),
                                    wrap(err),
                                    terminal,
+                                   encoding,
                                    callback);
         CommandSession session = console.getSession();
         session.put("USER", user);
@@ -148,6 +157,9 @@ public class ConsoleFactory {
                 return Integer.toString(terminal.getWidth());
             }
         });
+        if (ctype != null) {
+            session.put("LC_CTYPE", ctype);
+        }
         session.put(".jline.terminal", terminal);
         session.put(SshAgent.SSH_AUTHSOCKET_ENV_NAME, agentId);
 
