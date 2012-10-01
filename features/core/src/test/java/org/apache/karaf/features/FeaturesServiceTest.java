@@ -18,7 +18,6 @@ package org.apache.karaf.features;
 
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.isA;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.reset;
 import static org.easymock.EasyMock.verify;
@@ -31,17 +30,13 @@ import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
-import java.util.Hashtable;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.apache.karaf.features.internal.BundleManager;
@@ -53,13 +48,13 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
-import org.osgi.framework.wiring.FrameworkWiring;
-import org.osgi.service.blueprint.container.BlueprintContainer;
-import org.slf4j.LoggerFactory;
 
 public class FeaturesServiceTest extends TestBase {
+    private static final String FEATURE_WITH_INVALID_BUNDLE = "<features name='test' xmlns='http://karaf.apache.org/xmlns/features/v1.0.0'>"
+            + "  <feature name='f1'><bundle>%s</bundle><bundle>zfs:unknown</bundle></feature>"
+            + "  <feature name='f2'><bundle>%s</bundle></feature>"
+            + "</features>";
 
     File dataFile;
 
@@ -67,35 +62,31 @@ public class FeaturesServiceTest extends TestBase {
     public void setUp() throws IOException {
         dataFile = File.createTempFile("features", null, null);
     }
+    
+    private URI createTempRepo(String repoContent, Object ... variables) throws IOException {
+        File tmp = File.createTempFile("karaf", ".feature");
+        PrintWriter pw = new PrintWriter(new FileWriter(tmp));
+        pw.printf(repoContent, variables);
+        pw.close();
+        return tmp.toURI();
+    }
 
     @Test
     public void testInstallFeature() throws Exception {
-
-        String name = getJarUrl(BlueprintContainer.class);
-
-        File tmp = File.createTempFile("karaf", ".feature");
-        PrintWriter pw = new PrintWriter(new FileWriter(tmp));
-        pw.println("<features name=\"test\" xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
-        pw.println("  <feature name=\"f1\">");
-        pw.println("    <bundle start='true'>" + name + "</bundle>");
-        pw.println("  </feature>");
-        pw.println("</features>");
-        pw.close();
-
-        URI uri = tmp.toURI();
+        URI uri = createTempRepo(
+                "<features name='test' xmlns='http://karaf.apache.org/xmlns/features/v1.0.0'>" 
+                + "  <feature name='f1'><bundle start='true'>bundle-f1</bundle></feature>"
+                + "</features>");
 
         BundleManager bundleManager = EasyMock.createMock(BundleManager.class);
-        Bundle installedBundle = createDummyBundle(12345L, name, headers());
-        FeaturesServiceImpl svc = testAddRepository(name, tmp, uri, bundleManager, installedBundle);
+        Bundle installedBundle = createDummyBundle(12345L, "bundle-f1", headers());
+        FeaturesServiceImpl svc = testAddRepository("bundle-f1", uri, bundleManager, installedBundle);
         
         reset(bundleManager);
         
-        expect(bundleManager.installBundleIfNeeded(eq(name), eq(0), eq((String)null))).andReturn(new BundleInstallerResult(installedBundle, true));
-        TreeSet<Bundle> existing = new TreeSet<Bundle>(Arrays.asList(installedBundle));
-        bundleManager.refreshBundles(eq(existing), eq(existing), eq(EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles)));
-        EasyMock.expectLastCall();
-        expect(bundleManager.getDataFile(EasyMock.anyObject(String.class))).andReturn(tmp);
-        
+        expect(bundleManager.installBundleIfNeeded(eq("bundle-f1"), eq(0), eq((String)null))).andReturn(new BundleInstallerResult(installedBundle, true));
+        expect(bundleManager.getDataFile(EasyMock.anyObject(String.class))).andReturn(dataFile);
+        ignoreRefreshes(bundleManager);
         replay(bundleManager);
         svc.installFeature("f1", org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION, EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
         verify(bundleManager);
@@ -105,9 +96,9 @@ public class FeaturesServiceTest extends TestBase {
         assertEquals("f1", installed[0].getName());
     }
 
-    private FeaturesServiceImpl testAddRepository(String name, File tmp, URI uri, BundleManager bundleManager,
+    private FeaturesServiceImpl testAddRepository(String name, URI uri, BundleManager bundleManager,
             Bundle installedBundle) throws IOException, BundleException, Exception {
-        expect(bundleManager.getDataFile(EasyMock.anyObject(String.class))).andReturn(tmp);
+        expect(bundleManager.getDataFile(EasyMock.anyObject(String.class))).andReturn(dataFile);
         expect(bundleManager.installBundleIfNeeded(eq(name), eq(0), eq((String)null))).andReturn(new BundleInstallerResult(installedBundle, true)).anyTimes();
 
         replay(bundleManager);
@@ -135,34 +126,23 @@ public class FeaturesServiceTest extends TestBase {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void testUninstallFeature() throws Exception {
+    public void testUninstallFeatureWithTwoVersions() throws Exception {
+        URI uri  = createTempRepo("<features name='test' xmlns='http://karaf.apache.org/xmlns/features/v1.0.0'>"
+                + "  <feature name='f1' version='0.1'><bundle>bundle-0.1</bundle></feature>"
+                + "  <feature name='f1' version='0.2'><bundle>bundle-0.1</bundle></feature>" 
+                + "</features>");
 
-        String name = getJarUrl(BlueprintContainer.class);
-
-        File tmp = File.createTempFile("karaf", ".feature");
-        PrintWriter pw = new PrintWriter(new FileWriter(tmp));
-        pw.println("<features name=\"test\" xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
-        pw.println("  <feature name=\"f1\" version=\"0.1\">");
-        pw.println("    <bundle>" + name + "</bundle>");
-        pw.println("  </feature>");
-        pw.println("  <feature name=\"f1\" version=\"0.2\">");
-        pw.println("    <bundle>" + name + "</bundle>");
-        pw.println("  </feature>");
-        pw.println("</features>");
-        pw.close();
-
-        URI uri = tmp.toURI();
-        
-        Bundle installedBundle = createDummyBundle(12345L, name, headers());
+        Bundle bundlef101 = createDummyBundle(12345L, "bundle-0.1", headers());
 
         BundleManager bundleManager = EasyMock.createMock(BundleManager.class);
-        expect(bundleManager.getDataFile(EasyMock.anyObject(String.class))).andReturn(tmp).anyTimes();
-        expect(bundleManager.installBundleIfNeeded(name, 0, null)).andReturn(new BundleInstallerResult(installedBundle, true));
-        expect(bundleManager.installBundleIfNeeded(name, 0, null)).andReturn(new BundleInstallerResult(installedBundle, false));
-        bundleManager.refreshBundles(EasyMock.anyObject(Set.class), EasyMock.anyObject(Set.class), EasyMock.anyObject(EnumSet.class));
-        EasyMock.expectLastCall().anyTimes();
-        bundleManager.uninstallBundles(EasyMock.anyObject(Set.class));
-        EasyMock.expectLastCall().times(2);
+        expect(bundleManager.getDataFile(EasyMock.anyObject(String.class))).andReturn(dataFile).anyTimes();
+        expect(bundleManager.installBundleIfNeeded("bundle-0.1", 0, null)).andReturn(new BundleInstallerResult(bundlef101, true));
+        expect(bundleManager.installBundleIfNeeded("bundle-0.1", 0, null)).andReturn(new BundleInstallerResult(bundlef101, false));
+        ignoreRefreshes(bundleManager);
+        bundleManager.uninstallById(Collections.EMPTY_SET);        
+        EasyMock.expectLastCall();
+        bundleManager.uninstallById(setOf(12345L));
+        EasyMock.expectLastCall();
         
         replay(bundleManager);
         FeaturesServiceImpl svc = new FeaturesServiceImpl(bundleManager);
@@ -187,32 +167,15 @@ public class FeaturesServiceTest extends TestBase {
 
         svc.uninstallFeature("f1", "0.1");
         svc.uninstallFeature("f1");
+        verify(bundleManager);
     }    
     
-    // Tests Add and Remove Repository
     @Test
     public void testAddAndRemoveRepository() throws Exception {
+        URI uri = createTempRepo("<features name='test' xmlns='http://karaf.apache.org/xmlns/features/v1.0.0'>"
+                + "  <feature name='f1' version='0.1'><bundle>bundle-f1-0.1</bundle></feature>"
+                + "</features>");
 
-        String name = getJarUrl(BlueprintContainer.class);
-
-        File tmp = File.createTempFile("karaf", ".feature");
-        PrintWriter pw = new PrintWriter(new FileWriter(tmp));
-        pw.println("<features name=\"test\" xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
-        pw.println("  <feature name=\"f1\" version=\"0.1\">");
-        pw.println("    <bundle>" + name + "</bundle>");
-        pw.println("  </feature>");
-        pw.println("  <feature name=\"f1\" version=\"0.2\">");
-        pw.println("    <bundle>" + name + "</bundle>");
-        pw.println("  </feature>");
-        pw.println("  <feature name=\"f2\" version=\"0.2\">");
-        pw.println("    <bundle>" + name + "</bundle>");
-        pw.println("  </feature>");
-        pw.println("</features>");
-        pw.close();
-
-        URI uri = tmp.toURI();
-
-        // loads the state
         BundleManager bundleManager = EasyMock.createMock(BundleManager.class);
         expect(bundleManager.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
 
@@ -222,6 +185,7 @@ public class FeaturesServiceTest extends TestBase {
 
         svc.addRepository(uri);                                                     
         svc.removeRepository(uri);
+        verify(bundleManager);
     }
 
     // Tests install of a Repository that includes a feature
@@ -230,502 +194,236 @@ public class FeaturesServiceTest extends TestBase {
     // Tests uninstall of features
     @Test
     public void testInstallFeatureWithDependantFeatures() throws Exception {
+        URI uri = createTempRepo("<features name='test' xmlns='http://karaf.apache.org/xmlns/features/v1.0.0'>"
+                + "  <feature name='f1' version='0.1'><feature version='0.1'>f2</feature><bundle>bundle-f1-0.1</bundle></feature>"
+                + "  <feature name='f2' version='0.1'><bundle>bundle-f2-0.1</bundle></feature>"
+                + "</features>");
 
-        String name = getJarUrl(BlueprintContainer.class);
-
-        File tmp = File.createTempFile("karaf", ".feature");
-        PrintWriter pw = new PrintWriter(new FileWriter(tmp));
-        pw.println("<features name=\"test\" xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
-        pw.println("  <feature name=\"f1\" version=\"0.1\">");
-        pw.println("  <feature version=\"0.1\">f2</feature>");
-        pw.println("    <bundle>" + name + "</bundle>");
-        pw.println("  </feature>");
-        pw.println("  <feature name=\"f2\" version=\"0.1\">");
-        pw.println("    <bundle>" + name + "</bundle>");
-        pw.println("  </feature>");
-        pw.println("</features>");
-        pw.close();
-
-        URI uri = tmp.toURI();
-
-        BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
-        Bundle installedBundle = EasyMock.createMock(Bundle.class);
-        Bundle framework = EasyMock.createMock(Bundle.class);
-
-        // required since the sorted set uses it
-        expect(installedBundle.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
-
-        // Installs feature f1 with dependency on f2
-        // so will install f2 first
-        expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
-        expect(bundleContext.installBundle(isA(String.class),
-                                           isA(InputStream.class))).andReturn(installedBundle);
-        expect(installedBundle.getBundleId()).andReturn(12345L);
-        expect(installedBundle.getBundleId()).andReturn(12345L);
-        expect(installedBundle.getBundleId()).andReturn(12345L);
-        expect(bundleContext.getBundle(12345L)).andReturn(installedBundle);
-        expect(installedBundle.getHeaders()).andReturn(new Hashtable<String, String>());
-        installedBundle.start();
-
-        // Then installs f1
-        expect(bundleContext.createFilter(EasyMock.<String>anyObject())).andReturn(null).anyTimes();
-        expect(installedBundle.getSymbolicName()).andReturn(name).anyTimes();
-        expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
-        expect(bundleContext.installBundle(isA(String.class),
-                                           isA(InputStream.class))).andReturn(installedBundle);
-        expect(installedBundle.getBundleId()).andReturn(1234L);
-        expect(installedBundle.getBundleId()).andReturn(1234L);
-        expect(installedBundle.getBundleId()).andReturn(1234L);
-        expect(bundleContext.getBundle(1234L)).andReturn(installedBundle);
-        expect(installedBundle.getHeaders()).andReturn(new Hashtable<String, String>()).anyTimes();
-        installedBundle.start();
-
-        // uninstalls first feature name = f1, version = 0.1
-        expect(bundleContext.getBundle(1234)).andReturn(installedBundle);
-        installedBundle.uninstall();
-
-        // uninstalls first feature name = f2, version = 0.1
-        expect(bundleContext.getBundle(12345)).andReturn(installedBundle);
-        installedBundle.uninstall();
-
-        expect(bundleContext.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
-
-        expect(bundleContext.getBundle()).andReturn(framework).anyTimes();
-        expect(framework.adapt(FrameworkWiring.class)).andReturn(null).anyTimes();
-
-        replay(bundleContext, installedBundle, framework);
-
-        FeaturesServiceImpl svc = new FeaturesServiceImpl(new BundleManager(bundleContext));
+        BundleManager bundleManager = EasyMock.createMock(BundleManager.class);
+        Bundle bundlef101 = createDummyBundle(12345L, "bundle-f1-0.1", headers());
+        Bundle bundlef201 = createDummyBundle(54321L, "bundle-f2-0.1", headers());
+        expect(bundleManager.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
+        expect(bundleManager.installBundleIfNeeded("bundle-f1-0.1", 0, null)).andReturn(new BundleInstallerResult(bundlef101, true));
+        expect(bundleManager.installBundleIfNeeded("bundle-f2-0.1", 0, null)).andReturn(new BundleInstallerResult(bundlef201, true));
+        ignoreRefreshes(bundleManager);
+        bundleManager.uninstallById(setOf(12345L));        
+        EasyMock.expectLastCall();
+        bundleManager.uninstallById(setOf(54321L));
+        EasyMock.expectLastCall();
+        
+        replay(bundleManager);
+        FeaturesServiceImpl svc = new FeaturesServiceImpl(bundleManager);
         svc.addRepository(uri);
-
         svc.installFeature("f1", "0.1");
-
-        // Uninstall repository
         svc.uninstallFeature("f1", "0.1");
         svc.uninstallFeature("f2", "0.1");
-
+        verify(bundleManager);
+    }
+    
+    @SuppressWarnings("unchecked")
+    private BundleManager prepareBundleManagerForInstallUninstall(String bundleUri, String bundlename) throws Exception {
+        BundleManager bundleManager = EasyMock.createMock(BundleManager.class);
+        Bundle installedBundle = createDummyBundle(12345L, bundlename, headers());
+        expect(bundleManager.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
+        expect(bundleManager.installBundleIfNeeded(bundleUri, 0, null)).andReturn(new BundleInstallerResult(installedBundle, true));
+        ignoreRefreshes(bundleManager);
+        bundleManager.uninstallById(Collections.EMPTY_SET);        
+        EasyMock.expectLastCall();
+        bundleManager.uninstallById(setOf(12345L));
+        EasyMock.expectLastCall();
+        return bundleManager;
     }
 
-    // Tests install of a Repository that includes a feature with a feature dependency
     @Test
     public void testInstallFeatureWithDependantFeaturesAndVersionWithoutPreinstall() throws Exception {
+        URI uri = createTempRepo("<features name='test' xmlns='http://karaf.apache.org/xmlns/features/v1.0.0'>"
+                + "  <feature name='f1' version='0.1'><feature version='0.1'>f2</feature></feature>"
+                + "  <feature name='f2' version='0.1'><bundle>bundle-0.1</bundle></feature>"
+                + "  <feature name='f2' version='0.2'><bundle>bundle-0.2</bundle></feature>"
+                + "</features>");
 
-        String name = getJarUrl(BlueprintContainer.class);
+        BundleManager bundleManager = prepareBundleManagerForInstallUninstall("bundle-0.1", "bundle-0.1");
 
-        File tmp = File.createTempFile("karaf", ".feature");
-        PrintWriter pw = new PrintWriter(new FileWriter(tmp));
-        pw.println("<features name=\"test\" xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
-        pw.println("  <feature name=\"f1\" version=\"0.1\">");
-        pw.println("    <feature version=\"0.1\">f2</feature>");
-        pw.println("  </feature>");
-        pw.println("  <feature name=\"f2\" version=\"0.1\">");
-        pw.println("    <bundle>" + name + "</bundle>");
-        pw.println("  </feature>");
-        pw.println("  <feature name=\"f2\" version=\"0.2\">");
-        pw.println("    <bundle>" + name + "</bundle>");
-        pw.println("  </feature>");
-        pw.println("</features>");
-        pw.close();
-
-        URI uri = tmp.toURI();
-
-        BundleContext bundleContext = prepareBundleContextForInstallUninstall();
-
-        FeaturesServiceImpl svc = new FeaturesServiceImpl(new BundleManager(bundleContext));
+        replay(bundleManager);
+        FeaturesServiceImpl svc = new FeaturesServiceImpl(bundleManager);
         svc.addRepository(uri);
-
         svc.installFeature("f1", "0.1");
-
-        // Uninstall repository
         svc.uninstallFeature("f1", "0.1");
         svc.uninstallFeature("f2", "0.1");
+        verify(bundleManager);
     }
 
-    // Tests install of a Repository that includes a feature with a feature dependency
     @Test
     public void testInstallFeatureWithDependantFeaturesAndNoVersionWithoutPreinstall() throws Exception {
+        URI uri = createTempRepo("<features name='test' xmlns='http://karaf.apache.org/xmlns/features/v1.0.0'>"
+                + "  <feature name='f1' version='0.1'><feature>f2</feature></feature>"
+                + "  <feature name='f2' version='0.1'><bundle>bundle-0.1</bundle></feature>"
+                + "  <feature name='f2' version='0.2'><bundle>bundle-0.2</bundle></feature>"
+                + "</features>");
 
-        String name = getJarUrl(BlueprintContainer.class);
+        BundleManager bundleManager = prepareBundleManagerForInstallUninstall("bundle-0.2", "bundle-0.2");
 
-        File tmp = File.createTempFile("karaf", ".feature");
-        PrintWriter pw = new PrintWriter(new FileWriter(tmp));
-        pw.println("<features name=\"test\" xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
-        pw.println("  <feature name=\"f1\" version=\"0.1\">");
-        pw.println("    <feature>f2</feature>");
-        pw.println("  </feature>");
-        pw.println("  <feature name=\"f2\" version=\"0.1\">");
-        pw.println("    <bundle>" + name + "</bundle>");
-        pw.println("  </feature>");
-        pw.println("  <feature name=\"f2\" version=\"0.2\">");
-        pw.println("    <bundle>" + name + "</bundle>");
-        pw.println("  </feature>");
-        pw.println("</features>");
-        pw.close();
-
-        URI uri = tmp.toURI();
-
-        BundleContext bundleContext = prepareBundleContextForInstallUninstall();
-
-        FeaturesServiceImpl svc = new FeaturesServiceImpl(new BundleManager(bundleContext));
+        replay(bundleManager);
+        FeaturesServiceImpl svc = new FeaturesServiceImpl(bundleManager);
         svc.addRepository(uri);
-
         svc.installFeature("f1", "0.1");
-
-        // Uninstall repository
         svc.uninstallFeature("f1", "0.1");
         svc.uninstallFeature("f2", "0.2");
+        verify(bundleManager);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void testInstallFeatureWithDependantFeaturesAndRangeWithoutPreinstall() throws Exception {
+        URI uri = createTempRepo("<features name='test' xmlns='http://karaf.apache.org/xmlns/features/v1.0.0'>"
+                + "  <feature name='f1' version='0.1'><feature version='[0.1,0.3)'>f2</feature></feature>"
+                + "  <feature name='f2' version='0.1'><bundle>bundle-0.1</bundle></feature>"
+                + "  <feature name='f2' version='0.2'><bundle>bundle-0.2</bundle></feature>"
+                + "</features>");
 
-        String name = getJarUrl(BlueprintContainer.class);
+        BundleManager bundleManager = EasyMock.createMock(BundleManager.class);
+        Bundle bundleVer02 = createDummyBundle(54321L, "bundleVer02", headers());
+        expect(bundleManager.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
+        expect(bundleManager.installBundleIfNeeded("bundle-0.2", 0, null)).andReturn(new BundleInstallerResult(bundleVer02, true));
+        ignoreRefreshes(bundleManager);
+        bundleManager.uninstallById(Collections.EMPTY_SET);        
+        EasyMock.expectLastCall();
+        bundleManager.uninstallById(setOf(54321L));
+        EasyMock.expectLastCall();
 
-        File tmp = File.createTempFile("karaf", ".feature");
-        PrintWriter pw = new PrintWriter(new FileWriter(tmp));
-        pw.println("<features name=\"test\" xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
-        pw.println("  <feature name=\"f1\" version=\"0.1\">");
-        pw.println("    <feature version=\"[0.1,0.3)\">f2</feature>");
-        pw.println("  </feature>");
-        pw.println("  <feature name=\"f2\" version=\"0.1\">");
-        pw.println("    <bundle>" + name + "</bundle>");
-        pw.println("  </feature>");
-        pw.println("  <feature name=\"f2\" version=\"0.2\">");
-        pw.println("    <bundle>" + name + "</bundle>");
-        pw.println("  </feature>");
-        pw.println("</features>");
-        pw.close();
-
-        URI uri = tmp.toURI();
-
-        BundleContext bundleContext = prepareBundleContextForInstallUninstall();
-
-        FeaturesServiceImpl svc = new FeaturesServiceImpl(new BundleManager(bundleContext));
+        replay(bundleManager);
+        FeaturesServiceImpl svc = new FeaturesServiceImpl(bundleManager);
         svc.addRepository(uri);
-
         svc.installFeature("f1", "0.1");
-
-        // Uninstall repository
         svc.uninstallFeature("f1", "0.1");
         svc.uninstallFeature("f2", "0.2");
+        verify(bundleManager);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void testInstallFeatureWithDependantFeaturesAndRangeWithPreinstall() throws Exception {
+        String bundleVer01Uri = "bundle-0.1";
+        String bundleVer02Uri = "bundle-0.2";
 
-        String name = getJarUrl(BlueprintContainer.class);
+        URI uri = createTempRepo("<features name='test' xmlns='http://karaf.apache.org/xmlns/features/v1.0.0'>"
+                + "<feature name='f1' version='0.1'><feature version='[0.1,0.3)'>f2</feature></feature>"
+                + "  <feature name='f2' version='0.1'><bundle>%s</bundle></feature>"
+                + "  <feature name='f2' version='0.2'><bundle>%s</bundle></feature>"
+                + "</features>", bundleVer01Uri, bundleVer02Uri);
+        
+        BundleManager bundleManager = EasyMock.createMock(BundleManager.class);
+        Bundle bundleVer01 = createDummyBundle(12345L, "bundleVer01", headers());
+        expect(bundleManager.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
+        expect(bundleManager.installBundleIfNeeded(bundleVer01Uri, 0, null)).andReturn(new BundleInstallerResult(bundleVer01, true));
+        expect(bundleManager.installBundleIfNeeded(bundleVer01Uri, 0, null)).andReturn(new BundleInstallerResult(bundleVer01, false));
+        ignoreRefreshes(bundleManager);
+        bundleManager.uninstallById(Collections.EMPTY_SET);        
+        EasyMock.expectLastCall();
+        bundleManager.uninstallById(setOf(12345L));
+        EasyMock.expectLastCall();
 
-        File tmp = File.createTempFile("karaf", ".feature");
-        PrintWriter pw = new PrintWriter(new FileWriter(tmp));
-        pw.println("<features name=\"test\" xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
-        pw.println("  <feature name=\"f1\" version=\"0.1\">");
-        pw.println("    <feature version=\"[0.1,0.3)\">f2</feature>");
-        pw.println("  </feature>");
-        pw.println("  <feature name=\"f2\" version=\"0.1\">");
-        pw.println("    <bundle>" + name + "</bundle>");
-        pw.println("  </feature>");
-        pw.println("  <feature name=\"f2\" version=\"0.2\">");
-        pw.println("    <bundle>" + name + "</bundle>");
-        pw.println("  </feature>");
-        pw.println("</features>");
-        pw.close();
-
-        URI uri = tmp.toURI();
-
-        BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
-        Bundle framework = EasyMock.createMock(Bundle.class);
-        Bundle installedBundle = EasyMock.createMock(Bundle.class);
-
-        // required since the sorted set uses it
-        expect(installedBundle.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
-
-        // Installs feature f1 with dependency on f2
-        expect(bundleContext.createFilter(EasyMock.<String>anyObject())).andReturn(null).anyTimes();
-        expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
-        expect(bundleContext.installBundle(isA(String.class),
-                                           isA(InputStream.class))).andReturn(installedBundle);
-        expect(installedBundle.getBundleId()).andReturn(12345L).anyTimes();
-        expect(bundleContext.getBundle(12345L)).andReturn(installedBundle).anyTimes();
-        expect(installedBundle.getHeaders()).andReturn(new Hashtable<String, String>()).anyTimes();
-        installedBundle.start();
-
-        expect(bundleContext.getBundles()).andReturn(new Bundle[] { installedBundle });
-        expect(installedBundle.getSymbolicName()).andReturn(name).anyTimes();
-        expect(bundleContext.installBundle(isA(String.class),
-                                           isA(InputStream.class))).andReturn(installedBundle);
-        installedBundle.start();
-
-        // uninstalls first feature name = f2, version = 0.1
-        installedBundle.uninstall();
-
-        expect(bundleContext.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
-
-        expect(bundleContext.getBundle()).andReturn(framework).anyTimes();
-        expect(framework.adapt(FrameworkWiring.class)).andReturn(null).anyTimes();
-
-        replay(bundleContext, installedBundle, framework);
-
-        FeaturesServiceImpl svc = new FeaturesServiceImpl(new BundleManager(bundleContext));
+        replay(bundleManager);
+        FeaturesServiceImpl svc = new FeaturesServiceImpl(bundleManager);
         svc.addRepository(uri);
-
         svc.installFeature("f2", "0.1");
         svc.installFeature("f1", "0.1");
-
-        // Uninstall repository
         svc.uninstallFeature("f1", "0.1");
         svc.uninstallFeature("f2", "0.1");
+        verify(bundleManager);
     }
 
     @Test
     public void testGetFeaturesShouldHandleDifferentVersionPatterns() throws Exception {
-
-        String name = getJarUrl(BlueprintContainer.class);
-
-        File tmp = File.createTempFile("karaf", ".feature");
-        PrintWriter pw = new PrintWriter(new FileWriter(tmp));
-        pw.println("<features name=\"test\" xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
-        pw.println("  <feature name=\"f1\" version=\"0.1\">");
-        pw.println("    <feature version=\"[0.1,0.3)\">f2</feature>");
-        pw.println("  </feature>");
-        pw.println("  <feature name=\"f2\" version=\"0.1\">");
-        pw.println("    <bundle>" + name + "</bundle>");
-        pw.println("  </feature>");
-        pw.println("  <feature name=\"f2\" version=\"0.2\">");
-        pw.println("    <bundle>" + name + "</bundle>");
-        pw.println("  </feature>");
-        pw.println("</features>");
-        pw.close();
-
-        URI uri = tmp.toURI();
+        URI uri = createTempRepo("<features name='test' xmlns='http://karaf.apache.org/xmlns/features/v1.0.0'>"
+                + "  <feature name='f1' version='0.1'><feature version='[0.1,0.3)'>f2</feature></feature>"
+                + "  <feature name='f2' version='0.1'><bundle>bundle1</bundle></feature>"
+                + "  <feature name='f2' version='0.2'><bundle>bundle2</bundle></feature>"
+                + "</features>");
         
-        BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
+        BundleManager bundleManager = EasyMock.createMock(BundleManager.class);
+        expect(bundleManager.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
         
-        bundleContext.getDataFile((String) EasyMock.anyObject());
-        EasyMock.expectLastCall().andReturn(File.createTempFile("test", "test")); 
-        EasyMock.replay(bundleContext);
-
-        FeaturesServiceImpl svc = new FeaturesServiceImpl(new BundleManager(bundleContext));
+        replay(bundleManager);
+        FeaturesServiceImpl svc = new FeaturesServiceImpl(bundleManager);
         svc.addRepository(uri);
+        verify(bundleManager);
 
-        Feature feature = svc.getFeature("f2", "[0.1,0.3)");
-        assertEquals("f2", feature.getName());
-        assertEquals("0.2", feature.getVersion());
-
-        Feature feature2 = svc.getFeature("f2", "0.0.0");
-        assertEquals("f2", feature2.getName());
-        assertEquals("0.2", feature2.getVersion());
-
-        Feature feature3 = svc.getFeature("f2", "0.2");
-        assertEquals("f2", feature3.getName());
-        assertEquals("0.2", feature3.getVersion());
-
-        Feature feature4 = svc.getFeature("f2", "0.3");
-        assertNull(feature4);
-    }
-
-    private BundleContext prepareBundleContextForInstallUninstall() throws Exception {
-        BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
-        Bundle installedBundle = EasyMock.createMock(Bundle.class);
-        Bundle framework = EasyMock.createMock(Bundle.class);
-
-        // required since the sorted set uses it
-        expect(installedBundle.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
-
-        // Installs feature f1 with dependency on f2
-        expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
-        expect(bundleContext.installBundle(isA(String.class),
-                                           isA(InputStream.class))).andReturn(installedBundle);
-        expect(installedBundle.getBundleId()).andReturn(12345L);
-        expect(installedBundle.getBundleId()).andReturn(12345L);
-        expect(installedBundle.getBundleId()).andReturn(12345L);
-        expect(bundleContext.getBundle(12345L)).andReturn(installedBundle);
-        expect(installedBundle.getHeaders()).andReturn(new Hashtable<String, String>());
-        installedBundle.start();
-
-        // uninstalls first feature name = f2, version = 0.1
-        expect(bundleContext.createFilter(EasyMock.<String>anyObject())).andReturn(null).anyTimes();
-        expect(installedBundle.getSymbolicName()).andReturn("mybundle").anyTimes();
-        expect(bundleContext.getBundle(12345)).andReturn(installedBundle);
-        installedBundle.uninstall();
-
-        expect(bundleContext.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
-
-        expect(bundleContext.getBundle()).andReturn(framework).anyTimes();
-        expect(framework.adapt(FrameworkWiring.class)).andReturn(null).anyTimes();
-
-        replay(bundleContext, installedBundle, framework);
-        return bundleContext;
+        assertEquals(feature("f2", "0.2"), svc.getFeature("f2", "[0.1,0.3)"));
+        assertEquals(feature("f2", "0.2"), svc.getFeature("f2", "0.0.0"));
+        assertEquals(feature("f2", "0.2"), svc.getFeature("f2", "0.2"));
+        assertNull(svc.getFeature("f2", "0.3"));
     }
 
     @Test
     public void testInstallBatchFeatureWithContinueOnFailureNoClean() throws Exception {
-        String bundle1 = getJarUrl(BlueprintContainer.class);
-        String bundle2 = getJarUrl(LoggerFactory.class);
+        String bundle1Uri = "bundle1";
+        String bundle2Uri = "bundle2";
 
-        File tmp = File.createTempFile("karaf", ".feature");
-        PrintWriter pw = new PrintWriter(new FileWriter(tmp));
-        pw.println("<features name=\"test\" xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
-        pw.println("  <feature name='f1'>");
-        pw.println("    <bundle>" + bundle1 + "</bundle>");
-        pw.println("    <bundle>" + "zfs:unknown" + "</bundle>");
-        pw.println("  </feature>");
-        pw.println("  <feature name='f2'>");
-        pw.println("    <bundle>" + bundle2 + "</bundle>");
-        pw.println("  </feature>");
-        pw.println("</features>");
-        pw.close();
+        URI uri = createTempRepo(FEATURE_WITH_INVALID_BUNDLE, bundle1Uri, bundle2Uri);
+        
+        BundleManager bundleManager = EasyMock.createMock(BundleManager.class);
+        Bundle installedBundle1 = createDummyBundle(12345L, "bundle1", headers());
+        Bundle installedBundle2 = createDummyBundle(54321L, "bundle2", headers());
+        expect(bundleManager.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
+        expect(bundleManager.installBundleIfNeeded(bundle1Uri, 0, null)).andReturn(new BundleInstallerResult(installedBundle1, true));
+        expect(bundleManager.installBundleIfNeeded(bundle2Uri, 0, null)).andReturn(new BundleInstallerResult(installedBundle2, true));
+        expect(bundleManager.installBundleIfNeeded("zfs:unknown", 0, null)).andThrow(new MalformedURLException());
+        EasyMock.expectLastCall();
+        ignoreRefreshes(bundleManager);
 
-        URI uri = tmp.toURI();
-
-        BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
-        Bundle installedBundle1 = EasyMock.createMock(Bundle.class);
-        Bundle installedBundle2 = EasyMock.createMock(Bundle.class);
-
-        // required since the sorted set uses it
-        expect(installedBundle1.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
-        expect(installedBundle2.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
-
-        // Installs feature f1 and f2
-        expect(bundleContext.createFilter(EasyMock.<String>anyObject())).andReturn(null).anyTimes();
-        expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
-        expect(bundleContext.installBundle(eq(bundle1), isA(InputStream.class))).andReturn(installedBundle1);
-        expect(installedBundle1.getBundleId()).andReturn(12345L);
-        expect(installedBundle1.getBundleId()).andReturn(12345L);
-        expect(installedBundle1.getBundleId()).andReturn(12345L);
-
-        expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
-        expect(bundleContext.installBundle(eq(bundle2), isA(InputStream.class))).andReturn(installedBundle2);
-        expect(installedBundle2.getBundleId()).andReturn(54321L);
-        expect(installedBundle2.getBundleId()).andReturn(54321L);
-        expect(installedBundle2.getBundleId()).andReturn(54321L);
-        expect(installedBundle2.getHeaders()).andReturn(new Hashtable<String, String>()).anyTimes();
-        installedBundle2.start();
-
-        expect(bundleContext.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
-        expect(installedBundle1.getSymbolicName()).andReturn("bundle1").anyTimes();
-        expect(installedBundle2.getSymbolicName()).andReturn("bundle2").anyTimes();
-
-        replay(bundleContext, installedBundle1, installedBundle2);
-
-        FeaturesServiceImpl svc = new FeaturesServiceImpl(new BundleManager(bundleContext));
+        replay(bundleManager);
+        FeaturesServiceImpl svc = new FeaturesServiceImpl(bundleManager);
         svc.addRepository(uri);
-
         svc.installFeatures(new CopyOnWriteArraySet<Feature>(Arrays.asList(svc.listFeatures())),
                             EnumSet.of(FeaturesService.Option.ContinueBatchOnFailure, FeaturesService.Option.NoCleanIfFailure));
-
-//        verify(preferencesService, prefs, repositoriesNode, featuresNode, bundleContext, installedBundle1, installedBundle2);
+        verify(bundleManager);
     }
-
+    
     @Test
     public void testInstallBatchFeatureWithContinueOnFailureClean() throws Exception {
-        String bundle1 = getJarUrl(BlueprintContainer.class);
-        String bundle2 = getJarUrl(LoggerFactory.class);
+        String bundle1Uri = "file:bundle1";
+        String bundle2Uri = "file:bundle2";
 
-        File tmp = File.createTempFile("karaf", ".feature");
-        PrintWriter pw = new PrintWriter(new FileWriter(tmp));
-        pw.println("<features name=\"test\" xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
-        pw.println("  <feature name='f1'>");
-        pw.println("    <bundle>" + bundle1 + "</bundle>");
-        pw.println("    <bundle>" + "zfs:unknown" + "</bundle>");
-        pw.println("  </feature>");
-        pw.println("  <feature name='f2'>");
-        pw.println("    <bundle>" + bundle2 + "</bundle>");
-        pw.println("  </feature>");
-        pw.println("</features>");
-        pw.close();
+        URI uri = createTempRepo(FEATURE_WITH_INVALID_BUNDLE, bundle1Uri, bundle2Uri);
 
-        URI uri = tmp.toURI();
+        BundleManager bundleManager = EasyMock.createMock(BundleManager.class);
+        Bundle installedBundle1 = createDummyBundle(12345L, "bundle1", headers());
+        Bundle installedBundle2 = createDummyBundle(54321L, "bundle2", headers());
+        expect(bundleManager.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
+        expect(bundleManager.installBundleIfNeeded(bundle1Uri, 0, null)).andReturn(new BundleInstallerResult(installedBundle1, true));
+        expect(bundleManager.installBundleIfNeeded(bundle2Uri, 0, null)).andReturn(new BundleInstallerResult(installedBundle2, true));
+        expect(bundleManager.installBundleIfNeeded("zfs:unknown", 0, null)).andThrow(new MalformedURLException());
+        bundleManager.uninstall(setOf(installedBundle1));
+        EasyMock.expectLastCall();
+        ignoreRefreshes(bundleManager);
 
-        BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
-        Bundle installedBundle1 = EasyMock.createMock(Bundle.class);
-        Bundle installedBundle2 = EasyMock.createMock(Bundle.class);
-
-        // required since the sorted set uses it
-        expect(installedBundle1.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
-        expect(installedBundle2.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
-
-        // Installs feature f1 and f2
-        expect(bundleContext.createFilter(EasyMock.<String>anyObject())).andReturn(null).anyTimes();
-        expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
-        expect(bundleContext.installBundle(eq(bundle1), isA(InputStream.class))).andReturn(installedBundle1);
-        expect(installedBundle1.getBundleId()).andReturn(12345L);
-        expect(installedBundle1.getBundleId()).andReturn(12345L);
-        expect(installedBundle1.getBundleId()).andReturn(12345L);
-        expect(installedBundle1.getSymbolicName()).andReturn("bundle1").anyTimes();
-        installedBundle1.uninstall();
-
-        expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
-        expect(bundleContext.installBundle(eq(bundle2), isA(InputStream.class))).andReturn(installedBundle2);
-        expect(installedBundle2.getBundleId()).andReturn(54321L);
-        expect(installedBundle2.getBundleId()).andReturn(54321L);
-        expect(installedBundle2.getBundleId()).andReturn(54321L);
-        expect(installedBundle2.getHeaders()).andReturn(new Hashtable<String, String>()).anyTimes();
-        expect(installedBundle2.getSymbolicName()).andReturn("bundle2").anyTimes();
-        installedBundle2.start();
-
-        expect(bundleContext.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
-
-        replay(bundleContext, installedBundle1, installedBundle2);
-
-        FeaturesServiceImpl svc = new FeaturesServiceImpl(new BundleManager(bundleContext));
+        replay(bundleManager);
+        FeaturesServiceImpl svc = new FeaturesServiceImpl(bundleManager);
         svc.addRepository(uri);
-
         svc.installFeatures(new CopyOnWriteArraySet<Feature>(Arrays.asList(svc.listFeatures())),
                             EnumSet.of(FeaturesService.Option.ContinueBatchOnFailure));
-
-//        verify(preferencesService, prefs, repositoriesNode, featuresNode, bundleContext, installedBundle1, installedBundle2);
+        verify(bundleManager);
     }
 
     @Test
     public void testInstallBatchFeatureWithoutContinueOnFailureNoClean() throws Exception {
-        String bundle1 = getJarUrl(BlueprintContainer.class);
-        String bundle2 = getJarUrl(LoggerFactory.class);
+        String bundle1Uri = "file:bundle1";
+        String bundle2Uri = "file:bundle2";
 
-        File tmp = File.createTempFile("karaf", ".feature");
-        PrintWriter pw = new PrintWriter(new FileWriter(tmp));
-        pw.println("<features name=\"test\" xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
-        pw.println("  <feature name='f1'>");
-        pw.println("    <bundle>" + bundle1 + "</bundle>");
-        pw.println("    <bundle>" + "zfs:unknown" + "</bundle>");
-        pw.println("  </feature>");
-        pw.println("  <feature name='f2'>");
-        pw.println("    <bundle>" + bundle2 + "</bundle>");
-        pw.println("  </feature>");
-        pw.println("</features>");
-        pw.close();
+        URI uri = createTempRepo(FEATURE_WITH_INVALID_BUNDLE, bundle1Uri, bundle2Uri);
 
-        URI uri = tmp.toURI();
-
-        BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
-        Bundle installedBundle1 = EasyMock.createMock(Bundle.class);
-        Bundle installedBundle2 = EasyMock.createMock(Bundle.class);
-
-        // required since the sorted set uses it
-        expect(installedBundle1.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
-        expect(installedBundle2.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
-
-        // Installs feature f1 and f2
-        expect(bundleContext.createFilter(EasyMock.<String>anyObject())).andReturn(null).anyTimes();
-        expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
-        expect(bundleContext.installBundle(eq(bundle1), isA(InputStream.class))).andReturn(installedBundle1);
-        expect(installedBundle1.getBundleId()).andReturn(12345L);
-        expect(installedBundle1.getBundleId()).andReturn(12345L);
-        expect(installedBundle1.getBundleId()).andReturn(12345L);
-
-        expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
-        expect(bundleContext.installBundle(eq(bundle2), isA(InputStream.class))).andReturn(installedBundle2);
-        expect(installedBundle2.getBundleId()).andReturn(54321L);
-        expect(installedBundle2.getBundleId()).andReturn(54321L);
-        expect(installedBundle2.getBundleId()).andReturn(54321L);
-        installedBundle2.start();
-
-        expect(bundleContext.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
-
-        replay(bundleContext, installedBundle1, installedBundle2);
-
-        FeaturesServiceImpl svc = new FeaturesServiceImpl(new BundleManager(bundleContext));
+        BundleManager bundleManager = EasyMock.createMock(BundleManager.class);
+        Bundle installedBundle1 = createDummyBundle(12345L, bundle1Uri, headers());
+        Bundle installedBundle2 = createDummyBundle(54321L, bundle2Uri, headers());
+        expect(bundleManager.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
+        expect(bundleManager.installBundleIfNeeded(bundle1Uri, 0, null)).andReturn(new BundleInstallerResult(installedBundle1, true));
+        expect(bundleManager.installBundleIfNeeded(bundle2Uri, 0, null)).andReturn(new BundleInstallerResult(installedBundle2, true));
+        expect(bundleManager.installBundleIfNeeded("zfs:unknown", 0, null)).andThrow(new MalformedURLException());
+        
+        replay(bundleManager);
+        FeaturesServiceImpl svc = new FeaturesServiceImpl(bundleManager);
         svc.addRepository(uri);
-
         try {
             List<Feature> features = Arrays.asList(svc.listFeatures());
             Collections.reverse(features);
@@ -734,61 +432,29 @@ public class FeaturesServiceTest extends TestBase {
             fail("Call should have thrown an exception");
         } catch (MalformedURLException e) {
         }
-
-//        verify(preferencesService, prefs, repositoriesNode, featuresNode, bundleContext, installedBundle1, installedBundle2);
+        verify(bundleManager);
     }
 
     @Test
     public void testInstallBatchFeatureWithoutContinueOnFailureClean() throws Exception {
-        String bundle1 = getJarUrl(BlueprintContainer.class);
-        String bundle2 = getJarUrl(LoggerFactory.class);
+        String bundle1Uri = "file:bundle1";
+        String bundle2Uri = "file:bundle2";
 
-        File tmp = File.createTempFile("karaf", ".feature");
-        PrintWriter pw = new PrintWriter(new FileWriter(tmp));
-        pw.println("<features name=\"test\" xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
-        pw.println("  <feature name='f1'>");
-        pw.println("    <bundle>" + bundle1 + "</bundle>");
-        pw.println("    <bundle>" + "zfs:unknown" + "</bundle>");
-        pw.println("  </feature>");
-        pw.println("  <feature name='f2'>");
-        pw.println("    <bundle>" + bundle2 + "</bundle>");
-        pw.println("  </feature>");
-        pw.println("</features>");
-        pw.close();
+        URI uri = createTempRepo(FEATURE_WITH_INVALID_BUNDLE, bundle1Uri, bundle2Uri);
+        
+        BundleManager bundleManager = EasyMock.createMock(BundleManager.class);
+        Bundle installedBundle1 = createDummyBundle(12345L, "bundle1", headers());
+        Bundle installedBundle2 = createDummyBundle(54321L, "bundle2", headers());
+        expect(bundleManager.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
+        expect(bundleManager.installBundleIfNeeded(bundle1Uri, 0, null)).andReturn(new BundleInstallerResult(installedBundle1, true));
+        expect(bundleManager.installBundleIfNeeded(bundle2Uri, 0, null)).andReturn(new BundleInstallerResult(installedBundle2, true));
+        expect(bundleManager.installBundleIfNeeded("zfs:unknown", 0, null)).andThrow(new MalformedURLException());
+        bundleManager.uninstall(setOf(installedBundle1, installedBundle2));
+        EasyMock.expectLastCall();
 
-        URI uri = tmp.toURI();
-
-        BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
-        Bundle installedBundle1 = EasyMock.createMock(Bundle.class);
-        Bundle installedBundle2 = EasyMock.createMock(Bundle.class);
-
-        // required since the sorted set uses it
-        expect(installedBundle1.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
-        expect(installedBundle2.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
-
-        // Installs feature f1 and f2
-        expect(bundleContext.createFilter(EasyMock.<String>anyObject())).andReturn(null).anyTimes();
-        expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
-        expect(bundleContext.installBundle(eq(bundle1), isA(InputStream.class))).andReturn(installedBundle1);
-        expect(installedBundle1.getBundleId()).andReturn(12345L);
-        expect(installedBundle1.getBundleId()).andReturn(12345L);
-        expect(installedBundle1.getBundleId()).andReturn(12345L);
-        installedBundle1.uninstall();
-
-        expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
-        expect(bundleContext.installBundle(eq(bundle2), isA(InputStream.class))).andReturn(installedBundle2);
-        expect(installedBundle2.getBundleId()).andReturn(54321L);
-        expect(installedBundle2.getBundleId()).andReturn(54321L);
-        expect(installedBundle2.getBundleId()).andReturn(54321L);
-        installedBundle2.uninstall();
-
-        expect(bundleContext.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
-
-        replay(bundleContext, installedBundle1, installedBundle2);
-
-        FeaturesServiceImpl svc = new FeaturesServiceImpl(new BundleManager(bundleContext));
+        replay(bundleManager);
+        FeaturesServiceImpl svc = new FeaturesServiceImpl(bundleManager);
         svc.addRepository(uri);
-
         try {
             List<Feature> features = Arrays.asList(svc.listFeatures());
             Collections.reverse(features);
@@ -797,8 +463,7 @@ public class FeaturesServiceTest extends TestBase {
             fail("Call should have thrown an exception");
         } catch (MalformedURLException e) {
         }
-
-//        verify(preferencesService, prefs, repositoriesNode, featuresNode, bundleContext, installedBundle1, installedBundle2);
+        verify(bundleManager);
     }
 
     /**
@@ -806,32 +471,21 @@ public class FeaturesServiceTest extends TestBase {
      */
     @Test
     public void testSchemaValidation() throws Exception {
-        File tmp = File.createTempFile("karaf", ".feature");
-        PrintWriter pw = new PrintWriter(new FileWriter(tmp));
-        pw.println("<features name=\"test\" xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
-        pw.println("  <featur>");
-        pw.println("    <bundle>somebundle</bundle>");
-        pw.println("  </featur>");
-        pw.println("</features>");
-        pw.close();
+        URI uri = createTempRepo("<features name='test' xmlns='http://karaf.apache.org/xmlns/features/v1.0.0'>"
+                + "  <featur><bundle>somebundle</bundle></featur></features>");
 
-        URI uri = tmp.toURI();
+        BundleManager bundleManager = EasyMock.createMock(BundleManager.class);
+        expect(bundleManager.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
 
-        BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
-        Bundle bundle = EasyMock.createMock(Bundle.class);
-        // required since the sorted set uses it
-        expect(bundle.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
-        expect(bundleContext.getBundle()).andReturn(bundle);
-        expect(bundle.adapt(FrameworkWiring.class)).andReturn(null);
-        expect(bundleContext.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
-
-        FeaturesServiceImpl svc = new FeaturesServiceImpl(new BundleManager(bundleContext));
+        replay(bundleManager);
+        FeaturesServiceImpl svc = new FeaturesServiceImpl(bundleManager);
         try {
             svc.addRepository(uri);
             fail("exception expected");
         } catch (Exception e) {
             assertTrue(e.getMessage().contains("Unable to validate"));
         }
+        verify(bundleManager);
     }
 
     /**
@@ -839,39 +493,20 @@ public class FeaturesServiceTest extends TestBase {
      */
     @Test
     public void testLoadOldFeatureFile() throws Exception {
-        String bundle1 = getJarUrl(BlueprintContainer.class);
-        String bundle2 = getJarUrl(LoggerFactory.class);
-        
-        File tmp = File.createTempFile("karaf", ".feature");
-        PrintWriter pw = new PrintWriter(new FileWriter(tmp));
-        pw.println("<features name=\"test\" xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
-        pw.println("  <feature name='f1'>");
-        pw.println("    <bundle>" + bundle1 + "</bundle>");
-        pw.println("    <bundle>" + bundle2 + "</bundle>");
-        pw.println("  </feature>");
-        pw.println("</features>");
-        pw.close();
+        URI uri = createTempRepo("<features name='test' xmlns='http://karaf.apache.org/xmlns/features/v1.0.0'>"
+                + "  <feature name='f1'><bundle>file:bundle1</bundle><bundle>file:bundle2</bundle></feature>"
+                + "</features>");
 
-        URI uri = tmp.toURI();
+        BundleManager bundleManager = EasyMock.createMock(BundleManager.class);
+        expect(bundleManager.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
 
-        BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
-        expect(bundleContext.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
-        replay(bundleContext);
-
-        FeaturesServiceImpl svc = new FeaturesServiceImpl(new BundleManager(bundleContext));
+        replay(bundleManager);
+        FeaturesServiceImpl svc = new FeaturesServiceImpl(bundleManager);
         svc.addRepository(uri);
         Feature feature = svc.getFeature("f1");
         Assert.assertNotNull("No feature named fi found", feature);        
         List<BundleInfo> bundles = feature.getBundles();
         Assert.assertEquals(2, bundles.size());
-    }
-
-    private String getJarUrl(Class<?> cl) {
-        String name = cl.getName();
-        name = name.replace(".", "/")  + ".class";
-        name = getClass().getClassLoader().getResource(name).toString();
-        name = name.substring("jar:".length(), name.indexOf('!'));
-        return name;
     }
 
 }

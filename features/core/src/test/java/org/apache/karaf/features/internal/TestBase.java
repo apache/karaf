@@ -19,10 +19,14 @@ package org.apache.karaf.features.internal;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
 
+import java.util.Arrays;
 import java.util.Dictionary;
+import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.karaf.features.Feature;
 import org.easymock.EasyMock;
@@ -32,13 +36,17 @@ import org.osgi.framework.startlevel.BundleStartLevel;
 public class TestBase {
     public Bundle createDummyBundle(long id, final String symbolicName, Dictionary<String,String> headers) {
         Bundle bundle = EasyMock.createNiceMock(Bundle.class);
+        
+        // Be aware that this means all bundles are treated as different
+        expect(bundle.compareTo(EasyMock.<Bundle>anyObject())).andReturn(1).anyTimes();
+
         expect(bundle.getBundleId()).andReturn(id).anyTimes();
-        expect(bundle.getSymbolicName()).andReturn(symbolicName);
+        expect(bundle.getSymbolicName()).andReturn(symbolicName).anyTimes();
         expect(bundle.getHeaders()).andReturn(headers).anyTimes();
         BundleStartLevel sl = EasyMock.createMock(BundleStartLevel.class);
-        expect(sl.isPersistentlyStarted()).andReturn(true);
-        expect(bundle.adapt(BundleStartLevel.class)).andReturn(sl );
-        replay(bundle);
+        expect(sl.isPersistentlyStarted()).andReturn(true).anyTimes();
+        expect(bundle.adapt(BundleStartLevel.class)).andReturn(sl).anyTimes();
+        replay(bundle, sl);
         return bundle;
     }
     
@@ -51,7 +59,6 @@ public class TestBase {
             headersTable.put(key, value);
         }
         return headersTable;
-        
     }
     
     public Map<String, Map<String, Feature>> features(Feature ... features) {
@@ -74,5 +81,19 @@ public class TestBase {
 
     public Feature feature(String name, String version) {
         return new org.apache.karaf.features.internal.model.Feature(name, version);
+    }
+    
+    public Set<Bundle> setOf(Bundle ... elements) {
+        return new HashSet<Bundle>(Arrays.asList(elements));
+    }
+    
+    public Set<Long> setOf(Long ... elements) {
+        return new HashSet<Long>(Arrays.asList(elements));
+    }
+
+    @SuppressWarnings("unchecked")
+    public void ignoreRefreshes(BundleManager bundleManager) {
+        bundleManager.refreshBundles(EasyMock.anyObject(Set.class), EasyMock.anyObject(Set.class), EasyMock.anyObject(EnumSet.class));        
+        EasyMock.expectLastCall().anyTimes();
     }
 }
