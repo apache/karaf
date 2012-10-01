@@ -19,17 +19,13 @@ package org.apache.karaf.features.internal;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -121,52 +117,7 @@ public class FeaturesServiceImplTest extends TestBase {
         }
     }
 
-    /**
-     * This test checks KARAF-388 which allows you to specify version of boot feature.
-     */
-    @Test
-    @SuppressWarnings("unchecked")
-    public void testStartDoesNotFailWithNonExistentVersion()  {
-        BundleManager bundleManager = EasyMock.createMock(BundleManager.class);
-        expect(bundleManager.createAndRegisterEventAdminListener()).andReturn(null);
-        bundleManager.refreshBundles(EasyMock.anyObject(Set.class), EasyMock.anyObject(Set.class), EasyMock.anyObject(EnumSet.class));
-        EasyMock.expectLastCall().anyTimes();
 
-        final Map<String, Map<String, Feature>> features = features(
-                feature("transaction", "1.0.0"),
-                feature("transaction", "2.0.0"),
-                feature("ssh", "1.0.0")
-        );
-
-        final FeaturesServiceImpl impl = new FeaturesServiceImpl(bundleManager, null) {
-            protected Map<String,Map<String,Feature>> getFeatures() throws Exception {
-                return features;
-            };
-
-            // override methods which refers to bundle context to avoid mocking everything
-            @Override
-            protected boolean loadState() {
-                return true;
-            }
-            @Override
-            protected void saveState() {
-            }
-        };
-       
-        BootFeaturesInstaller bootFeatures = new BootFeaturesInstaller(impl, "transaction;version=1.2,ssh;version=1.0.0");
-        replay(bundleManager);
-        try {
-            Thread.currentThread().setContextClassLoader(new URLClassLoader(new URL[0]));
-            impl.start();
-            bootFeatures.installBootFeatures();
-            assertFalse("Feature transaction 1.0.0 should not be installed", impl.isInstalled(impl.getFeature("transaction", "1.0.0")));
-            assertFalse("Feature transaction 2.0.0 should not be installed", impl.isInstalled(impl.getFeature("transaction", "2.0.0")));
-            assertTrue("Feature ssh should be installed", impl.isInstalled(impl.getFeature("ssh", "1.0.0")));
-        } catch (Exception e) {
-            fail(String.format("Service should not throw start-up exception but log the error instead: %s", e));
-        }
-        
-    }
     
     /**
      * This test ensures that every feature get installed only once, even if it appears multiple times in the list

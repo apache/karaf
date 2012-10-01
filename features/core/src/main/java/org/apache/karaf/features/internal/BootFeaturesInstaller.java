@@ -16,11 +16,14 @@
  */
 package org.apache.karaf.features.internal;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
-import java.util.LinkedHashSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
@@ -64,52 +67,78 @@ public class BootFeaturesInstaller {
     }
     
 	void installBootFeatures() {
-		Set<Feature> features = determineFeaturesToInstall();
+	    List<Feature> installedFeatures = Arrays.asList(featuresService.listInstalledFeatures());
+		List<Set<String>> stagedFeatureNames = parseBootFeatures(boot);
+        List<Set<Feature>> stagedFeatures = toFeatureSetList(stagedFeatureNames);
+
         try {
-            featuresService.installFeatures(features, EnumSet.of(Option.NoCleanIfFailure, Option.ContinueBatchOnFailure));
+            for (Set<Feature> features : stagedFeatures) {
+                features.removeAll(installedFeatures);
+                featuresService.installFeatures(features, EnumSet.of(Option.NoCleanIfFailure, Option.ContinueBatchOnFailure));                
+            }
         } catch (Exception e) {
             LOGGER.error("Error installing boot features", e);
         }
 	}
 	
-    private Set<Feature> determineFeaturesToInstall() {
-    	List<Feature> installedFeatures = Arrays.asList(featuresService.listInstalledFeatures());
-        String[] list = boot.split(",");
-        Set<Feature> features = new LinkedHashSet<Feature>();
-        for (String f : list) {
-            f = f.trim();
-            if (f.length() > 0) {
-                String featureVersion = null;
-
-                // first we split the parts of the feature string to gain access to the version info
-                // if specified
-                String[] parts = f.split(";");
-                String featureName = parts[0];
-                for (String part : parts) {
-                    // if the part starts with "version=" it contains the version info
-                    if (part.startsWith(VERSION_PREFIX)) {
-                        featureVersion = part.substring(VERSION_PREFIX.length());
-                    }
-                }
-
-                if (featureVersion == null) {
-                    // no version specified - use default version
-                    featureVersion = org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION;
-                }
-
+	private List<Set<Feature>> toFeatureSetList(List<Set<String>> stagedFeatures) {
+	    ArrayList<Set<Feature>> result = new ArrayList<Set<Feature>>();
+	    for (Set<String> features : stagedFeatures) {
+	        HashSet<Feature> featureSet = new HashSet<Feature>();
+            for (String featureName : features) {
                 try {
-                    // try to grab specific feature version
-                    Feature feature = featuresService.getFeature(featureName, featureVersion);
-                    if (feature != null && !installedFeatures.contains(feature)) {
-                        features.add(feature);
+                    Feature feature = getFeature(featureName);
+                    if (feature == null) {
+                        LOGGER.error("Error Boot feature " + featureName + " not found");
                     } else {
-                        LOGGER.error("Error installing boot feature " + f + ": feature not found");
+                        featureSet.add(feature);
                     }
                 } catch (Exception e) {
-                    LOGGER.error("Error installing boot feature " + f, e);
+                    LOGGER.error("Error getting feature for feature string " + featureName, e);
                 }
             }
+            result.add(featureSet);
         }
-		return features;
+        return result;
 	}
+	
+	/**
+	 * 
+	 * @param featureSt either feature name or <featurename>;version=<version>
+	 * @return feature matching the feature string
+	 * @throws Exception
+	 */
+    private Feature getFeature(String featureSt) throws Exception {
+        String[] parts = featureSt.trim().split(";");
+        String featureName = parts[0];
+        String featureVersion = null;
+        for (String part : parts) {
+            // if the part starts with "version=" it contains the version info
+            if (part.startsWith(VERSION_PREFIX)) {
+                featureVersion = part.substring(VERSION_PREFIX.length());
+            }
+        }
+        if (featureVersion == null) {
+            // no version specified - use default version
+            featureVersion = org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION;
+        }
+        return featuresService.getFeature(featureName, featureVersion);
+    }
+    
+    protected List<Set<String>> parseBootFeatures(String bootFeatures) {
+        Pattern pattern = Pattern.compile("(\\((.+))\\),|.+");
+        Matcher matcher = pattern.matcher(bootFeatures);
+        List<Set<String>> result = new ArrayList<Set<String>>();
+        while (matcher.find()) {
+            String group = matcher.group(2) != null ? matcher.group(2) : matcher.group();
+            result.add(parseFeatureList(group));
+        }
+        return result;
+    }
+
+    private Set<String> parseFeatureList(String group) {
+        HashSet<String> features = new HashSet<String>(Arrays.asList(group.trim().split("\\s*,\\s*")));
+        return features;
+    }
+
 }
