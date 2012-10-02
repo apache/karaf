@@ -13,13 +13,13 @@
  */
 package org.apache.karaf.itests;
 
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.ExamReactorStrategy;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
 import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
-
-import static org.junit.Assert.assertTrue;
 
 @RunWith(JUnit4TestRunner.class)
 @ExamReactorStrategy(AllConfinedStagedReactorFactory.class)
@@ -27,18 +27,20 @@ public class RegionTest extends KarafTestSupport {
 
     @Test
     public void infoCommand() throws Exception {
+        Thread.sleep(1000);
         String infoOutput = executeCommand("region:info");
         System.out.println(infoOutput);
-        assertTrue(infoOutput.contains("org.eclipse.equinox.region.kernel"));
-        assertTrue(infoOutput.contains("org.apache.karaf.region.application"));
+        assertTrue("Region org.eclipse.equinox.region.kernel should be present", infoOutput.contains("org.eclipse.equinox.region.kernel"));
+        assertTrue("Region org.apache.karaf.region.application should be present", infoOutput.contains("org.apache.karaf.region.application"));
     }
 
     @Test
     public void addRegionCommand() throws Exception {
+        Thread.sleep(2000);
         System.out.println(executeCommand("region:addregion itest"));
         String infoOutput = executeCommand("region:info");
         System.out.println(infoOutput);
-        assertTrue(infoOutput.contains("itest"));
+        assertTrue("Region itest should be present", infoOutput.contains("itest"));
     }
 
 }

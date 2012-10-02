@@ -26,7 +26,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -40,6 +42,7 @@ import javax.management.remote.JMXServiceURL;
 
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
+import org.apache.karaf.features.BootFinished;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.tooling.exam.options.LogLevelOption;
@@ -68,6 +71,12 @@ public class KarafTestSupport {
 
     @Inject
     FeaturesService featureService;
+    
+    /**
+     * To make sure the tests run only when the boot features are fully installed
+     */
+    @Inject
+    BootFinished bootFinished;
 
     @ProbeBuilder
     public TestProbeBuilder probeConfiguration(TestProbeBuilder probe) {
@@ -81,7 +90,7 @@ public class KarafTestSupport {
             karafDistributionConfiguration().frameworkUrl(maven().groupId("org.apache.karaf").artifactId("apache-karaf").versionAsInProject().type("tar.gz"))
                     .name("Apache Karaf").unpackDirectory(new File("target/exam")),
                 keepRuntimeFolder(),
-                logLevel(LogLevelOption.LogLevel.ERROR) };
+                logLevel(LogLevelOption.LogLevel.INFO) };
     }
 
     /**
@@ -230,6 +239,17 @@ public class KarafTestSupport {
             }
         }
         Assert.fail("Feature " + featureName + " should be installed but is not");
+    }
+    
+    public void assertFeaturesInstalled(String ... expectedFeatures) {
+        Set<String> expectedFeaturesSet = new HashSet<String>(Arrays.asList(expectedFeatures)); 
+        Feature[] features = featureService.listInstalledFeatures();
+        Set<String> installedFeatures = new HashSet<String>();
+        for (Feature feature : features) {
+            installedFeatures.add(feature.getName()); 
+        }
+        String msg = "Expecting the following features to be installed : " + expectedFeaturesSet + " but found " + installedFeatures;
+        Assert.assertTrue(msg, installedFeatures.containsAll(expectedFeaturesSet));
     }
 
 }

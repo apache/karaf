@@ -25,13 +25,7 @@ public class StandardFeaturesTest extends KarafTestSupport {
 
     @Test
     public void testBootFeatures() throws Exception {
-        assertFeatureInstalled("standard");
-        assertFeatureInstalled("config");
-        assertFeatureInstalled("region");
-        assertFeatureInstalled("package");
-        assertFeatureInstalled("kar");
-        assertFeatureInstalled("ssh");
-        assertFeatureInstalled("management");
+        assertFeaturesInstalled("standard", "config2", "region", "package", "kar", "ssh", "management");
     }
 
     private void installAndAssertFeature(String feature) throws Exception {
