@@ -24,6 +24,7 @@ import static org.ops4j.pax.exam.CoreOptions.scanFeatures;
 
 import javax.inject.Inject;
 
+import org.apache.karaf.features.BootFinished;
 import org.apache.karaf.features.FeaturesService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,6 +40,9 @@ public class FeaturesScannerProvisionTest {
 
     @Inject
     private FeaturesService featuresService;
+    
+    @Inject
+    BootFinished bootFinished;
 
     @Configuration
     public Option[] config() {
