@@ -23,11 +23,6 @@ import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
 @ExamReactorStrategy(AllConfinedStagedReactorFactory.class)
 public class StandardFeaturesTest extends KarafTestSupport {
 
-    @Test
-    public void testBootFeatures() throws Exception {
-        assertFeaturesInstalled("standard", "config2", "region", "package", "kar", "ssh", "management");
-    }
-
     private void installAndAssertFeature(String feature) throws Exception {
         featureService.installFeature(feature);
         assertFeatureInstalled(feature);
