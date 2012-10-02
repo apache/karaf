@@ -26,6 +26,7 @@ import static org.ops4j.pax.exam.CoreOptions.scanFeatures;
 
 import javax.inject.Inject;
 
+import org.apache.karaf.features.BootFinished;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.tooling.exam.options.configs.FeaturesCfg;
 import org.junit.Test;
@@ -45,6 +46,9 @@ public class MixFeatureAndDeployFolderFalseTest {
 
     @Inject
     private FeaturesService featuresService;
+    
+    @Inject
+    BootFinished bootFinished;
 
     @Configuration
     public Option[] config() {
