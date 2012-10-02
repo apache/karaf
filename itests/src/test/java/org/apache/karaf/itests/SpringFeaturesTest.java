@@ -13,6 +13,7 @@
  */
 package org.apache.karaf.itests;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.ExamReactorStrategy;
@@ -94,11 +95,13 @@ public class SpringFeaturesTest extends KarafTestSupport {
     }
 
     @Test
+    @Ignore
     public void installSpringWebPortletFeature() throws Exception {
         installAndAssertFeature("spring-web-portlet");
     }
 
     @Test
+    @Ignore
     public void installGeminiBlueprintFeature() throws Exception {
         installAndAssertFeature("gemini-blueprint");
     }
