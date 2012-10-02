@@ -52,6 +52,7 @@ http://www.osgi.org/xmlns/blueprint-ext/v1.0.0 http://aries.apache.org/schemas/b
     </bean>
     
     <bean id="bootFeaturesInstaller" class="org.apache.karaf.features.internal.BootFeaturesInstaller" init-method="start">
+    	<argument ref="blueprintBundleContext" />
     	<argument ref="featuresService" />
         <argument value="$[featuresBoot]" />
     </bean>
