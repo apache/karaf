@@ -36,6 +36,7 @@ import java.util.Hashtable;
 
 import javax.inject.Inject;
 
+import org.apache.karaf.features.BootFinished;
 import org.apache.karaf.tooling.exam.options.KarafDistributionOption;
 import org.apache.karaf.tooling.exam.regression.supports.EchoServlet;
 import org.apache.karaf.tooling.exam.regression.supports.ServletActivator;
@@ -59,6 +60,12 @@ public class KarafWithBundleTest {
     protected BundleContext bundleContext;
 
     private ServletListener webListener;
+    
+    /**
+     * To make sure the tests run only when the boot features are fully installed
+     */
+    @Inject
+    BootFinished bootFinished;
 
     @Before
     public void registerListener() {
