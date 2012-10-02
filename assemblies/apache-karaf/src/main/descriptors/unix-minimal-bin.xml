@@ -16,8 +16,9 @@
     limitations under the License.
 -->
 <assembly>
+
     <id>minimal</id>
-    <!-- Used as artifact discriminator -->
+
     <formats>
         <format>tar.gz</format>
     </formats>
@@ -43,11 +44,6 @@
             <lineEnding>unix</lineEnding>
         </fileSet>
         <fileSet>
-            <directory>src/main/distribution/unix-text</directory>
-            <outputDirectory>/</outputDirectory>
-            <lineEnding>unix</lineEnding>
-        </fileSet>
-        <fileSet>
             <directory>target/classes/bin</directory>
             <outputDirectory>/bin/</outputDirectory>
             <lineEnding>unix</lineEnding>
@@ -64,25 +60,14 @@
             </excludes>
             <outputDirectory>/etc/</outputDirectory>
             <lineEnding>unix</lineEnding>
+            <fileMode>0644</fileMode>
         </fileSet>
 
         <fileSet>
             <directory>target/classes/minimal</directory>
             <outputDirectory>/etc/</outputDirectory>
             <lineEnding>unix</lineEnding>
-        </fileSet>
-
-        <!-- Copy over files that should not get the line endings converted -->
-        <fileSet>
-            <directory>src/main/distribution/binary</directory>
-            <outputDirectory>/</outputDirectory>
-        </fileSet>
-
-        <!-- Copy over the files that should not get the line endings converted but need to be chmod to 755 -->
-        <fileSet>
-            <directory>src/main/distribution/unix-binary</directory>
-            <outputDirectory>/</outputDirectory>
-            <fileMode>0755</fileMode>
+            <fileMode>0644</fileMode>
         </fileSet>
 
         <!-- Copy over the files that need unix line endings and also chmod to 755 -->
@@ -101,6 +86,7 @@
                 <exclude>*.pdf</exclude>
             </excludes>
             <outputDirectory>/</outputDirectory>
+            <fileMode>0644</fileMode>
         </fileSet>
         <fileSet>
             <directory>target/features-repo</directory>
@@ -108,6 +94,7 @@
             	<include>**/*.xml</include>
             </includes>
             <outputDirectory>system</outputDirectory>
+            <fileMode>0644</fileMode>
         </fileSet>
 
     </fileSets>
@@ -117,6 +104,7 @@
             <outputDirectory>/lib/endorsed</outputDirectory>
             <unpack>false</unpack>
             <useProjectArtifact>false</useProjectArtifact>
+            <fileMode>0644</fileMode>
             <includes>
                 <include>org.apache.karaf:org.apache.karaf.exception</include>
             </includes>
@@ -126,6 +114,7 @@
             <outputDirectory>/system</outputDirectory>
             <unpack>false</unpack>
             <useProjectArtifact>false</useProjectArtifact>
+            <fileMode>0644</fileMode>
             <outputFileNameMapping>
                 org/apache/felix/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}
             </outputFileNameMapping>
@@ -139,6 +128,7 @@
             <outputDirectory>/system</outputDirectory>
             <unpack>false</unpack>
             <useProjectArtifact>false</useProjectArtifact>
+            <fileMode>0644</fileMode>
             <outputFileNameMapping>
                 org/ops4j/pax/logging/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}
             </outputFileNameMapping>
@@ -151,6 +141,7 @@
             <outputDirectory>/system</outputDirectory>
             <unpack>false</unpack>
             <useProjectArtifact>false</useProjectArtifact>
+            <fileMode>0644</fileMode>
             <outputFileNameMapping>
                 org/ops4j/pax/url/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}
             </outputFileNameMapping>
@@ -163,6 +154,7 @@
             <outputDirectory>/system</outputDirectory>
             <unpack>false</unpack>
             <useProjectArtifact>false</useProjectArtifact>
+            <fileMode>0644</fileMode>
             <outputFileNameMapping>
                 org/apache/karaf/management/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}
             </outputFileNameMapping>
@@ -174,6 +166,7 @@
             <outputDirectory>/system</outputDirectory>
             <unpack>false</unpack>
             <useProjectArtifact>false</useProjectArtifact>
+            <fileMode>0644</fileMode>
             <outputFileNameMapping>
                 org/apache/karaf/features/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}
             </outputFileNameMapping>
@@ -187,6 +180,7 @@
             <outputDirectory>/system</outputDirectory>
             <unpack>false</unpack>
             <useProjectArtifact>false</useProjectArtifact>
+            <fileMode>0644</fileMode>
             <outputFileNameMapping>
                 org/apache/karaf/shell/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}
             </outputFileNameMapping>
@@ -204,6 +198,7 @@
             <outputDirectory>/system</outputDirectory>
             <unpack>false</unpack>
             <useProjectArtifact>false</useProjectArtifact>
+            <fileMode>0644</fileMode>
             <outputFileNameMapping>
                 org/apache/karaf/diagnostic/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}
             </outputFileNameMapping>
@@ -218,6 +213,7 @@
             <outputDirectory>/system</outputDirectory>
             <unpack>false</unpack>
             <useProjectArtifact>false</useProjectArtifact>
+            <fileMode>0644</fileMode>
             <outputFileNameMapping>
                 org/apache/karaf/jaas/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}
             </outputFileNameMapping>
@@ -231,6 +227,7 @@
             <outputDirectory>/system</outputDirectory>
             <unpack>false</unpack>
             <useProjectArtifact>false</useProjectArtifact>
+            <fileMode>0644</fileMode>
             <outputFileNameMapping>
                 org/eclipse/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}
             </outputFileNameMapping>
@@ -242,6 +239,7 @@
             <outputDirectory>/system</outputDirectory>
             <unpack>false</unpack>
             <useProjectArtifact>false</useProjectArtifact>
+            <fileMode>0644</fileMode>
             <outputFileNameMapping>
                 org/apache/aries/blueprint/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}
             </outputFileNameMapping>
@@ -253,6 +251,7 @@
             <outputDirectory>/system</outputDirectory>
             <unpack>false</unpack>
             <useProjectArtifact>false</useProjectArtifact>
+            <fileMode>0644</fileMode>
             <outputFileNameMapping>
                 org/apache/aries/proxy/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}
             </outputFileNameMapping>
@@ -264,6 +263,7 @@
             <outputDirectory>/system</outputDirectory>
             <unpack>false</unpack>
             <useProjectArtifact>false</useProjectArtifact>
+            <fileMode>0644</fileMode>
             <outputFileNameMapping>
                 org/apache/aries/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}
             </outputFileNameMapping>
@@ -275,6 +275,7 @@
             <outputDirectory>/system</outputDirectory>
             <unpack>false</unpack>
             <useProjectArtifact>false</useProjectArtifact>
+            <fileMode>0644</fileMode>
             <outputFileNameMapping>
                 org/apache/servicemix/bundles/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}
             </outputFileNameMapping>
@@ -286,6 +287,7 @@
             <outputDirectory>/system</outputDirectory>
             <unpack>false</unpack>
             <useProjectArtifact>false</useProjectArtifact>
+            <fileMode>0644</fileMode>
             <outputFileNameMapping>
                 org/apache/aries/jmx/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}
             </outputFileNameMapping>
@@ -296,4 +298,5 @@
             </includes>
         </dependencySet>
     </dependencySets>
+
 </assembly>
