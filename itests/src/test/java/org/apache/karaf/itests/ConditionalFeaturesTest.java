@@ -23,6 +23,7 @@ import javax.inject.Inject;
 
 import junit.framework.Assert;
 
+import org.apache.karaf.features.BootFinished;
 import org.apache.karaf.features.FeaturesService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -43,6 +44,9 @@ public class ConditionalFeaturesTest {
 
     @Inject
     private BundleContext bundleContext;
+    
+    @Inject
+    BootFinished bootFinished;
 
     @ProbeBuilder
     public TestProbeBuilder probeConfiguration(TestProbeBuilder probe) {
