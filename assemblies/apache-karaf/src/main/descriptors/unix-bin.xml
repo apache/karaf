@@ -64,11 +64,13 @@
             <directory>target/classes/demos</directory>
             <outputDirectory>/demos/</outputDirectory>
             <lineEnding>unix</lineEnding>
+            <fileMode>0644</fileMode>
         </fileSet>
         <fileSet>
             <directory>../../demos</directory>
             <outputDirectory>/demos/</outputDirectory>
             <lineEnding>unix</lineEnding>
+            <fileMode>0644</fileMode>
             <excludes>
                 <exclude>**/target/**</exclude>
                 <exclude>**/*.i??</exclude>
