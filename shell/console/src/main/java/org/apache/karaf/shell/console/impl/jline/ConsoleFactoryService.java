@@ -39,19 +39,20 @@ import org.apache.karaf.shell.console.ConsoleFactory;
 public class ConsoleFactoryService implements ConsoleFactory {
     
     @Override
-    public Console createLocal(CommandProcessor processor, final Terminal terminal, Runnable closeCallback) {
+    public Console createLocal(CommandProcessor processor, final Terminal terminal, String encoding, Runnable closeCallback) {
         return create(processor, 
                 StreamWrapUtil.reWrapIn(terminal, System.in), 
                 StreamWrapUtil.reWrap(System.out), 
                 StreamWrapUtil.reWrap(System.err), 
-                terminal, 
+                terminal,
+                encoding,
                 closeCallback);
     }
 
     @Override
     public Console create(CommandProcessor processor, InputStream in, PrintStream out, PrintStream err, final Terminal terminal,
-            Runnable closeCallback) {
-        ConsoleImpl console = new ConsoleImpl(processor, in, out, err, terminal, closeCallback);
+            String encoding, Runnable closeCallback) {
+        ConsoleImpl console = new ConsoleImpl(processor, in, out, err, terminal, encoding, closeCallback);
         CommandSession session = console.getSession();
         session.put("APPLICATION", System.getProperty("karaf.name", "root"));
         session.put("#LINES", new Function() {

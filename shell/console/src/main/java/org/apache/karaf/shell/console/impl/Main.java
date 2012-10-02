@@ -208,7 +208,7 @@ public class Main {
      * @throws Exception
      */
     protected ConsoleImpl createConsole(CommandProcessorImpl commandProcessor, InputStream in, PrintStream out, PrintStream err, Terminal terminal) throws Exception {
-        return new ConsoleImpl(commandProcessor, in, out, err, terminal, null);
+        return new ConsoleImpl(commandProcessor, in, out, err, terminal, null, null);
     }
 
     /**

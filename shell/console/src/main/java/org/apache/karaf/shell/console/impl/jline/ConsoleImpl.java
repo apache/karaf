@@ -84,6 +84,7 @@ public class ConsoleImpl implements Console
                    PrintStream out,
                    PrintStream err,
                    Terminal term,
+                   String encoding,
                    Runnable closeCallback)
     {
         this.in = in;
@@ -98,9 +99,11 @@ public class ConsoleImpl implements Console
         this.closeCallback = closeCallback;
 
         try {
-            reader = new ConsoleReader(this.consoleInput,
+            reader = new ConsoleReader(null,
+                                       this.consoleInput,
                                        this.out,
-                                       this.terminal);
+                                       this.terminal,
+                                       encoding);
         } catch (IOException e) {
             throw new RuntimeException("Error opening console reader", e);
         }

@@ -157,6 +157,10 @@ public class SshAction extends OsgiCommandSupport {
                     ((ChannelShell) channel).setPtyColumns(getTermWidth());
                     ((ChannelShell) channel).setupSensibleDefaultPty();
                     ((ChannelShell) channel).setAgentForwarding(true);
+                    Object ctype = session.get("LC_CTYPE");
+                    if (ctype != null) {
+                        ((ChannelShell) channel).setEnv("LC_CTYPE", ctype.toString());
+                    }
                 }
                 channel.setOut(new NoCloseOutputStream(System.out));
                 channel.setErr(new NoCloseOutputStream(System.err));
