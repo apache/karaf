@@ -23,6 +23,9 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.net.URL;
 import java.security.KeyPair;
+import java.io.InterruptedIOException;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 import jline.NoInterruptUnixTerminal;
 import jline.Terminal;
@@ -37,7 +40,6 @@ import org.apache.sshd.agent.local.LocalAgentFactory;
 import org.apache.sshd.client.channel.ChannelShell;
 import org.apache.sshd.client.future.ConnectFuture;
 import org.apache.sshd.common.RuntimeSshException;
-import org.apache.sshd.common.util.NoCloseInputStream;
 import org.fusesource.jansi.AnsiConsole;
 import org.slf4j.impl.SimpleLogger;
 
@@ -67,11 +69,13 @@ public class Main {
             if (config.getCommand().length() > 0) {
                 channel = session.createChannel("exec", config.getCommand() + "\n");
                 channel.setIn(new ByteArrayInputStream(new byte[0]));
-            } else {
+			} else {
                 TerminalFactory.registerFlavor(TerminalFactory.Flavor.UNIX, NoInterruptUnixTerminal.class);
                 terminal = TerminalFactory.create();
                 channel = session.createChannel("shell");
-                channel.setIn(new NoCloseInputStream(System.in));
+                ConsoleInputStream in = new ConsoleInputStream(terminal.wrapInIfNeeded(System.in));
+                new Thread(in).start();
+                channel.setIn(in);
                 ((ChannelShell) channel).setupSensibleDefaultPty();
                 ((ChannelShell) channel).setAgentForwarding(true);
             }
@@ -171,6 +175,99 @@ public class Main {
             sb.append((char) c);
         }
         return sb.toString();
+    }
+
+    private static class ConsoleInputStream extends InputStream implements Runnable {
+
+        private InputStream in;
+        private boolean eof = false;
+        private final BlockingQueue<Integer> queue = new ArrayBlockingQueue<Integer>(1024);
+
+        public ConsoleInputStream(InputStream in) {
+            this.in = in;
+        }
+
+        private int read(boolean wait) throws IOException
+        {
+            if (eof && queue.isEmpty()) {
+                return -1;
+            }
+            Integer i;
+            if (wait) {
+                try {
+                    i = queue.take();
+                } catch (InterruptedException e) {
+                    throw new InterruptedIOException();
+                }
+            } else {
+                i = queue.poll();
+            }
+            if (i == null) {
+                return -1;
+            }
+            return i;
+        }
+
+        @Override
+        public int read() throws IOException
+        {
+            return read(true);
+        }
+
+        @Override
+        public int read(byte b[], int off, int len) throws IOException
+        {
+            if (b == null) {
+                throw new NullPointerException();
+            } else if (off < 0 || len < 0 || len > b.length - off) {
+                throw new IndexOutOfBoundsException();
+            } else if (len == 0) {
+                return 0;
+            }
+
+            int nb = 1;
+            int i = read(true);
+            if (i < 0) {
+                return -1;
+            }
+            b[off++] = (byte) i;
+            while (nb < len) {
+                i = read(false);
+                if (i < 0) {
+                    return nb;
+                }
+                b[off++] = (byte) i;
+                nb++;
+            }
+            return nb;
+        }
+
+        @Override
+        public int available() throws IOException {
+            return queue.size();
+        }
+
+        public void run() {
+            try {
+                while (true) {
+                    try {
+                        int c = in.read();
+                        if (c == -1) {
+                            return;
+                        }
+                        queue.put(c);
+                    } catch (Throwable t) {
+                        return;
+                    }
+                }
+            } finally {
+                eof = true;
+                try {
+                    queue.put(-1);
+                } catch (InterruptedException e) {
+                }
+            }
+        }
     }
 
 }
