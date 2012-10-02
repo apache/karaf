@@ -20,14 +20,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.karaf.features.BootFinished;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.FeaturesService.Option;
+import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,6 +42,7 @@ public class BootFeaturesInstaller {
 
     public static String VERSION_PREFIX = "version=";
 
+    private final BundleContext bundleContext;
     private final FeaturesService featuresService;
     private final String boot;
 
@@ -47,8 +51,9 @@ public class BootFeaturesInstaller {
      * @param featuresService
      * @param boot list of boot features separated by comma. Optionally contains ;version=x.x.x to specify a specific feature version
      */
-    public BootFeaturesInstaller(FeaturesService featuresService, String boot) {
-		this.featuresService = featuresService;
+    public BootFeaturesInstaller(BundleContext bundleContext, FeaturesService featuresService, String boot) {
+		this.bundleContext = bundleContext;
+        this.featuresService = featuresService;
 		this.boot = boot;
 	}
     
@@ -61,8 +66,11 @@ public class BootFeaturesInstaller {
             new Thread() {
                 public void run() {
                     installBootFeatures();
+                    publishBootFinished();
                 }
             }.start();
+        } else {
+            publishBootFinished();
         }
     }
     
@@ -139,6 +147,13 @@ public class BootFeaturesInstaller {
     private Set<String> parseFeatureList(String group) {
         HashSet<String> features = new HashSet<String>(Arrays.asList(group.trim().split("\\s*,\\s*")));
         return features;
+    }
+
+    private void publishBootFinished() {
+        if (bundleContext != null) {
+            BootFinished bootFinished = new BootFinished() {};
+            bundleContext.registerService(BootFinished.class, bootFinished, new Hashtable<String, String>());
+        }
     }
 
 }
