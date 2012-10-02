@@ -102,8 +102,12 @@ public class ShellFactoryImpl implements Factory<Command> {
                         destroy();
                     }
                 };
+                String encoding = env.getEnv().get("LC_CTYPE");
+                if (encoding != null && encoding.indexOf('.') > 0) {
+                    encoding = encoding.substring(encoding.indexOf('.') + 1);
+                }
                 Console console = consoleFactory.create(commandProcessor, in,
-                        lfToCrLfPrintStream(out), lfToCrLfPrintStream(err), terminal, destroyCallback);
+                        lfToCrLfPrintStream(out), lfToCrLfPrintStream(err), terminal, encoding, destroyCallback);
                 final CommandSession session = console.getSession();
                 for (Map.Entry<String, String> e : env.getEnv().entrySet()) {
                     session.put(e.getKey(), e.getValue());

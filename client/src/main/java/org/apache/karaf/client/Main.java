@@ -24,6 +24,8 @@ import java.io.ObjectInputStream;
 import java.net.URL;
 import java.security.KeyPair;
 import java.io.InterruptedIOException;
+import java.nio.charset.Charset;
+import java.util.Locale;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -78,6 +80,12 @@ public class Main {
                 channel.setIn(in);
                 ((ChannelShell) channel).setupSensibleDefaultPty();
                 ((ChannelShell) channel).setAgentForwarding(true);
+                String ctype = System.getenv("LC_CTYPE");
+                if (ctype == null) {
+                    ctype = Locale.getDefault().toString() + "."
+                                + System.getProperty("input.encoding", Charset.defaultCharset().name());
+                }
+                ((ChannelShell) channel).setEnv("LC_CTYPE", ctype);
             }
             channel.setOut(AnsiConsole.wrapOutputStream(System.out));
             channel.setErr(AnsiConsole.wrapOutputStream(System.err));
