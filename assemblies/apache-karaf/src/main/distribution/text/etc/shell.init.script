@@ -27,94 +27,100 @@ cl = { config:list "(service.pid=$args)" } ;
 help = { *:help $args | more } ;
 man = { help $args } ;
 
-// system:* aliases
-system:framework = { dev:framework $args } ;
-system:name = { osgi:name $args } ;
-system:shutdown = { osgi:shutdown $args } ;
-system:start-level = { osgi:start-level $args } ;
-system:property = { dev:system-property $args } ;
-system:version = { osgi:version $args } ;
+enable-3x-aliases = {
 
-// service:* aliases
-service:list = { ls $args } ;
-service:wait = { dev:wait-for-service $args } ;
+    // system:* aliases
+    system:framework = { dev:framework $args } ;
+    system:name = { osgi:name $args } ;
+    system:shutdown = { osgi:shutdown $args } ;
+    system:start-level = { osgi:start-level $args } ;
+    system:property = { dev:system-property $args } ;
+    system:version = { osgi:version $args } ;
 
-// bundle:* aliases
-bundle:dynamic-import = { dev:dynamic-import $args } ;
-bundle:list = { osgi:list $args } ;
-bundle:install = { osgi:install $args };
-bundle:uninstall = { osgi:uninstall $args } ;
-bundle:start = { osgi:start $args } ;
-bundle:stop = { osgi:stop $args } ;
-bundle:classes = { osgi:classes $args } ;
-bundle:find-class = { osgi:find-class $args } ;
-bundle:headers = { osgi:headers $args } ;
-bundle:info = { osgi:info $args } ;
-bundle:refresh = { osgi:refresh $args } ;
-bundle:resolve = { osgi:resolve $args } ;
-bundle:restart = { osgi:restart $args } ;
-bundle:services = { osgi:bundle-services $args } ;
-bundle:start-level = { osgi:start-level $args } ;
-bundle:tree-show = { dev:show-tree $args } ;
-bundle:update = { osgi:update $args } ;
-bundle:watch = { dev:watch $args } ;
+    // service:* aliases
+    service:list = { ls $args } ;
+    service:wait = { dev:wait-for-service $args } ;
 
-// config:* aliases
-config:property-append = { config:propappend $args } ;
-config:property-delete = { config:propdel $args } ;
-config:property-list = { config:proplist $args } ;
-config:property-set = { config:propset $args } ;
+    // bundle:* aliases
+    bundle:dynamic-import = { dev:dynamic-import $args } ;
+    bundle:list = { osgi:list $args } ;
+    bundle:install = { osgi:install $args };
+    bundle:uninstall = { osgi:uninstall $args } ;
+    bundle:start = { osgi:start $args } ;
+    bundle:stop = { osgi:stop $args } ;
+    bundle:classes = { osgi:classes $args } ;
+    bundle:find-class = { osgi:find-class $args } ;
+    bundle:headers = { osgi:headers $args } ;
+    bundle:info = { osgi:info $args } ;
+    bundle:refresh = { osgi:refresh $args } ;
+    bundle:resolve = { osgi:resolve $args } ;
+    bundle:restart = { osgi:restart $args } ;
+    bundle:services = { osgi:bundle-services $args } ;
+    bundle:start-level = { osgi:start-level $args } ;
+    bundle:tree-show = { dev:show-tree $args } ;
+    bundle:update = { osgi:update $args } ;
+    bundle:watch = { dev:watch $args } ;
 
-// dev:* aliases
-dev:dump-create = { dev:create-dump $args } ;
+    // config:* aliases
+    config:property-append = { config:propappend $args } ;
+    config:property-delete = { config:propdel $args } ;
+    config:property-list = { config:proplist $args } ;
+    config:property-set = { config:propset $args } ;
 
-// package:* aliases
-package:exports = { packages:exports $args } ;
-package:imports = { packages:imports $args } ;
+    // dev:* aliases
+    dev:dump-create = { dev:create-dump $args } ;
 
-// feature:* aliases
-feature:add-url = { features:addurl $args } ;
-feature:repo-add = { features:addurl $args } ;
-feature:refresh-url = { features:refreshurl $args } ;
-feature:info = { features:info $args } ;
-feature:remove-repository = { features:removerepository $args } ;
-feature:install = { features:install $args } ;
-feature:repo-remove = { features:removeurl $args } ;
-feature:list = { features:list $args } ;
-feature:uninstall = { features:uninstall $args } ;
-feature:repo-list = { features:listrepositories $args } ;
-feature:url-list = { features:listurl $args } ;
-feature:version-list = { features:listversions $args } ;
+    // package:* aliases
+    package:exports = { packages:exports $args } ;
+    package:imports = { packages:imports $args } ;
 
-// system:* aliases
-system:property = { dev:system-property $args } ;
+    // feature:* aliases
+    feature:add-url = { features:addurl $args } ;
+    feature:repo-add = { features:addurl $args } ;
+    feature:refresh-url = { features:refreshurl $args } ;
+    feature:info = { features:info $args } ;
+    feature:remove-repository = { features:removerepository $args } ;
+    feature:install = { features:install $args } ;
+    feature:repo-remove = { features:removeurl $args } ;
+    feature:list = { features:list $args } ;
+    feature:uninstall = { features:uninstall $args } ;
+    feature:repo-list = { features:listrepositories $args } ;
+    feature:url-list = { features:listurl $args } ;
+    feature:version-list = { features:listversions $args } ;
 
-// instance:* aliases
-instance:opts-change = { admin:change-opts $args } ;
-instance:rmi-registry-port-change = { admin:change-rmi-registry-port $args } ;
-instance:rmi-server-port-change = { admin:change-rmi-server-port $args } ;
-instance:ssh-port-change = { admin:change-ssh-port $args } ;
-instance:clone = { admin:clone $args } ;
-instance:connect = { admin:connect $args } ;
-instance:create = { admin:create $args } ;
-instance:destroy = { admin:destroy $args } ;
-instance:list = { admin:list $args } ;
-instance:rename = { admin:rename $args } ;
-instance:start = { admin:start $args } ;
-instance:stop = { admin:stop $args } ;
+    // system:* aliases
+    system:property = { dev:system-property $args } ;
 
-// jaas:* aliases
-jaas:pending-list = { jaas:pending $args } ;
-jaas:realm-list = { jaas:realms $args } ;
-jaas:user-list = { jaas:users $args } ;
-jaas:realm-manage = { jaas:manage $args } ;
-jaas:role-add = { jaas:roleadd $args } ;
-jaas:role-delete = { jaas:roledel $args } ;
-jaas:user-add = { jaas:useradd $args } ;
-jaas:user-delete = { jaas:userdel $args } ;
+    // instance:* aliases
+    instance:opts-change = { admin:change-opts $args } ;
+    instance:rmi-registry-port-change = { admin:change-rmi-registry-port $args } ;
+    instance:rmi-server-port-change = { admin:change-rmi-server-port $args } ;
+    instance:ssh-port-change = { admin:change-ssh-port $args } ;
+    instance:clone = { admin:clone $args } ;
+    instance:connect = { admin:connect $args } ;
+    instance:create = { admin:create $args } ;
+    instance:destroy = { admin:destroy $args } ;
+    instance:list = { admin:list $args } ;
+    instance:rename = { admin:rename $args } ;
+    instance:start = { admin:start $args } ;
+    instance:stop = { admin:stop $args } ;
 
-// obr:* aliases
-obr:url-add = { obr:addUrl $args } ;
-obr:url-list = { obr:listUrl $args } ;
-obr:url-refresh = { obr:refreshUrl $args } ;
-obr:url-remove = { obr:removeUrl $args } ;
+    // jaas:* aliases
+    jaas:pending-list = { jaas:pending $args } ;
+    jaas:realm-list = { jaas:realms $args } ;
+    jaas:user-list = { jaas:users $args } ;
+    jaas:realm-manage = { jaas:manage $args } ;
+    jaas:role-add = { jaas:roleadd $args } ;
+    jaas:role-delete = { jaas:roledel $args } ;
+    jaas:user-add = { jaas:useradd $args } ;
+    jaas:user-delete = { jaas:userdel $args } ;
+
+    // obr:* aliases
+    obr:url-add = { obr:addUrl $args } ;
+    obr:url-list = { obr:listUrl $args } ;
+    obr:url-refresh = { obr:refreshUrl $args } ;
+    obr:url-remove = { obr:removeUrl $args } ;
+
+    echo "Karaf 3.x aliases enabled"
+
+}
