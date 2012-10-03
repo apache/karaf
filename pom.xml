@@ -166,18 +166,32 @@
         <aries.application.management.version>1.0.0</aries.application.management.version>
         <aries.blueprint.annotation.version>1.0.0</aries.blueprint.annotation.version>
         <aries.blueprint.annotation.api.version>1.0.0</aries.blueprint.annotation.api.version>
-        <aries.blueprint.version>1.0.0</aries.blueprint.version>
+        <aries.blueprint.version>1.0.1</aries.blueprint.version>
         <aries.blueprint.api.version>1.0.0</aries.blueprint.api.version>
-        <aries.jmx.version>1.0.0</aries.jmx.version>
+        <aries.blueprint.core.version>1.0.1</aries.blueprint.core.version>
+        <aries.blueprint.core.compatibility.version>1.0.0</aries.blueprint.core.compatibility.version>
+        <aries.blueprint.cm.version>1.0.0</aries.blueprint.cm.version>
+        <aries.blueprint.jexl.evaluator.version>1.0.0</aries.blueprint.jexl.evaluator.version>
         <aries.jmx.api.version>1.0.0</aries.jmx.api.version>
-        <aries.jmx.blueprint.core.version>1.0.1</aries.jmx.blueprint.core.version>
-        <aries.jpa.version>1.0.0</aries.jpa.version>
+        <aries.jmx.core.version>1.0.1</aries.jmx.core.version>
+        <aries.jmx.blueprint.api.version>1.0.0</aries.jmx.blueprint.api.version>
+        <aries.jmx.blueprint.core.version>1.0.0</aries.jmx.blueprint.core.version>
+        <aries.jmx.core.version>1.0.1</aries.jmx.core.version>
+        <aries.jmx.whiteboard.version>1.0.0</aries.jmx.whiteboard.version>
+        <aries.jpa.version>1.0.1</aries.jpa.version>
+        <aries.jpa.blueprint.aries.version>1.0.0</aries.jpa.blueprint.aries.version>
         <aries.jpa.api.version>1.0.0</aries.jpa.api.version>
+        <aries.jpa.blueprint.version>1.0.0</aries.jpa.blueprint.version>
+        <aries.jpa.container.version>1.0.0</aries.jpa.container.version>
+        <aries.jpa.container.context.version>1.0.1</aries.jpa.container.context.version>
         <aries.jndi.version>1.0.0</aries.jndi.version>
         <aries.jndi.api.version>1.0.0</aries.jndi.api.version>
         <aries.proxy.version>1.0.0</aries.proxy.version>
         <aries.proxy.api.version>1.0.0</aries.proxy.api.version>
-        <aries.transaction.version>1.0.0</aries.transaction.version>
+        <aries.transaction.version>1.0.1</aries.transaction.version>
+        <aries.transaction.manager.version>1.0.1</aries.transaction.manager.version>
+        <aries.transaction.blueprint.version>1.0.0</aries.transaction.blueprint.version>
+        <aries.transaction.jdbc.version>1.0.0</aries.transaction.jdbc.version>
         <aries.util.version>1.0.0</aries.util.version>
 
         <gemini.blueprint.version>1.0.0.RELEASE</gemini.blueprint.version>
@@ -1513,22 +1527,22 @@
             <dependency>
                 <groupId>org.apache.aries.blueprint</groupId>
                 <artifactId>org.apache.aries.blueprint.cm</artifactId>
-                <version>${aries.blueprint.version}</version>
+                <version>${aries.blueprint.cm.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.aries.blueprint</groupId>
                 <artifactId>org.apache.aries.blueprint.core.compatibility</artifactId>
-                <version>${aries.blueprint.version}</version>
+                <version>${aries.blueprint.core.compatibility.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.aries.blueprint</groupId>
                 <artifactId>org.apache.aries.blueprint.core</artifactId>
-                <version>${aries.blueprint.version}</version>
+                <version>${aries.blueprint.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.aries.blueprint</groupId>
                 <artifactId>org.apache.aries.blueprint.jexl.evaluator</artifactId>
-                <version>${aries.blueprint.version}</version>
+                <version>${aries.blueprint.jexl.evaluator.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>commons-logging</groupId>
@@ -1559,17 +1573,17 @@
             <dependency>
                 <groupId>org.apache.aries.jmx</groupId>
                 <artifactId>org.apache.aries.jmx.core</artifactId>
-                <version>${aries.jmx.version}</version>
+                <version>${aries.jmx.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.aries.jmx</groupId>
                 <artifactId>org.apache.aries.jmx.whiteboard</artifactId>
-                <version>${aries.jmx.version}</version>
+                <version>${aries.jmx.whiteboard.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.aries.jmx</groupId>
                 <artifactId>org.apache.aries.jmx.blueprint.api</artifactId>
-                <version>${aries.jmx.version}</version>
+                <version>${aries.jmx.blueprint.api.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.slf4j</groupId>
@@ -1617,17 +1631,12 @@
             <dependency>
                 <groupId>org.apache.aries.transaction</groupId>
                 <artifactId>org.apache.aries.transaction.blueprint</artifactId>
-                <version>${aries.transaction.version}</version>
+                <version>${aries.transaction.blueprint.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.aries.transaction</groupId>
                 <artifactId>org.apache.aries.transaction.manager</artifactId>
-                <version>${aries.transaction.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.aries.transaction</groupId>
-                <artifactId>org.apache.aries.transaction.wrappers</artifactId>
-                <version>${aries.transaction.version}</version>
+                <version>${aries.transaction.manager.version}</version>
             </dependency>
 
             <dependency>
@@ -1638,12 +1647,12 @@
             <dependency>
                 <groupId>org.apache.aries.jpa</groupId>
                 <artifactId>org.apache.aries.jpa.blueprint.aries</artifactId>
-                <version>${aries.jpa.version}</version>
+                <version>${aries.jpa.blueprint.aries.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.aries.jpa</groupId>
                 <artifactId>org.apache.aries.jpa.container</artifactId>
-                <version>${aries.jpa.version}</version>
+                <version>${aries.jpa.container.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.aries.jpa</groupId>
@@ -1709,6 +1718,11 @@
             <dependency>
                 <groupId>org.apache.xbean</groupId>
                 <artifactId>xbean-finder-shaded</artifactId>
+                <version>${xbean.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.xbean</groupId>
+                <artifactId>xbean-blueprint</artifactId>
                 <version>${xbean.version}</version>
             </dependency>
             <dependency>
