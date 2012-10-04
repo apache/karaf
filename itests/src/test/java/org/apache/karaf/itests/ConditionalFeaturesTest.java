@@ -62,7 +62,7 @@ public class ConditionalFeaturesTest {
         MavenArtifactUrlReference karafUrl = maven().groupId("org.apache.karaf").artifactId("apache-karaf").type("zip").versionAsInProject();
         return new Option[]{
             karafDistributionConfiguration().frameworkUrl(karafUrl),
-            KarafDistributionOption.editConfigurationFilePut("etc/org.ops4j.pax.web.cfg", "org.osgi.service.http.port", "9080")
+            KarafDistributionOption.editConfigurationFilePut("etc/org.ops4j.pax.web.cfg", "org.osgi.service.http.port", KarafTestSupport.HTTP_PORT)
         };
     }
 
