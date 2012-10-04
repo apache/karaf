@@ -12,6 +12,6 @@ public class BootFeaturesTest extends KarafTestSupport {
 
     @Test
     public void testBootFeatures() throws Exception {
-        assertFeaturesInstalled("standard", "config", "region", "package", "kar", "ssh", "management");
+        assertFeaturesInstalled("standard", "config", "region", "package", "kar", "management");
     }
 }
