@@ -32,5 +32,5 @@ public interface ObrMBean {
     void refreshUrl(String url) throws Exception;
 
     void deployBundle(String bundle) throws Exception;
-    void deployBundle(String bundle, boolean start) throws Exception;
+    void deployBundle(String bundle, boolean start, boolean deployOptional) throws Exception;
 }
