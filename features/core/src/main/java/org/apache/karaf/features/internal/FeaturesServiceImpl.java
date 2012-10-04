@@ -400,7 +400,7 @@ public class FeaturesServiceImpl implements FeaturesService {
             bundleManager.refreshBundles(state.bundles, state.installed, options);
             // Start all bundles
             for (Bundle b : state.bundles) {
-                LOGGER.info("Starting bundle: {}", b.getSymbolicName());
+                LOGGER.debug("Starting bundle: {}", b.getSymbolicName());
                 startBundle(state, b);
             }
             // Clean up for batch
@@ -481,9 +481,10 @@ public class FeaturesServiceImpl implements FeaturesService {
 	}
 
     protected void doInstallFeature(InstallationState state, Feature feature, boolean verbose) throws Exception {
-        LOGGER.debug("Installing feature " + feature.getName() + " " + feature.getVersion());
+        String msg = "Installing feature " + feature.getName() + " " + feature.getVersion();
+        LOGGER.info(msg);
         if (verbose) {
-            System.out.println("Installing feature " + feature.getName() + " " + feature.getVersion());
+            System.out.println(msg);
         }
         for (Dependency dependency : feature.getDependencies()) {
             installFeatureDependency(dependency, state, verbose);
@@ -500,12 +501,10 @@ public class FeaturesServiceImpl implements FeaturesService {
             if (result.isNew) {
                 state.installed.add(result.bundle);
             }
+            String msg2 = (result.isNew) ? "Found installed bundle: " + result.bundle : "Installing bundle " + bInfo.getLocation();
+            LOGGER.debug(msg2);
             if (verbose) {
-                if (result.isNew) {
-                    System.out.println("Found installed bundle: " + result.bundle);
-                } else {
-                    System.out.println("Installing bundle " + bInfo.getLocation());
-                }
+                System.out.println(msg2);
             }
 
             bundles.add(result.bundle.getBundleId());
