@@ -13,6 +13,7 @@
  */
 package org.apache.karaf.itests;
 
+import static org.apache.karaf.tooling.exam.options.KarafDistributionOption.editConfigurationFilePut;
 import static org.apache.karaf.tooling.exam.options.KarafDistributionOption.karafDistributionConfiguration;
 import static org.apache.karaf.tooling.exam.options.KarafDistributionOption.keepRuntimeFolder;
 import static org.apache.karaf.tooling.exam.options.KarafDistributionOption.logLevel;
@@ -51,6 +52,7 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.TestProbeBuilder;
 import org.ops4j.pax.exam.junit.Configuration;
 import org.ops4j.pax.exam.junit.ProbeBuilder;
+import org.ops4j.pax.exam.options.MavenArtifactUrlReference;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
@@ -60,6 +62,8 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
 public class KarafTestSupport {
+
+    private static final String RMI_PORT = "1100";
 
     static final Long COMMAND_TIMEOUT = 10000L;
     static final Long SERVICE_TIMEOUT = 30000L;
@@ -86,11 +90,16 @@ public class KarafTestSupport {
 
     @Configuration
     public Option[] config() {
+        MavenArtifactUrlReference karafUrl = maven().groupId("org.apache.karaf").artifactId("apache-karaf").versionAsInProject().type("tar.gz");
         return new Option[]{
-            karafDistributionConfiguration().frameworkUrl(maven().groupId("org.apache.karaf").artifactId("apache-karaf").versionAsInProject().type("tar.gz"))
-                    .name("Apache Karaf").unpackDirectory(new File("target/exam")),
-                keepRuntimeFolder(),
-                logLevel(LogLevelOption.LogLevel.INFO) };
+            karafDistributionConfiguration().frameworkUrl(karafUrl).name("Apache Karaf").unpackDirectory(new File("target/exam")),
+            keepRuntimeFolder(),
+            logLevel(LogLevelOption.LogLevel.INFO),
+            editConfigurationFilePut("etc/org.apache.karaf.features.cfg", "featuresBoot", "config,standard,region,package,kar,management"),
+            editConfigurationFilePut("etc/org.ops4j.pax.web.cfg", "org.osgi.service.http.port", "9080"),
+            editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiRegistryPort", RMI_PORT),
+            editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiServerPort", "44445")
+        };
     }
 
     /**
@@ -223,7 +232,7 @@ public class KarafTestSupport {
     }
 
     public JMXConnector getJMXConnector() throws Exception {
-        JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:1099/karaf-root");
+        JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:" + RMI_PORT+ "/karaf-root");
         Hashtable<String, Object> env = new Hashtable<String, Object>();
         String[] credentials = new String[]{ "karaf", "karaf" };
         env.put("jmx.remote.credentials", credentials);

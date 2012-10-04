@@ -36,12 +36,6 @@ public class FeatureTest extends KarafTestSupport {
         String featureListOutput = executeCommand("feature:list -i");
         System.out.println(featureListOutput);
         assertTrue(featureListOutput.contains("standard"));
-        assertTrue(featureListOutput.contains("config"));
-        assertTrue(featureListOutput.contains("region"));
-        assertTrue(featureListOutput.contains("package"));
-        assertTrue(featureListOutput.contains("kar"));
-        assertTrue(featureListOutput.contains("ssh"));
-        assertTrue(featureListOutput.contains("management"));
     }
 
     @Test
