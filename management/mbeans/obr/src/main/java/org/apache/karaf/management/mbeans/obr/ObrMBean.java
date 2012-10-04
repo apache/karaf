@@ -87,8 +87,9 @@ public interface ObrMBean {
      *
      * @param bundle the bundle to deploy.
      * @param start true to start the bundle, false else.
+     * @param deployOptional true to deploy optional bundles, false else.
      * @throws Exception
      */
-    void deploy(String bundle, boolean start) throws Exception;
+    void deploy(String bundle, boolean start, boolean deployOptional) throws Exception;
 
 }

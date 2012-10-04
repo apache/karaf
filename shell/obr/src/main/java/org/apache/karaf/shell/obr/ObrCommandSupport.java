@@ -51,8 +51,7 @@ public abstract class ObrCommandSupport extends OsgiCommandSupport {
             }
 
             doExecute(admin);
-        }
-        finally {
+        } finally {
             getBundleContext().ungetService(ref);
         }
         return null;
@@ -60,16 +59,12 @@ public abstract class ObrCommandSupport extends OsgiCommandSupport {
 
     protected abstract void doExecute(RepositoryAdmin admin) throws Exception;
 
-    protected Resource[] searchRepository(RepositoryAdmin admin, String targetId, String targetVersion) throws InvalidSyntaxException
-    {
+    protected Resource[] searchRepository(RepositoryAdmin admin, String targetId, String targetVersion) throws InvalidSyntaxException {
         // Try to see if the targetId is a bundle ID.
-        try
-        {
+        try {
             Bundle bundle = getBundleContext().getBundle(Long.parseLong(targetId));
             targetId = bundle.getSymbolicName();
-        }
-        catch (NumberFormatException ex)
-        {
+        } catch (NumberFormatException ex) {
             // It was not a number, so ignore.
         }
 
@@ -80,8 +75,7 @@ public abstract class ObrCommandSupport extends OsgiCommandSupport {
         sb.append(")(symbolicname=");
         sb.append(targetId);
         sb.append("))");
-        if (targetVersion != null)
-        {
+        if (targetVersion != null) {
             sb.insert(0, "(&");
             sb.append("(version=");
             sb.append(targetVersion);
@@ -90,22 +84,16 @@ public abstract class ObrCommandSupport extends OsgiCommandSupport {
         return admin.discoverResources(sb.toString());
     }
 
-    public Resource selectNewestVersion(Resource[] resources)
-    {
+    public Resource selectNewestVersion(Resource[] resources) {
         int idx = -1;
         Version v = null;
-        for (int i = 0; (resources != null) && (i < resources.length); i++)
-        {
-            if (i == 0)
-            {
+        for (int i = 0; (resources != null) && (i < resources.length); i++) {
+            if (i == 0) {
                 idx = 0;
                 v = resources[i].getVersion();
-            }
-            else
-            {
+            } else {
                 Version vtmp = resources[i].getVersion();
-                if (vtmp.compareTo(v) > 0)
-                {
+                if (vtmp.compareTo(v) > 0) {
                     idx = i;
                     v = vtmp;
                 }
@@ -118,100 +106,78 @@ public abstract class ObrCommandSupport extends OsgiCommandSupport {
         String[] target;
         int idx = bundle.indexOf(VERSION_DELIM);
         if (idx > 0) {
-            target = new String[] { bundle.substring(0, idx), bundle.substring(idx+1) };
-        }
-        else
-        {
-            target = new String[] { bundle, null };
+            target = new String[]{bundle.substring(0, idx), bundle.substring(idx + 1)};
+        } else {
+            target = new String[]{bundle, null};
         }
         return target;
     }
 
-    protected void printUnderline(PrintStream out, int length)
-    {
-        for (int i = 0; i < length; i++)
-        {
+    protected void printUnderline(PrintStream out, int length) {
+        for (int i = 0; i < length; i++) {
             out.print('-');
         }
         out.println("");
     }
 
-    protected void doDeploy(RepositoryAdmin admin, List<String> bundles, boolean start) throws Exception {
+    protected void doDeploy(RepositoryAdmin admin, List<String> bundles, boolean start, boolean deployOptional) throws Exception {
         Resolver resolver = admin.resolver();
         for (String bundle : bundles) {
             String[] target = getTarget(bundle);
             Resource resource = selectNewestVersion(searchRepository(admin, target[0], target[1]));
-            if (resource != null)
-            {
+            if (resource != null) {
                 resolver.add(resource);
-            }
-            else
-            {
+            } else {
                 System.err.println("Unknown bundle - " + target[0]);
             }
         }
         if ((resolver.getAddedResources() != null) &&
-            (resolver.getAddedResources().length > 0))
-        {
-            if (resolver.resolve())
-            {
+                (resolver.getAddedResources().length > 0)) {
+            if (resolver.resolve(deployOptional ? 0 : Resolver.NO_OPTIONAL_RESOURCES)) {
                 System.out.println("Target resource(s):");
                 printUnderline(System.out, 19);
                 Resource[] resources = resolver.getAddedResources();
-                for (int resIdx = 0; (resources != null) && (resIdx < resources.length); resIdx++)
-                {
+                for (int resIdx = 0; (resources != null) && (resIdx < resources.length); resIdx++) {
                     System.out.println("   " + resources[resIdx].getPresentationName()
-                        + " (" + resources[resIdx].getVersion() + ")");
+                            + " (" + resources[resIdx].getVersion() + ")");
                 }
                 resources = resolver.getRequiredResources();
-                if ((resources != null) && (resources.length > 0))
-                {
+                if ((resources != null) && (resources.length > 0)) {
                     System.out.println("\nRequired resource(s):");
                     printUnderline(System.out, 21);
-                    for (int resIdx = 0; resIdx < resources.length; resIdx++)
-                    {
+                    for (int resIdx = 0; resIdx < resources.length; resIdx++) {
                         System.out.println("   " + resources[resIdx].getPresentationName()
-                            + " (" + resources[resIdx].getVersion() + ")");
+                                + " (" + resources[resIdx].getVersion() + ")");
                     }
                 }
-                resources = resolver.getOptionalResources();
-                if ((resources != null) && (resources.length > 0))
-                {
-                    System.out.println("\nOptional resource(s):");
-                    printUnderline(System.out, 21);
-                    for (int resIdx = 0; resIdx < resources.length; resIdx++)
-                    {
-                        System.out.println("   " + resources[resIdx].getPresentationName()
-                            + " (" + resources[resIdx].getVersion() + ")");
+                if (deployOptional) {
+                    resources = resolver.getOptionalResources();
+                    if ((resources != null) && (resources.length > 0)) {
+                        System.out.println("\nOptional resource(s):");
+                        printUnderline(System.out, 21);
+                        for (int resIdx = 0; resIdx < resources.length; resIdx++) {
+                            System.out.println("   " + resources[resIdx].getPresentationName()
+                                    + " (" + resources[resIdx].getVersion() + ")");
+                        }
                     }
                 }
-
-                try
-                {
+                try {
                     System.out.print("\nDeploying...");
                     resolver.deploy(start ? Resolver.START : 0);
                     System.out.println("done.");
-                }
-                catch (IllegalStateException ex)
-                {
+                } catch (IllegalStateException ex) {
                     System.err.println(ex);
                 }
-            }
-            else
-            {
+            } else {
                 Reason[] reqs = resolver.getUnsatisfiedRequirements();
-                if ((reqs != null) && (reqs.length > 0))
-                {
+                if ((reqs != null) && (reqs.length > 0)) {
                     System.out.println("Unsatisfied requirement(s):");
                     printUnderline(System.out, 27);
-                    for (int reqIdx = 0; reqIdx < reqs.length; reqIdx++)
-                    {
+                    for (int reqIdx = 0; reqIdx < reqs.length; reqIdx++) {
                         System.out.println("   " + reqs[reqIdx].getRequirement().getFilter());
                         System.out.println("      " + reqs[reqIdx].getResource().getPresentationName());
                     }
-                }
-                else
-                {
+                } else {
                     System.out.println("Could not resolve targets.");
                 }
             }

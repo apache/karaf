@@ -32,8 +32,11 @@ public class DeployCommand extends ObrCommandSupport {
     @Option(name = "-s", aliases = { "--start" }, description = "Start all deployed bundles", required = false, multiValued = false)
     protected boolean start = false;
 
+    @Option(name = "-d", aliases = { "--deployOptional" }, description = "Deploy optional bundles", required = false, multiValued = false)
+    protected boolean deployOptional = false;
+
     protected void doExecute(RepositoryAdmin admin) throws Exception {
-        doDeploy(admin, bundles, start);
+        doDeploy(admin, bundles, start, deployOptional);
     }
 
 }

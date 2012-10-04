@@ -103,10 +103,10 @@ public class ObrMBeanImpl extends StandardMBean implements ObrMBean {
     }
 
     public void deploy(String bundle) throws Exception {
-        deploy(bundle, false);
+        deploy(bundle, false, false);
     }
 
-    public void deploy(String bundle, boolean start) throws Exception {
+    public void deploy(String bundle, boolean start, boolean deployOptional) throws Exception {
         Resolver resolver = repositoryAdmin.resolver();
         String[] target = getTarget(bundle);
         Resource resource = selectNewestVersion(searchRepository(repositoryAdmin, target[0], target[1]));
@@ -116,16 +116,12 @@ public class ObrMBeanImpl extends StandardMBean implements ObrMBean {
         resolver.add(resource);
         if ((resolver.getAddedResources() != null) &&
                 (resolver.getAddedResources().length > 0)) {
-        }
-        if (resolver.resolve()) {
-            Resource[] resources = resolver.getAddedResources();
-            resources = resolver.getRequiredResources();
-            resources = resolver.getOptionalResources();
-
-            try {
-                resolver.deploy(start ? Resolver.START : 0);
-            } catch (IllegalStateException ex) {
-                throw new IllegalStateException("Can't deploy using OBR", ex);
+            if (resolver.resolve(deployOptional ? 0 : Resolver.NO_OPTIONAL_RESOURCES)) {
+                try {
+                    resolver.deploy(start ? Resolver.START : 0);
+                } catch (IllegalStateException ex) {
+                    throw new IllegalStateException("Can't deploy using OBR", ex);
+                }
             }
         }
     }
