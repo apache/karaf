@@ -63,7 +63,9 @@ import org.osgi.util.tracker.ServiceTracker;
 
 public class KarafTestSupport {
 
-    private static final String RMI_PORT = "1100";
+    public static final String RMI_SERVER_PORT = "44445";
+    public static final String HTTP_PORT = "9081";
+    public static final String RMI_REG_PORT = "1100";
 
     static final Long COMMAND_TIMEOUT = 10000L;
     static final Long SERVICE_TIMEOUT = 30000L;
@@ -96,9 +98,9 @@ public class KarafTestSupport {
             keepRuntimeFolder(),
             logLevel(LogLevelOption.LogLevel.INFO),
             editConfigurationFilePut("etc/org.apache.karaf.features.cfg", "featuresBoot", "config,standard,region,package,kar,management"),
-            editConfigurationFilePut("etc/org.ops4j.pax.web.cfg", "org.osgi.service.http.port", "9081"),
-            editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiRegistryPort", RMI_PORT),
-            editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiServerPort", "44445")
+            editConfigurationFilePut("etc/org.ops4j.pax.web.cfg", "org.osgi.service.http.port", HTTP_PORT),
+            editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiRegistryPort", RMI_REG_PORT),
+            editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiServerPort", RMI_SERVER_PORT)
         };
     }
 
@@ -232,7 +234,7 @@ public class KarafTestSupport {
     }
 
     public JMXConnector getJMXConnector() throws Exception {
-        JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:" + RMI_PORT+ "/karaf-root");
+        JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:" + RMI_REG_PORT+ "/karaf-root");
         Hashtable<String, Object> env = new Hashtable<String, Object>();
         String[] credentials = new String[]{ "karaf", "karaf" };
         env.put("jmx.remote.credentials", credentials);
