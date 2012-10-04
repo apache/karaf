@@ -31,6 +31,6 @@ public interface ObrMBean {
 
     TabularData list() throws Exception;
     void deploy(String bundle) throws Exception;
-    void deploy(String bundle, boolean start) throws Exception;
+    void deploy(String bundle, boolean start, boolean deployOptional) throws Exception;
 
 }
