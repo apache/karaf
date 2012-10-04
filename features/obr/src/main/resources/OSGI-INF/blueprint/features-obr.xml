@@ -26,6 +26,8 @@
     <ext:property-placeholder placeholder-prefix="$[" placeholder-suffix="]" ignore-missing-locations="true">
         <ext:default-properties>
             <ext:property name="resolveOptionalImports" value="false"/>
+            <ext:property name="startByDefault" value="true"/>
+            <ext:property name="startLevel" value="80"/>
         </ext:default-properties>
         <ext:location>file:$(karaf.base)/etc/org.apache.karaf.features.obr.cfg</ext:location>
     </ext:property-placeholder>
@@ -33,6 +35,8 @@
     <bean id="obrResolver" class="org.apache.karaf.features.obr.internal.ObrResolver">
         <property name="repositoryAdmin" ref="repositoryAdmin" />
         <property name="resolveOptionalImports" value="$[resolveOptionalImports]" />
+        <property name="startByDefault" value="$[startByDefault]" />
+        <property name="startLevel" value="$[startLevel]" />
     </bean>
 
     <reference id="repositoryAdmin" interface="org.apache.felix.bundlerepository.RepositoryAdmin" />

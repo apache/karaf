@@ -40,6 +40,8 @@ public class ObrResolver implements Resolver {
 
     private RepositoryAdmin repositoryAdmin;
     private boolean resolveOptionalImports;
+    private boolean startByDefault;
+    private int startLevel;
 
     public RepositoryAdmin getRepositoryAdmin() {
         return repositoryAdmin;
@@ -63,10 +65,18 @@ public class ObrResolver implements Resolver {
         this.resolveOptionalImports = resolveOptionalImports;
     }
 
+    public void setStartByDefault(boolean startByDefault) {
+        this.startByDefault = startByDefault;
+    }
+
+    public void setStartLevel(int startLevel) {
+        this.startLevel = startLevel;
+    }
+
     public List<BundleInfo> resolve(Feature feature) throws Exception {
         List<Requirement> reqs = new ArrayList<Requirement>();
         List<Resource> ress = new ArrayList<Resource>();
-        List<Resource> deploy = new ArrayList<Resource>();
+        List<Resource> featureDeploy = new ArrayList<Resource>();
         Map<Object, BundleInfo> infos = new HashMap<Object, BundleInfo>();
         for (BundleInfo bundleInfo : feature.getBundles()) {
         	URL url = null;
@@ -120,11 +130,13 @@ public class ObrResolver implements Resolver {
         }
 
         List<BundleInfo> bundles = new ArrayList<BundleInfo>();
-        Collections.addAll(deploy, resolver.getAddedResources());
+        List<Resource> deploy = new ArrayList<Resource>();
         Collections.addAll(deploy, resolver.getRequiredResources());
         if (resolveOptionalImports) {
             Collections.addAll(deploy, resolver.getOptionalResources());
         }
+        Collections.addAll(deploy, resolver.getAddedResources());
+        deploy.addAll(featureDeploy);
         for (Resource res : deploy) {
             BundleInfo info = infos.get(res);
             if (info == null) {
@@ -139,7 +151,7 @@ public class ObrResolver implements Resolver {
                 }
             }
             if (info == null) {
-                info = new BundleInfoImpl(res.getURI());
+                info = new BundleInfoImpl(res.getURI(), this.startLevel, this.startByDefault, false);
             }
             bundles.add(info);
         }
