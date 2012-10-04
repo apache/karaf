@@ -38,7 +38,7 @@ public class LogTest extends KarafTestSupport {
     public void setDebugAndDisplay() throws Exception {
         System.out.println(executeCommand("log:set DEBUG"));
         LOGGER.debug("Making sure there is DEBUG level output");
-        String displayOutput = executeCommand("log:display");
+        String displayOutput = executeCommand("log:display -n 200");
         System.out.println(displayOutput);
         assertTrue(displayOutput.contains("DEBUG"));
     }
