@@ -269,10 +269,10 @@
             <unpack>false</unpack>
             <useProjectArtifact>false</useProjectArtifact>
             <outputFileNameMapping>
-                org/apache/servicemix/bundles/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}
+                org/ow2/asm/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}
             </outputFileNameMapping>
             <includes>
-                <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.asm</include>
+                <include>org.ow2.asm:asm-all</include>
             </includes>
         </dependencySet>
         <dependencySet>

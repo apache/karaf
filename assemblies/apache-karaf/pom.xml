@@ -364,8 +364,8 @@
             <artifactId>jetty-xml</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.asm</artifactId>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm-all</artifactId>
         </dependency>
         <dependency>
             <groupId>org.ops4j.pax.web</groupId>

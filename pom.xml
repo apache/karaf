@@ -102,7 +102,7 @@
 
     <properties>
         <aopalliance.bundle.version>1.0_6</aopalliance.bundle.version>
-        <asm.bundle.version>3.3.1_1</asm.bundle.version>
+        <asm.version>4.0</asm.version>
         <bndlib.version>1.50.0</bndlib.version>
         <cglib.bundle.version>2.2.2_1</cglib.bundle.version>
         <commons-beanutils.version>1.8.3</commons-beanutils.version>
@@ -767,9 +767,9 @@
                 <version>${jetty.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.servicemix.bundles</groupId>
-                <artifactId>org.apache.servicemix.bundles.asm</artifactId>
-                <version>${asm.bundle.version}</version>
+                <groupId>org.ow2.asm</groupId>
+                <artifactId>asm-all</artifactId>
+                <version>${asm.version}</version>
             </dependency>
             <dependency>
                 <groupId>log4j</groupId>
