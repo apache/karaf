@@ -478,10 +478,17 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         			configFile.getFinalname(), configFile.isOverride(), verbose);
         }
         Set<Long> bundles = new TreeSet<Long>();
+        List<InstallResult> installResultList = new LinkedList<InstallResult>();
         for (BundleInfo bInfo : resolve(feature)) {
-            Bundle b = installBundleIfNeeded(state, bInfo, verbose);
-            bundles.add(b.getBundleId());
-            state.bundleInfos.put(b.getBundleId(), bInfo);
+            InstallResult result = installBundleIfNeeded(state, bInfo, verbose);
+            bundles.add(result.getBundle().getBundleId());
+            state.bundleInfos.put(result.getBundle().getBundleId(), bInfo);
+            installResultList.add(result);
+        }
+        for (InstallResult result : installResultList) {
+            if (!result.isPreviouslyInstalled()) {
+                startBundleIfNeeded(result.getBundle(), result.getStartLevel());
+            }
         }
         state.features.put(feature, bundles);
     }
@@ -646,7 +653,33 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         return result;
     }
 
-    protected Bundle installBundleIfNeeded(InstallationState state, BundleInfo bundleInfo, boolean verbose) throws IOException, BundleException {
+    protected static class InstallResult {
+
+        private final boolean previouslyInstalled;
+        private final Bundle bundle;
+        private final int startLevel;
+
+        protected InstallResult(boolean previouslyInstalled, Bundle bundle, int startLevel) {
+            this.previouslyInstalled = previouslyInstalled;
+            this.bundle = bundle;
+            this.startLevel = startLevel;
+        }
+
+        public boolean isPreviouslyInstalled() {
+            return previouslyInstalled;
+        }
+
+        public Bundle getBundle() {
+            return bundle;
+        }
+
+        public int getStartLevel() {
+            return startLevel;
+        }
+
+    }
+
+    protected InstallResult installBundleIfNeeded(InstallationState state, BundleInfo bundleInfo, boolean verbose) throws IOException, BundleException {
         InputStream is;
         String bundleLocation = bundleInfo.getLocation();
         LOGGER.debug("Checking " + bundleLocation);
@@ -684,7 +717,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
                             System.out.println("Found installed bundle: " + b);
                         }
                         state.bundles.add(b);
-                        return b;
+                        return new InstallResult(true, b, 0);
                     }
                 }
             }
@@ -699,18 +732,18 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
                 System.out.println("Installing bundle " + bundleLocation);
             }
             Bundle b = getBundleContext().installBundle(bundleLocation, is);
-            
-            // Define the startLevel for the bundle when defined
-            int ibsl = bundleInfo.getStartLevel();
-            if (ibsl > 0) {
-                getStartLevel().setBundleStartLevel(b, ibsl);
-            }
 
             state.bundles.add(b);
             state.installed.add(b);
-            return b;
+            return new InstallResult(false, b, bundleInfo.getStartLevel());
         } finally {
             is.close();
+        }
+    }
+
+    private void startBundleIfNeeded(Bundle bundle, int startLevel) {
+        if (startLevel > 0) {
+            getStartLevel().setBundleStartLevel(bundle, startLevel);
         }
     }
     

@@ -206,12 +206,12 @@ public class FeaturesServiceImplTest extends TestCase {
             }
 
             @Override
-            protected Bundle installBundleIfNeeded(InstallationState state, BundleInfo bundleInfo, boolean verbose) throws IOException, BundleException {
+            protected InstallResult installBundleIfNeeded(InstallationState state, BundleInfo bundleInfo, boolean verbose) throws IOException, BundleException {
                 // let's return a mock bundle and bundle id to keep the features service happy
                 Bundle bundle = createNiceMock(Bundle.class);
                 expect(bundle.getBundleId()).andReturn(10l).anyTimes();
                 replay(bundle);
-                return bundle;
+                return new InstallResult(false, bundle, 0);
             }
         };
         impl.addRepository(getClass().getResource("repo2.xml").toURI());
