@@ -96,7 +96,7 @@ public class KarafWithBundleTest {
     public void testService() throws Exception {
         waitForServlet();
         System.out.println("Trying to get url");
-        URL url = new URL("http://localhost:9080/test/services");
+        URL url = new URL("http://localhost:" + RegressionTestSupport.HTTP_PORT + "/test/services");
         URLConnection conn = url.openConnection();
         conn.setDoOutput(true);
         OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
@@ -121,7 +121,7 @@ public class KarafWithBundleTest {
                 .classifier("features").versionAsInProject(), "http").start(),
             // set the system property for pax web
             KarafDistributionOption.editConfigurationFilePut("etc/org.ops4j.pax.web.cfg", "org.osgi.service.http.port",
-                "9080"),
+                RegressionTestSupport.HTTP_PORT),
             // create bundle to install
             streamBundle(bundle()
                 .add(EchoServlet.class)
