@@ -90,9 +90,8 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.osgi</groupId>
+            <groupId>org.apache.karaf</groupId>
             <artifactId>org.osgi.compendium</artifactId>
-            <version>${osgi.compendium.version}</version>
             <scope>test</scope>
             <optional>true</optional>
         </dependency>
