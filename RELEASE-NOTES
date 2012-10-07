@@ -42,6 +42,7 @@ to help make migrating betwen 2.3.x and 3.x easier.
     * [KARAF-1293] - feature level start-level not completely finished....
     * [KARAF-1305] - Error with Basic HTTP Authentication when using karaf realm
     * [KARAF-1343] - Features repo points to the old pax-wicket app
+    * [KARAF-1354] - SSH Log-In failes with "Authentication failed" with valid credentials
     * [KARAF-1360] - Configration update doesn't work
     * [KARAF-1363] - Upgrade Jetty when bugfix for the Loggging to stderr bug is available
     * [KARAF-1373] - features-maven-plugin, unexpected text in stderr
@@ -106,21 +107,23 @@ to help make migrating betwen 2.3.x and 3.x easier.
     * [KARAF-1845] - Minimal distribution doesn't start
     * [KARAF-1852] - Osgi packages are exported with wrong versions
     * [KARAF-1858] - itests look stuck (use 100% CPU)
+    * [KARAF-1882] - Provide Level attribute in the LogMBean
+    * [KARAF-1888] - Remove aliases by default
 
 ** Dependency upgrade
-    * [KARAF-681] - Upgrade to Pax URL 1.3.4
-    * [KARAF-770] - Upgrade to Eclipse Equinox 3.7.1
-    * [KARAF-854] - Upgrade to Felix Framework 4.0.1
+    * [KARAF-681] - Upgrade to Pax URL 1.3.4 (noted here for historical purposes)
+    * [KARAF-770] - Upgrade to Eclipse Equinox 3.7.1 (noted here for historical purposes)
+    * [KARAF-854] - Upgrade to Felix Framework 4.0.1 (noted here for historical purposes)
     * [KARAF-855] - Add support for OSGi R4.3
-    * [KARAF-903] - Upgrade to Pax Web 1.1.2
-    * [KARAF-961] - Update Mina SSHD to version 0.6.0
+    * [KARAF-903] - Upgrade to Pax Web 1.1.2 (noted here for historical purposes)
+    * [KARAF-961] - Update Mina SSHD to version 0.6.0 (noted here for historical purposes)
     * [KARAF-966] - Update xbean to 3.8
-    * [KARAF-1346] - Upgrade to Mina 2.0.4
+    * [KARAF-1346] - Upgrade to Mina 2.0.4 (noted here for historical purposes)
     * [KARAF-1378] - Upgrade to fileinstall 3.2.2
     * [KARAF-1425] - Upgrade to pax-web 1.1.3
     * [KARAF-1431] - Upgrade to Pax URL 1.3.5
     * [KARAF-1458] - Upgrade to ServiceMix Specs 2.0
-    * [KARAF-1490] - upgrade to pax-logging 1.6.7
+    * [KARAF-1490] - upgrade to pax-logging 1.6.7 (noted here for historical purposes)
     * [KARAF-1498] - Upgrade blueprint, jmx and util bundles to next minor release
     * [KARAF-1517] - Upgrade to OSGi Compendium 4.3.0
     * [KARAF-1520] - Upgrade to Jansi 1.9
@@ -128,9 +131,9 @@ to help make migrating betwen 2.3.x and 3.x easier.
     * [KARAF-1534] - Upgrade to JLine 2.7
     * [KARAF-1535] - Upgrade to Felix Utils 1.2.0
     * [KARAF-1536] - Upgrade to Felix FileInstall 3.2.4
-    * [KARAF-1568] - Upgrade to sshd 0.7.0
+    * [KARAF-1568] - Upgrade to sshd 0.7.0 (noted here for historical purposes)
     * [KARAF-1577] - Upgrade to slf4j 1.6.6
-    * [KARAF-1578] - Upgrade to pax-logging 1.6.9
+    * [KARAF-1578] - Upgrade to pax-logging 1.6.9 (noted here for historical purposes)
     * [KARAF-1579] - Upgrade to commons-compress 1.4.1
     * [KARAF-1582] - Upgrade to Felix BundleRepository 1.6.6
     * [KARAF-1601] - Upgrade to maven-antrun-plugin 1.7
@@ -159,15 +162,26 @@ to help make migrating betwen 2.3.x and 3.x easier.
     * [KARAF-1732] - Upgrade to ServiceMix Ant bundle 1.8.4_1
     * [KARAF-1733] - Upgrade to ServiceMix aopalliance bundle  1.0_6
     * [KARAF-1737] - Upgrade to ServiceMix cglib bundle 2.2.2_1
-    * [KARAF-1740] - Upgrade to Jetty 7.6.5.v20120716
+    * [KARAF-1740] - Upgrade to Jetty 7.6.5.v20120716 (noted here for historical purposes)
     * [KARAF-1745] - Upgrade to Felix WebConsole 4.0.0
-    * [KARAF-1747] - Update to jline 2.8
-    * [KARAF-1769] - Upgrade to pax-logging 1.6.10
-    * [KARAF-1773] - Upgrade to pax-logging 1.6.10
+    * [KARAF-1747] - Update to jline 2.8 (noted here for historical purposes)
+    * [KARAF-1769] - Upgrade to pax-logging 1.6.10 (noted here for historical purposes)
+    * [KARAF-1773] - Upgrade to pax-logging 1.6.10 (duplicate) 
     * [KARAF-1781] - Upgrade to Mina 2.0.5
     * [KARAF-1787] - Upgrade to commons-fileupload 1.2.2
     * [KARAF-1788] - Upgrade to commons-io 2.4
+    * [KARAF-1816] - Upgrade to jline 2.9
+    * [KARAF-1817] - Upgrade to sshd 0.8.0
+    * [KARAF-1819] - Upgrade to Mina 2.0.5 (duplicate)
     * [KARAF-1859] - Upgrade to ServiceMix Specs 2.1
+    * [KARAF-1862] - Upgrade to Felix FileInstall 3.2.6
+    * [KARAF-1863] - Upgrade to sshd 0.8.0 (duplicate)
+    * [KARAF-1865] - Upgrade to paxlogging 1.7.0
+    * [KARAF-1866] - Upgrade to felix config admin 1.4.0
+    * [KARAF-1867] - Upgrade to felix event admin 1.3.0
+    * [KARAF-1868] - Upgrade aries bundles to 1.0.1 (blueprint-core, jmx-core, transaction-manager, jpa-container-context)
+    * [KARAF-1883] - Upgrade to ASM 4.0
+    * [KARAF-1890] - Upgrade to Jetty 7.6.7.v20120910
 
 
 ** Improvement
@@ -211,6 +225,7 @@ to help make migrating betwen 2.3.x and 3.x easier.
     * [KARAF-1834] - Make KarafTestSupport available externally
     * [KARAF-1844] - Add command aliases for migration purpose between 2.3.x and 3.x
     * [KARAF-1850] - feature:list should use alphabetical order
+    * [KARAF-1878] - Feature bundle start up order by startLvl
 
 ** New Feature
     * [KARAF-866] - New dev:wait-for-service command to wait for a given osgi service
@@ -230,6 +245,8 @@ to help make migrating betwen 2.3.x and 3.x easier.
     * [KARAF-1415] - Support Jetty 7.6
     * [KARAF-1445] - more svn:ignore are needed
 
+** Test
+     * [KARAF-1876] - Improve StandardFeaturesTest, EnterpriseFeaturesTest and SpringFeaturesTest using feature service
 
 
                     Apache Karaf 2.2.6
