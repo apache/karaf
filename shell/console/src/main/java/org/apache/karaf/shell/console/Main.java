@@ -20,11 +20,13 @@ package org.apache.karaf.shell.console;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.io.Reader;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -71,18 +73,6 @@ public class Main {
 
         CommandProcessorImpl commandProcessor = new CommandProcessorImpl(threadio);
 
-        ClassLoader cl = Main.class.getClassLoader();
-        if (args.length > 0 && args[0].startsWith("--classpath=")) {
-            String base = args[0].substring("--classpath=".length());
-            List<URL> urls = getFiles(new File(base));
-            cl = new URLClassLoader(urls.toArray(new URL[urls.size()]), cl);
-            String[] a = new String[args.length - 1];
-            System.arraycopy(args, 1, a, 0, a.length);
-            args = a;
-        }
-
-        discoverCommands(commandProcessor, cl);
-
         InputStream in = unwrap(System.in);
         PrintStream out = wrap(unwrap(System.out));
         PrintStream err = wrap(unwrap(System.err));
@@ -110,44 +100,83 @@ public class Main {
             }
         });
 
-        ClassLoader cl = Main.class.getClassLoader();
-        if (args.length > 0 && args[0].startsWith("--classpath=")) {
-            String base = args[0].substring("--classpath=".length());
-            List<URL> urls = getFiles(new File(base));
-            cl = new URLClassLoader(urls.toArray(new URL[urls.size()]), cl);
-            String[] a = new String[args.length - 1];
-            System.arraycopy(args, 1, a, 0, a.length);
-            args = a;
-        }
-
-        discoverCommands(commandProcessor, cl);
-
         InputStream in = parent.getKeyboard();
         PrintStream out = parent.getConsole();
         PrintStream err = parent.getConsole();
         run(commandProcessor, args, in, out, err);
     }
 
-    private void run(final CommandProcessorImpl commandProcessor, String[] args, final InputStream in, final PrintStream out, final PrintStream err) throws Exception {
+    private void run(CommandProcessorImpl commandProcessor, String[] args, InputStream in, PrintStream out, PrintStream err) throws Exception {
+        StringBuilder sb = new StringBuilder();
+        String classpath = null;
+        boolean batch = false;
+        String file  = null;
 
-        if (args.length > 0) {
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < args.length; i++) {
-                if (i > 0) {
-                    sb.append(" ");
-                }
-                sb.append(args[i]);
+        for (int i = 0; i < args.length; i++) {
+            String arg = args[i];
+            if (arg.startsWith("--classpath=")) {
+                classpath = arg.substring("--classpath=".length());
+            } else if (arg.startsWith("-c=")) {
+                classpath = arg.substring("-c=".length());
+            } else if (arg.equals("--classpath") || arg.equals("-c")) {
+                classpath = args[++i];
+            } else if (arg.equals("-b") || arg.equals("--batch")) {
+                batch = true;
+            } else if (arg.startsWith("--file=")) {
+                file = arg.substring("--file=".length());
+            } else if (arg.startsWith("-f=")) {
+                file = arg.substring("-f=".length());
+            } else if (arg.equals("--file") || arg.equals("-f")) {
+                file = args[++i];
+            } else {
+                sb.append(arg);
+                sb.append(' ');
             }
+        }
+
+        if (file != null) {
+            Reader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+            try {
+                sb.setLength(0);
+                for (int c = reader.read(); c >= 0; c = reader.read()) {
+                    sb.append((char) c);
+                }
+            } finally {
+                reader.close();
+            }
+        } else if (batch) {
+            // read all stdin
+            Reader reader = new BufferedReader(new InputStreamReader(System.in));
+            sb.setLength(0);
+            for (int c = reader.read(); c >= 0; c = reader.read()) {
+                sb.append((char) c);
+            }
+        }
+
+        ClassLoader cl = Main.class.getClassLoader();
+        if (classpath != null) {
+            List<URL> urls = getFiles(new File(classpath));
+            cl = new URLClassLoader(urls.toArray(new URL[urls.size()]), cl);
+        }
+
+        discoverCommands(commandProcessor, cl);
+
+        run(commandProcessor, sb.toString(), in, out, err);
+    }
+
+    private void run(final CommandProcessorImpl commandProcessor, String command, final InputStream in, final PrintStream out, final PrintStream err) throws Exception {
+
+        if (command.length() > 0) {
 
             // Shell is directly executing a sub/command, we don't setup a terminal and console
             // in this case, this avoids us reading from stdin un-necessarily.
-            CommandSession session = commandProcessor.createSession(in,out, err);
+            CommandSession session = commandProcessor.createSession(in, out, err);
             session.put("USER", user);
             session.put("APPLICATION", application);
             session.put(NameScoping.MULTI_SCOPE_MODE_KEY, Boolean.toString(isMultiScopeMode()));
 
             try {
-                session.execute(sb);
+                session.execute(command);
             } catch (Throwable t) {
                 if (t instanceof CommandNotFoundException) {
                     String str = Ansi.ansi()

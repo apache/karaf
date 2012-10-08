@@ -16,14 +16,18 @@
  */
 package org.apache.karaf.client;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.net.URL;
-import java.security.KeyPair;
+import java.io.InputStreamReader;
 import java.io.InterruptedIOException;
+import java.io.ObjectInputStream;
+import java.io.Reader;
+import java.net.URL;
 import java.nio.charset.Charset;
+import java.security.KeyPair;
 import java.util.Locale;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -56,6 +60,8 @@ public class Main {
         int level = 1;
         int retryAttempts = 0;
         int retryDelay = 2;
+        boolean batch = false;
+        String file = null;
 
         for (int i = 0; i < args.length; i++) {
             if (args[i].charAt(0) == '-') {
@@ -73,6 +79,10 @@ public class Main {
                     password = args[++i];
                 } else if (args[i].equals("-d")) {
                     retryDelay = Integer.parseInt(args[++i]);
+                } else if (args[i].equals("-b")) {
+                    batch = true;
+                } else if (args[i].equals("-f")) {
+                    file = args[++i];
                 } else if (args[i].equals("--help")) {
                     System.out.println("Apache Karaf client");
                     System.out.println("  -a [port]     specify the port to connect to");
@@ -84,6 +94,8 @@ public class Main {
                     System.out.println("  -v            raise verbosity");
                     System.out.println("  -r [attempts] retry connection establishment (up to attempts times)");
                     System.out.println("  -d [delay]    intra-retry delay (defaults to 2 seconds)");
+                    System.out.println("  -b            batch mode, specify multiple commands via standard input");
+                    System.out.println("  -f [file]    read commands from the specified file");
                     System.out.println("  [commands]    commands to run");
                     System.out.println("If no commands are specified, the client will be put in an interactive mode");
                     System.exit(0);
@@ -98,6 +110,25 @@ public class Main {
             }
         }
         SimpleLogger.setLevel(level);
+
+        if (file != null) {
+            Reader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+            try {
+                sb.setLength(0);
+                for (int c = reader.read(); c >= 0; c = reader.read()) {
+                    sb.append((char) c);
+                }
+            } finally {
+                reader.close();
+            }
+        } else if (batch) {
+            // read all stdin
+            Reader reader = new BufferedReader(new InputStreamReader(System.in));
+            sb.setLength(0);
+            for (int c = reader.read(); c >= 0; c = reader.read()) {
+                sb.append((char) c);
+            }
+        }
 
         SshClient client = null;
         Terminal terminal = null;
