@@ -36,6 +36,7 @@ import org.w3c.dom.Document;
 
 import org.apache.felix.fileinstall.ArtifactUrlTransformer;
 import org.apache.karaf.features.Feature;
+import org.apache.karaf.features.FeaturesNamespaces;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
 import org.osgi.framework.Bundle;
@@ -88,14 +89,37 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
         bundleContext.removeBundleListener(this);
     }
 
+    private boolean isKnownFeaturesURI(String uri){
+    	if(uri == null){
+    		return true;
+    	}
+    	if(FeaturesNamespaces.URI_0_0_0.equalsIgnoreCase(uri)){
+    		return true;
+    	}
+    	if(FeaturesNamespaces.URI_1_0_0.equalsIgnoreCase(uri)){
+    		return true;
+    	}
+    	if(FeaturesNamespaces.URI_1_1_0.equalsIgnoreCase(uri)){
+    		return true;
+    	}
+    	if(FeaturesNamespaces.URI_CURRENT.equalsIgnoreCase(uri)){
+    		return true;
+    	}
+    	return false;
+    }
+
     public boolean canHandle(File artifact) {
         try {
             if (artifact.isFile() && artifact.getName().endsWith(".xml")) {
                 Document doc = parse(artifact);
                 String name = doc.getDocumentElement().getLocalName();
                 String uri  = doc.getDocumentElement().getNamespaceURI();
-                if ("features".equals(name) && (uri == null || "".equals(uri)  || "http://karaf.apache.org/xmlns/features/v1.0.0".equalsIgnoreCase(uri))) {
-                    return true;
+                if ("features".equals(name) ) {
+                	if(isKnownFeaturesURI(uri)){
+                        return true;
+                	} else {
+                		logger.error("unknown features uri", new Exception("" + uri));
+                	}
                 }
             }
         } catch (Exception e) {
