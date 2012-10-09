@@ -27,6 +27,7 @@
             <ext:property name="featuresRepositories" value=""/>
             <ext:property name="featuresBoot" value=""/>
             <ext:property name="resolverTimeout" value="5000"/>
+            <ext:property name="respectStartLvlDuringFeatureStartup" value="false"/>
         </ext:default-properties>
         <ext:location>file:$(karaf.base)/etc/org.apache.karaf.features.cfg</ext:location>
     </ext:property-placeholder>
@@ -34,6 +35,7 @@
     <bean id="featuresService" class="org.apache.karaf.features.internal.FeaturesServiceImpl" init-method="start" destroy-method="stop">
         <property name="urls" value="$[featuresRepositories]" />
         <property name="boot" value="$[featuresBoot]" />
+        <property name="respectStartLvlDuringFeatureStartup" value="$[respectStartLvlDuringFeatureStartup]" />
         <property name="resolverTimeout" value="$[resolverTimeout]" />
         <property name="configAdmin" ref="configAdmin" />
         <property name="packageAdmin" ref="packageAdmin" />
