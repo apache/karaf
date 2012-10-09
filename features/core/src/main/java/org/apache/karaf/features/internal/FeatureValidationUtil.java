@@ -56,6 +56,8 @@ public class FeatureValidationUtil {
         }
 
         SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+        
+        /** FIXME should move to 1.1.0 ? */
         // root element has namespace - we can use schema validation
         Schema schema = factory.newSchema(new StreamSource(FeatureValidationUtil.class
             .getResourceAsStream("/org/apache/karaf/features/karaf-features-1.0.0.xsd")));

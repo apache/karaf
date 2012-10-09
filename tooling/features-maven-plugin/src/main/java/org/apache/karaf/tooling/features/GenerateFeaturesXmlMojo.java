@@ -87,6 +87,19 @@ public class GenerateFeaturesXmlMojo extends MojoSupport {
     private ArtifactCollector collector;
 
     /**
+     * Installation mode. If present, generate "feature.install" attribute:
+     *
+     * <a href="http://karaf.apache.org/xmlns/features/v1.1.0">Installation mode</a>
+     *
+     * Can be either manual or auto. Specifies whether the feature should be automatically installed when
+     * dropped inside the deploy folder. Note: this attribute doesn't affect feature descriptors that are installed
+     * from the feature:install command or as part of the etc/org.apache.karaf.features.cfg file.
+     *
+     * @parameter
+     */
+    protected String installMode;
+
+    /**
      * The file to generate
      * 
      * @parameter default-value="${project.build.directory}/classes/feature.xml"
@@ -524,12 +537,12 @@ public class GenerateFeaturesXmlMojo extends MojoSupport {
         return String.format("%s/%s/%s/%s", artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion(), artifact.getType());
     }
 
-    private class Feature {
+    /*package*/ class Feature {
 
         private Stack<Artifact> artifacts = new Stack<Artifact>();
         private final Artifact artifact;
         
-        private Feature(Artifact artifact) {
+        /*package*/ Feature(Artifact artifact) {
             super();
             this.artifact = artifact;
             artifacts.push(artifact);
@@ -547,10 +560,25 @@ public class GenerateFeaturesXmlMojo extends MojoSupport {
             }
             return false;
         }
+        
+        private String writeAttr(String name, String value){
+        	return " " + name + "=" + "'" + value + "'" + " ";
+        }
 
         public void write(PrintStream out) {
-            out.println("  <feature name='" + artifact.getArtifactId() + "' version='"
-            		+ artifact.getBaseVersion() + "'>");
+        	
+            out.print(
+				" <feature " +
+				writeAttr("name", artifact.getArtifactId()) + 
+				writeAttr("version", artifact.getBaseVersion()) +
+				" "
+				);
+
+            if(installMode != null){
+                out.print(writeAttr("install", installMode));
+            }
+            
+            out.println(" > ");
             
             Stack<Artifact> resulting = new Stack<Artifact>();
             resulting.addAll(artifacts);
@@ -575,7 +603,9 @@ public class GenerateFeaturesXmlMojo extends MojoSupport {
                     }
                 }
             }
-            out.println("  </feature>");
+            
+            out.println(" </feature>");
+            
         }
         
         public List<Artifact> getDependencies() {
