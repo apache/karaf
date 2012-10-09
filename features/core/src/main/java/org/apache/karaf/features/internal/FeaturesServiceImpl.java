@@ -16,34 +16,6 @@
  */
 package org.apache.karaf.features.internal;
 
-import static java.lang.String.format;
-
-import java.io.Closeable;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Dictionary;
-import java.util.EnumSet;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.apache.felix.utils.version.VersionRange;
 import org.apache.felix.utils.version.VersionTable;
 import org.apache.karaf.features.BundleInfo;
@@ -67,6 +39,35 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Closeable;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Dictionary;
+import java.util.EnumSet;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static java.lang.String.format;
+
 /**
  * The Features service implementation.
  * Adding a repository url will load the features contained in this repository and
@@ -79,6 +80,7 @@ public class FeaturesServiceImpl implements FeaturesService {
     private final BundleManager bundleManager;
     private final FeatureConfigInstaller configManager;
 
+    private boolean respectStartLvlDuringFeatureStartup;
     private long resolverTimeout = 5000;
     private Set<URI> uris;
     private Map<URI, Repository> repositories = new HashMap<URI, Repository>();
@@ -103,6 +105,10 @@ public class FeaturesServiceImpl implements FeaturesService {
 
     public void setResolverTimeout(long resolverTimeout) {
         this.resolverTimeout = resolverTimeout;
+    }
+
+    public void setRespectStartLvlDuringFeatureStartup(boolean respectStartLvlDuringFeatureStartup) {
+        this.respectStartLvlDuringFeatureStartup = respectStartLvlDuringFeatureStartup;
     }
 
     public void registerListener(FeaturesListener listener) {
@@ -359,8 +365,8 @@ public class FeaturesServiceImpl implements FeaturesService {
      * @throws Exception in case of install failure.
      */
     public void installFeatures(Set<Feature> features, EnumSet<Option> options) throws Exception {
-        InstallationState state = new InstallationState();
-        InstallationState failure = new InstallationState();
+        final InstallationState state = new InstallationState();
+        final InstallationState failure = new InstallationState();
         boolean verbose = options.contains(FeaturesService.Option.Verbose);
         try {
             // Install everything
@@ -398,8 +404,18 @@ public class FeaturesServiceImpl implements FeaturesService {
             	}
             }
             bundleManager.refreshBundles(state.bundles, state.installed, options);
-            // Start all bundles
-            for (Bundle b : state.bundles) {
+            // start all bundles sorted by startlvl if wished for
+            List<Bundle> bundlesSortedByStartLvl = new ArrayList<Bundle>(state.bundles);
+            if (respectStartLvlDuringFeatureStartup) {
+                Collections.sort(bundlesSortedByStartLvl, new Comparator<Bundle>() {
+                    @Override
+                    public int compare(Bundle bundle, Bundle bundle1) {
+                        return state.bundleInfos.get(bundle.getBundleId()).getStartLevel() -
+                                state.bundleInfos.get(bundle1.getBundleId()).getStartLevel();
+                    }
+                });
+            }
+            for (Bundle b : bundlesSortedByStartLvl) {
                 LOGGER.debug("Starting bundle: {}", b.getSymbolicName());
                 startBundle(state, b);
             }
