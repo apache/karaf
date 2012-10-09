@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Dictionary;
 import java.util.EnumSet;
 import java.util.Enumeration;
@@ -99,6 +100,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
     private ConfigurationAdmin configAdmin;
     private PackageAdmin packageAdmin;
     private StartLevel startLevel;
+    private boolean respectStartLvlDuringFeatureStartup;
     private long resolverTimeout = 5000;
     private Set<URI> uris;
     private Map<URI, RepositoryImpl> repositories = new HashMap<URI, RepositoryImpl>();
@@ -141,6 +143,10 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
 
     public StartLevel getStartLevel() {
         return startLevel;
+    }
+
+    public void setRespectStartLvlDuringFeatureStartup(boolean respectStartLvlDuringFeatureStartup) {
+        this.respectStartLvlDuringFeatureStartup = respectStartLvlDuringFeatureStartup;
     }
 
     public void setStartLevel(StartLevel startLevel) {
@@ -388,8 +394,8 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
     }
 
     public void installFeatures(Set<Feature> features, EnumSet<Option> options) throws Exception {
-        InstallationState state = new InstallationState();
-        InstallationState failure = new InstallationState();
+        final InstallationState state = new InstallationState();
+        final InstallationState failure = new InstallationState();
         boolean verbose = options.contains(FeaturesService.Option.Verbose);
         try {
             // Install everything
@@ -439,8 +445,18 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
                     }
                 }
             }
-            // Start all bundles
-            for (Bundle b : state.bundles) {
+            // start all bundles sorted by startlvl if wished for
+            List<Bundle> bundlesSortedByStartLvl = new ArrayList<Bundle>(state.bundles);
+            if (respectStartLvlDuringFeatureStartup) {
+                Collections.sort(bundlesSortedByStartLvl, new Comparator<Bundle>() {
+                    @Override
+                    public int compare(Bundle bundle, Bundle bundle1) {
+                        return state.bundleInfos.get(bundle.getBundleId()).getStartLevel() -
+                                state.bundleInfos.get(bundle1.getBundleId()).getStartLevel();
+                    }
+                });
+            }
+            for (Bundle b : bundlesSortedByStartLvl) {
                 // do not start fragment bundles
                 Dictionary d = b.getHeaders();
                 String fragmentHostHeader = (String) d.get(Constants.FRAGMENT_HOST);
