@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class PropertiesBackingEngine implements BackingEngine {
 
@@ -70,7 +71,7 @@ public class PropertiesBackingEngine implements BackingEngine {
             }
         }
 
-        String userInfos = users.get(username);
+        String userInfos = (String) users.get(username);
 
         //If user already exists, update password
         if (userInfos != null && userInfos.length() > 0) {
@@ -117,7 +118,9 @@ public class PropertiesBackingEngine implements BackingEngine {
     public List<UserPrincipal> listUsers() {
         List<UserPrincipal> result = new ArrayList<UserPrincipal>();
 
-        for (String userNames : users.keySet()) {
+        Set<String> userSet = users.keySet();
+
+        for (String userNames : userSet) {
             UserPrincipal userPrincipal = new UserPrincipal(userNames);
             result.add(userPrincipal);
         }
@@ -132,7 +135,7 @@ public class PropertiesBackingEngine implements BackingEngine {
      */
     public List<RolePrincipal> listRoles(UserPrincipal user) {
         List<RolePrincipal> result = new ArrayList<RolePrincipal>();
-        String userInfo = users.get(user.getName());
+        String userInfo = (String) users.get(user.getName());
         String[] infos = userInfo.split(",");
         for (int i = 1; i < infos.length; i++) {
             result.add(new RolePrincipal(infos[i]));
@@ -147,7 +150,7 @@ public class PropertiesBackingEngine implements BackingEngine {
      * @param role
      */
     public void addRole(String username, String role) {
-        String userInfos = users.get(username);
+        String userInfos = (String) users.get(username);
         if (userInfos != null) {
             String newUserInfos = userInfos + "," + role;
             users.put(username, newUserInfos);
@@ -169,7 +172,7 @@ public class PropertiesBackingEngine implements BackingEngine {
         String[] infos = null;
         StringBuffer userInfoBuffer = new StringBuffer();
 
-        String userInfos = users.get(username);
+        String userInfos = (String) users.get(username);
 
         //If user already exists, remove the role
         if (userInfos != null && userInfos.length() > 0) {
