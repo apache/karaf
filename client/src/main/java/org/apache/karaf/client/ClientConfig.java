@@ -26,6 +26,8 @@ public class ClientConfig {
     private int level;
     private int retryAttempts;
     private int retryDelay;
+    private boolean batch;
+    private String file = null;
     private String command;
 
     public ClientConfig(String[] args) {
@@ -35,6 +37,7 @@ public class ClientConfig {
         level = SimpleLogger.WARN;
         retryAttempts = 0;
         retryDelay = 2;
+        batch = false;
         StringBuilder commandBuilder = new StringBuilder();
         for (int i = 0; i < args.length; i++) {
             if (args[i].charAt(0) == '-') {
@@ -50,6 +53,10 @@ public class ClientConfig {
                     retryAttempts = Integer.parseInt(args[++i]);
                 } else if (args[i].equals("-d")) {
                     retryDelay = Integer.parseInt(args[++i]);
+                } else if (args[i].equals("-b")) {
+                    batch = true;
+                } else if (args[i].equals("-f ")) {
+                    file = args[++i];
                 } else if (args[i].equals("--help")) {
                     showHelp();
                 } else {
@@ -74,6 +81,8 @@ public class ClientConfig {
         System.out.println("  -v            raise verbosity");
         System.out.println("  -r [attempts] retry connection establishment (up to attempts times)");
         System.out.println("  -d [delay]    intra-retry delay (defaults to 2 seconds)");
+        System.out.println("  -b            batch mode, specify multiple commands via standard input");
+        System.out.println("  -f [file]     read commands from the specified file");
         System.out.println("  [commands]    commands to run");
         System.out.println("If no commands are specified, the client will be put in an interactive mode");
         System.exit(0);
@@ -107,4 +116,15 @@ public class ClientConfig {
         return command;
     }
 
+    public void setCommand(String command) {
+        this.command = command;
+    }
+
+    public boolean isBatch() {
+        return batch;
+    }
+
+    public String getFile() {
+        return file;
+    }
 }
