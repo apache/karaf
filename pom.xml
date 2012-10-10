@@ -176,7 +176,7 @@
         <aries.jmx.api.version>1.0.0</aries.jmx.api.version>
         <aries.jmx.core.version>1.0.1</aries.jmx.core.version>
         <aries.jmx.blueprint.api.version>1.0.0</aries.jmx.blueprint.api.version>
-        <aries.jmx.blueprint.core.version>1.0.0</aries.jmx.blueprint.core.version>
+        <aries.jmx.blueprint.core.version>1.0.1</aries.jmx.blueprint.core.version>
         <aries.jmx.core.version>1.0.1</aries.jmx.core.version>
         <aries.jmx.whiteboard.version>1.0.0</aries.jmx.whiteboard.version>
         <aries.jpa.version>1.0.1</aries.jpa.version>
