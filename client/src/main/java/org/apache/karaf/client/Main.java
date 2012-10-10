@@ -16,14 +16,9 @@
  */
 package org.apache.karaf.client;
 
-import java.io.ByteArrayInputStream;
-import java.io.Closeable;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
+import java.io.*;
 import java.net.URL;
 import java.security.KeyPair;
-import java.io.InterruptedIOException;
 import java.nio.charset.Charset;
 import java.util.Locale;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -54,6 +49,28 @@ public class Main {
         ClientConfig config = new ClientConfig(args);
         SimpleLogger.setLevel(config.getLevel());
 
+        if (config.getFile() != null) {
+            StringBuilder sb = new StringBuilder();
+            sb.setLength(0);
+            Reader reader = new BufferedReader(new InputStreamReader(new FileInputStream(config.getFile())));
+            try {
+                for (int c = reader.read(); c >= 0; c = reader.read()) {
+                    sb.append((char) c);
+                }
+            } finally {
+                reader.close();
+            }
+            config.setCommand(sb.toString());
+        } else if (config.isBatch()) {
+            StringBuilder sb = new StringBuilder();
+            sb.setLength(0);
+            Reader reader = new BufferedReader(new InputStreamReader(System.in));
+            for (int c = reader.read(); c >= 0; c = reader.read()) {
+                sb.append((char) c);
+            }
+            config.setCommand(sb.toString());
+        }
+
         SshClient client = null;
         Terminal terminal = null;
         try {
@@ -71,7 +88,7 @@ public class Main {
             if (config.getCommand().length() > 0) {
                 channel = session.createChannel("exec", config.getCommand() + "\n");
                 channel.setIn(new ByteArrayInputStream(new byte[0]));
-			} else {
+            } else {
                 TerminalFactory.registerFlavor(TerminalFactory.Flavor.UNIX, NoInterruptUnixTerminal.class);
                 terminal = TerminalFactory.create();
                 channel = session.createChannel("shell");
@@ -83,7 +100,7 @@ public class Main {
                 String ctype = System.getenv("LC_CTYPE");
                 if (ctype == null) {
                     ctype = Locale.getDefault().toString() + "."
-                                + System.getProperty("input.encoding", Charset.defaultCharset().name());
+                            + System.getProperty("input.encoding", Charset.defaultCharset().name());
                 }
                 ((ChannelShell) channel).setEnv("LC_CTYPE", ctype);
             }
@@ -101,12 +118,14 @@ public class Main {
         } finally {
             try {
                 client.stop();
-            } catch (Throwable t) { }
+            } catch (Throwable t) {
+            }
             try {
                 if (terminal != null) {
                     terminal.restore();
                 }
-            } catch (Throwable t) { }
+            } catch (Throwable t) {
+            }
         }
         System.exit(0);
     }
@@ -119,14 +138,13 @@ public class Main {
         client.getProperties().put(SshAgent.SSH_AUTHSOCKET_ENV_NAME, "local");
     }
 
-    private static ClientSession connectWithRetries(SshClient client, ClientConfig config)
-            throws Exception, InterruptedException {
+    private static ClientSession connectWithRetries(SshClient client, ClientConfig config) throws Exception, InterruptedException {
         ClientSession session = null;
         int retries = 0;
         do {
             ConnectFuture future = client.connect(config.getHost(), config.getPort());
             future.await();
-            try { 
+            try {
                 session = future.getSession();
             } catch (RuntimeSshException ex) {
                 if (retries++ < config.getRetryAttempts()) {
@@ -171,7 +189,7 @@ public class Main {
         StringBuffer sb = new StringBuffer();
         System.err.print(msg);
         System.err.flush();
-        for (;;) {
+        for (; ; ) {
             int c = System.in.read();
             if (c < 0) {
                 return null;
@@ -195,8 +213,7 @@ public class Main {
             this.in = in;
         }
 
-        private int read(boolean wait) throws IOException
-        {
+        private int read(boolean wait) throws IOException {
             if (eof && queue.isEmpty()) {
                 return -1;
             }
@@ -217,14 +234,12 @@ public class Main {
         }
 
         @Override
-        public int read() throws IOException
-        {
+        public int read() throws IOException {
             return read(true);
         }
 
         @Override
-        public int read(byte b[], int off, int len) throws IOException
-        {
+        public int read(byte b[], int off, int len) throws IOException {
             if (b == null) {
                 throw new NullPointerException();
             } else if (off < 0 || len < 0 || len > b.length - off) {
