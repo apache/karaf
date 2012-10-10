@@ -92,7 +92,7 @@ public class PublickeyLoginModule extends AbstractKarafLoginModule {
         String userInfos = null;
 
         try {
-            userInfos = users.get(user);
+            userInfos = (String) users.get(user);
         } catch (NullPointerException e) {
             //error handled in the next statement
         }
