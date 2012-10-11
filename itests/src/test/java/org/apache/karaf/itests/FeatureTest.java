@@ -25,10 +25,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.ExamReactorStrategy;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
-import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
+import org.ops4j.pax.exam.spi.reactors.EagerSingleStagedReactorFactory;
 
 @RunWith(JUnit4TestRunner.class)
-@ExamReactorStrategy(AllConfinedStagedReactorFactory.class)
+@ExamReactorStrategy(EagerSingleStagedReactorFactory.class)
 public class FeatureTest extends KarafTestSupport {
 
     @Test

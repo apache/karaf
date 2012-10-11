@@ -11,8 +11,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.itests;
+package org.apache.karaf.itests.features;
 
+import org.apache.karaf.itests.KarafTestSupport;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;

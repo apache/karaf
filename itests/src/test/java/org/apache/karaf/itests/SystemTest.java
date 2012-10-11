@@ -13,21 +13,21 @@
  */
 package org.apache.karaf.itests;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.ops4j.pax.exam.junit.ExamReactorStrategy;
-import org.ops4j.pax.exam.junit.JUnit4TestRunner;
-import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.ops4j.pax.exam.junit.ExamReactorStrategy;
+import org.ops4j.pax.exam.junit.JUnit4TestRunner;
+import org.ops4j.pax.exam.spi.reactors.EagerSingleStagedReactorFactory;
 
 @RunWith(JUnit4TestRunner.class)
-@ExamReactorStrategy(AllConfinedStagedReactorFactory.class)
+@ExamReactorStrategy(EagerSingleStagedReactorFactory.class)
 public class SystemTest extends KarafTestSupport {
 
     @Test
@@ -112,25 +112,6 @@ public class SystemTest extends KarafTestSupport {
             ObjectName name = new ObjectName("org.apache.karaf:type=system,name=root");
             int startLevel = (Integer) connection.getAttribute(name, "StartLevel");
             assertEquals(100, startLevel);
-        } finally {
-            if (connector != null)
-                connector.close();
-        }
-    }
-
-    @Test
-    public void shutdownCommand() throws Exception {
-        System.out.println(executeCommand("system:shutdown -f"));
-    }
-
-    @Test
-    public void shutdownViaMBean() throws Exception {
-        JMXConnector connector = null;
-        try {
-            connector = this.getJMXConnector();
-            MBeanServerConnection connection = connector.getMBeanServerConnection();
-            ObjectName name = new ObjectName("org.apache.karaf:type=system,name=root");
-            connection.invoke(name, "halt", new Object[]{}, new String[]{});
         } finally {
             if (connector != null)
                 connector.close();

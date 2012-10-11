@@ -13,22 +13,22 @@
  */
 package org.apache.karaf.itests;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.ops4j.pax.exam.junit.ExamReactorStrategy;
-import org.ops4j.pax.exam.junit.JUnit4TestRunner;
-import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import javax.management.openmbean.TabularData;
 import javax.management.remote.JMXConnector;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.ops4j.pax.exam.junit.ExamReactorStrategy;
+import org.ops4j.pax.exam.junit.JUnit4TestRunner;
+import org.ops4j.pax.exam.spi.reactors.EagerSingleStagedReactorFactory;
 
 @RunWith(JUnit4TestRunner.class)
-@ExamReactorStrategy(AllConfinedStagedReactorFactory.class)
+@ExamReactorStrategy(EagerSingleStagedReactorFactory.class)
 public class ServiceTest extends KarafTestSupport {
 
     @Test

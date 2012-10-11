@@ -76,7 +76,7 @@ public class KarafTestSupport {
     protected BundleContext bundleContext;
 
     @Inject
-    FeaturesService featureService;
+    protected FeaturesService featureService;
     
     /**
      * To make sure the tests run only when the boot features are fully installed

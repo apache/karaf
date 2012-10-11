@@ -1,5 +1,6 @@
-package org.apache.karaf.itests;
+package org.apache.karaf.itests.features;
 
+import org.apache.karaf.itests.KarafTestSupport;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.ExamReactorStrategy;
