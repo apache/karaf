@@ -43,12 +43,12 @@ public class ListBundleServices extends BundlesCommand {
     @Override
     protected void doExecute(List<Bundle> bundles) throws Exception {
         for (Bundle bundle : bundles) {
-            ServiceReference<?>[] refs = (inUse) ? bundle.getServicesInUse() : bundle.getRegisteredServices();
+            ServiceReference[] refs = (inUse) ? bundle.getServicesInUse() : bundle.getRegisteredServices();
             printServices(bundle, refs, showProperties);
         }
     }
 
-    private void printServices(Bundle bundle, ServiceReference<?>[] refs, boolean showProperties) {
+    private void printServices(Bundle bundle, ServiceReference[] refs, boolean showProperties) {
         boolean headerPrinted = false;
         boolean needSeparator = false;
 
@@ -56,7 +56,7 @@ public class ListBundleServices extends BundlesCommand {
             return;
         }
 
-        for (ServiceReference<?> serviceRef : refs) {
+        for (ServiceReference serviceRef : refs) {
             String[] objectClass = (String[]) serviceRef.getProperty(Constants.OBJECTCLASS);
 
             boolean print = showAll || !isCommand(objectClass);
@@ -96,7 +96,7 @@ public class ListBundleServices extends BundlesCommand {
         return false;
     }
 
-    private void printProperties(ServiceReference<?> serviceRef) {
+    private void printProperties(ServiceReference serviceRef) {
         for (String key : serviceRef.getPropertyKeys()) {
             System.out.println(key + " = " + ListBundleServices.getValueString(serviceRef.getProperty(key)));
         }
