@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.karaf.tooling.features;
 
 import org.apache.karaf.deployer.kar.KarArtifactInstaller;
@@ -110,10 +109,7 @@ public class CreateKarMojo extends MojoSupport {
         File archive = createArchive(resources);
 
         // attach the generated archive to install/deploy
-        Artifact artifact = factory.createArtifact(project.getGroupId(), project.getArtifactId(), project.getVersion(), null, "kar");
-        artifact.setFile(archive);
-
-        project.addAttachedArtifact(artifact);
+        projectHelper.attachArtifact(project, "kar", null, archive);
     }
 
     /**
