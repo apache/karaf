@@ -13,49 +13,33 @@
  */
 package org.apache.karaf.itests;
 
-import static org.junit.Assert.assertEquals;
-
-import java.util.List;
-
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
-import javax.management.openmbean.TabularData;
 import javax.management.remote.JMXConnector;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.ExamReactorStrategy;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
-import org.ops4j.pax.exam.spi.reactors.EagerSingleStagedReactorFactory;
+import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
 
 @RunWith(JUnit4TestRunner.class)
-@ExamReactorStrategy(EagerSingleStagedReactorFactory.class)
-public class ObrTest extends KarafTestSupport {
+@ExamReactorStrategy(AllConfinedStagedReactorFactory.class)
+public class SystemShutdownTest extends KarafTestSupport {
 
-    @Before
-    public void installObrFeature() throws Exception {
-        System.out.println(executeCommand("feature:install obr"));
+    @Test
+    public void shutdownCommand() throws Exception {
+        System.out.println(executeCommand("system:shutdown -f"));
     }
 
     @Test
-    public void listCommands() throws Exception {
-        System.out.println(executeCommand("obr:url-list"));
-        System.out.println(executeCommand("obr:list"));
-    }
-
-    @Test
-    public void listsViaMBean() throws Exception {
+    public void shutdownViaMBean() throws Exception {
         JMXConnector connector = null;
         try {
             connector = this.getJMXConnector();
             MBeanServerConnection connection = connector.getMBeanServerConnection();
-            ObjectName name = new ObjectName("org.apache.karaf:type=obr,name=root");
-            @SuppressWarnings("unchecked")
-            List<String> urls = (List<String>) connection.getAttribute(name, "Urls");
-            assertEquals(0, urls.size());
-            TabularData bundles = (TabularData) connection.getAttribute(name, "Bundles");
-            assertEquals(0, bundles.size());
+            ObjectName name = new ObjectName("org.apache.karaf:type=system,name=root");
+            connection.invoke(name, "halt", new Object[]{}, new String[]{});
         } finally {
             if (connector != null)
                 connector.close();
