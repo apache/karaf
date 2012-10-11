@@ -110,10 +110,7 @@ public class CreateKarMojo extends MojoSupport {
         File archive = createArchive(resources);
 
         // attach the generated archive to install/deploy
-        Artifact artifact = factory.createArtifact(project.getGroupId(), project.getArtifactId(), project.getVersion(), null, "kar");
-        artifact.setFile(archive);
-
-        project.addAttachedArtifact(artifact);
+        projectHelper.attachArtifact(project, "kar", null, archive);
     }
 
     /**
