@@ -21,8 +21,9 @@ import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
 
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
-import javax.management.openmbean.TabularData;
 import javax.management.remote.JMXConnector;
+
+import java.util.ArrayList;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -45,7 +46,7 @@ public class PackagesTest extends KarafTestSupport {
             connector = this.getJMXConnector();
             MBeanServerConnection connection = connector.getMBeanServerConnection();
             ObjectName name = new ObjectName("org.apache.karaf:type=packages,name=root");
-            TabularData exports = (TabularData) connection.invoke(name, "exportedPackages", new Object[]{ }, new String[]{ });
+            ArrayList exports = (ArrayList) connection.invoke(name, "exportedPackages", new Object[]{ }, new String[]{ });
             assertTrue(exports.size() > 0);
         } finally {
             if (connector != null)
@@ -67,7 +68,7 @@ public class PackagesTest extends KarafTestSupport {
             connector = this.getJMXConnector();
             MBeanServerConnection connection = connector.getMBeanServerConnection();
             ObjectName name = new ObjectName("org.apache.karaf:type=packages,name=root");
-            TabularData imports = (TabularData) connection.invoke(name, "importedPackages", new Object[]{ }, new String[]{ });
+            ArrayList imports = (ArrayList) connection.invoke(name, "importedPackages", new Object[]{ }, new String[]{ });
             assertTrue(imports.size() > 0);
         } finally {
             if (connector != null)
