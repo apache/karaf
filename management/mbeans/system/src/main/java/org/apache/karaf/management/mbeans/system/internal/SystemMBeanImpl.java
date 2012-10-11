@@ -18,6 +18,7 @@ package org.apache.karaf.management.mbeans.system.internal;
 
 import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.management.mbeans.system.SystemMBean;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.startlevel.FrameworkStartLevel;
 import org.slf4j.Logger;
@@ -116,11 +117,15 @@ public class SystemMBeanImpl extends StandardMBean implements SystemMBean {
     }
 
     public void setStartLevel(int startLevel) {
-        getBundleContext().getBundle(0).adapt(FrameworkStartLevel.class).setStartLevel(startLevel, null);
+        Bundle b = getBundleContext().getBundle(0);
+        FrameworkStartLevel fsl = (FrameworkStartLevel) b.adapt(FrameworkStartLevel.class);
+        fsl.setStartLevel(startLevel, null);
     }
 
     public int getStartLevel() {
-        return getBundleContext().getBundle(0).adapt(FrameworkStartLevel.class).getStartLevel();
+        Bundle b = getBundleContext().getBundle(0);
+        FrameworkStartLevel fsl = (FrameworkStartLevel) b.adapt(FrameworkStartLevel.class);
+        return fsl.getStartLevel();
     }
 
     /* for backward compatibility */
