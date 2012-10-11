@@ -30,30 +30,12 @@ import static org.junit.Assert.assertFalse;
 @ExamReactorStrategy(AllConfinedStagedReactorFactory.class)
 public class WrapperTest extends KarafTestSupport {
 
-    @Before
-    public void installWrapperFeature() throws Exception {
-        System.out.println(executeCommand("feature:install wrapper"));
-    }
-
     @Test
     public void installCommand() throws Exception {
+        System.out.println(executeCommand("features:install wrapper"));
         String installOutput = executeCommand("wrapper:install");
         System.out.println(installOutput);
         assertFalse(installOutput.isEmpty());
-    }
-
-    @Test
-    public void installViaMBean() throws Exception {
-        JMXConnector connector = null;
-        try {
-            connector = this.getJMXConnector();
-            MBeanServerConnection connection = connector.getMBeanServerConnection();
-            ObjectName name = new ObjectName("org.apache.karaf:type=wrapper,name=root");
-            connection.invoke(name, "install", new Object[]{}, new String[]{});
-        } finally {
-            if (connector != null)
-                connector.close();
-        }
     }
 
 }
