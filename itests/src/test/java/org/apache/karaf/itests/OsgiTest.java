@@ -56,10 +56,10 @@ public class OsgiTest extends KarafTestSupport {
 
     @Test
     public void classesCommand() throws Exception {
-        String classesOutput = executeCommand("osgi:classes --force 10");
+        String classesOutput = executeCommand("osgi:classes --force org.apache.aries.proxy.api");
         System.out.println(classesOutput);
         assertFalse(classesOutput.isEmpty());
-        classesOutput = executeCommand("osgi:classes --force 10");
+        classesOutput = executeCommand("osgi:classes --force org.apache.aries.proxy.api");
         System.out.println(classesOutput);
         assertTrue(classesOutput.contains("org/apache/aries/proxy"));
     }
@@ -73,14 +73,14 @@ public class OsgiTest extends KarafTestSupport {
 
     @Test
     public void headersCommand() throws Exception {
-        String headersOutput = executeCommand("osgi:headers --force 10");
+        String headersOutput = executeCommand("osgi:headers --force org.apache.aries.proxy.api");
         System.out.println(headersOutput);
         assertTrue(headersOutput.contains("Bundle-SymbolicName = org.apache.aries.proxy.api"));
     }
 
     @Test
     public void infoCommand() throws Exception {
-        String infoOutput = executeCommand("osgi:info --force 10");
+        String infoOutput = executeCommand("osgi:info --force org.apache.aries.proxy.api");
         System.out.println(infoOutput);
         assertTrue(infoOutput.contains("Apache Aries Proxy API"));
     }
