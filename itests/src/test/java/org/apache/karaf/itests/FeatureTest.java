@@ -33,9 +33,7 @@ public class FeatureTest extends KarafTestSupport {
 
     @Test
     public void bootFeatures() throws Exception {
-        String featureListOutput = executeCommand("feature:list -i");
-        System.out.println(featureListOutput);
-        assertTrue(featureListOutput.contains("standard"));
+        assertContains("standard", executeCommand("feature:list -i"));
     }
 
     @Test
@@ -95,13 +93,9 @@ public class FeatureTest extends KarafTestSupport {
     @Test
     public void repoAddRemoveCommand() throws Exception {
         System.out.println(executeCommand("feature:repo-add mvn:org.apache.karaf.cellar/apache-karaf-cellar/2.2.4/xml/features"));
-        String repoListOutput = executeCommand("feature:repo-list");
-        System.out.println(repoListOutput);
-        assertTrue(repoListOutput.contains("apache-karaf-cellar"));
+        assertContains("apache-karaf-cellar", executeCommand("feature:repo-list"));
         System.out.println(executeCommand("feature:repo-remove mvn:org.apache.karaf.cellar/apache-karaf-cellar/2.2.4/xml/features"));
-        repoListOutput = executeCommand("feature:repo-list");
-        System.out.println(repoListOutput);
-        assertFalse(repoListOutput.contains("apache-karaf-cellar"));
+        assertContainsNot("apache-karaf-cellar", executeCommand("feature:repo-list"));
     }
 
     @Test

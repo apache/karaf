@@ -16,31 +16,19 @@
  */
 package org.apache.karaf.itests;
 
-import static org.apache.karaf.tooling.exam.options.KarafDistributionOption.karafDistributionConfiguration;
-import static org.ops4j.pax.exam.CoreOptions.maven;
-
-import javax.inject.Inject;
-
 import junit.framework.Assert;
 
-import org.apache.karaf.features.BootFinished;
-import org.apache.karaf.features.FeaturesService;
-import org.apache.karaf.tooling.exam.options.KarafDistributionOption;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.TestProbeBuilder;
-import org.ops4j.pax.exam.junit.Configuration;
+import org.ops4j.pax.exam.junit.ExamReactorStrategy;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
-import org.ops4j.pax.exam.junit.ProbeBuilder;
-import org.ops4j.pax.exam.options.MavenArtifactUrlReference;
+import org.ops4j.pax.exam.spi.reactors.EagerSingleStagedReactorFactory;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
 
 @RunWith(JUnit4TestRunner.class)
-public class ConditionalFeaturesTest {
-
+@ExamReactorStrategy(EagerSingleStagedReactorFactory.class)
+public class ConditionalFeaturesTest extends KarafTestSupport {
+    /*
     @Inject
     private FeaturesService featuresService;
 
@@ -50,11 +38,13 @@ public class ConditionalFeaturesTest {
     @Inject
     BootFinished bootFinished;
 
+
     @ProbeBuilder
     public TestProbeBuilder probeConfiguration(TestProbeBuilder probe) {
         probe.setHeader(Constants.DYNAMICIMPORT_PACKAGE, "*,org.apache.felix.service.*;status=provisional");
         return probe;
     }
+
 
     @Configuration
     public Option[] config() {
@@ -65,40 +55,51 @@ public class ConditionalFeaturesTest {
             KarafDistributionOption.editConfigurationFilePut("etc/org.ops4j.pax.web.cfg", "org.osgi.service.http.port", KarafTestSupport.HTTP_PORT)
         };
     }
+    */
 
     @Test
     public void testScr() throws Exception {
         //Remove management and install scr
-        featuresService.uninstallFeature("management");
-        featuresService.installFeature("scr");
-        Assert.assertFalse(isBundleInstalled("org.apache.karaf.scr.management"));
+        featureService.uninstallFeature("management");
+        featureService.installFeature("scr");
+        assertBundleNotInstalled("org.apache.karaf.scr.management");
 
         //Add management back
-        featuresService.installFeature("management");
-        Assert.assertTrue(isBundleInstalled("org.apache.karaf.scr.management"));
+        featureService.installFeature("management");
+        assertBundleInstalled("org.apache.karaf.scr.management");
     }
 
     @Test
     public void testWebconsole() throws Exception {
-        featuresService.installFeature("webconsole");
+        try {
+            featureService.uninstallFeature("eventadmin");
+        } catch (Exception e) {
+        }
+        featureService.installFeature("webconsole");
 
-        Assert.assertTrue(isBundleInstalled("org.apache.karaf.webconsole.features"));
-        Assert.assertTrue(isBundleInstalled("org.apache.karaf.webconsole.instance"));
-        Assert.assertTrue(isBundleInstalled("org.apache.karaf.webconsole.gogo"));
-        Assert.assertTrue(isBundleInstalled("org.apache.karaf.webconsole.http"));
+        assertBundleInstalled("org.apache.karaf.webconsole.features");
+        assertBundleInstalled("org.apache.karaf.webconsole.instance");
+        assertBundleInstalled("org.apache.karaf.webconsole.gogo");
+        assertBundleInstalled("org.apache.karaf.webconsole.http");
 
-        Assert.assertFalse(isBundleInstalled("org.apache.felix.webconsole.plugins.event"));
+        assertBundleNotInstalled("org.apache.felix.webconsole.plugins.event");
 
         //Add eventadmin
         try {
-            featuresService.installFeature("eventadmin");
+            featureService.installFeature("eventadmin");
         } catch (Exception ex) {
           //ignore as the eventadmin activator might throw an error.
         }
-        Assert.assertTrue(isBundleInstalled("org.apache.felix.webconsole.plugins.event"));
+        assertBundleInstalled("org.apache.felix.webconsole.plugins.event");
     }
 
-
+    private void assertBundleInstalled(String name) {
+        Assert.assertTrue("Bundle " + name + " should be installed", isBundleInstalled(name));
+    }
+    
+    private void assertBundleNotInstalled(String name) {
+        Assert.assertFalse("Bundle " + name + " should not be installed", isBundleInstalled(name));
+    }
 
     private boolean isBundleInstalled(String symbolicName) {
         for (Bundle bundle : bundleContext.getBundles()) {

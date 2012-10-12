@@ -13,7 +13,6 @@
  */
 package org.apache.karaf.itests;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import javax.management.MBeanServerConnection;
@@ -21,26 +20,23 @@ import javax.management.ObjectName;
 import javax.management.openmbean.TabularData;
 import javax.management.remote.JMXConnector;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.ExamReactorStrategy;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
-import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
+import org.ops4j.pax.exam.spi.reactors.EagerSingleStagedReactorFactory;
 
 @RunWith(JUnit4TestRunner.class)
-@ExamReactorStrategy(AllConfinedStagedReactorFactory.class)
+@ExamReactorStrategy(EagerSingleStagedReactorFactory.class)
 public class InstanceTest extends KarafTestSupport {
 
     @Test
     public void createDestroyCommand() throws Exception {
-        System.out.println(executeCommand("instance:create itest"));
-        String instanceListOutput = executeCommand("instance:list");
-        System.out.println(instanceListOutput);
-        assertTrue(instanceListOutput.contains("itest"));
-        System.out.println(executeCommand("instance:destroy itest"));
-        instanceListOutput = executeCommand("instance:list");
-        System.out.println(instanceListOutput);
-        assertFalse(instanceListOutput.contains("itest"));
+        System.out.println(executeCommand("instance:create itest1"));
+        assertContains("itest1" ,executeCommand("instance:list"));
+        System.out.println(executeCommand("instance:destroy itest1"));
+        assertContainsNot("itest1" ,executeCommand("instance:list"));
     }
 
     @Test
@@ -50,25 +46,27 @@ public class InstanceTest extends KarafTestSupport {
             connector = this.getJMXConnector();
             MBeanServerConnection connection = connector.getMBeanServerConnection();
             ObjectName name = new ObjectName("org.apache.karaf:type=instance,name=root");
-            connection.invoke(name, "createInstance", new Object[]{ "itest", 0, 0, 0, null, null, null, null },
+            int oldNum = getInstancesNum(connection, name);  
+            connection.invoke(name, "createInstance", new Object[]{ "itest2", 0, 0, 0, null, null, null, null },
                     new String[]{ "java.lang.String", "int", "int", "int", "java.lang.String", "java.lang.String", "java.lang.String", "java.lang.String" });
-            TabularData instances = (TabularData) connection.getAttribute(name, "Instances");
-            assertTrue(instances.size() ==  2);
-            connection.invoke(name, "destroyInstance", new Object[]{ "itest" }, new String[]{ "java.lang.String" });
-            instances = (TabularData) connection.getAttribute(name, "Instances");
-            assertTrue(instances.size() == 1);
+            Assert.assertEquals(oldNum + 1, getInstancesNum(connection, name));
+            connection.invoke(name, "destroyInstance", new Object[]{ "itest2" }, new String[]{ "java.lang.String" });
+            Assert.assertEquals(oldNum, getInstancesNum(connection, name));
         } finally {
             if (connector != null)
                 connector.close();
         }
     }
 
+    private int getInstancesNum(MBeanServerConnection connection, ObjectName name) throws Exception {
+        TabularData instances = (TabularData) connection.getAttribute(name, "Instances");
+        return instances.size();
+    }
+
     @Test
     public void cloneCommand() throws Exception {
-        System.out.println(executeCommand("instance:clone root itest"));
-        String instanceListOutput = executeCommand("instance:list");
-        System.out.println(instanceListOutput);
-        assertTrue(instanceListOutput.contains("itest"));
+        System.out.println(executeCommand("instance:clone root itest3"));
+        assertContains("itest3", executeCommand("instance:list"));
     }
 
     @Test
@@ -78,10 +76,10 @@ public class InstanceTest extends KarafTestSupport {
             connector = this.getJMXConnector();
             MBeanServerConnection connection = connector.getMBeanServerConnection();
             ObjectName name = new ObjectName("org.apache.karaf:type=instance,name=root");
-            connection.invoke(name, "cloneInstance", new Object[]{ "root", "itest", 0, 0, 0, null, null },
+            int oldNum = getInstancesNum(connection, name);
+            connection.invoke(name, "cloneInstance", new Object[]{ "root", "itest4", 0, 0, 0, null, null },
                     new String[]{ "java.lang.String", "java.lang.String", "int", "int", "int", "java.lang.String", "java.lang.String" });
-            TabularData instances = (TabularData) connection.getAttribute(name, "Instances");
-            assertTrue(instances.size() ==  2);
+            Assert.assertEquals(oldNum + 1, getInstancesNum(connection, name));
         } finally {
             if (connector != null)
                 connector.close();

@@ -13,8 +13,6 @@
  */
 package org.apache.karaf.itests;
 
-import static org.junit.Assert.assertTrue;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.ExamReactorStrategy;
@@ -28,9 +26,8 @@ public class JaasTest extends KarafTestSupport {
     @Test
     public void realmListCommand() throws Exception {
         String listRealmsOutput = executeCommand("jaas:realm-list");
-        System.out.println(listRealmsOutput);
-        assertTrue(listRealmsOutput.contains("PropertiesLoginModule"));
-        assertTrue(listRealmsOutput.contains("PublickeyLoginModule"));
+        assertContains("PropertiesLoginModule", listRealmsOutput);
+        assertContains("PublickeyLoginModule", listRealmsOutput);
     }
 
 }
