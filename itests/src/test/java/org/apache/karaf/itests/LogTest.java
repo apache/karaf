@@ -25,26 +25,25 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.ExamReactorStrategy;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
-import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
+import org.ops4j.pax.exam.spi.reactors.EagerSingleStagedReactorFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @RunWith(JUnit4TestRunner.class)
-@ExamReactorStrategy(AllConfinedStagedReactorFactory.class)
+@ExamReactorStrategy(EagerSingleStagedReactorFactory.class)
 public class LogTest extends KarafTestSupport {
     private static final Logger LOGGER = LoggerFactory.getLogger(LogTest.class);
 
     @Test
     public void setDebugAndDisplay() throws Exception {
-        System.out.println(executeCommand("log:set DEBUG"));
+        assertSetLevel("DEBUG");
         LOGGER.debug("Making sure there is DEBUG level output");
-        String displayOutput = executeCommand("log:display -n 200");
-        System.out.println(displayOutput);
-        assertTrue(displayOutput.contains("DEBUG"));
+        assertContains("DEBUG", executeCommand("log:display -n 200"));
     }
 
     @Test
     public void setDebugViaMBean() throws Exception {
+        assertSetLevel("INFO");
         JMXConnector connector = null;
         try {
             connector = this.getJMXConnector();
@@ -62,15 +61,16 @@ public class LogTest extends KarafTestSupport {
 
     @Test
     public void setGetDebugAndClear() throws Exception {
-        System.out.println(executeCommand("log:set DEBUG"));
-        String getOutput = executeCommand("log:get");
-        System.out.println(getOutput);
-        assertTrue(getOutput.contains("DEBUG"));
-        System.out.println(executeCommand("log:set INFO"));
+        assertSetLevel("DEBUG");
+        assertSetLevel("INFO");
         System.out.println(executeCommand("log:clear"));
-        String displayOutput = executeCommand("log:display");
-        System.out.println(displayOutput.trim());
-        assertTrue(displayOutput.trim().isEmpty());
+        String displayOutput = executeCommand("log:display").trim();
+        assertTrue("Should be empty but was: " + displayOutput, displayOutput.trim().isEmpty());
+    }
+    
+    public void assertSetLevel(String level) {
+        System.out.println(executeCommand("log:set " + level));
+        assertContains(level, executeCommand("log:get"));
     }
 
 }

@@ -21,7 +21,6 @@ import javax.management.openmbean.TabularData;
 import javax.management.remote.JMXConnector;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.ExamReactorStrategy;
@@ -40,14 +39,10 @@ public class HttpTest extends KarafTestSupport {
 
     @Test
     public void list() throws Exception {
-        String listOutput = executeCommand("http:list");
-        System.out.println(listOutput);
-        assertTrue(listOutput.contains("/system/console"));
+        assertContains("/system/console", executeCommand("http:list"));
     }
 
-    @Ignore
     @Test
-    // TODO remove ignore flag when the HttpMBean is fixed
     public void listViaMBean() throws Exception {
         JMXConnector connector = null;
         try {

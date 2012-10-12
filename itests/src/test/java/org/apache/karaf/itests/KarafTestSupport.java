@@ -17,6 +17,7 @@ import static org.apache.karaf.tooling.exam.options.KarafDistributionOption.edit
 import static org.apache.karaf.tooling.exam.options.KarafDistributionOption.karafDistributionConfiguration;
 import static org.apache.karaf.tooling.exam.options.KarafDistributionOption.keepRuntimeFolder;
 import static org.apache.karaf.tooling.exam.options.KarafDistributionOption.logLevel;
+import static org.junit.Assert.assertTrue;
 import static org.ops4j.pax.exam.CoreOptions.maven;
 
 import java.io.ByteArrayOutputStream;
@@ -263,4 +264,11 @@ public class KarafTestSupport {
         Assert.assertTrue(msg, installedFeatures.containsAll(expectedFeaturesSet));
     }
 
+    public void assertContains(String expectedPart, String actual) {
+        assertTrue("Should contain '" + expectedPart + "' but was : " + actual, actual.contains(expectedPart));
+    }
+    
+    public void assertContainsNot(String expectedPart, String actual) {
+        Assert.assertFalse("Should not contain '" + expectedPart + "' but was : " + actual, actual.contains(expectedPart));
+    }
 }
