@@ -10,7 +10,7 @@
         (the "License"); you may not use this file except in compliance with
         the License.  You may obtain a copy of the License at
 
-           http://www.apache.org/licenses/LICENSE-2.0
+            http://www.apache.org/licenses/LICENSE-2.0
 
         Unless required by applicable law or agreed to in writing, software
         distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,36 +18,24 @@
         See the License for the specific language governing permissions and
         limitations under the License.
     -->
-    
+
     <modelVersion>4.0.0</modelVersion>
-    
+
     <parent>
         <groupId>org.apache.karaf</groupId>
         <artifactId>karaf</artifactId>
         <version>3.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    
-    <artifactId>org.apache.karaf.util</artifactId>
-    <packaging>jar</packaging>
-    <name>Apache Karaf :: Util</name>
-    <description>Karaf Util contains utility classes used in different Karaf modules.</description>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.apache.karaf.osgi</groupId>
-            <artifactId>org.osgi.core</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
-    </dependencies>
-    
-    <properties>
-        <appendedResourcesDirectory>${basedir}/../etc/appended-resources</appendedResourcesDirectory>
-    </properties>
+    <groupId>org.apache.karaf.osgi</groupId>
+    <artifactId>osgi</artifactId>
+    <packaging>pom</packaging>
+    <name>Apache Karaf :: OSGi</name>
+
+    <modules>
+        <module>core</module>
+        <module>compendium</module>
+    </modules>
 
 </project>

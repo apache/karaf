@@ -40,12 +40,12 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.apache.karaf</groupId>
+            <groupId>org.apache.karaf.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.osgi</groupId>
+            <groupId>org.apache.karaf.osgi</groupId>
             <artifactId>org.osgi.compendium</artifactId>
             <scope>provided</scope>
         </dependency>

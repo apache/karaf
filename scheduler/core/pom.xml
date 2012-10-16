@@ -68,7 +68,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.apache.karaf</groupId>
+            <groupId>org.apache.karaf.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
             <scope>provided</scope>
         </dependency>
