@@ -10,7 +10,7 @@
         (the "License"); you may not use this file except in compliance with
         the License.  You may obtain a copy of the License at
 
-           http://www.apache.org/licenses/LICENSE-2.0
+            http://www.apache.org/licenses/LICENSE-2.0
 
         Unless required by applicable law or agreed to in writing, software
         distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,87 +22,93 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.karaf</groupId>
-        <artifactId>karaf</artifactId>
+        <groupId>org.apache.karaf.osgi</groupId>
+        <artifactId>osgi</artifactId>
         <version>3.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>org.apache.karaf.main</artifactId>
+    <artifactId>org.osgi.compendium</artifactId>
     <packaging>bundle</packaging>
-    <name>Apache Karaf :: Main</name>
-    <description>This bundle is the main Karaf launcher. It's responsible of the Karaf startup including
-    the console, branding, etc bootstrap.</description>
+    <name>Apache Karaf :: OSGi :: Compendium (for Java 7)</name>
+    <description>
+        The original OSGi Compendium specification can not be used to compile other code with Java 7. So we recompile
+        the specification for Java 5+ so it can be used as a Maven dependency in projects that are compiled with Java 7.
+    </description>
 
     <properties>
-        <appendedResourcesDirectory>${basedir}/../etc/appended-resources</appendedResourcesDirectory>
+        <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
     </properties>
 
     <dependencies>
         <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+            <classifier>sources</classifier>
+        </dependency>
+        <dependency>
             <groupId>org.apache.karaf.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
             <scope>provided</scope>
-        </dependency>    
-
-        <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.junit</artifactId>
-            <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.ops4j.pax.tinybundles</groupId>
-            <artifactId>tinybundles</artifactId>
-            <scope>test</scope>
+            <groupId>${servlet.spec.groupId}</groupId>
+            <artifactId>${servlet.spec.artifactId}</artifactId>
+            <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
-            <version>1.1.1</version>
-            <scope>test</scope>
+            <groupId>javax.persistence</groupId>
+            <artifactId>persistence-api</artifactId>
+            <version>1.0.2</version>
+            <scope>provided</scope>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.microemu</groupId>
+            <artifactId>microemu-cldc</artifactId>
+            <version>2.0.4</version>
+            <optional>true</optional>
         </dependency>
     </dependencies>
 
     <build>
-        <resources>
-            <resource>
-                <directory>${project.basedir}/src/main/resources</directory>
-                <filtering>true</filtering>
-                <includes>
-                    <include>**/*</include>
-                </includes>
-            </resource>
-        </resources>
+        <sourceDirectory>${project.build.directory}/generated-sources/src/main/java</sourceDirectory>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-                        </manifest>
-                    </archive>
-                </configuration>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack-sources</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.osgi</groupId>
+                                    <artifactId>org.osgi.compendium</artifactId>
+                                    <classifier>sources</classifier>
+                                </artifactItem>
+                            </artifactItems>
+                            <outputDirectory>${project.build.directory}/generated-sources/src/main/java</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <_donotcopy>(CVS|.svn|config.properties)</_donotcopy>
-                        <Main-Class>org.apache.karaf.main.Main</Main-Class>
-                        <Bundle-Name>Apache Karaf</Bundle-Name>
-                        <Bundle-Description>OSGi R4 framework.</Bundle-Description>
-                        <Export-Package>
-                            org.apache.karaf.info
-                        </Export-Package>
-                        <Private-Package>
-                            org.apache.karaf.main*
-                        </Private-Package>
+                        <Export-Package>org.osgi.*;-split-package:=merge-first</Export-Package>
                     </instructions>
-                    <unpackBundle>true</unpackBundle>
                 </configuration>
             </plugin>
         </plugins>

@@ -35,8 +35,7 @@
     <inceptionYear>2007</inceptionYear>
 
     <modules>
-        <module>osgicore</module>
-        <module>osgicompendium</module>
+        <module>osgi</module>
         <module>util</module>
         <module>main</module>
         <module>features</module>
@@ -321,14 +320,16 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- It will be removed with new OSGi spec artifacts -->
             <dependency>
-                <groupId>org.apache.karaf</groupId>
+                <groupId>org.apache.karaf.osgi</groupId>
                 <artifactId>org.osgi.core</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <!-- It will be removed with new OSGi spec artifacts -->
             <dependency>
-            	<groupId>org.apache.karaf</groupId>
-	        <artifactId>org.osgi.compendium</artifactId>
+            	<groupId>org.apache.karaf.osgi</groupId>
+	            <artifactId>org.osgi.compendium</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -336,6 +337,12 @@
                 <artifactId>org.osgi.core</artifactId>
                 <version>${osgi.version}</version>
                 <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.osgi</groupId>
+                <artifactId>org.osgi.core</artifactId>
+                <version>${osgi.version}</version>
+                <classifier>sources</classifier>
             </dependency>
             <dependency>
                 <groupId>org.apache.karaf</groupId>
@@ -794,6 +801,12 @@
                 <groupId>org.osgi</groupId>
                 <artifactId>org.osgi.compendium</artifactId>
                 <version>${osgi.compendium.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.osgi</groupId>
+                <artifactId>org.osgi.compendium</artifactId>
+                <version>${osgi.compendium.version}</version>
+                <classifier>sources</classifier>
             </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>

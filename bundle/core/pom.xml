@@ -46,12 +46,12 @@
         </dependency>
 		
 		<dependency>
-            <groupId>org.apache.karaf</groupId>
+            <groupId>org.apache.karaf.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.osgi</groupId>
+            <groupId>org.apache.karaf.osgi</groupId>
             <artifactId>org.osgi.compendium</artifactId>
             <scope>provided</scope>
         </dependency>
@@ -60,13 +60,6 @@
             <artifactId>pax-url-aether</artifactId>
             <scope>provided</scope>
         </dependency>
-<!--
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.core</artifactId>
-            <scope>provided</scope>
-        </dependency>
-		-->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
