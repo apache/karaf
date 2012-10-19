@@ -107,11 +107,10 @@ public class Shutdown extends OsgiCommandSupport {
             public void run() {
                 try {
                     if (sleep > 0) {
-                        System.err.println("Shutdown in " + sleep/1000/60 + " minute(s).");
+                        System.err.println("Shutdown in " + sleep/1000/60 + " minute(s)");
                     }
                     Thread.sleep(sleep);
-                    Bundle bundle = getBundleContext().getBundle(0);
-                    bundle.stop();
+                    getBundleContext().getBundle(0).stop();
                 } catch (Exception e) {
                     log.error("Error when shutting down", e);
                 }
