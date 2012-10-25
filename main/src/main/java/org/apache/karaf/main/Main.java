@@ -51,6 +51,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
@@ -210,7 +211,8 @@ public class Main {
     private boolean exiting = false;
     private ShutdownCallback shutdownCallback;
     private List<BundleActivator> karafActivators = new ArrayList<BundleActivator>();
-
+    private Object startLevelLock = new Object();
+    private StartLevelListener startLevelListener;
 
     public Main(String[] args) {
         this.args = args;
@@ -290,6 +292,10 @@ public class Main {
         // Process properties
         loadStartupProperties(configProps);
         processAutoProperties(framework.getBundleContext());
+
+        startLevelListener = new StartLevelListener(startLevelLock);
+        framework.getBundleContext().addFrameworkListener(startLevelListener);
+
         framework.start();
         // Start custom activators
         startKarafActivators(classLoader);
@@ -1370,8 +1376,16 @@ public class Main {
                     Thread.sleep(lockDelay);
                 }
                 if (framework.getState() == Bundle.ACTIVE && !exiting) {
-                    LOG.info("Lost the lock, stopping this instance ...");
-                    setStartLevel(lockStartLevel);
+                    LOG.info("Lost the lock, reducing start level to " + lockStartLevel);
+                    synchronized (startLevelLock) {
+                        setStartLevel(lockStartLevel);
+                        
+                        // we have to wait for the start level to be reduced here because
+                        // if the lock is regained before the start level is fully changed
+                        // things may not come up as expected
+                        LOG.fine("Waiting for start level change to complete...");
+                        startLevelLock.wait(shutdownTimeout);
+                    }
                 }
             } else if (!lockLogged) {
                 LOG.info("Waiting for the lock ...");
@@ -1442,6 +1456,10 @@ public class Main {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public Lock getLock() {
+        return lock;
     }
 
     private class ShutdownSocketThread extends Thread {
