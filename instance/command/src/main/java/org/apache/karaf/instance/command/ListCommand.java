@@ -31,6 +31,7 @@ public class ListCommand extends InstanceCommandSupport {
     boolean javaOpts;
 
     protected Object doExecute() throws Exception {
+        getInstanceService().refreshInstance();
         Instance[] instances = getInstanceService().getInstances();
         ShellTable table = new ShellTable();
         table.column("SSH Port").alignRight();
