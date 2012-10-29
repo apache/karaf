@@ -59,4 +59,5 @@ public interface Instance {
 
     String getState() throws Exception;
 
+    boolean isAttached();
 }
