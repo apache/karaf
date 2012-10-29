@@ -21,6 +21,8 @@ public interface AdminService {
     Instance createInstance(String name, InstanceSettings settings) throws Exception;
 
     void renameInstance(String name, String newName) throws Exception;
+    
+    void refreshInstance() throws Exception;
 
     Instance[] getInstances();
 

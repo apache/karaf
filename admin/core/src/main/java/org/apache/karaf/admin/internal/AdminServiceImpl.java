@@ -135,6 +135,37 @@ public class AdminServiceImpl implements AdminService {
             LOGGER.warn("Unable to reload Karaf instance list", e);
         }
     }
+    
+    
+    public synchronized void refreshInstance() throws Exception {
+        try {
+            File storageFile = new File(storageLocation, STORAGE_FILE);
+            if (!storageFile.isFile()) {
+                if (storageFile.exists()) {
+                    LOGGER.error("Instances storage location should be a file: " + storageFile);
+                }
+                return;
+            }
+            Properties storage = loadStorage(storageFile);
+            int count = Integer.parseInt(storage.getProperty("count", "0"));
+            for (int i = 0; i < count; i++) {
+                String name = storage.getProperty("item." + i + ".name", null);
+                int pid = Integer.parseInt(storage.getProperty("item." + i + ".pid", "0"));
+                if (name != null) {
+                    InstanceImpl instance = (InstanceImpl)instances.get(name);
+                    if (pid > 0 && instance != null && !instance.isAttached()) {
+                        try {
+                            instance.attach(pid);
+                        } catch (IOException e) {
+                            // Ignore
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.warn("Unable to reload Karaf instance list", e);
+        }
+    }
 
     public synchronized Instance createInstance(String name, InstanceSettings settings) throws Exception {
         if (instances.get(name) != null) {

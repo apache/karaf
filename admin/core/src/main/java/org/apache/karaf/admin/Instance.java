@@ -58,5 +58,7 @@ public interface Instance {
     void destroy() throws Exception;
 
     String getState() throws Exception;
+    
+    boolean isAttached();
 
 }
