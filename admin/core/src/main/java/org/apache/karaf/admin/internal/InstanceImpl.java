@@ -537,4 +537,8 @@ public class InstanceImpl implements Instance {
         return val;
     }
 
+    public boolean isAttached() {
+        return (process != null);
+    }
+
 }
