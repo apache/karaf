@@ -33,6 +33,7 @@ public class ListCommand extends AdminCommandSupport {
     boolean javaOpts;
 
     protected Object doExecute() throws Exception {
+        getAdminService().refreshInstance();
         Instance[] instances = getAdminService().getInstances();
         if (javaOpts) {
             System.out.println("  SSH Port   RMI Ports         State       Pid  JavaOpts");
