@@ -16,14 +16,22 @@
  */
 package org.apache.karaf.management;
 
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.UnknownHostException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.rmi.server.RMIClientSocketFactory;
+import java.rmi.server.RMIServerSocketFactory;
+import java.rmi.server.RMISocketFactory;
 import java.rmi.server.UnicastRemoteObject;
 
 public class RmiRegistryFactory {
 
     private int port = Registry.REGISTRY_PORT;
+    private String host;
     private Registry registry;
     private boolean locate;
     private boolean create = true;
@@ -71,14 +79,22 @@ public class RmiRegistryFactory {
         this.port = port;
     }
 
+    public String getHost() {
+        return host;
+    }
+
+    public void setHost(String host) {
+        this.host = host;
+    }
+
     public Object getObject() throws Exception {
         return registry;
     }
 
-    public void init() throws RemoteException {
+    public void init() throws RemoteException, UnknownHostException {
         if (registry == null && locate) {
             try {
-                Registry reg = LocateRegistry.getRegistry(getPort());
+                Registry reg = LocateRegistry.getRegistry(host, getPort());
                 reg.list();
                 registry = reg;
             } catch (RemoteException e) {
@@ -86,7 +102,15 @@ public class RmiRegistryFactory {
             }
         }
         if (registry == null && create) {
-            registry = LocateRegistry.createRegistry(getPort());
+            if (host != null && !host.isEmpty()) {
+                RMIClientSocketFactory socketFactory = RMISocketFactory.getDefaultSocketFactory();
+                InetAddress addr = InetAddress.getByName(host);
+                RMIServerSocketFactory serverSocketFactory = new KarafServerSocketFactory(addr, port);
+
+                registry = LocateRegistry.createRegistry(getPort(), socketFactory, serverSocketFactory);
+            } else {
+                registry = LocateRegistry.createRegistry(getPort());
+            }
             locallyCreated = true;
         }
     }
@@ -96,6 +120,20 @@ public class RmiRegistryFactory {
             Registry reg = registry;
             registry = null;
             UnicastRemoteObject.unexportObject(reg, true);
+        }
+    }
+
+    private static class KarafServerSocketFactory implements RMIServerSocketFactory {
+        private final int port;
+        private final InetAddress addr;
+
+        private KarafServerSocketFactory(InetAddress addr, int port) {
+            this.addr = addr;
+            this.port = port;
+        }
+
+        public ServerSocket createServerSocket(int i) throws IOException {
+            return new ServerSocket(port, 0, addr);
         }
     }
 
