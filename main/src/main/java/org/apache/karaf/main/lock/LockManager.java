@@ -85,4 +85,7 @@ public class LockManager {
         lock.release();
     }
 
+    public Lock getLock() {
+        return lock;
+    }
 }

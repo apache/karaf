@@ -50,6 +50,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
 import org.osgi.framework.startlevel.BundleStartLevel;
@@ -215,7 +216,8 @@ public class Main {
         }
         BootstrapLogManager.setProperties(config.props);
         Lock lock = createLock();
-        lockManager = new LockManager(lock, new KarafLockCallback(), config.lockDelay);
+        KarafLockCallback lockCallback = new KarafLockCallback();
+        lockManager = new LockManager(lock, lockCallback, config.lockDelay);
         InstanceHelper.updateInstancePid(config.karafHome, config.karafBase);
         LOG.addHandler(BootstrapLogManager.getDefaultHandler());
 
@@ -231,6 +233,7 @@ public class Main {
         FrameworkFactory factory = loadFrameworkFactory(classLoader);
         framework = factory.newFramework(new StringMap(config.props, false));
         framework.init();
+        framework.getBundleContext().addFrameworkListener(lockCallback);
         framework.start();
 
         FrameworkStartLevel sl = framework.adapt(FrameworkStartLevel.class);
@@ -472,12 +475,30 @@ public class Main {
         }
     }
     
-    private final class KarafLockCallback implements LockCallBack {
+    public LockManager getLockManager() {
+        return lockManager;
+    }
+
+    private final class KarafLockCallback implements LockCallBack, FrameworkListener {
+        private Object startLevelLock = new Object();
+
         @Override
         public void lockLost() {
             if (framework.getState() == Bundle.ACTIVE) {
                 LOG.warning("Lock lost. Setting startlevel to " + config.lockStartLevel);
-                setStartLevel(config.lockStartLevel);
+                synchronized (startLevelLock) {
+                    setStartLevel(config.lockStartLevel);
+
+                    // we have to wait for the start level to be reduced here because
+                    // if the lock is regained before the start level is fully changed
+                    // things may not come up as expected
+                    LOG.fine("Waiting for start level change to complete...");
+                    try {
+                        startLevelLock.wait(config.shutdownTimeout);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
         }
 
@@ -492,6 +513,16 @@ public class Main {
         public void waitingForLock() {
             LOG.fine("Waiting for the lock ...");
         }
+
+        @Override
+        public void frameworkEvent(FrameworkEvent event) {
+            if (event.getType() == FrameworkEvent.STARTLEVEL_CHANGED) {
+                synchronized (startLevelLock) {
+                    LOG.fine("Start level change complete.");
+                    startLevelLock.notifyAll();
+                }
+            }
+       }
     }
 
 }
