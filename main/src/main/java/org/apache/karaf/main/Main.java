@@ -509,6 +509,13 @@ public class Main {
                     FileInputStream fis = new FileInputStream(propertiesFile);
                     props.load(fis);
                     int count = Integer.parseInt(props.getProperty("count"));
+
+                    // update root name if karaf.name got updated since the last container start
+                    String savedRootName = props.getProperty("item.0.name");
+                    if (savedRootName != null && isRoot && !savedRootName.equals(instanceName)) {
+                        props.setProperty("item.0.name", instanceName);
+                    }
+
                     for (int i = 0; i < count; i++) {
                         String name = props.getProperty("item." + i + ".name");
                         if (name.equals(instanceName)) {
