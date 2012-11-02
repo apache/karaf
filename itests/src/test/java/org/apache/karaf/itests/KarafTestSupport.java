@@ -15,6 +15,7 @@ package org.apache.karaf.itests;
 
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
+import org.apache.karaf.features.BootFinished;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.tooling.exam.options.LogLevelOption;
@@ -56,6 +57,12 @@ public class KarafTestSupport {
 
     @Inject
     protected FeaturesService featuresService;
+    
+    /**
+     * Make sure the boot features are installed before starting the test
+     */
+    @Inject
+    protected BootFinished bootFinished;
 
     @ProbeBuilder
     public TestProbeBuilder probeConfiguration(TestProbeBuilder probe) {
