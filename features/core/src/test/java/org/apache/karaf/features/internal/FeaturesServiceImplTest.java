@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.List;
 import java.util.LinkedList;
@@ -41,6 +42,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.FrameworkListener;
+import org.osgi.framework.InvalidSyntaxException;
 
 /**
  * Test cases for {@link FeaturesServiceImpl}
@@ -111,11 +113,14 @@ public class FeaturesServiceImplTest extends TestCase {
         assertSame("2.0.0", impl.getFeature("transaction", FeatureImpl.DEFAULT_VERSION).getVersion());
     }
 
-    public void testStartDoesNotFailWithOneInvalidUri()  {
+    public void testStartDoesNotFailWithOneInvalidUri() throws InvalidSyntaxException  {
         BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
         expect(bundleContext.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
         bundleContext.addFrameworkListener(EasyMock.<FrameworkListener>anyObject());
         bundleContext.removeFrameworkListener(EasyMock.<FrameworkListener>anyObject());
+        expect(bundleContext.registerService(EasyMock.<String>anyObject(), EasyMock.anyObject(), EasyMock.<Dictionary<String, ?>>anyObject()))
+        	.andReturn(null);
+        expect(bundleContext.createFilter("(objectClass=org.osgi.service.event.EventAdmin)")).andReturn(null);
         replay(bundleContext);
         FeaturesServiceImpl service = new FeaturesServiceImpl();
         service.setBundleContext(bundleContext);
@@ -129,10 +134,11 @@ public class FeaturesServiceImplTest extends TestCase {
 
     /**
      * This test checks KARAF-388 which allows you to specify version of boot feature.
+     * @throws InvalidSyntaxException 
      */
-    public void testStartDoesNotFailWithNonExistentVersion()  {
-        BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
-
+    public void testStartDoesNotFailWithNonExistentVersion() throws InvalidSyntaxException  {
+        BundleContext bundleContext = EasyMock.createNiceMock(BundleContext.class);
+        replay(bundleContext);
         final Map<String, Map<String, Feature>> features = new HashMap<String, Map<String,Feature>>();
         Map<String, Feature> versions = new HashMap<String, Feature>();
         versions.put("1.0.0", new FeatureImpl("transaction", "1.0.0"));
