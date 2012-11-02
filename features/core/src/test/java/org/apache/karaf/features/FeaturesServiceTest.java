@@ -513,11 +513,7 @@ public class FeaturesServiceTest extends TestCase {
 
         URI uri = tmp.toURI();
 
-        FeaturesServiceImpl svc = new FeaturesServiceImpl() {
-			@Override
-			protected void saveState() {
-			}
-        };
+        FeaturesServiceImpl svc = new FeaturesServiceImpl();
         svc.addRepository(uri);
 
         Feature feature = svc.getFeature("f2", "[0.1,0.3)");
