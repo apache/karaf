@@ -16,8 +16,6 @@
  */
 package org.apache.karaf.features.internal;
 
-import static java.lang.String.format;
-
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -57,7 +55,6 @@ import org.apache.felix.utils.manifest.Clause;
 import org.apache.felix.utils.manifest.Parser;
 import org.apache.felix.utils.version.VersionRange;
 import org.apache.felix.utils.version.VersionTable;
-import org.apache.karaf.features.BootFinished;
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.ConfigFileInfo;
 import org.apache.karaf.features.Feature;
@@ -77,7 +74,6 @@ import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.Version;
-import org.osgi.framework.startlevel.BundleStartLevel;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.packageadmin.PackageAdmin;
@@ -85,6 +81,8 @@ import org.osgi.service.startlevel.StartLevel;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static java.lang.String.format;
 
 /**
  * The Features service implementation.
@@ -451,9 +449,10 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
             List<Bundle> bundlesSortedByStartLvl = new ArrayList<Bundle>(state.bundles);
             if (respectStartLvlDuringFeatureStartup) {
                 Collections.sort(bundlesSortedByStartLvl, new Comparator<Bundle>() {
+                    @Override
                     public int compare(Bundle bundle, Bundle bundle1) {
-                        return bundle.adapt(BundleStartLevel.class).getStartLevel() -
-                               bundle1.adapt(BundleStartLevel.class).getStartLevel();
+                        return state.bundleInfos.get(bundle.getBundleId()).getStartLevel() -
+                                state.bundleInfos.get(bundle1.getBundleId()).getStartLevel();
                     }
                 });
             }
@@ -472,7 +471,6 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
                         if (bundleInfo == null || bundleInfo.isStart()) {
                             try {
                                 b.start();
-                                LOGGER.debug("Starting bundle " + b.getBundleId() + "-" + b.getSymbolicName() + " at level " + b.adapt(BundleStartLevel.class).getStartLevel());
                             } catch (BundleException be) {
                                 String msg = format("Could not start bundle %s in feature(s) %s: %s", b.getLocation(), getFeaturesContainingBundleList(b), be.getMessage());
                                 throw new Exception(msg, be);
@@ -1146,48 +1144,8 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
                     }
                     bootFeaturesInstalled = true;
                     saveState();
-                    publishBootFinished();
-                    LOGGER.info("Boot features installed");
-                    //restartSpringDm();
                 }
             }.start();
-        } else {
-        	publishBootFinished();
-        }
-    }
-    
-    /**
-     * Fix for issue where bundles using spring dm are sometimes not initialized
-     */
-    protected void restartSpringDm() {
-    	Bundle springDmExtender = getBundleByName("org.springframework.osgi.extender");
-    	if (springDmExtender != null) {
-    		try {
-    			LOGGER.info("Restarting spring dm extender");
-				springDmExtender.stop();
-				springDmExtender.start();
-			} catch (BundleException e) {
-				LOGGER.error("Error restarting spring dm");
-			}
-    	}
-	}
-
-	private Bundle getBundleByName(String name) {
-		if (bundleContext == null) {
-			return null;
-		}
-		for (Bundle bundle : bundleContext.getBundles()) {
-			if (name.equals(bundle.getSymbolicName())) {
-				return bundle;
-			}
-		}
-		return null;
-	}
-
-	private void publishBootFinished() {
-        if (bundleContext != null) {
-            BootFinished bootFinished = new BootFinished() {};
-            bundleContext.registerService(BootFinished.class.getName(), bootFinished, new Hashtable<String, String>());
         }
     }
 
