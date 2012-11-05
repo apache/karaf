@@ -122,6 +122,10 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
             if (debug) {
                 LOGGER.debug("Push back the user informations in the users properties.");
             }
+            if (user.contains("\\")) {
+                users.remove(user);
+                user = user.replace("\\", "\\\\");
+            }
             users.put(user, userInfos);
             try {
                 if (debug) {
