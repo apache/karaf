@@ -167,6 +167,10 @@
             <artifactId>org.apache.karaf.jaas.command</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.apache.karaf.jaas</groupId>
+            <artifactId>org.apache.karaf.jaas.authz</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.apache.karaf.management</groupId>
             <artifactId>org.apache.karaf.management.server</artifactId>
         </dependency>

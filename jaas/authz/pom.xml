@@ -22,16 +22,16 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.karaf.shell</groupId>
-        <artifactId>shell</artifactId>
+        <groupId>org.apache.karaf.jaas</groupId>
+        <artifactId>jaas</artifactId>
         <version>2.3.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>org.apache.karaf.shell.ssh</artifactId>
+    <artifactId>org.apache.karaf.jaas.authz</artifactId>
     <packaging>bundle</packaging>
-    <name>Apache Karaf :: Shell :: SSH</name>
-    <description>This bundle provides SSH support to the Karaf console.</description>
+    <name>Apache Karaf :: JAAS :: Authorization</name>
+    <description>Karaf authorization service.</description>
 
     <properties>
         <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
@@ -39,42 +39,24 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.apache.karaf.shell</groupId>
-            <artifactId>org.apache.karaf.shell.console</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>org.apache.karaf.jaas</groupId>
-            <artifactId>org.apache.karaf.jaas.modules</artifactId>
+            <artifactId>org.apache.karaf.jaas.boot</artifactId>
+            <scope>provided</scope>
         </dependency>
-
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
             <scope>provided</scope>
         </dependency>
-
         <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.compendium</artifactId>
+            <groupId>org.apache.aries.blueprint</groupId>
+            <artifactId>org.apache.aries.blueprint.core</artifactId>
             <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.gogo.runtime</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.junit</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.sshd</groupId>
-            <artifactId>sshd-core</artifactId>
         </dependency>
     </dependencies>
 
@@ -100,14 +82,11 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Import-Package>
-                            org.apache.felix.service.command,
-                            org.apache.felix.gogo.commands,
-                            org.apache.karaf.shell.console,
-                            org.apache.sshd.server.keyprovider,
-                            org.apache.sshd.server.jaas,
-                            *
-                        </Import-Package>
+                        <Export-Package>${project.artifactId};version=${project.version}</Export-Package>
+                        <Import-Package>!${project.artifactId},*</Import-Package>
+                        <Private-Package>
+                            ${project.artifactId}.impl;-split-package:=merge-first,
+                        </Private-Package>
                     </instructions>
                 </configuration>
             </plugin>
