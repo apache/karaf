@@ -58,7 +58,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.karaf.jaas</groupId>
-            <artifactId>org.apache.karaf.jaas.modules</artifactId>
+            <artifactId>org.apache.karaf.jaas.authz</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.karaf</groupId>

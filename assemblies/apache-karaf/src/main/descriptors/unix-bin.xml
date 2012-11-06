@@ -256,6 +256,7 @@
                 <include>org.apache.karaf.jaas:org.apache.karaf.jaas.config</include>
                 <include>org.apache.karaf.jaas:org.apache.karaf.jaas.modules</include>
                 <include>org.apache.karaf.jaas:org.apache.karaf.jaas.command</include>
+                <include>org.apache.karaf.jaas:org.apache.karaf.jaas.authz</include>
             </includes>
         </dependencySet>
         <dependencySet>

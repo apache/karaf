@@ -17,22 +17,14 @@
     limitations under the License.
 
 -->
-<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+           xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.2.0">
 
-    <service interface="org.apache.aries.blueprint.NamespaceHandler">
-        <service-properties>
-            <entry key="osgi.service.blueprint.namespace">
-                <array>
-                    <value>http://karaf.apache.org/xmlns/shell/v1.0.0</value>
-                    <value>http://karaf.apache.org/xmlns/shell/v1.1.0</value>
-                </array>
-            </entry>
-        </service-properties>
-        <bean class="org.apache.karaf.shell.console.commands.NamespaceHandler">
-            <property name="authorizationService">
-                <reference interface="org.apache.karaf.jaas.authz.AuthorizationService" />
-            </property>
-        </bean>
-    </service>
+    <service interface="org.apache.karaf.jaas.authz.AuthorizationService" ref="authorizationService"/>
+
+    <bean id="authorizationService" class="org.apache.karaf.jaas.authz.impl.AuthorizationServiceImpl">
+        <cm:managed-properties persistent-id="org.apache.karaf.jaas.authz"
+                               update-strategy="container-managed" />
+    </bean>
 
 </blueprint>
