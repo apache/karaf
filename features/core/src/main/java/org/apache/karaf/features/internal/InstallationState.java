@@ -30,5 +30,6 @@ public class InstallationState {
     final Set<Bundle> installed = new HashSet<Bundle>();
     final Set<Bundle> bundles = new TreeSet<Bundle>();
     final Map<Long, BundleInfo> bundleInfos = new HashMap<Long, BundleInfo>();
+    final Map<Bundle,Integer> bundleStartLevels = new HashMap<Bundle, Integer>();
     final Map<Feature, Set<Long>> features = new HashMap<Feature, Set<Long>>();
 }

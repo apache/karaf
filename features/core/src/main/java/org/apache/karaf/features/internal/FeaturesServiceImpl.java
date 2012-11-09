@@ -77,6 +77,9 @@ import static java.lang.String.format;
 public class FeaturesServiceImpl implements FeaturesService {
     private static final Logger LOGGER = LoggerFactory.getLogger(FeaturesServiceImpl.class);
 
+    private static final int KARAF_BUNDLE_START_LEVEL =
+            Integer.parseInt(System.getProperty("karaf.startlevel.bundle", "80"));
+
     private final BundleManager bundleManager;
     private final FeatureConfigInstaller configManager;
 
@@ -379,6 +382,7 @@ public class FeaturesServiceImpl implements FeaturesService {
                     state.bundles.addAll(s.bundles);
                     state.features.putAll(s.features);
                     state.installed.addAll(s.installed);
+                    state.bundleStartLevels.putAll(s.bundleStartLevels);
 
                     //Check if current feature satisfies the conditionals of existing features
                     for (Feature installedFeature : listInstalledFeatures()) {
@@ -392,6 +396,7 @@ public class FeaturesServiceImpl implements FeaturesService {
                     state.bundles.addAll(s.bundles);
                     state.features.putAll(s.features);
                     state.installed.addAll(s.installed);
+                    state.bundleStartLevels.putAll(s.bundleStartLevels);
             	} catch (Exception e) {
                     failure.bundles.addAll(s.bundles);
                     failure.features.putAll(s.features);
@@ -410,8 +415,7 @@ public class FeaturesServiceImpl implements FeaturesService {
                 Collections.sort(bundlesSortedByStartLvl, new Comparator<Bundle>() {
                     @Override
                     public int compare(Bundle bundle, Bundle bundle1) {
-                        return state.bundleInfos.get(bundle.getBundleId()).getStartLevel() -
-                                state.bundleInfos.get(bundle1.getBundleId()).getStartLevel();
+                        return state.bundleStartLevels.get(bundle) - state.bundleStartLevels.get(bundle1);
                     }
                 });
             }
@@ -514,6 +518,7 @@ public class FeaturesServiceImpl implements FeaturesService {
             int startLevel = getBundleStartLevel(bInfo.getStartLevel(),feature.getStartLevel());
             BundleInstallerResult result = bundleManager.installBundleIfNeeded(bInfo.getLocation(), startLevel, feature.getRegion());
             state.bundles.add(result.bundle);
+            state.bundleStartLevels.put(result.bundle, getBundleStartLevelForOrdering(startLevel));
             if (result.isNew) {
                 state.installed.add(result.bundle);
             }
@@ -534,6 +539,10 @@ public class FeaturesServiceImpl implements FeaturesService {
         return (bundleStartLevel > 0) ? bundleStartLevel : featureStartLevel;
     }
 
+    private int getBundleStartLevelForOrdering(int startLevel){
+        return startLevel == 0 ? KARAF_BUNDLE_START_LEVEL : startLevel;
+    }
+
     protected void doInstallFeatureConditionals(InstallationState state, Feature feature,  boolean verbose) throws Exception {
         //Check conditions of the current feature.
         for (Conditional conditional : feature.getConditional()) {
@@ -545,6 +554,7 @@ public class FeaturesServiceImpl implements FeaturesService {
                 state.bundles.addAll(s.bundles);
                 state.features.putAll(s.features);
                 state.installed.addAll(s.installed);
+                state.bundleStartLevels.putAll(s.bundleStartLevels);
             }
         }
     }
