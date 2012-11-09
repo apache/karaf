@@ -67,8 +67,10 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
     public List<String> getPrincipals(Subject subject) {
         List<String> principals = new ArrayList<String>();
-        for (Principal principal : subject.getPrincipals()) {
-            principals.add(principal.getClass().getName() + ":" + principal.getName());
+        if (subject != null) {
+            for (Principal principal : subject.getPrincipals()) {
+                principals.add(principal.getClass().getName() + ":" + principal.getName());
+            }
         }
         return principals;
     }
