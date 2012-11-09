@@ -96,6 +96,9 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FeaturesServiceImpl.class);
 
+    private static final int KARAF_BUNDLE_START_LEVEL =
+                        Integer.parseInt(System.getProperty("karaf.startlevel.bundle", "80"));
+
     private BundleContext bundleContext;
     private ConfigurationAdmin configAdmin;
     private PackageAdmin packageAdmin;
@@ -451,8 +454,11 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
                 Collections.sort(bundlesSortedByStartLvl, new Comparator<Bundle>() {
                     @Override
                     public int compare(Bundle bundle, Bundle bundle1) {
-                        return state.bundleInfos.get(bundle.getBundleId()).getStartLevel() -
-                                state.bundleInfos.get(bundle1.getBundleId()).getStartLevel();
+                        int startLevel = state.bundleInfos.get(bundle.getBundleId()).getStartLevel();
+                        startLevel = startLevel == 0 ? KARAF_BUNDLE_START_LEVEL : startLevel;
+                        int startLevel1 = state.bundleInfos.get(bundle1.getBundleId()).getStartLevel();
+                        startLevel1 = startLevel1 == 0 ? KARAF_BUNDLE_START_LEVEL : startLevel1;
+                        return startLevel - startLevel1;
                     }
                 });
             }
