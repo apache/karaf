@@ -156,39 +156,36 @@ public class ListBundles extends OsgiCommandSupport {
 	                    }
 	                }
 	                line += " [" + level + "] " + name;
-	                System.out.println(line);
-	
+
 	                if (admin != null) {
 	                    Bundle[] fragments = admin.getFragments(bundles[i]);
 	                    Bundle[] hosts = admin.getHosts(bundles[i]);
-	
 	                    if (fragments != null) {
-	                        System.out.print("                                       Fragments: ");
+                            line += ", Fragments: ";
 	                        int ii = 0;
 	                        for (Bundle fragment : fragments) {
 	                            ii++;
-	                            System.out.print(fragment.getBundleId());
+	                            line += fragment.getBundleId();
 	                            if ((fragments.length > 1) && ii < (fragments.length)) {
-	                                System.out.print(",");
+	                                line += ",";
 	                            }
 	                        }
-	                        System.out.println();
 	                    }
-	
 	                    if (hosts != null) {
-	                        System.out.print("                                       Hosts: ");
+	                        line += ", Hosts: ";
 	                        int ii = 0;
 	                        for (Bundle host : hosts) {
 	                            ii++;
-	                            System.out.print(host.getBundleId());
+	                            line += host.getBundleId();
 	                            if ((hosts.length > 1) && ii < (hosts.length)) {
-	                                System.out.print(",");
+	                                line += ",";
 	                            }
 	                        }
-	                        System.out.println();
 	                    }
 	
 	                }
+
+                    System.out.println(line);
 	            }
             }
         }
