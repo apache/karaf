@@ -108,6 +108,7 @@
                 <configuration>
                     <instructions>
                         <Import-Package>
+                            javax.net,
                             org.apache.aries.blueprint,
                             org.osgi.service.blueprint.container,
                             org.osgi.service.blueprint.reflect,
