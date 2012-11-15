@@ -106,6 +106,7 @@
                 <configuration>
                     <instructions>
                         <Import-Package>
+                            javax.net,
                             org.apache.karaf.jaas.config,
                             org.apache.aries.blueprint.ext,
                             *
