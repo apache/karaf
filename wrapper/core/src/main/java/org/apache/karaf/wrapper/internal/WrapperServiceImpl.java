@@ -51,6 +51,7 @@ public class WrapperServiceImpl implements WrapperService {
         }
 
         HashMap<String, String> props = new HashMap<String, String>();
+        props.put("${java.home}", System.getProperty("java.home"));
         props.put("${karaf.home}", System.getProperty("karaf.home"));
         props.put("${karaf.base}", base.getPath());
         props.put("${karaf.data}", System.getProperty("karaf.data"));
