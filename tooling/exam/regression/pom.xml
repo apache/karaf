@@ -28,7 +28,6 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <groupId>org.apache.karaf.tooling.exam</groupId>
     <artifactId>regression</artifactId>
     <packaging>jar</packaging>
 
@@ -38,7 +37,6 @@
         <dependency>
             <groupId>org.apache.karaf.tooling.exam</groupId>
             <artifactId>org.apache.karaf.tooling.exam.container</artifactId>
-            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -51,11 +49,18 @@
             <artifactId>apache-karaf</artifactId>
             <type>zip</type>
             <scope>test</scope>
-            <version>${project.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.karaf</groupId>
                     <artifactId>org.apache.karaf.client</artifactId>
+                </exclusion>
+                <exclusion>
+                	<artifactId>osgi</artifactId>
+                	<groupId>org.eclipse</groupId>
+                </exclusion>
+                <exclusion>
+                	<artifactId>org.apache.felix.framework</artifactId>
+                	<groupId>org.apache.felix</groupId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -64,11 +69,18 @@
             <artifactId>apache-karaf</artifactId>
             <type>tar.gz</type>
             <scope>test</scope>
-            <version>${project.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.karaf</groupId>
                     <artifactId>org.apache.karaf.client</artifactId>
+                </exclusion>
+                <exclusion>
+                	<artifactId>osgi</artifactId>
+                	<groupId>org.eclipse</groupId>
+                </exclusion>
+                <exclusion>
+                	<artifactId>org.apache.felix.framework</artifactId>
+                	<groupId>org.apache.felix</groupId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -77,34 +89,28 @@
             <artifactId>standard</artifactId>
             <type>xml</type>
             <classifier>features</classifier>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.karaf.features</groupId>
             <artifactId>org.apache.karaf.features.core</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.karaf.system</groupId>
             <artifactId>org.apache.karaf.system.core</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.karaf.osgi</groupId>
+            <groupId>org.osgi</groupId>
             <artifactId>org.osgi.compendium</artifactId>
             <scope>test</scope>
-            <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>org.apache.karaf.osgi</groupId>
+            <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
-            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.ops4j.pax.tinybundles</groupId>
             <artifactId>tinybundles</artifactId>
-            <version>${pax.tinybundle.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
