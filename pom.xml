@@ -35,7 +35,6 @@
     <inceptionYear>2007</inceptionYear>
 
     <modules>
-        <module>osgi</module>
         <module>util</module>
         <module>main</module>
         <module>features</module>
@@ -201,8 +200,8 @@
         <log4j.version>1.2.17</log4j.version>
         <maven.version>2.0.9</maven.version>
         <mina.version>2.0.7</mina.version>
-        <osgi.version>4.3.0</osgi.version>
-        <osgi.compendium.version>4.3.0</osgi.compendium.version>
+        <osgi.version>4.3.1</osgi.version>
+        <osgi.compendium.version>4.3.1</osgi.compendium.version>
         <pax.exam.version>2.4.0</pax.exam.version>
         <pax.logging.version>1.7.0</pax.logging.version>
         <pax.runner.version>1.7.6</pax.runner.version>
@@ -320,18 +319,6 @@
 
     <dependencyManagement>
         <dependencies>
-            <!-- It will be removed with new OSGi spec artifacts -->
-            <dependency>
-                <groupId>org.apache.karaf.osgi</groupId>
-                <artifactId>org.osgi.core</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <!-- It will be removed with new OSGi spec artifacts -->
-            <dependency>
-            	<groupId>org.apache.karaf.osgi</groupId>
-	            <artifactId>org.osgi.compendium</artifactId>
-                <version>${project.version}</version>
-            </dependency>
             <dependency>
                 <groupId>org.osgi</groupId>
                 <artifactId>org.osgi.core</artifactId>
