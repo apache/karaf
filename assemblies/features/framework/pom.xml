@@ -289,7 +289,7 @@
                                     <destFileName>karaf.jar</destFileName>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.apache.karaf.osgi</groupId>
+                                    <groupId>org.osgi</groupId>
                                     <artifactId>org.osgi.core</artifactId>
                                     <outputDirectory>target/classes/resources/lib</outputDirectory>
                                     <destFileName>karaf-org.osgi.core.jar</destFileName>
