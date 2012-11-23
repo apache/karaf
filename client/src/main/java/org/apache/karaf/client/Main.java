@@ -79,7 +79,16 @@ public class Main {
             client.start();
             ClientSession session = connectWithRetries(client, config);
             if (!session.authAgent(config.getUser()).await().isSuccess()) {
-                String password = readLine("Password: ");
+                String password = null;
+                Console console = System.console();
+                if (console != null) {
+                    char[] readPassword = console.readPassword("Password: ");
+                    if (readPassword != null) {
+                        password = new String(readPassword);
+                    }
+                } else {
+                    throw new Exception("Unable to prompt password: could not get system console");
+                }
                 if (!session.authPassword(config.getUser(), password).await().isSuccess()) {
                     throw new Exception("Authentication failure");
                 }
