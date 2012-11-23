@@ -16,15 +16,7 @@
  */
 package org.apache.karaf.client;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.InterruptedIOException;
-import java.io.ObjectInputStream;
-import java.io.Reader;
+import java.io.*;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.security.KeyPair;
@@ -157,7 +149,15 @@ public class Main {
             } while (session == null);
             if (!session.authAgent(user).await().isSuccess()) {
                 if (password == null) {
-                    password = readLine("Password: ");
+                    Console console = System.console();
+                    if (console != null) {
+                        char[] readPassword = console.readPassword("Password: ");
+                        if (readPassword != null) {
+                            password = new String(readPassword);
+                        }
+                    } else {
+                        throw new Exception("Unable to prompt password: could not get system console");
+                    }
                 }
                 if (!session.authPassword(user, password).await().isSuccess()) {
                     throw new Exception("Authentication failure");
