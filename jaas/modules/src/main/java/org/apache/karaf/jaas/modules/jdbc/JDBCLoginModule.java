@@ -46,7 +46,7 @@ public class JDBCLoginModule extends AbstractKarafLoginModule {
     public static final String INSERT_ROLE_STATEMENT = "insert.role";
     public static final String DELETE_ROLE_STATEMENT = "delete.role";
     public static final String DELETE_ROLES_STATEMENT = "delete.roles";
-    public static final String DELETE_USER_STATEMENT = "delete.roles";
+    public static final String DELETE_USER_STATEMENT = "delete.user";
 
     private String datasourceURL;
     protected String passwordQuery = "SELECT PASSWORD FROM USERS WHERE USERNAME=?";
