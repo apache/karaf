@@ -161,6 +161,8 @@ public class Console implements Runnable
         running = false;
         CommandSessionHolder.unset();
         pipe.interrupt();
+        thread.interrupt();
+        reader.shutdown();
         if (closedByUser && closeCallback != null) {
             closeCallback.run();
         }
