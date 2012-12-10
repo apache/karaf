@@ -35,11 +35,14 @@ public class SshServerAction extends OsgiCommandSupport implements BlueprintCont
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    @Option(name="-p", aliases={ "--port" }, description = "The port to setup the SSH server (Default: 8101)", required = false, multiValued = false)
+    @Option(name = "-p", aliases = { "--port" }, description = "The port to setup the SSH server (Default: 8101)", required = false, multiValued = false)
     private int port = 8101;
 
-    @Option(name="-b", aliases={ "--background"}, description = "The service will run in the background (Default: true)", required = false, multiValued = false)
+    @Option(name = "-b", aliases = { "--background"}, description = "The service will run in the background (Default: true)", required = false, multiValued = false)
     private boolean background = true;
+
+    @Option(name = "-i", aliases = { "--idle-timeout" }, description = "The session idle timeout (Default: 60000ms)", required = false, multiValued = false)
+    private long idleTimeout = 60000;
 
     private BlueprintContainer container;
 
@@ -59,11 +62,16 @@ public class SshServerAction extends OsgiCommandSupport implements BlueprintCont
 
         log.debug("Created server: {}", server);
 
+        // port number
         server.setPort(port);
 
+        // idle timeout
+        server.getProperties().put(SshServer.IDLE_TIMEOUT, new Long(idleTimeout).toString());
+
+        // starting the SSHd server
         server.start();
 
-        System.out.println("SSH server listening on port " + port);
+        System.out.println("SSH server listening on port " + port + " (idle timeout " + idleTimeout + "ms)");
 
         if (!background) {
             synchronized (this) {
