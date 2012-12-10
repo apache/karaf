@@ -39,6 +39,7 @@
         <cm:default-properties>
             <cm:property name="sshPort" value="8101"/>
             <cm:property name="sshHost" value="0.0.0.0"/>
+            <cm:property name="sshIdleTimeout" value="60000"/>
             <cm:property name="sshRealm" value="karaf"/>
             <cm:property name="sshRole" value="$[karaf.admin.role]"/>
             <cm:property name="hostKey" value="$[karaf.base]/etc/host.key"/>
@@ -122,6 +123,7 @@
           destroy-method="stop" activation="eager">
         <argument ref="sshServer"/>
         <property name="start" value="$[karaf.startRemoteShell]"/>
+        <property name="idleTimeout" value="${sshIdleTimeout}"/>
     </bean>
 
     <reference id="commandProcessor" interface="org.apache.felix.service.command.CommandProcessor">
