@@ -26,6 +26,7 @@ public class SshServerFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SshServerFactory.class);
 
+    private long idleTimeout;
     private boolean start;
 
     private SshServer server;
@@ -42,9 +43,18 @@ public class SshServerFactory {
         this.start = start;
     }
 
+    public long getIdleTimeout() {
+        return idleTimeout;
+    }
+
+    public void setIdleTimeout(long idleTimeout) {
+        this.idleTimeout = idleTimeout;
+    }
+
     public void start() {
         if (start) {
             try {
+                server.getProperties().put(SshServer.IDLE_TIMEOUT, new Long(idleTimeout).toString());
                 server.start();
             } catch (Exception e) {
                 LOGGER.info("Error updating SSH server", e);
