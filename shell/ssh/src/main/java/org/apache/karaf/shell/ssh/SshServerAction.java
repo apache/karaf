@@ -41,8 +41,8 @@ public class SshServerAction extends OsgiCommandSupport implements BlueprintCont
     @Option(name = "-b", aliases = { "--background"}, description = "The service will run in the background (Default: true)", required = false, multiValued = false)
     private boolean background = true;
 
-    @Option(name = "-i", aliases = { "--idle-timeout" }, description = "The session idle timeout (Default: 60000ms)", required = false, multiValued = false)
-    private long idleTimeout = 60000;
+    @Option(name = "-i", aliases = { "--idle-timeout" }, description = "The session idle timeout (Default: 1800000ms)", required = false, multiValued = false)
+    private long idleTimeout = 1800000;
 
     private BlueprintContainer container;
 
