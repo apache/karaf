@@ -24,7 +24,8 @@
     <parent>
         <groupId>org.apache</groupId>
         <artifactId>apache</artifactId>
-        <version>11</version>
+        <version>12</version>
+        <relativePath />
     </parent>
 
     <groupId>org.apache.karaf</groupId>
