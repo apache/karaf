@@ -68,12 +68,12 @@ class StartupListener implements FrameworkListener, SynchronousBundleListener {
         }
     }
     public void showProgressBar(int done, int total) {
-        // progress bar can only have 73 characters so that 80 char wide terminal will display properly
+        // progress bar can only have 72 characters so that 80 char wide terminal will display properly
         int percent = (done * 100) / total;
-        int scaledPercent = (int) (73.0 * (percent / 100.0));
+        int scaledPercent = (int) (72.0 * (percent / 100.0));
         StringBuilder sb = new StringBuilder();
         sb.append(String.format("\r%3d%% [", percent));
-        for (int i = 0; i < 73; i++) {
+        for (int i = 0; i < 72; i++) {
             if (i < scaledPercent) {
                 sb.append('=');
             } else if (i == scaledPercent) {
