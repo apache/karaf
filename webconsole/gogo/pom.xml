@@ -105,6 +105,7 @@
                     <instructions>
                         <Import-Package>
                             jline;version="[${jline.version}, ${jline.version}]",
+                            org.apache.felix.webconsole;version="[3,5)",
                             *
                         </Import-Package>
                         <Embed-Dependency>
