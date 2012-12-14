@@ -579,7 +579,7 @@ public class Main {
                             //looking for root instance entry
                             String name = props.getProperty("item." + i + ".name");
                             boolean root = Boolean.parseBoolean(props.getProperty("item." + i + ".root", "false"));
-                            if (root && !name.equals(instanceName)) {
+                            if (name != null && root && !name.equals(instanceName)) {
                                 props.setProperty("item." + i + ".name", instanceName);
                             }
                         }
