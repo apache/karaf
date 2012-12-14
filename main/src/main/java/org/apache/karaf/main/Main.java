@@ -511,9 +511,15 @@ public class Main {
                     int count = Integer.parseInt(props.getProperty("count"));
 
                     // update root name if karaf.name got updated since the last container start
-                    String savedRootName = props.getProperty("item.0.name");
-                    if (savedRootName != null && isRoot && !savedRootName.equals(instanceName)) {
-                        props.setProperty("item.0.name", instanceName);
+                    if (isRoot) {
+                        for (int i = 0; i < count; i++) {
+                            //looking for root instance entry
+                            String name = props.getProperty("item." + i + ".name");
+                            boolean root = Boolean.parseBoolean(props.getProperty("item." + i + ".root", "false"));
+                            if (root && !name.equals(instanceName)) {
+                                props.setProperty("item." + i + ".name", instanceName);
+                            }
+                        }
                     }
 
                     for (int i = 0; i < count; i++) {
