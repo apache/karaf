@@ -137,7 +137,7 @@
         <felix.eventadmin.version>1.3.2</felix.eventadmin.version>
         <felix.eventadmin-plugin.version>1.0.2</felix.eventadmin-plugin.version>
         <felix.obr.version>1.0.2</felix.obr.version>
-        <felix.scr.version>1.6.0</felix.scr.version>
+        <felix.scr.version>1.6.2</felix.scr.version>
         <aries.application.version>1.0.0</aries.application.version>
         <aries.application.api.version>1.0.0</aries.application.api.version>
         <aries.application.management.version>1.0.0</aries.application.management.version>
