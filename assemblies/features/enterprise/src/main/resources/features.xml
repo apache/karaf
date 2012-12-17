@@ -22,6 +22,14 @@
 
     <feature name="transaction" description="OSGi Transaction Manager" version="${aries.transaction.version}" resolver="(obr)">
         <details>JTA implementation provided by Apache Aries Transaction ${aries.transaction.version}</details>
+        <config name="org.apache.aries.transaction">
+            aries.transaction.recoverable = true
+            aries.transaction.timeout = 600
+            aries.transaction.howl.logFileDir = ${karaf.data}/txlog
+            aries.transaction.howl.maxLogFiles = 2
+            aries.transaction.howl.maxBlocksPerFile = 512
+            aries.transaction.howl.bufferSizeKBytes = 4
+        </config>
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.transaction/org.apache.aries.transaction.blueprint/${aries.transaction.blueprint.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.transaction/org.apache.aries.transaction.manager/${aries.transaction.manager.version}</bundle>
