@@ -45,7 +45,6 @@ public abstract class ConfigCommandSupport extends OsgiCommandSupport {
     public static final String PROPERTY_CONFIG_PID = "ConfigCommand.PID";
     public static final String PROPERTY_CONFIG_PROPS = "ConfigCommand.Props";
     private static final String PID_FILTER = "(service.pid=%s*)";
-    private static final String FILE_PREFIX = "file:";
     private static final String CONFIG_SUFFIX = ".cfg";
     private static final String FACTORY_SEPARATOR = "-";
     private static final String FILEINSTALL_FILE_NAME = "felix.fileinstall.filename";
@@ -102,16 +101,21 @@ public abstract class ConfigCommandSupport extends OsgiCommandSupport {
      * @return
      */
     public Configuration findConfigurationByFileName(ConfigurationAdmin admin, String fileName) throws IOException, InvalidSyntaxException {
-        if (fileName != null && fileName.contains(FACTORY_SEPARATOR)) {
-            String factoryPid = fileName.substring(0, fileName.lastIndexOf(FACTORY_SEPARATOR));
-            String absoluteFileName = FILE_PREFIX + storage.getAbsolutePath() + File.separator + fileName + CONFIG_SUFFIX;
+        if (fileName != null) {
+            String factoryPid = fileName;
+            if (fileName.contains(FACTORY_SEPARATOR)) {
+                factoryPid = fileName.substring(0, fileName.lastIndexOf(FACTORY_SEPARATOR));
+            }
             Configuration[] configurations = admin.listConfigurations(String.format(PID_FILTER, factoryPid));
             if (configurations != null) {
                 for (Configuration configuration : configurations) {
                     Dictionary dictionary = configuration.getProperties();
                     if (dictionary != null) {
                         String fileInstallFileName = (String) dictionary.get(FILEINSTALL_FILE_NAME);
-                        if (absoluteFileName.equals(fileInstallFileName)) {
+                        int indexOfFileNameStart = fileInstallFileName.lastIndexOf("/");
+                        int indexOfFileNameEnd = fileInstallFileName.lastIndexOf(CONFIG_SUFFIX);
+                        String relativeFileName = fileInstallFileName.substring(indexOfFileNameStart + 1, indexOfFileNameEnd);
+                        if (fileName.equals(relativeFileName)) {
                             return configuration;
                         }
                     }
