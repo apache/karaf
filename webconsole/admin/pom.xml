@@ -115,6 +115,7 @@
                     <instructions>
                         <Import-Package>
                             org.apache.felix.webconsole;version="[3,5)",
+                            org.apache.karaf.admin;resolution:=optional,
                             *
                         </Import-Package>
                         <Embed-Dependency>
