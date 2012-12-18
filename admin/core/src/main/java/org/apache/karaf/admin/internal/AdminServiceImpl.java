@@ -139,6 +139,7 @@ public class AdminServiceImpl implements AdminService {
     
     public synchronized void refreshInstance() throws Exception {
         try {
+            init();
             File storageFile = new File(storageLocation, STORAGE_FILE);
             if (!storageFile.isFile()) {
                 if (storageFile.exists()) {
@@ -168,6 +169,11 @@ public class AdminServiceImpl implements AdminService {
     }
 
     public synchronized Instance createInstance(String name, InstanceSettings settings) throws Exception {
+        try {
+            init();
+        } catch (Exception e) {
+            LOGGER.warn("Unable to reload Karaf instance list", e);
+        }
         if (instances.get(name) != null) {
             throw new IllegalArgumentException("Instance '" + name + "' already exists");
         }
@@ -275,6 +281,11 @@ public class AdminServiceImpl implements AdminService {
     }
 
     public synchronized Instance getInstance(String name) {
+        try {
+            init();
+        } catch (Exception e) {
+            LOGGER.warn("Unable to reload Karaf instance list", e);
+        }
         return instances.get(name);
     }
 
@@ -283,6 +294,11 @@ public class AdminServiceImpl implements AdminService {
     }
 
     public synchronized void renameInstance(String oldName, String newName) throws Exception {
+        try {
+            init();
+        } catch (Exception e) {
+            LOGGER.warn("Unable to reload Karaf instance list", e);
+        }
         if (instances.get(newName) != null) {
             throw new IllegalArgumentException("Instance " + newName + " already exists");
         }
