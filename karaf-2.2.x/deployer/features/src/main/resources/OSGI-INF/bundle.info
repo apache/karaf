@@ -1,0 +1,15 @@
+\u001B[1mSYNOPSIS\u001B[0m
+    ${project.name}
+
+    ${project.description}
+
+    Maven URL:
+        \u001B[33mmvn:${project.groupId}/${project.artifactId}/${project.version}\u001B[0m
+
+\u001B[1mDESCRIPTION\u001B[0m
+    The features deployer allow you to drop directly a XML features descriptor in the Karaf deploy directory.
+
+    Karaf will resolve and deploy all features and bundles contained in this features descriptor.
+
+\u001B[1mSEE ALSO\u001B[0m
+    \u001B[31mDeployer\u001B[0m section of the Karaf User Guide.

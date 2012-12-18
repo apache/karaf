@@ -1,0 +1,34 @@
+\u001B[1mSYNOPSIS\u001B[0m
+    ${project.name}
+
+    ${project.description}
+
+    Maven URL:
+        \u001B[33mmvn:${project.groupId}/${project.artifactId}/${project.version}\u001B[0m
+
+\u001B[1mDESCRIPTION\u001B[0m
+    This bundle provides various shell commands.
+
+    The following commands are available:
+    \u001B[36mshell:cat\u001B[0m Displays the content of a file or url.
+    \u001B[36mshell:clear\u001B[0m Clears the console buffer.
+    \u001B[36mshell:each\u001B[0m Execute a closure on a list of arguments.
+    \u001B[36mshell:echo\u001B[0m Echoes or prints arguments to STDOUT.
+    \u001B[36mshell:exec\u001B[0m Executes system processes.
+    \u001B[36mshell:grep\u001B[0m Prints lines matching the given pattern.
+    \u001B[36mshell:head\u001B[0m Displays the first lines of a file.
+    \u001B[36mshell:history\u001B[0m Prints command history.
+    \u001B[36mshell:if\u001B[0m If/Then/Else block.
+    \u001B[36mshell:info\u001B[0m Prints system information.
+    \u001B[36mshell:java\u001B[0m Executes a Java standard application.
+    \u001B[36mshell:logout\u001B[0m Disconnects shell from current session.
+    \u001B[36mshell:more\u001B[0m File pager.
+    \u001B[36mshell:new\u001B[0m Creates a new java object.
+    \u001B[36mshell:printf\u001B[0m Formats and prints arguments.
+    \u001B[36mshell:sleep\u001B[0m Sleeps for a bit then wakes up.
+    \u001B[36mshell:sort\u001B[0m Writes sorted concatenation of all files to standard output.
+    \u001B[36mshell:tac\u001B[0m Captures the STDIN and returns it as a string. Optionally writes the content to a file.
+    \u001B[36mshell:tail\u001B[0m Displays the last lines of a file.
+
+\u001B[1mSEE ALSO\u001B[0m
+    \u001B[36mCommands\u001B[0m and \u001B[36mUsing the console\u001B[0m sections of the Karaf User Guide.

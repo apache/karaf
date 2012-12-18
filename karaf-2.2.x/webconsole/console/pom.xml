@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <!--
+
+        Licensed to the Apache Software Foundation (ASF) under one or more
+        contributor license agreements.  See the NOTICE file distributed with
+        this work for additional information regarding copyright ownership.
+        The ASF licenses this file to You under the Apache License, Version 2.0
+        (the "License"); you may not use this file except in compliance with
+        the License.  You may obtain a copy of the License at
+
+           http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+    -->
+
+    <modelVersion>4.0.0</modelVersion>
+  
+    <parent>
+        <groupId>org.apache.karaf.webconsole</groupId>
+        <artifactId>webconsole</artifactId>
+        <version>2.2.10</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>org.apache.karaf.webconsole.console</artifactId>
+    <packaging>bundle</packaging>
+    <name>Apache Karaf :: Web Console :: Console</name>
+    <description>This bundle is a repackaging of the Felix Web console with small security related changed.</description>
+
+    <properties>
+        <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
+    </properties>
+
+    <dependencies>
+        <dependency>
+          <groupId>org.apache.geronimo.specs</groupId>
+          <artifactId>geronimo-servlet_2.5_spec</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>org.osgi</groupId>
+          <artifactId>org.osgi.core</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>org.osgi</groupId>
+          <artifactId>org.osgi.compendium</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.webconsole</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>commons-fileupload</groupId>
+            <artifactId>commons-fileupload</artifactId>
+            <version>1.1.1</version>
+            <scope>provided</scope>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>1.4</version>
+            <scope>provided</scope>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20070829</version>
+            <scope>provided</scope>
+            <optional>true</optional>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/*.info</include>
+                </includes>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <version>${felix.plugin.version}</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Bundle-SymbolicName>
+                            ${project.artifactId}
+                        </Bundle-SymbolicName>
+                        <Bundle-Vendor>
+                            The Apache Software Foundation
+                        </Bundle-Vendor>
+                        <Bundle-DocURL>
+                            http://felix.apache.org/site/apache-felix-web-console.html
+                        </Bundle-DocURL>
+                        <Bundle-Activator>
+                            org.apache.felix.webconsole.internal.KarafOsgiManagerActivator
+                        </Bundle-Activator>
+                        <Export-Package>
+                            org.apache.felix.webconsole;version=${felix.webconsole.version}
+                        </Export-Package>
+                        <Private-Package>
+                            !org.apache.felix.webconsole,
+                            org.apache.felix.webconsole.*;-split-package:=merge-first,
+                        </Private-Package>
+                        <Import-Package>
+                            org.apache.felix.scr;version=1.0;resolution:=optional,
+                            org.osgi.service.http,
+                            org.apache.felix.shell;
+                            org.osgi.service.*;resolution:=optional,
+                            javax.portlet;resolution:=optional,
+                            javax.servlet.*;version=2.4,
+                            *
+                        </Import-Package>
+                        <DynamicImport-Package>
+                            org.apache.felix.bundlerepository,
+                            org.osgi.service.obr
+                        </DynamicImport-Package>
+                        <Embed-Dependency>
+                            <!-- Webconsole -->
+                            org.apache.felix.webconsole;inline=**,
+
+                            <!-- Import/Export-Package parsing -->
+                            org.apache.felix.utils;inline=org/apache/felix/utils/manifest/**,
+                            org.apache.felix.framework;inline=org/apache/felix/framework/util/VersionRange**,
+
+                            <!-- ServiceTracker -->
+                            org.osgi.compendium;
+                                inline=org/osgi/util/tracker/*,
+
+                            <!-- Required for JSON data transfer -->
+                            json,
+
+                            <!-- File Upload functionality -->
+                            commons-fileupload,
+
+                            <!-- Required by FileUpload and Util -->
+                            commons-io
+                        </Embed-Dependency>
+
+                        <_removeheaders>
+                            Embed-Dependency,Private-Package,Include-Resource
+                        </_removeheaders>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

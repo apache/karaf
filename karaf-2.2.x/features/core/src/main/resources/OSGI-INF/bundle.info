@@ -1,0 +1,17 @@
+\u001B[1mSYNOPSIS\u001B[0m
+    ${project.name}
+
+    ${project.description}
+
+    Maven URL:
+        \u001B[33mmvn:${project.groupId}/${project.artifactId}/${project.version}\u001B[0m
+
+\u001B[1mDESCRIPTION\u001B[0m
+    This bundle is the core implementation of the Karaf features support.
+
+    Karaf provides a simple, yet flexible, way to provision applications or "features". Such a mechanism is mainly
+    provided by a set of commands available in the features shell. The provisioning system uses xml "repositories"
+    that define a set of features.
+
+\u001B[1mSEE ALSO\u001B[0m
+    \u001B[36mProvisioning\u001B[0m section of the Karaf User Guide.

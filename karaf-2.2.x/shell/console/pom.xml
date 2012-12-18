@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <!-- Licensed to the Apache Software Foundation (ASF) under one or more 
+        contributor license agreements. See the NOTICE file distributed with this 
+        work for additional information regarding copyright ownership. The ASF licenses 
+        this file to You under the Apache License, Version 2.0 (the "License"); you 
+        may not use this file except in compliance with the License. You may obtain 
+        a copy of the License at http://www.apache.org/licenses/LICENSE-2.0 Unless 
+        required by applicable law or agreed to in writing, software distributed 
+        under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES 
+        OR CONDITIONS OF ANY KIND, either express or implied. See the License for 
+        the specific language governing permissions and limitations under the License. -->
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.apache.karaf.shell</groupId>
+        <artifactId>shell</artifactId>
+        <version>2.2.10</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>org.apache.karaf.shell.console</artifactId>
+    <packaging>bundle</packaging>
+    <name>Apache Karaf :: Shell :: Console</name>
+    <description>This bundle provides OSGi shell integration and console support.</description>
+
+    <properties>
+        <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>jline</groupId>
+            <artifactId>jline</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.fusesource.jansi</groupId>
+            <artifactId>jansi</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.jaas</groupId>
+            <artifactId>org.apache.karaf.jaas.boot</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.jaas</groupId>
+            <artifactId>org.apache.karaf.jaas.modules</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.aries.blueprint</groupId>
+            <artifactId>org.apache.aries.blueprint</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.gogo.runtime</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/*.info</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>${project.basedir}/src/main/filtered-resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>Main</mainClass>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <configuration>
+                    <instructions>
+                        <Import-Package>
+                            org.osgi.service.event;resolution:=optional,
+                            org.apache.karaf.branding;resolution:=optional,
+                            *
+                        </Import-Package>
+                        <Export-Package>
+                            org.apache.felix.gogo*;version=${felix.gogo.version};-split-package:=merge-first,
+                            org.apache.felix.service.command;version=${felix.gogo.version};status=provisional;mandatory:=status;-split-package:=merge-first,
+                            org.apache.felix.service.threadio;version=${felix.gogo.version};status=provisional;mandatory:=status;-split-package:=merge-first,
+                            org.apache.karaf.shell.console*;version=${project.version};-split-package:=merge-first,
+                            org.fusesource.jansi;version=${jansi.version};-split-package:=merge-first,
+                            jline*;version=${jline.version};-split-package:=merge-first,
+                            org.fusesource.hawtjni*;version=1.0;-split-package:=merge-first
+                        </Export-Package>
+                        <Private-Package>
+                            org.fusesource.jansi.internal;-split-package:=merge-first,
+                            org.apache.felix.gogo.runtime*;-split-package:=merge-first,
+                            META-INF.native.*;-split-package:=merge-first
+                        </Private-Package>
+                        <Bundle-NativeCode>
+                            META-INF/native/windows32/jansi.dll;osname=Win32;processor=x86,
+                            META-INF/native/windows64/jansi.dll;osname=Win32;processor=x86-64,
+                            *
+                        </Bundle-NativeCode>
+                        <Bundle-Activator>
+                            org.apache.karaf.shell.console.jline.Activator
+                        </Bundle-Activator>
+                        <Main-Class>
+                            org.apache.karaf.shell.console.Main
+                        </Main-Class>
+                        <Export-Service>
+                            org.apache.felix.service.threadio.ThreadIO,
+                            org.apache.felix.service.command.CommandProcessor,
+                            org.apache.felix.service.command.Converter
+                        </Export-Service>
+                    </instructions>
+                    <unpackBundle>true</unpackBundle>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

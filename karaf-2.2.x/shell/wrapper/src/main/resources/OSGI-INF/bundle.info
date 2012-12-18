@@ -1,0 +1,15 @@
+\u001B[1mSYNOPSIS\u001B[0m
+    ${project.name}
+
+    ${project.description}
+
+    Maven URL:
+        \u001B[33mmvn:${project.groupId}/${project.artifactId}/${project.version}\u001B[0m
+
+\u001B[1mDESCRIPTION\u001B[0m
+    This bundle provides support of the service wrapper.
+
+    The service wrapper allows you to start/stop Karaf as a system service.
+
+\u001B[1mSEE ALSO\u001B[0m
+    \u001B[36mService Wrapper\u001B[0m section of the Karaf User Guide.

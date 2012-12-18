@@ -1,0 +1,67 @@
+//
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+//
+// This script is run each time a shell is created.
+// You can define here closures or variables that will be available
+// in each session.
+//
+ld = { log:display $args } ;
+lde = { log:display-exception $args } ;
+la = { osgi:list -t 0 $args } ;
+cl = { config:list "(service.pid=$args)" } ;
+man = { help $args } ;
+watch = { shell:command-watch $args } ;
+
+// system:* aliases
+system:shutdown = { osgi:shutdown $args } ;
+system:start-level = { osgi:start-level $args } ;
+
+// service:* aliases
+service:list = { ls $args } ;
+
+// bundle:* aliases
+bundle:list = { osgi:list $args } ;
+bundle:install = { osgi:install $args };
+bundle:uninstall = { osgi:uninstall $args } ;
+bundle:start = { osgi:start $args } ;
+bundle:stop = { osgi:stop $args } ;
+bundle:headers = { osgi:headers $args } ;
+bundle:info = { osgi:info $args } ;
+bundle:refresh = { osgi:refresh $args } ;
+bundle:resolve = { osgi:resolve $args } ;
+bundle:restart = { osgi:restart $args } ;
+bundle:start-level = { osgi:start-level $args } ;
+bundle:update = { osgi:update $args } ;
+
+// package:* aliases
+package:export = { packages:exports $args } ;
+package:import = { packages:imports $args } ;
+
+// feature:* aliases
+feature:add-url = { features:addurl $args } ;
+feature:repo-add = { features:addurl $args } ;
+feature:refresh-url = { features:refreshurl $args } ;
+feature:info = { features:info $args } ;
+feature:remove-repository = { features:removerepository $args } ;
+feature:install = { features:install $args } ;
+feature:remove-url = { features:removeurl $args } ;
+feature:list = { features:list $args } ;
+feature:uninstall = { features:uninstall $args } ;
+feature:list-repository = { features:listrepositories $args } ;
+feature:list-url = { features:listurl $args } ;
+feature:list-version = { features:listversions $args } ;
