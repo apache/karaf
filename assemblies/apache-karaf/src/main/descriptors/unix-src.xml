@@ -20,17 +20,27 @@
     <formats>
         <format>tar.gz</format>
     </formats>
+
     <fileSets>
-        <!-- Copy license and other files from root -->
+        <!-- Copy BUILDING and other files from root -->
         <fileSet>
             <directory>../..</directory>
             <outputDirectory>/</outputDirectory>
             <includes>
                 <include>BUILDING</include>
                 <include>README</include>
-                <include>NOTICE</include>
-                <include>LICENSE</include>
                 <include>RELEASE*</include>
+            </includes>
+            <lineEnding>unix</lineEnding>
+        </fileSet>
+
+        <!-- Copy src LICENSE and NOTICE -->
+        <fileSet>
+            <directory>src/main/distribution/src</directory>
+            <outputDirectory>/</outputDirectory>
+            <includes>
+                <include>LICENSE</include>
+                <include>NOTICE</include>
             </includes>
             <lineEnding>unix</lineEnding>
         </fileSet>
