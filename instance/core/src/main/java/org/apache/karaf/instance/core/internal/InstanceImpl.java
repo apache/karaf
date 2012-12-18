@@ -423,6 +423,7 @@ public class InstanceImpl implements Instance {
     }
 
     public boolean isAttached() {
+        checkProcess();
         return (process != null);
     }
 
