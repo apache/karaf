@@ -28,11 +28,21 @@
             <directory>${basedir}/../..</directory>
             <outputDirectory>/</outputDirectory>
             <excludes>
+                <exclude>LICENSE</exclude>
+                <exclude>NOTICE</exclude>
                 <exclude>**/target/**</exclude>
                 <exclude>**/eclipse-classes/**</exclude>
                 <exclude>**/*.i??</exclude>
                 <exclude>**/.idea/**</exclude>
             </excludes>
+        </fileSet>
+        <fileSet>
+            <directory>src/main/distribution/src</directory>
+            <outputDirectory>/</outputDirectory>
+            <includes>
+                <include>LICENSE</include>
+                <include>NOTICE</include>
+            </includes>
         </fileSet>
     </fileSets>
 
