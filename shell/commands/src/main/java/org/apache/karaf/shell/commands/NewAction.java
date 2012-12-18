@@ -36,7 +36,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Instanciate a new object
+ * Instantiate a new object
  */
 @Command(scope = "shell", name = "new", description = "Creates a new java object.")
 public class NewAction extends AbstractAction {
@@ -71,12 +71,12 @@ public class NewAction extends AbstractAction {
                 Map.Entry<Constructor, List<Object>> match = matches.entrySet().iterator().next();
                 return newInstance(match.getKey(), match.getValue().toArray());
             } catch (Throwable e) {
-                throw new Exception("Error when instanciating object of class " + clazz.getName(), getRealCause(e));
+                throw new Exception("Error when instantiating object of class " + clazz.getName(), getRealCause(e));
             }
         } else if (matches.size() == 0) {
-            throw new Exception("Unable to find a matching constructor on class " + clazz.getName() + " for arguments " + args + " when instanciating object.");
+            throw new Exception("Unable to find a matching constructor on class " + clazz.getName() + " for arguments " + args + " when instantiating object.");
         } else {
-            throw new Exception("Multiple matching constructors found on class " + clazz.getName() + " for arguments " + args + " when instanciating object: " + matches.keySet());
+            throw new Exception("Multiple matching constructors found on class " + clazz.getName() + " for arguments " + args + " when instantiating object: " + matches.keySet());
         }
     }
 
