@@ -34,10 +34,12 @@ import org.osgi.framework.startlevel.FrameworkStartLevel;
  */
 class StartupListener implements FrameworkListener, SynchronousBundleListener {
     private static final String SYSTEM_PROP_KARAF_CONSOLE_STARTED = "karaf.console.started";
+    private int currentPercentage;
 
 	private final BundleContext context;
     StartupListener(BundleContext context) {
         this.context = context;
+        this.currentPercentage = 0;
         context.addBundleListener(this);
         context.addFrameworkListener(this);
     }
@@ -71,20 +73,24 @@ class StartupListener implements FrameworkListener, SynchronousBundleListener {
         // progress bar can only have 72 characters so that 80 char wide terminal will display properly
         int percent = (done * 100) / total;
         int scaledPercent = (int) (72.0 * (percent / 100.0));
-        StringBuilder sb = new StringBuilder();
-        sb.append(String.format("\r%3d%% [", percent));
-        for (int i = 0; i < 72; i++) {
-            if (i < scaledPercent) {
-                sb.append('=');
-            } else if (i == scaledPercent) {
-                sb.append('>');
-            } else {
-                sb.append(' ');
+        // Make sure we do not go backwards with percentage
+        if (percent > currentPercentage) {
+            currentPercentage = percent;
+            StringBuilder sb = new StringBuilder();
+            sb.append(String.format("\r%3d%% [", percent));
+            for (int i = 0; i < 72; i++) {
+                if (i < scaledPercent) {
+                    sb.append('=');
+                } else if (i == scaledPercent) {
+                    sb.append('>');
+                } else {
+                    sb.append(' ');
+                }
             }
+            sb.append(']');
+            System.out.print(sb.toString());
+            System.out.flush();
         }
-        sb.append(']');
-        System.out.print(sb.toString());
-        System.out.flush();
         if (done == total) {
             System.out.println();
         }
