@@ -15,6 +15,89 @@
  * limitations under the License.
  */
 
+                    Apache Karaf 2.2.10
+                    ===================
+
+  Overview
+  --------
+
+  This release of Apache Karaf is based off of the 2.2.x series branch, representing an
+ update to Apache Karaf 2.2.9. It contains bug fixes identified in the prior release, and
+ introduces improvements including; Making pom.xml eclipse 3.7 m2e friendly, updating 
+ Spring to 2.5.6.SEC03, improved terminal behavior when sshing from windows to unix, and 
+ improved lock logic to wait while start level change occurs. Several dependencies were
+ also updated, bringing Felix Webconsole to 4.0.0, pax-logging to 1.6.10, pax-web to 1.0.12,
+ and the Apache pom to version 12. 
+  For more detail please see the change log below.
+
+  Changelog
+  ---------
+
+** Bug
+    * [KARAF-1305] - Error with Basic HTTP Authentication when using karaf realm
+    * [KARAF-1576] - The version of the aries transaction feature is 0.3.0 while the bundles have been upgraded to 0.3.1
+    * [KARAF-1715] - Occasional freeze on feature:install webconsole
+    * [KARAF-1736] - Feature spring-struts can't be installed
+    * [KARAF-1751] - Spring feature dependencies specified too tightly
+    * [KARAF-1754] - updating features.xml in auto deploy folder results in duplication
+    * [KARAF-1756] - No SSH connection possible on Debian 6.0.5
+    * [KARAF-1759] - No Way To Start obr Dependencies By Default
+    * [KARAF-1765] - The obr Shell Deploy And Start Commands Always Deploy Optional Dependencies
+    * [KARAF-1770] - Unable to feature:install webconsole under apache-karaf minimal package
+    * [KARAF-1796] - Feature Install Sequence Should Be Install/Install/Install...Start/Start/Start
+    * [KARAF-1797] - NPE thrown from OsgiConfiguration.unregister
+    * [KARAF-1809] - Feature spring-web-portlet can't be installed
+    * [KARAF-1814] - Cursor keys do not work when using bin/client on windows
+    * [KARAF-1815] - When ssh'ing from a windows box into a unix box, arrow keys are not correctly interpreted
+    * [KARAF-1849] - Some files should not have the executable flag
+    * [KARAF-1853] - Attached kar deploys to a different snapshot build number than the main artifact
+    * [KARAF-1911] - Wrong version of camel-example-osgi in Getting Started/Quickstart Guide - 2.7.0 doesn't work
+    * [KARAF-1915] - ClassCastException when uninstalling war feature
+    * [KARAF-1936] - LDAPLoginModule not working in 2.3.0 due to missing import of javax.net.SocketFactory
+    * [KARAF-1938] - Lock logic should wait for start level change to occur
+    * [KARAF-1963] - incorrect statement in developers-guide/branding-console.html
+    * [KARAF-1978] - if use script to start a child instance then using karaf console admin:list can't get the instance correct status
+    * [KARAF-1986] - instance.properties file doesn't get updated if karaf.name is changed
+    * [KARAF-1992] - PropertiesLoginModule handles usernames with backslash not correct
+    * [KARAF-2009] - Error on visualize Licences page
+    * [KARAF-2013] - Bug in Karaf 2.3.0 Maven2 Features Plugin Documentation
+    * [KARAF-2028] - org.apache.karaf.webconsole.console imports wrong version of org.osgi.service.deploymentadmin
+    * [KARAF-2029] - delete.user option missing from JDBCLoginModule
+    * [KARAF-2047] - config:edit -f command doesn't work on Windows platform
+    * [KARAF-2057] - NOTICE and LICENSE files are not correct
+    * [KARAF-2058] - ensure find the root instance entry when update root karaf instance name in instances.properties
+    * [KARAF-2074] - ensure admin service always load storage file instance.properties before each operation
+
+** Dependency upgrade
+    * [KARAF-1745] - Upgrade to Felix WebConsole 4.0.0
+    * [KARAF-1769] - Upgrade to pax-logging 1.6.10
+    * [KARAF-1773] - Upgrade to pax-logging 1.6.10 (duplicate included here for record keeping)
+    * [KARAF-1917] - upgrade to pax-web 1.0.12
+    * [KARAF-1948] - Upgrade to Apache POM 11 (incremental update included here for record keeping)
+    * [KARAF-2055] - Upgrade to Apache POM 12
+
+
+** Improvement
+    * [KARAF-1048] - make pom.xml eclipse 3.7 m2e friendly
+    * [KARAF-1749] - The command packages:imports should work on unresolved bundles
+    * [KARAF-1757] - Welcome message incorrect during ssh session or using bin/client.
+    * [KARAF-1810] - Provide alias for feature:repo-add in Karaf 2.x
+    * [KARAF-1811] - Remove section about console colors from manual
+    * [KARAF-1828] - Build src distributions within specific profiles
+    * [KARAF-1829] - Upgrade to Spring 2.5.6.SEC03
+    * [KARAF-1850] - feature:list should use alphabetical order
+    * [KARAF-1989] - Add CXF DOSGi feature uri to org.apache.karaf.features.repos.cfg
+    * [KARAF-1990] - Add Cellar feature URI in org.apache.karaf.features.repos.cfg
+    * [KARAF-2017] - Service wrapper should use and populate JAVA_HOME in conf file
+    * [KARAF-2043] - Document caveats of Pax Url Wrap when used in Karaf Shell
+    * [KARAF-2049] - Instructions in welcome screen is a bit misleading with hit
+    * [KARAF-2072] - Spelling correction
+
+** New Feature
+    * [KARAF-1807] - The blueprint bean sshServerFactory in bundle org.apache.karaf.shell.ssh/2.2.9 incorrectly threw an exception from its destroy method
+    * [KARAF-2050] - Ability to configure ssh session idle timeout - currently hardcode as 5 minutes
+
+
                     Apache karaf 2.2.9
                     ==================
 
