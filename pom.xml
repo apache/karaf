@@ -113,7 +113,6 @@
         <commons-fileupload.version>1.2.2</commons-fileupload.version>
         <commons-io.version>2.4</commons-io.version>
         <commons-lang.version>2.6</commons-lang.version>
-        <icu4j.version>4.8.1.1</icu4j.version>
         <injection.bundle.version>1.0</injection.bundle.version>
         <jasypt.bundle.version>1.9.0_1</jasypt.bundle.version>
         <jetty.version>7.6.7.v20120910</jetty.version>
@@ -238,11 +237,6 @@
 
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>com.ibm.icu</groupId>
-                <artifactId>icu4j</artifactId>
-                <version>${icu4j.version}</version>
-            </dependency>
             <dependency>
                 <groupId>org.apache.karaf</groupId>
                 <artifactId>manual</artifactId>
