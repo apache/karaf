@@ -30,7 +30,7 @@
 
     <artifactId>org.apache.karaf.jaas.command</artifactId>
     <packaging>bundle</packaging>
-    <name>Apache Karaf :: Jaas :: Command</name>
+    <name>Apache Karaf :: JAAS :: Command</name>
     <description>This bundle provides Karaf shell commands to manipulate JAAS security framework.</description>
 
     <properties>
