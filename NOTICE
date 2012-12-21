@@ -45,10 +45,6 @@ Tanuki Software (http://www.tanukisoftware.com/).
 Licensed under the Apache License 2.0.
 
 This product uses software developed at
-ICU Project (http://site.icu-project.org/).
-Licensed under the ICU License.
-
-This product uses software developed at
 Jasypt (http://jasypt.sourceforge.net/).
 Licensed under the Apache License 2.0.
 
@@ -72,6 +68,5 @@ III. License Summary
 - Apache License 2.0
 - BSD License
 - EPL License
-- ICU License
 - LGPL License
 - MIT License
