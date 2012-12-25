@@ -103,6 +103,60 @@ public class AdminServiceImplTest extends TestCase {
         service.renameInstance(getName(), getName() + "b");
         assertNotNull(service.getInstance(getName() + "b"));
     }
+    
+    /**
+     * <p>
+     * Test the renaming of an existing instance.
+     * </p>
+     */
+    public void testToSimulateRenameInstanceByExternalProcess() throws Exception {
+        AdminServiceImpl service = new AdminServiceImpl();
+        File storageLocation = new File("target/instances/" + System.currentTimeMillis());
+        service.setStorageLocation(storageLocation);
+
+        InstanceSettings settings = new InstanceSettings(8122, 1122, 44444, getName(), null, null, null);
+        service.createInstance(getName(), settings);
+        
+        //to simulate the scenario that the instance name get changed by 
+        //external process, likely the admin command CLI tool, which cause
+        //the instance storage file get updated, the AdminService should be 
+        //able to reload the storage file before check any status for the 
+        //instance
+        
+        File storageFile = new File(storageLocation, AdminServiceImpl.STORAGE_FILE);
+        assertTrue(storageFile.isFile());
+        Properties storage = loadStorage(storageFile);
+        storage.setProperty("item.0.name", getName() + "b");
+        saveStorage(storage, storageFile, "testToSimulateRenameInstanceByExternalProcess");
+        
+        assertNotNull(service.getInstance(getName() + "b"));
+    }
+
+    private void saveStorage(Properties props, File location, String comment) throws IOException {
+        OutputStream os = null;
+        try {
+            os = new FileOutputStream(location);
+            props.store(os, comment);
+        } finally {
+            if (os != null) {
+                os.close();
+            }
+        }
+    }
+    
+    private Properties loadStorage(File location) throws IOException {
+        InputStream is = null;
+        try {
+            is = new FileInputStream(location);
+            Properties props = new Properties();
+            props.load(is);
+            return props;
+        } finally {
+            if (is != null) {
+                is.close();
+            }
+        }
+    }
 
     private void assertFileExists(String path, String name) throws IOException {
         File file = new File(path, name);
