@@ -582,7 +582,10 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
             if (state.features.containsKey(fi)) {
                 LOGGER.debug("Feature {} with version {} is already being installed", feature.getName(), feature.getVersion());
             } else {
-                doInstallFeature(state, fi, verbose);
+                if (! (fi.getName().equals(feature.getName())
+                    && fi.getVersion().equals(feature.getVersion()))) {
+                    doInstallFeature(state, fi, verbose);
+                }
             }
         }
         for (String config : feature.getConfigurations().keySet()) {
