@@ -21,6 +21,7 @@
     </feature>
     <feature name="f1">
         <feature>common</feature>
+        <feature>f1</feature>
         <bundle>b2</bundle>
     </feature>
     <feature name="f2">
