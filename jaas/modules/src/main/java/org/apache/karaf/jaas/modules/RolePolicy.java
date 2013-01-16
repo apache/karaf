@@ -12,7 +12,7 @@
  *  limitations under the License.
  *  under the License.
  */
-package org.apache.karaf.jaas.boot.principal;
+package org.apache.karaf.jaas.modules;
 
 import java.security.Principal;
 import java.security.acl.Group;

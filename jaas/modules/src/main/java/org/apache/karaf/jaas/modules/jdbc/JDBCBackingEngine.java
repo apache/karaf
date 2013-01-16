@@ -15,8 +15,8 @@
  */
 package org.apache.karaf.jaas.modules.jdbc;
 
-import org.apache.karaf.jaas.boot.principal.RolePrincipal;
-import org.apache.karaf.jaas.boot.principal.UserPrincipal;
+import org.apache.karaf.jaas.modules.RolePrincipal;
+import org.apache.karaf.jaas.modules.UserPrincipal;
 import org.apache.karaf.jaas.modules.BackingEngine;
 import org.apache.karaf.jaas.modules.encryption.EncryptionSupport;
 import org.slf4j.Logger;

@@ -77,7 +77,7 @@ public class JaasAuthenticator implements JMXAuthenticator {
             });
             loginContext.login();
             if (role != null && role.length() > 0) {
-            	String clazz = "org.apache.karaf.jaas.boot.principal.RolePrincipal";
+            	String clazz = "org.apache.karaf.jaas.modules.RolePrincipal";
                 String name = role;
                 int idx = role.indexOf(':');
                 if (idx > 0) {

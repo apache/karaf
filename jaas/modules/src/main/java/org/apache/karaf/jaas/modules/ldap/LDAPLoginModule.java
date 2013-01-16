@@ -15,8 +15,8 @@
  */
 package org.apache.karaf.jaas.modules.ldap;
 
-import org.apache.karaf.jaas.boot.principal.RolePrincipal;
-import org.apache.karaf.jaas.boot.principal.UserPrincipal;
+import org.apache.karaf.jaas.modules.RolePrincipal;
+import org.apache.karaf.jaas.modules.UserPrincipal;
 import org.apache.karaf.jaas.config.KeystoreManager;
 import org.apache.karaf.jaas.modules.AbstractKarafLoginModule;
 import org.osgi.framework.ServiceReference;
