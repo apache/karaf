@@ -24,7 +24,9 @@ public interface SystemMBean {
     void halt() throws Exception;
     void halt(String time) throws Exception;
     void reboot() throws Exception;
-    void reboot(String time, boolean clean) throws Exception;
+    void reboot(String time) throws Exception;
+    void rebootCleanCache(String time) throws Exception;
+    void rebootCleanAll(String time) throws Exception;
 
     void setStartLevel(int startLevel) throws Exception;
     int getStartLevel() throws Exception;

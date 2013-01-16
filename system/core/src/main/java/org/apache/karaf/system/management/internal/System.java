@@ -54,8 +54,16 @@ public class System extends StandardMBean implements SystemMBean {
         systemService.reboot();
     }
 
-    public void reboot(String time, boolean clean) throws Exception {
-        systemService.reboot(time, clean);
+    public void reboot(String time) throws Exception {
+        systemService.reboot(time, SystemService.Swipe.NONE);
+    }
+
+    public void rebootCleanCache(String time) throws Exception {
+        systemService.reboot(time, SystemService.Swipe.CACHE);
+    }
+
+    public void rebootCleanAll(String time) throws Exception {
+        systemService.reboot(time, SystemService.Swipe.ALL);
     }
 
     public void setStartLevel(int startLevel) throws Exception {

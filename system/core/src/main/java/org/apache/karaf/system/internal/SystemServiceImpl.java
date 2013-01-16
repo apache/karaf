@@ -57,11 +57,11 @@ public class SystemServiceImpl implements SystemService {
     }
 
     public void reboot() throws Exception {
-        reboot(null, false);
+        reboot(null, Swipe.NONE);
     }
 
-    public void reboot(String time, boolean cleanup) throws Exception {
-        reboot(timeToSleep(time), true);
+    public void reboot(String time, Swipe cleanup) throws Exception {
+        reboot(timeToSleep(time), cleanup);
     }
 
     private void shutdown(final long sleep) {
@@ -77,13 +77,17 @@ public class SystemServiceImpl implements SystemService {
         }.start();
     }
 
-    private void reboot(final long sleep, final boolean clean) {
+    private void reboot(final long sleep, final Swipe clean) {
         new Thread() {
             public void run() {
                 try {
                     sleepWithMsg(sleep, "Reboot in " + sleep / 1000 / 60 + " minute(s)");
                     System.setProperty("karaf.restart", "true");
-                    System.setProperty("karaf.restart.clean", Boolean.toString(clean));
+                    if (clean.equals(Swipe.ALL)) {
+                        System.setProperty("karaf.clean.all", "true");
+                    } else if (clean.equals(Swipe.CACHE)) {
+                        System.setProperty("karaf.clean.cache", "true");
+                    }
                     bundleContext.getBundle(0).stop();
                 } catch (Exception e) {
                     LOGGER.error("Reboot error", e);
