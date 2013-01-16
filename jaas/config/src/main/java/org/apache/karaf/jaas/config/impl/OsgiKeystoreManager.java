@@ -110,14 +110,6 @@ public class OsgiKeystoreManager implements KeystoreManager {
         return context.getSocketFactory();
     }
 
-    private void sleep(long time) {
-        try {
-            Thread.sleep(time);
-        } catch (InterruptedException e) {
-
-        }
-    }
-
     /**
      * Purely check for the availability of provided key stores and key
      *
@@ -126,33 +118,34 @@ public class OsgiKeystoreManager implements KeystoreManager {
      * @param trustStore
      * @param timeout
      */
-    private boolean checkForKeystoresAvailability(String keyStore, String keyAlias, String trustStore, long timeout) {
-        boolean found = false;
-        for (int i = 0; i < timeout / 1000; ++i) {
+    private boolean checkForKeystoresAvailability( String keyStore, String keyAlias, String trustStore, long timeout ) throws GeneralSecurityException {
+        long start = System.currentTimeMillis();
+        while (true) {
             KeystoreInstance keyInstance = getKeystore(keyStore);
-            if (keyInstance == null || (keyInstance != null && keyInstance.isKeystoreLocked())) {
-                sleep(1000);
-                logger.info("Looking for keystore: {}...", keyStore);
-                continue;
-            }
-            if (keyInstance == null || (keyInstance != null && keyInstance.isKeyLocked(keyAlias))) {
-                sleep(1000);
-                logger.info("Looking for keystore's key: {}...", keyAlias);
-                continue;
-            }
-
             KeystoreInstance trustInstance = trustStore == null ? null : getKeystore(trustStore);
-            if (trustInstance == null || (trustInstance != null && trustInstance.isKeystoreLocked())) {
-                sleep(1000);
-                logger.info("Looking for truststore: {}...", trustStore);
-                continue;
+            if (keyStore != null && keyInstance == null) {
+                logger.info( "Keystore {} not found", keyStore );
+            } else if (keyStore != null && keyInstance.isKeystoreLocked()) {
+                logger.info( "Keystore {} locked", keyStore );
+            } else if (keyStore != null && keyAlias != null && keyInstance.isKeyLocked(keyAlias)) {
+                logger.info( "Keystore's key {} locked", keyAlias );
+            } else if (trustStore != null && trustInstance == null) {
+                logger.info( "Truststore {} not found", trustStore );
+            } else if (trustStore != null && trustInstance.isKeystoreLocked()) {
+                logger.info( "Truststore {} locked", keyStore );
+            } else {
+                return true;
             }
-
-            found = true;
-            break;
+            if (System.currentTimeMillis() - start < timeout) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    throw new GeneralSecurityException("Interrupted", e);
+                }
+            } else {
+                return false;
+            }
         }
-
-        return found;
     }
 
 }
