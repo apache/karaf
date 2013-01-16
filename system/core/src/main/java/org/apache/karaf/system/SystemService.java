@@ -22,6 +22,18 @@ package org.apache.karaf.system;
 public interface SystemService {
 
     /**
+     * Types defining what to remove on a restart of Karaf
+     */
+    public enum Swipe {
+        /** Delete nothing; simple restart */
+        NONE,
+        /** Delete only the cache; everything else remains */
+        CACHE,
+        /** Forces a clean restart by removing the working directory; this option is compatible to the former clean method. */
+        ALL
+    }
+
+    /**
      * Halt the Karaf container.
      */
     void halt() throws Exception;
@@ -52,7 +64,7 @@ public interface SystemService {
      *  to wait. The word now is an alias for +0.
      *  @param clean Force a clean restart by deleting the working directory.
      */
-    void reboot(String time, boolean clean) throws Exception;
+    void reboot(String time, Swipe clean) throws Exception;
 
     /**
      * Set the system start level.

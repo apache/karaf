@@ -19,6 +19,7 @@ package org.apache.karaf.system.commands;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
+import org.apache.karaf.system.SystemService;
 
 /**
  * Command to shut down Karaf container.
@@ -35,8 +36,12 @@ public class Shutdown extends AbstractSystemAction {
     @Option(name = "-h", aliases = "--halt", description = "Halt the Karaf container.", required = false, multiValued = false)
     boolean halt = false;
 
-    @Option(name = "-c", aliases = "--clean", description = "Clean the Karaf container (working directory) during reboot.", required = false, multiValued = false)
-    boolean clean = false;
+    @Option(name = "-c", aliases = {"--clean", "--clean-all", "-ca"}, description = "Force a clean restart by deleting the data directory")
+    private boolean cleanAll;
+
+    @Option(name = "-cc", aliases = {"--clean-cache", "-cc"}, description = "Force a clean restart by deleting the cache directory")
+    private boolean cleanCache;
+
 
     @Argument(name = "time", index = 0, description = "Shutdown after a specified delay. The time argument can have different" +
             " formats. First, it can be an abolute time in the format hh:mm, in which hh is the hour (1 or 2 digits) and mm" +
@@ -48,7 +53,7 @@ public class Shutdown extends AbstractSystemAction {
 
         if (force) {
             if (reboot) {
-                systemService.reboot(time, clean);
+                systemService.reboot(time, determineSwipeType());
             } else {
                 systemService.halt(time);
             }
@@ -79,13 +84,22 @@ public class Shutdown extends AbstractSystemAction {
             String str = sb.toString();
             if (str.equals("yes")) {
                 if (reboot) {
-                    systemService.reboot(time, clean);
+                    systemService.reboot(time, determineSwipeType());
                 } else {
                     systemService.halt(time);
                 }
             }
             return null;
         }
+    }
+
+    private SystemService.Swipe determineSwipeType() {
+        if (cleanAll) {
+            return SystemService.Swipe.ALL;
+        } else if (cleanCache) {
+            return SystemService.Swipe.CACHE;
+        }
+        return SystemService.Swipe.NONE;
     }
 
 }

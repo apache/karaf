@@ -169,7 +169,24 @@ public class ConfigProperties {
             Utils.deleteDirectory(this.karafData);
             this.karafData = Utils.getKarafDirectory(PROP_KARAF_DATA, ENV_KARAF_DATA, new File(karafBase, "data"), true, true);
         }
-        
+
+        File cleanAllIndicatorFile = new File(karafData, "clean_all");
+        File cleanCacheIndicatorFile = new File(karafData, "clean_cache");
+        if (Boolean.getBoolean("karaf.clean.all") || cleanAllIndicatorFile.exists()) {
+            if (cleanAllIndicatorFile.exists()) {
+                cleanAllIndicatorFile.delete();
+            }
+            Utils.deleteDirectory(karafData);
+        } else {
+            if (Boolean.getBoolean("karaf.clean.cache") || cleanCacheIndicatorFile.exists()) {
+                if (cleanCacheIndicatorFile.exists()) {
+                    cleanCacheIndicatorFile.delete();
+                }
+                File karafCache = Utils.getKarafDirectory(PROP_KARAF_DATA, ENV_KARAF_DATA, new File(karafData, "cache"), true, true);
+                Utils.deleteDirectory(karafCache);
+            }
+        }
+
         this.karafInstances = Utils.getKarafDirectory(PROP_KARAF_INSTANCES, ENV_KARAF_INSTANCES, new File(karafHome, "instances"), false, false);
 
         Package p = Package.getPackage("org.apache.karaf.main");
