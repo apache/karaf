@@ -97,6 +97,11 @@
                 <null/>
             </completers>
         </command>
+        <command>
+            <action class="org.apache.karaf.shell.commands.impl.EditAction">
+                <property name="editorFactory" ref="editorFactory"/>
+            </action>
+        </command>
     </command-bundle>
 
    <bean id="commandCompleter" class="org.apache.karaf.shell.console.completer.CommandsCompleter"/>
@@ -117,5 +122,6 @@
     </reference-list>
 
     <reference id="commandProcessor" interface="org.apache.felix.service.command.CommandProcessor"/>
+    <reference id="editorFactory" interface="org.jledit.EditorFactory"/>
  
 </blueprint>
