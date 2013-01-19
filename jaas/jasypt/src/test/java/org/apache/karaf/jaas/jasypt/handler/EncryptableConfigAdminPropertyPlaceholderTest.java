@@ -19,11 +19,11 @@ import de.kalpatec.pojosr.framework.launch.BundleDescriptor;
 import de.kalpatec.pojosr.framework.launch.ClasspathScanner;
 import de.kalpatec.pojosr.framework.launch.PojoServiceRegistry;
 import de.kalpatec.pojosr.framework.launch.PojoServiceRegistryFactory;
-import junit.framework.TestCase;
 import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.jasypt.encryption.pbe.config.EnvironmentStringPBEConfig;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.ops4j.pax.swissbox.tinybundles.core.TinyBundle;
 import org.osgi.framework.*;
@@ -36,9 +36,11 @@ import java.net.URL;
 import java.util.*;
 import java.util.jar.JarInputStream;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.newBundle;
 
-public class EncryptableConfigAdminPropertyPlaceholderTest extends TestCase {
+public class EncryptableConfigAdminPropertyPlaceholderTest {
 
     public static final long DEFAULT_TIMEOUT = 30000;
 
@@ -104,6 +106,7 @@ public class EncryptableConfigAdminPropertyPlaceholderTest extends TestCase {
         bundleContext.getBundle().stop();
     }
 
+    @Ignore("TODO: KARAF-2082; Temporary ignore till we have a fix for this")
     @Test
     public void testEncryptConfigProperty() throws Exception {
 
