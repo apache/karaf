@@ -18,17 +18,14 @@
 package org.apache.karaf.shell.console.commands;
 
 import java.lang.reflect.Type;
-import java.security.AccessController;
 import java.util.List;
 import java.util.Map;
-import javax.security.auth.Subject;
 
 import org.apache.felix.gogo.commands.Action;
 import org.apache.felix.gogo.commands.basic.AbstractCommand;
 import org.apache.felix.gogo.commands.basic.ActionPreparator;
 import org.apache.felix.gogo.commands.basic.DefaultActionPreparator;
 import org.apache.felix.service.command.CommandSession;
-import org.apache.karaf.jaas.authz.AuthorizationService;
 import org.apache.karaf.shell.console.BlueprintContainerAware;
 import org.apache.karaf.shell.console.BundleContextAware;
 import org.apache.karaf.shell.console.CompletableFunction;
@@ -46,8 +43,6 @@ public class
     protected String actionId;
     protected List<Completer> completers;
     protected Map<String,Completer> optionalCompleters;
-    protected String name;
-    protected AuthorizationService authorizationService;
 
     public void setBlueprintContainer(BlueprintContainer blueprintContainer) {
         this.blueprintContainer = blueprintContainer;
@@ -75,31 +70,6 @@ public class
 
     public void setOptionalCompleters(Map<String, Completer> optionalCompleters) {
         this.optionalCompleters = optionalCompleters;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public AuthorizationService getAuthorizationService() {
-        return authorizationService;
-    }
-
-    public void setAuthorizationService(AuthorizationService authorizationService) {
-        this.authorizationService = authorizationService;
-    }
-
-    @Override
-    public Object execute(CommandSession session, List<Object> arguments) throws Exception {
-        if (authorizationService != null) {
-            Subject subject = Subject.getSubject(AccessController.getContext());
-            authorizationService.checkPermission(subject, "command:" + name);
-        }
-        return super.execute(session, arguments);
     }
 
     @Override

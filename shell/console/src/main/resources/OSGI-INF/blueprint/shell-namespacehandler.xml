@@ -28,11 +28,7 @@
                 </array>
             </entry>
         </service-properties>
-        <bean class="org.apache.karaf.shell.console.commands.NamespaceHandler">
-            <property name="authorizationService">
-                <reference interface="org.apache.karaf.jaas.authz.AuthorizationService" />
-            </property>
-        </bean>
+        <bean class="org.apache.karaf.shell.console.commands.NamespaceHandler"/>
     </service>
 
 </blueprint>

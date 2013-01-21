@@ -39,7 +39,6 @@
         <module>modules</module>
         <module>jasypt</module>
         <module>command</module>
-        <module>authz</module>
     </modules>
 
 </project>
