@@ -20,36 +20,25 @@ package org.apache.karaf.shell.console.commands;
 
 import java.net.URL;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
+import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.aries.blueprint.ParserContext;
-import org.apache.aries.blueprint.PassThroughMetadata;
-import org.apache.aries.blueprint.mutable.MutableBeanMetadata;
-import org.apache.aries.blueprint.mutable.MutableCollectionMetadata;
-import org.apache.aries.blueprint.mutable.MutableIdRefMetadata;
-import org.apache.aries.blueprint.mutable.MutablePassThroughMetadata;
-import org.apache.aries.blueprint.mutable.MutableRefMetadata;
-import org.apache.aries.blueprint.mutable.MutableServiceMetadata;
-import org.apache.aries.blueprint.mutable.MutableValueMetadata;
 import org.apache.felix.service.command.Function;
-import org.apache.karaf.jaas.authz.AuthorizationService;
-import org.apache.karaf.shell.console.CompletableFunction;
-import org.osgi.service.blueprint.container.ComponentDefinitionException;
-import org.osgi.service.blueprint.reflect.BeanArgument;
-import org.osgi.service.blueprint.reflect.BeanMetadata;
-import org.osgi.service.blueprint.reflect.BeanProperty;
-import org.osgi.service.blueprint.reflect.ComponentMetadata;
-import org.osgi.service.blueprint.reflect.IdRefMetadata;
-import org.osgi.service.blueprint.reflect.MapMetadata;
-import org.osgi.service.blueprint.reflect.Metadata;
-import org.osgi.service.blueprint.reflect.NullMetadata;
-import org.osgi.service.blueprint.reflect.RefMetadata;
-import org.osgi.service.blueprint.reflect.ValueMetadata;
+import org.osgi.service.blueprint.reflect.*;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import org.apache.aries.blueprint.ParserContext;
+import org.apache.aries.blueprint.mutable.MutableBeanMetadata;
+import org.apache.aries.blueprint.mutable.MutableIdRefMetadata;
+import org.apache.aries.blueprint.mutable.MutableServiceMetadata;
+import org.apache.aries.blueprint.mutable.MutableValueMetadata;
+import org.apache.aries.blueprint.mutable.MutableRefMetadata;
+import org.apache.aries.blueprint.mutable.MutableCollectionMetadata;
+import org.apache.karaf.shell.console.CompletableFunction;
+import org.osgi.service.blueprint.container.ComponentDefinitionException;
 
 
 public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHandler {
@@ -72,19 +61,8 @@ public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHan
 
     public static final String SHELL_NAMESPACE_1_0_0 = "http://karaf.apache.org/xmlns/shell/v1.0.0";
     public static final String SHELL_NAMESPACE_1_1_0 = "http://karaf.apache.org/xmlns/shell/v1.1.0";
-    public static final String AUTHORIZATION_SERVICE = "authorizationService";
 
     private int nameCounter = 0;
-
-    private AuthorizationService authorizationService;
-
-    public AuthorizationService getAuthorizationService() {
-        return authorizationService;
-    }
-
-    public void setAuthorizationService(AuthorizationService authorizationService) {
-        this.authorizationService = authorizationService;
-    }
 
     public URL getSchemaLocation(String namespace) {
         if(SHELL_NAMESPACE_1_0_0.equals(namespace)) {
@@ -145,8 +123,6 @@ public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHan
             function = location;
         }
 
-        command.addProperty(NAME, createStringValue(context, location));
-        command.addProperty(AUTHORIZATION_SERVICE, createPassThrough(context, authorizationService));
         NodeList children = element.getChildNodes();
         for (int i = 0; i < children.getLength(); i++) {
             Node child  = children.item(i);
@@ -233,12 +209,6 @@ public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHan
     private ValueMetadata createStringValue(ParserContext context, String str) {
         MutableValueMetadata value = context.createMetadata(MutableValueMetadata.class);
         value.setStringValue(str);
-        return value;
-    }
-
-    private PassThroughMetadata createPassThrough(ParserContext context, Object obj) {
-        MutablePassThroughMetadata value = context.createMetadata(MutablePassThroughMetadata.class);
-        value.setObject(obj);
         return value;
     }
 
