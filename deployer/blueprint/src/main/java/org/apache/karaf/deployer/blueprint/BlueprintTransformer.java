@@ -31,8 +31,6 @@ import java.util.TreeSet;
 import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -53,6 +51,8 @@ import org.w3c.dom.NodeList;
 
 import org.osgi.framework.Constants;
 
+import static org.apache.karaf.util.MvnUtils.getMvnPath;
+
 public class BlueprintTransformer {
 
     static Transformer transformer;
@@ -64,7 +64,7 @@ public class BlueprintTransformer {
         // Build dom document
         Document doc = parse(url);
         // Heuristicly retrieve name and version
-        String name = getPath(url);
+        String name = getMvnPath(url);
         int idx = name.lastIndexOf('/');
         if (idx >= 0) {
             name = name.substring(idx + 1);
@@ -185,34 +185,4 @@ public class BlueprintTransformer {
         return db.parse(url.toString());
     }
 
-    protected static String getPath(URL url) {
-        if (url.getProtocol().equals("mvn")) {
-            String[] parts = url.toExternalForm().substring(4).split("/");
-            String groupId;
-            String artifactId;
-            String version;
-            String type;
-            String qualifier;
-            if (parts.length < 3 || parts.length > 5) {
-                return url.getPath();
-            }
-            groupId = parts[0];
-            artifactId = parts[1];
-            version = parts[2];
-            type = (parts.length >= 4) ?  "." + parts[3] : ".jar";
-            qualifier = (parts.length >= 5) ? "-" + parts[4] :  "";
-            return groupId.replace('.', '/') + "/" + artifactId + "/"
-                    + version + "/" + artifactId + "-" + version + qualifier + type;
-        }
-        return url.getPath();
-    }
-
-    protected static void copyInputStream(InputStream in, OutputStream out) throws Exception {
-        byte[] buffer = new byte[4096];
-        int len = in.read(buffer);
-        while (len >= 0) {
-            out.write(buffer, 0, len);
-            len = in.read(buffer);
-        }
-    }
 }
