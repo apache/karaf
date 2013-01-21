@@ -36,7 +36,7 @@ public class FeatureTransformer {
 
     public static void transform(URL url, OutputStream os) throws Exception {
         // Heuristicly retrieve name and version
-        String name = url.getPath();
+        String name = getPath(url);
         int idx = name.lastIndexOf('/');
         if (idx >= 0) {
             name = name.substring(idx + 1);
@@ -70,6 +70,28 @@ public class FeatureTransformer {
         out.closeEntry();
         out.close();
         os.close();
+    }
+
+    private static String getPath(URL url) {
+        if (url.getProtocol().equals("mvn")) {
+            String[] parts = url.toExternalForm().substring(4).split("/");
+            String groupId;
+            String artifactId;
+            String version;
+            String type;
+            String qualifier;
+            if (parts.length < 3 || parts.length > 5) {
+                return url.getPath();
+            }
+            groupId = parts[0];
+            artifactId = parts[1];
+            version = parts[2];
+            type = (parts.length >= 4) ?  "." + parts[3] : ".jar";
+            qualifier = (parts.length >= 5) ? "-" + parts[4] :  "";
+            return groupId.replace('.', '/') + "/" + artifactId + "/"
+                    + version + "/" + artifactId + "-" + version + qualifier + type;
+        }
+        return url.getPath();
     }
 
     private static void copyInputStream(InputStream in, OutputStream out) throws IOException {
