@@ -108,6 +108,12 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
+                <configuration>
+                    <useDefaultDelimiters>false</useDefaultDelimiters>
+                    <delimiters>
+                        <delimiter>${*}</delimiter>
+                    </delimiters>
+                </configuration>
                 <executions>
                     <execution>
                         <id>filter</id>
@@ -287,17 +293,17 @@
                         </goals>
                         <configuration>
                             <tasks>
-                                <mkdir dir="${manual.dir}" />
-                                <move file="${project.build.directory}/sitegen/manual.html" tofile="${manual}.html" />
-                                <echo message="Generating PDF using Prince XML (http://www.princexml.com/)" />
+                                <mkdir dir="${manual.dir}"/>
+                                <move file="${project.build.directory}/sitegen/manual.html" tofile="${manual}.html"/>
+                                <echo message="Generating PDF using Prince XML (http://www.princexml.com/)"/>
                                 <exec executable="prince">
-                                    <arg value="${manual}.html" />
-                                    <arg value="${manual}.pdf" />
-                                    <arg value="--log" />
-                                    <arg value="${project.build.directory}/prince.log" />
+                                    <arg value="${manual}.html"/>
+                                    <arg value="${manual}.pdf"/>
+                                    <arg value="--log"/>
+                                    <arg value="${project.build.directory}/prince.log"/>
                                 </exec>
-                                <attachartifact file="${manual}.html" type="html" />
-                                <attachartifact file="${manual}.pdf" type="pdf" />
+                                <attachartifact file="${manual}.html" type="html"/>
+                                <attachartifact file="${manual}.pdf" type="pdf"/>
                             </tasks>
                         </configuration>
                     </execution>
