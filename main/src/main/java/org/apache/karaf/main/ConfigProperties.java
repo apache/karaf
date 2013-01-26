@@ -165,28 +165,6 @@ public class ConfigProperties {
         this.karafBase = Utils.getKarafDirectory(PROP_KARAF_BASE, ENV_KARAF_BASE, karafHome, false, true);
         this.karafData = Utils.getKarafDirectory(PROP_KARAF_DATA, ENV_KARAF_DATA, new File(karafBase, "data"), true, true);
         
-        if (Boolean.getBoolean("karaf.restart.clean")) {
-            Utils.deleteDirectory(this.karafData);
-            this.karafData = Utils.getKarafDirectory(PROP_KARAF_DATA, ENV_KARAF_DATA, new File(karafBase, "data"), true, true);
-        }
-
-        File cleanAllIndicatorFile = new File(karafData, "clean_all");
-        File cleanCacheIndicatorFile = new File(karafData, "clean_cache");
-        if (Boolean.getBoolean("karaf.clean.all") || cleanAllIndicatorFile.exists()) {
-            if (cleanAllIndicatorFile.exists()) {
-                cleanAllIndicatorFile.delete();
-            }
-            Utils.deleteDirectory(karafData);
-        } else {
-            if (Boolean.getBoolean("karaf.clean.cache") || cleanCacheIndicatorFile.exists()) {
-                if (cleanCacheIndicatorFile.exists()) {
-                    cleanCacheIndicatorFile.delete();
-                }
-                File karafCache = Utils.getKarafDirectory(PROP_KARAF_DATA, ENV_KARAF_DATA, new File(karafData, "cache"), true, true);
-                Utils.deleteDirectory(karafCache);
-            }
-        }
-
         this.karafInstances = Utils.getKarafDirectory(PROP_KARAF_INSTANCES, ENV_KARAF_INSTANCES, new File(karafHome, "instances"), false, false);
 
         Package p = Package.getPackage("org.apache.karaf.main");
@@ -203,9 +181,27 @@ public class ConfigProperties {
         }
         PropertiesLoader.loadSystemProperties(new File(etcFolder, SYSTEM_PROPERTIES_FILE_NAME));
 
+        File cleanAllIndicatorFile = new File(karafData, "clean_all");
+        File cleanCacheIndicatorFile = new File(karafData, "clean_cache");
+        if (Boolean.getBoolean("karaf.clean.all") || cleanAllIndicatorFile.exists()) {
+            if (cleanAllIndicatorFile.exists()) {
+                cleanAllIndicatorFile.delete();
+            }
+            Utils.deleteDirectory(this.karafData);
+            this.karafData = Utils.getKarafDirectory(PROP_KARAF_DATA, ENV_KARAF_DATA, new File(karafBase, "data"), true, true);
+        } else {
+            if (Boolean.getBoolean("karaf.clean.cache") || cleanCacheIndicatorFile.exists()) {
+                if (cleanCacheIndicatorFile.exists()) {
+                    cleanCacheIndicatorFile.delete();
+                }
+                File karafCache = Utils.getKarafDirectory(PROP_KARAF_DATA, ENV_KARAF_DATA, new File(karafData, "cache"), true, true);
+                Utils.deleteDirectory(karafCache);
+            }
+        }
+
         File file = new File(etcFolder, CONFIG_PROPERTIES_FILE_NAME);
         this.props = PropertiesLoader.loadConfigProperties(file);
-        
+
         String prop = props.getProperty(SECURITY_PROVIDERS);
         this.securityProviders = (prop != null) ? prop.split(",") : new String[] {};
         this.defaultStartLevel = Integer.parseInt(props.getProperty(Constants.FRAMEWORK_BEGINNING_STARTLEVEL));
