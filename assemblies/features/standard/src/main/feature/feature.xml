@@ -94,6 +94,8 @@
 
     <feature name="http" version="${project.version}" resolver="(obr)" description="Implementation of the OSGI HTTP Service">
         <feature version="${pax.web.version}">pax-http</feature>
+        <bundle start-level="30">mvn:org.apache.karaf.http/org.apache.karaf.http.core/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.karaf.http/org.apache.karaf.http.command/${project.version}</bundle>
     </feature>
 
     <feature name="http-whiteboard" description="Provide HTTP Whiteboard pattern support" version="${project.version}" resolver="(obr)">
@@ -102,6 +104,8 @@
 
     <feature name="war" description="Turn Karaf as a full WebContainer" version="${project.version}" resolver="(obr)">
         <feature version="${pax.web.version}">pax-war</feature>
+        <bundle start-level="30">mvn:org.apache.karaf.web/org.apache.karaf.web.core/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.karaf.web/org.apache.karaf.web.command/${project.version}</bundle>
     </feature>
 
     <feature name="kar" description="Provide KAR (KARaf archive) support" version="${project.version}" resolver="(obr)">
