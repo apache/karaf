@@ -84,7 +84,7 @@
     </feature>
 
     <feature name="jetty" description="Provide Jetty engine support" version="${jetty.version}" resolver="(obr)">
-        <feature version="${jetty.version}">pax-web-jetty</feature>
+        <feature version="${jetty.version}">pax-jetty</feature>
     </feature>
 
     <feature name="package" version="${project.version}" resolver="(obr)" description="Package commands and mbeans">
