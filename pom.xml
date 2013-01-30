@@ -170,7 +170,7 @@
         <aries.blueprint.api.version>1.0.0</aries.blueprint.api.version>
         <aries.blueprint.core.version>1.0.1</aries.blueprint.core.version>
         <aries.blueprint.core.compatibility.version>1.0.0</aries.blueprint.core.compatibility.version>
-        <aries.blueprint.cm.version>1.0.0</aries.blueprint.cm.version>
+        <aries.blueprint.cm.version>1.0.1</aries.blueprint.cm.version>
         <aries.blueprint.jexl.evaluator.version>1.0.0</aries.blueprint.jexl.evaluator.version>
         <aries.jmx.api.version>1.0.0</aries.jmx.api.version>
         <aries.jmx.core.version>1.0.1</aries.jmx.core.version>
