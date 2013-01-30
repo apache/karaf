@@ -143,7 +143,7 @@
         <aries.blueprint.version>1.0.1</aries.blueprint.version>
         <aries.blueprint.api.version>1.0.0</aries.blueprint.api.version>
         <aries.blueprint.core.version>1.0.1</aries.blueprint.core.version>
-        <aries.blueprint.cm.version>1.0.0</aries.blueprint.cm.version>
+        <aries.blueprint.cm.version>1.0.1</aries.blueprint.cm.version>
         <aries.jmx.api.version>1.0.0</aries.jmx.api.version>
         <aries.jmx.core.version>1.0.1</aries.jmx.core.version>
         <aries.jmx.blueprint.api.version>1.0.0</aries.jmx.blueprint.api.version>
