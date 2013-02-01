@@ -248,7 +248,12 @@ public class Console implements Runnable
             if (reader.getHistory().size()==0) {
                 reader.getHistory().add(command);
             } else {
-                reader.getHistory().replace(command);
+                // jline doesn't add blank lines to the history so we don't 
+                // need to replace the command in jline's console history with
+                // an indented one
+                if (command.length() > 0 && !" ".equals(command)) {
+                    reader.getHistory().replace(command);    
+                }                                
             }
             try {
                 new Parser(command).program();
