@@ -25,6 +25,7 @@ import java.io.File;
 import junit.framework.Assert;
 
 import org.apache.karaf.main.util.Utils;
+import org.junit.After;
 import org.junit.Test;
 import org.ops4j.pax.tinybundles.core.TinyBundles;
 import org.osgi.framework.Bundle;
@@ -33,7 +34,16 @@ import org.osgi.framework.launch.Framework;
 
 public class MainStartTest {
 
-	@Test
+    private Main main;
+
+    @After
+    public void tearDown() throws Exception {
+        if(main != null){
+            main.destroy();
+        }
+    }
+
+    @Test
     public void testAutoStart() throws Exception {
         File basedir = new File(getClass().getClassLoader().getResource("foo").getPath()).getParentFile();
         File home = new File(basedir, "test-karaf-home");
@@ -45,7 +55,7 @@ public class MainStartTest {
 		System.setProperty("karaf.home", home.toString());
 		System.setProperty("karaf.data", data.toString());
 
-		Main main = new Main(args);
+		main = new Main(args);
 		main.launch();
 		Framework framework = main.getFramework();
 		Bundle[] bundles = framework.getBundleContext().getBundles();
@@ -59,8 +69,6 @@ public class MainStartTest {
 
 		Bundle bundle2 = framework.getBundleContext().getBundle("pax-url-mvn.jar");
 		Assert.assertEquals(Bundle.ACTIVE, bundle2.getState());
-
-        main.destroy();
 	}
 
     @Test
@@ -76,7 +84,7 @@ public class MainStartTest {
 		System.setProperty("karaf.data", data.toString());
         System.setProperty("karaf.framework.factory", "org.apache.felix.framework.FrameworkFactory");
 
-        Main main = new Main(args);
+        main = new Main(args);
         main.launch();
         Framework framework = main.getFramework();
         String activatorName = TimeoutShutdownActivator.class.getName().replace('.', '/') + ".class";
