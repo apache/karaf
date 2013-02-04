@@ -72,6 +72,19 @@ public class CreateArchiveMojo extends MojoSupport {
      */
     private File targetFile;
 
+    /**
+     * pack a assembly as a tar.gz archive
+     *
+     * @parameter
+     */
+    private boolean archiveTarGz = true;
+
+    /**
+     * pack a assembly as a zip archive
+     *
+     * @parameter
+     */
+    private boolean archiveZip = true;
 
     public void execute() throws MojoExecutionException, MojoFailureException {
         getLog().debug("Setting artifact file: " + targetFile);
@@ -79,8 +92,12 @@ public class CreateArchiveMojo extends MojoSupport {
         artifact.setFile(targetFile);
         try {
             //now pack up the server.
-            archive("tar.gz");
-            archive("zip");
+            if(archiveTarGz){
+                archive("tar.gz");
+            }
+            if(archiveZip) {
+                archive("zip");
+            }
         } catch (Exception e) {
             throw new MojoExecutionException("Could not archive plugin", e);
         }
