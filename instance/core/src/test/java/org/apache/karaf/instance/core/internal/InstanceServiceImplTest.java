@@ -25,57 +25,68 @@ import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Properties;
 
-import junit.framework.TestCase;
-
 import org.apache.karaf.instance.core.Instance;
 import org.apache.karaf.instance.core.InstanceSettings;
-import org.apache.karaf.instance.core.internal.InstanceServiceImpl;
+import org.junit.BeforeClass;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+import org.junit.rules.TestName;
 
-public class InstanceServiceImplTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
-    public void testHandleFeatures() throws Exception {
-        InstanceServiceImpl as = new InstanceServiceImpl();
-        
-        File f = File.createTempFile(getName(), ".test");
-        try {
-            Properties p = new Properties();
-            p.put("featuresBoot", "abc,def ");
-            p.put("featuresRepositories", "somescheme://xyz");
-            OutputStream os = new FileOutputStream(f);
-            try {
-                p.store(os, "Test comment");
-            } finally {
-                os.close();
-            }
-            
-            InstanceSettings s = new InstanceSettings(8122, 1122, 44444, null, null, null, Arrays.asList("test"));
-            as.addFeaturesFromSettings(f, s);
-            
-            Properties p2 = new Properties();
-            InputStream is = new FileInputStream(f);
-            try {
-                p2.load(is);
-            } finally {
-                is.close();
-            }
-            assertEquals(2, p2.size());
-            assertEquals("abc,def,ssh,test", p2.get("featuresBoot"));
-            assertEquals("somescheme://xyz", p2.get("featuresRepositories"));
-        } finally {
-            f.delete();
-        }
+public class InstanceServiceImplTest {
+
+    @Rule
+    public TestName name = new TestName();
+
+    @Rule
+    public TemporaryFolder tempFolder = new TemporaryFolder();
+
+    @BeforeClass
+    public static void setUpClass() throws Exception {
+        String buildDirectory = ClassLoader.getSystemResource("etc/startup.properties").getFile()
+                .replace("etc/startup.properties", "");
+        System.setProperty("karaf.base", buildDirectory);
     }
 
-    /**
-     * Ensure the instance:create generates all the required configuration files
-     * //TODO: fix this test so it can run in an IDE
-     */
+    @Test
+    public void testHandleFeatures() throws Exception {
+        InstanceServiceImpl as = new InstanceServiceImpl();
+
+        File f = tempFolder.newFile(getName() + ".test");
+        Properties p = new Properties();
+        p.put("featuresBoot", "abc,def ");
+        p.put("featuresRepositories", "somescheme://xyz");
+        OutputStream os = new FileOutputStream(f);
+        try {
+            p.store(os, "Test comment");
+        } finally {
+            os.close();
+        }
+
+        InstanceSettings s = new InstanceSettings(8122, 1122, 44444, null, null, null, Arrays.asList("test"));
+        as.addFeaturesFromSettings(f, s);
+
+        Properties p2 = new Properties();
+        InputStream is = new FileInputStream(f);
+        try {
+            p2.load(is);
+        } finally {
+            is.close();
+        }
+        assertEquals(2, p2.size());
+        assertEquals("abc,def,ssh,test", p2.get("featuresBoot"));
+        assertEquals("somescheme://xyz", p2.get("featuresRepositories"));
+    }
+
+    @Test
     public void testConfigurationFiles() throws Exception {
         InstanceServiceImpl service = new InstanceServiceImpl();
-        service.setStorageLocation(new File("target/instances/" + System.currentTimeMillis()));
+        service.setStorageLocation(tempFolder.newFolder("instances"));
 
-        System.setProperty("karaf.base", new File("target/test-classes/").getAbsolutePath());
-        
         InstanceSettings settings = new InstanceSettings(8122, 1122, 44444, getName(), null, null, null);
         Instance instance = service.createInstance(getName(), settings, true);
 
@@ -97,11 +108,10 @@ public class InstanceServiceImplTest extends TestCase {
      * Test the renaming of an existing instance.
      * </p>
      */
+    @Test
     public void testRenameInstance() throws Exception {
         InstanceServiceImpl service = new InstanceServiceImpl();
-        service.setStorageLocation(new File("target/instances/" + System.currentTimeMillis()));
-
-        System.setProperty("karaf.base", new File("target/test-classes/").getAbsolutePath());
+        service.setStorageLocation(tempFolder.newFolder("instances"));
 
         InstanceSettings settings = new InstanceSettings(8122, 1122, 44444, getName(), null, null, null);
         service.createInstance(getName(), settings, true);
@@ -110,15 +120,15 @@ public class InstanceServiceImplTest extends TestCase {
         assertNotNull(service.getInstance(getName() + "b"));
     }
 
-
     /**
      * <p>
      * Test the renaming of an existing instance.
      * </p>
      */
+    @Test
     public void testToSimulateRenameInstanceByExternalProcess() throws Exception {
         InstanceServiceImpl service = new InstanceServiceImpl();
-        File storageLocation = new File("target/instances/" + System.currentTimeMillis());
+        File storageLocation = tempFolder.newFolder("instances");
         service.setStorageLocation(storageLocation);
 
         InstanceSettings settings = new InstanceSettings(8122, 1122, 44444, getName(), null, null, null);
@@ -137,6 +147,10 @@ public class InstanceServiceImplTest extends TestCase {
         saveStorage(storage, storageFile, "testToSimulateRenameInstanceByExternalProcess");
         
         assertNotNull(service.getInstance(getName() + "b"));
+    }
+
+    private String getName() {
+        return name.getMethodName();
     }
 
     private void saveStorage(Properties props, File location, String comment) throws IOException {
