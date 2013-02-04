@@ -34,7 +34,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -43,6 +45,7 @@ import javax.xml.stream.XMLStreamException;
 
 import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.features.BundleInfo;
+import org.apache.karaf.features.Dependency;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
 import org.apache.karaf.features.internal.model.Bundle;
@@ -164,8 +167,18 @@ public class InstallKarsMojo extends MojoSupport {
      */
     private List<RemoteRepository> remoteRepos;
 
+    /**
+     * When a feature depends on another feature, try to find it in another referenced feature-file and install that one
+     * too.
+     *
+     * @parameter
+     */
+    private boolean addTransitiveFeatures = true;
+
     private URI system;
     private CommentProperties startupProperties = new CommentProperties();
+    private Set<Feature> featureSet = new HashSet<Feature>();
+    private List<Dependency> missingDependencies = new ArrayList<Dependency>();
 
     /**
      * list of features to  install into local repo.
@@ -399,10 +412,12 @@ public class InstallKarsMojo extends MojoSupport {
                     }
                     Features repo = readFeatures(uri);
                     for (Feature feature : repo.getFeature()) {
+                        featureSet.add(feature);
                         if (startupFeatures != null && startupFeatures.contains(feature.getName())) {
                             installFeature(feature, null);
                         } else if (bootFeatures != null && bootFeatures.contains(feature.getName())) {
                             localRepoFeatures.add(feature);
+                            missingDependencies.addAll(feature.getDependencies());
                             String existingBootFeatures = retrieveProperty(properties, FEATURES_BOOT);
                             if (!existingBootFeatures.contains(feature.getName())) {
                                 existingBootFeatures = existingBootFeatures + feature.getName();
@@ -410,7 +425,11 @@ public class InstallKarsMojo extends MojoSupport {
                             }
                         } else if (installedFeatures != null && installedFeatures.contains(feature.getName())) {
                             localRepoFeatures.add(feature);
+                            missingDependencies.addAll(feature.getDependencies());
                         }
+                    }
+                    if (addTransitiveFeatures) {
+                        addMissingDependenciesToRepo();
                     }
                     FileOutputStream out = new FileOutputStream(featuresCfgFile);
                     try {
@@ -424,6 +443,27 @@ public class InstallKarsMojo extends MojoSupport {
                 Features features = readFeatures(uri);
                 for (Feature feature : features.getFeature()) {
                     installFeature(feature, null);
+                }
+            }
+        }
+
+        private void addMissingDependenciesToRepo() {
+            for (ListIterator<Dependency> iterator = missingDependencies.listIterator(); iterator.hasNext(); ) {
+                Dependency dependency = iterator.next();
+                Feature depFeature = lookupFeature(dependency);
+                if (depFeature == null) {
+                    continue;
+                }
+                localRepoFeatures.add(depFeature);
+                iterator.remove();
+                addAllMissingDependencies(iterator, depFeature);
+            }
+        }
+
+        private void addAllMissingDependencies(ListIterator<Dependency> iterator, Feature depFeature) {
+            for (Dependency dependency : depFeature.getDependencies()) {
+                if (!missingDependencies.contains(dependency)) {
+                    iterator.add(dependency);
                 }
             }
         }
@@ -507,6 +547,22 @@ public class InstallKarsMojo extends MojoSupport {
                     }
                 }
             }
+        }
+
+        private Feature lookupFeature(Dependency dependency) {
+            for (Feature feature : featureSet) {
+                if (featureSatisfiesDependency(feature, dependency)) {
+                    return feature;
+                }
+            }
+            return null;
+        }
+
+        private boolean featureSatisfiesDependency(Feature feature, Dependency dependency) {
+            if (!feature.getName().equals(dependency.getName())) {
+                return false;
+            }
+            return true;
         }
 
         @Override
