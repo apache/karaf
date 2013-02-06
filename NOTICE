@@ -1,5 +1,5 @@
 Apache Karaf
-Copyright 2010-2012 The Apache Software Foundation
+Copyright 2010-2013 The Apache Software Foundation
 
 
 I. Included Software
@@ -38,7 +38,7 @@ Licensed under the Apache License 2.0.
 
 This product uses software developed at
 AOP Alliance (http://aopalliance.sourceforge.net/).
-Licensed under the LGPL.
+Licensed under Public Domain.
 
 This product uses software developed at
 Tanuki Software (http://www.tanukisoftware.com/).
@@ -68,5 +68,4 @@ III. License Summary
 - Apache License 2.0
 - BSD License
 - EPL License
-- LGPL License
 - MIT License
