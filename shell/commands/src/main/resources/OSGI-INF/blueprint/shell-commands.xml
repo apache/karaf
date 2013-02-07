@@ -27,6 +27,9 @@
             <action class="org.apache.karaf.shell.commands.impl.ClearAction"/>
         </command>
         <command>
+            <action class="org.apache.karaf.shell.commands.impl.DateAction"/>
+        </command>
+        <command>
             <action class="org.apache.karaf.shell.commands.impl.EachAction"/>
         </command>
         <command>

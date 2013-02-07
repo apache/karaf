@@ -14,6 +14,7 @@ This bundle provides various shell commands.
 The following commands are available:
 * shell:cat - Displays the content of a file or url.
 * shell:clear - Clears the console buffer.
+* shell:date - Display the current time in the given FORMAT
 * shell:each - Execute a closure on a list of arguments.
 * shell:echo - Echoes or prints arguments to STDOUT.
 * shell:exec - Executes system processes.
