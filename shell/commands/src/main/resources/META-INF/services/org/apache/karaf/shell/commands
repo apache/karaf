@@ -16,6 +16,7 @@
 ##---------------------------------------------------------------------------
 org.apache.karaf.shell.commands.CatAction
 org.apache.karaf.shell.commands.ClearAction
+org.apache.karaf.shell.commands.DateAction
 org.apache.karaf.shell.commands.EachAction
 org.apache.karaf.shell.commands.EchoAction
 org.apache.karaf.shell.commands.ExecuteAction

@@ -26,6 +26,9 @@
         <command name="shell/clear">
             <action class="org.apache.karaf.shell.commands.ClearAction"/>
         </command>
+        <command name="shell/date">
+            <action class="org.apache.karaf.shell.commands.DateAction"/>
+        </command>
         <command name="shell/each">
             <action class="org.apache.karaf.shell.commands.EachAction"/>
         </command>

@@ -12,6 +12,7 @@
     The following commands are available:
     \u001B[36mshell:cat\u001B[0m Displays the content of a file or url.
     \u001B[36mshell:clear\u001B[0m Clears the console buffer.
+    \u001B[36mshell:date\u001B[0m Display the current time in the given FORMAT
     \u001B[36mshell:each\u001B[0m Execute a closure on a list of arguments.
     \u001B[36mshell:echo\u001B[0m Echoes or prints arguments to STDOUT.
     \u001B[36mshell:exec\u001B[0m Executes system processes.
