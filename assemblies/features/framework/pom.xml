@@ -322,6 +322,11 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.apache.servicemix.specs</groupId>
+                                    <artifactId>org.apache.servicemix.specs.locator</artifactId>
+                                    <outputDirectory>target/classes/resources/lib</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.apache.servicemix.specs</groupId>
                                     <artifactId>org.apache.servicemix.specs.jaxp-api-1.4</artifactId>
                                     <outputDirectory>target/classes/resources/lib/endorsed</outputDirectory>
                                 </artifactItem>
