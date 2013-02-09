@@ -18,7 +18,7 @@
   ~ under the License.
   -->
 
-<features xmlns="http://karaf.apache.org/xmlns/features/v1.0.0" name="test-input-file">
+<features xmlns="http://karaf.apache.org/xmlns/features/v1.2.0" name="test-input-file">
     <feature description="Test Description" version="1.0-SNAPSHOT" name="test-input-file">
         <details>Test Description</details>
         <bundle>mvn:test/test-input-file/1.0-SNAPSHOT</bundle>
