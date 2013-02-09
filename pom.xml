@@ -880,12 +880,17 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.servicemix.specs</groupId>
-                <artifactId>org.apache.servicemix.specs.activation-api-1.1</artifactId>
+                <artifactId>org.apache.servicemix.specs.activator</artifactId>
                 <version>${servicemix.specs.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.servicemix.specs</groupId>
-                <artifactId>org.apache.servicemix.specs.activator</artifactId>
+                <artifactId>org.apache.servicemix.specs.locator</artifactId>
+                <version>${servicemix.specs.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.servicemix.specs</groupId>
+                <artifactId>org.apache.servicemix.specs.activation-api-1.1</artifactId>
                 <version>${servicemix.specs.version}</version>
             </dependency>
             <dependency>

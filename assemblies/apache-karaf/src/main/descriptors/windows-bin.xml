@@ -108,6 +108,7 @@
             <useProjectArtifact>false</useProjectArtifact>
             <includes>
                 <include>org.apache.servicemix.specs:org.apache.servicemix.specs.activator</include>
+                <include>org.apache.servicemix.specs:org.apache.servicemix.specs.locator</include>
             </includes>
         </dependencySet>
 
