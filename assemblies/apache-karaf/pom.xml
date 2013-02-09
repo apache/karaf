@@ -413,6 +413,10 @@
         </dependency>
         <dependency>
             <groupId>org.apache.servicemix.specs</groupId>
+            <artifactId>org.apache.servicemix.specs.locator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.servicemix.specs</groupId>
             <artifactId>org.apache.servicemix.specs.jaxp-api-1.4</artifactId>
         </dependency>
         <dependency>
