@@ -17,9 +17,10 @@
  * under the License.
  */
 
-package test.a;
+package test.b;
 
-public class A
-{
-    public static String ASTRING = "A-string";
+public class B {
+
+	public static String STRING = "B-string";
+
 }
