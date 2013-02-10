@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<features xmlns="http://karaf.apache.org/xmlns/features/v1.2.0" name="bundle-module-b">
+    <feature description="bundle-module-b" version="1.0-SNAPSHOT" name="bundle-module-b">
+        <bundle>mvn:test/bundle-module-b/1.0-SNAPSHOT</bundle>
+        <bundle>mvn:test/bundle-module-a/1.0-SNAPSHOT</bundle>
+    </feature>
+</features>
