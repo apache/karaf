@@ -195,8 +195,7 @@ Packagings
 
   - unpacks the resources content from project dependencies that are kars
 
-  - unpacks the system maven-repo-like structure from project dependencies that are kars. If the project dependency is scope compile or provided it is unpacked to system.  If the scope is runtime
-  it is unpacked to local-repo
+  - unpacks the system maven-repo-like structure from project dependencies that are kars. If the project dependency is scope compile or provided it is unpacked to system.
 
   - locates and installs all the bundles mentioned in feature xml descriptors that are project dependencies or located in project dependencies that are kars of scope compile/provided.
 

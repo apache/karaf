@@ -130,14 +130,14 @@ public class InstallKarsMojo extends MojoSupport {
     private List<String> startupFeatures;
 
     /**
-     * List of features from runtime-scope features xml and kars to be installed into local-repo and listed in features service boot features.
+     * List of features from runtime-scope features xml and kars to be installed into system repo and listed in features service boot features.
      *
      * @parameter
      */
     private List<String> bootFeatures;
 
     /**
-     * List of features from runtime-scope features xml and kars to be installed into local-repo and not mentioned elsewhere.
+     * List of features from runtime-scope features xml and kars to be installed into system repo and not mentioned elsewhere.
      *
      * @parameter
      */
@@ -286,7 +286,7 @@ public class InstallKarsMojo extends MojoSupport {
             }
         }
 
-        // install bundles listed in install features not in system into local-repo
+        // install bundles listed in install features not in system
         for (Feature feature : localRepoFeatures) {
             for (Bundle bundle : feature.getBundle()) {
                 if (!bundle.isDependency()) {
