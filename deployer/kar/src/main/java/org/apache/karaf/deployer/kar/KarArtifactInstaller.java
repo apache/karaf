@@ -52,7 +52,7 @@ public class KarArtifactInstaller implements ArtifactInstaller {
     private static final String ZIP_SUFFIX = ".zip";
 
     private String base = "./";
-    private String localRepoPath = "./target/local-repo";
+    private String localRepoPath = "./target/system";
 
     private String timestampPath;
 
