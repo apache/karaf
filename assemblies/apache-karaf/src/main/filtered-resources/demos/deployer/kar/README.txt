@@ -51,8 +51,8 @@ To deploy a kar, simply drop the kar into the deploy directory.
 The KAR Deployer will deploy all the kar content starting from
 the features descriptor.
 
-The KAR Deployer creates a repository dedicated to your kar 
-(in the $/local-repo) and register the features descriptor.
+The KAR Deployer uncompress the KAR archive in the system
+repository and register the features descriptor.
 You can now see your feature available for installation:
 
   karaf@root> feature:list | grep -i my-kar

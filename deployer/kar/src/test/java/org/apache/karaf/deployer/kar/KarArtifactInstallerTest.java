@@ -51,7 +51,7 @@ public class KarArtifactInstallerTest {
 
         karArtifactInstaller.setFeaturesService(featuresService);
         karArtifactInstaller.setBasePath("./target");
-        karArtifactInstaller.setLocalRepoPath("./target/local-repo");
+        karArtifactInstaller.setLocalRepoPath("./target/system");
 
         karArtifactInstaller.init();
 

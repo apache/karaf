@@ -36,8 +36,6 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 
-import javax.swing.text.html.Option;
-
 /**
  * Installs kar dependencies into a server-under-construction in target/assembly
  *
@@ -69,15 +67,15 @@ public class InstallKarsMojo extends MojoSupport {
     /**
      * Directory that resources are copied to during the build.
      *
-     * @parameter expression="${project.build.directory}/assembly/local-repo"
+     * @parameter expression="${project.build.directory}/assembly/system"
      * @required
      */
-    protected String localRepoDirectory;
+    protected String systemRepoDirectory;
 
     public void execute() throws MojoExecutionException, MojoFailureException {
         KarArtifactInstaller installer = new KarArtifactInstaller();
         installer.setBasePath(workDirectory);
-        installer.setLocalRepoPath(localRepoDirectory);
+        installer.setLocalRepoPath(systemRepoDirectory);
         FeaturesService featuresService = new OfflineFeaturesService();
         installer.setFeaturesService(featuresService);
         installer.init();
