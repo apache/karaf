@@ -41,7 +41,6 @@
         <details>JPA implementation provided by Apache Aries JPA ${aries.jpa.version}. NB: this feature doesn't provide the JPA engine, you have to install one by yourself (OpenJPA for instance)</details>
         <bundle dependency='true' start-level='30'>mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
         <bundle dependency='true' start-level='30'>mvn:org.apache.geronimo.specs/geronimo-jpa_2.0_spec/${geronimo.jpa-spec.version}</bundle>
-        <bundle start-level='30'>mvn:org.apache.aries/org.apache.aries.util/${aries.util.version}</bundle>
         <bundle start-level='30'>mvn:org.apache.aries.jpa/org.apache.aries.jpa.api/${aries.jpa.api.version}</bundle>
         <bundle start-level='30'>mvn:org.apache.aries.jpa/org.apache.aries.jpa.blueprint.aries/${aries.jpa.blueprint.aries.version}</bundle>
         <bundle start-level='30'>mvn:org.apache.aries.jpa/org.apache.aries.jpa.container/${aries.jpa.container.version}</bundle>
@@ -50,7 +49,6 @@
 
     <feature name='jndi' description='OSGi Service Registry JNDI access' version='${aries.jndi.version}' resolver='(obr)'>
         <details>JNDI support provided by Apache Aries JNDI ${aries.jndi.version}</details>
-        <bundle start-level='30'>mvn:org.apache.aries/org.apache.aries.util/${aries.util.version}</bundle>
         <bundle start-level='30'>mvn:org.apache.aries.jndi/org.apache.aries.jndi.api/${aries.jndi.api.version}</bundle>
         <bundle start-level='30'>mvn:org.apache.aries.jndi/org.apache.aries.jndi.core/${aries.jndi.version}</bundle>
         <bundle start-level='30'>mvn:org.apache.aries.jndi/org.apache.aries.jndi.rmi/${aries.jndi.version}</bundle>
@@ -61,12 +59,6 @@
     <feature name='application-without-isolation' description='Provide EBA archive support' version='${aries.application.version}'>
         <details>Support of the Aries EBA archives</details>
         <!-- pre-requisites-->
-        <bundle dependency='true' start-level='20'>mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.api/${aries.blueprint.api.version}</bundle>
-        <bundle dependency='true' start-level='20'>mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.core/${aries.blueprint.version}</bundle>
-        <bundle dependency='true' start-level='20'>mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.cm/${aries.blueprint.cm.version}</bundle>
-        <bundle dependency='true' start-level='20'>mvn:org.apache.aries.proxy/org.apache.aries.proxy.api/${aries.proxy.api.version}</bundle>
-        <bundle dependency='true' start-level='20'>mvn:org.apache.aries.proxy/org.apache.aries.proxy.impl/${aries.proxy.version}</bundle>
-        <bundle dependency='true' start-level='20'>mvn:org.apache.aries/org.apache.aries.util/${aries.util.version}</bundle>
         <feature version='${project.version}'>obr</feature>
         <!-- common -->
         <bundle start-level='30'>mvn:org.apache.aries.application/org.apache.aries.application.resolver.obr/${aries.application.version}</bundle>
