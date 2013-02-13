@@ -104,7 +104,7 @@ public class KarafJaasAuthenticator implements PasswordAuthenticator, PublickeyA
             session.setAttribute(SUBJECT_ATTRIBUTE_KEY, subject);
             return true;
         } catch (Exception e) {
-            LOGGER.warn("User authentication failed with " + e.getMessage(), e);
+            LOGGER.debug("User authentication failed with " + e.getMessage(), e);
             return false;
         }
     }
@@ -149,7 +149,7 @@ public class KarafJaasAuthenticator implements PasswordAuthenticator, PublickeyA
             session.setAttribute(SUBJECT_ATTRIBUTE_KEY, subject);
             return true;
         } catch (Exception e) {
-            LOGGER.warn("User authentication failed with " + e.getMessage(), e);
+            LOGGER.debug("User authentication failed with " + e.getMessage(), e);
             return false;
         }
     }
