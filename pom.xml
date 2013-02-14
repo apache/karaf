@@ -144,10 +144,10 @@
         <aries.blueprint.api.version>1.0.0</aries.blueprint.api.version>
         <aries.blueprint.core.version>1.1.0</aries.blueprint.core.version>
         <aries.blueprint.cm.version>1.0.1</aries.blueprint.cm.version>
-        <aries.jmx.api.version>1.1.1-SNAPSHOT</aries.jmx.api.version>
-        <aries.jmx.core.version>1.1.1-SNAPSHOT</aries.jmx.core.version>
-        <aries.jmx.blueprint.api.version>1.1.1-SNAPSHOT</aries.jmx.blueprint.api.version>
-        <aries.jmx.blueprint.core.version>1.1.1-SNAPSHOT</aries.jmx.blueprint.core.version>
+        <aries.jmx.api.version>1.1.0</aries.jmx.api.version>
+        <aries.jmx.core.version>1.1.1</aries.jmx.core.version>
+        <aries.jmx.blueprint.api.version>1.1.0</aries.jmx.blueprint.api.version>
+        <aries.jmx.blueprint.core.version>1.1.0</aries.jmx.blueprint.core.version>
         <aries.jpa.version>1.0.1</aries.jpa.version>
         <aries.jpa.api.version>1.0.0</aries.jpa.api.version>
         <aries.jpa.container.version>1.0.0</aries.jpa.container.version>
