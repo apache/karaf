@@ -18,48 +18,39 @@ package org.apache.karaf.bundle.core.internal;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLStreamHandler;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
 import org.apache.karaf.bundle.core.BundleScanner;
-import org.apache.karaf.bundle.core.BundleService;
-import org.apache.karaf.bundle.core.BundleWatcher;
 import org.ops4j.pax.url.mvn.Parser;
 import org.ops4j.pax.url.mvn.ServiceConstants;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleEvent;
-import org.osgi.framework.BundleException;
-import org.osgi.framework.BundleListener;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * See {@link BundleScanner}
+ * See {@link BundleScanner}.
  */
 public class BundleScannerImpl implements Runnable, BundleScanner {
 
 	/**
-	 * Matching bundles only with this qualifier
+	 * Matching bundles only with given qualifier.
 	 */
 	private static final String QUALIFIER = "SNAPSHOT";
+
 	private static final String THREAD_NAME = BundleScannerImpl.class.getName();
 
 	private final Logger logger = LoggerFactory
@@ -70,21 +61,48 @@ public class BundleScannerImpl implements Runnable, BundleScanner {
 	private final MavenConfigService mavenConfigService;
 
 	private final AtomicBoolean running = new AtomicBoolean(false);
-	private volatile long interval = 1000L;
+	private volatile long interval = 1 * 1000L;
+
+	/**
+	 * Registered matching patterns.
+	 * <p>
+	 * [original-regex : compiled-pattern]
+	 */
 	private final Map<String, Pattern> matchingPatterns = new ConcurrentHashMap<String, Pattern>();
 
 	/**
-	 * Constructor
+	 * Collected bundle update statistics.
+	 * <p>
+	 * [bundle-symbolic-name : number-of-updates]
+	 */
+	private final Map<String, AtomicInteger> updateStats = new ConcurrentHashMap<String, AtomicInteger>();
+
+	/**
+	 * Constructor.
 	 */
 	@SuppressWarnings("deprecation")
 	public BundleScannerImpl( //
-			BundleContext bundleContext, //
-			PackageAdmin packageAdmin, //
-			MavenConfigService mavenConfigService //
+			final BundleContext bundleContext, //
+			final PackageAdmin packageAdmin, //
+			final MavenConfigService mavenConfigService //
 	) {
 		this.bundleContext = bundleContext;
 		this.packageAdmin = packageAdmin;
 		this.mavenConfigService = mavenConfigService;
+	}
+
+	@Override
+	public Map<String, Integer> getStatistics() {
+		Map<String, Integer> statsMap = new TreeMap<String, Integer>();
+		for (Map.Entry<String, AtomicInteger> entry : updateStats.entrySet()) {
+			statsMap.put(entry.getKey(), entry.getValue().get());
+		}
+		return statsMap;
+	}
+
+	@Override
+	public void clearStatistics() {
+		updateStats.clear();
 	}
 
 	/**
@@ -101,7 +119,7 @@ public class BundleScannerImpl implements Runnable, BundleScanner {
 
 			try {
 				Thread.sleep(interval);
-			} catch (InterruptedException ex) {
+			} catch (final InterruptedException ex) {
 				running.set(false);
 			}
 
@@ -118,18 +136,18 @@ public class BundleScannerImpl implements Runnable, BundleScanner {
 			return;
 		}
 
-		Map<String, Bundle> matchingBundles = new HashMap<String, Bundle>();
+		final Map<String, Bundle> matchingBundles = new HashMap<String, Bundle>();
 
-		for (Bundle bundle : bundleContext.getBundles()) {
+		for (final Bundle bundle : bundleContext.getBundles()) {
 
-			String name = bundle.getSymbolicName();
-			String qualifier = bundle.getVersion().getQualifier();
+			final String name = bundle.getSymbolicName();
+			final String qualifier = bundle.getVersion().getQualifier();
 
 			if (!QUALIFIER.equalsIgnoreCase(qualifier)) {
 				continue;
 			}
 
-			for (Pattern pattern : matchingPatterns.values()) {
+			for (final Pattern pattern : matchingPatterns.values()) {
 				if (pattern.matcher(name).matches()) {
 					matchingBundles.put(name, bundle);
 				}
@@ -140,43 +158,54 @@ public class BundleScannerImpl implements Runnable, BundleScanner {
 			return;
 		}
 
-		File localRepository = mavenConfigService.getLocalRepository();
+		final File localRepository = mavenConfigService.getLocalRepository();
 
-		List<Bundle> updatedBundles = getUpdatedBundles(localRepository,
+		final List<Bundle> updatedBundles = getUpdatedBundles(localRepository,
 				matchingBundles.values());
 
 		packageAdmin.refreshPackages(updatedBundles
 				.toArray(new Bundle[updatedBundles.size()]));
 
+		for (final Bundle bundle : updatedBundles) {
+			final String name = bundle.getSymbolicName();
+			final AtomicInteger count = updateStats.get(name);
+			if (count == null) {
+				updateStats.put(name, new AtomicInteger(0));
+			}
+			count.getAndIncrement();
+		}
+
 	}
 
 	/**
-	 * {@link ServiceConstants#PROTOCOL}
+	 * Maven URL detector. See {@link ServiceConstants#PROTOCOL}.
 	 */
-	private boolean isMavenURL(String url) {
+	private boolean isMavenURL(final String url) {
 		if (url == null) {
 			return false;
+		} else {
+			return url.startsWith(ServiceConstants.PROTOCOL);
 		}
-		return url.startsWith(ServiceConstants.PROTOCOL);
 	}
 
 	/**
-	 * 
+	 * Force maven artifact resolution, update bundle when artifact is updated,
+	 * and produce list of affected bundles.
 	 */
-	private List<Bundle> getUpdatedBundles(File localRepository,
-			Collection<Bundle> bundleList) {
+	private List<Bundle> getUpdatedBundles(final File localRepository,
+			final Collection<Bundle> bundleList) {
 
 		final List<Bundle> updatedList = new ArrayList<Bundle>();
 
-		for (Bundle bundle : bundleList) {
-
-			String bundleLocation = bundle.getLocation();
-
-			if (!isMavenURL(bundleLocation)) {
-				continue;
-			}
+		for (final Bundle bundle : bundleList) {
 
 			try {
+
+				final String bundleLocation = bundle.getLocation();
+
+				if (!isMavenURL(bundleLocation)) {
+					continue;
+				}
 
 				final File externalLocation = getBundleExternalLocation(
 						localRepository, bundle);
@@ -185,43 +214,35 @@ public class BundleScannerImpl implements Runnable, BundleScanner {
 					continue;
 				}
 
-				long bundleStamp = bundle.getLastModified();
-
-				long currentStamp = externalLocation.lastModified();
-
 				/**
-				 * Force maven resolution, can be constrained by maven update
-				 * policy.
+				 * Force maven resolution, update artifact in local maven
+				 * repository. Will be constrained by global or per-repository
+				 * maven repository update policy.
 				 */
 				new URL(bundleLocation).openStream().close();
 
-				long updatedStamp = externalLocation.lastModified();
+				final long bundleStamp = bundle.getLastModified();
 
-				if (updatedStamp <= currentStamp) {
+				final long artifactStamp = externalLocation.lastModified();
 
+				if (bundleStamp >= artifactStamp) {
+					continue;
 				}
 
-				if (externalLocation.lastModified() > bundle.getLastModified()) {
-
-					InputStream is = new FileInputStream(externalLocation);
-
-					try {
-						logger.info("[Scanner] Updating matching bundle: "
-								+ bundle.getSymbolicName() + " ("
-								+ bundle.getVersion() + ")");
-						bundle.update(is);
-						updatedList.add(bundle);
-					} finally {
-						is.close();
+				InputStream stream = null;
+				try {
+					stream = new FileInputStream(externalLocation);
+					logger.info("Updating bundle: " + bundle);
+					bundle.update(stream);
+					updatedList.add(bundle);
+				} finally {
+					if (stream != null) {
+						stream.close();
 					}
-
 				}
 
-			} catch (Exception e) {
-				logger.info(
-						"[Scanner] Bundle update failure. "
-								+ bundle.getSymbolicName() + " ("
-								+ bundle.getVersion() + ")", e);
+			} catch (final Exception e) {
+				logger.error("Bundle update failure: " + bundle, e);
 			}
 
 		}
@@ -231,26 +252,42 @@ public class BundleScannerImpl implements Runnable, BundleScanner {
 	}
 
 	@Override
-	public boolean add(String regex) {
+	public boolean add(final String regex) {
 		try {
-			Pattern pattern = Pattern.compile(regex);
-			matchingPatterns.put(regex, pattern);
-			return true;
-		} catch (Exception e) {
+			if (matchingPatterns.containsKey(regex)) {
+				return false;
+			} else {
+				final Pattern pattern = Pattern.compile(regex);
+				matchingPatterns.put(regex, pattern);
+				return true;
+			}
+		} catch (final Exception e) {
 			return false;
 		}
 	}
 
 	@Override
-	public boolean remove(String regex) {
-		Pattern pattern = matchingPatterns.remove(regex);
+	public boolean remove(final String regex) {
+		final Pattern pattern = matchingPatterns.remove(regex);
 		return pattern != null;
+	}
+
+	@Override
+	public List<String> getPatterns() {
+		List<String> list = new ArrayList<String>(matchingPatterns.keySet());
+		Collections.sort(list);
+		return list;
+	}
+
+	@Override
+	public void clearPatterns() {
+		matchingPatterns.clear();
 	}
 
 	/**
 	 * Extract bundleURI from "mvn:bundleURI"
 	 */
-	private String getBundleURI(Bundle bundle) {
+	private String getBundleURI(final Bundle bundle) {
 
 		final String location = bundle.getLocation();
 
@@ -259,7 +296,7 @@ public class BundleScannerImpl implements Runnable, BundleScanner {
 					+ bundle);
 		}
 
-		String bundleURI = location.substring(ServiceConstants.PROTOCOL
+		final String bundleURI = location.substring(ServiceConstants.PROTOCOL
 				.length() + 1);
 
 		return bundleURI;
@@ -272,41 +309,29 @@ public class BundleScannerImpl implements Runnable, BundleScanner {
 	 * @param bundle
 	 * @return
 	 */
-	private File getBundleExternalLocation(File localRepository, Bundle bundle) {
-		try {
+	private File getBundleExternalLocation(final File localRepository,
+			final Bundle bundle) throws Exception {
 
-			Parser parser = new Parser(getBundleURI(bundle));
+		final Parser parser = new Parser(getBundleURI(bundle));
 
-			String filePath = localRepository.getPath() + File.separator
-					+ parser.getArtifactPath();
+		final String filePath = localRepository.getPath() + File.separator
+				+ parser.getArtifactPath();
 
-			return new File(filePath);
+		return new File(filePath);
 
-		} catch (Exception e) {
-			logger.error(
-					"Could not parse artifact path for bundle"
-							+ bundle.getSymbolicName(), e);
-		}
-		return null;
 	}
 
 	@Override
-	public boolean start() {
+	public void start() {
 		if (running.compareAndSet(false, true)) {
-			Thread thread = new Thread(this, THREAD_NAME);
+			final Thread thread = new Thread(this, THREAD_NAME);
 			thread.start();
-			return true;
-		} else {
-			return false;
 		}
 	}
 
 	@Override
-	public boolean stop() {
+	public void stop() {
 		if (running.compareAndSet(true, false)) {
-			return true;
-		} else {
-			return false;
 		}
 	}
 
@@ -315,10 +340,11 @@ public class BundleScannerImpl implements Runnable, BundleScanner {
 	}
 
 	@Override
-	public void setInterval(long interval) {
+	public void setInterval(final long interval) {
 		this.interval = interval;
 	}
 
+	@Override
 	public boolean isRunning() {
 		return running.get();
 	}

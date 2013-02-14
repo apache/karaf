@@ -21,6 +21,7 @@
 
     <reference id="bundleService" interface="org.apache.karaf.bundle.core.BundleService" />
     <reference id="bundleWatcher" interface="org.apache.karaf.bundle.core.BundleWatcher"/>
+    <reference id="bundleScanner" interface="org.apache.karaf.bundle.core.BundleScanner"/>
 
     <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
         <command>
@@ -125,6 +126,11 @@
         <command>
             <action class="org.apache.karaf.bundle.command.Watch" >
                 <property name="bundleWatcher" ref="bundleWatcher"/>
+            </action>
+        </command>
+        <command>
+            <action class="org.apache.karaf.bundle.command.Scanner" >
+                <property name="bundleScanner" ref="bundleScanner"/>
             </action>
         </command>
     </command-bundle>

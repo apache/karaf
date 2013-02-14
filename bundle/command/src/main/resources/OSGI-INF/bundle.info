@@ -21,8 +21,9 @@ The following commands are available:
 * bundle:refresh - Refresh bundles.
 * bundle:resolve - Resolve bundles.
 * bundle:restart - Stop and restart bundles.
+* bundle:scanner - Scans and updates snapshot bundles.
 * bundle:start - Starts bundles.
-* bundlestart-level - Get or set the start level of a bundle.
+* bundle:start-level - Get or set the start level of a bundle.
 * bundle:stop - Stop bundles.
 * bundle:uninstall - Uninstall bundles.
 * bundle:update - Update a bundle.

@@ -13,9 +13,15 @@
  */
 package org.apache.karaf.bundle.core;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * Periodically scan and update snapshot bundles matching a given bundle
  * symbolic name pattern.
+ * <p>
+ * Requires maven repository update policy set to "always" either globally or
+ * for individual remote maven repositories. See pax-url-aether.
  */
 public interface BundleScanner {
 
@@ -31,25 +37,52 @@ public interface BundleScanner {
 	 * 
 	 * @return true, if regex was removed.
 	 */
-	boolean remove(String pattern);
+	boolean remove(String regex);
+
+	/**
+	 * List of matching patterns.
+	 * 
+	 * @return list of regex expressoins.
+	 */
+	List<String> getPatterns();
+
+	/**
+	 * Remove all bundle symbolic name match patterns.
+	 */
+	void clearPatterns();
 
 	/**
 	 * Start scanner service.
-	 * 
-	 * @return true, if service was started.
 	 */
-	boolean start();
+	void start();
 
 	/**
 	 * Stop scanner service.
-	 * 
-	 * @return true, if service was stopped.
 	 */
-	boolean stop();
+	void stop();
 
 	/**
 	 * Set scanner invocation interval.
 	 */
 	void setInterval(long interval);
+
+	/**
+	 * Bundle update statistics:
+	 * <p>
+	 * [bundle-symbolic-name : number-of-updates]
+	 */
+	Map<String, Integer> getStatistics();
+
+	/**
+	 * Reset bundle update statistics:
+	 */
+	void clearStatistics();
+	
+	/**
+	 * Verify scanner run status.
+	 * 
+	 * @return true, if scanner is running.
+	 */
+	boolean isRunning();
 
 }
