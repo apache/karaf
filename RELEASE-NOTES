@@ -15,6 +15,125 @@
  * limitations under the License.
  */
 
+                    Apache Karaf 2.3.1
+                    ==================
+
+  Overview
+  --------
+
+  In this patch update to the 2.3.x line contains multiple bug fixes, improvements, and dependency updates including; an upgrade to OSGi spec 4.3.1, Spring 3.1.4.RELEASE, Pax Exam 2.6.0, Pax Web 1.1.12, Jetty 7.6.8.v20121106, Aries Blueprint Core 1.1.0, and fixes to the LDAP login module, improved failover lock logic, removes a console shutdown -f hang, and adds a jre-1.8 to jre.properties.
+  For more detail please see the change log below.
+
+  Changelog
+  ---------
+
+** Bug
+    * [KARAF-1715] - Occasional freeze on feature:install webconsole
+    * [KARAF-1748] - Karaf startup fails with NullPointerException when logfile can't be written
+    * [KARAF-1770] - Unable to feature:install webconsole under apache-karaf minimal package
+    * [KARAF-1851] - inconsistent FeaturesNamespaces versions
+    * [KARAF-1887] - Make integration tests more reliable by making sure the boot is finished
+    * [KARAF-1914] - SSH client authentication randomly fails
+    * [KARAF-1921] - Upgrade to Spring 3.1.x for Karaf 2.3.x
+    * [KARAF-1936] - LDAPLoginModule not working in 2.3.0 due to missing import of javax.net.SocketFactory
+    * [KARAF-1938] - Lock logic should wait for start level change to occur
+    * [KARAF-1949] - console shutdown -f hang
+    * [KARAF-1963] - incorrect statement in developers-guide/branding-console.html
+    * [KARAF-1968] - Uninstalling jndi feature leads to hanging Karaf
+    * [KARAF-1978] - if use script to start a child instance then using karaf console admin:list can't get the instance correct status
+    * [KARAF-1986] - instance.properties file doesn't get updated if karaf.name is changed
+    * [KARAF-1992] - PropertiesLoginModule handles usernames with backslash not correct
+    * [KARAF-2007] - features without start-level in features.xml are always started first
+    * [KARAF-2009] - Error on visualize Licences page
+    * [KARAF-2013] - Bug in Karaf 2.3.0 Maven2 Features Plugin Documentation
+    * [KARAF-2026] - Two broken links on remote console manual page
+    * [KARAF-2027] - invalid password option for admin:connect command in documenation
+    * [KARAF-2029] - delete.user option missing from JDBCLoginModule
+    * [KARAF-2035] - Not able to clone the root instance
+    * [KARAF-2047] - config:edit -f command doesn't work on Windows platform
+    * [KARAF-2052] - Progress bar doesn't display properly on 80 char consoles
+    * [KARAF-2057] - NOTICE and LICENSE files are not correct
+    * [KARAF-2058] - ensure find the root instance entry when update root karaf instance name in instances.properties
+    * [KARAF-2071] - Minimal distribution doesn't start
+    * [KARAF-2073] - Progress bar sometimes goes backwards
+    * [KARAF-2074] - ensure admin service always load storage file instance.properties before each operation
+    * [KARAF-2096] - Upgrade to Pax Exam 2.6.0
+    * [KARAF-2114] - Update org.ops4j.pax.url.mvn.cfg file in child instance to include the system folder
+    * [KARAF-2115] - Sync weaving behavior between root and child instances
+    * [KARAF-2117] - LDAP login module is broken
+    * [KARAF-2133] - Generated title contain unresolved placeholder
+    * [KARAF-2134] - Features deployer does not support mvn urls
+    * [KARAF-2136] - ServiceMix Spec property mispelled in etc/system.properties
+    * [KARAF-2137] - Unable to prevent remote JMX access 
+    * [KARAF-2143] - Remove Jetty JUL logger configuration
+    * [KARAF-2154] - Entering an empty command removes previous command in history
+    * [KARAF-2171] - Start Karaf as service shows 'Activator' error in wrapper.log
+
+** Dependency upgrade
+    * [KARAF-1801] - slf4j 1.7.0
+    * [KARAF-1884] - Upgrade exam to Pax Exam 2.6.0
+    * [KARAF-1930] - Upgrade to Pax Web 1.1.5
+    * [KARAF-1948] - Upgrade to Apache POM 11
+    * [KARAF-1955] - Upgrade to ServiceMix Specs 2.2.0
+    * [KARAF-1977] - Upgrade to OSGi 4.3.1
+    * [KARAF-1981] - Upgrade to Felix ConfigAdmin 1.6.0
+    * [KARAF-2002] - Upgrade to Pax Web 1.1.6
+    * [KARAF-2015] - Upgrade to Pax Web 1.1.7
+    * [KARAF-2036] - Upgrade to Pax Web 1.1.9
+    * [KARAF-2055] - Upgrade to Apache POM 12
+    * [KARAF-2061] - Upgrade to commons-codec 1.7
+    * [KARAF-2063] - Upgrade to Felix EventAdmin 1.3.2
+    * [KARAF-2064] - Upgrade to Felix Metatype 1.0.6
+    * [KARAF-2065] - Upgrade to Felix SCR 1.6.2
+    * [KARAF-2068] - Upgrade to ASM 4.1
+    * [KARAF-2079] - upgrade to pax web 1.1.10
+    * [KARAF-2080] - Upgrade to slf4j 1.7.2
+    * [KARAF-2088] - Upgrade to Jetty 7.6.8.v20121106
+    * [KARAF-2147] - Upgrade to Aries JMX 1.1.1
+    * [KARAF-2148] - Upgrade to Aries Proxy 1.0.1
+    * [KARAF-2149] - Upgrade to Aries Blueprint Core 1.1.0
+    * [KARAF-2150] - Upgrade to Aries Blueprint CM 1.0.1
+    * [KARAF-2157] - Upgrade to Aries Util 1.1.0
+    * [KARAF-2162] - Upgrade to Pax Web 1.1.12
+    * [KARAF-2184] - Upgrade to Spring 3.1.4.RELEASE
+
+** Improvement
+    * [KARAF-1129] - Allow configuring rmi Registry host as well as port
+    * [KARAF-1924] - Fix the WARN logs from starting a vanilla Karaf 2.3.0
+    * [KARAF-1933] - Add id for Maven repository
+    * [KARAF-1935] - Paxexam-Karaf manual needs to be backported from 3.9
+    * [KARAF-1951] - Remove workaround for KARAF-1117
+    * [KARAF-1990] - Add Cellar feature URI in org.apache.karaf.features.repos.cfg
+    * [KARAF-2017] - Service wrapper should use and populate JAVA_HOME in conf file
+    * [KARAF-2024] - add @id for org.ops4j.pax.url.mvn.repositories urls
+    * [KARAF-2043] - Document caveats of Pax Url Wrap when used in Karaf Shell
+    * [KARAF-2049] - Instructions in welcome screen is a bit misleading with hit
+    * [KARAF-2072] - Spelling correction
+    * [KARAF-2094] - Include howto add additional jvm configurations (if using the wrapper) to the documentation
+    * [KARAF-2097] - endorse stax-api spec jar
+    * [KARAF-2105] - Karaf features for Spring should all be same name and use version ranges
+    * [KARAF-2108] - a feature depend itself will cause stackoverflow error
+    * [KARAF-2119] - upgrade pax.base to 1.4.0
+    * [KARAF-2163] - Add a jre-1.8 to jre.properties
+    * [KARAF-2175] - Add the sonatype standard snapshot repository to the karaf repositories
+
+** New Feature
+    * [KARAF-581] - Also make rmiRegistryHost configurable
+    * [KARAF-2050] - Ability to configure ssh session idle timeout - currently hardcode as 5 minutes
+    * [KARAF-2078] - Create the shell:date command
+
+** Task
+    * [KARAF-2083] - Remove icu4j dependency
+    * [KARAF-2129] - more svn:ignores setttings
+    * [KARAF-2156] - Upgrade aries utils
+    * [KARAF-2161] - Incorrect LGPL license info in Notices file
+
+** Test
+    * [KARAF-2082] - Jasypt unit tests fail
+    * [KARAF-2087] - add a testcase to cover the scenario that the AdminService can always load latest instance status which changed by external process
+
+
+
                     Apache Karaf 2.3.0
                     ==================
 
