@@ -30,9 +30,16 @@ import static org.junit.Assert.assertFalse;
 @ExamReactorStrategy(AllConfinedStagedReactorFactory.class)
 public class WrapperTest extends KarafTestSupport {
 
+    @Before
+    public void installObrFeature() throws Exception {
+        System.out.println(executeCommand("features:install wrapper"));
+        // give it time on faster machines to complete
+        Thread.sleep(500);
+    }
+
+
     @Test
     public void installCommand() throws Exception {
-        System.out.println(executeCommand("features:install wrapper"));
         String installOutput = executeCommand("wrapper:install");
         System.out.println(installOutput);
         assertFalse(installOutput.isEmpty());
