@@ -61,8 +61,12 @@ public class DefaultJDBCLock implements Lock {
     int timeout;
 
     public DefaultJDBCLock(Properties props) {
-        LOG.addHandler(BootstrapLogManager.getDefaultHandler());
-        
+        try {
+            LOG.addHandler(BootstrapLogManager.getDefaultHandler());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         this.url = props.getProperty(PROPERTY_LOCK_URL);
         this.driver = props.getProperty(PROPERTY_LOCK_JDBC_DRIVER);
         this.user = props.getProperty(PROPERTY_LOCK_JDBC_USER, DEFAULT_USER);
