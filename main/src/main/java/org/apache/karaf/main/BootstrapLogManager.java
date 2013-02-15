@@ -40,7 +40,7 @@ public class BootstrapLogManager {
 
     private static Properties configProps;
 
-    public static synchronized Handler getDefaultHandler () {
+    public static synchronized Handler getDefaultHandler () throws Exception {
         if (handler != null) {
             return handler;
         }
@@ -79,13 +79,8 @@ public class BootstrapLogManager {
         }
 
 
-        try {
-            handler = new BootstrapLogManager.SimpleFileHandler(log);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        return new BootstrapLogManager.SimpleFileHandler(log);
 
-        return handler;
     }
 
     public static void setProperties(Properties configProps) {

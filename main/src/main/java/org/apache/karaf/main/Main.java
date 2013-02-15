@@ -501,6 +501,10 @@ public class Main {
             final Main main = new Main(args);
             try {
                 main.launch();
+            } catch (IOException ioe){
+                main.destroy();
+                main.setExitCode(-1);
+                System.err.println("Karaf can't startup, make sure the log file can be accessed and written by the user starting Karaf : " + ioe.getMessage());
             } catch (Throwable ex) {
                 main.destroy();
                 main.setExitCode(-1);
