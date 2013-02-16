@@ -566,6 +566,14 @@ public class InstanceServiceImpl implements InstanceService {
     }
 
     private void copy(File source, File destination) throws Exception {
+        if (source.getName().equals("cache.lock")) {
+            // ignore cache.lock file
+            return;
+        }
+        if (source.getName().equals("lock")) {
+            // ignore lock file
+            return;
+        }
         if (source.isDirectory()) {
             if (!destination.exists()) {
                 destination.mkdirs();
