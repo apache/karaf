@@ -34,6 +34,6 @@ public interface FeaturesNamespaces {
     QName FEATURES_1_1_0 = new QName(URI_1_1_0, "features");
     QName FEATURES_1_2_0 = new QName(URI_1_2_0, "features");
 
-    QName FEATURES_CURRENT = FEATURES_1_1_0;
+    QName FEATURES_CURRENT = FEATURES_1_2_0;
 
 }

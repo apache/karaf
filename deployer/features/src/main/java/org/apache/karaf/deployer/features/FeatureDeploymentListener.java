@@ -101,6 +101,9 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
     	if(FeaturesNamespaces.URI_1_1_0.equalsIgnoreCase(uri)){
     		return true;
     	}
+    	if(FeaturesNamespaces.URI_1_2_0.equalsIgnoreCase(uri)){
+    		return true;
+    	}
     	if(FeaturesNamespaces.URI_CURRENT.equalsIgnoreCase(uri)){
     		return true;
     	}
