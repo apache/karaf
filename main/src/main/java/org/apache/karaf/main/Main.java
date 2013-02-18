@@ -22,6 +22,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -170,8 +171,7 @@ public class Main {
                 main.launch();
             } catch (Throwable ex) {
                 // Also log to sytem.err in case logging is not yet initialized
-                System.err.println("Could not launch framework: " + ex);
-                ex.printStackTrace();
+                System.err.println(ex.getMessage());
 
                 main.LOG.log(Level.SEVERE, "Could not launch framework", ex);
                 main.destroy();
@@ -296,7 +296,12 @@ public class Main {
         try {
             return (Lock) Lock.class.getClassLoader().loadClass(config.lockClass).getConstructor(Properties.class).newInstance(config.props);
         } catch (Exception e) {
-            throw new RuntimeException("Exception instantiating lock class " + config.lockClass, e);
+            if (e instanceof InvocationTargetException){
+                throw new RuntimeException("Exception instantiating lock class " + config.lockClass
+                                            + "\n" + ((InvocationTargetException)e).getTargetException().getMessage());
+            }else{
+                throw new RuntimeException("Exception instantiating lock class " + config.lockClass, e);
+            }
         }
     }
 
