@@ -52,7 +52,9 @@ public class SimpleFileLock implements Lock {
             File base = new File(props.getProperty(PROPERTY_LOCK_DIR));
             lockPath = new File(base, "lock"); 
             lockFile = new RandomAccessFile(lockPath, "rw");
-        } catch (IOException e) {
+        } catch (IOException ioe){
+            throw new RuntimeException("Karaf can't startup, make sure the log file can be accessed and written by the user starting Karaf : " + ioe.getMessage());
+        } catch (Exception e){
             throw new RuntimeException("Could not create file lock", e);
         }
     }

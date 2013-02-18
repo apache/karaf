@@ -45,7 +45,12 @@ public class KarafActivatorManager {
     public KarafActivatorManager(ClassLoader classLoader, Framework framework) {
         this.classLoader = classLoader;
         this.framework = framework;
-        LOG.addHandler(BootstrapLogManager.getDefaultHandler());
+        try{
+            LOG.addHandler(BootstrapLogManager.getDefaultHandler());
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+
     }
 
     void startKarafActivators() throws IOException {
