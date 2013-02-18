@@ -99,7 +99,6 @@
                 <configuration>
                     <instructions>
                         <Import-Package>
-                            org.apache.felix.webconsole;version="[3,5)",
                             *
                         </Import-Package>
                         <Embed-Dependency>
