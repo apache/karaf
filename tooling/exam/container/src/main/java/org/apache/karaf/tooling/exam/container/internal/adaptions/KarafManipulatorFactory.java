@@ -28,7 +28,18 @@ public final class KarafManipulatorFactory {
     }
 
     public static KarafManipulator createManipulator(String karafVersion) {
-        Version version = new Version(karafVersion.replaceFirst("-", "."));
+        int dots = 0;
+        int i = 0;
+        while ((i = karafVersion.indexOf('.', i)) != -1) {
+            dots++;
+            i++;
+        }
+        Version version;
+        if (dots < 3) {           
+            version = new Version(karafVersion.replaceFirst("-", "."));
+        } else {
+            version = new Version(karafVersion);
+        }        
         if (version.getMajor() < 2 || version.getMajor() == 2 && version.getMinor() < 2) {
             throw new IllegalArgumentException("Karaf versions < 2.2.0 are not supported");
         }
