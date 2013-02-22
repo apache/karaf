@@ -18,7 +18,7 @@
   ~ under the License.
   -->
 
-<features xmlns="http://karaf.apache.org/xmlns/features/v1.0.0" name="check-dependencies-features">
+<features xmlns="http://karaf.apache.org/xmlns/features/v1.2.0" name="check-dependencies-features">
     <feature description="dependency-module-c" version="1.0-SNAPSHOT" name="dependency-module-c">
         <bundle>mvn:test/dependency-module-a/1.0-SNAPSHOT</bundle>
         <bundle>mvn:test/dependency-module-b/1.0-SNAPSHOT</bundle>
