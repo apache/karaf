@@ -18,7 +18,7 @@
   ~ under the License.
   -->
 
-<features xmlns="http://karaf.apache.org/xmlns/features/v1.0.0" name="aggregate-features">
+<features xmlns="http://karaf.apache.org/xmlns/features/v1.2.0" name="aggregate-features">
     <feature description="aggregate-recursive-module-c" version="1.0-SNAPSHOT" name="aggregate-recursive-module-c">
         <details>Test Description</details>
         <bundle>mvn:test/aggregate-recursive-module-b/1.0-SNAPSHOT</bundle>
