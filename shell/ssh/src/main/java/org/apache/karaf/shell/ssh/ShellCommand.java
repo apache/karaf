@@ -82,8 +82,6 @@ public class ShellCommand implements Command, SessionAware {
             final CommandSession session = commandProcessor.createSession(in, new PrintStream(out), new PrintStream(err));
             session.put("SCOPE", "shell:osgi:*");
             session.put("APPLICATION", System.getProperty("karaf.name", "root"));
-            String scriptFileName = System.getProperty(SHELL_INIT_SCRIPT);
-            executeScript(scriptFileName, session);
             for (Map.Entry<String,String> e : env.getEnv().entrySet()) {
                 session.put(e.getKey(), e.getValue());
             }
@@ -92,6 +90,8 @@ public class ShellCommand implements Command, SessionAware {
                 Object result;
                 if (subject != null) {
                     try {
+                        String scriptFileName = System.getProperty(SHELL_INIT_SCRIPT);
+                        executeScript(scriptFileName, session);
                         result = Subject.doAs(subject, new PrivilegedExceptionAction<Object>() {
                             public Object run() throws Exception {
                                 return session.execute(command);
@@ -101,6 +101,8 @@ public class ShellCommand implements Command, SessionAware {
                         throw e.getException();
                     }
                 } else {
+                    String scriptFileName = System.getProperty(SHELL_INIT_SCRIPT);
+                    executeScript(scriptFileName, session);
                     result = session.execute(command);
                 }
                 if (result != null)
