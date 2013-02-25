@@ -35,8 +35,10 @@ import org.apache.karaf.main.util.Utils;
 public class PropertiesLoader {
 
     private static final String INCLUDES_PROPERTY = "${includes}"; // mandatory includes
-    
-    private static final String OPTIONALS_PROPERTY = "${optionals}"; // optionals includes
+
+    private static final String OPTIONALS_PROPERTY = "${optionals}"; // optionals include
+
+	private static final String OVERRIDE_PREFIX = "karaf.override."; // prefix that marks that system property should override defaults.
 
     /**
      * <p>
@@ -79,7 +81,7 @@ public class PropertiesLoader {
 
         return configProps;
     }
-    
+
     /**
      * <p>
      * Loads the properties in the system property file associated with the
@@ -95,7 +97,7 @@ public class PropertiesLoader {
      * </p>
      *
      * @param karafBase the karaf base folder
-     * @throws IOException 
+     * @throws IOException
      */
     static void loadSystemProperties(File file) throws IOException {
         Properties props = new Properties();
@@ -106,11 +108,17 @@ public class PropertiesLoader {
         } catch (Exception e1) {
             // Ignore
         }
-    
+
         for (Enumeration<?> e = props.propertyNames(); e.hasMoreElements();) {
             String name = (String) e.nextElement();
-            String value = System.getProperty(name, props.getProperty(name));
-            System.setProperty(name, SubstHelper.substVars(value, name, null, props));
+			if (name.startsWith(OVERRIDE_PREFIX)) {
+				String overrideName = name.substring(OVERRIDE_PREFIX.length());
+				String value = props.getProperty(name);
+				System.setProperty(overrideName, SubstHelper.substVars(value, name, null, props));
+			} else {
+				String value = System.getProperty(name, props.getProperty(name));
+				System.setProperty(name, SubstHelper.substVars(value, name, null, props));
+			}
         }
     }
 
@@ -125,7 +133,7 @@ public class PropertiesLoader {
             }
         }
     }
-    
+
     static Properties loadPropertiesOrFail(File configFile) {
         try {
             URL configPropURL = configFile.toURI().toURL();
@@ -134,7 +142,7 @@ public class PropertiesLoader {
             throw new RuntimeException("Error loading properties from " + configFile, e);
         }
     }
-    
+
     private static Properties loadPropertiesFile(URL configPropURL, boolean failIfNotFound) throws Exception {
         Properties configProps = new Properties();
         InputStream is = null;
