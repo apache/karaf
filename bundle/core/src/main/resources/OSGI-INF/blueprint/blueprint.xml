@@ -25,7 +25,7 @@
     <reference id="configurationAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"/>
     <reference id="packageAdmin" interface="org.osgi.service.packageadmin.PackageAdmin"/>
     <reference-list id="bundleStateServices" interface="org.apache.karaf.bundle.core.BundleStateService" availability="optional" />
-
+    
     <bean id="bundleService" class="org.apache.karaf.bundle.core.internal.BundleServiceImpl">
         <argument ref="blueprintBundleContext"/>
         <argument ref="bundleStateServices"/>
@@ -33,17 +33,24 @@
 
     <bean id="blueprintListener" class="org.apache.karaf.bundle.core.internal.BlueprintListener" />
 
-
     <bean id="bundlesMBean" class="org.apache.karaf.bundle.core.internal.Bundles">
         <argument ref="blueprintBundleContext" />
         <argument ref="bundleService" />
     </bean>
 
-    <bean id="watcher" class="org.apache.karaf.bundle.core.internal.BundleWatcherImpl" init-method="start" destroy-method="stop">
+    <bean id="watcher" class="org.apache.karaf.bundle.core.internal.BundleWatcherImpl" 
+    	init-method="start" destroy-method="stop">
         <argument ref="blueprintBundleContext"/>
         <argument ref="packageAdmin"/>
         <argument ref="mavenConfigService"/>
         <argument ref="bundleService"/>
+    </bean>
+
+    <bean id="scanner" class="org.apache.karaf.bundle.core.internal.BundleScannerImpl" 
+    	init-method="start" destroy-method="stop">
+        <argument ref="blueprintBundleContext"/>
+        <argument ref="packageAdmin"/>
+        <argument ref="mavenConfigService"/>
     </bean>
 
     <bean id="mavenConfigService" class="org.apache.karaf.bundle.core.internal.MavenConfigService">
@@ -57,12 +64,17 @@
             <value>org.apache.karaf.bundle.core.BundleStateService</value>
         </interfaces>
     </service>
+    
     <service interface="org.apache.karaf.bundle.core.BundleService" ref="bundleService"/>
+    
     <service ref="bundlesMBean" auto-export="interfaces">
          <service-properties>
               <entry key="jmx.objectname" value="org.apache.karaf:type=bundle,name=$[karaf.name]"/>
           </service-properties>
     </service>
+    
     <service ref="watcher" interface="org.apache.karaf.bundle.core.BundleWatcher"/>
+
+    <service ref="scanner" interface="org.apache.karaf.bundle.core.BundleScanner"/>
 
 </blueprint>
