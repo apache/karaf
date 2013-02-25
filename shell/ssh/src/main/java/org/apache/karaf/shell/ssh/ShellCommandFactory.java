@@ -18,11 +18,7 @@
  */
 package org.apache.karaf.shell.ssh;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintStream;
+import java.io.*;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.Map;
@@ -45,6 +41,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ShellCommandFactory implements CommandFactory {
+
+    public static final String SHELL_INIT_SCRIPT = "karaf.shell.init.script";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ShellCommandFactory.class);
 
@@ -104,6 +102,8 @@ public class ShellCommandFactory implements CommandFactory {
                     Object result;
                     if (subject != null) {
                         try {
+                            String scriptFileName = System.getProperty(SHELL_INIT_SCRIPT);
+                            executeScript(scriptFileName, session);
                             result = Subject.doAs(subject, new PrivilegedExceptionAction<Object>() {
                                 public Object run() throws Exception {
                                     return session.execute(command);
@@ -113,6 +113,8 @@ public class ShellCommandFactory implements CommandFactory {
                             throw e.getException();
                         }
                     } else {
+                        String scriptFileName = System.getProperty(SHELL_INIT_SCRIPT);
+                        executeScript(scriptFileName, session);
                         result = session.execute(command);
                     }
                     if (result != null)
@@ -191,4 +193,32 @@ public class ShellCommandFactory implements CommandFactory {
             }
         }
     }
+
+    private void executeScript(String scriptFileName, CommandSession session) {
+        if (scriptFileName != null) {
+            Reader r = null;
+            try {
+                File scriptFile = new File(scriptFileName);
+                r = new InputStreamReader(new FileInputStream(scriptFile));
+                CharArrayWriter w = new CharArrayWriter();
+                int n;
+                char[] buf = new char[8192];
+                while ((n = r.read(buf)) > 0) {
+                    w.write(buf, 0, n);
+                }
+                session.execute(new String(w.toCharArray()));
+            } catch (Exception e) {
+                LOGGER.debug("Error in initialization script", e);
+            } finally {
+                if (r != null) {
+                    try {
+                        r.close();
+                    } catch (IOException e) {
+                        // Ignore
+                    }
+                }
+            }
+        }
+    }
+
 }
