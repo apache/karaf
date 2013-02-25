@@ -18,10 +18,7 @@
  */
 package org.apache.karaf.shell.ssh;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintStream;
+import java.io.*;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.Map;
@@ -38,8 +35,14 @@ import org.apache.sshd.server.Environment;
 import org.apache.sshd.server.ExitCallback;
 import org.apache.sshd.server.SessionAware;
 import org.apache.sshd.server.session.ServerSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ShellCommand implements Command, SessionAware {
+
+    public static final String SHELL_INIT_SCRIPT = "karaf.shell.init.script";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ShellCommand.class);
 
     private String command;
     private InputStream in;
@@ -79,6 +82,8 @@ public class ShellCommand implements Command, SessionAware {
             final CommandSession session = commandProcessor.createSession(in, new PrintStream(out), new PrintStream(err));
             session.put("SCOPE", "shell:osgi:*");
             session.put("APPLICATION", System.getProperty("karaf.name", "root"));
+            String scriptFileName = System.getProperty(SHELL_INIT_SCRIPT);
+            executeScript(scriptFileName, session);
             for (Map.Entry<String,String> e : env.getEnv().entrySet()) {
                 session.put(e.getKey(), e.getValue());
             }
@@ -115,5 +120,32 @@ public class ShellCommand implements Command, SessionAware {
 
     public void destroy() {
 	}
+
+    private void executeScript(String scriptFileName, CommandSession session) {
+        if (scriptFileName != null) {
+            Reader r = null;
+            try {
+                File scriptFile = new File(scriptFileName);
+                r = new InputStreamReader(new FileInputStream(scriptFile));
+                CharArrayWriter w = new CharArrayWriter();
+                int n;
+                char[] buf = new char[8192];
+                while ((n = r.read(buf)) > 0) {
+                    w.write(buf, 0, n);
+                }
+                session.execute(new String(w.toCharArray()));
+            } catch (Exception e) {
+                LOGGER.debug("Error in initialization script", e);
+            } finally {
+                if (r != null) {
+                    try {
+                        r.close();
+                    } catch (IOException e) {
+                        // Ignore
+                    }
+                }
+            }
+        }
+    }
 
 }
