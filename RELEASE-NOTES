@@ -28,11 +28,12 @@
   ---------
 
 ** Bug
+    * [KARAF-1278] - Comands: History does not work, can not edit current comand
+    * [KARAF-1327] - Client: can't execute alias command
+    * [KARAF-1386] - feature install war fails if http-whiteboard is already installed
     * [KARAF-1715] - Occasional freeze on feature:install webconsole
     * [KARAF-1748] - Karaf startup fails with NullPointerException when logfile can't be written
     * [KARAF-1770] - Unable to feature:install webconsole under apache-karaf minimal package
-    * [KARAF-1851] - inconsistent FeaturesNamespaces versions
-    * [KARAF-1887] - Make integration tests more reliable by making sure the boot is finished
     * [KARAF-1914] - SSH client authentication randomly fails
     * [KARAF-1921] - Upgrade to Spring 3.1.x for Karaf 2.3.x
     * [KARAF-1936] - LDAPLoginModule not working in 2.3.0 due to missing import of javax.net.SocketFactory
@@ -68,6 +69,10 @@
     * [KARAF-2143] - Remove Jetty JUL logger configuration
     * [KARAF-2154] - Entering an empty command removes previous command in history
     * [KARAF-2171] - Start Karaf as service shows 'Activator' error in wrapper.log
+    * [KARAF-2190] - Karaf itest fails on fast machine
+    * [KARAF-2192] - Karaf obr:listURl and obr:list tests fail on faster boxes
+    * [KARAF-2206] - The container fails to start correctly with IBM Java 6
+    * [KARAF-2209] - Allow overriding system properties
 
 ** Dependency upgrade
     * [KARAF-1801] - slf4j 1.7.0
@@ -96,6 +101,7 @@
     * [KARAF-2157] - Upgrade to Aries Util 1.1.0
     * [KARAF-2162] - Upgrade to Pax Web 1.1.12
     * [KARAF-2184] - Upgrade to Spring 3.1.4.RELEASE
+    * [KARAF-2208] - Upgrade to Aries JPA Blueprint 1.0.1
 
 ** Improvement
     * [KARAF-1129] - Allow configuring rmi Registry host as well as port
@@ -127,6 +133,7 @@
     * [KARAF-2129] - more svn:ignores setttings
     * [KARAF-2156] - Upgrade aries utils
     * [KARAF-2161] - Incorrect LGPL license info in Notices file
+    * [KARAF-2198] - Remove new features from karaf-2.3.x branch
 
 ** Test
     * [KARAF-2082] - Jasypt unit tests fail
