@@ -133,7 +133,6 @@
     * [KARAF-2129] - more svn:ignores setttings
     * [KARAF-2156] - Upgrade aries utils
     * [KARAF-2161] - Incorrect LGPL license info in Notices file
-    * [KARAF-2198] - Remove new features from karaf-2.3.x branch
 
 ** Test
     * [KARAF-2082] - Jasypt unit tests fail
