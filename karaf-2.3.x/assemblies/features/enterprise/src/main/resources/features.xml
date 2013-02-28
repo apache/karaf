@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one or more
+    contributor license agreements.  See the NOTICE file distributed with
+    this work for additional information regarding copyright ownership.
+    The ASF licenses this file to You under the Apache License, Version 2.0
+    (the "License"); you may not use this file except in compliance with
+    the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+
+<features name="karaf-enterprise-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.0.0">
+
+    <feature name="transaction" description="OSGi Transaction Manager" version="${aries.transaction.version}" resolver="(obr)">
+        <details>JTA implementation provided by Apache Aries Transaction ${aries.transaction.version}</details>
+        <config name="org.apache.aries.transaction">
+            aries.transaction.recoverable = true
+            aries.transaction.timeout = 600
+            aries.transaction.howl.logFileDir = ${karaf.data}/txlog
+            aries.transaction.howl.maxLogFiles = 2
+            aries.transaction.howl.maxBlocksPerFile = 512
+            aries.transaction.howl.bufferSizeKBytes = 4
+        </config>
+        <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.transaction/org.apache.aries.transaction.blueprint/${aries.transaction.blueprint.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.transaction/org.apache.aries.transaction.manager/${aries.transaction.manager.version}</bundle>
+    </feature>
+
+    <feature name="jpa" description="OSGi Persistence Container" version="${aries.jpa.version}" resolver="(obr)">
+        <details>JPA implementation provided by Apache Aries JPA ${aries.jpa.version}. NB: this feature doesn't provide the JPA engine, you have to install one by yourself (OpenJPA for instance)</details>
+        <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jpa_2.0_spec/${geronimo.jpa-spec.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.jpa/org.apache.aries.jpa.api/${aries.jpa.api.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.jpa/org.apache.aries.jpa.blueprint.aries/${aries.jpa.blueprint.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.jpa/org.apache.aries.jpa.container/${aries.jpa.container.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.jpa/org.apache.aries.jpa.container.context/${aries.jpa.container.context.version}</bundle>
+    </feature>
+
+    <feature name="jndi" description="OSGi Service Registry JNDI access" version="${aries.jndi.version}" resolver="(obr)">
+        <details>JNDI support provided by Apache Aries JNDI ${aries.jndi.version}</details>
+        <bundle start-level="30">mvn:org.apache.aries.jndi/org.apache.aries.jndi.api/${aries.jndi.api.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.jndi/org.apache.aries.jndi.core/${aries.jndi.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.jndi/org.apache.aries.jndi.rmi/${aries.jndi.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.jndi/org.apache.aries.jndi.url/${aries.jndi.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.jndi/org.apache.aries.jndi.legacy.support/${aries.jndi.version}</bundle>
+    </feature>
+
+    <feature name="application-without-isolation" description="Provide EBA archive support" version="${aries.application.version}">
+        <details>Support of the Aries EBA archives</details>
+        <feature version="${project.version}">obr</feature>
+        <!-- commom -->
+        <bundle start-level="30">mvn:org.apache.aries.application/org.apache.aries.application.resolver.obr/${aries.application.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.application/org.apache.aries.application.install/${aries.application.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.application/org.apache.aries.application.api/${aries.application.api.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.application/org.apache.aries.application.management/${aries.application.management.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.application/org.apache.aries.application.utils/${aries.application.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.application/org.apache.aries.application.modeller/${aries.application.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.application/org.apache.aries.application.default.local.platform/${aries.application.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.application/org.apache.aries.application.resolver.noop/${aries.application.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.application/org.apache.aries.application.deployment.management/${aries.application.version}</bundle>
+        <!-- without isolation -->
+        <bundle start-level="30">mvn:org.apache.aries.application/org.apache.aries.application.runtime/${aries.application.version}</bundle>
+    </feature>
+
+</features>

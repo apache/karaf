@@ -1,0 +1,13 @@
+The edit command can be used to create or edit a configuration by passing its pid as argument.
+  > config:edit org.apache.karaf.sample.pid
+The command above will create a file etc/org.apache.karaf.sample.pid which corresponds to a configuration object with pid org.apache.karaf.sample.pid
+
+In case of Managed Service Factories the user can create or edit the configuration of a specific instance of a managed service.
+  > config:edit org.apache.karaf.sample.service.factory.pid-instanceid
+The command above will create a file etc/org.apache.karaf.sample.service.factory.pid-instanceid but in this case the pid is generated, according to the specification.
+
+This makes further editing to the configuration difficult because the generated pid is not known to the user. To make things simple config:edit provides a special flag -f or --use-file which allows editing a configuration using the filename instead of the pid.
+So the user can simply edit again the configuration by typing:
+  > config:edit org.apache.karaf.sample.service.factory.pid-instanceid.
+
+The --factory option can be used to create a new configuration for a given factory pid.  The parameter will be used as the factory pid and the configuration pid will be generated.  Note that this option
