@@ -73,6 +73,7 @@
     * [KARAF-2192] - Karaf obr:listURl and obr:list tests fail on faster boxes
     * [KARAF-2206] - The container fails to start correctly with IBM Java 6
     * [KARAF-2209] - Allow overriding system properties
+    * [KARAF-2213] - Missing org.apache.karaf.jaas.authz-2.3.1.jar from the system repo prevents minimal distro startup
 
 ** Dependency upgrade
     * [KARAF-1801] - slf4j 1.7.0
