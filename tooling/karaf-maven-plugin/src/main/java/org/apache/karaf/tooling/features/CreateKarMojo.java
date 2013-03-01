@@ -18,7 +18,11 @@
  */
 package org.apache.karaf.tooling.features;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.InputStream;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -90,6 +94,14 @@ public class CreateKarMojo extends MojoSupport {
     private String finalName = null;
 
     /**
+     * Classifier to add to the artifact generated. If given, the artifact will be attached.
+     * If this is not given,it will merely be written to the output directory according to the finalName.
+     *
+     * @parameter
+     */
+    protected String classifier;
+
+    /**
      * Location of resources directory for additional content to include in the kar.
      * Note that it includes everything under classes so as to include maven-remote-resources
      *
@@ -123,8 +135,26 @@ public class CreateKarMojo extends MojoSupport {
         // Build the archive
         File archive = createArchive(resources);
 
+        // backward compatibility HACK
+        // if no classifier specified and packaging is not kar, emit a warning and attach artifact
+        if (classifier == null  &&  !"kar".equals(getProject().getPackaging()))
+        {
+            getLog().warn("COMPAT MODE: Please update your project to use \"kar\" packaging or configure a \"classifier\" for kar attachment");
+
+        	projectHelper.attachArtifact(getProject(), "kar", null, archive);
+            return;
+        }
+
+
         // Attach the generated archive for install/deploy
-        projectHelper.attachArtifact(project, "kar", null, archive);
+        if (classifier != null)
+        {
+            projectHelper.attachArtifact(getProject(), "kar", classifier, archive);
+        }
+        else
+        {
+            getProject().getArtifact().setFile(archive);
+        }
     }
 
     /**
@@ -167,7 +197,7 @@ public class CreateKarMojo extends MojoSupport {
      */
     private File createArchive(List<Artifact> bundles) throws MojoExecutionException {
         ArtifactRepositoryLayout layout = new DefaultRepositoryLayout();
-        File archiveFile = getArchiveFile(outputDirectory, finalName, null);
+        File archiveFile = getArchiveFile(outputDirectory, finalName, classifier);
 
         MavenArchiver archiver = new MavenArchiver();
         archiver.setArchiver(jarArchiver);
