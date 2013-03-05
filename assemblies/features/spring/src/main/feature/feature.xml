@@ -66,7 +66,7 @@
     </feature>
 
     <feature name="spring-jms" description="Spring JMS support" version="${spring31.version}" resolver="(obr)">
-        <feature version="${spring31.version}">spring-web</feature>
+        <feature version="${spring31.version}">spring</feature>
         <bundle start-level="10">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
         <bundle start-level="10">mvn:org.apache.geronimo.specs/geronimo-jms_1.1_spec/${geronimo.jms-spec.version}</bundle>
         <bundle start-level="30">mvn:org.springframework/spring-jms/${spring31.version}</bundle>
