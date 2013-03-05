@@ -131,6 +131,7 @@
                         </Export-Package>
                         <Private-Package>
                             org.fusesource.jansi.internal;-split-package:=merge-first,
+                            !org.apache.karaf.util.properties,
                             org.apache.karaf.util*;-split-package:=merge-first,
                             META-INF.native.*;-split-package:=merge-first
                         </Private-Package>

@@ -64,6 +64,10 @@
             <version>1.1.1</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.apache.karaf.util</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -110,6 +114,8 @@
                         -->
                         <Private-Package>
                             org.apache.karaf.main*,
+                            org.apache.karaf.util.properties,
+                            org.apache.felix.utils.properties,
                             org.osgi.*;-split-package:=merge-first
                         </Private-Package>
                     </instructions>

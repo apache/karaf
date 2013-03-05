@@ -21,7 +21,7 @@
            xmlns:ext="http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.0.0"
            default-activation="lazy">
 
-    <bean id="adminService" class="org.apache.karaf.admin.internal.AdminServiceImpl" init-method="init">
+    <bean id="adminService" class="org.apache.karaf.admin.internal.AdminServiceImpl">
         <property name="storageLocation" value="${karaf.instances}" />
     </bean>
 
