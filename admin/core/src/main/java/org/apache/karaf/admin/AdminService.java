@@ -21,7 +21,8 @@ public interface AdminService {
     Instance createInstance(String name, InstanceSettings settings) throws Exception;
 
     void renameInstance(String name, String newName) throws Exception;
-    
+
+    @Deprecated
     void refreshInstance() throws Exception;
 
     Instance cloneInstance(String name, String cloneName, InstanceSettings settings) throws Exception;
