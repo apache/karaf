@@ -1,0 +1,189 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.karaf.shell.commands;
+
+import java.io.Closeable;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.UUID;
+import java.util.regex.Pattern;
+
+import jline.Terminal;
+import org.apache.felix.gogo.commands.Argument;
+import org.apache.felix.gogo.commands.Command;
+import org.apache.karaf.shell.console.AbstractAction;
+import org.jledit.ConsoleEditor;
+import org.jledit.EditorFactory;
+
+@Command(scope = "shell", name = "edit", description = "Calls a text editor.")
+public class EditAction extends AbstractAction {
+
+    private final Pattern URL_PATTERN = Pattern.compile("[^: ]+:[^ ]+");
+
+    @Argument(index = 0, name = "url", description = "The url of the resource to edit.", required = true, multiValued = false)
+    private String url;
+
+    private EditorFactory editorFactory;
+
+    @Override
+    protected Object doExecute() throws Exception {
+        URLConnection connection = null;
+        InputStream is = null;
+        OutputStream os = null;
+        String path = null;
+        boolean isLocal = true;
+        String sourceUrl = url;
+
+        // if no url format found, assume file url
+        if (!URL_PATTERN.matcher(sourceUrl).matches()) {
+            File f = new File(sourceUrl);
+            sourceUrl = "file://" + f.getAbsolutePath();
+        }
+
+        URL u = new URL(sourceUrl);
+        // if its not a file url
+        if (!u.getProtocol().equals("file")) {
+            isLocal = false;
+
+            try {
+                connection = u.openConnection();
+                is = connection.getInputStream();
+            } catch (IOException ex) {
+                System.out.println("Failed to open " + sourceUrl + " for reading.");
+                return null;
+            }
+            try {
+                os = connection.getOutputStream();
+            } catch (IOException ex) {
+                System.out.println("Failed to open " + sourceUrl + " for writing.");
+                return null;
+            }
+
+            // copy the resource to a tmp location
+            FileOutputStream fos = null;
+            try {
+                path = System.getProperty("karaf.data") + "/editor/" + UUID.randomUUID();
+                File f = new File(path);
+                if (!f.exists()) {
+                    if (!f.getParentFile().exists()) {
+                        f.getParentFile().mkdirs();
+                    }
+                }
+
+                fos = new FileOutputStream(f);
+                copy(is, fos);
+            } catch (Exception ex) {
+                System.out.println("Failed to copy resource from url:" + sourceUrl + " to tmp file: " + path + "  for editing.");
+            } finally {
+                close(fos);
+            }
+        } else {
+            path = u.getFile();
+        }
+
+
+        File file = new File(path);
+        if (!file.exists()) {
+            if (!file.getParentFile().exists()) {
+                file.getParentFile().mkdirs();
+            }
+        }
+
+        // call the editor
+        ConsoleEditor editor = editorFactory.create(getTerminal());
+        editor.setTitle("Karaf");
+        editor.open(file.getAbsolutePath(), url);
+        editor.setOpenEnabled(false);
+        editor.start();
+
+        // if resource is not local, copy the resource back
+        if (!isLocal) {
+            FileInputStream fis = new FileInputStream(path);
+            try {
+                copy(fis, os);
+            } finally {
+                close(fis);
+            }
+        }
+
+        if (is != null) {
+            close(is);
+        }
+
+        if (os != null) {
+            close(os);
+        }
+        return null;
+    }
+
+    /**
+     * Gets the {@link jline.Terminal} from the current session.
+     *
+     * @return
+     * @throws Exception
+     */
+    private Terminal getTerminal() throws Exception {
+        Object terminalObject = session.get(".jline.terminal");
+        if (terminalObject instanceof Terminal) {
+            return (Terminal) terminalObject;
+
+        }
+        throw new IllegalStateException("Could not get Terminal from CommandSession.");
+    }
+
+    /**
+     * Copies the content of {@link InputStream} to {@link OutputStream}.
+     *
+     * @param input
+     * @param output
+     * @throws IOException
+     */
+    private void copy(final InputStream input, final OutputStream output) throws IOException {
+        byte[] buffer = new byte[1024 * 16];
+        int n = 0;
+        while (-1 != (n = input.read(buffer))) {
+            output.write(buffer, 0, n);
+            output.flush();
+        }
+    }
+
+    public EditorFactory getEditorFactory() {
+        return editorFactory;
+    }
+
+    public void setEditorFactory(EditorFactory editorFactory) {
+        this.editorFactory = editorFactory;
+    }
+
+    private static void close(Closeable... closeables) {
+        for (Closeable c : closeables) {
+            try {
+                if (c != null) {
+                    c.close();
+                }
+            } catch (IOException e) {
+                // Ignore
+            }
+        }
+    }
+}

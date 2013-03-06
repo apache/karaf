@@ -100,6 +100,11 @@
         <command name="shell/wc">
             <action class="org.apache.karaf.shell.commands.WcAction"/>
         </command>
+        <command name="shell/edit">
+            <action class="org.apache.karaf.shell.commands.EditAction">
+                <property name="editorFactory" ref="editorFactory"/>
+            </action>
+        </command>
     </command-bundle>
 
    <bean id="commandCompleter" class="org.apache.karaf.shell.console.completer.CommandsCompleter"/>
@@ -120,5 +125,6 @@
     </reference-list>
 
     <reference id="commandProcessor" interface="org.apache.felix.service.command.CommandProcessor"/>
- 
+    <reference id="editorFactory" interface="org.jledit.EditorFactory"/>
+
 </blueprint>

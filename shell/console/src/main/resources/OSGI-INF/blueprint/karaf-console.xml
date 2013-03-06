@@ -48,6 +48,8 @@
     <bean id="terminalFactory" class="org.apache.karaf.shell.console.jline.TerminalFactory"
           destroy-method="destroy"/>
 
+    <bean id="editorFactory" class="org.jledit.ConcreteEditorFactory"/>
+
     <service>
         <interfaces>
             <value>org.apache.felix.service.command.Function</value>
@@ -104,5 +106,6 @@
         <bean class="org.apache.karaf.shell.console.help.BrandingHelpProvider"/>
     </service>
 
+    <service ref="editorFactory" interface="org.jledit.EditorFactory"/>
 
 </blueprint>
