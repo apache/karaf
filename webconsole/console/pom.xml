@@ -120,7 +120,7 @@
                             org.apache.felix.webconsole.internal.KarafOsgiManagerActivator
                         </Bundle-Activator>
                         <Export-Package>
-                            org.apache.felix.webconsole;version=${felix.webconsole.version}
+                            org.apache.felix.webconsole <!-- maven-bundle-plugin adopts package version from felix.webconsole bundle -->
                         </Export-Package>
                         <Private-Package>
                             !org.apache.felix.webconsole,
