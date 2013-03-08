@@ -50,15 +50,20 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
 
     public void initialize(Subject sub, CallbackHandler handler, Map sharedState, Map options) {
         super.initialize(sub,handler,options);
-        usersFile = (String) options.get(USER_FILE) + "";
-
+        usersFile = (String) options.get(USER_FILE);
         if (debug) {
             LOGGER.debug("Initialized debug={} usersFile={}", debug, usersFile);
         }
     }
 
     public boolean login() throws LoginException {
+        if (usersFile == null) {
+            throw new LoginException("The property users may not be null");
+        }
         File f = new File(usersFile);
+        if (!f.exists()) {
+            throw new LoginException("Users file not found at " + f);
+        }
         Properties users;
         try {
             users = new Properties(f);
