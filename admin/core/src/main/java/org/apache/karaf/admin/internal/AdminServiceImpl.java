@@ -32,6 +32,8 @@ import java.io.PrintStream;
 import java.io.RandomAccessFile;
 import java.net.Socket;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -135,7 +137,8 @@ public class AdminServiceImpl implements AdminService {
                 proxies.put(instance.name, new InstanceImpl(this, instance.name));
             }
         }
-        for (String name : this.proxies.keySet()) {
+        List<String> names = new ArrayList<String>(this.proxies.keySet());
+        for (String name : names) {
             if (!state.instances.containsKey(name)) {
                 this.proxies.remove(name);
             }
