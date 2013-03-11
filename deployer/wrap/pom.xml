@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache.karaf.deployer</groupId>
         <artifactId>deployer</artifactId>
-        <version>3.0.0.RC1-SNAPSHOT</version>
+        <version>3.0.0.RC1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -83,7 +83,7 @@
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-                        <Export-Package></Export-Package>
+                        <Export-Package />
                         <Private-Package>
                             org.apache.karaf.deployer.wrap,
                             org.apache.karaf.util

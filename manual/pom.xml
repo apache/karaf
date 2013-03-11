@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache.karaf</groupId>
         <artifactId>karaf</artifactId>
-        <version>3.0.0.RC1-SNAPSHOT</version>
+        <version>3.0.0.RC1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -490,12 +490,12 @@
                                     <tasks>
                                         <mkdir dir="${manual.dir}" />
                                         <move file="${project.build.directory}/sitegen/manual.html" tofile="${manual}.html" />
-                                        <echo message="Generating PDF using Prince XML (http://www.princexml.com/)"/>
+                                        <echo message="Generating PDF using Prince XML (http://www.princexml.com/)" />
                                         <exec executable="prince">
-                                            <arg value="${manual}.html"/>
-                                            <arg value="${manual}.pdf"/>
-                                            <arg value="--log"/>
-                                            <arg value="${project.build.directory}/prince.log"/>
+                                            <arg value="${manual}.html" />
+                                            <arg value="${manual}.pdf" />
+                                            <arg value="--log" />
+                                            <arg value="${project.build.directory}/prince.log" />
                                         </exec>
                                     </tasks>
                                 </configuration>
