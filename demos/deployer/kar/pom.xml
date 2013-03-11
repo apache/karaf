@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" 
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
-         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0           http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <!--
 
@@ -27,13 +24,13 @@
     <parent>
         <groupId>org.apache.karaf.demos</groupId>
         <artifactId>org.apache.karaf.demos.deployer</artifactId>
-        <version>3.0.0.RC1-SNAPSHOT</version>
+        <version>3.0.0.RC1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <groupId>org.apache.karaf.demos</groupId>
     <artifactId>my-kar</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>3.0.0.RC1</version>
     <packaging>pom</packaging>
     <name>Apache Karaf :: Demos :: Deployer :: Kar</name>
 
@@ -51,7 +48,7 @@
             <plugin>
                 <groupId>org.apache.karaf.tooling</groupId>
                 <artifactId>karaf-maven-plugin</artifactId>
-                <version>3.0.0.RC1-SNAPSHOT</version>
+                <version>3.0.0.RC1</version>
                 <executions>
                     <execution>
                         <id>package</id>
