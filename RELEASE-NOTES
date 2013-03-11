@@ -15,6 +15,985 @@
  * limitations under the License.
  */
 
+                    Apache Karaf 3.0.0.RC1
+                    ======================
+
+  Overview
+  --------
+
+  !! This is a technology preview release of Apache Karaf, and should NOT be considered production ready !!
+
+  Apache Karaf 3.0.0.RC1 represents a major refactoring of the project, and includes numerous new features. We ask that users provide the community with their feed back so that the full Apache Karaf 3.0.0 release can be as feature complete and stable as possible.
+
+  Changelog
+  --------- 
+
+** Sub-task
+    * [KARAF-305] - New maven goal to create a kar file from a given feature / feature set
+    * [KARAF-1095] - Update Branding Shell demo
+    * [KARAF-1096] - Update Custom Command demo
+    * [KARAF-1098] - Update Dump Provider demo
+    * [KARAF-1099] - Update Web demo
+    * [KARAF-1275] - Refactor bundle modules into core, command, management
+    * [KARAF-1457] - Revert Aries JMX Update on SCR Management Component
+    * [KARAF-1524] - Support creating a kar from the console
+    * [KARAF-2228] - Karaf.webconsole uses wrong version in export-package header
+    * [KARAF-2229] - Adapt karaf.webconsole package-imports/exports to felix.webconsole all-in-one bundle
+
+
+** Bug
+    * [KARAF-18] - features:list fails to show which bundles have been installed by featuresBoot if any exception is thrown during installation
+    * [KARAF-281] - History using up arrow does not work on windows
+    * [KARAF-384] - Cannot find some jar in ext directory
+    * [KARAF-398] - Features schema is not correct
+    * [KARAF-440] - features-maven-plugin throws NullPointerException maven 3.0.2
+    * [KARAF-451] - Trunk build is broken
+    * [KARAF-456] - Artifact versions named in the documentation are not replaced with the version of the current project
+    * [KARAF-457] - Merge 2.2.x assemblies structure to trunk
+    * [KARAF-468] - The admin InstanceImpl class should use the util properties for loading / storing rmiRegistryPort , sshPort
+    * [KARAF-472] - features-maven-plugin: TAB-characters in feature-repository lead to resolution-errors in add-features-to-repo
+    * [KARAF-479] - Console doesn't like it when the console window is to small - no line wrapping for commands
+    * [KARAF-493] - Various site fixes
+    * [KARAF-496] - Karaf prompt displayed twice
+    * [KARAF-499] - Unable to load simple standalone JSF 2.0 webapp - JSF's implementation's META-INF/*.tld files are not scanned at startup
+    * [KARAF-504] - Features Maven Plugin does not work with Maven 3
+    * [KARAF-506] - The config shell commands offer no way to delete a command
+    * [KARAF-507] - The config shell completer does not allow completion of factory based pids
+    * [KARAF-508] - The config:edit create does not allow the creation of factory configs
+    * [KARAF-509] - The config:update command does not save factory configurations to the correct file
+    * [KARAF-512] - WebConsole installation failed due to missing jetty-jaas feature
+    * [KARAF-518] - Unable to load features.xml with included schema attribute
+    * [KARAF-519] - Jline behavior problem when pasting long lines
+    * [KARAF-521] - Executing complex scripts is extremely difficult
+    * [KARAF-525] - Bundles listed in etc/startup.properties should only installed the first time
+    * [KARAF-527] - The console bundle should indicate it provides the gogo related services
+    * [KARAF-528] - Error while using correct feature descriptor in features-maven-plugin
+    * [KARAF-534] - Startlevel: Strange deployment behaviour
+    * [KARAF-535] - Description for List command incorrectly claims Threshold default is -1
+    * [KARAF-536] - Backspace no longer works in Putty after using 'connect' command to connect to other instance, and commands are printed in only 2 columns.
+    * [KARAF-537] - admin.bat prints stacktraces to standard out
+    * [KARAF-538] - Dependency issue with feature spring-web
+    * [KARAF-546] - Null point exception when executing log:display on an empty log
+    * [KARAF-547] - Missing features file in the system directory of the distribution
+    * [KARAF-557] - Feature: Failed to check to not install a bundle with the symbolic name contains attributes
+    * [KARAF-558] - Boot feature from configuration file, can contain some spaces; the name should be trimmed
+    * [KARAF-559] - AdminService loses root flag for instances
+    * [KARAF-562] - Config properties defined in <config> tag (features.xml) are loaded during each refresh
+    * [KARAF-565] - junit bundle missing (required by dev commands)
+    * [KARAF-568] - minimal assembly: zip and tar.gz do differ in content
+    * [KARAF-569] - Installing and uninstalling the jetty feature leaves Karaf in an ususable state
+    * [KARAF-575] - webconsole: branding isn't resolved, therfore the webconsole doesn't work anymore
+    * [KARAF-583] - Karaf manual does not build with new karaf-maven-plugin
+    * [KARAF-585] - When connected to a remote instance, Ctrl-C closes the connection instead of simply interrupting the command
+    * [KARAF-600] - "Extending the console" documentation still refers to org.osgi.service.command
+    * [KARAF-601] - features:list does not show features of newly installed feature file
+    * [KARAF-604] - All bundles are considered as system bundle
+    * [KARAF-610] - Can't input the path string completely via karaf shell
+    * [KARAF-622] - Jaas Cancel command is not working
+    * [KARAF-624] - admin:stop command behavior not correct
+    * [KARAF-625] - Missing property 'log4j.appender.out.file' in the file org.ops4j.pax.logging.cfg caused a NPE
+    * [KARAF-630] - SpringDeploymentListenerTest fails on IBM JDK builds with No Class Def Found Error
+    * [KARAF-634] - README file refers an incorrect contribution URL
+    * [KARAF-637] - Update branding-console documentation to include the changes to custom.properties
+    * [KARAF-653] - Karaf minimal is missing the feature files.
+    * [KARAF-655] - Remove http://repository.ops4j.org/maven2 from org.apache.karaf.management.cfg
+    * [KARAF-656] - kar deployer service not exported
+    * [KARAF-669] - Dependency artifacts should be available on the Maven central repo
+    * [KARAF-670] - Missing ${karaf.base}/system cause NullPointerException
+    * [KARAF-671] - http:list does not display the correct information
+    * [KARAF-675] - Longer shell commands affect the shell view when using up and down arrows
+    * [KARAF-686] - introduce an override flag to configfile element so that we get chance to not override the finalname if it already exist
+    * [KARAF-689] - Karaf instance can wrongly obtain a lock when the locking table is empty on a Oracle DB
+    * [KARAF-690] - install http feature will start both 8080 and 8181 jetty port
+    * [KARAF-697] - features:list shows the features that failed installation as installed.
+    * [KARAF-706] - variable substitution doesn't work for system.properties
+    * [KARAF-712] - Karaf's ls command does not represent URL objects correctly
+    * [KARAF-718] - Grep doesn't work when piped from features:listurl
+    * [KARAF-735] - java.util.NoSuchElementException if issue the first command as an empty command
+    * [KARAF-753] - commandlist --help points to help for jaas:pending
+    * [KARAF-754] - shell:cat hyphen ("-") option not activating STDIN.
+    * [KARAF-760] - MInor time rendering bug
+    * [KARAF-766] - Wrong help for features:install
+    * [KARAF-769] - Update NOTICE file to mention JSW
+    * [KARAF-771] - KAR Deployer doesn't work
+    * [KARAF-773] - KAR docu outdated
+    * [KARAF-776] - jclouds features require OSS Sonatype repository
+    * [KARAF-781] - Class RunnableServiceListener misspelled
+    * [KARAF-794] - mvn eclipse:eclipse fails with maven plugin 2.8.
+    * [KARAF-796] - Editing Pax Web Configuration Via Karaf Console
+    * [KARAF-800] - karaf does not start when using java7
+    * [KARAF-811] - Combination of wrap+mvn and instructions doesnt work any more
+    * [KARAF-812] - Cannot start bundle built with org.osgi.framework v. 4.3.0
+    * [KARAF-815] - Generic the Karaf manual link
+    * [KARAF-816] - Wrapper feature doesn't load security libraries
+    * [KARAF-820] - Karaf client.bat swallows commands to be passed to the Karaf instance
+    * [KARAF-824] - Web demo folder in 2.2.2 release is missing content and README.txt has bugs
+    * [KARAF-826] - KarArtifactInstaller should look for "features" classifier in place of "feature"
+    * [KARAF-827] - Karaf Web deployer (Pax-Web) always tries to deploy the deploy/README file
+    * [KARAF-867] - Inconsistent deployment behavior between bundle installer and feature installer
+    * [KARAF-875] - Unable to define escape the event designator '!' using '\!'
+    * [KARAF-883] - NPE in features-maven-plugin
+    * [KARAF-889] - dev:framework commands incorrect workflow
+    * [KARAF-891] - Problem with $ charact in wrap:mvn URL
+    * [KARAF-892] - EventAdmin events from Gogo not being sent from Karaf's console bundle
+    * [KARAF-893] - Wrong URL in release notes [1]
+    * [KARAF-894] - Kar deployment failed
+    * [KARAF-895] - NPE during webconsole startup
+    * [KARAF-896] - Karaf webconsole exports wrong version of Felix webconsole package
+    * [KARAF-902] - Jaas: Properties backing engine doesn't remove users
+    * [KARAF-904] - add jetty.port=8181 to jetty.xml so that configuration for jetty connector could take effect
+    * [KARAF-905] - propdel() method in the ConfigMBean didn't work
+    * [KARAF-910] - Race between FeatureService and ConfigAdmin for resolving mvn: URLs?
+    * [KARAF-913] - Omitted @Command on Gogo plugin is hard to debug because of NPE
+    * [KARAF-915] - KAR deployment failed in the features XML is not the first entry of the KAR archive
+    * [KARAF-917] - warn instead of info when failing to install a feature
+    * [KARAF-918] - pax-url prerequisites for a feature are not respected
+    * [KARAF-919] - Kar redeployment failed
+    * [KARAF-920] - Feature autoinstall from kar failed
+    * [KARAF-921] - maven eclipse plugin 2.8 does not work correctly with karaf
+    * [KARAF-922] - features-maven-plugin ignores repository tags in feature files
+    * [KARAF-923] - features-maven-plugin#AddFeaturesToRepoMojo does not handle spaces in repository urls well
+    * [KARAF-926] - JAAS: Properties backing engine doesn't respect encryptor prefix and suffix
+    * [KARAF-932] - ConfigMBean raise a NPE when dictionnary is null
+    * [KARAF-935] - Deployer bundles do not start
+    * [KARAF-937] - Karaf maven plugin generates feature configuration with dublicate entries
+    * [KARAF-939] - the realm set for JAASLoginService in jetty.xml should be karaf but not the default
+    * [KARAF-951] - dev:create-dump raises a NullPointerException
+    * [KARAF-952] - config:propdel doesn't delete the property in the cfg file
+    * [KARAF-954] - Double quotes missing in generated karaf-wrapper.conf
+    * [KARAF-964] - admin feature is no more available in Karaf
+    * [KARAF-982] - Utils.fromMaven cant deal with both classifier and extension
+    * [KARAF-985] - LDAPLoginModule generates a large number of DirContext objects
+    * [KARAF-1000] - Karaf distributions shouldn't include data and local-repo folders
+    * [KARAF-1008] - WebConsole raise NCDF on service page
+    * [KARAF-1015] - ConfigMBean should use a different config pid than the config shell
+    * [KARAF-1020] - BundleWatcher should look for SNAPSHOT
+    * [KARAF-1024] - Bug generating feature.xml when dependency has no manifest
+    * [KARAF-1030] - Grep command breaks existing line formating
+    * [KARAF-1031] - Performance issue in the features jaxb support
+    * [KARAF-1033] - Set the Features validation optional
+    * [KARAF-1036] - Some MBeans don't provide attribute correctly
+    * [KARAF-1040] - Commands should not catch exceptions but should rethrow them
+    * [KARAF-1050] - "osgi:start xxx" doesn't print anything
+    * [KARAF-1051] - addcommand / removecommand / eval should be in the shell scope
+    * [KARAF-1064] - BootstrapLogManager does not reuse the instantiated Handler
+    * [KARAF-1065] - TextDumpProvider.createDump(DumpDestination) does not flush OutputStreamWriter
+    * [KARAF-1066] - make features xml parser more forgiving
+    * [KARAF-1067] - JDK7 compile issues with OsgiCommandSupport
+    * [KARAF-1068] - Multiple blueprint plans using command namespace result in multiple converter registrations
+    * [KARAF-1071] - Cursor keys do not work in Karaf shell on windows
+    * [KARAF-1090] - deployers feature for fileinstall deployers that used to be in full profile
+    * [KARAF-1101] - Completion does not work when quiesce manager is deployed
+    * [KARAF-1106] - Jetty feature should use ServiceMix Spec for activation
+    * [KARAF-1110] - Archetypes don't work
+    * [KARAF-1111] - Add documentation about archetypes
+    * [KARAF-1114] - osgi shell blueprint bundle shouldn't use lazy default-activation
+    * [KARAF-1116] - Scripts fail at resolving java jdk.
+    * [KARAF-1122] - Feature <configfile/> creates an empty file if the file URL is not resolved
+    * [KARAF-1124] - karaf does not work properly with closing brace in the working directory path
+    * [KARAF-1126] - features-maven-plugin:validate goal raises a NPE if karafConfig configuration is not set
+    * [KARAF-1127] - Boot features failed to startup when karaf started from directory with closing brace; logs also unavailable
+    * [KARAF-1131] - Remove PackageMBean and move operation to BundleMBean
+    * [KARAF-1133] - Error executing command 'start' when starting a child instance
+    * [KARAF-1139] - Redeploy kar cause installing old feature
+    * [KARAF-1140] - config:list has NPE since it uses a service after ungetting the service reference
+    * [KARAF-1143] - Karaf (Config Mbean) can not recognize the features when Karaf installation path containing blank space
+    * [KARAF-1144] - When running a single remote command through SSH, the SCOPE variable isn't set
+    * [KARAF-1149] - Karaf MBeanServer is not usable behind firewall
+    * [KARAF-1150] - admin:create command creates broken org.ops4j.pax.url.mvn.cfg file
+    * [KARAF-1158] - Karaf trunk fails to build on a clean repo
+    * [KARAF-1161] - The shell:new action does not support the creation of arrays
+    * [KARAF-1162] - A command that can not be loaded breaks the whole completion
+    * [KARAF-1174] - war feature cannot be installed after the cxf
+    * [KARAF-1175] - Duplicate key exception should be handle locally to avoid to affect the whole MBean
+    * [KARAF-1178] - OBR feature doesn't work
+    * [KARAF-1179] - "dev:watch *" doesn't notice new bundles added to the container
+    * [KARAF-1188] - Console bundle depends on aries blueprint 0.3.x but imports [0.4.0,1)
+    * [KARAF-1198] - Add Maven repository metadata in the system repository
+    * [KARAF-1199] - dev:watch command issues "[WATCH]" announcements only to the issuing shell
+    * [KARAF-1206] - Child instance doesn't start
+    * [KARAF-1207] - Karaf tooling exam regression tests failing on NoSuchMethodError com.google.common.io.Files.deleteRecursively
+    * [KARAF-1209] - ServiceRecipe blueprint exception in the log
+    * [KARAF-1212] - NPE during update of the FeatureFinder
+    * [KARAF-1215] - Shell scripts are incompatible with /bin/sh on Solaris
+    * [KARAF-1216] - add-features-to-repo goal does not reclaim file handles fast enough
+    * [KARAF-1219] - Assemblies ignore some resources
+    * [KARAF-1220] - o.p.karaf.management bundles must stop when its configured keystore is not available
+    * [KARAF-1222] - System shell hangs after karaf integration tests had been run
+    * [KARAF-1225] - Manual build fails
+    * [KARAF-1226] - Karaf Client cannot run a script
+    * [KARAF-1228] - application-without-isolation enterprise feature doesn't install
+    * [KARAF-1241] - admin script does not pass on JAVA_OPTS to instance
+    * [KARAF-1242] - org.apache.karaf.scr.command format error
+    * [KARAF-1243] - Karaf JMX Config MBean behaves in unpredictable ways
+    * [KARAF-1244] - Deployer Transformers Supports Manifest Element without A Supporting Schema
+    * [KARAF-1247] - maven-metadata-local.xml is not generated for bundles from a boot feature
+    * [KARAF-1250] - Cleanup karaf-maven-plugin
+    * [KARAF-1252] - Features core bundle should not depend to shell and management bundles
+    * [KARAF-1253] - No completion on some commands with scope *
+    * [KARAF-1256] - Archetypes should use dynamic variables
+    * [KARAF-1257] - Configuration completers should avoid using getConfiguration method of config admin
+    * [KARAF-1262] - Reintroduce package:* modules
+    * [KARAF-1265] - Add AIX, HP-UX, Solaris, and "custom" support in the service wrapper
+    * [KARAF-1267] - Align Pax-web features with std. features
+    * [KARAF-1269] - aries-annotation feature doesn't install
+    * [KARAF-1270] - Allow multiple commands in karaf 3.0.x bin/karaf script
+    * [KARAF-1277] - Features deployer is not in the startup.properties
+    * [KARAF-1278] - Comands: History does not work, can not edit current comand
+    * [KARAF-1285] - Karaf 3.x - Karaf bundle archetype maven bundle plugin configuration is missing "instructions" tags.
+    * [KARAF-1287] - Check documentation consistent
+    * [KARAF-1293] - feature level start-level not completely finished....
+    * [KARAF-1298] - dev:watch does not work in some cases
+    * [KARAF-1304] - Quick help text for features:info command is erroneous
+    * [KARAF-1305] - Error with Basic HTTP Authentication when using karaf realm
+    * [KARAF-1318] - User bundles are treated as system bundles
+    * [KARAF-1327] - Client: can't execute alias command
+    * [KARAF-1331] - Source distribution is missing
+    * [KARAF-1343] - Features repo points to the old pax-wicket app
+    * [KARAF-1354] - SSH Log-In failes with "Authentication failed" with valid credentials
+    * [KARAF-1359] - instance:create fails with Error executing command: Unable to find resource etc/config.properties
+    * [KARAF-1360] - Configration update doesn't work
+    * [KARAF-1362] - Karaf web console does not work on tabs features, http and  instance
+    * [KARAF-1363] - Upgrade Jetty when bugfix for the Loggging to stderr bug is available
+    * [KARAF-1367] - Remove line number logging from default logging config
+    * [KARAF-1369] - Shell history does not log all commands
+    * [KARAF-1370] - Loading snapshots from local repository does not work and the system dir should be read only
+    * [KARAF-1374] - Fileinstaller logging by default is not enabled.
+    * [KARAF-1388] - SSHD authorized key provider should log in DEBUG
+    * [KARAF-1389] - SSH doesn't correctly use the karaf.base variable
+    * [KARAF-1391] - Top-level build is missing obr module
+    * [KARAF-1392] - Removing a KAR should uninstall the shipped features
+    * [KARAF-1394] - Custom login modules not seen with Equinox
+    * [KARAF-1395] - Instance commands are not started at bootstrap
+    * [KARAF-1402] - Order in test framework generated features.xml is wrong
+    * [KARAF-1406] - scanFeatures is incompatible with editing the etc/org.apache.karaf.features.cfg file
+    * [KARAF-1407] - Use useDeployFolder(false) together with scan features fail
+    * [KARAF-1411] - Spec activator doesn't start correctly
+    * [KARAF-1416] - Blueprint archetype instructions is missing
+    * [KARAF-1418] - Instance command imports an internal package from instance core
+    * [KARAF-1430] - Default child instance config is not the same as the root instance
+    * [KARAF-1439] - Re-add demos to Karaf 3.0 kits
+    * [KARAF-1447] - Make the three big (cxf, amq, camel) play nicely with Karaf 3 without change
+    * [KARAF-1450] - System bundles could be started without problems; all other bundles need to be forced
+    * [KARAF-1452] - karaf-maven-plugin does not compile using java7
+    * [KARAF-1455] - PAX Url (obr & war), Felix and Karaf (trunk) fight with each other resulting in an m_bundleLock
+    * [KARAF-1459] - Problem with the OBR Resolver and Pax Web
+    * [KARAF-1472] - Karaf manual references wrong artifacts
+    * [KARAF-1482] - NullPointerException when deploying a feature without specified "install"-attribute
+    * [KARAF-1483] - Help generation does not work for commands without noargs constructor
+    * [KARAF-1485] - Use ShellTable in bundle:list
+    * [KARAF-1487] - Bundles in deploy are deployed before startup process had been  finished
+    * [KARAF-1491] - Admin service not able to start child instances when the JDK path contains a space on OS X
+    * [KARAF-1496] - Bad login when using sufficient modules but when the first fail
+    * [KARAF-1510] - Deployer kar demo Jenkins build issue
+    * [KARAF-1513] - SSH keystore incompatible if generated with IBM JDK
+    * [KARAF-1515] - features-generate-descriptor does not set the version in generated features
+    * [KARAF-1528] - Web:List command not working anymore
+    * [KARAF-1529] - command-watch messes the output when used with commands that take longer than the interval
+    * [KARAF-1539] - kar feature should a boot one
+    * [KARAF-1540] - featuresRepositories URL are not correct
+    * [KARAF-1541] - jaas:realm-manage raises a NullPointerException
+    * [KARAF-1544] - Several bugs in main around locking
+    * [KARAF-1547] - NullpointerException when running commands on jdk 6 update 33 or jdk 7 update 5
+    * [KARAF-1549] - Child instance features cfg file looks weird
+    * [KARAF-1553] - Command service references should be AUTO_EXPORT_INTERFACES
+    * [KARAF-1556] - standard-feature refers to non-existing "commands"-artifacts
+    * [KARAF-1560] - config:update throws ClassCastException when used on a Configuration with boolean fields created in the web console
+    * [KARAF-1561] - Restart Framework from Web Console's System Information tab results in Karaf dying
+    * [KARAF-1564] - karaf feature validate plugin should support to load the exports packages from dependency features
+    * [KARAF-1566] - instance:clone set the source instance in error
+    * [KARAF-1571] - InstallKarsMojo fails to compile with jdk-7
+    * [KARAF-1573] - Potential ZipFile leak at KarArtifactInstaller.install()
+    * [KARAF-1585] - Installing using wrap protocol fails when specifying bundle version
+    * [KARAF-1587] - When executing a command through the client, no error is printed in the console in case of errors
+    * [KARAF-1591] - Upgrade to XBean 3.11.1
+    * [KARAF-1596] - Karaf pom still refers geronimo-spec 1.0 whereas 1.1 is in use
+    * [KARAF-1609] - command-watch info does not work
+    * [KARAF-1617] - Blueprint deployer in combination with maven URL deployer creates wrong OSGi/blueprint/ file
+    * [KARAF-1618] - Exception when restarting Karaf with shutdown -r . Can not delete jansi.dll
+    * [KARAF-1624] - Rat checks fail
+    * [KARAF-1635] - config.properties should be filtered
+    * [KARAF-1655] - ManagementCfg configuratoinPointers in tooling-exam are incorrect
+    * [KARAF-1666] - Default configuration for jetty.xml could create problems
+    * [KARAF-1675] - Wrapper service requires a shell
+    * [KARAF-1682] - Custom distribution section of dev guide is outdates
+    * [KARAF-1683] - "no matching cipher found" error connecting via SSH to wrapper Karaf service - on Ubuntu
+    * [KARAF-1695] - startup fails on Windows with only JRE installed
+    * [KARAF-1699] - MBeans should support the same flags as the commands
+    * [KARAF-1702] - Stopping the console bundle should not shutdown the osgi framework
+    * [KARAF-1705] - Sync features between 2.3 and trunk
+    * [KARAF-1713] - Build failure at manual module
+    * [KARAF-1715] - Occasional freeze on feature:install webconsole
+    * [KARAF-1723] - Provide meaningful thread names for karaf console
+    * [KARAF-1734] - When logging into karaf with ssh as user karaf the prompt shows admin@root
+    * [KARAF-1736] - Feature spring-struts can't be installed
+    * [KARAF-1738] - features-generate-descriptor should support "install" attribute
+    * [KARAF-1742] - Add command to show list of threads and stack traces
+    * [KARAF-1746] - karaf github contributions rules
+    * [KARAF-1751] - Spring feature dependencies specified too tightly
+    * [KARAF-1754] - updating features.xml in auto deploy folder results in duplication
+    * [KARAF-1756] - No SSH connection possible on Debian 6.0.5
+    * [KARAF-1759] - No Way To Start obr Dependencies By Default
+    * [KARAF-1765] - The obr Shell Deploy And Start Commands Always Deploy Optional Dependencies
+    * [KARAF-1797] - NPE thrown from OsgiConfiguration.unregister
+    * [KARAF-1803] - Servlets attribute doesn't work on HttpMBean
+    * [KARAF-1804] - SystemMBean should support name attribute
+    * [KARAF-1809] - Feature spring-web-portlet can't be installed
+    * [KARAF-1814] - Cursor keys do not work when using bin/client on windows
+    * [KARAF-1815] - When ssh'ing from a windows box into a unix box, arrow keys are not correctly interpreted
+    * [KARAF-1824] - tooling-exam contains reference to wrong commons-io artifact
+    * [KARAF-1827] - Build the manual within specific profiles
+    * [KARAF-1835] - NPE in jaas:realm-manage command when multiple realm with the same name are present and not login module name is provided.
+    * [KARAF-1838] - PackageMBean should return List<String> and support operation with bundleId
+    * [KARAF-1839] - system bundle also should export javax.xml.ws.spi.http package
+    * [KARAF-1840] - should also endorse saaj-api
+    * [KARAF-1843] - SystemMBean reboot(time, cleanup) operation always cleanup
+    * [KARAF-1845] - Minimal distribution doesn't start
+    * [KARAF-1846] - jre.properties is corrupt in 3.0.0-SNAPSHOT
+    * [KARAF-1851] - inconsistent FeaturesNamespaces versions
+    * [KARAF-1853] - Attached kar deploys to a different snapshot build number than the main artifact
+    * [KARAF-1861] - Test failure in exam regression tests : KarafWithBundleTest
+    * [KARAF-1887] - Make integration tests more reliable by making sure the boot is finished
+    * [KARAF-1900] - create project for private compendium build for java 7
+    * [KARAF-1905] - ASM4 causes the Proxy/Weaving of Xerces, but that then causes validation factories to fail.
+    * [KARAF-1914] - SSH client authentication randomly fails
+    * [KARAF-1936] - LDAPLoginModule not working in 2.3.0 due to missing import of javax.net.SocketFactory
+    * [KARAF-1938] - Lock logic should wait for start level change to occur
+    * [KARAF-1963] - incorrect statement in developers-guide/branding-console.html
+    * [KARAF-1978] - if use script to start a child instance then using karaf console admin:list can't get the instance correct status
+    * [KARAF-1986] - instance.properties file doesn't get updated if karaf.name is changed
+    * [KARAF-1992] - PropertiesLoginModule handles usernames with backslash not correct
+    * [KARAF-2007] - features without start-level in features.xml are always started first
+    * [KARAF-2008] - respectStartLvlDuringFeatureStartup does not respect feature-start-levels (only bundles)
+    * [KARAF-2009] - Error on visualize Licences page
+    * [KARAF-2011] - dev:watch looks in an incorrect local maven repository
+    * [KARAF-2014] - karaf-maven-plugin uses null for karafVersion by default
+    * [KARAF-2016] - Hudson paths hard coded in assembled zip and tar.gz distributions
+    * [KARAF-2019] - Wrapper doesn't display all Linux statements
+    * [KARAF-2026] - Two broken links on remote console manual page
+    * [KARAF-2027] - invalid password option for admin:connect command in documenation
+    * [KARAF-2029] - delete.user option missing from JDBCLoginModule
+    * [KARAF-2035] - Not able to clone the root instance
+    * [KARAF-2037] - karaf 3.0 with gemini blueprint
+    * [KARAF-2051] - Duplicate definition of org.ops4j.pax.url.mvn.localRepository in org.ops4j.pax.url.mvn.cfg
+    * [KARAF-2052] - Progress bar doesn't display properly on 80 char consoles
+    * [KARAF-2057] - NOTICE and LICENSE files are not correct
+    * [KARAF-2058] - ensure find the root instance entry when update root karaf instance name in instances.properties
+    * [KARAF-2067] - instance-script terminates with NoClassDefFoundError
+    * [KARAF-2074] - ensure admin service always load storage file instance.properties before each operation
+    * [KARAF-2095] - Camel Route (JMS Polling) not working when installing feature "jndi"
+    * [KARAF-2096] - Upgrade to Pax Exam 2.6.0
+    * [KARAF-2115] - Sync weaving behavior between root and child instances
+    * [KARAF-2117] - LDAP login module is broken
+    * [KARAF-2133] - Generated title contain unresolved placeholder
+    * [KARAF-2134] - Features deployer does not support mvn urls
+    * [KARAF-2135] - Issue with jledit addition
+    * [KARAF-2136] - ServiceMix Spec property mispelled in etc/system.properties
+    * [KARAF-2143] - Remove Jetty JUL logger configuration
+    * [KARAF-2144] - MainStartTest test fails when methods are executed in reverse order
+    * [KARAF-2152] - wrong version for pax-jetty
+    * [KARAF-2154] - Entering an empty command removes previous command in history
+    * [KARAF-2155] - Wrapper/service does not start for karaf 3
+    * [KARAF-2158] - Test InstanceServiceImplTest#testToSimulateRenameInstanceByExternalProcess fails when run isolated
+    * [KARAF-2167] - org.apache.karaf.tooling.exam.container.internal.adaptions.KarafManipulatorFactory creates invalid version qualifier
+    * [KARAF-2171] - Start Karaf as service shows 'Activator' error in wrapper.log
+    * [KARAF-2178] - remove karaf-org.osgi.core.jar
+    * [KARAF-2181] - jpa feature can't be installed "out of the box"
+    * [KARAF-2188] - JPA bundle error out at shutdown
+    * [KARAF-2189] - blueprint disable service too soon at shutdown
+    * [KARAF-2191] - Karaf 3.0.x CLONE - Karaf startup fails with NullPointerException when logfile can't be written
+    * [KARAF-2193] - Upgrade to Pax URL 1.5.2
+    * [KARAF-2194] - Karaf regression test fails on BootClasspathLibraryOptionTest
+    * [KARAF-2209] - Allow overriding system properties
+    * [KARAF-2215] - <packaging>kar</packaging> fails to attach artifact
+    * [KARAF-2220] - spring-jms feature shouldn't depend on spring-web
+    * [KARAF-2221] - The admin service is not safe when used to create / start agents quickly
+    * [KARAF-2225] - jaas PropertiesLoginModule does not complain when users.properties is not found but fails later
+    * [KARAF-2226] - Properties with pathname are not correct on windows in jaas PropertiesLoginModule
+
+** Dependency upgrade
+    * [KARAF-449] - Upgrade to PAX-WEB 1.1.0 (SNAPSHOT right now)
+    * [KARAF-529] - Upgrade to Pax URL 1.3.2
+    * [KARAF-582] - Upgrade Apache Mina to 2.0.3
+    * [KARAF-590] - Upgrade to pax-logging 1.6.2
+    * [KARAF-591] - Upgrade aopalliance ServiceMix bundle to 1.0_5
+    * [KARAF-592] - Upgrade asm ServiceMix bundle to 3.3_2
+    * [KARAF-593] - Upgrade cglib ServiceMix bundle to 2.1_3_7
+    * [KARAF-594] - Upgrade commons-codec ServiceMix bundle to 1.3_4
+    * [KARAF-595] - Upgrade commons-collections ServiceMix bundle to 3.2.1_2
+    * [KARAF-596] - Upgrade commons-lang ServiceMix bundle to 2.4_5
+    * [KARAF-597] - Upgrade jasypt ServiceMix bundle to 1.7_3
+    * [KARAF-598] - Upgrade junit ServiceMix bundle to 4.7_3
+    * [KARAF-607] - Upgrade felix-framework to 3.2.1
+    * [KARAF-613] - Upgrade to Blueprint 0.3.1
+    * [KARAF-672] - Upgrade to felix event admin 1.2.12
+    * [KARAF-679] - Update jansi to version 1.6
+    * [KARAF-681] - Upgrade to Pax URL 1.3.4
+    * [KARAF-682] - upgrade to jetty 7.4.2.v20110526
+    * [KARAF-757] - upgrade to jetty 7.4.4.v20110707
+    * [KARAF-767] - Upgrade to Felix Framework 3.2.2
+    * [KARAF-768] - Upgrade to Eclipse Equinox 3.6.2.R36x_v20110210
+    * [KARAF-770] - Upgrade to Eclipse Equinox 3.7.1
+    * [KARAF-789] - Upgrade jetty to 7.4.5.v20110725
+    * [KARAF-791] - Upgrade paxurl to 1.3.5
+    * [KARAF-793] - Upgrade paxrunner to 1.7.5
+    * [KARAF-797] - Upgrade to Pax Web 1.1.1
+    * [KARAF-834] - Upgrade to Spring 3.0.6 - in std. features.xml
+    * [KARAF-854] - Upgrade to Felix Framework 4.0.1
+    * [KARAF-855] - Add support for OSGi R4.3
+    * [KARAF-903] - Upgrade to Pax Web 1.1.2
+    * [KARAF-928] - Support of Gemini Blueprint
+    * [KARAF-961] - Update Mina SSHD to version 0.6.0
+    * [KARAF-962] - Update easymock to version 2.5.2
+    * [KARAF-966] - Update xbean to 3.8
+    * [KARAF-989] - Upgrade to Aries Application 0.4
+    * [KARAF-990] - Upgrade to Aries JMX 0.4
+    * [KARAF-991] - Upgrade to Aries JPA 0.4
+    * [KARAF-992] - Upgrade to Aries JNDI 0.4
+    * [KARAF-993] - Upgrade to Aries Proxy 0.4
+    * [KARAF-994] - Upgrade to Aries Transaction 0.4
+    * [KARAF-995] - Upgrade to Aries Util 0.4
+    * [KARAF-998] - upgrade to jetty 7.5.4.v20111024
+    * [KARAF-1028] - Upgrade to Felix Framework 4.0.2
+    * [KARAF-1042] - Upgrade to jline 2.6
+    * [KARAF-1092] - Upgrade to Jasypt 1.8
+    * [KARAF-1107] - Karaf should use directly commons-* bundles
+    * [KARAF-1120] - Upgrade to Spring 3.1.0.RELEASE
+    * [KARAF-1135] - Upgrade pax exam to 2.4.0
+    * [KARAF-1154] - Upgrade to eventadmin 1.2.14
+    * [KARAF-1155] - Upgrade to Apache POM 10
+    * [KARAF-1163] - Upgrade to Guava 11.0.1
+    * [KARAF-1172] - Upgrade to Aries JNDI API 1.0.0
+    * [KARAF-1177] - Upgrade to standalone tinybundle 1.0.0
+    * [KARAF-1183] - Upgrade to slf4j 1.6.4
+    * [KARAF-1184] - Upgrade to JUnit 4.10
+    * [KARAF-1185] - Upgrade to Pax Logging 1.6.5
+    * [KARAF-1192] - Upgrade to pax-web 2.0.0
+    * [KARAF-1193] - Upgrade to pax-url 1.4.0.RC1
+    * [KARAF-1201] - Update jline groupid in main pom and shell/console/pom
+    * [KARAF-1205] - Upgrade to maven-bundle-plugin 2.3.7
+    * [KARAF-1224] - Upgrade to Spring 3.1.1.RELEASE
+    * [KARAF-1229] - Upgrade to jansi 1.8
+    * [KARAF-1230] - Upgrade to jansi 1.8
+    * [KARAF-1231] - Upgrade to EasyMock 3.1
+    * [KARAF-1232] - Upgrade to Jasypt 1.9.0
+    * [KARAF-1233] - Upgrade to asm 3.3.1
+    * [KARAF-1258] - Upgrade to Jetty 8.1.4
+    * [KARAF-1259] - Upgrade to pax-url 1.4.0
+    * [KARAF-1272] - Upgrade to fileinstall 3.2.0
+    * [KARAF-1346] - Upgrade to Mina 2.0.4
+    * [KARAF-1378] - Upgrade to fileinstall 3.2.2
+    * [KARAF-1456] - Upgrade to blueprint 1.0.0
+    * [KARAF-1458] - Upgrade to ServiceMix Specs 2.0
+    * [KARAF-1490] - upgrade to pax-logging 1.6.7
+    * [KARAF-1517] - Upgrade to OSGi Compendium 4.3.0
+    * [KARAF-1518] - Avoid to depend to OSGi Compendium
+    * [KARAF-1520] - Upgrade to Jansi 1.9
+    * [KARAF-1526] - Upgrade to pax-url 1.4.2
+    * [KARAF-1531] - Upgrade to Felix ConfigAdmin 1.4.0
+    * [KARAF-1534] - Upgrade to JLine 2.7
+    * [KARAF-1535] - Upgrade to Felix Utils 1.2.0
+    * [KARAF-1536] - Upgrade to Felix FileInstall 3.2.4
+    * [KARAF-1567] - Upgrade to pax-web 2.0.1
+    * [KARAF-1568] - Upgrade to sshd 0.7.0
+    * [KARAF-1570] - Upgrade maven-external-dependency-plugin to 0.5
+    * [KARAF-1577] - Upgrade to slf4j 1.6.6
+    * [KARAF-1578] - Upgrade to pax-logging 1.6.9
+    * [KARAF-1579] - Upgrade to commons-compress 1.4.1
+    * [KARAF-1581] - Upgrade to commons-jexl 2.1.1
+    * [KARAF-1582] - Upgrade to Felix BundleRepository 1.6.6
+    * [KARAF-1592] - Upgrade to quiesce api 1.0.1-SNAPSHOT
+    * [KARAF-1597] - Upgrade to geronimo-jaspic 1.1
+    * [KARAF-1598] - Upgrade to pax-runner 1.7.6
+    * [KARAF-1599] - Upgrade to pax-swissbox 1.5.1
+    * [KARAF-1601] - Upgrade to maven-antrun-plugin 1.7
+    * [KARAF-1603] - Upgrade to maven-surefire-plugin 2.12
+    * [KARAF-1604] - Upgrade to maven-assembly-plugin 2.3
+    * [KARAF-1606] - Upgrade to maven-compiler-plugin 2.5.1
+    * [KARAF-1608] - Upgrade to maven-dependency-plugin 2.4
+    * [KARAF-1610] - Upgrade to maven-eclipse-plugin 2.9
+    * [KARAF-1611] - Upgrade to maven-enforcer-plugin 1.1
+    * [KARAF-1612] - Upgrade to maven-enforcer-plugin 1.1
+    * [KARAF-1613] - Upgrade to maven-jar-plugin 2.4
+    * [KARAF-1615] - Upgrade to maven-javadoc-plugin 2.8.1
+    * [KARAF-1616] - Upgrade to maven-release-plugin 2.3.2
+    * [KARAF-1619] - Upgrade to maven-remote-resources-plugin 1.3
+    * [KARAF-1620] - Upgrade to maven-shade-plugin 1.7
+    * [KARAF-1621] - Upgrade to maven-site-plugin 3.1
+    * [KARAF-1622] - Upgrade to maven-war-plugin 2.2
+    * [KARAF-1623] - Upgrade to apache-rat-plugin 0.8
+    * [KARAF-1630] - Upgrade to Aries Util 1.0.0
+    * [KARAF-1631] - Upgrade to Aries Blueprint API 1.0.0
+    * [KARAF-1632] - Upgrade to Aries JMX API 1.0.0
+    * [KARAF-1634] - Upgrade to Felix Framework 4.0.3
+    * [KARAF-1636] - Upgrade to Equinox 3.8
+    * [KARAF-1638] - Upgrade to Pax Web 2.0.1
+    * [KARAF-1642] - Upgrade to exec-maven-plugin 1.2.1
+    * [KARAF-1643] - Upgrade to jaxb2-maven-plugin 1.3.1
+    * [KARAF-1644] - Upgrade to Aries JNDI API 1.0.0
+    * [KARAF-1645] - Upgrade to Aries Quiesce Manager 1.0.0
+    * [KARAF-1646] - Upgrade to Pax Web 2.0.2
+    * [KARAF-1649] - Upgrade to Aries JPA API 1.0.0
+    * [KARAF-1650] - Upgrade to Aries Blueprint Annotation API 1.0.0
+    * [KARAF-1651] - Upgrade to Aries JMX Blueprint API 1.0.0
+    * [KARAF-1652] - Upgrade to Aries JMX Core 1.0.0
+    * [KARAF-1653] - Upgrade to Aries JNDI Core 1.0.0
+    * [KARAF-1654] - Upgrade to Aries Proxy API 1.0.0
+    * [KARAF-1656] - use quiesce API 1.0.0 final instead of 1.0.1-SNAPSHOT
+    * [KARAF-1658] - Upgrade to Aries JMX 1.0.0
+    * [KARAF-1660] - Upgrade Aries Application API to 1.0.0
+    * [KARAF-1661] - Upgrade Aries Application Utils to 1.0.0
+    * [KARAF-1662] - Upgrade Aries Proxy Impl to 1.0.0
+    * [KARAF-1663] - Upgrade Aries transaction manager to 1.0.0
+    * [KARAF-1664] - Upgrade Aries JNDI legacy support to 1.0.0
+    * [KARAF-1665] - Upgrade Aries JNDI rmi to 1.0.0
+    * [KARAF-1668] - Upgrade blueprint core to 1.0.0
+    * [KARAF-1669] - Upgrade Aries Application to 1.0.0
+    * [KARAF-1670] - Uprade Aries Application Management to 1.0.0
+    * [KARAF-1671] - Uprade Aries Application Modeller to 1.0.0
+    * [KARAF-1672] - Upgrade Aries Application Deployment 1.0.0
+    * [KARAF-1673] - Upgrade to Aries JPA Blueprint 1.0.0
+    * [KARAF-1685] - Upgrade to Aries Blueprint Annotation Impl 1.0.0
+    * [KARAF-1686] - Upgrade to Aries Blueprint CM 1.0.0
+    * [KARAF-1687] - Upgrade to Aries Blueprint Core Compatibility 1.0.0
+    * [KARAF-1688] - Upgrade to Aries Blueprint JEXL Evaluator 1.0.0
+    * [KARAF-1689] - Upgrade to Aries JNDI URL 1.0.0
+    * [KARAF-1690] - Upgrade to Aries Transaction Wrappers 1.0.0
+    * [KARAF-1691] - Remove Aries Quiesce dependencies
+    * [KARAF-1696] - Upgrade to Spring 3.1.2.RELEASE
+    * [KARAF-1704] - Upgrade to Aries Transaction Blueprint 1.0.0
+    * [KARAF-1711] - Upgrade to pax-web 2.1.0
+    * [KARAF-1719] - Upgrade to javax.mail 1.4.5
+    * [KARAF-1722] - Upgrade to Aries JMX Blueprint Core 1.0.1
+    * [KARAF-1732] - Upgrade to ServiceMix Ant bundle 1.8.4_1
+    * [KARAF-1733] - Upgrade to ServiceMix aopalliance bundle  1.0_6
+    * [KARAF-1737] - Upgrade to ServiceMix cglib bundle 2.2.2_1
+    * [KARAF-1739] - Upgrade to Jetty 8.1.5.v20120716
+    * [KARAF-1744] - Upgrade to guava 13.0
+    * [KARAF-1745] - Upgrade to Felix WebConsole 4.0.0
+    * [KARAF-1747] - Update to jline 2.8
+    * [KARAF-1769] - Upgrade to pax-logging 1.6.10
+    * [KARAF-1773] - Upgrade to pax-logging 1.6.10
+    * [KARAF-1774] - Upgrade to pax-url 1.5.0
+    * [KARAF-1779] - Upgrade to guava 13.0.1
+    * [KARAF-1781] - Upgrade to Mina 2.0.5
+    * [KARAF-1787] - Upgrade to commons-fileupload 1.2.2
+    * [KARAF-1788] - Upgrade to commons-io 2.4
+    * [KARAF-1801] - slf4j 1.7.0
+    * [KARAF-1816] - Upgrade to jline 2.9
+    * [KARAF-1817] - Upgrade to sshd 0.8.0
+    * [KARAF-1819] - Upgrade to Mina 2.0.5
+    * [KARAF-1859] - Upgrade to ServiceMix Specs 2.1
+    * [KARAF-1862] - Upgrade to Felix FileInstall 3.2.6
+    * [KARAF-1863] - Upgrade to sshd 0.8.0
+    * [KARAF-1865] - Upgrade to paxlogging 1.7.0
+    * [KARAF-1866] - Upgrade to felix config admin 1.4.0
+    * [KARAF-1867] - Upgrade to felix event admin 1.3.0
+    * [KARAF-1868] - Upgrade aries bundles to 1.0.1 (blueprint-core, jmx-core, transaction-manager, jpa-container-context)
+    * [KARAF-1884] - Upgrade exam to Pax Exam 2.6.0
+    * [KARAF-1893] - Upgrade to Jetty 8.1.7.v20120910
+    * [KARAF-1904] - Upgrade to Mina 2.0.7
+    * [KARAF-1908] - Upgrade to XBean 3.12
+    * [KARAF-1948] - Upgrade to Apache POM 11
+    * [KARAF-1955] - Upgrade to ServiceMix Specs 2.2.0
+    * [KARAF-1966] - Upgrade to Pax Web 3.0
+    * [KARAF-1977] - Upgrade to OSGi 4.3.1
+    * [KARAF-1981] - Upgrade to Felix ConfigAdmin 1.6.0
+    * [KARAF-2012] - Upgrade to Pax Web 3.0.0.M1
+    * [KARAF-2055] - Upgrade to Apache POM 12
+    * [KARAF-2061] - Upgrade to commons-codec 1.7
+    * [KARAF-2063] - Upgrade to Felix EventAdmin 1.3.2
+    * [KARAF-2064] - Upgrade to Felix Metatype 1.0.6
+    * [KARAF-2065] - Upgrade to Felix SCR 1.6.2
+    * [KARAF-2068] - Upgrade to ASM 4.1
+    * [KARAF-2080] - Upgrade to slf4j 1.7.2
+    * [KARAF-2081] - Upgrade to JUnit 4.11
+    * [KARAF-2084] - Upgrade to Jetty 8.1.8.v20121106
+    * [KARAF-2085] - Upgrade to Jetty 8.1.8.v20121106
+    * [KARAF-2086] - Upgrade to Spring 3.1.3.RELEASE
+    * [KARAF-2147] - Upgrade to Aries JMX 1.1.1
+    * [KARAF-2148] - Upgrade to Aries Proxy 1.0.1
+    * [KARAF-2149] - Upgrade to Aries Blueprint Core 1.1.0
+    * [KARAF-2150] - Upgrade to Aries Blueprint CM 1.0.1
+    * [KARAF-2157] - Upgrade to Aries Util 1.1.0
+    * [KARAF-2176] - Upgrade to Pax URL 1.5.1
+    * [KARAF-2177] - Upgrade to Felix Framework 4.2.0
+    * [KARAF-2184] - Upgrade to Spring 3.1.4.RELEASE
+    * [KARAF-2197] - Upgrade to JLine 2.10
+    * [KARAF-2208] - Upgrade to Aries JPA Blueprint 1.0.1
+    * [KARAF-2227] - Upgrade to Pax-Web 3.0.0.M3 and Jetty 8.1.9.v20130131
+    * [KARAF-2232] - Upgrade to Aries Blueprint Core 1.1.1
+
+** Improvement
+    * [KARAF-216] - Create an admin:clone command
+    * [KARAF-338] - Upgrade Karaf to version 1.0.0 of pax-web
+    * [KARAF-362] - Add documentation how to build a custom karaf distribution including branding
+    * [KARAF-366] - Remove sax parser code from features core
+    * [KARAF-402] - Gather features and cmdhelp maven plugins into a generic karaf maven plugin
+    * [KARAF-403] - Improve Bundle-Description header display
+    * [KARAF-404] - Upgrade to felix maven-bundle-plugin 2.3.4
+    * [KARAF-412] - Documentation: Add notes on how to make multiple configuration files available to the bundle context.
+    * [KARAF-422] - If no version was found, features-maven-plugin try to create an artifact with a null version
+    * [KARAF-445] - Add completion for shell aliases
+    * [KARAF-447] - Add JDBC lock implementation for PostgreSQL
+    * [KARAF-460] - Add commands to manipulate kar archives
+    * [KARAF-461] - dev:create-dump command should generate a cleaner zip file name
+    * [KARAF-465] - Merge http with war feature
+    * [KARAF-469] - Remove duplicate code
+    * [KARAF-470] - Move Main variables management in util
+    * [KARAF-471] - would be nice for a "already exists" call to features:addurl to trigger a refresh
+    * [KARAF-476] - The admin-command should be extended to handle RMI-server-port settings
+    * [KARAF-483] - pax-web jetty.xml configfile should contain default security realm
+    * [KARAF-484] - Upgrade to Felix Framework 3.0.9
+    * [KARAF-487] - Improve --help information for obr:list
+    * [KARAF-488] - obr:list should also include the bundle-symbolic-name of the packages it lists as this is used to execute other OBR commands
+    * [KARAF-495] - Add a Tutorials section to the website.
+    * [KARAF-513] - The ssh:ssh and admin:connect command do not allow passing a command to execute
+    * [KARAF-514] - When starting a child instance, there's no way to wait until it's started
+    * [KARAF-517] - Upgrade to pax-runner 1.6.1
+    * [KARAF-530] - Rename org.apache.karaf.assemblies/apache-karaf to org.apache.karaf/apache-karaf
+    * [KARAF-533] - Improve depdencny handling to manual
+    * [KARAF-539] - Document configfile xml tag of features
+    * [KARAF-540] - Add IdentificationUtils in Karaf utils
+    * [KARAF-542] - Support of next line with '>' character
+    * [KARAF-544] - Documentation on how to use the JMX console
+    * [KARAF-551] - Implement the shell:source command
+    * [KARAF-554] - Add karaf version in system properties and display in shell:info command output
+    * [KARAF-560] - Modify all console log commands to receive a "logger" argument.
+    * [KARAF-561] - Make obr:list output similar to osgi:list
+    * [KARAF-563] - Adjustable PermSize and MaxPermSize in karaf script
+    * [KARAF-564] - Allow configuring features OBR resolver to resolve optional imports as well
+    * [KARAF-573] - Print out that karaf has to be restarted if using framework with new framework
+    * [KARAF-574] - Re-introduce export version in packages:exports command
+    * [KARAF-576] - introduce start-level attribute for feature element in features.xml
+    * [KARAF-588] - Some fixes to Karaf Site
+    * [KARAF-606] - JAAS: Allow LDAPLoginModule to supply role "DN" from LDAP group search
+    * [KARAF-608] - Allow for multi-stage boot features installation
+    * [KARAF-614] - Add warning to osgi:shutdown to avoid inadvertently shutting down the container
+    * [KARAF-618] - Align Cellar major version with the Karaf one
+    * [KARAF-623] - Create a shell completer for jaas realms
+    * [KARAF-638] - Use the same naming convention in commands
+    * [KARAF-640] - The Cellar's Hazelcast instance should be configured via Configuration Admin.
+    * [KARAF-645] - Add a flag to suppress --help Option output on
+    * [KARAF-651] - features-maven-plugin should "embed" the Karaf features descriptor
+    * [KARAF-654] - Merge jetty feature with jetty-jaas feature
+    * [KARAF-659] - correct manuall about http-whiteboard feature
+    * [KARAF-661] - Typing ^D should behave as on Unix
+    * [KARAF-662] - Clarify relationship of config.properties and custom.properties
+    * [KARAF-663] - features-maven-plugin add-features-to-repo should embed Karaf core features descriptor
+    * [KARAF-664] - Use Wiki syntax in bundle.info instead of Ansi control sequences
+    * [KARAF-665] - Rename karaf-maven-plugin goals
+    * [KARAF-668] - The karaf web console doesn't list web contexts
+    * [KARAF-693] - features:addurl raises "Premature end of file" when network is not available
+    * [KARAF-698] - Technical edits to User's Guide
+    * [KARAF-699] - Grammar fixes to source code files
+    * [KARAF-700] - Updates to developer's guide
+    * [KARAF-705] - Upgrade demos/web to use jdk 1.6 on the trunk.
+    * [KARAF-713] - Refactor karaf main
+    * [KARAF-720] - Make 3.0.x source JDK7 compliant for type handling.
+    * [KARAF-725] - Read-only commands shouldn't ask for system bundle confirmation
+    * [KARAF-729] - Karaf Maven Plugin source code cleanup
+    * [KARAF-733] - Doc fixes to the quick start guide and overview page
+    * [KARAF-737] - The Karaf WebConsole should not only list Http contexts but also web contexts as in web:list
+    * [KARAF-752] - Editorial fixes to the assemblies/ configuration files
+    * [KARAF-755] - Recommended improvements to help commands
+    * [KARAF-756] - Add ability to have KeyStoreManager to wait for SSL keystore to be fully initialize by other bundle through timeout
+    * [KARAF-762] - dev:watch should support multiple bundle IDs
+    * [KARAF-764] - Correct links to ops4j in documentation
+    * [KARAF-772] - Cleanup Karaf assemblies
+    * [KARAF-783] - Improve security docs wrt role policies
+    * [KARAF-784] - Add date in the default Karaf log
+    * [KARAF-786] - Add more MBeans
+    * [KARAF-795] - Kar builder uses a different version for easymock then the rest of the project
+    * [KARAF-802] - Upgrade mail bundle version to 1.4.4.
+    * [KARAF-807] - Add a features name to the karaf-cellar features.xml
+    * [KARAF-808] - Remove author attribute tags from Karaf source code
+    * [KARAF-813] - Install Pax URL OBR with the OBR feature
+    * [KARAF-817] - Allow to set Karaf window name via parameter
+    * [KARAF-818] - Allow JAVA_MAX_MEM, JAVA_PERM_MEM, JAVA_MIN_MEM, JAVA_MAX_PERM_MEM the same way as for linux startup file
+    * [KARAF-819] - Rename Karaf features name (and sub-projects features name) to use full qualified name
+    * [KARAF-829] - Support of Java 7
+    * [KARAF-832] - build html manual by default, use a profile for pdf generation
+    * [KARAF-840] - specify javax.annotation packages version to 1.1.0 for jre-1.6 as Annotation 1.1 Spec is used for Java 6
+    * [KARAF-847] - Provide Karaf features covering all Spring bundles
+    * [KARAF-851] - Upgrade Maven plugins in use
+    * [KARAF-864] - obr:deploy command should provide a start option
+    * [KARAF-881] - Make aliases to osgi:* commands to be more clear for the users
+    * [KARAF-885] - StartBundle doesn't deploy all bundles if one failed
+    * [KARAF-886] - Document security properties in the relevant configuration files
+    * [KARAF-888] - Add a Karaf Config Service
+    * [KARAF-897] - Fixing text in bundle.info files
+    * [KARAF-898] - Config delete operation should remove the pid.cfg file
+    * [KARAF-899] - Upgrade to Apache Felix Gogo version 0.10.0
+    * [KARAF-900] - Shutdown command should display the instance name
+    * [KARAF-907] - Include 64 bits wrapper library
+    * [KARAF-916] - use org.apache.aries.jmx.core instead of org.apache.aries.jmx
+    * [KARAF-925] - Karaf config.properties doesn't define J2SE-1.6 and J2SE-1.7 execution environment
+    * [KARAF-930] - Bundles MBean should mimic the BundleSelector like osgi:* commands
+    * [KARAF-931] - Add includeTransitiveDependencies option to features-generate-descriptor Maven goal
+    * [KARAF-936] - Features info command should display the start level of a bundle if available.
+    * [KARAF-940] - Align various bat and sh scripts
+    * [KARAF-942] - Expose Karaf RMI registry as a service
+    * [KARAF-945] - Use singular for shell commands
+    * [KARAF-946] - MBeans should be renamed in singular
+    * [KARAF-947] - Rename admin service to instance service
+    * [KARAF-948] - Apply normalized shell command format
+    * [KARAF-956] - jaas module should throw generic FailedLoginException
+    * [KARAF-963] - Refactoring of the modules
+    * [KARAF-965] - Allow features-maven-plugin to handle multiple versions of the same feature
+    * [KARAF-968] - Features file should require name attribute on features element
+    * [KARAF-970] - feature <config/> tag doesn't create the cfg file
+    * [KARAF-981] - Set kar as a boot feature
+    * [KARAF-999] - local-repo folder shouldn't be used
+    * [KARAF-1001] - Consistency between command annotation and blueprint
+    * [KARAF-1002] - Switch the blueprint extender to synchronous mode
+    * [KARAF-1005] - Port current karaf integration tests to new test framework
+    * [KARAF-1010] - Add 64Bit ServiceWrapper to karaf
+    * [KARAF-1013] - Less verbose in log when mistyped commands at INFO level
+    * [KARAF-1014] - Make files specified by ${includes} optional
+    * [KARAF-1017] - Use the Pax Web features.xml for Pax Web 2.0 and further
+    * [KARAF-1019] - Set java memory options only when required
+    * [KARAF-1021] - karaf-maven-plugin does not prefix non-bundles with the wrap: prefix when generating a feature.xml
+    * [KARAF-1022] - java.io.tmpdir system property should use $KARAF_DATA/tmp in place of $KARAF_BASE/tmp
+    * [KARAF-1023] - Add karaf activators for jars in the lib folder
+    * [KARAF-1032] - Text improvements to Features XSD
+    * [KARAF-1035] - Allow Karaf config commands to accept the pid as an option
+    * [KARAF-1039] - Rename the org.apache.felix.gogo.commands package to org.apache.karaf.shell.commands
+    * [KARAF-1041] - create-kar goal should handle configfile
+    * [KARAF-1045] - Improved help system
+    * [KARAF-1048] - make pom.xml eclipse 3.7 m2e friendly
+    * [KARAF-1057] - Update the list of supported execution environments
+    * [KARAF-1069] - create a ServerInfo service that Main sets up that exposes karaf home, base, data, instances, and the command line arguments
+    * [KARAF-1072] - Provide man command as an alias to help
+    * [KARAF-1073] - Add -r (reboot) and -h (halt) options to the system:shutdown command
+    * [KARAF-1077] - New service:list command focused on services instead of bundles
+    * [KARAF-1080] - Spring feature repo for spring related features
+    * [KARAF-1087] - kar archetype
+    * [KARAF-1088] - assembly archetype
+    * [KARAF-1091] - Upgrade maven bundle plugin to 2.3.6
+    * [KARAF-1093] - Make org.apache.karaf.util a bundle
+    * [KARAF-1112] - shell:sleep should be in seconds
+    * [KARAF-1115] - Add a jre.properties.cxf with all changes required to run cxf
+    * [KARAF-1118] - Enable install of CXF into karaf with a simple command
+    * [KARAF-1119] - expose rmiregistry port as a service property
+    * [KARAF-1129] - Allow configuring rmi Registry host as well as port
+    * [KARAF-1142] - Get rid of the code using StartLevel and PackageAdmin has they are now deprecated
+    * [KARAF-1145] - Upgrade to pax-logging 1.6.4
+    * [KARAF-1167] - No SCR implementation supplied with Karaf
+    * [KARAF-1181] - Add tab completer to the help command
+    * [KARAF-1186] - Provide a migration/update section in the manual
+    * [KARAF-1191] - Switch back to millis per default on shell:sleep and introduce -s option
+    * [KARAF-1197] - AdminService - Allow to provide a PrintStream so you can capture or control activity on the console
+    * [KARAF-1208] - Rename features to feature
+    * [KARAF-1214] - Improvement in Karaf log4j appender docs
+    * [KARAF-1245] - blueprint deployer and spring deployer should get started before features.core bundle
+    * [KARAF-1261] - Jaas commands should allow you to distinguish between to realms that have the same name
+    * [KARAF-1271] - Feature service should log in DEBUG instead of INFO
+    * [KARAF-1273] - Combine the commands and mbeans for osgi framework related stuff into one module set
+    * [KARAF-1276] - Add activation="eager" to springListener bean in shell/osgi/src/main/resources/OSGI-INF/blueprint/shell-osgi.xml
+    * [KARAF-1281] - New table support for shell
+    * [KARAF-1282] - Remove osgi sources from karaf main
+    * [KARAF-1289] - Move the standard feature definition to the feature.xml
+    * [KARAF-1290] - Kar deployer should move into the kar module
+    * [KARAF-1291] - Features deployer should be in the features module
+    * [KARAF-1295] - serviceUrl in org.apache.karaf.management.cfg should use 0.0.0.0 but not localhost
+    * [KARAF-1296] - Karaf startup without startup.properties
+    * [KARAF-1299] - Make sure that all karaf archetype contain a description
+    * [KARAF-1300] - features managment should be more robust if customer features descriptor file has duplicated feature name
+    * [KARAF-1302] - Replace MBeanRegistrer with aries jmx whiteboard and remove .management modules
+    * [KARAF-1307] - Refactor http command and mbean to new module layout and change to use jmx whiteboard
+    * [KARAF-1328] - jclouds feature repo url has been changed after version 1.0
+    * [KARAF-1351] - Improvements to features-generate-descriptor
+    * [KARAF-1383] - Fix warning messages during bundle build
+    * [KARAF-1385] - Be able to disable the default PropertiesLoginModule
+    * [KARAF-1390] - Embedded features should have POM dependencies on the projects they represent
+    * [KARAF-1396] - config:list command description should be enhanced
+    * [KARAF-1410] - Error in stop script if KARAF_DEBUG is enabled
+    * [KARAF-1427] - Split shell console into API and impl
+    * [KARAF-1438] - Simplify imports in bundle plugin for deployers
+    * [KARAF-1444] - Rename shell.shell to shell.commands.impl and make packages private
+    * [KARAF-1446] - Move help system and table out of console into separate modules
+    * [KARAF-1448] - diag command should print the full stacktrace instead of the messages only
+    * [KARAF-1449] - The InstallKarMojo fails with a nullpointer if an artifact could not be retrieved
+    * [KARAF-1462] - Improvements to shell tables
+    * [KARAF-1468] - Use the geronimo servlet spec instead of jetty' since it's backward compatible
+    * [KARAF-1470] - Cleanup: Remove no longer required org.apache.karaf.tooling.testing project
+    * [KARAF-1471] - Use project.version instead of direct version in manual
+    * [KARAF-1489] - Add an itest showing how to correctly use tinybundles with provision in paxexam-karaf
+    * [KARAF-1499] - InfoAction shell command should sort the properties from InfoProvider instances
+    * [KARAF-1500] - Forgot a space between hours and minutes in InfoAction.java
+AF-1574] - When two karaf containers are started locally, an exception is displayed at startup.  A nicer message would be better.
+    * [KARAF-1575] - Features provided by karaf do not have any description
+    * [KARAF-1580] - Demo should exclude Eclipse and IntelliJ IDEA files
+    * [KARAF-1586] - wrapper:install command should be usable outside OSGi too
+    * [KARAF-1600] - Avoid duplicate feature and bundle resolution when installing cascading features
+    * [KARAF-1607] - Move dev commands and services to bundle, system and shell
+    * [KARAF-1628] - Make client indepenent of console
+    * [KARAF-1629] - Command completer should complete only on first scope level
+    * [KARAF-1640] - Make sure the local console is fully working before the user can type commands
+    * [KARAF-1641] - Avoid embedding jline in the console
+    * [KARAF-1657] - org.ops4j.pax.url.mvn.proxySupport=false
+    * [KARAF-1659] - Use dependencyManagement in features assemblies
+    * [KARAF-1667] - Improve wait startup message
+    * [KARAF-1676] - OBR URL's in Karaf have no simple identifier
+    * [KARAF-1678] - WebConsole still use "admin" instead of "instance"
+    * [KARAF-1693] - Rename command-watch to watch
+    * [KARAF-1700] - update manual to reflect JDBC Lock updates
+    * [KARAF-1710] - Remove @version headers from source
+    * [KARAF-1712] - Use Pax-Web Features
+    * [KARAF-1752] - hard coded features uri in features deployer feature discovery
+    * [KARAF-1757] - Welcome message incorrect during ssh session or using bin/client.
+    * [KARAF-1798] - Use exam framework for our itests and increase tests coverage
+    * [KARAF-1811] - Remove section about console colors from manual
+    * [KARAF-1818] - Improve user guide
+    * [KARAF-1828] - Build src distributions within specific profiles
+    * [KARAF-1834] - Make KarafTestSupport available externally
+    * [KARAF-1836] - Provide a login module class name completer.
+    * [KARAF-1850] - feature:list should use alphabetical order
+    * [KARAF-1878] - Feature bundle start up order by startLvl
+    * [KARAF-1889] - Change logging in FeaturesServiceImpl
+    * [KARAF-1903] - Refactore osgicore and osgicompendium modules
+    * [KARAF-1933] - Add id for Maven repository
+    * [KARAF-1940] - admin/instance should be provided as a feature
+    * [KARAF-1951] - Remove workaround for KARAF-1117
+    * [KARAF-1952] - Allow Karaf monitoring using host:port
+    * [KARAF-1989] - Add CXF DOSGi feature uri to org.apache.karaf.features.repos.cfg
+    * [KARAF-1990] - Add Cellar feature URI in org.apache.karaf.features.repos.cfg
+    * [KARAF-2003] - Interrupt a running command in shell
+    * [KARAF-2017] - Service wrapper should use and populate JAVA_HOME in conf file
+    * [KARAF-2043] - Document caveats of Pax Url Wrap when used in Karaf Shell
+    * [KARAF-2049] - Instructions in welcome screen is a bit misleading with hit
+    * [KARAF-2053] - HTTP feature should install a default etc/org.ops4j.pax.web.cfg file
+    * [KARAF-2072] - Spelling correction
+    * [KARAF-2017] - Service wrapper should use and populate JAVA_HOME in conf file
+    * [KARAF-2094] - Include howto add additional jvm configurations (if using the wrapper) to the documentation
+    * [KARAF-2097] - endorse stax-api spec jar
+    * [KARAF-2104] - Add wildcard support in features:refreshurl
+    * [KARAF-2119] - upgrade pax.base to 1.4.0
+    * [KARAF-2138] - Add a status check script and karaf script argument
+    * [KARAF-2160] - add options to only create tar.gz or zip archive in CreateArchiveMojo
+    * [KARAF-2163] - Add a jre-1.8 to jre.properties
+    * [KARAF-2175] - Add the sonatype standard snapshot repository to the karaf repositories
+    * [KARAF-2219] - Add option to jaas LoginModules to skip checking the credentials
+
+** New Feature
+    * [KARAF-32] - Support ssh public key authentication and agent forwarding
+    * [KARAF-222] - mvn karaf:run plugin, like jetty:run
+    * [KARAF-376] - State replication between Karaf instances
+    * [KARAF-401] - Provide kar goal in the karaf maven plugin
+    * [KARAF-407] - Extend features:info command to display features description and details
+    * [KARAF-408] - Add osgi:services related commands
+    * [KARAF-426] - Manage Karaf shell.name by branding
+    * [KARAF-463] - Add chapter for Pax Web and the OSGi HttpService
+    * [KARAF-473] - Support version resolving in FeatureService#getFeatures(name/version)
+    * [KARAF-477] - Karaf console should gracefully handle errors due to the history file being read only.
+    * [KARAF-478] - Subclasses of Console should be able to change the history file.
+    * [KARAF-523] - Allow maven style names in startup.properties
+    * [KARAF-541] - Support JMX SSL via etc/org.apache.karaf.management.cfg
+    * [KARAF-572] - Command to show all registered servlets and their contexts
+    * [KARAF-581] - Also make rmiRegistryHost configurable
+    * [KARAF-605] - Add param to Gogo Argument and Option to override default value with specific value
+    * [KARAF-647] - Support of sub-shell
+    * [KARAF-657] - kar deployer should start the feature
+    * [KARAF-696] - Add a macro allowing users to identify the contents of a specific config file.
+    * [KARAF-798] - Support for relocating karaf.history file
+    * [KARAF-835] - Provide a spring-jms feature
+    * [KARAF-845] - Add a jasypt based property placeholder to support encrypted values
+    * [KARAF-866] - New dev:wait-for-service command to wait for a given osgi service
+    * [KARAF-908] - Provide a way to access system properties easily in the shell
+    * [KARAF-934] - Provide a way to select which features are to be installed when dropping a descriptor to the deploy folder.
+    * [KARAF-977] - config propset, propappend & propdel could use some autocompletion
+    * [KARAF-980] - Add demo for extending Karaf's console commands
+    * [KARAF-984] - Add Kar deployer demo using karaf-maven-plugin
+    * [KARAF-987] - Add scp support
+    * [KARAF-1004] - Introduce paxexam-karaf into karaf tooling
+    * [KARAF-1007] - Include paxexam-karaf testframework documentation into the manual
+    * [KARAF-1029] - Add completer support on option values
+    * [KARAF-1055] - New bundle:capabilities and bundle:requirements commands
+    * [KARAF-1059] - Karaf command features:status to indicate feature loaded or not
+    * [KARAF-1109] - Provide archetypes for bundle, bundle-blueprint, web-bundle, war
+    * [KARAF-1196] - implement a 'watch' command so we can watch the output of a karaf command like the unix 'watch' mechanism
+    * [KARAF-1203] - Make invoker in karaf testcontainer configurable
+    * [KARAF-1213] - Add option to configure BundleStartLvl of automatically installed base bundles
+    * [KARAF-1254] - Jasypt config admin property with reload strategy.
+    * [KARAF-1334] - Use the new servicemix spec to allow the use of both the JRE implementations and implementations from bundles
+    * [KARAF-1379] - Provide exit alias and improve shell:logout command
+    * [KARAF-1380] - Add a command to easily name an instance
+    * [KARAF-1475] - Support SSH agent forwarding and use the agent authentication when connecting to other instances
+    * [KARAF-1512] - enhancement: add self to generated feature in "features-generate-descriptor" goal
+    * [KARAF-1519] - Support to download features for later offline usage
+    * [KARAF-1546] - Add -i/--install-all option to feature:add-url
+    * [KARAF-1762] - command to list bundles with the requested class
+    * [KARAF-1806] - Add version attribute in the SystemMBean
+    * [KARAF-1886] - Create transaction-jdbc and transaction-jms enterprise features
+    * [KARAF-2044] - Provide the ability to edit text resources from the Karaf shell
+    * [KARAF-2050] - Ability to configure ssh session idle timeout - currently hardcode as 5 minutes
+    * [KARAF-2069] - Provide less command
+    * [KARAF-2070] - Add support of !$ to recall the last command argument
+    * [KARAF-2078] - Create the shell:date command
+    * [KARAF-2159] - add option to resolve transitive feature-dependencies in InstallKarsMojo
+    * [KARAF-2164] - Create shell:wc command
+    * [KARAF-2185] - Provide Spring 3.2.x support
+
+** Task
+    * [KARAF-328] - Drop support for JDK 1.5
+    * [KARAF-431] - Add documentation around remote management via JMX
+    * [KARAF-432] - Remove spring2 support from karaf features
+    * [KARAF-433] - Add documentation about KAR archive format and deployer
+    * [KARAF-434] - Add wrap deployer description in the deployer section of the Karaf user guide
+    * [KARAF-435] - Add diagnostic documentation (dev:create-dump, etc) in the Karaf User Guide
+    * [KARAF-437] - Document jre.properties tuning
+    * [KARAF-439] - Provide documentation about the Karaf wrapper
+    * [KARAF-444] - Upgrade to latest version of pax-url
+    * [KARAF-454] - Upgrade Karaf to version 1.0.1 of pax-web
+    * [KARAF-489] - Upgrade pax-logging to 1.6.1
+    * [KARAF-500] - Upgrade to Jetty 7.3.1
+    * [KARAF-501] - Upgrade to PAX Exam 1.2.4
+    * [KARAF-516] - Upgrade to felix eventadmin 1.2.10
+    * [KARAF-543] - Add manual section around log custom appenders
+    * [KARAF-553] - Get place of jetty config with mvn url in sync
+    * [KARAF-566] - Build: Remove duplicate entries from build artefacts.
+    * [KARAF-567] - org.apache.karaf.jaas.config.impl accidentally exported?
+    * [KARAF-584] - Upgrade Karaf build environment
+    * [KARAF-619] - Add Cellar manual
+    * [KARAF-620] - Cellar should use the parent Karaf POM
+    * [KARAF-646] - Upgrade to Jetty 7.4.1.v20110513
+    * [KARAF-694] - Upgrade to Pax-Logging 1.6.3
+    * [KARAF-887] - Refer PrinceXML website in the manual
+    * [KARAF-909] - Delete the copy of the felix gogo Closure class
+    * [KARAF-1053] - Removed unused folders/code from Assemblies
+    * [KARAF-1054] - Setup eclipse targets now deprecated assembly folder.
+    * [KARAF-1086] - Create Kar for Karaf demos
+    * [KARAF-1094] - Refactor Karaf Demos to new assemblies format
+    * [KARAF-1097] - Update Kar documentation
+    * [KARAF-1136] - Rationalize Karaf 3.0 minimal distribution
+    * [KARAF-1274] - Please set svn:ignore to all eclipse's project files
+    * [KARAF-1357] - Document features-generator
+    * [KARAF-1393] - Rename commands module to command
+    * [KARAF-1440] - Port deployer wrap demo to Karaf 3.0
+    * [KARAF-1441] - Port deployer feature demo to Karaf 3.0
+    * [KARAF-1442] - Port deployer bundle demo to Karaf 3.0
+    * [KARAF-1445] - more svn:ignore are needed
+    * [KARAF-2124] - Adapt the chapter about extending the console to changes made by KARAF-1001
+    * [KARAF-2161] - Incorrect LGPL license info in Notices file
+    * [KARAF-2222] - Add hawtio to features.repos
+
+** Test
+    * [KARAF-1530] - Create integration tests for karaf-maven-plugin
+    * [KARAF-1537] - Additional integration tests for karaf-maven-plugin
+    * [KARAF-1870] - Add assertion to EquinoxFrameworkTest
+    * [KARAF-1871] - KeepRuntimeFolderTest is named wrong and does not assert anything
+    * [KARAF-1872] - Backward224Test should check for the karaf version
+    * [KARAF-1873] - BaseKarafDefaultFrameworkTest should test for felix framework
+    * [KARAF-1874] - Add assertion to FrameworkWithShellOffTest
+    * [KARAF-1875] - Improvement of test for keeping or deleting the pax exam folder
+    * [KARAF-1876] - Improve StandardFeaturesTest, EnterpriseFeaturesTest and SpringFeaturesTest using feature service
+    * [KARAF-1877] - itests fail on jenkins
+    * [KARAF-1896] - itests.EnterpriseFeaturesTest.installApplicationWithoutIsolationFeature fails with NotSerializableException
+    * [KARAF-1897] - Use dynamic port allocation of integration tests
+    * [KARAF-1916] - Make tests faster by using EagerSingleStagedReactorFactory
+    * [KARAF-2087] - add a testcase to cover the scenario that the AdminService can always load latest instance status which changed by external process
+
                     Apache Karaf 2.0.0
                     ==================
 
