@@ -116,56 +116,6 @@ public class ExecuteTest extends TestCase {
             delete(tempFile);
         }        
     }
-    
-    public void testExecute() throws Exception {
-        final File tempFile = createTempDir(getName());
-        Properties p = new Properties();
-        p.setProperty("ssh.port", "1302");
-        p.setProperty("rmi.registry.port", "1122");
-        p.setProperty("rmi.server.port", "44444");
-        FileOutputStream fos = new FileOutputStream(new File(tempFile, AdminServiceImpl.STORAGE_FILE));
-        p.store(fos, "");
-        fos.close();
-
-        final List<AdminServiceImpl> admins = new ArrayList<AdminServiceImpl>();
-        try {
-            AdminCommandSupport mockCommand = EasyMock.createStrictMock(AdminCommandSupport.class);
-            mockCommand.setAdminService((AdminService) EasyMock.anyObject());
-            EasyMock.expectLastCall().andAnswer(new IAnswer<Object>() {
-                public Object answer() throws Throwable {
-                    AdminServiceImpl svc = (AdminServiceImpl) EasyMock.getCurrentArguments()[0];
-                    assertEquals(tempFile, svc.getStorageLocation());
-                    admins.add(svc);
-                    return null;
-                }
-            });
-            
-            EasyMock.expect(mockCommand.execute(null)).andAnswer(new IAnswer<Object>() {
-                public Object answer() throws Throwable {
-                    // The Admin Service should be initialized at this point.
-                    // One way to find this out is by reading out the port number
-                    AdminServiceImpl admin = admins.get(0);
-                    Field sshField = AdminServiceImpl.class.getDeclaredField("defaultSshPortStart");
-                    sshField.setAccessible(true);
-                    assertEquals(1302, sshField.get(admin));
-                    Field rmiRegistryField = AdminServiceImpl.class.getDeclaredField("defaultRmiRegistryPortStart");
-                    rmiRegistryField.setAccessible(true);
-                    assertEquals(1122, rmiRegistryField.get(admin));
-                    Field rmiServerField = AdminServiceImpl.class.getDeclaredField("defaultRmiServerPortStart");
-                    rmiServerField.setAccessible(true);
-                    assertEquals(44444, rmiServerField.get(admin));
-                    return null;
-                }
-            });
-            EasyMock.replay(mockCommand);            
-            
-            Execute.execute(mockCommand, tempFile, new String [] {"test"});
-            
-            EasyMock.verify(mockCommand);
-        } finally {
-            delete(tempFile);
-        }
-    }
 
     private static File createTempDir(String name) throws IOException {
         final File tempFile = File.createTempFile(name, null);
@@ -182,4 +132,5 @@ public class ExecuteTest extends TestCase {
         }
         tmp.delete();
     }
+
 }
