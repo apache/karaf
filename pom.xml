@@ -31,7 +31,7 @@
     <groupId>org.apache.karaf</groupId>
     <artifactId>karaf</artifactId>
     <packaging>pom</packaging>
-    <version>3.0.0.RC1</version>
+    <version>3.0.0-SNAPSHOT</version>
     <name>Apache Karaf</name>
     <inceptionYear>2007</inceptionYear>
 
@@ -70,9 +70,9 @@
     </modules>
 
     <scm>
-        <connection>scm:svn:http://svn.apache.org/repos/asf/karaf/tags/karaf-3.0.0.RC1</connection>
-        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/karaf/tags/karaf-3.0.0.RC1</developerConnection>
-        <url>http://svn.apache.org/viewvc/karaf/tags/karaf-3.0.0.RC1</url>
+        <connection>scm:svn:http://svn.apache.org/repos/asf/karaf/trunk</connection>
+        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/karaf/trunk</developerConnection>
+        <url>http://svn.apache.org/viewvc/karaf/trunk/</url>
     </scm>
 
     <issueManagement>
