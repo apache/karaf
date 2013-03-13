@@ -61,6 +61,10 @@
             <version>1.1.1</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.apache.karaf.util</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -99,8 +103,14 @@
                             org.apache.karaf.info
                         </Export-Package>
                         <Private-Package>
-                            org.apache.karaf.main*
+                            org.apache.karaf.main*,
+                            org.apache.felix.*;-split-package:=merge-first,
+                            org.apache.karaf.util.*;-split-package:=merge-first,
+                            org.eclipse.*;-split-package:=merge-first,
+                            org.osgi.*;-split-package:=merge-first,
+                            META-INF;-split-package:=merge-first
                         </Private-Package>
+                        <Import-Package>!*</Import-Package>
                     </instructions>
                     <unpackBundle>true</unpackBundle>
                 </configuration>

@@ -25,12 +25,14 @@ public interface Instance {
 
     String getName();
 
+    @Deprecated
     void setName(String name);
     
     boolean isRoot();
 
     String getLocation();
 
+    @Deprecated
     void setLocation(String location);
 
     int getPid();
@@ -59,5 +61,6 @@ public interface Instance {
 
     String getState() throws Exception;
 
+    @Deprecated
     boolean isAttached();
 }

@@ -814,6 +814,7 @@
                         <groupId>org.apache.felix</groupId>
                         <artifactId>org.apache.felix.shell</artifactId>
                     </exclusion>
+
                     <exclusion>
                         <groupId>net.sf.kxml</groupId>
                         <artifactId>kxml2</artifactId>

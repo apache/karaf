@@ -117,56 +117,6 @@ public class ExecuteTest extends TestCase {
         }        
     }
     
-    public void testExecute() throws Exception {
-        final File tempFile = createTempDir(getName());
-        Properties p = new Properties();
-        p.setProperty("ssh.port", "1302");
-        p.setProperty("rmi.registry.port", "1122");
-        p.setProperty("rmi.server.port", "44444");
-        FileOutputStream fos = new FileOutputStream(new File(tempFile, InstanceServiceImpl.STORAGE_FILE));
-        p.store(fos, "");
-        fos.close();
-
-        final List<InstanceServiceImpl> instanceServices = new ArrayList<InstanceServiceImpl>();
-        try {
-            InstanceCommandSupport mockCommand = EasyMock.createStrictMock(InstanceCommandSupport.class);
-            mockCommand.setInstanceService((InstanceService) EasyMock.anyObject());
-            EasyMock.expectLastCall().andAnswer(new IAnswer<Object>() {
-                public Object answer() throws Throwable {
-                    InstanceServiceImpl instanceService = (InstanceServiceImpl) EasyMock.getCurrentArguments()[0];
-                    assertEquals(tempFile, instanceService.getStorageLocation());
-                    instanceServices.add(instanceService);
-                    return null;
-                }
-            });
-            
-            EasyMock.expect(mockCommand.execute(null)).andAnswer(new IAnswer<Object>() {
-                public Object answer() throws Throwable {
-                    // The Instances Service should be initialized at this point.
-                    // One way to find this out is by reading out the port number
-                    InstanceServiceImpl instanceService = instanceServices.get(0);
-                    Field sshField = InstanceServiceImpl.class.getDeclaredField("defaultSshPortStart");
-                    sshField.setAccessible(true);
-                    assertEquals(1302, sshField.get(instanceService));
-                    Field rmiRegistryField = InstanceServiceImpl.class.getDeclaredField("defaultRmiRegistryPortStart");
-                    rmiRegistryField.setAccessible(true);
-                    assertEquals(1122, rmiRegistryField.get(instanceService));
-                    Field rmiServerField = InstanceServiceImpl.class.getDeclaredField("defaultRmiServerPortStart");
-                    rmiServerField.setAccessible(true);
-                    assertEquals(44444, rmiServerField.get(instanceService));
-                    return null;
-                }
-            });
-            EasyMock.replay(mockCommand);            
-            
-            Execute.execute(mockCommand, tempFile, new String [] {"test"});
-            
-            EasyMock.verify(mockCommand);
-        } finally {
-            delete(tempFile);
-        }
-    }
-
     private static File createTempDir(String name) throws IOException {
         final File tempFile = File.createTempFile(name, null);
         tempFile.delete();
