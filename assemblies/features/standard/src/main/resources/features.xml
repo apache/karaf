@@ -192,11 +192,10 @@
     </feature>
 
     <feature name="spring-jms" description="Spring 3.1 JMS support" version="${spring31.version}" resolver="(obr)">
-        <feature version="${spring31.version}">spring</feature>
+        <feature version="${spring31.version}">spring-tx</feature>
         <bundle start-level="10">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
         <bundle start-level="10">mvn:org.apache.geronimo.specs/geronimo-jms_1.1_spec/${geronimo.jms-spec.version}</bundle>
         <bundle start-level="30">mvn:org.springframework/spring-jms/${spring31.version}</bundle>
-        <bundle start-level="30">mvn:org.springframework/spring-tx/${spring31.version}</bundle>
     </feature>
 
     <feature name="spring-struts" description="Spring 3.1 Struts support" version="${spring31.version}" resolver="(obr)">
@@ -239,6 +238,82 @@
         <feature version="${spring31.version}">spring-web</feature>
         <bundle dependency="true" start-level="30">mvn:javax.portlet/portlet-api/${portlet-api.version}</bundle>
         <bundle start-level="30">mvn:org.springframework/spring-webmvc-portlet/${spring31.version}</bundle>
+    </feature>
+
+    <!-- Spring 3.2 support -->
+
+    <feature name="spring" description="Spring 3.2.x support" version="${spring32.version}" resolver="(obr)">
+        <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.aopalliance/${aopalliance.bundle.version}</bundle>
+        <bundle start-level="30">mvn:org.springframework/org.springframework.core/${spring32.version}</bundle>
+        <bundle start-level="30">mvn:org.springframework/org.springframework.expression/${spring32.version}</bundle>
+        <bundle start-level="30">mvn:org.springframework/org.springframework.beans/${spring32.version}</bundle>
+        <bundle start-level="30">mvn:org.springframework/org.springframework.aop/${spring32.version}</bundle>
+        <bundle start-level="30">mvn:org.springframework/org.springframework.context/${spring32.version}</bundle>
+        <bundle start-level="30">mvn:org.springframework/org.springframework.context.support/${spring32.version}</bundle>
+    </feature>
+
+    <feature name="spring-aspects" description="Spring 3.2 AOP support" version="${spring32.version}" resolver="(obr)">
+        <feature version="${spring32.version}">spring</feature>
+        <bundle start-level="30">mvn:org.springframework/org.springframework.aspects/${spring32.version}</bundle>
+    </feature>
+
+    <feature name="spring-instrument" description="Spring 3.2 Instrument support" version="${spring32.version}" resolver="(obr)">
+        <feature version="${spring32.version}">spring</feature>
+        <bundle start-level="30">mvn:org.springframework/org.springframework.instrument/${spring32.version}</bundle>
+    </feature>
+
+    <feature name="spring-jdbc" description="Spring 3.2 JDBC support" version="${spring32.version}" resolver="(obr)">
+        <feature version="${spring32.version}">spring-tx</feature>
+        <bundle start-level="30">mvn:org.springframework/org.springframework.jdbc/${spring32.version}</bundle>
+    </feature>
+
+    <feature name="spring-jms" description="Spring 3.2 JMS support" version="${spring32.version}" resolver="(obr)">
+        <feature version="${spring32.version}">spring-tx</feature>
+        <bundle start-level="10">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
+        <bundle start-level="10">mvn:org.apache.geronimo.specs/geronimo-jms_1.1_spec/${geronimo.jms-spec.version}</bundle>
+        <bundle start-level="30">mvn:org.springframework/org.springframework.jms/${spring32.version}</bundle>
+    </feature>
+
+    <feature name="spring-struts" description="Spring 3.2 Struts support" version="${spring32.version}" resolver="(obr)">
+        <feature version="${spring32.version}">spring-web</feature>
+        <feature>war</feature>
+        <bundle dependency="true" start-level="30">mvn:commons-collections/commons-collections/${commons-collections.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:commons-beanutils/commons-beanutils/${commons-beanutils.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.struts/${struts.bundle.version}</bundle>
+        <bundle start-level="30">mvn:org.springframework/org.springframework.web.struts/${spring32.version}</bundle>
+    </feature>
+
+    <feature name="spring-test" description="Spring 3.2 Test support" version="${spring32.version}" resolver="(obr)">
+        <feature version="${spring32.version}">spring</feature>
+        <bundle start-level="30">mvn:org.springframework/org.springframework.test/${spring32.version}</bundle>
+    </feature>
+
+    <feature name="spring-orm" description="Spring 3.2 ORM support" version="${spring32.version}" resolver="(obr)">
+        <feature version="${spring32.version}">spring-jdbc</feature>
+        <bundle start-level="30">mvn:org.springframework/org.springframework.orm/${spring32.version}</bundle>
+    </feature>
+
+    <feature name="spring-oxm" description="Spring 3.2 OXM support" version="${spring32.version}" resolver="(obr)">
+        <feature version="${spring32.version}">spring</feature>
+        <bundle start-level="30">mvn:org.springframework/org.springframework.oxm/${spring32.version}</bundle>
+    </feature>
+
+    <feature name="spring-tx" description="Spring 3.2 Transaction (TX) support" version="${spring32.version}" resolver="(obr)">
+        <feature version="${spring32.version}">spring</feature>
+        <bundle start-level="30">mvn:org.springframework/org.springframework.transaction/${spring32.version}</bundle>
+    </feature>
+
+    <feature name="spring-web" description="Spring 3.2 Web support" version="${spring32.version}" resolver="(obr)">
+        <feature version="${spring32.version}">spring</feature>
+        <feature version="${http.feature.version}">http</feature>
+        <bundle start-level="30">mvn:org.springframework/org.springframework.web/${spring32.version}</bundle>
+        <bundle start-level="30">mvn:org.springframework/org.springframework.web.servlet/${spring32.version}</bundle>
+    </feature>
+
+    <feature name="spring-web-portlet" description="Spring 3.2 Web Portlet support" version="${spring32.version}" resolver="(obr)">
+        <feature version="${spring32.version}">spring-web</feature>
+        <bundle dependency="true" start-level="30">mvn:javax.portlet/portlet-api/${portlet-api.version}</bundle>
+        <bundle start-level="30">mvn:org.springframework/org.springframework.web.portlet/${spring32.version}</bundle>
     </feature>
 
     <feature name="wrapper" description="Provide OS integration" version="${project.version}">
