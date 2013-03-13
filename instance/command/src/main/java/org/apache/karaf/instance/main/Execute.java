@@ -130,7 +130,6 @@ public class Execute {
                 
         InstanceServiceImpl instanceService = new InstanceServiceImpl();
         instanceService.setStorageLocation(storageFile);
-        instanceService.init();
         command.setInstanceService(instanceService);
         command.execute(null);
     }

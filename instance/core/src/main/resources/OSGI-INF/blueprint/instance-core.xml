@@ -22,7 +22,7 @@
 
     <ext:property-placeholder />
 
-    <bean id="instanceService" class="org.apache.karaf.instance.core.internal.InstanceServiceImpl" init-method="init">
+    <bean id="instanceService" class="org.apache.karaf.instance.core.internal.InstanceServiceImpl">
         <property name="storageLocation" value="${karaf.instances}" />
     </bean>
     
