@@ -388,6 +388,16 @@
                     </instructions>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-scm-publish-plugin</artifactId>
+                <version>1.0-beta-2</version>
+                <configuration>
+                    <checkinComment>[scm-publish] Updating main site with Karaf manual</checkinComment>
+                    <pubScmUrl>scm:svn:https://svn.apache.org/repos/asf/karaf/site/production/manual/latest-2.3.x</pubScmUrl>
+                    <content>${project.build.directory}/sitegen</content>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
