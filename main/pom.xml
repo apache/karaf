@@ -116,13 +116,17 @@
                             org.apache.karaf.main*,
                             org.apache.karaf.util.properties,
                             org.apache.felix.utils.properties,
-                            org.osgi.*;-split-package:=merge-first
+                            org.osgi.framework*;
+                            org.osgi.resource;
+                            org.osgi.service.packageadmin;
+                            org.osgi.service.startlevel;
+                            org.osgi.service.url;
+                            org.osgi.util.tracker;-split-package:=merge-first
                         </Private-Package>
                     </instructions>
                     <unpackBundle>true</unpackBundle>
                 </configuration>
             </plugin>
-            <!--
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -135,35 +139,23 @@
                         <configuration>
                             <artifactSet>
                                 <includes>
-                                    <include>org.eclipse:osgi</include>
-                                    <include>org.apache.felix:org.apache.felix.framework</include>
                                     <include>${project.groupId}:${project.artifactId}</include>
                                 </includes>
                             </artifactSet>
-                            <filters>
-                                <filter>
-                                    <artifact>org.eclipse:osgi</artifact>
-                                    <includes>
-                                        <include>org/osgi/**</include>
-                                        <include>org/eclipse/**</include>
-                                        <include>hookconfigurators.properties</include>
-                                    </includes>
-                                </filter>
-                                <filter>
-                                    <artifact>org.apache.felix:org.apache.felix.framework</artifact>
-                                    <includes>
-                                        <include>org/apache/felix/**</include>
-                                    </includes>
-                                </filter>
-                            </filters>
-                            <createSourcesJar>${createSourcesJar}</createSourcesJar>
-                            <promoteTransitiveDependencies>true</promoteTransitiveDependencies>
-                            <createDependencyReducedPom>true</createDependencyReducedPom>
+                            <relocations>
+                                <relocation>
+                                    <pattern>org.apache.karaf.util.properties</pattern>
+                                    <shadedPattern>org.apache.karaf.main.util</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.apache.felix.utils.properties</pattern>
+                                    <shadedPattern>org.apache.karaf.main.util</shadedPattern>
+                                </relocation>
+                             </relocations>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
-        -->
         </plugins>
     </build>
 
