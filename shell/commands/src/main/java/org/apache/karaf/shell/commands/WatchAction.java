@@ -36,6 +36,9 @@ public class WatchAction extends AbstractAction {
 
     @Option(name = "-n", aliases = {"--interval"}, description = "The interval between executions of the command in seconds", required = false, multiValued = false)
     private long interval = 1;
+    
+    @Option(name = "-a", aliases = {"--append"}, description = "The output should be appended but not clear the console", required = false, multiValued = false)
+    private boolean append = false;
 
     @Argument(index = 0, name = "command", description = "The command to watch / refresh", required = true, multiValued = true)
     private String[] arguments;
@@ -92,8 +95,10 @@ public class WatchAction extends AbstractAction {
                 output = byteArrayOutputStream.toString();
                 // make sure before displaying that this is not a forgotten long running task
                 if (doDisplay) {
-                    System.out.print("\33[2J");
-                    System.out.print("\33[1;1H");
+                    if (!append) {
+                        System.out.print("\33[2J");
+                        System.out.print("\33[1;1H");
+                    }
                     System.out.print(output);
                     System.out.flush();
                 }
