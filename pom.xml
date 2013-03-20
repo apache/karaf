@@ -159,6 +159,7 @@
         <felix.eventadmin-plugin.version>1.0.2</felix.eventadmin-plugin.version>
         <felix.obr.version>1.0.2</felix.obr.version>
         <felix.scr.version>1.6.2</felix.scr.version>
+        <felix.scr-plugin.version>1.0.0</felix.scr-plugin.version>
         <felix.scr.annotation.version>1.6.0</felix.scr.annotation.version>
 
         <aries.application.version>1.0.0</aries.application.version>
