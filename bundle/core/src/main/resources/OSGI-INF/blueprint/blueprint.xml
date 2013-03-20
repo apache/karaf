@@ -23,7 +23,6 @@
     <ext:property-placeholder placeholder-prefix="$[" placeholder-suffix="]"/>
     
     <reference id="configurationAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"/>
-    <reference id="packageAdmin" interface="org.osgi.service.packageadmin.PackageAdmin"/>
     <reference-list id="bundleStateServices" interface="org.apache.karaf.bundle.core.BundleStateService" availability="optional" />
 
     <bean id="bundleService" class="org.apache.karaf.bundle.core.internal.BundleServiceImpl">
@@ -41,7 +40,6 @@
 
     <bean id="watcher" class="org.apache.karaf.bundle.core.internal.BundleWatcherImpl" init-method="start" destroy-method="stop">
         <argument ref="blueprintBundleContext"/>
-        <argument ref="packageAdmin"/>
         <argument ref="mavenConfigService"/>
         <argument ref="bundleService"/>
     </bean>
