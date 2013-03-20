@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -38,6 +39,9 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.BundleListener;
+import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.FrameworkListener;
+import org.osgi.framework.wiring.FrameworkWiring;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +55,6 @@ public class BundleWatcherImpl implements Runnable, BundleListener, BundleWatche
     private final Logger logger = LoggerFactory.getLogger(BundleWatcherImpl.class);
 
     private BundleContext bundleContext;
-    private final PackageAdmin packageAdmin;
 	private final BundleService bundleService;
 	private final MavenConfigService localRepoDetector;
 
@@ -64,9 +67,8 @@ public class BundleWatcherImpl implements Runnable, BundleListener, BundleWatche
      * Constructor
      */
     @SuppressWarnings("deprecation")
-    public BundleWatcherImpl(BundleContext bundleContext, PackageAdmin packageAdmin, MavenConfigService mavenConfigService, BundleService bundleService) {
+    public BundleWatcherImpl(BundleContext bundleContext, MavenConfigService mavenConfigService, BundleService bundleService) {
         this.bundleContext = bundleContext;
-        this.packageAdmin = packageAdmin;
 		this.localRepoDetector = mavenConfigService;
         this.bundleService = bundleService;
     }
@@ -107,7 +109,18 @@ public class BundleWatcherImpl implements Runnable, BundleListener, BundleWatche
                         logger.error("Error updating bundle.", ex);
                     }
                 }
-                packageAdmin.refreshPackages(updated.toArray(new Bundle[updated.size()]));
+                try {
+                    final CountDownLatch latch = new CountDownLatch(1);
+                    FrameworkWiring wiring = bundleContext.getBundle(0).adapt(FrameworkWiring.class);
+                    wiring.refreshBundles(updated, new FrameworkListener() {
+                        public void frameworkEvent(FrameworkEvent event) {
+                            latch.countDown();
+                        }
+                    });
+                    latch.await();
+                } catch (InterruptedException e) {
+                    running.set(false);
+                }
             }
             try {
                 Thread.sleep(interval);
