@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -41,7 +42,10 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.BundleListener;
+import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.wiring.FrameworkWiring;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.packageadmin.PackageAdmin;
@@ -117,15 +121,17 @@ public class BundleWatcher implements Runnable, BundleListener {
                         logger.error("Error updating bundle.", ex);
                     }
                 }
-                ServiceReference ref = null;
                 try {
-                    ref = getBundleContext().getServiceReference(PackageAdmin.class.getName());
-                    PackageAdmin pa = (PackageAdmin) getBundleContext().getService(ref);
-                    pa.refreshPackages(updated.toArray(new Bundle[updated.size()]));
-                } finally {
-                    if (ref != null) {
-                        getBundleContext().ungetService(ref);
-                    }
+                    final CountDownLatch latch = new CountDownLatch(1);
+                    FrameworkWiring wiring = getBundleContext().getBundle(0).adapt(FrameworkWiring.class);
+                    wiring.refreshBundles(updated, new FrameworkListener() {
+                        public void frameworkEvent(FrameworkEvent event) {
+                            latch.countDown();
+                        }
+                    });
+                    latch.await();
+                } catch (InterruptedException e) {
+                    running.set(false);
                 }
             }
             try {
