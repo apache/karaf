@@ -175,6 +175,10 @@
             <condition>management</condition>
             <bundle start-level="30">mvn:org.apache.karaf.scr/org.apache.karaf.scr.management/${project.version}</bundle>
         </conditional>
+        <conditional>
+            <condition>webconsole</condition>
+            <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.webconsole.plugins.ds/${felix.scr-plugin.version}</bundle>
+        </conditional>
     </feature>
 
 </features>
