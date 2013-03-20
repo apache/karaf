@@ -51,9 +51,9 @@ public class ConnectCommand extends InstanceCommandSupport {
 
         int port = getExistingInstance(instance).getSshPort();
         if (username != null) {
-            session.execute("ssh -l " + username + " -p " + port + " localhost " + cmdStr);
+            session.execute("ssh:ssh -l " + username + " -p " + port + " localhost " + cmdStr);
         } else {
-            session.execute("ssh -p " + port + " localhost " + cmdStr);
+            session.execute("ssh:ssh -p " + port + " localhost " + cmdStr);
         }
         return null;
     }
