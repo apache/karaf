@@ -50,11 +50,27 @@ public class GenerateFeaturesXmlMojoTest extends TestCase {
         expect(artifact.getArtifactId()).andReturn("test-artifact");
         expect(artifact.getVersion()).andReturn("1.2.3");
         expect(artifact.getType()).andReturn("jar");
+        expect(artifact.hasClassifier()).andReturn(false);
         
         replay(artifact);
         
         assertEquals("org.apache.karaf.test/test-artifact/1.2.3", GenerateFeaturesXmlMojo.toString(artifact));
-    } 
+    }
+
+    public void testToStringWithClassifier() throws Exception {
+        Artifact artifact = EasyMock.createMock(Artifact.class);
+
+        expect(artifact.getGroupId()).andReturn("org.apache.karaf.test");
+        expect(artifact.getArtifactId()).andReturn("test-artifact");
+        expect(artifact.getVersion()).andReturn("1.2.3");
+        expect(artifact.getType()).andReturn("zip").times(2);
+        expect(artifact.hasClassifier()).andReturn(true);
+        expect(artifact.getClassifier()).andReturn("linux");
+
+        replay(artifact);
+
+        assertEquals("org.apache.karaf.test/test-artifact/1.2.3/zip/linux", GenerateFeaturesXmlMojo.toString(artifact));
+    }
 
     public void testInstallMode() throws Exception {
     	
@@ -65,6 +81,7 @@ public class GenerateFeaturesXmlMojoTest extends TestCase {
         expect(artifact.getBaseVersion()).andReturn("1.2.3").anyTimes();
         expect(artifact.getVersion()).andReturn("1.2.3").anyTimes();
         expect(artifact.getType()).andReturn("jar").anyTimes();
+        expect(artifact.hasClassifier()).andReturn(false).anyTimes();
         
         replay(artifact);
         
