@@ -23,7 +23,7 @@
     <groupId>${groupId}</groupId>
     <artifactId>${artifactId}</artifactId>
     <version>${version}</version>
-    <packaging>pom</packaging>
+    <packaging>kar</packaging>
 
     <name>${artifactId}-kar</name>
     <description>${artifactId} details</description>
