@@ -90,6 +90,14 @@ public class CreateKarMojo extends MojoSupport {
     private String finalName = null;
 
     /**
+     * Classifier to add to the artifact generated. If given, the artifact will be attached.
+     * If it's not given, it will merely be written to the output directory according to the finalName.
+     *
+     * @parameter
+     */
+    protected String classifier;
+
+    /**
      * Location of resources directory for additional content to include in the kar.
      * Note that it includes everything under classes so as to include maven-remote-resources
      *
@@ -123,8 +131,20 @@ public class CreateKarMojo extends MojoSupport {
         // Build the archive
         File archive = createArchive(resources);
 
+        // if no classifier is specified and packaging is not kar, display a warning
+        // and attach artifact
+        if (classifier == null && !this.getProject().getPackaging().equals("kar")) {
+            this.getLog().warn("Your project should use the \"kar\" packaging or configure a \"classifier\" for kar attachment");
+            projectHelper.attachArtifact(getProject(), "kar", null, archive);
+            return;
+        }
+
         // Attach the generated archive for install/deploy
-        projectHelper.attachArtifact(project, "kar", null, archive);
+        if (classifier != null) {
+            projectHelper.attachArtifact(getProject(), "kar", classifier, archive);
+        } else {
+            getProject().getArtifact().setFile(archive);
+        }
     }
 
     /**
@@ -167,7 +187,7 @@ public class CreateKarMojo extends MojoSupport {
      */
     private File createArchive(List<Artifact> bundles) throws MojoExecutionException {
         ArtifactRepositoryLayout layout = new DefaultRepositoryLayout();
-        File archiveFile = getArchiveFile(outputDirectory, finalName, null);
+        File archiveFile = getArchiveFile(outputDirectory, finalName, classifier);
 
         MavenArchiver archiver = new MavenArchiver();
         archiver.setArchiver(jarArchiver);
