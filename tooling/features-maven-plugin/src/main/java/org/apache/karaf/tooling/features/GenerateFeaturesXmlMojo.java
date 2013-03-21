@@ -529,12 +529,19 @@ public class GenerateFeaturesXmlMojo extends MojoSupport {
         }
         return list;
     }
-    
+
     public static String toString(Artifact artifact) {
-        if (artifact.getType().equals("jar")) {
-            return String.format("%s/%s/%s", artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion());
+        return toString(artifact, artifact.getVersion());
+    }
+
+    private static String toString(Artifact artifact, String version) {
+        if (artifact.hasClassifier()) {
+            return String.format("%s/%s/%s/%s/%s", artifact.getGroupId(), artifact.getArtifactId(), version, artifact.getType(), artifact.getClassifier());
         }
-        return String.format("%s/%s/%s/%s", artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion(), artifact.getType());
+        if (artifact.getType().equals("jar")) {
+            return String.format("%s/%s/%s", artifact.getGroupId(), artifact.getArtifactId(), version);
+        }
+        return String.format("%s/%s/%s/%s", artifact.getGroupId(), artifact.getArtifactId(), version, artifact.getType());
     }
 
     /*package*/ class Feature {
@@ -596,11 +603,7 @@ public class GenerateFeaturesXmlMojo extends MojoSupport {
                     out.println("    <feature version='"
             		+ next.getBaseVersion() + "'>" + String.format("%s</feature>", next.getArtifactId()));
                 } else {
-                    if (next.getType().equals("jar")) {
-                        out.println(String.format("    <bundle>mvn:%s/%s/%s</bundle>", next.getGroupId(), next.getArtifactId(), next.getBaseVersion()));
-                    } else {
-                        out.println(String.format("    <bundle>mvn:%s/%s/%s/%s</bundle>", next.getGroupId(), next.getArtifactId(), next.getBaseVersion(), next.getType()));
-                    }
+                    out.println(String.format("    <bundle>mvn:%s</bundle>", GenerateFeaturesXmlMojo.toString(next, next.getBaseVersion())));
                 }
             }
             
