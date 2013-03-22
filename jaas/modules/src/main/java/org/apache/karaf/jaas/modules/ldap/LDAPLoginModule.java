@@ -62,6 +62,7 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
     public final static String SSL_KEYSTORE = "ssl.keystore";
     public final static String SSL_KEYALIAS = "ssl.keyalias";
     public final static String SSL_TRUSTSTORE = "ssl.truststore";
+    public final static String SSL_TIMEOUT = "ssl.timeout";
 
     public final static String DEFAULT_INITIAL_CONTEXT_FACTORY = "com.sun.jndi.ldap.LdapCtxFactory";
 
@@ -84,6 +85,7 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
     private String sslKeystore;
     private String sslKeyAlias;
     private String sslTrustStore;
+    private int sslTimeout = 10;
 
     public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String, ?> sharedState, Map<String, ?> options) {
         super.initialize(subject, callbackHandler, options);
@@ -118,6 +120,7 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
         sslKeystore = (String) options.get(SSL_KEYSTORE);
         sslKeyAlias = (String) options.get(SSL_KEYALIAS);
         sslTrustStore = (String) options.get(SSL_TRUSTSTORE);
+        sslTimeout = (Integer) options.get(SSL_TIMEOUT);
     }
 
     public boolean login() throws LoginException {
@@ -277,7 +280,7 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
             env.put("java.naming.ldap.factory.socket", ManagedSSLSocketFactory.class.getName());
             ref = bundleContext.getServiceReference(KeystoreManager.class.getName());
             KeystoreManager manager = (KeystoreManager) bundleContext.getService(ref);
-            SSLSocketFactory factory = manager.createSSLFactory(sslProvider, sslProtocol, sslAlgorithm, sslKeystore, sslKeyAlias, sslTrustStore);
+            SSLSocketFactory factory = manager.createSSLFactory(sslProvider, sslProtocol, sslAlgorithm, sslKeystore, sslKeyAlias, sslTrustStore, sslTimeout);
             ManagedSSLSocketFactory.setSocketFactory(factory);
             Thread.currentThread().setContextClassLoader(ManagedSSLSocketFactory.class.getClassLoader());
         } catch (Exception e) {
