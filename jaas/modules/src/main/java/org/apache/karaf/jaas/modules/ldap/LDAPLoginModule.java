@@ -120,7 +120,9 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
         sslKeystore = (String) options.get(SSL_KEYSTORE);
         sslKeyAlias = (String) options.get(SSL_KEYALIAS);
         sslTrustStore = (String) options.get(SSL_TRUSTSTORE);
-        sslTimeout = (Integer) options.get(SSL_TIMEOUT);
+        if (options.get(SSL_TIMEOUT) != null) {
+            sslTimeout = (Integer) options.get(SSL_TIMEOUT);
+        }
     }
 
     public boolean login() throws LoginException {
