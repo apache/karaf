@@ -35,7 +35,7 @@
     <properties>
         <jetty.port>8080</jetty.port>
         <maven-jetty-plugin.version>6.1.26</maven-jetty-plugin.version>
-        <geronimo.servlet.version>1.1.2</geronimo.servlet.version>
+        <geronimo.servlet.version>1.0</geronimo.servlet.version>
 
         <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
     </properties>
@@ -57,7 +57,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.geronimo.specs</groupId>
-            <artifactId>geronimo-servlet_2.5_spec</artifactId>
+            <artifactId>geronimo-servlet_3.0_spec</artifactId>
             <scope>provided</scope>
         </dependency>
     </dependencies>

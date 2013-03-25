@@ -115,13 +115,15 @@
         <commons-lang.version>2.6</commons-lang.version>
         <injection.bundle.version>1.0</injection.bundle.version>
         <jasypt.bundle.version>1.9.0_1</jasypt.bundle.version>
-        <jetty.version>7.6.8.v20121106</jetty.version>
+        <jetty.version>8.1.10.v20130312</jetty.version>
         <junit.version>4.10</junit.version>
         <junit.bundle.version>4.10_1</junit.bundle.version>
+        <geronimo.annotation-spec.version>1.0.1</geronimo.annotation-spec.version>
+        <geronimo.jaspic-spec.version>1.1</geronimo.jaspic-spec.version>
         <geronimo.jms-spec.version>1.1.1</geronimo.jms-spec.version>
         <geronimo.jpa-spec.version>1.1</geronimo.jpa-spec.version>
         <geronimo.jta-spec.version>1.1.1</geronimo.jta-spec.version>
-        <geronimo.servlet.version>1.2</geronimo.servlet.version>
+        <geronimo.servlet.version>1.0</geronimo.servlet.version>
         <easymock.version>3.1</easymock.version>
         <equinox.version>3.8.0.v20120529-1548</equinox.version>
         <felix.bundlerepository.version>1.6.6</felix.bundlerepository.version>
@@ -174,7 +176,7 @@
         <pax.logging.version>1.7.0</pax.logging.version>
         <pax.runner.version>1.7.6</pax.runner.version>
         <pax.url.version>1.3.6</pax.url.version>
-        <pax.web.version>1.1.12</pax.web.version>
+        <pax.web.version>2.1.2</pax.web.version>
         <pax.swissbox.version>1.5.1</pax.swissbox.version>
         <pax.tinybundles.version>1.3.0</pax.tinybundles.version>
         <plexus.utils.version>2.1</plexus.utils.version>
@@ -872,7 +874,7 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.geronimo.specs</groupId>
-                <artifactId>geronimo-servlet_2.5_spec</artifactId>
+                <artifactId>geronimo-servlet_3.0_spec</artifactId>
                 <version>${geronimo.servlet.version}</version>
             </dependency>
             <dependency>
