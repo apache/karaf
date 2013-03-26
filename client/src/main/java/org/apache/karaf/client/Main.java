@@ -104,6 +104,7 @@ public class Main {
                 ConsoleInputStream in = new ConsoleInputStream(terminal.wrapInIfNeeded(System.in));
                 new Thread(in).start();
                 channel.setIn(in);
+                ((ChannelShell) channel).setPtyColumns(terminal != null ? terminal.getWidth() : 80);
                 ((ChannelShell) channel).setupSensibleDefaultPty();
                 ((ChannelShell) channel).setAgentForwarding(true);
                 String ctype = System.getenv("LC_CTYPE");
