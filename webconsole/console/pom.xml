@@ -35,6 +35,8 @@
 
     <properties>
         <appendedResourcesDirectory>${project.basedir}/../../etc/appended-resources</appendedResourcesDirectory>
+        <org.json.version>20070829</org.json.version>
+        <org.json.version.osgi>0.0.0.${org.json.version}</org.json.version.osgi>
     </properties>
 
     <dependencies>
@@ -77,7 +79,7 @@
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20070829</version>
+            <version>${org.json.version}</version>
             <scope>provided</scope>
             <optional>true</optional>
         </dependency>
@@ -120,24 +122,36 @@
                             org.apache.felix.webconsole.internal.KarafOsgiManagerActivator
                         </Bundle-Activator>
                         <Export-Package>
-                            org.apache.felix.webconsole
+                            org.apache.felix.webconsole,
+                            org.apache.commons.fileupload,
+                            org.apache.commons.fileupload.disk,
+                            org.apache.commons.fileupload.servlet,
+                            org.apache.commons.fileupload.util,
+                            org.apache.commons.io,
+                            org.apache.commons.io.filefilter,
+                            org.apache.commons.io.input,
+                            org.apache.commons.io.output,
+                            org.json;version=${org.json.version.osgi}
                         </Export-Package>
                         <Private-Package>
                             !org.apache.felix.webconsole,
                             org.apache.felix.webconsole.*;-split-package:=merge-first
                         </Private-Package>
                         <Import-Package>
-                            org.apache.felix.scr;version=1.0;resolution:=optional,
-                            org.osgi.service.http,
-                            org.apache.felix.shell;
-                            org.osgi.service.*;resolution:=optional,
-                            javax.portlet;resolution:=optional,
-                            javax.servlet.*;version=2.4,
+                            org.osgi.service.metatype;resolution:=optional,
+                            org.osgi.service.prefs;resolution:=optional,
+                            javax.servlet.*,
                             *
                         </Import-Package>
                         <DynamicImport-Package>
-                            org.apache.felix.bundlerepository,
-                            org.osgi.service.obr
+                            org.apache.felix.bundlerepository;version="[2.0,3)",
+                            org.osgi.service.obr;version="[1.0,2)",
+                            org.osgi.service.cm;version="[1.2,2)",
+                            org.osgi.service.condpermadmin;version="[1.0,2)",
+                            org.osgi.service.log;version="[1.3,2)",
+                            org.osgi.service.metatype;version="[1.1,2)",
+                            org.osgi.service.permissionadmin;version="[1.2,2)",
+                            org.osgi.service.wireadmin;version="[1.0,2)"
                         </DynamicImport-Package>
                         <Embed-Dependency>
                             <!-- Webconsole -->
@@ -151,14 +165,8 @@
                             org.osgi.compendium;
                                 inline=org/osgi/util/tracker/*,
 
-                            <!-- Required for JSON data transfer -->
-                            json,
-
-                            <!-- File Upload functionality -->
-                            commons-fileupload,
-
-                            <!-- Required by FileUpload and Util -->
-                            commons-io
+                            <!-- Metatype -->
+                            org.osgi.compendium;inline=org/osgi/service/metatype/**
                         </Embed-Dependency>
 
                         <_removeheaders>
