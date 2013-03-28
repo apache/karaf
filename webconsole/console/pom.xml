@@ -35,6 +35,8 @@
 
     <properties>
         <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
+        <org.json.version>20070829</org.json.version>
+        <org.json.version.osgi>0.0.0.${org.json.version}</org.json.version.osgi>
     </properties>
 
     <dependencies>
@@ -77,7 +79,7 @@
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20070829</version>
+            <version>${org.json.version}</version>
             <scope>provided</scope>
             <optional>true</optional>
         </dependency>
@@ -127,18 +129,21 @@
                             org.apache.felix.webconsole.*;-split-package:=merge-first
                         </Private-Package>
                         <Import-Package>
-                            org.osgi.service.metatype;version=1.0,
-                            org.apache.felix.scr;version=1.0;resolution:=optional,
-                            org.osgi.service.http,
-                            org.apache.felix.shell;
-                            org.osgi.service.*;resolution:=optional,
+                            org.osgi.service.metatype;resolution:=optional,
+                            org.osgi.service.prefs;resolution:=optional,
                             javax.portlet;resolution:=optional,
-                            javax.servlet.*;version=2.4,
+                            javax.servlet.*,
                             *
                         </Import-Package>
                         <DynamicImport-Package>
                             org.apache.felix.bundlerepository,
-                            org.osgi.service.obr
+                            org.osgi.service.obr,
+                            org.osgi.service.cm,
+                            org.osgi.service.condpermadmin,
+                            org.osgi.service.log,
+                            org.osgi.service.metatype,
+                            org.osgi.service.permissionadmin,
+                            org.osgi.service.wireadmin
                         </DynamicImport-Package>
                         <Embed-Dependency>
                             <!-- Webconsole -->
