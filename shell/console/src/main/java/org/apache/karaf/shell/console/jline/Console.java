@@ -135,7 +135,6 @@ public class Console implements Runnable
     }
 
     public void close(boolean closedByUser) {
-        //System.err.println("Closing");
         if (!running) {
             return;
         }
@@ -194,8 +193,10 @@ public class Console implements Runnable
         try {
             if (t instanceof CommandNotFoundException) {
                 LOGGER.debug("Unknown command entered", t);
+            } else if (t instanceof CommandException) {
+                LOGGER.debug("Command exception (Undefined option, ...)", t);
             } else {
-                LOGGER.info("Exception caught while executing command", t);
+                LOGGER.error("Exception caught while executing command", t);
             }
             session.put(LAST_EXCEPTION, t);
             if (t instanceof CommandException) {
