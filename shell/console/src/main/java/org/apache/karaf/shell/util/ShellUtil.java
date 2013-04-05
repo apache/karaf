@@ -235,8 +235,10 @@ public class ShellUtil {
     	try {
             if (t instanceof CommandNotFoundException) {
                 LOGGER.debug("Unknown command entered", t);
+            } else if (t instanceof CommandException ) {
+                LOGGER.debug("Command exception (Undefined option, ...)", t);
             } else {
-                LOGGER.info("Exception caught while executing command", t);
+                LOGGER.error("Exception caught while executing command", t);
             }
     	    session.put(SessionProperties.LAST_EXCEPTION, t);
     	    if (t instanceof CommandException) {
