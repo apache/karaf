@@ -22,6 +22,8 @@ public class ScrCommandConstants {
 
     public static final String OSGI_COMMAND_FUNCTION_KEY = "osgi.command.function";
 
+    public static final String HIDDEN_COMPONENT_KEY = "hidden.component";
+
     public static final String SCR_COMMAND = "scr";
 
     public static final String LIST_FUNCTION = "list";

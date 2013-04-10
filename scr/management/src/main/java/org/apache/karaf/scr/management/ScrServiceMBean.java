@@ -16,14 +16,51 @@
  */
 package org.apache.karaf.scr.management;
 
+/**
+ * The management interface for SCR Components.
+ */
 public interface ScrServiceMBean {
+
+    /**
+     * Presents a {@String} array of components currently registered with the SCR.
+     *
+     * @return String[]
+     * @throws Exception
+     */
     String[] listComponents() throws Exception;
 
+    /**
+     * Verifies if the named component is currently in an ACTIVE state.
+     *
+     * @param componentName the components name
+     * @return true if ACTIVE, otherwise false
+     * @throws Exception
+     */
     boolean isComponentActive(String componentName) throws Exception;
-    
+
+    /**
+     * Returns the named components state
+     *
+     * @param componentName the components name
+     * @return
+     * @throws Exception
+     */
     int componentState(String componentName) throws Exception;
 
+    /**
+     * Activates a component that is currently in a DISABLED state.
+     *
+     * @param componentName the components name
+     * @throws Exception
+     */
     void activateComponent(String componentName) throws Exception;
 
-    void deactiveateComponent(String componentName) throws Exception;
+    /**
+     * Disables a component that is not in an ACTIVE state.
+     *
+     * @param componentName the components name
+     * @throws Exception
+     */
+    void deactivateComponent(String componentName) throws Exception;
+
 }

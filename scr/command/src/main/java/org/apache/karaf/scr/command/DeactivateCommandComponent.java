@@ -34,8 +34,16 @@ import aQute.bnd.annotation.component.Reference;
 /**
  * Shell Command used to deactivate a Declarative Service Component.
  */
-@Component(provide=CompletableFunction.class, name = DeactivateCommandComponent.COMPONENT_NAME, enabled = true, immediate = true,
-        properties={ ScrCommandConstants.OSGI_COMMAND_SCOPE_KEY+"="+ScrCommandConstants.SCR_COMMAND, ScrCommandConstants.OSGI_COMMAND_FUNCTION_KEY+"="+ScrCommandConstants.DEACTIVATE_FUNCTION})
+@Component(
+        provide=CompletableFunction.class,
+        name = DeactivateCommandComponent.COMPONENT_NAME,
+        enabled = true,
+        immediate = true,
+        properties={
+                ScrCommandConstants.OSGI_COMMAND_SCOPE_KEY + "=" + ScrCommandConstants.SCR_COMMAND,
+                ScrCommandConstants.OSGI_COMMAND_FUNCTION_KEY + "=" + ScrCommandConstants.DEACTIVATE_FUNCTION,
+                ScrCommandConstants.HIDDEN_COMPONENT_KEY + "=true"
+        })
 public class DeactivateCommandComponent extends ScrCommandSupport {
 
     public static final String COMPONENT_NAME = "DeactivateCommand";

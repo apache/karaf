@@ -20,10 +20,15 @@ import java.util.List;
 
 import org.apache.felix.scr.Component;
 import org.apache.felix.scr.ScrService;
+import org.apache.karaf.scr.command.action.ScrActionSupport;
 import org.apache.karaf.shell.console.Completer;
 import org.apache.karaf.shell.console.completer.StringsCompleter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class ScrCompleterSupport implements Completer {
+
+    protected final transient Logger logger = LoggerFactory.getLogger(ScrCompleterSupport.class);
 
     private ScrService scrService;
 
@@ -38,18 +43,32 @@ public abstract class ScrCompleterSupport implements Completer {
         StringsCompleter delegate = new StringsCompleter();
         try {
             for (Component component : scrService.getComponents()) {
-                if (availableComponent(component)) {
-                    delegate.getStrings().add(component.getName());
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Component Name to work on: " + component.getName());
+                }
+                if (ScrActionSupport.showHiddenComponent(component)) {
+                    // we display all because we are overridden
+                    if (availableComponent(component)) {
+                        delegate.getStrings().add(component.getName());
+                    }
+                } else {
+                    if (ScrActionSupport.isHiddenComponent(component)) {
+                    // do nothing
+                    } else {
+                        // we aren't hidden so print it
+                        if (availableComponent(component)) {
+                            delegate.getStrings().add(component.getName());
+                        }
+                    }
                 }
             }
         } catch (Exception e) {
-            // Ignore
+            logger.warn("Exception completing the command request: " + e.getLocalizedMessage());
         }
         return delegate.complete(buffer, cursor, candidates);
     }
 
-    public abstract boolean availableComponent(Component component)
-            throws Exception;
+    public abstract boolean availableComponent(Component component) throws Exception;
 
     /**
      * Get the scrService Object associated with this instance of

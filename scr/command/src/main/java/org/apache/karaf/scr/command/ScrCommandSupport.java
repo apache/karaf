@@ -48,8 +48,7 @@ public abstract class ScrCommandSupport extends AbstractCommand implements Compl
     public Action createNewAction() {
         try {
             lock.readLock().lock();
-            ScrActionSupport action = (ScrActionSupport) getActionClass()
-                    .newInstance();
+            ScrActionSupport action = (ScrActionSupport) getActionClass().newInstance();
             action.setScrService(getScrService());
             return action;
         } catch (InstantiationException e) {
@@ -69,8 +68,7 @@ public abstract class ScrCommandSupport extends AbstractCommand implements Compl
                 lock.readLock().lock();
                 completers = new ArrayList<Completer>();
                 for (Class<? extends Completer> completerClass : getCompleterClasses()) {
-                    ScrCompleterSupport ccs = (ScrCompleterSupport) completerClass
-                            .newInstance();
+                    ScrCompleterSupport ccs = (ScrCompleterSupport) completerClass.newInstance();
                     ccs.setScrService(scrService);
                     completers.add(ccs);
                 }
