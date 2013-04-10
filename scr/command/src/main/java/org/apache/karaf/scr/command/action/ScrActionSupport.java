@@ -47,6 +47,10 @@ public abstract class ScrActionSupport extends SubShellAction {
 
     private ScrService scrService;
 
+    public ScrActionSupport() {
+        setSubShell("scr");
+    }
+
     @Override
     public Object doExecute() throws Exception {
         if (scrService == null) {
