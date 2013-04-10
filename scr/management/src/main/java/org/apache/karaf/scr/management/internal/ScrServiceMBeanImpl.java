@@ -40,7 +40,8 @@ import org.slf4j.LoggerFactory;
 @aQute.bnd.annotation.component.Component(
         name = ScrServiceMBeanImpl.COMPONENT_NAME,
         enabled = true,
-        immediate = true)
+        immediate = true,
+        properties = { "hidden.component=true" })
 public class ScrServiceMBeanImpl extends StandardMBean implements ScrServiceMBean {
     
     public static final String OBJECT_NAME = "org.apache.karaf:type=scr,name=" + System.getProperty("karaf.name", "root");
@@ -107,6 +108,12 @@ public class ScrServiceMBeanImpl extends StandardMBean implements ScrServiceMBea
         }
     }
 
+    /*
+     * @see org.apache.karaf.management.mbeans.scr.ScrServiceMBean#listComponents()
+     *
+     * @return
+     * @throws Exception
+     */
     public String[] listComponents() throws Exception {
         Component[] components = safe(scrService.getComponents());
         String[] componentNames = new String[components.length];
@@ -116,10 +123,24 @@ public class ScrServiceMBeanImpl extends StandardMBean implements ScrServiceMBea
         return componentNames;
     }
 
+    /*
+     * @see org.apache.karaf.management.mbeans.scr.ScrServiceMBean#isComponentActive(java.lang.String)
+     *
+     * @param componentName
+     * @return
+     * @throws Exception
+     */
     public boolean isComponentActive(String componentName) throws Exception {
         return (componentState(componentName) == Component.STATE_ACTIVE)?true:false;
     }
-    
+
+    /*
+     * @see org.apache.karaf.management.mbeans.scr.ScrServiceMBean#componentState(java.lang.String)
+     *
+     * @param componentName
+     * @return
+     * @throws Exception
+     */
     public int componentState(String componentName) throws Exception {
         int state = -1;
         final Component component = findComponent(componentName);
@@ -130,6 +151,12 @@ public class ScrServiceMBeanImpl extends StandardMBean implements ScrServiceMBea
         return state;
     }
 
+    /*
+     * @see org.apache.karaf.management.mbeans.scr.ScrServiceMBean#activateComponent(java.lang.String)
+     *
+     * @param componentName
+     * @throws Exception
+     */
     public void activateComponent(String componentName) throws Exception {
         final Component component = findComponent(componentName);
         if(component != null)
@@ -138,7 +165,13 @@ public class ScrServiceMBeanImpl extends StandardMBean implements ScrServiceMBea
             LOGGER.warn("No component found for name: " + componentName);
     }
 
-    public void deactiveateComponent(String componentName) throws Exception {
+    /*
+     * @see org.apache.karaf.management.mbeans.scr.ScrServiceMBean#deactiveateComponent(java.lang.String)
+     *
+     * @param componentName
+     * @throws Exception
+     */
+    public void deactivateComponent(String componentName) throws Exception {
         final Component component = findComponent(componentName);
         if(component != null)
             component.disable();

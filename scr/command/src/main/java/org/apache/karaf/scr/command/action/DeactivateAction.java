@@ -24,7 +24,6 @@ import org.apache.karaf.scr.command.ScrCommandConstants;
 
 /**
  * Deactivates the given component by supplying its component name.
- *
  */
 @Command(scope = ScrCommandConstants.SCR_COMMAND, name = ScrCommandConstants.DEACTIVATE_FUNCTION, description = "Deactivates a Component for the given name")
 public class DeactivateAction extends ScrActionSupport {
@@ -34,7 +33,7 @@ public class DeactivateAction extends ScrActionSupport {
 
     @Override
     protected Object doScrAction(ScrService scrService) throws Exception {
-        if(logger.isDebugEnabled()){
+        if (logger.isDebugEnabled()) {
             logger.debug("Deactivate Action");
             logger.debug("  Deactivating the Component: " + name);
         }

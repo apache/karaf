@@ -27,6 +27,8 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentConstants;
 
+import java.util.Hashtable;
+
 /**
  * Displays the details associated with a given component by supplying its component name.
  */
@@ -39,7 +41,7 @@ public class DetailsAction extends ScrActionSupport {
     @SuppressWarnings("rawtypes")
 	@Override
     protected Object doScrAction(ScrService scrService) throws Exception {
-        if(logger.isDebugEnabled()){
+        if (logger.isDebugEnabled()) {
             logger.debug("Executing the Details Action");
         }
         System.out.println(getBoldString("Component Details"));
@@ -47,43 +49,48 @@ public class DetailsAction extends ScrActionSupport {
         for (Component component : ScrUtils.emptyIfNull(Component.class, components)) {
             printDetail("  Name                : ", component.getName());
             printDetail("  State               : ", ScrUtils.getState(component.getState()));
+
+            Hashtable props = (Hashtable)component.getProperties();
+            if (!props.isEmpty()) {
+                System.out.println(getBoldString("  Properties          : "));
+                for (Object key : props.keySet()) {
+                    Object value = props.get(key);
+                    printDetail("    ", key + "=" + value);
+                }
+            }
             Reference[] references = component.getReferences();
             System.out.println(getBoldString("References"));
 
-            for (Reference reference : ScrUtils.emptyIfNull(Reference.class,references)) {
+            for (Reference reference : ScrUtils.emptyIfNull(Reference.class, references)) {
                 printDetail("  Reference           : ", reference.getName());
-                printDetail("    State             : ", (reference.isSatisfied())?"satisfied":"unsatisfied");
+                printDetail("    State             : ", (reference.isSatisfied()) ? "satisfied" : "unsatisfied");
                 printDetail("    Multiple          : ", (reference.isMultiple() ? "multiple" : "single" ));
                 printDetail("    Optional          : ", (reference.isOptional() ? "optional" : "mandatory" ));
-                printDetail("    Policy            : ", (reference.isStatic() ? "static" : "dynamic" ));
+                printDetail("    Policy            : ", (reference.isStatic() ?  "static" : "dynamic" ));
 
                 // list bound services
 				ServiceReference[] boundRefs = reference.getServiceReferences();
                 for (ServiceReference serviceReference : ScrUtils.emptyIfNull(ServiceReference.class, boundRefs)) {
                     final StringBuffer b = new StringBuffer();
-                    b.append( "Bound Service ID " );
-                    b.append( serviceReference.getProperty( Constants.SERVICE_ID ) );
+                    b.append("Bound Service ID ");
+                    b.append(serviceReference.getProperty(Constants.SERVICE_ID));
 
-                    String componentName = ( String ) serviceReference.getProperty( ComponentConstants.COMPONENT_NAME );
-                    if ( componentName == null )
-                    {
-                        componentName = ( String ) serviceReference.getProperty( Constants.SERVICE_PID );
-                        if ( componentName == null )
-                        {
-                            componentName = ( String ) serviceReference.getProperty( Constants.SERVICE_DESCRIPTION );
+                    String componentName = (String) serviceReference.getProperty(ComponentConstants.COMPONENT_NAME);
+                    if (componentName == null) {
+                        componentName = (String) serviceReference.getProperty(Constants.SERVICE_PID);
+                        if (componentName == null) {
+                            componentName = (String) serviceReference.getProperty(Constants.SERVICE_DESCRIPTION);
                         }
                     }
-                    if ( componentName != null )
-                    {
-                        b.append( " (" );
-                        b.append( componentName );
-                        b.append( ")" );
+                    if (componentName != null) {
+                        b.append(" (");
+                        b.append(componentName);
+                        b.append(")");
                     }
                     printDetail("    Service Reference : ", b.toString());
                 }
                 
-                if(ScrUtils.emptyIfNull(ServiceReference.class, boundRefs).length == 0)
-                {
+                if(ScrUtils.emptyIfNull(ServiceReference.class, boundRefs).length == 0) {
                     printDetail("    Service Reference : ", "No Services bound");
                 }
             }

@@ -34,8 +34,16 @@ import aQute.bnd.annotation.component.Reference;
 /**
  * Shell Command used to activate a Declarative Service Component.
  */
-@Component(provide=CompletableFunction.class, name = ActivateCommandComponent.COMPONENT_NAME, enabled = true, immediate = true,
-        properties={ ScrCommandConstants.OSGI_COMMAND_SCOPE_KEY+"="+ScrCommandConstants.SCR_COMMAND, ScrCommandConstants.OSGI_COMMAND_FUNCTION_KEY+"="+ScrCommandConstants.ACTIVATE_FUNCTION})
+@Component(
+        provide=CompletableFunction.class,
+        name = ActivateCommandComponent.COMPONENT_NAME,
+        enabled = true,
+        immediate = true,
+        properties={
+                ScrCommandConstants.OSGI_COMMAND_SCOPE_KEY + "=" + ScrCommandConstants.SCR_COMMAND,
+                ScrCommandConstants.OSGI_COMMAND_FUNCTION_KEY + "=" + ScrCommandConstants.ACTIVATE_FUNCTION,
+                ScrCommandConstants.HIDDEN_COMPONENT_KEY + "=true"
+        })
 public class ActivateCommandComponent extends ScrCommandSupport {
 
     public static final String COMPONENT_NAME = "ActivateCommand";

@@ -28,11 +28,7 @@ public class DeactivateCompleter extends ScrCompleterSupport {
      */
     @Override
     public boolean availableComponent(Component component) throws Exception {
-        return (component != null
-        		&& ( 
-        				component.getState() == Component.STATE_ACTIVE || 
-        				component.getState() == Component.STATE_REGISTERED || 
-        				component.getState() == Component.STATE_UNSATISFIED));
+        return (component != null && (component.getState() == Component.STATE_ACTIVE));
     }
 
 }

@@ -32,8 +32,16 @@ import aQute.bnd.annotation.component.Reference;
 /**
  * Shell Command that lists the available Declarative Service Components.
  */
-@Component(provide=CompletableFunction.class, name = ListCommandComponent.COMPONENT_NAME, enabled = true, immediate = true,
-        properties={ ScrCommandConstants.OSGI_COMMAND_SCOPE_KEY+"="+ScrCommandConstants.SCR_COMMAND, ScrCommandConstants.OSGI_COMMAND_FUNCTION_KEY+"="+ScrCommandConstants.LIST_FUNCTION})
+@Component(
+        provide=CompletableFunction.class,
+        name = ListCommandComponent.COMPONENT_NAME,
+        enabled = true,
+        immediate = true,
+        properties={
+                ScrCommandConstants.OSGI_COMMAND_SCOPE_KEY + "=" + ScrCommandConstants.SCR_COMMAND,
+                ScrCommandConstants.OSGI_COMMAND_FUNCTION_KEY + "=" + ScrCommandConstants.LIST_FUNCTION,
+                ScrCommandConstants.HIDDEN_COMPONENT_KEY + "=true"
+        })
 public class ListCommandComponent extends ScrCommandSupport {
 
     public static final String COMPONENT_NAME = "ListCommand";
