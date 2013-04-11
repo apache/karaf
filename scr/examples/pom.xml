@@ -29,58 +29,13 @@
     </parent>
 
     <artifactId>org.apache.karaf.scr.examples</artifactId>
-    <packaging>bundle</packaging>
+    <packaging>pom</packaging>
     <name>Apache Karaf :: SCR :: Examples</name>
-    <description>Building SCR Components using the BND Annotation Libraries</description>
 
-    <properties>
-        <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
-    </properties>
-
-    <dependencies>
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.scr</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>biz.aQute</groupId>
-            <artifactId>bndlib</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.compendium</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.core</artifactId>
-        </dependency>
-    </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <inherited>true</inherited>
-                <configuration>
-                    <instructions>
-                        <Export-Package>
-                            ${project.artifactId}.service
-                        </Export-Package>
-                        <Import-Package>
-                            !${project.artifactId}.service,
-                            *
-                        </Import-Package>
-                        <Private-Package>
-                            aQute.bnd.annotation.metatype,
-                            ${project.artifactId}.component,
-                            ${project.artifactId}.service.provider
-                        </Private-Package>
-                        <Service-Component>*</Service-Component>
-                    </instructions>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+    <modules>
+        <module>service</module>
+        <module>managed-service</module>
+        <module>component-factory</module>
+    </modules>
 
 </project>
