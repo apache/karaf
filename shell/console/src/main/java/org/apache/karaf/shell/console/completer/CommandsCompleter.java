@@ -102,6 +102,7 @@ public class CommandsCompleter implements Completer {
                         }
                         try {
                             completers.add(new ArgumentCompleter(session, (CommandWithAction) function, command));
+                            completers.add(new CommandNamesCompleter(session));
                         } catch (Throwable t) {
                             LOGGER.debug("Unable to create completers for command '" + command + "'", t);
                         }
