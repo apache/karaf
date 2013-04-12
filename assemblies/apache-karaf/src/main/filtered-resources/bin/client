@@ -113,7 +113,7 @@ locateHome() {
     # In POSIX shells, CDPATH may cause cd to write to stdout
     (unset CDPATH) >/dev/null 2>&1 && unset CDPATH
 
-    KARAF_HOME=`cd $DIRNAME/..; pwd`
+    KARAF_HOME=`cd "$DIRNAME/.."; pwd`
     if [ ! -d "$KARAF_HOME" ]; then
         die "KARAF_HOME is not valid: $KARAF_HOME"
     fi
@@ -290,7 +290,7 @@ run() {
         CLASSPATH=`cygpath --path --windows "$CLASSPATH"`
     fi
 
-    exec $JAVA $JAVA_OPTS -Dkaraf.instances="${KARAF_HOME}/instances" -Dkaraf.home="$KARAF_HOME" -Dkaraf.base="$KARAF_BASE" -Djava.io.tmpdir="$KARAF_DATA/tmp" -Djava.util.logging.config.file=$KARAF_BASE/etc/java.util.logging.properties $KARAF_OPTS $OPTS -classpath "$CLASSPATH" org.apache.karaf.client.Main "$@"
+    exec "$JAVA" $JAVA_OPTS -Dkaraf.instances="${KARAF_HOME}/instances" -Dkaraf.home="$KARAF_HOME" -Dkaraf.base="$KARAF_BASE" -Djava.io.tmpdir="$KARAF_DATA/tmp" -Djava.util.logging.config.file="$KARAF_BASE/etc/java.util.logging.properties" $KARAF_OPTS $OPTS -classpath "$CLASSPATH" org.apache.karaf.client.Main "$@"
 }
 
 main() {
