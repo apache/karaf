@@ -113,7 +113,7 @@ locateHome() {
     # In POSIX shells, CDPATH may cause cd to write to stdout
     (unset CDPATH) >/dev/null 2>&1 && unset CDPATH
 
-    KARAF_HOME=`cd $DIRNAME/..; pwd`
+    KARAF_HOME=`cd "$DIRNAME/.."; pwd`
     if [ ! -d "$KARAF_HOME" ]; then
         die "KARAF_HOME is not valid: $KARAF_HOME"
     fi
@@ -315,7 +315,7 @@ init() {
 
 run() {
 
-    CLASSPATH=${KARAF_HOME}/system/org/apache/karaf/admin/org.apache.karaf.admin.command/${project.version}/org.apache.karaf.admin.command-${project.version}.jar:${KARAF_HOME}/system/org/apache/karaf/admin/org.apache.karaf.admin.core/${project.version}/org.apache.karaf.admin.core-${project.version}.jar:${KARAF_HOME}/system/org/apache/karaf/shell/org.apache.karaf.shell.console/${project.version}/org.apache.karaf.shell.console-${project.version}.jar:${KARAF_HOME}/system/org/apache/aries/blueprint/org.apache.aries.blueprint/${aries.blueprint.version}/org.apache.aries.blueprint-${aries.blueprint.version}.jar:${KARAF_HOME}/system/org/ops4j/pax/logging/pax-logging-api/${pax.logging.version}/pax-logging-api-${pax.logging.version}.jar:${KARAF_HOME}/system/org/apache/felix/org.apache.felix.framework/${felix.framework.version}/org.apache.felix.framework-${felix.framework.version}.jar
+    CLASSPATH="${KARAF_HOME}/system/org/apache/karaf/admin/org.apache.karaf.admin.command/${project.version}/org.apache.karaf.admin.command-${project.version}.jar:${KARAF_HOME}/system/org/apache/karaf/admin/org.apache.karaf.admin.core/${project.version}/org.apache.karaf.admin.core-${project.version}.jar:${KARAF_HOME}/system/org/apache/karaf/shell/org.apache.karaf.shell.console/${project.version}/org.apache.karaf.shell.console-${project.version}.jar:${KARAF_HOME}/system/org/apache/aries/blueprint/org.apache.aries.blueprint/${aries.blueprint.version}/org.apache.aries.blueprint-${aries.blueprint.version}.jar:${KARAF_HOME}/system/org/ops4j/pax/logging/pax-logging-api/${pax.logging.version}/pax-logging-api-${pax.logging.version}.jar:${KARAF_HOME}/system/org/apache/felix/org.apache.felix.framework/${felix.framework.version}/org.apache.felix.framework-${felix.framework.version}.jar"
 
     if $cygwin; then
         KARAF_HOME=`cygpath --path --windows "$KARAF_HOME"`
@@ -323,7 +323,7 @@ run() {
         CLASSPATH=`cygpath --path --windows "$CLASSPATH"`
     fi
 
-    exec $JAVA $JAVA_OPTS -Dkaraf.instances="${KARAF_HOME}/instances" -Dkaraf.home="$KARAF_HOME" -Dkaraf.base="$KARAF_BASE" -Djava.io.tmpdir="$KARAF_DATA/tmp" -Djava.util.logging.config.file=$KARAF_BASE/etc/java.util.logging.properties $KARAF_OPTS $OPTS -classpath "$CLASSPATH" org.apache.karaf.admin.main.Execute "$@"
+    exec "$JAVA" $JAVA_OPTS -Dkaraf.instances="${KARAF_HOME}/instances" -Dkaraf.home="$KARAF_HOME" -Dkaraf.base="$KARAF_BASE" -Djava.io.tmpdir="$KARAF_DATA/tmp" -Djava.util.logging.config.file="$KARAF_BASE/etc/java.util.logging.properties" $KARAF_OPTS $OPTS -classpath "$CLASSPATH" org.apache.karaf.admin.main.Execute "$@"
 }
 
 main() {
