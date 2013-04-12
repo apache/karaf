@@ -75,6 +75,7 @@ public class CommandNamesCompleter implements Completer {
                 commands.add(name);
                 if (name.indexOf(':') > 0) {
                     commands.add(name.substring(0, name.indexOf(':')));
+                    commands.add(name.substring(name.indexOf(':') + 1));
                 }
             }
         }
