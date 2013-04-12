@@ -20,11 +20,13 @@ package org.apache.karaf.shell.help.impl;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import jline.Terminal;
 
-import org.apache.felix.gogo.runtime.CommandProxy;
 import org.apache.felix.gogo.runtime.CommandSessionImpl;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Function;
@@ -77,14 +79,6 @@ public class CommandListHelpProvider implements HelpProvider {
                     name = name.substring(2);
                 }
                 commands.put(name, description);
-            } else if (function instanceof CommandProxy) {
-                Hashtable<String, HelpSystem.GogoCommandHelper> helpers = (Hashtable<String, HelpSystem.GogoCommandHelper>) session.get(HelpSystem.GOGO_COMMAND_HELPERS);
-                if (helpers != null) {
-                    HelpSystem.GogoCommandHelper helper = helpers.get(name);
-                    if (helper != null) {
-                        commands.put(name, helper.getDescription());
-                    }
-                }
             }
         }
         return commands;
