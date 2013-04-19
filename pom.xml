@@ -129,7 +129,7 @@
         <felix.bundlerepository.version>1.6.6</felix.bundlerepository.version>
         <felix.configadmin.version>1.6.0</felix.configadmin.version>
         <felix.fileinstall.version>3.2.6</felix.fileinstall.version>
-        <felix.framework.version>4.2.1</felix.framework.version>
+        <felix.framework.version>4.0.3</felix.framework.version>
         <felix.gogo.version>0.10.0</felix.gogo.version>
         <felix.plugin.version>2.3.7</felix.plugin.version>
         <felix.utils.version>1.2.0</felix.utils.version>
