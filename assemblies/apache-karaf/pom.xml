@@ -433,6 +433,10 @@
         </dependency>
         <dependency>
             <groupId>org.apache.servicemix.specs</groupId>
+            <artifactId>org.apache.servicemix.specs.activation-api-1.1</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.servicemix.specs</groupId>
             <artifactId>org.apache.servicemix.specs.stax-api-1.2</artifactId>
         </dependency>
     </dependencies>
