@@ -34,6 +34,7 @@
         <cm:default-properties>
             <cm:property name="rmiRegistryHost" value="0.0.0.0"/>
             <cm:property name="rmiRegistryPort" value="1099"/>
+            <cm:property name="rmiServerHost" value="0.0.0.0"/>
             <cm:property name="rmiServerPort" value="44444"/>
             <cm:property name="jmxRealm" value="karaf"/>
             <cm:property name="jmxRole" value="$[karaf.admin.role]"/>
@@ -80,6 +81,7 @@
           destroy-method="destroy">
         <property name="server" ref="mbeanServer"/>
         <property name="serviceUrl" value="${serviceUrl}"/>
+        <property name="rmiServerHost" value="${rmiServerHost}"/>
         <property name="daemon" value="${daemon}"/>
         <property name="threaded" value="${threaded}"/>
         <property name="objectName" value="${objectName}"/>
