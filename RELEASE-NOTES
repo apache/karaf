@@ -15,6 +15,54 @@
  * limitations under the License.
  */
 
+                    Apache Karaf 2.2.11
+                    ===================
+
+  Overview
+  --------
+
+  This release of Apache Karaf is based off of the 2.2.x series branch, representing an 
+ update to Apache Karaf 2.2.10. It contains bug fixes identified in the prior release, and
+ introduces improvements including; repaired command history, allowing LDAP login module 
+ to properly pick up keystore and/or truststore, and a fix for when Karaf scripts contain 
+ spaces in paths.
+  For more detail please see the change log below.
+
+  Changelog
+  ---------
+
+** Sub-task
+    * [KARAF-2228] - Karaf.webconsole uses wrong version in export-package header
+
+** Bug
+    * [KARAF-1278] - Comands: History does not work, can not edit current comand
+    * [KARAF-1327] - Client: can't execute alias command
+    * [KARAF-1968] - Uninstalling jndi feature leads to hanging Karaf
+    * [KARAF-2120] - revert changes of KARAF-1305 for 2.2.x
+    * [KARAF-2133] - Generated title contain unresolved placeholder
+    * [KARAF-2134] - Features deployer does not support mvn urls
+    * [KARAF-2154] - Entering an empty command removes previous command in history
+    * [KARAF-2166] - Apache Karaf Web Console Configuration is missing bundles and also metatype.properties content.
+    * [KARAF-2209] - Allow overriding system properties
+    * [KARAF-2215] - <packaging>kar</packaging> fails to attach artifact
+    * [KARAF-2218] - Fix manual links on website
+    * [KARAF-2220] - spring-jms feature shouldn't depend on spring-web
+    * [KARAF-2236] - karaf scripts fail when paths contain spaces
+    * [KARAF-2237] - LDAP login module cannot look up keystore and/or truststore
+    * [KARAF-2249] - config:property-append doesn't set a needed comma for seperation
+
+** Improvement
+    * [KARAF-2053] - HTTP feature should install a default etc/org.ops4j.pax.web.cfg file
+    * [KARAF-2108] - a feature depend itself will cause stackoverflow error
+
+** Task
+    * [KARAF-2161] - Incorrect LGPL license info in Notices file
+
+** Test
+    * [KARAF-2087] - add a testcase to cover the scenario that the AdminService can always load latest instance status which changed by external process
+
+ 
+
                     Apache Karaf 2.2.10
                     ===================
 
