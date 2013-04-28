@@ -23,6 +23,8 @@
             description="%rmiRegistryHost.description"/>
         <AD id="rmiRegistryPort" type="Integer" default="1099" name="%rmiRegistryPort.name"
             description="%rmiRegistryPort.description"/>
+        <AD id="rmiServerHost" type="String" default="" name="%rmiServerHost.name"
+            description="%rmiServerHost.description"/>
         <AD id="rmiServerPort" type="Integer" default="44444" name="%rmiServerPort.name"
             description="%rmiServerPort.description"/>
         <AD id="jmxRealm" type="String" default="karaf" name="%jmxRealm.name"
