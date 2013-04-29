@@ -79,6 +79,14 @@ public class ConnectorServerFactory {
         this.serviceUrl = serviceUrl;
     }
 
+    public String getRmiServerHost() {
+        return this.rmiServerHost;
+    }
+
+    public void setRmiServerHost(String rmiServerHost) {
+        this.rmiServerHost = rmiServerHost;
+    }
+
     public Map getEnvironment() {
         return environment;
     }
