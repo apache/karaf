@@ -149,7 +149,7 @@
         <felix.bundlerepository.version>1.6.6</felix.bundlerepository.version>
         <felix.configadmin.version>1.6.0</felix.configadmin.version>
         <felix.fileinstall.version>3.2.6</felix.fileinstall.version>
-        <felix.framework.version>4.0.3</felix.framework.version>
+        <felix.framework.version>4.2.1</felix.framework.version>
         <felix.gogo.version>0.10.0</felix.gogo.version>
         <felix.plugin.version>2.3.7</felix.plugin.version>
         <felix.utils.version>1.2.0</felix.utils.version>
@@ -200,7 +200,7 @@
         <log4j.version>1.2.17</log4j.version>
         <maven.version>2.0.9</maven.version>
         <mina.version>2.0.7</mina.version>
-        <osgi.version>4.3.1</osgi.version>
+        <osgi.version>5.0.0</osgi.version>
         <osgi.compendium.version>4.3.1</osgi.compendium.version>
         <pax.exam.version>2.6.0</pax.exam.version>
         <pax.logging.version>1.7.0</pax.logging.version>
@@ -325,12 +325,6 @@
                 <artifactId>org.osgi.core</artifactId>
                 <version>${osgi.version}</version>
                 <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.osgi</groupId>
-                <artifactId>org.osgi.core</artifactId>
-                <version>${osgi.version}</version>
-                <classifier>sources</classifier>
             </dependency>
             <dependency>
                 <groupId>org.apache.karaf</groupId>
@@ -789,12 +783,6 @@
                 <groupId>org.osgi</groupId>
                 <artifactId>org.osgi.compendium</artifactId>
                 <version>${osgi.compendium.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.osgi</groupId>
-                <artifactId>org.osgi.compendium</artifactId>
-                <version>${osgi.compendium.version}</version>
-                <classifier>sources</classifier>
             </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>
