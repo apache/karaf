@@ -25,7 +25,6 @@
         <property name="adminService" ref="adminService" />
         <property name="bundleContext" ref="blueprintBundleContext" />
     </bean>
-
     <service ref="adminPlugin" interface="javax.servlet.Servlet" >
         <service-properties>
             <entry key="felix.webconsole.label" value="admin"/>
