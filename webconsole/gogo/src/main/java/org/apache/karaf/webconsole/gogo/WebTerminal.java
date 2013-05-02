@@ -30,9 +30,11 @@ public class WebTerminal extends TerminalSupport {
     }
 
     public void init() throws Exception {
+        // nothing to do
     }
 
     public void restore() throws Exception {
+        // nothing to do
     }
 
     public int getWidth() {
