@@ -25,7 +25,6 @@
         <property name="commandProcessor" ref="commandProcessor" />
         <property name="bundleContext" ref="blueprintBundleContext" />
     </bean>
-
     <service ref="gogoPlugin" interface="javax.servlet.Servlet" >
         <service-properties>
             <entry key="felix.webconsole.label" value="gogo"/>

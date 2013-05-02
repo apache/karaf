@@ -24,7 +24,6 @@
  * See http://www.ecma-international.org/publications/standards/Ecma-048.htm
  *       and http://vt100.net/docs/vt510-rm/
  */
-
 package org.apache.karaf.webconsole.gogo;
 
 import java.util.Arrays;
