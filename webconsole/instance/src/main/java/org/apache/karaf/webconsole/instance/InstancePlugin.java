@@ -40,7 +40,7 @@ import org.osgi.framework.BundleContext;
 import org.slf4j.LoggerFactory;
 
 /**
- * Felix Web Console plugin for interacting with the {@link InstanceService}
+ * WebConsole plugin for{@link InstanceService}.
  */
 public class InstancePlugin extends AbstractWebConsolePlugin {
 
@@ -52,17 +52,12 @@ public class InstancePlugin extends AbstractWebConsolePlugin {
     private BundleContext bundleContext;
     private InstanceService instanceService;
     private ClassLoader classLoader;
-    
-    
 
     @Override
     protected boolean isHtmlRequest(HttpServletRequest request) {
         return false;
     }
 
-    /**
-     * Blueprint lifecycle callback methods
-     */
     public void start() {
         super.activate(bundleContext);
         this.classLoader = this.getClass().getClassLoader();
@@ -148,16 +143,13 @@ public class InstancePlugin extends AbstractWebConsolePlugin {
         }
     }
 
-    /*
-     * Parse the String value, returning <code>null</code> if the String is empty 
-     */
     private String parseString(String value) {
         if (value != null && value.trim().length() == 0) {
             value = null;
         }
         return value;
     }
-    
+
     private List<String> parseStringList(String value) {
         List<String> list = new ArrayList<String>();
         if (value != null) {
@@ -167,14 +159,11 @@ public class InstancePlugin extends AbstractWebConsolePlugin {
                     continue;
                 }
                 list.add(trimmed);
-            }            
+            }
         }
         return list;
     }
 
-    /*
-     * Parse the port number for the String given, returning 0 if the String does not represent an integer 
-     */
     private int parsePortNumber(String port) {
         try {
             return Integer.parseInt(port);
@@ -185,6 +174,9 @@ public class InstancePlugin extends AbstractWebConsolePlugin {
 
     protected URL getResource(String path) {
         path = path.substring(NAME.length() + 1);
+        if (path == null || path.isEmpty()) {
+            return null;
+        }
         URL url = this.classLoader.getResource(path);
         if (url != null) {
             InputStream ins = null;
@@ -206,7 +198,7 @@ public class InstancePlugin extends AbstractWebConsolePlugin {
                     }
                 }
             }
-        } 
+        }
         return url;
     }
 
@@ -228,9 +220,7 @@ public class InstancePlugin extends AbstractWebConsolePlugin {
             jw.key("instances");
             jw.array();
             for (Instance i : instances) {
-//                if (!i.isRoot()) {
-                    instanceInfo(jw, i);
-//                }
+                instanceInfo(jw, i);
             }
             jw.endArray();
             jw.endObject();
@@ -372,16 +362,10 @@ public class InstancePlugin extends AbstractWebConsolePlugin {
         return false;
     }
 
-    /**
-     * @param instanceService the instanceService to set
-     */
     public void setInstanceService(InstanceService instanceService) {
         this.instanceService = instanceService;
     }
 
-    /**
-     * @param bundleContext the bundleContext to set
-     */
     public void setBundleContext(BundleContext bundleContext) {
         this.bundleContext = bundleContext;
     }

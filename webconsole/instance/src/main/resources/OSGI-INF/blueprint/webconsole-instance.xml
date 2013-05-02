@@ -25,7 +25,6 @@
         <property name="instanceService" ref="instanceService" />
         <property name="bundleContext" ref="blueprintBundleContext" />
     </bean>
-
     <service ref="instancePlugin" interface="javax.servlet.Servlet" >
         <service-properties>
             <entry key="felix.webconsole.label" value="instance"/>
