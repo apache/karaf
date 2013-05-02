@@ -19,7 +19,6 @@
  * Based on http://antony.lesuisse.org/software/ajaxterm/
  *  Public Domain License
  */
-
 package org.apache.karaf.webconsole.gogo;
 
 import java.io.ByteArrayInputStream;
@@ -49,100 +48,77 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The <code>GogoPlugin</code>
+ * WebConsole plugin for {@link Console}.
  */
 public class GogoPlugin extends AbstractWebConsolePlugin {
-
-    /** Pseudo class version ID to keep the IDE quite. */
-    private static final long serialVersionUID = 1L;
 
     private final Logger logger = LoggerFactory.getLogger(GogoPlugin.class);
 
     public static final String NAME = "gogo";
-
     public static final String LABEL = "Gogo";
-
     public static final int TERM_WIDTH = 120;
     public static final int TERM_HEIGHT = 39;
 
-
-
     private BundleContext bundleContext;
-
     private CommandProcessor commandProcessor;
-    
     private ConsoleFactory consoleFactory;
-    
-    
 
     @Override
     protected boolean isHtmlRequest(HttpServletRequest request) {
         return false;
     }
 
-    public void setBundleContext(BundleContext bundleContext)
-    {
+    public void setBundleContext(BundleContext bundleContext) {
         this.bundleContext = bundleContext;
     }
 
-    public void setCommandProcessor(CommandProcessor commandProcessor)
-    {
+    public void setCommandProcessor(CommandProcessor commandProcessor) {
         this.commandProcessor = commandProcessor;
     }
 
     public void setConsoleFactory(ConsoleFactory consoleFactory) {
         this.consoleFactory = consoleFactory;
     }
-    
-    /*
-    * Blueprint lifecycle callback methods
-    */
 
-
-    public void start()
-    {
-        super.activate( bundleContext );
-        this.logger.info( LABEL + " plugin activated" );
+    public void start() {
+        super.activate(bundleContext);
+        this.logger.info(LABEL + " plugin activated");
     }
 
-    public void stop()
-    {
-        this.logger.info( LABEL + " plugin deactivated" );
+    public void stop() {
+        this.logger.info(LABEL + " plugin deactivated");
         super.deactivate();
     }
 
-    //
-    // AbstractWebConsolePlugin interface
-    //
-    public String getLabel()
-    {
+    @Override
+    public String getLabel() {
         return NAME;
     }
 
-
-    public String getTitle()
-    {
+    @Override
+    public String getTitle() {
         return LABEL;
     }
 
-
-    protected void renderContent( HttpServletRequest request, HttpServletResponse response ) throws IOException
-    {
+    @Override
+    protected void renderContent(HttpServletRequest request, HttpServletResponse response) throws IOException {
         PrintWriter pw = response.getWriter();
 
         String appRoot = request.getContextPath() + request.getServletPath();
-        pw.println( "<link href=\"" + appRoot + "/gogo/res/ui/gogo.css\" rel=\"stylesheet\" type=\"text/css\" />" );
-        pw.println( "<script src=\"" + appRoot + "/gogo/res/ui/gogo.js\" type=\"text/javascript\"></script>" );
-        pw.println( "<div id='console'><div id='term'></div></div>" );
-        pw.println( "<script type=\"text/javascript\"><!--" );
-        pw.println( "window.onload = function() { gogo.Terminal(document.getElementById(\"term\"), " + TERM_WIDTH + ", " + TERM_HEIGHT + "); }" );
-        pw.println( "--></script>" );
+        pw.println("<link href=\"" + appRoot + "/gogo/res/ui/gogo.css\" rel=\"stylesheet\" type=\"text/css\" />");
+        pw.println("<script src=\"" + appRoot + "/gogo/res/ui/gogo.js\" type=\"text/javascript\"></script>");
+        pw.println("<div id='console'><div id='term'></div></div>");
+        pw.println("<script type=\"text/javascript\"><!--");
+        pw.println("window.onload = function() { gogo.Terminal(document.getElementById(\"term\"), " + TERM_WIDTH + ", " + TERM_HEIGHT + "); }");
+        pw.println("--></script>");
     }
 
-    protected URL getResource( String path )
-    {
-        path = path.substring( NAME.length() + 1 );
-        URL url = this.getClass().getClassLoader().getResource( path );
+    protected URL getResource(String path) {
+        path = path.substring(NAME.length() + 1);
+        if (path == null || path.isEmpty()) {
+            return null;
+        }
+        URL url = this.getClass().getClassLoader().getResource(path);
         if (url != null) {
             InputStream ins = null;
             try {
@@ -184,7 +160,7 @@ public class GogoPlugin extends AbstractWebConsolePlugin {
                 response.setHeader("Content-Encoding", "gzip");
                 response.setHeader("Content-Type", "text/html");
                 try {
-                    GZIPOutputStream gzos =  new GZIPOutputStream(response.getOutputStream());
+                    GZIPOutputStream gzos = new GZIPOutputStream(response.getOutputStream());
                     gzos.write(dump.getBytes());
                     gzos.close();
                 } catch (IOException ie) {
@@ -196,7 +172,6 @@ public class GogoPlugin extends AbstractWebConsolePlugin {
             }
         }
     }
-
 
     public class SessionTerminal implements Runnable {
 
@@ -213,16 +188,16 @@ public class GogoPlugin extends AbstractWebConsolePlugin {
                 in = new PipedOutputStream();
                 out = new PipedInputStream();
                 PrintStream pipedOut = new PrintStream(new PipedOutputStream(out), true);
-                
+
                 final Subject subject = new Subject();
                 subject.getPrincipals().add(new UserPrincipal("karaf"));
                 Console console = consoleFactory.create(commandProcessor,
-                                      new PipedInputStream(in),
-                                      pipedOut,
-                                      pipedOut,
-                                      new WebTerminal(TERM_WIDTH, TERM_HEIGHT),
-                                      null,
-                                      null);
+                        new PipedInputStream(in),
+                        pipedOut,
+                        pipedOut,
+                        new WebTerminal(TERM_WIDTH, TERM_HEIGHT),
+                        null,
+                        null);
                 consoleFactory.startConsoleAs(console, subject, "Web");
             } catch (IOException e) {
                 e.printStackTrace();
@@ -260,12 +235,12 @@ public class GogoPlugin extends AbstractWebConsolePlugin {
 
         public void run() {
             try {
-                for (;;) {
+                for (; ; ) {
                     byte[] buf = new byte[8192];
                     int l = out.read(buf);
                     InputStreamReader r = new InputStreamReader(new ByteArrayInputStream(buf, 0, l));
                     StringBuilder sb = new StringBuilder();
-                    for (;;) {
+                    for (; ; ) {
                         int c = r.read();
                         if (c == -1) {
                             break;
@@ -289,4 +264,5 @@ public class GogoPlugin extends AbstractWebConsolePlugin {
         }
 
     }
+
 }
