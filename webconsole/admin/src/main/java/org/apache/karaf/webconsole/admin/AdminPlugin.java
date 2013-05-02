@@ -39,7 +39,7 @@ import org.osgi.framework.BundleContext;
 import org.slf4j.LoggerFactory;
 
 /**
- * Felix Web Console plugin for interacting with the {@link AdminService}
+ * WebConsole plugin for the {@link AdminService}.
  */
 public class AdminPlugin extends AbstractWebConsolePlugin {
 
@@ -52,9 +52,6 @@ public class AdminPlugin extends AbstractWebConsolePlugin {
     private AdminService adminService;
     private ClassLoader classLoader;
 
-    /**
-     * Blueprint lifecycle callback methods
-     */
     public void start() {
         super.activate(bundleContext);
         this.classLoader = this.getClass().getClassLoader();
@@ -134,22 +131,19 @@ public class AdminPlugin extends AbstractWebConsolePlugin {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
             }
-            this.renderJSON(res, null);
+            this.renderJSON(res);
         } else {
             super.doPost(req, res);
         }
     }
 
-    /*
-     * Parse the String value, returning <code>null</code> if the String is empty 
-     */
     private String parseString(String value) {
         if (value != null && value.trim().length() == 0) {
             value = null;
         }
         return value;
     }
-    
+
     private List<String> parseStringList(String value) {
         List<String> list = new ArrayList<String>();
         if (value != null) {
@@ -159,14 +153,11 @@ public class AdminPlugin extends AbstractWebConsolePlugin {
                     continue;
                 }
                 list.add(trimmed);
-            }            
+            }
         }
         return list;
     }
 
-    /*
-     * Parse the port number for the String given, returning 0 if the String does not represent an integer 
-     */
     private int parsePortNumber(String port) {
         try {
             return Integer.parseInt(port);
@@ -177,6 +168,9 @@ public class AdminPlugin extends AbstractWebConsolePlugin {
 
     protected URL getResource(String path) {
         path = path.substring(NAME.length() + 1);
+        if (path == null || path.isEmpty()) {
+            return null;
+        }
         URL url = this.classLoader.getResource(path);
         if (url != null) {
             InputStream ins = null;
@@ -198,11 +192,11 @@ public class AdminPlugin extends AbstractWebConsolePlugin {
                     }
                 }
             }
-        } 
+        }
         return url;
     }
 
-    private void renderJSON(final HttpServletResponse response, final String feature) throws IOException {
+    private void renderJSON(final HttpServletResponse response) throws IOException {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
@@ -220,9 +214,7 @@ public class AdminPlugin extends AbstractWebConsolePlugin {
             jw.key("instances");
             jw.array();
             for (Instance i : instances) {
-//                if (!i.isRoot()) {
-                    instanceInfo(jw, i);
-//                }
+                instanceInfo(jw, i);
             }
             jw.endArray();
             jw.endObject();
@@ -364,17 +356,12 @@ public class AdminPlugin extends AbstractWebConsolePlugin {
         return false;
     }
 
-    /**
-     * @param adminService the adminService to set
-     */
     public void setAdminService(AdminService adminService) {
         this.adminService = adminService;
     }
 
-    /**
-     * @param bundleContext the bundleContext to set
-     */
     public void setBundleContext(BundleContext bundleContext) {
         this.bundleContext = bundleContext;
     }
+
 }
