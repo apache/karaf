@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.karaf.webconsole.http;
 
 import java.util.HashMap;
@@ -25,18 +24,15 @@ import org.ops4j.pax.web.service.spi.WebListener;
 
 public class WebEventHandler implements WebListener {
 
-	private final Map<Long, WebEvent> bundleEvents = new HashMap<Long, WebEvent>();
-	
-	/* (non-Javadoc)
-	 * @see org.ops4j.pax.web.service.spi.WebListener#webEvent(org.ops4j.pax.web.service.spi.WebEvent)
-	 */
-	@Override
-	public void webEvent(WebEvent event) {
-		bundleEvents.put(event.getBundle().getBundleId(), event);
-	}
-	
-	public Map<Long, WebEvent> getBundleEvents() {
-		return bundleEvents;
-	}
+    private final Map<Long, WebEvent> bundleEvents = new HashMap<Long, WebEvent>();
+
+    @Override
+    public void webEvent(WebEvent event) {
+        bundleEvents.put(event.getBundle().getBundleId(), event);
+    }
+
+    public Map<Long, WebEvent> getBundleEvents() {
+        return bundleEvents;
+    }
 
 }

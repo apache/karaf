@@ -20,13 +20,11 @@
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" default-activation="lazy">
 
 	<bean id="eaHandler" class="org.apache.karaf.webconsole.http.ServletEventHandler" />
-	
-	<bean id="webEaHandler" class="org.apache.karaf.webconsole.http.WebEventHandler"/>
+    <service id="servletListener"
+             interface="org.ops4j.pax.web.service.spi.ServletListener"
+             ref="eaHandler" />
 
-	<service id="servletListener"
-		interface="org.ops4j.pax.web.service.spi.ServletListener"
-		ref="eaHandler" />
-		
+	<bean id="webEaHandler" class="org.apache.karaf.webconsole.http.WebEventHandler"/>
 	<service id="webListener" interface="org.ops4j.pax.web.service.spi.WebListener" ref="webEaHandler"/>
 
     <bean id="httpPlugin" class="org.apache.karaf.webconsole.http.HttpPlugin" init-method="start" destroy-method="stop">
@@ -34,7 +32,6 @@
         <property name="webEventHandler" ref="webEaHandler" />
         <property name="bundleContext" ref="blueprintBundleContext" />
     </bean>
-
     <service ref="httpPlugin" interface="javax.servlet.Servlet" >
         <service-properties>
             <entry key="felix.webconsole.label" value="http"/>
