@@ -16,7 +16,6 @@
  */
 package org.apache.karaf.webconsole.features;
 
-
 import java.util.List;
 import java.util.Map;
 
@@ -26,23 +25,16 @@ import org.apache.karaf.features.ConfigFileInfo;
 import org.apache.karaf.features.Dependency;
 import org.apache.karaf.features.Feature;
 
+public class ExtendedFeature implements Feature {
 
-/**
- * 
- */
-public class ExtendedFeature implements Feature
-{
-
-    public enum State
-    {
+    public enum State {
         INSTALLED, UNINSTALLED;
 
         @Override
-        public String toString()
-        {
+        public String toString() {
             //only capitalize the first letter
             String s = super.toString();
-            return s.substring( 0, 1 ) + s.substring( 1 ).toLowerCase();
+            return s.substring(0, 1) + s.substring(1).toLowerCase();
         }
     }
 
@@ -50,90 +42,72 @@ public class ExtendedFeature implements Feature
     protected final String repository;
     protected final Feature feature;
 
-
-    //
-    // Constructors
-    //
-
-    public ExtendedFeature( State state, String repository, Feature feature )
-    {
+    public ExtendedFeature(State state, String repository, Feature feature) {
         this.state = state;
         this.repository = repository;
         this.feature = feature;
     }
 
-
-    //
-    // Feature interface
-    //
-
-
-    public List<BundleInfo> getBundles()
-    {
+    @Override
+    public List<BundleInfo> getBundles() {
         return this.feature.getBundles();
     }
 
-
-    public Map<String, Map<String, String>> getConfigurations()
-    {
+    @Override
+    public Map<String, Map<String, String>> getConfigurations() {
         return this.feature.getConfigurations();
     }
 
+    @Override
     public List<ConfigFileInfo> getConfigurationFiles() {
-		return this.feature.getConfigurationFiles();
-	}
+        return this.feature.getConfigurationFiles();
+    }
 
     @Override
     public List<? extends Conditional> getConditional() {
         return this.feature.getConditional();
     }
 
-    public List<Dependency> getDependencies()
-    {
+    @Override
+    public List<Dependency> getDependencies() {
         return this.feature.getDependencies();
     }
 
-
-    public String getId()
-    {
+    @Override
+    public String getId() {
         return this.feature.getId();
     }
 
-
-    public String getName()
-    {
+    @Override
+    public String getName() {
         return this.feature.getName();
     }
 
-
-    public String getVersion()
-    {
+    @Override
+    public String getVersion() {
         return this.feature.getVersion();
     }
 
-    public String getResolver()
-    {
+    @Override
+    public String getResolver() {
         return this.feature.getResolver();
     }
 
+    @Override
     public String getDescription() {
         return this.feature.getDescription();
     }
 
+    @Override
     public String getDetails() {
         return this.feature.getDetails();
     }
-
-
-    //
-    // Additional methods
-    //
-
 
     public String getRepository() {
         return this.repository;
     }
 
+    @Override
     public String getInstall() {
         return feature.getInstall();
     }
@@ -141,20 +115,20 @@ public class ExtendedFeature implements Feature
     public State getState() {
         return this.state;
     }
-    
+
+    @Override
     public int getStartLevel() {
         return 0;
     }
 
+    @Override
     public boolean hasVersion() {
         return this.feature.hasVersion();
     }
-
 
     @Override
     public String getRegion() {
         return feature.getRegion();
     }
 
-    
 }
