@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.karaf.webconsole.http;
 
 import java.util.Collection;
@@ -26,18 +25,15 @@ import org.ops4j.pax.web.service.spi.ServletListener;
 
 public class ServletEventHandler implements ServletListener {
 
-	Map<String, ServletEvent> servletEvents =  new HashMap<String, ServletEvent>();
-	
-	@Override
-	public void servletEvent(ServletEvent event) {
-		servletEvents.put(event.getServletName(), event);
-	}
+    Map<String, ServletEvent> servletEvents = new HashMap<String, ServletEvent>();
 
-	/**
-	 * @return the servletEvents
-	 */
-	public Collection<ServletEvent> getServletEvents() {
-		return servletEvents.values();
-	}
+    @Override
+    public void servletEvent(ServletEvent event) {
+        servletEvents.put(event.getServletName(), event);
+    }
+
+    public Collection<ServletEvent> getServletEvents() {
+        return servletEvents.values();
+    }
 
 }
