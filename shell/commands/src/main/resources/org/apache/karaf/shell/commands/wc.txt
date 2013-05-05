@@ -1,0 +1,35 @@
+This command will output the information in the following format
+
+    Lines     Words     Characters     Bytes     Name
+
+Note, the name field will not always be present. For example, in the case of a piped
+application of wc.
+
+Example usage :
+
+    Display information about a single file
+
+        wc LICENSE
+
+    Which outputs
+
+        475     4053    28230   LICENSE
+
+    Display information about multiple files
+
+        wc LICENSE README RELEASE-NOTES
+
+    Which outputs
+
+        475     4053    28230   LICENSE
+        77      562     3933    README
+        1831    16765   118449  RELEASE-NOTES
+        2383    21380   150612  total
+
+    Piped example
+
+        echo "Hello World" | wc -w -l
+
+    Which outputs
+
+        1       2
