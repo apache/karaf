@@ -94,6 +94,9 @@
                 <null/>
             </completers>
         </command>
+        <command name="shell/wc">
+            <action class="org.apache.karaf.shell.commands.WcAction"/>
+        </command>
     </command-bundle>
 
    <bean id="commandCompleter" class="org.apache.karaf.shell.console.completer.CommandsCompleter"/>
