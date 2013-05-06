@@ -33,3 +33,4 @@ org.apache.karaf.shell.commands.impl.SleepAction
 org.apache.karaf.shell.commands.impl.SortAction
 org.apache.karaf.shell.commands.impl.TacAction
 org.apache.karaf.shell.commands.impl.TailAction
+org.apache.karaf.shell.commands.impl.WcAction

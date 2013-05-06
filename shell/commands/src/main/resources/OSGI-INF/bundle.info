@@ -32,6 +32,7 @@ The following commands are available:
 * shell:sort - Writes sorted concatenation of all files to standard output.
 * shell:tac - Captures the STDIN and returns it as a string. Optionally writes the content to a file.
 * shell:tail - Displays the last lines of a file.
+* shell:wc - Print newline, word, and byte counts for each file.
 
 h1. See also
 
