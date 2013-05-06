@@ -30,6 +30,7 @@
     \u001B[36mshell:sort\u001B[0m Writes sorted concatenation of all files to standard output.
     \u001B[36mshell:tac\u001B[0m Captures the STDIN and returns it as a string. Optionally writes the content to a file.
     \u001B[36mshell:tail\u001B[0m Displays the last lines of a file.
+    \u001B[36mshell:wc\u001B[0m Performs counting operations on Strings/files.
 
 \u001B[1mSEE ALSO\u001B[0m
     \u001B[36mCommands\u001B[0m and \u001B[36mUsing the console\u001B[0m sections of the Karaf User Guide.
