@@ -16,7 +16,9 @@
       See the License for the specific language governing permissions and
       limitations under the License.
 -->
-<features name="standard-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0">
+<features name="standard-${project.version}" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
+	<repository>mvn:org.ops4j.pax.web/pax-web-features/${pax.web.version}/xml/features</repository>
 
     <feature name="standard" description="Karaf standard feature" version="${project.version}">
         <bundle start-level="30">mvn:org.apache.karaf.shell/org.apache.karaf.shell.console/${project.version}</bundle>
