@@ -444,13 +444,23 @@ public class KarArtifactInstaller implements ArtifactInstaller {
         //
         else if (file.isFile() && file.getName().endsWith(ZIP_SUFFIX)) {
             logger.debug("Found a .zip file to deploy; checking contents to see if it's a Karaf archive.");
+            ZipFile zipFile = null;
             try {
-                if (new ZipFile(file).getEntry("META-INF/KARAF.MF") != null) {
+                zipFile = new ZipFile(file);
+                if (zipFile.getEntry("META-INF/KARAF.MF") != null) {
                     logger.info("Found a Karaf archive with .zip prefix; will deploy.");
                     return true;
                 }
             } catch (Exception e) {
                 logger.warn("Problem extracting zip file '{}'; ignoring.", file.getName(), e);
+            } finally {
+                try {
+                    if (zipFile != null) {
+                        zipFile.close();
+                    }
+                } catch (IOException e) {
+                    logger.warn("Problem closing zip file '{}'; ignoring.", file.getName(), e);
+                }
             }
         }
 
