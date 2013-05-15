@@ -277,7 +277,7 @@ setupDefaults() {
     fi
 
     # Add the jars in the lib dir
-    for file in "$KARAF_HOME"/lib/*.jar
+    for file in "$KARAF_HOME"/lib/karaf*.jar
     do
         if [ -z "$CLASSPATH" ]; then
             CLASSPATH="$file"
