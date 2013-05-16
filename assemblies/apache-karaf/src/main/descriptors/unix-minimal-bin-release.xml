@@ -43,7 +43,7 @@
             <lineEnding>unix</lineEnding>
         </fileSet>
         <fileSet>
-            <directory>src/main/distribution/unix-text</directory>
+            <directory>src/main/distribution/release</directory>
             <outputDirectory>/</outputDirectory>
             <lineEnding>unix</lineEnding>
         </fileSet>
