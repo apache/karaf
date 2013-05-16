@@ -42,6 +42,11 @@
             <lineEnding>dos</lineEnding>
         </fileSet>
         <fileSet>
+            <directory>src/main/distribution/release</directory>
+            <outputDirectory>/</outputDirectory>
+            <lineEnding>dos</lineEnding>
+        </fileSet>
+        <fileSet>
             <directory>src/main/distribution/windows-text</directory>
             <outputDirectory>/</outputDirectory>
             <lineEnding>dos</lineEnding>
