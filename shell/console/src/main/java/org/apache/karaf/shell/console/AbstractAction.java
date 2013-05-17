@@ -34,5 +34,17 @@ public abstract class AbstractAction implements Action {
     }
 
     protected abstract Object doExecute() throws Exception;
+    
+    /**
+     * This is for long running commands to be interrupted by ctrl-c
+     * 
+     * @throws InterruptedException
+     */
+    public static void checkInterrupted() throws InterruptedException {
+        Thread.yield(); 
+        if (Thread.currentThread().isInterrupted()) {
+            throw new InterruptedException();
+        }
+    }
 
 }
