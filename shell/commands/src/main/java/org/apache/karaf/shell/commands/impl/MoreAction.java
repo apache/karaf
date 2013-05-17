@@ -43,6 +43,7 @@ public class MoreAction extends AbstractAction {
             String line;
             while ((line = reader.readLine()) != null) {
                 System.out.println(line);
+                checkInterrupted();
             }
             return null;
         } else {
@@ -62,6 +63,7 @@ public class MoreAction extends AbstractAction {
                             return null;
                         }
                         System.out.println(line);
+                        checkInterrupted();
                     } while (++count < lines - 2);
                     c = -1;
                     while (c == -1) {
@@ -97,6 +99,9 @@ public class MoreAction extends AbstractAction {
                     }
                 } while (c != 'q');
                 return null;
+            } catch (InterruptedException ie) {
+            	log.debug("Interupted by user");
+            	return null;
             } finally {
                 term.setEchoEnabled(echo);
             }
