@@ -131,6 +131,13 @@
                                         <include>**/*.cfg</include>
                                     </includes>
                                 </resource>
+                                <resource>
+                                	<directory>${project.basedir}/../../assemblies/features/framework/src/main/snapshot</directory>
+                                	<filtering>true</filtering>
+                                    <includes>
+                                        <include>**/*.cfg</include>
+                                    </includes>
+                                </resource>
                             </resources>
                         </configuration>
                     </execution>
