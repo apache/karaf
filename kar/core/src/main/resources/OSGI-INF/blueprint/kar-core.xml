@@ -17,9 +17,17 @@
     -->
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
            xmlns:ext="http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.0.0"
+           xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
            default-activation="lazy">
 
     <ext:property-placeholder placeholder-prefix="$[" placeholder-suffix="]" />
+
+    <!-- AdminConfig property place holder for the org.apache.karaf.kar  -->
+    <cm:property-placeholder persistent-id="org.apache.karaf.kar" update-strategy="reload">
+        <cm:default-properties>
+            <cm:property name="noAutoRefreshBundles" value="false"/>
+        </cm:default-properties>
+    </cm:property-placeholder>
     
     <reference id="featuresService" interface="org.apache.karaf.features.FeaturesService"/>
     <reference id="configAdmin" interface="org.osgi.service.cm.ConfigurationAdmin" />
@@ -27,6 +35,7 @@
     <bean id="karService" class="org.apache.karaf.kar.internal.KarServiceImpl">
         <argument value="$[karaf.base]" />
         <argument ref="featuresService" />
+        <property name="noAutoRefreshBundles" value="${noAutoRefreshBundles}"/>
     </bean>
     
     <service ref="karService" interface="org.apache.karaf.kar.KarService"/>
