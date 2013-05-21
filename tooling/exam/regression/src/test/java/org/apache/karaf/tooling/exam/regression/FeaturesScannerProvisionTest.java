@@ -19,8 +19,12 @@ package org.apache.karaf.tooling.exam.regression;
 
 import static junit.framework.Assert.assertTrue;
 import static org.apache.karaf.tooling.exam.options.KarafDistributionOption.karafDistributionConfiguration;
+import static org.apache.karaf.tooling.exam.options.KarafDistributionOption.keepRuntimeFolder;
+import static org.apache.karaf.tooling.exam.options.KarafDistributionOption.logLevel;
 import static org.ops4j.pax.exam.CoreOptions.maven;
 import static org.ops4j.pax.exam.CoreOptions.scanFeatures;
+
+import java.io.File;
 
 import javax.inject.Inject;
 
@@ -49,7 +53,7 @@ public class FeaturesScannerProvisionTest {
         return new Option[]{
             karafDistributionConfiguration().frameworkUrl(
                 maven().groupId("org.apache.karaf").artifactId("apache-karaf").type("zip")
-                    .versionAsInProject()),
+                    .versionAsInProject()).unpackDirectory(new File("target/paxexam/feature/")),
             scanFeatures(
                 maven().groupId("org.apache.karaf.features").artifactId("standard").type("xml")
                     .classifier("features").versionAsInProject(), "scheduler", "wrapper").start() };
