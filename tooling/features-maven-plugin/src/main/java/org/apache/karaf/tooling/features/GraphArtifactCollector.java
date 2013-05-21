@@ -37,6 +37,7 @@ import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
 import org.apache.maven.artifact.resolver.CyclicDependencyException;
 import org.apache.maven.artifact.resolver.ResolutionListener;
 import org.apache.maven.artifact.resolver.ResolutionNode;
+import org.apache.maven.artifact.resolver.conflict.ConflictResolver;
 import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.OverConstrainedVersionException;
@@ -44,32 +45,41 @@ import org.apache.maven.artifact.versioning.VersionRange;
 
 public class GraphArtifactCollector implements ArtifactCollector {
     public ArtifactResolutionResult collect(
-            Set artifacts,
+            Set<Artifact> artifacts,
             Artifact originatingArtifact,
             ArtifactRepository localRepository,
-            List remoteRepositories,
+            List<ArtifactRepository> remoteRepositories,
             ArtifactMetadataSource source,
             ArtifactFilter filter,
-            List listeners) throws ArtifactResolutionException {
+            List<ResolutionListener> listeners) {
         return collect(artifacts, originatingArtifact, Collections.EMPTY_MAP,
                 localRepository, remoteRepositories, source, filter, listeners);
     }
 
     public ArtifactResolutionResult collect(
-            Set artifacts,
+            Set<Artifact> artifacts,
             Artifact originatingArtifact,
             Map managedVersions,
             ArtifactRepository localRepository,
-            List remoteRepositories,
+            List<ArtifactRepository> remoteRepositories,
             ArtifactMetadataSource source,
             ArtifactFilter filter,
-            List listeners) throws ArtifactResolutionException {
+            List<ResolutionListener> listeners) {
         Map resolvedArtifacts = new HashMap();
 
         ResolutionNode root = new ResolutionNode(originatingArtifact, remoteRepositories);
-        root.addDependencies(artifacts, remoteRepositories, filter);
-        recurse(root, resolvedArtifacts, managedVersions, localRepository,
-                remoteRepositories, source, filter, listeners);
+        try {
+            root.addDependencies(artifacts, remoteRepositories, filter);
+            recurse(root, resolvedArtifacts, managedVersions, localRepository,
+                    remoteRepositories, source, filter, listeners);
+        } catch (CyclicDependencyException e) {
+            e.printStackTrace();
+        } catch (OverConstrainedVersionException e) {
+            e.printStackTrace();
+        } catch (ArtifactResolutionException e) {
+            e.printStackTrace();
+        }
+        
 
         Set set = new HashSet();
         for (Iterator i = resolvedArtifacts.values().iterator(); i.hasNext();) {
@@ -77,13 +87,17 @@ public class GraphArtifactCollector implements ArtifactCollector {
             for (Iterator j = nodes.iterator(); j.hasNext();) {
                 ResolutionNode node = (ResolutionNode) j.next();
                 Artifact artifact = node.getArtifact();
-                if (!node.equals(root) && node.isActive() && node.filterTrail(filter)
-                        // If it was optional and not a direct dependency,
-                        // we don't add it or its children, just allow the
-                        // update of the version and scope
-                        && (node.isChildOfRootNode() || !artifact.isOptional())) {
-                    artifact.setDependencyTrail(node.getDependencyTrail());
-                    set.add(node);
+                try {
+                    if (!node.equals(root) && node.isActive() && node.filterTrail(filter)
+                            // If it was optional and not a direct dependency,
+                            // we don't add it or its children, just allow the
+                            // update of the version and scope
+                            && (node.isChildOfRootNode() || !artifact.isOptional())) {
+                        artifact.setDependencyTrail(node.getDependencyTrail());
+                        set.add(node);
+                    }
+                } catch (OverConstrainedVersionException e) {
+                    e.printStackTrace();
                 }
             }
         }
@@ -429,4 +443,16 @@ public class GraphArtifactCollector implements ArtifactCollector {
             }
         }
     }
+
+    public ArtifactResolutionResult collect(Set<Artifact> artifacts, Artifact originatingArtifact,
+                                            Map managedVersions, ArtifactRepository localRepository,
+                                            List<ArtifactRepository> remoteRepositories,
+                                            ArtifactMetadataSource source, ArtifactFilter filter,
+                                            List<ResolutionListener> listeners,
+                                            List<ConflictResolver> conflictResolvers)
+        throws ArtifactResolutionException {
+         
+        return null;
+    }
+
 }
