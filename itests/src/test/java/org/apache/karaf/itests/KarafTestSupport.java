@@ -54,6 +54,7 @@ import org.ops4j.pax.exam.TestProbeBuilder;
 import org.ops4j.pax.exam.junit.Configuration;
 import org.ops4j.pax.exam.junit.ProbeBuilder;
 import org.ops4j.pax.exam.options.MavenArtifactUrlReference;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
@@ -271,4 +272,21 @@ public class KarafTestSupport {
     public void assertContainsNot(String expectedPart, String actual) {
         Assert.assertFalse("Should not contain '" + expectedPart + "' but was : " + actual, actual.contains(expectedPart));
     }
+
+	protected void assertBundleInstalled(String name) {
+	    Assert.assertTrue("Bundle " + name + " should be installed", isBundleInstalled(name));
+	}
+
+	protected void assertBundleNotInstalled(String name) {
+	    Assert.assertFalse("Bundle " + name + " should not be installed", isBundleInstalled(name));
+	}
+
+	private boolean isBundleInstalled(String symbolicName) {
+	    for (Bundle bundle : bundleContext.getBundles()) {
+	        if (bundle.getSymbolicName().equals(symbolicName)) {
+	            return true;
+	        }
+	    }
+	    return false;
+	}
 }
