@@ -75,6 +75,7 @@ public class Packages extends StandardMBean implements PackagesMBean {
                                          bundle.getBundleId(),
                                          bundle.getSymbolicName()};
                     CompositeData comp = new CompositeDataSupport(bundleType, names, data);
+                    log.debug("Adding CompositeDataSupport {} for key: {}", comp, key);
                     table.put(comp);
                 }
             }
