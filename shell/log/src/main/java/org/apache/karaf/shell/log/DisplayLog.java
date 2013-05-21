@@ -168,7 +168,7 @@ public class DisplayLog extends OsgiCommandSupport {
 
     private String getColor(PaxLoggingEvent event) {
         String color = null;
-        if (!noColor) {
+        if (!noColor && event != null && event.getLevel() != null && event.getLevel().toString() != null) {
             String lvl = event.getLevel().toString().toLowerCase();
             if (FATAL.equals(lvl)) {
                 color = fatalColor;
