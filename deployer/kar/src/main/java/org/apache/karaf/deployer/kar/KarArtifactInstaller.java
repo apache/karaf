@@ -59,6 +59,8 @@ public class KarArtifactInstaller implements ArtifactInstaller {
     private DocumentBuilderFactory dbf;
 
     private FeaturesService featuresService;
+    
+    private boolean noAutoRefreshBundles;
 
     public void init() {
         dbf = DocumentBuilderFactory.newInstance();
@@ -180,7 +182,12 @@ public class KarArtifactInstaller implements ArtifactInstaller {
                     try {
                         for (Feature feature : repository.getFeatures()) {
                             try {
-                                featuresService.installFeature(feature, EnumSet.noneOf(FeaturesService.Option.class));
+                                logger.debug("noAutoRefreshBundles is " + isNoAutoRefreshBundles());
+                                if (isNoAutoRefreshBundles()) {
+                                    featuresService.installFeature(feature, EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
+                                } else {
+                                    featuresService.installFeature(feature, EnumSet.noneOf(FeaturesService.Option.class));
+                                }
                             } catch (Exception e) {
                                 logger.warn("Unable to install Kar feature {}", feature.getName() + "/" + feature.getVersion(), e);
                             }
@@ -495,6 +502,14 @@ public class KarArtifactInstaller implements ArtifactInstaller {
 
     public void setFeaturesService(FeaturesService featuresService) {
         this.featuresService = featuresService;
+    }
+
+    public boolean isNoAutoRefreshBundles() {
+        return noAutoRefreshBundles;
+    }
+
+    public void setNoAutoRefreshBundles(boolean noAutoRefreshBundles) {
+        this.noAutoRefreshBundles = noAutoRefreshBundles;
     }
 
 }
