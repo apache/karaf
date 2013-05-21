@@ -22,9 +22,13 @@ import java.util.List;
 import org.apache.karaf.shell.console.MultiException;
 import org.osgi.framework.Bundle;
 import org.apache.felix.gogo.commands.Command;
+import org.apache.felix.gogo.commands.Option;
 
 @Command(scope = "osgi", name = "stop", description = "Stop bundle(s).")
 public class StopBundle extends BundlesCommand {
+	
+	@Option(name = "-t", aliases={"--transient"}, description="Keep the bundle as auto-start", required = false, multiValued = false)
+	boolean transientStop;
 	
 	protected void doExecute(List<Bundle> bundles) throws Exception {
         if (bundles.isEmpty()) {
@@ -34,7 +38,11 @@ public class StopBundle extends BundlesCommand {
         List<Exception> exceptions = new ArrayList<Exception>();
         for (Bundle bundle : bundles) {
             try {
-                bundle.stop();
+            	if (transientStop) {
+            		bundle.stop(Bundle.STOP_TRANSIENT);
+            	} else {
+            		bundle.stop();
+            	}
             } catch (Exception e) {
                 exceptions.add(new Exception("Unable to stop bundle " + bundle.getBundleId() +
                         (e.getMessage() != null ? ": " + e.getMessage() : ""), e));
