@@ -165,6 +165,26 @@
                             </resources>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>copy-released</id>
+                        <!-- here the phase you need -->
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${basedir}/target/classes/org/apache/karaf/admin/etc</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>../../assemblies/apache-karaf/src/main/distribution/release/etc/</directory>
+                                    <filtering>true</filtering>
+                                    <includes>
+                                        <include>*.cfg</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>
