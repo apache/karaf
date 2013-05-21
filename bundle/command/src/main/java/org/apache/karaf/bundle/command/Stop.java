@@ -17,18 +17,26 @@
 package org.apache.karaf.bundle.command;
 
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Option;
 import org.osgi.framework.Bundle;
 
 @Command(scope = "bundle", name = "stop", description = "Stop bundles.")
 public class Stop extends BundlesCommandWithConfirmation {
     
+	@Option(name = "-t", aliases={"--transient"}, description="Keep the bundle as auto-start", required = false, multiValued = false)
+	boolean transientStop;
+	
     public Stop() {
         this.errorMessage = "Unable to stop bundle";
     }
 
     @Override
     protected void executeOnBundle(Bundle bundle) throws Exception {
-        bundle.stop();
+    	if (transientStop) {
+    		bundle.stop(Bundle.STOP_TRANSIENT);
+    	} else {
+    		bundle.stop();
+    	}
     }
 
 }
