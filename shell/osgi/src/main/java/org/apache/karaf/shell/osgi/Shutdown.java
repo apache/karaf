@@ -87,12 +87,24 @@ public class Shutdown extends OsgiCommandSupport {
                 if (c < 0) {
                     return null;
                 }
-                System.err.print((char) c);
+                if (c == 127 || c == 'b') {
+                    System.err.print((char) '\b');
+                    System.err.print((char) ' ');
+                    System.err.print((char) '\b');
+                } else {
+                    System.err.print((char) c);
+                }
                 System.err.flush();
                 if (c == '\r' || c == '\n') {
                     break;
                 }
-                sb.append((char) c);
+                if (c == 127 || c == 'b') {
+                    if (sb.length() > 0) {
+                        sb.deleteCharAt(sb.length() - 1);
+                    }
+                } else {
+                    sb.append((char) c);
+                }
             }
             String str = sb.toString();
             if (str.equals("yes")) {
