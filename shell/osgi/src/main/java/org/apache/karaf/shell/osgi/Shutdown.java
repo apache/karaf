@@ -107,7 +107,6 @@ public class Shutdown extends OsgiCommandSupport {
                 }
             }
             String str = sb.toString();
-            System.out.println("the str is " + str);
             if (str.equals("yes")) {
                 this.shutdown(sleep);
             }
