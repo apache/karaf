@@ -42,6 +42,7 @@ import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
+import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.plugin.AbstractMojo;
@@ -50,6 +51,7 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.project.MavenProjectHelper;
 import org.apache.maven.project.ProjectBuildingException;
+import org.apache.maven.settings.Proxy;
 
 public abstract class MojoSupport extends AbstractMojo {
 
@@ -113,6 +115,15 @@ public abstract class MojoSupport extends AbstractMojo {
      * @parameter default-value="xml"
      */
     private String featureArtifactType = "xml";
+    
+    /**
+     * The Maven session.
+     * 
+     * @parameter expression="${session}"
+     * @readonly
+     * @required
+     */
+    protected MavenSession mavenSession;
 
     protected MavenProject getProject() {
         return project;
@@ -386,6 +397,10 @@ public abstract class MojoSupport extends AbstractMojo {
                     repoUrl,
                     repoUrl,
                     new DefaultRepositoryLayout());
+            org.apache.maven.repository.Proxy mavenProxy = configureProxyToInlineRepo();
+            if (mavenProxy != null) {
+                repo.setProxy(mavenProxy);
+            }
             resourceLocation = resourceLocation.substring(repoDelimIntex + 1);
 
         }
@@ -420,5 +435,26 @@ public abstract class MojoSupport extends AbstractMojo {
         Artifact artifact = factory.createArtifactWithClassifier(groupId, artifactId, version, type, classifier);
         artifact.setRepository(repo);
         return artifact;
+    }
+    
+    private org.apache.maven.repository.Proxy configureProxyToInlineRepo() {
+        if (mavenSession != null && mavenSession.getSettings() != null) {
+            Proxy proxy = mavenSession.getSettings().getActiveProxy();
+            org.apache.maven.repository.Proxy mavenProxy = new org.apache.maven.repository.Proxy();
+            if (proxy != null) {
+                mavenProxy.setProtocol(proxy.getProtocol());
+                mavenProxy.setHost(proxy.getHost());
+                mavenProxy.setPort(proxy.getPort());
+                mavenProxy.setNonProxyHosts(proxy.getNonProxyHosts());
+                mavenProxy.setUserName(proxy.getUsername());
+                mavenProxy.setPassword(proxy.getPassword());
+                return mavenProxy;
+            } else {
+                return null;
+            }
+            
+        } else {
+            return null;
+        }
     }
 }
