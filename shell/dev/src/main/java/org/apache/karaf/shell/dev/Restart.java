@@ -26,13 +26,18 @@ import org.apache.karaf.shell.console.OsgiCommandSupport;
 @Command(scope = "dev", name = "restart", description = "Restart Karaf.")
 public class Restart  extends OsgiCommandSupport {
 
-    @Option(name = "-c", aliases = { "--clean" }, description = "Force a clean restart by deleting the working directory")
-    private boolean clean;
+    @Option(name = "-c", aliases = {"--clean", "--clean-all", "-ca"}, description = "Force a clean restart by deleting the working directory")
+    private boolean cleanAll;
+
+    @Option(name = "-cc", aliases = {"--clean-cache", "-cc"}, description = "Force a clean restart by deleting the working directory")
+    private boolean cleanCache;
+
 
     @Override
     protected Object doExecute() throws Exception {
         System.setProperty("karaf.restart", "true");
-        System.setProperty("karaf.restart.clean", Boolean.toString(clean));
+        System.setProperty("karaf.clean.cache", Boolean.toString(cleanCache));
+        System.setProperty("karaf.clean.all", Boolean.toString(cleanAll));
         bundleContext.getBundle(0).stop();
         return null;
     }

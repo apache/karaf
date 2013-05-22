@@ -18,7 +18,27 @@
  */
 package org.apache.karaf.main;
 
-import java.io.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
+import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.launch.Framework;
+import org.osgi.framework.launch.FrameworkFactory;
+import org.osgi.service.startlevel.StartLevel;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.net.InetAddress;
@@ -253,6 +273,29 @@ public class Main {
         
         // Copy framework properties from the system properties.
         Main.copySystemProperties(configProps);
+
+        File cleanAllIndicatorFile = new File(karafData, "clean_all");
+        File cleanCacheIndicatorFile = new File(karafData, "clean_cache");
+        if (Boolean.getBoolean("karaf.clean.all") || cleanAllIndicatorFile.exists()) {
+            if (cleanAllIndicatorFile.exists()) {
+                cleanAllIndicatorFile.delete();
+            }
+            File karafHome = Utils.getKarafHome();
+            File karafBase = Utils.getKarafDirectory(Main.PROP_KARAF_BASE, Main.ENV_KARAF_BASE, karafHome, false, true);
+            File karafData = Utils.getKarafDirectory(Main.PROP_KARAF_DATA, Main.ENV_KARAF_DATA, new File(karafBase, "data"), true, true);
+            Utils.deleteDirectory(karafData);
+        } else {
+            if (Boolean.getBoolean("karaf.clean.cache") || cleanCacheIndicatorFile.exists()) {
+                if (cleanCacheIndicatorFile.exists()) {
+                    cleanCacheIndicatorFile.delete();
+                }
+                File karafHome = Utils.getKarafHome();
+                File karafBase = Utils.getKarafDirectory(Main.PROP_KARAF_BASE, Main.ENV_KARAF_BASE, karafHome, false, true);
+                File karafData = Utils.getKarafDirectory(Main.PROP_KARAF_DATA, Main.ENV_KARAF_DATA, new File(karafBase, "data"), true, true);
+                File karafCache = Utils.getKarafDirectory(Main.PROP_KARAF_DATA, Main.ENV_KARAF_DATA, new File(karafData, "cache"), true, true);
+                Utils.deleteDirectory(karafCache);
+            }
+        }
 
         boolean delayConsoleStart = Boolean.parseBoolean(configProps.getProperty(KARAF_DELAY_CONSOLE, "false"));
         System.setProperty(KARAF_DELAY_CONSOLE, new Boolean(delayConsoleStart).toString());
@@ -496,12 +539,6 @@ public class Main {
         while (true) {
             boolean restart = false;
             System.setProperty("karaf.restart", "false");
-            if (Boolean.getBoolean("karaf.restart.clean")) {
-                File karafHome = Utils.getKarafHome();
-                File karafBase = Utils.getKarafDirectory(Main.PROP_KARAF_BASE, Main.ENV_KARAF_BASE, karafHome, false, true);
-                File karafData = Utils.getKarafDirectory(Main.PROP_KARAF_DATA, Main.ENV_KARAF_DATA, new File(karafBase, "data"), true, true);
-                Utils.deleteDirectory(karafData);
-            }
             final Main main = new Main(args);
             try {
                 main.launch();
