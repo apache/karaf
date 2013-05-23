@@ -107,7 +107,7 @@
         <bndlib.version>1.50.0</bndlib.version>
         <cglib.bundle.version>2.2.2_1</cglib.bundle.version>
         <commons-beanutils.version>1.8.3</commons-beanutils.version>
-        <commons-codec.version>1.7</commons-codec.version>
+        <commons-codec.version>1.8</commons-codec.version>
         <commons-collections.version>3.2.1</commons-collections.version>
         <commons-compress.version>1.4.1</commons-compress.version>
         <commons-fileupload.version>1.2.2</commons-fileupload.version>
