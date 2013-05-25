@@ -188,7 +188,7 @@
         <aries.proxy.api.version>1.0.0</aries.proxy.api.version>
         <aries.transaction.version>1.0.1</aries.transaction.version>
         <aries.transaction.manager.version>1.0.1</aries.transaction.manager.version>
-        <aries.transaction.blueprint.version>1.0.0</aries.transaction.blueprint.version>
+        <aries.transaction.blueprint.version>1.0.1</aries.transaction.blueprint.version>
         <aries.transaction.jdbc.version>1.0.0</aries.transaction.jdbc.version>
         <aries.util.version>1.1.0</aries.util.version>
 
