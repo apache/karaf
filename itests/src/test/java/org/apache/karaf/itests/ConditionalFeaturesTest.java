@@ -16,14 +16,12 @@
  */
 package org.apache.karaf.itests;
 
-import junit.framework.Assert;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.ExamReactorStrategy;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
 import org.ops4j.pax.exam.spi.reactors.EagerSingleStagedReactorFactory;
-import org.osgi.framework.Bundle;
 
 @RunWith(JUnit4TestRunner.class)
 @ExamReactorStrategy(EagerSingleStagedReactorFactory.class)
@@ -91,22 +89,5 @@ public class ConditionalFeaturesTest extends KarafTestSupport {
           //ignore as the eventadmin activator might throw an error.
         }
         assertBundleInstalled("org.apache.felix.webconsole.plugins.event");
-    }
-
-    private void assertBundleInstalled(String name) {
-        Assert.assertTrue("Bundle " + name + " should be installed", isBundleInstalled(name));
-    }
-    
-    private void assertBundleNotInstalled(String name) {
-        Assert.assertFalse("Bundle " + name + " should not be installed", isBundleInstalled(name));
-    }
-
-    private boolean isBundleInstalled(String symbolicName) {
-        for (Bundle bundle : bundleContext.getBundles()) {
-            if (bundle.getSymbolicName().equals(symbolicName)) {
-                return true;
-            }
-        }
-        return false;
     }
 }

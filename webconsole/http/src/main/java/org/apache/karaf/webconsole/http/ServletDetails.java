@@ -16,18 +16,19 @@
 package org.apache.karaf.webconsole.http;
 
 public class ServletDetails {
-    private long  id;
-    private String  servlet;
-    private String  servletName;
-    private String  state;
-    private String  alias;
-    private String[]  urls;
+
+    private long id;
+    private String servlet;
+    private String servletName;
+    private String state;
+    private String alias;
+    private String[] urls;
 
     public String getAlias() {
         return alias;
     }
 
-    public void setAlias( String alias ) {
+    public void setAlias(String alias) {
         this.alias = alias;
     }
 
@@ -35,7 +36,7 @@ public class ServletDetails {
         return id;
     }
 
-    public void setId( long id ) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -43,7 +44,7 @@ public class ServletDetails {
         return servlet;
     }
 
-    public void setServlet( String servlet ) {
+    public void setServlet(String servlet) {
         this.servlet = servlet;
     }
 
@@ -51,7 +52,7 @@ public class ServletDetails {
         return servletName;
     }
 
-    public void setServletName( String servletName ) {
+    public void setServletName(String servletName) {
         this.servletName = servletName;
     }
 
@@ -59,7 +60,7 @@ public class ServletDetails {
         return state;
     }
 
-    public void setState( String state ) {
+    public void setState(String state) {
         this.state = state;
     }
 
@@ -67,8 +68,8 @@ public class ServletDetails {
         return urls;
     }
 
-    public void setUrls( String[] urls ) {
+    public void setUrls(String[] urls) {
         this.urls = urls;
     }
-    
+
 }

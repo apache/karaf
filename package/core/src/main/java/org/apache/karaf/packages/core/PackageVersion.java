@@ -16,8 +16,8 @@
  */
 package org.apache.karaf.packages.core;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
@@ -26,7 +26,7 @@ public class PackageVersion {
 
     private String packageName;
     private Version version;
-    private List<Bundle> bundles = new ArrayList<Bundle>();
+    private Set<Bundle> bundles = new HashSet<Bundle>();
     
     public PackageVersion(String packageName, Version version) {
         this.packageName = packageName;
@@ -45,7 +45,7 @@ public class PackageVersion {
         this.bundles.add(bundle);
     }
     
-    public List<Bundle> getBundles() {
+    public Set<Bundle> getBundles() {
         return this.bundles;
     }
 

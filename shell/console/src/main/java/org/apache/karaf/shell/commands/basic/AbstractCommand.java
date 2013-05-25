@@ -58,5 +58,5 @@ public abstract class AbstractCommand implements CommandWithAction {
     protected ActionPreparator getPreparator() throws Exception {
         return new DefaultActionPreparator();
     }
-
+    
 }

@@ -132,7 +132,7 @@ public class LogEventFormatterImpl implements LogEventFormatter {
 
     private String getColor(PaxLoggingEvent event, boolean noColor) {
         String color = null;
-        if (!noColor) {
+        if (!noColor && event != null && event.getLevel() != null && event.getLevel().toString() != null) {
             String lvl = event.getLevel().toString().toLowerCase();
             if (FATAL.equals(lvl)) {
                 color = fatalColor;

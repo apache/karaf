@@ -101,6 +101,9 @@
             </completers>
         </command>
         <command>
+            <action class="org.apache.karaf.shell.commands.impl.WcAction"/>
+        </command>
+        <command>
             <action class="org.apache.karaf.shell.commands.impl.EditAction">
                 <property name="editorFactory" ref="editorFactory"/>
             </action>

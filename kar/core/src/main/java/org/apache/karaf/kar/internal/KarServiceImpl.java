@@ -63,6 +63,8 @@ public class KarServiceImpl implements KarService {
     private File storage;
     private File base;
     private FeaturesService featuresService;
+    
+    private boolean noAutoRefreshBundles;
 
     public KarServiceImpl(String karafBase, FeaturesService featuresService) {
         this.base = new File(karafBase);
@@ -206,7 +208,12 @@ public class KarServiceImpl implements KarService {
                     try {
                         for (Feature feature : repository.getFeatures()) {
                             try {
-                                featuresService.installFeature(feature, EnumSet.noneOf(FeaturesService.Option.class));
+                                LOGGER.debug("noAutoRefreshBundles is " + isNoAutoRefreshBundles());
+                                if (isNoAutoRefreshBundles()) {
+                                    featuresService.installFeature(feature, EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
+                                } else {
+                                    featuresService.installFeature(feature, EnumSet.noneOf(FeaturesService.Option.class));
+                                }
                             } catch (Exception e) {
                                 LOGGER.warn("Unable to install Kar feature {}", feature.getName() + "/" + feature.getVersion(), e);
                             }
@@ -362,6 +369,14 @@ public class KarServiceImpl implements KarService {
                 }
             }
         }
+    }
+
+    public boolean isNoAutoRefreshBundles() {
+        return noAutoRefreshBundles;
+    }
+
+    public void setNoAutoRefreshBundles(boolean noAutoRefreshBundles) {
+        this.noAutoRefreshBundles = noAutoRefreshBundles;
     }
 
 }

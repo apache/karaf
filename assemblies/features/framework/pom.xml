@@ -347,6 +347,11 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.apache.servicemix.specs</groupId>
+                                    <artifactId>org.apache.servicemix.specs.activation-api-1.1</artifactId>
+                                    <outputDirectory>target/classes/resources/lib/endorsed</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.apache.servicemix.specs</groupId>
                                     <artifactId>org.apache.servicemix.specs.stax-api-1.2</artifactId>
                                     <outputDirectory>target/classes/resources/lib/endorsed</outputDirectory>
                                 </artifactItem>
@@ -425,5 +430,39 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>snapshot</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <resources>
+                    <resource>
+                        <directory>${project.basedir}/src/main/snapshot</directory>
+                        <filtering>false</filtering>
+                        <includes>
+                            <include>**/*</include>
+                        </includes>
+                    </resource>
+                </resources>
+            </build>
+        </profile>
+        <profile>
+            <id>release</id>
+            <build>
+                <resources>
+                    <resource>
+                        <directory>${project.basedir}/src/main/release</directory>
+                        <filtering>false</filtering>
+                        <includes>
+                            <include>**/*</include>
+                        </includes>
+                    </resource>
+                </resources>
+            </build>
+        </profile>
+    </profiles>
 
 </project>

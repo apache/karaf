@@ -20,6 +20,7 @@ import org.apache.karaf.jaas.config.KeystoreManager;
 
 import java.io.IOException;
 import java.net.BindException;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.rmi.server.RMIClientSocketFactory;
 import java.rmi.server.RMIServerSocketFactory;
@@ -33,6 +34,7 @@ import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
 import javax.management.remote.rmi.RMIConnectorServer;
+import javax.net.ServerSocketFactory;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
@@ -44,6 +46,7 @@ public class ConnectorServerFactory {
 
     private MBeanServer server;
     private String serviceUrl;
+    private String rmiServerHost;
     private Map environment;
     private ObjectName objectName;
     private boolean threaded = false;
@@ -74,6 +77,14 @@ public class ConnectorServerFactory {
 
     public void setServiceUrl(String serviceUrl) {
         this.serviceUrl = serviceUrl;
+    }
+
+    public String getRmiServerHost() {
+        return this.rmiServerHost;
+    }
+
+    public void setRmiServerHost(String rmiServerHost) {
+        this.rmiServerHost = rmiServerHost;
     }
 
     public Map getEnvironment() {

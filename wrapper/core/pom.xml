@@ -115,6 +115,7 @@
                         <Import-Package>
                             !org.apache.felix.utils.properties,
                             !org.apache.karaf.util.properties,
+                            !org.apache.karaf.info,
                             *
                         </Import-Package>
                     </instructions>

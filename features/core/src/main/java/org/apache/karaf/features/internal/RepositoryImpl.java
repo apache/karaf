@@ -16,8 +16,11 @@
  */
 package org.apache.karaf.features.internal;
 
+import java.io.BufferedInputStream;
+import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InterruptedIOException;
 import java.net.URI;
 import org.apache.karaf.features.Repository;
 import org.apache.karaf.features.internal.model.Features;
@@ -65,6 +68,15 @@ public class RepositoryImpl implements Repository {
         if (features == null) {
             try {
                 InputStream inputStream = uri.toURL().openStream();
+                inputStream = new FilterInputStream(inputStream) {
+    				@Override
+    				public int read(byte b[], int off, int len) throws IOException {
+    					if (Thread.currentThread().isInterrupted()) {
+    						throw new InterruptedIOException();
+    					}
+    					return super.read(b, off, len);
+    				}
+    			};
                 try {
                     features = JaxbUtil.unmarshal(inputStream, false);
                 } finally {
