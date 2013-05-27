@@ -193,7 +193,7 @@
         <aries.util.version>1.1.0</aries.util.version>
 
         <gemini.blueprint.version>1.0.0.RELEASE</gemini.blueprint.version>
-        <jansi.version>1.9</jansi.version>
+        <jansi.version>1.11</jansi.version>
         <jline.version>2.11</jline.version>
         <jledit.version>0.1.2</jledit.version>
         <jsw.version>3.2.3</jsw.version>
