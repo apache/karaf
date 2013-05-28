@@ -255,9 +255,14 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
             while (namingEnumeration.hasMore()) {
                 SearchResult result = (SearchResult) namingEnumeration.next();
                 Attributes attributes = result.getAttributes();
-                String role = (String) attributes.get(roleNameAttribute).get();
-                if (role != null) {
-                    principals.add(new RolePrincipal(role));
+                Attribute roles = attributes.get(roleNameAttribute);
+                if (roles != null) {
+                    for (int i = 0; i < roles.size(); i++) {
+                        String role = (String)roles.get(i);
+                        if (role != null) {
+                            principals.add(new RolePrincipal(role));
+                        }
+                    }
                 }
             }
         } catch (Exception e) {
