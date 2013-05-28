@@ -253,12 +253,18 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
             logger.debug("  filter: " + roleFilter);
             NamingEnumeration namingEnumeration = context.search(roleBaseDN, roleFilter, controls);
             while (namingEnumeration.hasMore()) {
-                SearchResult result = (SearchResult) namingEnumeration.next();
+                SearchResult result = (SearchResult)namingEnumeration.next();
                 Attributes attributes = result.getAttributes();
-                String role = (String) attributes.get(roleNameAttribute).get();
-                if (role != null) {
-                    principals.add(new RolePrincipal(role));
+                Attribute roles = attributes.get(roleNameAttribute);
+                if (roles != null) {
+                    for (int i = 0; i < roles.size(); i++) {
+                        String role = (String)roles.get(i);
+                        if (role != null) {
+                            principals.add(new RolePrincipal(role));
+                        }
+                    }
                 }
+
             }
         } catch (Exception e) {
             throw new LoginException("Can't get user " + user + " roles: " + e.getMessage());
