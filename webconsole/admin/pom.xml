@@ -77,8 +77,7 @@
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20070829</version>
-            <scope>compile</scope>
+            <scope>provided</scope>
             <optional>true</optional>
         </dependency>
 
@@ -115,13 +114,9 @@
                     <instructions>
                         <Import-Package>
                             org.apache.karaf.admin;resolution:=optional,
+                            org.json,
                             *
                         </Import-Package>
-                        <Embed-Dependency>
-                            <!-- Required for JSON data transfer -->
-                            <!-- TODO: this needs to be put in a common place for reuse. -->
-                            json
-                        </Embed-Dependency>
                     </instructions>
                 </configuration>
             </plugin>

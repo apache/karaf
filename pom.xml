@@ -156,6 +156,7 @@
         <maven.version>2.0.9</maven.version>
         <mina.version>2.0.5</mina.version>
         <osgi.version>4.2.0</osgi.version>
+        <org.json.version>20070829</org.json.version>
         <pax.exam.version>1.2.4</pax.exam.version>
         <pax.logging.version>1.6.10</pax.logging.version>
         <pax.runner.version>1.6.2</pax.runner.version>
@@ -595,6 +596,11 @@
                 <groupId>org.apache.maven</groupId>
                 <artifactId>maven-project</artifactId>
                 <version>${maven.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.json</groupId>
+                <artifactId>json</artifactId>
+                <version>${org.json.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
