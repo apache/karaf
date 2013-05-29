@@ -35,7 +35,6 @@
 
     <properties>
         <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
-        <org.json.version>20070829</org.json.version>
         <org.json.version.osgi>0.0.0.${org.json.version}</org.json.version.osgi>
     </properties>
 
@@ -79,7 +78,6 @@
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>${org.json.version}</version>
             <scope>provided</scope>
             <optional>true</optional>
         </dependency>
@@ -122,7 +120,8 @@
                             org.apache.felix.webconsole.internal.KarafOsgiManagerActivator
                         </Bundle-Activator>
                         <Export-Package>
-                            org.apache.felix.webconsole
+                            org.apache.felix.webconsole,
+                            org.json;version="${org.json.version.osgi}"
                         </Export-Package>
                         <Private-Package>
                             !org.apache.felix.webconsole,
@@ -156,9 +155,6 @@
                             <!-- ServiceTracker -->
                             org.osgi.compendium;
                                 inline=org/osgi/util/tracker/*,
-
-                            <!-- Required for JSON data transfer -->
-                            json,
 
                             <!-- File Upload functionality -->
                             commons-fileupload,
