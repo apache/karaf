@@ -80,8 +80,7 @@
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20070829</version>
-            <scope>compile</scope>
+            <scope>provided</scope>
             <optional>true</optional>
         </dependency>
     </dependencies>
@@ -110,16 +109,12 @@
                     <instructions>
                         <Import-Package>
                             org.apache.aries.blueprint,
-			    org.apache.felix.webconsole*;version="[3,5)",
+			                org.apache.felix.webconsole*;version="[3,5)",
+                            org.json,
                             org.osgi.service.blueprint.container,
                             org.osgi.service.blueprint.reflect,
                             *
                         </Import-Package>
-                        <Embed-Dependency>
-                            <!-- Required for JSON data transfer -->
-                            <!-- TODO: this needs to be put in a common place for reuse. -->
-                            json
-                        </Embed-Dependency>
                     </instructions>
                 </configuration>
             </plugin>

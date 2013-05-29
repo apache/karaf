@@ -202,6 +202,7 @@
         <mina.version>2.0.7</mina.version>
         <osgi.version>5.0.0</osgi.version>
         <osgi.compendium.version>4.3.1</osgi.compendium.version>
+        <org.json.version>20070829</org.json.version>
         <pax.exam.version>2.6.0</pax.exam.version>
         <pax.logging.version>1.7.0</pax.logging.version>
         <pax.runner.version>1.7.6</pax.runner.version>
@@ -738,6 +739,12 @@
               <type>xml</type>
               <classifier>features</classifier>
               <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.json</groupId>
+                <artifactId>json</artifactId>
+                <version>${org.json.version}</version>
             </dependency>
 
             <dependency>
