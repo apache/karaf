@@ -82,7 +82,7 @@
 
         <!-- listed in source feature.xml with explicit startlevel -->
         <dependency>
-            <groupId>biz.aQute</groupId>
+            <groupId>biz.aQute.bnd</groupId>
             <artifactId>bndlib</artifactId>
             <exclusions>
                 <exclusion>

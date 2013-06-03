@@ -37,7 +37,7 @@
     <dependencies>
         <!-- contains the SCR Annotations -->
         <dependency>
-            <groupId>biz.aQute</groupId>
+            <groupId>biz.aQute.bnd</groupId>
             <artifactId>bndlib</artifactId>
         </dependency>
         <!-- contains the SCR Binaries (only required if you need the low level SCR APIs -->
