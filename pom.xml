@@ -144,7 +144,7 @@
         <geronimo.jaspic-spec.version>1.1</geronimo.jaspic-spec.version>
         <easymock.version>3.1</easymock.version>
         <equinox.version>3.8.0.v20120529-1548</equinox.version>
-        <bndlib.version>1.50.0</bndlib.version>
+        <bndlib.version>2.1.0</bndlib.version>
         <equinox.region.version>1.0.0.v20110506</equinox.region.version>
         <felix.bundlerepository.version>1.6.6</felix.bundlerepository.version>
         <felix.configadmin.version>1.6.0</felix.configadmin.version>
@@ -211,7 +211,7 @@
         <pax.base.version>1.4.0</pax.base.version>
         <pax.url.version>1.5.2</pax.url.version>
         <pax.web.version>3.0.1</pax.web.version>
-        <pax.swissbox.version>1.5.1</pax.swissbox.version>
+        <pax.swissbox.version>1.7.0-SNAPSHOT</pax.swissbox.version>
         <pax.tinybundle.version>1.0.0</pax.tinybundle.version>
         <portlet-api.version>2.0</portlet-api.version>
         <servlet.api.version>3.0</servlet.api.version>
@@ -922,7 +922,7 @@
             </dependency>
 
             <dependency>
-                <groupId>biz.aQute</groupId>
+                <groupId>biz.aQute.bnd</groupId>
                 <artifactId>bndlib</artifactId>
                 <version>${bndlib.version}</version>
             </dependency>
