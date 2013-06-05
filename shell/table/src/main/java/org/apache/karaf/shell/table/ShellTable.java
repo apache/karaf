@@ -89,7 +89,10 @@ public class ShellTable {
         if (showHeaders) {
             String headerLine = headerRow.getContent(cols, separator);
             out.println(headerLine);
-            out.println(underline(headerLine.length()));
+            for (Col col : cols) {
+              out.print(underline(col.getSize()));
+            }
+            out.println(underline((cols.size() - 1) * 3));
         }
 
         for (Row row : rows) {

@@ -68,6 +68,10 @@ public class Col {
         this.maxSize = maxSize;
         return this;
     }
+
+    public int getSize() {
+      return size;
+    }
     
     protected void updateSize(int cellSize) {
         if (this.size <= cellSize) {
