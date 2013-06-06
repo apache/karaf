@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class ShellTable {
+
     private List<Col> cols = new ArrayList<Col>();
     private List<Row> rows = new ArrayList<Row>();
     boolean showHeaders = true;
@@ -89,7 +90,10 @@ public class ShellTable {
         if (showHeaders) {
             String headerLine = headerRow.getContent(cols, separator);
             out.println(headerLine);
-            out.println(underline(headerLine.length()));
+            for (Col col : cols) {
+                out.print(underline(col.getSize()));
+            }
+            out.println(underline((cols.size() - 1) * 3));
         }
 
         for (Row row : rows) {
