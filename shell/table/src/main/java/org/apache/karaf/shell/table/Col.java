@@ -15,8 +15,6 @@
  */
 package org.apache.karaf.shell.table;
 
-
-
 /**
  * Column definition.
  */
@@ -67,6 +65,10 @@ public class Col {
     public Col maxSize(int maxSize) {
         this.maxSize = maxSize;
         return this;
+    }
+
+    public int getSize() {
+        return size;
     }
     
     protected void updateSize(int cellSize) {
