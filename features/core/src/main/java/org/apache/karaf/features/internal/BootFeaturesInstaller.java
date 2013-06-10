@@ -63,12 +63,8 @@ public class BootFeaturesInstaller {
      */
     public void start() throws Exception {
         if (boot != null) {
-            new Thread() {
-                public void run() {
-                    installBootFeatures();
-                    publishBootFinished();
-                }
-            }.start();
+            installBootFeatures();
+            publishBootFinished();
         } else {
             publishBootFinished();
         }
