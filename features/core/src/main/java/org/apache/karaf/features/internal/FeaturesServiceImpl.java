@@ -97,7 +97,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(FeaturesServiceImpl.class);
 
     private static final int KARAF_BUNDLE_START_LEVEL =
-                        Integer.parseInt(System.getProperty("karaf.startlevel.bundle", "80"));
+            Integer.parseInt(System.getProperty("karaf.startlevel.bundle", "80"));
 
     private BundleContext bundleContext;
     private ConfigurationAdmin configAdmin;
@@ -209,6 +209,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
 
     /**
      * Register a features repository.
+     *
      * @param uri the features repository URI.
      * @throws Exception in case of adding failure.
      */
@@ -364,7 +365,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
     /**
      * Install a feature identified by a name, including installation options.
      *
-     * @param name the name of the feature.
+     * @param name    the name of the feature.
      * @param options the installation options.
      * @throws Exception in case of installation failure.
      */
@@ -375,7 +376,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
     /**
      * Install a feature identified by a name and a version.
      *
-     * @param name the name of the feature.
+     * @param name    the name of the feature.
      * @param version the version of the feature.
      * @throws Exception in case of installation failure.
      */
@@ -582,8 +583,8 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
             if (state.features.containsKey(fi)) {
                 LOGGER.debug("Feature {} with version {} is already being installed", feature.getName(), feature.getVersion());
             } else {
-                if (! (fi.getName().equals(feature.getName())
-                    && fi.getVersion().equals(feature.getVersion()))) {
+                if (!(fi.getName().equals(feature.getName())
+                        && fi.getVersion().equals(feature.getVersion()))) {
                     doInstallFeature(state, fi, verbose);
                 }
             }
@@ -1107,54 +1108,50 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         }
         // Install boot features
         if (boot != null && !bootFeaturesInstalled) {
-            new Thread() {
-                public void run() {
-                    // splitting the features
-                    String[] list = boot.split(",");
-                    Set<Feature> features = new LinkedHashSet<Feature>();
-                    for (String f : list) {
-                        f = f.trim();
-                        if (f.length() > 0) {
-                            String featureVersion = null;
+            // splitting the features
+            String[] list = boot.split(",");
+            Set<Feature> features = new LinkedHashSet<Feature>();
+            for (String f : list) {
+                f = f.trim();
+                if (f.length() > 0) {
+                    String featureVersion = null;
 
-                            // first we split the parts of the feature string to gain access to the version info
-                            // if specified
-                            String[] parts = f.split(";");
-                            String featureName = parts[0];
-                            for (String part : parts) {
-                                // if the part starts with "version=" it contains the version info
-                                if (part.startsWith(FeatureImpl.VERSION_PREFIX)) {
-                                    featureVersion = part.substring(FeatureImpl.VERSION_PREFIX.length());
-                                }
-                            }
-
-                            if (featureVersion == null) {
-                                // no version specified - use default version
-                                featureVersion = FeatureImpl.DEFAULT_VERSION;
-                            }
-
-                            try {
-                                // try to grab specific feature version
-                                Feature feature = getFeature(featureName, featureVersion);
-                                if (feature != null) {
-                                    features.add(feature);
-                                } else {
-                                    LOGGER.error("Error installing boot feature " + f + ": feature not found");
-                                }
-                            } catch (Exception e) {
-                                LOGGER.error("Error installing boot feature " + f, e);
-                            }
+                    // first we split the parts of the feature string to gain access to the version info
+                    // if specified
+                    String[] parts = f.split(";");
+                    String featureName = parts[0];
+                    for (String part : parts) {
+                        // if the part starts with "version=" it contains the version info
+                        if (part.startsWith(FeatureImpl.VERSION_PREFIX)) {
+                            featureVersion = part.substring(FeatureImpl.VERSION_PREFIX.length());
                         }
                     }
-                    try {
-                        installFeatures(features, EnumSet.of(Option.NoCleanIfFailure, Option.ContinueBatchOnFailure));
-                    } catch (Exception e) {
-                        LOGGER.error("Error installing boot features", e);
+
+                    if (featureVersion == null) {
+                        // no version specified - use default version
+                        featureVersion = FeatureImpl.DEFAULT_VERSION;
                     }
-                    bootFeaturesInstalled = true;
-                    saveState();
+
+                    try {
+                        // try to grab specific feature version
+                        Feature feature = getFeature(featureName, featureVersion);
+                        if (feature != null) {
+                            features.add(feature);
+                        } else {
+                            LOGGER.error("Error installing boot feature " + f + ": feature not found");
+                        }
+                    } catch (Exception e) {
+                        LOGGER.error("Error installing boot feature " + f, e);
+                    }
                 }
-            }.start();
+            }
+            try {
+                installFeatures(features, EnumSet.of(Option.NoCleanIfFailure, Option.ContinueBatchOnFailure));
+            } catch (Exception e) {
+                LOGGER.error("Error installing boot features", e);
+            }
+            bootFeaturesInstalled = true;
+            saveState();
         }
     }
 
