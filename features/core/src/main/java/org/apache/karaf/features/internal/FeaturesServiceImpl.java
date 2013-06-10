@@ -90,7 +90,6 @@ import static java.lang.String.format;
  * Adding a repository url will load the features contained in this repository and
  * create dummy sub shells.  When invoked, these commands will prompt the user for
  * installing the needed bundles.
- *
  */
 public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
 
@@ -218,7 +217,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         callListeners(new RepositoryEvent(repo, RepositoryEvent.EventType.RepositoryAdded, false));
         features = null;
         return repo;
-        
+
     }
 
     public void removeRepository(URI uri) {
@@ -234,10 +233,10 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         callListeners(new RepositoryEvent(repo, RepositoryEvent.EventType.RepositoryRemoved, false));
         features = null;
     }
-    
+
     public void restoreRepository(URI uri) throws Exception {
-    	repositories.put(uri, (RepositoryImpl)repo.get());
-    	callListeners(new RepositoryEvent(repo.get(), RepositoryEvent.EventType.RepositoryAdded, false));
+        repositories.put(uri, (RepositoryImpl) repo.get());
+        callListeners(new RepositoryEvent(repo.get(), RepositoryEvent.EventType.RepositoryAdded, false));
         features = null;
     }
 
@@ -251,7 +250,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         for (Feature f : repo.getFeatures()) {
             installFeature(f.getName(), f.getVersion());
         }
-        internalRemoveRepository(uri);            
+        internalRemoveRepository(uri);
     }
 
     public void uninstallAllFeatures(URI uri) throws Exception {
@@ -259,11 +258,11 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         for (Feature f : repo.getFeatures()) {
             uninstallFeature(f.getName(), f.getVersion());
         }
-        internalRemoveRepository(uri);            
+        internalRemoveRepository(uri);
     }
 
     public void installFeature(String name) throws Exception {
-    	installFeature(name, FeatureImpl.DEFAULT_VERSION);
+        installFeature(name, FeatureImpl.DEFAULT_VERSION);
     }
 
     public void installFeature(String name, String version) throws Exception {
@@ -274,7 +273,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         Feature f = getFeature(name, version);
         if (f == null) {
             throw new Exception("No feature named '" + name
-            		+ "' with version '" + version + "' available");
+                    + "' with version '" + version + "' available");
         }
         installFeature(f, options);
     }
@@ -291,13 +290,13 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
             // Install everything
             for (Feature f : features) {
                 InstallationState s = new InstallationState();
-            	try {
+                try {
                     doInstallFeature(s, f, verbose);
                     state.bundleInfos.putAll(s.bundleInfos);
                     state.bundles.addAll(s.bundles);
                     state.features.putAll(s.features);
                     state.installed.addAll(s.installed);
-            	} catch (Exception e) {
+                } catch (Exception e) {
                     failure.bundles.addAll(s.bundles);
                     failure.features.putAll(s.features);
                     failure.installed.addAll(s.installed);
@@ -306,7 +305,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
                     } else {
                         throw e;
                     }
-            	}
+                }
             }
             // Find bundles to refresh
             boolean print = options.contains(Option.PrintBundlesToRefresh);
@@ -344,18 +343,18 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
                     // do not start bundles that are persistently stopped
                     if (state.installed.contains(b)
                             || (b.getState() != Bundle.STARTING && b.getState() != Bundle.ACTIVE
-                                    && getStartLevel().isBundlePersistentlyStarted(b))) {
-                    	// do no start bundles when user request it
-                    	Long bundleId = b.getBundleId();
-                    	BundleInfo bundleInfo = state.bundleInfos.get(bundleId);
+                            && getStartLevel().isBundlePersistentlyStarted(b))) {
+                        // do no start bundles when user request it
+                        Long bundleId = b.getBundleId();
+                        BundleInfo bundleInfo = state.bundleInfos.get(bundleId);
                         if (bundleInfo == null || bundleInfo.isStart()) {
-	                        try {
-	                            b.start();
-	                        } catch (BundleException be) {
-	                            String msg = format("Could not start bundle %s in feature(s) %s: %s", b.getLocation(), getFeaturesContainingBundleList(b), be.getMessage());
-	                            throw new Exception(msg, be);
-	                        }
-                    	}
+                            try {
+                                b.start();
+                            } catch (BundleException be) {
+                                String msg = format("Could not start bundle %s in feature(s) %s: %s", b.getLocation(), getFeaturesContainingBundleList(b), be.getMessage());
+                                throw new Exception(msg, be);
+                            }
+                        }
                     }
                 }
             }
@@ -424,7 +423,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         }
         for (Feature dependency : feature.getDependencies()) {
             VersionRange range = FeatureImpl.DEFAULT_VERSION.equals(dependency.getVersion())
-                        ? VersionRange.ANY_VERSION : new VersionRange(dependency.getVersion(), true, true);
+                    ? VersionRange.ANY_VERSION : new VersionRange(dependency.getVersion(), true, true);
             Feature fi = null;
             for (Feature f : installed.keySet()) {
                 if (f.getName().equals(dependency.getName())) {
@@ -456,14 +455,14 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
             if (state.features.containsKey(fi)) {
                 LOGGER.debug("Feature {} with version {} is already being installed", feature.getName(), feature.getVersion());
             } else {
-                if (! (fi.getName().equals(feature.getName())
-                    && fi.getVersion().equals(feature.getVersion()))) {
+                if (!(fi.getName().equals(feature.getName())
+                        && fi.getVersion().equals(feature.getVersion()))) {
                     doInstallFeature(state, fi, verbose);
                 }
             }
         }
         for (String config : feature.getConfigurations().keySet()) {
-            Dictionary<String,String> props = new Hashtable<String, String>(feature.getConfigurations().get(config));
+            Dictionary<String, String> props = new Hashtable<String, String>(feature.getConfigurations().get(config));
             String[] pid = parsePid(config);
             Configuration cfg = findExistingConfiguration(configAdmin, pid[0], pid[1]);
             if (cfg == null) {
@@ -477,8 +476,8 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
             }
         }
         for (ConfigFileInfo configFile : feature.getConfigurationFiles()) {
-        	installConfigurationFile(configFile.getLocation(), 
-        			configFile.getFinalname(), configFile.isOverride(), verbose);
+            installConfigurationFile(configFile.getLocation(),
+                    configFile.getFinalname(), configFile.isOverride(), verbose);
         }
         Set<Long> bundles = new TreeSet<Long>();
         List<InstallResult> installResultList = new LinkedList<InstallResult>();
@@ -504,7 +503,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         String resolver = feature.getResolver();
         // If no resolver is specified, we expect a list of uris
         if (resolver == null || resolver.length() == 0) {
-        	return feature.getBundles();
+            return feature.getBundles();
         }
         boolean optional = false;
         if (resolver.startsWith("(") && resolver.endsWith(")")) {
@@ -583,7 +582,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         }
         // Second pass: for each bundle, check if there is any unresolved optional package that could be resolved
         Map<Bundle, List<Clause>> imports = new HashMap<Bundle, List<Clause>>();
-        for (Iterator<Bundle> it = bundles.iterator(); it.hasNext();) {
+        for (Iterator<Bundle> it = bundles.iterator(); it.hasNext(); ) {
             Bundle b = it.next();
             String importsStr = (String) b.getHeaders().get(Constants.IMPORT_PACKAGE);
             List<Clause> importsList = getOptionalImports(importsStr);
@@ -606,10 +605,10 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
                 exports.addAll(Arrays.asList(exportsList));
             }
         }
-        for (Iterator<Bundle> it = bundles.iterator(); it.hasNext();) {
+        for (Iterator<Bundle> it = bundles.iterator(); it.hasNext(); ) {
             Bundle b = it.next();
             List<Clause> importsList = imports.get(b);
-            for (Iterator<Clause> itpi = importsList.iterator(); itpi.hasNext();) {
+            for (Iterator<Clause> itpi = importsList.iterator(); itpi.hasNext(); ) {
                 Clause pi = itpi.next();
                 boolean matching = false;
                 for (Clause pe : exports) {
@@ -696,7 +695,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
             is.mark(256 * 1024);
             JarInputStream jar = new JarInputStream(is);
             Manifest m = jar.getManifest();
-            if(m == null) {
+            if (m == null) {
                 throw new BundleException("Manifest not present in the first entry of the zip " + bundleLocation);
             }
             String sn = m.getMainAttributes().getValue(Constants.BUNDLE_SYMBOLICNAME);
@@ -749,34 +748,34 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
             getStartLevel().setBundleStartLevel(bundle, startLevel);
         }
     }
-    
+
     public void installConfigurationFile(String fileLocation, String finalname, boolean override, boolean verbose) throws IOException {
-    	LOGGER.debug("Checking configuration file " + fileLocation);
+        LOGGER.debug("Checking configuration file " + fileLocation);
         if (verbose) {
             System.out.println("Checking configuration file " + fileLocation);
         }
-    	
-    	String basePath = System.getProperty("karaf.base");
-    	
-    	if (finalname.indexOf("${") != -1) {
-    		//remove any placeholder or variable part, this is not valid.
-    		int marker = finalname.indexOf("}");
-    		finalname = finalname.substring(marker+1);
-    	}
-    	
-    	finalname = basePath + File.separator + finalname;
-    	
-    	File file = new File(finalname); 
-    	if (file.exists() && !override) {
-    		LOGGER.debug("configFile already exist, don't override it");
-    		return;
-    	}
+
+        String basePath = System.getProperty("karaf.base");
+
+        if (finalname.indexOf("${") != -1) {
+            //remove any placeholder or variable part, this is not valid.
+            int marker = finalname.indexOf("}");
+            finalname = finalname.substring(marker + 1);
+        }
+
+        finalname = basePath + File.separator + finalname;
+
+        File file = new File(finalname);
+        if (file.exists() && !override) {
+            LOGGER.debug("configFile already exist, don't override it");
+            return;
+        }
 
         InputStream is = null;
         FileOutputStream fop = null;
         try {
             is = new BufferedInputStream(new URL(fileLocation).openStream());
-            
+
             if (!file.exists()) {
                 File parentFile = file.getParentFile();
                 if (parentFile != null) {
@@ -786,10 +785,10 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
             }
 
             fop = new FileOutputStream(file);
-        
+
             int bytesRead = 0;
             byte[] buffer = new byte[1024];
-            
+
             while ((bytesRead = is.read(buffer)) != -1) {
                 fop.write(buffer, 0, bytesRead);
             }
@@ -797,17 +796,17 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
             LOGGER.error(e.getMessage());
             throw e;
         } catch (MalformedURLException e) {
-        	LOGGER.error(e.getMessage());
+            LOGGER.error(e.getMessage());
             throw e;
-		} finally {
-			if (is != null)
-				is.close();
+        } finally {
+            if (is != null)
+                is.close();
             if (fop != null) {
-			    fop.flush();
-			    fop.close();
+                fop.flush();
+                fop.close();
             }
-		}
-            
+        }
+
     }
 
     public void uninstallFeature(String name) throws Exception {
@@ -833,12 +832,12 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         }
         uninstallFeature(name, versions.get(0));
     }
-    
+
     public void uninstallFeature(String name, String version) throws Exception {
-    	Feature feature = getFeature(name, version);
+        Feature feature = getFeature(name, version);
         if (feature == null || !installed.containsKey(feature)) {
-            throw new Exception("Feature named '" + name 
-            		+ "' with version '" + version + "' is not installed");
+            throw new Exception("Feature named '" + name
+                    + "' with version '" + version + "' is not installed");
         }
         // Grab all the bundles installed by this feature
         // and remove all those who will still be in use.
@@ -861,7 +860,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
     public Feature[] listFeatures() throws Exception {
         Collection<Feature> features = new ArrayList<Feature>();
         for (Map<String, Feature> featureWithDifferentVersion : getFeatures().values()) {
-			for (Feature f : featureWithDifferentVersion.values()) {
+            for (Feature f : featureWithDifferentVersion.values()) {
                 features.add(f);
             }
         }
@@ -918,11 +917,11 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
 
     protected Map<String, Map<String, Feature>> getFeatures() throws Exception {
         if (features == null) {
-        	//the outer map's key is feature name, the inner map's key is feature version       
+            //the outer map's key is feature name, the inner map's key is feature version
             Map<String, Map<String, Feature>> map = new HashMap<String, Map<String, Feature>>();
             // Two phase load:
             // * first load dependent repositories
-            for (;;) {
+            for (; ; ) {
                 boolean newRepo = false;
                 for (Repository repo : listRepositories()) {
                     for (URI uri : repo.getRepositories()) {
@@ -939,13 +938,13 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
             // * then load all features
             for (Repository repo : repositories.values()) {
                 for (Feature f : repo.getFeatures()) {
-                	if (map.get(f.getName()) == null) {
-                		Map<String, Feature> versionMap = new HashMap<String, Feature>();
-                		versionMap.put(f.getVersion(), f);
-                		map.put(f.getName(), versionMap);
-                	} else {
-                		map.get(f.getName()).put(f.getVersion(), f);
-                	}
+                    if (map.get(f.getName()) == null) {
+                        Map<String, Feature> versionMap = new HashMap<String, Feature>();
+                        versionMap.put(f.getVersion(), f);
+                        map.put(f.getName(), versionMap);
+                    } else {
+                        map.get(f.getName()).put(f.getVersion(), f);
+                    }
                 }
             }
             features = map;
@@ -971,9 +970,9 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
             if (uris != null) {
                 for (URI uri : uris) {
                     try {
-                    	internalAddRepository(uri);
+                        internalAddRepository(uri);
                     } catch (Exception e) {
-                        LOGGER.warn(format("Unable to add features repository %s at startup", uri), e);    
+                        LOGGER.warn(format("Unable to add features repository %s at startup", uri), e);
                     }
                 }
             }
@@ -981,54 +980,50 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         }
         // Install boot features
         if (boot != null && !bootFeaturesInstalled) {
-            new Thread() {
-                public void run() {
-                    // splitting the features
-                    String[] list = boot.split(",");
-                    Set<Feature> features = new LinkedHashSet<Feature>();
-                    for (String f : list) {
-                        f = f.trim();
-                        if (f.length() > 0) {
-                            String featureVersion = null;
+            // splitting the features
+            String[] list = boot.split(",");
+            Set<Feature> features = new LinkedHashSet<Feature>();
+            for (String f : list) {
+                f = f.trim();
+                if (f.length() > 0) {
+                    String featureVersion = null;
 
-                            // first we split the parts of the feature string to gain access to the version info
-                            // if specified
-                            String[] parts = f.split(";");
-                            String featureName = parts[0];
-                            for (String part : parts) {
-                                // if the part starts with "version=" it contains the version info
-                                if (part.startsWith(FeatureImpl.VERSION_PREFIX)) {
-                                    featureVersion = part.substring(FeatureImpl.VERSION_PREFIX.length());
-                                }
-                            }
-
-                            if (featureVersion == null) {
-                                // no version specified - use default version
-                                featureVersion = FeatureImpl.DEFAULT_VERSION;
-                            }
-
-                            try {
-                                // try to grab specific feature version
-                                Feature feature = getFeature(featureName, featureVersion);
-                                if (feature != null) {
-                                    features.add(feature);
-                                } else {
-                                    LOGGER.error("Error installing boot feature " + f + ": feature not found");
-                                }
-                            } catch (Exception e) {
-                                LOGGER.error("Error installing boot feature " + f, e);
-                            }
+                    // first we split the parts of the feature string to gain access to the version info
+                    // if specified
+                    String[] parts = f.split(";");
+                    String featureName = parts[0];
+                    for (String part : parts) {
+                        // if the part starts with "version=" it contains the version info
+                        if (part.startsWith(FeatureImpl.VERSION_PREFIX)) {
+                            featureVersion = part.substring(FeatureImpl.VERSION_PREFIX.length());
                         }
                     }
-                    try {
-                        installFeatures(features, EnumSet.of(Option.NoCleanIfFailure, Option.ContinueBatchOnFailure));
-                    } catch (Exception e) {
-                        LOGGER.error("Error installing boot features", e);
+
+                    if (featureVersion == null) {
+                        // no version specified - use default version
+                        featureVersion = FeatureImpl.DEFAULT_VERSION;
                     }
-                    bootFeaturesInstalled = true;
-                    saveState();
+
+                    try {
+                        // try to grab specific feature version
+                        Feature feature = getFeature(featureName, featureVersion);
+                        if (feature != null) {
+                            features.add(feature);
+                        } else {
+                            LOGGER.error("Error installing boot feature " + f + ": feature not found");
+                        }
+                    } catch (Exception e) {
+                        LOGGER.error("Error installing boot feature " + f, e);
+                    }
                 }
-            }.start();
+            }
+            try {
+                installFeatures(features, EnumSet.of(Option.NoCleanIfFailure, Option.ContinueBatchOnFailure));
+            } catch (Exception e) {
+                LOGGER.error("Error installing boot features", e);
+            }
+            bootFeaturesInstalled = true;
+            saveState();
         }
     }
 
@@ -1126,11 +1121,11 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
             }
             Set<URI> repositories = loadSet(props, "repositories.");
             for (URI repo : repositories) {
-            	try {
-            		internalAddRepository(repo);
-            	} catch (Exception e) {
-            		LOGGER.warn(format("Unable to add features repository %s at startup", repo), e);
-            	}
+                try {
+                    internalAddRepository(repo);
+                } catch (Exception e) {
+                    LOGGER.warn(format("Unable to add features repository %s at startup", repo), e);
+                }
             }
             installed = loadMap(props, "features.");
             for (Feature f : installed.keySet()) {
@@ -1175,7 +1170,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
 
     protected Map<Feature, Set<Long>> loadMap(Properties props, String prefix) {
         Map<Feature, Set<Long>> map = new HashMap<Feature, Set<Long>>();
-        for (Enumeration e = props.propertyNames(); e.hasMoreElements();) {
+        for (Enumeration e = props.propertyNames(); e.hasMoreElements(); ) {
             String key = (String) e.nextElement();
             if (key.startsWith(prefix)) {
                 String val = (String) props.get(key);
@@ -1200,9 +1195,9 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
     protected Set<Long> readValue(String val) {
         Set<Long> set = new HashSet<Long>();
         if (val != null && val.length() != 0) {
-        	for (String str : val.split(",")) {
-        		set.add(Long.parseLong(str));
-        	}
+            for (String str : val.split(",")) {
+                set.add(Long.parseLong(str));
+            }
         }
         return set;
     }
@@ -1225,10 +1220,10 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         }
     }
 
-    static Pattern fuzzyVersion  = Pattern.compile("(\\d+)(\\.(\\d+)(\\.(\\d+))?)?([^a-zA-Z0-9](.*))?",
-                                                   Pattern.DOTALL);
+    static Pattern fuzzyVersion = Pattern.compile("(\\d+)(\\.(\\d+)(\\.(\\d+))?)?([^a-zA-Z0-9](.*))?",
+            Pattern.DOTALL);
     static Pattern fuzzyModifier = Pattern.compile("(\\d+[.-])*(.*)",
-                                                   Pattern.DOTALL);
+            Pattern.DOTALL);
 
     /**
      * Clean up version parameters. Other builders use more fuzzy definitions of
@@ -1286,7 +1281,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         }
     }
 
-    public Set<Feature> getFeaturesContainingBundle (Bundle bundle) throws Exception {
+    public Set<Feature> getFeaturesContainingBundle(Bundle bundle) throws Exception {
         Set<Feature> features = new HashSet<Feature>();
         for (Map<String, Feature> featureMap : this.getFeatures().values()) {
             for (Feature f : featureMap.values()) {
@@ -1306,7 +1301,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         StringBuilder buffer = new StringBuilder();
         Iterator<Feature> iter = features.iterator();
         while (iter.hasNext()) {
-            Feature feature= iter.next();
+            Feature feature = iter.next();
             buffer.append(feature.getId());
             if (iter.hasNext()) {
                 buffer.append(", ");
