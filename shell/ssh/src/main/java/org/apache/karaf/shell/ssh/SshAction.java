@@ -52,6 +52,9 @@ public class SshAction extends OsgiCommandSupport implements BlueprintContainerA
     @Option(name="-l", aliases={"--username"}, description = "The user name for remote login", required = false, multiValued = false)
     private String username;
 
+    @Option(name = "-P", aliases = {"--password"}, description = "The password for remote login", required = false, multiValued = false)
+    private String password;
+
     @Option(name="-p", aliases={"--port"}, description = "The port to use for SSH connection", required = false, multiValued = false)
     private int port = 22;
 
@@ -101,6 +104,7 @@ public class SshAction extends OsgiCommandSupport implements BlueprintContainerA
 
         // Create the client from prototype
         SshClient client = (SshClient) container.getComponentInstance(sshClientId);
+
         log.debug("Created client: {}", client);
         client.start();
 
@@ -133,7 +137,9 @@ public class SshAction extends OsgiCommandSupport implements BlueprintContainerA
                 }
                 if (!authed) {
                     log.debug("Prompting user for password");
-                    String password = readLine("Password: ");
+                    if (password == null) {
+                        password = readLine("Password: ");
+                    }
                     sshSession.authPassword(username, password);
                     int ret = sshSession.waitFor(ClientSession.WAIT_AUTH | ClientSession.CLOSED | ClientSession.AUTHED, 0);
                     if ((ret & ClientSession.AUTHED) == 0) {
