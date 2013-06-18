@@ -30,6 +30,9 @@ public class ConnectCommand extends AdminCommandSupport {
     @Option(name="-u", aliases={"--username"}, description="Remote user name", required = false, multiValued = false)
     private String username;
 
+    @Option(name = "-p", aliases = {"--password"}, description = "Remote password", required = false, multiValued = false)
+    private String password;
+
     @Argument(index = 0, name="name", description="The name of the container instance", required = true, multiValued = false)
     private String instance = null;
 
@@ -51,7 +54,11 @@ public class ConnectCommand extends AdminCommandSupport {
 
         int port = getExistingInstance(instance).getSshPort();
         if (username != null) {
-            session.execute("ssh -l " + username + " -p " + port + " localhost " + cmdStr);
+            if (password == null) {
+                session.execute("ssh -l " + username + " -p " + port + " localhost " + cmdStr);
+            } else {
+                session.execute("ssh -l " + username + " -P " + password + " -p " + port + " localhost " + cmdStr);
+            }
         } else {
             session.execute("ssh -p " + port + " localhost " + cmdStr);
         }
