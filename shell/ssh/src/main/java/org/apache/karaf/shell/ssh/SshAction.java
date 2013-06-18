@@ -47,6 +47,9 @@ public class SshAction extends OsgiCommandSupport {
     @Option(name="-l", aliases={"--username"}, description = "The user name for remote login", required = false, multiValued = false)
     private String username;
 
+    @Option(name="-P", aliases={"--password"}, description = "The password for remote login", required = false, multiValued = false)
+    private String password;
+
     @Option(name="-p", aliases={"--port"}, description = "The port to use for SSH connection", required = false, multiValued = false)
     private int port = 22;
     
@@ -123,8 +126,12 @@ public class SshAction extends OsgiCommandSupport {
                     }
                 }
                 if (!authed) {
-                    log.debug("Prompting user for password");
-                    String password = readLine("Password: ");
+                    if (password == null) {
+                        log.debug("Prompting user for password");
+                        password = readLine("Password: ");
+                    } else {
+                        log.debug("Password provided using command line option");
+                    }
                     sshSession.authPassword(username, password);
                     int ret = sshSession.waitFor(ClientSession.WAIT_AUTH | ClientSession.CLOSED | ClientSession.AUTHED, 0);
                     if ((ret & ClientSession.AUTHED) == 0) {
