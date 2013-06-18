@@ -136,8 +136,8 @@ public class SshAction extends OsgiCommandSupport implements BlueprintContainerA
                     }
                 }
                 if (!authed) {
-                    log.debug("Prompting user for password");
                     if (password == null) {
+                        log.debug("Prompting user for password");
                         password = readLine("Password: ");
                     }
                     sshSession.authPassword(username, password);
