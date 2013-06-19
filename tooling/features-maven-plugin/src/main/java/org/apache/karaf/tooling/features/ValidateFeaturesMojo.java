@@ -65,6 +65,8 @@ public class ValidateFeaturesMojo extends MojoSupport {
 
     private static final String KARAF_CORE_STANDARD_FEATURE_URL = "mvn:org.apache.karaf.assemblies.features/standard/%s/xml/features";
     private static final String KARAF_CORE_ENTERPRISE_FEATURE_URL = "mvn:org.apache.karaf.assemblies.features/enterprise/%s/xml/features";
+    
+    private static boolean isCustomStreamURLHandlerSet;
 
     /**
      * The dependency tree builder to use.
@@ -190,7 +192,12 @@ public class ValidateFeaturesMojo extends MojoSupport {
      */
     private void prepare() throws Exception {
         info("== Preparing for validation ==");
-        URL.setURLStreamHandlerFactory(new CustomBundleURLStreamHandlerFactory());
+        if (!isCustomStreamURLHandlerSet) {
+            //URL.setURLStreamHandlerFactory can be called at most once in a given Java Virtual
+            //Machine, so set a flag to avoid calling this method multiple times
+            URL.setURLStreamHandlerFactory(new CustomBundleURLStreamHandlerFactory());
+            isCustomStreamURLHandlerSet = true;
+        }
         info(" - getting list of system bundle exports");
         readSystemPackages();
         info(" - getting list of provided bundle exports");
