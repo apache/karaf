@@ -81,6 +81,34 @@ public class TestCommands extends TestCase {
         assertEquals(Arrays.asList(4), c.execute("my-action --increment 3"));
     }
 
+    public void testCommandTwoArguments() throws Exception {
+        Context c= new Context();
+        c.addCommand("my-action-two-arguments", new SimpleCommand(MyActionTwoArguments.class));
+
+        // Test required argument
+        try
+        {
+            c.execute("my-action-two-arguments");
+            fail("Action should have thrown an exception because of a missing argument");
+        }
+        catch (CommandException e)
+        {
+            assertEquals("Argument one is required", e.getMessage());
+        }
+
+        try
+        {
+            c.execute("my-action-two-arguments 1");
+            fail("Action should have thrown an exception because of a missing argument");
+        }
+        catch (CommandException e)
+        {
+            assertEquals("Argument two is required", e.getMessage());
+        }
+
+        c.execute("my-action-two-arguments 1 2");
+    }
+
     public String capture() throws IOException
     {
         StringWriter sw = new StringWriter();
@@ -134,6 +162,20 @@ public class TestCommands extends TestCase {
                 }
             }
             return ids;
+        }
+    }
+
+    @Command(scope = "test", name = "my-action-two-arguments", description = "My Action with two arguments")
+    public static class MyActionTwoArguments implements Action
+    {
+        @Argument(index = 0, name = "one", description = "one description", required = true)
+        private String one;
+
+        @Argument(index = 1, name = "two", description = "two description", required = true)
+        private String two;
+
+        public Object execute(CommandSession session) throws Exception {
+            return null;
         }
     }
 }
