@@ -300,7 +300,7 @@ public class DefaultActionPreparator implements ActionPreparator {
                 }
             }
         }
-        for (Argument argument : arguments.keySet()) {
+        for (Argument argument : orderedArguments) {
             if (argument.required() && argumentValues.get(argument) == null) {
                 Command command = action.getClass().getAnnotation(Command.class);
                 if (command != null) {
