@@ -650,7 +650,12 @@ public class FeaturesServiceImpl implements FeaturesService {
 
         //Also remove bundles installed as conditionals
         for (Conditional conditional : feature.getConditional()) {
-            bundles.addAll(installed.remove(conditional.asFeature(feature.getName(),feature.getVersion())));
+            Feature conditionalFeature = conditional.asFeature(feature.getName(),feature.getVersion());
+            if (installed.containsKey(conditionalFeature)) {
+            	bundles.addAll(installed.remove(conditionalFeature));
+            } else {
+            	LOGGER.info("Conditional feature {}, hasn't been installed!");
+            }
         }
 
         for (Set<Long> b : installed.values()) {
