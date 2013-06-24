@@ -43,7 +43,7 @@ public class TestCommands extends TestCase {
     }
 
     public void testCommand() throws Exception {
-        Context c= new Context();
+        Context c = new Context();
         c.addCommand("capture", this);
         c.addCommand("my-action", new SimpleCommand(MyAction.class));
 
@@ -56,13 +56,10 @@ public class TestCommands extends TestCase {
 
 
         // Test required argument
-        try
-        {
+        try {
             c.execute("my-action");
             fail("Action should have thrown an exception because of a missing argument");
-        }
-        catch (CommandException e)
-        {
+        } catch (CommandException e) {
         }
 
         // Test required argument
@@ -81,33 +78,49 @@ public class TestCommands extends TestCase {
         assertEquals(Arrays.asList(4), c.execute("my-action --increment 3"));
     }
 
-    public String capture() throws IOException
-    {
+    public void testCommandTwoArguments() throws Exception {
+        Context c = new Context();
+        c.addCommand("my-action-two-arguments", new SimpleCommand(MyActionTwoArguments.class));
+
+        // test required arguments
+        try {
+            c.execute("my-action-two-arguments");
+            fail("Action should have thrown an exception because of a missing argument");
+        } catch (CommandException e) {
+            assertEquals("Argument one is required", e.getMessage());
+        }
+
+        try {
+            c.execute("my-action-two-arguments 1");
+            fail("Action should have thrown an exception because of a missing argument");
+        } catch (CommandException e) {
+            assertEquals("Argument two is required", e.getMessage());
+        }
+
+        c.execute("my-action-two-arguments 1 2");
+    }
+
+    public String capture() throws IOException {
         StringWriter sw = new StringWriter();
         BufferedReader rdr = new BufferedReader(new InputStreamReader(System.in));
         String s = rdr.readLine();
-        while (s != null)
-        {
+        while (s != null) {
             sw.write(s);
             s = rdr.readLine();
         }
         return sw.toString();
     }
 
-    public CharSequence echo(Object args[])
-    {
-        if (args == null)
-        {
+    public CharSequence echo(Object args[]) {
+        if (args == null) {
             return "";
         }
 
         StringBuilder sb = new StringBuilder();
         String del = "";
-        for (Object arg : args)
-        {
+        for (Object arg : args) {
             sb.append(del);
-            if (arg != null)
-            {
+            if (arg != null) {
                 sb.append(arg);
                 del = " ";
             }
@@ -116,24 +129,37 @@ public class TestCommands extends TestCase {
     }
 
     @Command(scope = "test", name = "my-action", description = "My Action")
-    public static class MyAction implements Action
-    {
+    public static class MyAction implements Action {
 
-        @Option(name = "-i", aliases = { "--increment" }, description = "First option")
+        @Option(name = "-i", aliases = {"--increment"}, description = "First option")
         private boolean increment;
 
         @Argument(name = "ids", description = "Bundle ids", required = true, multiValued = true)
         private List<Integer> ids;
 
         public Object execute(CommandSession session) throws Exception {
-            if (increment)
-            {
-                for (int i = 0; i < ids.size(); i++)
-                {
+            if (increment) {
+                for (int i = 0; i < ids.size(); i++) {
                     ids.set(i, ids.get(i) + 1);
                 }
             }
             return ids;
         }
     }
+
+    @Command(scope = "test", name = "my-action-two-arguments", description = "My Action with two arguments")
+    public static class MyActionTwoArguments implements Action {
+
+        @Argument(index = 0, name = "one", description = "one description", required = true, multiValued = false)
+        private String one;
+
+        @Argument(index = 1, name = "two", description = "two description", required = true, multiValued = false)
+        private String two;
+
+        public Object execute(CommandSession session) throws Exception {
+            return null;
+        }
+
+    }
+
 }
