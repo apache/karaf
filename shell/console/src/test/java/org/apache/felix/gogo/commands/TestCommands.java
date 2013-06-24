@@ -31,11 +31,10 @@ import org.apache.felix.service.command.CommandSession;
 
 public class TestCommands extends TestCase {
 
-
     public void testPrompt() throws Exception {
         Context c = new Context();
         c.addCommand("echo", this);
-        c.set("USER", "gnodet");
+        c.set("USER", "test");
         c.set("APPLICATION", "karaf");
         //c.set("SCOPE", "");
         Object p = c.execute("echo \"@|bold ${USER}|@${APPLICATION}:@|bold ${SCOPE}|> \"");
@@ -54,12 +53,12 @@ public class TestCommands extends TestCase {
         assertTrue(((String) help).indexOf("First option") >= 0);
         assertTrue(((String) help).indexOf("Bundle ids") >= 0);
 
-
         // Test required argument
         try {
             c.execute("my-action");
             fail("Action should have thrown an exception because of a missing argument");
         } catch (CommandException e) {
+            // ignore
         }
 
         // Test required argument
