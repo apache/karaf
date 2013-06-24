@@ -168,7 +168,7 @@ public class DefaultActionPreparator implements ActionPreparator {
                     );
             }
         }
-        for (Argument argument : arguments.keySet()) {
+        for (Argument argument : orderedArguments) {
             if (argument.required() && argumentValues.get(argument) == null) {
                     throw new CommandException(commandErrorSt +
                             Ansi.ansi().a("argument ").bold().a(argument.name()).boldOff().a(" is required").toString(),
