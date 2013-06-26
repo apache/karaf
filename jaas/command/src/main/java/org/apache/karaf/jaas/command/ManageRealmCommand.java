@@ -65,7 +65,7 @@ public class ManageRealmCommand extends JaasCommandSupport {
                 List<JaasRealm> realms = getRealms();
                 if (realms != null && realms.size() > 0) {
                     int i = 1;
-                    for (JaasRealm r : realms) {
+                    realms_loop: for (JaasRealm r : realms) {
                         AppConfigurationEntry[] entries = r.getEntries();
 
                         if (entries != null) {
@@ -73,7 +73,7 @@ public class ManageRealmCommand extends JaasCommandSupport {
                                 if (i == index) {
                                     realm = r;
                                     entry = entries[j];
-                                    break;
+                                    break realms_loop;
                                 }
                                 i++;
                             }
