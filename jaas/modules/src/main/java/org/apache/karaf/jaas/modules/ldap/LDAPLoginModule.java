@@ -250,6 +250,7 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
             logger.debug("Looking for the user roles in LDAP with ");
             logger.debug("  base DN: " + roleBaseDN);
             roleFilter = roleFilter.replaceAll("%u", user);
+            roleFilter = roleFilter.replaceAll("%dn", userDN);
             logger.debug("  filter: " + roleFilter);
             NamingEnumeration namingEnumeration = context.search(roleBaseDN, roleFilter, controls);
             while (namingEnumeration.hasMore()) {
