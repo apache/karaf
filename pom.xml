@@ -194,6 +194,7 @@
         <struts.bundle.version>1.3.10_1</struts.bundle.version>
         <xbean.version>3.12</xbean.version>
         <javax.mail.version>1.4.5</javax.mail.version>
+        <xerces.version>2.11.0</xerces.version>
         <http.feature.version>[2,3)</http.feature.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <appendedResourcesDirectory>${basedir}/etc/appended-resources</appendedResourcesDirectory>
@@ -626,6 +627,11 @@
                 <groupId>org.apache.maven</groupId>
                 <artifactId>maven-project</artifactId>
                 <version>${maven.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.xerces</groupId>
+                <artifactId>xercesImpl</artifactId>
+                <version>${xerces.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>

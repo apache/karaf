@@ -113,6 +113,7 @@
             <useProjectArtifact>false</useProjectArtifact>
             <includes>
                 <include>org.apache.karaf:org.apache.karaf.exception</include>
+                <include>org.apache.xerces:xercesImpl</include>
             </includes>
         </dependencySet>
 
