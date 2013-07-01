@@ -20,6 +20,9 @@
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" default-activation="lazy">
 
     <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.0.0">
+        <command name="shell/alias">
+            <action class="org.apache.karaf.shell.commands.AliasAction"/>
+        </command>
         <command name="shell/cat">
             <action class="org.apache.karaf.shell.commands.CatAction"/>
         </command>
