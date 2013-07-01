@@ -21,6 +21,9 @@
 
     <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
         <command>
+            <action class="org.apache.karaf.shell.commands.impl.AliasAction"/>
+        </command>
+        <command>
             <action class="org.apache.karaf.shell.commands.impl.CatAction"/>
         </command>
         <command>
