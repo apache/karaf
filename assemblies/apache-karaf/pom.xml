@@ -439,6 +439,10 @@
             <groupId>org.apache.servicemix.specs</groupId>
             <artifactId>org.apache.servicemix.specs.stax-api-1.2</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.apache.xerces</groupId>
+            <artifactId>xercesImpl</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
