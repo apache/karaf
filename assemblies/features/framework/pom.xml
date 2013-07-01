@@ -356,6 +356,11 @@
                                     <outputDirectory>target/classes/resources/lib/endorsed</outputDirectory>
                                 </artifactItem>
                                 <artifactItem>
+                                    <groupId>org.apache.xerces</groupId>
+                                    <artifactId>xercesImpl</artifactId>
+                                    <outputDirectory>target/classes/resources/lib/endorsed</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
                                     <groupId>org.eclipse</groupId>
                                     <artifactId>osgi</artifactId>
                                     <outputDirectory>target/classes/resources/system/org/eclipse/osgi/${equinox.version}</outputDirectory>
