@@ -45,16 +45,18 @@ public class BootFeaturesInstaller {
     private final BundleContext bundleContext;
     private final FeaturesService featuresService;
     private final String boot;
+    private final boolean bootAsynchronous;
 
     /**
      * 
      * @param featuresService
      * @param boot list of boot features separated by comma. Optionally contains ;version=x.x.x to specify a specific feature version
      */
-    public BootFeaturesInstaller(BundleContext bundleContext, FeaturesService featuresService, String boot) {
+    public BootFeaturesInstaller(BundleContext bundleContext, FeaturesService featuresService, String boot, boolean bootAsynchronous) {
 		this.bundleContext = bundleContext;
         this.featuresService = featuresService;
 		this.boot = boot;
+        this.bootAsynchronous = bootAsynchronous;
 	}
     
     /**
@@ -63,8 +65,17 @@ public class BootFeaturesInstaller {
      */
     public void start() throws Exception {
         if (boot != null) {
-            installBootFeatures();
-            publishBootFinished();
+            if (bootAsynchronous) {
+                new Thread() {
+                    public void run() {
+                        installBootFeatures();
+                        publishBootFinished();
+                    }
+                }.start();
+            } else {
+                installBootFeatures();
+                publishBootFinished();
+            }
         } else {
             publishBootFinished();
         }

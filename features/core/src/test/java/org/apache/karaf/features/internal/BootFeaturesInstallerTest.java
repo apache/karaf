@@ -33,7 +33,7 @@ public class BootFeaturesInstallerTest extends TestBase {
     @Test
     @SuppressWarnings("unchecked")
     public void testParser() {
-        BootFeaturesInstaller installer = new BootFeaturesInstaller(null, null, "");
+        BootFeaturesInstaller installer = new BootFeaturesInstaller(null, null, "", false);
         Assert.assertEquals(asList(setOf("test1", "test2"),setOf("test3")), installer.parseBootFeatures("(test1, test2), test3"));
         Assert.assertEquals(asList(setOf("test1", "test2", "test3")), installer.parseBootFeatures("test1, test2, test3"));
     }
@@ -53,7 +53,7 @@ public class BootFeaturesInstallerTest extends TestBase {
         EasyMock.expectLastCall();
         
         replay(impl);
-        BootFeaturesInstaller bootFeatures = new BootFeaturesInstaller(null, impl, "config,standard,region");
+        BootFeaturesInstaller bootFeatures = new BootFeaturesInstaller(null, impl, "config,standard,region", false);
         bootFeatures.installBootFeatures();
         EasyMock.verify(impl);        
     }
@@ -76,7 +76,7 @@ public class BootFeaturesInstallerTest extends TestBase {
         EasyMock.expectLastCall();
         
         replay(impl);
-        BootFeaturesInstaller bootFeatures = new BootFeaturesInstaller(null, impl , "transaction;version=1.2,ssh;version=1.0.0");
+        BootFeaturesInstaller bootFeatures = new BootFeaturesInstaller(null, impl , "transaction;version=1.2,ssh;version=1.0.0", false);
         bootFeatures.installBootFeatures();
         EasyMock.verify(impl);        
     }
@@ -96,7 +96,7 @@ public class BootFeaturesInstallerTest extends TestBase {
         EasyMock.expectLastCall();
         
         replay(impl);
-        BootFeaturesInstaller bootFeatures = new BootFeaturesInstaller(null, impl , "(transaction), ssh");
+        BootFeaturesInstaller bootFeatures = new BootFeaturesInstaller(null, impl , "(transaction), ssh", false);
         bootFeatures.installBootFeatures();
         EasyMock.verify(impl);        
     }
