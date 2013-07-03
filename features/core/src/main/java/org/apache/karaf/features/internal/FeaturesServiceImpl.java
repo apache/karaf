@@ -110,6 +110,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
     private Map<String, Map<String, Feature>> features;
     private Map<Feature, Set<Long>> installed = new HashMap<Feature, Set<Long>>();
     private String boot;
+    private boolean bootFeaturesAsynchronous;
     private boolean bootFeaturesInstalled;
     private List<FeaturesListener> listeners = new CopyOnWriteArrayIdentityList<FeaturesListener>();
     private ThreadLocal<Repository> repo = new ThreadLocal<Repository>();
@@ -196,6 +197,10 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
 
     public void setBoot(String boot) {
         this.boot = boot;
+    }
+
+    public void setBootFeaturesAsynchronous(boolean bootFeaturesAsynchronous) {
+        this.bootFeaturesAsynchronous = bootFeaturesAsynchronous;
     }
 
     /**
@@ -1108,50 +1113,101 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         }
         // Install boot features
         if (boot != null && !bootFeaturesInstalled) {
-            // splitting the features
-            String[] list = boot.split(",");
-            Set<Feature> features = new LinkedHashSet<Feature>();
-            for (String f : list) {
-                f = f.trim();
-                if (f.length() > 0) {
-                    String featureVersion = null;
+            if (bootFeaturesAsynchronous) {
+                new Thread() {
+                    public void run() {
+                        // splitting the features
+                        String[] list = boot.split(",");
+                        Set<Feature> features = new LinkedHashSet<Feature>();
+                        for (String f : list) {
+                            f = f.trim();
+                            if (f.length() > 0) {
+                                String featureVersion = null;
 
-                    // first we split the parts of the feature string to gain access to the version info
-                    // if specified
-                    String[] parts = f.split(";");
-                    String featureName = parts[0];
-                    for (String part : parts) {
-                        // if the part starts with "version=" it contains the version info
-                        if (part.startsWith(FeatureImpl.VERSION_PREFIX)) {
-                            featureVersion = part.substring(FeatureImpl.VERSION_PREFIX.length());
+                                // first we split the parts of the feature string to gain access to the version info
+                                // if specified
+                                String[] parts = f.split(";");
+                                String featureName = parts[0];
+                                for (String part : parts) {
+                                    // if the part starts with "version=" it contains the version info
+                                    if (part.startsWith(FeatureImpl.VERSION_PREFIX)) {
+                                        featureVersion = part.substring(FeatureImpl.VERSION_PREFIX.length());
+                                    }
+                                }
+
+                                if (featureVersion == null) {
+                                    // no version specified - use default version
+                                    featureVersion = FeatureImpl.DEFAULT_VERSION;
+                                }
+
+                                try {
+                                    // try to grab specific feature version
+                                    Feature feature = getFeature(featureName, featureVersion);
+                                    if (feature != null) {
+                                        features.add(feature);
+                                    } else {
+                                        LOGGER.error("Error installing boot feature " + f + ": feature not found");
+                                    }
+                                } catch (Exception e) {
+                                    LOGGER.error("Error installing boot feature " + f, e);
+                                }
+                            }
                         }
-                    }
-
-                    if (featureVersion == null) {
-                        // no version specified - use default version
-                        featureVersion = FeatureImpl.DEFAULT_VERSION;
-                    }
-
-                    try {
-                        // try to grab specific feature version
-                        Feature feature = getFeature(featureName, featureVersion);
-                        if (feature != null) {
-                            features.add(feature);
-                        } else {
-                            LOGGER.error("Error installing boot feature " + f + ": feature not found");
+                        try {
+                            installFeatures(features, EnumSet.of(Option.NoCleanIfFailure, Option.ContinueBatchOnFailure));
+                        } catch (Exception e) {
+                            LOGGER.error("Error installing boot features", e);
                         }
-                    } catch (Exception e) {
-                        LOGGER.error("Error installing boot feature " + f, e);
+                        bootFeaturesInstalled = true;
+                        saveState();
+                    }
+                }.start();
+            } else {
+                // splitting the features
+                String[] list = boot.split(",");
+                Set<Feature> features = new LinkedHashSet<Feature>();
+                for (String f : list) {
+                    f = f.trim();
+                    if (f.length() > 0) {
+                        String featureVersion = null;
+
+                        // first we split the parts of the feature string to gain access to the version info
+                        // if specified
+                        String[] parts = f.split(";");
+                        String featureName = parts[0];
+                        for (String part : parts) {
+                            // if the part starts with "version=" it contains the version info
+                            if (part.startsWith(FeatureImpl.VERSION_PREFIX)) {
+                                featureVersion = part.substring(FeatureImpl.VERSION_PREFIX.length());
+                            }
+                        }
+
+                        if (featureVersion == null) {
+                            // no version specified - use default version
+                            featureVersion = FeatureImpl.DEFAULT_VERSION;
+                        }
+
+                        try {
+                            // try to grab specific feature version
+                            Feature feature = getFeature(featureName, featureVersion);
+                            if (feature != null) {
+                                features.add(feature);
+                            } else {
+                                LOGGER.error("Error installing boot feature " + f + ": feature not found");
+                            }
+                        } catch (Exception e) {
+                            LOGGER.error("Error installing boot feature " + f, e);
+                        }
                     }
                 }
+                try {
+                    installFeatures(features, EnumSet.of(Option.NoCleanIfFailure, Option.ContinueBatchOnFailure));
+                } catch (Exception e) {
+                    LOGGER.error("Error installing boot features", e);
+                }
+                bootFeaturesInstalled = true;
+                saveState();
             }
-            try {
-                installFeatures(features, EnumSet.of(Option.NoCleanIfFailure, Option.ContinueBatchOnFailure));
-            } catch (Exception e) {
-                LOGGER.error("Error installing boot features", e);
-            }
-            bootFeaturesInstalled = true;
-            saveState();
         }
     }
 
@@ -1348,10 +1404,10 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         }
     }
 
-static Pattern fuzzyVersion = Pattern.compile("(\\d+)(\\.(\\d+)(\\.(\\d+))?)?([^a-zA-Z0-9](.*))?",
-        Pattern.DOTALL);
-static Pattern fuzzyModifier = Pattern.compile("(\\d+[.-])*(.*)",
-        Pattern.DOTALL);
+    static Pattern fuzzyVersion = Pattern.compile("(\\d+)(\\.(\\d+)(\\.(\\d+))?)?([^a-zA-Z0-9](.*))?",
+            Pattern.DOTALL);
+    static Pattern fuzzyModifier = Pattern.compile("(\\d+[.-])*(.*)",
+            Pattern.DOTALL);
 
     /**
      * Clean up version parameters. Other builders use more fuzzy definitions of
