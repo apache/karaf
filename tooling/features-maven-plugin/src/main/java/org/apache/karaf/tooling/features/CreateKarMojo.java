@@ -82,6 +82,13 @@ public class CreateKarMojo extends MojoSupport {
     private String finalName = null;
 
     /**
+     * Ignore the dependency flag on the bundles in the features XML
+     *
+     * @parameter default-value="false"
+     */
+    private boolean ignoreDependencyFlag;
+
+    /**
      * Location of resources directory for additional content to include in the KAR.
      * Note that it includes everything under classes so as to include maven-remote-resources
      *
@@ -125,7 +132,7 @@ public class CreateKarMojo extends MojoSupport {
             Feature[] features = featuresRepo.getFeatures();
             for (Feature feature : features) {
                 for (BundleInfo bundle : feature.getBundles()) {
-                    if (!bundle.isDependency()) {
+                    if (ignoreDependencyFlag || (!ignoreDependencyFlag && !bundle.isDependency())) {
                         resources.add(resourceToArtifact(bundle.getLocation(), false));
                     }
                 }
