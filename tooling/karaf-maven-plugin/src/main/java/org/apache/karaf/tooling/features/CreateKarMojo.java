@@ -90,6 +90,13 @@ public class CreateKarMojo extends MojoSupport {
     private String finalName = null;
 
     /**
+     * Ignore the dependency flag on the bundles in the features XML
+     *
+     * @parameter default-value="false"
+     */
+    private boolean ignoreDependencyFlag;
+
+    /**
      * Classifier to add to the artifact generated. If given, the artifact will be attached.
      * If it's not given, it will merely be written to the output directory according to the finalName.
      *
@@ -161,7 +168,7 @@ public class CreateKarMojo extends MojoSupport {
                 Features features = JaxbUtil.unmarshal(in, false);
                 for (Feature feature : features.getFeature()) {
                     for (BundleInfo bundle : feature.getBundles()) {
-                        if (!bundle.isDependency()) {
+                        if (ignoreDependencyFlag || (!ignoreDependencyFlag && !bundle.isDependency())) {
                             resources.add(resourceToArtifact(bundle.getLocation(), false));
                         }
                     }
