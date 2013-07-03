@@ -15,6 +15,101 @@
  * limitations under the License.
  */
 
+                    Apache Karaf 2.3.2
+                    ==================
+
+  Overview
+  --------
+
+  In this patch update to the 2.3.x line contains multiple bug fixes, improvements, and dependency updates including; restored IBM Java compatibility, DirectoryWatcher for deploy folder now waits for framework start level to reach 60, BundleWatcher now waits for refresh to be finished before updating another bundle, CXF DOSGI feature now included in Karaf repos config, HTTP feature now installs a default web config file, and dependency updates to Spring 3.2.3.RELEASE, Pax Web 1.1.14, Aries Transaction Blueprint 1.0.1, and Pax Url 1.3.6.  
+  For more detail please see the change log below.
+
+  Changelog
+  ---------
+
+** Sub-task
+    * [KARAF-2228|https://issues.apache.org/jira/browse/KARAF-2228] - Karaf.webconsole uses wrong version in export-package header
+    * [KARAF-2229|https://issues.apache.org/jira/browse/KARAF-2229] - Adapt karaf.webconsole package-imports/exports to felix.webconsole all-in-one bundle
+
+** Bug
+    * [KARAF-911|https://issues.apache.org/jira/browse/KARAF-911] - features-maven-plugin:add-features-to-repo doesn't use maven proxy setting
+    * [KARAF-1487|https://issues.apache.org/jira/browse/KARAF-1487] - Bundles in deploy are deployed before startup process had been  finished
+    * [KARAF-1925|https://issues.apache.org/jira/browse/KARAF-1925] - Blueprint timeout exceptions after karaf startup
+    * [KARAF-1973|https://issues.apache.org/jira/browse/KARAF-1973] - NullPointerException when performing log:clear then log:tail
+    * [KARAF-2125|https://issues.apache.org/jira/browse/KARAF-2125] - "Components" tab not shown in WebConsole
+    * [KARAF-2137|https://issues.apache.org/jira/browse/KARAF-2137] - Unable to prevent remote JMX access
+    * [KARAF-2206|https://issues.apache.org/jira/browse/KARAF-2206] - The container fails to start correctly with IBM Java 6
+    * [KARAF-2215|https://issues.apache.org/jira/browse/KARAF-2215] - <packaging>kar</packaging> fails to attach artifact
+    * [KARAF-2218|https://issues.apache.org/jira/browse/KARAF-2218] - Fix manual links on website
+    * [KARAF-2220|https://issues.apache.org/jira/browse/KARAF-2220] - spring-jms feature shouldn't depend on spring-web
+    * [KARAF-2221|https://issues.apache.org/jira/browse/KARAF-2221] - The admin service is not safe when used to create / start agents quickly
+    * [KARAF-2224|https://issues.apache.org/jira/browse/KARAF-2224] - generate-features-xml Mojo ignores classifier of maven dependencies
+    * [KARAF-2225|https://issues.apache.org/jira/browse/KARAF-2225] - jaas PropertiesLoginModule does not complain when users.properties is not found but fails later
+    * [KARAF-2226|https://issues.apache.org/jira/browse/KARAF-2226] - Properties with pathname are not correct on windows in jaas PropertiesLoginModule
+    * [KARAF-2231|https://issues.apache.org/jira/browse/KARAF-2231] - ConcurrentModificationException at org.apache.karaf.admin.internal.AdminServiceImplTest.testToSimulateRenameInstanceByExternalProcess
+    * [KARAF-2234|https://issues.apache.org/jira/browse/KARAF-2234] - Thrown Exception in shell commands should be logged as ERROR
+    * [KARAF-2236|https://issues.apache.org/jira/browse/KARAF-2236] - karaf scripts fail when paths contain spaces
+    * [KARAF-2237|https://issues.apache.org/jira/browse/KARAF-2237] - LDAP login module cannot look up keystore and/or truststore
+    * [KARAF-2244|https://issues.apache.org/jira/browse/KARAF-2244] - BundleWatcher should wait for refresh to be finished before updating another bundle
+    * [KARAF-2248|https://issues.apache.org/jira/browse/KARAF-2248] - Karaf console wraps on Windows 7 when connecting using the client
+    * [KARAF-2249|https://issues.apache.org/jira/browse/KARAF-2249] - config:property-append doesn't set a needed comma for seperation
+    * [KARAF-2254|https://issues.apache.org/jira/browse/KARAF-2254] - karaf-feature-archetype generates a feature.xml file which can not be add to featureUrl
+    * [KARAF-2255|https://issues.apache.org/jira/browse/KARAF-2255] - SCR feature generates an error when deployed on Karaf 2.3.1
+    * [KARAF-2259|https://issues.apache.org/jira/browse/KARAF-2259] - jetty.xml has old RolePrincipal class name
+    * [KARAF-2269|https://issues.apache.org/jira/browse/KARAF-2269] - Servicemix Specs Activator/OsgiLocator Broken due to KARAF-2136
+    * [KARAF-2270|https://issues.apache.org/jira/browse/KARAF-2270] - Service wrapper assumes java is on system path
+    * [KARAF-2285|https://issues.apache.org/jira/browse/KARAF-2285] - Some tabs in WebConsole are blank
+    * [KARAF-2297|https://issues.apache.org/jira/browse/KARAF-2297] - WebConsole should export org.json
+    * [KARAF-2306|https://issues.apache.org/jira/browse/KARAF-2306] - BootClasspathLibraries should be copied before Karaf classpath settings in pax-exam container
+    * [KARAF-2309|https://issues.apache.org/jira/browse/KARAF-2309] - Normal Zip file which put into the deploy folder can't be deleted anymore
+    * [KARAF-2314|https://issues.apache.org/jira/browse/KARAF-2314] - Remove SNAPSHOT repositories by default in the distribution
+    * [KARAF-2316|https://issues.apache.org/jira/browse/KARAF-2316] - features-maven-plugin ignore proxy settings in maven settings.xml
+    * [KARAF-2339|https://issues.apache.org/jira/browse/KARAF-2339] - Do not install boot features asynchronously
+    * [KARAF-2346|https://issues.apache.org/jira/browse/KARAF-2346] - WebConsole should export package with version 3.1.2 (and not 4.0.0)
+    * [KARAF-2357|https://issues.apache.org/jira/browse/KARAF-2357] - features-create-kar goal of the karaf-maven-plugin ignores bundles listed in the features that have the "dependency" property set to "true"
+    * [KARAF-2359|https://issues.apache.org/jira/browse/KARAF-2359] - DirectoryWatcher for "deploy" directory should be configured to wait until framework start level reaches 60
+    * [KARAF-2362|https://issues.apache.org/jira/browse/KARAF-2362] - Authentication fail on a child instance
+    * [KARAF-2363|https://issues.apache.org/jira/browse/KARAF-2363] - Second feature validation result in an Exception.
+    * [KARAF-2365|https://issues.apache.org/jira/browse/KARAF-2365] - jaas:manage selects wrong configuration
+    * [KARAF-2366|https://issues.apache.org/jira/browse/KARAF-2366] - Cannot Update Factory Configuration Not Backed By A File With The "config:" Command
+    * [KARAF-2367|https://issues.apache.org/jira/browse/KARAF-2367] - Config Not Released When Declarative Services Bundle Stopped
+    * [KARAF-2368|https://issues.apache.org/jira/browse/KARAF-2368] - Commands with more than one argument have incorrect help string
+
+** Dependency upgrade
+    * [KARAF-2223|https://issues.apache.org/jira/browse/KARAF-2223] - Update to pax url 1.3.6
+    * [KARAF-2239|https://issues.apache.org/jira/browse/KARAF-2239] - Upgrade to Pax Web 1.1.13
+    * [KARAF-2310|https://issues.apache.org/jira/browse/KARAF-2310] - Upgrade to Spring 3.2.2.RELEASE
+    * [KARAF-2311|https://issues.apache.org/jira/browse/KARAF-2311] - Upgrade to Pax Web 1.1.14
+    * [KARAF-2330|https://issues.apache.org/jira/browse/KARAF-2330] - Upgrade to Aries Transaction Blueprint 1.0.1
+    * [KARAF-2335|https://issues.apache.org/jira/browse/KARAF-2335] - Upgrade to Spring 3.2.3.RELEASE
+
+** Improvement
+    * [KARAF-1989|https://issues.apache.org/jira/browse/KARAF-1989] - Add CXF DOSGi feature uri to org.apache.karaf.features.repos.cfg
+    * [KARAF-2053|https://issues.apache.org/jira/browse/KARAF-2053] - HTTP feature should install a default etc/org.ops4j.pax.web.cfg file
+    * [KARAF-2230|https://issues.apache.org/jira/browse/KARAF-2230] - Watch command - Add option to control if the console should clear or not
+    * [KARAF-2273|https://issues.apache.org/jira/browse/KARAF-2273] - Turn blueprint as synchronous by default
+    * [KARAF-2290|https://issues.apache.org/jira/browse/KARAF-2290] - should also endorse activation-api spec jar
+    * [KARAF-2291|https://issues.apache.org/jira/browse/KARAF-2291] - make rmiServerHost configurable
+    * [KARAF-2320|https://issues.apache.org/jira/browse/KARAF-2320] - make kar deployer/service to support NoAutoRefreshBundles option
+    * [KARAF-2326|https://issues.apache.org/jira/browse/KARAF-2326] - Backspace stops working after shutdown command
+    * [KARAF-2344|https://issues.apache.org/jira/browse/KARAF-2344] - ensure LDAPLoginModule can retrieve multiple roles assigned to a specific user
+    * [KARAF-2360|https://issues.apache.org/jira/browse/KARAF-2360] - Add password option to admin:connect and ssh:ssh commands
+    * [KARAF-2369|https://issues.apache.org/jira/browse/KARAF-2369] - extend role.filter of LDAPLoginModule to support distinguishedName filter
+
+** New Feature
+    * [KARAF-2164|https://issues.apache.org/jira/browse/KARAF-2164] - Create shell:wc command
+    * [KARAF-2370|https://issues.apache.org/jira/browse/KARAF-2370] - Add alias command
+    * [KARAF-2372|https://issues.apache.org/jira/browse/KARAF-2372] - Introduce boot features sync mode property (true|false)
+
+** Task
+    * [KARAF-2062|https://issues.apache.org/jira/browse/KARAF-2062] - Add a spring3.2 feature
+    * [KARAF-2222|https://issues.apache.org/jira/browse/KARAF-2222] - Add hawtio to features.repos
+
+** Test
+    * [KARAF-2214|https://issues.apache.org/jira/browse/KARAF-2214] - add EncryptableConfigAdminPropertyPlaceholderTest back
+
+
+
                     Apache Karaf 2.3.1
                     ==================
 
