@@ -66,6 +66,7 @@ public class MainStartTest {
 	}
 
     @Test
+    @Ignore("Unit test for testStopWithTimeout disabled for now")
     public void testStopWithTimeout() throws Exception {
         File basedir = new File(getClass().getClassLoader().getResource("foo").getPath()).getParentFile();
         File home = new File(basedir, "test-karaf-home");
