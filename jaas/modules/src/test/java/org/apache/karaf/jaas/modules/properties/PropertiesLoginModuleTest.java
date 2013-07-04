@@ -1,6 +1,7 @@
 package org.apache.karaf.jaas.modules.properties;
 
 import java.io.IOException;
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,7 +30,9 @@ public class PropertiesLoginModuleTest {
         try {
             testWithUsersFile("/test/users.properties");
         } catch (LoginException e) {
-            Assert.assertEquals("Users file not found at /test/users.properties", e.getMessage());
+            String test = "Users file not found at " + File.separator +
+                          "test" + File.separator + "users.properties";
+            Assert.assertEquals(test, e.getMessage());
         }
     }
 
