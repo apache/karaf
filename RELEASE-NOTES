@@ -74,6 +74,7 @@
     * [KARAF-2366|https://issues.apache.org/jira/browse/KARAF-2366] - Cannot Update Factory Configuration Not Backed By A File With The "config:" Command
     * [KARAF-2367|https://issues.apache.org/jira/browse/KARAF-2367] - Config Not Released When Declarative Services Bundle Stopped
     * [KARAF-2368|https://issues.apache.org/jira/browse/KARAF-2368] - Commands with more than one argument have incorrect help string
+    * [KARAF-2375|https://issues.apache.org/jira/browse/KARAF-2375] - Remove WcTest and associated resources
     * [KARAF-2376|https://issues.apache.org/jira/browse/KARAF-2376] - Make PropertiesLoginModuleTest OS file separator agnostic
 
 ** Dependency upgrade
