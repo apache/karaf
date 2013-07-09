@@ -51,6 +51,10 @@
         </dependency>
         <dependency>
             <groupId>org.apache.karaf</groupId>
+            <artifactId>org.apache.karaf.main</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf</groupId>
             <artifactId>apache-karaf</artifactId>
             <type>zip</type>
             <scope>provided</scope>
