@@ -196,4 +196,8 @@ public class StreamPumper implements Runnable
 
         notifyAll();
     }
+    
+    public InputStream getInputStream() {
+        return this.in;
+    }
 }

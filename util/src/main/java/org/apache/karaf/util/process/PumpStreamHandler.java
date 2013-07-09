@@ -239,4 +239,12 @@ public class PumpStreamHandler
         pumper.setAutoflush(true);
         return pumper;
     }
+    
+    public StreamPumper getOutputPump() {
+        return this.outputPump;
+    }
+    
+    public StreamPumper getErrorPump() {
+        return this.errorPump;
+    }
 }
