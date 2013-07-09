@@ -58,10 +58,31 @@
                 <property name="formatter" ref="formatter"/>
             </action>
         </command>
+        <command>
+            <action class="org.apache.karaf.log.command.LogEntry">
+                <argument ref="osgiLogService" />
+            </action>
+            <optional-completers>
+                <entry key="--level" value-ref="osgiLogLevelsCompleter"/>
+            </optional-completers>
+        </command>
     </command-bundle>
+
+    <bean id="osgiLogLevelsCompleter" class="org.apache.karaf.shell.console.completer.StringsCompleter">
+        <argument type="java.util.Collection" >
+            <list>
+                <value>WARNING</value>
+                <value>DEBUG</value>
+                <value>INFO</value>
+                <value>ERROR</value>
+            </list>
+        </argument>
+        <argument value="false" />
+    </bean>
     
     <reference id="formatter" interface="org.apache.karaf.log.core.LogEventFormatter"/>
     <reference id="logService" interface="org.apache.karaf.log.core.LogService"/>
+    <reference id="osgiLogService" interface="org.osgi.service.log.LogService"/>
 
     <bean id="logLevelCompleter" class="org.apache.karaf.log.command.completers.LogLevelCompleter"/>
 
