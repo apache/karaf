@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.apache.karaf.util.process;
 
 import java.io.InputStream;
@@ -26,7 +27,6 @@ import java.io.IOException;
  * Copies all data from an input stream to an output stream.
  */
 public class StreamPumper implements Runnable {
-
     private InputStream in;
 
     private OutputStream out;
@@ -194,5 +194,9 @@ public class StreamPumper implements Runnable {
         finish = true;
 
         notifyAll();
+    }
+    
+    public InputStream getInputStream() {
+        return this.in;
     }
 }
