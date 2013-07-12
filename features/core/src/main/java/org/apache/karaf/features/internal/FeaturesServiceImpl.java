@@ -82,8 +82,10 @@ public class FeaturesServiceImpl implements FeaturesService {
 
     private final BundleManager bundleManager;
     private final FeatureConfigInstaller configManager;
+    
 
     private boolean respectStartLvlDuringFeatureStartup;
+    private boolean respectStartLvlDuringFeatureUninstall;
     private long resolverTimeout = 5000;
     private Set<URI> uris;
     private Map<URI, Repository> repositories = new HashMap<URI, Repository>();
@@ -368,6 +370,7 @@ public class FeaturesServiceImpl implements FeaturesService {
      * @throws Exception in case of install failure.
      */
     public void installFeatures(Set<Feature> features, EnumSet<Option> options) throws Exception {
+
         final InstallationState state = new InstallationState();
         final InstallationState failure = new InstallationState();
         boolean verbose = options.contains(FeaturesService.Option.Verbose);
@@ -661,7 +664,25 @@ public class FeaturesServiceImpl implements FeaturesService {
         for (Set<Long> b : installed.values()) {
             bundles.removeAll(b);
         }
-        bundleManager.uninstallById(bundles);
+   
+        List<Bundle> bundlesDescendSortedByStartLvl = new ArrayList<Bundle>();
+        for (long bundleId : bundles) {
+            Bundle b = bundleManager.getBundleContext().getBundle(bundleId);
+            if (b != null) {
+                bundlesDescendSortedByStartLvl.add(b);
+            }
+        }
+        
+        if (isRespectStartLvlDuringFeatureUninstall()) {
+            Collections.sort(bundlesDescendSortedByStartLvl, new Comparator<Bundle>() {
+                @Override
+                public int compare(Bundle bundle, Bundle bundle1) {
+                    return bundle1.adapt(BundleStartLevel.class).getStartLevel() -
+                        bundle.adapt(BundleStartLevel.class).getStartLevel();
+                }
+            });
+        }
+        bundleManager.uninstall(bundlesDescendSortedByStartLvl);
         callListeners(new FeatureEvent(feature, FeatureEvent.EventType.FeatureUninstalled, false));
         saveState();
     }
@@ -1071,4 +1092,11 @@ public class FeaturesServiceImpl implements FeaturesService {
        return satisfied;
     }
 
+    public boolean isRespectStartLvlDuringFeatureUninstall() {
+        return respectStartLvlDuringFeatureUninstall;
+    }
+
+    public void setRespectStartLvlDuringFeatureUninstall(boolean respectStartLvlDuringFeatureUninstall) {
+        this.respectStartLvlDuringFeatureUninstall = respectStartLvlDuringFeatureUninstall;
+    }
 }

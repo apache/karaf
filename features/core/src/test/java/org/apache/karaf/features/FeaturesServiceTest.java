@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -48,6 +49,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 
 public class FeaturesServiceTest extends TestBase {
@@ -135,14 +137,15 @@ public class FeaturesServiceTest extends TestBase {
         Bundle bundlef101 = createDummyBundle(12345L, "bundle-0.1", headers());
 
         BundleManager bundleManager = EasyMock.createMock(BundleManager.class);
+        BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
         expect(bundleManager.getDataFile(EasyMock.anyObject(String.class))).andReturn(dataFile).anyTimes();
         expect(bundleManager.installBundleIfNeeded("bundle-0.1", 0, null)).andReturn(new BundleInstallerResult(bundlef101, true));
         expect(bundleManager.installBundleIfNeeded("bundle-0.1", 0, null)).andReturn(new BundleInstallerResult(bundlef101, false));
+        expect(bundleManager.getBundleContext()).andReturn(bundleContext);
         ignoreRefreshes(bundleManager);
-        bundleManager.uninstallById(Collections.EMPTY_SET);        
-        EasyMock.expectLastCall();
-        bundleManager.uninstallById(setOf(12345L));
-        EasyMock.expectLastCall();
+        bundleManager.uninstall(Collections.EMPTY_LIST);        
+        EasyMock.expectLastCall().times(2);
+        
         
         replay(bundleManager);
         FeaturesServiceImpl svc = new FeaturesServiceImpl(bundleManager);
@@ -192,45 +195,50 @@ public class FeaturesServiceTest extends TestBase {
     // with a feature dependency
     // The dependant feature is in the same repository
     // Tests uninstall of features
+    @SuppressWarnings("unchecked")
     @Test
     public void testInstallFeatureWithDependantFeatures() throws Exception {
         URI uri = createTempRepo("<features name='test' xmlns='http://karaf.apache.org/xmlns/features/v1.0.0'>"
-                + "  <feature name='f1' version='0.1'><feature version='0.1'>f2</feature><bundle>bundle-f1-0.1</bundle></feature>"
-                + "  <feature name='f2' version='0.1'><bundle>bundle-f2-0.1</bundle></feature>"
-                + "</features>");
+                                 + "  <feature name='f1' version='0.1'><feature version='0.1'>f2</feature><bundle>bundle-f1-0.1</bundle></feature>"
+                                 + "  <feature name='f2' version='0.1'><bundle>bundle-f2-0.1</bundle></feature>"
+                                 + "</features>");
 
         BundleManager bundleManager = EasyMock.createMock(BundleManager.class);
+        BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
         Bundle bundlef101 = createDummyBundle(12345L, "bundle-f1-0.1", headers());
         Bundle bundlef201 = createDummyBundle(54321L, "bundle-f2-0.1", headers());
-        expect(bundleManager.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
-        expect(bundleManager.installBundleIfNeeded("bundle-f1-0.1", 0, null)).andReturn(new BundleInstallerResult(bundlef101, true));
-        expect(bundleManager.installBundleIfNeeded("bundle-f2-0.1", 0, null)).andReturn(new BundleInstallerResult(bundlef201, true));
+        expect(bundleManager.getDataFile(EasyMock.<String> anyObject())).andReturn(dataFile).anyTimes();
+        expect(bundleManager.installBundleIfNeeded("bundle-f1-0.1", 0, null))
+            .andReturn(new BundleInstallerResult(bundlef101, true));
+        expect(bundleManager.installBundleIfNeeded("bundle-f2-0.1", 0, null))
+            .andReturn(new BundleInstallerResult(bundlef201, true));
+        expect(bundleManager.getBundleContext()).andReturn(bundleContext).anyTimes();
+        expect(bundleContext.getBundle(12345)).andReturn(bundlef101).anyTimes();
         ignoreRefreshes(bundleManager);
-        bundleManager.uninstallById(setOf(12345L));        
-        EasyMock.expectLastCall();
-        bundleManager.uninstallById(setOf(54321L));
-        EasyMock.expectLastCall();
-        
+        bundleManager.uninstall(Collections.EMPTY_LIST);
+       
+        EasyMock.expectLastCall().anyTimes();
         replay(bundleManager);
+        
         FeaturesServiceImpl svc = new FeaturesServiceImpl(bundleManager);
         svc.addRepository(uri);
         svc.installFeature("f1", "0.1");
         svc.uninstallFeature("f1", "0.1");
-        svc.uninstallFeature("f2", "0.1");
         verify(bundleManager);
+
     }
-    
+
     @SuppressWarnings("unchecked")
     private BundleManager prepareBundleManagerForInstallUninstall(String bundleUri, String bundlename) throws Exception {
         BundleManager bundleManager = EasyMock.createMock(BundleManager.class);
+        BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
         Bundle installedBundle = createDummyBundle(12345L, bundlename, headers());
         expect(bundleManager.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
         expect(bundleManager.installBundleIfNeeded(bundleUri, 0, null)).andReturn(new BundleInstallerResult(installedBundle, true));
+        expect(bundleManager.getBundleContext()).andReturn(bundleContext);
         ignoreRefreshes(bundleManager);
-        bundleManager.uninstallById(Collections.EMPTY_SET);        
-        EasyMock.expectLastCall();
-        bundleManager.uninstallById(setOf(12345L));
-        EasyMock.expectLastCall();
+        bundleManager.uninstall(Collections.EMPTY_LIST);
+        EasyMock.expectLastCall().times(2);
         return bundleManager;
     }
 
@@ -282,14 +290,15 @@ public class FeaturesServiceTest extends TestBase {
                 + "</features>");
 
         BundleManager bundleManager = EasyMock.createMock(BundleManager.class);
+        BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
         Bundle bundleVer02 = createDummyBundle(54321L, "bundleVer02", headers());
         expect(bundleManager.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
         expect(bundleManager.installBundleIfNeeded("bundle-0.2", 0, null)).andReturn(new BundleInstallerResult(bundleVer02, true));
+        expect(bundleManager.getBundleContext()).andReturn(bundleContext);
         ignoreRefreshes(bundleManager);
-        bundleManager.uninstallById(Collections.EMPTY_SET);        
-        EasyMock.expectLastCall();
-        bundleManager.uninstallById(setOf(54321L));
-        EasyMock.expectLastCall();
+        bundleManager.uninstall(Collections.EMPTY_LIST);        
+        EasyMock.expectLastCall().times(2);
+        
 
         replay(bundleManager);
         FeaturesServiceImpl svc = new FeaturesServiceImpl(bundleManager);
@@ -313,15 +322,16 @@ public class FeaturesServiceTest extends TestBase {
                 + "</features>", bundleVer01Uri, bundleVer02Uri);
         
         BundleManager bundleManager = EasyMock.createMock(BundleManager.class);
+        BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
         Bundle bundleVer01 = createDummyBundle(12345L, "bundleVer01", headers());
         expect(bundleManager.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
         expect(bundleManager.installBundleIfNeeded(bundleVer01Uri, 0, null)).andReturn(new BundleInstallerResult(bundleVer01, true));
         expect(bundleManager.installBundleIfNeeded(bundleVer01Uri, 0, null)).andReturn(new BundleInstallerResult(bundleVer01, false));
+        expect(bundleManager.getBundleContext()).andReturn(bundleContext);
         ignoreRefreshes(bundleManager);
-        bundleManager.uninstallById(Collections.EMPTY_SET);        
-        EasyMock.expectLastCall();
-        bundleManager.uninstallById(setOf(12345L));
-        EasyMock.expectLastCall();
+        bundleManager.uninstall(Collections.EMPTY_LIST);        
+        
+        EasyMock.expectLastCall().times(2);
 
         replay(bundleManager);
         FeaturesServiceImpl svc = new FeaturesServiceImpl(bundleManager);
