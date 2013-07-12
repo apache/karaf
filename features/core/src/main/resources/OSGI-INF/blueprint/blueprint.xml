@@ -35,6 +35,7 @@ http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.0.0 http://aries.apache
             <ext:property name="featuresBoot" value=""/>
             <ext:property name="resolverTimeout" value="5000"/>
             <ext:property name="respectStartLvlDuringFeatureStartup" value="true"/>
+            <ext:property name="respectStartLvlDuringFeatureUninstall" value="true"/>
             <ext:property name="featuresBootAsynchronous" value="false"/>
         </ext:default-properties>
         <ext:location>file:$(karaf.base)/etc/org.apache.karaf.features.cfg</ext:location>
@@ -52,6 +53,7 @@ http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.0.0 http://aries.apache
     	<argument ref="configInstaller" />
         <property name="urls" value="$[featuresRepositories]" />
         <property name="respectStartLvlDuringFeatureStartup" value="$[respectStartLvlDuringFeatureStartup]" />
+        <property name="respectStartLvlDuringFeatureUninstall" value="$[respectStartLvlDuringFeatureUninstall]" />
         <property name="resolverTimeout" value="$[resolverTimeout]" />
     </bean>
     

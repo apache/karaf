@@ -411,7 +411,20 @@ public class BundleManager {
 				// Ignore
 			}
 		}
+		refreshPackages(null);
 	}
+
+        public void uninstall(List<Bundle> bundles) {
+                for (Bundle b : bundles) {
+                        try {
+                                b.uninstall();
+                        } catch (Exception e2) {
+                                // Ignore
+                        }
+                }
+                refreshPackages(null);
+        }
+
 
 	public void uninstallById(Set<Long> bundles) throws BundleException,
 			InterruptedException {
@@ -486,6 +499,10 @@ public class BundleManager {
 		}
 	}
 
+	public BundleContext getBundleContext() {
+	    return this.bundleContext;
+	}
+	
 	public static class BundleInstallerResult {
 		Bundle bundle;
 		boolean isNew;
