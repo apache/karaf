@@ -123,7 +123,7 @@
         <commons-codec.version>1.8</commons-codec.version>
         <commons-collections.version>3.2.1</commons-collections.version>
         <commons-fileupload.version>1.2.2</commons-fileupload.version>
-        <commons-compress.version>1.4.1</commons-compress.version>
+        <commons-compress.version>1.5</commons-compress.version>
         <commons-io.version>2.4</commons-io.version>
         <commons-jexl.version>2.1.1</commons-jexl.version>
         <commons-lang.version>2.6</commons-lang.version>
