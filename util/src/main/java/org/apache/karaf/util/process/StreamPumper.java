@@ -38,6 +38,8 @@ public class StreamPumper implements Runnable
 
     private boolean closeWhenExhausted;
 
+    private boolean nonBlocking;
+
     private boolean autoflush;
 
     private Throwable exception;
@@ -45,6 +47,8 @@ public class StreamPumper implements Runnable
     private int bufferSize = 128;
 
     private boolean started;
+
+    private Thread thread;
 
     /**
      * Create a new stream pumper.
@@ -73,6 +77,14 @@ public class StreamPumper implements Runnable
         this(in, out, false);
     }
 
+    public InputStream getIn() {
+        return in;
+    }
+
+    public OutputStream getOut() {
+        return out;
+    }
+
     /**
      * Set whether data should be flushed through to the output stream.
      *
@@ -83,6 +95,14 @@ public class StreamPumper implements Runnable
     }
 
     /**
+     * Set whether data should be read in a non blocking way.
+     * @param nonBlocking   If true, data will be read in a non blocking mode
+     */
+    public void setNonBlocking(boolean nonBlocking) {
+        this.nonBlocking = nonBlocking;
+    }
+
+    /**
      * Copies data from the input stream to the output stream.
      *
      * Terminates as soon as the input stream is closed or an error occurs.
@@ -90,28 +110,48 @@ public class StreamPumper implements Runnable
     public void run() {
         synchronized (this) {
             started = true;
+            finished = false;
+            finish = false;
+            thread = Thread.currentThread();
         }
-        finished = false;
-        finish = false;
 
         final byte[] buf = new byte[bufferSize];
 
         int length;
         try {
-            do {
-                while (in.available() > 0) {
-                    length = in.read(buf);
-                    if (length < 1 ) {
-                        break;
+            while (true) {
+                if (nonBlocking) {
+                    while (in.available() > 0) {
+                        length = in.read(buf);
+                        if (length > 0) {
+                            out.write(buf, 0, length);
+                            if (autoflush) {
+                                out.flush();
+                            }
+                        } else {
+                            break;
+                        }
                     }
-                    out.write(buf, 0, length);
-                    if (autoflush) {
-                        out.flush();
-                    }
+                    Thread.sleep(50); // Pause to avoid tight loop if external proc is too slow
+                } else {
+                    do {
+                        length = in.read(buf);
+                        if (length > 0) {
+                            out.write(buf, 0, length);
+                            if (autoflush) {
+                                out.flush();
+                            }
+                        }
+                    } while (length > 0);
                 }
-                out.flush();
-                Thread.sleep(200);  // Pause to avoid tight loop if external proc is slow
-            } while (!finish);
+                boolean finish;
+                synchronized (this) {
+                    finish = this.finish;
+                }
+                if (finish) {
+                    break;
+                }
+            }
         }
         catch (Throwable t) {
             synchronized (this) {
@@ -119,14 +159,16 @@ public class StreamPumper implements Runnable
             }
         }
         finally {
+            try {
+                out.flush();
+            } catch (IOException e) { }
             if (closeWhenExhausted) {
                 try {
                     out.close();
                 } catch (IOException e) { }
             }
-            finished = true;
-
             synchronized (this) {
+                finished = true;
                 notifyAll();
             }
         }
@@ -137,7 +179,7 @@ public class StreamPumper implements Runnable
      *
      * @return true     If the stream has been exhausted.
      */
-    public boolean isFinished() {
+    public synchronized boolean isFinished() {
         return finished;
     }
 
@@ -193,7 +235,9 @@ public class StreamPumper implements Runnable
      */
     public synchronized void stop() {
         finish = true;
-
+        if (nonBlocking && thread != null && !finished) {
+            thread.interrupt();
+        }
         notifyAll();
     }
     
