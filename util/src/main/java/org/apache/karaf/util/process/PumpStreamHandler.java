@@ -156,6 +156,9 @@ public class PumpStreamHandler
             catch (InterruptedException e) {
                 // ignore
             }
+            try {
+                outputPump.getIn().close();
+            } catch (IOException e) { }
         }
 
         if (errorPump != null) {
@@ -166,10 +169,16 @@ public class PumpStreamHandler
             catch (InterruptedException e) {
                 // ignore
             }
+            try {
+                errorPump.getIn().close();
+            } catch (IOException e) { }
         }
 
         if (inputPump != null) {
             inputPump.stop();
+            try {
+                inputPump.getOut().close();
+            } catch (IOException e) { }
         }
 
         try {
@@ -236,6 +245,7 @@ public class PumpStreamHandler
         assert out != null;
 
         StreamPumper pumper = new StreamPumper(in, out, closeWhenExhausted);
+        pumper.setNonBlocking(true);
         pumper.setAutoflush(true);
         return pumper;
     }
