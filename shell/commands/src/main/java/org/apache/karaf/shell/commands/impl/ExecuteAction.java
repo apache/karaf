@@ -45,16 +45,7 @@ public class ExecuteAction extends AbstractAction {
 
         log.debug("Waiting for process to exit...");
         
-        do {
-            //give some time to let StreamPumper to pump the stream from 
-            //external process
-            Thread.sleep(1000);
-        } while (handler.getOutputPump().getInputStream().available() > 0 
-            || handler.getErrorPump().getInputStream().available() > 0);
-        
-        
         int status = p.waitFor();
-
 
         log.info("Process exited w/status: {}", status);
 
