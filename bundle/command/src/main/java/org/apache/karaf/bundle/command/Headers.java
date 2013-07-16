@@ -49,6 +49,7 @@ public class Headers extends BundlesCommand {
     protected final static String BUNDLE_PREFIX = "Bundle-";
     protected final static String PACKAGE_SUFFFIX = "-Package";
     protected final static String SERVICE_SUFFIX = "-Service";
+    protected final static String CAPABILITY_SUFFIX = "-Capability";
     protected final static String IMPORT_PACKAGES_ATTRIB = "Import-Package";
     protected final static String REQUIRE_BUNDLE_ATTRIB = "Require-Bundle";
 
@@ -98,7 +99,7 @@ public class Headers extends BundlesCommand {
             if (k.startsWith(BUNDLE_PREFIX)) {
                 // starts with Bundle-xxx
                 bundleAttribs.put(k, v);
-            } else if (k.endsWith(SERVICE_SUFFIX)) {
+            } else if (k.endsWith(SERVICE_SUFFIX) || k.endsWith(CAPABILITY_SUFFIX)) {
                 // ends with xxx-Service
                 serviceAttribs.put(k, v);
             } else if (k.endsWith(PACKAGE_SUFFFIX)) {
