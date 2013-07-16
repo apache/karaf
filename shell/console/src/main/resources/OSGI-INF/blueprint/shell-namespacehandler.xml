@@ -19,16 +19,18 @@
 -->
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
 
-    <service interface="org.apache.aries.blueprint.NamespaceHandler">
+    <bean id="namespaceHandler" class="org.apache.karaf.shell.console.commands.NamespaceHandler" />
+
+    <service ref="namespaceHandler" interface="org.apache.aries.blueprint.NamespaceHandler">
         <service-properties>
-            <entry key="osgi.service.blueprint.namespace">
-                <array>
-                    <value>http://karaf.apache.org/xmlns/shell/v1.0.0</value>
-                    <value>http://karaf.apache.org/xmlns/shell/v1.1.0</value>
-                </array>
-            </entry>
+            <entry key="osgi.service.blueprint.namespace" value="http://karaf.apache.org/xmlns/shell/v1.0.0" />
         </service-properties>
-        <bean class="org.apache.karaf.shell.console.commands.NamespaceHandler"/>
+    </service>
+
+    <service ref="namespaceHandler" interface="org.apache.aries.blueprint.NamespaceHandler">
+        <service-properties>
+            <entry key="osgi.service.blueprint.namespace" value="http://karaf.apache.org/xmlns/shell/v1.1.0" />
+        </service-properties>
     </service>
 
 </blueprint>
