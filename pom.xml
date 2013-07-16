@@ -1469,6 +1469,13 @@
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <inherited>true</inherited>
+                <configuration>
+                    <instructions>
+                        <nsh_interface>org.apache.aries.blueprint.NamespaceHandler</nsh_interface>
+                        <nsh_namespace>osgi.service.blueprint.namespace</nsh_namespace>
+                        <_removeheaders>Private-Package,Include-Resource</_removeheaders>
+                    </instructions>
+                </configuration>
                 <executions>
                     <execution>
                         <id>cleanVersions</id>
