@@ -26,15 +26,12 @@
         <bean class="org.apache.karaf.jaas.jasypt.impl.JasyptEncryptionService"/>
     </service>
 
-    <service interface="org.apache.aries.blueprint.NamespaceHandler">
+    <bean id="namespaceHandler" class="org.apache.karaf.jaas.jasypt.handler.NamespaceHandler"/>
+
+    <service ref="namespaceHandler" interface="org.apache.aries.blueprint.NamespaceHandler">
         <service-properties>
-            <entry key="osgi.service.blueprint.namespace">
-                <array>
-                    <value>http://karaf.apache.org/xmlns/jasypt/v1.0.0</value>
-                </array>
-            </entry>
+            <entry key="osgi.service.blueprint.namespace" value="http://karaf.apache.org/xmlns/jasypt/v1.0.0" />
         </service-properties>
-        <bean class="org.apache.karaf.jaas.jasypt.handler.NamespaceHandler"/>
     </service>
 
 </blueprint>
