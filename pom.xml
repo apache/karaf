@@ -1479,7 +1479,7 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse</groupId>
-                <artifactId>osgi</artifactId>
+                <artifactId>org.eclipse.osgi</artifactId>
                 <version>${equinox.version}</version>
             </dependency>
             <dependency>
