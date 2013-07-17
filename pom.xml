@@ -118,7 +118,7 @@
     <properties>
         <aopalliance.bundle.version>1.0_6</aopalliance.bundle.version>
         <asm.version>4.1</asm.version>
-        <cglib.bundle.version>2.2.2_1</cglib.bundle.version>
+        <cglib.bundle.version>3.0_1</cglib.bundle.version>
         <commons-beanutils.version>1.8.3</commons-beanutils.version>
         <commons-codec.version>1.8</commons-codec.version>
         <commons-collections.version>3.2.1</commons-collections.version>
