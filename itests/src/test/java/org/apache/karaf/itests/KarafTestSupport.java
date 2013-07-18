@@ -13,10 +13,10 @@
  */
 package org.apache.karaf.itests;
 
-import static org.apache.karaf.tooling.exam.options.KarafDistributionOption.editConfigurationFilePut;
-import static org.apache.karaf.tooling.exam.options.KarafDistributionOption.karafDistributionConfiguration;
-import static org.apache.karaf.tooling.exam.options.KarafDistributionOption.keepRuntimeFolder;
-import static org.apache.karaf.tooling.exam.options.KarafDistributionOption.logLevel;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.karafDistributionConfiguration;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.logLevel;
 import static org.junit.Assert.assertTrue;
 import static org.ops4j.pax.exam.CoreOptions.maven;
 
@@ -47,12 +47,12 @@ import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.features.BootFinished;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
-import org.apache.karaf.tooling.exam.options.LogLevelOption;
 import org.junit.Assert;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.TestProbeBuilder;
 import org.ops4j.pax.exam.junit.Configuration;
 import org.ops4j.pax.exam.junit.ProbeBuilder;
+import org.ops4j.pax.exam.karaf.options.LogLevelOption;
 import org.ops4j.pax.exam.options.MavenArtifactUrlReference;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
