@@ -70,8 +70,8 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.karaf.tooling.exam</groupId>
-            <artifactId>org.apache.karaf.tooling.exam.container</artifactId>
+            <groupId>org.ops4j.pax.exam</groupId>
+            <artifactId>pax-exam-container-karaf</artifactId>
             <scope>test</scope>
         </dependency>
 

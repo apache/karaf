@@ -205,9 +205,8 @@
         <osgi.version>5.0.0</osgi.version>
         <osgi.compendium.version>4.3.1</osgi.compendium.version>
         <org.json.version>20070829</org.json.version>
-        <pax.exam.version>2.6.0</pax.exam.version>
+        <pax.exam.version>3.1.0</pax.exam.version>
         <pax.logging.version>1.7.0</pax.logging.version>
-        <pax.runner.version>1.7.6</pax.runner.version>
         <pax.base.version>1.4.0</pax.base.version>
         <pax.url.version>1.6.0</pax.url.version>
         <pax.web.version>3.0.1</pax.web.version>
@@ -1297,11 +1296,6 @@
                 <version>${pax.base.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.ops4j.base</groupId>
-                <artifactId>ops4j-base-net</artifactId>
-                <version>${pax.base.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.ops4j.pax.url</groupId>
                 <artifactId>pax-url-maven-commons</artifactId>
                 <version>${pax.url.version}</version>
@@ -1428,27 +1422,7 @@
             </dependency>
             <dependency>
                 <groupId>org.ops4j.pax.exam</groupId>
-                <artifactId>pax-exam-container-remote</artifactId>
-                <version>${pax.exam.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.ops4j.pax.exam</groupId>
-                <artifactId>pax-exam-spi</artifactId>
-                <version>${pax.exam.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.ops4j.pax.exam</groupId>
-                <artifactId>pax-exam-invoker-junit</artifactId>
-                <version>${pax.exam.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.ops4j.pax.exam</groupId>
-                <artifactId>pax-exam-container-rbc</artifactId>
-                <version>${pax.exam.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.ops4j.pax.exam</groupId>
-                <artifactId>pax-exam-container-rbc-client</artifactId>
+                <artifactId>pax-exam-container-karaf</artifactId>
                 <version>${pax.exam.version}</version>
             </dependency>
             <dependency>
@@ -1456,16 +1430,6 @@
                 <artifactId>pax-exam-junit4</artifactId>
                 <version>${pax.exam.version}</version>
                 <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.ops4j.pax.exam</groupId>
-                <artifactId>pax-exam-extender-service</artifactId>
-                <version>${pax.exam.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.ops4j.pax.exam</groupId>
-                <artifactId>pax-exam-inject</artifactId>
-                <version>${pax.exam.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.geronimo.specs</groupId>
@@ -1700,11 +1664,6 @@
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.gogo.commands</artifactId>
                 <version>${felix.gogo.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.ops4j.pax.runner</groupId>
-                <artifactId>pax-runner-no-jcl</artifactId>
-                <version>${pax.runner.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.ops4j.pax.web</groupId>
