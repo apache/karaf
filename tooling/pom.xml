@@ -36,7 +36,6 @@
     <modules>
         <module>features-maven-plugin</module>
         <module>cmdhelp-maven-plugin</module>
-        <module>exam</module>
     </modules>
 
 </project>

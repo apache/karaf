@@ -17,7 +17,7 @@ import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
-import org.apache.karaf.tooling.exam.options.LogLevelOption;
+import org.ops4j.pax.exam.karaf.options.LogLevelOption;
 import org.junit.Assert;
 import org.ops4j.pax.exam.MavenUtils;
 import org.ops4j.pax.exam.Option;
@@ -38,9 +38,9 @@ import java.io.PrintStream;
 import java.util.*;
 import java.util.concurrent.*;
 
-import static org.apache.karaf.tooling.exam.options.KarafDistributionOption.karafDistributionConfiguration;
-import static org.apache.karaf.tooling.exam.options.KarafDistributionOption.keepRuntimeFolder;
-import static org.apache.karaf.tooling.exam.options.KarafDistributionOption.logLevel;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.karafDistributionConfiguration;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.logLevel;
 
 import static org.ops4j.pax.exam.CoreOptions.maven;
 

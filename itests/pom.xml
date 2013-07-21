@@ -77,9 +77,8 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.karaf.tooling.exam</groupId>
-            <artifactId>org.apache.karaf.tooling.exam.container</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.ops4j.pax.exam</groupId>
+            <artifactId>pax-exam-container-karaf</artifactId>
             <scope>test</scope>
         </dependency>
 
@@ -87,6 +86,12 @@
             <groupId>org.ops4j.pax.exam</groupId>
             <artifactId>pax-exam-junit4</artifactId>
             <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.geronimo.specs</groupId>
+            <artifactId>geronimo-atinject_1.0_spec</artifactId>
+            <version>1.0</version>
         </dependency>
 
     </dependencies>
