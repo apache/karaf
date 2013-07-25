@@ -64,7 +64,10 @@ public class LogTail extends DisplayLog {
             try {
                 events.addAppender(appender);
                 while (!needEndLog)  {
-                    display(cnv, queue.take(), out);
+                    PaxLoggingEvent logEvent = queue.take();
+                    if (logEvent != null) {
+                        display(cnv, logEvent, out);
+                    }
                 }
             } catch (InterruptedException e) {
                 // Ignore
