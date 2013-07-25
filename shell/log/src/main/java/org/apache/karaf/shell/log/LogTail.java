@@ -17,8 +17,6 @@
 package org.apache.karaf.shell.log;
 
 import java.io.PrintStream;
-import java.util.LinkedList;
-import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -28,36 +26,56 @@ import org.apache.karaf.shell.log.layout.PatternParser;
 import org.ops4j.pax.logging.spi.PaxAppender;
 import org.ops4j.pax.logging.spi.PaxLoggingEvent;
 
-@Command(scope = "log", name = "tail", description = "Continuously display log entries.")
+@Command(scope = "log", name = "tail", description = "Continuously display log entries. Use ctrl-c to quit this command")
 public class LogTail extends DisplayLog {
+    
+    private boolean needEndLog;
 
     protected Object doExecute() throws Exception {
-        final PatternConverter cnv = new PatternParser(overridenPattern != null ? overridenPattern : pattern).parse();
-        final PrintStream out = System.out;
+        new Thread(new PrintEventThread()).start();
+        
+        for (;;) {
+            int c = session.getKeyboard().read();
+            if (c < 0) {
+                needEndLog = true;
+                break;
+            }
 
-        Iterable<PaxLoggingEvent> le = events.getElements(entries == 0 ? Integer.MAX_VALUE : entries);
-        for (PaxLoggingEvent event : le) {
-            display(cnv, event, out);
         }
-        // Tail
-        final BlockingQueue<PaxLoggingEvent> queue = new LinkedBlockingQueue<PaxLoggingEvent>();
-        PaxAppender appender = new PaxAppender() {
-            public void doAppend(PaxLoggingEvent event) {
-                queue.add(event);
-            }
-        };
-        try {
-            events.addAppender(appender);
-            for (;;) {
-                display(cnv, queue.take(), out);
-            }
-        } catch (InterruptedException e) {
-            // Ignore
-        } finally {
-            events.removeAppender(appender);
-        }
-        out.println();
         return null;
+    }
+    
+    class PrintEventThread implements Runnable {
+        public void run() {
+            final PatternConverter cnv = new PatternParser(overridenPattern != null ? overridenPattern : pattern).parse();
+            final PrintStream out = System.out;
+
+            Iterable<PaxLoggingEvent> le = events.getElements(entries == 0 ? Integer.MAX_VALUE : entries);
+            for (PaxLoggingEvent event : le) {
+                display(cnv, event, out);
+            }
+            // Tail
+            final BlockingQueue<PaxLoggingEvent> queue = new LinkedBlockingQueue<PaxLoggingEvent>();
+            PaxAppender appender = new PaxAppender() {
+                public void doAppend(PaxLoggingEvent event) {
+                    queue.add(event);
+                }
+            };
+            try {
+                events.addAppender(appender);
+                while (!needEndLog)  {
+                    PaxLoggingEvent logEvent = queue.take();
+                    if (logEvent != null) {
+                        display(cnv, logEvent, out);
+                    }
+                }
+            } catch (InterruptedException e) {
+                // Ignore
+            } finally {
+                events.removeAppender(appender);
+            }
+            out.println();
+        }
     }
 
 }
