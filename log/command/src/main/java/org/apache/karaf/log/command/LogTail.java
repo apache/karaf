@@ -19,41 +19,64 @@ package org.apache.karaf.log.command;
 import java.io.PrintStream;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.karaf.shell.commands.Command;
 import org.ops4j.pax.logging.spi.PaxAppender;
 import org.ops4j.pax.logging.spi.PaxLoggingEvent;
 
-@Command(scope = "log", name = "tail", description = "Continuously display log entries.")
+@Command(scope = "log", name = "tail", description = "Continuously display log entries. Use ctrl-c to quit this command")
 public class LogTail extends DisplayLog {
 	
+    private boolean needEndLog;
+    
     protected Object doExecute() throws Exception {
-        final PrintStream out = System.out;
+        new Thread(new PrintEventThread()).start();
+       
+        for (;;) {
+            int c = session.getKeyboard().read();
+            if (c < 0) {
+                needEndLog = true;
+                break;
+            }
 
-        Iterable<PaxLoggingEvent> le = this.logService.getEvents(entries == 0 ? Integer.MAX_VALUE : entries);
-        for (PaxLoggingEvent event : le) {
-            printEvent(out, event);
         }
-        // Tail
-        final BlockingQueue<PaxLoggingEvent> queue = new LinkedBlockingQueue<PaxLoggingEvent>();
-        PaxAppender appender = new PaxAppender() {
-            public void doAppend(PaxLoggingEvent event) {
-                    queue.add(event);
-            }
-        };
-        try {
-            logService.addAppender(appender);
-            for (;;) {
-            	PaxLoggingEvent event = queue.take();
-            	printEvent(out, event);
-            }
-        } catch (InterruptedException e) {
-            // Ignore
-        } finally {
-            logService.removeAppender(appender);
-        }
-        out.println();
+            
         return null;
+    }
+    
+    
+    class PrintEventThread implements Runnable {
+        PrintStream out = System.out;
+        public void run() {
+            Iterable<PaxLoggingEvent> le = logService.getEvents(entries == 0 ? Integer.MAX_VALUE : entries);
+            for (PaxLoggingEvent event : le) {
+                printEvent(out, event);
+            }
+            // Tail
+            final BlockingQueue<PaxLoggingEvent> queue = new LinkedBlockingQueue<PaxLoggingEvent>();
+            PaxAppender appender = new PaxAppender() {
+                public void doAppend(PaxLoggingEvent event) {
+                        queue.add(event);
+                }
+            };
+            try {
+                logService.addAppender(appender);
+                
+                while (!needEndLog) {
+                    PaxLoggingEvent event = queue.take();
+                    if (event != null) {
+                        printEvent(out, event);
+                    }
+                }
+            } catch (InterruptedException e) {
+                // Ignore
+            } finally {
+                logService.removeAppender(appender);
+            }
+            out.println();
+            
+        }
     }
 
 }
