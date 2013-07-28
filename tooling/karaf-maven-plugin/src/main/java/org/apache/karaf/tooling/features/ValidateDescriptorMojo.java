@@ -24,6 +24,7 @@ import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.Repository;
 import org.apache.karaf.features.internal.FeatureValidationUtil;
 import org.apache.karaf.features.internal.RepositoryImpl;
+import org.apache.karaf.tooling.url.CustomBundleURLStreamHandlerFactory;
 import org.apache.karaf.tooling.utils.MojoSupport;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
