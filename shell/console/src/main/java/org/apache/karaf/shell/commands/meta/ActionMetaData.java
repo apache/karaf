@@ -141,16 +141,14 @@ public class ActionMetaData {
                     IndentFormatter.printFormatted("                ", argument.description(), termWidth, out);
                     if (!argument.required()) {
                         if (argument.valueToShowInHelp() != null && argument.valueToShowInHelp().length() != 0) {
-                            try {
-                                if (Argument.DEFAULT_STRING.equals(argument.valueToShowInHelp())) {
-                                    arguments.get(argument).setAccessible(true);
-                                    Object o = arguments.get(argument).get(action);
-                                    printObjectDefaultsTo(out, o);
-                                } else {
-                                    printDefaultsTo(out, argument.valueToShowInHelp());
+                            if (Argument.DEFAULT_STRING.equals(argument.valueToShowInHelp())) {
+                                Object o = getDefaultValue(action, argument);
+                                String defaultValue = getDefaultValueString(o);
+                                if (defaultValue != null) {
+                                    printDefaultsTo(out, defaultValue);
                                 }
-                            } catch (Throwable t) {
-                                // Ignore
+                            } else {
+                                printDefaultsTo(out, argument.valueToShowInHelp());
                             }
                         }
                     }
@@ -168,16 +166,14 @@ public class ActionMetaData {
                     out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a(opt).a(Ansi.Attribute.RESET));
                     IndentFormatter.printFormatted("                ", option.description(), termWidth, out);
                     if (option.valueToShowInHelp() != null && option.valueToShowInHelp().length() != 0) {
-                        try {
-                            if (Option.DEFAULT_STRING.equals(option.valueToShowInHelp())) {
-                                options.get(option).setAccessible(true);
-                                Object o = options.get(option).get(action);
-                                printObjectDefaultsTo(out, o);
-                            } else {
-                                printDefaultsTo(out, option.valueToShowInHelp());
+                        if (Option.DEFAULT_STRING.equals(option.valueToShowInHelp())) {
+                            Object o = getDefaultValue(action, option);
+                            String defaultValue = getDefaultValueString(o);
+                            if (defaultValue != null) {
+                                printDefaultsTo(out, defaultValue);
                             }
-                        } catch (Throwable t) {
-                            // Ignore
+                        } else {
+                            printDefaultsTo(out, option.valueToShowInHelp());
                         }
                     }
                 }
@@ -185,31 +181,53 @@ public class ActionMetaData {
             }
             if (command.detailedDescription().length() > 0) {
                 out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("DETAILS").a(Ansi.Attribute.RESET));
-                String desc = loadDescription(actionClass, command.detailedDescription());
+                String desc = getDetailedDescription();
                 IndentFormatter.printFormatted("        ", desc, termWidth, out);
             }
         }
     }
     
-    private String loadDescription(Class clazz, String desc) {
-        if (desc.startsWith("classpath:")) {
+    public Object getDefaultValue(Action action, Argument argument) {
+        try {
+            arguments.get(argument).setAccessible(true);
+            return arguments.get(argument).get(action);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+    
+    public Object getDefaultValue(Action action, Option option) {
+        try {
+            options.get(option).setAccessible(true);
+            return options.get(option).get(action);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+    
+    public String getDetailedDescription() {
+        String desc = command.detailedDescription();
+        return loadDescription(actionClass, desc);
+    }
+    
+    private String loadDescription(Class<?> clazz, String desc) {
+        if (desc != null && desc.startsWith("classpath:")) {
             desc = ShellUtil.loadClassPathResource(clazz, desc.substring("classpath:".length()));
         }
         return desc;
     }
-
-    private void printObjectDefaultsTo(PrintStream out, Object o) {
-        if (o != null
-                && (!(o instanceof Boolean) || ((Boolean) o))
-                && (!(o instanceof Number) || ((Number) o).doubleValue() != 0.0)) {
-            printDefaultsTo(out, o.toString());
+    
+    public String getDefaultValueString(Object o) {
+        if (o != null && (!(o instanceof Boolean) || ((Boolean)o))
+            && (!(o instanceof Number) || ((Number)o).doubleValue() != 0.0)) {
+            return o.toString();
+        } else {
+            return null;
         }
     }
 
     private void printDefaultsTo(PrintStream out, String value) {
-        out.print("                (defaults to ");
-        out.print(value);
-        out.println(")");
+        out.println("                (defaults to " + value + ")");
     }
 
 }
