@@ -111,6 +111,7 @@
             <fileMode>0664</fileMode>
             <includes>
                 <include>org.apache.karaf:org.apache.karaf.exception</include>
+                <include>org.apache.servicemix.specs:org.apache.servicemix.specs.jaxp-api-1.4</include>
                 <include>org.apache.xerces:xercesImpl</include>
             </includes>
         </dependencySet>
