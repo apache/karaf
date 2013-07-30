@@ -11,7 +11,7 @@ h1. Description
 
 The diagnostic core bundle is the diagnostic core implementation.
 
-It's used by the diagnostic commands bundle and is responsible of the dump generation (features, logs, bundles, threads).
+It's used by the diagnostic commands bundle and is responsible of the dump generation (environment, features, logs, bundles, threads).
 
 h1. See also
 

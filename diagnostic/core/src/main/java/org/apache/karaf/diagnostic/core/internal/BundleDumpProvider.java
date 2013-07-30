@@ -72,10 +72,10 @@ public class BundleDumpProvider extends TextDumpProvider {
         writer.write("Number of installed bundles " + bundles.length + "\n");
 
         // create file header
-        writer.write("Id\tSymbolic name\tState\n");
+        writer.write("Id\tSymbolic name\tVersion\tState\n");
         for (Bundle bundle : bundles) {
             // write row :)
-            writer.write(bundle.getBundleId() + "\t" + bundle.getSymbolicName()
+            writer.write(bundle.getBundleId() + "\t" + bundle.getSymbolicName() + '\t' + bundle.getVersion()
                 + "\t" + stateMap.get(bundle.getState()) + "\n");
         }
 
