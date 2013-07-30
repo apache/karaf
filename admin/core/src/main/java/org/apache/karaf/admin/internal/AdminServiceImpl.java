@@ -519,6 +519,10 @@ public class AdminServiceImpl implements AdminService {
     }
 
     public synchronized Instance cloneInstance(final String name, final String cloneName, final InstanceSettings settings) throws Exception {
+        final int instanceSshPort = getInstanceSshPort(name);
+        final int instanceRmiRegistryPort = getInstanceRmiRegistryPort(name);
+        final int instanceRmiServerPort = getInstanceRmiServerPort(name);
+        
         return execute(new Task<Instance>() {
             public Instance call(State state) throws IOException {
                 if (state.instances.get(cloneName) != null) {
@@ -546,11 +550,11 @@ public class AdminServiceImpl implements AdminService {
                 props.put(name, cloneName);
                 props.put(locationPath, cloneLocationPath);
                 if (settings.getSshPort() > 0)
-                    props.put(Integer.toString(getInstanceSshPort(instance.name)), Integer.toString(settings.getSshPort()));
+                    props.put(Integer.toString(instanceSshPort), Integer.toString(settings.getSshPort()));
                 if (settings.getRmiRegistryPort() > 0)
-                    props.put(Integer.toString(getInstanceRmiRegistryPort(instance.name)), Integer.toString(settings.getRmiRegistryPort()));
+                    props.put(Integer.toString(instanceRmiRegistryPort), Integer.toString(settings.getRmiRegistryPort()));
                 if (settings.getRmiServerPort() > 0)
-                    props.put(Integer.toString(getInstanceRmiServerPort(instance.name)), Integer.toString(settings.getRmiServerPort()));
+                    props.put(Integer.toString(instanceRmiServerPort), Integer.toString(settings.getRmiServerPort()));
                 // filtering clone files
                 filterResource(cloneLocation, "etc/custom.properties", props);
                 filterResource(cloneLocation, "etc/org.apache.karaf.management.cfg", props);
