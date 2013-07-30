@@ -559,7 +559,7 @@
                                 <feature>config</feature>
                                 <feature>ssh</feature>
                                 <feature>management</feature>
-				                <feature>wrapper</feature>
+                                <feature>wrapper</feature>
                             </features>
                             <includeMvnBasedDescriptors>true</includeMvnBasedDescriptors>
                             <repository>target/features-repo</repository>
