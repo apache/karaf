@@ -56,4 +56,9 @@
             <entry key="jmx.objectname" value="org.apache.karaf:type=diagnostic,name=${karaf.name}"/>
         </service-properties>
     </service>
+
+    <bean id="environment" class="org.apache.karaf.diagnostic.core.internal.EnvironmentDumpProvider" >
+        <argument ref="blueprintBundleContext" />
+    </bean>
+    <service ref="environment" auto-export="interfaces" />
 </blueprint>
