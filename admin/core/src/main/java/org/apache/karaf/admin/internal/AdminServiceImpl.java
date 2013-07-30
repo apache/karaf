@@ -559,7 +559,6 @@ public class AdminServiceImpl implements AdminService {
                 filterResource(cloneLocation, "etc/custom.properties", props);
                 filterResource(cloneLocation, "etc/org.apache.karaf.management.cfg", props);
                 filterResource(cloneLocation, "etc/org.apache.karaf.shell.cfg", props);
-                filterResource(cloneLocation, "etc/org.ops4j.pax.logging.cfg", props);
                 filterResource(cloneLocation, "etc/system.properties", props);
                 filterResource(cloneLocation, "bin/karaf", props);
                 filterResource(cloneLocation, "bin/start", props);
