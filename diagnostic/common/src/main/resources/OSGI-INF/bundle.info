@@ -10,6 +10,7 @@
     The diagnostic common bundle provides diagnostic services.
 
     The diagnostic services cover dump on:
+    - environment
     - features
     - logs
     - bundles
