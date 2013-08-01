@@ -192,7 +192,7 @@ public class InstanceServiceImpl implements InstanceService {
         T call(State state) throws IOException;
     }
 
-    <T> T execute(final Task<T> callback) {
+    synchronized <T> T execute(final Task<T> callback) {
         final File storageFile = new File(storageLocation, STORAGE_FILE);
         if (!storageFile.exists()) {
             storageFile.getParentFile().mkdirs();
