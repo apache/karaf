@@ -124,7 +124,8 @@ public class ManifestUtils {
         return bsn;
     }
     
-    public static VersionRange getVersionRange(Clause clause)
+    @SuppressWarnings("deprecation")
+	public static VersionRange getVersionRange(Clause clause)
     {
         String v = clause.getAttribute(Constants.VERSION_ATTRIBUTE);
         if (v == null)

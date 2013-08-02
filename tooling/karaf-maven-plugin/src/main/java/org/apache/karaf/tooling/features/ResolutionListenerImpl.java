@@ -29,8 +29,8 @@ import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.plugin.logging.Log;
 
 public class ResolutionListenerImpl implements ResolutionListener {
-    private Stack parents = new Stack();
-    private Map artifacts = new HashMap();
+    private Stack<Node> parents = new Stack<Node>();
+    private Map<String, Node> artifacts = new HashMap<String, Node>();
     private Node rootNode;
     private Log log;
 
@@ -97,8 +97,8 @@ public class ResolutionListenerImpl implements ResolutionListener {
 
     protected void print(Node node, String string) {
         // getLog().debug(string + rootNode.getArtifact());
-        for (Iterator iter = node.getChildren().iterator(); iter.hasNext();) {
-            Node n = (Node) iter.next();
+        for (Iterator<Node> iter = node.getChildren().iterator(); iter.hasNext();) {
+            Node n = iter.next();
             print(n, string + "  ");
         }
     }
@@ -147,7 +147,7 @@ public class ResolutionListenerImpl implements ResolutionListener {
         return (Node) artifacts.get(artifact.getDependencyConflictId());
     }
 
-    public Collection getArtifacts() {
+    public Collection<Node> getArtifacts() {
         return artifacts.values();
     }
 

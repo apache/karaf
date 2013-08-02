@@ -34,7 +34,8 @@ import org.junit.Test;
 
 public class BundleToArtifactTest extends MojoSupport {
 
-    public BundleToArtifactTest() throws NoSuchFieldException, IllegalAccessException {
+    @SuppressWarnings("rawtypes")
+	public BundleToArtifactTest() throws NoSuchFieldException, IllegalAccessException {
         factory = new DefaultArtifactFactory();
         ArtifactHandlerManager artifactHandlerManager = new DefaultArtifactHandlerManager();
         Field f = factory.getClass().getDeclaredField("artifactHandlerManager");

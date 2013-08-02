@@ -17,7 +17,12 @@
  */
 package org.apache.karaf.tooling.utils;
 
+import java.io.BufferedOutputStream;
+import java.io.Closeable;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -37,8 +42,6 @@ import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.repository.DefaultArtifactRepository;
 import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
-import org.apache.maven.artifact.resolver.ArtifactCollector;
-import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
@@ -53,6 +56,7 @@ import org.apache.maven.project.MavenProjectHelper;
 import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.settings.Proxy;
 
+@SuppressWarnings({"deprecation", "rawtypes", "unchecked"})
 public abstract class MojoSupport extends AbstractMojo {
 
     /**
@@ -154,7 +158,7 @@ public abstract class MojoSupport extends AbstractMojo {
         n.getChildren().clear();
     }
 
-    protected Set getArtifacts(Node n, Set s) {
+	protected Set getArtifacts(Node n, Set s) {
         if (!s.contains(n.getArtifact())) {
             s.add(n.getArtifact());
             for (Iterator iter = n.getChildren().iterator(); iter.hasNext();) {
@@ -455,6 +459,56 @@ public abstract class MojoSupport extends AbstractMojo {
             
         } else {
             return null;
+        }
+    }
+
+    protected void silentClose(Closeable closeable) {
+        if (closeable != null) {
+            try {
+                closeable.close();
+            } catch (IOException e) {
+                // Ignore
+            }
+        }
+    }
+    
+    protected void copy(File sourceFile, File destFile) {
+        File targetDir = destFile.getParentFile();
+        ensureDirExists(targetDir);
+
+        FileInputStream is = null;
+        BufferedOutputStream bos = null;
+        try {
+            is = new FileInputStream(sourceFile);
+            bos = new BufferedOutputStream(new FileOutputStream(destFile));
+            int count = 0;
+            byte[] buffer = new byte[8192];
+            while ((count = is.read(buffer)) > 0) {
+                bos.write(buffer, 0, count);
+            }
+            bos.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        } finally {
+            silentClose(is);
+            silentClose(bos);
+        }
+    }
+    
+
+    /**
+     * Make sure the target directory exists and
+     * that is actually a directory
+     * @param targetDir
+     * @throws IOException
+     */
+    private static void ensureDirExists(File targetDir) {
+        if (!targetDir.exists()) {
+            if (!targetDir.mkdirs()) {
+                throw new RuntimeException("Unable to create target directory: " + targetDir);
+            }
+        } else if (!targetDir.isDirectory()) {
+            throw new RuntimeException("Target is not a directory: " + targetDir);
         }
     }
 }

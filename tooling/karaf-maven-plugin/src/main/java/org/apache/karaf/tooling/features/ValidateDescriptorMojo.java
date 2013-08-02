@@ -60,7 +60,7 @@ import static org.apache.karaf.tooling.features.ManifestUtils.*;
  * @inheritByDefault true
  * @description Validates the features XML file
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings("deprecation")
 public class ValidateDescriptorMojo extends MojoSupport {
 
     private static final String MVN_URI_PREFIX = "mvn:";
@@ -517,7 +517,6 @@ public class ValidateDescriptorMojo extends MojoSupport {
      */
     private Manifest getManifest(String bundle, Object artifact) throws ArtifactResolutionException, ArtifactNotFoundException,
             ZipException, IOException {
-        ZipFile file = null;
         if (!(artifact instanceof Artifact)) {
             //not resolved as mvn artifact, so it's non-mvn protocol, just use the CustomBundleURLStreamHandlerFactory
             // to open stream
@@ -535,14 +534,13 @@ public class ValidateDescriptorMojo extends MojoSupport {
                 if (m == null) {
                     throw new IOException("Manifest not present in the first entry of the zip");
                 }
-
+                silentClose(jar);
                 return m;
             } finally {
-                if (is != null) { // just in case when we did not open bundle
-                    is.close();
-                }
+            	silentClose(is);
             }
         } else {
+        	ZipFile file = null;
             Artifact mvnArtifact = (Artifact) artifact;
             File localFile = new File(localRepo.pathOf(mvnArtifact));
             if (localFile.exists()) {
@@ -560,6 +558,7 @@ public class ValidateDescriptorMojo extends MojoSupport {
                 Manifest manifest = new Manifest(file.getInputStream(file.getEntry("META-INF/MANIFEST.MF")));
                 return manifest;
             } finally {
+            	silentClose(file);
                 System.setErr(original);
             }
         }

@@ -103,7 +103,8 @@ public class CreateArchiveMojo extends MojoSupport {
         }
     }
 
-    private void archive(String type) throws IOException {
+    @SuppressWarnings("deprecation")
+	private void archive(String type) throws IOException {
         Artifact artifact1 = factory.createArtifactWithClassifier(project.getArtifact().getGroupId(), project.getArtifact().getArtifactId(), project.getArtifact().getVersion(), type, "bin");
         File target1 = archive(targetServerDirectory, destDir, artifact1);
         projectHelper.attachArtifact( project, artifact1.getType(), null, target1 );
