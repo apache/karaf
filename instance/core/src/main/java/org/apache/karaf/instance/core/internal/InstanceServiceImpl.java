@@ -418,6 +418,7 @@ public class InstanceServiceImpl implements InstanceService {
                         + " -Djava.ext.dirs=\"" + new File(new File(new File(System.getProperty("java.home"), "jre"), "lib"), "ext") + System.getProperty("path.separator") + new File(new File(System.getProperty("java.home"), "lib"), "ext") + System.getProperty("path.separator") + new File(libDir, "ext").getCanonicalPath() + "\""
                         + " -Dkaraf.home=\"" + System.getProperty("karaf.home") + "\""
                         + " -Dkaraf.base=\"" + new File(location).getCanonicalPath() + "\""
+                        + " -Dkaraf.data=\"" + new File(new File(location).getCanonicalPath(), "data") + "\""
                         + " -Dkaraf.startLocalConsole=false"
                         + " -Dkaraf.startRemoteShell=true"
                         + " -classpath " + classpath.toString()
