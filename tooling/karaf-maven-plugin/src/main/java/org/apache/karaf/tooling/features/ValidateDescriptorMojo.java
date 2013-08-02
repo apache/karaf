@@ -558,7 +558,6 @@ public class ValidateDescriptorMojo extends MojoSupport {
                 Manifest manifest = new Manifest(file.getInputStream(file.getEntry("META-INF/MANIFEST.MF")));
                 return manifest;
             } finally {
-            	silentClose(file);
                 System.setErr(original);
             }
         }
