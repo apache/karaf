@@ -37,7 +37,8 @@ import org.apache.karaf.management.mbeans.scr.ScrServiceMBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@aQute.bnd.annotation.component.Component(name = ScrServiceMBeanImpl.COMPONENT_NAME, enabled = true, immediate = true)
+@aQute.bnd.annotation.component.Component(name = ScrServiceMBeanImpl.COMPONENT_NAME, enabled = true, immediate = true,
+properties = {"hidden.component=true"})
 public class ScrServiceMBeanImpl extends StandardMBean implements ScrServiceMBean {
 
     public static final String OBJECT_NAME = "org.apache.karaf:type=scr,name=" + System.getProperty("karaf.name", "root");
