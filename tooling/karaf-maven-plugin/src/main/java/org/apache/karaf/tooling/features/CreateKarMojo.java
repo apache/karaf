@@ -192,7 +192,8 @@ public class CreateKarMojo extends MojoSupport {
      *
      * @param bundles
      */
-    private File createArchive(List<Artifact> bundles) throws MojoExecutionException {
+    @SuppressWarnings("deprecation")
+	private File createArchive(List<Artifact> bundles) throws MojoExecutionException {
         ArtifactRepositoryLayout layout = new DefaultRepositoryLayout();
         File archiveFile = getArchiveFile(outputDirectory, finalName, classifier);
 
@@ -219,7 +220,7 @@ public class CreateKarMojo extends MojoSupport {
 //            archive.addManifestEntry(Constants.BUNDLE_SYMBOLICNAME, project.getArtifactId());
 
             //include the feature.xml
-            Artifact featureArtifact = factory.createArtifactWithClassifier(project.getGroupId(), project.getArtifactId(), project.getVersion(), "xml", KarArtifactInstaller.FEATURE_CLASSIFIER);
+			Artifact featureArtifact = factory.createArtifactWithClassifier(project.getGroupId(), project.getArtifactId(), project.getVersion(), "xml", KarArtifactInstaller.FEATURE_CLASSIFIER);
             jarArchiver.addFile(featuresFile, repositoryPath + layout.pathOf(featureArtifact));
 
             if (featureArtifact.isSnapshot()) {

@@ -17,14 +17,7 @@
  */
 package org.apache.karaf.tooling.url;
 
-import org.apache.karaf.deployer.blueprint.BlueprintTransformer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -34,8 +27,6 @@ import java.net.URLStreamHandler;
  * Simple workaround for "WAR" prefix.
  */
 public class WarURLHandler extends URLStreamHandler {
-
-	private final Logger logger = LoggerFactory.getLogger(WarURLHandler.class);
 
 	private static String SYNTAX = "war: war-uri";
 

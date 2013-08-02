@@ -21,8 +21,6 @@ import static org.apache.karaf.tooling.features.ManifestUtils.matches;
 
 import junit.framework.TestCase;
 
-import java.util.HashMap;
-
 import org.apache.felix.utils.manifest.Attribute;
 import org.apache.felix.utils.manifest.Clause;
 import org.apache.felix.utils.manifest.Directive;

@@ -1,5 +1,6 @@
 package org.apache.karaf.tooling.features;
 
+import org.apache.karaf.tooling.features.model.Repository;
 import org.apache.maven.artifact.factory.DefaultArtifactFactory;
 import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.artifact.handler.manager.DefaultArtifactHandlerManager;
@@ -19,7 +20,8 @@ import java.util.HashMap;
  * To change this template use File | Settings | File Templates.
  */
 public class AddToRepositoryMojoTest extends AddToRepositoryMojo {
-    public AddToRepositoryMojoTest() throws NoSuchFieldException, IllegalAccessException {
+    @SuppressWarnings("rawtypes")
+	public AddToRepositoryMojoTest() throws NoSuchFieldException, IllegalAccessException {
         factory = new DefaultArtifactFactory();
         ArtifactHandlerManager artifactHandlerManager = new DefaultArtifactHandlerManager();
         Field f = factory.getClass().getDeclaredField("artifactHandlerManager");
@@ -39,7 +41,7 @@ public class AddToRepositoryMojoTest extends AddToRepositoryMojo {
     @Test
     public void testSimpleURL() throws Exception {
         URL in = getClass().getClassLoader().getResource("input-repository.xml");
-        AddToRepositoryMojo.Repository repo = new AddToRepositoryMojo.Repository(in.toURI());
+        Repository repo = new Repository(in.toURI());
 
         String[] repos = repo.getDefinedRepositories();
 

@@ -78,24 +78,12 @@ public class DependencyHelper {
       */
      private final List<RemoteRepository> projectRepos;
 
-     /**
-      * The project's remote repositories to use for the resolution of plugins and their dependencies.
-      *
-      * @parameter default-value="${project.remotePluginRepositories}"
-      * @required
-      * @readonly
-      */
-     private final List<RemoteRepository> pluginRepos;
-
     //dependencies we are interested in
     protected Map<Artifact, String> localDependencies;
     //log of what happened during search
     protected String treeListing;
 
-
-
-    public DependencyHelper(List<RemoteRepository> pluginRepos, List<RemoteRepository> projectRepos, RepositorySystemSession repoSession, RepositorySystem repoSystem) {
-        this.pluginRepos = pluginRepos;
+    public DependencyHelper(List<RemoteRepository> projectRepos, RepositorySystemSession repoSession, RepositorySystem repoSystem) {
         this.projectRepos = projectRepos;
         this.repoSession = repoSession;
         this.repoSystem = repoSystem;

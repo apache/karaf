@@ -23,11 +23,11 @@ import java.util.HashSet;
 import org.apache.maven.artifact.Artifact;
 
 public class Node {
-    private Set children = new HashSet();
-    private Set parents = new HashSet();
+    private Set<Node> children = new HashSet<Node>();
+    private Set<Node> parents = new HashSet<Node>();
     private Artifact artifact;
 
-    public Set getChildren() {
+    public Set<Node> getChildren() {
         return children;
     }
 
@@ -35,15 +35,15 @@ public class Node {
         return artifact;
     }
 
-    public Set getParents() {
+    public Set<Node> getParents() {
         return parents;
     }
 
-    public void setChildren(Set children) {
+    public void setChildren(Set<Node> children) {
         this.children = children;
     }
 
-    public void setParents(Set parents) {
+    public void setParents(Set<Node> parents) {
         this.parents = parents;
     }
 
