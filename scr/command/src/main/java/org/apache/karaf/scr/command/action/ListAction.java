@@ -20,7 +20,10 @@ import org.apache.felix.scr.Component;
 import org.apache.felix.scr.ScrService;
 import org.apache.karaf.scr.command.ScrCommandConstants;
 import org.apache.karaf.scr.command.ScrUtils;
+import org.apache.karaf.scr.command.support.IdComparator;
 import org.apache.karaf.shell.commands.Command;
+
+import java.util.Arrays;
 
 /**
  * Lists all the components currently installed.
@@ -28,6 +31,8 @@ import org.apache.karaf.shell.commands.Command;
 @Command(scope = ScrCommandConstants.SCR_COMMAND, name = ScrCommandConstants.LIST_FUNCTION, description = "Displays a list of available components")
 public class ListAction extends ScrActionSupport {
 
+
+    private final IdComparator idComparator = new IdComparator();
     @Override
     protected Object doScrAction(ScrService scrService) throws Exception {
         if (logger.isDebugEnabled()) {
@@ -35,6 +40,7 @@ public class ListAction extends ScrActionSupport {
         }
         System.out.println(getBoldString("   ID   State             Component Name"));
         Component[] components = scrService.getComponents();
+        Arrays.sort(components, idComparator);
         for (Component component : ScrUtils.emptyIfNull(Component.class, components)) {
             if (showHidden) {
                 // we display all because we are overridden
