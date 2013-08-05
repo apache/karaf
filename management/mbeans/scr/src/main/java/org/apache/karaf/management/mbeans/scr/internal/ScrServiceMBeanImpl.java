@@ -172,6 +172,16 @@ public class ScrServiceMBeanImpl extends StandardMBean implements ScrServiceMBea
      * @throws Exception
      */
     public void deactiveateComponent(String componentName) throws Exception {
+        deactivateComponent(componentName);
+    }
+
+    /*
+     * @see org.apache.karaf.management.mbeans.scr.ScrServiceMBean#deactiveateComponent(java.lang.String)
+     *
+     * @param componentName
+     * @throws Exception
+    */
+    public void deactivateComponent(String componentName) throws Exception {
         final Component component = findComponent(componentName);
         if (component != null)
             component.disable();
