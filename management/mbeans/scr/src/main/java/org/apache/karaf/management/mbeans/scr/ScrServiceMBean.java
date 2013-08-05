@@ -62,5 +62,14 @@ public interface ScrServiceMBean {
      * @param componentName the components name
      * @throws Exception
      */
+    @Deprecated
     void deactiveateComponent(String componentName) throws Exception;
+
+    /**
+     * Disables a component that is not in an ACTIVE state.
+     *
+     * @param componentName the components name
+     * @throws Exception
+     */
+    void deactivateComponent(String componentName) throws Exception;
 }
