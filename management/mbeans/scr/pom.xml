@@ -30,7 +30,7 @@
 
     <artifactId>org.apache.karaf.management.mbeans.scr</artifactId>
     <packaging>bundle</packaging>
-    <name>Apache Karaf :: Management :: MBeans :: Services</name>
+    <name>Apache Karaf :: Management :: MBeans :: SCR</name>
     <description>This bundle provides MBeans to manipulate Service Components via JMX.</description>
 
     <properties>
@@ -88,7 +88,9 @@
                 <configuration>
                     <instructions>
                         <Export-Package>
-                            org.apache.karaf.management.mbeans.scr
+                            org.apache.karaf.management.mbeans.scr,
+                            org.apache.karaf.management.mbeans.scr.codec
+
                         </Export-Package>
                         <Private-Package>
                             org.apache.karaf.management.mbeans.scr.internal
