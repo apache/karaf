@@ -25,6 +25,7 @@ import javax.management.MBeanServer;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 import javax.management.StandardMBean;
+import javax.management.openmbean.TabularData;
 
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Deactivate;
@@ -34,6 +35,7 @@ import org.apache.felix.scr.Component;
 import org.apache.felix.scr.ScrService;
 import org.apache.karaf.scr.management.ScrServiceMBean;
 
+import org.apache.karaf.scr.management.codec.JmxComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -108,12 +110,22 @@ public class ScrServiceMBeanImpl extends StandardMBean implements ScrServiceMBea
         }
     }
 
+    @Override
+    public TabularData getComponents() throws Exception {
+        try {
+        return JmxComponent.tableFrom(safe(scrService.getComponents()));
+        }catch (Exception e) {
+            e.printStackTrace(System.out);
+            return null;
+        }
+    }
+
     /*
-     * @see org.apache.karaf.management.mbeans.scr.ScrServiceMBean#listComponents()
-     *
-     * @return
-     * @throws Exception
-     */
+         * @see org.apache.karaf.management.mbeans.scr.ScrServiceMBean#listComponents()
+         *
+         * @return
+         * @throws Exception
+         */
     public String[] listComponents() throws Exception {
         Component[] components = safe(scrService.getComponents());
         String[] componentNames = new String[components.length];
