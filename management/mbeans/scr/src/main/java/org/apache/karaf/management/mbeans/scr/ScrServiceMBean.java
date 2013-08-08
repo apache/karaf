@@ -16,11 +16,54 @@
  */
 package org.apache.karaf.management.mbeans.scr;
 
+import javax.management.openmbean.TabularData;
+
 /**
  * The management interface for SCR Components.
  */
 public interface ScrServiceMBean {
-    
+
+    String COMPONENT_ID = "Id";
+    String COMPONENT_NAME = "Name";
+    String COMPONENT_STATE = "State";
+    String COMPONENT_PROPERTIES = "Properties";
+    String COMPONENT_REFERENCES = "References";
+
+    String PROPERTY_KEY = "Key";
+    String PROPERTY_VALUE = "Value";
+
+    String REFERENCE_NAME = "Name";
+    String REFERENCE_SATISFIED = "Satisfied";
+
+    String REFERENCE_CARDINALITY = "Cardinality";
+    String REFERENCE_CARDINALITY_SINGLE = "Single";
+    String REFERENCE_CARDINALITY_MULTIPLE = "Multiple";
+    String REFERENCE_AVAILABILITY = "Availability";
+    String REFERENCE_AVAILABILITY_OPTIONAL = "Optional";
+    String REFERENCE_AVAILABILITY_MANDATORY = "Mandatory";
+
+    String REFERENCE_POLICY = "Policy";
+    String REFERENCE_POLICY_DYNAMIC = "Dynamic";
+    String REFERENCE_POLICY_STATIC = "Static";
+
+    String REFERENCE_BOUND_SERVICES = "Bound Services";
+
+    /**
+     * The item names in the CompositeData representing a component
+     */
+    String[] COMPONENT = { COMPONENT_ID, COMPONENT_NAME, COMPONENT_STATE,
+            COMPONENT_PROPERTIES, COMPONENT_REFERENCES };
+
+    String[] PROPERTY = { PROPERTY_KEY, PROPERTY_VALUE };
+
+    String[] REFERENCE = { REFERENCE_NAME, REFERENCE_SATISFIED, REFERENCE_CARDINALITY, REFERENCE_AVAILABILITY, REFERENCE_POLICY, REFERENCE_BOUND_SERVICES};
+
+    /**
+     * Displays a {@link TabularData} with all the component details.
+     * @return
+     * @throws Exception
+     */
+    TabularData getComponents() throws Exception;
     
     /**
      * Presents a {@ String} array of components currently registered with the SCR.
