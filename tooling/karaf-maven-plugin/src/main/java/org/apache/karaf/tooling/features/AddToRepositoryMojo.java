@@ -18,6 +18,7 @@
 package org.apache.karaf.tooling.features;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.karaf.tooling.features.model.BundleRef;
 import org.apache.karaf.tooling.features.model.Feature;
 import org.apache.karaf.tooling.features.model.Repository;
 import org.apache.karaf.tooling.utils.MojoSupport;
@@ -104,6 +106,32 @@ public class AddToRepositoryMojo extends MojoSupport {
      * @parameter
      */
     private boolean addTransitiveFeatures = true;
+    
+    /**
+     * If set to true the exported bundles will be directly copied into the repository dir.
+     * If set to false the default maven repository layout will be used
+     * @parameter
+     */
+    private boolean flatRepoLayout;
+    
+    /**
+     * If set to true then the resolved features and bundles will be exported into a single xml file.
+     * This is intended to allow further build scripts to create configs for OSGi containers
+     * @parameter
+     */
+    private boolean exportMetaData;
+    
+    /**
+     * Name of the file for exported feature meta data
+     * 
+     * @parameter expression="${project.build.directory}/features.xml"
+     */
+    private File metaDataFile;
+    
+    /**
+     * Internal counter for garbage collection
+     */
+    private int resolveCount = 0;
 
     public void execute() throws MojoExecutionException, MojoFailureException {
         if (karafVersion == null) {
@@ -116,64 +144,46 @@ public class AddToRepositoryMojo extends MojoSupport {
         addFeatureRepo(String.format(KARAF_CORE_STANDARD_FEATURE_URL, karafVersion));
 
         try {
-            Set<String> bundles = new HashSet<String>();
+            Set<String> artifactsToCopy = new HashSet<String>();
             Map<String, Feature> featuresMap = new HashMap<String, Feature>();
             for (String uri : descriptors) {
-                retrieveDescriptorsRecursively(uri, bundles, featuresMap);
+                retrieveDescriptorsRecursively(uri, artifactsToCopy, featuresMap);
             }
 
             // no features specified, handle all of them
             if (features == null) {
                 features = new ArrayList<String>(featuresMap.keySet());
             }
-
-            Set<String> featuresBundles = new HashSet<String>();
-            Set<String> transitiveFeatures = new HashSet<String>();
-            addFeatures(features, featuresBundles, transitiveFeatures, featuresMap);
-
-            // add the bundles of the configured features to the bundles list
-            bundles.addAll(featuresBundles);
-
-            // if transitive features are enabled we add the contents of those
-            // features to the bundles list
-            if (addTransitiveFeatures) {
-                for (String feature : transitiveFeatures) {
-                    // transitiveFeatures contains name/version
-                    Feature f = featuresMap.get(feature);
-                    getLog().info("Adding contents of transitive feature: " + feature);
-                    bundles.addAll(f.getBundles());
-                    // Treat the config files as bundles, since it is only copying
-                    bundles.addAll(f.getConfigFiles());
-                }
-            }
+            
+            Set<Feature> featuresSet = new HashSet<Feature>();
+            
+            addFeatures(features, featuresSet, featuresMap, addTransitiveFeatures);
 
             getLog().info("Base repo: " + localRepo.getUrl());
-            int currentBundle = 0;
-            for (String bundle : bundles) {
-                Artifact artifact = resourceToArtifact(bundle, skipNonMavenProtocols);
-
-                // Maven ArtifactResolver leaves file handles around so need to clean up
-                // or we will run out of file descriptors
-                if (currentBundle++ % 100 == 0) {
-                    System.gc();
-                    System.runFinalization();
-                }
-
-                if (artifact == null) {
-                    continue;
-                }
-                resolveAndCopyArtifact(artifact, remoteRepos);
+            for (Feature feature : featuresSet) {
+            	copyBundlesToDestRepository(feature.getBundles());
+            	copyArtifactsToDestRepository(feature.getConfigFiles());
             }
-
-            if (copyFileBasedDescriptors != null) {
-                for (CopyFileBasedDescriptor fileBasedDescriptor : copyFileBasedDescriptors) {
-                    File destDir = new File(repository, fileBasedDescriptor.getTargetDirectory());
-                    File destFile = new File(destDir, fileBasedDescriptor.getTargetFileName());
-                    copy(fileBasedDescriptor.getSourceFile(), destFile);
-                }
+            
+            copyFileBasedDescriptorsToDestRepository();
+            
+            if (exportMetaData) {
+            	exportMetaData(featuresSet, metaDataFile);
             }
         } catch (Exception e) {
             throw new MojoExecutionException("Error populating repository", e);
+        }
+    }
+
+    private void exportMetaData(Set<Feature> featuresSet, File metaDataFile) {
+        try {
+            FeatureMetaDataExporter exporter = new FeatureMetaDataExporter(new FileOutputStream(metaDataFile));
+            for (Feature feature : featuresSet) {
+                exporter.writeFeature(feature);
+            }
+            exporter.close();
+        } catch (Exception e) {
+            throw new RuntimeException("Error writing feature meta data to " + metaDataFile + ": " + e.getMessage(), e);
         }
     }
 
@@ -216,6 +226,49 @@ public class AddToRepositoryMojo extends MojoSupport {
         }
     }
 
+    private void copyBundlesToDestRepository(List<BundleRef> bundleRefs) throws MojoExecutionException {
+        for (BundleRef bundle : bundleRefs) {
+            Artifact artifact = resourceToArtifact(bundle.getUrl(), skipNonMavenProtocols);
+            if (artifact != null) {
+                // Store artifact in bundle for later export
+                bundle.setArtifact(artifact);
+                resolveAndCopyArtifact(artifact, remoteRepos);
+            }
+            checkDoGarbageCollect();
+        }
+    }
+
+    private void copyArtifactsToDestRepository(List<String> list) throws MojoExecutionException {
+        for (String bundle : list) {
+            Artifact artifact = resourceToArtifact(bundle, skipNonMavenProtocols);
+            if (artifact != null) {
+                resolveAndCopyArtifact(artifact, remoteRepos);
+            }
+            checkDoGarbageCollect();
+        }
+    }
+    
+    /**
+     * Maven ArtifactResolver leaves file handles around so need to clean up
+     * or we will run out of file descriptors
+     */
+    private void checkDoGarbageCollect() {
+        if (this.resolveCount++ % 100 == 0) {
+            System.gc();
+            System.runFinalization();
+        }
+    }
+
+    private void copyFileBasedDescriptorsToDestRepository() {
+        if (copyFileBasedDescriptors != null) {
+            for (CopyFileBasedDescriptor fileBasedDescriptor : copyFileBasedDescriptors) {
+                File destDir = new File(repository, fileBasedDescriptor.getTargetDirectory());
+                File destFile = new File(destDir, fileBasedDescriptor.getTargetFileName());
+                copy(fileBasedDescriptor.getSourceFile(), destFile);
+            }
+        }
+    }
+
     /**
      * Resolves and copies the given artifact to the repository path.
      * Prefers to resolve using the repository of the artifact if present.
@@ -248,54 +301,61 @@ public class AddToRepositoryMojo extends MojoSupport {
      * @return relative path of the given artifact in a default repo layout
      */
     private String getRelativePath(Artifact artifact) {
-        String dir = artifact.getGroupId().replace('.', '/') + "/" + artifact.getArtifactId() + "/" + artifact.getBaseVersion() + "/";
-        String name = artifact.getArtifactId() + "-" + artifact.getBaseVersion()
-            + (artifact.getClassifier() != null ? "-" + artifact.getClassifier() : "") + "." + artifact.getType();
+    	String dir = (this.flatRepoLayout) ? "" : MavenUtil.getDir(artifact);
+        String name = MavenUtil.getFileName(artifact);
         return dir + name;
     }
 
-    private void addFeatures(List<String> features, Set<String> featuresBundles, Set<String> transitiveFeatures,
-            Map<String, Feature> featuresMap) {
-        for (String feature : features) {
 
-            // feature could be only the name or name/version
-            int delimIndex = feature.indexOf('/');
-            String version = null;
-            if (delimIndex > 0) {
-                version = feature.substring(delimIndex + 1);
-                feature = feature.substring(0, delimIndex);
+
+
+
+    /**
+     * Populate the features by traversing the listed features and their
+     * dependencies if transitive is true
+     *  
+     * @param featureNames
+     * @param features
+     * @param featuresMap
+     * @param transitive
+     */
+    private void addFeatures(List<String> featureNames, Set<Feature> features,
+            Map<String, Feature> featuresMap, boolean transitive) {
+        for (String feature : featureNames) {
+            Feature f = getMatchingFeature(featuresMap, feature);
+            features.add(f);
+            if (transitive) {
+            	addFeatures(f.getDependencies(), features, featuresMap, true);
             }
+        }
+    }
 
-            Feature f = null;
-            if (version != null) {
-                // looking for a specific feature with name and version
-                f = featuresMap.get(feature + "/" + version);
-            } else {
-                // looking for the first feature name (whatever the version is)
-                for (String key : featuresMap.keySet()) {
-                    String[] nameVersion = key.split("/");
-                    if (feature.equals(nameVersion[0])) {
-                        f = featuresMap.get(key);
-                        break;
-                    }
+    private Feature getMatchingFeature(Map<String, Feature> featuresMap, String feature) {
+        // feature could be only the name or name/version
+        int delimIndex = feature.indexOf('/');
+        String version = null;
+        if (delimIndex > 0) {
+            version = feature.substring(delimIndex + 1);
+            feature = feature.substring(0, delimIndex);
+        }
+        Feature f = null;
+        if (version != null) {
+            // looking for a specific feature with name and version
+            f = featuresMap.get(feature + "/" + version);
+        } else {
+            // looking for the first feature name (whatever the version is)
+            for (String key : featuresMap.keySet()) {
+                String[] nameVersion = key.split("/");
+                if (feature.equals(nameVersion[0])) {
+                    f = featuresMap.get(key);
+                    break;
                 }
             }
-            if (f == null) {
-                throw new IllegalArgumentException("Unable to find the feature '" + feature + "'");
-            }
-            // only add the feature to transitives if it is not
-            // listed in the features list defined by the config
-            if (!this.features.contains(f.getName() + "/" + f.getVersion())) {
-                transitiveFeatures.add(f.getName() + "/" + f.getVersion());
-            } else {
-                // add the bundles of the feature to the bundle set
-                getLog().info("Adding contents for feature: " + f.getName() + "/" + f.getVersion());
-                featuresBundles.addAll(f.getBundles());
-                // Treat the config files as bundles, since it is only copying
-                featuresBundles.addAll(f.getConfigFiles());
-            }
-            addFeatures(f.getDependencies(), featuresBundles, transitiveFeatures, featuresMap);
         }
+        if (f == null) {
+            throw new IllegalArgumentException("Unable to find the feature '" + feature + "'");
+        }
+        return f;
     }
 
 }

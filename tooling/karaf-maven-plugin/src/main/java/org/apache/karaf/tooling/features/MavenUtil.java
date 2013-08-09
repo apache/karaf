@@ -216,5 +216,15 @@ public class MavenUtil {
         Writer writer = new FileWriter(target);
         metadataWriter.write(writer, metadata);
     }
+    
+    static String getFileName(Artifact artifact) {
+        String name = artifact.getArtifactId() + "-" + artifact.getBaseVersion()
+            + (artifact.getClassifier() != null ? "-" + artifact.getClassifier() : "") + "." + artifact.getType();
+        return name;
+    }
+    
+    static String getDir(Artifact artifact) {
+        return artifact.getGroupId().replace('.', '/') + "/" + artifact.getArtifactId() + "/" + artifact.getBaseVersion() + "/";
+    }
 
 }
