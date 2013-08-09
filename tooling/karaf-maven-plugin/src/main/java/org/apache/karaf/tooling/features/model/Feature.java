@@ -27,7 +27,7 @@ public class Feature {
     private String name;
     private String version;
     private List<String> dependencies = new ArrayList<String>();
-    private List<String> bundles = new ArrayList<String>();
+    private List<BundleRef> bundles = new ArrayList<BundleRef>();
     private Map<String, Map<String, String>> configs = new HashMap<String, Map<String, String>>();
     private List<String> configFiles = new ArrayList<String>();
 
@@ -51,7 +51,7 @@ public class Feature {
         return dependencies;
     }
 
-    public List<String> getBundles() {
+    public List<BundleRef> getBundles() {
         return bundles;
     }
 
@@ -67,7 +67,7 @@ public class Feature {
         dependencies.add(dependency);
     }
 
-    public void addBundle(String bundle) {
+    public void addBundle(BundleRef bundle) {
         bundles.add(bundle);
     }
 

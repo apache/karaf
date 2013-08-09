@@ -121,7 +121,13 @@ public class Repository {
                 NodeList bundleNodes = e.getElementsByTagName("bundle");
                 for (int j = 0; j < bundleNodes.getLength(); j++) {
                     Element b = (Element) bundleNodes.item(j);
-                    f.addBundle(b.getTextContent());
+                    Integer startLevel;
+                    try {
+                        startLevel = Integer.parseInt(b.getAttribute("start-level"));
+                    } catch (Exception e1) {
+                        startLevel = null;
+                    }
+                    f.addBundle(new BundleRef(b.getTextContent(), startLevel));
                 }
                 features.add(f);
             }
