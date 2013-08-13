@@ -17,9 +17,7 @@
 package org.apache.karaf.log.command;
 
 import java.io.PrintStream;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 import org.apache.karaf.shell.commands.Command;
 import org.ops4j.pax.logging.spi.PaxAppender;
@@ -27,27 +25,32 @@ import org.ops4j.pax.logging.spi.PaxLoggingEvent;
 
 @Command(scope = "log", name = "tail", description = "Continuously display log entries. Use ctrl-c to quit this command")
 public class LogTail extends DisplayLog {
-	
-    private boolean needEndLog;
+
+    private ExecutorService executorService = Executors.newSingleThreadExecutor();
     
     protected Object doExecute() throws Exception {
-        new Thread(new PrintEventThread()).start();
+        PrintEventThread thread = new PrintEventThread();
+        executorService.execute(thread);
        
         for (;;) {
             int c = session.getKeyboard().read();
             if (c < 0) {
-                needEndLog = true;
+                thread.abort();
                 break;
             }
 
         }
-            
+
+        executorService.shutdownNow();
         return null;
     }
     
     
     class PrintEventThread implements Runnable {
+
         PrintStream out = System.out;
+        boolean doDisplay = true;
+
         public void run() {
             Iterable<PaxLoggingEvent> le = logService.getEvents(entries == 0 ? Integer.MAX_VALUE : entries);
             for (PaxLoggingEvent event : le) {
@@ -63,7 +66,7 @@ public class LogTail extends DisplayLog {
             try {
                 logService.addAppender(appender);
                 
-                while (!needEndLog) {
+                if (doDisplay) {
                     PaxLoggingEvent event = queue.take();
                     if (event != null) {
                         printEvent(out, event);
@@ -77,6 +80,11 @@ public class LogTail extends DisplayLog {
             out.println();
             
         }
+
+        public void abort() {
+            doDisplay = false;
+        }
+
     }
 
 }
