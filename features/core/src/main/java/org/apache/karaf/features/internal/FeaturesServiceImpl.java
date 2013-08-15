@@ -191,7 +191,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         String[] s = uris.split(",");
         this.uris = new HashSet<URI>();
         for (String value : s) {
-            this.uris.add(new URI(value));
+            this.uris.add(new URI(value.trim()));
         }
     }
 
