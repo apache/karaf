@@ -292,7 +292,7 @@ if "%KARAF_PROFILER%" == "" goto :RUN
     goto :RUN_LOOP
 
 :EXECUTE_CLEAN
-    rmdir /S /Q %KARAF_DATA%
+    rmdir /S /Q "%KARAF_DATA%"
     shift
     goto :RUN_LOOP
 
@@ -305,7 +305,7 @@ if "%KARAF_PROFILER%" == "" goto :RUN
 :EXECUTE
     SET ARGS=%1 %2 %3 %4 %5 %6 %7 %8
     rem Execute the Java Virtual Machine
-    cd %KARAF_BASE%
+    cd "%KARAF_BASE%"
     "%JAVA%" %JAVA_OPTS% %OPTS% -classpath "%CLASSPATH%" -Djava.endorsed.dirs="%JAVA_HOME%\jre\lib\endorsed;%JAVA_HOME%\lib\endorsed;%KARAF_HOME%\lib\endorsed" -Djava.ext.dirs="%JAVA_HOME%\jre\lib\ext;%JAVA_HOME%\lib\ext;%KARAF_HOME%\lib\ext" -Dkaraf.instances="%KARAF_HOME%\instances" -Dkaraf.home="%KARAF_HOME%" -Dkaraf.base="%KARAF_BASE%" -Djava.io.tmpdir="%KARAF_DATA%\tmp" -Dkaraf.data="%KARAF_DATA%" -Djava.util.logging.config.file="%KARAF_BASE%\etc\java.util.logging.properties" %KARAF_OPTS% %MAIN% %ARGS%
 
 rem # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
