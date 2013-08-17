@@ -29,6 +29,8 @@ public interface BundleService {
     List<Bundle> selectBundles(List<String> ids, boolean defaultAllBundles);
     
     List<Bundle> getBundlesByURL(String urlFilter);
+
+    Bundle getBundle(String id, boolean defaultAllBundles);
     
     String getDiag(Bundle bundle);
     

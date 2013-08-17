@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.bundle.command;
 
+import org.apache.karaf.bundle.core.BundleService;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.apache.karaf.shell.util.ShellUtil;
@@ -26,27 +27,37 @@ import org.osgi.framework.Bundle;
  */
 public abstract class BundleCommand extends OsgiCommandSupport {
 
-    @Argument(index = 0, name = "id", description = "The bundle ID", required = true, multiValued = false)
-    long id;
+    @Argument(index = 0, name = "id", description = "The bundle ID or name or name/version", required = true, multiValued = false)
+    String id;
+
+    boolean defaultAllBundles = true;
+
+    BundleService bundleService;
+
+    public BundleCommand(boolean defaultAllBundles) {
+        this.defaultAllBundles = defaultAllBundles;
+    }
 
     protected Object doExecute() throws Exception {
         return doExecute(true);
     }
 
     protected Object doExecute(boolean force) throws Exception {
-        Bundle bundle = getBundleContext().getBundle(id);
-        if (bundle == null) {
-            System.err.println("Bundle " + id + " not found");
-            return null;
-        }
-        if (force || !ShellUtil.isASystemBundle(bundleContext, bundle)) {
-            doExecute(bundle);
-        } else {
-            System.err.println("Access to system bundle " + id + " is discouraged. You may override with -f");
+        Bundle bundle = bundleService.getBundle(id, defaultAllBundles);
+        if (bundle != null) {
+            if (force || !ShellUtil.isASystemBundle(bundleContext, bundle)) {
+                doExecute(bundle);
+            } else {
+                System.err.println("Access to system bundle " + id + " is discouraged. You may override with -f");
+            }
         }
         return null;
     }
 
     protected abstract void doExecute(Bundle bundle) throws Exception;
+
+    public void setBundleService(BundleService bundleService) {
+        this.bundleService = bundleService;
+    }
 
 }

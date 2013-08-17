@@ -25,6 +25,7 @@
     <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
         <command>
             <action class="org.apache.karaf.bundle.command.StartLevel">
+                <property name="bundleService" ref="bundleService"/>
             </action>
         </command>
         <command>
@@ -73,6 +74,7 @@
         </command>
         <command>
             <action class="org.apache.karaf.bundle.command.Update">
+                <property name="bundleService" ref="bundleService"/>
             </action>
         </command>
         <command>

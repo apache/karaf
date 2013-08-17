@@ -49,9 +49,14 @@ import org.slf4j.LoggerFactory;
  */
 @Command(scope = "bundle", name = "tree-show", description = "Shows the tree of bundles based on the wiring information.")
 public class ShowBundleTree extends BundleCommand {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ShowBundleTree.class);
     private BundleService bundleService;
     private Tree<Bundle> tree;
+
+    public ShowBundleTree(boolean defaultAllBundles) {
+        super(defaultAllBundles);
+    }
 
     public void setBundleService(BundleService bundleService) {
         this.bundleService = bundleService;

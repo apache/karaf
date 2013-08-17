@@ -26,7 +26,12 @@ import org.osgi.framework.Bundle;
  */
 @Command(scope = "bundle", name = "dynamic-import", description = "Enables/disables dynamic-import for a given bundle.")
 public class DynamicImport extends BundleCommand {
+
     BundleService bundleService;
+
+    public DynamicImport() {
+        super(true);
+    }
 
     public void setBundleService(BundleService bundleService) {
         this.bundleService = bundleService;

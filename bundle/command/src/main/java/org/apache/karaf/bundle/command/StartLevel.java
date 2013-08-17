@@ -27,6 +27,10 @@ public class StartLevel extends BundleCommand {
     @Argument(index = 1, name = "startLevel", description = "The bundle's new start level", required = false, multiValued = false)
     Integer level;
 
+    public StartLevel() {
+        super(true);
+    }
+
     protected void doExecute(Bundle bundle) throws Exception {
         // Get package instance service.
         BundleStartLevel bsl = bundle.adapt(BundleStartLevel.class);
