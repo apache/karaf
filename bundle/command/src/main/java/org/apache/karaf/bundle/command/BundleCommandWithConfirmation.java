@@ -26,6 +26,10 @@ public abstract class BundleCommandWithConfirmation extends BundleCommand {
     @Option(name = "--force", aliases = {"-f"}, description = "Forces the command to execute", required = false, multiValued = false)
     boolean force;
 
+    public BundleCommandWithConfirmation() {
+        super(true);
+    }
+
     protected Object doExecute() throws Exception {
         return doExecute(force);
     }

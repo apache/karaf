@@ -45,7 +45,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class BundleServiceImpl implements BundleService {
+
     private static Logger LOG = LoggerFactory.getLogger(BundleService.class);
+
     /**
      * The header key where we store the active wires when we enable DynamicImport=*
      */
@@ -62,6 +64,19 @@ public class BundleServiceImpl implements BundleService {
     @Override
     public List<Bundle> selectBundles(List<String> ids, boolean defaultAllBundles) {
         return new BundleSelectorImpl(bundleContext).selectBundles(ids, defaultAllBundles);
+    }
+
+    @Override
+    public Bundle getBundle(String id, boolean defaultAllBundles) {
+        List<String> ids = new ArrayList<String>(1);
+        ids.add(id);
+        List<Bundle> bundles = selectBundles(ids, defaultAllBundles);
+        if (bundles.isEmpty()) {
+            System.err.println("Bundle " + id + " is not found");
+            return null;
+        } else {
+            return bundles.get(0);
+        }
     }
 
     @Override
