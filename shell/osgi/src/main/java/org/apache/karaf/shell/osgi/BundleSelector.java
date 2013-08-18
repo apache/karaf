@@ -85,6 +85,24 @@ public class BundleSelector {
         return bundles;
     }
 
+    /**
+     * Get a bundle by ID, or name, or name/version.
+     *
+     * @param id bundle ID, or name, or name/version.
+     * @param force forces the command to execute.
+     * @return the bundle or null if not found.
+     * @throws Exception
+     */
+    public Bundle getBundle(String id, boolean force) throws Exception {
+        List<String> ids = new ArrayList<String>(1);
+        ids.add(id);
+        List<Bundle> bundles = selectBundles(ids, force);
+        if (bundles.isEmpty()) {
+            return null;
+        }
+        return bundles.get(0);
+    }
+
     private void addBundle(Bundle bundle, String id, boolean force, List<Bundle> bundles) throws Exception {
         if (bundle == null) {
             // if the bundle is null here, it's because we didn't find it
