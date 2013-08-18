@@ -23,25 +23,23 @@ import org.osgi.framework.Bundle;
 
 public abstract class BundleCommand extends OsgiCommandSupport {
 
-    @Argument(index = 0, name = "id", description = "The bundle ID", required = true, multiValued  = false)
-    long id;
+    @Argument(index = 0, name = "id", description = "The bundle ID or name or name/version", required = true, multiValued  = false)
+    String id;
 
     @Option(name = "--force", aliases = {}, description = "Forces the command to execute", required = false, multiValued = false)
     boolean force;
 
     protected Object doExecute() throws Exception {
-        Bundle bundle = getBundleContext().getBundle(id);
+        BundleSelector selector = new BundleSelector(getBundleContext(), session);
+        Bundle bundle = selector.getBundle(id, force);
+
         if (bundle == null) {
-            System.out.println("Bundle " + id + " not found");
+            System.err.println("Bundle " + id + " not found");
             return null;
         }
 
-        if (!force && Util.isASystemBundle(getBundleContext(), bundle) && !Util.accessToSystemBundleIsAllowed(bundle.getBundleId(), session)) {
-            return null;
-        } else {
-            doExecute(bundle);
-            return null;
-        }
+        doExecute(bundle);
+        return null;
     }
 
     protected abstract void doExecute(Bundle bundle) throws Exception;
