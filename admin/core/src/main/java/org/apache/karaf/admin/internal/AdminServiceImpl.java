@@ -406,7 +406,7 @@ public class AdminServiceImpl implements AdminService {
                         + " -Dkaraf.data=\"" + new File(new File(location).getCanonicalPath(), "data") + "\""
                         + " -Dkaraf.startLocalConsole=false"
                         + " -Dkaraf.startRemoteShell=true"
-                        + " -classpath " + classpath.toString()
+                        + " -classpath \"" + classpath.toString() + "\""
                         + " org.apache.karaf.main.Main";
                 LOGGER.debug("Starting instance " + name + " with command: " + command);
                 org.apache.karaf.jpm.Process process = ProcessBuilderFactory.newInstance().newBuilder()
