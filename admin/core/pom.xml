@@ -211,7 +211,7 @@
                             org.apache.karaf.admin.internal,
                             org.apache.karaf.jpm.impl,
                             org.apache.karaf.util.properties,
-                            org.apache.felix.utils.properties
+                            org.apache.felix.utils.properties;-split-package:=merge-first
                         </Private-Package>
                     </instructions>
                 </configuration>
