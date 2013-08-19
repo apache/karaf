@@ -21,4 +21,4 @@ REM =========================================================================
 SET KARAF_HOME=${SUBST-KARAF-HOME}
 SET KARAF_NAME=${SUBST-KARAF-NAME}
 
-%KARAF_HOME%\bin\instance.bat stop %KARAF_NAME%
+"%KARAF_HOME%\bin\instance.bat" stop %KARAF_NAME%
