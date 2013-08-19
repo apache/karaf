@@ -142,8 +142,7 @@
                             *
                         </Import-Package>
                         <Private-Package>
-                            org.apache.karaf.jaas.jasypt.impl,
-                            com.ibm.icu*
+                            org.apache.karaf.jaas.jasypt.impl
                         </Private-Package>
                     </instructions>
                 </configuration>
