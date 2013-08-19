@@ -119,7 +119,7 @@ public class OsgiTest extends KarafTestSupport {
     public void versionCommand() throws Exception {
         String versionOutput = executeCommand("osgi:version");
         System.out.println(versionOutput);
-        assertTrue(versionOutput.contains("2.3"));
+        assertTrue(versionOutput.contains("2.4"));
     }
 
     @Test
@@ -130,7 +130,7 @@ public class OsgiTest extends KarafTestSupport {
             MBeanServerConnection connection = connector.getMBeanServerConnection();
             ObjectName name = new ObjectName("org.apache.karaf:type=system,name=root");
             String version = (String) connection.getAttribute(name, "Version");
-            assertTrue(version.contains("2.3"));
+            assertTrue(version.contains("2.4"));
         } finally {
             if (connector != null)
                 connector.close();
