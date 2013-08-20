@@ -208,18 +208,34 @@ public class Util
     public static boolean accessToSystemBundleIsAllowed(long bundleId, CommandSession session) throws IOException {
         for (;;) {
             StringBuffer sb = new StringBuffer();
-            System.err.print("You are about to access system bundle " + bundleId + ".  Do you wish to continue (yes/no): ");
+            System.err.println("You are about to access system bundle " + bundleId + ".  Do you wish to continue (yes/no): ");
             System.err.flush();
             for (;;) {
                 int c = session.getKeyboard().read();
                 if (c < 0) {
                     return false;
                 }
-                System.err.print((char) c);
                 if (c == '\r' || c == '\n') {
+                    System.err.println();
+                    System.err.flush();
                     break;
                 }
-                sb.append((char) c);
+                if (c == 127 || c == 'b') {
+                    System.err.print((char)'\b');
+                    System.err.print((char)' ');
+                    System.err.print((char)'\b');
+                } else {
+                    System.err.print((char)c);
+                }
+                
+                System.err.flush();
+                if (c == 127 || c == 'b') {
+                    if (sb.length() > 0) {
+                        sb.deleteCharAt(sb.length() - 1);
+                    }
+                } else {
+                    sb.append((char)c);
+                }
             }
             String str = sb.toString();
             if ("yes".equals(str)) {
