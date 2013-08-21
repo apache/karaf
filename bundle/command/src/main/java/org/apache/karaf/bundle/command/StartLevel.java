@@ -22,14 +22,10 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.startlevel.BundleStartLevel;
 
 @Command(scope = "bundle", name = "start-level", description = "Gets or sets the start level of a bundle.")
-public class StartLevel extends BundleCommand {
+public class StartLevel extends BundleCommandWithConfirmation {
 
     @Argument(index = 1, name = "startLevel", description = "The bundle's new start level", required = false, multiValued = false)
     Integer level;
-
-    public StartLevel() {
-        super(true);
-    }
 
     protected void doExecute(Bundle bundle) throws Exception {
         // Get package instance service.
@@ -41,21 +37,37 @@ public class StartLevel extends BundleCommand {
         if (level == null) {
             System.out.println("Level " + bsl.getStartLevel());
         }
-        else if ((level < 50) && bsl.getStartLevel() > 50){
+        else if ((level < 50) && (bsl.getStartLevel() > 50) && !force){
             for (;;) {
                 StringBuffer sb = new StringBuffer();
                 System.err.println("You are about to designate bundle as a system bundle.  Do you wish to continue (yes/no): ");
                 System.err.flush();
                 for (;;) {
-                    int c = System.in.read();
+                    int c = session.getKeyboard().read();
                     if (c < 0) {
-                        return;
-                    }
-                    System.err.println((char) c);
-                    if (c == '\r' || c == '\n') {
                         break;
                     }
-                    sb.append((char) c);
+                    if (c == '\r' || c == '\n') {
+                        System.err.println();
+                        System.err.flush();
+                        break;
+                    }
+                    if (c == 127 || c == 'b') {
+                        System.err.print((char)'\b');
+                        System.err.print((char)' ');
+                        System.err.print((char)'\b');
+                    } else {
+                        System.err.print((char)c);
+                    }
+
+                    System.err.flush();
+                    if (c == 127 || c == 'b') {
+                        if (sb.length() > 0) {
+                            sb.deleteCharAt(sb.length() - 1);
+                        }
+                    } else {
+                        sb.append((char)c);
+                    }
                 }
                 String str = sb.toString();
                 if ("yes".equals(str)) {
@@ -65,6 +77,7 @@ public class StartLevel extends BundleCommand {
                     break;
                 }
             }
+
         } else {
             bsl.setStartLevel(level);
         }
