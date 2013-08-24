@@ -68,8 +68,10 @@ public class JmxReference {
 
     public static TabularData tableFrom(Reference... references) {
         TabularDataSupport table = new TabularDataSupport(REFERENCE_TABLE);
-        for (Reference reference : references) {
-            table.put(new JmxReference(reference).asCompositeData());
+        if (references != null) {
+            for (Reference reference : references) {
+                table.put(new JmxReference(reference).asCompositeData());
+            }
         }
         return table;
     }
