@@ -41,7 +41,7 @@ public class AddToRepositoryMojoTest extends AddToRepositoryMojo {
     @Test
     public void testSimpleURL() throws Exception {
         URL in = getClass().getClassLoader().getResource("input-repository.xml");
-        Repository repo = new Repository(in.toURI());
+        Repository repo = new Repository(in.toURI(), 80);
 
         String[] repos = repo.getDefinedRepositories();
 
