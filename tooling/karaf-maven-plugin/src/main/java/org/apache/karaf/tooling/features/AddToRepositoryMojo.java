@@ -129,6 +129,12 @@ public class AddToRepositoryMojo extends MojoSupport {
     private File metaDataFile;
     
     /**
+     * The start level exported when no explicit start level is set for a bundle
+     * @parameter 
+     */
+    private int defaultStartLevel = 80;
+    
+    /**
      * Internal counter for garbage collection
      */
     private int resolveCount = 0;
@@ -215,7 +221,8 @@ public class AddToRepositoryMojo extends MojoSupport {
         if (includeMvnBasedDescriptors) {
             bundles.add(uri);
         }
-        Repository repo = new Repository(URI.create(translateFromMaven(uri.replaceAll(" ", "%20"))));
+        URI repoURI = URI.create(translateFromMaven(uri.replaceAll(" ", "%20")));
+        Repository repo = new Repository(repoURI, defaultStartLevel);
         for (Feature f : repo.getFeatures()) {
             featuresMap.put(f.getName() + "/" + f.getVersion(), f);
         }

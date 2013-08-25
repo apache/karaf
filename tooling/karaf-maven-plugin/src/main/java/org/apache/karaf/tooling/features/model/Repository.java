@@ -36,9 +36,11 @@ public class Repository {
     private URI uri;
     private List<Feature> features;
     private List<String> repositories;
+    private Integer defaultStartLevel;
 
-    public Repository(URI uri) {
+    public Repository(URI uri, Integer defaultStartLevel) {
         this.uri = uri;
+        this.defaultStartLevel = defaultStartLevel;
     }
 
     public URI getURI() {
@@ -126,6 +128,9 @@ public class Repository {
                         startLevel = Integer.parseInt(b.getAttribute("start-level"));
                     } catch (Exception e1) {
                         startLevel = null;
+                    }
+                    if (startLevel == null || startLevel == 0) {
+                        startLevel = defaultStartLevel;
                     }
                     f.addBundle(new BundleRef(b.getTextContent(), startLevel));
                 }
