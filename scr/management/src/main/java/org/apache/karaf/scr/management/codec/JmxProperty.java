@@ -94,7 +94,7 @@ public class JmxProperty {
     private static TabularType createPropertyTableType() {
         try {
             return new TabularType("References", "The table of all properties",
-                    PROPERTY, ScrServiceMBean.PROPERTY);
+                    PROPERTY, new String[] {ScrServiceMBean.PROPERTY_KEY});
         } catch (OpenDataException e) {
             throw new IllegalStateException("Unable to build properties table type", e);
         }

@@ -106,7 +106,7 @@ public class JmxReference {
     private static TabularType createReferenceTableType() {
         try {
             return new TabularType("References", "The table of all references",
-                    REFERENCE,  ScrServiceMBean.REFERENCE);
+                    REFERENCE,  new String[] {ScrServiceMBean.REFERENCE_NAME});
         } catch (OpenDataException e) {
             throw new IllegalStateException("Unable to build references table type", e);
         }
