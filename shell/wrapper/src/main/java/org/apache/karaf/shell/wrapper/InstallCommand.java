@@ -61,7 +61,7 @@ public class InstallCommand extends AbstractAction {
             File lib = new File(base, "lib");
 
             HashMap<String, String> props = new HashMap<String, String>();
-            props.put("${java.home}", System.getProperty("java.home"));
+            props.put("${java.home}", System.getenv("JAVA_HOME"));
             props.put("${karaf.home}", System.getProperty("karaf.home"));
             props.put("${karaf.base}", base.getPath());
             props.put("${karaf.data}", System.getProperty("karaf.data"));
