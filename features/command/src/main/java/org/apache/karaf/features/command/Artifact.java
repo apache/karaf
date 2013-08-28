@@ -30,6 +30,9 @@ public class Artifact {
     
     public Artifact(String coords) {
         String[] coordsAr = coords.split(":");
+        if (coordsAr.length != 5) {
+            throw new IllegalArgumentException("Maven URL " + coords + " is malformed or incomplete");
+        }
         this.groupId = coordsAr[0];
         this.artifactId = coordsAr[1];
         this.version = coordsAr[4];
