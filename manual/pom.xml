@@ -48,33 +48,6 @@
         <maven.wagon.version>1.0-beta-6</maven.wagon.version>
     </properties>
 
-    <repositories>
-        <repository>
-            <id>fusesource</id>
-            <name>Fusesource Maven Repository</name>
-            <url>http://repo.fusesource.com/nexus/content/repositories/snapshots/</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
-
-    <pluginRepositories>
-        <pluginRepository>
-            <id>fusesource</id>
-            <name>Fusesource Maven Repository</name>
-            <url>http://repo.fusesource.com/nexus/content/repositories/snapshots/</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </pluginRepository>
-    </pluginRepositories>
 
     <dependencies>
         <dependency>
