@@ -72,6 +72,7 @@ public class CommandsCompleter implements Completer {
         // TODO: fix that in gogo instead
         // get the current sub-shell
         String subshell = (String) session.get("SUBSHELL");
+
         Set<String> names = new HashSet<String>((Set<String>) session.get(CommandSessionImpl.COMMANDS));
         Set<String> filteredNames = new HashSet<String>();
         for (String command : names) {
@@ -94,12 +95,22 @@ public class CommandsCompleter implements Completer {
             // add argument completers for each command
             for (String command : names) {
                 Function function = (Function) session.get(command);
+
                 function = unProxy(function);
                 if (function instanceof CommandWithAction) {
                     if (command.startsWith(subshell)) {
                         if (subshell.length() > 1 && command.length() > subshell.length()) {
                             command = command.substring(subshell.length() + 1);
                         }
+
+                        // filter on subshell
+                        if (command.contains(":")) {
+                            int index = command.indexOf(':');
+                            command = command.substring(0, index);
+                        }
+
+                        command.trim();
+
                         try {
                             completers.add(new ArgumentCompleter(session, (CommandWithAction) function, command));
                         } catch (Throwable t) {
