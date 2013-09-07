@@ -51,6 +51,12 @@ public class DefaultActionPreparator implements ActionPreparator {
         Map<Argument, Field> arguments = actionMetaData.getArguments();
         List<Argument> orderedArguments = actionMetaData.getOrderedArguments();
         Command command2 = actionMetaData.getCommand();
+
+        if (command2 == null) {
+            // to avoid NPE with subshell
+            return true;
+        }
+
         String commandErrorSt = (command2 != null) ? Ansi.ansi()
                 .fg(Ansi.Color.RED)
                 .a("Error executing command ")
