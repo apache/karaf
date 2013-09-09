@@ -48,12 +48,12 @@ public class FeatureMetaDataExporter {
     }
 
     public void writeFeature(Feature feature) throws XMLStreamException {
-        writer.add(factory.createStartElement("", "", "feature"));
-        writer.add(factory.createAttribute("name", feature.getName()));
-        if (feature.getVersion() != null) {
-            writer.add(factory.createAttribute("version", feature.getVersion()));
+        writeFeatureTag(feature);
+        for (String featureDep : feature.getDependencies()) {
+            writer.add(factory.createStartElement("", "", "feature"));
+            writer.add(factory.createCharacters(featureDep));
+            endElement("feature");
         }
-        newLine();
         for (BundleRef bundle : feature.getBundles()) {
             writer.add(factory.createStartElement("", "", "bundle"));
             if (bundle.getStartLevel() != null) {
@@ -68,6 +68,15 @@ public class FeatureMetaDataExporter {
             endElement("bundle");
         }
         endElement("feature");
+    }
+
+    private void writeFeatureTag(Feature feature) throws XMLStreamException {
+        writer.add(factory.createStartElement("", "", "feature"));
+        writer.add(factory.createAttribute("name", feature.getName()));
+        if (feature.getVersion() != null) {
+            writer.add(factory.createAttribute("version", feature.getVersion()));
+        }
+        newLine();
     }
 
     public void close() throws XMLStreamException {
