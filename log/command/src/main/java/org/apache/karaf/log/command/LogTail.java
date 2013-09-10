@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.log.command;
 
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.concurrent.*;
 
@@ -29,22 +30,37 @@ public class LogTail extends DisplayLog {
     private ExecutorService executorService = Executors.newSingleThreadExecutor();
     
     protected Object doExecute() throws Exception {
-        PrintEventThread thread = new PrintEventThread();
-        executorService.execute(thread);
-       
-        for (;;) {
-            int c = session.getKeyboard().read();
-            if (c < 0) {
-                thread.abort();
-                break;
-            }
-
-        }
-
-        executorService.shutdownNow();
-        return null;
+        PrintEventThread printThread = new PrintEventThread();
+        executorService.execute(printThread);
+        new Thread(new ReadKeyBoardThread(this, Thread.currentThread())).start();
+        while (!Thread.currentThread().isInterrupted());
+        printThread.abort();
+        executorService.shutdownNow();  
+        return null;      
     }
-    
+   
+    class ReadKeyBoardThread implements Runnable {
+        private LogTail logTail;
+        private Thread sessionThread;
+        public ReadKeyBoardThread(LogTail logtail, Thread thread) {
+            this.logTail = logtail;
+            this.sessionThread = thread;
+        }
+        public void run() {
+            for (;;) {
+                try {
+                    int c = this.logTail.session.getKeyboard().read();
+                    if (c < 0) {
+                        this.sessionThread.interrupt();
+                        break;
+                    }
+                } catch (IOException e) {
+                    break;
+                }
+                
+            }
+        }
+    } 
     
     class PrintEventThread implements Runnable {
 
@@ -66,7 +82,7 @@ public class LogTail extends DisplayLog {
             try {
                 logService.addAppender(appender);
                 
-                if (doDisplay) {
+                while (doDisplay) {
                     PaxLoggingEvent event = queue.take();
                     if (event != null) {
                         printEvent(out, event);
