@@ -209,7 +209,7 @@
         <pax.logging.version>1.7.1-SNAPSHOT</pax.logging.version>
         <pax.base.version>1.4.0</pax.base.version>
         <pax.url.version>1.6.0</pax.url.version>
-        <pax.web.version>3.0.1</pax.web.version>
+        <pax.web.version>3.0.2</pax.web.version>
         <pax.swissbox.version>1.7.0</pax.swissbox.version>
         <pax.tinybundle.version>1.0.0</pax.tinybundle.version>
         <portlet-api.version>2.0</portlet-api.version>
