@@ -141,7 +141,7 @@
         <geronimo.jta-spec.version>1.1.1</geronimo.jta-spec.version>
         <geronimo.annotation-spec.version>1.0.1</geronimo.annotation-spec.version>
         <geronimo.jaspic-spec.version>1.1</geronimo.jaspic-spec.version>
-        <easymock.version>3.1</easymock.version>
+        <easymock.version>3.2</easymock.version>
         <equinox.version>3.8.0.v20120529-1548</equinox.version>
         <bndlib.version>2.1.0</bndlib.version>
         <equinox.region.version>1.0.0.v20110506</equinox.region.version>
