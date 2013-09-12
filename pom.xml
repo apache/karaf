@@ -128,7 +128,6 @@
         <commons-jexl.version>2.1.1</commons-jexl.version>
         <commons-lang.version>2.6</commons-lang.version>
         <jasypt.bundle.version>1.9.1_1</jasypt.bundle.version>
-        <jetty.version>8.1.9.v20130131</jetty.version>
         <servlet.spec.groupId>org.apache.geronimo.specs</servlet.spec.groupId>
         <servlet.spec.artifactId>geronimo-servlet_3.0_spec</servlet.spec.artifactId>
         <servlet.spec.version>1.0</servlet.spec.version>
@@ -1120,12 +1119,6 @@
                 <groupId>org.eclipse.gemini.blueprint</groupId>
                 <artifactId>gemini-blueprint-extender</artifactId>
                 <version>${gemini.blueprint.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.eclipse.jetty.aggregate</groupId>
-                <artifactId>jetty-all-server</artifactId>
-                <version>${jetty.version}</version>
             </dependency>
 
             <dependency>

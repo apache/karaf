@@ -252,11 +252,6 @@
             <artifactId>geronimo-jaspic_1.0_spec</artifactId>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty.aggregate</groupId>
-            <artifactId>jetty-all-server</artifactId>
-            <scope>provided</scope>
-        </dependency>
 
         <!-- package deps -->
         <dependency>
