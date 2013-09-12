@@ -87,10 +87,6 @@
         <bundle start-level="30">mvn:org.apache.karaf.region/org.apache.karaf.region.command/${project.version}</bundle>
     </feature>
 
-    <feature name="jetty" description="Provide Jetty engine support" version="${jetty.version}" resolver="(obr)">
-        <feature version="${jetty.version}">pax-jetty</feature>
-    </feature>
-
     <feature name="package" version="${project.version}" resolver="(obr)" description="Package commands and mbeans">
         <bundle start-level="30">mvn:org.apache.karaf.package/org.apache.karaf.package.core/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.package/org.apache.karaf.package.command/${project.version}</bundle>
