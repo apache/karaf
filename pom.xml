@@ -176,7 +176,7 @@
         <org.json.version>20070829</org.json.version>
         <pax.base.version>1.4.0</pax.base.version>
         <pax.exam.version>3.2.0</pax.exam.version>
-        <pax.logging.version>1.7.1-SNAPSHOT</pax.logging.version>
+        <pax.logging.version>1.7.1</pax.logging.version>
         <pax.url.version>1.3.6</pax.url.version>
         <pax.swissbox.version>1.6.0</pax.swissbox.version>
         <pax.web.version>2.1.4</pax.web.version>
