@@ -15,6 +15,64 @@
  * limitations under the License.
  */
 
+                    Apache Karaf 2.3.3
+                    ==================
+
+  Overview
+  --------
+
+ s patch update to the 2.3.x line contains multiple bug fixes, improvements, and dependency updates including; improvements to the service wrapper to detect java, return correct exit codes, have correct karaf.data information on child instances and operate on Solaris, the log command can now list all the logging levels currently set, and dependency updates to Spring 3.2.4.RELEASE, Pax Logging 1.7.1, easymock 3.2, and jasypt 1.9.1. 
+
+  Changelog
+  ---------
+
+** Bug
+    * [KARAF-1593] - Pressing strg+d during log:tail make everything hang
+    * [KARAF-2020] - log:tail blocks on ^D
+    * [KARAF-2270] - Service wrapper assumes java is on system path
+    * [KARAF-2375] - WcTests set to ignore
+    * [KARAF-2378] - Shell:exec doesn't show output for commands that execute too quickly
+    * [KARAF-2381] - The shell log:set command not as documented
+    * [KARAF-2403] - NPE in log:tail after doing a log:clear
+    * [KARAF-2407] - dev:create-dump should generate full stack traces of each thread
+    * [KARAF-2416] - OverlappingFileLockException when cloning an instance
+    * [KARAF-2417] - Logging doesn't work in cloned instances 
+    * [KARAF-2418] - Minimal distro hanging on startup
+    * [KARAF-2421] - FeatureFinder should prevent ArrayIndexOutOfBoundException
+    * [KARAF-2423] - Avoid overlapping lock exceptions when multiple threads access the admin service
+    * [KARAF-2424] - Wrapper's generated karaf-service does not work on Solaris
+    * [KARAF-2427] - When using service wrapper karaf.data is wrong on child instances
+    * [KARAF-2428] - The ScrServiceMBean should be hidden.
+    * [KARAF-2429] - It would be nice to have scr:list sort components by id.
+    * [KARAF-2431] - Typo in ScrServiceMBean operation for deactivate
+    * [KARAF-2437] - Logs still have been printed into console after log:tail and Ctrl + C
+    * [KARAF-2445] - "bin\karaf.bat clean" does not work with whitespaces in KARAF_HOME
+    * [KARAF-2446] - Fix etc/config.properties for endorsed xercesImpl
+    * [KARAF-2447] - Managing child instances does not work with whitespaces in KARAF_HOME
+    * [KARAF-2452] - The "--force" option is not honored when designate bundle as a system bundle
+    * [KARAF-2457] - Branding is not propagated to instance created with admin:create
+    * [KARAF-2458] - Update to Spring 3.2.4.RELEASE
+    * [KARAF-2471] - Karaf Wrapper doesn't return the correct exit result when using RUN_AS_USER
+
+** Dependency upgrade
+    * [KARAF-2436] - Upgrade to Pax Logging 1.7.1
+    * [KARAF-2463] - Upgrade to easymock 3.2
+    * [KARAF-2465] - Upgrade to jasypt 1.9.1
+
+** Improvement
+    * [KARAF-2415] - dev:create-dump: extending with environment information
+    * [KARAF-2438] - Improve ScrServiceMBean to display more details about SCR components
+    * [KARAF-2443] - bundle-level and update commands should take symbolic name as parameter
+    * [KARAF-2444] - The featuresRepositories property should support multi-lines input value in the etc/org.apache.karaf.features.cfg
+    * [KARAF-2451] - can't use backspace to edit osgi shell input if it's a system level bundle 
+
+** New Feature
+    * [KARAF-2300] - log command to list all the logging levels currently been set
+
+** Task
+    * [KARAF-2413] - Add features:chooseurl for camel-extra
+
+
                     Apache Karaf 2.3.2
                     ==================
 
