@@ -35,6 +35,8 @@ import java.security.Principal;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Karaf JAAS login module which uses a LDAP backend.
@@ -186,7 +188,7 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
             }
             logger.debug("Looking for the user in LDAP with ");
             logger.debug("  base DN: " + userBaseDN);
-            userFilter = userFilter.replaceAll("%u", user);
+            userFilter = userFilter.replaceAll(Pattern.quote("%u"), Matcher.quoteReplacement(user));
             logger.debug("  filter: " + userFilter);
             NamingEnumeration namingEnumeration = context.search(userBaseDN, userFilter, controls);
             if (!namingEnumeration.hasMore()) {
@@ -249,8 +251,8 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
             }
             logger.debug("Looking for the user roles in LDAP with ");
             logger.debug("  base DN: " + roleBaseDN);
-            roleFilter = roleFilter.replaceAll("%u", user);
-            roleFilter = roleFilter.replaceAll("%dn", userDN);
+            roleFilter = roleFilter.replaceAll(Pattern.quote("%u"), Matcher.quoteReplacement(user));
+            roleFilter = roleFilter.replaceAll(Pattern.quote("%dn"), Matcher.quoteReplacement(userDN));
             logger.debug("  filter: " + roleFilter);
             NamingEnumeration namingEnumeration = context.search(roleBaseDN, roleFilter, controls);
             while (namingEnumeration.hasMore()) {
