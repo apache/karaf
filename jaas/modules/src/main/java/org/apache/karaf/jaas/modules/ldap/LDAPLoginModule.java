@@ -189,6 +189,7 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
             logger.debug("Looking for the user in LDAP with ");
             logger.debug("  base DN: " + userBaseDN);
             userFilter = userFilter.replaceAll(Pattern.quote("%u"), Matcher.quoteReplacement(user));
+            userFilter = userFilter.replace("\\", "\\\\");
             logger.debug("  filter: " + userFilter);
             NamingEnumeration namingEnumeration = context.search(userBaseDN, userFilter, controls);
             if (!namingEnumeration.hasMore()) {
@@ -253,6 +254,7 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
             logger.debug("  base DN: " + roleBaseDN);
             roleFilter = roleFilter.replaceAll(Pattern.quote("%u"), Matcher.quoteReplacement(user));
             roleFilter = roleFilter.replaceAll(Pattern.quote("%dn"), Matcher.quoteReplacement(userDN));
+            roleFilter = roleFilter.replace("\\", "\\\\");
             logger.debug("  filter: " + roleFilter);
             NamingEnumeration namingEnumeration = context.search(roleBaseDN, roleFilter, controls);
             while (namingEnumeration.hasMore()) {
