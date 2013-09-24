@@ -17,12 +17,19 @@
  */
 package org.apache.karaf.tooling.features.model;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.util.jar.JarInputStream;
+import java.util.jar.Manifest;
+
 import org.apache.maven.artifact.Artifact;
 
 public class BundleRef {
     String url;
     Integer startLevel;
     Artifact artifact;
+    String bundleSymbolicName;
+    String bundleVersion;
 
     public BundleRef(String url, Integer startLevel) {
         super();
@@ -44,6 +51,28 @@ public class BundleRef {
 
     public void setArtifact(Artifact artifact) {
         this.artifact = artifact;
+    }
+    
+    public void readManifest() {
+        JarInputStream bundleJar = null;
+        try {
+            File file = artifact.getFile();
+            bundleJar = new JarInputStream(new FileInputStream(file));
+            Manifest manifest = bundleJar.getManifest();
+            bundleSymbolicName = manifest.getMainAttributes().getValue("Bundle-SymbolicName");
+            bundleVersion = manifest.getMainAttributes().getValue("Bundle-Version");
+            bundleJar.close();
+        } catch (Exception e) {
+            // Ignore errors in manifest
+        }
+    }
+
+    public String getBundleSymbolicName() {
+        return bundleSymbolicName;
+    }
+
+    public String getBundleVersion() {
+        return bundleVersion;
     }
 
 }

@@ -27,6 +27,7 @@ import javax.xml.stream.events.StartDocument;
 
 import org.apache.karaf.tooling.features.model.BundleRef;
 import org.apache.karaf.tooling.features.model.Feature;
+import org.apache.maven.artifact.Artifact;
 
 /**
  * Export feature meta data as xml into a stream
@@ -43,7 +44,7 @@ public class FeatureMetaDataExporter {
         StartDocument startDocument = factory.createStartDocument();
         writer.add(startDocument);
         newLine();
-        writer.add(factory.createStartElement("", "", "bundles"));
+        writer.add(factory.createStartElement("", "", "features"));
         newLine();
     }
 
@@ -62,8 +63,13 @@ public class FeatureMetaDataExporter {
             if (bundle.getArtifact()!=null) {
                 String name = MavenUtil.getFileName(bundle.getArtifact());
                 writer.add(factory.createAttribute("name", name));
+                Artifact artifact = bundle.getArtifact();
+                bundle.readManifest();
+                writer.add(factory.createAttribute("Bundle-SymbolicName", bundle.getBundleSymbolicName()));
+                writer.add(factory.createAttribute("Bundle-Version", bundle.getBundleVersion()));
+                writer.add(factory.createAttribute("version", artifact.getVersion()));
             }
-            
+
             writer.add(factory.createCharacters(bundle.getUrl()));
             endElement("bundle");
         }
@@ -80,7 +86,7 @@ public class FeatureMetaDataExporter {
     }
 
     public void close() throws XMLStreamException {
-        endElement("bundles");
+        endElement("features");
         writer.add(factory.createEndDocument());
         writer.close();
     }
