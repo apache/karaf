@@ -30,18 +30,33 @@ public class StandardFeaturesTest extends KarafTestSupport {
     }
 
     @Test
+    public void installAriesAnnotationFeature() throws Exception {
+        installAndAssertFeature("aries-annotation");
+    }
+    
+    @Test
     public void installWrapperFeature() throws Exception {
         installAndAssertFeature("wrapper");
     }
-
+    
     @Test
     public void installObrFeature() throws Exception {
         installAndAssertFeature("obr");
     }
 
     @Test
-    public void installJettyFeature() throws Exception {
-        installAndAssertFeature("jetty");
+    public void installConfigFeature() throws Exception {
+        installAndAssertFeature("config");
+    }
+    
+    @Test
+    public void installRegionFeature() throws Exception {
+        installAndAssertFeature("region");
+    }
+    
+    @Test
+    public void installPackageFeature() throws Exception {
+        installAndAssertFeature("package");
     }
 
     @Test
@@ -58,12 +73,27 @@ public class StandardFeaturesTest extends KarafTestSupport {
     public void installWarFeature() throws Exception {
         installAndAssertFeature("war");
     }
+    
+    @Test
+    public void installKarFeature() throws Exception {
+        installAndAssertFeature("kar");
+    }
 
     @Test
     public void installWebConsoleFeature() throws Exception {
         installAndAssertFeature("webconsole");
     }
 
+    @Test
+    public void installSSHFeature() throws Exception {
+        installAndAssertFeature("ssh");
+    }
+    
+    @Test
+    public void installManagementFeature() throws Exception {
+        installAndAssertFeature("management");
+    }
+    
     @Test
     public void installSchedulerFeature() throws Exception {
         installAndAssertFeature("scheduler");
