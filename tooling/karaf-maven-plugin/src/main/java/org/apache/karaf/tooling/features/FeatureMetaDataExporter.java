@@ -67,7 +67,15 @@ public class FeatureMetaDataExporter {
                 bundle.readManifest();
                 writer.add(factory.createAttribute("Bundle-SymbolicName", bundle.getBundleSymbolicName()));
                 writer.add(factory.createAttribute("Bundle-Version", bundle.getBundleVersion()));
-                writer.add(factory.createAttribute("version", artifact.getVersion()));
+                writer.add(factory.createAttribute("groupId", artifact.getGroupId()));
+                writer.add(factory.createAttribute("artifactId", artifact.getArtifactId()));
+                if (artifact.getType() != null) {
+                    writer.add(factory.createAttribute("type", artifact.getType()));
+                }
+                if (artifact.getClassifier() != null) {
+                    writer.add(factory.createAttribute("classifier", artifact.getClassifier()));
+                }
+                writer.add(factory.createAttribute("version", artifact.getBaseVersion()));
             }
 
             writer.add(factory.createCharacters(bundle.getUrl()));
