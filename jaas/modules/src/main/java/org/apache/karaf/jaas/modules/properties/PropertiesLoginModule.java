@@ -31,6 +31,7 @@ import javax.security.auth.login.FailedLoginException;
 import javax.security.auth.login.LoginException;
 
 import org.apache.felix.utils.properties.Properties;
+import org.apache.karaf.jaas.boot.principal.GroupPrincipal;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.apache.karaf.jaas.modules.AbstractKarafLoginModule;
@@ -44,7 +45,7 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
 
     private static final transient Logger LOGGER = LoggerFactory.getLogger(PropertiesLoginModule.class);
 
-    private static final String USER_FILE = "users";
+    static final String USER_FILE = "users";
 
     private String usersFile;
 
@@ -84,6 +85,11 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
         }
         // user callback get value
         user = ((NameCallback) callbacks[0]).getName();
+        if (user.startsWith(PropertiesBackingEngine.GROUP_PREFIX)) {
+            // you can't log in under a group name
+            throw new FailedLoginException("login failed");
+        }
+
         // password callback get value
         String password = new String(((PasswordCallback) callbacks[1]).getPassword());
 
@@ -155,7 +161,20 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
         principals = new HashSet<Principal>();
         principals.add(new UserPrincipal(user));
         for (int i = 1; i < infos.length; i++) {
-            principals.add(new RolePrincipal(infos[i]));
+            if (infos[i].startsWith(PropertiesBackingEngine.GROUP_PREFIX)) {
+                // it's a group reference
+                principals.add(new GroupPrincipal(infos[i].substring(PropertiesBackingEngine.GROUP_PREFIX.length())));
+                String groupInfo = (String) users.get(infos[i]);
+                if (groupInfo != null) {
+                    String[] roles = groupInfo.split(",");
+                    for (int j = 1; j < roles.length; j++) {
+                        principals.add(new RolePrincipal(roles[j]));
+                    }
+                }
+            } else {
+                // it's an user reference
+                principals.add(new RolePrincipal(infos[i]));
+            }
         }
 
         users.clear();

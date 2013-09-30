@@ -15,14 +15,17 @@
  */
 package org.apache.karaf.jaas.command;
 
-import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.jaas.boot.principal.GroupPrincipal;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
+import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.apache.karaf.jaas.config.JaasRealm;
 import org.apache.karaf.jaas.modules.BackingEngine;
 import org.apache.karaf.shell.table.ShellTable;
 
 import javax.security.auth.login.AppConfigurationEntry;
+import java.security.Principal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Command(scope = "jaas", name = "user-list", description = "List the users of the selected JAAS realm/login module")
@@ -54,19 +57,20 @@ public class ListUsersCommand extends JaasCommandSupport {
 
         ShellTable table = new ShellTable();
         table.column("User Name");
+        table.column("Group");
         table.column("Role");
 
         for (UserPrincipal user : users) {
+            List<String> reportedRoles = new ArrayList<String>();
             String userName = user.getName();
-            List<RolePrincipal> roles = engine.listRoles(user);
 
-            if (roles != null && roles.size() >= 1) {
-                for (RolePrincipal role : roles) {
-                    String roleName = role.getName();
-                    table.addRow().addContent(userName, roleName);
-                }
-            } else {
-                table.addRow().addContent(userName, "");
+            for (GroupPrincipal group : engine.listGroups(user)) {
+                String groupName = group.getName();
+                reportedRoles.addAll(displayRole(engine, userName, groupName, group, table));
+            }
+
+            if (reportedRoles.size() == 0) {
+                table.addRow().addContent(userName, "", "");
             }
 
         }
@@ -74,6 +78,21 @@ public class ListUsersCommand extends JaasCommandSupport {
         table.print(System.out);
 
         return null;
+    }
+
+    private List<String> displayRole(BackingEngine engine, String userName, String groupName, Principal principal, ShellTable table) {
+        List<String> names = new ArrayList<String>();
+        List<RolePrincipal> roles = engine.listRoles(principal);
+
+        if (roles != null && roles.size() >= 1) {
+            for (RolePrincipal role : roles) {
+                String roleName = role.getName();
+                names.add(roleName);
+                table.addRow().addContent(userName, groupName, roleName);
+            }
+        }
+
+        return names;
     }
 
 }
