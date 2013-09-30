@@ -341,7 +341,7 @@ checkUser() {
             fi
         fi
 
-        exit $RESTVAL
+        exit $RETVAL
     fi
 }
 
