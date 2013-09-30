@@ -13,9 +13,9 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package org.apache.karaf.jaas.modules.jdbc;
 
+import org.apache.karaf.jaas.boot.principal.GroupPrincipal;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.apache.karaf.jaas.modules.BackingEngine;
@@ -24,11 +24,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
+import java.security.Principal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class JDBCBackingEngine implements BackingEngine {
@@ -216,12 +218,12 @@ public class JDBCBackingEngine implements BackingEngine {
     }
 
     /**
-     * List the roles of the {@param user}.
+     * List the roles of the {@param principal}.
      *
-     * @param user
+     * @param principal
      * @return
      */
-    public List<RolePrincipal> listRoles(UserPrincipal user) {
+    public List<RolePrincipal> listRoles(Principal principal) {
         List<RolePrincipal> roles = new ArrayList<RolePrincipal>();
 
         Connection connection = null;
@@ -236,7 +238,7 @@ public class JDBCBackingEngine implements BackingEngine {
 
                 //Remove from roles
                 listRolesStatement = connection.prepareStatement(selectRolesQuery);
-                listRolesStatement.setString(1, user.getName());
+                listRolesStatement.setString(1, principal.getName());
 
                 rolesResultSet = listRolesStatement.executeQuery();
 
@@ -404,6 +406,36 @@ public class JDBCBackingEngine implements BackingEngine {
 
     public void setSelectRolesQuery(String selectRolesQuery) {
         this.selectRolesQuery = selectRolesQuery;
+    }
+
+    @Override
+    public List<GroupPrincipal> listGroups(UserPrincipal user) {
+        // TODO support of groups has to be added
+        return Collections.emptyList();
+    }
+
+    @Override
+    public void addGroup(String username, String group) {
+        // TODO support of groups has to be added
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void deleteGroup(String username, String group) {
+        // TODO support of groups has to be added
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void addGroupRole(String group, String role) {
+        // TODO support of groups has to be added
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void deleteGroupRole(String group, String role) {
+        // TODO support of groups has to be added
+        throw new UnsupportedOperationException();
     }
 
 }
