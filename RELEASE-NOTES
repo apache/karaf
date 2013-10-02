@@ -15,6 +15,16 @@
  * limitations under the License.
  */
 
+                    Apache Karaf 3.0.0.RC2
+                    ======================
+
+  Migration
+  ---------
+
+  karaf-maven-plugin:
+  For the goal features-add-to-repository. The karaf core features are not added automatically anymore. You have to add the needed ones in descriptors.
+
+
                     Apache Karaf 3.0.0.RC1
                     ======================
 

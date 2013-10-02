@@ -82,9 +82,13 @@ public class AddToRepositoryMojo extends AbstractFeatureMojo {
     }
 
     protected void copy(Artifact artifact, File destRepository) {
-        getLog().info("Copying artifact: " + artifact);
-        File destFile = new File(destRepository, getRelativePath(artifact));
-        copy(artifact.getFile(), destFile);
+        try {
+            getLog().info("Copying artifact: " + artifact);
+            File destFile = new File(destRepository, getRelativePath(artifact));
+            copy(artifact.getFile(), destFile);
+        } catch (Exception e) {
+            getLog().warn("Error copying artifact " + artifact, e);
+        }
     }
 
     /**
