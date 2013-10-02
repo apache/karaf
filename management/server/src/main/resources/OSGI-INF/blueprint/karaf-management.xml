@@ -37,7 +37,6 @@
             <cm:property name="rmiServerHost" value="0.0.0.0"/>
             <cm:property name="rmiServerPort" value="44444"/>
             <cm:property name="jmxRealm" value="karaf"/>
-            <cm:property name="jmxRole" value="$[karaf.admin.role]"/>
             <cm:property name="serviceUrl" value="service:jmx:rmi://localhost:44444/jndi/rmi://localhost:1099/karaf-$[karaf.name]"/>
             <cm:property name="daemon" value="true"/>
             <cm:property name="threaded" value="true"/>
@@ -105,8 +104,26 @@
     <!-- JAAS authenticator -->
     <bean id="jaasAuthenticator" class="org.apache.karaf.management.JaasAuthenticator">
         <property name="realm" value="${jmxRealm}"/>
-        <property name="role" value="${jmxRole}"/>
     </bean>
+
+    <!-- Get a reference to the ConfigurationAdmin service -->
+    <reference id="configAdmin" interface="org.osgi.service.cm.ConfigurationAdmin" />
+
+    <!-- For role-based security on the JMX API -->
+    <bean id="karafMBeanServerGuard" class="org.apache.karaf.management.KarafMBeanServerGuard" init-method="init">
+        <property name="configAdmin" ref="configAdmin" />
+    </bean>
+
+    <!-- JMX Security MBean -->
+    <bean id="jmxSecurityMBean" class="org.apache.karaf.management.internal.JMXSecurityMBeanImpl">
+        <property name="mbeanServer" ref="mbeanServer"/>
+    </bean>
+
+    <service ref="jmxSecurityMBean" auto-export="interfaces">
+        <service-properties>
+            <entry key="jmx.objectname" value="org.apache.karaf:type=security,area=jmx,name=$[karaf.name]" />
+        </service-properties>
+    </service>
 
 </blueprint>
 
