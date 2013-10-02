@@ -32,16 +32,13 @@ import org.apache.karaf.tooling.features.model.Repository;
 import org.apache.karaf.tooling.utils.MojoSupport;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.artifact.resolver.AbstractArtifactResolutionException;
 import org.apache.maven.plugin.MojoExecutionException;
 
 /**
  * Common functionality for mojos that need to reolve features
  */
 public abstract class AbstractFeatureMojo extends MojoSupport {
-
-    protected static final String KARAF_CORE_STANDARD_FEATURE_URL = "mvn:org.apache.karaf.features/standard/%s/xml/features";
-    protected static final String KARAF_CORE_ENTERPRISE_FEATURE_URL = "mvn:org.apache.karaf.features/enterprise/%s/xml/features";
+    
     /**
      * @parameter
      */
@@ -54,12 +51,6 @@ public abstract class AbstractFeatureMojo extends MojoSupport {
      */
     protected List<String> features;
 
-    /**
-     * the target karaf version used to resolve Karaf core features descriptors
-     *
-     * @parameter
-     */
-    protected String karafVersion;
     /**
      * @parameter
      */
@@ -153,11 +144,12 @@ public abstract class AbstractFeatureMojo extends MojoSupport {
                     Collections.singletonList(artifact.getRepository())
                     : remoteRepos;
             resolver.resolve(artifact, usedRemoteRepos, localRepo);
-        } catch (AbstractArtifactResolutionException e) {
+        } catch (Exception e) {
             if (failOnArtifactResolutionError) {
-                throw new RuntimeException("Can't resolve bundle " + artifact, e);
+                throw new RuntimeException("Can't resolve artifact " + artifact, e);
             }
-            getLog().error("Can't resolve bundle " + artifact, e);
+            getLog().warn("Can't resolve artifact " + artifact);
+            getLog().debug(e);
         }
     }
 
@@ -211,15 +203,6 @@ public abstract class AbstractFeatureMojo extends MojoSupport {
 
     protected Set<Feature> resolveFeatures() throws MojoExecutionException {
         Set<Feature> featuresSet = new HashSet<Feature>();
-        if (karafVersion == null) {
-            Package p = Package.getPackage("org.apache.karaf.tooling.features");
-            karafVersion = p.getImplementationVersion();
-        }
-    
-        addFeatureRepo(String.format(KARAF_CORE_ENTERPRISE_FEATURE_URL, karafVersion));
-        addFeatureRepo(String.format(KARAF_CORE_STANDARD_FEATURE_URL, karafVersion));
-        addFeatureRepo(String.format(KARAF_CORE_STANDARD_FEATURE_URL, karafVersion));
-    
         try {
             Set<String> artifactsToCopy = new HashSet<String>();
             Map<String, Feature> featuresMap = new HashMap<String, Feature>();
