@@ -311,6 +311,12 @@
                                     <destFileName>karaf-jaas-boot.jar</destFileName>
                                 </artifactItem>
                                 <artifactItem>
+                                    <groupId>org.apache.karaf.management</groupId>
+                                    <artifactId>org.apache.karaf.management.boot</artifactId>
+                                    <outputDirectory>target/classes/resources/lib</outputDirectory>
+                                    <destFileName>karaf-jmx-boot.jar</destFileName>
+                                </artifactItem>
+                                <artifactItem>
                                     <groupId>org.apache.karaf</groupId>
                                     <artifactId>org.apache.karaf.exception</artifactId>
                                     <outputDirectory>target/classes/resources/lib/endorsed</outputDirectory>

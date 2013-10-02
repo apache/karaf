@@ -51,7 +51,17 @@
         </dependency>
         <dependency>
             <groupId>org.apache.karaf.jaas</groupId>
+            <artifactId>org.apache.karaf.jaas.boot</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.jaas</groupId>
             <artifactId>org.apache.karaf.jaas.config</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.management</groupId>
+            <artifactId>org.apache.karaf.management.boot</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -96,7 +106,8 @@
                     <instructions>
                         <Export-Package>org.apache.karaf.management;version=${project.version};-split-package:=merge-first</Export-Package>
                         <Private-Package>
-                            org.apache.karaf.management
+                            org.apache.karaf.management,
+                            org.apache.karaf.management.internal
                         </Private-Package>
                     </instructions>
                 </configuration>
