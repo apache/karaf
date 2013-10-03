@@ -116,7 +116,7 @@
 
     <!-- JMX Security MBean -->
     <bean id="jmxSecurityMBean" class="org.apache.karaf.management.internal.JMXSecurityMBeanImpl">
-        <property name="mbeanServer" ref="mbeanServer"/>
+        <property name="MBeanServer" ref="mbeanServer"/>
     </bean>
 
     <service ref="jmxSecurityMBean" auto-export="interfaces">
