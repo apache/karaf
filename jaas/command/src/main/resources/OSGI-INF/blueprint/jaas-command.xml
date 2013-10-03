@@ -69,6 +69,12 @@
         <command>
             <action class="org.apache.karaf.jaas.command.GroupDeleteCommand"/>
         </command>
+        <command>
+            <action class="org.apache.karaf.jaas.command.GroupRoleAddCommand"/>
+        </command>
+        <command>
+            <action class="org.apache.karaf.jaas.command.GroupRoleDeleteCommand"/>
+        </command>
     </command-bundle>
 
     <!-- JAAS Realms -->

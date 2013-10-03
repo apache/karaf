@@ -24,7 +24,6 @@ import org.apache.karaf.jaas.modules.BackingEngine;
 import org.apache.karaf.shell.table.ShellTable;
 
 import javax.security.auth.login.AppConfigurationEntry;
-import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -65,8 +64,16 @@ public class ListUsersCommand extends JaasCommandSupport {
             String userName = user.getName();
 
             for (GroupPrincipal group : engine.listGroups(user)) {
-                String groupName = group.getName();
-                reportedRoles.addAll(displayRole(engine, userName, groupName, group, table));
+                reportedRoles.addAll(displayGroupRoles(engine, userName, group, table));
+            }
+
+            for (RolePrincipal role : engine.listRoles(user)) {
+                String roleName = role.getName();
+                if (reportedRoles.contains(roleName)) {
+                    continue;
+                }
+                reportedRoles.add(roleName);
+                table.addRow().addContent(userName, "", roleName);
             }
 
             if (reportedRoles.size() == 0) {
@@ -80,18 +87,17 @@ public class ListUsersCommand extends JaasCommandSupport {
         return null;
     }
 
-    private List<String> displayRole(BackingEngine engine, String userName, String groupName, Principal principal, ShellTable table) {
+    private List<String> displayGroupRoles(BackingEngine engine, String userName, GroupPrincipal group, ShellTable table) {
         List<String> names = new ArrayList<String>();
-        List<RolePrincipal> roles = engine.listRoles(principal);
+        List<RolePrincipal> roles = engine.listRoles(group);
 
         if (roles != null && roles.size() >= 1) {
             for (RolePrincipal role : roles) {
                 String roleName = role.getName();
                 names.add(roleName);
-                table.addRow().addContent(userName, groupName, roleName);
+                table.addRow().addContent(userName, group.getName(), roleName);
             }
         }
-
         return names;
     }
 
