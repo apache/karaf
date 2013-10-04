@@ -128,6 +128,7 @@
                 <configuration>
                     <instructions>
                         <Import-Package>
+                            !org.apache.felix.gogo.runtime.*,
                             org.osgi.service.event;resolution:=optional,
                             org.apache.karaf.branding;resolution:=optional,
                             org.apache.sshd.agent*;resolution:=optional,
@@ -146,19 +147,10 @@
                         </Export-Package>
                         <Private-Package>
                         	org.apache.karaf.shell.console.impl*,
-                        	org.apache.felix.gogo.runtime*;-split-package:=first
                         </Private-Package>
-                        <Bundle-Activator>
-                            org.apache.felix.gogo.runtime.activator.Activator
-                        </Bundle-Activator>
                         <Main-Class>
                             org.apache.karaf.shell.console.impl.Main
                         </Main-Class>
-                        <Export-Service>
-                            org.apache.felix.service.threadio.ThreadIO,
-                            org.apache.felix.service.command.CommandProcessor,
-                            org.apache.felix.service.command.Converter
-                        </Export-Service>
                     </instructions>
                     <unpackBundle>true</unpackBundle>
                 </configuration>

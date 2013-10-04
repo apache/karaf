@@ -22,12 +22,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.Set;
 
-import org.apache.felix.gogo.runtime.CommandSessionImpl;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.threadio.ThreadIO;
 import org.apache.karaf.shell.console.HelpProvider;
 
 public class SingleCommandHelpProvider implements HelpProvider {
+
+    public static final String COMMANDS = ".commands";
 
     private ThreadIO io;
     
@@ -43,8 +44,7 @@ public class SingleCommandHelpProvider implements HelpProvider {
                 return null;
             }
         }
-        @SuppressWarnings("unchecked")
-        Set<String> names = (Set<String>) session.get(CommandSessionImpl.COMMANDS);
+        Set<String> names = (Set<String>) session.get(COMMANDS);
         if (path != null && names.contains(path)) {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             io.setStreams(new ByteArrayInputStream(new byte[0]), new PrintStream(baos, true), new PrintStream(baos, true));

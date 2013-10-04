@@ -18,21 +18,16 @@
  */
 package org.apache.karaf.shell.console.impl.jline;
 
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.net.URL;
 import java.nio.charset.Charset;
-import java.security.KeyPair;
-import java.util.Hashtable;
+
 import javax.security.auth.Subject;
 
 import jline.Terminal;
 import org.apache.felix.service.command.CommandProcessor;
+import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.apache.karaf.shell.console.Console;
 import org.apache.karaf.shell.console.ConsoleFactory;
-import org.apache.sshd.agent.SshAgent;
-import org.apache.sshd.agent.local.AgentImpl;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
@@ -50,7 +45,6 @@ public class LocalConsoleManager {
     private final int defaultStartLevel;
     private CommandProcessor commandProcessor;
     private ServiceRegistration registration;
-    private SshAgent local;
 
     public LocalConsoleManager(boolean start, 
             String defaultStartLevel,
@@ -84,7 +78,6 @@ public class LocalConsoleManager {
                 }
             }
         };
-        String agentId = startAgent("karaf");
         String ctype = System.getenv("LC_CTYPE");
         String encoding = ctype;
         if (encoding != null && encoding.indexOf('.') > 0) {
@@ -93,8 +86,9 @@ public class LocalConsoleManager {
             encoding = System.getProperty("input.encoding", Charset.defaultCharset().name());
         }
         this.console = consoleFactory.createLocal(this.commandProcessor, terminal, encoding, callback);
-        this.console.getSession().put(SshAgent.SSH_AUTHSOCKET_ENV_NAME, agentId);
-        
+
+        registration = bundleContext.registerService(CommandSession.class, console.getSession(), null);
+
         Runnable consoleStarter = new Runnable() {
             public void run() {
                 consoleFactory.startConsoleAs(console, subject, "Local");
@@ -110,20 +104,6 @@ public class LocalConsoleManager {
         }
     }
 
-    protected String startAgent(String user) {
-        try {
-            local = SshAgentLoader.load(bundleContext);
-            String agentId = "local:" + user;
-            Hashtable properties = new Hashtable();
-            properties.put("id", agentId);
-            registration = bundleContext.registerService(SshAgent.class.getName(), local, properties);
-            return agentId;
-        } catch (Throwable e) {
-            LOGGER.warn("Error starting ssh agent for local console", e);
-            return null;
-        }
-    }
-
     public void stop() throws Exception {
         if (registration != null) {
             registration.unregister();
@@ -133,23 +113,6 @@ public class LocalConsoleManager {
         // osgi framework isn't stopped
         if (console != null) {
             console.close(false);
-        }
-    }
-
-    static class SshAgentLoader {
-        static SshAgent load(BundleContext bundleContext) {
-            try {
-                SshAgent agent = new AgentImpl();
-                URL url = bundleContext.getBundle().getResource("karaf.key");
-                InputStream is = url.openStream();
-                ObjectInputStream r = new ObjectInputStream(is);
-                KeyPair keyPair = (KeyPair) r.readObject();
-                agent.addIdentity(keyPair, "karaf");
-                return agent;
-            } catch (Throwable e) {
-                LOGGER.warn("Error starting ssh agent for local console", e);
-                return null;
-            }
         }
     }
 

@@ -38,7 +38,6 @@ import jline.Terminal;
 import jline.UnsupportedTerminal;
 import jline.console.ConsoleReader;
 import jline.console.history.PersistentHistory;
-import org.apache.felix.gogo.runtime.Parser;
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Converter;
@@ -221,23 +220,33 @@ public class ConsoleImpl implements Console
             if (reader.getHistory().size()==0) {
                 reader.getHistory().add(command);
             } else {
-                // jline doesn't add blank lines to the history so we don't 
+                // jline doesn't add blank lines to the history so we don't
                 // need to replace the command in jline's console history with
                 // an indented one
                 if (command.length() > 0 && !" ".equals(command)) {
-                    reader.getHistory().replace(command);    
-                }                                
+                    reader.getHistory().replace(command);
+                }
             }
-		    try {
-		        new Parser(command).program();
-		        loop = false;
-		    } catch (Exception e) {
-		        loop = true;
-		        first = false;
-		    }
-		}
-		return command;
-	}
+            if (command.length() > 0 && command.charAt(command.length() - 1) == '\\') {
+                loop = true;
+                first = false;
+            } else {
+                try {
+                    Class<?> cl = CommandSession.class.getClassLoader().loadClass("org.apache.felix.gogo.runtime.Parser");
+                    Object parser = cl.getConstructor(CharSequence.class).newInstance(command);
+                    cl.getMethod("program").invoke(parser);
+                    loop = false;
+                } catch (Exception e) {
+                    loop = true;
+                    first = false;
+                } catch (Throwable t) {
+                    // Reflection problem ? just quit
+                    loop = false;
+                }
+            }
+        }
+        return command;
+    }
 
 	private void executeScript(String scriptFileName) {
 		if (scriptFileName != null) {

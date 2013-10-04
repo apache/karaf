@@ -108,9 +108,11 @@
         <property name="agentFactory" ref="agentFactory" />
     </bean>
 
-    <bean id="agentFactory" class="org.apache.karaf.shell.ssh.KarafAgentFactory" />
-    <reference-list id="agents" interface="org.apache.sshd.agent.SshAgent" availability="optional" activation="eager">
-        <reference-listener ref="agentFactory" bind-method="registerAgent" unbind-method="unregisterAgent" />
+    <bean id="agentFactory" class="org.apache.karaf.shell.ssh.KarafAgentFactory">
+        <property name="bundleContext" ref="blueprintBundleContext" />
+    </bean>
+    <reference-list id="commandSessions" interface="org.apache.felix.service.command.CommandSession" availability="optional" activation="eager">
+        <reference-listener ref="agentFactory" bind-method="registerCommandSession" unbind-method="unregisterCommandSession" />
     </reference-list>
 
     <bean id="keyPairProvider" class="org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider">
