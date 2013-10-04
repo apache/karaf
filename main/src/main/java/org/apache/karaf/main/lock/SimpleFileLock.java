@@ -82,7 +82,7 @@ public class SimpleFileLock implements Lock {
     }
  
     public boolean isAlive() throws Exception {
-        return lock != null;
+        return lock != null && lock.isValid() && lockPath.exists();
     }
 
     private static File getKarafLock(File lock,Properties props) {
