@@ -68,7 +68,7 @@ public class MainLockingTest {
         
         FrameworkStartLevel sl = framework.adapt(FrameworkStartLevel.class);
         
-        MockLock lock = (MockLock) main.getLockManager().getLock();        
+        MockLock lock = (MockLock) main.getLock();
 
         Assert.assertEquals(100, sl.getStartLevel());       
 

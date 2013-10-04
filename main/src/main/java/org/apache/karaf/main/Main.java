@@ -39,7 +39,6 @@ import java.util.logging.Logger;
 import org.apache.karaf.info.ServerInfo;
 import org.apache.karaf.main.lock.Lock;
 import org.apache.karaf.main.lock.LockCallBack;
-import org.apache.karaf.main.lock.LockManager;
 import org.apache.karaf.main.lock.NoLock;
 import org.apache.karaf.main.util.ArtifactResolver;
 import org.apache.karaf.main.util.BootstrapLogManager;
@@ -83,7 +82,9 @@ public class Main {
     private int exitCode;
     private ShutdownCallback shutdownCallback;
     private KarafActivatorManager activatorManager;
-    private LockManager lockManager;
+    private Lock lock;
+    private KarafLockCallback lockCallback;
+    private boolean exiting;
     
     /**
      * <p>
@@ -217,9 +218,8 @@ public class Main {
             System.out.println(config.startupMessage);
         }
         BootstrapLogManager.setProperties(config.props);
-        Lock lock = createLock();
-        KarafLockCallback lockCallback = new KarafLockCallback();
-        lockManager = new LockManager(lock, lockCallback, config.lockDelay);
+        lock = createLock();
+        lockCallback = new KarafLockCallback();
         InstanceHelper.updateInstancePid(config.karafHome, config.karafBase);
         LOG.addHandler(BootstrapLogManager.getDefaultHandler());
 
@@ -262,7 +262,52 @@ public class Main {
         if (config.delayConsoleStart) {
             new StartupListener(LOG, framework.getBundleContext());
         }
-        lockManager.startLockMonitor();
+        monitor();
+    }
+
+    private void monitor() {
+        new Thread() {
+            public void run() {
+                doMonitor();
+            }
+        }.start();
+    }
+
+    private void doMonitor() {
+        File dataDir = new File(System.getProperty(ConfigProperties.PROP_KARAF_DATA));
+        while (!exiting) {
+            try {
+                if (lock.lock()) {
+                    lockCallback.lockAquired();
+                    for (;;) {
+                        if (!dataDir.isDirectory()) {
+                            LOG.info("Data directory does not exist anymore, halting");
+                            framework.stop();
+                            System.exit(-1);
+                            return;
+                        }
+                        if (!lock.isAlive() || exiting) {
+                            break;
+                        }
+                        Thread.sleep(config.lockDelay);
+                    }
+                    if (!exiting) {
+                        lockCallback.lockLost();
+                    }
+                } else {
+                    lockCallback.waitingForLock();
+                }
+                Thread.sleep(config.lockDelay);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    Lock getLock() {
+        return lock;
     }
     
     private ClassLoader createClassLoader(ArtifactResolver resolver) throws Exception {
@@ -444,7 +489,7 @@ public class Main {
                 shutdownCallback.waitingForShutdown(step);
             }
 
-            lockManager.stopLockMonitor();
+            exiting = true;
 
             if (framework.getState() == Bundle.ACTIVE || framework.getState() == Bundle.STARTING) {
                 new Thread() {
@@ -475,17 +520,13 @@ public class Main {
             }
             return false;
         } finally {
-            if (lockManager != null) {
-                lockManager.stopLockMonitor();
-                lockManager.unlock();
+            if (lock != null) {
+                exiting = true;
+                lock.release();
             }
         }
     }
     
-    public LockManager getLockManager() {
-        return lockManager;
-    }
-
     private final class KarafLockCallback implements LockCallBack, FrameworkListener {
         private Object startLevelLock = new Object();
 
