@@ -19,24 +19,45 @@
 package org.apache.karaf.shell.ssh;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.net.URL;
+import java.security.KeyPair;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.felix.service.command.CommandSession;
 import org.apache.sshd.agent.SshAgent;
 import org.apache.sshd.agent.SshAgentFactory;
 import org.apache.sshd.agent.SshAgentServer;
 import org.apache.sshd.agent.common.AgentDelegate;
+import org.apache.sshd.agent.local.AgentImpl;
 import org.apache.sshd.agent.local.AgentServerProxy;
 import org.apache.sshd.agent.local.ChannelAgentForwarding;
 import org.apache.sshd.common.Channel;
 import org.apache.sshd.common.NamedFactory;
 import org.apache.sshd.common.Session;
 import org.apache.sshd.server.session.ServerSession;
+import org.osgi.framework.BundleContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class KarafAgentFactory implements SshAgentFactory {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(KarafAgentFactory.class);
+
     private final Map<String, AgentServerProxy> proxies = new ConcurrentHashMap<String, AgentServerProxy>();
     private final Map<String, SshAgent> locals = new ConcurrentHashMap<String, SshAgent>();
+
+    private BundleContext bundleContext;
+
+    public BundleContext getBundleContext() {
+        return bundleContext;
+    }
+
+    public void setBundleContext(BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
+    }
 
     public NamedFactory<Channel> getChannelForwardingFactory() {
         return new ChannelAgentForwarding.Factory();
@@ -75,23 +96,32 @@ public class KarafAgentFactory implements SshAgentFactory {
         };
     }
 
-    public void registerAgent(SshAgent agent, Map<String, ?> properties) {
-        if (agent != null) {
-            Object id = properties.get("id");
-            if (id == null) {
-                throw new IllegalStateException("Local agent can't be registered with no 'id' property");
-            }
-            locals.put(id.toString(), agent);
+    public void registerCommandSession(CommandSession session) {
+        try {
+            String user = (String) session.get("USER");
+            SshAgent agent = new AgentImpl();
+            URL url = bundleContext.getBundle().getResource("karaf.key");
+            InputStream is = url.openStream();
+            ObjectInputStream r = new ObjectInputStream(is);
+            KeyPair keyPair = (KeyPair) r.readObject();
+            agent.addIdentity(keyPair, "karaf");
+            String agentId = "local:" + user;
+            session.put(SshAgent.SSH_AUTHSOCKET_ENV_NAME, agentId);
+            locals.put(agentId, agent);
+        } catch (Throwable e) {
+            LOGGER.warn("Error starting ssh agent for local console", e);
         }
     }
 
-    public void unregisterAgent(SshAgent agent, Map<String, ?> properties) {
-        if (agent != null) {
-            Object id = properties.get("id");
-            if (id == null) {
-                throw new IllegalStateException("Local agent can't be unregistered with no 'id' property");
+    public void unregisterCommandSession(CommandSession session) {
+        try {
+            String agentId = (String) session.get(SshAgent.SSH_AUTHSOCKET_ENV_NAME);
+            session.put(SshAgent.SSH_AUTHSOCKET_ENV_NAME, null);
+            if (agentId != null) {
+                locals.remove(agentId);
             }
-            locals.remove(id.toString());
+        } catch (Throwable e) {
+            LOGGER.warn("Error stopping ssh agent for local console", e);
         }
     }
 

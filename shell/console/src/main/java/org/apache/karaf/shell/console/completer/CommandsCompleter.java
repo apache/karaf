@@ -18,6 +18,7 @@
  */
 package org.apache.karaf.shell.console.completer;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -25,13 +26,12 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.karaf.shell.commands.CommandWithAction;
-import org.apache.felix.gogo.runtime.Closure;
-import org.apache.felix.gogo.runtime.CommandProxy;
-import org.apache.felix.gogo.runtime.CommandSessionImpl;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Function;
 import org.apache.karaf.shell.console.CommandSessionHolder;
 import org.apache.karaf.shell.console.Completer;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +40,8 @@ import org.slf4j.LoggerFactory;
  * instead used from the non-OSGi {@link org.apache.karaf.shell.console.impl.Main}
  */
 public class CommandsCompleter implements Completer {
+
+    public static final String COMMANDS = ".commands";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CommandsCompleter.class);
 
@@ -73,7 +75,7 @@ public class CommandsCompleter implements Completer {
         // get the current sub-shell
         String subshell = (String) session.get("SUBSHELL");
 
-        Set<String> names = new HashSet<String>((Set<String>) session.get(CommandSessionImpl.COMMANDS));
+        Set<String> names = new HashSet<String>((Set<String>) session.get(COMMANDS));
         Set<String> filteredNames = new HashSet<String>();
         for (String command : names) {
             if (subshell == null || command.startsWith(subshell)) {
@@ -134,7 +136,7 @@ public class CommandsCompleter implements Completer {
         Set<String> aliases = new HashSet<String>();
         for (String var : vars) {
             Object content = session.get(var);
-            if (content instanceof Closure)  {
+            if ("org.apache.felix.gogo.runtime.Closure".equals(content.getClass().getName()))  {
                 aliases.add(var);
             }
         }
@@ -142,20 +144,28 @@ public class CommandsCompleter implements Completer {
     }
 
     protected Function unProxy(Function function) {
-        if (function instanceof CommandProxy) {
-            CommandProxy proxy = (CommandProxy) function;
-            Object target = proxy.getTarget();
-            Function result;
-            if (target instanceof Function) {
-                result = (Function) target;
-            } else {
-                result = function;
+        try {
+            if ("org.apache.felix.gogo.runtime.CommandProxy".equals(function.getClass().getName())) {
+                Field contextField = function.getClass().getDeclaredField("context");
+                Field referenceField = function.getClass().getDeclaredField("reference");
+                contextField.setAccessible(true);
+                referenceField.setAccessible(true);
+                BundleContext context = (BundleContext) contextField.get(function);
+                ServiceReference reference = (ServiceReference) referenceField.get(function);
+                Object target = context != null ? context.getService(reference) : null;
+                try {
+                    if (target instanceof Function) {
+                        function = (Function) target;
+                    }
+                } finally {
+                    if (context != null) {
+                        context.ungetService(reference);
+                    }
+                }
             }
-            proxy.ungetTarget();
-            return result;
-        } else {
-            return function;
+        } catch (Throwable t) {
         }
+        return function;
     }
 
 }
