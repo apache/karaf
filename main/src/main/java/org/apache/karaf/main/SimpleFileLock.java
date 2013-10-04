@@ -30,6 +30,7 @@ public class SimpleFileLock implements Lock {
     private static final Logger LOG = Logger.getLogger(SimpleFileLock.class.getName());
     private static final String PROPERTY_LOCK_DIR = "karaf.lock.dir";
     private static final String PROP_KARAF_BASE = "karaf.base";
+    private File file;
     private RandomAccessFile lockFile;
     private FileLock lock;
 
@@ -46,8 +47,8 @@ public class SimpleFileLock implements Lock {
                 props.setProperty(PROPERTY_LOCK_DIR, System.getProperty(PROP_KARAF_BASE));
             }
 
-            File base = new File(props.getProperty(PROPERTY_LOCK_DIR));
-            lockFile = new RandomAccessFile(new File(base, "lock"), "rw");
+            file = new File(props.getProperty(PROPERTY_LOCK_DIR), "lock");
+            lockFile = new RandomAccessFile(file, "rw");
         } catch (IOException ioe){
             throw new RuntimeException("Karaf can't startup, make sure the log file can be accessed and written by the user starting Karaf : " + ioe.getMessage());
         } catch (Exception e){
@@ -73,7 +74,7 @@ public class SimpleFileLock implements Lock {
     }
  
     public boolean isAlive() throws Exception {
-        return lock != null;
+        return lock != null && lock.isValid() && file.exists();
     }
 
     private static File getKarafLock(File lock,Properties props) {
