@@ -39,8 +39,6 @@ import jline.UnsupportedTerminal;
 import jline.console.ConsoleReader;
 import jline.console.history.PersistentHistory;
 import org.apache.felix.gogo.commands.CommandException;
-import org.apache.felix.gogo.runtime.CommandNotFoundException;
-import org.apache.felix.gogo.runtime.Parser;
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Converter;
@@ -192,7 +190,8 @@ public class Console implements Runnable
 
     private void logException(Throwable t) {
         try {
-            if (t instanceof CommandNotFoundException) {
+            boolean isCommandNotFound = "org.apache.felix.gogo.runtime.CommandNotFoundException".equals(t.getClass().getName());
+            if (isCommandNotFound) {
                 LOGGER.debug("Unknown command entered", t);
             } else if (t instanceof CommandException) {
                 LOGGER.debug("Command exception (Undefined option, ...)", t);
@@ -202,12 +201,12 @@ public class Console implements Runnable
             session.put(LAST_EXCEPTION, t);
             if (t instanceof CommandException) {
                 session.getConsole().println(((CommandException) t).getNiceHelp());
-            } else if (t instanceof CommandNotFoundException) {
+            } else if (isCommandNotFound) {
                 String str = Ansi.ansi()
                         .fg(Ansi.Color.RED)
                         .a("Command not found: ")
                         .a(Ansi.Attribute.INTENSITY_BOLD)
-                        .a(((CommandNotFoundException) t).getCommand())
+                        .a(t.getClass().getMethod("getCommand").invoke(t))
                         .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
                         .fg(Ansi.Color.DEFAULT).toString();
                 session.getConsole().println(str);
@@ -216,7 +215,7 @@ public class Console implements Runnable
                 session.getConsole().print(Ansi.ansi().fg(Ansi.Color.RED).toString());
                 t.printStackTrace(session.getConsole());
                 session.getConsole().print(Ansi.ansi().fg(Ansi.Color.DEFAULT).toString());
-            } else if (!(t instanceof CommandException) && !(t instanceof CommandNotFoundException)) {
+            } else if (!(t instanceof CommandException) && !isCommandNotFound) {
                 session.getConsole().print(Ansi.ansi().fg(Ansi.Color.RED).toString());
                 session.getConsole().println("Error executing command: "
                     + (t.getMessage() != null ? t.getMessage() : t.getClass().getName()));
@@ -254,11 +253,16 @@ public class Console implements Runnable
                 }                                
             }
             try {
-                new Parser(command).program();
+                Class<?> cl = CommandSession.class.getClassLoader().loadClass("org.apache.felix.gogo.runtime.Parser");
+                Object parser = cl.getConstructor(CharSequence.class).newInstance(command);
+                cl.getMethod("program").invoke(parser);
                 loop = false;
             } catch (Exception e) {
                 loop = true;
                 first = false;
+            } catch (Throwable t) {
+                // Reflection problem ? just quit
+                loop = false;
             }
         }
         return command;

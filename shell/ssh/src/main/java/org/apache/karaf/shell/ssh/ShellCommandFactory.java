@@ -123,7 +123,8 @@ public class ShellCommandFactory implements CommandFactory {
                     }
                 } catch (Throwable t) {
                     try {
-                        if (t instanceof CommandNotFoundException) {
+                        boolean isCommandNotFound = "org.apache.felix.gogo.runtime.CommandNotFoundException".equals(t.getClass().getName());
+                        if (isCommandNotFound) {
                             LOGGER.debug("Unknown command entered", t);
                         } else {
                             LOGGER.info("Exception caught while executing command", t);
@@ -131,12 +132,12 @@ public class ShellCommandFactory implements CommandFactory {
                         session.put(Console.LAST_EXCEPTION, t);
                         if (t instanceof CommandException) {
                             session.getConsole().println(((CommandException) t).getNiceHelp());
-                        } else if (t instanceof CommandNotFoundException) {
+                        } else if (isCommandNotFound) {
                             String str = Ansi.ansi()
                                     .fg(Ansi.Color.RED)
                                     .a("Command not found: ")
                                     .a(Ansi.Attribute.INTENSITY_BOLD)
-                                    .a(((CommandNotFoundException) t).getCommand())
+                                    .a(t.getClass().getMethod("getCommand").invoke(t))
                                     .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
                                     .fg(Ansi.Color.DEFAULT).toString();
                             session.getConsole().println(str);
@@ -146,7 +147,7 @@ public class ShellCommandFactory implements CommandFactory {
                             t.printStackTrace(session.getConsole());
                             session.getConsole().print(Ansi.ansi().fg(Ansi.Color.DEFAULT).toString());
                         }
-                        else if (!(t instanceof CommandException) && !(t instanceof CommandNotFoundException)) {
+                        else if (!(t instanceof CommandException) && !isCommandNotFound) {
                             session.getConsole().print(Ansi.ansi().fg(Ansi.Color.RED).toString());
                             session.getConsole().println("Error executing command: "
                                     + (t.getMessage() != null ? t.getMessage() : t.getClass().getName()));

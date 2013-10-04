@@ -27,7 +27,6 @@ import java.net.URL;
 import java.security.KeyPair;
 import java.nio.charset.Charset;
 import java.security.PrivilegedExceptionAction;
-import java.util.Hashtable;
 import java.util.List;
 import javax.security.auth.Subject;
 
@@ -54,7 +53,6 @@ public class ConsoleFactory {
     Console console;
     private boolean start;
     private ServiceRegistration registration;
-    private SshAgent local;
 
     public void setBundleContext(BundleContext bundleContext) {
         this.bundleContext = bundleContext;
@@ -112,8 +110,6 @@ public class ConsoleFactory {
     }
 
     protected void doStart(String user) throws Exception {
-        String agentId = startAgent(user);
-
         final Terminal terminal = terminalFactory.getTerminal();
         // unwrap stream so it can be recognized by the terminal and wrapped to get 
         // special keys in windows
@@ -145,6 +141,10 @@ public class ConsoleFactory {
                                    encoding,
                                    callback);
         CommandSession session = console.getSession();
+        for (Object o : System.getProperties().keySet()) {
+            String key = o.toString();
+            session.put(key, System.getProperty(key));
+        }
         session.put("USER", user);
         session.put("APPLICATION", System.getProperty("karaf.name", "root"));
         session.put("#LINES", new Function() {
@@ -161,27 +161,14 @@ public class ConsoleFactory {
             session.put("LC_CTYPE", ctype);
         }
         session.put(".jline.terminal", terminal);
-        session.put(SshAgent.SSH_AUTHSOCKET_ENV_NAME, agentId);
+
+        registration = bundleContext.registerService(CommandSession.class, session, null);
 
         boolean delayconsole = Boolean.parseBoolean(System.getProperty("karaf.delay.console"));
         if (delayconsole) {
             new DelayedStarted(this.console, bundleContext, unwrappedIn).start();
         } else {
             new Thread(this.console, "Karaf Shell Console Thread").start();
-        }
-    }
-
-    protected String startAgent(String user) {
-        try {
-            local = SshAgentLoader.load(bundleContext);
-            String agentId = "local:" + user;
-            Hashtable properties = new Hashtable();
-            properties.put("id", agentId);
-            registration = bundleContext.registerService(SshAgent.class.getName(), local, properties);
-            return agentId;
-        } catch (Throwable e) {
-            LOGGER.warn("Error starting ssh agent for local console", e);
-            return null;
         }
     }
 

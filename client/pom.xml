@@ -82,7 +82,7 @@
                             META-INF;-split-package:=merge-first
                         </Private-Package>
                         <Include-Resource>
-                            ../shell/console/src/main/resources/karaf.key,
+                            ../shell/ssh/src/main/resources/karaf.key,
                             {maven-resources}
                         </Include-Resource>
                         <Import-Package>!*</Import-Package>

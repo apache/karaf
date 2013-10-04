@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-import org.apache.felix.gogo.runtime.CommandSessionImpl;
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.shell.console.Completer;
@@ -38,6 +37,8 @@ import org.osgi.framework.ServiceListener;
  * Completes command names
  */
 public class CommandNamesCompleter implements Completer {
+
+    public static final String COMMANDS = ".commands";
 
     private CommandSession session;
     private final Set<String> commands = new CopyOnWriteArraySet<String>();
@@ -69,7 +70,7 @@ public class CommandNamesCompleter implements Completer {
 
     protected void checkData() {
         if (commands.isEmpty()) {
-            Set<String> names = new HashSet<String>((Set<String>) session.get(CommandSessionImpl.COMMANDS));
+            Set<String> names = new HashSet<String>((Set<String>) session.get(COMMANDS));
             for (String name : names) {
                 commands.add(name);
                 if (name.indexOf(':') > 0) {

@@ -26,9 +26,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.felix.gogo.commands.basic.AbstractCommand;
-import org.apache.felix.gogo.runtime.Closure;
-import org.apache.felix.gogo.runtime.CommandProxy;
-import org.apache.felix.gogo.runtime.CommandSessionImpl;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Function;
 import org.apache.karaf.shell.console.Completer;
@@ -43,6 +40,8 @@ import org.slf4j.LoggerFactory;
  * instead used from the non-OSGi {@link org.apache.karaf.shell.console.Main}
  */
 public class CommandsCompleter implements Completer {
+
+    public static final String COMMANDS = ".commands";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CommandsCompleter.class);
 
@@ -72,7 +71,7 @@ public class CommandsCompleter implements Completer {
     protected synchronized void checkData() {
         // Copy the set to avoid concurrent modification exceptions
         // TODO: fix that in gogo instead
-        Set<String> names = new HashSet<String>((Set<String>) session.get(CommandSessionImpl.COMMANDS));
+        Set<String> names = new HashSet<String>((Set<String>) session.get(COMMANDS));
         if (!names.equals(commands)) {
             commands.clear();
             completers.clear();
@@ -107,7 +106,7 @@ public class CommandsCompleter implements Completer {
         Set<String> aliases = new HashSet<String>();
         for (String var : vars) {
             Object content = session.get(var);
-            if (content instanceof Closure)  {
+            if ("org.apache.felix.gogo.runtime.Closure".equals(content.getClass().getName()))  {
                 aliases.add(var);
             }
         }
@@ -116,7 +115,7 @@ public class CommandsCompleter implements Completer {
 
     protected Function unProxy(Function function) {
         try {
-            if (function instanceof CommandProxy) {
+            if ("org.apache.felix.gogo.runtime.CommandProxy".equals(function.getClass().getName())) {
                 Field contextField = function.getClass().getDeclaredField("context");
                 Field referenceField = function.getClass().getDeclaredField("reference");
                 contextField.setAccessible(true);

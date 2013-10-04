@@ -79,6 +79,17 @@ public class DefaultActionPreparator implements ActionPreparator {
         Map<Option, Field> options = new HashMap<Option, Field>();
         Map<Argument, Field> arguments = new HashMap<Argument, Field>();
         List<Argument> orderedArguments = new ArrayList<Argument>();
+        // It's a shame, but gogo converts string to numbers if possible
+        // and blueprint does not do the opposite conversion, so transform
+        // them back before preparing
+        List<Object> newParams = new ArrayList<Object>(params.size());
+        for (Object o : params) {
+            if (o instanceof Number) {
+                o = o.toString();
+            }
+            newParams.add(o);
+        }
+        params = newParams;
         // Introspect
         for (Class type = action.getClass(); type != null; type = type.getSuperclass()) {
             for (Field field : type.getDeclaredFields()) {

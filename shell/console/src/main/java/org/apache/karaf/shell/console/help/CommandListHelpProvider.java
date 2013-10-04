@@ -31,7 +31,6 @@ import org.apache.felix.gogo.commands.Action;
 import org.apache.felix.gogo.commands.Command;
 import org.apache.felix.gogo.commands.basic.AbstractCommand;
 import org.apache.felix.gogo.commands.basic.DefaultActionPreparator;
-import org.apache.felix.gogo.runtime.CommandSessionImpl;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Function;
 import org.apache.karaf.shell.console.HelpProvider;
@@ -41,6 +40,8 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
 public class CommandListHelpProvider implements HelpProvider {
+
+    public static final String COMMANDS = ".commands";
 
     public String getHelp(CommandSession session, String path) {
         if (path.indexOf('|') > 0) {
@@ -57,7 +58,7 @@ public class CommandListHelpProvider implements HelpProvider {
     }
 
     private SortedMap<String, String> getCommandDescriptions(CommandSession session, String command) {
-        Set<String> names = (Set<String>) session.get(CommandSessionImpl.COMMANDS);
+        Set<String> names = (Set<String>) session.get(COMMANDS);
         SortedMap<String,String> commands = new TreeMap<String,String>();
         for (String name : names) {
             if (command != null && !name.startsWith(command)) {
