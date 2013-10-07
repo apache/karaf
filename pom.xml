@@ -397,6 +397,11 @@
                 <artifactId>org.apache.karaf.service.command</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.service</groupId>
+                <artifactId>org.apache.karaf.service.guard</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>org.apache.karaf.log</groupId>

@@ -16,21 +16,34 @@
  */
 package org.apache.karaf.management;
 
-import org.apache.karaf.jaas.boot.principal.RolePrincipal;
-import org.apache.karaf.management.boot.KarafMBeanServerBuilder;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.service.cm.Configuration;
-import org.osgi.service.cm.ConfigurationAdmin;
-
-import javax.management.*;
-import javax.security.auth.Subject;
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.security.AccessControlContext;
 import java.security.AccessController;
 import java.security.Principal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import javax.management.Attribute;
+import javax.management.AttributeList;
+import javax.management.JMException;
+import javax.management.MBeanAttributeInfo;
+import javax.management.MBeanInfo;
+import javax.management.MBeanOperationInfo;
+import javax.management.MBeanParameterInfo;
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
+import javax.security.auth.Subject;
+
+import org.apache.karaf.jaas.boot.principal.RolePrincipal;
+import org.apache.karaf.management.boot.KarafMBeanServerBuilder;
+import org.apache.karaf.service.guard.tools.ACLConfigurationParser;
+import org.apache.karaf.service.guard.tools.ACLConfigurationParser.Specificity;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 
 public class KarafMBeanServerGuard implements InvocationHandler {
 
@@ -232,8 +245,6 @@ public class KarafMBeanServerGuard implements InvocationHandler {
     }
 
     List<String> getRequiredRoles(ObjectName objectName, String methodName, Object[] params, String[] signature) throws IOException {
-        List<String> roles = new ArrayList<String>();
-
         List<String> allPids = new ArrayList<String>();
         try {
             for (Configuration config : configAdmin.listConfigurations("(service.pid=jmx.acl*)")) {
@@ -246,255 +257,14 @@ public class KarafMBeanServerGuard implements InvocationHandler {
         for (String pid : iterateDownPids(getNameSegments(objectName))) {
             if (allPids.contains(pid)) {
                 Configuration config = configAdmin.getConfiguration(pid);
-                Dictionary<String, Object> properties = trimKeys(config.getProperties());
-
-                /*
-                1. get all direct string matches
-                2. get regex matches
-                3. get signature matches
-                4. without signature
-                5. method name wildcard
-
-                We return immediately when a definition is found, so if a specific definition is found, we do not
-                search for a more generic specification.
-                Regular expressions and exact matches are considered equally specific, so they are combined...
-                 */
-
-                boolean foundExactOrRegex = false;
-                if (params != null) {
-                    Object exactArgMatchRoles = properties.get(getExactArgSignature(methodName, signature, params));
-                    if (exactArgMatchRoles instanceof String) {
-                        roles.addAll(parseRoles((String) exactArgMatchRoles));
-                        foundExactOrRegex = true;
-                    }
-
-                    foundExactOrRegex |= getRegexRoles(properties, methodName, signature, params, roles);
-
-                    if (foundExactOrRegex) {
-                        // since we have the actual parameters we can match them and if they do, we won't look for any
-                        // more generic rules...
-                        return roles;
-                    }
-                } else {
-                    foundExactOrRegex = getExactArgOrRegexRoles(properties, methodName, signature, roles);
-                }
-
-                Object signatureRoles = properties.get(getSignature(methodName, signature));
-                if (signatureRoles instanceof String) {
-                    roles.addAll(parseRoles((String) signatureRoles));
+                List<String> roles = new ArrayList<String>();
+                Specificity s = ACLConfigurationParser.getRolesForInvocation(methodName, params, signature, config.getProperties(), roles);
+                if (s != Specificity.NO_MATCH) {
                     return roles;
                 }
-
-                if (foundExactOrRegex) {
-                    // we can get here if params == null and there were exact and/or regex rules but no signature rules
-                    return roles;
-                }
-
-                Object methodRoles = properties.get(methodName);
-                if (methodRoles instanceof String) {
-                    roles.addAll(parseRoles((String) methodRoles));
-                    return roles;
-                }
-
-                if (getMethodNameWildcardRoles(properties, methodName, roles))
-                    return roles;
             }
         }
-        return roles;
-    }
-
-    private Dictionary<String, Object> trimKeys(Dictionary<String, Object> properties) {
-        Dictionary<String, Object> d = new Hashtable<String, Object>();
-        for (Enumeration<String> e = properties.keys(); e.hasMoreElements(); ) {
-            String key = e.nextElement();
-            Object value = properties.get(key);
-
-            d.put(removeSpaces(key), value);
-        }
-        return d;
-    }
-
-    private String removeSpaces(String key) {
-        StringBuilder sb = new StringBuilder();
-        char quoteChar = 0;
-        for (int i = 0; i < key.length(); i++) {
-            char c = key.charAt(i);
-
-            if (quoteChar == 0 && c == ' ')
-                continue;
-
-            if (quoteChar == 0 && (c == '\"' || c == '/') && sb.length() > 0 &&
-                    (sb.charAt(sb.length() - 1) == '[' || sb.charAt(sb.length() - 1) == ',')) {
-                // we are in a quoted string
-                quoteChar = c;
-            } else if (quoteChar != 0 && c == quoteChar) {
-                // look ahead to see if the next non-space is the closing bracket or a comma, which ends the quoted string
-                for (int j = i + 1; j < key.length(); j++) {
-                    if (key.charAt(j) == ' ') {
-                        continue;
-                    }
-                    if (key.charAt(j) == ']' || key.charAt(j) == ',') {
-                        quoteChar = 0;
-                    }
-                    break;
-                }
-            }
-            sb.append(c);
-        }
-
-        return sb.toString();
-    }
-
-    private List<String> parseRoles(String roleString) {
-        int hashIndex = roleString.indexOf('#');
-        if (hashIndex >= 0) {
-            // you can put a comment at the end
-            roleString = roleString.substring(0, hashIndex);
-        }
-
-        List<String> roles = new ArrayList<String>();
-        for (String role : roleString.split("[,]")) {
-            String trimmed = role.trim();
-            if (trimmed.length() > 0)
-                roles.add(trimmed);
-        }
-
-        return roles;
-    }
-
-    private Object getExactArgSignature(String methodName, String[] signature, Object[] params) {
-        StringBuilder sb = new StringBuilder(getSignature(methodName, signature));
-        sb.append('[');
-        boolean first = true;
-        for (Object param : params) {
-            if (first)
-                first = false;
-            else
-                sb.append(',');
-
-            sb.append('"');
-            sb.append(param.toString().trim());
-            sb.append('"');
-        }
-        sb.append(']');
-        return sb.toString();
-    }
-
-    private String getSignature(String methodName, String[] signature) {
-        StringBuilder sb = new StringBuilder(methodName);
-        sb.append('(');
-        boolean first = true;
-        for (String s : signature) {
-            if (first)
-                first = false;
-            else
-                sb.append(',');
-
-            sb.append(s);
-        }
-        sb.append(')');
-        return sb.toString();
-    }
-
-    private boolean getRegexRoles(Dictionary<String, Object> properties, String methodName, String[] signature, Object[] params, List<String> roles) {
-        boolean matchFound = false;
-        String methodSig = getSignature(methodName, signature);
-        String prefix = methodSig + "[/";
-        for (Enumeration<String> e = properties.keys(); e.hasMoreElements(); ) {
-            String key = e.nextElement().trim();
-            if (key.startsWith(prefix) && key.endsWith("/]")) {
-                List<String> regexArgs = getRegexDecl(key.substring(methodName.length()));
-                if (allParamsMatch(regexArgs, params)) {
-                    matchFound = true;
-                    Object roleString = properties.get(key);
-                    if (roleString instanceof String)
-                        roles.addAll(parseRoles((String) roleString));
-                }
-            }
-        }
-        return matchFound;
-    }
-
-    private boolean getExactArgOrRegexRoles(Dictionary<String, Object> properties, String methodName, String[] signature, List<String> roles) {
-        boolean matchFound = false;
-        String methodSig = getSignature(methodName, signature);
-        String prefix = methodSig + "[";
-        for (Enumeration<String> e = properties.keys(); e.hasMoreElements(); ) {
-            String key = e.nextElement().trim();
-            if (key.startsWith(prefix) && key.endsWith("]")) {
-                matchFound = true;
-                Object roleString = properties.get(key);
-                if (roleString instanceof String)
-                    roles.addAll(parseRoles((String) roleString));
-            }
-        }
-        return matchFound;
-    }
-
-    private boolean getMethodNameWildcardRoles(Dictionary<String, Object> properties, String methodName, List<String> roles) {
-        SortedMap<String, String> wildcardRules = new TreeMap<String, String>(new Comparator<String>() {
-            public int compare(String s1, String s2) {
-                // returns longer entries before shorter ones...
-                return s2.length() - s1.length();
-            }
-        });
-        for (Enumeration<String> e = properties.keys(); e.hasMoreElements(); ) {
-            String key = e.nextElement();
-            if (key.endsWith("*")) {
-                String prefix = key.substring(0, key.length() - 1);
-                if (methodName.startsWith(prefix)) {
-                    wildcardRules.put(prefix, properties.get(key).toString());
-                }
-            }
-        }
-
-        if (wildcardRules.size() != 0) {
-            roles.addAll(parseRoles(wildcardRules.values().iterator().next()));
-            return true;
-        } else
-            return false;
-    }
-
-    private boolean allParamsMatch(List<String> regexArgs, Object[] params) {
-        if (regexArgs.size() != params.length)
-            return false;
-
-        for (int i = 0; i < regexArgs.size(); i++) {
-            if (!params[i].toString().trim().matches(regexArgs.get(i)))
-                return false;
-        }
-
-        return true;
-    }
-
-    private List<String> getRegexDecl(String key) {
-        List<String> l = new ArrayList<String>();
-
-        boolean inRegex = false;
-        StringBuilder currentRegex = new StringBuilder();
-        for (int i = 0; i < key.length(); i++) {
-            if (!inRegex) {
-                if (key.length() > i+1) {
-                    String s = key.substring(i, i+2);
-
-                    if ("[/".equals(s) || ",/".equals(s)) {
-                        inRegex = true;
-                        i++;
-                        continue;
-                    }
-                }
-            } else {
-                String s = key.substring(i, i+2);
-                if ("/]".equals(s) || "/,".equals(s)) {
-                    l.add(currentRegex.toString());
-                    currentRegex = new StringBuilder();
-                    inRegex = false;
-                    continue;
-                }
-                currentRegex.append(key.charAt(i));
-            }
-        }
-        return l;
+        return Collections.emptyList();
     }
 
     private List<String> getNameSegments(ObjectName objectName) {

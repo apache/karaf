@@ -24,9 +24,6 @@
 
     <!-- Allow the use of system properties -->
     <ext:property-placeholder placeholder-prefix="$[" placeholder-suffix="]">
-        <ext:default-properties>
-            <ext:property name="karaf.admin.role" value="admin" />
-        </ext:default-properties>
     </ext:property-placeholder>
 
     <!-- Property place holder -->

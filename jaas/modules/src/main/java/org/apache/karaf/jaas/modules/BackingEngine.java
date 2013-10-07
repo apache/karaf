@@ -44,7 +44,7 @@ public interface BackingEngine {
     List<UserPrincipal> listUsers();
 
     /**
-     * List groups that an user is in.
+     * List groups that a user is in.
      *
      * @param user
      * @return

@@ -19,7 +19,7 @@ import org.apache.karaf.jaas.modules.BackingEngine;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 
-@Command(scope = "jaas", name = "group-delete", description = "Remove an user from a group")
+@Command(scope = "jaas", name = "group-delete", description = "Remove a user from a group")
 public class GroupDeleteCommand extends JaasCommandSupport {
 
     @Argument(index = 0, name = "username", description = "Username", required = true, multiValued = false)
