@@ -147,6 +147,7 @@
                         </Export-Package>
                         <Private-Package>
                         	org.apache.karaf.shell.console.impl*,
+                            org.apache.karaf.shell.security.impl*,
                         </Private-Package>
                         <Main-Class>
                             org.apache.karaf.shell.console.impl.Main

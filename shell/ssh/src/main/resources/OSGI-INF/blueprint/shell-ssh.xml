@@ -35,7 +35,6 @@
     <ext:property-placeholder placeholder-prefix="$[" placeholder-suffix="]">
         <ext:default-properties>
             <ext:property name="karaf.startRemoteShell" value="true" />
-            <ext:property name="karaf.admin.role" value="admin" />
         </ext:default-properties>
     </ext:property-placeholder>
 
@@ -45,7 +44,6 @@
             <cm:property name="sshHost" value="0.0.0.0"/>
             <cm:property name="sshIdleTimeout" value="1800000"/>
             <cm:property name="sshRealm" value="karaf"/>
-            <cm:property name="sshRole" value="$[karaf.admin.role]"/>
             <cm:property name="hostKey" value="$[karaf.base]/etc/host.key"/>
             <cm:property name="authorizedKeys" value="$[karaf.base]/etc/authorized_keys"/>
             <cm:property name="authMethods" value="password,publickey"/>
@@ -123,7 +121,6 @@
 
     <bean id="authenticator" class="org.apache.karaf.shell.ssh.KarafJaasAuthenticator">
         <property name="realm" value="${sshRealm}"/>
-        <property name="role" value="${sshRole}"/>
     </bean>
 
     <bean id="sshServerFactory" class="org.apache.karaf.shell.ssh.SshServerFactory" init-method="start"

@@ -23,8 +23,10 @@ import java.nio.charset.Charset;
 import javax.security.auth.Subject;
 
 import jline.Terminal;
+
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
+import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.apache.karaf.shell.console.Console;
 import org.apache.karaf.shell.console.ConsoleFactory;
@@ -46,10 +48,10 @@ public class LocalConsoleManager {
     private CommandProcessor commandProcessor;
     private ServiceRegistration registration;
 
-    public LocalConsoleManager(boolean start, 
+    public LocalConsoleManager(boolean start,
             String defaultStartLevel,
-            BundleContext bundleContext, 
-            TerminalFactory terminalFactory, 
+            BundleContext bundleContext,
+            TerminalFactory terminalFactory,
             ConsoleFactory consoleFactory,
             CommandProcessor commandProcessor) throws Exception {
         this.start = start;
@@ -67,6 +69,13 @@ public class LocalConsoleManager {
         }
         final Subject subject = new Subject();
         subject.getPrincipals().add(new UserPrincipal("karaf"));
+
+        String roles = System.getProperty("karaf.local.roles");
+        if (roles != null) {
+            for (String role : roles.split("[,]")) {
+                subject.getPrincipals().add(new RolePrincipal(role.trim()));
+            }
+        }
 
         final Terminal terminal = terminalFactory.getTerminal();
         Runnable callback = new Runnable() {
@@ -94,7 +103,7 @@ public class LocalConsoleManager {
                 consoleFactory.startConsoleAs(console, subject, "Local");
             }
         };
-        
+
         boolean delayconsole = Boolean.parseBoolean(System.getProperty("karaf.delay.console"));
         if (delayconsole) {
             DelayedStarted watcher = new DelayedStarted(consoleStarter, bundleContext, System.in);

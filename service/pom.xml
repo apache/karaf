@@ -36,6 +36,7 @@
     <modules>
         <module>core</module>
         <module>command</module>
+        <module>guard</module>
     </modules>
 
 </project>

@@ -16,17 +16,20 @@
  */
 package org.apache.karaf.management.boot;
 
-import junit.framework.TestCase;
-import org.easymock.EasyMock;
-
-import javax.management.AttributeList;
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.management.Attribute;
+import javax.management.AttributeList;
+import javax.management.InstanceNotFoundException;
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
+
+import junit.framework.TestCase;
+
+import org.easymock.EasyMock;
 
 public class KarafMBeanServerBuilderTest extends TestCase {
 
@@ -56,6 +59,7 @@ public class KarafMBeanServerBuilderTest extends TestCase {
         ObjectName on = ObjectName.getInstance("foo.bar:type=TestObject");
 
         try {
+            // obtain a JMX attribute
             kmbs.getAttribute(on, "myAttr");
             fail("Should have access denied");
         } catch (SecurityException se) {
@@ -70,6 +74,7 @@ public class KarafMBeanServerBuilderTest extends TestCase {
         }
 
         try {
+            // obtain a number of JMX attributes
             kmbs.getAttributes(on, new String[]{"foo", "bar"});
             fail("Should have access denied");
         } catch (SecurityException se) {
@@ -77,13 +82,15 @@ public class KarafMBeanServerBuilderTest extends TestCase {
         }
 
         try {
-            kmbs.getAttributes(on, new String[]{ "goo", "far" });
+            // set a JMX attribute
+            kmbs.setAttribute(on, new Attribute("goo", "far"));
             fail("Should have access denied");
         } catch (SecurityException se) {
             // good
         }
 
         try {
+            // set a number of JMX attributes
             kmbs.setAttributes(on, new AttributeList());
             fail("Should have access denied");
         } catch (SecurityException se) {
@@ -91,7 +98,8 @@ public class KarafMBeanServerBuilderTest extends TestCase {
         }
 
         try {
-            kmbs.setAttributes(on, new AttributeList());
+            // mimic a JMX method invocation
+            kmbs.invoke(on, "foo", new Object [] {}, new String [] {});
             fail("Should have access denied");
         } catch (SecurityException se) {
             // good

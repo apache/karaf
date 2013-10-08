@@ -18,13 +18,13 @@ package org.apache.karaf.shell.console;
 
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.util.Properties;
 
 import jline.Terminal;
+
 import org.apache.felix.gogo.runtime.CommandProcessorImpl;
 import org.apache.karaf.shell.console.impl.Main;
 import org.apache.karaf.shell.console.impl.jline.ConsoleImpl;
-
-import java.util.Properties;
 
 /**
  * This class is mostly here so that folks can see an example of how you can extend the Karaf Main shell.  Also
@@ -46,7 +46,7 @@ public class ExampleSubclassMain extends Main  {
 
     @Override
     protected ConsoleImpl createConsole(CommandProcessorImpl commandProcessor, InputStream in, PrintStream out, PrintStream err, Terminal terminal) throws Exception {
-        return new ConsoleImpl(commandProcessor, in, out, err, terminal, null, null) {
+        return new ConsoleImpl(commandProcessor, in, out, err, terminal, null, null, null) {
 
             /**
              * If you don't overwrite, then karaf will use the welcome message found in the
