@@ -194,7 +194,7 @@ public class ConfigProperties {
                 if (cleanCacheIndicatorFile.exists()) {
                     cleanCacheIndicatorFile.delete();
                 }
-                File karafCache = Utils.getKarafDirectory(PROP_KARAF_DATA, ENV_KARAF_DATA, new File(karafData, "cache"), true, true);
+                File karafCache = Utils.validateDirectoryExists(new File(karafData, "cache").getPath(), "Invalid cache directory", true, true);
                 Utils.deleteDirectory(karafCache);
             }
         }
