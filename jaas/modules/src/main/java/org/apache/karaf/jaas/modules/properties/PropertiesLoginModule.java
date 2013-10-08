@@ -84,6 +84,9 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
             throw new LoginException(uce.getMessage() + " not available to obtain information from user");
         }
         // user callback get value
+        if (((NameCallback) callbacks[0]).getName() == null) {
+            throw new LoginException("Username can not be null");
+        }
         user = ((NameCallback) callbacks[0]).getName();
         if (user.startsWith(PropertiesBackingEngine.GROUP_PREFIX)) {
             // you can't log in under a group name
@@ -91,6 +94,9 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
         }
 
         // password callback get value
+        if (((PasswordCallback) callbacks[1]).getPassword() == null) {
+            throw new LoginException("Password can not be null");
+        }
         String password = new String(((PasswordCallback) callbacks[1]).getPassword());
 
         // user infos container read from the users properties file
