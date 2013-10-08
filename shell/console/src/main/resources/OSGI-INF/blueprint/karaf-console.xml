@@ -29,6 +29,7 @@
     <reference id="commandProcessor" interface="org.apache.felix.service.command.CommandProcessor" />
 
     <bean id="consoleFactoryService" class="org.apache.karaf.shell.console.impl.jline.ConsoleFactoryService">
+        <argument ref="blueprintBundleContext"/>
     </bean>    
     <service interface="org.apache.karaf.shell.console.ConsoleFactory" ref="consoleFactoryService" />
 
@@ -67,4 +68,14 @@
 
     <bean id="exit" class="org.apache.karaf.shell.console.ExitAction" activation="lazy" scope="prototype" />
 
+    <!-- Get a reference to the Configuration Admin Service -->
+    <reference id="configAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"  />
+    
+    <!-- For role-based security on the shell commands -->
+    <bean id="secureCommandConfigTransformer" 
+        class="org.apache.karaf.shell.security.impl.SecuredCommandConfigTransformer"
+        init-method="init">
+        <property name="configAdmin" ref="configAdmin"/>
+    </bean>
+    <service ref="secureCommandConfigTransformer" interface="org.osgi.service.cm.ConfigurationListener"/>
 </blueprint>

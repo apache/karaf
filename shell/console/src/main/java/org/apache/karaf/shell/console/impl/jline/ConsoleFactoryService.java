@@ -35,15 +35,21 @@ import org.apache.felix.service.command.Function;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.apache.karaf.shell.console.Console;
 import org.apache.karaf.shell.console.ConsoleFactory;
+import org.osgi.framework.BundleContext;
 
 public class ConsoleFactoryService implements ConsoleFactory {
-    
+    private final BundleContext bundleContext;
+
+    public ConsoleFactoryService(BundleContext bc) {
+        bundleContext = bc;
+    }
+
     @Override
     public Console createLocal(CommandProcessor processor, final Terminal terminal, String encoding, Runnable closeCallback) {
-        return create(processor, 
-                StreamWrapUtil.reWrapIn(terminal, System.in), 
-                StreamWrapUtil.reWrap(System.out), 
-                StreamWrapUtil.reWrap(System.err), 
+        return create(processor,
+                StreamWrapUtil.reWrapIn(terminal, System.in),
+                StreamWrapUtil.reWrap(System.out),
+                StreamWrapUtil.reWrap(System.err),
                 terminal,
                 encoding,
                 closeCallback);
@@ -52,7 +58,7 @@ public class ConsoleFactoryService implements ConsoleFactory {
     @Override
     public Console create(CommandProcessor processor, InputStream in, PrintStream out, PrintStream err, final Terminal terminal,
             String encoding, Runnable closeCallback) {
-        ConsoleImpl console = new ConsoleImpl(processor, in, out, err, terminal, encoding, closeCallback);
+        ConsoleImpl console = new ConsoleImpl(processor, in, out, err, terminal, encoding, closeCallback, bundleContext);
         CommandSession session = console.getSession();
         session.put("APPLICATION", System.getProperty("karaf.name", "root"));
         session.put("#LINES", new Function() {
@@ -78,7 +84,7 @@ public class ConsoleFactoryService implements ConsoleFactory {
             session.put(key, System.getProperty(key));
         }
     }
-    
+
     @Override
     public void startConsoleAs(final Console console, final Subject subject, String consoleType) {
         final String userName = getUserName(subject);

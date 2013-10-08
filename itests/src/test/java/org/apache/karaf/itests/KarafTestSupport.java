@@ -13,12 +13,12 @@
  */
 package org.apache.karaf.itests;
 
+import static org.junit.Assert.assertTrue;
+import static org.ops4j.pax.exam.CoreOptions.maven;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.karafDistributionConfiguration;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.logLevel;
-import static org.junit.Assert.assertTrue;
-import static org.ops4j.pax.exam.CoreOptions.maven;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -79,7 +79,7 @@ public class KarafTestSupport {
 
     @Inject
     protected FeaturesService featureService;
-    
+
     /**
      * To make sure the tests run only when the boot features are fully installed
      */
@@ -96,6 +96,7 @@ public class KarafTestSupport {
     public Option[] config() {
         MavenArtifactUrlReference karafUrl = maven().groupId("org.apache.karaf").artifactId("apache-karaf").versionAsInProject().type("tar.gz");
         return new Option[]{
+            // KarafDistributionOption.debugConfiguration("8889", true),
             karafDistributionConfiguration().frameworkUrl(karafUrl).name("Apache Karaf").unpackDirectory(new File("target/exam")),
             keepRuntimeFolder(),
             logLevel(LogLevelOption.LogLevel.INFO),
@@ -127,6 +128,8 @@ public class KarafTestSupport {
      * @return
      */
     protected String executeCommand(final String command, final Long timeout, final Boolean silent) {
+        waitForCommandService(command);
+
         String response;
         final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         final PrintStream printStream = new PrintStream(byteArrayOutputStream);
@@ -158,7 +161,6 @@ public class KarafTestSupport {
 
         return response;
     }
-
 
     protected <T> T getOsgiService(Class<T> type, long timeout) {
         return getOsgiService(type, null, timeout);
@@ -210,6 +212,44 @@ public class KarafTestSupport {
         }
     }
 
+    private void waitForCommandService(String command) {
+        // The commands are represented by services. Due to the asynchronous nature of services they may not be
+        // immediately available. This code waits for the services to be available, in their secured form. This
+        // means that the code waits for the command service to appear with the roles defined.
+
+        if (command == null || command.length() == 0) {
+            return;
+        }
+
+        int spaceIdx = command.indexOf(' ');
+        if (spaceIdx > 0) {
+            command = command.substring(0, spaceIdx);
+        }
+        int colonIdx = command.indexOf(':');
+
+        try {
+            if (colonIdx > 0) {
+                String scope = command.substring(0, colonIdx);
+                String function = command.substring(colonIdx + 1);
+                waitForService("(&(osgi.command.scope=" + scope + ")(osgi.command.function=" + function + ")(org.apache.karaf.service.guard.roles=*))", SERVICE_TIMEOUT);
+            } else {
+                waitForService("(&(osgi.command.function=" + command + "(org.apache.karaf.service.guard.roles=*))", SERVICE_TIMEOUT);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void waitForService(String filter, long timeout) throws InvalidSyntaxException, InterruptedException {
+        ServiceTracker<Object, Object> st = new ServiceTracker<Object, Object>(bundleContext, bundleContext.createFilter(filter), null);
+        try {
+            st.open();
+            st.waitForService(timeout);
+        } finally {
+            st.close();
+        }
+    }
+
     /*
     * Explode the dictionary into a ,-delimited list of key=value pairs
     */
@@ -253,13 +293,13 @@ public class KarafTestSupport {
         }
         Assert.fail("Feature " + featureName + " should be installed but is not");
     }
-    
+
     public void assertFeaturesInstalled(String ... expectedFeatures) {
-        Set<String> expectedFeaturesSet = new HashSet<String>(Arrays.asList(expectedFeatures)); 
+        Set<String> expectedFeaturesSet = new HashSet<String>(Arrays.asList(expectedFeatures));
         Feature[] features = featureService.listInstalledFeatures();
         Set<String> installedFeatures = new HashSet<String>();
         for (Feature feature : features) {
-            installedFeatures.add(feature.getName()); 
+            installedFeatures.add(feature.getName());
         }
         String msg = "Expecting the following features to be installed : " + expectedFeaturesSet + " but found " + installedFeatures;
         Assert.assertTrue(msg, installedFeatures.containsAll(expectedFeaturesSet));
@@ -268,7 +308,7 @@ public class KarafTestSupport {
     public void assertContains(String expectedPart, String actual) {
         assertTrue("Should contain '" + expectedPart + "' but was : " + actual, actual.contains(expectedPart));
     }
-    
+
     public void assertContainsNot(String expectedPart, String actual) {
         Assert.assertFalse("Should not contain '" + expectedPart + "' but was : " + actual, actual.contains(expectedPart));
     }
