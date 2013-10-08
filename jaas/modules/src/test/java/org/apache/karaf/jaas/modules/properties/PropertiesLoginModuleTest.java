@@ -260,6 +260,23 @@ public class PropertiesLoginModuleTest {
         }
     }
 
+    @Test
+    public void testNullPassword() throws Exception {
+        PropertiesLoginModule module = new PropertiesLoginModule();
+        Subject subject = new Subject();
+        CallbackHandler handler = new NullHandler();
+        Map<String, String> options = new HashMap<String, String>();
+        options.put("users", this.getClass().getClassLoader().getResource("org/apache/karaf/jaas/modules/properties/test.properties").getFile());
+        module.initialize(subject, handler, null, options);
+
+        try {
+            module.login();
+            Assert.fail("LoginException expected");
+        } catch (LoginException e) {
+            Assert.assertEquals("Password can not be null", e.getMessage());
+        }
+    }
+
     private void testWithUsersFile(String usersFilePath) throws LoginException {
         PropertiesLoginModule module = new PropertiesLoginModule();
         Subject sub = new Subject();
