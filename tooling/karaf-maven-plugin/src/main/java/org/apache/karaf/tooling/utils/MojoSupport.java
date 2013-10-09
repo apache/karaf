@@ -25,17 +25,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import org.apache.karaf.tooling.features.Node;
-import org.apache.karaf.tooling.features.ResolutionListenerImpl;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
@@ -141,82 +136,6 @@ public abstract class MojoSupport extends AbstractMojo {
         return projectHelper;
     }
 
-    protected void removeBranch(ResolutionListenerImpl listener,
-            Artifact artifact) {
-        Node n = listener.getNode(artifact);
-        if (n != null) {
-            for (Iterator it = n.getParents().iterator(); it.hasNext();) {
-                Node parent = (Node) it.next();
-                parent.getChildren().remove(n);
-            }
-        }
-    }
-
-    protected void removeChildren(ResolutionListenerImpl listener,
-            Artifact artifact) {
-        Node n = listener.getNode(artifact);
-        n.getChildren().clear();
-    }
-
-	protected Set getArtifacts(Node n, Set s) {
-        if (!s.contains(n.getArtifact())) {
-            s.add(n.getArtifact());
-            for (Iterator iter = n.getChildren().iterator(); iter.hasNext();) {
-                Node c = (Node) iter.next();
-                getArtifacts(c, s);
-            }
-        }
-        return s;
-    }
-
-    protected void excludeBranch(Node n, Set excludes) {
-        excludes.add(n);
-        for (Iterator iter = n.getChildren().iterator(); iter.hasNext();) {
-            Node c = (Node) iter.next();
-            excludeBranch(c, excludes);
-        }
-    }
-
-    protected void print(Node rootNode) {
-        for (Iterator iter = getArtifacts(rootNode, new HashSet()).iterator(); iter.hasNext();) {
-            Artifact a = (Artifact) iter.next();
-            getLog().info(" " + a);
-        }
-    }
-
-    protected Set retainArtifacts(Set includes, ResolutionListenerImpl listener) {
-        Set finalIncludes = new HashSet();
-        Set filteredArtifacts = getArtifacts(listener.getRootNode(),
-                new HashSet());
-        for (Iterator iter = includes.iterator(); iter.hasNext();) {
-            Artifact artifact = (Artifact) iter.next();
-            for (Iterator iter2 = filteredArtifacts.iterator(); iter2.hasNext();) {
-                Artifact filteredArtifact = (Artifact) iter2.next();
-                if (filteredArtifact.getArtifactId().equals(
-                        artifact.getArtifactId())
-                        && filteredArtifact.getType()
-                                .equals(artifact.getType())
-                        && filteredArtifact.getGroupId().equals(
-                                artifact.getGroupId())) {
-                    if (!filteredArtifact.getVersion().equals(
-                            artifact.getVersion())) {
-                        getLog()
-                                .warn(
-                                        "Resolved artifact "
-                                                + artifact
-                                                + " has a different version from that in dependency management "
-                                                + filteredArtifact
-                                                + ", overriding dependency management");
-                    }
-                    finalIncludes.add(artifact);
-                }
-            }
-
-        }
-
-        return finalIncludes;
-    }
-
     protected Map createManagedVersionMap(String projectId,
             DependencyManagement dependencyManagement) throws ProjectBuildingException {
         Map map;
@@ -246,44 +165,6 @@ public abstract class MojoSupport extends AbstractMojo {
             map = Collections.EMPTY_MAP;
         }
         return map;
-    }
-
-    /**
-     * Set up a classloader for the execution of the main class.
-     *
-     * @return
-     * @throws MojoExecutionException
-     */
-    protected URLClassLoader getClassLoader() throws MojoExecutionException {
-        try {
-            Set urls = new HashSet();
-
-            URL mainClasses = new File(project.getBuild().getOutputDirectory())
-                    .toURL();
-            getLog().debug("Adding to classpath : " + mainClasses);
-            urls.add(mainClasses);
-
-            URL testClasses = new File(project.getBuild()
-                    .getTestOutputDirectory()).toURL();
-            getLog().debug("Adding to classpath : " + testClasses);
-            urls.add(testClasses);
-
-            Set dependencies = project.getArtifacts();
-            Iterator iter = dependencies.iterator();
-            while (iter.hasNext()) {
-                Artifact classPathElement = (Artifact) iter.next();
-                getLog().debug(
-                        "Adding artifact: " + classPathElement.getFile()
-                                + " to classpath");
-                urls.add(classPathElement.getFile().toURL());
-            }
-            URLClassLoader appClassloader = new URLClassLoader((URL[]) urls
-                    .toArray(new URL[urls.size()]), this.getClass().getClassLoader());
-            return appClassloader;
-        } catch (MalformedURLException e) {
-            throw new MojoExecutionException(
-                    "Error during setting up classpath", e);
-        }
     }
     
     protected String translateFromMaven(String uri) {

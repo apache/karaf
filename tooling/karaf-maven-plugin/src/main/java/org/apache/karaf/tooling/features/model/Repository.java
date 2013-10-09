@@ -123,15 +123,7 @@ public class Repository {
                 NodeList bundleNodes = e.getElementsByTagName("bundle");
                 for (int j = 0; j < bundleNodes.getLength(); j++) {
                     Element b = (Element) bundleNodes.item(j);
-                    Integer startLevel;
-                    try {
-                        startLevel = Integer.parseInt(b.getAttribute("start-level"));
-                    } catch (Exception e1) {
-                        startLevel = null;
-                    }
-                    if (startLevel == null || startLevel == 0) {
-                        startLevel = defaultStartLevel;
-                    }
+                    Integer startLevel = getInt(b, "start-level", defaultStartLevel);
                     f.addBundle(new BundleRef(b.getTextContent(), startLevel));
                 }
                 features.add(f);
@@ -139,6 +131,16 @@ public class Repository {
         } catch (Exception e) {
             throw new RuntimeException("Error loading features for " + this.uri, e);
         }
+    }
+
+    private Integer getInt(Element el, String key, Integer defaultValue) {
+        Integer value;
+        try {
+            value = Integer.parseInt(el.getAttribute(key));
+        } catch (Exception e1) {
+            value = null;
+        }
+        return (value == null || value == 0) ? defaultValue : value;
     }
 
 }
