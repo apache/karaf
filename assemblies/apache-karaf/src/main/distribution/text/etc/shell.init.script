@@ -27,6 +27,9 @@ cl = { config:list "(service.pid=$args)" } ;
 help = { *:help $args | more } ;
 man = { help $args } ;
 log:list = { log:get ALL };
+fi = { features:list -i | more } ;
+fu = { features:list | grep -i '\[uninstalled' | more } ;
+
 
 enable-3x-aliases = {
 
