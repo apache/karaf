@@ -51,15 +51,11 @@ import org.apache.karaf.shell.util.ShellUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ConsoleImpl implements Console
-{
+public class ConsoleImpl implements Console {
 
     public static final String SHELL_INIT_SCRIPT = "karaf.shell.init.script";
     public static final String PROMPT = "PROMPT";
     public static final String DEFAULT_PROMPT = "\u001B[1m${USER}\u001B[0m@${APPLICATION}(${SUBSHELL})> ";
-    public static final String PRINT_STACK_TRACES = "karaf.printStackTraces";
-    public static final String LAST_EXCEPTION = "karaf.lastException";
-    public static final String IGNORE_INTERRUPTS = "karaf.ignoreInterrupts";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Console.class);
 
@@ -79,13 +75,12 @@ public class ConsoleImpl implements Console
     private Thread thread;
 
     public ConsoleImpl(CommandProcessor processor,
-                   InputStream in,
-                   PrintStream out,
-                   PrintStream err,
-                   Terminal term,
-                   String encoding,
-                   Runnable closeCallback)
-    {
+                       InputStream in,
+                       PrintStream out,
+                       PrintStream err,
+                       Terminal term,
+                       String encoding,
+                       Runnable closeCallback) {
         this.in = in;
         this.out = out;
         this.err = err;
@@ -95,26 +90,27 @@ public class ConsoleImpl implements Console
         this.session = processor.createSession(this.consoleInput, this.out, this.err);
         this.session.put("SCOPE", "shell:bundle:*");
         this.session.put("SUBSHELL", "");
+        this.setCompletionMode();
         this.closeCallback = closeCallback;
 
         try {
             reader = new ConsoleReader(null,
-                                       this.consoleInput,
-                                       this.out,
-                                       this.terminal,
-                                       encoding);
+                    this.consoleInput,
+                    this.out,
+                    this.terminal,
+                    encoding);
         } catch (IOException e) {
             throw new RuntimeException("Error opening console reader", e);
         }
 
-		final File file = getHistoryFile();
-		
+        final File file = getHistoryFile();
+
         try {
-        	file.getParentFile().mkdirs();
-			reader.setHistory(new KarafFileHistory(file));
-		} catch (Exception e) {
-			LOGGER.error("Can not read history from file " + file + ". Using in memory history", e);
-		}
+            file.getParentFile().mkdirs();
+            reader.setHistory(new KarafFileHistory(file));
+        } catch (Exception e) {
+            LOGGER.error("Can not read history from file " + file + ". Using in memory history", e);
+        }
         session.put(".jline.reader", reader);
         session.put(".jline.history", reader.getHistory());
         Completer completer = createCompleter();
@@ -128,10 +124,11 @@ public class ConsoleImpl implements Console
 
     /**
      * Subclasses can override to use a different history file.
+     *
      * @return
      */
     protected File getHistoryFile() {
-    	String defaultHistoryPath = new File(System.getProperty("user.home"), ".karaf/karaf.history").toString();
+        String defaultHistoryPath = new File(System.getProperty("user.home"), ".karaf/karaf.history").toString();
         return new File(System.getProperty("karaf.history", defaultHistoryPath));
     }
 
@@ -154,14 +151,12 @@ public class ConsoleImpl implements Console
         running = false;
         CommandSessionHolder.unset();
         pipe.interrupt();
-        if (closedByUser && closeCallback != null)
-        {
+        if (closedByUser && closeCallback != null) {
             closeCallback.run();
         }
     }
 
-    public void run()
-    {
+    public void run() {
         thread = Thread.currentThread();
         CommandSessionHolder.setSession(session);
         running = true;
@@ -179,45 +174,52 @@ public class ConsoleImpl implements Console
                 }
                 //session.getConsole().println("Executing: " + line);
                 Object result = session.execute(command);
-                if (result != null)
-                {
+                if (result != null) {
                     session.getConsole().println(session.format(result, Converter.INSPECT));
                 }
-            }
-            catch (InterruptedIOException e)
-            {
+            } catch (InterruptedIOException e) {
                 //System.err.println("^C");
                 // TODO: interrupt current thread
-            }
-            catch (CloseShellException e)
-            {
+            } catch (CloseShellException e) {
                 break;
-            }
-            catch (Throwable t)
-            {
+            } catch (Throwable t) {
                 ShellUtil.logException(session, t);
             }
         }
         close(true);
     }
 
-	private String readAndParseCommand() throws IOException {
-		String command = null;
-		boolean loop = true;
-		boolean first = true;
-		while (loop) {
-		    checkInterrupt();
-		    String line = reader.readLine(first ? getPrompt() : "> ");
-		    if (line == null)
-		    {
-		        break;
-		    }
-		    if (command == null) {
-		        command = line;
-		    } else {
-		        command += " " + line;
-		    }
-            if (reader.getHistory().size()==0) {
+    private void setCompletionMode() {
+        try {
+            File shellCfg = new File(System.getProperty("karaf.base"), "/etc/org.apache.karaf.shell.cfg");
+            Properties properties = new Properties();
+            properties.load(new FileInputStream(shellCfg));
+            if (properties.get("completionMode") != null) {
+                this.session.put(SessionProperties.COMPLETION_MODE, properties.get("completionMode"));
+            } else {
+                LOGGER.debug("completionMode property is not defined in etc/org.apache.karaf.shell.cfg file. Using default completion mode.");
+            }
+        } catch (Exception e) {
+            LOGGER.warn("Can't read {}/etc/org.apache.karaf.shell.cfg file. The completion is set to default.", System.getProperty("karaf.base"));
+        }
+    }
+
+    private String readAndParseCommand() throws IOException {
+        String command = null;
+        boolean loop = true;
+        boolean first = true;
+        while (loop) {
+            checkInterrupt();
+            String line = reader.readLine(first ? getPrompt() : "> ");
+            if (line == null) {
+                break;
+            }
+            if (command == null) {
+                command = line;
+            } else {
+                command += " " + line;
+            }
+            if (reader.getHistory().size() == 0) {
                 reader.getHistory().add(command);
             } else {
                 // jline doesn't add blank lines to the history so we don't
@@ -248,8 +250,8 @@ public class ConsoleImpl implements Console
         return command;
     }
 
-	private void executeScript(String scriptFileName) {
-		if (scriptFileName != null) {
+    private void executeScript(String scriptFileName) {
+        if (scriptFileName != null) {
             Reader r = null;
             try {
                 File scriptFile = new File(scriptFileName);
@@ -274,7 +276,7 @@ public class ConsoleImpl implements Console
                 }
             }
         }
-	}
+    }
 
     protected void welcome(Properties brandingProps) {
         String welcome = brandingProps.getProperty("welcome");
@@ -343,10 +345,8 @@ public class ConsoleImpl implements Console
         thread.interrupt();
     }
 
-    private class ConsoleInputStream extends InputStream
-    {
-        private int read(boolean wait) throws IOException
-        {
+    private class ConsoleInputStream extends InputStream {
+        private int read(boolean wait) throws IOException {
             if (!running) {
                 return -1;
             }
@@ -372,14 +372,12 @@ public class ConsoleImpl implements Console
         }
 
         @Override
-        public int read() throws IOException
-        {
+        public int read() throws IOException {
             return read(true);
         }
 
         @Override
-        public int read(byte b[], int off, int len) throws IOException
-        {
+        public int read(byte b[], int off, int len) throws IOException {
             if (b == null) {
                 throw new NullPointerException();
             } else if (off < 0 || len < 0 || len > b.length - off) {
@@ -411,47 +409,32 @@ public class ConsoleImpl implements Console
         }
     }
 
-    private class Pipe implements Runnable
-    {
-        public void run()
-        {
+    private class Pipe implements Runnable {
+        public void run() {
             try {
-                while (running)
-                {
-                    try
-                    {
+                while (running) {
+                    try {
                         int c = in.read();
-                        if (c == -1)
-                        {
+                        if (c == -1) {
                             return;
-                        }
-                        else if (c == 4 && !ShellUtil.getBoolean(session, SessionProperties.IGNORE_INTERRUPTS))
-                        {
+                        } else if (c == 4 && !ShellUtil.getBoolean(session, SessionProperties.IGNORE_INTERRUPTS)) {
                             err.println("^D");
                             return;
-                        }
-                        else if (c == 3 && !ShellUtil.getBoolean(session, SessionProperties.IGNORE_INTERRUPTS))
-                        {
+                        } else if (c == 3 && !ShellUtil.getBoolean(session, SessionProperties.IGNORE_INTERRUPTS)) {
                             err.println("^C");
                             reader.getCursorBuffer().clear();
                             interrupt();
                         }
                         queue.put(c);
-                    }
-                    catch (Throwable t) {
+                    } catch (Throwable t) {
                         return;
                     }
                 }
-            }
-            finally
-            {
+            } finally {
                 eof = true;
-                try
-                {
+                try {
                     queue.put(-1);
-                }
-                catch (InterruptedException e)
-                {
+                } catch (InterruptedException e) {
                 }
             }
         }

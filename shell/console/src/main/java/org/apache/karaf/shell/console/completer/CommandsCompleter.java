@@ -30,6 +30,7 @@ import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Function;
 import org.apache.karaf.shell.console.CommandSessionHolder;
 import org.apache.karaf.shell.console.Completer;
+import org.apache.karaf.shell.console.SessionProperties;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
@@ -74,6 +75,9 @@ public class CommandsCompleter implements Completer {
         // TODO: fix that in gogo instead
         // get the current sub-shell
         String subshell = (String) session.get("SUBSHELL");
+        String completion = (String) session.get(SessionProperties.COMPLETION_MODE);
+        if (completion == null)
+            completion = "GLOBAL";
 
         Set<String> names = new HashSet<String>((Set<String>) session.get(COMMANDS));
         Set<String> filteredNames = new HashSet<String>();
@@ -82,16 +86,20 @@ public class CommandsCompleter implements Completer {
                 filteredNames.add(command);
             }
         }
-        
+
         if (!filteredNames.equals(commands)) {
             commands.clear();
             completers.clear();
 
-            
-            if (subshell == null || subshell.length() == 0) {
-                // Add aliases if we are not in a subshell
+            if (completion.equalsIgnoreCase("GLOBAL")) {
                 Set<String> aliases = this.getAliases();
                 completers.add(new StringsCompleter(aliases));
+            } else {
+                if (subshell == null || subshell.length() == 0) {
+                    // add aliases if we are not in a subshell
+                    Set<String> aliases = this.getAliases();
+                    completers.add(new StringsCompleter(aliases));
+                }
             }
 
             // add argument completers for each command
@@ -100,23 +108,35 @@ public class CommandsCompleter implements Completer {
 
                 function = unProxy(function);
                 if (function instanceof CommandWithAction) {
-                    if (command.startsWith(subshell)) {
-                        if (subshell.length() > 1 && command.length() > subshell.length()) {
-                            command = command.substring(subshell.length() + 1);
-                        }
-
-                        // filter on subshell
-                        if (command.contains(":")) {
-                            int index = command.indexOf(':');
-                            command = command.substring(0, index);
-                        }
-
-                        command.trim();
-
+                    if (completion.equalsIgnoreCase("GLOBAL") ||
+                            (completion.equalsIgnoreCase("FIRST") && (subshell == null || subshell.length() == 0))) {
                         try {
                             completers.add(new ArgumentCompleter(session, (CommandWithAction) function, command));
                         } catch (Throwable t) {
-                            LOGGER.debug("Unable to create completers for command '" + command + "'", t);
+                            LOGGER.debug("Unable to create completers for command '{}'", command, t);
+                        }
+                    } else {
+                        if (command.startsWith(subshell)) {
+
+                            if (subshell.length() > 1 && command.length() > subshell.length()) {
+                                command = command.substring(subshell.length() + 1);
+                            }
+
+                            if (completion.equalsIgnoreCase("SUBSHELL")) {
+                                // filter on subshell
+                                // as the completion mode is set to SUBSHELL, we complete only with the commands local
+                                // to the current subshell
+                                if (command.contains(":")) {
+                                    int index = command.indexOf(':');
+                                    command = command.substring(0, index);
+                                }
+                                command.trim();
+                            }
+                            try {
+                                completers.add(new ArgumentCompleter(session, (CommandWithAction) function, command));
+                            } catch (Throwable t) {
+                                LOGGER.debug("Unable to create completers for command '{}'", command, t);
+                            }
                         }
                     }
                 }
@@ -136,7 +156,7 @@ public class CommandsCompleter implements Completer {
         Set<String> aliases = new HashSet<String>();
         for (String var : vars) {
             Object content = session.get(var);
-            if ("org.apache.felix.gogo.runtime.Closure".equals(content.getClass().getName()))  {
+            if ("org.apache.felix.gogo.runtime.Closure".equals(content.getClass().getName())) {
                 aliases.add(var);
             }
         }

@@ -22,18 +22,21 @@ import org.apache.karaf.shell.console.AbstractAction;
 import org.apache.karaf.shell.console.SessionProperties;
 
 /**
- * Command for showing the full tree of bundles that have been used to resolve
- * a given bundle.
+ * Command to change the completion mode while using the shell console.
  */
-@Command(scope = "shell", name = "stack-traces-print", description = "Prints the full stack trace in the console when the execution of a command throws an exception.")
-public class PrintStackTraces extends AbstractAction {
+@Command(scope = "shell", name = "completion", description = "Change the completion mode on the current console session.")
+public class CompletionAction extends AbstractAction {
 
-    @Argument(name = "print", description="Print stack traces or not", required = false, multiValued = false)
-    boolean print = true;
+    @Argument(index = 0, name = "mode", description = "", required = true, multiValued = false)
+    String mode;
 
     protected Object doExecute() throws Exception {
-        System.out.println("Printing of stacktraces set to " + print);
-        session.put(SessionProperties.PRINT_STACK_TRACES, Boolean.valueOf(print));
+        if (!mode.equalsIgnoreCase("global") && !mode.equalsIgnoreCase("first") && !mode.equalsIgnoreCase("subshell")) {
+            System.err.println("The completion mode is not correct. The valid modes are: global, first, subshell. See documentation for details.");
+            return null;
+        }
+
+        session.put(SessionProperties.COMPLETION_MODE, mode);
         return null;
     }
 

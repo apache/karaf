@@ -30,6 +30,9 @@
             <action class="org.apache.karaf.shell.commands.impl.ClearAction"/>
         </command>
         <command>
+            <action class="org.apache.karaf.shell.commands.impl.CompletionAction"/>
+        </command>
+        <command>
             <action class="org.apache.karaf.shell.commands.impl.DateAction"/>
         </command>
         <command>
@@ -68,7 +71,7 @@
             <action class="org.apache.karaf.shell.commands.impl.NewAction"/>
         </command>
         <command>
-            <action class="org.apache.karaf.shell.commands.impl.PrintStackTraces" />
+            <action class="org.apache.karaf.shell.commands.impl.PrintStackTracesAction"/>
         </command>
         <command>
             <action class="org.apache.karaf.shell.commands.impl.LogoutAction"/>

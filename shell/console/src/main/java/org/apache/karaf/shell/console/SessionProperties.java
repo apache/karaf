@@ -23,5 +23,6 @@ public class SessionProperties {
     public static final String PRINT_STACK_TRACES = "karaf.printStackTraces";
     public static final String LAST_EXCEPTION = "karaf.lastException";
     public static final String IGNORE_INTERRUPTS = "karaf.ignoreInterrupts";
+    public static final String COMPLETION_MODE = "karaf.completionMode";
 
 }
