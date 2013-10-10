@@ -24,17 +24,24 @@ import org.apache.karaf.shell.console.SessionProperties;
 /**
  * Command to change the completion mode while using the shell console.
  */
-@Command(scope = "shell", name = "completion", description = "Change the completion mode on the current console session.")
+@Command(scope = "shell", name = "completion", description = "Display or change the completion mode on the current console session.")
 public class CompletionAction extends AbstractAction {
 
-    @Argument(index = 0, name = "mode", description = "", required = true, multiValued = false)
+    @Argument(index = 0, name = "mode", description = "The completion mode to set. The valid completion modes are: global, first, subshell.", required = false, multiValued = false)
     String mode;
 
     protected Object doExecute() throws Exception {
+        if (mode == null) {
+            System.out.println(session.get(SessionProperties.COMPLETION_MODE));
+            return null;
+        }
+
         if (!mode.equalsIgnoreCase("global") && !mode.equalsIgnoreCase("first") && !mode.equalsIgnoreCase("subshell")) {
             System.err.println("The completion mode is not correct. The valid modes are: global, first, subshell. See documentation for details.");
             return null;
         }
+
+        mode = mode.toUpperCase();
 
         session.put(SessionProperties.COMPLETION_MODE, mode);
         return null;
