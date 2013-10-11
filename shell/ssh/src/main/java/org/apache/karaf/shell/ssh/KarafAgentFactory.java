@@ -97,31 +97,35 @@ public class KarafAgentFactory implements SshAgentFactory {
     }
 
     public void registerCommandSession(CommandSession session) {
-        try {
-            String user = (String) session.get("USER");
-            SshAgent agent = new AgentImpl();
-            URL url = bundleContext.getBundle().getResource("karaf.key");
-            InputStream is = url.openStream();
-            ObjectInputStream r = new ObjectInputStream(is);
-            KeyPair keyPair = (KeyPair) r.readObject();
-            agent.addIdentity(keyPair, "karaf");
-            String agentId = "local:" + user;
-            session.put(SshAgent.SSH_AUTHSOCKET_ENV_NAME, agentId);
-            locals.put(agentId, agent);
-        } catch (Throwable e) {
-            LOGGER.warn("Error starting ssh agent for local console", e);
+        if (session != null) {
+            try {
+                String user = (String) session.get("USER");
+                SshAgent agent = new AgentImpl();
+                URL url = bundleContext.getBundle().getResource("karaf.key");
+                InputStream is = url.openStream();
+                ObjectInputStream r = new ObjectInputStream(is);
+                KeyPair keyPair = (KeyPair) r.readObject();
+                agent.addIdentity(keyPair, "karaf");
+                String agentId = "local:" + user;
+                session.put(SshAgent.SSH_AUTHSOCKET_ENV_NAME, agentId);
+                locals.put(agentId, agent);
+            } catch (Throwable e) {
+                LOGGER.warn("Error starting ssh agent for local console", e);
+            }
         }
     }
 
     public void unregisterCommandSession(CommandSession session) {
-        try {
-            String agentId = (String) session.get(SshAgent.SSH_AUTHSOCKET_ENV_NAME);
-            session.put(SshAgent.SSH_AUTHSOCKET_ENV_NAME, null);
-            if (agentId != null) {
-                locals.remove(agentId);
+        if (session != null) {
+            try {
+                String agentId = (String) session.get(SshAgent.SSH_AUTHSOCKET_ENV_NAME);
+                session.put(SshAgent.SSH_AUTHSOCKET_ENV_NAME, null);
+                if (agentId != null) {
+                    locals.remove(agentId);
+                }
+            } catch (Throwable e) {
+                LOGGER.warn("Error stopping ssh agent for local console", e);
             }
-        } catch (Throwable e) {
-            LOGGER.warn("Error stopping ssh agent for local console", e);
         }
     }
 
