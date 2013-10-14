@@ -180,6 +180,8 @@ public class ConsoleImpl implements Console {
             } catch (InterruptedIOException e) {
                 //System.err.println("^C");
                 // TODO: interrupt current thread
+            } catch (InterruptedException e) {
+                //interrupt current thread
             } catch (CloseShellException e) {
                 break;
             } catch (Throwable t) {
