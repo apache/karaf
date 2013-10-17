@@ -25,6 +25,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 import jline.Terminal;
+import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.shell.console.jline.TerminalFactory;
 import org.apache.sshd.ClientChannel;
 import org.apache.sshd.ClientSession;
@@ -43,17 +44,30 @@ import org.slf4j.impl.SimpleLogger;
  */
 public class Main {
 
+    private static final String ROLE_DELIMITER = ",";
+
     public static void main(String[] args) throws Exception {
-        String host = "localhost";
-        int port = 8101;
-        String user = "karaf";
-        String password = null;
-        StringBuilder sb = new StringBuilder();
+        Properties shellCfg = new Properties(new File(System.getProperty("karaf.home"), "etc/org.apache.karaf.shell.cfg"));
+
+        String host = shellCfg.getProperty("sshHost", "localhost");
+        int port = Integer.parseInt(shellCfg.getProperty("sshPort", "8101"));
         int level = 1;
         int retryAttempts = 0;
         int retryDelay = 2;
         boolean batch = false;
         String file = null;
+        String user = "karaf";
+        String password = null;
+        StringBuilder command = new StringBuilder();
+
+        Properties usersCfg = new Properties(new File(System.getProperty("karaf.home") + "/etc/users.properties"));
+        if (!usersCfg.isEmpty()) {
+            user = (String) usersCfg.keySet().iterator().next();
+            password = (String) usersCfg.getProperty(user);
+            if (password.contains(ROLE_DELIMITER)) {
+                password = password.substring(0, password.indexOf(ROLE_DELIMITER));
+            }
+        }
 
         for (int i = 0; i < args.length; i++) {
             if (args[i].charAt(0) == '-') {
@@ -97,8 +111,8 @@ public class Main {
                     System.exit(1);
                 }
             } else {
-                sb.append(args[i]);
-                sb.append(' ');
+                command.append(args[i]);
+                command.append(' ');
             }
         }
         SimpleLogger.setLevel(level);
@@ -106,9 +120,9 @@ public class Main {
         if (file != null) {
             Reader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
             try {
-                sb.setLength(0);
+                command.setLength(0);
                 for (int c = reader.read(); c >= 0; c = reader.read()) {
-                    sb.append((char) c);
+                    command.append((char) c);
                 }
             } finally {
                 reader.close();
@@ -116,9 +130,9 @@ public class Main {
         } else if (batch) {
             // read all stdin
             Reader reader = new BufferedReader(new InputStreamReader(System.in));
-            sb.setLength(0);
+            command.setLength(0);
             for (int c = reader.read(); c >= 0; c = reader.read()) {
-                sb.append((char) c);
+                command.append((char) c);
             }
         }
 
@@ -164,8 +178,8 @@ public class Main {
                 }
             }
             ClientChannel channel;
-			if (sb.length() > 0) {
-                channel = session.createChannel("exec", sb.append("\n").toString());
+			if (command.length() > 0) {
+                channel = session.createChannel("exec", command.append("\n").toString());
                 channel.setIn(new ByteArrayInputStream(new byte[0]));
 			} else {
                 terminal = new TerminalFactory().getTerminal();
