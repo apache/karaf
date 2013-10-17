@@ -31,7 +31,7 @@
     <artifactId>org.apache.karaf.client</artifactId>
     <name>Apache Karaf :: Client</name>
     <description>Karaf client to connect remotely to a running Karaf instance.</description>
-    <packaging>jar</packaging>
+    <packaging>bundle</packaging>
 
     <properties>
         <appendedResourcesDirectory>${basedir}/../etc/appended-resources</appendedResourcesDirectory>
@@ -50,6 +50,10 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.utils</artifactId>
+        </dependency>
     </dependencies>
 
 	<build>
@@ -60,6 +64,30 @@
             </resource>
         </resources>
 		<plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <configuration>
+                    <instructions>
+                        <_donotcopy>(CVS|.svn|config.properties)</_donotcopy>
+                        <Main-Class>org.apache.karaf.client.Main</Main-Class>
+                        <Bundle-Name>Apache Karaf Shell Client</Bundle-Name>
+                        <Bundle-Description>Shell client bundle for Apache Karaf.</Bundle-Description>
+                        <Private-Package>
+                            org.apache.karaf.client;
+                            org.slf4j.impl;
+                            org.apache.felix.utils.properties;-split-package:=merge-first,
+                            META-INF;-split-package:=merge-first
+                        </Private-Package>
+                        <Include-Resource>
+                            ../shell/ssh/src/main/resources/karaf.key,
+                            {maven-resources}
+                        </Include-Resource>
+                        <Import-Package>!*</Import-Package>
+                    </instructions>
+                    <unpackBundle>true</unpackBundle>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>

@@ -16,13 +16,21 @@
  */
 package org.apache.karaf.client;
 
+import java.io.File;
+import java.io.IOException;
+
+import org.apache.felix.utils.properties.Properties;
+
 import org.slf4j.impl.SimpleLogger;
 
 public class ClientConfig {
-    
+
+    private static final String ROLE_DELIMITER = ",";
+
     private String host;
     private int port;
     private String user;
+    private String password;
     private int level;
     private int retryAttempts;
     private int retryDelay;
@@ -30,15 +38,20 @@ public class ClientConfig {
     private String file = null;
     private String command;
 
-    public ClientConfig(String[] args) {
-        host = "localhost";
-        port = 8101;
-        user = "karaf";
+    public ClientConfig(String[] args) throws IOException {
+        Properties shellCfg = new Properties(new File(System.getProperty("karaf.home"), "etc/org.apache.karaf.shell.cfg"));
+
+        host = shellCfg.getProperty("sshHost", "localhost");
+        port = Integer.parseInt(shellCfg.getProperty("sshPort", "8101"));
         level = SimpleLogger.WARN;
         retryAttempts = 0;
         retryDelay = 2;
         batch = false;
+        file = null;
+        user = null;
+        password = null;
         StringBuilder commandBuilder = new StringBuilder();
+
         for (int i = 0; i < args.length; i++) {
             if (args[i].charAt(0) == '-') {
                 if (args[i].equals("-a")) {
@@ -70,6 +83,18 @@ public class ClientConfig {
             }
         }
         command = commandBuilder.toString();
+
+        Properties usersCfg = new Properties(new File(System.getProperty("karaf.home") + "/etc/users.properties"));
+        if (!usersCfg.isEmpty()) {
+            if (user == null) {
+                user = (String) usersCfg.keySet().iterator().next();
+            }
+            password = (String) usersCfg.getProperty(user);
+            if (password != null && password.contains(ROLE_DELIMITER)) {
+                password = password.substring(0, password.indexOf(ROLE_DELIMITER));
+            }
+        }
+
     }
     
     private static void showHelp() {
@@ -98,6 +123,10 @@ public class ClientConfig {
 
     public String getUser() {
         return user;
+    }
+
+    public String getPassword() {
+        return password;
     }
 
     public int getLevel() {

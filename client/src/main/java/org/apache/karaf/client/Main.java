@@ -35,6 +35,7 @@ import org.apache.sshd.agent.SshAgent;
 import org.apache.sshd.agent.local.AgentImpl;
 import org.apache.sshd.agent.local.LocalAgentFactory;
 import org.apache.sshd.client.channel.ChannelShell;
+import org.apache.sshd.client.future.AuthFuture;
 import org.apache.sshd.client.future.ConnectFuture;
 import org.apache.sshd.common.RuntimeSshException;
 import org.fusesource.jansi.AnsiConsole;
@@ -78,18 +79,31 @@ public class Main {
             setupAgent(config.getUser(), client);
             client.start();
             ClientSession session = connectWithRetries(client, config);
+            Console console = System.console();
+            console.printf("Logging in as %s\n", config.getUser());
             if (!session.authAgent(config.getUser()).await().isSuccess()) {
-                String password = null;
-                Console console = System.console();
-                if (console != null) {
-                    char[] readPassword = console.readPassword("Password: ");
-                    if (readPassword != null) {
-                        password = new String(readPassword);
+                AuthFuture authFuture;
+                boolean useDefault = config.getPassword() != null;
+                do {
+                    String password;
+                    if (useDefault) {
+                        password = config.getPassword();
+                        useDefault = false;
+                    } else {
+                        if (console != null) {
+                            char[] readPassword = console.readPassword("Password: ");
+                            if (readPassword != null) {
+                                password = new String(readPassword);
+                            } else {
+                                return;
+                            }
+                        } else {
+                            throw new Exception("Unable to prompt password: could not get system console");
+                        }
                     }
-                } else {
-                    throw new Exception("Unable to prompt password: could not get system console");
-                }
-                if (!session.authPassword(config.getUser(), password).await().isSuccess()) {
+                    authFuture = session.authPassword(config.getUser(), password);
+                } while (authFuture.await().isFailure());
+                if (!authFuture.isSuccess()) {
                     throw new Exception("Authentication failure");
                 }
             }
