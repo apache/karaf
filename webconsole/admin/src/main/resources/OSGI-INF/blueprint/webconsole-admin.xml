@@ -28,6 +28,7 @@
     <service ref="adminPlugin" interface="javax.servlet.Servlet" >
         <service-properties>
             <entry key="felix.webconsole.label" value="admin"/>
+            <entry key="alias" value="/admin"/>
         </service-properties>
     </service>
 
