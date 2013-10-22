@@ -28,6 +28,7 @@
     <service ref="instancePlugin" interface="javax.servlet.Servlet" >
         <service-properties>
             <entry key="felix.webconsole.label" value="instance"/>
+            <entry key="alias" value="/instance"/>
         </service-properties>
     </service>
 
