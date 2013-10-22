@@ -46,7 +46,6 @@ public class KarafJaasAuthenticator implements PasswordAuthenticator, PublickeyA
     private final Logger LOGGER = LoggerFactory.getLogger(KarafJaasAuthenticator.class);
 
     private String realm;
-    private String role;
 
     public String getRealm() {
         return realm;
@@ -54,14 +53,6 @@ public class KarafJaasAuthenticator implements PasswordAuthenticator, PublickeyA
 
     public void setRealm(String realm) {
         this.realm = realm;
-    }
-
-    public String getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
     }
 
     public boolean authenticate(final String username, final String password, final ServerSession session) {
@@ -81,26 +72,7 @@ public class KarafJaasAuthenticator implements PasswordAuthenticator, PublickeyA
                 }
             });
             loginContext.login();
-            if (role != null && role.length() > 0) {
-                String clazz = RolePrincipal.class.getName();
-                String name = role;
-                int idx = role.indexOf(':');
-                if (idx > 0) {
-                    clazz = role.substring(0, idx);
-                    name = role.substring(idx + 1);
-                }
-                boolean found = false;
-                for (Principal p : subject.getPrincipals()) {
-                    if (p.getClass().getName().equals(clazz)
-                            && p.getName().equals(name)) {
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found) {
-                    throw new FailedLoginException("User does not have the required role " + role);
-                }
-            }
+
             session.setAttribute(SUBJECT_ATTRIBUTE_KEY, subject);
             return true;
         } catch (Exception e) {
@@ -126,26 +98,7 @@ public class KarafJaasAuthenticator implements PasswordAuthenticator, PublickeyA
                 }
             });
             loginContext.login();
-            if (role != null && role.length() > 0) {
-                String clazz = RolePrincipal.class.getName();
-                String name = role;
-                int idx = role.indexOf(':');
-                if (idx > 0) {
-                    clazz = role.substring(0, idx);
-                    name = role.substring(idx + 1);
-                }
-                boolean found = false;
-                for (Principal p : subject.getPrincipals()) {
-                    if (p.getClass().getName().equals(clazz)
-                            && p.getName().equals(name)) {
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found) {
-                    throw new FailedLoginException("User does not have the required role " + role);
-                }
-            }
+
             session.setAttribute(SUBJECT_ATTRIBUTE_KEY, subject);
             return true;
         } catch (Exception e) {

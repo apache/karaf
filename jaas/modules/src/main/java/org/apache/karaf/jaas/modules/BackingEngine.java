@@ -44,7 +44,7 @@ public interface BackingEngine {
     List<UserPrincipal> listUsers();
 
     /**
-     * List groups that an user is in.
+     * List groups that a user is in.
      *
      * @param user
      * @return
@@ -52,7 +52,7 @@ public interface BackingEngine {
     List<GroupPrincipal> listGroups(UserPrincipal user);
 
     /**
-     * Add an user to a group.
+     * Add a user to a group.
      *
      * @param username
      * @param group
@@ -60,7 +60,7 @@ public interface BackingEngine {
     void addGroup(String username, String group);
 
     /**
-     * Remove an user from a group.
+     * Remove a user from a group.
      *
      * @param username
      * @param group

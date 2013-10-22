@@ -56,6 +56,7 @@ public class KarafMBeanServerBuilderTest extends TestCase {
         ObjectName on = ObjectName.getInstance("foo.bar:type=TestObject");
 
         try {
+            // obtain a JMX attribute
             kmbs.getAttribute(on, "myAttr");
             fail("Should have access denied");
         } catch (SecurityException se) {
@@ -70,6 +71,7 @@ public class KarafMBeanServerBuilderTest extends TestCase {
         }
 
         try {
+            // obtain a number of JMX attributes
             kmbs.getAttributes(on, new String[]{"foo", "bar"});
             fail("Should have access denied");
         } catch (SecurityException se) {
@@ -77,6 +79,7 @@ public class KarafMBeanServerBuilderTest extends TestCase {
         }
 
         try {
+            // set a JMX attribute
             kmbs.getAttributes(on, new String[]{ "goo", "far" });
             fail("Should have access denied");
         } catch (SecurityException se) {
@@ -84,6 +87,7 @@ public class KarafMBeanServerBuilderTest extends TestCase {
         }
 
         try {
+            // set a number of JMX attributes
             kmbs.setAttributes(on, new AttributeList());
             fail("Should have access denied");
         } catch (SecurityException se) {
@@ -91,6 +95,7 @@ public class KarafMBeanServerBuilderTest extends TestCase {
         }
 
         try {
+            // mimic a JMX method invocation
             kmbs.setAttributes(on, new AttributeList());
             fail("Should have access denied");
         } catch (SecurityException se) {

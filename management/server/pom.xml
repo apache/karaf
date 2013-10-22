@@ -65,6 +65,11 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>org.apache.karaf.service</groupId>
+            <artifactId>org.apache.karaf.service.guard</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.junit</artifactId>
             <scope>test</scope>
@@ -106,7 +111,6 @@
                     <instructions>
                         <Export-Package>org.apache.karaf.management;version=${project.version};-split-package:=merge-first</Export-Package>
                         <Private-Package>
-                            org.apache.karaf.management,
                             org.apache.karaf.management.internal
                         </Private-Package>
                     </instructions>

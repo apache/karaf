@@ -13,12 +13,12 @@
  */
 package org.apache.karaf.itests;
 
+import static org.junit.Assert.assertTrue;
+import static org.ops4j.pax.exam.CoreOptions.maven;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.karafDistributionConfiguration;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.logLevel;
-import static org.junit.Assert.assertTrue;
-import static org.ops4j.pax.exam.CoreOptions.maven;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -96,6 +96,7 @@ public class KarafTestSupport {
     public Option[] config() {
         MavenArtifactUrlReference karafUrl = maven().groupId("org.apache.karaf").artifactId("apache-karaf").versionAsInProject().type("tar.gz");
         return new Option[]{
+            // KarafDistributionOption.debugConfiguration("8889", true),
             karafDistributionConfiguration().frameworkUrl(karafUrl).name("Apache Karaf").unpackDirectory(new File("target/exam")),
             keepRuntimeFolder(),
             logLevel(LogLevelOption.LogLevel.INFO),
@@ -127,6 +128,8 @@ public class KarafTestSupport {
      * @return
      */
     protected String executeCommand(final String command, final Long timeout, final Boolean silent) {
+        waitForCommandService(command);
+
         String response;
         final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         final PrintStream printStream = new PrintStream(byteArrayOutputStream);
@@ -210,6 +213,44 @@ public class KarafTestSupport {
         }
     }
 
+    private void waitForCommandService(String command) {
+        // the commands are represented by services. Due to the asynchronous nature of services they may not be
+        // immediately available. This code waits the services to be available, in their secured form. It
+        // means that the code waits for the command service to appear with the roles defined.
+
+        if (command == null || command.length() == 0) {
+            return;
+        }
+
+        int spaceIdx = command.indexOf(' ');
+        if (spaceIdx > 0) {
+            command = command.substring(0, spaceIdx);
+        }
+        int colonIndx = command.indexOf(':');
+
+        try {
+            if (colonIndx > 0) {
+                String scope = command.substring(0, colonIndx);
+                String function = command.substring(colonIndx + 1);
+                waitForService("(&(osgi.command.scope=" + scope + ")(osgi.command.function=" + function + ")(org.apache.karaf.service.guard.roles=*))", SERVICE_TIMEOUT);
+            } else {
+                waitForService("(&(osgi.command.function=" + command + ")(org.apache.karaf.service.guard.roles=*))", SERVICE_TIMEOUT);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void waitForService(String filter, long timeout) throws InvalidSyntaxException, InterruptedException {
+        ServiceTracker<Object, Object> st = new ServiceTracker<Object, Object>(bundleContext, bundleContext.createFilter(filter), null);
+        try {
+            st.open();
+            st.waitForService(timeout);
+        } finally {
+            st.close();
+        }
+    }
+
     /*
     * Explode the dictionary into a ,-delimited list of key=value pairs
     */
@@ -289,4 +330,5 @@ public class KarafTestSupport {
 	    }
 	    return false;
 	}
+
 }

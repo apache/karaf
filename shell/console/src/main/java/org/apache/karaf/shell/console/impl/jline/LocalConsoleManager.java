@@ -25,6 +25,7 @@ import javax.security.auth.Subject;
 import jline.Terminal;
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
+import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.apache.karaf.shell.console.Console;
 import org.apache.karaf.shell.console.ConsoleFactory;
@@ -67,6 +68,13 @@ public class LocalConsoleManager {
         }
         final Subject subject = new Subject();
         subject.getPrincipals().add(new UserPrincipal("karaf"));
+
+        String roles = System.getProperty("karaf.local.roles");
+        if (roles != null) {
+            for (String role : roles.split("[,]")) {
+                subject.getPrincipals().add(new RolePrincipal(role.trim()));
+            }
+        }
 
         final Terminal terminal = terminalFactory.getTerminal();
         Runnable callback = new Runnable() {
