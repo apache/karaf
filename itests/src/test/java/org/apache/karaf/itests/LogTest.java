@@ -23,14 +23,14 @@ import javax.management.remote.JMXConnector;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.ops4j.pax.exam.junit.ExamReactorStrategy;
-import org.ops4j.pax.exam.junit.JUnit4TestRunner;
-import org.ops4j.pax.exam.spi.reactors.EagerSingleStagedReactorFactory;
+import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
+import org.ops4j.pax.exam.spi.reactors.PerClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@RunWith(JUnit4TestRunner.class)
-@ExamReactorStrategy(EagerSingleStagedReactorFactory.class)
+@RunWith(PaxExam.class)
+@ExamReactorStrategy(PerClass.class)
 public class LogTest extends KarafTestSupport {
     private static final Logger LOGGER = LoggerFactory.getLogger(LogTest.class);
 
