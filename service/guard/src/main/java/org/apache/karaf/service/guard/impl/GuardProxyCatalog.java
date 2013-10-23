@@ -252,7 +252,7 @@ public class GuardProxyCatalog implements ServiceListener {
                         objectClassProperty, sf, proxyPropertiesRoles());
 
                 Dictionary<String, Object> actualProxyProps = copyProperties(registrationHolder.registration.getReference());
-                LOG.info("Created proxy of service {} under {} with properties {}",
+                LOG.debug("Created proxy of service {} under {} with properties {}",
                         orgServiceID, actualProxyProps.get(Constants.OBJECTCLASS), actualProxyProps);
             }
 
