@@ -144,6 +144,8 @@
                 <include>org.apache.felix:org.apache.felix.configadmin</include>
                 <include>org.apache.felix:org.apache.felix.framework</include>
                 <include>org.apache.felix:org.apache.felix.fileinstall</include>
+                <include>org.apache.felix:org.apache.felix.framework.security</include>
+                <include>org.apache.felix:org.apache.felix.gogo.runtime</include>
             </includes>
         </dependencySet>
         <dependencySet>
