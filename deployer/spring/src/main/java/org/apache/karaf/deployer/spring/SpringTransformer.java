@@ -31,8 +31,6 @@ import java.util.TreeSet;
 import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -46,11 +44,12 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
 import org.apache.karaf.util.DeployerUtils;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 import org.osgi.framework.Constants;
 
 public class SpringTransformer {
@@ -90,7 +89,7 @@ public class SpringTransformer {
                 String text = e.getTextContent();
                 Properties props = new Properties();
                 props.load(new ByteArrayInputStream(text.trim().getBytes()));
-                Enumeration en = props.propertyNames();
+                Enumeration<?> en = props.propertyNames();
                 while (en.hasMoreElements()) {
                     String k = (String) en.nextElement();
                     String v = props.getProperty(k);
@@ -179,6 +178,15 @@ public class SpringTransformer {
             dbf.setNamespaceAware(true);
         }
         DocumentBuilder db = dbf.newDocumentBuilder();
+        db.setErrorHandler(new ErrorHandler() {
+            public void warning(SAXParseException exception) throws SAXException {
+            }
+            public void error(SAXParseException exception) throws SAXException {
+            }
+            public void fatalError(SAXParseException exception) throws SAXException {
+                throw exception;
+            }
+        });
         return db.parse(url.toString());
     }
 

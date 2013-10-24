@@ -18,37 +18,35 @@
 package org.apache.karaf.deployer.spring;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.net.URL;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.events.StartElement;
+import javax.xml.stream.events.XMLEvent;
 
 import org.apache.felix.fileinstall.ArtifactUrlTransformer;
-import org.xml.sax.ErrorHandler;
-import org.xml.sax.SAXParseException;
-import org.xml.sax.SAXException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A deployment listener that listens for spring xml applications
  * and creates bundles for these.
  */
 public class SpringDeploymentListener implements ArtifactUrlTransformer {
+	private static final QName SPRING_DM_ROOT = new QName("http://www.springframework.org/schema/beans", "beans");
 
     private final Logger logger = LoggerFactory.getLogger(SpringDeploymentListener.class);
-
-    private DocumentBuilderFactory dbf;
-
+	private XMLInputFactory factory;
+	
     public boolean canHandle(File artifact) {
         try {
             if (artifact.isFile() && artifact.getName().endsWith(".xml")) {
-                Document doc = parse(artifact);
-                String name = doc.getDocumentElement().getLocalName();
-                String uri  = doc.getDocumentElement().getNamespaceURI();
-                if ("beans".equals(name) && "http://www.springframework.org/schema/beans".equals(uri)) {
+                StartElement element = getRootElement(artifact);
+                if (element != null && SPRING_DM_ROOT.equals(element.getName())) {
                     return true;
                 }
             }
@@ -67,22 +65,30 @@ public class SpringDeploymentListener implements ArtifactUrlTransformer {
         }
     }
 
-    protected Document parse(File artifact) throws Exception {
-        if (dbf == null) {
-            dbf = DocumentBuilderFactory.newInstance();
-            dbf.setNamespaceAware(true);
-        }
-        DocumentBuilder db = dbf.newDocumentBuilder();
-        db.setErrorHandler(new ErrorHandler() {
-            public void warning(SAXParseException exception) throws SAXException {
-            }
-            public void error(SAXParseException exception) throws SAXException {
-            }
-            public void fatalError(SAXParseException exception) throws SAXException {
-                throw exception;
-            }
-        });
-        return db.parse(artifact);
+	protected StartElement getRootElement(File artifact) throws Exception {
+    	XMLEventReader parser = null;
+    	InputStream in = null;
+    	try {
+			if (factory == null) {
+				factory = XMLInputFactory.newInstance();
+			}
+			in = new FileInputStream(artifact);
+			parser = factory.createXMLEventReader(in);
+			while (parser.hasNext()) {
+				XMLEvent event = parser.nextEvent();
+				if (event.isStartElement()) {
+					return event.asStartElement();
+				}
+			}
+			return null;
+		} finally {
+			if (parser != null) {
+				parser.close();
+			}
+			if (in != null) {
+				in.close();
+			}
+		}
     }
 
 }
