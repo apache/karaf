@@ -16,20 +16,31 @@
  */
 package org.apache.karaf.packages.command;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
+import java.util.TreeMap;
 
 import org.apache.karaf.packages.core.PackageService;
 import org.apache.karaf.packages.core.PackageVersion;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.apache.karaf.shell.table.Col;
 import org.apache.karaf.shell.table.ShellTable;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.Version;
+import org.osgi.framework.wiring.BundleCapability;
+import org.osgi.framework.wiring.BundleRevision;
 
 @Command(scope = "package", name = "exports", description = "Lists exported packages and the bundles that export them")
 public class Exports extends OsgiCommandSupport {
 
     private PackageService packageService;
+    
+    @Option(name = "-d", description = "Only show packages that are exported by more than one bundle", required = false, multiValued = false)
+    private boolean onlyDuplicates;
 
     public Exports(PackageService packageService) {
         super();
@@ -37,7 +48,16 @@ public class Exports extends OsgiCommandSupport {
     }
 
     protected Object doExecute() throws Exception {
-        SortedMap<String, PackageVersion> exports = packageService.getExports();
+    	if (onlyDuplicates) {
+    		checkDuplicateExports();
+    	} else {
+    		showExports();
+    	}
+        return null;
+    }
+
+	private void showExports() {
+		SortedMap<String, PackageVersion> exports = packageService.getExports();
         ShellTable table = new ShellTable();
         table.column(new Col("Package Name"));
         table.column(new Col("Version"));
@@ -51,7 +71,55 @@ public class Exports extends OsgiCommandSupport {
             }
         }
         table.print(System.out);
-        return null;
+	}
+    
+    private void checkDuplicateExports() {
+        Bundle[] bundles = bundleContext.getBundles();
+        SortedMap<String, PackageVersion> packageVersionMap = getDuplicatePackages(bundles);
+        ShellTable table = new ShellTable();
+        table.column(new Col("Package Name"));
+        table.column(new Col("Version"));
+        table.column(new Col("Exporting bundles (ID)"));
+       
+        for (String key : packageVersionMap.keySet()) {
+            PackageVersion pVer = packageVersionMap.get(key);
+            if (pVer.getBundles().size() > 1) {
+            	String pBundles = getBundlesSt(pVer.getBundles());
+            	table.addRow().addContent(pVer.getPackageName(), pVer.getVersion().toString(), pBundles); 
+            }
+        }
+        table.print(System.out);
     }
 
+	private String getBundlesSt(Set<Bundle> bundles) {
+		StringBuilder st = new StringBuilder();
+		for (Bundle bundle : bundles) {
+            st.append(bundle.getBundleId() + " ");
+        }
+		return st.toString();
+	}
+
+	private SortedMap<String, PackageVersion> getDuplicatePackages(
+			Bundle[] bundles) {
+		SortedMap<String, PackageVersion> packageVersionMap = new TreeMap<String, PackageVersion>();
+        for (Bundle bundle : bundles) {
+            BundleRevision rev = bundle.adapt(BundleRevision.class);
+            if (rev!=null) {
+                List<BundleCapability> caps = rev.getDeclaredCapabilities(BundleRevision.PACKAGE_NAMESPACE);
+                for (BundleCapability cap : caps) {
+                    Map<String, Object> attr = cap.getAttributes();
+                    String packageName = (String)attr.get(BundleRevision.PACKAGE_NAMESPACE);
+                    Version version = (Version)attr.get("version");
+                    String key = packageName + ":" + version.toString();
+                    PackageVersion pVer = packageVersionMap.get(key);
+                    if (pVer == null) {
+                        pVer = new PackageVersion(packageName, version);
+                        packageVersionMap.put(key, pVer);
+                    }
+                    pVer.addBundle(bundle);
+                }
+            }
+        }
+		return packageVersionMap;
+	}
 }
