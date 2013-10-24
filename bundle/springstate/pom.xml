@@ -42,7 +42,6 @@
         <dependency>
             <groupId>org.apache.karaf.bundle</groupId>
             <artifactId>org.apache.karaf.bundle.core</artifactId>
-            <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
 
@@ -97,17 +96,10 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
                 <configuration>
-                    <instructions>
-                        <Export-Package>
-                        </Export-Package>
-                        <Import-Package>
-                            org.apache.felix.service.command;status=provisional,
-                             *
-                        </Import-Package>
-                        <Private-Package>
-                            org.apache.karaf.bundle.springstate
-                        </Private-Package>
+                	<instructions>
+                        <Bundle-Activator>org.apache.karaf.bundle.state.spring.internal.Activator</Bundle-Activator>
                     </instructions>
                 </configuration>
             </plugin>

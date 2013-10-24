@@ -14,8 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.bundle.springstate;
+package org.apache.karaf.bundle.state.spring.internal;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -33,14 +37,14 @@ import org.springframework.osgi.context.event.OsgiBundleContextFailedEvent;
 import org.springframework.osgi.context.event.OsgiBundleContextRefreshedEvent;
 import org.springframework.osgi.extender.event.BootstrappingDependencyEvent;
 
-public class SpringApplicationListener implements OsgiBundleApplicationContextListener,
+public class SpringStateService implements OsgiBundleApplicationContextListener,
         BundleListener, BundleStateService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SpringApplicationListener.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SpringStateService.class);
 
     private final Map<Long, OsgiBundleApplicationContextEvent> states;
 
-    public SpringApplicationListener(BundleContext bundleContext) {
+    public SpringStateService(BundleContext bundleContext) {
         this.states = new ConcurrentHashMap<Long, OsgiBundleApplicationContextEvent>();
     }
 
@@ -55,7 +59,40 @@ public class SpringApplicationListener implements OsgiBundleApplicationContextLi
     }
     
     public String getDiag(Bundle bundle) {
-        return null;
+    	OsgiBundleApplicationContextEvent event = states.get(bundle.getBundleId());
+        if (event == null) {
+            return null;
+        }
+        
+        StringBuilder message = new StringBuilder();
+        Date date = new Date(event.getTimestamp());
+        SimpleDateFormat df = new SimpleDateFormat();
+        message.append(df.format(date) + "\n");
+        Throwable ex = getException(event);
+        if (ex != null) {
+            message.append("Exception: \n");
+            addMessages(message, ex);
+        }
+        return message.toString();
+    }
+    
+    private void addMessages(StringBuilder message, Throwable ex) {
+    	if (ex != null) {
+    		message.append(ex.getMessage());
+    		message.append("\n");
+            StringWriter errorWriter = new StringWriter();
+            ex.printStackTrace(new PrintWriter(errorWriter));
+            message.append(errorWriter.toString());
+            message.append("\n");
+    	}
+    }
+    
+    private Throwable getException(OsgiBundleApplicationContextEvent event) {
+    	if (!(event instanceof OsgiBundleContextFailedEvent)) {
+        	return null;
+        }
+    	OsgiBundleContextFailedEvent failureEvent = (OsgiBundleContextFailedEvent) event;
+    	return failureEvent.getFailureCause();
     }
 
     public void onOsgiApplicationEvent(OsgiBundleApplicationContextEvent event) {
