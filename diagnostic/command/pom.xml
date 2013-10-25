@@ -93,7 +93,6 @@
                             org.osgi.service.blueprint.reflect,
                             *
                         </Import-Package>
-                        <Private-Package>!*</Private-Package>
                     </instructions>
                 </configuration>
             </plugin>
