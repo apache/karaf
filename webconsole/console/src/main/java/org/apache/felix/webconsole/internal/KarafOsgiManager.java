@@ -30,8 +30,8 @@ import org.apache.felix.webconsole.internal.servlet.OsgiManager;
 import org.osgi.framework.BundleContext;
 
 public class KarafOsgiManager extends OsgiManager {
-
-    public static final String SUBJECT_RUN_AS = "karaf.subject.runas";
+	private static final long serialVersionUID = 1090035807469459598L;
+	public static final String SUBJECT_RUN_AS = "karaf.subject.runas";
 
     public KarafOsgiManager(BundleContext bundleContext) {
         super(bundleContext);
