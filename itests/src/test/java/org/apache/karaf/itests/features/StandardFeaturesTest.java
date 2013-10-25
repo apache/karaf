@@ -24,11 +24,6 @@ import org.ops4j.pax.exam.spi.reactors.PerMethod;
 @ExamReactorStrategy(PerMethod.class)
 public class StandardFeaturesTest extends KarafTestSupport {
 
-    private void installAndAssertFeature(String feature) throws Exception {
-        featureService.installFeature(feature);
-        assertFeatureInstalled(feature);
-    }
-
     @Test
     public void installAriesAnnotationFeature() throws Exception {
         installAndAssertFeature("aries-annotation");

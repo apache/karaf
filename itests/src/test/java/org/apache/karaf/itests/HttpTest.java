@@ -32,9 +32,8 @@ import org.ops4j.pax.exam.spi.reactors.PerClass;
 public class HttpTest extends KarafTestSupport {
 
     @Before
-    public void installHttpFeature() {
-        System.out.println(executeCommand("feature:install http"));
-        System.out.println(executeCommand("feature:install webconsole"));
+    public void installHttpFeature() throws Exception {
+    	installAndAssertFeature("webconsole");
     }
 
     @Test

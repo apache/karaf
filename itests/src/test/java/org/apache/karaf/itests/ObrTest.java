@@ -35,7 +35,7 @@ public class ObrTest extends KarafTestSupport {
 
     @Before
     public void installObrFeature() throws Exception {
-        System.out.println(executeCommand("feature:install obr"));
+    	installAndAssertFeature("obr");
     }
 
     @Test

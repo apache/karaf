@@ -18,7 +18,6 @@ import static org.ops4j.pax.exam.CoreOptions.maven;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.karafDistributionConfiguration;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.logLevel;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -52,7 +51,6 @@ import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.ProbeBuilder;
 import org.ops4j.pax.exam.TestProbeBuilder;
-import org.ops4j.pax.exam.karaf.options.LogLevelOption;
 import org.ops4j.pax.exam.options.MavenArtifactUrlReference;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -99,7 +97,6 @@ public class KarafTestSupport {
             // KarafDistributionOption.debugConfiguration("8889", true),
             karafDistributionConfiguration().frameworkUrl(karafUrl).name("Apache Karaf").unpackDirectory(new File("target/exam")),
             keepRuntimeFolder(),
-            logLevel(LogLevelOption.LogLevel.INFO),
             editConfigurationFilePut("etc/org.apache.karaf.features.cfg", "featuresBoot", "config,standard,region,package,kar,management"),
             editConfigurationFilePut("etc/org.ops4j.pax.web.cfg", "org.osgi.service.http.port", HTTP_PORT),
             editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiRegistryPort", RMI_REG_PORT),
@@ -330,5 +327,16 @@ public class KarafTestSupport {
 	    }
 	    return false;
 	}
+	
+    protected void installAndAssertFeature(String feature) throws Exception {
+        featureService.installFeature(feature);
+        assertFeatureInstalled(feature);
+    }
+    
+    protected void installAssertAndUninstallFeature(String feature) throws Exception {
+        featureService.installFeature(feature);
+        assertFeatureInstalled(feature);
+        featureService.uninstallFeature(feature);
+    }
 
 }

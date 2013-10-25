@@ -34,8 +34,7 @@ public class WebTest extends KarafTestSupport {
 
     @Before
     public void installWarFeature() throws Exception {
-    	featureService.installFeature("war");
-    	assertFeatureInstalled("war");
+    	installAndAssertFeature("war");
     	assertBundleInstalled("org.apache.karaf.web.command");
     	//just sleep for a while so blueprint is able to pick up the new commands. 
     	Thread.sleep(2000);

@@ -25,11 +25,6 @@ import org.ops4j.pax.exam.spi.reactors.PerMethod;
 @ExamReactorStrategy(PerMethod.class)
 public class SpringFeaturesTest extends KarafTestSupport {
 
-    private void installAndAssertFeature(String feature) throws Exception {
-        featureService.installFeature(feature);
-        assertFeatureInstalled(feature);
-    }
-
     @Test
     public void installSpringFeature() throws Exception {
         installAndAssertFeature("spring");
