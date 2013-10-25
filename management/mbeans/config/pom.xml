@@ -94,8 +94,7 @@
                         </Import-Package>
                         <Private-Package>
                             org.apache.karaf.management.mbeans.config.internal,
-                            org.apache.felix.utils.properties;-split-package:=merge-first,
-                            !*
+                            org.apache.felix.utils.properties;-split-package:=merge-first
                         </Private-Package>
                     </instructions>
                 </configuration>

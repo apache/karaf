@@ -90,8 +90,7 @@
                             *
                         </Import-Package>
                         <Private-Package>
-                            org.apache.karaf.management.mbeans.log.internal,
-                            !*
+                            org.apache.karaf.management.mbeans.log.internal
                         </Private-Package>
                     </instructions>
                 </configuration>

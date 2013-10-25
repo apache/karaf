@@ -76,8 +76,7 @@
                             *
                         </Import-Package>
                         <Private-Package>
-                            org.apache.karaf.management.mbeans.web.internal,
-                            !*
+                            org.apache.karaf.management.mbeans.web.internal
                         </Private-Package>
                     </instructions>
                 </configuration>
