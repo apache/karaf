@@ -18,95 +18,95 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
-import org.ops4j.pax.exam.spi.reactors.PerMethod;
+import org.ops4j.pax.exam.spi.reactors.PerClass;
 
 @RunWith(PaxExam.class)
-@ExamReactorStrategy(PerMethod.class)
+@ExamReactorStrategy(PerClass.class)
 public class StandardFeaturesTest extends KarafTestSupport {
 
     @Test
     public void installAriesAnnotationFeature() throws Exception {
-        installAndAssertFeature("aries-annotation");
+        installAssertAndUninstallFeature("aries-annotation");
     }
     
     @Test
     public void installWrapperFeature() throws Exception {
-        installAndAssertFeature("wrapper");
+        installAssertAndUninstallFeature("wrapper");
     }
     
     @Test
     public void installObrFeature() throws Exception {
-        installAndAssertFeature("obr");
+        installAssertAndUninstallFeature("obr");
     }
 
     @Test
     public void installConfigFeature() throws Exception {
-        installAndAssertFeature("config");
+        installAssertAndUninstallFeature("config");
     }
     
     @Test
     public void installRegionFeature() throws Exception {
-        installAndAssertFeature("region");
+        installAssertAndUninstallFeature("region");
     }
     
     @Test
     public void installPackageFeature() throws Exception {
-        installAndAssertFeature("package");
+        installAssertAndUninstallFeature("package");
     }
 
     @Test
     public void installHttpFeature() throws Exception {
-        installAndAssertFeature("http");
+        installAssertAndUninstallFeature("http");
     }
 
     @Test
     public void installHttpWhiteboardFeature() throws Exception {
-        installAndAssertFeature("http-whiteboard");
+        installAssertAndUninstallFeature("http-whiteboard");
     }
 
     @Test
     public void installWarFeature() throws Exception {
-        installAndAssertFeature("war");
+        installAssertAndUninstallFeature("war");
     }
     
     @Test
     public void installKarFeature() throws Exception {
-        installAndAssertFeature("kar");
+        installAssertAndUninstallFeature("kar");
     }
 
     @Test
     public void installWebConsoleFeature() throws Exception {
-        installAndAssertFeature("webconsole");
+        installAssertAndUninstallFeature("webconsole");
     }
 
     @Test
     public void installSSHFeature() throws Exception {
-        installAndAssertFeature("ssh");
+        installAssertAndUninstallFeature("ssh");
     }
     
     @Test
     public void installManagementFeature() throws Exception {
-        installAndAssertFeature("management");
+        installAssertAndUninstallFeature("management");
     }
     
     @Test
     public void installSchedulerFeature() throws Exception {
-        installAndAssertFeature("scheduler");
+        installAssertAndUninstallFeature("scheduler");
     }
 
     @Test
     public void installEventAdminFeature() throws Exception {
-        installAndAssertFeature("eventadmin");
+        installAssertAndUninstallFeature("eventadmin");
     }
 
     @Test
     public void installJasyptEncryptionFeature() throws Exception {
-        installAndAssertFeature("jasypt-encryption");
+        installAssertAndUninstallFeature("jasypt-encryption");
     }
 
     @Test
     public void installScrFeature() throws Exception {
-        installAndAssertFeature("scr");
+        installAssertAndUninstallFeature("scr");
     }
 
 }

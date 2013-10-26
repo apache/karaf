@@ -19,87 +19,87 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
-import org.ops4j.pax.exam.spi.reactors.PerMethod;
+import org.ops4j.pax.exam.spi.reactors.PerClass;
 
 @RunWith(PaxExam.class)
-@ExamReactorStrategy(PerMethod.class)
+@ExamReactorStrategy(PerClass.class)
 public class SpringFeaturesTest extends KarafTestSupport {
 
     @Test
     public void installSpringFeature() throws Exception {
-        installAndAssertFeature("spring");
+        installAssertAndUninstallFeature("spring");
     }
 
     @Test
     public void installSpringAspectsFeature() throws Exception {
-        installAndAssertFeature("spring-aspects");
+        installAssertAndUninstallFeature("spring-aspects");
     }
 
     @Test
     public void installSpringDmFeature() throws Exception {
-        installAndAssertFeature("spring-dm");
+        installAssertAndUninstallFeature("spring-dm");
     }
 
     @Test
     public void installSpringDmWebFeature() throws Exception {
-        installAndAssertFeature("spring-dm-web");
+        installAssertAndUninstallFeature("spring-dm-web");
     }
 
     @Test
     public void installSpringInstrumentFeature() throws Exception {
-        installAndAssertFeature("spring-instrument");
+        installAssertAndUninstallFeature("spring-instrument");
     }
 
     @Test
     public void installSpringJdbcFeature() throws Exception {
-        installAndAssertFeature("spring-jdbc");
+        installAssertAndUninstallFeature("spring-jdbc");
     }
 
     @Test
     public void installSpringJmsFeature() throws Exception {
-        installAndAssertFeature("spring-jms");
+        installAssertAndUninstallFeature("spring-jms");
     }
 
     @Test
     public void installSpringStrutsFeature() throws Exception {
-        installAndAssertFeature("spring-struts");
+        installAssertAndUninstallFeature("spring-struts");
     }
 
     @Test
     public void installSpringTestFeature() throws Exception {
-        installAndAssertFeature("spring-test");
+        installAssertAndUninstallFeature("spring-test");
     }
 
     @Test
     public void installSpringOrmFeature() throws Exception {
-        installAndAssertFeature("spring-orm");
+        installAssertAndUninstallFeature("spring-orm");
     }
 
     @Test
     public void installSpringOxmFeature() throws Exception {
-        installAndAssertFeature("spring-oxm");
+        installAssertAndUninstallFeature("spring-oxm");
     }
 
     @Test
     public void installSpringTxFeature() throws Exception {
-        installAndAssertFeature("spring-tx");
+        installAssertAndUninstallFeature("spring-tx");
     }
 
     @Test
     public void installSpringWebFeature() throws Exception {
-        installAndAssertFeature("spring-web");
+        installAssertAndUninstallFeature("spring-web");
     }
 
     @Test
     @Ignore
     public void installSpringWebPortletFeature() throws Exception {
-        installAndAssertFeature("spring-web-portlet");
+        installAssertAndUninstallFeature("spring-web-portlet");
     }
 
     @Test
     @Ignore
     public void installGeminiBlueprintFeature() throws Exception {
-        installAndAssertFeature("gemini-blueprint");
+        installAssertAndUninstallFeature("gemini-blueprint");
     }
 
 }

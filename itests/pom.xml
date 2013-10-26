@@ -38,29 +38,16 @@
     </properties>
 
     <dependencies>
-
-        <dependency>
-            <groupId>org.apache.karaf</groupId>
-            <artifactId>apache-karaf</artifactId>
-            <scope>test</scope>
-            <type>zip</type>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.apache.karaf</groupId>
-                    <artifactId>org.apache.karaf.client</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
         <dependency>
             <groupId>org.apache.karaf</groupId>
             <artifactId>apache-karaf</artifactId>
             <scope>test</scope>
             <type>tar.gz</type>
             <exclusions>
-                <exclusion>
-                    <groupId>org.apache.karaf</groupId>
-                    <artifactId>org.apache.karaf.client</artifactId>
-                </exclusion>
+            	<exclusion>
+            		<artifactId>org.apache.karaf.client</artifactId>
+            		<groupId>org.apache.karaf</groupId>
+            	</exclusion>
             </exclusions>
         </dependency>
 
