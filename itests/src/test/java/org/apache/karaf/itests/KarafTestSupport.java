@@ -229,9 +229,9 @@ public class KarafTestSupport {
             if (colonIndx > 0) {
                 String scope = command.substring(0, colonIndx);
                 String function = command.substring(colonIndx + 1);
-                waitForService("(&(osgi.command.scope=" + scope + ")(osgi.command.function=" + function + ")(org.apache.karaf.service.guard.roles=*))", SERVICE_TIMEOUT);
+                waitForService("(&(osgi.command.scope=" + scope + ")(osgi.command.function=" + function + "))", SERVICE_TIMEOUT);
             } else {
-                waitForService("(&(osgi.command.function=" + command + ")(org.apache.karaf.service.guard.roles=*))", SERVICE_TIMEOUT);
+                waitForService("(osgi.command.function=" + command + ")", SERVICE_TIMEOUT);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
