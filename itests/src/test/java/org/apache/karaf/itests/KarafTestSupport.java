@@ -31,10 +31,12 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.inject.Inject;
 import javax.management.remote.JMXConnector;
@@ -141,7 +143,7 @@ public class KarafTestSupport {
                             }
                             commandSession.execute(command);
                         } catch (Exception e) {
-                            e.printStackTrace(System.err);
+                            throw new RuntimeException(e.getMessage(), e);
                         }
                         printStream.flush();
                         return byteArrayOutputStream.toString();
@@ -151,10 +153,15 @@ public class KarafTestSupport {
         try {
             executor.submit(commandFuture);
             response = commandFuture.get(timeout, TimeUnit.MILLISECONDS);
-        } catch (Exception e) {
+        } catch (TimeoutException e) {
             e.printStackTrace(System.err);
             response = "SHELL COMMAND TIMED OUT: ";
-        }
+        } catch (ExecutionException e) {
+        	Throwable cause = e.getCause().getCause();
+        	throw new RuntimeException(cause.getMessage(), cause);
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e.getMessage(), e);
+		}
 
         return response;
     }
@@ -312,22 +319,22 @@ public class KarafTestSupport {
     }
 
 	protected void assertBundleInstalled(String name) {
-	    Assert.assertTrue("Bundle " + name + " should be installed", isBundleInstalled(name));
+	    Assert.assertNotNull("Bundle " + name + " should be installed", findBundleByName(name));
 	}
 
 	protected void assertBundleNotInstalled(String name) {
-	    Assert.assertFalse("Bundle " + name + " should not be installed", isBundleInstalled(name));
-	}
-
-	private boolean isBundleInstalled(String symbolicName) {
-	    for (Bundle bundle : bundleContext.getBundles()) {
-	        if (bundle.getSymbolicName().equals(symbolicName)) {
-	            return true;
-	        }
-	    }
-	    return false;
+	    Assert.assertNull("Bundle " + name + " should not be installed", findBundleByName(name));
 	}
 	
+	protected Bundle findBundleByName(String symbolicName) {
+	    for (Bundle bundle : bundleContext.getBundles()) {
+	        if (bundle.getSymbolicName().equals(symbolicName)) {
+	            return bundle;
+	        }
+	    }
+	    return null;
+	}
+
     protected void installAndAssertFeature(String feature) throws Exception {
         featureService.installFeature(feature);
         assertFeatureInstalled(feature);

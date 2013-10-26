@@ -58,7 +58,7 @@ public class BundleTests extends KarafTestSupport {
         String allCapabilitiesOutput = executeCommand("bundle:capabilities");
         System.out.println(allCapabilitiesOutput);
         assertFalse(allCapabilitiesOutput.isEmpty());
-        String jmxWhiteboardBundleCapabilitiesOutput = executeCommand("bundle:capabilities 74");
+        String jmxWhiteboardBundleCapabilitiesOutput = executeCommand("bundle:capabilities org.apache.aries.jmx.whiteboard");
         System.out.println(jmxWhiteboardBundleCapabilitiesOutput);
         assertTrue(jmxWhiteboardBundleCapabilitiesOutput.contains("osgi.wiring.bundle; org.apache.aries.jmx.whiteboard 1.0.0 [UNUSED]"));
     }
@@ -66,18 +66,19 @@ public class BundleTests extends KarafTestSupport {
     @Test
     public void classesCommand() throws Exception {
         String allClassesOutput = executeCommand("bundle:classes");
-        System.out.println(allClassesOutput);
         assertFalse(allClassesOutput.isEmpty());
-        String jmxWhiteboardBundleClassesOutput = executeCommand("bundle:classes 74");
+        String jmxWhiteboardBundleClassesOutput = executeCommand("bundle:classes org.apache.aries.jmx.whiteboard");
         System.out.println(jmxWhiteboardBundleClassesOutput);
         assertTrue(jmxWhiteboardBundleClassesOutput.contains("org/apache/aries/jmx/whiteboard/Activator$MBeanTracker.class"));
     }
 
+    /**
+     * TODO We need some more thorough tests for diag
+     */
     @Test
     public void diagCommand() throws Exception {
         String allDiagOutput = executeCommand("bundle:diag");
-        System.out.println(allDiagOutput);
-        assertFalse(allDiagOutput.isEmpty());
+        assertTrue(allDiagOutput.isEmpty());
     }
 
     @Test
@@ -89,29 +90,29 @@ public class BundleTests extends KarafTestSupport {
 
     @Test
     public void headersCommand() throws Exception {
-        String headersOutput = executeCommand("bundle:headers 74");
+        String headersOutput = executeCommand("bundle:headers org.apache.aries.jmx.whiteboard");
         System.out.println(headersOutput);
         assertTrue(headersOutput.contains("Bundle-Activator = org.apache.aries.jmx.whiteboard.Activator"));
     }
 
     @Test
     public void infoCommand() throws Exception {
-        String infoOutput = executeCommand("bundle:info 69");
+        String infoOutput = executeCommand("bundle:info org.apache.karaf.management.server");
         System.out.println(infoOutput);
         assertTrue(infoOutput.contains("This bundle starts the Karaf embedded MBean server"));
     }
 
     @Test
-    public void installCommand() throws Exception {
-        System.out.println(executeCommand("bundle:install mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.commons-lang/2.4_6"));
-        String bundleListOutput = executeCommand("bundle:list -l | grep -i commons-lang");
-        System.out.println(bundleListOutput);
-        assertFalse(bundleListOutput.isEmpty());
+    public void installUninstallCommand() throws Exception {
+        executeCommand("bundle:install mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.commons-lang/2.4_6");
+        assertBundleInstalled("org.apache.servicemix.bundles.commons-lang");
+        executeCommand("bundle:uninstall org.apache.servicemix.bundles.commons-lang");
+        assertBundleNotInstalled("org.apache.servicemix.bundles.commons-lang");
     }
 
     @Test
     public void showTreeCommand() throws Exception {
-        String bundleTreeOutput = executeCommand("bundle:tree-show 69");
+        String bundleTreeOutput = executeCommand("bundle:tree-show org.apache.karaf.management.server");
         System.out.println(bundleTreeOutput);
         assertFalse(bundleTreeOutput.isEmpty());
     }
