@@ -347,6 +347,10 @@ run() {
                 MAIN=org.apache.karaf.main.Stop
                 shift
                 ;;
+            'status')
+                MAIN=org.apache.karaf.main.Status
+                shift
+                ;;
             'console')
                 shift
                 ;;

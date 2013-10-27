@@ -267,6 +267,7 @@ if "%KARAF_PROFILER%" == "" goto :RUN
 
 :RUN_LOOP
     if "%1" == "stop" goto :EXECUTE_STOP
+    if "%1" == "status" goto :EXECUTE_STATUS
     if "%1" == "console" goto :EXECUTE_CONSOLE
     if "%1" == "server" goto :EXECUTE_SERVER
     if "%1" == "client" goto :EXECUTE_CLIENT
@@ -276,6 +277,11 @@ if "%KARAF_PROFILER%" == "" goto :RUN
 
 :EXECUTE_STOP
     SET MAIN=org.apache.karaf.main.Stop
+    shift
+    goto :RUN_LOOP
+
+:EXECUTE_STATUS
+    SET MAIN=org.apache.karaf.main.Status
     shift
     goto :RUN_LOOP
 
