@@ -18,22 +18,19 @@
  */
 package org.apache.karaf.main;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.net.ConnectException;
 import java.net.Socket;
 
 /**
- * Main class used to stop the root Karaf instance
+ * Main class used to check the status of the root Karaf instance.
  */
-public class Stop {
+public class Status {
 
     /**
-     * Sends the shutdown command to the running karaf instance. Uses either a shut down port configured in config.properties or
-     * the port from the shutdown port file.
-     * 
+     * Checks if the shutdown port is bound. The shutdown port can be configured in config.properties
+     * or in the shutdown port file.
+     *
      * @param args
      * @throws Exception
      */
@@ -43,13 +40,28 @@ public class Stop {
             config.shutdownPort = getPortFromShutdownPortFile(config.portFile);
         }
         if (config.shutdownPort > 0) {
-            Socket s = new Socket(config.shutdownHost, config.shutdownPort);
-            s.getOutputStream().write(config.shutdownCommand.getBytes());
-            s.close();
+            Socket s = null;
+            try {
+                s = new Socket(config.shutdownHost, config.shutdownPort);
+                if (s.isBound()) {
+                    System.out.println("Running ...");
+                    System.exit(0);
+                } else {
+                    System.out.println("Not Running ...");
+                    System.exit(1);
+                }
+            } catch (ConnectException connectException) {
+                System.out.println("Not Running ...");
+                System.exit(1);
+            } finally {
+                if (s != null) {
+                    s.close();
+                }
+            }
         } else {
             System.err.println("Unable to find port...");
+            System.exit(2);
         }
-
     }
 
     private static int getPortFromShutdownPortFile(String portFile) throws FileNotFoundException, IOException {
