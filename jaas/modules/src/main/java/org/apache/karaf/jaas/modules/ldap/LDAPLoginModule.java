@@ -225,6 +225,7 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
         // step 2: bind the user using the DN
         context = null;
         try {
+            // switch the credentials to the Karaf login user so that we can verify his password is correct
             logger.debug("Bind user (authentication).");
             env.put(Context.SECURITY_AUTHENTICATION, authentication);
             logger.debug("Set the security principal for " + userDN + "," + userBaseDN);
@@ -251,6 +252,12 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
         context = null;
         try {
             logger.debug("Get user roles.");
+            // switch back to the connection credentials for the role search like we did for the user search in step 1 
+            if (connectionUsername != null && connectionUsername.trim().length() > 0) {
+                env.put(Context.SECURITY_AUTHENTICATION, authentication);
+                env.put(Context.SECURITY_PRINCIPAL, connectionUsername);
+                env.put(Context.SECURITY_CREDENTIALS, connectionPassword);
+            }
             context = new InitialDirContext(env);
             SearchControls controls = new SearchControls();
             if (roleSearchSubtree) {
