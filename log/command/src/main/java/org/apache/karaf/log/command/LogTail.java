@@ -70,7 +70,9 @@ public class LogTail extends DisplayLog {
         public void run() {
             Iterable<PaxLoggingEvent> le = logService.getEvents(entries == 0 ? Integer.MAX_VALUE : entries);
             for (PaxLoggingEvent event : le) {
-                printEvent(out, event);
+                if (event != null) {
+                    printEvent(out, event);
+                }
             }
             // Tail
             final BlockingQueue<PaxLoggingEvent> queue = new LinkedBlockingQueue<PaxLoggingEvent>();
