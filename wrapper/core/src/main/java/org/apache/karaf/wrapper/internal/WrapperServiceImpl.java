@@ -106,6 +106,9 @@ public class WrapperServiceImpl implements WrapperService {
             wrapperConf = new File(etc, name + "-wrapper.conf");
             copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props);
 
+            File plistConf = new File(bin, "org.apache.karaf."+ name + ".plist");
+            copyFilteredResourceTo(plistConf, "macosx/org.apache.karaf.KARAF.plist", props);
+            
             mkdir(lib);
 
             copyResourceTo(new File(lib, "libwrapper.jnilib"), "macosx/libwrapper.jnilib", false);

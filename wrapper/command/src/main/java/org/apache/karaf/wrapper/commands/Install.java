@@ -31,25 +31,25 @@ import org.fusesource.jansi.Ansi;
 @Command(scope = "wrapper", name = "install", description = "Install the container as a system service in the OS.")
 public class Install extends AbstractAction {
 
-    @Option(name = "-n", aliases = {"--name"}, description = "The service name that will be used when installing the service. (Default: karaf)", required = false, multiValued = false)
-    private String name = "karaf";
+	@Option(name = "-n", aliases = { "--name" }, description = "The service name that will be used when installing the service. (Default: karaf)", required = false, multiValued = false)
+	private String name = "karaf";
 
-    @Option(name = "-d", aliases = {"--display"}, description = "The display name of the service.", required = false, multiValued = false)
-    private String displayName;
+	@Option(name = "-d", aliases = { "--display" }, description = "The display name of the service.", required = false, multiValued = false)
+	private String displayName;
 
-    @Option(name = "-D", aliases = {"--description"}, description = "The description of the service.", required = false, multiValued = false)
-    private String description = "";
+	@Option(name = "-D", aliases = { "--description" }, description = "The description of the service.", required = false, multiValued = false)
+	private String description = "";
 
-    @Option(name = "-s", aliases = {"--start-type"}, description = "Mode in which the service is installed. AUTO_START or DEMAND_START (Default: AUTO_START)", required = false, multiValued = false)
-    private String startType = "AUTO_START";
+	@Option(name = "-s", aliases = { "--start-type" }, description = "Mode in which the service is installed. AUTO_START or DEMAND_START (Default: AUTO_START)", required = false, multiValued = false)
+	private String startType = "AUTO_START";
 
-    private WrapperService wrapperService = new WrapperServiceImpl();
+	private WrapperService wrapperService = new WrapperServiceImpl();
 
-    public void setWrapperService(WrapperService wrapperService) {
-        this.wrapperService = wrapperService;
-    }
+	public void setWrapperService(WrapperService wrapperService) {
+		this.wrapperService = wrapperService;
+	}
 
-    protected Object doExecute() throws Exception {
+	protected Object doExecute() throws Exception {
         File[] wrapperPaths = wrapperService.install(name, displayName, description, startType);
 
         String os = System.getProperty("os.name", "Unknown");
@@ -77,16 +77,25 @@ public class Install extends AbstractAction {
             System.out.println("");
         } else if (os.startsWith("Mac OS X")) {
             System.out.println("");
-            System.out.println("At this time it is not known how to get this service to start when the machine is rebooted.");
-            System.out.println("If you know how to install the following service script so that it gets started");
-            System.out.println("when OS X starts, please email dev@felix.apache.org and let us know how so");
-            System.out.println("we can update this message.");
-            System.out.println(" ");
-            System.out.println("  To start the service:");
-            System.out.println("    $ " + serviceFile.getPath() + " start");
+            System.out.println("to add bin/org.apache.karaf.KARAF as user service move this file into ~/Library/LaunchAgents/");  
+            System.out.println("> mv bin/org.apache.karaf.KARAF.plist ~/Library/LaunchAgents/");
             System.out.println("");
-            System.out.println("  To stop the service:");
-            System.out.println("    $ " + serviceFile.getPath() + " stop");
+            System.out.println("to add org.apache.karaf.KARAF as system service move this into /Library/LaunchDaemons");  
+            System.out.println("> sudo mv bin/org.apache.karaf.KARAF.plist /Library/LaunchDaemons/");  
+            System.out.println("change owner and rights");  
+            System.out.println("> sudo chown root:wheel /Library/LaunchDaemons/org.apache.karaf.KARAF.plist");  
+            System.out.println("> sudo chmod u=rw,g=r,o=r /Library/LaunchDaemons/org.apache.karaf.KARAF.plist");  
+            System.out.println(""); 
+            System.out.println("test your service");  
+            System.out.println("> launchctl load ~/Library/LaunchAgents/org.apache.karaf.KARAF.plist");  
+            System.out.println("> launchctl start org.apache.karaf.KARAF");  
+            System.out.println("> launchctl stop org.apache.karaf.KARAF");  
+            System.out.println("");  
+            System.out.println("after restart your session or system");  
+            System.out.println("you can use launchctl command to start and stop your service");  
+            System.out.println("");  
+            System.out.println("for removing the service call");  
+            System.out.println("> launchctl remove org.apache.karaf.KARAF");  
             System.out.println("");
         } else if (os.startsWith("Linux")) {
 
@@ -181,5 +190,4 @@ public class Install extends AbstractAction {
 
         return null;
     }
-
 }
