@@ -18,6 +18,7 @@ package org.apache.karaf.shell.commands;
 
 import jline.console.history.History;
 import org.apache.felix.gogo.commands.Command;
+import org.apache.felix.gogo.commands.Option;
 import org.apache.karaf.shell.console.AbstractAction;
 import org.fusesource.jansi.Ansi;
 
@@ -27,9 +28,16 @@ import org.fusesource.jansi.Ansi;
 @Command(scope = "shell", name="history", description="Prints command history.")
 public class HistoryAction extends AbstractAction {
 
-    @Override
-    protected Object doExecute() throws Exception {
-        History history = (History) session.get(".jline.history");
+    @Option(name = "-c", aliases = { "--clear" }, description = "Clears the shell command history.", required = false, multiValued = false)
+    private boolean clear;
+    
+     @Override
+     protected Object doExecute() throws Exception {
+        History history = (History) session.get(".jline.history");       
+ 
+        if (history != null && clear) {
+            history.clear();
+        }
 
         for (History.Entry element : history) {
             System.out.println(
