@@ -43,6 +43,8 @@ import java.util.regex.Pattern;
  */
 public class LDAPLoginModule extends AbstractKarafLoginModule {
 
+    private static final String DEFAULT_AUTHENTICATION = "simple";
+
     private static Logger logger = LoggerFactory.getLogger(LDAPLoginModule.class);
 
     public final static String CONNECTION_URL = "connection.url";
@@ -78,7 +80,7 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
     private String roleFilter;
     private String roleNameAttribute;
     private boolean roleSearchSubtree = true;
-    private String authentication = "simple";
+    private String authentication = DEFAULT_AUTHENTICATION;
     private String initialContextFactory = null;
     private boolean ssl;
     private String sslProvider;
@@ -106,6 +108,9 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
             initialContextFactory = DEFAULT_INITIAL_CONTEXT_FACTORY;
         }
         authentication = (String) options.get(AUTHENTICATION);
+        if (authentication == null) {
+            authentication = DEFAULT_AUTHENTICATION;
+        }
         if (connectionURL == null || connectionURL.trim().length() == 0) {
             logger.error("No LDAP URL specified.");
         } else if (!connectionURL.startsWith("ldap:") && !connectionURL.startsWith("ldaps:")) {
