@@ -37,6 +37,7 @@ import java.util.regex.Pattern;
 import jline.Terminal;
 import jline.UnsupportedTerminal;
 import jline.console.ConsoleReader;
+import jline.console.history.MemoryHistory;
 import jline.console.history.PersistentHistory;
 import org.apache.felix.gogo.commands.CommandException;
 import org.apache.felix.service.command.CommandProcessor;
@@ -54,6 +55,7 @@ public class Console implements Runnable
 {
 
     public static final String SHELL_INIT_SCRIPT = "karaf.shell.init.script";
+    public static final String SHELL_HISTORY_MAXSIZE = "karaf.shell.history.maxSize";
     public static final String PROMPT = "PROMPT";
     public static final String DEFAULT_PROMPT = "\u001B[1m${USER}\u001B[0m@${APPLICATION}> ";
     public static final String PRINT_STACK_TRACES = "karaf.printStackTraces";
@@ -108,6 +110,14 @@ public class Console implements Runnable
 		} catch (Exception e) {
 			LOGGER.error("Can not read history from file " + file + ". Using in memory history", e);
 		}
+
+        if (reader != null && reader.getHistory() instanceof MemoryHistory) {
+            String maxSizeStr = System.getProperty(SHELL_HISTORY_MAXSIZE);
+            if (maxSizeStr != null) {
+                ((MemoryHistory)reader.getHistory()).setMaxSize(Integer.parseInt(maxSizeStr));   
+            }
+        }
+
         session.put(".jline.reader", reader);
         session.put(".jline.history", reader.getHistory());
         Completer completer = createCompleter();
