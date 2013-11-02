@@ -38,7 +38,7 @@ public class OracleJDBCLockIntegrationTest extends BaseJDBCLockIntegrationTest {
         password = "root";
         driver = "oracle.jdbc.driver.OracleDriver";
         url = "jdbc:oracle:thin:@172.16.16.133:1521:XE";
-        momentDatatype = "NuMBER(20)";
+        momentDatatype = "NUMBER(20)";
         
         super.setUp();
     }
