@@ -309,6 +309,10 @@
 
                     <systemProperties>
                         <systemProperty>
+                            <name>jetty.port</name>
+                            <value>${jetty-port}</value>
+                        </systemProperty>
+                        <systemProperty>
                             <name>scalate.editor</name>
                             <value>${scalate.editor}</value>
                         </systemProperty>
