@@ -36,7 +36,7 @@ public class WrapperServiceImpl implements WrapperService {
     private final static Logger LOGGER = LoggerFactory.getLogger(WrapperServiceImpl.class);
 
     public void install() throws Exception {
-        install("karaf", "", "", "AUTO_START");
+        install("karaf", "karaf", "", "AUTO_START");
     }
 
     public File[] install(String name, String displayName, String description, String startType) throws Exception {

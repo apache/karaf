@@ -35,7 +35,7 @@ public class Install extends AbstractAction {
 	private String name = "karaf";
 
 	@Option(name = "-d", aliases = { "--display" }, description = "The display name of the service.", required = false, multiValued = false)
-	private String displayName;
+	private String displayName = "karaf";
 
 	@Option(name = "-D", aliases = { "--description" }, description = "The description of the service.", required = false, multiValued = false)
 	private String description = "";
