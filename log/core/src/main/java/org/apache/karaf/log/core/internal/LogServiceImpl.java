@@ -90,17 +90,15 @@ public class LogServiceImpl implements LogService {
         if (ROOT_LOGGER.equalsIgnoreCase(logger)) {
             logger = null;
         }
-        
+
         if (logLevel == Level.DEFAULT && logger == null) {
             throw new RuntimeException("Can not unset the ROOT logger");
         }
 
         Configuration cfg = getConfiguration();
-        @SuppressWarnings("rawtypes")
         Dictionary props = cfg.getProperties();
-        
-        String level = logLevel.toString();
 
+        String level = logLevel.toString();
         String val;
         String prop;
         if (logger == null) {
@@ -108,8 +106,9 @@ public class LogServiceImpl implements LogService {
         } else {
             prop = LOGGER_PREFIX + logger;
         }
+
         val = (String) props.get(prop);
-        if (level.equals("DEFAULT")) {
+        if (Level.isDefault(level)) {
             if (val != null) {
                 val = val.trim();
                 int idx = val.indexOf(",");
