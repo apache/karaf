@@ -96,7 +96,6 @@ public class SystemProperty extends OsgiCommandSupport {
                 ps.flush();
                 ps.close();
             } else {
-                System.out.println("OSGi and System properties: ");
                 printOrderedProperties(props, System.out);
             }
 
