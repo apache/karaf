@@ -160,8 +160,8 @@ public class System extends StandardMBean implements SystemMBean {
 
         if (dumpToFile) {
             PrintStream ps = new PrintStream(new File(bundleContext.getProperty("karaf.data"), "dump-properties-" + java.lang.System.currentTimeMillis() + ".properties"));
-            ps.println("#Dump of the System and OSGi properties with the command dev:dump-properties");
-            ps.println("#Dump execute at " + new SimpleDateFormat().format(new Date()));
+            ps.println("#Dump of the System and OSGi properties");
+            ps.println("#Dump executed at " + new SimpleDateFormat().format(new Date()));
             printOrderedProperties(props, ps);
             ps.flush();
             ps.close();

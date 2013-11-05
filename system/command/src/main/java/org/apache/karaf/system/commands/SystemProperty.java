@@ -36,7 +36,7 @@ public class SystemProperty extends AbstractSystemAction {
     @Option(name = "-p", aliases = {"--persistent"}, description = "Persist the new value to the etc/system.properties file")
     boolean persistent;
 
-    @Option(name = "-f", aliases = {"--file-dump"}, description = "Dump all system properties in a file")
+    @Option(name = "-f", aliases = {"--file-dump"}, description = "Dump all system properties in a file (in data folder)")
     boolean dumpToFile;
 
     @Option(name = "-u", aliases = {"--unset"}, description = "Show unset know properties with value unset")
@@ -100,13 +100,12 @@ public class SystemProperty extends AbstractSystemAction {
                                 "dump-properties-" + System.currentTimeMillis() + ".properties"
                         )
                 );
-                ps.println("#Dump of the System and OSGi properties with the command dev:dump-properties");
-                ps.println("#Dump execute at " + new SimpleDateFormat().format(new Date()));
+                ps.println("#Dump of the System and OSGi properties with the command system:property");
+                ps.println("#Dump executed at " + new SimpleDateFormat().format(new Date()));
                 printOrderedProperties(props, ps);
                 ps.flush();
                 ps.close();
             } else {
-                System.out.println("Dumping OSGi and System properties");
                 printOrderedProperties(props, System.out);
             }
 
