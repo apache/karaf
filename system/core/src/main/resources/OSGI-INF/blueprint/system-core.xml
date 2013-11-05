@@ -30,6 +30,7 @@
 
     <bean id="systemMBean" class="org.apache.karaf.system.management.internal.System">
         <property name="systemService" ref="systemService" />
+        <property name="bundleContext" ref="blueprintBundleContext"/>
     </bean>
 
     <service ref="systemMBean" auto-export="interfaces">

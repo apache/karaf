@@ -16,19 +16,73 @@
  */
 package org.apache.karaf.system.management;
 
+import java.util.Map;
+
 /**
  * Describe the system MBean.
  */
 public interface SystemMBean {
 
+    /**
+     * Stop the Karaf instance
+     *
+     * @throws Exception
+     */
     void halt() throws Exception;
+
+    /**
+     * Stop the Karaf instance at a given time.
+     *
+     * @param time the time when to stop the Karaf instance.
+     * @throws Exception
+     */
     void halt(String time) throws Exception;
+
+    /**
+     * Reboot the Karaf instance.
+     *
+     * @throws Exception
+     */
     void reboot() throws Exception;
+
+    /**
+     * Reboot the Karaf instance at a given time.
+     *
+     * @param time the time when to reboot the Karaf instance.
+     * @throws Exception
+     */
     void reboot(String time) throws Exception;
+
+    /**
+     * Reboot the Karaf instance at a given time and clean the cache.
+     *
+     * @param time the time when to reboot the Karaf instance.
+     * @throws Exception
+     */
     void rebootCleanCache(String time) throws Exception;
+
+    /**
+     * Reboot the Karaf instance at a given time and clean all working files.
+     *
+     * @param time the time when to reboot the Karaf instance.
+     * @throws Exception
+     */
     void rebootCleanAll(String time) throws Exception;
 
+    /**
+     * Set the system bundle start level.
+     *
+     * @param startLevel the new system bundle start level.
+     * @throws Exception
+     */
     void setStartLevel(int startLevel) throws Exception;
+
+    /**
+     * Get the current system bundle start level.
+     *
+     * @return the current system bundle start level.
+     * @throws Exception
+     */
     int getStartLevel() throws Exception;
 
     /**
@@ -72,5 +126,31 @@ public interface SystemMBean {
      * @return the current Karaf instance version.
      */
     String getVersion();
+
+    /**
+     * Get all system properties.
+     *
+     * @param unset if true, display the OSGi properties even if they are not defined (with "undef" value).
+     * @param dumpToFile if true, dump the properties into a file in the data folder.
+     * @return the list of system properties.
+     */
+    Map<String, String> getProperties(boolean unset, boolean dumpToFile) throws Exception;
+
+    /**
+     * Get the value of a given system property.
+     *
+     * @param key the system property key.
+     * @return the system property value.
+     */
+    String getProperty(String key);
+
+    /**
+     * Set the value of a system property.
+     *
+     * @param key the system property key.
+     * @param value the new system property value.
+     * @param persistent if true, persist the new value to the etc/system.properties file.
+     */
+    void setProperty(String key, String value, boolean persistent);
 
 }

@@ -19,9 +19,15 @@ package org.apache.karaf.system.management.internal;
 import org.apache.karaf.system.FrameworkType;
 import org.apache.karaf.system.SystemService;
 import org.apache.karaf.system.management.SystemMBean;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
+import java.io.File;
+import java.io.PrintStream;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * System MBean implementation.
@@ -29,6 +35,11 @@ import javax.management.StandardMBean;
 public class System extends StandardMBean implements SystemMBean {
 
     private SystemService systemService;
+    private BundleContext bundleContext;
+
+    public void setBundleContext(BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
+    }
 
     public System() throws NotCompliantMBeanException {
         super(SystemMBean.class);
@@ -105,6 +116,107 @@ public class System extends StandardMBean implements SystemMBean {
     @Override
     public String getVersion() {
         return this.systemService.getVersion();
+    }
+
+    @Override
+    public Map<String, String> getProperties(boolean unset, boolean dumpToFile) throws Exception {
+        Map<String, String> result = new HashMap<String, String>();
+
+        Properties props = (Properties) java.lang.System.getProperties().clone();
+
+        String def = null;
+        if (unset) {
+            def = "unset";
+        }
+
+        setProperty(props, Constants.FRAMEWORK_BEGINNING_STARTLEVEL, def);
+        setProperty(props, Constants.FRAMEWORK_BOOTDELEGATION, def);
+        setProperty(props, Constants.FRAMEWORK_BUNDLE_PARENT, def);
+        setProperty(props, Constants.FRAMEWORK_BUNDLE_PARENT_APP, def);
+        setProperty(props, Constants.FRAMEWORK_BUNDLE_PARENT_BOOT, def);
+        setProperty(props, Constants.FRAMEWORK_BUNDLE_PARENT_EXT, def);
+        setProperty(props, Constants.FRAMEWORK_BUNDLE_PARENT_FRAMEWORK, def);
+        setProperty(props, Constants.FRAMEWORK_EXECPERMISSION, def);
+        setProperty(props, Constants.FRAMEWORK_EXECUTIONENVIRONMENT, def);
+        setProperty(props, Constants.FRAMEWORK_LANGUAGE, def);
+        setProperty(props, Constants.FRAMEWORK_LIBRARY_EXTENSIONS, def);
+        setProperty(props, Constants.FRAMEWORK_OS_NAME, def);
+        setProperty(props, Constants.FRAMEWORK_OS_VERSION, def);
+        setProperty(props, Constants.FRAMEWORK_PROCESSOR, def);
+        setProperty(props, Constants.FRAMEWORK_SECURITY, def);
+        setProperty(props, Constants.FRAMEWORK_SECURITY_OSGI, def);
+        setProperty(props, Constants.FRAMEWORK_STORAGE, def);
+        setProperty(props, Constants.FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT, def);
+        setProperty(props, Constants.FRAMEWORK_SYSTEMPACKAGES, def);
+        setProperty(props, Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA, def);
+        setProperty(props, Constants.FRAMEWORK_VENDOR, def);
+        setProperty(props, Constants.FRAMEWORK_VERSION, def);
+        setProperty(props, Constants.FRAMEWORK_WINDOWSYSTEM, def);
+
+        setProperty(props, Constants.SUPPORTS_BOOTCLASSPATH_EXTENSION, def);
+        setProperty(props, Constants.SUPPORTS_FRAMEWORK_EXTENSION, def);
+        setProperty(props, Constants.SUPPORTS_FRAMEWORK_FRAGMENT, def);
+        setProperty(props, Constants.SUPPORTS_FRAMEWORK_REQUIREBUNDLE, def);
+
+        if (dumpToFile) {
+            PrintStream ps = new PrintStream(new File(bundleContext.getProperty("karaf.data"), "dump-properties-" + java.lang.System.currentTimeMillis() + ".properties"));
+            ps.println("#Dump of the System and OSGi properties with the command dev:dump-properties");
+            ps.println("#Dump execute at " + new SimpleDateFormat().format(new Date()));
+            printOrderedProperties(props, ps);
+            ps.flush();
+            ps.close();
+        } else {
+            printOrderedProperties(props, result);
+        }
+
+        return result;
+    }
+
+    private void printOrderedProperties(Properties props, PrintStream out) {
+        Set<Object> keys = props.keySet();
+        Vector<String> order = new Vector<String>(keys.size());
+        for (Iterator<Object> i = keys.iterator(); i.hasNext(); ) {
+            Object str = (Object) i.next();
+            order.add((String) str);
+        }
+        Collections.sort(order);
+        for (Iterator<String> i = order.iterator(); i.hasNext(); ) {
+            String key = (String) i.next();
+            out.println(key + "=" + props.getProperty(key));
+        }
+    }
+
+    private void printOrderedProperties(Properties props, Map<String, String> result) {
+        Set<Object> keys = props.keySet();
+        Vector<String> order = new Vector<String>(keys.size());
+        for (Iterator<Object> i = keys.iterator(); i.hasNext(); ) {
+            Object str = (Object) i.next();
+            order.add((String) str);
+        }
+        Collections.sort(order);
+        for (Iterator<String> i = order.iterator(); i.hasNext(); ) {
+            String key = (String) i.next();
+            result.put(key, props.getProperty(key));
+        }
+    }
+
+    private void setProperty(Properties props, String key, String def) {
+        String val = bundleContext.getProperty(key);
+        if (val == null && def != null) {
+            props.setProperty(key, def);
+        } else if (val != null) {
+            props.setProperty(key, val);
+        }
+    }
+
+    @Override
+    public String getProperty(String key) {
+        return java.lang.System.getProperty(key);
+    }
+
+    @Override
+    public void setProperty(String key, String value, boolean persistent) {
+        systemService.setSystemProperty(key, value, persistent);
     }
 
 }
