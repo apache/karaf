@@ -40,7 +40,7 @@ public class Status {
             try {
                 config.shutdownPort = getPortFromShutdownPortFile(config.portFile);
             } catch (FileNotFoundException fnfe) {
-                System.err.println(config.portFile + " port file doesn't exist. The container is not running.");
+                System.err.println(config.portFile + " shutdown port file doesn't exist. The container is not running.");
                 System.exit(3);
             } catch (IOException ioe) {
                 System.err.println("Can't read " + config.portFile + " port file: " + ioe.getMessage());
