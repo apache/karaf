@@ -23,6 +23,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.ConnectException;
 import java.net.Socket;
 
 /**
@@ -33,21 +34,40 @@ public class Stop {
     /**
      * Sends the shutdown command to the running karaf instance. Uses either a shut down port configured in config.properties or
      * the port from the shutdown port file.
-     * 
+     *
      * @param args
      * @throws Exception
      */
     public static void main(String[] args) throws Exception {
         ConfigProperties config = new ConfigProperties();
         if (config.shutdownPort == 0 && config.portFile != null) {
-            config.shutdownPort = getPortFromShutdownPortFile(config.portFile);
+            try {
+                config.shutdownPort = getPortFromShutdownPortFile(config.portFile);
+            } catch (FileNotFoundException fnfe) {
+                System.err.println(config.portFile + " port file doesn't exist. The container is not running.");
+                System.exit(3);
+            } catch (IOException ioe) {
+                System.err.println("Can't read " + config.portFile + " port file: " + ioe.getMessage());
+                System.exit(4);
+            }
         }
         if (config.shutdownPort > 0) {
-            Socket s = new Socket(config.shutdownHost, config.shutdownPort);
-            s.getOutputStream().write(config.shutdownCommand.getBytes());
-            s.close();
+            Socket s = null;
+            try {
+                s = new Socket(config.shutdownHost, config.shutdownPort);
+                s.getOutputStream().write(config.shutdownCommand.getBytes());
+                System.exit(0);
+            } catch (ConnectException connectException) {
+                System.err.println("Can't connect to the container. The container is not running.");
+                System.exit(1);
+            } finally {
+                if (s != null) {
+                    s.close();
+                }
+            }
         } else {
             System.err.println("Unable to find port...");
+            System.exit(2);
         }
 
     }
