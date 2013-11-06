@@ -223,7 +223,7 @@ public class DependencyHelper {
                     }
                 } else {
                     log.append(indent).append("local:").append(dependencyNode).append("\n");
-                    if (carDependencies.contains(dependencyNode.getDependency().getArtifact())) {
+                    if (localDependencies.containsKey(dependencyNode.getDependency().getArtifact())) {
                         log.append(indent).append("already in feature, returning:").append(dependencyNode).append("\n");
                         return;
                     }
