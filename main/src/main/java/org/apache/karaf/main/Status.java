@@ -37,7 +37,15 @@ public class Status {
     public static void main(String[] args) throws Exception {
         ConfigProperties config = new ConfigProperties();
         if (config.shutdownPort == 0 && config.portFile != null) {
-            config.shutdownPort = getPortFromShutdownPortFile(config.portFile);
+            try {
+                config.shutdownPort = getPortFromShutdownPortFile(config.portFile);
+            } catch (FileNotFoundException fnfe) {
+                System.err.println(config.portFile + " port file doesn't exist. The container is not running.");
+                System.exit(3);
+            } catch (IOException ioe) {
+                System.err.println("Can't read " + config.portFile + " port file: " + ioe.getMessage());
+                System.exit(4);
+            }
         }
         if (config.shutdownPort > 0) {
             Socket s = null;
