@@ -18,8 +18,6 @@
  */
 package org.apache.karaf.main;
 
-import static org.ops4j.pax.tinybundles.core.TinyBundles.withBnd;
-
 import java.io.File;
 
 import junit.framework.Assert;
@@ -27,9 +25,7 @@ import junit.framework.Assert;
 import org.apache.karaf.main.util.Utils;
 import org.junit.After;
 import org.junit.Test;
-import org.ops4j.pax.tinybundles.core.TinyBundles;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.Constants;
 import org.osgi.framework.launch.Framework;
 
 public class MainStartTest {
@@ -71,38 +67,4 @@ public class MainStartTest {
 		Assert.assertEquals(Bundle.ACTIVE, bundle2.getState());
 	}
 
-    @Test
-    public void testStopWithTimeout() throws Exception {
-        File basedir = new File(getClass().getClassLoader().getResource("foo").getPath()).getParentFile();
-        File home = new File(basedir, "test-karaf-home");
-        File data = new File(home, "data");
-
-        Utils.deleteDirectory(data);
-
-		String[] args = new String[0];
-		System.setProperty("karaf.home", home.toString());
-		System.setProperty("karaf.data", data.toString());
-        System.setProperty("karaf.framework.factory", "org.apache.felix.framework.FrameworkFactory");
-
-        main = new Main(args);
-        main.launch();
-        Framework framework = main.getFramework();
-        String activatorName = TimeoutShutdownActivator.class.getName().replace('.', '/') + ".class";
-        Bundle bundle = framework.getBundleContext().installBundle("foo",
-                TinyBundles.bundle()
-                    .set( Constants.BUNDLE_ACTIVATOR, TimeoutShutdownActivator.class.getName() )
-                    .add( activatorName, getClass().getClassLoader().getResourceAsStream( activatorName ) )
-                    .build( withBnd() )
-        );
-        bundle.start();
-
-        Thread.sleep(1000);
-
-        long t0 = System.currentTimeMillis();
-        Stop.main(null);
-        main.awaitShutdown();
-        long t1 = System.currentTimeMillis();
-//        System.err.println("Shutdown duration: " + (t1 - t0) + " ms");
-        Assert.assertTrue((t1 - t0) > TimeoutShutdownActivator.TIMEOUT / 2);
-    }
 }
