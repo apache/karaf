@@ -151,7 +151,7 @@
         <felix.framework.version>4.2.1</felix.framework.version>
         <felix.gogo.version>0.10.0</felix.gogo.version>
         <felix.plugin.version>2.4.0</felix.plugin.version>
-        <felix.utils.version>1.2.0</felix.utils.version>
+        <felix.utils.version>1.4.0</felix.utils.version>
         <felix.webconsole.version>4.2.0</felix.webconsole.version>
         <felix.webconsole.api.version>3.1.2</felix.webconsole.api.version>
         <felix.metatype.version>1.0.8</felix.metatype.version>
