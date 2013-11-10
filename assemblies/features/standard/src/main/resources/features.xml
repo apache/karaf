@@ -451,6 +451,11 @@
         <bundle start-level="30">mvn:org.apache.karaf.jaas/org.apache.karaf.jaas.jasypt/${project.version}</bundle>
     </feature>
 
+    <feature name="blueprint-web" description="Provides an OSGi-aware Servlet ContextListener for bootstrapping blueprint inside web-bundle containers" version="${project.version}" resolver="(obr)">
+        <feature>war</feature>
+        <bundle>mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.webosgi/${aries.blueprint.web.version}</bundle>
+    </feature>
+
     <feature name="scr" description="Declarative Service support" version="${project.version}" resolver="(obr)">
         <feature>eventadmin</feature>
         <bundle dependency="true" start-level="30">mvn:org.apache.felix/org.apache.felix.metatype/${felix.metatype.version}</bundle>
