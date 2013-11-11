@@ -68,6 +68,7 @@ public class StandardFeaturesTest extends KarafTestSupport {
         
         // TODO: Check why uninstalling http does not uninstall pax-http-whiteboard
         featureService.uninstallFeature("pax-http-whiteboard");
+        featureService.uninstallFeature("pax-http");
     }
 
     @Test
