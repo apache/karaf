@@ -23,6 +23,21 @@ import org.ops4j.pax.exam.spi.reactors.PerClass;
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
 public class StandardFeaturesTest extends KarafTestSupport {
+	
+	@Test
+	/**
+	 * Regression test for https://issues.apache.org/jira/browse/KARAF-2566
+	 * @throws Exception
+	 */
+	public void checkInteractionOfHttpAndAriesAnnotationFeature() throws Exception {
+		featureService.installFeature("pax-http");
+		try {
+			installAssertAndUninstallFeature("aries-annotation");
+		} finally {
+        	featureService.uninstallFeature("pax-http");
+        	featureService.uninstallFeature("pax-jetty");
+        }
+    }
 
     @Test
     public void installAriesAnnotationFeature() throws Exception {
