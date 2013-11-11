@@ -281,9 +281,13 @@ public class KarafTestSupport {
     }
 
     public JMXConnector getJMXConnector() throws Exception {
+        return getJMXConnector("karaf", "karaf");
+    }
+ 
+    public JMXConnector getJMXConnector(String userName, String passWord) throws Exception {
         JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:" + RMI_REG_PORT+ "/karaf-root");
         Hashtable<String, Object> env = new Hashtable<String, Object>();
-        String[] credentials = new String[]{ "karaf", "karaf" };
+        String[] credentials = new String[]{ userName, passWord };
         env.put("jmx.remote.credentials", credentials);
         JMXConnector connector = JMXConnectorFactory.connect(url, env);
         return connector;
