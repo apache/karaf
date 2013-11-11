@@ -63,6 +63,7 @@ public class Install extends AbstractAction {
         System.out.println("");
         if (os.startsWith("Win")) {
             System.out.println("");
+            System.out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("MS Windows system detected:").a(Ansi.Attribute.RESET).toString());
             System.out.println("To install the service, run: ");
             System.out.println("  C:> " + serviceFile.getPath() + " install");
             System.out.println("");
@@ -77,6 +78,7 @@ public class Install extends AbstractAction {
             System.out.println("");
         } else if (os.startsWith("Mac OS X")) {
             System.out.println("");
+            System.out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("Mac OS X system detected:").a(Ansi.Attribute.RESET).toString());
             System.out.println("to add bin/org.apache.karaf.KARAF as user service move this file into ~/Library/LaunchAgents/");  
             System.out.println("> mv bin/org.apache.karaf.KARAF.plist ~/Library/LaunchAgents/");
             System.out.println("");
@@ -104,6 +106,7 @@ public class Install extends AbstractAction {
 
             if (redhatRelease.exists()) {
                 System.out.println("");
+                System.out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("RedHat/Fedora/CentOS Linux system detected:").a(Ansi.Attribute.RESET).toString());
                 System.out.println("  To install the service:");
                 System.out.println("    $ ln -s " + serviceFile.getPath() + " /etc/init.d/");
                 System.out.println("    $ chkconfig " + serviceFile.getName() + " --add");
@@ -125,6 +128,7 @@ public class Install extends AbstractAction {
                 System.out.println("    $ rm /etc/init.d/" + serviceFile.getPath());
             } else if (debianVersion.exists()) {
                 System.out.println("");
+                System.out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("Ubuntu/Debian Linux system detected:").a(Ansi.Attribute.RESET).toString());
                 System.out.println("  To install the service:");
                 System.out.println("    $ ln -s " + serviceFile.getPath() + " /etc/init.d/");
                 System.out.println("");
