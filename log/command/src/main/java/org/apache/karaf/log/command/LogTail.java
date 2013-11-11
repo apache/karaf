@@ -34,7 +34,7 @@ public class LogTail extends DisplayLog {
         executorService.execute(printThread);
         new Thread(new ReadKeyBoardThread(this, Thread.currentThread())).start();
         while (!Thread.currentThread().isInterrupted()) {
-            Thread.sleep(500);
+            Thread.sleep(200);
         }
         printThread.abort();
         executorService.shutdownNow();  
