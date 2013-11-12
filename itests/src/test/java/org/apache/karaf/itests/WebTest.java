@@ -57,8 +57,7 @@ public class WebTest extends KarafTestSupport {
             TabularData webBundles = (TabularData) connection.getAttribute(name, "WebBundles");
             assertEquals(0, webBundles.size());
         } finally {
-            if (connector != null)
-                connector.close();
+            close(connector);
         }
     }
 

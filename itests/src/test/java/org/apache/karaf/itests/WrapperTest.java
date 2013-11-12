@@ -51,8 +51,7 @@ public class WrapperTest extends KarafTestSupport {
             ObjectName name = new ObjectName("org.apache.karaf:type=wrapper,name=root");
             connection.invoke(name, "install", new Object[]{}, new String[]{});
         } finally {
-            if (connector != null)
-                connector.close();
+            close(connector);
         }
     }
 

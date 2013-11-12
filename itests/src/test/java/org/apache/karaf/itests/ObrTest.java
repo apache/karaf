@@ -57,8 +57,7 @@ public class ObrTest extends KarafTestSupport {
             TabularData bundles = (TabularData) connection.getAttribute(name, "Bundles");
             assertEquals(0, bundles.size());
         } finally {
-            if (connector != null)
-                connector.close();
+        	close(connector);
         }
     }
 

@@ -48,8 +48,7 @@ public class PackageTest extends KarafTestSupport {
             TabularData exports = (TabularData) connection.getAttribute(name, "Exports");
             assertTrue(exports.size() > 0);
         } finally {
-            if (connector != null)
-                connector.close();
+            close(connector);
         }
     }
 
@@ -70,8 +69,7 @@ public class PackageTest extends KarafTestSupport {
             TabularData imports = (TabularData) connection.getAttribute(name, "Imports");
             assertTrue(imports.size() > 0);
         } finally {
-            if (connector != null)
-                connector.close();
+        	close(connector);
         }
     }
 

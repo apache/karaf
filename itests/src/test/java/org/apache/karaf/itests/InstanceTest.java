@@ -53,8 +53,7 @@ public class InstanceTest extends KarafTestSupport {
             connection.invoke(name, "destroyInstance", new Object[]{ "itest2" }, new String[]{ "java.lang.String" });
             Assert.assertEquals(oldNum, getInstancesNum(connection, name));
         } finally {
-            if (connector != null)
-                connector.close();
+        	close(connector);
         }
     }
 

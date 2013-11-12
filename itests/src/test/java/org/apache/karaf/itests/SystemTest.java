@@ -48,8 +48,7 @@ public class SystemTest extends KarafTestSupport {
             String currentName = (String) connection.getAttribute(name, "Name");
             assertEquals("root", currentName);
         } finally {
-            if (connector != null)
-                connector.close();
+            close(connector);
         }
     }
 

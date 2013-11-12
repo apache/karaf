@@ -51,8 +51,7 @@ public class HttpTest extends KarafTestSupport {
             TabularData servlets = (TabularData) connection.getAttribute(name, "Servlets");
             assertTrue(servlets.size() > 0);
         } finally {
-            if (connector != null)
-                connector.close();
+            close(connector);
         }
     }
 

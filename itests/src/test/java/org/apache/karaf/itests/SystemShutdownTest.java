@@ -41,8 +41,7 @@ public class SystemShutdownTest extends KarafTestSupport {
             ObjectName name = new ObjectName("org.apache.karaf:type=system,name=root");
             connection.invoke(name, "halt", new Object[]{}, new String[]{});
         } finally {
-            if (connector != null)
-                connector.close();
+        	close(connector);
         }
     }
 

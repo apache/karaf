@@ -47,8 +47,7 @@ public class KarTest extends KarafTestSupport {
             List<String> kars = (List<String>) connection.getAttribute(name, "Kars");
             assertEquals(0, kars.size());
         } finally {
-            if (connector != null)
-                connector.close();
+            close(connector);
         }
     }
 

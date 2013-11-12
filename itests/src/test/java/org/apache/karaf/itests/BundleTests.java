@@ -48,8 +48,7 @@ public class BundleTests extends KarafTestSupport {
             TabularDataSupport value = (TabularDataSupport) connection.getAttribute(name, "Bundles");
             assertTrue(value.size() > 0);
         } finally {
-            if (connector != null)
-                connector.close();
+        	close(connector);
         }
     }
 

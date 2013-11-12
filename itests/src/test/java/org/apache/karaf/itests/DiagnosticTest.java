@@ -41,8 +41,7 @@ public class DiagnosticTest extends KarafTestSupport {
             ObjectName name = new ObjectName("org.apache.karaf:type=diagnostic,name=root");
             connection.invoke(name, "createDump", new Object[]{ "itest" }, new String[]{ "java.lang.String" });
         } finally {
-            if (connector != null)
-                connector.close();
+        	close(connector);
         }
     }
 

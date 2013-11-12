@@ -20,7 +20,9 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.karafDist
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
 
 import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.Collection;
@@ -348,6 +350,16 @@ public class KarafTestSupport {
         featureService.installFeature(feature);
         assertFeatureInstalled(feature);
         featureService.uninstallFeature(feature);
+    }
+    
+    protected void close(Closeable closeAble) {
+    	if (closeAble != null) {
+    		try {
+				closeAble.close();
+			} catch (IOException e) {
+				throw new RuntimeException(e.getMessage(), e);
+			}
+    	}
     }
 
 }

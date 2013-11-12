@@ -48,8 +48,7 @@ public class ServiceTest extends KarafTestSupport {
             TabularData services = (TabularData) connection.getAttribute(name, "Services");
             assertTrue(services.size() > 0);
         } finally {
-            if (connector != null)
-                connector.close();
+            close(connector);
         }
     }
 

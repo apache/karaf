@@ -57,8 +57,7 @@ public class ConfigTest extends KarafTestSupport {
             Map<String, String> properties = (Map<String, String>) connection.invoke(name, "listProperties", new Object[]{ "org.apache.karaf.features" }, new String[]{ "java.lang.String" });
             assertTrue(properties.keySet().size() > 0);
         } finally {
-            if (connector != null)
-                connector.close();
+        	close(connector);
         }
     }
 
