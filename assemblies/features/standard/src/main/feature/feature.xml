@@ -63,6 +63,9 @@
         <bundle start-level="30">mvn:org.apache.karaf.wrapper/org.apache.karaf.wrapper.core/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.wrapper/org.apache.karaf.wrapper.command/${project.version}</bundle>
     </feature>
+    <feature name="service-wrapper" description="Provide OS integration (alias to wrapper feature)" version="${project.version}">
+        <feature version="${project.version}">wrapper</feature>
+    </feature>
 
     <feature name="obr" description="Provide OSGi Bundle Repository (OBR) support" version="${project.version}">
         <bundle dependency="true" start-level="30">mvn:commons-lang/commons-lang/${commons-lang.version}</bundle>
