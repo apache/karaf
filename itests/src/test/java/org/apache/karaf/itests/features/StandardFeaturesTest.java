@@ -30,13 +30,8 @@ public class StandardFeaturesTest extends KarafTestSupport {
 	 * @throws Exception
 	 */
 	public void checkInteractionOfHttpAndAriesAnnotationFeature() throws Exception {
-		featureService.installFeature("pax-http");
-		try {
-			installAssertAndUninstallFeature("aries-annotation");
-		} finally {
-        	featureService.uninstallFeature("pax-http");
-        	featureService.uninstallFeature("pax-jetty");
-        }
+		installAssertAndUninstallFeature("aries-annotation", "pax-http");
+		installAssertAndUninstallFeature("aries-annotation", "pax-http");
     }
 
     @Test
@@ -72,18 +67,11 @@ public class StandardFeaturesTest extends KarafTestSupport {
     @Test
     public void installHttpFeature() throws Exception {
         installAssertAndUninstallFeature("http");
-        
-        // TODO: Check why uninstalling http does not uninstall pax-http
-        featureService.uninstallFeature("pax-http");
     }
 
     @Test
     public void installHttpWhiteboardFeature() throws Exception {
         installAssertAndUninstallFeature("http-whiteboard");
-        
-        // TODO: Check why uninstalling http does not uninstall pax-http-whiteboard
-        featureService.uninstallFeature("pax-http-whiteboard");
-        featureService.uninstallFeature("pax-http");
     }
 
     @Test

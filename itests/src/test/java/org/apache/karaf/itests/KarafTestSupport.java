@@ -66,6 +66,8 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class KarafTestSupport {
 
@@ -75,7 +77,9 @@ public class KarafTestSupport {
 
     static final Long COMMAND_TIMEOUT = 10000L;
     static final Long SERVICE_TIMEOUT = 30000L;
-    
+
+    private static Logger LOG = LoggerFactory.getLogger(KarafTestSupport.class);
+
     @Rule
     public KarafTestWatcher baseTestWatcher = new KarafTestWatcher();
 
@@ -356,11 +360,36 @@ public class KarafTestSupport {
         assertFeatureInstalled(feature);
     }
     
-    protected void installAssertAndUninstallFeature(String feature) throws Exception {
-        featureService.installFeature(feature);
-        assertFeatureInstalled(feature);
-        featureService.uninstallFeature(feature);
+    protected void installAssertAndUninstallFeature(String... feature) throws Exception {
+    	Set<Feature> featuresBefore = new HashSet<Feature>(Arrays.asList(featureService.listInstalledFeatures()));
+    	for (String curFeature : feature) {
+    		featureService.installFeature(curFeature);
+            assertFeatureInstalled(curFeature);			
+		}
+        uninstallNewFeatures(featuresBefore);
     }
+
+    /**
+     * The feature service does not uninstall feature dependencies when uninstalling a single feature.
+     * So we need to make sure we uninstall all features that were newly installed.
+     * 
+     * @param featuresBefore
+     * @throws Exception
+     */
+	private void uninstallNewFeatures(Set<Feature> featuresBefore)
+			throws Exception {
+		Feature[] features = featureService.listInstalledFeatures();
+        for (Feature curFeature : features) {
+			if (!featuresBefore.contains(curFeature)) {
+				try {
+					System.out.println("Uninstalling " + curFeature.getName());
+					featureService.uninstallFeature(curFeature.getName(), curFeature.getVersion());
+				} catch (Exception e) {
+					LOG.error(e.getMessage(), e);
+				}
+			}
+		}
+	}
     
     protected void close(Closeable closeAble) {
     	if (closeAble != null) {
