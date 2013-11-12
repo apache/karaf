@@ -345,7 +345,7 @@ public class Main {
         } catch (Exception e) {
             if (e instanceof InvocationTargetException){
                 throw new RuntimeException("Exception instantiating lock class " + config.lockClass
-                                            + "\n" + ((InvocationTargetException)e).getTargetException().getMessage());
+                                            + "\n" + ((InvocationTargetException)e).getTargetException().getMessage(), e);
             }else{
                 throw new RuntimeException("Exception instantiating lock class " + config.lockClass, e);
             }
