@@ -15,19 +15,24 @@
  */
 package org.apache.karaf.jaas.command;
 
+import java.security.Principal;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+
 import javax.security.auth.login.AppConfigurationEntry;
 
 import org.apache.felix.gogo.commands.Command;
-import org.apache.karaf.jaas.config.JaasRealm;
-import org.apache.karaf.jaas.modules.BackingEngine;
+import org.apache.karaf.jaas.boot.principal.GroupPrincipal;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
+import org.apache.karaf.jaas.config.JaasRealm;
+import org.apache.karaf.jaas.modules.BackingEngine;
 
 @Command(scope = "jaas", name = "users", description = "List the users of the selected JAAS Realm/Login Module")
 public class ListUsersCommand extends JaasCommandSupport {
 
-    private static final String OUTPUT_FORMAT = "%-20s %-20s";
+    private static final String OUTPUT_FORMAT = "%-20s %-20s %-20s";
 
     @Override
     protected Object doExecute() throws Exception {
@@ -52,22 +57,43 @@ public class ListUsersCommand extends JaasCommandSupport {
     @Override
     protected Object doExecute(BackingEngine engine) throws Exception {
         List<UserPrincipal> users = engine.listUsers();
-        System.out.println(String.format(OUTPUT_FORMAT, "User Name", "Role"));
+        System.out.println(String.format(OUTPUT_FORMAT, "User Name", "Group", "Role"));
 
         for (UserPrincipal user : users) {
+            List<String> reportedRoles = new ArrayList<String>();
             String userName = user.getName();
-            List<RolePrincipal> roles = engine.listRoles(user);
 
-            if (roles != null && roles.size() >= 1) {
-                for (RolePrincipal role : roles) {
-                    String roleName = role.getName();
-                    System.out.println(String.format(OUTPUT_FORMAT, userName, roleName));
-                }
-            } else {
-                System.out.println(String.format(OUTPUT_FORMAT, userName, ""));
+            for(GroupPrincipal group : engine.listGroups(user)) {
+                String groupName = group.getName();
+                reportedRoles.addAll(displayRole(engine, userName, groupName, group));
             }
 
+            reportedRoles.addAll(displayRole(engine, userName, "", user, reportedRoles));
+            if (reportedRoles.size() == 0) {
+                System.out.println(String.format(OUTPUT_FORMAT, userName, "", ""));
+            }
         }
         return null;
+    }
+
+    private List<String> displayRole(BackingEngine engine, String userName, String groupName, Principal principal) {
+        return displayRole(engine, userName, groupName, principal, Collections.<String>emptyList());
+    }
+
+    private List<String> displayRole(BackingEngine engine, String userName, String groupName, Principal principal, List<String> excludedRoles) {
+        List<String> names = new ArrayList<String>();
+        List<RolePrincipal> roles = engine.listRoles(principal);
+
+        if (roles != null && roles.size() >= 1) {
+            for (RolePrincipal role : roles) {
+                String roleName = role.getName();
+                if (excludedRoles.contains(roleName))
+                    continue;
+
+                names.add(roleName);
+                System.out.println(String.format(OUTPUT_FORMAT, userName, groupName, roleName));
+            }
+        }
+        return names;
     }
 }

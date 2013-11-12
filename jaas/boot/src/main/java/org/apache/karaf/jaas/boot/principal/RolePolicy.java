@@ -2,9 +2,9 @@
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
- * 
+ *
  *       http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,11 +15,11 @@
 package org.apache.karaf.jaas.boot.principal;
 
 import java.security.Principal;
-import java.security.acl.Group;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
 import javax.security.auth.Subject;
 
 public enum RolePolicy {
@@ -35,7 +35,8 @@ public enum RolePolicy {
                 }
             }
         }
-    },
+    }; // ,
+    /* TODO Is this used anywhere?
     GROUP_ROLES("group") {
         public void handleRoles(Subject subject,Set<Principal> principals,String discriminator) {
             Group group = new GroupPrincipal(discriminator);
@@ -49,6 +50,7 @@ public enum RolePolicy {
             subject.getPrincipals().add(group);
         }
     };
+    */
 
     private String value;
 

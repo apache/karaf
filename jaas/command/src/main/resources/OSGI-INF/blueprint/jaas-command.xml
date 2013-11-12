@@ -62,6 +62,18 @@
         <command name="jaas/roledel">
             <action class="org.apache.karaf.jaas.command.RoleDeleteCommand"/>
         </command>
+        <command name="jaas/groupadd">
+            <action class="org.apache.karaf.jaas.command.GroupAddCommand"/>
+        </command>
+        <command name="jaas/groupdel">
+            <action class="org.apache.karaf.jaas.command.GroupDeleteCommand"/>
+        </command>
+        <command name="jaas/grouproleadd">
+            <action class="org.apache.karaf.jaas.command.GroupRoleAddCommand"/>
+        </command>
+        <command name="jaas/grouproledel">
+            <action class="org.apache.karaf.jaas.command.GroupRoleDeleteCommand"/>
+        </command>
     </command-bundle>
 
     <!-- JAAS Realms -->

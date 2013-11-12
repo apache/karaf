@@ -14,8 +14,10 @@
  */
 package org.apache.karaf.jaas.modules;
 
+import java.security.Principal;
 import java.util.List;
 
+import org.apache.karaf.jaas.boot.principal.GroupPrincipal;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 
@@ -42,12 +44,34 @@ public interface BackingEngine {
     List<UserPrincipal> listUsers();
 
     /**
-     * List Roles for {@param user}.
+     * List groups that a user is in
+     * @param user
+     * @return the groups that the user is in
+     */
+    List<GroupPrincipal> listGroups(UserPrincipal user);
+
+    /**
+     * Add a user to a group
+     * @param username
+     * @param group
+     */
+    void addGroup(String username, String group);
+
+    /**
+     * Remote a user from a group
+     * @param username
+     * @param group
+     */
+    void deleteGroup(String username, String group);
+
+    /**
+     * List Roles for {@param principal}. This could either be a
+     * {@link UserPrincipal} or a {@link GroupPrincipal}.
      *
      * @param user
      * @return
      */
-    List<RolePrincipal> listRoles(UserPrincipal user);
+    List<RolePrincipal> listRoles(Principal principal);
 
     /**
      * Add a role to the user
@@ -65,4 +89,17 @@ public interface BackingEngine {
      */
     void deleteRole(String username, String role);
 
+    /**
+     * Add a role to a group
+     * @param groupname
+     * @param role
+     */
+    void addGroupRole(String groupname, String role);
+
+    /**
+     * Remote a role from a group
+     * @param groupname
+     * @param role
+     */
+    void deleteGroupRole(String groupname, String role);
 }
