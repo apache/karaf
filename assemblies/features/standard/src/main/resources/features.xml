@@ -322,6 +322,9 @@
     <feature name="wrapper" description="Provide OS integration" version="${project.version}">
         <bundle>mvn:org.apache.karaf.shell/org.apache.karaf.shell.wrapper/${project.version}</bundle>
     </feature>
+    <feature name="service-wrapper" description="Provide OS integration (alias to wrapper feature)" version="${project.version}">
+        <feature version="${project.version}">wrapper</feature>
+    </feature>
 
     <feature name="obr" description="Provide OSGi Bundle Repository (OBR) support" version="${project.version}">
         <bundle start-level="30">mvn:org.apache.felix/org.osgi.service.obr/${felix.obr.version}</bundle>
