@@ -27,7 +27,9 @@ public class StreamUtils {
     public static void close(Closeable... closeables) {
         for (Closeable c : closeables) {
             try {
-                c.close();
+            	if (c != null) {
+            		c.close();
+            	}
             } catch (IOException e) {
                 // Ignore
             }
