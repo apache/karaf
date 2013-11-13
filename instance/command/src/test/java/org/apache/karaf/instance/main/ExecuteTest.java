@@ -18,21 +18,11 @@ package org.apache.karaf.instance.main;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
 
 import junit.framework.TestCase;
-
-import org.apache.karaf.instance.command.InstanceCommandSupport;
-import org.apache.karaf.instance.core.InstanceService;
-import org.apache.karaf.instance.core.internal.InstanceServiceImpl;
-import org.easymock.EasyMock;
-import org.easymock.IAnswer;
 
 public class ExecuteTest extends TestCase {
     private String userDir;
@@ -90,7 +80,7 @@ public class ExecuteTest extends TestCase {
         try {
             Execute.main(new String [] {"create"});            
         } catch (RuntimeException re) {
-            assertEquals("-1", re.getMessage());
+            assertEquals("-2", re.getMessage());
             
             String s = new String(baos.toByteArray());            
             assertTrue(s.contains("karaf.instances"));
