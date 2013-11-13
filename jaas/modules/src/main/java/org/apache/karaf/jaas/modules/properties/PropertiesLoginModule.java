@@ -95,7 +95,7 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
         String userInfos = null;
 
         try {
-            userInfos = users.get(user);
+            userInfos = (String) users.get(user);
         } catch (NullPointerException e) {
             //error handled in the next statement
         }
@@ -162,7 +162,7 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
             if (infos[i].startsWith(PropertiesBackingEngine.GROUP_PREFIX)) {
                 // It's a group reference
                 principals.add(new GroupPrincipal(infos[i].substring(PropertiesBackingEngine.GROUP_PREFIX.length())));
-                String groupInfo = users.get(infos[i]);
+                String groupInfo = (String) users.get(infos[i]);
                 if (groupInfo != null) {
                     String[] roles = groupInfo.split(",");
                     for (int j = 1; j < roles.length; j++) {
