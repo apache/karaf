@@ -75,7 +75,7 @@ public class KarafTestSupport {
     public static final String HTTP_PORT = "9081";
     public static final String RMI_REG_PORT = "1100";
 
-    static final Long COMMAND_TIMEOUT = 10000L;
+    static final Long COMMAND_TIMEOUT = 30000L;
     static final Long SERVICE_TIMEOUT = 30000L;
 
     private static Logger LOG = LoggerFactory.getLogger(KarafTestSupport.class);
