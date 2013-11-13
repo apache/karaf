@@ -21,6 +21,8 @@ package org.apache.karaf.main.util;
 import java.io.File;
 import java.util.Properties;
 import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
 
 import junit.framework.Assert;
 
@@ -47,6 +49,12 @@ public class BootstrapLogManagerTest {
 		BootstrapLogManager.setProperties(configProps);
 		Handler handler = BootstrapLogManager.getDefaultHandler();
 		Assert.assertNotNull(handler);
+        try {
+            // introduce a delay just to give the time to the handler to actually create the log file
+            Thread.sleep(200);
+        } catch (Exception e) {
+            // ignore
+        }
 		assertExists("target/log/karaf.log");
 	}
 	
