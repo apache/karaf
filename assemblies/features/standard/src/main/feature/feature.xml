@@ -111,6 +111,10 @@
         <bundle start-level="30">mvn:org.apache.karaf.web/org.apache.karaf.web.core/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.web/org.apache.karaf.web.command/${project.version}</bundle>
     </feature>
+    
+    <feature name="jetty" version="8.1.9.v20130131" resolver="(obr)">
+    	<feature>pax-jetty</feature>
+    </feature>
 
     <feature name="kar" description="Provide KAR (KARaf archive) support" version="${project.version}" resolver="(obr)">
         <bundle start-level="30">mvn:org.apache.karaf.kar/org.apache.karaf.kar.core/${project.version}</bundle>
