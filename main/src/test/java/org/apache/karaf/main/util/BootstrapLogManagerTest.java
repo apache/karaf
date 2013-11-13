@@ -49,12 +49,6 @@ public class BootstrapLogManagerTest {
 		BootstrapLogManager.setProperties(configProps);
 		Handler handler = BootstrapLogManager.getDefaultHandler();
 		Assert.assertNotNull(handler);
-        try {
-            // introduce a delay just to give the time to the handler to actually create the log file
-            Thread.sleep(200);
-        } catch (Exception e) {
-            // ignore
-        }
 		assertExists("target/log/karaf.log");
 	}
 	
