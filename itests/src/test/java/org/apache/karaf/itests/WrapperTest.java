@@ -32,7 +32,7 @@ public class WrapperTest extends KarafTestSupport {
 
     @Before
     public void installWrapperFeature() throws Exception {
-    	featureService.installFeature("wrapper");
+    	installAndAssertFeature("wrapper");
     }
 
     @Test
