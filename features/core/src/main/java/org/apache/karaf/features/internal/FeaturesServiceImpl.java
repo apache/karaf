@@ -188,7 +188,8 @@ public class FeaturesServiceImpl implements FeaturesService {
      * @param uri the features repository URI.
      * @throws Exception in case of refresh failure.
      */
-    protected void refreshRepository(URI uri) throws Exception {
+    @Override
+    public void refreshRepository(URI uri) throws Exception {
         this.refreshRepository(uri, false);
     }
 

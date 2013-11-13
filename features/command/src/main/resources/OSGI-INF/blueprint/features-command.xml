@@ -40,6 +40,16 @@
             </completers>
         </command>
         <command>
+            <action class="org.apache.karaf.features.command.RepoRefreshCommand">
+                <property name="featureFinder" ref="featureFinder" />
+                <property name="featuresService" ref="featuresService" />
+            </action>
+            <completers>
+                <ref component-id="installedRepoUriCompleter" />
+                <null/>
+            </completers>
+        </command>
+        <command>
             <action class="org.apache.karaf.features.command.InstallFeatureCommand"/>
             <completers>
                 <ref component-id="uninstalledFeatureCompleter" />

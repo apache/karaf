@@ -586,6 +586,12 @@ public class InstallKarsMojo extends MojoSupport {
             // TODO Auto-generated method stub
             return null;
         }
+
+		@Override
+		public void refreshRepository(URI uri) throws Exception {
+			// TODO Auto-generated method stub
+			
+		}
     }
 
     // when FELIX-2887 is ready we can use plain Properties again

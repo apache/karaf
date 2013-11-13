@@ -80,4 +80,6 @@ public interface FeaturesService {
     Feature getFeature(String name, String version) throws Exception;
 
     Feature getFeature(String name) throws Exception;
+
+	void refreshRepository(URI uri) throws Exception;
 }
