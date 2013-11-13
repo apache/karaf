@@ -21,19 +21,22 @@ package org.apache.karaf.main.util;
 import java.io.File;
 import java.util.Properties;
 import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.LogRecord;
 
 import junit.framework.Assert;
 
 import org.junit.Test;
 
 public class BootstrapLogManagerTest {
-
+	
+	private Properties getConfigProperties() {
+		Properties configProps = new Properties();
+		configProps.put("karaf.data", "target");
+		return configProps;
+	}
+	
 	@Test
 	public void testGetLogManagerNoProperties() {
-		System.setProperty("karaf.data", "target");
-		BootstrapLogManager.setProperties(null);
+		BootstrapLogManager.setProperties(getConfigProperties());
 		try {
 			BootstrapLogManager.getDefaultHandler();
 		} catch (IllegalStateException e) {
@@ -44,9 +47,7 @@ public class BootstrapLogManagerTest {
 	@Test
 	public void testGetLogManager() {
 		new File("target/log/karaf.log").delete();
-		System.setProperty("karaf.data", "target");
-		Properties configProps = new Properties();
-		BootstrapLogManager.setProperties(configProps);
+		BootstrapLogManager.setProperties(getConfigProperties());
 		Handler handler = BootstrapLogManager.getDefaultHandler();
 		Assert.assertNotNull(handler);
 		assertExists("target/log/karaf.log");
@@ -55,9 +56,8 @@ public class BootstrapLogManagerTest {
 	@Test
 	public void testGetLogManagerFromPaxLoggingConfig() {
 		new File("target/test.log").delete();
-		System.setProperty("karaf.base", "src/test/resources/test-karaf-home");
-		Properties configProps = new Properties();
-		BootstrapLogManager.setProperties(configProps);
+		Properties configProps = getConfigProperties();
+		BootstrapLogManager.setProperties(configProps, "src/test/resources/org.ops4j.pax.logging.cfg");
 		Handler handler = BootstrapLogManager.getDefaultHandler();
 		Assert.assertNotNull(handler);
 		assertExists("target/test.log");

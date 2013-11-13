@@ -217,7 +217,8 @@ public class Main {
         if (config.delayConsoleStart) {
             System.out.println(config.startupMessage);
         }
-        BootstrapLogManager.setProperties(config.props);
+        String log4jConfigPath = System.getProperty("karaf.base") + "/etc/org.ops4j.pax.logging.cfg";
+        BootstrapLogManager.setProperties(config.props, log4jConfigPath);
         lock = createLock();
         lockCallback = new KarafLockCallback();
         InstanceHelper.updateInstancePid(config.karafHome, config.karafBase);

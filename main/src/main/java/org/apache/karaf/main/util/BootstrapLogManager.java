@@ -41,9 +41,11 @@ public class BootstrapLogManager {
     private static BootstrapLogManager instance;
 	private Handler handler;
     private Properties configProps;
+	private String log4jConfigPath;
     
-    public BootstrapLogManager(Properties configProps) {
+    public BootstrapLogManager(Properties configProps, String log4jConfigPath) {
 		this.configProps = configProps;
+		this.log4jConfigPath = log4jConfigPath;
 		this.handler = null;
 	}
 
@@ -55,8 +57,12 @@ public class BootstrapLogManager {
     }
     
     public static void setProperties(Properties configProps) {
-        instance = new BootstrapLogManager(configProps);
+        setProperties(configProps, null);
     }
+    
+	public static void setProperties(Properties configProps, String log4jConfigPath) {
+		instance = new BootstrapLogManager(configProps, log4jConfigPath);
+	}
 
     private Handler getDefaultHandlerInternal() {
         if (handler != null) {
@@ -64,7 +70,7 @@ public class BootstrapLogManager {
         }
         
         String filename = getLogFilePath();
-        filename = SubstHelper.substVars(filename, LOG4J_APPENDER_FILE, null, null);
+        filename = SubstHelper.substVars(filename, LOG4J_APPENDER_FILE, null, configProps);
         File logFile = new File(filename);
         try {
 			return new SimpleFileHandler(logFile);
@@ -73,11 +79,11 @@ public class BootstrapLogManager {
 		}
 	}
 
-	private static Properties loadPaxLoggingConfig() {
+	private Properties loadPaxLoggingConfig() {
     	Properties props = new Properties();
         FileInputStream fis = null;
         try {
-            fis = new FileInputStream(System.getProperty("karaf.base") + "/etc/org.ops4j.pax.logging.cfg");
+            fis = new FileInputStream(log4jConfigPath);
             props.load(fis);
         } catch (Exception e) {
         	// Ignore
