@@ -50,6 +50,9 @@ public class NameScoping {
      * Returns true if the given scope is the global scope so that it can be hidden from help messages
      */
     public static boolean isGlobalScope(CommandSession session, String scope) {
+        if (session == null)
+            return false;
+
         if (!isMultiScopeMode(session)) {
             String globalScope = (String) session.get("APPLICATION");
             if (globalScope != null) {
@@ -64,6 +67,9 @@ public class NameScoping {
      * avoid prefixing commands with their scope
      */
     public static boolean isMultiScopeMode(CommandSession session) {
+        if (session == null)
+            return false;
+
         Object value = session.get(MULTI_SCOPE_MODE_KEY);
         if (value != null && value.equals("false")) {
             return false;
