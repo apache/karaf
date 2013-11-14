@@ -118,7 +118,7 @@
         <jetty.version>7.6.8.v20121106</jetty.version>
         <junit.version>4.10</junit.version>
         <junit.bundle.version>4.10_1</junit.bundle.version>
-        <org.json.version>20070829</org.json.version>
+        <org.json.version>20131018</org.json.version>
         <geronimo.jms-spec.version>1.1.1</geronimo.jms-spec.version>
         <geronimo.jpa-spec.version>1.1</geronimo.jpa-spec.version>
         <geronimo.jta-spec.version>1.1.1</geronimo.jta-spec.version>
