@@ -90,7 +90,7 @@ public class ExecuteTest extends TestCase {
         try {
             Execute.main(new String [] {"create"});            
         } catch (RuntimeException re) {
-            assertEquals("-1", re.getMessage());
+            assertEquals("-2", re.getMessage());
             
             String s = new String(baos.toByteArray());            
             assertTrue(s.contains("karaf.instances"));
