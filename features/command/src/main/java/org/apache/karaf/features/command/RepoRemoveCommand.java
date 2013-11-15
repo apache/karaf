@@ -36,7 +36,7 @@ public class RepoRemoveCommand extends FeaturesCommandSupport {
     protected void doExecute(FeaturesService featuresService) throws Exception {
     	URI uri = null;
     	for (Repository r : featuresService.listRepositories()) {
-    		if (r.getName().equals(repository)) {
+    		if (r.getName() != null && r.getName().equals(repository)) {
     			uri = r.getURI();
     			break;
     		}
