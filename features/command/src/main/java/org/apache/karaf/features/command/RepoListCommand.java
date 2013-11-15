@@ -24,7 +24,6 @@ import org.apache.karaf.features.Repository;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.MultiException;
-import org.apache.karaf.shell.table.Row;
 import org.apache.karaf.shell.table.ShellTable;
 
 @Command(scope = "feature", name = "repo-list", description = "Displays a list of all defined repositories.")
@@ -45,9 +44,7 @@ public class RepoListCommand extends FeaturesCommandSupport {
 
         Repository[] repos = featuresService.listRepositories();
      	for (Repository repo : repos) {
-     	    Row row = table.addRow();
-     	    row.addContent(repo.getName());
-            row.addContent(repo.getURI().toString()); 
+     	    table.addRow().addContent(repo.getName(), repo.getURI().toString()); 
      	}
      	table.print(System.out);
     }
