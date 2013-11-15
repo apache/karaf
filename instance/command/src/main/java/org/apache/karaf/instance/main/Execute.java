@@ -44,6 +44,7 @@ public class Execute {
             ListCommand.class,
             RenameCommand.class,
             StartCommand.class,
+            StatusCommand.class,
             StopCommand.class};
     private static final Map<String, Class<?>> COMMANDS = new TreeMap<String, Class<?>>();
 
