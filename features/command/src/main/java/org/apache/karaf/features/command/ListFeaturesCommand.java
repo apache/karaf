@@ -16,7 +16,6 @@
  */
 package org.apache.karaf.features.command;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -46,7 +45,7 @@ public class ListFeaturesCommand extends FeaturesCommandSupport {
         table.column("Version");
         table.column("Installed");
         table.column("Repository");
-        table.column("Description");
+        table.column("Description").maxSize(50);
         table.emptyTableText(onlyInstalled ? "No features installed" : "No features available");
 
         List<Repository> repos = Arrays.asList(featuresService.listRepositories());
