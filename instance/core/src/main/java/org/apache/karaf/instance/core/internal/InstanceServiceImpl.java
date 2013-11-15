@@ -278,7 +278,6 @@ public class InstanceServiceImpl implements InstanceService {
                 copyResourceToDir(karafBase, "etc/org.apache.karaf.log.cfg", printOutput);
                 copyResourceToDir(karafBase, "etc/org.ops4j.pax.logging.cfg", printOutput);
                 copyResourceToDir(karafBase, "etc/org.ops4j.pax.url.mvn.cfg", printOutput);
-//                copyResourceToDir(karafBase, "etc/startup.properties", printOutput);
                 copyResourceToDir(karafBase, "etc/users.properties", printOutput);
                 copyResourceToDir(karafBase, "etc/keys.properties", printOutput);
 
@@ -337,8 +336,6 @@ public class InstanceServiceImpl implements InstanceService {
     void addFeaturesFromSettings(File featuresCfg, final InstanceSettings settings) throws IOException {
         FileLockUtils.execute(featuresCfg, new FileLockUtils.RunnableWithProperties() {
             public void run(org.apache.felix.utils.properties.Properties properties) throws IOException {
-                appendToPropList(properties, "featuresBoot", Collections.singletonList("ssh"));
-                appendToPropList(properties, "featuresBoot", Collections.singletonList("framework"));
                 appendToPropList(properties, "featuresBoot", settings.getFeatures());
                 appendToPropList(properties, "featuresRepositories", settings.getFeatureURLs());
             }
