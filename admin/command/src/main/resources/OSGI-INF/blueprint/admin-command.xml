@@ -125,6 +125,15 @@
                 <null/>
             </completers>
         </command>
+        <command name="admin/status">
+            <action class="org.apache.karaf.admin.command.StatusCommand">
+                <property name="adminService" ref="adminService" />
+            </action>
+            <completers>
+                <ref component-id="instanceCompleter" />
+                <null/>
+            </completers>
+        </command>
     </command-bundle>
 
     <reference id="adminService" interface="org.apache.karaf.admin.AdminService" />
