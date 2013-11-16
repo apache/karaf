@@ -28,6 +28,7 @@ import org.osgi.framework.ServiceReference;
 
 @Command(scope = "bundle", name = "services", description = "Lists OSGi services per Bundle")
 public class ListBundleServices extends BundlesCommand {
+
     @Option(name = "-a", aliases = {}, description = "Shows all services. (By default Karaf commands are hidden)", required = false, multiValued = false)
     boolean showAll;
 

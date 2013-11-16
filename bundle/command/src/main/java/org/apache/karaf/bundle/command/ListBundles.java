@@ -40,9 +40,6 @@ public class ListBundles extends OsgiCommandSupport {
 
     @Option(name = "-t", valueToShowInHelp = "", description = "Specifies the bundle threshold; bundles with a start-level less than this value will not get printed out.", required = false, multiValued = false)
     int bundleLevelThreshold = -1;
-    
-    @Option(name= "--table", description = "Show bundles using a shell table")
-    boolean newLayout;
 
     private BundleService bundleService;
 
@@ -65,27 +62,6 @@ public class ListBundles extends OsgiCommandSupport {
             System.out.println("START LEVEL " + fsl.getStartLevel() + " , List Threshold: " + bundleLevelThreshold);
         }
 
-        if (!newLayout) {
-        // Print column headers.
-        System.out.println("   ID   State         Level " + getNameHeader());
-
-        for (int i = 0; i < bundles.length; i++) {
-            Bundle bundle = bundles[i];
-            BundleInfo info = this.bundleService.getInfo(bundle);
-            if (info.getStartLevel() >= bundleLevelThreshold) {
-                String name = getNameToShow(info);
-                // Show bundle version if not showing location.
-                String version = info.getVersion();
-                name = (!showLoc && !showUpdate && (version != null)) ? name + " (" + version + ")" : name;
-                name += printFragments(info) + printHosts(info);
-                String line = String.format("[%4d] [%10s] [%5d] %s", info.getBundleId(),
-                                            getStateString(info.getState()), info.getStartLevel(), name);
-                System.out.println(line);
-            }
-        }
-        
-        } else {
-        
         ShellTable table = new ShellTable();
         table.column("ID").alignRight();
         table.column("State");
@@ -104,7 +80,7 @@ public class ListBundles extends OsgiCommandSupport {
             }
         }
         table.print(System.out);
-        }
+
         return null;
     }
 
