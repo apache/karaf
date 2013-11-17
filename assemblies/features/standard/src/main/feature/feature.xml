@@ -145,7 +145,7 @@
             sshPort=8101
             sshHost=0.0.0.0
             sshRealm=karaf
-            hostKey=${karaf.base}/etc/host.key
+            hostKey=${karaf.etc}/host.key
         </config>
         <bundle start="true" start-level="30">mvn:org.apache.mina/mina-core/${mina.version}</bundle>
         <bundle start="true" start-level="30">mvn:org.apache.sshd/sshd-core/${sshd.version}</bundle>

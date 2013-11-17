@@ -162,8 +162,8 @@ public class SystemServiceImpl implements SystemService {
     @Override
     public void setName(String name) {
         try {
-            String karafBase = bundleContext.getProperty("karaf.base");
-            File etcDir = new File(karafBase, "etc");
+            String karafEtc = bundleContext.getProperty("karaf.etc");
+            File etcDir = new File(karafEtc);
             File syspropsFile = new File(etcDir, "system.properties");
             FileInputStream fis = new FileInputStream(syspropsFile);
             Properties props = new Properties();
@@ -187,7 +187,7 @@ public class SystemServiceImpl implements SystemService {
     }
 
     private Properties loadProps() throws IOException {
-        return new Properties(new File(System.getProperty("karaf.base"), "etc/config.properties"));
+        return new Properties(new File(System.getProperty("karaf.etc"), "config.properties"));
     }
 
     public void setFramework(FrameworkType framework) {
@@ -199,7 +199,7 @@ public class SystemServiceImpl implements SystemService {
             properties.put("karaf.framework", framework.name());
             properties.save();
         } catch (IOException e) {
-            throw new RuntimeException("Error settting framework: " + e.getMessage(), e);
+            throw new RuntimeException("Error setting framework: " + e.getMessage(), e);
         }
     }
 
@@ -224,8 +224,8 @@ public class SystemServiceImpl implements SystemService {
     public String setSystemProperty(String key, String value, boolean persist) {
         if (persist) {
             try {
-                String base = System.getProperty("karaf.base");
-                Properties props = new Properties(new File(base, "etc/system.properties"));
+                String etc = System.getProperty("karaf.etc");
+                Properties props = new Properties(new File(etc, "system.properties"));
                 props.put(key, value);
                 props.save();
             } catch (IOException e) {

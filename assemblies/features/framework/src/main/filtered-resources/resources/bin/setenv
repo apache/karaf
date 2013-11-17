@@ -42,5 +42,6 @@
 # export KARAF_HOME # Karaf home folder
 # export KARAF_DATA # Karaf data folder
 # export KARAF_BASE # Karaf base folder
+# export KARAF_ETC  # Karaf etc  folder
 # export KARAF_OPTS # Additional available Karaf options
 

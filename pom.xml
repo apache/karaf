@@ -205,7 +205,7 @@
         <osgi.version>5.0.0</osgi.version>
         <osgi.compendium.version>5.0.0</osgi.compendium.version>
         <org.json.version>20131018</org.json.version>
-        <pax.exam.version>3.3.0</pax.exam.version>
+        <pax.exam.version>3.4.0-SNAPSHOT</pax.exam.version>
         <pax.logging.version>1.7.1</pax.logging.version>
         <pax.base.version>1.4.0</pax.base.version>
         <pax.url.version>1.6.0</pax.url.version>

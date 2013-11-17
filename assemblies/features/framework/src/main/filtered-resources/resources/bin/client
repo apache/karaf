@@ -139,6 +139,16 @@ locateData() {
     fi
 }
 
+locateEtc() {
+    if [ "x$KARAF_ETC" != "x" ]; then
+        if [ ! -d "$KARAF_ETC" ]; then
+            die "KARAF_ETC is not valid: $KARAF_ETC"
+        fi
+    else
+        KARAF_ETC=$KARAF_BASE/etc
+    fi
+}
+
 setupNativePath() {
     # Support for loading native libraries
     LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:$KARAF_BASE/lib:$KARAF_HOME/lib"
@@ -269,6 +279,9 @@ init() {
     # Locate the Karaf data directory
     locateData
 
+    # Locate the Karaf etc directory
+    locateEtc
+
     # Setup the native library path
     setupNativePath
 
@@ -288,10 +301,12 @@ run() {
     if $cygwin; then
         KARAF_HOME=`cygpath --path --windows "$KARAF_HOME"`
         KARAF_BASE=`cygpath --path --windows "$KARAF_BASE"`
+        KARAF_DATA=`cygpath --path --windows "$KARAF_DATA"`
+        KARAF_ETC=`cygpath --path --windows "$KARAF_ETC"`
         CLASSPATH=`cygpath --path --windows "$CLASSPATH"`
     fi
 
-    exec "$JAVA" $JAVA_OPTS -Dkaraf.instances="${KARAF_HOME}/instances" -Dkaraf.home="$KARAF_HOME" -Dkaraf.base="$KARAF_BASE" -Djava.io.tmpdir="$KARAF_DATA/tmp" -Djava.util.logging.config.file="$KARAF_BASE/etc/java.util.logging.properties" $KARAF_OPTS $OPTS -classpath "$CLASSPATH" org.apache.karaf.client.Main "$@"
+    exec "$JAVA" $JAVA_OPTS -Dkaraf.instances="${KARAF_HOME}/instances" -Dkaraf.home="$KARAF_HOME" -Dkaraf.base="$KARAF_BASE" -Dkaraf.etc="$KARAF_ETC" -Djava.io.tmpdir="$KARAF_DATA/tmp" -Djava.util.logging.config.file="$KARAF_BASE/etc/java.util.logging.properties" $KARAF_OPTS $OPTS -classpath "$CLASSPATH" org.apache.karaf.client.Main "$@"
 }
 
 main() {

@@ -21,7 +21,6 @@
 # This file contains the general platform information required by the itests to find out
 # about the current versions.
 #
-
 karafVersion=${project.version}
 name=Apache Karaf
 

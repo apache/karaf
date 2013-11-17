@@ -60,6 +60,16 @@ public class ConfigProperties {
      */
     public static final String ENV_KARAF_DATA = "KARAF_DATA";
     /**
+     * The system property for specifying the Karaf etc directory. The etc directory
+     * holds the configuration for a Karaf instance.
+     */
+    public static final String PROP_KARAF_ETC = "karaf.etc";
+    /**
+     * The environment variable for specifying the Karaf etc directory. The etc directory
+     * holds the configuration for a Karaf instance.
+     */
+    public static final String ENV_KARAF_ETC = "KARAF_ETC";
+    /**
      * The system property for specifying the Karaf data directory. The data directory
      * holds the bundles data and cache for a Karaf instance.
      */
@@ -134,6 +144,7 @@ public class ConfigProperties {
     File karafHome;
     File karafBase;
     File karafData;
+    File karafEtc;
     File karafInstances;
     
     Properties props;
@@ -154,9 +165,6 @@ public class ConfigProperties {
     String shutdownHost;
     String portFile;
     String shutdownCommand;
-    String includes;
-    String optionals;
-    File etcFolder;
     String startupMessage;
     boolean delayConsoleStart;
     
@@ -164,6 +172,7 @@ public class ConfigProperties {
         this.karafHome = Utils.getKarafHome(ConfigProperties.class, PROP_KARAF_HOME, ENV_KARAF_HOME);
         this.karafBase = Utils.getKarafDirectory(PROP_KARAF_BASE, ENV_KARAF_BASE, karafHome, false, true);
         this.karafData = Utils.getKarafDirectory(PROP_KARAF_DATA, ENV_KARAF_DATA, new File(karafBase, "data"), true, true);
+        this.karafEtc = Utils.getKarafDirectory(PROP_KARAF_ETC, ENV_KARAF_ETC, new File(karafBase, "etc"), true, true);
         
         this.karafInstances = Utils.getKarafDirectory(PROP_KARAF_INSTANCES, ENV_KARAF_INSTANCES, new File(karafHome, "instances"), false, false);
 
@@ -175,11 +184,10 @@ public class ConfigProperties {
         System.setProperty(PROP_KARAF_DATA, karafData.getPath());
         System.setProperty(PROP_KARAF_INSTANCES, karafInstances.getPath());
 
-        this.etcFolder = new File(karafBase, "etc");
-        if (!etcFolder.exists()) {
-            throw new FileNotFoundException("etc folder not found: " + etcFolder.getAbsolutePath());
+        if (!karafEtc.exists()) {
+            throw new FileNotFoundException("Karaf etc folder not found: " + karafEtc.getAbsolutePath());
         }
-        PropertiesLoader.loadSystemProperties(new File(etcFolder, SYSTEM_PROPERTIES_FILE_NAME));
+        PropertiesLoader.loadSystemProperties(new File(karafEtc, SYSTEM_PROPERTIES_FILE_NAME));
 
         File cleanAllIndicatorFile = new File(karafData, "clean_all");
         File cleanCacheIndicatorFile = new File(karafData, "clean_cache");
@@ -199,7 +207,7 @@ public class ConfigProperties {
             }
         }
 
-        File file = new File(etcFolder, CONFIG_PROPERTIES_FILE_NAME);
+        File file = new File(karafEtc, CONFIG_PROPERTIES_FILE_NAME);
         this.props = PropertiesLoader.loadConfigProperties(file);
 
         String prop = props.getProperty(SECURITY_PROVIDERS);
@@ -228,7 +236,7 @@ public class ConfigProperties {
         System.setProperty(KARAF_DELAY_CONSOLE, new Boolean(this.delayConsoleStart).toString());
     }
     
-    private String getProperyOrFail(String propertyName) {
+    private String getPropertyOrFail(String propertyName) {
         String value = props.getProperty(propertyName);
         if (value == null) {
             throw new IllegalArgumentException("Property " + propertyName + " must be set in the etc/" + CONFIG_PROPERTIES_FILE_NAME + " configuration file");
@@ -237,8 +245,8 @@ public class ConfigProperties {
     }
     
     private URI getFramework() throws URISyntaxException {
-        String framework = getProperyOrFail(KARAF_FRAMEWORK);
-        String frameworkBundleUri = getProperyOrFail(KARAF_FRAMEWORK + "." + framework);
+        String framework = getPropertyOrFail(KARAF_FRAMEWORK);
+        String frameworkBundleUri = getPropertyOrFail(KARAF_FRAMEWORK + "." + framework);
         return new URI(frameworkBundleUri);
     }
 

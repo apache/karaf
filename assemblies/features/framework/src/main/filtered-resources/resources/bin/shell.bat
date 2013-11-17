@@ -84,6 +84,16 @@ if "%KARAF_DATA%" == "" (
     set "KARAF_DATA=%KARAF_BASE%\data"
 )
 
+if not "%KARAF_ETC%" == "" (
+    if not exist "%KARAF_ETC%" (
+        call :warn KARAF_ETC is not valid: "%KARAF_ETC%"
+        goto END
+    )
+)
+if "%KARAF_ETC%" == "" (
+    set "KARAF_ETC=%KARAF_BASE%\etc"
+)
+
 set DEFAULT_JAVA_OPTS=
 set DEFAULT_JAVA_DEBUG_OPTS=-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005
 
@@ -119,7 +129,7 @@ set CLASSPATH=%CLASSPATH%;%KARAF_HOME%\system\jline\jline\${jline.version}\jline
     if "%SHIFT%" == "true" SET ARGS=%2 %3 %4 %5 %6 %7 %8
     if not "%SHIFT%" == "true" SET ARGS=%1 %2 %3 %4 %5 %6 %7 %8
     rem Execute the Java Virtual Machine
-    "%JAVA%" %JAVA_OPTS% %OPTS% -classpath "%CLASSPATH%" -Dkaraf.instances="%KARAF_HOME%\instances" -Dkaraf.home="%KARAF_HOME%" -Dkaraf.base="%KARAF_BASE%" -Djava.io.tmpdir="%KARAF_DATA%\tmp" -Djava.util.logging.config.file="%KARAF_BASE%\etc\java.util.logging.properties" -Djavax.management.builder.initial=org.apache.karaf.management.boot.KarafMBeanServerBuilder %KARAF_OPTS% org.apache.karaf.shell.console.impl.Main --classpath="%KARAF_HOME%\system" %ARGS%
+    "%JAVA%" %JAVA_OPTS% %OPTS% -classpath "%CLASSPATH%" -Dkaraf.instances="%KARAF_HOME%\instances" -Dkaraf.home="%KARAF_HOME%" -Dkaraf.base="%KARAF_BASE%" -Dkaraf.etc="%KARAF_ETC%" -Djava.io.tmpdir="%KARAF_DATA%\tmp" -Djava.util.logging.config.file="%KARAF_BASE%\etc\java.util.logging.properties" -Djavax.management.builder.initial=org.apache.karaf.management.boot.KarafMBeanServerBuilder %KARAF_OPTS% org.apache.karaf.shell.console.impl.Main --classpath="%KARAF_HOME%\system" %ARGS%
 
 rem # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 

@@ -88,8 +88,8 @@ public class RegionsPersistenceImpl implements RegionsPersistence {
 
     void load() throws IOException, BundleException, JAXBException, InvalidSyntaxException {
         if (this.regionDigraph.getRegions().size() <= 1) {
-            File base = new File(System.getProperty("karaf.base"));
-            File regionsConfig = new File(new File(base, "etc"), "regions-config.xml");
+            File etc = new File(System.getProperty("karaf.etc"));
+            File regionsConfig = new File(etc, "regions-config.xml");
             if (regionsConfig.exists()) {
                 log.info("initializing region digraph from etc/regions-config.xml");
                 Reader in = new FileReader(regionsConfig);

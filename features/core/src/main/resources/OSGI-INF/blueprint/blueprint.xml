@@ -38,7 +38,7 @@ http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.0.0 http://aries.apache
             <ext:property name="respectStartLvlDuringFeatureUninstall" value="true"/>
             <ext:property name="featuresBootAsynchronous" value="false"/>
         </ext:default-properties>
-        <ext:location>file:$(karaf.base)/etc/org.apache.karaf.features.cfg</ext:location>
+        <ext:location>file:$(karaf.etc)/org.apache.karaf.features.cfg</ext:location>
     </ext:property-placeholder>
 
 	<bean id="bundleManager" class="org.apache.karaf.features.internal.BundleManager">

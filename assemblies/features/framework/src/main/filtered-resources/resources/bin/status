@@ -99,6 +99,16 @@ locateData() {
     fi
 }
 
+locateEtc() {
+    if [ "x$KARAF_ETC" != "x" ]; then
+        if [ ! -d "$KARAF_ETC" ]; then
+            die "KARAF_ETC is not valid: $KARAF_ETC"
+        fi
+    else
+        KARAF_ETC=$KARAF_BASE/etc
+    fi
+}
+
 init() {
     # Determine if there is special OS handling we must perform
     detectOS
@@ -111,6 +121,9 @@ init() {
 
     # Locate the Karaf data directory
     locateData
+
+    # Locate the Karaf etc directory
+    locateEtc
 }
 
 run() {
@@ -118,6 +131,7 @@ run() {
         KARAF_HOME=`cygpath --path --windows "$KARAF_HOME"`
         KARAF_BASE=`cygpath --path --windows "$KARAF_BASE"`
         KARAF_DATA=`cygpath --path --windows "$KARAF_DATA"`
+        KARAF_ETC=`cygpath --path --windows "$KARAF_ETC"`
         CLASSPATH=`cygpath --path --windows "$CLASSPATH"`
     fi
     # Ensure the log directory exists -- we need to have a place to redirect stdout/stderr

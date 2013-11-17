@@ -217,7 +217,7 @@ public class Main {
         if (config.delayConsoleStart) {
             System.out.println(config.startupMessage);
         }
-        String log4jConfigPath = System.getProperty("karaf.base") + "/etc/org.ops4j.pax.logging.cfg";
+        String log4jConfigPath = System.getProperty("karaf.etc") + "/org.ops4j.pax.logging.cfg";
         BootstrapLogManager.setProperties(config.props, log4jConfigPath);
         lock = createLock();
         lockCallback = new KarafLockCallback();
@@ -246,7 +246,7 @@ public class Main {
         if (framework.getBundleContext().getBundles().length == 1) {
 
             LOG.info("Installing and starting initial bundles");
-            File startupPropsFile = new File(config.etcFolder, STARTUP_PROPERTIES_FILE_NAME);
+            File startupPropsFile = new File(config.karafEtc, STARTUP_PROPERTIES_FILE_NAME);
             List<BundleInfo> bundles = readBundlesFromStartupProperties(startupPropsFile);        
             installAndStartBundles(resolver, framework.getBundleContext(), bundles);
             LOG.info("All initial bundles installed and set to start");

@@ -39,7 +39,7 @@ public class ClientConfig {
     private String command;
 
     public ClientConfig(String[] args) throws IOException {
-        Properties shellCfg = new Properties(new File(System.getProperty("karaf.home"), "etc/org.apache.karaf.shell.cfg"));
+        Properties shellCfg = new Properties(new File(System.getProperty("karaf.etc"), "org.apache.karaf.shell.cfg"));
 
         host = shellCfg.getProperty("sshHost", "localhost");
         port = Integer.parseInt(shellCfg.getProperty("sshPort", "8101"));
@@ -84,7 +84,7 @@ public class ClientConfig {
         }
         command = commandBuilder.toString();
 
-        Properties usersCfg = new Properties(new File(System.getProperty("karaf.home") + "/etc/users.properties"));
+        Properties usersCfg = new Properties(new File(System.getProperty("karaf.etc") + "/users.properties"));
         if (!usersCfg.isEmpty()) {
             if (user == null) {
                 user = (String) usersCfg.keySet().iterator().next();

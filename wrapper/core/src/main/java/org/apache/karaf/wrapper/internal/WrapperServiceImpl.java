@@ -42,8 +42,8 @@ public class WrapperServiceImpl implements WrapperService {
     public File[] install(String name, String displayName, String description, String startType) throws Exception {
 
         File base = new File(System.getProperty("karaf.base"));
+        File etc = new File(System.getProperty("karaf.etc"));
         File bin = new File(base, "bin");
-        File etc = new File(base, "etc");
         File lib = new File(base, "lib");
 
         if (name == null) {
@@ -55,6 +55,7 @@ public class WrapperServiceImpl implements WrapperService {
         props.put("${karaf.home}", System.getProperty("karaf.home"));
         props.put("${karaf.base}", base.getPath());
         props.put("${karaf.data}", System.getProperty("karaf.data"));
+        props.put("${karaf.etc}", System.getProperty("karaf.etc"));
         props.put("${name}", name);
         props.put("${displayName}", displayName);
         props.put("${description}", description);

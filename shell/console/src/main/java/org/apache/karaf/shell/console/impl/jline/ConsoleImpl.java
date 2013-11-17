@@ -225,7 +225,7 @@ public class ConsoleImpl implements Console {
 
     private void setCompletionMode() {
         try {
-            File shellCfg = new File(System.getProperty("karaf.base"), "/etc/org.apache.karaf.shell.cfg");
+            File shellCfg = new File(System.getProperty("karaf.etc"), "/org.apache.karaf.shell.cfg");
             Properties properties = new Properties();
             properties.load(new FileInputStream(shellCfg));
             if (properties.get("completionMode") != null) {
@@ -234,7 +234,7 @@ public class ConsoleImpl implements Console {
                 LOGGER.debug("completionMode property is not defined in etc/org.apache.karaf.shell.cfg file. Using default completion mode.");
             }
         } catch (Exception e) {
-            LOGGER.warn("Can't read {}/etc/org.apache.karaf.shell.cfg file. The completion is set to default.", System.getProperty("karaf.base"));
+            LOGGER.warn("Can't read {}/org.apache.karaf.shell.cfg file. The completion is set to default.", System.getProperty("karaf.etc"));
         }
     }
 

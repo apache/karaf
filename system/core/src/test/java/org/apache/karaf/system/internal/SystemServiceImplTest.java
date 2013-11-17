@@ -41,7 +41,7 @@ public class SystemServiceImplTest {
         BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
         URL propUrl = this.getClass().getClassLoader().getResource("etc/system.properties");
         File propfile = new File(propUrl.toURI());        
-        EasyMock.expect(bundleContext.getProperty("karaf.base")).andReturn(propfile.getParentFile().getParent());
+        EasyMock.expect(bundleContext.getProperty("karaf.etc")).andReturn(propfile.getParentFile().getParent() + "/etc");
         EasyMock.replay(bundleContext);
         system.setBundleContext(bundleContext);
         system.setName(NEW_NAME);
