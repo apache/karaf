@@ -228,9 +228,9 @@ public abstract class ObrCommandSupport extends OsgiCommandSupport {
                 }
                 sb.append(repo.getURI());
             }
-            File base = new File(System.getProperty("karaf.base"));
-            File sys = new File(base, "etc/config.properties");
-            File sysTmp = new File(base, "etc/config.properties.tmp");
+            File etc = new File(System.getProperty("karaf.etc"));
+            File sys = new File(etc, "config.properties");
+            File sysTmp = new File(etc, "config.properties.tmp");
 
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(sysTmp)));
             boolean modified = false;

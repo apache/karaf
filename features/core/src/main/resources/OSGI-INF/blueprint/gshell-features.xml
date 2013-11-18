@@ -30,7 +30,7 @@
             <ext:property name="respectStartLvlDuringFeatureStartup" value="false"/>
             <ext:property name="featuresBootAsynchronous" value="false"/>
         </ext:default-properties>
-        <ext:location>file:$(karaf.base)/etc/org.apache.karaf.features.cfg</ext:location>
+        <ext:location>file:$(karaf.etc)/org.apache.karaf.features.cfg</ext:location>
     </ext:property-placeholder>
 
     <bean id="featuresService" class="org.apache.karaf.features.internal.FeaturesServiceImpl" init-method="start" destroy-method="stop">

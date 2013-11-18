@@ -52,6 +52,8 @@ rem Karaf data folder
 rem SET KARAF_DATA
 rem Karaf base folder
 rem SET KARAF_BASE
+rem Karaf etc folder
+rem SET KARAF_ETC
 rem Additional available Karaf options
 rem SET KARAF_OPTS
 

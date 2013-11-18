@@ -42,8 +42,8 @@
             <cm:property name="sshIdleTimeout" value="1800000"/>
             <cm:property name="sshRealm" value="karaf"/>
             <cm:property name="sshRole" value="$[karaf.admin.role]"/>
-            <cm:property name="hostKey" value="$[karaf.base]/etc/host.key"/>
-            <cm:property name="authorizedKeys" value="$[karaf.base]/etc/authorized_keys"/>
+            <cm:property name="hostKey" value="$[karaf.etc]/host.key"/>
+            <cm:property name="authorizedKeys" value="$[karaf.etc]/authorized_keys"/>
             <cm:property name="authMethods" value="password,publickey"/>
             <cm:property name="keySize" value="1024"/>
             <cm:property name="algorithm" value="DSA"/>

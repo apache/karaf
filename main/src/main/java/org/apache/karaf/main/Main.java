@@ -142,6 +142,16 @@ public class Main {
      */
     public static final String ENV_KARAF_DATA = "KARAF_DATA";
     /**
+     * The system property for specifying the Karaf etc directory. The etc directory
+     * holds the configuration files for a Karaf instance.
+     */
+    public static final String PROP_KARAF_ETC = "karaf.etc";
+    /**
+     * The environment variable for specifying the Karaf etc directory. The etc directory
+     * holds the configuration files for a Karaf instance.
+     */
+    public static final String ENV_KARAF_ETC = "KARAF_ETC";
+    /**
      * The system property for specifying the Karaf data directory. The data directory
      * holds the bundles data and cache for a Karaf instance.
      */
@@ -222,6 +232,7 @@ public class Main {
     private File karafHome;
     private File karafBase;
     private File karafData;
+    private File karafEtc;
     private File karafInstances;
     private Properties configProps = null;
     private Framework framework = null;
@@ -250,6 +261,7 @@ public class Main {
         karafHome = Utils.getKarafHome();
         karafBase = Utils.getKarafDirectory(Main.PROP_KARAF_BASE, Main.ENV_KARAF_BASE, karafHome, false, true);
         karafData = Utils.getKarafDirectory(Main.PROP_KARAF_DATA, Main.ENV_KARAF_DATA, new File(karafBase, "data"), true, true);
+        karafEtc = Utils.getKarafDirectory(Main.PROP_KARAF_ETC, Main.ENV_KARAF_ETC, new File(karafBase, "etc"), true, true);
         karafInstances = Utils.getKarafDirectory(Main.PROP_KARAF_INSTANCES, Main.ENV_KARAF_INSTANCES, new File(karafHome, "instances"), false, false);
 
         Package p = Package.getPackage("org.apache.karaf.main");
@@ -262,7 +274,7 @@ public class Main {
         System.setProperty(PROP_KARAF_INSTANCES, karafInstances.getPath());
 
         // Load system properties.
-        loadSystemProperties(karafBase);
+        loadSystemProperties(karafEtc);
 
         updateInstancePid();
 
@@ -882,9 +894,9 @@ public class Main {
      * arbitrary URL.
      * </p>
      *
-     * @param karafBase the karaf base folder
+     * @param karafEtc the karaf etc folder
      */
-    protected static void loadSystemProperties(File karafBase) {
+    protected static void loadSystemProperties(File karafEtc) {
         // The system properties file is either specified by a system
         // property or it is in the same directory as the Felix JAR file.
         // Try to load it from one of these places.
@@ -892,7 +904,7 @@ public class Main {
         // See if the property URL was specified as a property.
         URL propURL;
         try {
-            File file = new File(new File(karafBase, "etc"), SYSTEM_PROPERTIES_FILE_NAME);
+            File file = new File(karafEtc, SYSTEM_PROPERTIES_FILE_NAME);
             propURL = file.toURI().toURL();
         }
         catch (MalformedURLException ex) {
@@ -961,11 +973,10 @@ public class Main {
         URL configPropURL;
 
         try {
-            File etcFolder = new File(karafBase, "etc");
-            if (!etcFolder.exists()) {
-                throw new FileNotFoundException("etc folder not found: " + etcFolder.getAbsolutePath());
+            if (!karafEtc.exists()) {
+                throw new FileNotFoundException("etc folder not found: " + karafEtc.getAbsolutePath());
             }
-            File file = new File(etcFolder, CONFIG_PROPERTIES_FILE_NAME);
+            File file = new File(karafEtc, CONFIG_PROPERTIES_FILE_NAME);
             configPropURL = file.toURI().toURL();
         }
         catch (MalformedURLException ex) {
@@ -997,11 +1008,10 @@ public class Main {
         // See if the property URL was specified as a property.
         URL startupPropURL;
 
-        File etcFolder = new File(karafBase, "etc");
-        if (!etcFolder.exists()) {
-            throw new FileNotFoundException("etc folder not found: " + etcFolder.getAbsolutePath());
+        if (!karafEtc.exists()) {
+            throw new FileNotFoundException("etc folder not found: " + karafEtc.getAbsolutePath());
         }
-        File file = new File(etcFolder, STARTUP_PROPERTIES_FILE_NAME);
+        File file = new File(karafEtc, STARTUP_PROPERTIES_FILE_NAME);
         startupPropURL = file.toURI().toURL();
         Properties startupProps = loadPropertiesFile(startupPropURL, true);
 

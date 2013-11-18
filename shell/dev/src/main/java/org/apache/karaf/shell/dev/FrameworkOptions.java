@@ -61,7 +61,7 @@ public class FrameworkOptions extends OsgiCommandSupport {
                 frwk = new Felix(new File(KARAF_BASE));
             else
                 frwk = new Equinox(new File(KARAF_BASE));
-            Properties props = new Properties(new File(System.getProperty("karaf.base"), "etc/config.properties"));
+            Properties props = new Properties(new File(System.getProperty("karaf.etc"), "config.properties"));
             props.put("karaf.framework", framework.toLowerCase());
             props.save();
         }

@@ -36,9 +36,8 @@ public class Name extends OsgiCommandSupport {
             System.out.println(bundleContext.getProperty("karaf.name"));
         } else {
             try {
-                String karafBase = bundleContext.getProperty("karaf.base");
-                File etcDir = new File(karafBase, "etc");
-                File syspropsFile = new File(etcDir, "system.properties");
+                String karafEtc = bundleContext.getProperty("karaf.etc");
+                File syspropsFile = new File(karafEtc, "system.properties");
                 FileInputStream fis = new FileInputStream(syspropsFile);
                 Properties props = new Properties();
                 props.load(fis);

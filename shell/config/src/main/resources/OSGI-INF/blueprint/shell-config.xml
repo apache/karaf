@@ -114,7 +114,7 @@
 
     <cm:property-placeholder persistent-id="org.apache.karaf.shell.config">
         <cm:default-properties>
-            <cm:property name="storage" value="$[karaf.base]/etc/"/>
+            <cm:property name="storage" value="$[karaf.etc]"/>
         </cm:default-properties>
     </cm:property-placeholder>
 

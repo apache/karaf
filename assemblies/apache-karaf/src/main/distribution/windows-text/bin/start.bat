@@ -66,6 +66,26 @@ if "%KARAF_BASE%" == "" (
   set "KARAF_BASE=%KARAF_HOME%"
 )
 
+if not "%KARAF_DATA%" == "" (
+    if not exist "%KARAF_DATA%" (
+        call :warn KARAF_DATA is not valid: "%KARAF_DATA%"
+        goto END
+    )
+)
+if "%KARAF_DATA%" == "" (
+    set "KARAF_DATA=%KARAF_BASE%\data"
+)
+
+if not "%KARAF_ETC%" == "" (
+    if not exist "%KARAF_ETC%" (
+        call :warn KARAF_ETC is not valid: "%KARAF_ETC%"
+        goto END
+    )
+)
+if "%KARAF_ETC%" == "" (
+    set "KARAF_ETC=%KARAF_BASE%\etc"
+)
+
 :EXECUTE
     start "Karaf" /MIN "%KARAF_HOME%\bin\karaf.bat" server %*
 

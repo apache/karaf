@@ -47,7 +47,7 @@ public class Main {
     private static final String ROLE_DELIMITER = ",";
 
     public static void main(String[] args) throws Exception {
-        Properties shellCfg = new Properties(new File(System.getProperty("karaf.home"), "etc/org.apache.karaf.shell.cfg"));
+        Properties shellCfg = new Properties(new File(System.getProperty("karaf.etc"), "org.apache.karaf.shell.cfg"));
 
         String host = shellCfg.getProperty("sshHost", "localhost");
         int port = Integer.parseInt(shellCfg.getProperty("sshPort", "8101"));
@@ -60,7 +60,7 @@ public class Main {
         String password = null;
         StringBuilder command = new StringBuilder();
 
-        Properties usersCfg = new Properties(new File(System.getProperty("karaf.home") + "/etc/users.properties"));
+        Properties usersCfg = new Properties(new File(System.getProperty("karaf.etc"), "users.properties"));
         if (!usersCfg.isEmpty()) {
             user = (String) usersCfg.keySet().iterator().next();
             password = (String) usersCfg.getProperty(user);

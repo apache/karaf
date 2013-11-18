@@ -84,6 +84,16 @@ if "%KARAF_DATA%" == "" (
     set "KARAF_DATA=%KARAF_BASE%\data"
 )
 
+if not "%KARAF_ETC%" == "" (
+    if not exist "%KARAF_ETC%" (
+        call :warn KARAF_ETC is not valid: "%KARAF_ETC%"
+        goto END
+    )
+)
+if "%KARAF_ETC%" == "" (
+    set "KARAF_ETC=%KARAF_BASE%\etc"
+)
+
 set DEFAULT_JAVA_OPTS=
 
 rem Support for loading native libraries
@@ -111,7 +121,7 @@ set CLASSPATH=%CLASSPATH%;%KARAF_HOME%\system\org\apache\karaf\shell\org.apache.
     if "%SHIFT%" == "true" SET ARGS=%2 %3 %4 %5 %6 %7 %8 %9
     if not "%SHIFT%" == "true" SET ARGS=%1 %2 %3 %4 %5 %6 %7 %8 %9
     rem Execute the Java Virtual Machine
-    "%JAVA%" %JAVA_OPTS% %OPTS% -classpath "%CLASSPATH%" -Dkaraf.instances="%KARAF_HOME%\instances" -Dkaraf.home="%KARAF_HOME%" -Dkaraf.base="%KARAF_BASE%" -Djava.io.tmpdir="%KARAF_DATA%\tmp" -Djava.util.logging.config.file="%KARAF_BASE%\etc\java.util.logging.properties" %KARAF_OPTS% org.apache.karaf.client.Main %ARGS%
+    "%JAVA%" %JAVA_OPTS% %OPTS% -classpath "%CLASSPATH%" -Dkaraf.instances="%KARAF_HOME%\instances" -Dkaraf.home="%KARAF_HOME%" -Dkaraf.base="%KARAF_BASE%" -Dkaraf.data="%KARAF_DATA%" -Dkaraf.etc="%KARAF_ETC%" -Djava.io.tmpdir="%KARAF_DATA%\tmp" -Djava.util.logging.config.file="%KARAF_ETC%\java.util.logging.properties" %KARAF_OPTS% org.apache.karaf.client.Main %ARGS%
 
 rem # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 

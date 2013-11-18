@@ -403,6 +403,8 @@ public class AdminServiceImpl implements AdminService {
                         + " -Djava.ext.dirs=\"" + new File(new File(new File(System.getProperty("java.home"), "jre"), "lib"), "ext") + System.getProperty("path.separator") + new File(new File(System.getProperty("java.home"), "lib"), "ext") + System.getProperty("path.separator") + new File(libDir, "ext").getCanonicalPath() + "\""
                         + " -Dkaraf.home=\"" + System.getProperty("karaf.home") + "\""
                         + " -Dkaraf.base=\"" + new File(location).getCanonicalPath() + "\""
+                        + " -Dkaraf.data=\"" + new File(location + "/data").getCanonicalPath() + "\""
+                        + " -Dkaraf.etc=\"" + new File(location + "/etc").getCanonicalPath() + "\""
                         + " -Dkaraf.startLocalConsole=false"
                         + " -Dkaraf.startRemoteShell=true"
                         + " -classpath \"" + classpath.toString() + "\""
@@ -600,6 +602,7 @@ public class AdminServiceImpl implements AdminService {
             props.put("karaf.base", new File(instance.loc).getCanonicalPath());
             props.put("karaf.home", System.getProperty("karaf.home"));
             props.put("karaf.data", new File(new File(instance.loc), "data").getCanonicalPath());
+            props.put("karaf.etc", new File(new File(instance.loc), "etc").getCanonicalPath());
             for (Enumeration e = props.propertyNames(); e.hasMoreElements();) {
                 String key = (String) e.nextElement();
                 props.setProperty(key,

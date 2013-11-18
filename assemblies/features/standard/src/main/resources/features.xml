@@ -352,7 +352,7 @@
         <config name="org.ops4j.pax.web">
             org.osgi.service.http.port=8181
             javax.servlet.context.tempdir=${karaf.data}/pax-web-jsp
-            org.ops4j.pax.web.config.file=${karaf.base}/etc/jetty.xml
+            org.ops4j.pax.web.config.file=${karaf.etc}/jetty.xml
         </config>
         <feature version="[7.0,9.0)">jetty</feature>
     	<bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-api/${pax.web.version}</bundle>
@@ -409,7 +409,7 @@
             sshPort=8101
             sshHost=0.0.0.0
             sshRealm=karaf
-            hostKey=${karaf.base}/etc/host.key
+            hostKey=${karaf.etc}/host.key
         </config>
         <bundle start-level="30" dependency='true'>mvn:org.apache.mina/mina-core/${mina.version}</bundle>
         <bundle start-level="30" dependency='true'>mvn:org.apache.sshd/sshd-core/${sshd.version}</bundle>

@@ -51,9 +51,8 @@ public class SystemMBeanImpl extends StandardMBean implements SystemMBean {
 
     public void setName(String name) {
         try {
-            String karafBase = bundleContext.getProperty("karaf.base");
-            File etcDir = new File(karafBase, "etc");
-            File syspropsFile = new File(etcDir, "system.properties");
+            String karafEtc = bundleContext.getProperty("karaf.etc");
+            File syspropsFile = new File(karafEtc, "system.properties");
             FileInputStream fis = new FileInputStream(syspropsFile);
             Properties props = new Properties();
             props.load(fis);
@@ -88,7 +87,7 @@ public class SystemMBeanImpl extends StandardMBean implements SystemMBean {
     }
 
     public void setFrameworkDebug(boolean debug) throws Exception {
-        Properties properties = new Properties(new File(System.getProperty("karaf.base"), "etc/config.properties"));
+        Properties properties = new Properties(new File(System.getProperty("karaf.etc"), "config.properties"));
         if (debug) {
             properties.put("felix.log.level", "4");
             properties.put("osgi.debug", "etc/equinox-debug.properties");
@@ -109,7 +108,7 @@ public class SystemMBeanImpl extends StandardMBean implements SystemMBean {
     }
 
     public void setFramework(String framework) throws Exception {
-        Properties properties = new Properties(new File(System.getProperty("karaf.base"), "etc/config.properties"));
+        Properties properties = new Properties(new File(System.getProperty("karaf.etc"), "config.properties"));
         if (!framework.equals("felix") || !framework.equals("equinox"))
             throw new IllegalArgumentException("Framework name is not supported. Only felix or equinox are supported.");
         properties.put("karaf.framework", framework);

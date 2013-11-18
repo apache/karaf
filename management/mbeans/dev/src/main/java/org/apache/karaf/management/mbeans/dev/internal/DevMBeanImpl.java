@@ -53,7 +53,7 @@ public class DevMBeanImpl extends StandardMBean implements DevMBean {
     }
 
     public void frameworkOptions(boolean debug, String framework) throws Exception {
-        Properties properties = new Properties(new File(System.getProperty("karaf.base"), "etc/config.properties"));
+        Properties properties = new Properties(new File(System.getProperty("karaf.etc"), "config.properties"));
         if (framework != null) {
             // switch the framework is use
             if (!framework.equalsIgnoreCase("felix") && !framework.equalsIgnoreCase("equinox")) {
@@ -174,8 +174,8 @@ public class DevMBeanImpl extends StandardMBean implements DevMBean {
 
     public void setProperty(String key, String value, boolean persistent) throws Exception {
         if (persistent) {
-            String base = System.getProperty("karaf.base");
-            Properties props = new Properties(new File(base, "etc/system.properties"));
+            String etc = System.getProperty("karaf.etc");
+            Properties props = new Properties(new File(etc, "system.properties"));
             props.put(key, value);
             props.save();
         }

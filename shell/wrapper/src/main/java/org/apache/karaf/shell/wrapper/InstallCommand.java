@@ -56,8 +56,8 @@ public class InstallCommand extends AbstractAction {
         try {
             String name = getName();
             File base = new File(System.getProperty("karaf.base"));
+            File etc = new File(System.getProperty("karaf.etc"));
             File bin = new File(base, "bin");
-            File etc = new File(base, "etc");
             File lib = new File(base, "lib");
 
             HashMap<String, String> props = new HashMap<String, String>();
@@ -65,6 +65,7 @@ public class InstallCommand extends AbstractAction {
             props.put("${karaf.home}", System.getProperty("karaf.home"));
             props.put("${karaf.base}", base.getPath());
             props.put("${karaf.data}", System.getProperty("karaf.data"));
+            props.put("${karaf.etc}", System.getProperty("karaf.etc"));
             props.put("${name}", name);
             props.put("${displayName}", getDisplayName());
             props.put("${description}", getDescription());

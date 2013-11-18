@@ -22,6 +22,7 @@ setlocal
 set APP_NAME=${name}
 set APP_LONG_NAME=${displayName}
 set APP_BASE=${karaf.base}
+set APP_ETC=${karaf.etc}
 
 if ""%1"" == ""run"" goto doRun
 if ""%1"" == ""install"" goto doInstall
@@ -35,15 +36,15 @@ echo   remove            Remove the %APP_NAME% Windows service
 goto end
 
 :doRun
-"%APP_BASE%\bin\%APP_NAME%-wrapper.exe" -c "%APP_BASE%\etc\%APP_NAME%-wrapper.conf"
+"%APP_BASE%\bin\%APP_NAME%-wrapper.exe" -c "%APP_ETC%\%APP_NAME%-wrapper.conf"
 goto end
 
 :doInstall
-"%APP_BASE%\bin\%APP_NAME%-wrapper.exe" -i "%APP_BASE%\etc\%APP_NAME%-wrapper.conf"
+"%APP_BASE%\bin\%APP_NAME%-wrapper.exe" -i "%APP_ETC%\%APP_NAME%-wrapper.conf"
 goto end
 
 :doRemove
-"%APP_BASE%\bin\%APP_NAME%-wrapper.exe" -r "%APP_BASE%\etc\%APP_NAME%-wrapper.conf"
+"%APP_BASE%\bin\%APP_NAME%-wrapper.exe" -r "%APP_ETC%\%APP_NAME%-wrapper.conf"
 goto end
 
 :end
