@@ -66,6 +66,19 @@ public class SshAction extends OsgiCommandSupport {
 
 	private SshClientFactory sshClientFactory;
 
+    private final static String keyChangedMessage =
+            " @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ \n" +
+            " @    WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!      @ \n" +
+            " @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ \n" +
+            "IT IS POSSIBLE THAT SOMEONE IS DOING SOMETHING NASTY!\n" +
+            "Someone could be eavesdropping on you right now (man-in-the-middle attack)!\n" +
+            "It is also possible that the RSA host key has just been changed.\n" +
+            "Please contact your system administrator.\n" +
+            "Add correct host key in " + System.getProperty("user.home") + "/.sshkaraf/known_hosts to get rid of this message.\n" +
+            "Offending key in " + System.getProperty("user.home") + "/.sshkaraf/known_hosts\n" +
+            "RSA host key has changed and you have requested strict checking.\n" +
+            "Host key verification failed.";
+
     public void setSshClientFactory(SshClientFactory sshClientFactory) {
 		this.sshClientFactory = sshClientFactory;
 	}
@@ -113,11 +126,15 @@ public class SshAction extends OsgiCommandSupport {
             this.session.put( SessionProperties.IGNORE_INTERRUPTS, Boolean.TRUE );
 
             try {
-                System.out.println("Connected");
 
                 boolean authed = false;
                 if (agentSocket != null) {
-                    sshSession.authAgent(username);
+                    try {
+                        sshSession.authAgent(username);
+                    } catch (IllegalStateException ise) {
+                        System.err.println(keyChangedMessage);
+                        return null;
+                    }
                     int ret = sshSession.waitFor(ClientSession.WAIT_AUTH | ClientSession.CLOSED | ClientSession.AUTHED, 0);
                     if ((ret & ClientSession.AUTHED) == 0) {
                         System.err.println("Agent authentication failed, falling back to password authentication.");
@@ -132,7 +149,12 @@ public class SshAction extends OsgiCommandSupport {
                     } else {
                         log.debug("Password provided using command line option");
                     }
-                    sshSession.authPassword(username, password);
+                    try {
+                        sshSession.authPassword(username, password);
+                    } catch (IllegalStateException ise) {
+                        System.err.println(keyChangedMessage);
+                        return null;
+                    }
                     int ret = sshSession.waitFor(ClientSession.WAIT_AUTH | ClientSession.CLOSED | ClientSession.AUTHED, 0);
                     if ((ret & ClientSession.AUTHED) == 0) {
                         System.err.println("Password authentication failed");
@@ -143,6 +165,8 @@ public class SshAction extends OsgiCommandSupport {
                 if (!authed) {
                     return null;
                 }
+
+                System.out.println("Connected");
 
                 StringBuilder sb = new StringBuilder();
                 if (command != null) {
