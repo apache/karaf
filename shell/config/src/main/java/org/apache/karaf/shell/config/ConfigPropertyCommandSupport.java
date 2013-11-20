@@ -33,12 +33,15 @@ public abstract class ConfigPropertyCommandSupport extends ConfigCommandSupport 
     @Option(name = "-p", aliases = "--pid", description = "The configuration pid", required = false, multiValued = false)
     protected String pid;
 
-    @Option(name = "-b", aliases = { "--bypass-storage" }, multiValued = false, required = false, description = "Do not store the configuration in a properties file, but feed it directly to ConfigAdmin")
+    @Option(name = "-b", aliases = { "--bypass-storage" }, multiValued = false, required = false, description = "Only pass config changes to configuration admin, do not store in a file directly. Only relevant if -p is also set.")
     protected boolean bypassStorage;
 
 
     protected void doExecute(ConfigurationAdmin admin) throws Exception {
         Dictionary props = getEditedProps();
+        if (bypassStorage && pid == null) {
+        	System.err.println("Warning: option -b does not have any effect unless -p is also specified.");
+        }
         if (props == null && pid == null) {
             System.err.println("No configuration is being edited--run the edit command first");
         } else {
