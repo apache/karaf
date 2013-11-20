@@ -113,8 +113,11 @@
                             org.apache.felix.service.command,
                             org.apache.karaf.shell.commands,
                             org.apache.karaf.shell.console,
+                            org.apache.mina.util,
                             org.apache.sshd.server.keyprovider,
                             org.apache.sshd.server.jaas,
+                            org.apache.sshd.server.sftp,
+                            !org.apache.sshd.server.sftp.SftpSubsystem,
                             *
                         </Import-Package>
                         <Private-Package>

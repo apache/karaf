@@ -19,8 +19,8 @@
 package org.apache.karaf.shell.ssh;
 
 import org.apache.sshd.common.Session;
-import org.apache.sshd.server.FileSystemFactory;
-import org.apache.sshd.server.FileSystemView;
+import org.apache.sshd.common.file.FileSystemFactory;
+import org.apache.sshd.common.file.FileSystemView;
 
 /**
  * SSHd file system factory to reduce the visibility to the KARAF_BASE.
@@ -28,7 +28,7 @@ import org.apache.sshd.server.FileSystemView;
 public class KarafFileSystemFactory implements FileSystemFactory {
 
     public FileSystemView createFileSystemView(Session session) {
-        return new KarafFileSystemView();
+        return new KarafFileSystemView(session.getUsername());
     }
 
 }

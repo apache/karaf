@@ -20,6 +20,7 @@ package org.apache.karaf.shell.ssh;
 
 import org.apache.sshd.common.NamedFactory;
 import org.apache.sshd.server.UserAuth;
+import org.apache.sshd.server.auth.UserAuthKeyboardInteractive;
 import org.apache.sshd.server.auth.UserAuthPassword;
 import org.apache.sshd.server.auth.UserAuthPublicKey;
 import org.osgi.service.blueprint.container.ComponentDefinitionException;
@@ -49,6 +50,7 @@ public class UserAuthFactoriesFactory {
 
     public static final String PASSWORD_METHOD = "password";
     public static final String PUBLICKEY_METHOD = "publickey";
+    public static final String KEYBOARD_INTERACTIVE_METHOD = "keyboard-interactive";
 
     private Set<String> methodSet;
     private List<NamedFactory<UserAuth>> factories;
@@ -87,6 +89,8 @@ public class UserAuthFactoriesFactory {
         for (String am : ams) {
             if (PASSWORD_METHOD.equals(am)) {
                 this.factories.add(new UserAuthPassword.Factory());
+            } else if (KEYBOARD_INTERACTIVE_METHOD.equals(am)) {
+                this.factories.add(new UserAuthKeyboardInteractive.Factory());
             } else if (PUBLICKEY_METHOD.equals(am)) {
                 this.factories.add(new UserAuthPublicKey.Factory());
             } else {
@@ -106,6 +110,10 @@ public class UserAuthFactoriesFactory {
 
     public boolean isPasswordEnabled() {
         return this.methodSet.contains(PASSWORD_METHOD);
+    }
+
+    public boolean isKeyboardInteractive() {
+        return this.methodSet.contains(KEYBOARD_INTERACTIVE_METHOD);
     }
 
 }

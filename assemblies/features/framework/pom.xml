@@ -408,6 +408,12 @@
                         <goals>
                             <goal>features-generate-descriptor</goal>
                         </goals>
+                        <configuration>
+                            <excludedArtifactIds>
+                                <excludedArtifactId>slf4j-api</excludedArtifactId>
+                                <excludedArtifactId>mina-core</excludedArtifactId>
+                            </excludedArtifactIds>
+                        </configuration>
                     </execution>
                     <execution>
                         <id>package</id>

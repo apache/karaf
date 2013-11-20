@@ -18,12 +18,7 @@
 package org.apache.karaf.tooling.features;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 
@@ -103,6 +98,13 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
      * @parameter default-value="${project.build.directory}/feature/feature.xml"
      */
     private File outputFile;
+
+    /**
+     * (wrapper) Exclude some artifacts from the generated feature.
+     *
+     * @parameter
+     */
+    private List<String> excludedArtifactIds = new ArrayList<String>();
 
     /**
      * The resolver to use for the feature.  Normally null or "OBR" or "(OBR)"
@@ -328,6 +330,11 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
         }
         for (Map.Entry<Artifact, String> entry : localDependencies.entrySet()) {
             Artifact artifact = entry.getKey();
+
+            if (excludedArtifactIds.contains(artifact.getArtifactId())) {
+                continue;
+            }
+
             if (DependencyHelper.isFeature(artifact)) {
                 if (aggregateFeatures && FEATURE_CLASSIFIER.equals(artifact.getClassifier())) {
                     File featuresFile = resolve(artifact);
