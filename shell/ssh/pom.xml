@@ -101,6 +101,8 @@
                             org.apache.karaf.shell.console,
                             org.apache.sshd.server.keyprovider,
                             org.apache.sshd.server.jaas,
+                            org.apache.sshd.server.sftp,
+                            !org.apache.sshd.server.sftp.SftpSubsystem,
                             *
                         </Import-Package>
                     </instructions>

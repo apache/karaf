@@ -18,44 +18,50 @@
  */
 package org.apache.karaf.shell.ssh;
 
-import org.apache.sshd.server.FileSystemView;
-import org.apache.sshd.server.SshFile;
-import org.apache.sshd.server.filesystem.NativeSshFile;
+import org.apache.sshd.common.file.SshFile;
+import org.apache.sshd.common.file.nativefs.NativeFileSystemView;
+import org.apache.sshd.common.file.nativefs.NativeSshFile;
 
 import java.io.File;
 
 /**
  * Karaf file system view reduced to the KARAF_BASE location
  */
-public class KarafFileSystemView implements FileSystemView {
+public class KarafFileSystemView extends NativeFileSystemView {
 
+    private String username;
     private String location;
 
-    public KarafFileSystemView() {
-        location = System.getProperty("karaf.base");
+    public KarafFileSystemView(String username) {
+        super(username);
+        this.username = username;
     }
 
-    public SshFile getFile(String file) {
-        return getFile(location, file);
+    @Override
+    public String getVirtualUserDir() {
+        return "/";
     }
 
-    public SshFile getFile(SshFile baseDir, String file) {
-        return getFile(baseDir.getAbsolutePath(), file);
+    @Override
+    public String getPhysicalUserDir() {
+        if (location == null) {
+            location = new File(System.getProperty("karaf.base")).getAbsolutePath();
+        }
+        return location;
     }
 
+    @Override
     protected SshFile getFile(String dir, String file) {
         // get actual file object
-        String physicalName = NativeSshFile.getPhysicalName("/", dir, file, false);
-
-        if (!physicalName.startsWith(location)) {
+        String location = getPhysicalUserDir();
+        String physicalName = NativeSshFile.getPhysicalName(location, dir, file, false);
+        if (!physicalName.startsWith("location")) {
             throw new IllegalArgumentException("The path is not relative to KARAF_BASE. For security reason, it's not allowed.");
         }
-
         File fileObj = new File(physicalName);
-
         // strip the root directory and return
-        String karafFileName = physicalName.substring("/".length() - 1);
-        return new KarafSshFile(karafFileName, fileObj);
+        String karafFileName = physicalName.substring(location.length());
+        return createNativeSshFile(karafFileName, fileObj, username);
     }
 
 }
