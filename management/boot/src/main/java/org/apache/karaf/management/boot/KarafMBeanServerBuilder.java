@@ -16,15 +16,17 @@
  */
 package org.apache.karaf.management.boot;
 
-import javax.management.MBeanServer;
-import javax.management.MBeanServerBuilder;
-import javax.management.MBeanServerDelegate;
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import javax.management.MBeanServer;
+import javax.management.MBeanServerBuilder;
+import javax.management.MBeanServerDelegate;
 
 public class KarafMBeanServerBuilder extends MBeanServerBuilder {
 
@@ -60,9 +62,11 @@ public class KarafMBeanServerBuilder extends MBeanServerBuilder {
                 }
                 guard.invoke(proxy, method, args);
             }
-            return method.invoke(wrapped, args);
+            try {
+                return method.invoke(wrapped, args);
+            } catch (InvocationTargetException ite) {
+                throw ite.getCause();
+            }
         }
-
     }
-
 }

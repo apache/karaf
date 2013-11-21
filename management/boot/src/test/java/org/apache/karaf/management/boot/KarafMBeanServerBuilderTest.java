@@ -16,17 +16,21 @@
  */
 package org.apache.karaf.management.boot;
 
-import junit.framework.TestCase;
-import org.easymock.EasyMock;
-
-import javax.management.AttributeList;
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.management.AttributeList;
+import javax.management.InstanceNotFoundException;
+import javax.management.MBeanServer;
+import javax.management.NotCompliantMBeanException;
+import javax.management.ObjectName;
+
+import junit.framework.TestCase;
+
+import org.easymock.EasyMock;
+
 
 public class KarafMBeanServerBuilderTest extends TestCase {
 
@@ -146,6 +150,22 @@ public class KarafMBeanServerBuilderTest extends TestCase {
             assertSame(on, args[0]);
             assertEquals("myAttr", args[1]);
         }
+    }
+
+    public void testMBeanServerThrowsException() throws Exception {
+        MBeanServer mbs = EasyMock.createMock(MBeanServer.class);
+        EasyMock.replay(mbs);
+
+        KarafMBeanServerBuilder mbsb = new KarafMBeanServerBuilder();
+        MBeanServer kmbs = mbsb.newMBeanServer("test", mbs, null);
+
+        try {
+            kmbs.registerMBean("Foo", ObjectName.getInstance("foo.bar:type=TestObject"));
+        } catch (NotCompliantMBeanException ncme) {
+            // good
+            return;
+        }
+        fail("Should have thrown a NotCompliantMBeanException");
     }
 
     private Throwable getInnermostException(Throwable th) {
