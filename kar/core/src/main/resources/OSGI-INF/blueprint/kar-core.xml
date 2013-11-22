@@ -40,7 +40,7 @@
     
     <service ref="karService" interface="org.apache.karaf.kar.KarService"/>
     
-    <bean id="mbeanImpl" class="org.apache.karaf.kar.internal.Kars">
+    <bean id="mbeanImpl" class="org.apache.karaf.kar.internal.KarsMBeanImpl">
         <property name="karService" ref="karService"/>
     </bean>
     

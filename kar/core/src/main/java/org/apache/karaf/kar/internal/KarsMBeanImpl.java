@@ -19,33 +19,46 @@ package org.apache.karaf.kar.internal;
 import org.apache.karaf.kar.KarService;
 import org.apache.karaf.kar.KarsMBean;
 
+import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import java.net.URI;
 import java.util.List;
 
-public class Kars extends StandardMBean implements KarsMBean {
-    
+public class KarsMBeanImpl extends StandardMBean implements KarsMBean {
+
     private KarService karService;
-    
-    public Kars() throws NotCompliantMBeanException {
+
+    public KarsMBeanImpl() throws NotCompliantMBeanException {
         super(KarsMBean.class);
     }
-    
-    public List<String> getKars() throws Exception {
-        return karService.list();
+
+    public List<String> getKars() throws MBeanException {
+        try {
+            return karService.list();
+        } catch (Exception e) {
+            throw new MBeanException(null, e.getMessage());
+        }
     }
 
-    public void create(String repoName, List<String> features) throws Exception {
+    public void create(String repoName, List<String> features) {
         karService.create(repoName, features, null);
     }
-    
-    public void install(String url) throws Exception {
-        karService.install(new URI(url));
+
+    public void install(String url) throws MBeanException {
+        try {
+            karService.install(new URI(url));
+        } catch (Exception e) {
+            throw new MBeanException(null, e.getMessage());
+        }
     }
-    
-    public void uninstall(String name) throws Exception {
-        karService.uninstall(name);
+
+    public void uninstall(String name) throws MBeanException {
+        try {
+            karService.uninstall(name);
+        } catch (Exception e) {
+            throw new MBeanException(null, e.getMessage());
+        }
     }
 
     public KarService getKarService() {
@@ -55,5 +68,5 @@ public class Kars extends StandardMBean implements KarsMBean {
     public void setKarService(KarService karService) {
         this.karService = karService;
     }
-    
+
 }

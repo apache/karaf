@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.kar;
 
+import javax.management.MBeanException;
 import java.util.List;
 
 public interface KarsMBean {
@@ -26,7 +27,7 @@ public interface KarsMBean {
      * @return the list of KAR files.
      * @throws Exception in case of listing failure.
      */
-    List<String> getKars() throws Exception;
+    List<String> getKars() throws MBeanException;
 
     /**
      * Create a kar file for a list of feature repos
@@ -35,7 +36,7 @@ public interface KarsMBean {
      * @param features the features to include in the kar
      * @throws Exception in case of creation failure
      */
-    void create(String repoName, List<String> features) throws Exception;
+    void create(String repoName, List<String> features);
 
     /**
      * Install a KAR file from the given URL.
@@ -43,7 +44,7 @@ public interface KarsMBean {
      * @param url the JAR URL.
      * @throws Exception in case of installation failure.
      */
-    void install(String url) throws Exception;
+    void install(String url) throws MBeanException;
 
     /**
      * Uninstall a KAR file.
@@ -51,6 +52,6 @@ public interface KarsMBean {
      * @param name the name of the KAR file.
      * @throws Exception in case of uninstall failure.
      */
-    void uninstall(String name) throws Exception;
+    void uninstall(String name) throws MBeanException;
 
 }
