@@ -33,7 +33,7 @@
     <bean id="blueprintListener" class="org.apache.karaf.bundle.core.internal.BlueprintListener" />
 
 
-    <bean id="bundlesMBean" class="org.apache.karaf.bundle.core.internal.Bundles">
+    <bean id="bundlesMBean" class="org.apache.karaf.bundle.core.internal.BundlesMBeanImpl">
         <argument ref="blueprintBundleContext" />
         <argument ref="bundleService" />
     </bean>

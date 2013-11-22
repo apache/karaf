@@ -44,15 +44,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Bundles MBean implementation.
+ * BundlesMBean implementation.
  */
-public class Bundles extends StandardMBean implements BundlesMBean {
-    private Logger LOG = LoggerFactory.getLogger(Bundles.class);
+public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
+    private Logger LOG = LoggerFactory.getLogger(BundlesMBeanImpl.class);
 
     private BundleContext bundleContext;
     private final BundleService bundleService;
 
-    public Bundles(BundleContext bundleContext, BundleService bundleService) throws NotCompliantMBeanException {
+    public BundlesMBeanImpl(BundleContext bundleContext, BundleService bundleService) throws NotCompliantMBeanException {
         super(BundlesMBean.class);
         this.bundleContext = bundleContext;
         this.bundleService = bundleService;
@@ -69,7 +69,7 @@ public class Bundles extends StandardMBean implements BundlesMBean {
                     new String[]{"ID", "Name", "Version", "Start Level", "State"},
                     new String[]{"ID of the Bundle", "Name of the Bundle", "Version of the Bundle", "Start Level of the Bundle", "Current State of the Bundle"},
                     new OpenType[]{SimpleType.LONG, SimpleType.STRING, SimpleType.STRING, SimpleType.INTEGER, SimpleType.STRING});
-            TabularType tableType = new TabularType("Bundles", "Tables of all Bundles", bundleType, new String[]{"ID"});
+            TabularType tableType = new TabularType("BundlesMBeanImpl", "Tables of all BundlesMBeanImpl", bundleType, new String[]{"ID"});
             TabularData table = new TabularDataSupport(tableType);
 
             Bundle[] bundles = bundleContext.getBundles();
