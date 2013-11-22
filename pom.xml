@@ -291,6 +291,11 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.karaf.management</groupId>
+                <artifactId>org.apache.karaf.management.boot</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.management</groupId>
                 <artifactId>org.apache.karaf.management.server</artifactId>
                 <version>${project.version}</version>
             </dependency>
