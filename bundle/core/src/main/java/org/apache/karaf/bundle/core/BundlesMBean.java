@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.bundle.core;
 
+import javax.management.MBeanException;
 import javax.management.openmbean.TabularData;
 
 /**
@@ -23,30 +24,30 @@ import javax.management.openmbean.TabularData;
  */
 public interface BundlesMBean {
 
-    TabularData getBundles() throws Exception;
+    TabularData getBundles() throws MBeanException;
 
-    int getStartLevel(String bundleId) throws Exception;
-    void setStartLevel(String bundleId, int bundleStartLevel) throws Exception;
+    int getStartLevel(String bundleId) throws MBeanException;
+    void setStartLevel(String bundleId, int bundleStartLevel) throws MBeanException;
 
-    void refresh() throws Exception;
-    void refresh(String bundleId) throws Exception;
+    void refresh() throws MBeanException;
+    void refresh(String bundleId) throws MBeanException;
 
-    void update(String bundleId) throws Exception;
-    void update(String bundleId, String location) throws Exception;
+    void update(String bundleId) throws MBeanException;
+    void update(String bundleId, String location) throws MBeanException;
 
-    void resolve() throws Exception;
-    void resolve(String bundleId) throws Exception;
+    void resolve() throws MBeanException;
+    void resolve(String bundleId) throws MBeanException;
 
-    void restart(String bundleId) throws Exception;
+    void restart(String bundleId) throws MBeanException;
 
-    long install(String url) throws Exception;
-    long install(String url, boolean start) throws Exception;
+    long install(String url) throws MBeanException;
+    long install(String url, boolean start) throws MBeanException;
 
-    void start(String bundleId) throws Exception;
+    void start(String bundleId) throws MBeanException;
 
-    void stop(String bundleId) throws Exception;
+    void stop(String bundleId) throws MBeanException;
 
-    void uninstall(String bundleId) throws Exception;
+    void uninstall(String bundleId) throws MBeanException;
     
     String getDiag(long bundleId);
 
