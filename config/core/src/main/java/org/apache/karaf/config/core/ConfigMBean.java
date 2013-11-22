@@ -13,6 +13,7 @@
  */
 package org.apache.karaf.config.core;
 
+import javax.management.MBeanException;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +29,7 @@ public interface ConfigMBean {
      * @return the list of all configuration PIDs.
      * @throws Exception
      */
-    List<String> getConfigs() throws Exception;
+    List<String> getConfigs() throws MBeanException;
 
     /**
      * Create a new configuration for the given PID.
@@ -36,9 +37,9 @@ public interface ConfigMBean {
      * @param pid the configuration PID.
      * @throws Exception
      */
-    void create(String pid) throws Exception;
+    void create(String pid) throws MBeanException;
     
-    void update(String pid, Map<String, String> properties) throws IOException;
+    void update(String pid, Map<String, String> properties) throws MBeanException;
 
     /**
      * Delete a configuration identified by the given PID.
@@ -46,7 +47,7 @@ public interface ConfigMBean {
      * @param pid the configuration PID to delete.
      * @throws Exception
      */
-    void delete(String pid) throws Exception;
+    void delete(String pid) throws MBeanException;
 
     /**
      * Get the list of properties for a configuration PID.
@@ -55,7 +56,7 @@ public interface ConfigMBean {
      * @return the list of properties.
      * @throws Exception
      */
-    Map<String, String> listProperties(String pid) throws Exception;
+    Map<String, String> listProperties(String pid) throws MBeanException;
 
     /**
      * Remove the configuration property identified by the given key.
@@ -64,7 +65,7 @@ public interface ConfigMBean {
      * @param key the property key.
      * @throws Exception
      */
-    void deleteProperty(String pid, String key) throws Exception;
+    void deleteProperty(String pid, String key) throws MBeanException;
 
     /**
      * Append (or add) a value for the given configuration key.
@@ -74,7 +75,7 @@ public interface ConfigMBean {
      * @param value the value to append to the current property value.
      * @throws Exception
      */
-    void appendProperty(String pid, String key, String value) throws Exception;
+    void appendProperty(String pid, String key, String value) throws MBeanException;
 
     /**
      * Set a configuration property.
@@ -84,6 +85,6 @@ public interface ConfigMBean {
      * @param value the property value.
      * @throws Exception
      */
-    void setProperty(String pid, String key, String value) throws Exception;
+    void setProperty(String pid, String key, String value) throws MBeanException;
 
 }

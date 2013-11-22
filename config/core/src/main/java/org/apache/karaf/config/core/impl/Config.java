@@ -22,6 +22,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
+import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 
@@ -47,7 +48,7 @@ public class Config extends StandardMBean implements ConfigMBean {
         }
         return configuration;
     }
-    
+
     @SuppressWarnings("rawtypes")
     private Dictionary getConfigProperties(String pid) throws IOException {
         Configuration configuration = getConfiguration(pid);
@@ -62,75 +63,107 @@ public class Config extends StandardMBean implements ConfigMBean {
     /**
      * Get all config pids
      */
-    public List<String> getConfigs() throws Exception {
-        Configuration[] configurations = this.configRepo.getConfigAdmin().listConfigurations(null);
-        List<String> pids = new ArrayList<String>();
-        for (int i = 0; i < configurations.length; i++) {
-            pids.add(configurations[i].getPid());
+    public List<String> getConfigs() throws MBeanException {
+        try {
+            Configuration[] configurations = this.configRepo.getConfigAdmin().listConfigurations(null);
+            List<String> pids = new ArrayList<String>();
+            for (int i = 0; i < configurations.length; i++) {
+                pids.add(configurations[i].getPid());
+            }
+            return pids;
+        } catch (Exception e) {
+            throw new MBeanException(null, e.getMessage());
         }
-        return pids;
     }
 
     @SuppressWarnings("rawtypes")
-    public void create(String pid) throws Exception {
-        configRepo.update(pid, new Hashtable());
-    }
-    
-
-    public void update(String pid, Map<String, String> properties) throws IOException {
-        if (properties == null) {
-            properties = new HashMap<String, String>();
+    public void create(String pid) throws MBeanException {
+        try {
+            configRepo.update(pid, new Hashtable());
+        } catch (Exception e) {
+            throw new MBeanException(null, e.getMessage());
         }
-        Dictionary<String, String> dictionary = new Hashtable<String, String>();
-        for (String key : properties.keySet()) {
-            dictionary.put(key, properties.get(key));
-        }
-        configRepo.update(pid, dictionary);
     }
 
-    public void delete(String pid) throws Exception {
-        this.configRepo.delete(pid);
+
+    public void update(String pid, Map<String, String> properties) throws MBeanException {
+        try {
+            if (properties == null) {
+                properties = new HashMap<String, String>();
+            }
+            Dictionary<String, String> dictionary = new Hashtable<String, String>();
+            for (String key : properties.keySet()) {
+                dictionary.put(key, properties.get(key));
+            }
+            configRepo.update(pid, dictionary);
+        } catch (Exception e) {
+            throw new MBeanException(null, e.getMessage());
+        }
+    }
+
+    public void delete(String pid) throws MBeanException {
+        try {
+            this.configRepo.delete(pid);
+        } catch (Exception e) {
+            throw new MBeanException(null, e.getMessage());
+        }
     }
 
     @SuppressWarnings("rawtypes")
-    public Map<String, String> listProperties(String pid) throws Exception {
-        Dictionary dictionary = getConfigProperties(pid);
+    public Map<String, String> listProperties(String pid) throws MBeanException {
+        try {
+            Dictionary dictionary = getConfigProperties(pid);
 
-        Map<String, String> propertiesMap = new HashMap<String, String>();
-        for (Enumeration e = dictionary.keys(); e.hasMoreElements(); ) {
-            Object key = e.nextElement();
-            Object value = dictionary.get(key);
-            propertiesMap.put(key.toString(), value.toString());
+            Map<String, String> propertiesMap = new HashMap<String, String>();
+            for (Enumeration e = dictionary.keys(); e.hasMoreElements(); ) {
+                Object key = e.nextElement();
+                Object value = dictionary.get(key);
+                propertiesMap.put(key.toString(), value.toString());
+            }
+            return propertiesMap;
+        } catch (Exception e) {
+            throw new MBeanException(null, e.getMessage());
         }
-        return propertiesMap;
     }
 
     @SuppressWarnings("rawtypes")
-    public void deleteProperty(String pid, String key) throws Exception {
-        Dictionary dictionary = getConfigProperties(pid);
-        dictionary.remove(key);
-        configRepo.update(pid, dictionary);
+    public void deleteProperty(String pid, String key) throws MBeanException {
+        try {
+            Dictionary dictionary = getConfigProperties(pid);
+            dictionary.remove(key);
+            configRepo.update(pid, dictionary);
+        } catch (Exception e) {
+            throw new MBeanException(null, e.getMessage());
+        }
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public void appendProperty(String pid, String key, String value) throws Exception {
-        Dictionary dictionary = getConfigProperties(pid);
-        Object currentValue = dictionary.get(key);
-        if (currentValue == null) {
+    public void appendProperty(String pid, String key, String value) throws MBeanException {
+        try {
+            Dictionary dictionary = getConfigProperties(pid);
+            Object currentValue = dictionary.get(key);
+            if (currentValue == null) {
+                dictionary.put(key, value);
+            } else if (currentValue instanceof String) {
+                dictionary.put(key, currentValue + value);
+            } else {
+                throw new IllegalStateException("Current value is not a String");
+            }
+            configRepo.update(pid, dictionary);
+        } catch (Exception e) {
+            throw new MBeanException(null, e.getMessage());
+        }
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public void setProperty(String pid, String key, String value) throws MBeanException {
+        try {
+            Dictionary dictionary = getConfigProperties(pid);
             dictionary.put(key, value);
-        } else if (currentValue instanceof String) {
-            dictionary.put(key, currentValue + value);
-        } else {
-            throw new IllegalStateException("Current value is not a String");
+            configRepo.update(pid, dictionary);
+        } catch (Exception e) {
+            throw new MBeanException(null, e.getMessage());
         }
-        configRepo.update(pid, dictionary);
-    }
-
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    public void setProperty(String pid, String key, String value) throws Exception {
-        Dictionary dictionary = getConfigProperties(pid);
-        dictionary.put(key, value);
-        configRepo.update(pid, dictionary);
     }
 
     public void setConfigRepo(ConfigRepository configRepo) {
