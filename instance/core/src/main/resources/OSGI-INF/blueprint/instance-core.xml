@@ -28,11 +28,11 @@
     
     <service ref="instanceService" interface="org.apache.karaf.instance.core.InstanceService"/>
 
-    <bean id="mbeanImpl" class="org.apache.karaf.instance.core.internal.Instances">
+    <bean id="instancesMBean" class="org.apache.karaf.instance.core.internal.InstancesMBeanImpl">
         <argument ref="instanceService" />
     </bean>
 
-    <service ref="mbeanImpl" auto-export="interfaces">
+    <service ref="instancesMBean" auto-export="interfaces">
         <service-properties>
             <entry key="jmx.objectname" value="org.apache.karaf:type=instance,name=${karaf.name}"/>
         </service-properties>

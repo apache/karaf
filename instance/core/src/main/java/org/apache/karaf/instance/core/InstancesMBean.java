@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.instance.core;
 
+import javax.management.MBeanException;
 import javax.management.openmbean.TabularData;
 
 public interface InstancesMBean {
@@ -34,21 +35,21 @@ public interface InstancesMBean {
             INSTANCE_RMI_SERVER_PORT, INSTANCE_STATE, INSTANCE_LOCATION, INSTANCE_JAVAOPTS };
 
     // Operations
-    int createInstance(String name, int sshPort, int rmiRegistryPort, int rmiServerPort, String location, String javaOpts, String features, String featureURLs) throws Exception;
-    void changeSshPort(String name, int port) throws Exception;
-    void changeRmiRegistryPort(String name, int port) throws Exception;
-    void changeRmiServerPort(String name, int port) throws Exception;
-    void changeJavaOpts(String name, String javaopts) throws Exception;
-    void destroyInstance(String name) throws Exception;
-    void startInstance(String name) throws Exception;
-    void startInstance(String name, String opts) throws Exception;
-    void startInstance(String name, String opts, boolean wait, boolean debug) throws Exception;
-    void stopInstance(String name) throws Exception;
-    void renameInstance(String originalName, String newName) throws Exception;
-    void renameInstance(String originalName, String newName, boolean verbose) throws Exception;
-    void cloneInstance(String name, String cloneName, int sshPort, int rmiRegistryPort, int rmiServerPort, String location, String javaOpts) throws Exception;
+    int createInstance(String name, int sshPort, int rmiRegistryPort, int rmiServerPort, String location, String javaOpts, String features, String featureURLs) throws MBeanException;
+    void changeSshPort(String name, int port) throws MBeanException;
+    void changeRmiRegistryPort(String name, int port) throws MBeanException;
+    void changeRmiServerPort(String name, int port) throws MBeanException;
+    void changeJavaOpts(String name, String javaopts) throws MBeanException;
+    void destroyInstance(String name) throws MBeanException;
+    void startInstance(String name) throws MBeanException;
+    void startInstance(String name, String opts) throws MBeanException;
+    void startInstance(String name, String opts, boolean wait, boolean debug) throws MBeanException;
+    void stopInstance(String name) throws MBeanException;
+    void renameInstance(String originalName, String newName) throws MBeanException;
+    void renameInstance(String originalName, String newName, boolean verbose) throws MBeanException;
+    void cloneInstance(String name, String cloneName, int sshPort, int rmiRegistryPort, int rmiServerPort, String location, String javaOpts) throws MBeanException;
 
     // Attributes
-    TabularData getInstances() throws Exception;
+    TabularData getInstances() throws MBeanException;
 
 }
