@@ -16,6 +16,7 @@ package org.apache.karaf.diagnostic.core.internal;
 import java.io.File;
 import java.util.List;
 
+import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 
@@ -28,8 +29,7 @@ import org.apache.karaf.diagnostic.core.common.ZipDumpDestination;
 /**
  * Implementation of diagnostic MBean.
  */
-public class DiagnosticDump extends StandardMBean implements 
-    DiagnosticDumpMBean {
+public class DiagnosticDump extends StandardMBean implements DiagnosticDumpMBean {
 
     /**
      * Dump providers.
@@ -38,7 +38,7 @@ public class DiagnosticDump extends StandardMBean implements
 
     /**
      * Creates new diagnostic mbean.
-     * 
+     *
      * @throws NotCompliantMBeanException
      */
     public DiagnosticDump() throws NotCompliantMBeanException {
@@ -47,37 +47,41 @@ public class DiagnosticDump extends StandardMBean implements
 
     /**
      * Creates dump witch given name
-     * 
+     *
      * @param name Name of the dump.
      */
-    public void createDump(String name) throws Exception {
+    public void createDump(String name) throws MBeanException {
         createDump(false, name);
     }
 
     /**
      * {@inheritDoc}
      */
-    public void createDump(boolean directory, String name) throws Exception {
-        File target = new File(name);
+    public void createDump(boolean directory, String name) throws MBeanException {
+        try {
+            File target = new File(name);
 
-        DumpDestination destination;
-        if (directory) {
-            destination = new DirectoryDumpDestination(target);
-        } else {
-            destination = new ZipDumpDestination(target);
+            DumpDestination destination;
+            if (directory) {
+                destination = new DirectoryDumpDestination(target);
+            } else {
+                destination = new ZipDumpDestination(target);
+            }
+
+            for (DumpProvider provider : providers) {
+                provider.createDump(destination);
+            }
+
+            destination.save();
+        } catch (Exception e) {
+            throw new MBeanException(null, e.getMessage());
         }
-
-        for (DumpProvider provider : providers) {
-            provider.createDump(destination);
-        }
-
-        destination.save();
     }
 
     /**
      * Sets dump providers.
-     * 
-     * @param providers Dump providers. 
+     *
+     * @param providers Dump providers.
      */
     public void setProviders(List<DumpProvider> providers) {
         this.providers = providers;

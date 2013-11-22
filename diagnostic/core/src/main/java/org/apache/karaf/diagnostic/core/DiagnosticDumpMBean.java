@@ -15,6 +15,8 @@
  */
 package org.apache.karaf.diagnostic.core;
 
+import javax.management.MBeanException;
+
 /**
  * Diagnostic MBean which allows to create dumps over JMX.
  */
@@ -26,7 +28,7 @@ public interface DiagnosticDumpMBean {
      * @param name Name of the dump.
      * @throws Exception In case of any problems.
      */
-    void createDump(String name) throws Exception;
+    void createDump(String name) throws MBeanException;
 
     /**
      * Create dump with directory switch and name.
@@ -35,6 +37,6 @@ public interface DiagnosticDumpMBean {
      * @param name Name of the dump.
      * @throws Exception In case of any problems.
      */
-    void createDump(boolean directory, String name) throws Exception;
+    void createDump(boolean directory, String name) throws MBeanException;
 
 }
