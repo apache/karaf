@@ -34,6 +34,7 @@ import org.apache.karaf.shell.commands.basic.AbstractCommand;
 import org.apache.karaf.shell.commands.meta.ActionMetaDataFactory;
 import org.apache.karaf.shell.console.HelpProvider;
 import org.apache.karaf.shell.console.NameScoping;
+import org.apache.karaf.shell.console.SessionProperties;
 import org.apache.karaf.shell.table.Col;
 import org.apache.karaf.shell.table.ShellTable;
 import org.fusesource.jansi.Ansi;
@@ -60,11 +61,33 @@ public class CommandListHelpProvider implements HelpProvider {
 
     private SortedMap<String, String> getCommandDescriptions(CommandSession session, String command) {
         Set<String> names = (Set<String>) session.get(COMMANDS);
+
+        String subshell = (String) session.get("SUBSHELL");
+        String completionMode = (String) session.get(SessionProperties.COMPLETION_MODE);
+
         SortedMap<String,String> commands = new TreeMap<String,String>();
         for (String name : names) {
+
             if (command != null && !name.startsWith(command)) {
                 continue;
             }
+
+            if (completionMode != null && completionMode.equalsIgnoreCase("subshell")) {
+                // filter the help only for "global" commands
+                if (subshell == null || subshell.trim().isEmpty()) {
+                    if (!name.startsWith("*")) {
+                        continue;
+                    }
+                }
+            }
+
+            if (completionMode != null && (completionMode.equalsIgnoreCase("subshell") || completionMode.equalsIgnoreCase("first"))) {
+                // filter the help only for commands local to the subshell
+                if (!name.startsWith(subshell)) {
+                    continue;
+                }
+            }
+
             String description = null;
             Function function = (Function) session.get(name);
             function = unProxy(function);
@@ -77,6 +100,9 @@ public class CommandListHelpProvider implements HelpProvider {
                 }
                 if (name.startsWith("*:")) {
                     name = name.substring(2);
+                }
+                if (subshell != null && !subshell.trim().isEmpty() && name.startsWith(subshell)) {
+                    name = name.substring(subshell.length() + 1);
                 }
                 commands.put(name, description);
             }

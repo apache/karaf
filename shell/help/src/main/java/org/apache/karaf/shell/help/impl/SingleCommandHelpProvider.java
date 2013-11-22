@@ -37,6 +37,15 @@ public class SingleCommandHelpProvider implements HelpProvider {
     }
 
     public String getHelp(CommandSession session, String path) {
+
+        String subshell = (String) session.get("SUBSHELL");
+
+        if (subshell != null && !subshell.trim().isEmpty()) {
+            if (!path.startsWith(subshell)) {
+                path = subshell + ":" + path;
+            }
+        }
+
         if (path.indexOf('|') > 0) {
             if (path.startsWith("command|")) {
                 path = path.substring("command|".length());

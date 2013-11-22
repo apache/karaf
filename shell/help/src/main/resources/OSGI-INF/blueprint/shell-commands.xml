@@ -49,11 +49,13 @@
     <bean id="helpSystem" class="org.apache.karaf.shell.help.impl.HelpSystem">
         <argument ref="blueprintBundleContext"/>
     </bean>
-    
+
+    <!--use to get the help on the list of commands -->
     <service interface="org.apache.karaf.shell.console.HelpProvider" ranking="-20">
         <bean class="org.apache.karaf.shell.help.impl.CommandListHelpProvider" />
     </service>
 
+    <!-- use for "help command" syntax -->
     <reference id="threadIO" interface="org.apache.felix.service.threadio.ThreadIO"/>
     <service auto-export="interfaces" ranking="-10">
         <bean class="org.apache.karaf.shell.help.impl.SingleCommandHelpProvider">
@@ -61,11 +63,7 @@
         </bean>
     </service>
 
-    <service auto-export="interfaces" ref="subShellHelpProvider" ranking="-10"/>
-    <bean id="subShellHelpProvider" class="org.apache.karaf.shell.help.impl.SubShellHelpProvider" init-method="start" destroy-method="stop">
-        <property name="context" ref="blueprintBundleContext"/>
-    </bean>
-
+    <!-- use for "help" to get help on each command in the commands list -->
     <service auto-export="interfaces" ranking="-5">
         <bean class="org.apache.karaf.shell.help.impl.SimpleHelpProvider">
             <property name="help">
