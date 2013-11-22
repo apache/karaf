@@ -29,7 +29,7 @@ import org.apache.karaf.diagnostic.core.common.ZipDumpDestination;
 /**
  * Implementation of diagnostic MBean.
  */
-public class DiagnosticDump extends StandardMBean implements DiagnosticDumpMBean {
+public class DiagnosticDumpMBeanImpl extends StandardMBean implements DiagnosticDumpMBean {
 
     /**
      * Dump providers.
@@ -41,7 +41,7 @@ public class DiagnosticDump extends StandardMBean implements DiagnosticDumpMBean
      *
      * @throws NotCompliantMBeanException
      */
-    public DiagnosticDump() throws NotCompliantMBeanException {
+    public DiagnosticDumpMBeanImpl() throws NotCompliantMBeanException {
         super(DiagnosticDumpMBean.class);
     }
 

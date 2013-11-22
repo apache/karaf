@@ -47,7 +47,7 @@
     <reference-list id="providers" availability="optional"
         interface="org.apache.karaf.diagnostic.core.DumpProvider" />
 
-    <bean id="diagnosticDumpMBean" class="org.apache.karaf.diagnostic.core.internal.DiagnosticDump">
+    <bean id="diagnosticDumpMBean" class="org.apache.karaf.diagnostic.core.internal.DiagnosticDumpMBeanImpl">
         <property name="providers" ref="providers" />
     </bean>
 
