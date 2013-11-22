@@ -17,15 +17,13 @@
     limitations under the License.
 
 -->
-<blueprint 
-	xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
-	xmlns:ext="http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="
-http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
-http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.0.0 http://aries.apache.org/schemas/blueprint-ext/blueprint-ext.xsd 
-"
->
+<blueprint
+        xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+        xmlns:ext="http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.0.0"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+        http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
+        http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.0.0 http://aries.apache.org/schemas/blueprint-ext/blueprint-ext.xsd">
 
     <ext:property-placeholder placeholder-prefix="$(" placeholder-suffix=")"/>
 
@@ -41,46 +39,51 @@ http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.0.0 http://aries.apache
         <ext:location>file:$(karaf.etc)/org.apache.karaf.features.cfg</ext:location>
     </ext:property-placeholder>
 
-	<bean id="bundleManager" class="org.apache.karaf.features.internal.BundleManager">
-		<argument ref="blueprintBundleContext" />
-		<argument ref="regionsPersistence"/>
-	</bean>
-	<bean id="configInstaller" class="org.apache.karaf.features.internal.FeatureConfigInstaller">
-		<argument ref="configAdmin" />
-	</bean>
-    <bean id="featuresService" class="org.apache.karaf.features.internal.FeaturesServiceImpl" init-method="start" destroy-method="stop">
-    	<argument ref="bundleManager" />
-    	<argument ref="configInstaller" />
-        <property name="urls" value="$[featuresRepositories]" />
-        <property name="respectStartLvlDuringFeatureStartup" value="$[respectStartLvlDuringFeatureStartup]" />
-        <property name="respectStartLvlDuringFeatureUninstall" value="$[respectStartLvlDuringFeatureUninstall]" />
-        <property name="resolverTimeout" value="$[resolverTimeout]" />
+    <bean id="bundleManager" class="org.apache.karaf.features.internal.BundleManager">
+        <argument ref="blueprintBundleContext"/>
+        <argument ref="regionsPersistence"/>
     </bean>
-    
-    <bean id="bootFeaturesInstaller" class="org.apache.karaf.features.internal.BootFeaturesInstaller" init-method="start">
-    	<argument ref="blueprintBundleContext" />
-    	<argument ref="featuresService" />
-        <argument value="$[featuresBoot]" />
+    <bean id="configInstaller" class="org.apache.karaf.features.internal.FeatureConfigInstaller">
+        <argument ref="configAdmin"/>
+    </bean>
+    <bean id="featuresService" class="org.apache.karaf.features.internal.FeaturesServiceImpl" init-method="start"
+          destroy-method="stop">
+        <argument ref="bundleManager"/>
+        <argument ref="configInstaller"/>
+        <property name="urls" value="$[featuresRepositories]"/>
+        <property name="respectStartLvlDuringFeatureStartup" value="$[respectStartLvlDuringFeatureStartup]"/>
+        <property name="respectStartLvlDuringFeatureUninstall" value="$[respectStartLvlDuringFeatureUninstall]"/>
+        <property name="resolverTimeout" value="$[resolverTimeout]"/>
+    </bean>
+
+    <bean id="bootFeaturesInstaller" class="org.apache.karaf.features.internal.BootFeaturesInstaller"
+          init-method="start">
+        <argument ref="blueprintBundleContext"/>
+        <argument ref="featuresService"/>
+        <argument value="$[featuresBoot]"/>
         <argument value="$[featuresBootAsynchronous]"/>
     </bean>
 
-    <reference-list id="featuresListeners" interface="org.apache.karaf.features.FeaturesListener" availability="optional">
+    <reference-list id="featuresListeners" interface="org.apache.karaf.features.FeaturesListener"
+                    availability="optional">
         <reference-listener ref="featuresService"
                             bind-method="registerListener"
-                            unbind-method="unregisterListener" />
+                            unbind-method="unregisterListener"/>
     </reference-list>
 
-    <reference id="configAdmin" interface="org.osgi.service.cm.ConfigurationAdmin" />
+    <reference id="configAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"/>
 
-    <reference id="mvnUrlHandler" interface="org.osgi.service.url.URLStreamHandlerService" filter="(url.handler.protocol=mvn)" />
+    <reference id="mvnUrlHandler" interface="org.osgi.service.url.URLStreamHandlerService"
+               filter="(url.handler.protocol=mvn)"/>
 
-    <service ref="featuresService" interface="org.apache.karaf.features.FeaturesService" />
+    <service ref="featuresService" interface="org.apache.karaf.features.FeaturesService"/>
 
-    <reference id="regionsPersistence" availability="optional" interface="org.apache.karaf.region.persist.RegionsPersistence"/>
+    <reference id="regionsPersistence" availability="optional"
+               interface="org.apache.karaf.region.persist.RegionsPersistence"/>
 
-    <bean id="featuresServiceMBean" class="org.apache.karaf.features.management.internal.FeaturesService">
-        <property name="bundleContext" ref="blueprintBundleContext" />
-        <property name="featuresService" ref="featuresService" />
+    <bean id="featuresServiceMBean" class="org.apache.karaf.features.management.internal.FeaturesServiceMBeanImpl">
+        <property name="bundleContext" ref="blueprintBundleContext"/>
+        <property name="featuresService" ref="featuresService"/>
     </bean>
 
     <service ref="featuresServiceMBean" auto-export="interfaces">
@@ -88,4 +91,5 @@ http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.0.0 http://aries.apache
             <entry key="jmx.objectname" value="org.apache.karaf:type=feature,name=$(karaf.name)"/>
         </service-properties>
     </service>
+
 </blueprint>

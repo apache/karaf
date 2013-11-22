@@ -44,7 +44,7 @@ import org.osgi.framework.ServiceRegistration;
 /**
  * Implementation of {@link FeaturesServiceMBean}.
  */
-public class FeaturesService extends StandardEmitterMBean implements
+public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
     MBeanRegistration, FeaturesServiceMBean {
 
     private ServiceRegistration<FeaturesListener> registration;
@@ -57,7 +57,7 @@ public class FeaturesService extends StandardEmitterMBean implements
 
     private org.apache.karaf.features.FeaturesService featuresService;
 
-    public FeaturesService() throws NotCompliantMBeanException {
+    public FeaturesServiceMBeanImpl() throws NotCompliantMBeanException {
         super(FeaturesServiceMBean.class);
     }
 
