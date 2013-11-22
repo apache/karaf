@@ -19,6 +19,7 @@ package org.apache.karaf.http.core.internal;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import javax.management.openmbean.CompositeData;
@@ -37,15 +38,15 @@ import org.apache.karaf.http.core.ServletService;
 /**
  * Implementation of the HTTP MBean.
  */
-public class Http extends StandardMBean implements HttpMBean {
+public class HttpMBeanImpl extends StandardMBean implements HttpMBean {
     private ServletService servletService;
 
-    public Http(ServletService servletService) throws NotCompliantMBeanException {
+    public HttpMBeanImpl(ServletService servletService) throws NotCompliantMBeanException {
         super(HttpMBean.class);
         this.servletService = servletService;
     }
 
-    public TabularData getServlets() {
+    public TabularData getServlets() throws MBeanException {
         try {
             CompositeType servletType = new CompositeType("Servlet", "HTTP Servlet",
                 new String[]{"Bundle-ID", "Servlet", "Servlet Name", "State", "Alias", "URL"},
@@ -64,7 +65,7 @@ public class Http extends StandardMBean implements HttpMBean {
             }
             return table;
         } catch (Exception e) {
-            throw new RuntimeException(e.getMessage(), e);
+            throw new MBeanException(null, e.getMessage());
         }
     }
 

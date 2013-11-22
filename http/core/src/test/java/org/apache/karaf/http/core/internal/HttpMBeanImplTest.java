@@ -24,11 +24,11 @@ import javax.management.openmbean.TabularData;
 
 import org.junit.Test;
 
-public class HttpTest {
+public class HttpMBeanImplTest {
 
     @Test
     public void testRegisterMBean() throws Exception {
-        Http httpMBean = new Http(new ServletServiceImpl(new ServletEventHandler()));
+        HttpMBeanImpl httpMBean = new HttpMBeanImpl(new ServletServiceImpl(new ServletEventHandler()));
         MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
         mbeanServer.registerMBean(httpMBean, new ObjectName("org.apache.karaf:type=http,name=root"));
         

@@ -27,7 +27,7 @@
     
     <service interface="org.apache.karaf.http.core.ServletService" ref="servletService"/>
 
-    <bean id="httpMBean" class="org.apache.karaf.http.core.internal.Http">
+    <bean id="httpMBean" class="org.apache.karaf.http.core.internal.HttpMBeanImpl">
         <argument ref="servletService"/>
     </bean>
     

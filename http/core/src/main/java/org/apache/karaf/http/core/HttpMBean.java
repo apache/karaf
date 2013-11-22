@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.http.core;
 
+import javax.management.MBeanException;
 import javax.management.openmbean.TabularData;
 
 /**
@@ -29,6 +30,6 @@ public interface HttpMBean {
      * @return a tabular view of the servlets information.
      * @throws Exception
      */
-    TabularData getServlets();
+    TabularData getServlets() throws MBeanException;
 
 }
