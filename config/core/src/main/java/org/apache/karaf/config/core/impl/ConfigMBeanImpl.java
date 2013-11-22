@@ -33,11 +33,11 @@ import org.osgi.service.cm.Configuration;
 /**
  * Implementation of the ConfigMBean.
  */
-public class Config extends StandardMBean implements ConfigMBean {
+public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
 
     private ConfigRepository configRepo;
 
-    public Config() throws NotCompliantMBeanException {
+    public ConfigMBeanImpl() throws NotCompliantMBeanException {
         super(ConfigMBean.class);
     }
 
