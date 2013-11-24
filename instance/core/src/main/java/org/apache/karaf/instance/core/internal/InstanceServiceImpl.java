@@ -417,6 +417,7 @@ public class InstanceServiceImpl implements InstanceService {
                         + " -Dkaraf.base=\"" + new File(location).getCanonicalPath() + "\""
                         + " -Dkaraf.data=\"" + new File(new File(location).getCanonicalPath(), "data") + "\""
                         + " -Dkaraf.etc=\"" + new File(new File(location).getCanonicalPath(), "etc") + "\""
+                        + " -Djavax.management.builder.initial=org.apache.karaf.management.boot.KarafMBeanServerBuilder"
                         + " -Dkaraf.startLocalConsole=false"
                         + " -Dkaraf.startRemoteShell=true"
                         + " -classpath \"" + classpath.toString() + "\""
