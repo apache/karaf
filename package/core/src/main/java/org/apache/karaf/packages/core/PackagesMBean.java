@@ -21,7 +21,7 @@ import java.util.List;
 import javax.management.openmbean.TabularData;
 
 /**
- * Package MBean.
+ * Packages MBean.
  */
 public interface PackagesMBean {
 

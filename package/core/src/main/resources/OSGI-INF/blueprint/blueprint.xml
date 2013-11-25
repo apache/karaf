@@ -27,7 +27,7 @@
     </bean>
     <service interface="org.apache.karaf.packages.core.PackageService" ref="packageService"/>
 
-    <bean id="packageMBean" class="org.apache.karaf.packages.core.internal.Packages">
+    <bean id="packageMBean" class="org.apache.karaf.packages.core.internal.PackagesMBeanImpl">
         <argument ref="packageService" />
     </bean>
 

@@ -40,14 +40,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Bundles MBean implementation.
+ * Implementation of the Packages MBean.
  */
-public class Packages extends StandardMBean implements PackagesMBean {
-    private Logger log = LoggerFactory.getLogger(this.getClass());
+public class PackagesMBeanImpl extends StandardMBean implements PackagesMBean {
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(PackagesMBeanImpl.class);
 
     private final PackageService packageService;
 
-    public Packages(PackageService packageService) throws NotCompliantMBeanException {
+    public PackagesMBeanImpl(PackageService packageService) throws NotCompliantMBeanException {
         super(PackagesMBean.class);
         this.packageService = packageService;
     }
@@ -75,17 +76,17 @@ public class Packages extends StandardMBean implements PackagesMBean {
                                          bundle.getBundleId(),
                                          bundle.getSymbolicName()};
                     CompositeData comp = new CompositeDataSupport(bundleType, names, data);
-                    log.debug("Adding CompositeDataSupport {} for key: {}", comp, key);
+                    LOGGER.debug("Adding CompositeDataSupport {} for key: {}", comp, key);
                     table.put(comp);
                 }
             }
             return table;
         } catch (RuntimeException e) {
             // To avoid the exception gets swallowed by jmx
-            log.error(e.getMessage(), e);
+            LOGGER.error(e.getMessage(), e);
             throw e;
         } catch (OpenDataException e) {
-            log.error(e.getMessage(), e);
+            LOGGER.error(e.getMessage(), e);
             throw new RuntimeException(e.getMessage(), e);
         }
     }
@@ -120,10 +121,10 @@ public class Packages extends StandardMBean implements PackagesMBean {
             return table;
         } catch (RuntimeException e) {
             // To avoid the exception gets swallowed by jmx
-            log.error(e.getMessage(), e);
+            LOGGER.error(e.getMessage(), e);
             throw e;
         } catch (OpenDataException e) {
-            log.error(e.getMessage(), e);
+            LOGGER.error(e.getMessage(), e);
             throw new RuntimeException(e.getMessage(), e);
         }
     }
