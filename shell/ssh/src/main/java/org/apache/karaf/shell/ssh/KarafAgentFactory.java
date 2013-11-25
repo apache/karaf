@@ -89,6 +89,7 @@ public class KarafAgentFactory implements SshAgentFactory {
             public String getId() {
                 return proxy.getId();
             }
+
             public void close() {
                 proxies.remove(proxy.getId());
                 proxy.close();
@@ -115,10 +116,12 @@ public class KarafAgentFactory implements SshAgentFactory {
 
     public void unregisterCommandSession(CommandSession session) {
         try {
-            String agentId = (String) session.get(SshAgent.SSH_AUTHSOCKET_ENV_NAME);
-            session.put(SshAgent.SSH_AUTHSOCKET_ENV_NAME, null);
-            if (agentId != null) {
-                locals.remove(agentId);
+            if (session.get(SshAgent.SSH_AUTHSOCKET_ENV_NAME) != null) {
+                String agentId = (String) session.get(SshAgent.SSH_AUTHSOCKET_ENV_NAME);
+                session.put(SshAgent.SSH_AUTHSOCKET_ENV_NAME, null);
+                if (agentId != null) {
+                    locals.remove(agentId);
+                }
             }
         } catch (Throwable e) {
             LOGGER.warn("Error stopping ssh agent for local console", e);
