@@ -20,7 +20,7 @@
 
     <reference id="repositoryAdmin" interface="org.apache.felix.bundlerepository.RepositoryAdmin"/>
 
-    <bean id="obrMBean" class="org.apache.karaf.obr.core.internal.Obr">
+    <bean id="obrMBean" class="org.apache.karaf.obr.core.internal.ObrMBeanImpl">
         <argument ref="blueprintBundleContext"/>
         <argument ref="repositoryAdmin"/>
     </bean>

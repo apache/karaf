@@ -19,6 +19,7 @@ package org.apache.karaf.obr.core.internal;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import javax.management.openmbean.CompositeData;
@@ -43,20 +44,20 @@ import org.osgi.framework.Version;
 /**
  * Implementation of the OBR MBean.
  */
-public class Obr extends StandardMBean implements ObrMBean {
+public class ObrMBeanImpl extends StandardMBean implements ObrMBean {
 
     private static final char VERSION_DELIM = ',';
 
     private BundleContext bundleContext;
     private RepositoryAdmin repositoryAdmin;
 
-    public Obr(BundleContext bundleContext, RepositoryAdmin repositoryAdmin) throws NotCompliantMBeanException {
+    public ObrMBeanImpl(BundleContext bundleContext, RepositoryAdmin repositoryAdmin) throws NotCompliantMBeanException {
         super(ObrMBean.class);
         this.bundleContext = bundleContext;
         this.repositoryAdmin = repositoryAdmin;
     }
 
-    public List<String> getUrls() throws Exception {
+    public List<String> getUrls() {
         Repository[] repositories = repositoryAdmin.listRepositories();
         List<String> urls = new ArrayList<String>();
         for (int i = 0; i < repositories.length; i++) {
@@ -65,63 +66,83 @@ public class Obr extends StandardMBean implements ObrMBean {
         return urls;
     }
 
-    public TabularData getBundles() throws Exception {
-        CompositeType bundleType = new CompositeType("OBR Resource", "Bundle available in the OBR",
-                new String[]{"presentationname", "symbolicname", "version"},
-                new String[]{"Presentation Name", "Symbolic Name", "Version"},
-                new OpenType[]{SimpleType.STRING, SimpleType.STRING, SimpleType.STRING});
-        TabularType tableType = new TabularType("OBR Resources", "Table of all resources/bundles available in the OBR",
-                bundleType, new String[]{"presentationname"});
-        TabularData table = new TabularDataSupport(tableType);
+    public TabularData getBundles() throws MBeanException {
+        try {
+            CompositeType bundleType = new CompositeType("OBR Resource", "Bundle available in the OBR",
+                    new String[]{"presentationname", "symbolicname", "version"},
+                    new String[]{"Presentation Name", "Symbolic Name", "Version"},
+                    new OpenType[]{SimpleType.STRING, SimpleType.STRING, SimpleType.STRING});
+            TabularType tableType = new TabularType("OBR Resources", "Table of all resources/bundles available in the OBR",
+                    bundleType, new String[]{"presentationname"});
+            TabularData table = new TabularDataSupport(tableType);
 
-        Resource[] resources = repositoryAdmin.discoverResources("(|(presentationname=*)(symbolicname=*))");
-        for (int i = 0; i < resources.length; i++) {
-            try {
-                CompositeData data = new CompositeDataSupport(bundleType,
-                        new String[]{"presentationname", "symbolicname", "version"},
-                        new Object[]{resources[i].getPresentationName(), resources[i].getSymbolicName(), resources[i].getVersion()});
-                table.put(data);
-            } catch (Exception e) {
-                e.printStackTrace();
+            Resource[] resources = repositoryAdmin.discoverResources("(|(presentationname=*)(symbolicname=*))");
+            for (int i = 0; i < resources.length; i++) {
+                try {
+                    CompositeData data = new CompositeDataSupport(bundleType,
+                            new String[]{"presentationname", "symbolicname", "version"},
+                            new Object[]{resources[i].getPresentationName(), resources[i].getSymbolicName(), resources[i].getVersion()});
+                    table.put(data);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
+
+            return table;
+        } catch (Exception e) {
+            throw new MBeanException(null, e.getMessage());
         }
-
-        return table;
     }
 
-    public void addUrl(String url) throws Exception {
-        repositoryAdmin.addRepository(url);
+    public void addUrl(String url) throws MBeanException {
+        try {
+            repositoryAdmin.addRepository(url);
+        } catch (Exception e) {
+            throw new MBeanException(null, e.getMessage());
+        }
     }
 
-    public void removeUrl(String url) throws Exception {
+    public void removeUrl(String url) {
         repositoryAdmin.removeRepository(url);
     }
 
-    public void refreshUrl(String url) throws Exception {
-        repositoryAdmin.addRepository(url);
-    }
-
-    public void deployBundle(String bundle) throws Exception {
-        deployBundle(bundle, false, false);
-    }
-
-    public void deployBundle(String bundle, boolean start, boolean deployOptional) throws Exception {
-        Resolver resolver = repositoryAdmin.resolver();
-        String[] target = getTarget(bundle);
-        Resource resource = selectNewestVersion(searchRepository(repositoryAdmin, target[0], target[1]));
-        if (resource == null) {
-            throw new IllegalArgumentException("Unknown bundle " + target[0]);
+    public void refreshUrl(String url) throws MBeanException {
+        try {
+            repositoryAdmin.addRepository(url);
+        } catch (Exception e) {
+            throw new MBeanException(null, e.getMessage());
         }
-        resolver.add(resource);
-        if ((resolver.getAddedResources() != null) &&
-                (resolver.getAddedResources().length > 0)) {
-            if (resolver.resolve(deployOptional ? 0 : Resolver.NO_OPTIONAL_RESOURCES)) {
-                try {
-                    resolver.deploy(start ? Resolver.START : 0);
-                } catch (IllegalStateException ex) {
-                    throw new IllegalStateException("Can't deploy using OBR", ex);
+    }
+
+    public void deployBundle(String bundle) throws MBeanException {
+        try {
+            deployBundle(bundle, false, false);
+        } catch (Exception e) {
+            throw new MBeanException(null, e.getMessage());
+        }
+    }
+
+    public void deployBundle(String bundle, boolean start, boolean deployOptional) throws MBeanException {
+        try {
+            Resolver resolver = repositoryAdmin.resolver();
+            String[] target = getTarget(bundle);
+            Resource resource = selectNewestVersion(searchRepository(repositoryAdmin, target[0], target[1]));
+            if (resource == null) {
+                throw new IllegalArgumentException("Unknown bundle " + target[0]);
+            }
+            resolver.add(resource);
+            if ((resolver.getAddedResources() != null) &&
+                    (resolver.getAddedResources().length > 0)) {
+                if (resolver.resolve(deployOptional ? 0 : Resolver.NO_OPTIONAL_RESOURCES)) {
+                    try {
+                        resolver.deploy(start ? Resolver.START : 0);
+                    } catch (IllegalStateException ex) {
+                        throw new IllegalStateException("Can't deploy using OBR", ex);
+                    }
                 }
             }
+        } catch (Exception e) {
+            throw new MBeanException(null, e.getMessage());
         }
     }
 
