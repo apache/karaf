@@ -110,6 +110,10 @@
                             javax.management,
                             *
                         </Import-Package>
+                        <Private-Package>
+                            org.apache.karaf.management.internal,
+                            org.apache.karaf.management.tools
+                        </Private-Package>
                     </instructions>
                 </configuration>
             </plugin>

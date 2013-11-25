@@ -19,6 +19,7 @@ package org.apache.karaf.management;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
 import javax.management.JMException;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;

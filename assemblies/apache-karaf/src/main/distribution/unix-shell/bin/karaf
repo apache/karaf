@@ -396,7 +396,7 @@ run() {
     cd "$KARAF_BASE"
     
     if [ "x$KARAF_ACL" != "x" ]; then
-        warn "Enabling Security ACL support"
+        warn "Enabling JMX Role-Based Access Control"
         exec "$JAVA" $JAVA_OPTS -Djava.endorsed.dirs="${JAVA_ENDORSED_DIRS}" -Djava.ext.dirs="${JAVA_EXT_DIRS}" -Dkaraf.instances="${KARAF_HOME}/instances" -Dkaraf.home="$KARAF_HOME" -Dkaraf.base="$KARAF_BASE" -Dkaraf.data="$KARAF_DATA" -Dkaraf.etc="$KARAF_ETC" -Djava.io.tmpdir="$KARAF_DATA/tmp" -Djava.util.logging.config.file="$KARAF_ETC/java.util.logging.properties" -Djavax.management.builder.initial=org.apache.karaf.management.boot.KarafMBeanServerBuilder $KARAF_OPTS $OPTS -classpath "$CLASSPATH" $MAIN "$@"
     else     
         exec "$JAVA" $JAVA_OPTS -Djava.endorsed.dirs="${JAVA_ENDORSED_DIRS}" -Djava.ext.dirs="${JAVA_EXT_DIRS}" -Dkaraf.instances="${KARAF_HOME}/instances" -Dkaraf.home="$KARAF_HOME" -Dkaraf.base="$KARAF_BASE" -Dkaraf.data="$KARAF_DATA" -Dkaraf.etc="$KARAF_ETC" -Djava.io.tmpdir="$KARAF_DATA/tmp" -Djava.util.logging.config.file="$KARAF_ETC/java.util.logging.properties" $KARAF_OPTS $OPTS -classpath "$CLASSPATH" $MAIN "$@"
