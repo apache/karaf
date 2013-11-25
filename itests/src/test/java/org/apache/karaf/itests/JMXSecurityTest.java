@@ -190,6 +190,50 @@ public class JMXSecurityTest extends KarafTestSupport {
         testOSGiConfigAdminMBean(connection, true, true);
     }
 
+    @Test
+    public void testJMXSecurityCannotLogInAsGroupDirectly() throws Exception {
+        String suffix = "_" + counter.incrementAndGet();
+        String managerUser = "managerUser" + System.currentTimeMillis() + suffix;
+        String managerGroup = "managerGroup" + System.currentTimeMillis() + suffix;
+        String viewerUser = "viewerUser" + System.currentTimeMillis() + suffix;
+
+        System.out.println(executeCommand("jaas:realm-manage --realm karaf" +
+            ";jaas:user-add " + managerUser + " " + managerUser +
+            ";jaas:group-add " + managerUser + " " + managerGroup +
+            ";jaas:group-role-add " + managerGroup + " viewer" +
+            ";jaas:group-role-add " + managerGroup + " manager" +
+            ";jaas:user-add " + viewerUser + " " + viewerUser +
+            ";jaas:role-add " + viewerUser + " viewer" +
+            ";jaas:update" +
+            ";jaas:realm-manage --realm karaf" +
+            ";jaas:user-list"));
+
+        try {
+            getJMXConnector("admingroup", "group");
+            fail("Login with a group name should have failed");
+        } catch (SecurityException se) {
+            // good
+        }
+        try {
+            getJMXConnector("_g_:admingroup", "group");
+            fail("Login with a group name should have failed");
+        } catch (SecurityException se) {
+            // good
+        }
+        try {
+            getJMXConnector(managerGroup, "group");
+            fail("Login with a group name should have failed");
+        } catch (SecurityException se) {
+            // good
+        }
+        try {
+            getJMXConnector("_g_:" + managerGroup, "group");
+            fail("Login with a group name should have failed");
+        } catch (SecurityException se) {
+            // good
+        }
+    }
+
     private void testJMXSecurityMBean(MBeanServerConnection connection, boolean isManager, boolean isAdmin)
             throws MalformedObjectNameException, InstanceNotFoundException, MBeanException, ReflectionException, IOException {
         ObjectName securityMBean = new ObjectName("org.apache.karaf:type=security,area=jmx,name=root");
