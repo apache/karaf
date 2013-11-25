@@ -27,7 +27,7 @@
 
     <service ref="wrapperService" interface="org.apache.karaf.wrapper.WrapperService"/>
 
-    <bean id="wrapperMBean" class="org.apache.karaf.wrapper.management.internal.Wrapper">
+    <bean id="wrapperMBean" class="org.apache.karaf.wrapper.management.internal.WrapperMBeanImpl">
         <property name="wrapperService" ref="wrapperService" />
     </bean>
 

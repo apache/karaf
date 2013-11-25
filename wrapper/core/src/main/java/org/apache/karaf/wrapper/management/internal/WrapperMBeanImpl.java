@@ -19,6 +19,7 @@ package org.apache.karaf.wrapper.management.internal;
 import org.apache.karaf.wrapper.WrapperService;
 import org.apache.karaf.wrapper.management.WrapperMBean;
 
+import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import java.io.File;
@@ -26,11 +27,11 @@ import java.io.File;
 /**
  * Implementation of the wrapper MBean.
  */
-public class Wrapper extends StandardMBean implements WrapperMBean {
+public class WrapperMBeanImpl extends StandardMBean implements WrapperMBean {
 
     private WrapperService wrapperService;
 
-    public Wrapper() throws NotCompliantMBeanException {
+    public WrapperMBeanImpl() throws NotCompliantMBeanException {
         super(WrapperMBean.class);
     }
 
@@ -42,12 +43,20 @@ public class Wrapper extends StandardMBean implements WrapperMBean {
         return this.wrapperService;
     }
 
-    public void install() throws Exception {
-        wrapperService.install();
+    public void install() throws MBeanException {
+        try {
+            wrapperService.install();
+        } catch (Exception e) {
+            throw new MBeanException(null, e.getMessage());
+        }
     }
 
-    public File[] install(String name, String displayName, String description, String startType) throws Exception {
-        return wrapperService.install(name, displayName, description, startType);
+    public File[] install(String name, String displayName, String description, String startType) throws MBeanException {
+        try {
+            return wrapperService.install(name, displayName, description, startType);
+        } catch (Exception e) {
+            throw new MBeanException(null, e.getMessage());
+        }
     }
 
 }

@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.wrapper.management;
 
+import javax.management.MBeanException;
 import java.io.File;
 
 /**
@@ -26,9 +27,9 @@ public interface WrapperMBean {
     /**
      * Install the service wrapper.
      *
-     * @throws Exception in case of installation failure.
+     * @throws MBeanException in case of installation failure.
      */
-    void install() throws Exception;
+    void install() throws MBeanException;
 
     /**
      * Install the service wrapper.
@@ -38,8 +39,8 @@ public interface WrapperMBean {
      * @param description the service description.
      * @param startType the start type.
      * @return the wrapper configuration (index 0) and service files (index 1).
-     * @throws Exception in case of installation failure.
+     * @throws MBeanException in case of installation failure.
      */
-    File[] install(String name, String displayName, String description, String startType) throws Exception;
+    File[] install(String name, String displayName, String description, String startType) throws MBeanException;
 
 }
