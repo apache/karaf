@@ -116,7 +116,7 @@ public class KarafAgentFactory implements SshAgentFactory {
 
     public void unregisterCommandSession(CommandSession session) {
         try {
-            if (session.get(SshAgent.SSH_AUTHSOCKET_ENV_NAME) != null) {
+            if (session != null && session.get(SshAgent.SSH_AUTHSOCKET_ENV_NAME) != null) {
                 String agentId = (String) session.get(SshAgent.SSH_AUTHSOCKET_ENV_NAME);
                 session.put(SshAgent.SSH_AUTHSOCKET_ENV_NAME, null);
                 if (agentId != null) {
