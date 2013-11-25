@@ -16,18 +16,13 @@
  */
 package org.apache.karaf.log.core.internal;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
 import java.util.Hashtable;
 
 import junit.framework.TestCase;
 
-import org.apache.karaf.log.core.Level;
 import org.apache.karaf.log.core.LogMBean;
 import org.apache.karaf.log.core.LogService;
 import org.easymock.EasyMock;
-import org.junit.experimental.categories.Categories.ExcludeCategory;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 
@@ -56,7 +51,7 @@ public class SetLogLevelTest extends TestCase {
         ConfigurationAdmin configAdmin = EasyMock.createMock(ConfigurationAdmin.class);
         EasyMock.expect(configAdmin.getConfiguration(LogServiceImpl.CONFIGURATION_PID, null)).andReturn(configuration);
         logService = new LogServiceImpl(configAdmin, new LruList(100));
-        logMBean = new Log(logService);
+        logMBean = new LogMBeanImpl(logService);
         EasyMock.replay(configAdmin);
         EasyMock.replay(configuration);
     }

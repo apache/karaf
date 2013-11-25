@@ -16,7 +16,6 @@
  */
 package org.apache.karaf.log.core;
 
-
 /**
  * Log MBean.
  */

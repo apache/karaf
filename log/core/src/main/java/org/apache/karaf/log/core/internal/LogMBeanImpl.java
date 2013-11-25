@@ -23,13 +23,13 @@ import org.apache.karaf.log.core.LogMBean;
 import org.apache.karaf.log.core.LogService;
 
 /**
- * Implementation of the Log MBean.
+ * Implementation of the LogMBean.
  */
-public class Log extends StandardMBean implements LogMBean {
+public class LogMBeanImpl extends StandardMBean implements LogMBean {
 
     private final LogService logService;
 
-    public Log(LogService logService) throws NotCompliantMBeanException {
+    public LogMBeanImpl(LogService logService) throws NotCompliantMBeanException {
         super(LogMBean.class);
         this.logService = logService;
     }

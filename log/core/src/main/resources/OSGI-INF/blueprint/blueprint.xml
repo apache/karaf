@@ -50,7 +50,7 @@
     
     <service ref="logService" interface="org.apache.karaf.log.core.LogService"/>
 
-    <bean id="logMBean" class="org.apache.karaf.log.core.internal.Log">
+    <bean id="logMBean" class="org.apache.karaf.log.core.internal.LogMBeanImpl">
         <argument ref="logService"/>
     </bean>
 
