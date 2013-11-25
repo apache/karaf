@@ -28,7 +28,7 @@
 
     <service ref="systemService" interface="org.apache.karaf.system.SystemService"/>
 
-    <bean id="systemMBean" class="org.apache.karaf.system.management.internal.System">
+    <bean id="systemMBean" class="org.apache.karaf.system.management.internal.SystemMBeanImpl">
         <property name="systemService" ref="systemService" />
         <property name="bundleContext" ref="blueprintBundleContext"/>
     </bean>

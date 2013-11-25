@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.system.management;
 
+import javax.management.MBeanException;
 import java.util.Map;
 
 /**
@@ -28,7 +29,7 @@ public interface SystemMBean {
      *
      * @throws Exception
      */
-    void halt() throws Exception;
+    void halt() throws MBeanException;
 
     /**
      * Stop the Karaf instance at a given time.
@@ -36,14 +37,14 @@ public interface SystemMBean {
      * @param time the time when to stop the Karaf instance.
      * @throws Exception
      */
-    void halt(String time) throws Exception;
+    void halt(String time) throws MBeanException;
 
     /**
      * Reboot the Karaf instance.
      *
      * @throws Exception
      */
-    void reboot() throws Exception;
+    void reboot() throws MBeanException;
 
     /**
      * Reboot the Karaf instance at a given time.
@@ -51,7 +52,7 @@ public interface SystemMBean {
      * @param time the time when to reboot the Karaf instance.
      * @throws Exception
      */
-    void reboot(String time) throws Exception;
+    void reboot(String time) throws MBeanException;
 
     /**
      * Reboot the Karaf instance at a given time and clean the cache.
@@ -59,7 +60,7 @@ public interface SystemMBean {
      * @param time the time when to reboot the Karaf instance.
      * @throws Exception
      */
-    void rebootCleanCache(String time) throws Exception;
+    void rebootCleanCache(String time) throws MBeanException;
 
     /**
      * Reboot the Karaf instance at a given time and clean all working files.
@@ -67,7 +68,7 @@ public interface SystemMBean {
      * @param time the time when to reboot the Karaf instance.
      * @throws Exception
      */
-    void rebootCleanAll(String time) throws Exception;
+    void rebootCleanAll(String time) throws MBeanException;
 
     /**
      * Set the system bundle start level.
@@ -75,7 +76,7 @@ public interface SystemMBean {
      * @param startLevel the new system bundle start level.
      * @throws Exception
      */
-    void setStartLevel(int startLevel) throws Exception;
+    void setStartLevel(int startLevel) throws MBeanException;
 
     /**
      * Get the current system bundle start level.
@@ -83,7 +84,7 @@ public interface SystemMBean {
      * @return the current system bundle start level.
      * @throws Exception
      */
-    int getStartLevel() throws Exception;
+    int getStartLevel() throws MBeanException;
 
     /**
      * Get the current OSGi framework in use.
@@ -118,7 +119,7 @@ public interface SystemMBean {
      *
      * @param name the new Karaf instance name.
      */
-    void setName(String name) throws Exception;
+    void setName(String name);
 
     /**
      * Get the version of the current Karaf instance.
@@ -134,7 +135,7 @@ public interface SystemMBean {
      * @param dumpToFile if true, dump the properties into a file in the data folder.
      * @return the list of system properties.
      */
-    Map<String, String> getProperties(boolean unset, boolean dumpToFile) throws Exception;
+    Map<String, String> getProperties(boolean unset, boolean dumpToFile) throws MBeanException;
 
     /**
      * Get the value of a given system property.
