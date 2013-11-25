@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.scr.management;
 
+import javax.management.MBeanException;
 import javax.management.openmbean.TabularData;
 
 /**
@@ -51,27 +52,26 @@ public interface ScrServiceMBean {
     /**
      * The item names in the CompositeData representing a component
      */
-    String[] COMPONENT = { COMPONENT_ID, COMPONENT_NAME, COMPONENT_STATE,
-            COMPONENT_PROPERTIES, COMPONENT_REFERENCES };
+    String[] COMPONENT = {COMPONENT_ID, COMPONENT_NAME, COMPONENT_STATE,
+            COMPONENT_PROPERTIES, COMPONENT_REFERENCES};
 
-    String[] PROPERTY = { PROPERTY_KEY, PROPERTY_VALUE };
+    String[] PROPERTY = {PROPERTY_KEY, PROPERTY_VALUE};
 
-    String[] REFERENCE = { REFERENCE_NAME, REFERENCE_SATISFIED, REFERENCE_CARDINALITY, REFERENCE_AVAILABILITY, REFERENCE_POLICY, REFERENCE_BOUND_SERVICES};
+    String[] REFERENCE = {REFERENCE_NAME, REFERENCE_SATISFIED, REFERENCE_CARDINALITY, REFERENCE_AVAILABILITY, REFERENCE_POLICY, REFERENCE_BOUND_SERVICES};
 
     /**
      * Displays a {@link TabularData} with all the component details.
+     *
      * @return
-     * @throws Exception
      */
-    TabularData getComponents() throws Exception;
+    TabularData getComponents();
 
     /**
      * Presents a {@String} array of components currently registered with the SCR.
      *
      * @return String[]
-     * @throws Exception
      */
-    String[] listComponents() throws Exception;
+    String[] listComponents();
 
     /**
      * Verifies if the named component is currently in an ACTIVE state.
@@ -80,31 +80,28 @@ public interface ScrServiceMBean {
      * @return true if ACTIVE, otherwise false
      * @throws Exception
      */
-    boolean isComponentActive(String componentName) throws Exception;
+    boolean isComponentActive(String componentName) throws MBeanException;
 
     /**
      * Returns the named components state
      *
      * @param componentName the components name
      * @return
-     * @throws Exception
      */
-    int componentState(String componentName) throws Exception;
+    int componentState(String componentName);
 
     /**
      * Activates a component that is currently in a DISABLED state.
      *
      * @param componentName the components name
-     * @throws Exception
      */
-    void activateComponent(String componentName) throws Exception;
+    void activateComponent(String componentName);
 
     /**
      * Disables a component that is not in an ACTIVE state.
      *
      * @param componentName the components name
-     * @throws Exception
      */
-    void deactivateComponent(String componentName) throws Exception;
+    void deactivateComponent(String componentName);
 
 }

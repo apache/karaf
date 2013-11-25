@@ -21,10 +21,7 @@ import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import javax.management.MBeanServer;
-import javax.management.NotCompliantMBeanException;
-import javax.management.ObjectName;
-import javax.management.StandardMBean;
+import javax.management.*;
 import javax.management.openmbean.TabularData;
 
 import aQute.bnd.annotation.component.Activate;
@@ -43,15 +40,15 @@ import org.slf4j.LoggerFactory;
         name = ScrServiceMBeanImpl.COMPONENT_NAME,
         enabled = true,
         immediate = true,
-        properties = { "hidden.component=true" })
+        properties = {"hidden.component=true"})
 public class ScrServiceMBeanImpl extends StandardMBean implements ScrServiceMBean {
-    
+
     public static final String OBJECT_NAME = "org.apache.karaf:type=scr,name=" + System.getProperty("karaf.name", "root");
 
     public static final String COMPONENT_NAME = "ScrServiceMBean";
 
     public static final String COMPONENT_LABEL = "Apache Karaf SCR Service MBean";
-    
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ScrServiceMBeanImpl.class);
 
     private MBeanServer mBeanServer;
@@ -61,8 +58,8 @@ public class ScrServiceMBeanImpl extends StandardMBean implements ScrServiceMBea
     private ReadWriteLock lock = new ReentrantReadWriteLock();
 
     /**
-     * Creates new Declarative Services mbean.
-     * 
+     * Creates new Declarative Services MBean.
+     *
      * @throws NotCompliantMBeanException
      */
     public ScrServiceMBeanImpl() throws NotCompliantMBeanException {
@@ -71,7 +68,7 @@ public class ScrServiceMBeanImpl extends StandardMBean implements ScrServiceMBea
 
     /**
      * Service component activation call back.  Called when all dependencies are satisfied.
-     *  
+     *
      * @throws Exception
      */
     @Activate
@@ -92,9 +89,9 @@ public class ScrServiceMBeanImpl extends StandardMBean implements ScrServiceMBea
     }
 
     /**
-     * Service component deactivation call back.  Called after the component is in an active 
+     * Service component deactivation call back.  Called after the component is in an active
      * state when any dependencies become unsatisfied.
-     *  
+     *
      * @throws Exception
      */
     @Deactivate
@@ -111,22 +108,16 @@ public class ScrServiceMBeanImpl extends StandardMBean implements ScrServiceMBea
     }
 
     @Override
-    public TabularData getComponents() throws Exception {
+    public TabularData getComponents() {
         try {
-        return JmxComponent.tableFrom(safe(scrService.getComponents()));
-        }catch (Exception e) {
+            return JmxComponent.tableFrom(safe(scrService.getComponents()));
+        } catch (Exception e) {
             e.printStackTrace(System.out);
             return null;
         }
     }
 
-    /*
-         * @see org.apache.karaf.management.mbeans.scr.ScrServiceMBean#listComponents()
-         *
-         * @return
-         * @throws Exception
-         */
-    public String[] listComponents() throws Exception {
+    public String[] listComponents() {
         Component[] components = safe(scrService.getComponents());
         String[] componentNames = new String[components.length];
         for (int i = 0; i < componentNames.length; i++) {
@@ -135,62 +126,40 @@ public class ScrServiceMBeanImpl extends StandardMBean implements ScrServiceMBea
         return componentNames;
     }
 
-    /*
-     * @see org.apache.karaf.management.mbeans.scr.ScrServiceMBean#isComponentActive(java.lang.String)
-     *
-     * @param componentName
-     * @return
-     * @throws Exception
-     */
-    public boolean isComponentActive(String componentName) throws Exception {
-        return (componentState(componentName) == Component.STATE_ACTIVE)?true:false;
+    public boolean isComponentActive(String componentName) throws MBeanException {
+        try {
+            return (componentState(componentName) == Component.STATE_ACTIVE) ? true : false;
+        } catch (Exception e) {
+            throw new MBeanException(null, e.getMessage());
+        }
     }
 
-    /*
-     * @see org.apache.karaf.management.mbeans.scr.ScrServiceMBean#componentState(java.lang.String)
-     *
-     * @param componentName
-     * @return
-     * @throws Exception
-     */
-    public int componentState(String componentName) throws Exception {
+    public int componentState(String componentName) {
         int state = -1;
         final Component component = findComponent(componentName);
-        if(component != null)
+        if (component != null)
             state = component.getState();
         else
             LOGGER.warn("No component found for name: " + componentName);
         return state;
     }
 
-    /*
-     * @see org.apache.karaf.management.mbeans.scr.ScrServiceMBean#activateComponent(java.lang.String)
-     *
-     * @param componentName
-     * @throws Exception
-     */
-    public void activateComponent(String componentName) throws Exception {
+    public void activateComponent(String componentName) {
         final Component component = findComponent(componentName);
-        if(component != null)
+        if (component != null)
             component.enable();
         else
             LOGGER.warn("No component found for name: " + componentName);
     }
 
-    /*
-     * @see org.apache.karaf.management.mbeans.scr.ScrServiceMBean#deactiveateComponent(java.lang.String)
-     *
-     * @param componentName
-     * @throws Exception
-     */
-    public void deactivateComponent(String componentName) throws Exception {
+    public void deactivateComponent(String componentName) {
         final Component component = findComponent(componentName);
-        if(component != null)
+        if (component != null)
             component.disable();
         else
             LOGGER.warn("No component found for name: " + componentName);
     }
-    
+
     private Component findComponent(String componentName) {
         Component answer = null;
         if (scrService.getComponents(componentName) != null) {
@@ -201,31 +170,25 @@ public class ScrServiceMBeanImpl extends StandardMBean implements ScrServiceMBea
         }
         return answer;
     }
-    
-    private Component[] safe( Component[] components ) {
+
+    private Component[] safe(Component[] components) {
         return components == null ? new Component[0] : components;
     }
 
-	/**
-	 * @param mBeanServer the mBeanServer to set
-	 */
     @Reference
-	public void setmBeanServer(MBeanServer mBeanServer) {
-		this.mBeanServer = mBeanServer;
-	}
-	
+    public void setmBeanServer(MBeanServer mBeanServer) {
+        this.mBeanServer = mBeanServer;
+    }
+
     public void unsetmBeanServer(MBeanServer mBeanServer) {
         this.mBeanServer = null;
     }
 
-	/**
-	 * @param scrService the scrService to set
-	 */
-	@Reference
-	public void setScrService(ScrService scrService) {
-		this.scrService = scrService;
-	}
-	
+    @Reference
+    public void setScrService(ScrService scrService) {
+        this.scrService = scrService;
+    }
+
     public void unsetScrService(ScrService scrService) {
         this.scrService = null;
     }
