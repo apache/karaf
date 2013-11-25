@@ -38,7 +38,7 @@
     
     <service ref="webContainerService" interface="org.apache.karaf.web.WebContainerService"/>
     
-    <bean id="webMBean" class="org.apache.karaf.web.management.internal.Web">
+    <bean id="webMBean" class="org.apache.karaf.web.management.internal.WebMBeanImpl">
         <property name="webContainerService" ref="webContainerService"/>
     </bean>
 
