@@ -13,35 +13,49 @@
  */
 package org.apache.karaf.itests;
 
-import org.apache.felix.service.command.CommandProcessor;
-import org.apache.felix.service.command.CommandSession;
-import org.apache.karaf.features.Feature;
-import org.apache.karaf.features.FeaturesService;
-import org.ops4j.pax.exam.karaf.options.LogLevelOption;
-import org.junit.Assert;
-import org.ops4j.pax.exam.Configuration;
-import org.ops4j.pax.exam.MavenUtils;
-import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.ProbeBuilder;
-import org.ops4j.pax.exam.TestProbeBuilder;
-import org.osgi.framework.*;
-import org.osgi.util.tracker.ServiceTracker;
+import static org.ops4j.pax.exam.CoreOptions.maven;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.karafDistributionConfiguration;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.logLevel;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.PrintStream;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.PrintStream;
-import java.util.*;
-import java.util.concurrent.*;
-
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.karafDistributionConfiguration;
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.logLevel;
-import static org.ops4j.pax.exam.CoreOptions.maven;
+import org.apache.felix.service.command.CommandProcessor;
+import org.apache.felix.service.command.CommandSession;
+import org.apache.karaf.features.Feature;
+import org.apache.karaf.features.FeaturesService;
+import org.junit.Assert;
+import org.ops4j.pax.exam.Configuration;
+import org.ops4j.pax.exam.MavenUtils;
+import org.ops4j.pax.exam.Option;
+import org.ops4j.pax.exam.ProbeBuilder;
+import org.ops4j.pax.exam.TestProbeBuilder;
+import org.ops4j.pax.exam.karaf.options.LogLevelOption;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
 
 public class KarafTestSupport {
 
@@ -65,6 +79,7 @@ public class KarafTestSupport {
     @Configuration
     public Option[] config() {
         return new Option[]{
+                // KarafDistributionOption.debugConfiguration("8889", true),
                 karafDistributionConfiguration().frameworkUrl(maven().groupId("org.apache.karaf").artifactId("apache-karaf").versionAsInProject().type("tar.gz"))
                         .karafVersion(MavenUtils.getArtifactVersion("org.apache.karaf", "apache-karaf")).name("Apache Karaf").unpackDirectory(new File("target/exam")),
                 keepRuntimeFolder(),
@@ -198,9 +213,13 @@ public class KarafTestSupport {
     }
 
     public JMXConnector getJMXConnector() throws Exception {
+        return getJMXConnector("karaf", "karaf");
+    }
+
+    public JMXConnector getJMXConnector(String userName, String passWord) throws Exception {
         JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:1099/karaf-root");
         Hashtable env = new Hashtable();
-        String[] credentials = new String[]{"karaf", "karaf"};
+        String[] credentials = new String[]{userName, passWord};
         env.put("jmx.remote.credentials", credentials);
         JMXConnector connector = JMXConnectorFactory.connect(url, env);
         return connector;

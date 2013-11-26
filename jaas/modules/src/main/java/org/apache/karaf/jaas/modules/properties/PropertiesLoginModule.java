@@ -39,10 +39,14 @@ import org.apache.karaf.jaas.modules.AbstractKarafLoginModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * JAAS Login module for user / password, based on two properties files.
+ */
 public class PropertiesLoginModule extends AbstractKarafLoginModule {
-    static final String USER_FILE = "users";
-    private final Logger LOG = LoggerFactory.getLogger(PropertiesLoginModule.class);
 
+    private static final transient Logger LOGGER = LoggerFactory.getLogger(PropertiesLoginModule.class);
+
+    static final String USER_FILE = "users";
 
     private String usersFile;
 
@@ -50,7 +54,7 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
         super.initialize(sub,handler,options);
         usersFile = (String) options.get(USER_FILE);
         if (debug) {
-            LOG.debug("Initialized debug=" + debug + " usersFile=" + usersFile);
+            LOGGER.debug("Initialized debug={} usersFile={}", debug, usersFile);
         }
     }
 
@@ -85,6 +89,11 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
             throw new LoginException("Username can not be null");
         }
         user = ((NameCallback) callbacks[0]).getName();
+        if (user.startsWith(PropertiesBackingEngine.GROUP_PREFIX)) {
+            // you can't log in under a group name
+            throw new FailedLoginException("login failed");
+        }
+
         // password callback get value
         if (((PasswordCallback) callbacks[1]).getPassword() == null) {
             throw new LoginException("Password can not be null");
@@ -95,7 +104,7 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
         String userInfos = null;
 
         try {
-            userInfos = (String) users.get(user);
+            userInfos = users.get(user);
         } catch (NullPointerException e) {
             //error handled in the next statement
         }
@@ -115,10 +124,10 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
         String encryptedPassword = getEncryptedPassword(storedPassword);
         if (!storedPassword.equals(encryptedPassword)) {
             if (debug) {
-                LOG.debug("The password isn't flagged as encrypted, encrypt it.");
+                LOGGER.debug("The password isn't flagged as encrypted, encrypt it.");
             }
             if (debug) {
-                LOG.debug("Rebuild the user informations string.");
+                LOGGER.debug("Rebuild the user informations string.");
             }
             userInfos = encryptedPassword + ",";
             for (int i = 1; i < infos.length; i++) {
@@ -129,7 +138,7 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
                 }
             }
             if (debug) {
-                LOG.debug("Push back the user informations in the users properties.");
+                LOGGER.debug("Push back the user informations in the users properties.");
             }
             if (user.contains("\\")) {
                 users.remove(user);
@@ -138,11 +147,11 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
             users.put(user, userInfos);
             try {
                 if (debug) {
-                    LOG.debug("Store the users properties file.");
+                    LOGGER.debug("Store the users properties file.");
                 }
                 users.save();
             } catch (IOException ioe) {
-                LOG.warn("Unable to write user properties file " + f, ioe);
+                LOGGER.warn("Unable to write user properties file {}", f, ioe);
             }
             storedPassword = encryptedPassword;
         }
@@ -160,9 +169,9 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
         principals.add(new UserPrincipal(user));
         for (int i = 1; i < infos.length; i++) {
             if (infos[i].startsWith(PropertiesBackingEngine.GROUP_PREFIX)) {
-                // It's a group reference
+                // it's a group reference
                 principals.add(new GroupPrincipal(infos[i].substring(PropertiesBackingEngine.GROUP_PREFIX.length())));
-                String groupInfo = (String) users.get(infos[i]);
+                String groupInfo = users.get(infos[i]);
                 if (groupInfo != null) {
                     String[] roles = groupInfo.split(",");
                     for (int j = 1; j < roles.length; j++) {
@@ -170,6 +179,7 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
                     }
                 }
             } else {
+                // it's an user reference
                 principals.add(new RolePrincipal(infos[i]));
             }
         }
@@ -177,7 +187,7 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
         users.clear();
 
         if (debug) {
-            LOG.debug("Successfully logged in " + user);
+            LOGGER.debug("Successfully logged in {}", user);
         }
         return true;
     }
@@ -185,7 +195,7 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
     public boolean abort() throws LoginException {
         clear();
         if (debug) {
-            LOG.debug("abort");
+            LOGGER.debug("abort");
         }
         return true;
     }
@@ -194,8 +204,9 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
         subject.getPrincipals().removeAll(principals);
         principals.clear();
         if (debug) {
-            LOG.debug("logout");
+            LOGGER.debug("logout");
         }
         return true;
     }
+
 }
