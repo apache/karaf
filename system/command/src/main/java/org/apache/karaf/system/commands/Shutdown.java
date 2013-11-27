@@ -44,7 +44,7 @@ public class Shutdown extends AbstractSystemAction {
 
 
     @Argument(name = "time", index = 0, description = "Shutdown after a specified delay. The time argument can have different" +
-            " formats. First, it can be an abolute time in the format hh:mm, in which hh is the hour (1 or 2 digits) and mm" +
+            " formats. First, it can be an absolute time in the format hh:mm, in which hh is the hour (1 or 2 digits) and mm" +
             " is the minute of the hour (in two digits). Second, it can be in the format +m, in which m is the number of minutes" +
             " to wait. The word now is an alias for +0.", required = false, multiValued = false)
     String time;
