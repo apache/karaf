@@ -316,6 +316,10 @@ public class GuardProxyCatalog implements ServiceListener {
                         if (idx >= 0) {
                             bareKey = bareKey.substring(0, idx);
                         }
+                        int idx1 = bareKey.indexOf('[');
+                        if (idx1 >= 0) {
+                            bareKey = bareKey.substring(0, idx1);
+                        }
                         int idx2 = bareKey.indexOf('*');
                         if (idx2 >= 0) {
                             bareKey = bareKey.substring(0, idx2);

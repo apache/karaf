@@ -252,12 +252,13 @@ public class GuardProxyCatalogTest {
         config.put("someOtherMethod(int)", "c");
         config.put("someOtherMethod(int)[/12/]", "d");
         config.put("someOtherMethod(int)[\"42\"]", "e");
-        config.put("someFoo*", "f");
+        config.put("someOtherMethod[/.*[x][y][z].*/]", "f");
+        config.put("someFoo*", "g");
 
         BundleContext bc = mockConfigAdminBundleContext(config);
 
         Dictionary<String, Object> proxyProps = testCreateProxy(bc, TestServiceAPI.class, new TestService());
-        assertEquals(new HashSet<String>(Arrays.asList("a", "b", "c", "d", "e", "f")),
+        assertEquals(new HashSet<String>(Arrays.asList("a", "b", "c", "d", "e", "f", "g")),
                 new HashSet<String>((Collection<String>) proxyProps.get(GuardProxyCatalog.SERVICE_GUARD_ROLES_PROPERTY)));
     }
 
