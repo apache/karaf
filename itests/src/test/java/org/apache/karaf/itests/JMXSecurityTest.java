@@ -48,6 +48,7 @@ import javax.management.openmbean.TabularDataSupport;
 import javax.management.openmbean.TabularType;
 import javax.management.remote.JMXConnector;
 
+import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -92,7 +93,7 @@ public class JMXSecurityTest extends KarafTestSupport {
             ";jaas:role-add " + viewerUser + " viewer" +
             ";jaas:update" +
             ";jaas:realm-manage --realm karaf" +
-            ";jaas:user-list"));
+            ";jaas:user-list", new RolePrincipal("admin")));
 
         JMXConnector connector = getJMXConnector(viewerUser, viewerUser);
         MBeanServerConnection connection = connector.getMBeanServerConnection();
@@ -132,7 +133,7 @@ public class JMXSecurityTest extends KarafTestSupport {
             ";jaas:role-add " + viewerUser + " viewer" +
             ";jaas:update" +
             ";jaas:realm-manage --realm karaf" +
-            ";jaas:user-list"));
+            ";jaas:user-list", new RolePrincipal("admin")));
 
         JMXConnector connector = getJMXConnector(managerUser, managerUser);
         MBeanServerConnection connection = connector.getMBeanServerConnection();
@@ -206,7 +207,7 @@ public class JMXSecurityTest extends KarafTestSupport {
             ";jaas:role-add " + viewerUser + " viewer" +
             ";jaas:update" +
             ";jaas:realm-manage --realm karaf" +
-            ";jaas:user-list"));
+            ";jaas:user-list", new RolePrincipal("admin")));
 
         try {
             getJMXConnector("admingroup", "group");

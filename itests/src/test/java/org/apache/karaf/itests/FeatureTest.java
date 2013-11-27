@@ -21,6 +21,7 @@ import javax.management.ObjectName;
 import javax.management.openmbean.TabularData;
 import javax.management.remote.JMXConnector;
 
+import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -62,13 +63,13 @@ public class FeatureTest extends KarafTestSupport {
 
     @Test
     public void installUninstallCommand() throws Exception {
-        String featureInstallOutput = executeCommand("feature:install -v eventadmin");
+        String featureInstallOutput = executeCommand("feature:install -v eventadmin", new RolePrincipal("admin"));
         System.out.println(featureInstallOutput);
         assertFalse(featureInstallOutput.isEmpty());
         String featureListOutput = executeCommand("feature:list -i | grep eventadmin");
         System.out.println(featureListOutput);
         assertFalse(featureListOutput.isEmpty());
-        System.out.println(executeCommand("feature:uninstall eventadmin"));
+        System.out.println(executeCommand("feature:uninstall eventadmin", new RolePrincipal("admin")));
         featureListOutput = executeCommand("feature:list -i | grep eventadmin");
         System.out.println(featureListOutput);
         assertTrue(featureListOutput.isEmpty());
