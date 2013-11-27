@@ -25,6 +25,8 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.security.Principal;
+import java.security.PrivilegedExceptionAction;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -45,6 +47,7 @@ import javax.inject.Inject;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
+import javax.security.auth.Subject;
 
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
@@ -90,7 +93,7 @@ public class KarafTestSupport {
 
     @Inject
     protected FeaturesService featureService;
-    
+
     /**
      * To make sure the tests run only when the boot features are fully installed
      */
@@ -102,7 +105,7 @@ public class KarafTestSupport {
         probe.setHeader(Constants.DYNAMICIMPORT_PACKAGE, "*,org.apache.felix.service.*;status=provisional");
         return probe;
     }
-    
+
     public File getConfigFile(String path) {
     	return new File(this.getClass().getResource(path).getFile());
     }
@@ -126,23 +129,25 @@ public class KarafTestSupport {
      * Executes a shell command and returns output as a String.
      * Commands have a default timeout of 10 seconds.
      *
-     * @param command
+     * @param command The command to execute
+     * @param principals The principals (e.g. RolePrincipal objects) to run the command under
      * @return
      */
-    protected String executeCommand(final String command) {
-        return executeCommand(command, COMMAND_TIMEOUT, false);
+    protected String executeCommand(final String command, Principal ... principals) {
+        return executeCommand(command, COMMAND_TIMEOUT, false, principals);
     }
 
     /**
      * Executes a shell command and returns output as a String.
      * Commands have a default timeout of 10 seconds.
      *
-     * @param command The command to execute.
-     * @param timeout The amount of time in millis to wait for the command to execute.
-     * @param silent  Specifies if the command should be displayed in the screen.
+     * @param command    The command to execute.
+     * @param timeout    The amount of time in millis to wait for the command to execute.
+     * @param silent     Specifies if the command should be displayed in the screen.
+     * @param principals The principals (e.g. RolePrincipal objects) to run the command under
      * @return
      */
-    protected String executeCommand(final String command, final Long timeout, final Boolean silent) {
+    protected String executeCommand(final String command, final Long timeout, final Boolean silent, final Principal ... principals) {
         waitForCommandService(command);
 
         String response;
@@ -150,21 +155,42 @@ public class KarafTestSupport {
         final PrintStream printStream = new PrintStream(byteArrayOutputStream);
         final CommandProcessor commandProcessor = getOsgiService(CommandProcessor.class);
         final CommandSession commandSession = commandProcessor.createSession(System.in, printStream, System.err);
-        FutureTask<String> commandFuture = new FutureTask<String>(
-                new Callable<String>() {
-                    public String call() {
-                        try {
-                            if (!silent) {
-                                System.err.println(command);
-                            }
-                            commandSession.execute(command);
-                        } catch (Exception e) {
-                            throw new RuntimeException(e.getMessage(), e);
-                        }
-                        printStream.flush();
-                        return byteArrayOutputStream.toString();
+
+        final Callable<String> commandCallable = new Callable<String>() {
+            @Override
+            public String call() throws Exception {
+                try {
+                    if (!silent) {
+                        System.err.println(command);
                     }
-                });
+                    commandSession.execute(command);
+                } catch (Exception e) {
+                    throw new RuntimeException(e.getMessage(), e);
+                }
+                printStream.flush();
+                return byteArrayOutputStream.toString();
+            }
+        };
+
+        FutureTask<String> commandFuture;
+        if (principals.length == 0) {
+            commandFuture = new FutureTask<String>(commandCallable);
+        } else {
+            // If principals are defined, run the command callable via Subject.doAs()
+            commandFuture = new FutureTask<String>(new Callable<String>() {
+                @Override
+                public String call() throws Exception {
+                    Subject subject = new Subject();
+                    subject.getPrincipals().addAll(Arrays.asList(principals));
+                    return Subject.doAs(subject, new PrivilegedExceptionAction<String>() {
+                        @Override
+                        public String run() throws Exception {
+                            return commandCallable.call();
+                        }
+                    });
+                }
+            });
+        }
 
         try {
             executor.submit(commandFuture);
@@ -178,7 +204,6 @@ public class KarafTestSupport {
 		} catch (InterruptedException e) {
 			throw new RuntimeException(e.getMessage(), e);
 		}
-
         return response;
     }
 
@@ -299,7 +324,7 @@ public class KarafTestSupport {
     public JMXConnector getJMXConnector() throws Exception {
         return getJMXConnector("karaf", "karaf");
     }
- 
+
     public JMXConnector getJMXConnector(String userName, String passWord) throws Exception {
         JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:" + RMI_REG_PORT+ "/karaf-root");
         Hashtable<String, Object> env = new Hashtable<String, Object>();
@@ -318,13 +343,13 @@ public class KarafTestSupport {
         }
         Assert.fail("Feature " + featureName + " should be installed but is not");
     }
-    
+
     public void assertFeaturesInstalled(String ... expectedFeatures) {
-        Set<String> expectedFeaturesSet = new HashSet<String>(Arrays.asList(expectedFeatures)); 
+        Set<String> expectedFeaturesSet = new HashSet<String>(Arrays.asList(expectedFeatures));
         Feature[] features = featureService.listInstalledFeatures();
         Set<String> installedFeatures = new HashSet<String>();
         for (Feature feature : features) {
-            installedFeatures.add(feature.getName()); 
+            installedFeatures.add(feature.getName());
         }
         String msg = "Expecting the following features to be installed : " + expectedFeaturesSet + " but found " + installedFeatures;
         Assert.assertTrue(msg, installedFeatures.containsAll(expectedFeaturesSet));
@@ -333,7 +358,7 @@ public class KarafTestSupport {
     public void assertContains(String expectedPart, String actual) {
         assertTrue("Should contain '" + expectedPart + "' but was : " + actual, actual.contains(expectedPart));
     }
-    
+
     public void assertContainsNot(String expectedPart, String actual) {
         Assert.assertFalse("Should not contain '" + expectedPart + "' but was : " + actual, actual.contains(expectedPart));
     }
@@ -345,7 +370,7 @@ public class KarafTestSupport {
 	protected void assertBundleNotInstalled(String name) {
 	    Assert.assertNull("Bundle " + name + " should not be installed", findBundleByName(name));
 	}
-	
+
 	protected Bundle findBundleByName(String symbolicName) {
 	    for (Bundle bundle : bundleContext.getBundles()) {
 	        if (bundle.getSymbolicName().equals(symbolicName)) {
@@ -359,23 +384,23 @@ public class KarafTestSupport {
         featureService.installFeature(feature);
         assertFeatureInstalled(feature);
     }
-    
+
     protected void installAssertAndUninstallFeature(String... feature) throws Exception {
     	Set<Feature> featuresBefore = new HashSet<Feature>(Arrays.asList(featureService.listInstalledFeatures()));
     	try {
 			for (String curFeature : feature) {
 				featureService.installFeature(curFeature);
-			    assertFeatureInstalled(curFeature);			
+			    assertFeatureInstalled(curFeature);
 			}
 		} finally {
 			uninstallNewFeatures(featuresBefore);
-		}      
+		}
     }
 
     /**
      * The feature service does not uninstall feature dependencies when uninstalling a single feature.
      * So we need to make sure we uninstall all features that were newly installed.
-     * 
+     *
      * @param featuresBefore
      * @throws Exception
      */
@@ -393,7 +418,7 @@ public class KarafTestSupport {
 			}
 		}
 	}
-    
+
     protected void close(Closeable closeAble) {
     	if (closeAble != null) {
     		try {

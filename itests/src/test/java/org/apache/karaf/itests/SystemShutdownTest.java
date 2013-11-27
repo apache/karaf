@@ -17,6 +17,7 @@ import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 
+import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -29,7 +30,7 @@ public class SystemShutdownTest extends KarafTestSupport {
 
     @Test
     public void shutdownCommand() throws Exception {
-        System.out.println(executeCommand("system:shutdown -f"));
+        System.out.println(executeCommand("system:shutdown -f", new RolePrincipal("admin")));
     }
 
     @Test

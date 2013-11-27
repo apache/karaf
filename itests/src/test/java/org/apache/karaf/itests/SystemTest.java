@@ -19,6 +19,7 @@ import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 
+import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -93,7 +94,8 @@ public class SystemTest extends KarafTestSupport {
 
     @Test
     public void startLevelCommand() throws Exception {
-        assertContains("100", executeCommand("system:start-level"));
+        assertContains("100", executeCommand("system:start-level",
+                new RolePrincipal("admin"), new RolePrincipal("manager"), new RolePrincipal("viewer")));
     }
 
     @Test
