@@ -38,13 +38,15 @@ rem karaf scripts
 rem
 rem Window name of the windows console
 rem SET KARAF_TITLE
+rem Location of Java installation
+rem SET JAVA_HOME
 rem Minimum memory for the JVM
 rem SET JAVA_MIN_MEM
 rem Maximum memory for the JVM
 rem SET JAVA_MAX_MEM
 rem Minimum perm memory for the JVM
 rem SET JAVA_PERM_MEM
-rem Maximum memory for the JVM
+rem Maximum perm memory for the JVM
 rem SET JAVA_MAX_PERM_MEM
 rem Karaf home folder
 rem SET KARAF_HOME
@@ -56,4 +58,6 @@ rem Karaf etc folder
 rem SET KARAF_ETC
 rem Additional available Karaf options
 rem SET KARAF_OPTS
+rem Enable debug mode
+rem SET KARAF_DEBUG
 

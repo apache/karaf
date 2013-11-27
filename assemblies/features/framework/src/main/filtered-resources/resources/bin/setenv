@@ -35,13 +35,15 @@
 # The following section shows the possible configuration options for the default 
 # karaf scripts
 #
+# export JAVA_HOME # Location of Java installation
 # export JAVA_MIN_MEM # Minimum memory for the JVM
 # export JAVA_MAX_MEM # Maximum memory for the JVM
 # export JAVA_PERM_MEM # Minimum perm memory for the JVM
-# export JAVA_MAX_PERM_MEM # Maximum memory for the JVM
+# export JAVA_MAX_PERM_MEM # Maximum perm memory for the JVM
 # export KARAF_HOME # Karaf home folder
 # export KARAF_DATA # Karaf data folder
 # export KARAF_BASE # Karaf base folder
 # export KARAF_ETC  # Karaf etc  folder
 # export KARAF_OPTS # Additional available Karaf options
+# export KARAF_DEBUG # Enable debug mode
 
