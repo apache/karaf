@@ -25,6 +25,7 @@ lde = { log:display-exception $args } ;
 la = { bundle:list -t 0 $args } ;
 ls = { service:list $args } ;
 cl = { config:list "(service.pid=$args)" } ;
+halt = { system:shutdown -h -f $args } ;
 help = { *:help $args | more } ;
 man = { help $args } ;
 log:list = { log:get ALL } ;
