@@ -39,6 +39,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.felix.service.command.CommandProcessor;
+import org.apache.felix.service.threadio.ThreadIO;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.apache.karaf.shell.console.Console;
 import org.apache.karaf.shell.console.ConsoleFactory;
@@ -62,6 +63,7 @@ public class GogoPlugin extends AbstractWebConsolePlugin {
     private BundleContext bundleContext;
     private CommandProcessor commandProcessor;
     private ConsoleFactory consoleFactory;
+    private ThreadIO threadIO;
 
     @Override
     protected boolean isHtmlRequest(HttpServletRequest request) {
@@ -78,6 +80,10 @@ public class GogoPlugin extends AbstractWebConsolePlugin {
 
     public void setConsoleFactory(ConsoleFactory consoleFactory) {
         this.consoleFactory = consoleFactory;
+    }
+
+    public void setThreadIO(ThreadIO threadIO) {
+        this.threadIO = threadIO;
     }
 
     public void start() {
@@ -192,6 +198,7 @@ public class GogoPlugin extends AbstractWebConsolePlugin {
                 final Subject subject = new Subject();
                 subject.getPrincipals().add(new UserPrincipal("karaf"));
                 Console console = consoleFactory.create(commandProcessor,
+                        threadIO,
                         new PipedInputStream(in),
                         pipedOut,
                         pipedOut,

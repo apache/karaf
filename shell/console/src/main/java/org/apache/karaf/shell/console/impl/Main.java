@@ -70,7 +70,7 @@ public class Main {
         InputStream in = unwrap(System.in);
         PrintStream out = wrap(unwrap(System.out));
         PrintStream err = wrap(unwrap(System.err));
-        run(commandProcessor, args, in, out, err);
+        run(commandProcessor, threadio, args, in, out, err);
 
         // TODO: do we need to stop the threadio that was started?
         // threadio.stop();
@@ -84,7 +84,7 @@ public class Main {
      * @param args
      * @throws Exception
      */
-    public void run(CommandSession parent, String args[]) throws Exception {
+    public void run(CommandSession parent, ThreadIO threadIO, String args[]) throws Exception {
 
         // TODO: find out what the down side of not using a real ThreadIO implementation is.
         CommandProcessorImpl commandProcessor = new CommandProcessorImpl(new ThreadIO() {
@@ -98,10 +98,10 @@ public class Main {
         InputStream in = parent.getKeyboard();
         PrintStream out = parent.getConsole();
         PrintStream err = parent.getConsole();
-        run(commandProcessor, args, in, out, err);
+        run(commandProcessor, threadIO, args, in, out, err);
     }
 
-    private void run(CommandProcessorImpl commandProcessor, String[] args, InputStream in, PrintStream out, PrintStream err) throws Exception {
+    private void run(CommandProcessorImpl commandProcessor, ThreadIO threadIO, String[] args, InputStream in, PrintStream out, PrintStream err) throws Exception {
         StringBuilder sb = new StringBuilder();
         String classpath = null;
         boolean batch = false;
@@ -155,10 +155,10 @@ public class Main {
 
         discoverCommands(commandProcessor, cl);
 
-        run(commandProcessor, sb.toString(), in, out, err);
+        run(commandProcessor, threadIO, sb.toString(), in, out, err);
     }
 
-    private void run(final CommandProcessorImpl commandProcessor, String command, final InputStream in, final PrintStream out, final PrintStream err) throws Exception {
+    private void run(final CommandProcessorImpl commandProcessor, ThreadIO threadIO, String command, final InputStream in, final PrintStream out, final PrintStream err) throws Exception {
 
         if (command.length() > 0) {
 
@@ -194,7 +194,7 @@ public class Main {
 
             final TerminalFactory terminalFactory = new TerminalFactory();
             final Terminal terminal = terminalFactory.getTerminal();
-            ConsoleImpl console = createConsole(commandProcessor, in, out, err, terminal);
+            ConsoleImpl console = createConsole(commandProcessor, threadIO, in, out, err, terminal);
             CommandSession session = console.getSession();
             session.put("USER", user);
             session.put("APPLICATION", application);
@@ -229,8 +229,8 @@ public class Main {
      * @return
      * @throws Exception
      */
-    protected ConsoleImpl createConsole(CommandProcessorImpl commandProcessor, InputStream in, PrintStream out, PrintStream err, Terminal terminal) throws Exception {
-        return new ConsoleImpl(commandProcessor, in, out, err, terminal, null, null, null);
+    protected ConsoleImpl createConsole(CommandProcessorImpl commandProcessor, ThreadIO threadIO, InputStream in, PrintStream out, PrintStream err, Terminal terminal) throws Exception {
+        return new ConsoleImpl(commandProcessor, threadIO, in, out, err, terminal, null, null, null);
     }
 
     /**

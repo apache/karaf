@@ -26,9 +26,10 @@ import javax.security.auth.Subject;
 import jline.Terminal;
 
 import org.apache.felix.service.command.CommandProcessor;
+import org.apache.felix.service.threadio.ThreadIO;
 
 public interface ConsoleFactory {
-    Console create(CommandProcessor processor, InputStream in, PrintStream out, PrintStream err, final Terminal term, String encoding, Runnable closeCallback);
-    Console createLocal(CommandProcessor processor, Terminal terminal, String encoding, Runnable closeCallback);
+    Console create(CommandProcessor processor, ThreadIO threadIO, InputStream in, PrintStream out, PrintStream err, final Terminal term, String encoding, Runnable closeCallback);
+    Console createLocal(CommandProcessor processor, ThreadIO threadIO, Terminal terminal, String encoding, Runnable closeCallback);
     void startConsoleAs(Console console, Subject subject, String threadName);
 }

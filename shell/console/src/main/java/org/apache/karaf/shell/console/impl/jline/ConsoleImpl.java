@@ -43,6 +43,7 @@ import jline.console.history.PersistentHistory;
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Converter;
+import org.apache.felix.service.threadio.ThreadIO;
 import org.apache.karaf.shell.console.CloseShellException;
 import org.apache.karaf.shell.console.CommandSessionHolder;
 import org.apache.karaf.shell.console.Completer;
@@ -65,6 +66,7 @@ public class ConsoleImpl implements Console {
     private static final Logger LOGGER = LoggerFactory.getLogger(Console.class);
 
     protected CommandSession session;
+    protected ThreadIO threadIO;
     private ConsoleReader reader;
     private BlockingQueue<Integer> queue;
     private boolean interrupt;
@@ -81,6 +83,7 @@ public class ConsoleImpl implements Console {
     private final BundleContext bundleContext;
 
     public ConsoleImpl(CommandProcessor processor,
+                       ThreadIO threadIO,
                        InputStream in,
                        PrintStream out,
                        PrintStream err,
@@ -88,6 +91,7 @@ public class ConsoleImpl implements Console {
                        String encoding,
                        Runnable closeCallback,
                        BundleContext bc) {
+        this.threadIO = threadIO;
         this.in = in;
         this.out = out;
         this.err = err;
@@ -172,40 +176,45 @@ public class ConsoleImpl implements Console {
     }
 
     public void run() {
-        SecuredCommandProcessorImpl secCP = createSecuredCommandProcessor();
-        thread = Thread.currentThread();
-        CommandSessionHolder.setSession(session);
-        running = true;
-        pipe.start();
-        Properties brandingProps = Branding.loadBrandingProperties(terminal);
-        welcome(brandingProps);
-        setSessionProperties(brandingProps);
-        String scriptFileName = System.getProperty(SHELL_INIT_SCRIPT);
-        executeScript(scriptFileName);
-        while (running) {
-            try {
-                String command = readAndParseCommand();
-                if (command == null) {
+        try {
+            threadIO.setStreams(consoleInput, out, err);
+            SecuredCommandProcessorImpl secCP = createSecuredCommandProcessor();
+            thread = Thread.currentThread();
+            CommandSessionHolder.setSession(session);
+            running = true;
+            pipe.start();
+            Properties brandingProps = Branding.loadBrandingProperties(terminal);
+            welcome(brandingProps);
+            setSessionProperties(brandingProps);
+            String scriptFileName = System.getProperty(SHELL_INIT_SCRIPT);
+            executeScript(scriptFileName);
+            while (running) {
+                try {
+                    String command = readAndParseCommand();
+                    if (command == null) {
+                        break;
+                    }
+                    //session.getConsole().println("Executing: " + line);
+                    Object result = session.execute(command);
+                    if (result != null) {
+                        session.getConsole().println(session.format(result, Converter.INSPECT));
+                    }
+                } catch (InterruptedIOException e) {
+                    //System.err.println("^C");
+                    // TODO: interrupt current thread
+                } catch (InterruptedException e) {
+                    //interrupt current thread
+                } catch (CloseShellException e) {
                     break;
+                } catch (Throwable t) {
+                    ShellUtil.logException(session, t);
                 }
-                //session.getConsole().println("Executing: " + line);
-                Object result = session.execute(command);
-                if (result != null) {
-                    session.getConsole().println(session.format(result, Converter.INSPECT));
-                }
-            } catch (InterruptedIOException e) {
-                //System.err.println("^C");
-                // TODO: interrupt current thread
-            } catch (InterruptedException e) {
-                //interrupt current thread
-            } catch (CloseShellException e) {
-                break;
-            } catch (Throwable t) {
-                ShellUtil.logException(session, t);
             }
+            secCP.close();
+            close(true);
+        } finally {
+            threadIO.close();
         }
-        secCP.close();
-        close(true);
     }
 
     SecuredCommandProcessorImpl createSecuredCommandProcessor() {

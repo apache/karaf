@@ -31,6 +31,7 @@ import java.security.PrivilegedAction;
 import javax.security.auth.Subject;
 
 import org.apache.felix.gogo.api.CommandSessionListener;
+import org.apache.felix.gogo.runtime.threadio.ThreadIOImpl;
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Converter;
@@ -73,7 +74,7 @@ public class ConsoleImplTest {
         }).anyTimes();
         EasyMock.replay(bc);
 
-        final ConsoleImpl console = new ConsoleImpl(null, System.in, System.out, System.err, null, "UTF-8", null, bc);
+        final ConsoleImpl console = new ConsoleImpl(null, new ThreadIOImpl(), System.in, System.out, System.err, null, "UTF-8", null, bc);
         assertTrue(console.session instanceof DelegateSession);
 
         console.session.put("foo", "bar");

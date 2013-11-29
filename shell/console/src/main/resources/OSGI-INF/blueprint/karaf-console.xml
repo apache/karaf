@@ -27,6 +27,7 @@
     </ext:property-placeholder>
 
     <reference id="commandProcessor" interface="org.apache.felix.service.command.CommandProcessor"/>
+    <reference id="threadIO" interface="org.apache.felix.service.threadio.ThreadIO" />
 
     <bean id="consoleFactoryService" class="org.apache.karaf.shell.console.impl.jline.ConsoleFactoryService">
         <argument ref="blueprintBundleContext"/>
@@ -41,6 +42,7 @@
         <argument ref="terminalFactory"/>
         <argument ref="consoleFactoryService"/>
         <argument ref="commandProcessor"/>
+        <argument ref="threadIO"/>
     </bean>
 
     <bean id="converters" class="org.apache.karaf.shell.console.impl.Converters">

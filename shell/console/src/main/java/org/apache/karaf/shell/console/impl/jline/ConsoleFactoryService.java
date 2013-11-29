@@ -32,6 +32,7 @@ import jline.Terminal;
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Function;
+import org.apache.felix.service.threadio.ThreadIO;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.apache.karaf.shell.console.Console;
 import org.apache.karaf.shell.console.ConsoleFactory;
@@ -46,8 +47,9 @@ public class ConsoleFactoryService implements ConsoleFactory {
     }
     
     @Override
-    public Console createLocal(CommandProcessor processor, final Terminal terminal, String encoding, Runnable closeCallback) {
-        return create(processor, 
+    public Console createLocal(CommandProcessor processor, ThreadIO threadIO, final Terminal terminal, String encoding, Runnable closeCallback) {
+        return create(processor,
+                threadIO,
                 StreamWrapUtil.reWrapIn(terminal, System.in), 
                 StreamWrapUtil.reWrap(System.out), 
                 StreamWrapUtil.reWrap(System.err), 
@@ -57,9 +59,9 @@ public class ConsoleFactoryService implements ConsoleFactory {
     }
 
     @Override
-    public Console create(CommandProcessor processor, InputStream in, PrintStream out, PrintStream err, final Terminal terminal,
+    public Console create(CommandProcessor processor, ThreadIO threadIO, InputStream in, PrintStream out, PrintStream err, final Terminal terminal,
             String encoding, Runnable closeCallback) {
-        ConsoleImpl console = new ConsoleImpl(processor, in, out, err, terminal, encoding, closeCallback, bundleContext);
+        ConsoleImpl console = new ConsoleImpl(processor, threadIO, in, out, err, terminal, encoding, closeCallback, bundleContext);
         CommandSession session = console.getSession();
         session.put("APPLICATION", System.getProperty("karaf.name", "root"));
         session.put("#LINES", new Function() {

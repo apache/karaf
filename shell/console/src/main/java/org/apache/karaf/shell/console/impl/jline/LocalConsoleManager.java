@@ -25,6 +25,7 @@ import javax.security.auth.Subject;
 import jline.Terminal;
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
+import org.apache.felix.service.threadio.ThreadIO;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.apache.karaf.shell.console.Console;
@@ -45,6 +46,7 @@ public class LocalConsoleManager {
     private boolean start;
     private final int defaultStartLevel;
     private CommandProcessor commandProcessor;
+    private ThreadIO threadIO;
     private ServiceRegistration registration;
 
     public LocalConsoleManager(boolean start, 
@@ -52,13 +54,15 @@ public class LocalConsoleManager {
             BundleContext bundleContext, 
             TerminalFactory terminalFactory, 
             ConsoleFactory consoleFactory,
-            CommandProcessor commandProcessor) throws Exception {
+            CommandProcessor commandProcessor,
+            ThreadIO threadIO) throws Exception {
         this.start = start;
         this.defaultStartLevel = Integer.parseInt(defaultStartLevel);
         this.bundleContext = bundleContext;
         this.terminalFactory = terminalFactory;
         this.consoleFactory = consoleFactory;
         this.commandProcessor = commandProcessor;
+        this.threadIO = threadIO;
         start();
     }
 
@@ -93,7 +97,7 @@ public class LocalConsoleManager {
         } else {
             encoding = System.getProperty("input.encoding", Charset.defaultCharset().name());
         }
-        this.console = consoleFactory.createLocal(this.commandProcessor, terminal, encoding, callback);
+        this.console = consoleFactory.createLocal(this.commandProcessor, this.threadIO, terminal, encoding, callback);
 
         registration = bundleContext.registerService(CommandSession.class, console.getSession(), null);
 

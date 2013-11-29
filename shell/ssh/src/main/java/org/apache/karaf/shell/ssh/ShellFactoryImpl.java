@@ -34,6 +34,8 @@ import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.shell.console.Console;
 import org.apache.karaf.shell.console.ConsoleFactory;
+import org.apache.felix.service.command.Function;
+import org.apache.felix.service.threadio.ThreadIO;
 import org.apache.sshd.common.Factory;
 import org.apache.sshd.server.Command;
 import org.apache.sshd.server.Environment;
@@ -49,10 +51,12 @@ import org.osgi.service.blueprint.container.ReifiedType;
 public class ShellFactoryImpl implements Factory<Command> {
     private CommandProcessor commandProcessor;
     private ConsoleFactory consoleFactory;
+    private ThreadIO threadIO;
 
-    public ShellFactoryImpl(CommandProcessor commandProcessor, ConsoleFactory consoleFactory) {
+    public ShellFactoryImpl(CommandProcessor commandProcessor, ConsoleFactory consoleFactory, ThreadIO threadIO) {
         this.commandProcessor = commandProcessor;
         this.consoleFactory = consoleFactory;
+        this.threadIO = threadIO;
     }
 
     public Command create() {
@@ -106,7 +110,7 @@ public class ShellFactoryImpl implements Factory<Command> {
                 if (encoding != null && encoding.indexOf('.') > 0) {
                     encoding = encoding.substring(encoding.indexOf('.') + 1);
                 }
-                Console console = consoleFactory.create(commandProcessor, in,
+                Console console = consoleFactory.create(commandProcessor, threadIO, in,
                         lfToCrLfPrintStream(out), lfToCrLfPrintStream(err), terminal, encoding, destroyCallback);
                 final CommandSession session = console.getSession();
                 for (Map.Entry<String, String> e : env.getEnv().entrySet()) {
