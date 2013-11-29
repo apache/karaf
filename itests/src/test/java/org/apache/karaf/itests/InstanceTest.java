@@ -53,7 +53,8 @@ public class InstanceTest extends KarafTestSupport {
             connection.invoke(name, "destroyInstance", new Object[]{ "itest2" }, new String[]{ "java.lang.String" });
             Assert.assertEquals(oldNum, getInstancesNum(connection, name));
         } finally {
-        	close(connector);
+            if (connector != null)
+        	    close(connector);
         }
     }
 
@@ -92,6 +93,22 @@ public class InstanceTest extends KarafTestSupport {
         String instanceListOutput = executeCommand("instance:list");
         System.out.println(instanceListOutput);
         assertTrue(instanceListOutput.contains("new_itest"));
+    }
+
+    @Test
+    public void renameViaMBean() throws Exception {
+        JMXConnector connector = null;
+        try {
+            connector = this.getJMXConnector();
+            MBeanServerConnection connection = connector.getMBeanServerConnection();
+            ObjectName name = new ObjectName("org.apache.karaf:type=instance,name=root");
+            connection.invoke(name, "createInstance", new Object[]{ "itest5", 0, 0, 0, null, null, null, null },
+                    new String[]{ "java.lang.String", "int", "int", "int", "java.lang.String", "java.lang.String", "java.lang.String", "java.lang.String" });
+            connection.invoke(name, "renameInstance", new Object[]{ "itest5", "new_itest5" }, new String[]{ "java.lang.String", "java.lang.String" });
+        } finally {
+            if (connector != null)
+                connector.close();
+        }
     }
 
 }
