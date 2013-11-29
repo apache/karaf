@@ -21,6 +21,7 @@ import java.io.PrintStream;
 
 import jline.Terminal;
 import org.apache.felix.gogo.runtime.CommandProcessorImpl;
+import org.apache.felix.service.threadio.ThreadIO;
 import org.apache.karaf.shell.console.jline.Console;
 
 /**
@@ -42,8 +43,8 @@ public class ExampleSubclassMain extends Main  {
     }
 
     @Override
-    protected Console createConsole(CommandProcessorImpl commandProcessor, InputStream in, PrintStream out, PrintStream err, Terminal terminal) throws Exception {
-        return new Console(commandProcessor, in, out, err, terminal, null, null) {
+    protected Console createConsole(CommandProcessorImpl commandProcessor, ThreadIO threadIO, InputStream in, PrintStream out, PrintStream err, Terminal terminal) throws Exception {
+        return new Console(commandProcessor, threadIO, in, out, err, terminal, null, null) {
 
             /**
              * If you don't overwrite, then karaf will use the welcome message found in the

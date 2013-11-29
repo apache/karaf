@@ -31,11 +31,13 @@
                             bind-method="registerCommandProcessor"
                             unbind-method="unregisterCommandProcessor"/>
     </reference>
+    <reference id="threadIO" interface="org.apache.felix.service.threadio.ThreadIO" />
 
     <bean id="consoleFactory" class="org.apache.karaf.shell.console.jline.ConsoleFactory">
         <property name="start" value="$[karaf.startLocalConsole]"/>
         <property name="bundleContext" ref="blueprintBundleContext"/>
         <property name="terminalFactory" ref="terminalFactory"/>
+        <property name="threadIO" ref="threadIO"/>
     </bean>
 
     <bean id="converters" class="org.apache.karaf.shell.console.Converters">

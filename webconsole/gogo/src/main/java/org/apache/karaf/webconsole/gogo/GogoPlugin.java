@@ -39,6 +39,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
+import org.apache.felix.service.threadio.ThreadIO;
 import org.apache.karaf.shell.console.jline.Console;
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
 import org.osgi.framework.BundleContext;
@@ -59,6 +60,7 @@ public class GogoPlugin extends AbstractWebConsolePlugin {
 
     private BundleContext bundleContext;
     private CommandProcessor commandProcessor;
+    private ThreadIO threadIO;
 
     public void setBundleContext(BundleContext bundleContext) {
         this.bundleContext = bundleContext;
@@ -66,6 +68,10 @@ public class GogoPlugin extends AbstractWebConsolePlugin {
 
     public void setCommandProcessor(CommandProcessor commandProcessor) {
         this.commandProcessor = commandProcessor;
+    }
+
+    public void setThreadIO(ThreadIO threadIO) {
+        this.threadIO = threadIO;
     }
 
     public void start() {
@@ -179,6 +185,7 @@ public class GogoPlugin extends AbstractWebConsolePlugin {
                 PrintStream pipedOut = new PrintStream(new PipedOutputStream(out), true);
 
                 console = new Console(commandProcessor,
+                        threadIO,
                         new PipedInputStream(in),
                         pipedOut,
                         pipedOut,

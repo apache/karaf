@@ -33,6 +33,7 @@ import jline.Terminal;
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Function;
+import org.apache.felix.service.threadio.ThreadIO;
 import org.apache.karaf.shell.console.jline.Console;
 import org.apache.sshd.common.Factory;
 import org.apache.sshd.server.Command;
@@ -48,9 +49,14 @@ import org.osgi.service.blueprint.container.ReifiedType;
 public class ShellFactoryImpl implements Factory<Command> {
 
     private CommandProcessor commandProcessor;
+    private ThreadIO threadIO;
 
     public void setCommandProcessor(CommandProcessor commandProcessor) {
         this.commandProcessor = commandProcessor;
+    }
+
+    public void setThreadIO(ThreadIO threadIO) {
+        this.threadIO = threadIO;
     }
 
     public Command create() {
@@ -99,6 +105,7 @@ public class ShellFactoryImpl implements Factory<Command> {
                     encoding = encoding.substring(encoding.indexOf('.') + 1);
                 }
                 Console console = new Console(commandProcessor,
+                                              threadIO,
                                               in,
                                               new PrintStream(new LfToCrLfFilterOutputStream(out), true),
                                               new PrintStream(new LfToCrLfFilterOutputStream(err), true),

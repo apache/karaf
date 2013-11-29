@@ -81,6 +81,7 @@
         <property name="shellFactory">
             <bean class="org.apache.karaf.shell.ssh.ShellFactoryImpl">
                 <property name="commandProcessor" ref="commandProcessor"/>
+                <property name="threadIO" ref="threadIO"/>
             </bean>
         </property>
         <property name="commandFactory">
@@ -134,6 +135,9 @@
     </bean>
 
     <reference id="commandProcessor" interface="org.apache.felix.service.command.CommandProcessor">
+    </reference>
+
+    <reference id="threadIO" interface="org.apache.felix.service.threadio.ThreadIO">
     </reference>
 
 </blueprint>
