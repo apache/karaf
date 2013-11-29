@@ -202,7 +202,8 @@ public class ACLConfigurationParser {
             else
                 sb.append(',');
             sb.append('"');
-            sb.append(param.toString().trim());
+            if (param != null)
+                sb.append(param.toString().trim());
             sb.append('"');
         }
         sb.append(']');
@@ -295,6 +296,8 @@ public class ACLConfigurationParser {
             return false;
 
         for (int i = 0; i < regexArgs.size(); i++) {
+            if (params[i] == null)
+                return false;
             if (!params[i].toString().trim().matches(regexArgs.get(i))) {
                 return false;
             }
