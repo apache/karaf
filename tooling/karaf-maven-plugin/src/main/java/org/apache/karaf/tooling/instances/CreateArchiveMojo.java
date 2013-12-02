@@ -169,7 +169,24 @@ public class CreateArchiveMojo extends MojoSupport {
             fs.setDir(source);
             fs.setPrefix(serverName);
             fs.setProject(project);
+            fs.setExcludes("bin/");
             zip.addFileset(fs);
+
+            fs = new ZipFileSet();
+            fs.setDir(source);
+            fs.setPrefix(serverName);
+            fs.setProject(project);
+            fs.setIncludes("bin/");
+            fs.setExcludes("bin/*.bat");
+            fs.setFileMode("755");
+            zip.add(fs);
+
+            fs = new ZipFileSet();
+            fs.setDir(source);
+            fs.setPrefix(serverName);
+            fs.setProject(project);
+            fs.setIncludes("bin/*.bat");
+            zip.add(fs);
 
             for (Resource resource: this.project.getResources()) {
                 File resourceFile = new File(resource.getDirectory());
