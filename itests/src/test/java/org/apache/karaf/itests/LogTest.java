@@ -21,6 +21,7 @@ import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -42,6 +43,7 @@ public class LogTest extends KarafTestSupport {
     }
 
     @Test
+    @Ignore
     public void setDebugViaMBean() throws Exception {
         assertSetLevel("INFO");
         JMXConnector connector = null;
