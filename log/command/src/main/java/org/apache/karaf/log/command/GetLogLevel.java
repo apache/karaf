@@ -18,9 +18,14 @@ package org.apache.karaf.log.command;
 
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.table.ShellTable;
+
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
- * Get the log level for a given logger
+ * Get the log level
  */
 @Command(scope = "log", name = "get", description = "Shows the currently set log level.")
 public class GetLogLevel extends LogCommandSupport {
@@ -29,7 +34,18 @@ public class GetLogLevel extends LogCommandSupport {
     String logger;
 
     protected Object doExecute() throws Exception {
-        System.out.println(logService.getLevelSt(logger));
+        Map<String, String> loggers = logService.getLevel(logger);
+
+        ShellTable table = new ShellTable();
+        table.column("Logger");
+        table.column("Level");
+
+        for (String logger : loggers.keySet()) {
+            table.addRow().addContent(logger, loggers.get(logger));
+        }
+
+        table.print(System.out);
+
         return null;
     }
 

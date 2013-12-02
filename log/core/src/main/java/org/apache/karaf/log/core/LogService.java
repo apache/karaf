@@ -19,14 +19,15 @@ package org.apache.karaf.log.core;
 import org.ops4j.pax.logging.spi.PaxAppender;
 import org.ops4j.pax.logging.spi.PaxLoggingEvent;
 
+import java.util.Map;
+
 public interface LogService {
-    Level getLevel();
+
+    String getLevel();
     void setLevel(Level level);
-    Level getLevel(String logger);
+
+    Map<String, String> getLevel(String logger);
     void setLevel(String logger, Level level);
-    
-    String getLevelSt();
-    String getLevelSt(String logger);
 
     void setLevelSt(String level);
     void setLevelSt(String logger, String level);

@@ -22,6 +22,8 @@ import javax.management.StandardMBean;
 import org.apache.karaf.log.core.LogMBean;
 import org.apache.karaf.log.core.LogService;
 
+import java.util.Map;
+
 /**
  * Implementation of the LogMBean.
  */
@@ -36,20 +38,18 @@ public class LogMBeanImpl extends StandardMBean implements LogMBean {
 
     @Override
     public String getLevel() {
-        return logService.getLevelSt();
+        return logService.getLevel();
     }
 
     @Override
-    public String getLevel(String logger) {
-        return logService.getLevelSt(logger);
+    public Map<String, String> getLevel(String logger) {
+        return logService.getLevel(logger);
     }
 
-    @Override
     public void setLevel(String level) {
         this.logService.setLevelSt(level);
     }
 
-    @Override
     public void setLevel(String logger, String level) {
         this.logService.setLevelSt(logger, level);
     }

@@ -18,6 +18,9 @@ package org.apache.karaf.log.core.internal;
 
 import java.io.IOException;
 import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.karaf.log.core.Level;
 import org.apache.karaf.log.core.LogService;
@@ -27,9 +30,11 @@ import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 
 public class LogServiceImpl implements LogService {
+
     static final String CONFIGURATION_PID = "org.ops4j.pax.logging";
     static final String ROOT_LOGGER_PREFIX = "log4j.rootLogger";
     static final String LOGGER_PREFIX = "log4j.logger.";
+    static final String ALL_LOGGER = "ALL";
     static final String ROOT_LOGGER = "ROOT";
     
     private final ConfigurationAdmin configAdmin;
@@ -40,11 +45,11 @@ public class LogServiceImpl implements LogService {
         this.events = events;
     }
 
-    public Level getLevel() {
-        return getLevel(null);
+    public String getLevel() {
+        return getLevel(null).get(ROOT_LOGGER);
     }
 
-    public Level getLevel(String logger) {
+    public Map<String, String> getLevel(String logger) {
         Configuration cfg;
         try {
             cfg = configAdmin.getConfiguration(CONFIGURATION_PID, null);
@@ -58,27 +63,49 @@ public class LogServiceImpl implements LogService {
             logger = null;
         }
 
+        Map<String, String> loggers = new TreeMap<String, String>();
+
+        if (ALL_LOGGER.equalsIgnoreCase(logger)) {
+            String root = getLevelFromProperty((String) props.get(ROOT_LOGGER_PREFIX));
+            loggers.put("ROOT", root);
+            for (Enumeration e = props.keys(); e.hasMoreElements(); ) {
+                String prop = (String) e.nextElement();
+                if (prop.startsWith(LOGGER_PREFIX)) {
+                    String val = getLevelFromProperty((String) props.get(prop));
+                    loggers.put(prop.substring(LOGGER_PREFIX.length()), val);
+                }
+            }
+            return loggers;
+        }
+
+        String l = logger;
         String val;
-        for (; ; ) {
+        for (;;) {
             String prop;
-            if (logger == null) {
+            if (l == null) {
                 prop = ROOT_LOGGER_PREFIX;
             } else {
-                prop = LOGGER_PREFIX + logger;
+                prop = LOGGER_PREFIX + l;
             }
             val = (String) props.get(prop);
             val = getLevelFromProperty(val);
-            if (val != null || logger == null) {
+            if (val != null || l == null) {
                 break;
             }
-            int idx = logger.lastIndexOf('.');
+            int idx = l.lastIndexOf('.');
             if (idx < 0) {
-                logger = null;
+                l = null;
             } else {
-                logger = logger.substring(0, idx);
+                l = l.substring(0, idx);
             }
         }
-        return Level.valueOf(val);
+
+        if (logger == null)
+            logger = ROOT_LOGGER;
+
+        loggers.put(logger, val);
+
+        return loggers;
     }
 
     public void setLevel(Level level) {
@@ -215,16 +242,6 @@ public class LogServiceImpl implements LogService {
     @Override
     public void removeAppender(PaxAppender appender) {
         events.removeAppender(appender);
-    }
-
-    @Override
-    public String getLevelSt() {
-        return getLevel().toString();
-    }
-
-    @Override
-    public String getLevelSt(String logger) {
-        return getLevel(logger).toString();
     }
 
     @Override
