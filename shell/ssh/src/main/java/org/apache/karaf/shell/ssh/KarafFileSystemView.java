@@ -55,7 +55,7 @@ public class KarafFileSystemView extends NativeFileSystemView {
         // get actual file object
         String location = getPhysicalUserDir();
         String physicalName = NativeSshFile.getPhysicalName(location, dir, file, false);
-        if (!physicalName.startsWith("location")) {
+        if (!physicalName.startsWith(location)) {
             throw new IllegalArgumentException("The path is not relative to KARAF_BASE. For security reason, it's not allowed.");
         }
         File fileObj = new File(physicalName);
