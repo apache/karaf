@@ -43,7 +43,6 @@ public class LogTest extends KarafTestSupport {
     }
 
     @Test
-    @Ignore
     public void setDebugViaMBean() throws Exception {
         assertSetLevel("INFO");
         JMXConnector connector = null;

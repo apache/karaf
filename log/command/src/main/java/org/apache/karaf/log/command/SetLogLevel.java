@@ -32,7 +32,7 @@ public class SetLogLevel extends LogCommandSupport {
     String logger;
 
     protected Object doExecute() throws Exception {
-        logService.setLevelSt(logger, level);
+        logService.setLevel(logger, level);
         return null;
     }
 

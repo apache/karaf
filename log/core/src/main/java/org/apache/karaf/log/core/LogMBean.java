@@ -26,7 +26,7 @@ public interface LogMBean {
     String getLevel();
     Map<String, String> getLevel(String logger);
 
-    // void setLevel(String level);
-    // void setLevel(String logger, String level);
+    void setLevel(String level);
+    void setLevel(String logger, String level);
 
 }

@@ -46,12 +46,14 @@ public class LogMBeanImpl extends StandardMBean implements LogMBean {
         return logService.getLevel(logger);
     }
 
+    @Override
     public void setLevel(String level) {
-        this.logService.setLevelSt(level);
+        this.logService.setLevel(level);
     }
 
+    @Override
     public void setLevel(String logger, String level) {
-        this.logService.setLevelSt(logger, level);
+        this.logService.setLevel(logger, level);
     }
 
 }

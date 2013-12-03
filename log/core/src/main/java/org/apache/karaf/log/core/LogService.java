@@ -24,13 +24,10 @@ import java.util.Map;
 public interface LogService {
 
     String getLevel();
-    void setLevel(Level level);
+    void setLevel(String level);
 
     Map<String, String> getLevel(String logger);
-    void setLevel(String logger, Level level);
-
-    void setLevelSt(String level);
-    void setLevelSt(String logger, String level);
+    void setLevel(String logger, String level);
     
     void clearEvents();
     Iterable<PaxLoggingEvent> getEvents();

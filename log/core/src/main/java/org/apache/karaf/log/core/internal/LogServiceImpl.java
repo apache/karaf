@@ -108,24 +108,29 @@ public class LogServiceImpl implements LogService {
         return loggers;
     }
 
-    public void setLevel(Level level) {
+    public void setLevel(String level) {
         setLevel(null, level);
     }
 
     @SuppressWarnings("unchecked")
-    public void setLevel(String logger, Level logLevel) {
+    public void setLevel(String logger, String level) {
         if (ROOT_LOGGER.equalsIgnoreCase(logger)) {
             logger = null;
         }
 
-        if (logLevel == Level.DEFAULT && logger == null) {
-            throw new RuntimeException("Can not unset the ROOT logger");
+        // make sure both uppercase and lowercase levels are supported
+        level = level.toUpperCase();
+
+        // check if the level is valid
+        Level.valueOf(level);
+
+        if (Level.isDefault(level) && logger == null) {
+            throw new IllegalStateException("Can not unset the ROOT logger");
         }
 
         Configuration cfg = getConfiguration();
         Dictionary props = cfg.getProperties();
 
-        String level = logLevel.toString();
         String val;
         String prop;
         if (logger == null) {
@@ -242,16 +247,6 @@ public class LogServiceImpl implements LogService {
     @Override
     public void removeAppender(PaxAppender appender) {
         events.removeAppender(appender);
-    }
-
-    @Override
-    public void setLevelSt(String level) {
-        setLevel(convertToLevel(level));
-    }
-
-    @Override
-    public void setLevelSt(String logger, String level) {
-        setLevel(logger, convertToLevel(level));
     }
 
     public Level convertToLevel(String level) {

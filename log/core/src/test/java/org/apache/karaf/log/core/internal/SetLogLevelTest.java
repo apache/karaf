@@ -63,69 +63,67 @@ public class SetLogLevelTest extends TestCase {
     
     public void testInvalidLogLevel() throws Exception {
         try {
-            // logMBean.setLevel("INVALID");
-            // fail("Exception expected");
+            logMBean.setLevel("INVALID");
+            fail("Exception expected");
         } catch(IllegalArgumentException e) {
             // Expected
         }
     }
     
     public void testSetLogLevel() throws Exception {
-        // logMBean.setLevel("org.apache.karaf.test", "INFO");
-        // assertEquals("INFO", properties.get(PACKAGE_LOGGER));
+        logMBean.setLevel("org.apache.karaf.test", "INFO");
+        assertEquals("INFO", properties.get(PACKAGE_LOGGER));
     }
     
     public void testSetRootLogLevel() throws Exception {
-        // logMBean.setLevel("INFO");
-        // assertEquals("INFO", properties.get(ROOT_LOGGER));
+        logMBean.setLevel("INFO");
+        assertEquals("INFO", properties.get(ROOT_LOGGER));
     }
     
     public void testSetLogLevelLowerCase() throws Exception {
-        // logMBean.setLevel("org.apache.karaf.test", "info");
-        // assertEquals("INFO", properties.get(PACKAGE_LOGGER));
+        logMBean.setLevel("org.apache.karaf.test", "info");
+        assertEquals("INFO", properties.get(PACKAGE_LOGGER));
     }
     
     public void testSetRootLogLevelLowerCase() throws Exception {
-        // logMBean.setLevel("info");
-        // assertEquals("INFO", properties.get(ROOT_LOGGER));
+        logMBean.setLevel("info");
+        assertEquals("INFO", properties.get(ROOT_LOGGER));
     }
     
     public void testChangeLogLevel() throws Exception {
         properties.put(PACKAGE_LOGGER, "DEBUG");
-        // logMBean.setLevel("org.apache.karaf.test", "INFO");
-        // assertEquals("INFO", properties.get(PACKAGE_LOGGER));
+        logMBean.setLevel("org.apache.karaf.test", "INFO");
+        assertEquals("INFO", properties.get(PACKAGE_LOGGER));
     }
     
     public void testChangeRootLogLevel() throws Exception {
         properties.put(ROOT_LOGGER, "DEBUG");
-        // logMBean.setLevel("INFO");
-        // assertEquals("INFO", properties.get(ROOT_LOGGER));
+        logMBean.setLevel("INFO");
+        assertEquals("INFO", properties.get(ROOT_LOGGER));
     }
     
     public void testChangeLogLevelWithAppender() throws Exception {
         properties.put(PACKAGE_LOGGER, "DEBUG, APPENDER1");
-        // logMBean.setLevel("org.apache.karaf.test", "INFO");
-        // assertEquals("INFO, APPENDER1", properties.get(PACKAGE_LOGGER));
+        logMBean.setLevel("org.apache.karaf.test", "INFO");
+        assertEquals("INFO, APPENDER1", properties.get(PACKAGE_LOGGER));
     }
     
     public void testChangeRootLogLevelWithAppender() throws Exception {
         properties.put(ROOT_LOGGER, "DEBUG, APPENDER1");
-        // logMBean.setLevel("INFO");
-        // assertEquals("INFO, APPENDER1", properties.get(ROOT_LOGGER));
+        logMBean.setLevel("INFO");
+        assertEquals("INFO, APPENDER1", properties.get(ROOT_LOGGER));
     }
-    
-    
+
     public void testUnsetLogLevel() throws Exception {
         properties.put(PACKAGE_LOGGER, "DEBUG");
-        // logMBean.setLevel("org.apache.karaf.test", "DEFAULT");
-        // assertFalse("Configuration for logger org.apache.karaf.test has been removed", properties.containsKey(PACKAGE_LOGGER));
+        logMBean.setLevel("org.apache.karaf.test", "DEFAULT");
+        assertFalse("Configuration for logger org.apache.karaf.test has been removed", properties.containsKey(PACKAGE_LOGGER));
     }
-    
-    
+
     public void testUnsetRootLogLevel() throws Exception {
         properties.put(ROOT_LOGGER, "INFO");
-        // logMBean.setLevel("org.apache.karaf.test", "DEFAULT");
-        // assertEquals("Configuration for root logger should not be removed", "INFO", properties.get(ROOT_LOGGER));
+        logMBean.setLevel("org.apache.karaf.test", "DEFAULT");
+        assertEquals("Configuration for root logger should not be removed", "INFO", properties.get(ROOT_LOGGER));
     }
     
 }
