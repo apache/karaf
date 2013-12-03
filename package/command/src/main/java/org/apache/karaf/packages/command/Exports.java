@@ -42,6 +42,9 @@ public class Exports extends OsgiCommandSupport {
     @Option(name = "-d", description = "Only show packages that are exported by more than one bundle", required = false, multiValued = false)
     private boolean onlyDuplicates;
 
+    @Option(name = "--no-format", description = "Disable table rendered output", required = false, multiValued = false)
+    boolean noFormat;
+
     public Exports(PackageService packageService) {
         super();
         this.packageService = packageService;
@@ -70,7 +73,7 @@ public class Exports extends OsgiCommandSupport {
                 table.addRow().addContent(pVer.getPackageName(),pVer.getVersion().toString(), bundle.getBundleId(), bundle.getSymbolicName());
             }
         }
-        table.print(System.out);
+        table.print(System.out, !noFormat);
 	}
     
     private void checkDuplicateExports() {
@@ -88,7 +91,7 @@ public class Exports extends OsgiCommandSupport {
             	table.addRow().addContent(pVer.getPackageName(), pVer.getVersion().toString(), pBundles); 
             }
         }
-        table.print(System.out);
+        table.print(System.out, !noFormat);
     }
 
 	private String getBundlesSt(Set<Bundle> bundles) {

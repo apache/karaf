@@ -23,6 +23,7 @@ import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.table.ShellTable;
 
 @Command(scope = "feature", name = "version-list", description = "Lists all versions of a feature available from the currently available repositories.")
@@ -30,6 +31,9 @@ public class ListFeatureVersionsCommand extends FeaturesCommandSupport {
 
 	@Argument(index = 0, name = "feature", description = "Name of feature.", required = true, multiValued = false)
 	String feature;
+
+    @Option(name = "--no-format", description = "Disable table rendered output", required = false, multiValued = false)
+    boolean noFormat;
 
     protected void doExecute(FeaturesService admin) throws Exception {
         ShellTable table = new ShellTable();
@@ -47,7 +51,7 @@ public class ListFeatureVersionsCommand extends FeaturesCommandSupport {
             }
         }
 
-        table.print(System.out);
+        table.print(System.out, !noFormat);
     }
 
 }

@@ -121,7 +121,7 @@ public class CommandListHelpProvider implements HelpProvider {
             String key = NameScoping.getCommandNameWithoutGlobalPrefix(session, entry.getKey());
             table.addRow().addContent(key, entry.getValue());
         }
-        table.print(out);
+        table.print(out, true);
     }
     
     protected Function unProxy(Function function) {

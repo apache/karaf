@@ -24,6 +24,7 @@ import org.apache.karaf.shell.commands.Action;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.felix.service.command.CommandSession;
+import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.table.ShellTable;
 
 @Command(scope = "obr", name = "list", description = "Lists OBR bundles, optionally providing the given packages.")
@@ -31,6 +32,9 @@ public class ListCommand implements Action {
 
     @Argument(index = 0, name = "packages", description = "A list of packages separated by whitespaces.", required = false, multiValued = true)
     List<String> packages;
+
+    @Option(name = "--no-format", description = "Disable table rendered output", required = false, multiValued = false)
+    boolean noFormat;
 
     RepositoryAdmin repoAdmin;
 
@@ -77,7 +81,7 @@ public class ListCommand implements Action {
                     emptyIfNull(resource.getVersion()));
         }
 
-        table.print(System.out);
+        table.print(System.out, !noFormat);
 
         return null;
     }

@@ -17,6 +17,7 @@
 package org.apache.karaf.web.commands;
 
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.apache.karaf.shell.table.Col;
 import org.apache.karaf.shell.table.ShellTable;
@@ -26,6 +27,9 @@ import org.apache.karaf.web.WebContainerService;
 
 @Command(scope = "web", name = "list", description = "Lists details for war bundles.")
 public class List extends OsgiCommandSupport {
+
+    @Option(name = "--no-format", description = "Disable table rendered output", required = false, multiValued = false)
+    boolean noFormat;
     
     private WebContainerService webContainerService;
     
@@ -55,7 +59,7 @@ public class List extends OsgiCommandSupport {
             }
             
         }
-        table.print(System.out);
+        table.print(System.out, !noFormat);
         return null;
     }
     

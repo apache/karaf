@@ -76,7 +76,13 @@ public class ShellTable {
         return this;
     }
 
-    public void print(PrintStream out)  {
+    public void print(PrintStream out) {
+        print(out, true);
+    }
+
+    public void print(PrintStream out, boolean format)  {
+
+        // "normal" table rendering, with borders
         Row headerRow = new Row(cols);
         headerRow.formatContent(cols);
         for (Row row : rows) {
@@ -87,7 +93,7 @@ public class ShellTable {
             tryGrowToMaxSize();
         }
 
-        if (showHeaders) {
+        if (format && showHeaders) {
             String headerLine = headerRow.getContent(cols, separator);
             out.println(headerLine);
             for (Col col : cols) {
@@ -97,10 +103,16 @@ public class ShellTable {
         }
 
         for (Row row : rows) {
-            out.println(row.getContent(cols, separator));
+            if (!format) {
+                if (separator == null || separator.equals(" | "))
+                    out.println(row.getContent(cols, "\t"));
+                else out.println(row.getContent(cols, separator));
+            } else {
+                out.println(row.getContent(cols, separator));
+            }
         }
 
-        if (rows.size() == 0 && emptyTableText != null) {
+        if (format && rows.size() == 0 && emptyTableText != null) {
             out.println(emptyTableText);
         }
     }

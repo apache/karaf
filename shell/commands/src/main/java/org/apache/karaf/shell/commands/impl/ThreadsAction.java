@@ -22,6 +22,7 @@ import java.lang.management.ThreadMXBean;
 
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.AbstractAction;
 import org.apache.karaf.shell.table.ShellTable;
 
@@ -34,6 +35,9 @@ public class ThreadsAction extends AbstractAction {
 
     @Argument(name = "id", description="Show details for thread with this Id", required = false, multiValued = false)
     Long id;
+
+    @Option(name = "--no-format", description = "Disable table rendered output", required = false, multiValued = false)
+    boolean noFormat;
 
     protected Object doExecute() throws Exception {
         ThreadMXBean threadsBean = ManagementFactory.getThreadMXBean();
@@ -69,7 +73,7 @@ public class ThreadsAction extends AbstractAction {
             long id = ti.getThreadId();
             table.addRow().addContent(id, ti.getThreadName(), ti.getThreadState(), threadsBean.getThreadCpuTime(id) / 1000000, threadsBean.getThreadUserTime(id) / 1000000);
         }
-        table.print(System.out);
+        table.print(System.out, !noFormat);
     }
 
 }

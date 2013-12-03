@@ -21,12 +21,16 @@ import java.util.Arrays;
 import org.apache.karaf.http.core.ServletInfo;
 import org.apache.karaf.http.core.ServletService;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.apache.karaf.shell.table.Col;
 import org.apache.karaf.shell.table.ShellTable;
 
 @Command(scope = "http", name = "list", description = "Lists details for servlets.")
 public class ServletListCommand extends OsgiCommandSupport {
+
+    @Option(name = "--no-format", description = "Disable table rendered output", required = false, multiValued = false)
+    boolean noFormat;
 
     private ServletService servletService;
     
@@ -48,7 +52,7 @@ public class ServletListCommand extends OsgiCommandSupport {
             table.addRow().addContent(info.getBundle().getBundleId(), info.getClassName(), info.getName(),
                                       info.getStateString(), info.getAlias(), Arrays.toString(info.getUrls()));
         }
-        table.print(System.out);
+        table.print(System.out, !noFormat);
         return null;
     }
 

@@ -18,6 +18,7 @@ package org.apache.karaf.log.command;
 
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.table.ShellTable;
 
 import java.util.Enumeration;
@@ -33,6 +34,9 @@ public class GetLogLevel extends LogCommandSupport {
     @Argument(index = 0, name = "logger", description = "The name of the logger, ALL or ROOT (default)", required = false, multiValued = false)
     String logger;
 
+    @Option(name = "--no-format", description = "Disable table rendered output", required = false, multiValued = false)
+    boolean noFormat;
+
     protected Object doExecute() throws Exception {
         Map<String, String> loggers = logService.getLevel(logger);
 
@@ -44,7 +48,7 @@ public class GetLogLevel extends LogCommandSupport {
             table.addRow().addContent(logger, loggers.get(logger));
         }
 
-        table.print(System.out);
+        table.print(System.out, !noFormat);
 
         return null;
     }

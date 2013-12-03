@@ -33,6 +33,9 @@ public class Imports extends OsgiCommandSupport {
     @Option(name = "-p", description = "Only show package instead of full filter", required = false, multiValued = false)
     boolean onlyPackage;
 
+    @Option(name = "--no-format", description = "Disable table rendered output", required = false, multiValued = false)
+    boolean noFormat;
+
     private PackageService packageService;
 
     public Imports(PackageService packageService) {
@@ -55,7 +58,7 @@ public class Imports extends OsgiCommandSupport {
             String firstCol = onlyPackage ? req.getPackageName() : req.getFilter();
             table.addRow().addContent(firstCol, req.isOptional() ? "optional" : "", bundle.getBundleId(), bundle.getSymbolicName(), req.isResolveable());
         }
-        table.print(System.out);
+        table.print(System.out, !noFormat);
         return null;
     }
 

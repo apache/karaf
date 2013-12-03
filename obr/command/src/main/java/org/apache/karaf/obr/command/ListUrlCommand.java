@@ -19,10 +19,14 @@ package org.apache.karaf.obr.command;
 import org.apache.felix.bundlerepository.Repository;
 import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.table.ShellTable;
 
 @Command(scope = "obr", name = "url-list", description = "Displays the repository URLs currently associated with the OBR service.")
 public class ListUrlCommand extends ObrCommandSupport {
+
+    @Option(name = "--no-format", description = "Disable table rendered output", required = false, multiValued = false)
+    boolean noFormat;
 
     protected void doExecute(RepositoryAdmin admin) {
 
@@ -38,7 +42,7 @@ public class ListUrlCommand extends ObrCommandSupport {
             }
         }
 
-        table.print(System.out);
+        table.print(System.out, !noFormat);
     }
 
 }

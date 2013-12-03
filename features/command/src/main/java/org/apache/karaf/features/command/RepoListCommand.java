@@ -29,8 +29,11 @@ import org.apache.karaf.shell.table.ShellTable;
 @Command(scope = "feature", name = "repo-list", description = "Displays a list of all defined repositories.")
 public class RepoListCommand extends FeaturesCommandSupport {
 
-    @Option(name="-r", description="Reload all feature urls")
+    @Option(name="-r", description="Reload all feature urls", required = false, multiValued = false)
     boolean reload;
+
+    @Option(name = "--no-format", description = "Disable table rendered output", required = false, multiValued = false)
+    boolean noFormat;
     
     protected void doExecute(FeaturesService featuresService) throws Exception {
         if (reload) {
@@ -46,7 +49,7 @@ public class RepoListCommand extends FeaturesCommandSupport {
      	for (Repository repo : repos) {
      	    table.addRow().addContent(repo.getName(), repo.getURI().toString()); 
      	}
-     	table.print(System.out);
+     	table.print(System.out, !noFormat);
     }
 
     private void reloadAllRepos(FeaturesService featuresService) throws MultiException {

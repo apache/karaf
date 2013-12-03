@@ -45,7 +45,7 @@ public class ShellTableTest {
 
         StringWriter writer = new StringWriter();
         PrintStream out = new PrintStream(new WriterOutputStream(writer));
-        table.print(out);
+        table.print(out, true);
         out.flush();
         String expected = 
                 "   id | Name                 |                Centered                \n" + 
@@ -66,7 +66,7 @@ public class ShellTableTest {
 
         StringWriter writer = new StringWriter();
         PrintStream out = new PrintStream(new WriterOutputStream(writer));
-        table.print(out);
+        table.print(out, true);
         out.flush();
         String expected = 
                 "1      | 2\n" + 
@@ -85,7 +85,7 @@ public class ShellTableTest {
 
         StringWriter writer = new StringWriter();
         PrintStream out = new PrintStream(new WriterOutputStream(writer));
-        table.print(out);
+        table.print(out, true);
         out.flush();
         String expected = //
                   "1     |  2\n" //
@@ -104,12 +104,45 @@ public class ShellTableTest {
 
         StringWriter writer = new StringWriter();
         PrintStream out = new PrintStream(new WriterOutputStream(writer));
-        table.print(out);
+        table.print(out, true);
         out.flush();
         String expected = //
                   "1     | \n" + // 
                   "--------\n" + //
                   "quite | \n";
+        Assert.assertEquals(expected, getString(writer));
+    }
+
+    @Test
+    public void testNoFormat() {
+        ShellTable table = new ShellTable();
+        table.column(new Col("first"));
+        table.column(new Col("second"));
+
+        table.addRow().addContent("first column", "second column");
+
+        StringWriter writer = new StringWriter();
+        PrintStream out = new PrintStream(new WriterOutputStream(writer));
+        table.print(out, false);
+        out.flush();
+        String expected = "first column\tsecond column\n";
+        Assert.assertEquals(expected, getString(writer));
+    }
+
+    @Test
+    public void testNoFormatWithCustomSeparator() {
+        ShellTable table = new ShellTable();
+        table.separator(";");
+        table.column(new Col("first"));
+        table.column(new Col("second"));
+
+        table.addRow().addContent("first column", "second column");
+
+        StringWriter writer = new StringWriter();
+        PrintStream out = new PrintStream(new WriterOutputStream(writer));
+        table.print(out, false);
+        out.flush();
+        String expected = "first column;second column\n";
         Assert.assertEquals(expected, getString(writer));
     }
     

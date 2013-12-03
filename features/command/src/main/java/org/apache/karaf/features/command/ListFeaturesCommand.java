@@ -37,6 +37,9 @@ public class ListFeaturesCommand extends FeaturesCommandSupport {
     @Option(name = "-o", aliases = {"--ordered"}, description = "Display a list using alphabetical order ", required = false, multiValued = false)
     boolean ordered;
 
+    @Option(name = "--no-format", description = "Disable table rendered output", required = false, multiValued = false)
+    boolean noFormat;
+
     protected void doExecute(FeaturesService featuresService) throws Exception {
         boolean needsLegend = false;
         
@@ -71,7 +74,7 @@ public class ListFeaturesCommand extends FeaturesCommandSupport {
             }
         }
 
-        table.print(System.out);
+        table.print(System.out, !noFormat);
 
         if (needsLegend) {
             System.out.println("* Installed via deploy directory");

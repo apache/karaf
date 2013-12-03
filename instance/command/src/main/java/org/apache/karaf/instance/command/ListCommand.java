@@ -30,6 +30,9 @@ public class ListCommand extends InstanceCommandSupport {
     @Option(name = "-o", aliases = { "--java-opts" }, description = "Displays the Java options used to launch the JVM", required = false, multiValued = false)
     boolean javaOpts;
 
+    @Option(name = "--no-color", description = "Disable table rendered output", required = false, multiValued = false)
+    boolean noFormat;
+
     protected Object doExecute() throws Exception {
         getInstanceService().refreshInstance();
         Instance[] instances = getInstanceService().getInstances();
@@ -49,7 +52,7 @@ public class ListCommand extends InstanceCommandSupport {
                     instance.getPid(),
                     getRightColumnValue(instance));
         }
-        table.print(System.out);
+        table.print(System.out, !noFormat);
         return null;
     }
 

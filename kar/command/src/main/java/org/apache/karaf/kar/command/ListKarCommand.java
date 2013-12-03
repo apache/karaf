@@ -17,10 +17,14 @@
 package org.apache.karaf.kar.command;
 
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.table.ShellTable;
 
 @Command(scope = "kar", name = "list", description = "List the installed KAR files.")
 public class ListKarCommand extends KarCommandSupport {
+
+    @Option(name = "--no-format", description = "Disable table rendered output", required = false, multiValued = false)
+    boolean noFormat;
     
     public Object doExecute() throws Exception {
 
@@ -31,7 +35,7 @@ public class ListKarCommand extends KarCommandSupport {
             table.addRow().addContent(karName);
         }
 
-        table.print(System.out);
+        table.print(System.out, !noFormat);
 
         return null;
     }

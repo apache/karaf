@@ -41,6 +41,9 @@ public class ListBundles extends OsgiCommandSupport {
     @Option(name = "-t", valueToShowInHelp = "", description = "Specifies the bundle threshold; bundles with a start-level less than this value will not get printed out.", required = false, multiValued = false)
     int bundleLevelThreshold = -1;
 
+    @Option(name = "--no-format", description = "Disable table rendered output", required = false, multiValued = false)
+    boolean noFormat;
+
     private BundleService bundleService;
 
     public void setBundleService(BundleService bundleService) {
@@ -79,7 +82,7 @@ public class ListBundles extends OsgiCommandSupport {
                         info.getStartLevel(), version, name);
             }
         }
-        table.print(System.out);
+        table.print(System.out, !noFormat);
 
         return null;
     }

@@ -21,6 +21,7 @@ import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.apache.karaf.jaas.config.JaasRealm;
 import org.apache.karaf.jaas.modules.BackingEngine;
+import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.table.ShellTable;
 
 import javax.security.auth.login.AppConfigurationEntry;
@@ -29,6 +30,9 @@ import java.util.List;
 
 @Command(scope = "jaas", name = "user-list", description = "List the users of the selected JAAS realm/login module")
 public class ListUsersCommand extends JaasCommandSupport {
+
+    @Option(name = "--no-format", description = "Disable table rendered output", required = false, multiValued = false)
+    boolean noFormat;
 
     @Override
     protected Object doExecute() throws Exception {
@@ -82,7 +86,7 @@ public class ListUsersCommand extends JaasCommandSupport {
 
         }
 
-        table.print(System.out);
+        table.print(System.out, !noFormat);
 
         return null;
     }
