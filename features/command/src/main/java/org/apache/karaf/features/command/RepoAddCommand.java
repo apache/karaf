@@ -27,13 +27,13 @@ import org.apache.karaf.shell.console.AbstractAction;
 @Command(scope = "feature", name = "repo-add", description = "Add a features repository")
 public class RepoAddCommand extends AbstractAction {
 
-    @Argument(index = 0, name = "Feature name or uri", description = "Shortcut name of the feature repository or the full URI", required = true, multiValued = false)
+    @Argument(index = 0, name = "name/url", description = "Shortcut name of the features repository or the full URL", required = true, multiValued = false)
     private String nameOrUrl;
     
-    @Argument(index = 1, name = "Feature version", description = "The version of the feature if using the feature name. Should be empty if using the uri", required = false, multiValued = false)
+    @Argument(index = 1, name = "version", description = "The version of the features repository if using features repository name as first argument. It should be empty if using the URL", required = false, multiValued = false)
     private String version;
 
-    @Option(name = "-i", aliases = { "--install" }, description = "Install all features contained in the repository", required = false, multiValued = false)
+    @Option(name = "-i", aliases = { "--install" }, description = "Install all features contained in the features repository", required = false, multiValued = false)
     private boolean install;
     
     private FeatureFinder featureFinder;
