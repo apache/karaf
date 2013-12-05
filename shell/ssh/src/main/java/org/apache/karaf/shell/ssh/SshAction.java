@@ -27,6 +27,7 @@ import jline.Terminal;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
+import jline.console.ConsoleReader;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.apache.karaf.shell.console.SessionProperties;
 import org.apache.sshd.ClientChannel;
@@ -123,7 +124,6 @@ public class SshAction extends OsgiCommandSupport {
             sshSession = future.getSession();
 
             Object oldIgnoreInterrupts = this.session.get(SessionProperties.IGNORE_INTERRUPTS);
-            this.session.put( SessionProperties.IGNORE_INTERRUPTS, Boolean.TRUE );
 
             try {
 
@@ -167,6 +167,7 @@ public class SshAction extends OsgiCommandSupport {
                 }
 
                 System.out.println("Connected");
+                this.session.put( SessionProperties.IGNORE_INTERRUPTS, Boolean.TRUE );
 
                 StringBuilder sb = new StringBuilder();
                 if (command != null) {
@@ -214,21 +215,12 @@ public class SshAction extends OsgiCommandSupport {
     }
 
     public String readLine(String msg) throws IOException {
-        StringBuffer sb = new StringBuffer();
-        System.err.print(msg);
-        System.err.flush();
-        for (;;) {
-            int c = super.session.getKeyboard().read();
-            if (c < 0) {
-                return null;
-            }
-            System.err.print((char) c);
-            if (c == '\r' || c == '\n') {
-                break;
-            }
-            sb.append((char) c);
-        }
-        return sb.toString();
+        return readLine(msg, null);
+    }
+
+    public String readLine(String msg, Character mask) throws IOException {
+        ConsoleReader reader = (ConsoleReader) session.get(".jline.reader");
+        return reader.readLine(msg, mask);
     }
 
 }

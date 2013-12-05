@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.system.commands;
 
+import jline.console.ConsoleReader;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
@@ -61,40 +62,16 @@ public class Shutdown extends AbstractSystemAction {
         }
 
         for (; ; ) {
-            StringBuffer sb = new StringBuffer();
             String karafName = System.getProperty("karaf.name");
+            String msg;
             if (reboot) {
-                System.err.println(String.format("Confirm: reboot instance %s (yes/no): ",karafName));
+                msg = String.format("Confirm: reboot instance %s (yes/no): ", karafName);
             } else {
-                System.err.println(String.format("Confirm: halt instance %s (yes/no): ",karafName));
+                msg = String.format("Confirm: halt instance %s (yes/no): ", karafName);
             }
-            System.err.flush();
-            for (; ; ) {
-                int c = session.getKeyboard().read();
-                if (c < 0) {
-                    return null;
-                }
-                if (c == 127 || c == 'b') {
-                    System.err.print((char) '\b');
-                    System.err.print((char) ' ');
-                    System.err.print((char) '\b');
-                } else {
-                    System.err.print((char) c);
-                }
-                System.err.flush();
-                if (c == '\r' || c == '\n') {
-                    break;
-                }
-                if (c == 127 || c == 'b') {
-                    if (sb.length() > 0) {
-                        sb.deleteCharAt(sb.length() - 1);
-                    }
-                } else {
-                    sb.append((char) c);
-                }
-            }
-            String str = sb.toString();
-            if (str.equals("yes")) {
+            ConsoleReader reader = (ConsoleReader) session.get(".jline.reader");
+            String str = reader.readLine(msg);
+            if (str.equalsIgnoreCase("yes")) {
                 if (reboot) {
                     systemService.reboot(time, determineSwipeType());
                 } else {

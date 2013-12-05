@@ -18,6 +18,7 @@ package org.apache.karaf.bundle.command;
 
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
+import jline.console.ConsoleReader;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.startlevel.BundleStartLevel;
 
@@ -39,41 +40,13 @@ public class StartLevel extends BundleCommandWithConfirmation {
         }
         else if ((level < 50) && (bsl.getStartLevel() > 50) && !force){
             for (;;) {
-                StringBuffer sb = new StringBuffer();
-                System.err.println("You are about to designate bundle as a system bundle.  Do you wish to continue (yes/no): ");
-                System.err.flush();
-                for (;;) {
-                    int c = session.getKeyboard().read();
-                    if (c < 0) {
-                        break;
-                    }
-                    if (c == '\r' || c == '\n') {
-                        System.err.println();
-                        System.err.flush();
-                        break;
-                    }
-                    if (c == 127 || c == 'b') {
-                        System.err.print((char)'\b');
-                        System.err.print((char)' ');
-                        System.err.print((char)'\b');
-                    } else {
-                        System.err.print((char)c);
-                    }
-
-                    System.err.flush();
-                    if (c == 127 || c == 'b') {
-                        if (sb.length() > 0) {
-                            sb.deleteCharAt(sb.length() - 1);
-                        }
-                    } else {
-                        sb.append((char)c);
-                    }
-                }
-                String str = sb.toString();
-                if ("yes".equals(str)) {
+                ConsoleReader reader = (ConsoleReader) session.get(".jline.reader");
+                String msg = "You are about to designate bundle as a system bundle.  Do you wish to continue (yes/no): ";
+                String str = reader.readLine(msg);
+                if ("yes".equalsIgnoreCase(str)) {
                     bsl.setStartLevel(level);
                     break;
-                } else if ("no".equals(str)) {
+                } else if ("no".equalsIgnoreCase(str)) {
                     break;
                 }
             }
