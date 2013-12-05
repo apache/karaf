@@ -150,6 +150,22 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
         }
     }
 
+    public void update(String pid, Map<String, String> properties) throws MBeanException {
+        try {
+            if (properties == null) {
+                properties = new HashMap<String, String>();
+            }
+            Dictionary<String, String> dictionary = new Hashtable<String, String>();
+            for (String key : properties.keySet()) {
+                dictionary.put(key, properties.get(key));
+            }
+            configRepo.update(pid, dictionary);
+        } catch (Exception e) {
+            throw new MBeanException(null, e.getMessage());
+        }
+    }
+
+
     public void setConfigRepo(ConfigRepository configRepo) {
         this.configRepo = configRepo;
     }

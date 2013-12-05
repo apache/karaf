@@ -85,4 +85,13 @@ public interface ConfigMBean {
      */
     void setProperty(String pid, String key, String value) throws MBeanException;
 
+    /**
+     * Update a complete configuration.
+     *
+     * @param pid the configuration PID.
+     * @param properties the new properties to set in the configuration.
+     * @throws MBeanException
+     */
+    void update(String pid, Map<String, String> properties) throws MBeanException;
+
 }
