@@ -27,6 +27,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 
+import jline.console.ConsoleReader;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.shell.commands.CommandException;
 import org.apache.karaf.shell.console.SessionProperties;
@@ -134,25 +135,13 @@ public class ShellUtil {
      */
     public static boolean accessToSystemBundleIsAllowed(long bundleId, CommandSession session) throws IOException {
         for (; ; ) {
-            StringBuffer sb = new StringBuffer();
-            System.err.print("You are about to access system bundle " + bundleId + ".  Do you wish to continue (yes/no): ");
-            System.err.flush();
-            for (; ; ) {
-                int c = session.getKeyboard().read();
-                if (c < 0) {
-                    return false;
-                }
-                System.err.print((char) c);
-                if (c == '\r' || c == '\n') {
-                    break;
-                }
-                sb.append((char) c);
-            }
-            String str = sb.toString();
-            if ("yes".equals(str)) {
+            ConsoleReader reader = (ConsoleReader) session.get(".jline.reader");
+            String msg = "You are about to access system bundle " + bundleId + ".  Do you wish to continue (yes/no): ";
+            String str = reader.readLine(msg);
+            if ("yes".equalsIgnoreCase(str)) {
                 return true;
             }
-            if ("no".equals(str)) {
+            if ("no".equalsIgnoreCase(str)) {
                 return false;
             }
         }
