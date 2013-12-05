@@ -15,11 +15,11 @@ package org.apache.karaf.itests;
 
 import static org.junit.Assert.assertTrue;
 import static org.ops4j.pax.exam.CoreOptions.maven;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.configureSecurity;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.karafDistributionConfiguration;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.replaceConfigurationFile;
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.configureSecurity;
 
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
@@ -407,7 +407,7 @@ public class KarafTestSupport {
      * @param featuresBefore
      * @throws Exception
      */
-	private void uninstallNewFeatures(Set<Feature> featuresBefore)
+	protected void uninstallNewFeatures(Set<Feature> featuresBefore)
 			throws Exception {
 		Feature[] features = featureService.listInstalledFeatures();
         for (Feature curFeature : features) {
