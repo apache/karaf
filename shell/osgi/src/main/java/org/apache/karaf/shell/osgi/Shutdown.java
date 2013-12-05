@@ -16,11 +16,11 @@
  */
 package org.apache.karaf.shell.osgi;
 
+import jline.console.ConsoleReader;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Option;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.apache.felix.gogo.commands.Command;
-import org.osgi.framework.Bundle;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -77,37 +77,11 @@ public class Shutdown extends OsgiCommandSupport {
         }
 
         for (; ; ) {
-            StringBuffer sb = new StringBuffer();
             String karafName = System.getProperty("karaf.name");
-            System.err.println(String.format("Confirm: shutdown instance %s (yes/no): ", karafName));
-
-            System.err.flush();
-            for (; ; ) {
-                int c = session.getKeyboard().read();
-                if (c < 0) {
-                    return null;
-                }
-                if (c == 127 || c == 'b') {
-                    System.err.print((char) '\b');
-                    System.err.print((char) ' ');
-                    System.err.print((char) '\b');
-                } else {
-                    System.err.print((char) c);
-                }
-                System.err.flush();
-                if (c == '\r' || c == '\n') {
-                    break;
-                }
-                if (c == 127 || c == 'b') {
-                    if (sb.length() > 0) {
-                        sb.deleteCharAt(sb.length() - 1);
-                    }
-                } else {
-                    sb.append((char) c);
-                }
-            }
-            String str = sb.toString();
-            if (str.equals("yes")) {
+            String msg = String.format("Confirm: shutdown instance %s (yes/no): ", karafName);
+            ConsoleReader reader = (ConsoleReader) session.get(".jline.reader");
+            String str = reader.readLine(msg);
+            if (str.equalsIgnoreCase("yes")) {
                 this.shutdown(sleep);
             }
             return null;
