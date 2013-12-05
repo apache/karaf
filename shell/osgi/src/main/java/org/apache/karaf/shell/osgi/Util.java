@@ -23,6 +23,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 
+import jline.console.ConsoleReader;
 import org.apache.felix.service.command.CommandSession;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -207,41 +208,13 @@ public class Util
      */
     public static boolean accessToSystemBundleIsAllowed(long bundleId, CommandSession session) throws IOException {
         for (;;) {
-            StringBuffer sb = new StringBuffer();
-            System.err.println("You are about to access system bundle " + bundleId + ".  Do you wish to continue (yes/no): ");
-            System.err.flush();
-            for (;;) {
-                int c = session.getKeyboard().read();
-                if (c < 0) {
-                    return false;
-                }
-                if (c == '\r' || c == '\n') {
-                    System.err.println();
-                    System.err.flush();
-                    break;
-                }
-                if (c == 127 || c == 'b') {
-                    System.err.print((char)'\b');
-                    System.err.print((char)' ');
-                    System.err.print((char)'\b');
-                } else {
-                    System.err.print((char)c);
-                }
-                
-                System.err.flush();
-                if (c == 127 || c == 'b') {
-                    if (sb.length() > 0) {
-                        sb.deleteCharAt(sb.length() - 1);
-                    }
-                } else {
-                    sb.append((char)c);
-                }
-            }
-            String str = sb.toString();
-            if ("yes".equals(str)) {
+            ConsoleReader reader = (ConsoleReader) session.get(".jline.reader");
+            String msg = "You are about to access system bundle " + bundleId + ".  Do you wish to continue (yes/no): ";
+            String str = reader.readLine(msg);
+            if ("yes".equalsIgnoreCase(str)) {
                 return true;
             }
-            if ("no".equals(str)) {
+            if ("no".equalsIgnoreCase(str)) {
                 return false;
             }
         }
