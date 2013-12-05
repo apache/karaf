@@ -38,8 +38,6 @@ public interface ConfigMBean {
      * @throws Exception
      */
     void create(String pid) throws MBeanException;
-    
-    void update(String pid, Map<String, String> properties) throws MBeanException;
 
     /**
      * Delete a configuration identified by the given PID.
