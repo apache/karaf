@@ -48,7 +48,6 @@
         <maven.wagon.version>1.0-beta-6</maven.wagon.version>
     </properties>
 
-
     <dependencies>
         <dependency>
             <groupId>org.fusesource.scalate</groupId>
@@ -389,32 +388,7 @@
                     </supportedProjectTypes>
                     <instructions>
                         <Import-Package>
-                            javax.servlet,
-                            javax.servlet.http,
-                            org.osgi.framework,
-                            org.osgi.service.packageadmin,
-                            javax.jms,
-                            javax.mail*,
-                            javax.management*,
-                            javax.naming*,
-                            javax.sql,
-                            javax.swing*,
-                            javax.ws.rs*,
-                            javax.xml*,
-                            org.w3c.dom,
-                            org.xml.sax*,
-                            sun.misc,
-                            sun.reflect,
-                            com.sun.jersey*;resolution:=optional,
-                            org.codehaus.groovy*;resolution:=optional,
-                            org.codehaus.janino;resolution:=optional,
-                            groovy.lang;resolution:=optional,
-                            org.apache.commons.logging;provider=paxlogging;resolution:=optional,
-                            org.apache.log4j;provider=paxlogging;resolution:=optional,
-                            org.apache.tools.ant*;resolution:=optional,
-                            org.fusesource*;resolution:=optional,
-                            jline;resolution:=optional,
-                            org.slf4j;provider=paxlogging;resolution:=optional;version="[1.5,2)",
+
                         </Import-Package>
                         <Bundle-ClassPath>.,WEB-INF/classes</Bundle-ClassPath>
                         <Embed-Directory>WEB-INF/lib</Embed-Directory>
