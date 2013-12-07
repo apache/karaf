@@ -24,6 +24,7 @@ import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import javax.management.openmbean.*;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -76,9 +77,29 @@ public class WebMBeanImpl extends StandardMBean implements WebMBean {
         }
     }
 
+    public void start(Long bundleId) throws MBeanException {
+        try {
+            List<Long> list = new ArrayList<Long>();
+            list.add(bundleId);
+            webContainerService.start(list);
+        } catch (Exception e) {
+            throw new MBeanException(null, e.getMessage());
+        }
+    }
+
     public void start(List<Long> bundleIds) throws MBeanException {
         try {
             webContainerService.start(bundleIds);
+        } catch (Exception e) {
+            throw new MBeanException(null, e.getMessage());
+        }
+    }
+
+    public void stop(Long bundleId) throws MBeanException {
+        try {
+            List<Long> list = new ArrayList<Long>();
+            list.add(bundleId);
+            webContainerService.stop(list);
         } catch (Exception e) {
             throw new MBeanException(null, e.getMessage());
         }

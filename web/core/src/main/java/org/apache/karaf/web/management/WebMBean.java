@@ -34,6 +34,14 @@ public interface WebMBean {
     TabularData getWebBundles() throws MBeanException;
 
     /**
+     * Start web context of the given web bundle (identified by ID).
+     *
+     * @param bundleId the bundle ID.
+     * @throws MBeanException
+     */
+    void start(Long bundleId) throws MBeanException;
+
+    /**
      * Start web context of the given web bundles (identified by ID).
      * 
      * @param bundleIds the list of bundle IDs.
@@ -43,7 +51,15 @@ public interface WebMBean {
     void start(List<Long> bundleIds) throws MBeanException;
 
     /**
-     * Stop web contact of the given web bundles (identified by ID).
+     * Stop web context of the given web bundle (identified by ID).
+     *
+     * @param bundleId the bundle ID.
+     * @throws MBeanException
+     */
+    void stop(Long bundleId) throws MBeanException;
+
+    /**
+     * Stop web context of the given web bundles (identified by ID).
      *
      * @param bundleIds the list of bundle IDs.
      *                  TODO use a BundleSelector service
