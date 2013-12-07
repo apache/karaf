@@ -73,7 +73,7 @@ public class ObrMBeanImpl extends StandardMBean implements ObrMBean {
                     new String[]{"Presentation Name", "Symbolic Name", "Version"},
                     new OpenType[]{SimpleType.STRING, SimpleType.STRING, SimpleType.STRING});
             TabularType tableType = new TabularType("OBR Resources", "Table of all resources/bundles available in the OBR",
-                    bundleType, new String[]{"presentationname"});
+                    bundleType, new String[]{"symbolicname", "version"});
             TabularData table = new TabularDataSupport(tableType);
 
             Resource[] resources = repositoryAdmin.discoverResources("(|(presentationname=*)(symbolicname=*))");
@@ -81,7 +81,7 @@ public class ObrMBeanImpl extends StandardMBean implements ObrMBean {
                 try {
                     CompositeData data = new CompositeDataSupport(bundleType,
                             new String[]{"presentationname", "symbolicname", "version"},
-                            new Object[]{resources[i].getPresentationName(), resources[i].getSymbolicName(), resources[i].getVersion()});
+                            new Object[]{resources[i].getPresentationName(), resources[i].getSymbolicName(), resources[i].getVersion().toString()});
                     table.put(data);
                 } catch (Exception e) {
                     e.printStackTrace();
