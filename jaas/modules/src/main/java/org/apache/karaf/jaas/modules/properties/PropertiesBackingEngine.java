@@ -152,7 +152,7 @@ public class PropertiesBackingEngine implements BackingEngine {
     public void addRole(String username, String role) {
         String userInfos = (String) users.get(username);
         if (userInfos != null) {
-            for (RolePrincipal rp : listRoles(username)) {
+            for (RolePrincipal rp : listRoles(new UserPrincipal(username))) {
                 if (role.equals(rp.getName())) {
                     return; 
                 }
