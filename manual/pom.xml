@@ -351,7 +351,7 @@
                             javax.servlet.http,
                             org.osgi.framework,
                             org.osgi.service.packageadmin,
-                            javax.swing.tree,
+                            javax.swing.tree;resolution:=optional,
                             org.apache.commons.logging;provider=paxlogging;resolution:=optional,
                             org.apache.log4j;provider=paxlogging;resolution:=optional,
                             org.slf4j;provider=paxlogging;resolution:=optional;version="[1.5,2)",
