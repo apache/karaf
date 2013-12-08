@@ -343,15 +343,7 @@
                     </supportedProjectTypes>
                     <instructions>
                         <Import-Package>
-                            javax.servlet,
-                            javax.servlet.http,
-                            org.osgi.framework,
-                            org.osgi.service.packageadmin,
-                            javax.swing.tree,
-                            org.apache.commons.logging;provider=paxlogging;resolution:=optional,
-                            org.apache.log4j;provider=paxlogging;resolution:=optional,
-                            org.slf4j;provider=paxlogging;resolution:=optional;version="[1.5,2)",
-                            *
+
                         </Import-Package>
                         <Bundle-ClassPath>.,WEB-INF/classes</Bundle-ClassPath>
                         <Embed-Directory>WEB-INF/lib</Embed-Directory>
