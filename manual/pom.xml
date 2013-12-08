@@ -394,7 +394,7 @@
                         <Embed-Directory>WEB-INF/lib</Embed-Directory>
                         <Embed-Dependency>*;scope=compile|runtime</Embed-Dependency>
                         <Embed-Transitive>true</Embed-Transitive>
-                        <Webapp-Context>/karaf-doc</Webapp-Context>
+                        <Web-ContextPath>/karaf-doc</Web-ContextPath>
                     </instructions>
                 </configuration>
             </plugin>
