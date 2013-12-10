@@ -108,40 +108,8 @@ public class PublickeyLoginModule extends AbstractKarafLoginModule {
         String[] infos = userInfos.split(",");
         String storedKey = infos[0];
 
-        // check if the stored password is flagged as encrypted
-        String encryptedKey = getEncryptedPassword(storedKey);
-        if (!storedKey.equals(encryptedKey)) {
-            if (debug) {
-                LOG.debug("The key isn't flagged as encrypted, encrypt it.");
-            }
-            if (debug) {
-                LOG.debug("Rebuild the user informations string.");
-            }
-            userInfos = encryptedKey + ",";
-            for (int i = 2; i < infos.length; i++) {
-                if (i == (infos.length - 1)) {
-                    userInfos = userInfos + infos[i];
-                } else {
-                    userInfos = userInfos + infos[i] + ",";
-                }
-            }
-            if (debug) {
-                LOG.debug("Push back the user informations in the users properties.");
-            }
-            users.put(user, userInfos);
-            try {
-                if (debug) {
-                    LOG.debug("Store the users properties file.");
-                }
-                users.save();
-            } catch (IOException ioe) {
-                LOG.warn("Unable to write user properties file " + f, ioe);
-            }
-            storedKey = encryptedKey;
-        }
-
         // check the provided password
-        if (!checkPassword(getString(key), storedKey)) {
+        if (!getString(key).equals(storedKey)) {
             if (!this.detailedLoginExcepion) {
                 throw new FailedLoginException("login failed");
             } else {
