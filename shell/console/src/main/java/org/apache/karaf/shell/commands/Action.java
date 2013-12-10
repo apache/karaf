@@ -33,7 +33,7 @@ import org.apache.felix.service.command.CommandSession;
  * is necessary so the help generator can instantiate the class and get the 
  * default values. 
  */
-public interface Action {
+public interface Action extends org.apache.felix.gogo.commands.Action {
 
     Object execute(CommandSession session) throws Exception;
 
