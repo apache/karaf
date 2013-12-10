@@ -18,7 +18,46 @@
  */
 package org.apache.felix.gogo.commands.basic;
 
+import java.util.List;
+
+import org.apache.felix.gogo.commands.Action;
+import org.apache.felix.service.command.CommandSession;
+import org.apache.karaf.shell.commands.CompatibleCommandWithAction;
+
 @Deprecated
-public abstract class AbstractCommand extends org.apache.karaf.shell.commands.basic.AbstractCommand {
+public abstract class AbstractCommand implements CompatibleCommandWithAction {
+
+    public Object execute(CommandSession session, List<Object> arguments) throws Exception {
+        Action action = createNewAction();
+        try {
+            if (getPreparator().prepare(action, session, arguments)) {
+                return action.execute(session);
+            } else {
+                return null;
+            }
+        } finally {
+            releaseAction(action);
+        }
+    }
+
+    public Class<? extends Action> getActionClass() {
+        return createNewAction().getClass();
+    }
+
+    public abstract Action createNewAction();
+
+    /**
+     * Release the used Action.
+     * This method has to be overridden for pool based Actions.
+     * @param action Action that was executed
+     * @throws Exception if something went wrong during the Action release
+     */
+    public void releaseAction(Action action) throws Exception {
+        // Do nothing by default (stateful)
+    }
+
+    protected ActionPreparator getPreparator() throws Exception {
+        return new DefaultActionPreparator();
+    }
 
 }
