@@ -22,10 +22,10 @@ import java.util.List;
 
 import org.apache.felix.gogo.commands.Action;
 import org.apache.felix.service.command.CommandSession;
-import org.apache.karaf.shell.commands.CompatibleCommandWithAction;
+import org.apache.felix.service.command.Function;
 
 @Deprecated
-public abstract class AbstractCommand implements CompatibleCommandWithAction {
+public abstract class AbstractCommand implements Function {
 
     public Object execute(CommandSession session, List<Object> arguments) throws Exception {
         Action action = createNewAction();
