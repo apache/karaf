@@ -68,7 +68,7 @@ public class ListServices extends OsgiCommandSupport {
         Collections.sort(serviceRefs, new ServiceClassComparator());
         
         for (ServiceReference<?> serviceRef : serviceRefs) {
-            if (!isCommand((String[])serviceRef.getProperty(Constants.OBJECTCLASS))) {
+            if (showAll || !isCommand((String[])serviceRef.getProperty(Constants.OBJECTCLASS))) {
                 printServiceRef(serviceRef);
             }
         }
