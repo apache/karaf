@@ -140,6 +140,39 @@ public class CommandsCompleter implements Completer {
                         }
                     }
                 }
+                if (function instanceof org.apache.felix.gogo.commands.CommandWithAction) {
+                    if (completion.equalsIgnoreCase("GLOBAL") ||
+                            (completion.equalsIgnoreCase("FIRST") && (subshell == null || subshell.length() == 0))) {
+                        try {
+                            completers.add(new OldArgumentCompleter(session, (org.apache.felix.gogo.commands.CommandWithAction) function, command));
+                        } catch (Throwable t) {
+                            LOGGER.debug("Unable to create completers for command '{}'", command, t);
+                        }
+                    } else {
+                        if (command.startsWith(subshell)) {
+
+                            if (subshell.length() > 1 && command.length() > subshell.length()) {
+                                command = command.substring(subshell.length() + 1);
+                            }
+
+                            if (completion.equalsIgnoreCase("SUBSHELL")) {
+                                // filter on subshell
+                                // as the completion mode is set to SUBSHELL, we complete only with the commands local
+                                // to the current subshell
+                                if (command.contains(":")) {
+                                    int index = command.indexOf(':');
+                                    command = command.substring(0, index);
+                                }
+                                command.trim();
+                            }
+                            try {
+                                completers.add(new OldArgumentCompleter(session, (org.apache.felix.gogo.commands.CommandWithAction) function, command));
+                            } catch (Throwable t) {
+                                LOGGER.debug("Unable to create completers for command '{}'", command, t);
+                            }
+                        }
+                    }
+                }
                 commands.add(command);
             }
         }
