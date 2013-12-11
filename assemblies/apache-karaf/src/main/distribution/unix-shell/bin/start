@@ -60,7 +60,6 @@ detectOS() {
     # For AIX, set an environment variable
     if $aix; then
          export LDR_CNTRL=MAXDATA=0xB0000000@DSA
-         export IBM_JAVA_HEAPDUMP_TEXT=true
          echo $LDR_CNTRL
     fi
 }
