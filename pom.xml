@@ -62,6 +62,7 @@
         <module>scr</module>
         <module>diagnostic</module>
         <module>obr</module>
+        <module>jndi</module>
         <module>tooling</module>
         <module>assemblies</module>
         <module>demos</module>
@@ -385,6 +386,17 @@
             <dependency>
                 <groupId>org.apache.karaf.http</groupId>
                 <artifactId>org.apache.karaf.http.command</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.karaf.jndi</groupId>
+                <artifactId>org.apache.karaf.jndi.core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.jndi</groupId>
+                <artifactId>org.apache.karaf.jndi.command</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -1705,6 +1717,11 @@
             <dependency>
                 <groupId>org.apache.xbean</groupId>
                 <artifactId>xbean-blueprint</artifactId>
+                <version>${xbean.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.xbean</groupId>
+                <artifactId>xbean-naming</artifactId>
                 <version>${xbean.version}</version>
             </dependency>
             <dependency>
