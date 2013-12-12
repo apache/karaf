@@ -202,6 +202,14 @@ public class JndiServiceImpl implements JndiService {
             }
         } else {
             Object object = context.lookup(name);
+            String[] splitted = alias.split("/");
+            if (splitted.length > 0) {
+                for (int i = 0; i < splitted.length - 1; i++) {
+                    context.createSubcontext(splitted[i]);
+                    context = (Context) context.lookup(splitted[i]);
+                }
+                alias = splitted[splitted.length - 1];
+            }
             context.bind(alias, object);
         }
     }
