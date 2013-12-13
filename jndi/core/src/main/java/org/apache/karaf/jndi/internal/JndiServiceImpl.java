@@ -105,13 +105,12 @@ public class JndiServiceImpl implements JndiService {
             Binding item = (Binding) list.next();
             String className = item.getClassName();
             String name = item.getName();
-            sb.append("/");
-            sb.append(name);
             Object o = item.getObject();
             if (o instanceof Context) {
+                sb.append("/").append(name);
                 list((Context) o, sb, map);
             } else {
-                map.put(sb.toString(), className);
+                map.put(sb.toString() + "/" + name, className);
             }
         }
     }
@@ -153,7 +152,14 @@ public class JndiServiceImpl implements JndiService {
                             String[] splitted = name.split("/");
                             if (splitted.length > 0) {
                                 for (int i = 0; i < splitted.length - 1; i++) {
-                                    context.createSubcontext(splitted[i]);
+                                    try {
+                                        Object o = context.lookup(splitted[i]);
+                                        if (!(o instanceof Context)) {
+                                            throw new NamingException("Name " + splitted[i] + " already exists");
+                                        }
+                                    } catch (NameNotFoundException nnfe) {
+                                        context.createSubcontext(splitted[i]);
+                                    }
                                     context = (Context) context.lookup(splitted[i]);
                                 }
                                 name = splitted[splitted.length - 1];
@@ -187,7 +193,14 @@ public class JndiServiceImpl implements JndiService {
                                 String[] splitted = alias.split("/");
                                 if (splitted.length > 0) {
                                     for (int i = 0; i < splitted.length - 1; i++) {
-                                        context.createSubcontext(splitted[i]);
+                                        try {
+                                            Object o = context.lookup(splitted[i]);
+                                            if (!(o instanceof Context)) {
+                                                throw new NamingException("Name " + splitted[i] + " already exists");
+                                            }
+                                        } catch (NameNotFoundException nnfe) {
+                                            context.createSubcontext(splitted[i]);
+                                        }
                                         context = (Context) context.lookup(splitted[i]);
                                     }
                                     alias = splitted[splitted.length -1];
@@ -205,7 +218,14 @@ public class JndiServiceImpl implements JndiService {
             String[] splitted = alias.split("/");
             if (splitted.length > 0) {
                 for (int i = 0; i < splitted.length - 1; i++) {
-                    context.createSubcontext(splitted[i]);
+                    try {
+                        Object o = context.lookup(splitted[i]);
+                        if (!(o instanceof Context)) {
+                            throw new NamingException("Name " + splitted[i] + " already exists");
+                        }
+                    } catch (NameNotFoundException nnfe) {
+                        context.createSubcontext(splitted[i]);
+                    }
                     context = (Context) context.lookup(splitted[i]);
                 }
                 alias = splitted[splitted.length - 1];
