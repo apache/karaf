@@ -16,6 +16,7 @@ The following commands are available:
 * jndi:alias
 * jndi:bind
 * jndi:create
+* jndi:contexts
 * jndi:delete
 * jndi:names
 * jndi:unbind

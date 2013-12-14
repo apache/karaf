@@ -24,7 +24,9 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 
 import javax.naming.*;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -91,8 +93,47 @@ public class JndiServiceImpl implements JndiService {
         return map;
     }
 
+    public List<String> contexts() throws Exception {
+        return contexts("/");
+    }
+
+    public List<String> contexts(String name) throws Exception {
+        List<String> contexts = new ArrayList<String>();
+        Context context = new InitialContext();
+        NamingEnumeration<NameClassPair> pairs = context.list(name);
+        while (pairs.hasMoreElements()) {
+            NameClassPair pair = pairs.nextElement();
+            Object o;
+            if (name != null) {
+                o = context.lookup(name + "/" + pair.getName());
+            } else {
+                o = context.lookup(pair.getName());
+            }
+            if (o instanceof Context) {
+                StringBuilder sb = new StringBuilder();
+                sb.append(pair.getName());
+                contexts((Context) o, sb);
+                contexts.add(sb.toString());
+            }
+        }
+        return contexts;
+    }
+
+    private void contexts(Context context, StringBuilder sb) throws Exception {
+        NamingEnumeration list = context.listBindings("");
+        while (list.hasMore()) {
+            Binding item = (Binding) list.next();
+            String name = item.getName();
+            Object o = item.getObject();
+            if (o instanceof Context) {
+                sb.append("/").append(name);
+                contexts((Context) o, sb);
+            }
+        }
+    }
+
     /**
-     * Recursively list a context
+     * Recursively list a context/names
      *
      * @param ctx the startup context.
      * @param sb the string builder where to construct the full qualified name.

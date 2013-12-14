@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.jndi;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -39,6 +40,23 @@ public interface JndiService {
      * @throws Exception
      */
     Map<String, String> names(String context) throws Exception;
+
+    /**
+     * List all JNDI sub-contexts.
+     *
+     * @return a list containing the sub-context names.
+     * @throws Exception
+     */
+    List<String> contexts() throws Exception;
+
+    /**
+     * List the JNDI sub-context from a given context.
+     *
+     * @param context the base JNDI context.
+     * @return a list containing the sub-context names.
+     * @throws Exception
+     */
+    List<String> contexts(String context) throws Exception;
 
     /**
      * Create a sub-context.

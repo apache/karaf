@@ -17,6 +17,7 @@
 package org.apache.karaf.jndi;
 
 import javax.management.MBeanException;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -40,6 +41,23 @@ public interface JndiMBean {
      * @throws MBeanException
      */
     public Map<String, String> getNames(String context) throws MBeanException;
+
+    /**
+     * Get a list of JNDI sub-contexts (as attribute).
+     *
+     * @return the MBean attribute containing the list of sub-contexts.
+     * @throws MBeanException
+     */
+    public List<String> getContexts() throws MBeanException;
+
+    /**
+     * Get a list of JNDI sub-contexts children of a given base context.
+     *
+     * @param context the base context.
+     * @return the list of sub-contexts.
+     * @throws MBeanException
+     */
+    public List<String> getContexts(String context) throws MBeanException;
 
     /**
      * Create a JNDI sub-context.

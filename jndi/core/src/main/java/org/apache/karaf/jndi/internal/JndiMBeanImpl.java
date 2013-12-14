@@ -20,6 +20,7 @@ import org.apache.karaf.jndi.JndiService;
 import org.apache.karaf.jndi.JndiMBean;
 
 import javax.management.MBeanException;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -42,6 +43,24 @@ public class JndiMBeanImpl implements JndiMBean {
     public Map<String, String> getNames(String context) throws MBeanException {
         try {
             return this.jndiService.names(context);
+        } catch (Throwable t) {
+            throw new MBeanException(null, t.getMessage());
+        }
+    }
+
+    @Override
+    public List<String> getContexts() throws MBeanException {
+        try {
+            return this.jndiService.contexts();
+        } catch (Throwable t) {
+            throw new MBeanException(null, t.getMessage());
+        }
+    }
+
+    @Override
+    public List<String> getContexts(String context) throws MBeanException {
+        try {
+            return this.jndiService.contexts(context);
         } catch (Throwable t) {
             throw new MBeanException(null, t.getMessage());
         }
