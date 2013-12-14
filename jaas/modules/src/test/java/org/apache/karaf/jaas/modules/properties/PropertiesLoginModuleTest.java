@@ -47,9 +47,11 @@ public class PropertiesLoginModuleTest {
         try {
             testWithUsersFile("/test/users.properties");
         } catch (LoginException e) {
+            String message = e.getMessage();
+            message = message.replace("\\", "/");
             String test = "Users file not found at " + File.separator +
                           "test" + File.separator + "users.properties";
-            Assert.assertEquals(test, e.getMessage());
+            Assert.assertEquals(test, message);
         }
     }
 
