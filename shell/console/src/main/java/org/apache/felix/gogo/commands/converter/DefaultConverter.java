@@ -51,8 +51,8 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.lang.reflect.InvocationTargetException;
 
-public class DefaultConverter
-{
+@Deprecated
+public class DefaultConverter {
 
     private Object loader;
 
@@ -61,7 +61,7 @@ public class DefaultConverter
     }
 
     public Object convert(Object source, Type target) throws Exception {
-        return convert( source, new GenericType(target));
+        return convert(source, new GenericType(target));
     }
 
     public Object convert(Object fromValue, ReifiedType type) throws Exception {
@@ -187,7 +187,7 @@ public class DefaultConverter
         } else if (Character.class == toType) {
             if (value.length() == 6 && value.startsWith("\\u")) {
                 int code = Integer.parseInt(value.substring(2), 16);
-                return (char)code;
+                return (char) code;
             } else if (value.length() == 1) {
                 return value.charAt(0);
             } else {
@@ -255,7 +255,7 @@ public class DefaultConverter
         Dictionary newDic = new Hashtable();
         if (obj instanceof Dictionary) {
             Dictionary dic = (Dictionary) obj;
-            for (Enumeration keyEnum = dic.keys(); keyEnum.hasMoreElements();) {
+            for (Enumeration keyEnum = dic.keys(); keyEnum.hasMoreElements(); ) {
                 Object key = keyEnum.nextElement();
                 try {
                     newDic.put(convert(key, keyType), convert(dic.get(key), valueType));
@@ -264,7 +264,7 @@ public class DefaultConverter
                 }
             }
         } else {
-            for (Map.Entry e : ((Map<Object,Object>) obj).entrySet()) {
+            for (Map.Entry e : ((Map<Object, Object>) obj).entrySet()) {
                 try {
                     newDic.put(convert(e.getKey(), keyType), convert(e.getValue(), valueType));
                 } catch (Exception t) {
@@ -281,7 +281,7 @@ public class DefaultConverter
         Map newMap = (Map) getMap(toClass(type)).newInstance();
         if (obj instanceof Dictionary) {
             Dictionary dic = (Dictionary) obj;
-            for (Enumeration keyEnum = dic.keys(); keyEnum.hasMoreElements();) {
+            for (Enumeration keyEnum = dic.keys(); keyEnum.hasMoreElements(); ) {
                 Object key = keyEnum.nextElement();
                 try {
                     newMap.put(convert(key, keyType), convert(dic.get(key), valueType));
@@ -290,7 +290,7 @@ public class DefaultConverter
                 }
             }
         } else {
-            for (Map.Entry e : ((Map<Object,Object>) obj).entrySet()) {
+            for (Map.Entry e : ((Map<Object, Object>) obj).entrySet()) {
                 try {
                     newMap.put(convert(e.getKey(), keyType), convert(e.getValue(), valueType));
                 } catch (Exception t) {
@@ -382,6 +382,7 @@ public class DefaultConverter
     }
 
     private static final Map<Class, Class> primitives;
+
     static {
         primitives = new HashMap<Class, Class>();
         primitives.put(byte.class, Byte.class);

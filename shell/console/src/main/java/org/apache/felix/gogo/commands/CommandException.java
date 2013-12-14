@@ -23,6 +23,7 @@ import org.fusesource.jansi.Ansi;
 /**
  * Base class for exceptions thrown when executing commands.
  */
+@Deprecated
 public class CommandException extends Exception {
 
     private String help;
@@ -53,7 +54,7 @@ public class CommandException extends Exception {
     }
 
     public String getNiceHelp() {
-        return  help != null ? help
+        return help != null ? help
                 : Ansi.ansi()
                 .fg(Ansi.Color.RED)
                 .a("Error executing command: ")

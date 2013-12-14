@@ -30,8 +30,7 @@ import java.lang.annotation.ElementType;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
 @Deprecated
-public @interface Command
-{
+public @interface Command {
     /**
      * Returns the scope or sub shell of the command
      */

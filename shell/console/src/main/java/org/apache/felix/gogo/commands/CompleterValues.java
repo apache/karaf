@@ -31,7 +31,7 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.FIELD})
-public @interface CompleterValues
-{
+@Deprecated
+public @interface CompleterValues {
     int index() default 0;
 }

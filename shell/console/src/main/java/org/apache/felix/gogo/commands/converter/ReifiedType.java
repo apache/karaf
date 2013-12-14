@@ -35,7 +35,9 @@ package org.apache.felix.gogo.commands.converter;
  *
  * @Immutable
  */
+@Deprecated
 public class ReifiedType {
+
     final static ReifiedType ALL = new ReifiedType(Object.class);
 
     private final Class clazz;

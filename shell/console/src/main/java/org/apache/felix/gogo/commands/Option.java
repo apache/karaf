@@ -29,9 +29,9 @@ import java.lang.annotation.ElementType;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD})
 @Deprecated
-public @interface Option
-{
-    public static final String DEFAULT_STRING= "DEFAULT";
+public @interface Option {
+
+    public static final String DEFAULT_STRING = "DEFAULT";
 
     String name();
 
@@ -44,4 +44,5 @@ public @interface Option
     boolean multiValued() default false;
 
     String valueToShowInHelp() default DEFAULT_STRING;
+
 }

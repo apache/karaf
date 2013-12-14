@@ -20,8 +20,8 @@ package org.apache.felix.gogo.commands;
 
 import org.apache.felix.service.command.CommandSession;
 
-public interface Action
-{
+@Deprecated
+public interface Action {
 
     Object execute(CommandSession session) throws Exception;
 
