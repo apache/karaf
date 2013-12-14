@@ -29,16 +29,16 @@ public interface JndiService {
      * @return the JNDI names.
      * @throws Exception
      */
-    Map<String, String> list() throws Exception;
+    Map<String, String> names() throws Exception;
 
     /**
-     * List the current JNDI name in the given context.
+     * List the current JNDI names in the given context.
      *
      * @param context the JNDI context.
      * @return the JNDI names in the context.
      * @throws Exception
      */
-    Map<String, String> list(String context) throws Exception;
+    Map<String, String> names(String context) throws Exception;
 
     /**
      * Create a sub-context.

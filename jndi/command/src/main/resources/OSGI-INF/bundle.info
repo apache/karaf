@@ -17,7 +17,7 @@ The following commands are available:
 * jndi:bind
 * jndi:create
 * jndi:delete
-* jndi:list
+* jndi:names
 * jndi:unbind
 
 h1. See also

@@ -22,8 +22,8 @@ import org.apache.karaf.shell.table.ShellTable;
 
 import java.util.Map;
 
-@Command(scope = "jndi", name = "list", description = "List the JNDI names.")
-public class ListCommand extends JndiCommandSupport {
+@Command(scope = "jndi", name = "names", description = "List the JNDI names.")
+public class NamesCommand extends JndiCommandSupport {
 
     @Argument(index = 0, name = "context", description = "The JNDI context to display the names", required = false, multiValued = false)
     String context;
@@ -36,9 +36,9 @@ public class ListCommand extends JndiCommandSupport {
 
         Map<String, String> names;
         if (context == null) {
-            names = this.getJndiService().list();
+            names = this.getJndiService().names();
         } else {
-            names = this.getJndiService().list(context);
+            names = this.getJndiService().names(context);
         }
 
         for (String name : names.keySet()) {

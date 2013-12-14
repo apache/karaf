@@ -39,14 +39,14 @@ public class JndiServiceImpl implements JndiService {
     private final static String OSGI_JNDI_SERVICE_PROPERTY = "osgi.jndi.service.name";
 
     @Override
-    public Map<String, String> list() throws Exception {
-        Map<String, String> result = list("/");
-        result.putAll(list(OSGI_JNDI_CONTEXT_PREFIX + "/"));
+    public Map<String, String> names() throws Exception {
+        Map<String, String> result = names("/");
+        result.putAll(names(OSGI_JNDI_CONTEXT_PREFIX + "/"));
         return result;
     }
 
     @Override
-    public Map<String, String> list(String name) throws Exception {
+    public Map<String, String> names(String name) throws Exception {
         Map<String, String> map = new HashMap<String, String>();
         if (name.startsWith(OSGI_JNDI_CONTEXT_PREFIX)) {
             // OSGi service binding
@@ -82,7 +82,7 @@ public class JndiServiceImpl implements JndiService {
                 if (o instanceof Context) {
                     StringBuilder sb = new StringBuilder();
                     sb.append(pair.getName());
-                    list((Context) o, sb, map);
+                    names((Context) o, sb, map);
                 } else {
                     map.put(pair.getName(), pair.getClassName());
                 }
@@ -99,7 +99,7 @@ public class JndiServiceImpl implements JndiService {
      * @param map the final map containing name/class name pairs.
      * @throws Exception
      */
-    private static final void list(Context ctx, StringBuilder sb, Map<String, String> map) throws Exception {
+    private static final void names(Context ctx, StringBuilder sb, Map<String, String> map) throws Exception {
         NamingEnumeration list = ctx.listBindings("");
         while (list.hasMore()) {
             Binding item = (Binding) list.next();
@@ -108,7 +108,7 @@ public class JndiServiceImpl implements JndiService {
             Object o = item.getObject();
             if (o instanceof Context) {
                 sb.append("/").append(name);
-                list((Context) o, sb, map);
+                names((Context) o, sb, map);
             } else {
                 map.put(sb.toString() + "/" + name, className);
             }

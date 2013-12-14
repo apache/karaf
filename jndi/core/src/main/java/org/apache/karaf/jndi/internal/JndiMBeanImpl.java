@@ -32,7 +32,7 @@ public class JndiMBeanImpl implements JndiMBean {
     @Override
     public Map<String, String> getNames() throws MBeanException {
         try {
-            return this.jndiService.list();
+            return this.jndiService.names();
         } catch (Throwable t) {
             throw new MBeanException(null, t.getMessage());
         }
@@ -41,7 +41,7 @@ public class JndiMBeanImpl implements JndiMBean {
     @Override
     public Map<String, String> getNames(String context) throws MBeanException {
         try {
-            return this.jndiService.list(context);
+            return this.jndiService.names(context);
         } catch (Throwable t) {
             throw new MBeanException(null, t.getMessage());
         }

@@ -26,7 +26,7 @@
             </action>
         </command>
         <command>
-            <action class="org.apache.karaf.jndi.command.ListCommand">
+            <action class="org.apache.karaf.jndi.command.NamesCommand">
                 <property name="jndiService" ref="jndiService" />
             </action>
         </command>
