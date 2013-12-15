@@ -112,22 +112,25 @@ public class JndiServiceImpl implements JndiService {
             if (o instanceof Context) {
                 StringBuilder sb = new StringBuilder();
                 sb.append(pair.getName());
-                contexts((Context) o, sb);
-                contexts.add(sb.toString());
+                contexts((Context) o, sb, contexts);
             }
         }
         return contexts;
     }
 
-    private void contexts(Context context, StringBuilder sb) throws Exception {
+    private void contexts(Context context, StringBuilder sb, List<String> contexts) throws Exception {
         NamingEnumeration list = context.listBindings("");
         while (list.hasMore()) {
             Binding item = (Binding) list.next();
             String name = item.getName();
             Object o = item.getObject();
             if (o instanceof Context) {
-                sb.append("/").append(name);
-                contexts((Context) o, sb);
+                if (((Context) o).list("").hasMoreElements()) {
+                    sb.append("/").append(name);
+                    contexts((Context) o, sb, contexts);
+                } else {
+                    contexts.add(sb.toString() + "/" + name);
+                }
             }
         }
     }

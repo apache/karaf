@@ -40,18 +40,18 @@ public class JndiMBeanImpl implements JndiMBean {
     }
 
     @Override
-    public Map<String, String> getNames(String context) throws MBeanException {
+    public List<String> getContexts() throws MBeanException {
         try {
-            return this.jndiService.names(context);
+            return this.jndiService.contexts();
         } catch (Throwable t) {
             throw new MBeanException(null, t.getMessage());
         }
     }
 
     @Override
-    public List<String> getContexts() throws MBeanException {
+    public Map<String, String> getNames(String context) throws MBeanException {
         try {
-            return this.jndiService.contexts();
+            return this.jndiService.names(context);
         } catch (Throwable t) {
             throw new MBeanException(null, t.getMessage());
         }

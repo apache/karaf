@@ -34,6 +34,14 @@ public interface JndiMBean {
     public Map<String, String> getNames() throws MBeanException;
 
     /**
+     * Get a list of JNDI sub-contexts (as attribute).
+     *
+     * @return the MBean attribute containing the list of sub-contexts.
+     * @throws MBeanException
+     */
+    public List<String> getContexts() throws MBeanException;
+
+    /**
      * Get a map of JNDI names/class names children of a given base context.
      *
      * @param context the base context.
@@ -41,14 +49,6 @@ public interface JndiMBean {
      * @throws MBeanException
      */
     public Map<String, String> getNames(String context) throws MBeanException;
-
-    /**
-     * Get a list of JNDI sub-contexts (as attribute).
-     *
-     * @return the MBean attribute containing the list of sub-contexts.
-     * @throws MBeanException
-     */
-    public List<String> getContexts() throws MBeanException;
 
     /**
      * Get a list of JNDI sub-contexts children of a given base context.
