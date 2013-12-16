@@ -59,6 +59,15 @@
         <bundle>mvn:org.apache.karaf.jndi/org.apache.karaf.jndi.command/${project.version}</bundle>
     </feature>
 
+    <feature name='jdbc' description='JDBC service and commands' version='${project.version}' resolver='(obr)'>
+        <details>JDBC support providing service, commands, and MBean.</details>
+        <feature>transaction</feature>
+        <bundle>mvn:commons-pool/commons-pool/1.6</bundle>
+        <bundle>mvn:commons-dbcp/commons-dbcp/1.4</bundle>
+        <bundle>mvn:org.apache.karaf.jdbc/org.apache.karaf.jdbc.core/${project.version}</bundle>
+        <bundle>mvn:org.apache.karaf.jdbc/org.apache.karaf.jdbc.command/${project.version}</bundle>
+    </feature>
+
     <feature name='application-without-isolation' description='Provide EBA archive support' version='${aries.application.version}'>
         <details>Support of the Aries EBA archives</details>
         <!-- pre-requisites-->

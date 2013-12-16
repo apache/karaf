@@ -1,0 +1,309 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.karaf.jdbc.internal;
+
+import org.apache.karaf.jdbc.JdbcService;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceReference;
+
+import javax.sql.DataSource;
+import java.io.*;
+import java.sql.*;
+import java.util.*;
+
+/**
+ * Default implementation of the JDBC Service.
+ */
+public class JdbcServiceImpl implements JdbcService {
+
+    public static enum TYPES {
+        DB2("wrap:mvn:com.ibm.db2.jdbc/db2jcc/", "9.7", "datasource-db2.xml"),
+        DERBY("mvn:org.apache.derby/derby/", "10.8.2.2", "datasource-derby.xml"),
+        GENERIC(null, null, "datasource-generic.xml"),
+        H2("mvn:com.h2database/h2/", "1.3.163", "datasource-h2.xml"),
+        HSQL("mvn:com.h2database/h2/", "1.3.163", "datasource-hsql.xml"),
+        MYSQL("mvn:mysql/mysql-connector-java/", "5.1.18", "datasource-mysql.xml"),
+        ORACLE("wrap:mvn:ojdbc/ojdbc/", "11.2.0.2.0", "datasource-oracle.xml"),
+        POSTGRES("wrap:mvn:postgresql/postgresql/", "9.1-901.jdbc4", "datasource-postgres.xml");
+
+        private final String bundleUrl;
+        private final String defaultVersion;
+        private final String templateFile;
+
+        TYPES(String bundleUrl, String defaultVersion, String templateFile) {
+            this.bundleUrl = bundleUrl;
+            this.defaultVersion = defaultVersion;
+            this.templateFile = templateFile;
+        }
+
+        public void installBundle(BundleContext bundleContext, String version) throws Exception {
+            if (version != null) {
+                bundleContext.installBundle(this.bundleUrl + version, null).start();
+            } else {
+                bundleContext.installBundle(this.bundleUrl + this.defaultVersion, null).start();
+            }
+        }
+
+        public void copyDataSourceFile(File outFile, HashMap<String, String> properties) throws Exception {
+            if (!outFile.exists()) {
+                InputStream is = JdbcServiceImpl.class.getResourceAsStream(this.templateFile);
+                if (is == null) {
+                    throw new IllegalArgumentException("Resource " + this.templateFile + " doesn't exist");
+                }
+                try {
+                    // read it line at a time so that we can use the platform line ending when we write it out
+                    PrintStream out = new PrintStream(new FileOutputStream(outFile));
+                    try {
+                        Scanner scanner = new Scanner(is);
+                        while (scanner.hasNextLine()) {
+                            String line = scanner.nextLine();
+                            line = filter(line, properties);
+                            out.println(line);
+                        }
+                    } finally {
+                        safeClose(out);
+                    }
+                } finally {
+                    safeClose(is);
+                }
+            } else {
+                throw new IllegalArgumentException("File " + outFile.getPath() + " already exists. Remove it if you wish to recreate it.");
+            }
+        }
+
+        private void safeClose(InputStream is) throws IOException {
+            if (is == null)
+                return;
+            try {
+                is.close();
+            } catch (Throwable ignore) {
+                // nothing to do
+            }
+        }
+
+        private void safeClose(OutputStream is) throws IOException {
+            if (is == null)
+                return;
+            try {
+                is.close();
+            } catch (Throwable ignore) {
+                // nothing to do
+            }
+        }
+
+        private String filter(String line, HashMap<String, String> props) {
+            for (Map.Entry<String, String> i : props.entrySet()) {
+                int p1 = line.indexOf(i.getKey());
+                if (p1 >= 0) {
+                    String l1 = line.substring(0, p1);
+                    String l2 = line.substring(p1 + i.getKey().length());
+                    line = l1 + i.getValue() + l2;
+                }
+            }
+            return line;
+        }
+    }
+
+    private BundleContext bundleContext;
+
+    @Override
+    public void create(String name, String type, String driverClassName, String version, String url, String user, String password, boolean tryToInstallBundles) throws Exception {
+        if (tryToInstallBundles) {
+            TYPES.valueOf(type.toUpperCase()).installBundle(bundleContext, version);
+        }
+
+        File karafBase = new File(System.getProperty("karaf.base"));
+        File deployFolder = new File(karafBase, "deploy");
+        File outFile = new File(deployFolder, "datasource-" + name + ".xml");
+
+        HashMap<String, String> properties = new HashMap<String, String>();
+        properties.put("${name}", name);
+        properties.put("${driver}", driverClassName);
+        properties.put("${url}", url);
+        properties.put("${user}", user);
+        properties.put("${password}", password);
+
+        TYPES.valueOf(type.toUpperCase()).copyDataSourceFile(outFile, properties);
+    }
+
+    @Override
+    public void delete(String name) throws Exception {
+        File karafBase = new File(System.getProperty("karaf.base"));
+        File deployFolder = new File(karafBase, "deploy");
+        File datasourceFile = new File(deployFolder, "datasource-" + name + ".xml");
+        if (!datasourceFile.exists()) {
+            throw new IllegalArgumentException("The JDBC datasource file "+ datasourceFile.getPath() + " doesn't exist");
+        }
+        datasourceFile.delete();
+    }
+
+    @Override
+    public List<String> datasources() throws Exception {
+        List<String> datasources = new ArrayList<String>();
+        ServiceReference[] references = bundleContext.getServiceReferences(DataSource.class.getName(), null);
+        if (references != null) {
+            for (ServiceReference reference : references) {
+                if (reference.getProperty("osgi.jndi.service.name") != null) {
+                    datasources.add((String) reference.getProperty("osgi.jndi.service.name"));
+                } else if (reference.getProperty("datasource") != null) {
+                    datasources.add((String) reference.getProperty("datasource"));
+                } else if (reference.getProperty("name") != null) {
+                    datasources.add((String) reference.getProperty("name"));
+                } else {
+                    datasources.add(reference.getProperty(Constants.SERVICE_ID).toString());
+                }
+            }
+        }
+        return datasources;
+    }
+
+    @Override
+    public Map<String, List<String>> query(String datasource, String query) throws Exception {
+        Map<String, List<String>> map = new HashMap<String, List<String>>();
+        ServiceReference reference = this.lookupDataSource(datasource);
+        Connection connection = null;
+        Statement statement = null;
+        try {
+            DataSource ds = (DataSource) bundleContext.getService(reference);
+            connection = ds.getConnection();
+            statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(query);
+            ResultSetMetaData metaData = resultSet.getMetaData();
+            for (int c = 1; c <= metaData.getColumnCount(); c++) {
+                map.put(metaData.getColumnLabel(c), new ArrayList<String>());
+            }
+            while (resultSet.next()) {
+                for (int c = 1; c <= metaData.getColumnCount(); c++) {
+                    map.get(metaData.getColumnLabel(c)).add(resultSet.getString(c));
+                }
+            }
+            resultSet.close();
+        } finally {
+            if (statement != null) {
+                statement.close();
+            }
+            if (connection != null) {
+                connection.close();
+            }
+            if (reference != null) {
+                bundleContext.ungetService(reference);
+            }
+        }
+        return map;
+    }
+
+    @Override
+    public void execute(String datasource, String command) throws Exception {
+        ServiceReference reference = this.lookupDataSource(datasource);
+        Connection connection = null;
+        Statement statement = null;
+        try {
+            DataSource ds = (DataSource) bundleContext.getService(reference);
+            connection = ds.getConnection();
+            statement = connection.createStatement();
+            statement.execute(command);
+        } finally {
+            if (statement != null) {
+                statement.close();
+            }
+            if (connection != null) {
+                connection.close();
+            }
+            if (reference != null) {
+                bundleContext.ungetService(reference);
+            }
+        }
+    }
+
+    @Override
+    public Map<String, List<String>> tables(String datasource) throws Exception {
+        Map<String, List<String>> map = new HashMap<String, List<String>>();
+        ServiceReference reference = this.lookupDataSource(datasource);
+        Connection connection = null;
+        try {
+            DataSource ds = (DataSource) bundleContext.getService(reference);
+            connection = ds.getConnection();
+            DatabaseMetaData dbMetaData = connection.getMetaData();
+            ResultSet resultSet = dbMetaData.getTables(null, null, null, null);
+            ResultSetMetaData metaData = resultSet.getMetaData();
+            for (int c = 1; c <= metaData.getColumnCount(); c++) {
+                map.put(metaData.getColumnLabel(c), new ArrayList<String>());
+            }
+            while (resultSet.next()) {
+                for (int c = 1; c <= metaData.getColumnCount(); c++) {
+                    map.get(metaData.getColumnLabel(c)).add(resultSet.getString(c));
+                }
+            }
+            resultSet.close();
+        } finally {
+            if (connection != null) {
+                connection.close();
+            }
+            if (reference != null) {
+                bundleContext.ungetService(reference);
+            }
+        }
+        return map;
+    }
+
+    @Override
+    public Map<String, String> info(String datasource) throws Exception {
+        Map<String, String> map = new HashMap<String, String>();
+        ServiceReference reference = this.lookupDataSource(datasource);
+        Connection connection = null;
+        try {
+            DataSource ds = (DataSource) bundleContext.getService(reference);
+            connection = ds.getConnection();
+            DatabaseMetaData dbMetaData = connection.getMetaData();
+            map.put("db.product", dbMetaData.getDatabaseProductName());
+            map.put("db.version", dbMetaData.getDatabaseProductVersion());
+            map.put("url", dbMetaData.getURL());
+            map.put("username", dbMetaData.getUserName());
+            map.put("driver.name", dbMetaData.getDriverName());
+            map.put("driver.version", dbMetaData.getDriverVersion());
+        } finally {
+            if (connection != null) {
+                connection.close();
+            }
+            if (reference != null) {
+                bundleContext.ungetService(reference);
+            }
+        }
+        return map;
+    }
+
+    private ServiceReference lookupDataSource(String name) throws Exception {
+        ServiceReference[] references = bundleContext.getServiceReferences(DataSource.class.getName(), "(|(osgi.jndi.service.name=" + name + ")(datasource=" + name + ")(name=" + name + ")(service.id=" + name + "))");
+        if (references == null || references.length == 0) {
+            throw new IllegalArgumentException("No JDBC datasource found for " + name);
+        }
+        if (references.length > 1) {
+            throw new IllegalArgumentException("Multiple JDBC datasource found for " + name);
+        }
+        return references[0];
+    }
+
+    public BundleContext getBundleContext() {
+        return bundleContext;
+    }
+
+    public void setBundleContext(BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
+    }
+
+}

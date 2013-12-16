@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           default-activation="eager">
+
+    <bean id="dataSource" class="org.apache.derby.jdbc.EmbeddedXADataSource">
+        <property name="databaseName" value="${name}"/>
+        <property name="createDatabase" value="create" />
+    </bean>
+
+    <service ref="dataSource" interface="javax.sql.DataSource">
+        <service-properties>
+            <entry key="osgi.jndi.service.name" value="/jdbc/${name}"/>
+        </service-properties>
+    </service>
+
+    <service ref="dataSource" interface="javax.sql.XADataSource">
+        <service-properties>
+            <entry key="osgi.jndi.service.name" value="/jdbc/${name}xa"/>
+        </service-properties>
+    </service>
+
+</blueprint>
