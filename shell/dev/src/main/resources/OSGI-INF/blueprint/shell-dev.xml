@@ -46,6 +46,12 @@
                 <property name="watcher" ref="watcher"/>
             </action>
         </command>
+        <command name="dev/load-test">
+            <action class="org.apache.karaf.shell.dev.LoadTest" />
+        </command>
+        <command name="dev/threads">
+            <action class="org.apache.karaf.shell.dev.Threads" />
+        </command>
     </command-bundle>
 
     <!-- Referenace to the Configuration Admin Service -->

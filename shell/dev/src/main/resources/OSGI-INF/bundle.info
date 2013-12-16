@@ -19,6 +19,8 @@
     \u001B[36mdev:restart\u001B[0m Restart Karaf.
     \u001B[36mdev:show-tree\u001B[0m Shows the tree of bundles based on the wiring information.
     \u001B[36mdev:watch\u001B[0m Watches and updates bundles.
+    \u001B[36mdev:load-test\u001B[0m Load test bundle lifecycle.
+    \u001B[36mdev:threads\u001B[0m Show threads in the JVM.
 
 \u001B[1mSEE ALSO\u001B[0m
     \u001B[36mCommands\u001B[0m section of the Karaf User Guide.
