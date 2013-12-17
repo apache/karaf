@@ -32,7 +32,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
-import org.osgi.framework.startlevel.FrameworkStartLevel;
+import org.osgi.framework.startlevel.BundleStartLevel;
 
 public class Converters implements Converter
 {
@@ -46,7 +46,7 @@ public class Converters implements Converter
     private CharSequence print(Bundle bundle)
     {
         // [ ID ] [STATE      ] [ SL ] symname
-        int level = bundle.adapt(FrameworkStartLevel.class).getStartLevel();
+        int level = bundle.adapt(BundleStartLevel.class).getStartLevel();
 
         return String.format("%5d|%-11s|%5d|%s (%s)", bundle.getBundleId(),
             getState(bundle), level, bundle.getSymbolicName(), bundle.getVersion());
