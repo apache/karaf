@@ -308,11 +308,25 @@ public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHan
 
     public static String getScope(Class<?> action) {
         Command command = action.getAnnotation(Command.class);
-        return command.scope();
+        if (command != null) {
+            return command.scope();
+        }
+        org.apache.felix.gogo.commands.Command command2 = action.getAnnotation(org.apache.felix.gogo.commands.Command.class);
+        if (command2 != null) {
+            return command2.scope();
+        }
+        return null;
     }
 
     public static String getName(Class<?> action) {
         Command command = action.getAnnotation(Command.class);
-        return command.name();
+        if (command != null) {
+            return command.name();
+        }
+        org.apache.felix.gogo.commands.Command command2 = action.getAnnotation(org.apache.felix.gogo.commands.Command.class);
+        if (command2 != null) {
+            return command2.name();
+        }
+        return null;
     }
 }
