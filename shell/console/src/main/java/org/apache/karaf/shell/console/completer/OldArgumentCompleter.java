@@ -96,7 +96,14 @@ public class OldArgumentCompleter implements Completer {
         argsCompleters = new ArrayList<Completer>();
 
         if (function instanceof CompletableFunction) {
-            optionalCompleters = ((CompletableFunction) function).getOptionalCompleters();
+            Map<String, Completer> opt;
+            try {
+                //
+                opt = ((CompletableFunction) function).getOptionalCompleters();
+            } catch (Throwable t) {
+                opt = new HashMap<String, Completer>();
+            }
+            optionalCompleters = opt;
             List<Completer> fcl = ((CompletableFunction) function).getCompleters();
             if (fcl != null) {
                 for (Completer c : fcl) {

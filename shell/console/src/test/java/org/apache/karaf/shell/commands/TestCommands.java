@@ -29,15 +29,14 @@ import junit.framework.TestCase;
 import org.apache.karaf.shell.commands.basic.SimpleCommand;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.shell.console.ExitAction;
-import org.apache.karaf.shell.console.SubShellAction;
 
 public class TestCommands extends TestCase {
 
     public void testSubShellScope() throws Exception {
         Context c = new Context();
         c.set("SCOPE", "*");
-        c.addCommand("foo", new SimpleSubShell("foo"));
-        c.addCommand("exit", new SimpleCommand(ExitAction.class));
+        c.addCommand("*", new SimpleSubShell("foo"), "foo");
+        c.addCommand("*", new SimpleCommand(ExitAction.class), "exit");
 
         String scope = (String) c.get("SCOPE");
         c.execute("foo");
@@ -58,8 +57,8 @@ public class TestCommands extends TestCase {
 
     public void testCommand() throws Exception {
         Context c = new Context();
-        c.addCommand("capture", this);
-        c.addCommand("my-action", new SimpleCommand(MyAction.class));
+        c.addCommand("*", this, "capture");
+        c.addCommand("*", new SimpleCommand(MyAction.class), "my-action");
 
         // Test help
         Object help = c.execute("my-action --help | capture");
@@ -94,7 +93,7 @@ public class TestCommands extends TestCase {
 
     public void testCommandTwoArguments() throws Exception {
         Context c = new Context();
-        c.addCommand("my-action-two-arguments", new SimpleCommand(MyActionTwoArguments.class));
+        c.addCommand("*", new SimpleCommand(MyActionTwoArguments.class), "my-action-two-arguments");
 
         // test required arguments
         try {
@@ -174,21 +173,6 @@ public class TestCommands extends TestCase {
             return null;
         }
 
-    }
-
-    public static class SimpleSubShell extends SimpleCommand {
-        private final String subshell;
-        public SimpleSubShell(String subshell) {
-            super(SubShellAction.class);
-            this.subshell = subshell;
-        }
-
-        @Override
-        public Action createNewAction() {
-            SubShellAction action = (SubShellAction) super.createNewAction();
-            action.setSubShell(subshell);
-            return action;
-        }
     }
 
 }

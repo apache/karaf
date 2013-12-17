@@ -33,7 +33,7 @@ public class NameScoping {
      */
     public static String getCommandNameWithoutGlobalPrefix(CommandSession session, String key) {
         if (!isMultiScopeMode(session)) {
-            String globalScope = (String) session.get("APPLICATION");
+            String globalScope = (String) (session != null ? session.get("APPLICATION") : null);
             if (globalScope != null) {
                 String prefix = globalScope + ":";
                 if (key.startsWith(prefix)) {

@@ -21,6 +21,7 @@ package org.apache.karaf.shell.commands;
 import org.apache.felix.gogo.runtime.CommandProcessorImpl;
 import org.apache.felix.gogo.runtime.CommandSessionImpl;
 import org.apache.felix.gogo.runtime.threadio.ThreadIOImpl;
+import org.apache.felix.service.command.CommandSession;
 
 public class Context extends CommandProcessorImpl
 {
@@ -49,11 +50,6 @@ public class Context extends CommandProcessorImpl
         return session.execute(source);
     }
 
-    public void addCommand(String name, Object target)
-    {
-        put("test:" + name, target);
-    }
-
     public void set(String name, Object value)
     {
         session.put(name, value);
@@ -64,5 +60,8 @@ public class Context extends CommandProcessorImpl
         return session.get(name);
     }
 
+    public CommandSession getSession() {
+        return session;
+    }
 
 }

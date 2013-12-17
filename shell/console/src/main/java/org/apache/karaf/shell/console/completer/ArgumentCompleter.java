@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.felix.service.command.Function;
 import org.apache.karaf.shell.commands.Action;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.CommandWithAction;
@@ -45,11 +46,15 @@ import org.apache.karaf.shell.console.NameScoping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.apache.karaf.shell.console.completer.CommandsCompleter.unProxy;
+
 public class ArgumentCompleter implements Completer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ArgumentCompleter.class);
 
     public static final String ARGUMENTS_LIST = "ARGUMENTS_LIST";
+
+    public static final String COMMANDS = ".commands";
 
     final Completer commandCompleter;
     final Completer optionsCompleter;
@@ -224,6 +229,16 @@ public class ArgumentCompleter implements Completer {
             // Verify command name
             if (!verifyCompleter(commandCompleter, args[index])) {
                 return -1;
+            }
+            // Verify scope if
+            // - the command name has no scope
+            // - we have a session
+            if (!args[index].contains(":") && commandSession != null) {
+                Function f1 = unProxy((Function) commandSession.get("*:" + args[index]));
+                Function f2 = unProxy(this.function);
+                if (f1 != null && f1 != f2) {
+                    return -1;
+                }
             }
             index++;
         } else {
