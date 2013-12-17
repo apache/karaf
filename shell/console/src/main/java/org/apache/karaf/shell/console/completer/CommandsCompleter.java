@@ -26,11 +26,15 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.felix.gogo.commands.basic.AbstractCommand;
+import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Function;
 import org.apache.karaf.shell.console.Completer;
 import org.apache.karaf.shell.console.jline.CommandSessionHolder;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.ServiceEvent;
+import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +59,11 @@ public class CommandsCompleter implements Completer {
 
     public CommandsCompleter(CommandSession session) {
         this.session = session;
+        try {
+            new CommandTracker();
+        } catch (Throwable t) {
+            // Ignore in case we're not in OSGi
+        }
     }
 
 
@@ -63,21 +72,28 @@ public class CommandsCompleter implements Completer {
             session = CommandSessionHolder.getSession();
         }
         checkData();
-        int res = new AggregateCompleter(completers).complete(buffer, cursor, candidates);
+        int res;
+        synchronized (this) {
+            res = new AggregateCompleter(completers).complete(buffer, cursor, candidates);
+        }
         Collections.sort(candidates);
         return res;
     }
 
-    protected synchronized void checkData() {
+    protected void checkData() {
         // Copy the set to avoid concurrent modification exceptions
         // TODO: fix that in gogo instead
-        Set<String> names = new HashSet<String>((Set<String>) session.get(COMMANDS));
-        if (!names.equals(commands)) {
-            commands.clear();
-            completers.clear();
-
+        Set<String> names;
+        boolean update;
+        synchronized (this) {
+            names = new HashSet<String>((Set<String>) session.get(COMMANDS));
+            update = !names.equals(commands);
+        }
+        if (update) {
             // get command aliases
             Set<String> aliases = this.getAliases();
+            Set<String> commands = new HashSet<String>();
+            List<Completer> completers = new ArrayList<Completer>();
             completers.add(new StringsCompleter(aliases));
 
             // add argument completers for each command
@@ -93,6 +109,13 @@ public class CommandsCompleter implements Completer {
                 }
                 commands.add(command);
             }
+
+            synchronized (this) {
+                this.commands.clear();
+                this.completers.clear();
+                this.commands.addAll(commands);
+                this.completers.addAll(completers);
+            }
         }
     }
 
@@ -106,7 +129,7 @@ public class CommandsCompleter implements Completer {
         Set<String> aliases = new HashSet<String>();
         for (String var : vars) {
             Object content = session.get(var);
-            if ("org.apache.felix.gogo.runtime.Closure".equals(content.getClass().getName()))  {
+            if (content != null && "org.apache.felix.gogo.runtime.Closure".equals(content.getClass().getName()))  {
                 aliases.add(var);
             }
         }
@@ -122,13 +145,15 @@ public class CommandsCompleter implements Completer {
                 referenceField.setAccessible(true);
                 BundleContext context = (BundleContext) contextField.get(function);
                 ServiceReference reference = (ServiceReference) referenceField.get(function);
-                Object target = context.getService(reference);
+                Object target = context != null ? context.getService(reference) : null;
                 try {
                     if (target instanceof Function) {
                         function = (Function) target;
                     }
                 } finally {
-                    context.ungetService(reference);
+                    if (context != null) {
+                        context.ungetService(reference);
+                    }
                 }
             }
         } catch (Throwable t) {
@@ -136,5 +161,24 @@ public class CommandsCompleter implements Completer {
         return function;
     }
 
+    private class CommandTracker {
+        public CommandTracker() throws Exception {
+            BundleContext context = FrameworkUtil.getBundle(getClass()).getBundleContext();
+            if (context == null) {
+                throw new IllegalStateException("Bundle is stopped");
+            }
+            ServiceListener listener = new ServiceListener() {
+                public void serviceChanged(ServiceEvent event) {
+                    synchronized (CommandsCompleter.this) {
+                        commands.clear();
+                    }
+                }
+            };
+            context.addServiceListener(listener,
+                    String.format("(&(%s=*)(%s=*))",
+                            CommandProcessor.COMMAND_SCOPE,
+                            CommandProcessor.COMMAND_FUNCTION));
+        }
+    }
 }
 

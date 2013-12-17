@@ -83,6 +83,9 @@ public class CommandNamesCompleter implements Completer {
     private class CommandTracker {
         public CommandTracker() throws Exception {
             BundleContext context = FrameworkUtil.getBundle(getClass()).getBundleContext();
+            if (context == null) {
+                throw new IllegalStateException("Bundle is stopped");
+            }
             ServiceListener listener = new ServiceListener() {
                 public void serviceChanged(ServiceEvent event) {
                     commands.clear();
