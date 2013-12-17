@@ -22,16 +22,16 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.karaf.jdbc</groupId>
-        <artifactId>jdbc</artifactId>
+        <groupId>org.apache.karaf.jms</groupId>
+        <artifactId>jms</artifactId>
         <version>3.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>org.apache.karaf.jdbc.core</artifactId>
+    <artifactId>org.apache.karaf.jms.core</artifactId>
     <packaging>bundle</packaging>
-    <name>Apache Karaf :: JDBC :: Core</name>
-    <description>This bundle provides core implementation of the JDBC service.</description>
+    <name>Apache Karaf :: JMS :: Core</name>
+    <description>This bundle provides core implementation of the JMS service.</description>
 
     <properties>
         <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
@@ -41,6 +41,17 @@
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.geronimo.specs</groupId>
+            <artifactId>geronimo-jms_1.1_spec</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-pool</artifactId>
+            <version>5.9.0</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
@@ -68,10 +79,13 @@
                 <configuration>
                     <instructions>
                         <Export-Package>
-                            org.apache.karaf.jdbc
+                            org.apache.karaf.jms
                         </Export-Package>
+                        <Import-Package>
+                            org.apache.activemq*;resolution:=optional
+                        </Import-Package>
                         <Private-Package>
-                            org.apache.karaf.jdbc.internal
+                            org.apache.karaf.jms.internal
                         </Private-Package>
                     </instructions>
                 </configuration>

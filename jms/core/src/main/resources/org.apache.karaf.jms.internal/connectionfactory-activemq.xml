@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
+
+    <bean id="activemqConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
+        <property name="brokerURL" value="${url}" />
+    </bean>
+
+    <bean id="pooledConnectionFactory" class="org.apache.activemq.pool.PooledConnectionFactory">
+        <property name="maxConnections" value="8" />
+        <property name="connectionFactory" ref="activemqConnectionFactory" />
+    </bean>
+
+    <bean id="resourceManager" class="org.apache.activemq.pool.ActiveMQResourceManager" init-method="recoverResource">
+        <property name="transactionManager" ref="transactionManager" />
+        <property name="connectionFactory" ref="activemqConnectionFactory" />
+        <property name="resourceName" value="activemq.localhost" />
+    </bean>
+
+    <reference id="transactionManager" interface="javax.transaction.TransactionManager" />
+
+    <service ref="pooledConnectionFactory" interface="javax.jms.ConnectionFactory">
+        <service-properties>
+            <entry key="name" value="${name}" />
+            <entry key="osgi.jndi.service.name" value="/jms/${name}" />
+        </service-properties>
+    </service>
+
+</blueprint>

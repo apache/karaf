@@ -13,8 +13,8 @@ This bundle provides the shell commands to manipulate the JDBC service.
 
 The following commands are available:
 
-* jdbc:datasource-create
-* jdbc:datasource-delete
+* jdbc:create
+* jdbc:delete
 * jdbc:datasources
 * jdbc:command
 * jdbc:query

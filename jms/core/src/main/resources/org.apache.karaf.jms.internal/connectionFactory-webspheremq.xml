@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
+
+    <bean id="wmqConnectionFactory" class="com.ibm.mq.jms.MQQueueConnectionFactory">
+        <property name="transportType" value="1" />
+        <property name="hostName" value="${hostname}" />
+        <property name="port" value="${port}" />
+        <property name="queueManager" value="${queuemanager}" />
+        <property name="channel" value="${channel}" />
+        <property name="useConnectionPooling" value="true" />
+    </bean>
+
+    <service ref="wmqConnectionFactory" interface="javax.jms.ConnectionFactory">
+        <service-properties>
+            <entry key="name" value="${name}"/>
+            <entry key="osgi.jndi.service.name" value="/jms/${name}"/>
+        </service-properties>
+    </service>
+
+</blueprint>

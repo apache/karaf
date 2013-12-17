@@ -22,16 +22,16 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.karaf.jdbc</groupId>
-        <artifactId>jdbc</artifactId>
+        <groupId>org.apache.karaf.jms</groupId>
+        <artifactId>jms</artifactId>
         <version>3.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>org.apache.karaf.jdbc.core</artifactId>
+    <artifactId>org.apache.karaf.jms.command</artifactId>
     <packaging>bundle</packaging>
-    <name>Apache Karaf :: JDBC :: Core</name>
-    <description>This bundle provides core implementation of the JDBC service.</description>
+    <name>Apache Karaf :: JMS :: Command</name>
+    <description>This bundle provides shell commands to manipulate the JMS server.</description>
 
     <properties>
         <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
@@ -39,9 +39,17 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.core</artifactId>
-            <scope>provided</scope>
+            <groupId>org.apache.karaf.jms</groupId>
+            <artifactId>org.apache.karaf.jms.core</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.karaf.shell</groupId>
+            <artifactId>org.apache.karaf.shell.console</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.shell</groupId>
+            <artifactId>org.apache.karaf.shell.table</artifactId>
         </dependency>
     </dependencies>
 
@@ -67,12 +75,7 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Export-Package>
-                            org.apache.karaf.jdbc
-                        </Export-Package>
-                        <Private-Package>
-                            org.apache.karaf.jdbc.internal
-                        </Private-Package>
+                        <Export-Package>!*</Export-Package>
                     </instructions>
                 </configuration>
             </plugin>

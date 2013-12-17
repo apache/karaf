@@ -64,6 +64,7 @@
         <module>obr</module>
         <module>jndi</module>
         <module>jdbc</module>
+        <module>jms</module>
         <module>tooling</module>
         <module>assemblies</module>
         <module>demos</module>
@@ -398,6 +399,17 @@
             <dependency>
                 <groupId>org.apache.karaf.jdbc</groupId>
                 <artifactId>org.apache.karaf.jdbc.command</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.karaf.jms</groupId>
+                <artifactId>org.apache.karaf.jms.core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.jms</groupId>
+                <artifactId>org.apache.karaf.jms.command</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
