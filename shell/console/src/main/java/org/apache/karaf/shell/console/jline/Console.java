@@ -261,7 +261,11 @@ public class Console implements Runnable
             if (command == null) {
                 command = line;
             } else {
-                command += " " + line;
+                if (command.charAt(command.length() - 1) == '\\') {
+                    command = command.substring(0, command.length() - 1) + line;
+                } else {
+                    command += "\n" + line;
+                }
             }
             if (reader.getHistory().size()==0) {
                 reader.getHistory().add(command);
@@ -273,17 +277,22 @@ public class Console implements Runnable
                     reader.getHistory().replace(command);    
                 }                                
             }
-            try {
-                Class<?> cl = CommandSession.class.getClassLoader().loadClass("org.apache.felix.gogo.runtime.Parser");
-                Object parser = cl.getConstructor(CharSequence.class).newInstance(command);
-                cl.getMethod("program").invoke(parser);
-                loop = false;
-            } catch (Exception e) {
+            if (command.length() > 0 && command.charAt(command.length() - 1) == '\\') {
                 loop = true;
                 first = false;
-            } catch (Throwable t) {
-                // Reflection problem ? just quit
-                loop = false;
+            } else {
+                try {
+                    Class<?> cl = CommandSession.class.getClassLoader().loadClass("org.apache.felix.gogo.runtime.Parser");
+                    Object parser = cl.getConstructor(CharSequence.class).newInstance(command);
+                    cl.getMethod("program").invoke(parser);
+                    loop = false;
+                } catch (Exception e) {
+                    loop = true;
+                    first = false;
+                } catch (Throwable t) {
+                    // Reflection problem ? just quit
+                    loop = false;
+                }
             }
         }
         return command;
