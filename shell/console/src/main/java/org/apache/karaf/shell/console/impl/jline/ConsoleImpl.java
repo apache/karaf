@@ -260,7 +260,11 @@ public class ConsoleImpl implements Console {
             if (command == null) {
                 command = line;
             } else {
-                command += " " + line;
+                if (command.charAt(command.length() - 1) == '\\') {
+                    command = command.substring(0, command.length() - 1) + line;
+                } else {
+                    command += "\n" + line;
+                }
             }
             if (reader.getHistory().size() == 0) {
                 reader.getHistory().add(command);
