@@ -29,15 +29,16 @@ public class ExitAction extends AbstractAction {
     public Object doExecute() throws Exception {
         // get the current sub-shell
         String currentSubShell = (String) session.get("SUBSHELL");
-        String currentScope = (String) session.get("SCOPE");
         if (!currentSubShell.isEmpty()) {
             if (currentSubShell.contains(":")) {
                 int index = currentSubShell.lastIndexOf(":");
                 session.put("SUBSHELL", currentSubShell.substring(0, index));
-                session.put("SCOPE", currentScope.substring(0, index));
             } else {
                 session.put("SUBSHELL", "");
             }
+            String currentScope = (String) session.get("SCOPE");
+            int index = currentScope.indexOf(":");
+            session.put("SCOPE", currentScope.substring(index + 1));
         }
         return null;
     }

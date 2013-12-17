@@ -28,8 +28,23 @@ import java.io.InputStreamReader;
 import junit.framework.TestCase;
 import org.apache.karaf.shell.commands.basic.SimpleCommand;
 import org.apache.felix.service.command.CommandSession;
+import org.apache.karaf.shell.console.ExitAction;
+import org.apache.karaf.shell.console.SubShellAction;
 
 public class TestCommands extends TestCase {
+
+    public void testSubShellScope() throws Exception {
+        Context c = new Context();
+        c.set("SCOPE", "*");
+        c.addCommand("foo", new SimpleSubShell("foo"));
+        c.addCommand("exit", new SimpleCommand(ExitAction.class));
+
+        String scope = (String) c.get("SCOPE");
+        c.execute("foo");
+        assertEquals("foo:" + scope, c.get("SCOPE"));
+        c.execute("exit");
+        assertEquals(scope, c.get("SCOPE"));
+    }
 
     public void testPrompt() throws Exception {
         Context c = new Context();
@@ -159,6 +174,21 @@ public class TestCommands extends TestCase {
             return null;
         }
 
+    }
+
+    public static class SimpleSubShell extends SimpleCommand {
+        private final String subshell;
+        public SimpleSubShell(String subshell) {
+            super(SubShellAction.class);
+            this.subshell = subshell;
+        }
+
+        @Override
+        public Action createNewAction() {
+            SubShellAction action = (SubShellAction) super.createNewAction();
+            action.setSubShell(subshell);
+            return action;
+        }
     }
 
 }
