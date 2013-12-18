@@ -20,6 +20,10 @@
 	xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
 	<repository>mvn:org.ops4j.pax.web/pax-web-features/${pax.web.version}/xml/features</repository>
 
+    <feature version="${project.version}" description="OSGi Security for Karaf" name="framework-security">
+        <bundle start="false" start-level="1">mvn:org.apache.felix/org.apache.felix.framework.security/${felix.framework.security.version}</bundle>
+    </feature>
+
     <feature name="standard" description="Karaf standard feature" version="${project.version}">
         <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.gogo.runtime/${felix.gogo.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.shell/org.apache.karaf.shell.console/${project.version}</bundle>

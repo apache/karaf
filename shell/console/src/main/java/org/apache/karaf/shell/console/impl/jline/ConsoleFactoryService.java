@@ -34,11 +34,18 @@ import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Function;
 import org.apache.felix.service.threadio.ThreadIO;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
+import org.apache.karaf.jaas.modules.JaasHelper;
 import org.apache.karaf.shell.console.Console;
 import org.apache.karaf.shell.console.ConsoleFactory;
 import org.osgi.framework.BundleContext;
 
 public class ConsoleFactoryService implements ConsoleFactory {
+
+    private static final Class[] SECURITY_BUGFIX = {
+            JaasHelper.class,
+            JaasHelper.OsgiSubjectDomainCombiner.class,
+            JaasHelper.DelegatingProtectionDomain.class,
+    };
 
     private final BundleContext bundleContext;
 
@@ -97,7 +104,7 @@ public class ConsoleFactoryService implements ConsoleFactory {
                 if (subject != null) {
                     CommandSession session = console.getSession();
                     session.put("USER", userName);
-                    Subject.doAs(subject, new PrivilegedAction<Object>() {
+                    JaasHelper.doAs(subject, new PrivilegedAction<Object>() {
                         public Object run() {
                             doRun();
                             return null;

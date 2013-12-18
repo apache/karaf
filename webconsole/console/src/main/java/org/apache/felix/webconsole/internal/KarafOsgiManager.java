@@ -27,11 +27,19 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
 import org.apache.felix.webconsole.internal.servlet.OsgiManager;
+import org.apache.karaf.jaas.modules.JaasHelper;
 import org.osgi.framework.BundleContext;
 
 public class KarafOsgiManager extends OsgiManager {
 	private static final long serialVersionUID = 1090035807469459598L;
-	public static final String SUBJECT_RUN_AS = "karaf.subject.runas";
+
+    private static final Class[] SECURITY_BUGFIX = {
+            JaasHelper.class,
+            JaasHelper.OsgiSubjectDomainCombiner.class,
+            JaasHelper.DelegatingProtectionDomain.class,
+    };
+
+    public static final String SUBJECT_RUN_AS = "karaf.subject.runas";
 
     public KarafOsgiManager(BundleContext bundleContext) {
         super(bundleContext);
@@ -42,7 +50,7 @@ public class KarafOsgiManager extends OsgiManager {
         Object obj = req.getAttribute(SUBJECT_RUN_AS);
         if (obj instanceof Subject) {
             try {
-                Subject.doAs((Subject) obj, new PrivilegedExceptionAction<Object>() {
+                JaasHelper.doAs((Subject) obj, new PrivilegedExceptionAction<Object>() {
                     public Object run() throws Exception {
                         doService(req, res);
                         return null;

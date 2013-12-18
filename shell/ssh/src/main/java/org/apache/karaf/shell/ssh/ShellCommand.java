@@ -28,6 +28,7 @@ import javax.security.auth.Subject;
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Converter;
+import org.apache.karaf.jaas.modules.JaasHelper;
 import org.apache.karaf.shell.util.ShellUtil;
 import org.apache.karaf.util.StreamUtils;
 import org.apache.sshd.server.Command;
@@ -43,6 +44,12 @@ public class ShellCommand implements Command, SessionAware {
     public static final String SHELL_INIT_SCRIPT = "karaf.shell.init.script";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ShellCommand.class);
+
+    private static final Class[] SECURITY_BUGFIX = {
+                    JaasHelper.class,
+                    JaasHelper.OsgiSubjectDomainCombiner.class,
+                    JaasHelper.DelegatingProtectionDomain.class,
+            };
 
     private String command;
     private InputStream in;
@@ -92,7 +99,7 @@ public class ShellCommand implements Command, SessionAware {
                     try {
                         String scriptFileName = System.getProperty(SHELL_INIT_SCRIPT);
                         executeScript(scriptFileName, session);
-                        result = Subject.doAs(subject, new PrivilegedExceptionAction<Object>() {
+                        result = JaasHelper.doAs(subject, new PrivilegedExceptionAction<Object>() {
                             public Object run() throws Exception {
                                 return session.execute(command);
                             }
