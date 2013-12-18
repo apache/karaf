@@ -227,6 +227,8 @@ public class Main {
 
 	public static final String OVERRIDE_PREFIX = "karaf.override.";
 
+    public static final String DEFAULT_LOCK_DELAY = "1000";
+
     Logger LOG = Logger.getLogger(this.getClass().getName());
 
     private File karafHome;
@@ -241,7 +243,7 @@ public class Main {
     private Lock lock;
     private int defaultStartLevel = 100;
     private int lockStartLevel = 1;
-    private int lockDelay = 1000;
+    private int lockDelay = Integer.parseInt( DEFAULT_LOCK_DELAY );
     private int shutdownTimeout = 5 * 60 * 1000;
     private boolean exiting = false;
     private ShutdownCallback shutdownCallback;
@@ -333,7 +335,7 @@ public class Main {
         defaultStartLevel = Integer.parseInt(configProps.getProperty(Constants.FRAMEWORK_BEGINNING_STARTLEVEL));
         System.setProperty(Constants.FRAMEWORK_BEGINNING_STARTLEVEL, Integer.toString(this.defaultStartLevel));
         lockStartLevel = Integer.parseInt(configProps.getProperty(PROPERTY_LOCK_LEVEL, Integer.toString(lockStartLevel)));
-        lockDelay = Integer.parseInt(configProps.getProperty(PROPERTY_LOCK_DELAY, Integer.toString(lockDelay)));
+        lockDelay = Integer.parseInt(configProps.getProperty(PROPERTY_LOCK_DELAY, DEFAULT_LOCK_DELAY));
         configProps.setProperty(Constants.FRAMEWORK_BEGINNING_STARTLEVEL, Integer.toString(lockStartLevel));
         shutdownTimeout = Integer.parseInt(configProps.getProperty(KARAF_SHUTDOWN_TIMEOUT, Integer.toString(shutdownTimeout)));
         // Start up the OSGI framework
