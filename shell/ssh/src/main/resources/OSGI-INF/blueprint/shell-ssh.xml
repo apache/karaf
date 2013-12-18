@@ -47,6 +47,8 @@
             <cm:property name="authMethods" value="keyboard-interactive,password,publickey"/>
             <cm:property name="keySize" value="1024"/>
             <cm:property name="algorithm" value="DSA"/>
+            <cm:property name="macs" value="hmac-sha1" />
+            <cm:property name="ciphers" value="aes256-ctr,aes192-ctr,aes128-ctr,arcfour256" />
         </cm:default-properties>
     </cm:property-placeholder>
 
@@ -78,6 +80,16 @@
     <bean id="sshServer" class="org.apache.sshd.SshServer" factory-method="setUpDefaultServer" scope="prototype">
         <property name="port" value="${sshPort}"/>
         <property name="host" value="${sshHost}"/>
+        <property name="macFactories">
+            <bean class="org.apache.karaf.shell.ssh.SshUtils" factory-method="buildMacs">
+                <argument value="${macs}" />
+            </bean>
+        </property>
+        <property name="cipherFactories">
+            <bean class="org.apache.karaf.shell.ssh.SshUtils" factory-method="buildCiphers">
+                <argument value="${ciphers}" />
+            </bean>
+        </property>
         <property name="shellFactory">
             <bean class="org.apache.karaf.shell.ssh.ShellFactoryImpl">
                 <property name="commandProcessor" ref="commandProcessor"/>
