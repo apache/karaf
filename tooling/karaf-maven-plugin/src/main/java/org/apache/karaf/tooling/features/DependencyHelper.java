@@ -248,7 +248,7 @@ public class DependencyHelper {
         }
 
         private Accept accept(DependencyNode dependency, Accept previous) {
-            String scope = dependency.getPremanagedScope();
+            String scope = dependency.getDependency().getScope();
             if (scope == null || "runtime".equalsIgnoreCase(scope) || "compile".equalsIgnoreCase(scope)) {
                 return previous;
             }
