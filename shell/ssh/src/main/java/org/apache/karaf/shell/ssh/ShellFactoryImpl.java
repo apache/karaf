@@ -34,6 +34,7 @@ import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Function;
 import org.apache.felix.service.threadio.ThreadIO;
+import org.apache.karaf.jaas.modules.JaasHelper;
 import org.apache.karaf.shell.console.jline.Console;
 import org.apache.sshd.common.Factory;
 import org.apache.sshd.server.Command;
@@ -47,6 +48,12 @@ import org.osgi.service.blueprint.container.ReifiedType;
  * SSHD {@link org.apache.sshd.server.Command} factory which provides access to Shell.
  */
 public class ShellFactoryImpl implements Factory<Command> {
+
+    private static final Class[] SECURITY_BUGFIX = {
+            JaasHelper.class,
+            JaasHelper.OsgiSubjectDomainCombiner.class,
+            JaasHelper.DelegatingProtectionDomain.class,
+    };
 
     private CommandProcessor commandProcessor;
     private ThreadIO threadIO;
@@ -137,7 +144,7 @@ public class ShellFactoryImpl implements Factory<Command> {
                     public void run() {
                         Subject subject = ShellImpl.this.session != null ? ShellImpl.this.session.getAttribute(KarafJaasAuthenticator.SUBJECT_ATTRIBUTE_KEY) : null;
                         if (subject != null) {
-                            Subject.doAs(subject, new PrivilegedAction<Object>() {
+                            JaasHelper.doAs(subject, new PrivilegedAction<Object>() {
                                 public Object run() {
                                     doRun();
                                     return null;

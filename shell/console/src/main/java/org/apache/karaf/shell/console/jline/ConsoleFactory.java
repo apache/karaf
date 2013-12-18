@@ -38,6 +38,7 @@ import org.apache.felix.service.threadio.ThreadIO;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.apache.sshd.agent.SshAgent;
 import org.apache.sshd.agent.local.AgentImpl;
+import org.apache.karaf.jaas.modules.JaasHelper;
 import org.fusesource.jansi.AnsiConsole;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -48,7 +49,13 @@ public class ConsoleFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConsoleFactory.class);
 
-    BundleContext bundleContext;
+    private static final Class[] SECURITY_BUGFIX = {
+            JaasHelper.class,
+            JaasHelper.OsgiSubjectDomainCombiner.class,
+            JaasHelper.DelegatingProtectionDomain.class,
+    };
+
+    private BundleContext bundleContext;
     private CommandProcessor commandProcessor;
     private ThreadIO threadIO;
     private TerminalFactory terminalFactory;
@@ -87,7 +94,7 @@ public class ConsoleFactory {
             Subject subject = new Subject();
             final String user = "karaf";
             subject.getPrincipals().add(new UserPrincipal(user));
-            Subject.doAs(subject, new PrivilegedExceptionAction<Object>() {
+            JaasHelper.doAs(subject, new PrivilegedExceptionAction<Object>() {
                 public Object run() throws Exception {
                     doStart(user);
                     return null;
