@@ -102,7 +102,7 @@ public class ConfigProperties {
      */
     private static final String PROPERTY_LOCK_CLASS = "karaf.lock.class";
 
-    private static final String PROPERTY_LOCK_DELAY = "karaf.lock.delay";
+    public static final String PROPERTY_LOCK_DELAY = "karaf.lock.delay";
 
     private static final String PROPERTY_LOCK_LEVEL = "karaf.lock.level";
 
@@ -133,7 +133,8 @@ public class ConfigProperties {
     private static final String PROPERTY_LOCK_CLASS_DEFAULT = SimpleFileLock.class.getName();
 
     private static final String SECURITY_PROVIDERS = "org.apache.karaf.security.providers";
-    
+
+    public static final String DEFAULT_LOCK_DELAY = "1000";
 
 
     /**
@@ -151,7 +152,7 @@ public class ConfigProperties {
     String[] securityProviders;
     int defaultStartLevel = 100;
     int lockStartLevel = 1;
-    int lockDelay = 1000;
+    int lockDelay;
     int shutdownTimeout = 5 * 60 * 1000;
     boolean useLock;
     String lockClass;
@@ -215,7 +216,7 @@ public class ConfigProperties {
         this.defaultStartLevel = Integer.parseInt(props.getProperty(Constants.FRAMEWORK_BEGINNING_STARTLEVEL));
         System.setProperty(Constants.FRAMEWORK_BEGINNING_STARTLEVEL, Integer.toString(this.defaultStartLevel));
         this.lockStartLevel = Integer.parseInt(props.getProperty(PROPERTY_LOCK_LEVEL, Integer.toString(lockStartLevel)));                
-        this.lockDelay = Integer.parseInt(props.getProperty(PROPERTY_LOCK_DELAY, Integer.toString(lockDelay)));
+        this.lockDelay = Integer.parseInt(props.getProperty(PROPERTY_LOCK_DELAY, DEFAULT_LOCK_DELAY));
         this.props.setProperty(Constants.FRAMEWORK_BEGINNING_STARTLEVEL, Integer.toString(lockStartLevel));
         this.shutdownTimeout = Integer.parseInt(props.getProperty(KARAF_SHUTDOWN_TIMEOUT, Integer.toString(shutdownTimeout)));
         this.useLock = Boolean.parseBoolean(props.getProperty(PROPERTY_USE_LOCK, "true"));
