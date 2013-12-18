@@ -19,20 +19,23 @@ package org.apache.karaf.deployer.features;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-
-import org.apache.karaf.features.internal.FeatureImpl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
 
 import org.apache.felix.fileinstall.ArtifactUrlTransformer;
 import org.apache.karaf.features.Feature;
@@ -43,6 +46,9 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
@@ -59,6 +65,7 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
     private DocumentBuilderFactory dbf;
     private FeaturesService featuresService;
     private BundleContext bundleContext;
+    private Properties properties = new Properties();
 
     public void setFeaturesService(FeaturesService featuresService) {
         this.featuresService = featuresService;
@@ -78,6 +85,8 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
 
     public void init() throws Exception {
         bundleContext.addBundleListener(this);
+        loadProperties();
+        // Scan bundles
         for (Bundle bundle : bundleContext.getBundles()) {
             if (bundle.getState() == Bundle.RESOLVED || bundle.getState() == Bundle.STARTING
                     || bundle.getState() == Bundle.ACTIVE)
@@ -106,6 +115,37 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
     		return true;
     	}
     	return false;
+    }
+
+    private void loadProperties() throws IOException {
+        // Load properties
+        File file = getPropertiesFile();
+        if (file != null) {
+            if (file.exists()) {
+                InputStream input = new FileInputStream(file);
+                try {
+                    properties.load(input);
+                } finally {
+                    input.close();
+                }
+            }
+        }
+    }
+
+    private void saveProperties() throws IOException {
+        File file = getPropertiesFile();
+        if (file != null) {
+            OutputStream output = new FileOutputStream(file);
+            try {
+                properties.store(output, null);
+            } finally {
+                output.close();
+            }
+        }
+    }
+
+    private File getPropertiesFile() {
+        return bundleContext.getDataFile("FeatureDeploymentListener.cfg");
     }
 
     public boolean canHandle(File artifact) {
@@ -186,28 +226,17 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
                         }
                     }
                     synchronized (this) {
-                        File file = bundleContext.getDataFile("FeatureDeploymentListener.cfg");
-                        if (file != null) {
-                            Properties props = new Properties();
-                            if (file.exists()) {
-                                InputStream input = new FileInputStream(file);
-                                try {
-                                    props.load(input);
-                                } finally {
-                                    input.close();
-                                }
-                            }
-                            String prefix = bundle.getSymbolicName() + "-" + bundle.getVersion();
-                            props.put(prefix + ".count", Integer.toString(urls.size()));
+                        String prefix = bundle.getSymbolicName() + "-" + bundle.getVersion();
+                        String old = (String) properties.get(prefix + ".count");
+                        if (old != null && urls.isEmpty()) {
+                            properties.remove(prefix + ".count");
+                            saveProperties();
+                        } else if (!urls.isEmpty()) {
+                            properties.put(prefix + ".count", Integer.toString(urls.size()));
                             for (int i = 0; i < urls.size(); i++) {
-                                props.put(prefix + ".url." + i, urls.get(i).toExternalForm());
+                                properties.put(prefix + ".url." + i, urls.get(i).toExternalForm());
                             }
-                            OutputStream output = new FileOutputStream(file);
-                            try {
-                                props.store(output, null);
-                            } finally {
-                                output.close();
-                            }
+                            saveProperties();
                         }
                     }
                 } catch (Exception e) {
@@ -216,56 +245,34 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
             } else if (bundleEvent.getType() == BundleEvent.UNINSTALLED) {
                 try {
                     synchronized (this) {
-                        File file = bundleContext.getDataFile("FeatureDeploymentListener.cfg");
-                        if (file != null) {
-                            Properties props = new Properties();
-                            if (file.exists()) {
-                                InputStream input = new FileInputStream(file);
-                                try {
-                                    props.load(input);
-                                } finally {
-                                    input.close();
-                                }
-                            }
-                            String prefix = bundle.getSymbolicName() + "-" + bundle.getVersion();
-                            String countStr = (String) props.get(prefix + ".count");
-                            if (countStr != null) {
-                                int count = Integer.parseInt(countStr);
-                                for (int i = 0; i < count; i++) {
-                                    URL url = new URL((String) props.get(prefix + ".url." + i));
-                                    for (Repository repo : featuresService.listRepositories()) {
-                                        try {
-                                            if (repo.getURI().equals(url.toURI())) {
-                                                for (Feature f : repo.getFeatures()) {
-                                                    try {
-                                                        featuresService.uninstallFeature(f.getName(), f.getVersion());
-                                                    } catch (Exception e) {
-                                                        logger.error("Unable to uninstall feature: " + f.getName(), e);
-                                                    }
+                        String prefix = bundle.getSymbolicName() + "-" + bundle.getVersion();
+                        String countStr = (String) properties.remove(prefix + ".count");
+                        if (countStr != null) {
+                            int count = Integer.parseInt(countStr);
+                            for (int i = 0; i < count; i++) {
+                                URL url = new URL((String) properties.remove(prefix + ".url." + i));
+                                for (Repository repo : featuresService.listRepositories()) {
+                                    try {
+                                        if (repo.getURI().equals(url.toURI())) {
+                                            for (Feature f : repo.getFeatures()) {
+                                                try {
+                                                    featuresService.uninstallFeature(f.getName(), f.getVersion());
+                                                } catch (Exception e) {
+                                                    logger.error("Unable to uninstall feature: " + f.getName(), e);
                                                 }
                                             }
-                                        } catch (Exception e) {
-                                            logger.error("Unable to uninstall features: " + url, e);
                                         }
-                                    }
-                                    try {
-                                        featuresService.removeRepository(url.toURI());
-                                    } catch (URISyntaxException e) {
-                                        logger.error("Unable to remove repository: " + url, e);
+                                    } catch (Exception e) {
+                                        logger.error("Unable to uninstall features: " + url, e);
                                     }
                                 }
-                            }
-                            for (Iterator<Object> it = props.keySet().iterator(); it.hasNext();) {
-                                if (it.next().toString().startsWith(prefix + ".")) {
-                                    it.remove();
+                                try {
+                                    featuresService.removeRepository(url.toURI());
+                                } catch (URISyntaxException e) {
+                                    logger.error("Unable to remove repository: " + url, e);
                                 }
                             }
-                            OutputStream output = new FileOutputStream(file);
-                            try {
-                                props.store(output, null);
-                            } finally {
-                                output.close();
-                            }
+                            saveProperties();
                         }
                     }
                 } catch (Exception e) {
