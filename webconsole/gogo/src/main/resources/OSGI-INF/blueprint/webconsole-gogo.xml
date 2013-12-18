@@ -32,6 +32,7 @@
     <service ref="gogoPlugin" interface="javax.servlet.Servlet" >
         <service-properties>
             <entry key="felix.webconsole.label" value="gogo"/>
+            <entry key="alias" value="/gogo"/>
         </service-properties>
     </service>
 

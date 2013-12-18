@@ -29,6 +29,7 @@
     <service ref="featuresPlugin" interface="javax.servlet.Servlet" >
         <service-properties>
             <entry key="felix.webconsole.label" value="features"/>
+            <entry key="alias" value="/features"/>
         </service-properties>
     </service>
 
