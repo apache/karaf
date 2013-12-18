@@ -82,7 +82,8 @@
                             org.apache.karaf.jms
                         </Export-Package>
                         <Import-Package>
-                            org.apache.activemq*;resolution:=optional
+                            org.apache.activemq*;resolution:=optional,
+                            *
                         </Import-Package>
                         <Private-Package>
                             org.apache.karaf.jms.internal
