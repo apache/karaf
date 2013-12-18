@@ -18,6 +18,8 @@
 -->
 <features name="karaf-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.0.0">
 
+    <repository>mvn:org.ops4j.pax.web/pax-web-features/${pax.web.version}/xml/features</repository>
+
     <feature name="karaf-framework" description="Karaf core feature" version="${project.version}" resolver="(obr)">
         <bundle start-level="5">mvn:org.ops4j.pax.url/pax-url-mvn/${pax.url.version}</bundle>
         <bundle start-level="5">mvn:org.ops4j.pax.url/pax-url-wrap/${pax.url.version}</bundle>
@@ -338,47 +340,19 @@
     </feature>
 
     <feature name="jetty" description="Provide Jetty engine support" version="${jetty.version}" resolver="(obr)">
-        <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.activation-api-1.1/${servicemix.specs.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-servlet_3.0_spec/${geronimo.servlet.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:javax.mail/mail/${javax.mail.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-annotation_1.1_spec/${geronimo.annotation-spec.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jaspic_1.0_spec/${geronimo.jaspic-spec.version}</bundle>
-        <bundle start-level="30">mvn:org.eclipse.jetty.aggregate/jetty-all-server/${jetty.version}</bundle>
+        <feature>pax-jetty</feature>
     </feature>
 
     <feature name="http" description="Implementation of the OSGi HTTP service" version="${project.version}" resolver="(obr)">
-        <configfile finalname="/etc/jetty.xml">mvn:org.apache.karaf/apache-karaf/${project.version}/xml/jettyconfig</configfile>
-        <config name="org.ops4j.pax.web">
-            org.osgi.service.http.port=8181
-            javax.servlet.context.tempdir=${karaf.data}/pax-web-jsp
-            org.ops4j.pax.web.config.file=${karaf.etc}/jetty.xml
-        </config>
-        <feature version="[7.0,9.0)">jetty</feature>
-    	<bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-api/${pax.web.version}</bundle>
-        <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-spi/${pax.web.version}</bundle>
-        <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-runtime/${pax.web.version}</bundle>
-        <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-jetty/${pax.web.version}</bundle>
+        <feature version="${pax.web.version}">pax-http</feature>
     </feature>
 
     <feature name="http-whiteboard" description="Provide HTTP Whiteboard pattern support" version="${project.version}" resolver="(obr)">
-        <feature version="${http.feature.version}">http</feature>
-        <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-jsp/${pax.web.version}</bundle>
-        <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-extender-whiteboard/${pax.web.version}</bundle>
+        <feature version="${pax.web.version}">pax-http-whiteboard</feature>
     </feature>
 
     <feature name="war" description="Turn Karaf as a full WebContainer" version="${project.version}" resolver="(obr)">
-        <config name="org.ops4j.pax.url.war">
-            org.ops4j.pax.url.war.importPaxLoggingPackages=true
-        </config>
-        <feature>http-whiteboard</feature>
-        <bundle start-level='30'>mvn:org.apache.karaf.shell/org.apache.karaf.shell.web/${project.version}</bundle>
-        <bundle start-level='30'>mvn:org.apache.karaf.management.mbeans/org.apache.karaf.management.mbeans.web/${project.version}</bundle>
-        <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-jsp/${pax.web.version}</bundle>
-        <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-extender-war/${pax.web.version}</bundle>
-        <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-extender-whiteboard/${pax.web.version}</bundle>
-        <bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-deployer/${pax.web.version}</bundle>
-        <bundle start-level="30">mvn:org.ops4j.pax.url/pax-url-war/${pax.url.version}</bundle>
+        <feature version="${pax.web.version}">pax-war</feature>
     </feature>
 
     <feature name="kar" description="Provide KAR (KARaf archive) support" version="${project.version}">
