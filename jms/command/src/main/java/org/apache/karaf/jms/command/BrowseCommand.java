@@ -42,7 +42,7 @@ public class BrowseCommand extends JmsCommandSupport {
     @Option(name = "-p", aliases = { "--password" }, description = "Password to connect to the JMS broker", required = false, multiValued = false)
     String password = "karaf";
 
-    @Option(name = "-v", aliases = { "--verbose" }, description = "Display JMS message headers and properties", required = false, multiValued = false)
+    @Option(name = "-v", aliases = { "--verbose" }, description = "Display JMS properties", required = false, multiValued = false)
     boolean verbose = false;
 
     public Object doExecute() throws Exception {
@@ -61,17 +61,12 @@ public class BrowseCommand extends JmsCommandSupport {
         table.column("ReplyTo");
         table.column("Timestamp");
         if (verbose) {
-            table.column("Headers");
             table.column("Properties");
         }
 
         List<JmsMessage> messages = getJmsService().browse(connectionFactory, queue, selector, username, password);
         for (JmsMessage message : messages) {
             if (verbose) {
-                StringBuilder headers = new StringBuilder();
-                for (String header : message.getHeaders().keySet()) {
-                    headers.append(header).append("=").append(message.getHeaders().get(header)).append("\n");
-                }
                 StringBuilder properties = new StringBuilder();
                 for (String property : message.getProperties().keySet()) {
                     properties.append(property).append("=").append(message.getProperties().get(property)).append("\n");
@@ -89,7 +84,6 @@ public class BrowseCommand extends JmsCommandSupport {
                         message.isRedelivered(),
                         message.getReplyTo(),
                         message.getTimestamp(),
-                        headers.toString(),
                         properties.toString());
             } else {
                 table.addRow().addContent(

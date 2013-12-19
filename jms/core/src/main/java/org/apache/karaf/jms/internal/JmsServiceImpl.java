@@ -230,6 +230,7 @@ public class JmsServiceImpl implements JmsService {
             Enumeration<Message> enumeration = browser.getEnumeration();
             while (enumeration.hasMoreElements()) {
                 Message message = enumeration.nextElement();
+
                 messages.add(new JmsMessage(message));
             }
             browser.close();
