@@ -18,6 +18,8 @@ package org.apache.karaf.jms;
 
 import javax.jms.*;
 import java.io.UnsupportedEncodingException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,20 +29,19 @@ import java.util.Map;
  */
 public class JmsMessage {
 
-    private Map<String, Object> headers = new HashMap<String, Object>();
     private Map<String, Object> properties = new HashMap<String, Object>();
 
     private String content;
     private String charset = "UTF-8";
     private String correlationID;
-    private int deliveryMode;
+    private String deliveryMode;
     private String destination;
-    private long expiration;
+    private String expiration;
     private String messageId;
     private int priority;
     private boolean redelivered;
     private String replyTo;
-    private long timestamp;
+    private String timestamp;
     private String type;
 
     public JmsMessage(Message message) {
@@ -61,12 +62,20 @@ public class JmsMessage {
         }
 
         correlationID = message.getJMSCorrelationID();
-        deliveryMode = message.getJMSDeliveryMode();
+        if (message.getJMSDeliveryMode() == DeliveryMode.NON_PERSISTENT) {
+            deliveryMode = "Non Persistent";
+        } else {
+            deliveryMode = "Persistent";
+        }
         Destination destinationDest = message.getJMSDestination();
         if (destinationDest != null) {
             destination = destinationDest.toString();
         }
-        expiration = message.getJMSExpiration();
+        if (message.getJMSExpiration() > 0) {
+            expiration = new Date(message.getJMSExpiration()).toString();
+        } else {
+            expiration = "Never";
+        }
         messageId = message.getJMSMessageID();
         priority = message.getJMSPriority();
         redelivered = message.getJMSRedelivered();
@@ -74,7 +83,11 @@ public class JmsMessage {
         if (replyToDest != null) {
             replyTo = replyToDest.toString();
         }
-        timestamp = message.getJMSTimestamp();
+        if (message.getJMSTimestamp() > 0) {
+            timestamp = new Date(message.getJMSTimestamp()).toString();
+        } else {
+            timestamp = "";
+        }
         type = message.getJMSType();
         content = getMessageContent(message);
     }
@@ -97,10 +110,6 @@ public class JmsMessage {
         return "";
     }
 
-    public Map<String, Object> getHeaders() {
-        return headers;
-    }
-
     public Map<String, Object> getProperties() {
         return properties;
     }
@@ -117,7 +126,7 @@ public class JmsMessage {
         return correlationID;
     }
 
-    public int getDeliveryMode() {
+    public String getDeliveryMode() {
         return deliveryMode;
     }
 
@@ -125,7 +134,7 @@ public class JmsMessage {
         return destination;
     }
 
-    public long getExpiration() {
+    public String getExpiration() {
         return expiration;
     }
 
@@ -145,7 +154,7 @@ public class JmsMessage {
         return replyTo;
     }
 
-    public long getTimestamp() {
+    public String getTimestamp() {
         return timestamp;
     }
 

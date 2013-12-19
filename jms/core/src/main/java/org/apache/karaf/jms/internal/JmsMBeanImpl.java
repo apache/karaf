@@ -128,7 +128,7 @@ public class JmsMBeanImpl implements JmsMBean {
             CompositeType type = new CompositeType("message", "JMS Message",
                     new String[]{ "id", "content", "charset", "type", "correlation", "delivery", "destination", "expiration", "priority", "redelivered", "replyto", "timestamp" },
                     new String[]{ "Message ID", "Content", "Charset", "Type", "Correlation ID", "Delivery Mode", "Destination", "Expiration Date", "Priority", "Redelivered", "Reply-To", "Timestamp" },
-                    new OpenType[]{ SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.INTEGER, SimpleType.STRING, SimpleType.LONG, SimpleType.INTEGER, SimpleType.BOOLEAN, SimpleType.STRING, SimpleType.LONG });
+                    new OpenType[]{ SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.INTEGER, SimpleType.BOOLEAN, SimpleType.STRING, SimpleType.STRING });
             TabularType tableType = new TabularType("messages", "JMS Messages", type, new String[]{ "id" });
             TabularData table = new TabularDataSupport(tableType);
             for (JmsMessage message : getJmsService().browse(connectionFactory, queue, selector, username, password)) {
