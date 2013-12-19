@@ -332,6 +332,7 @@ public class JmsServiceImpl implements JmsService {
                     count++;
                 }
             } while (message != null);
+            session.commit();
         } finally {
             if (session != null) {
                 session.close();

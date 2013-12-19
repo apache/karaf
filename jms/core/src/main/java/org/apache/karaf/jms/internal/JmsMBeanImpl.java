@@ -134,7 +134,7 @@ public class JmsMBeanImpl implements JmsMBean {
             for (JmsMessage message : getJmsService().browse(connectionFactory, queue, selector, username, password)) {
                 CompositeData data = new CompositeDataSupport(type,
                         new String[]{ "id", "content", "charset", "type", "correlation", "delivery", "destination", "expiration", "priority", "redelivered", "replyto", "timestamp" },
-                        new Object[]{ message.getMessageId(), message.getContent(), message.getCharset(), message.getType(), message.getCorrelationID(), message.getDeliveryMode(), message.getDestination(), message.getExpiration(), message.getProperties(), message.isRedelivered(), message.getReplyTo(), message.getTimestamp() }
+                        new Object[]{ message.getMessageId(), message.getContent(), message.getCharset(), message.getType(), message.getCorrelationID(), message.getDeliveryMode(), message.getDestination(), message.getExpiration(), message.getPriority(), message.isRedelivered(), message.getReplyTo(), message.getTimestamp() }
                         );
                 table.put(data);
             }
