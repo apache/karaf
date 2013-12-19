@@ -60,70 +60,70 @@ public class JmsMBeanImpl implements JmsMBean {
     }
 
     @Override
-    public Map<String, String> info(String connectionFactory) throws MBeanException {
+    public Map<String, String> info(String connectionFactory, String username, String password) throws MBeanException {
         try {
-            return jmsService.info(connectionFactory);
+            return jmsService.info(connectionFactory, username, password);
         } catch (Throwable t) {
             throw new MBeanException(null, t.getMessage());
         }
     }
 
     @Override
-    public int count(String connectionFactory, String queue) throws MBeanException {
+    public int count(String connectionFactory, String queue, String username, String password) throws MBeanException {
         try {
-            return jmsService.count(connectionFactory, queue);
+            return jmsService.count(connectionFactory, queue, username, password);
         } catch (Throwable t) {
             throw new MBeanException(null, t.getMessage());
         }
     }
 
     @Override
-    public List<String> queues(String connectionFactory) throws MBeanException {
+    public List<String> queues(String connectionFactory, String username, String password) throws MBeanException {
         try {
-            return jmsService.queues(connectionFactory);
+            return jmsService.queues(connectionFactory, username, password);
         } catch (Throwable t) {
             throw new MBeanException(null, t.getMessage());
         }
     }
 
     @Override
-    public List<String> topics(String connectionFactory) throws MBeanException {
+    public List<String> topics(String connectionFactory, String username, String password) throws MBeanException {
         try {
-            return jmsService.topics(connectionFactory);
+            return jmsService.topics(connectionFactory, username, password);
         } catch (Throwable t) {
             throw new MBeanException(null, t.getMessage());
         }
     }
 
     @Override
-    public void send(String connectionFactory, String queue, String content, String replyTo) throws MBeanException {
+    public void send(String connectionFactory, String queue, String content, String replyTo, String username, String password) throws MBeanException {
         try {
-            jmsService.send(connectionFactory, queue, content, replyTo);
+            jmsService.send(connectionFactory, queue, content, replyTo, username, password);
         } catch (Throwable t) {
             throw new MBeanException(null, t.getMessage());
         }
     }
 
     @Override
-    public int consume(String connectionFactory, String queue, String selector) throws MBeanException {
+    public int consume(String connectionFactory, String queue, String selector, String username, String password) throws MBeanException {
         try {
-            return jmsService.consume(connectionFactory, queue, selector);
+            return jmsService.consume(connectionFactory, queue, selector, username, password);
         } catch (Throwable t) {
             throw new MBeanException(null, t.getMessage());
         }
     }
 
     @Override
-    public int move(String connectionFactory, String source, String destination, String selector) throws MBeanException {
+    public int move(String connectionFactory, String source, String destination, String selector, String username, String password) throws MBeanException {
         try {
-            return jmsService.move(connectionFactory, source, destination, selector);
+            return jmsService.move(connectionFactory, source, destination, selector, username, password);
         } catch (Throwable t) {
             throw new MBeanException(null, t.getMessage());
         }
     }
 
     @Override
-    public TabularData browse(String connectionFactory, String queue, String selector) throws MBeanException {
+    public TabularData browse(String connectionFactory, String queue, String selector, String username, String password) throws MBeanException {
         try {
             CompositeType type = new CompositeType("message", "JMS Message",
                     new String[]{ "id", "content", "charset", "type", "correlation", "delivery", "destination", "expiration", "priority", "redelivered", "replyto", "timestamp" },
@@ -131,7 +131,7 @@ public class JmsMBeanImpl implements JmsMBean {
                     new OpenType[]{ SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.INTEGER, SimpleType.STRING, SimpleType.LONG, SimpleType.INTEGER, SimpleType.BOOLEAN, SimpleType.STRING, SimpleType.LONG });
             TabularType tableType = new TabularType("messages", "JMS Messages", type, new String[]{ "id" });
             TabularData table = new TabularDataSupport(tableType);
-            for (JmsMessage message : getJmsService().browse(connectionFactory, queue, selector)) {
+            for (JmsMessage message : getJmsService().browse(connectionFactory, queue, selector, username, password)) {
                 CompositeData data = new CompositeDataSupport(type,
                         new String[]{ "id", "content", "charset", "type", "correlation", "delivery", "destination", "expiration", "priority", "redelivered", "replyto", "timestamp" },
                         new Object[]{ message.getMessageId(), message.getContent(), message.getCharset(), message.getType(), message.getCorrelationID(), message.getDeliveryMode(), message.getDestination(), message.getExpiration(), message.getProperties(), message.isRedelivered(), message.getReplyTo(), message.getTimestamp() }

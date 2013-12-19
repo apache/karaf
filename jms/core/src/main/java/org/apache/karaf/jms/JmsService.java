@@ -54,38 +54,46 @@ public interface JmsService {
      * Get details about a given JMS connection factory.
      *
      * @param connectionFactory the JMS connection factory name.
+     * @param username optional username to connect to the JMS broker.
+     * @param password optional password to connect to the JMS broker.
      * @return a map (property/value) containing details.
      * @throws Exception
      */
-    Map<String, String> info(String connectionFactory) throws Exception;
+    Map<String, String> info(String connectionFactory, String username, String password) throws Exception;
 
     /**
      * Count the number of messages in a JMS queue.
      *
      * @param connectionFactory the JMS connection factory name.
      * @param queue the queue name.
+     * @param username optional username to connect to the JMS broker.
+     * @param password optional password to connect to the JMS broker.
      * @return the number of messages in a JMS queue.
      * @throws Exception
      */
-    int count(String connectionFactory, String queue) throws Exception;
+    int count(String connectionFactory, String queue, String username, String password) throws Exception;
 
     /**
      * List the queues.
      *
      * @param connectionFactory the JMS connection factory name.
+     * @param username optional username to connect to the JMS broker.
+     * @param password optional password to connect to the JMS broker.
      * @return the list of queues.
      * @throws Exception
      */
-    List<String> queues(String connectionFactory) throws Exception;
+    List<String> queues(String connectionFactory, String username, String password) throws Exception;
 
     /**
      * List the topics.
      *
      * @param connectionFactory the JMS connection factory name.
+     * @param username optional username to connect to the JMS broker.
+     * @param password optional password to connect to the JMS broker.
      * @return the list of topics.
      * @throws Exception
      */
-    List<String> topics(String connectionFactory) throws Exception;
+    List<String> topics(String connectionFactory, String username, String password) throws Exception;
 
     /**
      * Browse a destination.
@@ -93,10 +101,12 @@ public interface JmsService {
      * @param connectionFactory the JMS connection factory name.
      * @param queue the queue name.
      * @param selector the selector.
+     * @param username optional username to connect to the JMS broker.
+     * @param password optional password to connect to the JMS broker.
      * @return the list of messages.
      * @throws Exception
      */
-    List<JmsMessage> browse(String connectionFactory, String queue, String selector) throws Exception;
+    List<JmsMessage> browse(String connectionFactory, String queue, String selector, String username, String password) throws Exception;
 
     /**
      * Send a message on the given queue.
@@ -105,9 +115,11 @@ public interface JmsService {
      * @param queue the queue name.
      * @param body the message body.
      * @param replyTo the message replyTo header.
+     * @param username optional username to connect to the JMS broker.
+     * @param password optional password to connect to the JMS broker.
      * @throws Exception
      */
-    void send(String connectionFactory, String queue, String body, String replyTo) throws Exception;
+    void send(String connectionFactory, String queue, String body, String replyTo, String username, String password) throws Exception;
 
     /**
      * Consume messages from a given destination.
@@ -115,10 +127,12 @@ public interface JmsService {
      * @param connectionFactory the JMS connection factory name.
      * @param queue the queue name.
      * @param selector the messages selector.
+     * @param username optional username to connect to the JMS broker.
+     * @param password optional password to connect to the JMS broker.
      * @return the number of messages consumed.
      * @throws Exception
      */
-    int consume(String connectionFactory, String queue, String selector) throws Exception;
+    int consume(String connectionFactory, String queue, String selector, String username, String password) throws Exception;
 
     /**
      * Move messages from a destination to another.
@@ -127,9 +141,11 @@ public interface JmsService {
      * @param sourceQueue the source queue.
      * @param targetQueue the target queue.
      * @param selector the messages selector on the source queue.
+     * @param username optional username to connect to the JMS broker.
+     * @param password optional password to connect to the JMS broker.
      * @return the number of messages moved.
      * @throws Exception
      */
-    int move(String connectionFactory, String sourceQueue, String targetQueue, String selector) throws Exception;
+    int move(String connectionFactory, String sourceQueue, String targetQueue, String selector, String username, String password) throws Exception;
 
 }
