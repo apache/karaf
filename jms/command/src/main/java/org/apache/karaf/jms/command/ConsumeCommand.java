@@ -32,9 +32,15 @@ public class ConsumeCommand extends JmsCommandSupport {
     @Option(name = "-s", aliases = { "--selector" }, description = "The selector to use to select the messages to consume", required = false, multiValued = false)
     String selector;
 
+    @Option(name = "-u", aliases = { "--username" }, description = "Username to connect to the JMS broker", required = false, multiValued = false)
+    String username = "karaf";
+
+    @Option(name = "-p", aliases = { "--password" }, description = "Password to connect to the JMS broker", required = false, multiValued = false)
+    String password = "karaf";
+
     public Object doExecute() throws Exception {
 
-        System.out.println(getJmsService().consume(connectionFactory, queue, selector) + " message(s) consumed");
+        System.out.println(getJmsService().consume(connectionFactory, queue, selector, username, password) + " message(s) consumed");
 
         return null;
     }

@@ -47,7 +47,7 @@ public class JmsServiceImpl implements JmsService {
 
         File karafBase = new File(System.getProperty("karaf.base"));
         File deployFolder = new File(karafBase, "deploy");
-        File outFile = new File(deployFolder, "connectionfactory-" + name + ".xml");
+        File  outFile = new File(deployFolder, "connectionfactory-" + name + ".xml");
 
         if (type.equalsIgnoreCase("activemq")) {
             // activemq
@@ -101,13 +101,13 @@ public class JmsServiceImpl implements JmsService {
     }
 
     @Override
-    public Map<String, String> info(String connectionFactory) throws Exception {
+    public Map<String, String> info(String connectionFactory, String username, String password) throws Exception {
         Map<String, String> map = new HashMap<String, String>();
         ServiceReference reference = this.lookupConnectionFactory(connectionFactory);
         Connection connection = null;
         try {
             ConnectionFactory cf = (ConnectionFactory) bundleContext.getService(reference);
-            connection = cf.createConnection();
+            connection = cf.createConnection(username, password);
             ConnectionMetaData metaData = connection.getMetaData();
             map.put("product", metaData.getJMSProviderName());
             map.put("version", metaData.getProviderVersion());
@@ -123,13 +123,13 @@ public class JmsServiceImpl implements JmsService {
     }
 
     @Override
-    public int count(String connectionFactory, String destination) throws Exception {
+    public int count(String connectionFactory, String destination, String username, String password) throws Exception {
         ServiceReference reference = this.lookupConnectionFactory(connectionFactory);
         Connection connection = null;
         Session session = null;
         try {
             ConnectionFactory cf = (ConnectionFactory) bundleContext.getService(reference);
-            connection = cf.createConnection();
+            connection = cf.createConnection(username, password);
             session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
             QueueBrowser browser = session.createBrowser(session.createQueue(destination));
             Enumeration<Message> enumeration = browser.getEnumeration();
@@ -154,13 +154,13 @@ public class JmsServiceImpl implements JmsService {
     }
 
     @Override
-    public List<String> queues(String connectionFactory) throws Exception {
+    public List<String> queues(String connectionFactory, String username, String password) throws Exception {
         List<String> queues = new ArrayList<String>();
         ServiceReference reference = this.lookupConnectionFactory(connectionFactory);
         Connection connection = null;
         try {
             ConnectionFactory cf = (ConnectionFactory) bundleContext.getService(reference);
-            connection = cf.createConnection();
+            connection = cf.createConnection(username, password);
             if (connection instanceof PooledConnection) {
                 connection = ((PooledConnection) connection).getConnection();
             }
@@ -183,13 +183,13 @@ public class JmsServiceImpl implements JmsService {
     }
 
     @Override
-    public List<String> topics(String connectionFactory) throws Exception {
+    public List<String> topics(String connectionFactory, String username, String password) throws Exception {
         List<String> topics = new ArrayList<String>();
         ServiceReference reference = this.lookupConnectionFactory(connectionFactory);
         Connection connection = null;
         try {
             ConnectionFactory cf = (ConnectionFactory) bundleContext.getService(reference);
-            connection = cf.createConnection();
+            connection = cf.createConnection(username, password);
             if (connection instanceof PooledConnection) {
                 connection = ((PooledConnection) connection).getConnection();
             }
@@ -212,14 +212,14 @@ public class JmsServiceImpl implements JmsService {
     }
 
     @Override
-    public List<JmsMessage> browse(String connectionFactory, String queue, String filter) throws Exception {
+    public List<JmsMessage> browse(String connectionFactory, String queue, String filter, String username, String password) throws Exception {
         List<JmsMessage> messages = new ArrayList<JmsMessage>();
         ServiceReference reference = this.lookupConnectionFactory(connectionFactory);
         Connection connection = null;
         Session session = null;
         try {
             ConnectionFactory cf = (ConnectionFactory) bundleContext.getService(reference);
-            connection = cf.createConnection();
+            connection = cf.createConnection(username, password);
             session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
             QueueBrowser browser = session.createBrowser(session.createQueue(queue), filter);
             Enumeration<Message> enumeration = browser.getEnumeration();
@@ -243,13 +243,13 @@ public class JmsServiceImpl implements JmsService {
     }
 
     @Override
-    public void send(String connectionFactory, String queue, String body, String replyTo) throws Exception {
+    public void send(String connectionFactory, String queue, String body, String replyTo, String username, String password) throws Exception {
         ServiceReference reference = this.lookupConnectionFactory(connectionFactory);
         Connection connection = null;
         Session session = null;
         try {
             ConnectionFactory cf = (ConnectionFactory) bundleContext.getService(reference);
-            connection = cf.createConnection();
+            connection = cf.createConnection(username, password);
             session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
             Message message = session.createTextMessage(body);
             if (replyTo != null) {
@@ -272,14 +272,14 @@ public class JmsServiceImpl implements JmsService {
     }
 
     @Override
-    public int consume(String connectionFactory, String queue, String selector) throws Exception {
+    public int consume(String connectionFactory, String queue, String selector, String username, String password) throws Exception {
         int count = 0;
         ServiceReference reference = this.lookupConnectionFactory(connectionFactory);
         Connection connection = null;
         Session session = null;
         try {
             ConnectionFactory cf = (ConnectionFactory) bundleContext.getService(reference);
-            connection = cf.createConnection();
+            connection = cf.createConnection(username, password);
             session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
             MessageConsumer consumer = session.createConsumer(session.createQueue(queue), selector);
             Message message;
@@ -304,14 +304,14 @@ public class JmsServiceImpl implements JmsService {
     }
 
     @Override
-    public int move(String connectionFactory, String sourceQueue, String targetQueue, String selector) throws Exception {
+    public int move(String connectionFactory, String sourceQueue, String targetQueue, String selector, String username, String password) throws Exception {
         int count = 0;
         ServiceReference reference = this.lookupConnectionFactory(connectionFactory);
         Connection connection = null;
         Session session = null;
         try {
             ConnectionFactory cf = (ConnectionFactory) bundleContext.getService(reference);
-            connection = cf.createConnection();
+            connection = cf.createConnection(username, password);
             session = connection.createSession(true, Session.SESSION_TRANSACTED);
             MessageConsumer consumer = session.createConsumer(session.createQueue(sourceQueue), selector);
             Message message;

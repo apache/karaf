@@ -35,8 +35,14 @@ public class SendCommand extends JmsCommandSupport {
     @Option(name = "-r", aliases = { "--replyTo" }, description = "Set the message ReplyTo", required = false, multiValued = false)
     String replyTo;
 
+    @Option(name = "-u", aliases = { "--username" }, description = "Username to connect to the JMS broker", required = false, multiValued = false)
+    String username = "karaf";
+
+    @Option(name = "-p", aliases = { "--password" }, description = "Password to connect to the JMS broker", required = false, multiValued = false)
+    String password = "karaf";
+
     public Object doExecute() throws Exception {
-        getJmsService().send(connectionFactory, queue, message, replyTo);
+        getJmsService().send(connectionFactory, queue, message, replyTo, username, password);
         return null;
     }
 

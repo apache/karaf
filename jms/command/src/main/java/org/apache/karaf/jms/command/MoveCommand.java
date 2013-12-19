@@ -35,8 +35,14 @@ public class MoveCommand extends JmsCommandSupport {
     @Option(name = "-s", aliases = { "--selector" }, description = "Selector to move only some messages", required = false, multiValued = false)
     String selector;
 
+    @Option(name = "-u", aliases = { "--username" }, description = "Username to connect to the JMS broker", required = false, multiValued = false)
+    String username = "karaf";
+
+    @Option(name = "-p", aliases = { "--password" }, description = "Password to connect to the JMS broker", required = false, multiValued = false)
+    String password = "karaf";
+
     public Object doExecute() throws Exception {
-        System.out.println(getJmsService().move(connectionFactory, source, destination, selector) + " message(s) moved");
+        System.out.println(getJmsService().move(connectionFactory, source, destination, selector, username, password) + " message(s) moved");
         return null;
     }
 

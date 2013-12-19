@@ -36,6 +36,12 @@ public class BrowseCommand extends JmsCommandSupport {
     @Option(name = "-s", aliases = { "--selector" }, description = "The selector to select the messages to browse", required = false, multiValued = false)
     String selector;
 
+    @Option(name = "-u", aliases = { "--username" }, description = "Username to connect to the JMS broker", required = false, multiValued = false)
+    String username = "karaf";
+
+    @Option(name = "-p", aliases = { "--password" }, description = "Password to connect to the JMS broker", required = false, multiValued = false)
+    String password = "karaf";
+
     @Option(name = "-v", aliases = { "--verbose" }, description = "Display JMS message headers and properties", required = false, multiValued = false)
     boolean verbose = false;
 
@@ -59,7 +65,7 @@ public class BrowseCommand extends JmsCommandSupport {
             table.column("Properties");
         }
 
-        List<JmsMessage> messages = getJmsService().browse(connectionFactory, queue, selector);
+        List<JmsMessage> messages = getJmsService().browse(connectionFactory, queue, selector, username, password);
         for (JmsMessage message : messages) {
             if (verbose) {
                 StringBuilder headers = new StringBuilder();

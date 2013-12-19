@@ -18,6 +18,7 @@ package org.apache.karaf.jms.command;
 
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.table.ShellTable;
 
 @Command(scope = "jms", name = "queues", description = "List the JMS queues.")
@@ -26,12 +27,18 @@ public class QueuesCommand extends JmsCommandSupport {
     @Argument(index = 0, name = "connectionFactory", description= "The JMS connection factory name", required = true, multiValued = false)
     String connectionFactory;
 
+    @Option(name = "-u", aliases = { "--username" }, description = "Username to connect to the JMS broker", required = false, multiValued = false)
+    String username = "karaf";
+
+    @Option(name = "-p", aliases = { "--password" }, description = "Password to connect to the JMS broker", required = false, multiValued = false)
+    String password = "karaf";
+
     public Object doExecute() throws Exception {
         ShellTable table = new ShellTable();
 
         table.column("JMS Queues");
 
-        for (String queue : getJmsService().queues(connectionFactory)) {
+        for (String queue : getJmsService().queues(connectionFactory, username, password)) {
             table.addRow().addContent(queue);
         }
 

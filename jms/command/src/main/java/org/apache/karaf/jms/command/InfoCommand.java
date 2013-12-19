@@ -18,6 +18,7 @@ package org.apache.karaf.jms.command;
 
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.table.ShellTable;
 
 import java.util.Map;
@@ -28,12 +29,18 @@ public class InfoCommand extends JmsCommandSupport {
     @Argument(index = 0, name = "connectionFactory", description = "The JMS connection factory name", required = true, multiValued = false)
     String connectionFactory;
 
+    @Option(name = "-u", aliases = { "--username" }, description = "Username to connect to the JMS broker", required = false, multiValued = false)
+    String username = "karaf";
+
+    @Option(name = "-p", aliases = { "--password" }, description = "Password to connect to the JMS broker", required = false, multiValued = false)
+    String password = "karaf";
+
     public Object doExecute() throws Exception {
         ShellTable table = new ShellTable();
         table.column("Property");
         table.column("Value");
 
-        Map<String, String> info = getJmsService().info(connectionFactory);
+        Map<String, String> info = getJmsService().info(connectionFactory, username, password);
         for (String key : info.keySet()) {
             table.addRow().addContent(key, info.get(key));
         }
