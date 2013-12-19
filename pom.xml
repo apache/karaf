@@ -125,11 +125,13 @@
         <commons-beanutils.version>1.8.3</commons-beanutils.version>
         <commons-codec.version>1.8</commons-codec.version>
         <commons-collections.version>3.2.1</commons-collections.version>
+        <commons-dbcp.version>1.4</commons-dbcp.version>
         <commons-fileupload.version>1.2.2</commons-fileupload.version>
         <commons-compress.version>1.6</commons-compress.version>
         <commons-io.version>2.4</commons-io.version>
         <commons-jexl.version>2.1.1</commons-jexl.version>
         <commons-lang.version>2.6</commons-lang.version>
+        <commons-pool.version>1.6</commons-pool.version>
         <jasypt.bundle.version>1.9.1_1</jasypt.bundle.version>
         <servlet.spec.groupId>org.apache.geronimo.specs</servlet.spec.groupId>
         <servlet.spec.artifactId>geronimo-servlet_3.0_spec</servlet.spec.artifactId>
@@ -206,6 +208,7 @@
         <log4j.version>1.2.17</log4j.version>
         <maven.version>2.0.9</maven.version>
         <mina.version>2.0.7</mina.version>
+        <openjpa.version>2.3.0</openjpa.version>
         <osgi.version>5.0.0</osgi.version>
         <osgi.compendium.version>5.0.0</osgi.compendium.version>
         <org.json.version>20131018</org.json.version>

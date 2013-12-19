@@ -47,6 +47,17 @@
         <bundle start-level='30'>mvn:org.apache.aries.jpa/org.apache.aries.jpa.container.context/${aries.jpa.container.context.version}</bundle>
     </feature>
 
+    <feature name='openjpa' description='Apache OpenJPA persistence engine support' version='${openjpa.version}' resolver='(obr)'>
+        <details>Install Apache OpenJPA as persistence engine, used by the jpa feature.</details>
+        <feature>jpa</feature>
+        <feature>http</feature>
+        <bundle dependency='true'>mvn:commons-collections/commons-collections/${commons-collections.version}</bundle>
+        <bundle>mvn:commons-pool/commons-pool/${commons-pool.version}</bundle>
+        <bundle dependency='true'>mvn:commons-dbcp/commons-dbcp/${commons-dbcp.version}</bundle>
+        <bundle dependency='true'>mvn:commons-lang/commons-lang/${commons-lang.version}</bundle>
+        <bundle>mvn:org.apache.openjpa/openjpa/${openjpa.version}</bundle>
+    </feature>
+
     <feature name='jndi' description='OSGi Service Registry JNDI access' version='${project.version}' resolver='(obr)'>
         <details>JNDI support provided by Apache Aries JNDI ${aries.jndi.version}, including additional service, commands, and MBean.</details>
         <bundle start-level='30'>mvn:org.apache.xbean/xbean-naming/${xbean.version}</bundle>
@@ -62,8 +73,8 @@
     <feature name='jdbc' description='JDBC service and commands' version='${project.version}' resolver='(obr)'>
         <details>JDBC support providing service, commands, and MBean.</details>
         <feature>transaction</feature>
-        <bundle>mvn:commons-pool/commons-pool/1.6</bundle>
-        <bundle>mvn:commons-dbcp/commons-dbcp/1.4</bundle>
+        <bundle>mvn:commons-pool/commons-pool/${commons-pool.version}</bundle>
+        <bundle>mvn:commons-dbcp/commons-dbcp/${commons-dbcp.version}</bundle>
         <bundle>mvn:org.apache.karaf.jdbc/org.apache.karaf.jdbc.core/${project.version}</bundle>
         <bundle>mvn:org.apache.karaf.jdbc/org.apache.karaf.jdbc.command/${project.version}</bundle>
     </feature>
