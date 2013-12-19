@@ -108,6 +108,7 @@ public class JmsServiceImpl implements JmsService {
         try {
             ConnectionFactory cf = (ConnectionFactory) bundleContext.getService(reference);
             connection = cf.createConnection(username, password);
+            connection.start();
             ConnectionMetaData metaData = connection.getMetaData();
             map.put("product", metaData.getJMSProviderName());
             map.put("version", metaData.getProviderVersion());
@@ -130,6 +131,7 @@ public class JmsServiceImpl implements JmsService {
         try {
             ConnectionFactory cf = (ConnectionFactory) bundleContext.getService(reference);
             connection = cf.createConnection(username, password);
+            connection.start();
             session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
             QueueBrowser browser = session.createBrowser(session.createQueue(destination));
             Enumeration<Message> enumeration = browser.getEnumeration();
@@ -161,6 +163,7 @@ public class JmsServiceImpl implements JmsService {
         try {
             ConnectionFactory cf = (ConnectionFactory) bundleContext.getService(reference);
             connection = cf.createConnection(username, password);
+            connection.start();
             if (connection instanceof PooledConnection) {
                 connection = ((PooledConnection) connection).getConnection();
             }
@@ -190,6 +193,7 @@ public class JmsServiceImpl implements JmsService {
         try {
             ConnectionFactory cf = (ConnectionFactory) bundleContext.getService(reference);
             connection = cf.createConnection(username, password);
+            connection.start();
             if (connection instanceof PooledConnection) {
                 connection = ((PooledConnection) connection).getConnection();
             }
@@ -220,6 +224,7 @@ public class JmsServiceImpl implements JmsService {
         try {
             ConnectionFactory cf = (ConnectionFactory) bundleContext.getService(reference);
             connection = cf.createConnection(username, password);
+            connection.start();
             session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
             QueueBrowser browser = session.createBrowser(session.createQueue(queue), filter);
             Enumeration<Message> enumeration = browser.getEnumeration();
@@ -250,6 +255,7 @@ public class JmsServiceImpl implements JmsService {
         try {
             ConnectionFactory cf = (ConnectionFactory) bundleContext.getService(reference);
             connection = cf.createConnection(username, password);
+            connection.start();
             session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
             Message message = session.createTextMessage(body);
             if (replyTo != null) {
@@ -280,6 +286,7 @@ public class JmsServiceImpl implements JmsService {
         try {
             ConnectionFactory cf = (ConnectionFactory) bundleContext.getService(reference);
             connection = cf.createConnection(username, password);
+            connection.start();
             session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
             MessageConsumer consumer = session.createConsumer(session.createQueue(queue), selector);
             Message message;
@@ -312,6 +319,7 @@ public class JmsServiceImpl implements JmsService {
         try {
             ConnectionFactory cf = (ConnectionFactory) bundleContext.getService(reference);
             connection = cf.createConnection(username, password);
+            connection.start();
             session = connection.createSession(true, Session.SESSION_TRANSACTED);
             MessageConsumer consumer = session.createConsumer(session.createQueue(sourceQueue), selector);
             Message message;
