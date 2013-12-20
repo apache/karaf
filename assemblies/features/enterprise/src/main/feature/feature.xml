@@ -24,7 +24,7 @@
 
     <feature name='transaction' description='OSGi Transaction Manager' version='${aries.transaction.version}' resolver='(obr)'>
         <details>JTA implementation provided by Apache Aries Transaction ${aries.transaction.version}</details>
-        <config name="org.apache.aries.transaction">
+        <config name='org.apache.aries.transaction'>
             aries.transaction.recoverable = true
             aries.transaction.timeout = 600
             aries.transaction.howl.logFileDir = ${karaf.data}/txlog
@@ -48,14 +48,33 @@
     </feature>
 
     <feature name='openjpa' description='Apache OpenJPA persistence engine support' version='${openjpa.version}' resolver='(obr)'>
-        <details>Install Apache OpenJPA as persistence engine, used by the jpa feature.</details>
+        <details>Enable Apache OpenJPA as persistence engine.</details>
         <feature>jpa</feature>
         <feature>http</feature>
+        <bundle dependency='true'>mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.java-persistence-api-1.1.1/${servicemix.specs.version}</bundle>
         <bundle dependency='true'>mvn:commons-collections/commons-collections/${commons-collections.version}</bundle>
-        <bundle>mvn:commons-pool/commons-pool/${commons-pool.version}</bundle>
+        <bundle dependency='true'>mvn:commons-pool/commons-pool/${commons-pool.version}</bundle>
         <bundle dependency='true'>mvn:commons-dbcp/commons-dbcp/${commons-dbcp.version}</bundle>
         <bundle dependency='true'>mvn:commons-lang/commons-lang/${commons-lang.version}</bundle>
         <bundle>mvn:org.apache.openjpa/openjpa/${openjpa.version}</bundle>
+    </feature>
+
+    <feature name='hibernate' description='Hibernate JPA persistence engine support' version='${hibernate.version}' resolver='(obr)'>
+        <details>Enable Hibernate as persistence engine.</details>
+        <feature>jpa</feature>
+        <bundle dependency='true'>mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.java-persistence-api-1.1.1/${servicemix.specs.version}</bundle>
+        <bundle dependency='true'>mvn:commons-collections/commons-collections/${commons-collections.version}</bundle>
+        <bundle dependency='true'>mvn:commons-pool/commons-pool/${commons-pool.version}</bundle>
+        <bundle dependency='true'>mvn:commons-dbcp/commons-dbcp/${commons-dbcp.version}</bundle>
+        <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.dom4j/${dom4j.bundle.version}</bundle>
+        <bundle dependency='true'>mvn:org.objectweb.asm/com.springsource.org.objectweb.asm/${asm.springsource.version}</bundle>
+        <bundle dependency='true'>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.antlr/${antlr.bundle.version}</bundle>
+        <bundle dependency="true">mvn:net.sourceforge.cglib/com.springsource.net.sf.cglib/${cglib2.version}</bundle>
+        <bundle dependency="true">mvn:org.jboss.javassist/com.springsource.javassist/${javassist.version}</bundle>
+        <bundle>mvn:org.hibernate/com.springsource.org.hibernate.annotations.common/${hibernate.annotations.common.version}</bundle>
+        <bundle>mvn:org.hibernate/com.springsource.org.hibernate.annotations/${hibernate.annotations.version}</bundle>
+        <bundle>mvn:org.hibernate/com.springsource.org.hibernate.ejb/${hibernate.ejb.version}</bundle>
+        <bundle>mvn:org.hibernate/com.springsource.org.hibernate/${hibernate.version}</bundle>
     </feature>
 
     <feature name='jndi' description='OSGi Service Registry JNDI access' version='${project.version}' resolver='(obr)'>
