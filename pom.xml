@@ -209,6 +209,7 @@
         <maven.version>2.0.9</maven.version>
         <mina.version>2.0.7</mina.version>
         <openjpa.version>2.3.0</openjpa.version>
+        <openwebbeans.version>1.2.1</openwebbeans.version>
         <osgi.version>5.0.0</osgi.version>
         <osgi.compendium.version>5.0.0</osgi.compendium.version>
         <org.json.version>20131018</org.json.version>
@@ -231,7 +232,8 @@
         <xbean.version>3.16</xbean.version>
         <xerces.version>2.11.0</xerces.version>
         <javax.mail.version>1.4.5</javax.mail.version>
-        <http.feature.version>[3,4)</http.feature.version>      
+        <http.feature.version>[3,4)</http.feature.version>
+        <weld.version>2.1.1.Final</weld.version>
   
         <!-- Furter used maven plugin versions; e.g. in the docs -->
         <plugin.depends.version>1.2</plugin.depends.version>

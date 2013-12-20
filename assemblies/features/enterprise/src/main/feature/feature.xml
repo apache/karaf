@@ -87,6 +87,20 @@
         <bundle>mvn:org.apache.karaf.jms/org.apache.karaf.jms.command/${project.version}</bundle>
     </feature>
 
+    <feature name='openwebbeans' description='Apache OpenWebBeans CDI container support' version='${openwebbeans.version}' resolver='(obr)'>
+        <details>Add support of Apache OpenWebBeans CDI container.</details>
+        <feature>http</feature>
+        <feature>pax-cdi-openwebbeans</feature>
+        <bundle>mvn:org.apache.openwebbeans/openwebbeans-impl/${openwebbeans.version}</bundle>
+        <bundle>mvn:org.apache.openwebbeans/openwebbeans-osgi/${openwebbeans.version}</bundle>
+    </feature>
+
+    <feature name='weld' description='JBoss Weld CDI container support' version='${weld.version}' resolver='(obr)'>
+        <details>Add support of JBoss Weld CDI container.</details>
+        <feature>pax-cdi-weld</feature>
+        <bundle>mvn:org.jboss.weld/weld-osgi-bundle/${weld.version}</bundle>
+    </feature>
+
     <feature name='application-without-isolation' description='Provide EBA archive support' version='${aries.application.version}'>
         <details>Support of the Aries EBA archives</details>
         <!-- pre-requisites-->
