@@ -22,7 +22,6 @@ import java.io.File;
 
 import junit.framework.Assert;
 
-import org.apache.karaf.main.util.Utils;
 import org.junit.After;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
@@ -43,9 +42,8 @@ public class MainStartTest {
     public void testAutoStart() throws Exception {
         File basedir = new File(getClass().getClassLoader().getResource("foo").getPath()).getParentFile();
         File home = new File(basedir, "test-karaf-home");
-        File data = new File(home, "data");
-
-        Utils.deleteDirectory(data);
+        // generate an unique folder name to avoid conflict with folder created by other unit tests (KARAF-2558)
+        File data = new File(home, "data" + System.currentTimeMillis());
 
 		String[] args = new String[0];
 		System.setProperty("karaf.home", home.toString());
