@@ -21,7 +21,6 @@ package org.apache.karaf.main;
 import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.withBnd;
 
 import java.io.File;
-import java.net.URI;
 
 import junit.framework.Assert;
 
@@ -39,9 +38,8 @@ public class MainStartTest {
     public void testAutoStart() throws Exception {
         File basedir = new File(getClass().getClassLoader().getResource("foo").getPath()).getParentFile();
         File home = new File(basedir, "test-karaf-home");
-        File data = new File(home, "data");
-
-        Utils.deleteDirectory(data);
+        // create an unique data folder to avoid conflict with other unit tests (KARAF-2558)
+        File data = new File(home, "data" + System.currentTimeMillis());
 
 		String[] args = new String[0];
 		String fileMVNbundle = new File(home, "bundles/pax-url-mvn.jar").toURI().toURL().toExternalForm();
