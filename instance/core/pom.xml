@@ -129,6 +129,8 @@
                                     <includes>
                                         <include>**/*.properties</include>
                                         <include>**/*.cfg</include>
+                                        <include>**/*.xml</include>
+                                        <include>**/*.info</include>
                                     </includes>
                                 </resource>
                                 <resource>

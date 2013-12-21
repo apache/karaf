@@ -48,8 +48,8 @@ public class InstanceServiceImplTest {
     @BeforeClass
     public static void setUpClass() throws Exception {
         String buildDirectory = ClassLoader.getSystemResource("etc/startup.properties").getFile()
-                .replace("etc/startup.properties", "");
-        System.setProperty("karaf.base", buildDirectory);
+                .replace("startup.properties", "");
+        System.setProperty("karaf.etc", buildDirectory);
     }
 
     @Test
