@@ -21,7 +21,7 @@
 // in each session.
 //
 ld = { log:display $args } ;
-lde = { log:display-exception $args } ;
+lde = { log:exception-display $args } ;
 la = { bundle:list -t 0 $args } ;
 ls = { service:list $args } ;
 cl = { config:list "(service.pid=$args)" } ;
