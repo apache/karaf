@@ -20,6 +20,8 @@
 
 <features name="karaf-enterprise-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.0.0">
 
+    <repository>mvn:org.ops4j.pax.cdi/pax-cdi-features/${pax.cdi.version}/xml/features</repository>
+
     <feature name="transaction" description="OSGi Transaction Manager" version="${aries.transaction.version}" resolver="(obr)">
         <details>JTA implementation provided by Apache Aries Transaction ${aries.transaction.version}</details>
         <config name="org.apache.aries.transaction">
