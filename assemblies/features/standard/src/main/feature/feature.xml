@@ -16,8 +16,8 @@
       See the License for the specific language governing permissions and
       limitations under the License.
 -->
-<features name="standard-${project.version}" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
+<features name="standard-${project.version}" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
+
 	<repository>mvn:org.ops4j.pax.web/pax-web-features/${pax.web.version}/xml/features</repository>
 
     <feature version="${project.version}" description="OSGi Security for Karaf" name="framework-security">
