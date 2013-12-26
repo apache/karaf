@@ -1,32 +1,30 @@
-<?xml version='1.0' encoding='UTF-8'?>
-
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--
 
     Licensed to the Apache Software Foundation (ASF) under one or more
     contributor license agreements.  See the NOTICE file distributed with
     this work for additional information regarding copyright ownership.
     The ASF licenses this file to You under the Apache License, Version 2.0
-    (the 'License'); you may not use this file except in compliance with
+    (the "License"); you may not use this file except in compliance with
     the License.  You may obtain a copy of the License at
 
        http://www.apache.org/licenses/LICENSE-2.0
 
     Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an 'AS IS' BASIS,
+    distributed under the License is distributed on an "AS IS" BASIS,
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-
-<features name='enterprise-${project.version}' xmlns='http://karaf.apache.org/xmlns/features/v1.0.0'>
+<features name="enterprise-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
 
     <!-- NB: this file is not the one really used. This file is used by the karaf-maven-plugin to define the start-level of bundles in the generated feature.xml -->
 
     <repository>mvn:org.ops4j.pax.cdi/pax-cdi-features/${pax.cdi.version}/xml/features</repository>
 
-    <feature name='transaction' description='OSGi Transaction Manager' version='${aries.transaction.version}' resolver='(obr)'>
+    <feature name="transaction" description="OSGi Transaction Manager" version="${aries.transaction.version}" resolver="(obr)">
         <details>JTA implementation provided by Apache Aries Transaction ${aries.transaction.version}</details>
-        <config name='org.apache.aries.transaction'>
+        <config name="org.apache.aries.transaction">
             aries.transaction.recoverable = true
             aries.transaction.timeout = 600
             aries.transaction.howl.logFileDir = ${karaf.data}/txlog
@@ -34,43 +32,43 @@
             aries.transaction.howl.maxBlocksPerFile = 512
             aries.transaction.howl.bufferSizeKBytes = 4
         </config>
-        <bundle dependency='true' start-level='30'>mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
-        <bundle start-level='30'>mvn:org.apache.aries.transaction/org.apache.aries.transaction.blueprint/${aries.transaction.blueprint.version}</bundle>
-        <bundle start-level='30'>mvn:org.apache.aries.transaction/org.apache.aries.transaction.manager/${aries.transaction.manager.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.transaction/org.apache.aries.transaction.blueprint/${aries.transaction.blueprint.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.transaction/org.apache.aries.transaction.manager/${aries.transaction.manager.version}</bundle>
     </feature>
 
-    <feature name='jpa' description='OSGi Persistence Container' version='${aries.jpa.version}' resolver='(obr)'>
-        <details>JPA implementation provided by Apache Aries JPA ${aries.jpa.version}. NB: this feature doesn't provide the JPA engine, you have to install one by yourself (OpenJPA for instance)</details>
-        <bundle dependency='true' start-level='30'>mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
-        <bundle dependency='true' start-level='30'>mvn:org.apache.geronimo.specs/geronimo-jpa_2.0_spec/${geronimo.jpa-spec.version}</bundle>
-        <bundle start-level='30'>mvn:org.apache.aries.jpa/org.apache.aries.jpa.api/${aries.jpa.api.version}</bundle>
-        <bundle start-level='30'>mvn:org.apache.aries.jpa/org.apache.aries.jpa.blueprint.aries/${aries.jpa.blueprint.aries.version}</bundle>
-        <bundle start-level='30'>mvn:org.apache.aries.jpa/org.apache.aries.jpa.container/${aries.jpa.container.version}</bundle>
-        <bundle start-level='30'>mvn:org.apache.aries.jpa/org.apache.aries.jpa.container.context/${aries.jpa.container.context.version}</bundle>
+    <feature name="jpa" description="OSGi Persistence Container" version="${aries.jpa.version}" resolver="(obr)">
+        <details>JPA implementation provided by Apache Aries JPA ${aries.jpa.version}. NB: this feature doesn"t provide the JPA engine, you have to install one by yourself (OpenJPA for instance)</details>
+        <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jpa_2.0_spec/${geronimo.jpa-spec.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.jpa/org.apache.aries.jpa.api/${aries.jpa.api.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.jpa/org.apache.aries.jpa.blueprint.aries/${aries.jpa.blueprint.aries.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.jpa/org.apache.aries.jpa.container/${aries.jpa.container.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.jpa/org.apache.aries.jpa.container.context/${aries.jpa.container.context.version}</bundle>
     </feature>
 
-    <feature name='openjpa' description='Apache OpenJPA persistence engine support' version='${openjpa.version}' resolver='(obr)'>
+    <feature name="openjpa" description="Apache OpenJPA persistence engine support" version="${openjpa.version}" resolver="(obr)">
         <details>Enable Apache OpenJPA as persistence engine.</details>
         <feature>jpa</feature>
         <feature>http</feature>
-        <bundle dependency='true'>mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.java-persistence-api-1.1.1/${servicemix.specs.version}</bundle>
-        <bundle dependency='true'>mvn:commons-collections/commons-collections/${commons-collections.version}</bundle>
-        <bundle dependency='true'>mvn:commons-pool/commons-pool/${commons-pool.version}</bundle>
-        <bundle dependency='true'>mvn:commons-dbcp/commons-dbcp/${commons-dbcp.version}</bundle>
-        <bundle dependency='true'>mvn:commons-lang/commons-lang/${commons-lang.version}</bundle>
+        <bundle dependency="true">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.java-persistence-api-1.1.1/${servicemix.specs.version}</bundle>
+        <bundle dependency="true">mvn:commons-collections/commons-collections/${commons-collections.version}</bundle>
+        <bundle dependency="true">mvn:commons-pool/commons-pool/${commons-pool.version}</bundle>
+        <bundle dependency="true">mvn:commons-dbcp/commons-dbcp/${commons-dbcp.version}</bundle>
+        <bundle dependency="true">mvn:commons-lang/commons-lang/${commons-lang.version}</bundle>
         <bundle>mvn:org.apache.openjpa/openjpa/${openjpa.version}</bundle>
     </feature>
 
-    <feature name='hibernate' description='Hibernate JPA persistence engine support' version='${hibernate.version}' resolver='(obr)'>
+    <feature name="hibernate" description="Hibernate JPA persistence engine support" version="${hibernate.version}" resolver="(obr)">
         <details>Enable Hibernate as persistence engine.</details>
         <feature>jpa</feature>
-        <bundle dependency='true'>mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.java-persistence-api-1.1.1/${servicemix.specs.version}</bundle>
-        <bundle dependency='true'>mvn:commons-collections/commons-collections/${commons-collections.version}</bundle>
-        <bundle dependency='true'>mvn:commons-pool/commons-pool/${commons-pool.version}</bundle>
-        <bundle dependency='true'>mvn:commons-dbcp/commons-dbcp/${commons-dbcp.version}</bundle>
+        <bundle dependency="true">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.java-persistence-api-1.1.1/${servicemix.specs.version}</bundle>
+        <bundle dependency="true">mvn:commons-collections/commons-collections/${commons-collections.version}</bundle>
+        <bundle dependency="true">mvn:commons-pool/commons-pool/${commons-pool.version}</bundle>
+        <bundle dependency="true">mvn:commons-dbcp/commons-dbcp/${commons-dbcp.version}</bundle>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.dom4j/${dom4j.bundle.version}</bundle>
-        <bundle dependency='true'>mvn:org.objectweb.asm/com.springsource.org.objectweb.asm/${asm.springsource.version}</bundle>
-        <bundle dependency='true'>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.antlr/${antlr.bundle.version}</bundle>
+        <bundle dependency="true">mvn:org.objectweb.asm/com.springsource.org.objectweb.asm/${asm.springsource.version}</bundle>
+        <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.antlr/${antlr.bundle.version}</bundle>
         <bundle dependency="true">mvn:net.sourceforge.cglib/com.springsource.net.sf.cglib/${cglib2.version}</bundle>
         <bundle dependency="true">mvn:org.jboss.javassist/com.springsource.javassist/${javassist.version}</bundle>
         <bundle>mvn:org.hibernate/com.springsource.org.hibernate.annotations.common/${hibernate.annotations.common.version}</bundle>
@@ -79,19 +77,19 @@
         <bundle>mvn:org.hibernate/com.springsource.org.hibernate/${hibernate.version}</bundle>
     </feature>
 
-    <feature name='jndi' description='OSGi Service Registry JNDI access' version='${project.version}' resolver='(obr)'>
+    <feature name="jndi" description="OSGi Service Registry JNDI access" version="${project.version}" resolver="(obr)">
         <details>JNDI support provided by Apache Aries JNDI ${aries.jndi.version}, including additional service, commands, and MBean.</details>
-        <bundle start-level='30'>mvn:org.apache.xbean/xbean-naming/${xbean.version}</bundle>
-        <bundle start-level='30'>mvn:org.apache.karaf.jndi/org.apache.karaf.jndi.core/${project.version}</bundle>
-        <bundle start-level='30'>mvn:org.apache.aries.jndi/org.apache.aries.jndi.api/${aries.jndi.api.version}</bundle>
-        <bundle start-level='30'>mvn:org.apache.aries.jndi/org.apache.aries.jndi.core/${aries.jndi.version}</bundle>
-        <bundle start-level='30'>mvn:org.apache.aries.jndi/org.apache.aries.jndi.rmi/${aries.jndi.version}</bundle>
-        <bundle start-level='30'>mvn:org.apache.aries.jndi/org.apache.aries.jndi.url/${aries.jndi.version}</bundle>
-        <bundle start-level='30'>mvn:org.apache.aries.jndi/org.apache.aries.jndi.legacy.support/${aries.jndi.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.xbean/xbean-naming/${xbean.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.karaf.jndi/org.apache.karaf.jndi.core/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.jndi/org.apache.aries.jndi.api/${aries.jndi.api.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.jndi/org.apache.aries.jndi.core/${aries.jndi.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.jndi/org.apache.aries.jndi.rmi/${aries.jndi.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.jndi/org.apache.aries.jndi.url/${aries.jndi.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.jndi/org.apache.aries.jndi.legacy.support/${aries.jndi.version}</bundle>
         <bundle>mvn:org.apache.karaf.jndi/org.apache.karaf.jndi.command/${project.version}</bundle>
     </feature>
 
-    <feature name='jdbc' description='JDBC service and commands' version='${project.version}' resolver='(obr)'>
+    <feature name="jdbc" description="JDBC service and commands" version="${project.version}" resolver="(obr)">
         <details>JDBC support providing service, commands, and MBean.</details>
         <feature>transaction</feature>
         <bundle>mvn:commons-pool/commons-pool/${commons-pool.version}</bundle>
@@ -100,7 +98,7 @@
         <bundle>mvn:org.apache.karaf.jdbc/org.apache.karaf.jdbc.command/${project.version}</bundle>
     </feature>
 
-    <feature name='jms' description='JMS service and commands' version='${project.version}' resolver='(obr)'>
+    <feature name="jms" description="JMS service and commands" version="${project.version}" resolver="(obr)">
         <details>JMS support provinding service, commands, and MBean.</details>
         <feature>transaction</feature>
         <bundle>mvn:org.apache.geronimo.specs/geronimo-jms_1.1_spec/${geronimo.jms-spec.version}</bundle>
@@ -108,7 +106,7 @@
         <bundle>mvn:org.apache.karaf.jms/org.apache.karaf.jms.command/${project.version}</bundle>
     </feature>
 
-    <feature name='openwebbeans' description='Apache OpenWebBeans CDI container support' version='${openwebbeans.version}' resolver='(obr)'>
+    <feature name="openwebbeans" description="Apache OpenWebBeans CDI container support" version="${openwebbeans.version}" resolver="(obr)">
         <details>Add support of Apache OpenWebBeans CDI container.</details>
         <feature>http</feature>
         <feature>pax-cdi-openwebbeans</feature>
@@ -116,28 +114,28 @@
         <bundle>mvn:org.apache.openwebbeans/openwebbeans-osgi/${openwebbeans.version}</bundle>
     </feature>
 
-    <feature name='weld' description='JBoss Weld CDI container support' version='${weld.version}' resolver='(obr)'>
+    <feature name="weld" description="JBoss Weld CDI container support" version="${weld.version}" resolver="(obr)">
         <details>Add support of JBoss Weld CDI container.</details>
         <feature>pax-cdi-weld</feature>
         <bundle>mvn:org.jboss.weld/weld-osgi-bundle/${weld.version}</bundle>
     </feature>
 
-    <feature name='application-without-isolation' description='Provide EBA archive support' version='${aries.application.version}'>
+    <feature name="application-without-isolation" description="Provide EBA archive support" version="${aries.application.version}">
         <details>Support of the Aries EBA archives</details>
         <!-- pre-requisites-->
-        <feature version='${project.version}'>obr</feature>
+        <feature version="${project.version}">obr</feature>
         <!-- common -->
-        <bundle start-level='30'>mvn:org.apache.aries.application/org.apache.aries.application.resolver.obr/${aries.application.version}</bundle>
-        <bundle start-level='30'>mvn:org.apache.aries.application/org.apache.aries.application.install/${aries.application.version}</bundle>
-        <bundle start-level='30'>mvn:org.apache.aries.application/org.apache.aries.application.api/${aries.application.api.version}</bundle>
-        <bundle start-level='30'>mvn:org.apache.aries.application/org.apache.aries.application.management/${aries.application.management.version}</bundle>
-        <bundle start-level='30'>mvn:org.apache.aries.application/org.apache.aries.application.utils/${aries.application.version}</bundle>
-        <bundle start-level='30'>mvn:org.apache.aries.application/org.apache.aries.application.modeller/${aries.application.version}</bundle>
-        <bundle start-level='30'>mvn:org.apache.aries.application/org.apache.aries.application.default.local.platform/${aries.application.version}</bundle>
-        <bundle start-level='30'>mvn:org.apache.aries.application/org.apache.aries.application.resolver.noop/${aries.application.version}</bundle>
-        <bundle start-level='30'>mvn:org.apache.aries.application/org.apache.aries.application.deployment.management/${aries.application.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.application/org.apache.aries.application.resolver.obr/${aries.application.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.application/org.apache.aries.application.install/${aries.application.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.application/org.apache.aries.application.api/${aries.application.api.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.application/org.apache.aries.application.management/${aries.application.management.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.application/org.apache.aries.application.utils/${aries.application.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.application/org.apache.aries.application.modeller/${aries.application.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.application/org.apache.aries.application.default.local.platform/${aries.application.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.application/org.apache.aries.application.resolver.noop/${aries.application.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.application/org.apache.aries.application.deployment.management/${aries.application.version}</bundle>
         <!-- without isolation -->
-        <bundle start-level='30'>mvn:org.apache.aries.application/org.apache.aries.application.runtime/${aries.application.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.application/org.apache.aries.application.runtime/${aries.application.version}</bundle>
     </feature>
 
 </features>
