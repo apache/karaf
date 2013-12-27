@@ -264,18 +264,31 @@ public class AdminServiceImpl implements AdminService {
                 mkdir(karafBase, "deploy");
                 mkdir(karafBase, "data");
 
+                copyResourceToDir(karafBase, "etc/all.policy", true);
                 copyResourceToDir(karafBase, "etc/config.properties", true);
-                copyResourceToDir(karafBase, "etc/jre.properties", true);
                 copyResourceToDir(karafBase, "etc/custom.properties", true);
                 copyResourceToDir(karafBase, "etc/java.util.logging.properties", true);
+                copyResourceToDir(karafBase, "etc/jmx.acl.cfg", true);
+                copyResourceToDir(karafBase, "etc/jmx.acl.java.lang.Memory.cfg", true);
+                copyResourceToDir(karafBase, "etc/jmx.acl.org.apache.karaf.bundle.cfg", true);
+                copyResourceToDir(karafBase, "etc/jmx.acl.org.apache.karaf.config.cfg", true);
+                copyResourceToDir(karafBase, "etc/jmx.acl.org.apache.karaf.security.jmx.cfg", true);
+                copyResourceToDir(karafBase, "etc/jmx.acl.osgi.compendium.cm.cfg", true);
+                copyResourceToDir(karafBase, "etc/jre.properties", true);
+                copyResourceToDir(karafBase, "etc/keys.properties", true);
                 copyResourceToDir(karafBase, "etc/org.apache.felix.fileinstall-deploy.cfg", true);
-                copyResourceToDir(karafBase, "etc/org.apache.karaf.log.cfg", true);
                 copyResourceToDir(karafBase, FEATURES_CFG, true);
+                copyResourceToDir(karafBase, "etc/org.apache.karaf.features.obr.cfg", true);
+                copyResourceToDir(karafBase, "etc/org.apache.karaf.features.repos.cfg", true);
+                copyResourceToDir(karafBase, "etc/org.apache.karaf.jaas.cfg", true);
+                copyResourceToDir(karafBase, "etc/org.apache.karaf.kar.cfg", true);
+                copyResourceToDir(karafBase, "etc/org.apache.karaf.log.cfg", true);
                 copyResourceToDir(karafBase, "etc/org.ops4j.pax.logging.cfg", true);
                 copyResourceToDir(karafBase, "etc/org.ops4j.pax.url.mvn.cfg", true);
+                copyResourceToDir(karafBase, "etc/shell.init.script", true);
                 copyResourceToDir(karafBase, "etc/startup.properties", true);
+                copyResourceToDir(karafBase, "etc/system.properties", true);
                 copyResourceToDir(karafBase, "etc/users.properties", true);
-                copyResourceToDir(karafBase, "etc/keys.properties", true);
 
                 HashMap<String, String> props = new HashMap<String, String>();
                 props.put("${SUBST-KARAF-NAME}", name);

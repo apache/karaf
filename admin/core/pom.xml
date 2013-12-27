@@ -131,9 +131,10 @@
                                 <resource>
                                     <directory>../../assemblies/apache-karaf/src/main/distribution/text/etc/</directory>
                                     <includes>
+                                        <include>*.policy</include>
                                         <include>*.properties</include>
                                         <include>*.cfg</include>
-                                        <include>authorized_keys</include>
+                                        <include>shell.init.script</include>
                                     </includes>
                                     <excludes>
                                         <exclude>org.apache.karaf.shell.cfg</exclude>
