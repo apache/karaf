@@ -80,7 +80,9 @@ public class Main {
             client.start();
             ClientSession session = connectWithRetries(client, config);
             Console console = System.console();
-            console.printf("Logging in as %s\n", config.getUser());
+            if (console != null) {
+                console.printf("Logging in as %s\n", config.getUser());
+            }
             if (!session.authAgent(config.getUser()).await().isSuccess()) {
                 AuthFuture authFuture;
                 boolean useDefault = config.getPassword() != null;
