@@ -121,6 +121,7 @@
 
     <properties>
         <aopalliance.bundle.version>1.0_6</aopalliance.bundle.version>
+        <ant.bundle.version>1.8.2_2</ant.bundle.version>
         <antlr.bundle.version>2.7.7_5</antlr.bundle.version>
         <asm.version>4.1</asm.version>
         <asm.springsource.version>1.5.3</asm.springsource.version>
@@ -136,8 +137,9 @@
         <commons-jexl.version>2.1.1</commons-jexl.version>
         <commons-lang.version>2.6</commons-lang.version>
         <commons-pool.version>1.6</commons-pool.version>
-        <dom4j.bundle.version>1.6.1_2</dom4j.bundle.version>
+        <dom4j.bundle.version>1.6.1_5</dom4j.bundle.version>
         <jasypt.bundle.version>1.9.1_1</jasypt.bundle.version>
+        <serp.bundle.version>1.14.1_1</serp.bundle.version>
         <servlet.spec.groupId>org.apache.geronimo.specs</servlet.spec.groupId>
         <servlet.spec.artifactId>geronimo-servlet_3.0_spec</servlet.spec.artifactId>
         <servlet.spec.version>1.0</servlet.spec.version>
@@ -209,7 +211,8 @@
         <hibernate.annotations.common.version>3.3.0.ga</hibernate.annotations.common.version>
         <hibernate.annotations.version>3.4.0.GA</hibernate.annotations.version>
         <hibernate.ejb.version>3.4.0.GA</hibernate.ejb.version>
-        <hibernate.version>3.3.2.GA</hibernate.version>
+        <hibernate3.version>3.3.2.GA</hibernate3.version>
+        <hibernate4.version>4.2.7.Final</hibernate4.version>
         <jansi.version>1.11</jansi.version>
         <javassist.version>3.9.0.GA</javassist.version>
         <jline.version>2.11</jline.version>
