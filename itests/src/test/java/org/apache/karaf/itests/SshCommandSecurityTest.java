@@ -66,25 +66,43 @@ public class SshCommandSecurityTest extends KarafTestSupport {
 
         addUsers(manageruser, vieweruser);
 
-        // TODO viewer user
+        assertCommand(vieweruser, "bundle:refresh 999", Result.NOT_FOUND);
         assertCommand(manageruser, "bundle:refresh -f 999", Result.NO_CREDENTIALS);
         assertCommand(manageruser, "bundle:refresh 999", Result.OK);
         assertCommand("karaf", "bundle:refresh -f 999", Result.OK);
+        assertCommand("karaf", "bundle:refresh 999", Result.OK);
+
+        assertCommand(vieweruser, "bundle:restart 999", Result.NOT_FOUND);
         assertCommand(manageruser, "bundle:restart -f 999", Result.NO_CREDENTIALS);
         assertCommand(manageruser, "bundle:restart 999", Result.OK);
         assertCommand("karaf", "bundle:restart -f 999", Result.OK);
+        assertCommand("karaf", "bundle:restart 999", Result.OK);
+
+        assertCommand(vieweruser, "bundle:start 999", Result.NOT_FOUND);
         assertCommand(manageruser, "bundle:start -f 999", Result.NO_CREDENTIALS);
         assertCommand(manageruser, "bundle:start 999", Result.OK);
         assertCommand("karaf", "bundle:start -f 999", Result.OK);
+        assertCommand("karaf", "bundle:start 999", Result.OK);
+
+        assertCommand(vieweruser, "bundle:stop 999", Result.NOT_FOUND);
         assertCommand(manageruser, "bundle:stop -f 999", Result.NO_CREDENTIALS);
         assertCommand(manageruser, "bundle:stop 999", Result.OK);
         assertCommand("karaf", "bundle:stop -f 999", Result.OK);
+        assertCommand("karaf", "bundle:stop 999", Result.OK);
+
+        assertCommand(vieweruser, "bundle:uninstall 999", Result.NOT_FOUND);
         assertCommand(manageruser, "bundle:uninstall -f 999", Result.NO_CREDENTIALS);
         assertCommand(manageruser, "bundle:uninstall 999", Result.OK);
         assertCommand("karaf", "bundle:uninstall -f 999", Result.OK);
+        assertCommand("karaf", "bundle:uninstall 999", Result.OK);
+
+        assertCommand(vieweruser, "bundle:update 999", Result.NOT_FOUND);
         assertCommand(manageruser, "bundle:update -f 999", Result.NO_CREDENTIALS);
         assertCommand(manageruser, "bundle:update 999", Result.OK);
         assertCommand("karaf", "bundle:update -f 999", Result.OK);
+        assertCommand("karaf", "bundle:update 999", Result.OK);
+
+        assertCommand(vieweruser, "bundle:install xyz", Result.NOT_FOUND);
         assertCommand(manageruser, "bundle:install xyz", Result.NOT_FOUND);
         assertCommand("karaf", "bundle:install xyz", Result.OK);
     }
