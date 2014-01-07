@@ -105,6 +105,7 @@ public class SshCommandSecurityTest extends KarafTestSupport {
         testConfigEdits(manageruser, Result.NO_CREDENTIALS, "org.apache.karaf.command.acl.test_" + counter++, false);
         testConfigEdits(manageruser, Result.NO_CREDENTIALS, "org.apache.karaf.service.acl.test_" + counter++, false);
         testConfigEdits("karaf", Result.OK, "cfg.karaf_" + counter++, true);
+        testConfigEdits("karaf", Result.OK, "jmx.acl.test_" + counter++, true);
         testConfigEdits("karaf", Result.OK, "org.apache.karaf.command.acl.test_" + counter++, true);
         testConfigEdits("karaf", Result.OK, "org.apache.karaf.service.acl.test_" + counter++, true);
     }
@@ -143,6 +144,47 @@ public class SshCommandSecurityTest extends KarafTestSupport {
                     "config:property-list", Result.OK);
             Assert.assertTrue("The delete command should have had no effect", result3.contains("x = yz"));
             Assert.assertFalse(result3.contains("a = b"));
+        }
+    }
+
+    @Test
+    public void testConfigCommandSecurityWithoutEditSessionViaSsh() throws Exception {
+        String manageruser = "man" + System.nanoTime() + "_" + counter++;
+        String vieweruser = "view" + System.nanoTime() + "_" + counter++;
+
+        addUsers(manageruser, vieweruser);
+
+        // Test the viewer user. Since the viewer cannot modify anything wrt Config Admin
+        // the commands should not even be found...
+        testConfigEditsNoSession(vieweruser, Result.NOT_FOUND, "cfg." + vieweruser);
+        testConfigEditsNoSession(vieweruser, Result.NOT_FOUND, "jmx.acl.test_" + counter++);
+        testConfigEditsNoSession(vieweruser, Result.NOT_FOUND, "org.apache.karaf.command.acl.test_" + counter++);
+        testConfigEditsNoSession(vieweruser, Result.NOT_FOUND, "org.apache.karaf.service.acl.test_" + counter++);
+
+        // Test the manager user. The manager can modify some properties, but not the ones associated with security
+        // Therefore the config: commands will be found, but in some cases the manager is denied access
+        testConfigEditsNoSession(manageruser, Result.OK, "cfg." + manageruser);
+        testConfigEditsNoSession(manageruser, Result.NO_CREDENTIALS, "jmx.acl.test_" + counter++);
+        testConfigEditsNoSession(manageruser, Result.NO_CREDENTIALS, "org.apache.karaf.command.acl.test_" + counter++);
+        testConfigEditsNoSession(manageruser, Result.NO_CREDENTIALS, "org.apache.karaf.service.acl.test_" + counter++);
+
+        // The admin user can modify everything.
+        testConfigEditsNoSession("karaf", Result.OK, "cfg.karaf.test_" + counter++);
+        testConfigEditsNoSession("karaf", Result.OK, "jmx.acl.test_" + counter++);
+        testConfigEditsNoSession("karaf", Result.OK, "org.apache.karaf.command.acl.test_" + counter++);
+        testConfigEditsNoSession("karaf", Result.OK, "org.apache.karaf.service.acl.test_" + counter++);
+    }
+
+    private void testConfigEditsNoSession(String user, Result expectedResult, String pid) throws Exception, IOException {
+        assertCommand(user, "config:property-set -p " + pid + " a.b.c d.e.f", expectedResult);
+        assertCommand(user, "config:property-append -p " + pid + " a.b.c .g.h", expectedResult);
+
+        if (expectedResult == Result.OK) {
+            Assert.assertTrue(assertCommand(user, "config:property-list -p " + pid, Result.OK).contains("a.b.c = d.e.f.g.h"));
+        }
+        assertCommand(user, "config:property-delete -p " + pid + " a.b.c", expectedResult);
+        if (expectedResult == Result.OK) {
+            Assert.assertFalse(assertCommand(user, "config:property-list -p " + pid, Result.OK).contains("a.b.c"));
         }
     }
 
