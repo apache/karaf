@@ -19,6 +19,10 @@ import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
 
+/**
+ * This test exercises the Shell Command ACL for the bundle scope commands as defined in
+ * /framework/src/main/resources/resources/etc/org.apache.karaf.command.acl.bundle.cfg
+ */
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
 public class BundleSshCommandSecurityTest extends SshCommandTestBase {
