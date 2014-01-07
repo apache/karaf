@@ -96,19 +96,32 @@ public class SshCommandSecurityTest extends KarafTestSupport {
 
         addUsers(manageruser, vieweruser);
 
-        testConfigEditsSuccessful(manageruser, false);
-        testConfigEditsSuccessful("karaf", true);
+        // A viewer cannot do anything to ConfigAdmin
+        assertCommand(vieweruser, "config:edit cfg." + vieweruser, Result.NOT_FOUND);
+        assertCommand(vieweruser, "config:delete cfg." + vieweruser, Result.NOT_FOUND);
+
+        testConfigEdits(manageruser, Result.OK, "cfg." + manageruser, false);
+        testConfigEdits(manageruser, Result.NO_CREDENTIALS, "jmx.acl.test_" + counter++, false);
+        testConfigEdits(manageruser, Result.NO_CREDENTIALS, "org.apache.karaf.command.acl.test_" + counter++, false);
+        testConfigEdits(manageruser, Result.NO_CREDENTIALS, "org.apache.karaf.service.acl.test_" + counter++, false);
+        testConfigEdits("karaf", Result.OK, "cfg.karaf_" + counter++, true);
+        testConfigEdits("karaf", Result.OK, "org.apache.karaf.command.acl.test_" + counter++, true);
+        testConfigEdits("karaf", Result.OK, "org.apache.karaf.service.acl.test_" + counter++, true);
     }
 
-    private void testConfigEditsSuccessful(String user, boolean isAdmin) throws Exception, IOException {
-        String pid = "cfg." + user + "_" + counter++;
+    private void testConfigEdits(String user, Result expectedEditResult, String pid, boolean isAdmin) throws Exception, IOException {
         assertCommand(user, "config:edit " + pid + "\n" +
         		"config:property-set x y\n" +
         		"config:property-set a b\n" +
         		"config:property-append x z\n" +
-        		"config:update", Result.OK);
+        		"config:update", expectedEditResult);
+        if (expectedEditResult != Result.OK)
+            // If we're expecting failure, don't continue any further...
+            return;
+
         String result = assertCommand(user, "config:edit " + pid + "\n" +
-        		"config:property-list", Result.OK);
+        		"config:property-list\n" +
+        		"config:cancel", Result.OK);
         Assert.assertTrue(result.contains("x = yz"));
         Assert.assertTrue(result.contains("a = b"));
         String result2 = assertCommand(user, "config:edit " + pid + "\n" +
