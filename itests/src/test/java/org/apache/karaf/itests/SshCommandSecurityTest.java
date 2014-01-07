@@ -66,31 +66,79 @@ public class SshCommandSecurityTest extends KarafTestSupport {
 
         addUsers(manageruser, vieweruser);
 
-        testCommandCredentials(manageruser, "bundle:refresh -f 999\n", Result.NO_CREDENTIALS);
-        testCommandCredentials(manageruser, "bundle:refresh 999\n", Result.OK);
-        testCommandCredentials("karaf", "bundle:refresh -f 999\n", Result.OK);
-        testCommandCredentials(manageruser, "bundle:restart -f 999\n", Result.NO_CREDENTIALS);
-        testCommandCredentials(manageruser, "bundle:restart 999\n", Result.OK);
-        testCommandCredentials("karaf", "bundle:restart -f 999\n", Result.OK);
-        testCommandCredentials(manageruser, "bundle:start -f 999\n", Result.NO_CREDENTIALS);
-        testCommandCredentials(manageruser, "bundle:start 999\n", Result.OK);
-        testCommandCredentials("karaf", "bundle:start -f 999\n", Result.OK);
-        testCommandCredentials(manageruser, "bundle:stop -f 999\n", Result.NO_CREDENTIALS);
-        testCommandCredentials(manageruser, "bundle:stop 999\n", Result.OK);
-        testCommandCredentials("karaf", "bundle:stop -f 999\n", Result.OK);
-        testCommandCredentials(manageruser, "bundle:uninstall -f 999\n", Result.NO_CREDENTIALS);
-        testCommandCredentials(manageruser, "bundle:uninstall 999\n", Result.OK);
-        testCommandCredentials("karaf", "bundle:uninstall -f 999\n", Result.OK);
-        testCommandCredentials(manageruser, "bundle:update -f 999\n", Result.NO_CREDENTIALS);
-        testCommandCredentials(manageruser, "bundle:update 999\n", Result.OK);
-        testCommandCredentials("karaf", "bundle:update -f 999\n", Result.OK);
-        testCommandCredentials(manageruser, "bundle:install xyz\n", Result.NOT_FOUND);
-        testCommandCredentials("karaf", "bundle:install xyz\n", Result.OK);
+        // TODO viewer user
+        assertCommand(manageruser, "bundle:refresh -f 999", Result.NO_CREDENTIALS);
+        assertCommand(manageruser, "bundle:refresh 999", Result.OK);
+        assertCommand("karaf", "bundle:refresh -f 999", Result.OK);
+        assertCommand(manageruser, "bundle:restart -f 999", Result.NO_CREDENTIALS);
+        assertCommand(manageruser, "bundle:restart 999", Result.OK);
+        assertCommand("karaf", "bundle:restart -f 999", Result.OK);
+        assertCommand(manageruser, "bundle:start -f 999", Result.NO_CREDENTIALS);
+        assertCommand(manageruser, "bundle:start 999", Result.OK);
+        assertCommand("karaf", "bundle:start -f 999", Result.OK);
+        assertCommand(manageruser, "bundle:stop -f 999", Result.NO_CREDENTIALS);
+        assertCommand(manageruser, "bundle:stop 999", Result.OK);
+        assertCommand("karaf", "bundle:stop -f 999", Result.OK);
+        assertCommand(manageruser, "bundle:uninstall -f 999", Result.NO_CREDENTIALS);
+        assertCommand(manageruser, "bundle:uninstall 999", Result.OK);
+        assertCommand("karaf", "bundle:uninstall -f 999", Result.OK);
+        assertCommand(manageruser, "bundle:update -f 999", Result.NO_CREDENTIALS);
+        assertCommand(manageruser, "bundle:update 999", Result.OK);
+        assertCommand("karaf", "bundle:update -f 999", Result.OK);
+        assertCommand(manageruser, "bundle:install xyz", Result.NOT_FOUND);
+        assertCommand("karaf", "bundle:install xyz", Result.OK);
     }
 
-    private void testCommandCredentials(String user, String command, Result result) throws Exception, IOException {
+    @Test
+    public void testConfigCommandSecurityViaSsh() throws Exception {
+        String manageruser = "man" + System.nanoTime() + "_" + counter++;
+        String vieweruser = "view" + System.nanoTime() + "_" + counter++;
+
+        addUsers(manageruser, vieweruser);
+
+        testConfigEditsSuccessful(manageruser, false);
+        testConfigEditsSuccessful("karaf", true);
+    }
+
+    private void testConfigEditsSuccessful(String user, boolean isAdmin) throws Exception, IOException {
+        String pid = "cfg." + user + "_" + counter++;
+        assertCommand(user, "config:edit " + pid + "\n" +
+        		"config:property-set x y\n" +
+        		"config:property-set a b\n" +
+        		"config:property-append x z\n" +
+        		"config:update", Result.OK);
+        String result = assertCommand(user, "config:edit " + pid + "\n" +
+        		"config:property-list", Result.OK);
+        Assert.assertTrue(result.contains("x = yz"));
+        Assert.assertTrue(result.contains("a = b"));
+        String result2 = assertCommand(user, "config:edit " + pid + "\n" +
+                "config:property-delete a\n" +
+                "config:property-list\n" +
+                "config:update", Result.OK);
+        Assert.assertTrue(result2.contains("x = yz"));
+        Assert.assertFalse(result2.contains("a = b"));
+
+        if (isAdmin) {
+            assertCommand(user, "config:delete " + pid, Result.OK);
+            String result3 = assertCommand(user, "config:edit " + pid + "\n" +
+                    "config:property-list", Result.OK);
+            Assert.assertFalse(result3.contains("x = yz"));
+            Assert.assertFalse(result3.contains("a = b"));
+        } else {
+            assertCommand(user, "config:delete " + pid, Result.NOT_FOUND);
+            String result3 = assertCommand(user, "config:edit " + pid + "\n" +
+                    "config:property-list", Result.OK);
+            Assert.assertTrue("The delete command should have had no effect", result3.contains("x = yz"));
+            Assert.assertFalse(result3.contains("a = b"));
+        }
+    }
+
+    private String assertCommand(String user, String command, Result result) throws Exception, IOException {
+        if (!command.endsWith("\n"))
+            command += "\n";
+
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        OutputStream pipe = openSshChannel(user, user, out);
+        OutputStream pipe = openSshChannel(user, user, out, out);
         pipe.write(command.getBytes());
         pipe.flush();
 
@@ -113,6 +161,7 @@ public class SshCommandSecurityTest extends KarafTestSupport {
         default:
             Assert.fail("Unexpected enum value: " + result);
         }
+        return output;
     }
 
     private void addUsers(String manageruser, String vieweruser) throws Exception {
