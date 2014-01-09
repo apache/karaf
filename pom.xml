@@ -192,6 +192,7 @@
         <maven.version>3.0-alpha-2</maven.version>
         <mina.version>2.0.7</mina.version>
         <openjpa.version>2.3.0</openjpa.version>
+        <openwebbeans.version>1.2.1</openwebbeans.version>
         <osgi.version>4.3.1</osgi.version>
         <org.json.version>20131018</org.json.version>
         <pax.base.version>1.4.0</pax.base.version>
@@ -218,6 +219,7 @@
         <xbean.version>3.16</xbean.version>
         <xerces.version>2.11.0</xerces.version>
         <javax.mail.version>1.4.5</javax.mail.version>
+        <weld.version>2.1.1.Final</weld.version>
         <http.feature.version>[2,3)</http.feature.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <appendedResourcesDirectory>${basedir}/etc/appended-resources</appendedResourcesDirectory>
