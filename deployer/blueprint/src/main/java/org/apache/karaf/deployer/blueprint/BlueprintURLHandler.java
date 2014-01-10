@@ -42,8 +42,6 @@ public class BlueprintURLHandler extends AbstractURLStreamHandlerService {
 
 	private static String SYNTAX = "blueprint: bp-xml-uri";
 
-	private URL blueprintXmlURL;
-
     /**
      * Open the connection for the given URL.
      *
@@ -56,14 +54,9 @@ public class BlueprintURLHandler extends AbstractURLStreamHandlerService {
 		if (url.getPath() == null || url.getPath().trim().length() == 0) {
 			throw new MalformedURLException ("Path cannot be null or empty. Syntax: " + SYNTAX );
 		}
-		blueprintXmlURL = new URL(url.getPath());
 
-		logger.debug("Blueprint xml URL is: [" + blueprintXmlURL + "]");
+		logger.debug("Blueprint xml URL is: [" + url.getPath() + "]");
 		return new Connection(url);
-	}
-	
-	public URL getBlueprintXmlURL() {
-		return blueprintXmlURL;
 	}
 
     public class Connection extends URLConnection {
@@ -80,7 +73,7 @@ public class BlueprintURLHandler extends AbstractURLStreamHandlerService {
         public InputStream getInputStream() throws IOException {
             try {
                 ByteArrayOutputStream os = new ByteArrayOutputStream();
-                BlueprintTransformer.transform(blueprintXmlURL, os);
+                BlueprintTransformer.transform(new URL(url.getPath()), os);
                 os.close();
                 return new ByteArrayInputStream(os.toByteArray());
             } catch (Exception e) {

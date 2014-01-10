@@ -19,9 +19,6 @@ package org.apache.karaf.deployer.spring;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -42,8 +39,6 @@ public class SpringURLHandler extends AbstractURLStreamHandlerService {
 
 	private static String SYNTAX = "spring: spring-xml-uri";
 
-	private URL springXmlURL;
-
     /**
      * Open the connection for the given URL.
      *
@@ -55,15 +50,10 @@ public class SpringURLHandler extends AbstractURLStreamHandlerService {
 	public URLConnection openConnection(URL url) throws IOException {
 		if (url.getPath() == null || url.getPath().trim().length() == 0) {
 			throw new MalformedURLException ("Path cannot be null or empty. Syntax: " + SYNTAX );
-		}
-		springXmlURL = new URL(url.getPath());
+        }
 
-		logger.debug("Spring xml URL is: [" + springXmlURL + "]");
+		logger.debug("Spring xml URL is: [" + url.getPath() + "]");
 		return new Connection(url);
-	}
-	
-	public URL getSpringXmlURL() {
-		return springXmlURL;
 	}
 
     public class Connection extends URLConnection {
@@ -80,7 +70,7 @@ public class SpringURLHandler extends AbstractURLStreamHandlerService {
         public InputStream getInputStream() throws IOException {
             try {
                 ByteArrayOutputStream os = new ByteArrayOutputStream();
-                SpringTransformer.transform(springXmlURL, os);
+                SpringTransformer.transform(new URL(url.getPath()), os);
                 os.close();
                 return new ByteArrayInputStream(os.toByteArray());
             } catch (Exception e) {

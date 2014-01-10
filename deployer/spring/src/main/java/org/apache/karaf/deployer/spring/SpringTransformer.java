@@ -33,18 +33,15 @@ import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
 import org.apache.karaf.util.DeployerUtils;
 
+import org.apache.karaf.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -54,10 +51,6 @@ import org.osgi.framework.Constants;
 import static org.apache.karaf.util.MvnUtils.getMvnPath;
 
 public class SpringTransformer {
-
-    static Transformer transformer;
-    static DocumentBuilderFactory dbf;
-    static TransformerFactory tf;
 
 
     public static void transform(URL url, OutputStream os) throws Exception {
@@ -113,28 +106,17 @@ public class SpringTransformer {
         e = new ZipEntry("META-INF/spring/" + name);
         out.putNextEntry(e);
         // Copy the new DOM
-        if (tf == null) {
-            tf = TransformerFactory.newInstance();
-        }
-        tf.newTransformer().transform(new DOMSource(doc), new StreamResult(out));
+        XmlUtils.transform(new DOMSource(doc), new StreamResult(out));
         out.closeEntry();
         out.close();
     }
 
     public static Set<String> analyze(Source source) throws Exception {
-        if (transformer == null) {
-            if (tf == null) {
-                tf = TransformerFactory.newInstance();
-            }
-            Source s = new StreamSource(SpringTransformer.class.getResourceAsStream("extract.xsl"));
-            transformer = tf.newTransformer(s);
-        }
-
         Set<String> refers = new TreeSet<String>();
 
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
         Result r = new StreamResult(bout);
-        transformer.transform(source, r);
+        XmlUtils.transform(new StreamSource(SpringTransformer.class.getResourceAsStream("extract.xsl")), source, r);
 
         ByteArrayInputStream bin = new ByteArrayInputStream(bout.toByteArray());
         bout.close();
@@ -174,12 +156,7 @@ public class SpringTransformer {
     }
 
     protected static Document parse(URL url) throws Exception {
-        if (dbf == null) {
-            dbf = DocumentBuilderFactory.newInstance();
-            dbf.setNamespaceAware(true);
-        }
-        DocumentBuilder db = dbf.newDocumentBuilder();
-        return db.parse(url.toString());
+        return XmlUtils.parse(url.toString());
     }
 
 }
