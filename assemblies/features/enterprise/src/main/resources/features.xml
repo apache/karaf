@@ -20,6 +20,8 @@
 
 <features name="karaf-enterprise-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.0.0">
 
+    <repository>mvn:org.ops4j.pax.cdi/pax-cdi-features/${pax.cdi.version}/xml/features</repository>
+
     <feature name="transaction" description="OSGi Transaction Manager" version="${aries.transaction.version}" resolver="(obr)">
         <details>JTA implementation provided by Apache Aries Transaction ${aries.transaction.version}</details>
         <config name="org.apache.aries.transaction">
@@ -82,6 +84,20 @@
         <bundle start-level="30">mvn:org.apache.aries.jndi/org.apache.aries.jndi.rmi/${aries.jndi.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.jndi/org.apache.aries.jndi.url/${aries.jndi.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.jndi/org.apache.aries.jndi.legacy.support/${aries.jndi.version}</bundle>
+    </feature>
+
+    <feature name="openwebbeans" description="Apache OpenWebBeans CDI container support" version="${openwebbeans.version}" resolver="(obr)">
+        <details>Add support of Apache OpenWebBeans CDI container.</details>
+        <feature>http</feature>
+        <feature>pax-cdi-openwebbeans</feature>
+        <bundle>mvn:org.apache.openwebbeans/openwebbeans-impl/${openwebbeans.version}</bundle>
+        <bundle>mvn:org.apache.openwebbeans/openwebbeans-osgi/${openwebbeans.version}</bundle>
+    </feature>
+
+    <feature name="weld" description="JBoss Weld CDI container support" version="${weld.version}" resolver="(obr)">
+        <details>Add support of JBoss Weld CDI container.</details>
+        <feature>pax-cdi-weld</feature>
+        <bundle>mvn:org.jboss.weld/weld-osgi-bundle/${weld.version}</bundle>
     </feature>
 
     <feature name="application-without-isolation" description="Provide EBA archive support" version="${aries.application.version}">
