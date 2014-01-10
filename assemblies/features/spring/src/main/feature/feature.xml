@@ -194,6 +194,19 @@
         <bundle start-level="30">mvn:org.springframework/org.springframework.web.portlet/${spring32.version}</bundle>
     </feature>
 
+    <!-- Spring Security support -->
+
+    <feature name="spring-security" description="Spring Security 3.1.x support" version="${spring.security31.version}" resolver="(obr)">
+        <feature>war</feature>
+        <feature>spring-dm-web</feature>
+        <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.aspectj/${aspectj.bundle.version}</bundle>
+        <bundle start-level="30">mvn:org.springframework.security/spring-security-core/${spring.security31.version}</bundle>
+        <bundle start-level="30">mvn:org.springframework.security/spring-security-config/${spring.security31.version}</bundle>
+        <bundle start-level="30">mvn:org.springframework.security/spring-security-web/${spring.security31.version}</bundle>
+        <bundle start-level="30">mvn:org.springframework.security/spring-security-acl/${spring.security31.version}</bundle>
+        <bundle start-level="30">mvn:org.springframework.security/spring-security-taglibs/${spring.security31.version}</bundle>
+    </feature>
+
     <!-- Gemini Blueprint support -->
 
     <feature name="gemini-blueprint" description="Gemini Blueprint Extender" version="${gemini.blueprint.version}" resolver="(obr)">
