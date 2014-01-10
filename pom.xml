@@ -103,7 +103,9 @@
 
     <properties>
         <aopalliance.bundle.version>1.0_6</aopalliance.bundle.version>
+        <antlr.bundle.version>2.7.7_5</antlr.bundle.version>
         <asm.version>4.1</asm.version>
+        <asm.springsource.version>1.5.3</asm.springsource.version>
         <bndlib.version>1.50.0</bndlib.version>
         <cglib.bundle.version>2.2.2_1</cglib.bundle.version>
         <commons-beanutils.version>1.8.3</commons-beanutils.version>
@@ -115,12 +117,16 @@
         <commons-io.version>2.4</commons-io.version>
         <commons-lang.version>2.6</commons-lang.version>
         <commons-pool.version>1.6</commons-pool.version>
+        <dom4j.bundle.version>1.6.1_5</dom4j.bundle.version>
         <injection.bundle.version>1.0</injection.bundle.version>
         <jasypt.bundle.version>1.9.1_1</jasypt.bundle.version>
+        <javassist.version>3.9.0.GA</javassist.version>
         <jetty.version>7.6.8.v20121106</jetty.version>
         <junit.version>4.10</junit.version>
         <junit.bundle.version>4.10_1</junit.bundle.version>
         <org.json.version>20131018</org.json.version>
+        <geronimo.annotation-spec.version>1.0.1</geronimo.annotation-spec.version>
+        <geronimo.jaspic-spec.version>1.1</geronimo.jaspic-spec.version>
         <geronimo.jms-spec.version>1.1.1</geronimo.jms-spec.version>
         <geronimo.jpa-spec.version>1.1</geronimo.jpa-spec.version>
         <geronimo.jta-spec.version>1.1.1</geronimo.jta-spec.version>
@@ -142,6 +148,12 @@
         <felix.obr.version>1.0.2</felix.obr.version>
         <felix.scr.version>1.8.0</felix.scr.version>
         <felix.scr.webconsole.plugin.version>1.0.0</felix.scr.webconsole.plugin.version>
+
+        <hibernate.annotations.common.version>3.3.0.ga</hibernate.annotations.common.version>
+        <hibernate.annotations.version>3.4.0.GA</hibernate.annotations.version>
+        <hibernate.ejb.version>3.4.0.GA</hibernate.ejb.version>
+        <hibernate3.version>3.3.2.GA</hibernate3.version>
+
         <aries.application.version>1.0.0</aries.application.version>
         <aries.application.api.version>1.0.0</aries.application.api.version>
         <aries.application.management.version>1.0.0</aries.application.management.version>
@@ -188,7 +200,7 @@
         <portlet-api.version>2.0</portlet-api.version>
         <servicemix.specs.version>2.4.0</servicemix.specs.version>
         <servlet.api.version>2.5</servlet.api.version>
-        <slf4j.version>1.7.2</slf4j.version>
+        <slf4j.version>1.7.5</slf4j.version>
         <spring.osgi.version>1.2.1</spring.osgi.version>
         <spring2.version>2.5.6.SEC03</spring2.version>
         <spring30.version>3.0.7.RELEASE</spring30.version>

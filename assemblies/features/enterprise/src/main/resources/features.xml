@@ -57,6 +57,24 @@
         <bundle>mvn:org.apache.openjpa/openjpa/${openjpa.version}</bundle>
     </feature>
 
+    <feature name="hibernate" description="Hibernate 3.x JPA persistence engine support" version="${hibernate3.version}" resolver="(obr)">
+        <details>Enable Hibernate 3.x as persistence engine.</details>
+        <feature>jpa</feature>
+        <bundle dependency="true">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.java-persistence-api-1.1.1/${servicemix.specs.version}</bundle>
+        <bundle dependency="true">mvn:commons-collections/commons-collections/${commons-collections.version}</bundle>
+        <bundle dependency="true">mvn:commons-pool/commons-pool/${commons-pool.version}</bundle>
+        <bundle dependency="true">mvn:commons-dbcp/commons-dbcp/${commons-dbcp.version}</bundle>
+        <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.dom4j/${dom4j.bundle.version}</bundle>
+        <bundle dependency="true">mvn:org.objectweb.asm/com.springsource.org.objectweb.asm/${asm.springsource.version}</bundle>
+        <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.antlr/${antlr.bundle.version}</bundle>
+        <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.cglib/${cglib.bundle.version}</bundle>
+        <bundle dependency="true">mvn:org.jboss.javassist/com.springsource.javassist/${javassist.version}</bundle>
+        <bundle>mvn:org.hibernate/com.springsource.org.hibernate.annotations.common/${hibernate.annotations.common.version}</bundle>
+        <bundle>mvn:org.hibernate/com.springsource.org.hibernate.annotations/${hibernate.annotations.version}</bundle>
+        <bundle>mvn:org.hibernate/com.springsource.org.hibernate.ejb/${hibernate.ejb.version}</bundle>
+        <bundle>mvn:org.hibernate/com.springsource.org.hibernate/${hibernate3.version}</bundle>
+    </feature>
+
     <feature name="jndi" description="OSGi Service Registry JNDI access" version="${aries.jndi.version}" resolver="(obr)">
         <details>JNDI support provided by Apache Aries JNDI ${aries.jndi.version}</details>
         <bundle start-level="30">mvn:org.apache.aries.jndi/org.apache.aries.jndi.api/${aries.jndi.api.version}</bundle>
