@@ -35,8 +35,38 @@ public class EnterpriseFeaturesTest extends KarafTestSupport {
     }
 
     @Test
+    public void installOpenJpaFeature() throws Exception {
+        installAssertAndUninstallFeature("openjpa");
+    }
+
+    @Test
+    public void installHibernateFeature() throws Exception {
+        installAssertAndUninstallFeature("hibernate");
+    }
+
+    @Test
     public void installJndiFeature() throws Exception {
     	installAssertAndUninstallFeature("jndi");
+    }
+
+    @Test
+    public void installJdbcFeature() throws Exception {
+        installAssertAndUninstallFeature("jdbc");
+    }
+
+    @Test
+    public void installJmsFeature() throws Exception {
+        installAssertAndUninstallFeature("jms");
+    }
+
+    @Test
+    public void installOpenWebBeansFeature() throws Exception {
+        installAssertAndUninstallFeature("openwebbeans");
+    }
+
+    @Test
+    public void installWeldFeature() throws Exception {
+        installAssertAndUninstallFeature("weld");
     }
 
     @Test
