@@ -38,6 +38,11 @@ public class StandardFeaturesTest extends KarafTestSupport {
     public void installAriesAnnotationFeature() throws Exception {
         installAssertAndUninstallFeature("aries-annotation");
     }
+
+    @Test
+    public void installAriesBlueprintWebFeature() throws Exception {
+        installAssertAndUninstallFeature("blueprint-web");
+    }
     
     @Test
     public void installWrapperFeature() throws Exception {
