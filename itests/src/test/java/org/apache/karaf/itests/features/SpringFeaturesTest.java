@@ -97,6 +97,11 @@ public class SpringFeaturesTest extends KarafTestSupport {
     }
 
     @Test
+    public void installSpringSecurityFeature() throws Exception {
+        installAssertAndUninstallFeature("spring-security");
+    }
+
+    @Test
     @Ignore
     public void installGeminiBlueprintFeature() throws Exception {
         installAssertAndUninstallFeature("gemini-blueprint");
