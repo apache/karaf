@@ -17,71 +17,73 @@
 package org.apache.karaf.config.command;
 
 
-import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
 
 import java.util.Dictionary;
-import java.util.Properties;
+import java.util.Hashtable;
 
 import junit.framework.TestCase;
 
-import org.apache.felix.service.command.CommandSession;
-import org.apache.karaf.config.core.impl.ConfigRepositoryImpl;
+import org.apache.karaf.config.core.ConfigRepository;
 import org.easymock.EasyMock;
 import org.osgi.framework.BundleContext;
-import org.osgi.service.cm.Configuration;
-import org.osgi.service.cm.ConfigurationAdmin;
 
 /**
  * Test cases for {@link EditCommand}
  */
 public class UpdateCommandTest extends TestCase {
 
-    private static final String PID = "my.test.persistent.id-other";
+    private static final String FACTORY_PID = "myFactoryPid";
+    private static final String PID = "myPid";
 
-    private UpdateCommand command;
-    private BundleContext context;
-    private ConfigurationAdmin admin;
-    private CommandSession session;
+    public void testupdateRegularConfig() throws Exception {
+		Dictionary<String, Object> props = new Hashtable<String, Object>();
 
-    @Override
-    protected void setUp() throws Exception {
-        command = new UpdateCommand();
-
-        context = EasyMock.createMock(BundleContext.class);
+        UpdateCommand command = new UpdateCommand();
+        BundleContext context = EasyMock.createMock(BundleContext.class);
         command.setBundleContext(context);
-
-        admin = createMock(ConfigurationAdmin.class);
-        command.setConfigRepository(new ConfigRepositoryImpl(admin));
+        ConfigRepository configRepo = EasyMock.createMock(ConfigRepository.class);
+        configRepo.update(EasyMock.eq(PID), EasyMock.eq(props));
+        EasyMock.expectLastCall();
+		command.setConfigRepository(configRepo);
         expect(context.getBundle(0)).andReturn(null).anyTimes();
-
+        
+        MockCommandSession session = createMockSessionForFactoryEdit(PID, false, props);
         replay(context);
-
-        session = new MockCommandSession();
-    }
-
-    public void testupdateOnNewFactoryPid() throws Exception {
-        Dictionary props = new Properties();
-
-        session.put(ConfigCommandSupport.PROPERTY_CONFIG_PID, PID);
-        session.put(ConfigCommandSupport.PROPERTY_CONFIG_PROPS, props);
-
-        Configuration configNew = createMock(Configuration.class);
-        expect(admin.getConfiguration(PID, null)).andReturn(configNew);
-        expect(configNew.getProperties()).andReturn(null);
-
-
-        Configuration configFac = createMock(Configuration.class);
-        expect(admin.createFactoryConfiguration(PID.substring(0, PID.indexOf('-')), null)).andReturn(configFac);
-        configFac.update(props);
-        expect(configFac.getBundleLocation()).andReturn(null);
-        replay(admin);
-        replay(configNew);
-        replay(configFac);
+        replay(configRepo);
 
         command.execute(session);
-
+        EasyMock.verify(context, configRepo);
     }
+    
+    public void testupdateOnNewFactoryPid() throws Exception {
+		Dictionary<String, Object> props = new Hashtable<String, Object>();
+
+        UpdateCommand command = new UpdateCommand();
+        BundleContext context = EasyMock.createMock(BundleContext.class);
+        command.setBundleContext(context);
+        ConfigRepository configRepo = EasyMock.createMock(ConfigRepository.class);
+        expect(configRepo.createFactoryConfiguration(EasyMock.eq(FACTORY_PID), EasyMock.eq(props)))
+        	.andReturn(PID + ".35326647");
+		command.setConfigRepository(configRepo);
+        expect(context.getBundle(0)).andReturn(null).anyTimes();
+        
+        MockCommandSession session = createMockSessionForFactoryEdit(FACTORY_PID, true, props);
+        replay(context);
+        replay(configRepo);
+
+        command.execute(session);
+        EasyMock.verify(context, configRepo);
+    }
+
+	private MockCommandSession createMockSessionForFactoryEdit(String pid, boolean isFactory, 
+			Dictionary<String, Object> props) {
+		MockCommandSession session = new MockCommandSession();
+        session.put(ConfigCommandSupport.PROPERTY_CONFIG_PID, pid);
+        session.put(ConfigCommandSupport.PROPERTY_FACTORY, isFactory);
+        session.put(ConfigCommandSupport.PROPERTY_CONFIG_PROPS, props);
+		return session;
+	}
 
 }

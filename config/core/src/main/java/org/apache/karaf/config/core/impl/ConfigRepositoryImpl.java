@@ -39,38 +39,15 @@ public class ConfigRepositoryImpl implements ConfigRepository {
      * @see org.apache.karaf.shell.config.impl.ConfigRepository#update(java.lang.String, java.util.Dictionary, boolean)
      */
     @Override
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public void update(String pid, Dictionary props) throws IOException {
         Configuration cfg = this.configAdmin.getConfiguration(pid, null);
-        if (cfg.getProperties() == null) {
-            PidParts pidParts = parsePid(pid);
-            if (pidParts.factoryPid != null) {
-                cfg = this.configAdmin.createFactoryConfiguration(pidParts.pid, null);
-            }
-        }
         if (cfg.getBundleLocation() != null) {
             cfg.setBundleLocation(null);
         }
         cfg.update(props);
     }
 
-    private PidParts parsePid(String sourcePid) {
-        PidParts pidParts = new PidParts();
-        int n = sourcePid.indexOf('-');
-        if (n > 0) {
-            pidParts.factoryPid = sourcePid.substring(n + 1);
-            pidParts.pid = sourcePid.substring(0, n);
-        } else {
-            pidParts.pid = sourcePid;
-        }
-        return pidParts;
-    }
-    
-    private class PidParts {
-        String pid;
-        String factoryPid;
-    }
-    
     /* (non-Javadoc)
      * @see org.apache.karaf.shell.config.impl.ConfigRepository#delete(java.lang.String)
      */
@@ -107,5 +84,16 @@ public class ConfigRepositoryImpl implements ConfigRepository {
     public ConfigurationAdmin getConfigAdmin() {
         return this.configAdmin;
     }
+
+	@Override
+	public String createFactoryConfiguration(String factoryPid, Dictionary<String, ?> properties) {
+		try {
+			Configuration config = configAdmin.createFactoryConfiguration(factoryPid);
+			config.update(properties);
+			return config.getPid();
+		} catch (IOException e) {
+			throw new RuntimeException(e.getMessage(), e);
+		}
+	}
 
 }

@@ -23,7 +23,7 @@ import org.apache.karaf.shell.commands.Command;
 @Command(scope = "config", name = "update", description = "Saves and propagates changes from the configuration being edited.")
 public class UpdateCommand extends ConfigCommandSupport {
 
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     protected Object doExecute() throws Exception {
         Dictionary props = getEditedProps();
         if (props == null) {
@@ -32,8 +32,14 @@ public class UpdateCommand extends ConfigCommandSupport {
         }
 
         String pid = (String) this.session.get(PROPERTY_CONFIG_PID);
-        this.configRepository.update(pid, props);
+        boolean isFactory = this.session.get(PROPERTY_FACTORY) != null && (Boolean) this.session.get(PROPERTY_FACTORY);
+        if (isFactory) {
+        	this.configRepository.createFactoryConfiguration(pid, props);
+        } else {
+        	this.configRepository.update(pid, props);
+        }
         this.session.put(PROPERTY_CONFIG_PID, null);
+        this.session.put(PROPERTY_FACTORY, null);
         this.session.put(PROPERTY_CONFIG_PROPS, null);
         return null;
     }

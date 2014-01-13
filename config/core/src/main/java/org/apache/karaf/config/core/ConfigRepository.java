@@ -39,4 +39,13 @@ public interface ConfigRepository {
     Dictionary getConfigProperties(String pid) throws IOException, InvalidSyntaxException;
 
     ConfigurationAdmin getConfigAdmin();
+
+    /**
+     * Create a factory based configuration.
+     *
+     * @param factoryPid
+     * @param properties the new properties to set in the configuration.
+     * @return created pid
+     */
+	String createFactoryConfiguration(String factoryPid, Dictionary<String, ?> properties);
 }

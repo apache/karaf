@@ -30,6 +30,7 @@ import org.apache.karaf.shell.console.OsgiCommandSupport;
 public abstract class ConfigCommandSupport extends OsgiCommandSupport {
     public static final String PROPERTY_CONFIG_PID = "ConfigCommand.PID";
     public static final String PROPERTY_CONFIG_PROPS = "ConfigCommand.Props";
+    public static final String PROPERTY_FACTORY = "ConfigCommand.Factory";
     protected ConfigRepository configRepository;
 
     @SuppressWarnings("rawtypes")

@@ -17,6 +17,7 @@
 package org.apache.karaf.itests;
 
 import static org.junit.Assert.assertEquals;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.replaceConfigurationFile;
 
 import java.io.IOException;
 
@@ -25,6 +26,8 @@ import javax.inject.Inject;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.ops4j.pax.exam.CoreOptions;
+import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
@@ -34,36 +37,69 @@ import org.osgi.service.cm.ConfigurationAdmin;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
-public class ConfigManagedServiceFactoryTest extends KarafTestSupport {  
-    
-    @Inject
-    ConfigurationAdmin configAdmin;
-    
-    @Test
-    public void updateProperties() throws IOException, InvalidSyntaxException {
-        executeCommand("config:edit myconfig-itest \n" +
-                       "config:property-set test1 test \n" +
-                       "config:property-set test2 test \n" +
-                       "config:update", new RolePrincipal("manager"));
-        Configuration config = readConfig();
-        assertThatPropertiesAreCorrect(config);
-        
-        executeCommand("config:edit myconfig-itest \n" +
-            "config:property-set test1 test \n" +
-            "config:update", new RolePrincipal("manager"));
-        config = readConfig();
-        // fails at property test2. See KARAF-2676
-        assertThatPropertiesAreCorrect(config);
-    }
+public class ConfigManagedServiceFactoryTest extends KarafTestSupport {
 
-    private void assertThatPropertiesAreCorrect(Configuration config) {
-        assertEquals("test", config.getProperties().get("test1"));
-        assertEquals("test", config.getProperties().get("test2"));
-    }
+	@Inject
+	ConfigurationAdmin configAdmin;
 
-    private Configuration readConfig() throws IOException, InvalidSyntaxException {
-        Configuration[]configs = configAdmin.listConfigurations("(service.factorypid=myconfig)");
-        return configs[0];
-    }
+	@org.ops4j.pax.exam.Configuration
+	public Option[] config() {
+		return new Option[] {
+				CoreOptions.composite(super.config()),
+				replaceConfigurationFile("etc/myconfig-test1.cfg",
+						getConfigFile("/etc/myconfig-test1.cfg")),
+		// KarafDistributionOption.debugConfiguration()
+		};
+	}
+
+	@Test
+	public void updateProperties() throws IOException, InvalidSyntaxException {
+		checkInitialValuesFromFelixConfigAdmin();
+		checkEditByFactoryPid();
+		CheckEditByArbitraryAttribute();
+	}
+	
+	@Test
+	public void createNewFactoryConfig() throws Exception {
+		executeCommand("config:edit --factory myconfig2\n"
+				+ "config:property-set test1 data1\n"
+				+ "config:update", new RolePrincipal("manager"));
+		Configuration config = configAdmin.listConfigurations("(service.factorypid=myconfig2)")[0];
+		assertEquals("data1", config.getProperties().get("test1"));
+	}
+
+	private void checkInitialValuesFromFelixConfigAdmin() throws IOException,
+			InvalidSyntaxException {
+		Configuration config = readConfig();
+		assertEquals("data1", config.getProperties().get("test1"));
+		assertEquals("data2", config.getProperties().get("test2"));
+	}
+
+	private void checkEditByFactoryPid() throws IOException,
+			InvalidSyntaxException {
+		executeCommand("config:edit '(service.factorypid=myconfig)'\n"
+				+ "config:property-set test1 data1new\n" + "config:update",
+				new RolePrincipal("manager"));
+		Configuration config = readConfig();
+		assertEquals("data1new", config.getProperties().get("test1"));
+		assertEquals("data2", config.getProperties().get("test2"));
+	}
+
+	private void CheckEditByArbitraryAttribute() throws IOException,
+			InvalidSyntaxException {
+		executeCommand("config:edit '(test2=data2)'\n"
+				+ "config:property-set test1 data1new2\n" + "config:update",
+				new RolePrincipal("manager"));
+		Configuration config = readConfig();
+		assertEquals("data1new2", config.getProperties().get("test1"));
+		assertEquals("data2", config.getProperties().get("test2"));
+	}
+
+	private Configuration readConfig() throws IOException,
+			InvalidSyntaxException {
+		Configuration[] configs = configAdmin
+				.listConfigurations("(service.factorypid=myconfig)");
+		return configs[0];
+	}
 
 }

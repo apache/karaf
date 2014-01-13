@@ -14,7 +14,6 @@
 package org.apache.karaf.config.core;
 
 import javax.management.MBeanException;
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -93,5 +92,16 @@ public interface ConfigMBean {
      * @throws MBeanException
      */
     void update(String pid, Map<String, String> properties) throws MBeanException;
+    
+    /**
+     * Create a factory based configuration.
+     *
+     * @param factoryPid
+     * @param properties the new properties to set in the configuration.
+     * @return created pid
+     * @throws MBeanException
+     */
+    String createFactoryConfiguration(String factoryPid, Map<String, String> properties) throws MBeanException;
+
 
 }
