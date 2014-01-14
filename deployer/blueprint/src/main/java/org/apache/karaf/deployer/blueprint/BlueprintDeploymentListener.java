@@ -20,17 +20,15 @@ package org.apache.karaf.deployer.blueprint;
 import java.io.File;
 import java.net.URL;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
+import org.apache.karaf.util.XmlUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 import org.apache.felix.fileinstall.ArtifactUrlTransformer;
 import org.xml.sax.ErrorHandler;
-import org.xml.sax.SAXParseException;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 /**
  * A deployment listener that listens for spring xml applications
@@ -39,8 +37,6 @@ import org.xml.sax.SAXException;
 public class BlueprintDeploymentListener implements ArtifactUrlTransformer {
 
     private final Logger logger = LoggerFactory.getLogger(BlueprintDeploymentListener.class);
-
-    private DocumentBuilderFactory dbf;
 
     public boolean canHandle(File artifact) {
         try {
@@ -68,12 +64,7 @@ public class BlueprintDeploymentListener implements ArtifactUrlTransformer {
     }
 
     protected Document parse(File artifact) throws Exception {
-        if (dbf == null) {
-            dbf = DocumentBuilderFactory.newInstance();
-            dbf.setNamespaceAware(true);
-        }
-        DocumentBuilder db = dbf.newDocumentBuilder();
-        db.setErrorHandler(new ErrorHandler() {
+        return XmlUtils.parse(artifact, new ErrorHandler() {
             public void warning(SAXParseException exception) throws SAXException {
             }
             public void error(SAXParseException exception) throws SAXException {
@@ -82,7 +73,6 @@ public class BlueprintDeploymentListener implements ArtifactUrlTransformer {
                 throw exception;
             }
         });
-        return db.parse(artifact);
     }
 
 }
