@@ -107,6 +107,11 @@ public class StandardFeaturesTest extends KarafTestSupport {
     }
 
     @Test
+    public void testSpringSecurityFeature() throws Exception {
+        installAndAssertFeature("spring-security");
+    }
+
+    @Test
     public void testWrapperFeature() throws Exception {
         installAndAssertFeature("wrapper");
     }
