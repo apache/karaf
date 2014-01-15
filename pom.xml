@@ -223,7 +223,6 @@
         <log4j.version>1.2.17</log4j.version>
         <maven.version>2.0.9</maven.version>
         <mina.version>2.0.7</mina.version>
-        <openjpa.version>2.2.2</openjpa.version>
         <openwebbeans.version>1.2.1</openwebbeans.version>
         <osgi.version>5.0.0</osgi.version>
         <osgi.compendium.version>5.0.0</osgi.compendium.version>
