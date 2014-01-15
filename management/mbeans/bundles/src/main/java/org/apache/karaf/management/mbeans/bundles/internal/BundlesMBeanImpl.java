@@ -28,6 +28,7 @@ import javax.management.StandardMBean;
 import javax.management.openmbean.*;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -36,9 +37,14 @@ import java.util.List;
 public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
 
     private BundleContext bundleContext;
+    private List<BundleStateListener.Factory> bundleStateListenerFactories;
 
     public BundlesMBeanImpl() throws NotCompliantMBeanException {
         super(BundlesMBean.class);
+    }
+
+    public void setBundleStateListenerFactories(List<BundleStateListener.Factory> bundleStateListenerFactories) {
+        this.bundleStateListenerFactories = bundleStateListenerFactories;
     }
 
     public TabularData getBundles() throws Exception {
@@ -48,10 +54,40 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
             startLevel = (StartLevel) bundleContext.getService(startLevelReference);
         }
 
+        ArrayList<String> headers = new ArrayList<String>();
+        headers.add("ID");
+        headers.add("Name");
+        headers.add("Version");
+        headers.add("Start Level");
+        headers.add("State");
+
+        ArrayList<String> descriptions = new ArrayList<String>();
+        descriptions.add("ID of the Bundle");
+        descriptions.add("Name of the Bundle");
+        descriptions.add("Version of the Bundle");
+        descriptions.add("Start Level of the Bundle");
+        descriptions.add("Current State of the Bundle");
+
+        ArrayList<OpenType> types = new ArrayList<OpenType>();
+        types.add(SimpleType.LONG);
+        types.add(SimpleType.STRING);
+        types.add(SimpleType.STRING);
+        types.add(SimpleType.INTEGER);
+        types.add(SimpleType.STRING);
+
+        for (BundleStateListener.Factory factory : bundleStateListenerFactories) {
+            BundleStateListener listener = factory.getListener();
+            if (listener != null) {
+                headers.add(listener.getName());
+                descriptions.add(listener.getDescription());
+                types.add(SimpleType.STRING);
+            }
+        }
+
         CompositeType bundleType = new CompositeType("Bundle", "OSGi Bundle",
-                new String[]{"ID", "Name", "Version", "Start Level", "State"},
-                new String[]{"ID of the Bundle", "Name of the Bundle", "Version of the Bundle", "Start Level of the Bundle", "Current State of the Bundle"},
-                new OpenType[]{SimpleType.LONG, SimpleType.STRING, SimpleType.STRING, SimpleType.INTEGER, SimpleType.STRING});
+                headers.toArray(new String[]{}),
+                descriptions.toArray(new String[]{}),
+                types.toArray(new OpenType[]{}));
         TabularType tableType = new TabularType("Bundles", "Tables of all Bundles", bundleType, new String[]{"ID"});
         TabularData table = new TabularDataSupport(tableType);
 
@@ -59,6 +95,12 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
 
         for (int i = 0; i < bundles.length; i++) {
             try {
+                ArrayList<Object> values = new ArrayList<Object>();
+
+                values.add(bundles[i].getBundleId());
+                values.add(bundles[i].getSymbolicName());
+                values.add(bundles[i].getVersion().toString());
+
                 int bundleStartLevel = 1;
                 if (startLevel != null) {
                     bundleStartLevel = startLevel.getBundleStartLevel(bundles[i]);
@@ -76,9 +118,24 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
                 else if (bundleState == Bundle.STOPPING)
                     bundleStateString = "STOPPING";
                 else bundleStateString = "UNKNOWN";
+
+                values.add(bundleStartLevel);
+                values.add(bundleStateString);
+
+                for (BundleStateListener.Factory factory : bundleStateListenerFactories) {
+                    BundleStateListener listener = factory.getListener();
+                    if (listener != null) {
+                        String state = listener.getState(bundles[i]);
+                        if (state == null) {
+                            state = "";
+                        }
+                        values.add(state);
+                    }
+                }
+
                 CompositeData data = new CompositeDataSupport(bundleType,
-                        new String[]{"ID", "Name", "Version", "Start Level", "State"},
-                        new Object[]{bundles[i].getBundleId(), bundles[i].getSymbolicName(), bundles[i].getVersion().toString(), bundleStartLevel, bundleStateString});
+                        headers.toArray(new String[]{}),
+                        values.toArray(new Object[]{}));
                 table.put(data);
             } catch (Exception e) {
                 e.printStackTrace();

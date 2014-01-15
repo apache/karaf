@@ -14,26 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.shell.osgi;
+package org.apache.karaf.management.mbeans.bundles.internal;
 
-import java.util.Map;
-import java.util.Hashtable;
-import java.util.concurrent.ConcurrentHashMap;
-
-import org.springframework.osgi.context.event.OsgiBundleApplicationContextListener;
+import org.osgi.framework.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.osgi.context.event.OsgiBundleApplicationContextEvent;
+import org.springframework.osgi.context.event.OsgiBundleApplicationContextListener;
 import org.springframework.osgi.context.event.OsgiBundleContextFailedEvent;
 import org.springframework.osgi.context.event.OsgiBundleContextRefreshedEvent;
 import org.springframework.osgi.extender.event.BootstrappingDependencyEvent;
 import org.springframework.osgi.service.importer.event.OsgiServiceDependencyEvent;
 import org.springframework.osgi.service.importer.event.OsgiServiceDependencyWaitStartingEvent;
-import org.osgi.framework.BundleListener;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleEvent;
-import org.osgi.framework.ServiceRegistration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import java.util.Hashtable;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SpringStateListenerFactory implements BundleStateListener.Factory {
 
@@ -108,7 +104,11 @@ public class SpringStateListenerFactory implements BundleStateListener.Factory {
         }
 
         public String getName() {
-            return "Spring ";
+            return "Spring";
+        }
+
+        public String getDescription() {
+            return "Current state of the Spring context in the Bundle";
         }
 
         public String getState(Bundle bundle) {
