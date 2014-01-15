@@ -22,6 +22,12 @@
     <!-- Bundles MBean -->
     <bean id="bundlesMBean" class="org.apache.karaf.management.mbeans.bundles.internal.BundlesMBeanImpl">
         <property name="bundleContext" ref="blueprintBundleContext"/>
+        <property name="bundleStateListenerFactories">
+            <list xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
+                <ref component-id="blueprintListener" />
+                <ref component-id="springListener" />
+            </list>
+        </property>
     </bean>
 
     <!-- MBean Registrer -->
@@ -31,6 +37,13 @@
                 <entry value="org.apache.karaf:type=bundles,name=${karaf.name}" key-ref="bundlesMBean"/>
             </map>
         </property>
+    </bean>
+
+    <bean id="blueprintListener" class="org.apache.karaf.management.mbeans.bundles.internal.BlueprintListener" />
+    <service ref="blueprintListener" interface="org.osgi.service.blueprint.container.BlueprintListener" />
+
+    <bean id="springListener" class="org.apache.karaf.management.mbeans.bundles.internal.SpringStateListenerFactory" init-method="init" destroy-method="destroy">
+        <property name="bundleContext" ref="blueprintBundleContext" />
     </bean>
 
 </blueprint>

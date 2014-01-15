@@ -14,18 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.shell.osgi;
-
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+package org.apache.karaf.management.mbeans.bundles.internal;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
 import org.osgi.service.blueprint.container.BlueprintEvent;
-import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  *
@@ -33,7 +33,8 @@ import org.slf4j.Logger;
  *
  */
 public class BlueprintListener implements org.osgi.service.blueprint.container.BlueprintListener, BundleListener,
-                                            BundleStateListener, BundleStateListener.Factory {
+                                            BundleStateListener, BundleStateListener.Factory
+{
 
     public static enum BlueprintState {
         Unknown,
@@ -46,7 +47,7 @@ public class BlueprintListener implements org.osgi.service.blueprint.container.B
         Waiting
     }
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(BlueprintListener.class);
+    private static final Logger LOG = LoggerFactory.getLogger(BlueprintListener.class);
 
     private final Map<Long, BlueprintState> states;
     private BundleContext bundleContext;
@@ -56,7 +57,11 @@ public class BlueprintListener implements org.osgi.service.blueprint.container.B
     }
 
     public String getName() {
-        return "Blueprint   ";
+        return "Blueprint";
+    }
+
+    public String getDescription() {
+        return "Current state of the Blueprint container in the Bundle";
     }
 
     public String getState(Bundle bundle) {
@@ -81,7 +86,7 @@ public class BlueprintListener implements org.osgi.service.blueprint.container.B
 
     public void blueprintEvent(BlueprintEvent blueprintEvent) {
         BlueprintState state = getState(blueprintEvent);
-        LOGGER.debug("Blueprint app state changed to {} for bundle {}", state, blueprintEvent.getBundle().getBundleId());
+        LOG.debug("Blueprint app state changed to " + state + " for bundle " + blueprintEvent.getBundle().getBundleId());
         states.put(blueprintEvent.getBundle().getBundleId(), state);
     }
 
