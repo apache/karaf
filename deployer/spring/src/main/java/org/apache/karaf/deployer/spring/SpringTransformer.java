@@ -114,7 +114,7 @@ public class SpringTransformer {
 
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
         Result r = new StreamResult(bout);
-        XmlUtils.transform(source, r);
+        XmlUtils.transform(new StreamSource(SpringTransformer.class.getResourceAsStream("extract.xsl")), source, r);
 
         ByteArrayInputStream bin = new ByteArrayInputStream(bout.toByteArray());
         bout.close();
