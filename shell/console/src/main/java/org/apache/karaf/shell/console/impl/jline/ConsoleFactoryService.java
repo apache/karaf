@@ -20,6 +20,7 @@ package org.apache.karaf.shell.console.impl.jline;
 
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.lang.management.ManagementFactory;
 import java.security.PrivilegedAction;
 import java.util.Iterator;
 import java.util.List;
@@ -41,7 +42,7 @@ import org.osgi.framework.BundleContext;
 
 public class ConsoleFactoryService implements ConsoleFactory {
 
-    private static final Class[] SECURITY_BUGFIX = {
+    private static final Class<?>[] SECURITY_BUGFIX = {
             JaasHelper.class,
             JaasHelper.OsgiSubjectDomainCombiner.class,
             JaasHelper.DelegatingProtectionDomain.class,
@@ -83,10 +84,17 @@ public class ConsoleFactoryService implements ConsoleFactory {
         });
         session.put(".jline.terminal", terminal);
         addSystemProperties(session);
+        session.put("pid", getPid());
         return console;
     }
 
-    private void addSystemProperties(CommandSession session) {
+    private String getPid() {
+    	String name = ManagementFactory.getRuntimeMXBean().getName();
+    	String[] parts = name.split("@");
+		return parts[0];
+	}
+
+	private void addSystemProperties(CommandSession session) {
         Properties sysProps = System.getProperties();
         Iterator<Object> it = sysProps.keySet().iterator();
         while (it.hasNext()) {
