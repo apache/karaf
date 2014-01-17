@@ -35,7 +35,7 @@
     <service ref="jndiService" interface="org.apache.karaf.jndi.JndiService">
         <service-properties>
             <!-- bind the JNDI service itself in the JNDI context -->
-            <entry key="osgi.jndi.service.name" value="/jndi"/>
+            <entry key="osgi.jndi.service.name" value="jndi"/>
         </service-properties>
     </service>
 

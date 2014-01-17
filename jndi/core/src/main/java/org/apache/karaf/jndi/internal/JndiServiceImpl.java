@@ -37,13 +37,13 @@ public class JndiServiceImpl implements JndiService {
     private BundleContext bundleContext;
     private ProxyManager proxyManager;
 
-    private final static String OSGI_JNDI_CONTEXT_PREFIX = "osgi:service";
+    private final static String OSGI_JNDI_CONTEXT_PREFIX = "osgi:service/";
     private final static String OSGI_JNDI_SERVICE_PROPERTY = "osgi.jndi.service.name";
 
     @Override
     public Map<String, String> names() throws Exception {
         Map<String, String> result = names("/");
-        result.putAll(names(OSGI_JNDI_CONTEXT_PREFIX + "/"));
+        result.putAll(names(OSGI_JNDI_CONTEXT_PREFIX));
         return result;
     }
 
@@ -83,10 +83,10 @@ public class JndiServiceImpl implements JndiService {
                 }
                 if (o instanceof Context) {
                     StringBuilder sb = new StringBuilder();
-                    sb.append(pair.getName());
+                    sb.append("/" + pair.getName());
                     names((Context) o, sb, map);
                 } else {
-                    map.put(pair.getName(), pair.getClassName());
+                    map.put("/" + pair.getName(), pair.getClassName());
                 }
             }
         }

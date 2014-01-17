@@ -21,7 +21,7 @@
     <service ref="pooledConnectionFactory" interface="javax.jms.ConnectionFactory">
         <service-properties>
             <entry key="name" value="${name}" />
-            <entry key="osgi.jndi.service.name" value="/jms/${name}" />
+            <entry key="osgi.jndi.service.name" value="jms/${name}" />
         </service-properties>
     </service>
 
