@@ -18,6 +18,7 @@
  */
 package org.apache.karaf.tooling.features;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -32,10 +33,8 @@ import org.sonatype.aether.RepositorySystemSession;
 import org.sonatype.aether.artifact.Artifact;
 import org.sonatype.aether.collection.CollectRequest;
 import org.sonatype.aether.collection.CollectResult;
-import org.sonatype.aether.collection.DependencyCollectionContext;
 import org.sonatype.aether.collection.DependencyCollectionException;
 import org.sonatype.aether.collection.DependencyGraphTransformer;
-import org.sonatype.aether.collection.DependencySelector;
 import org.sonatype.aether.graph.Dependency;
 import org.sonatype.aether.graph.DependencyNode;
 import org.sonatype.aether.repository.RemoteRepository;
@@ -43,6 +42,7 @@ import org.sonatype.aether.util.DefaultRepositorySystemSession;
 import org.sonatype.aether.util.graph.selector.AndDependencySelector;
 import org.sonatype.aether.util.graph.selector.ExclusionDependencySelector;
 import org.sonatype.aether.util.graph.selector.OptionalDependencySelector;
+import org.sonatype.aether.util.graph.selector.ScopeDependencySelector;
 import org.sonatype.aether.util.graph.transformer.ChainedDependencyGraphTransformer;
 import org.sonatype.aether.util.graph.transformer.ConflictMarker;
 import org.sonatype.aether.util.graph.transformer.JavaDependencyContextRefiner;
@@ -109,13 +109,16 @@ public class DependencyHelper {
         treeListing = scanner.getLog();
     }
 
-    private DependencyNode getDependencyTree(Artifact artifact) throws MojoExecutionException {
+    public DependencyNode getDependencyTree(Artifact artifact) throws MojoExecutionException {
         try {
             CollectRequest collectRequest = new CollectRequest(new Dependency(artifact, "compile"), null, projectRepos);
             DefaultRepositorySystemSession session = new DefaultRepositorySystemSession(repoSession);
-            session.setDependencySelector(new AndDependencySelector(new OptionalDependencySelector(),
-                    new ScopeDependencySelector1(),
-                    new ExclusionDependencySelector()));
+            ScopeDependencySelector selector = new ScopeDependencySelector(
+            		Arrays.asList("compile", "runtime"), 
+    				Arrays.asList("provided", "system", "test"));
+            session.setDependencySelector(new AndDependencySelector(new OptionalDependencySelector(), 
+            		selector,
+            		new ExclusionDependencySelector()));
             DependencyGraphTransformer transformer = new ChainedDependencyGraphTransformer(new ConflictMarker(),
                     new JavaEffectiveScopeCalculator(),
                     new JavaDependencyContextRefiner());
@@ -127,53 +130,11 @@ public class DependencyHelper {
         }
     }
 
-    //aether's ScopeDependencySelector appears to always exclude the configured scopes (test and provided) and there is no way to configure it to
-    //accept the top level provided scope dependencies.  We need this 3 layer cake since aether never actually uses the top level selector you give it,
-    //it always starts by getting the child to apply to the project's dependencies.
-    private static class ScopeDependencySelector1 implements DependencySelector {
-
-        private DependencySelector child = new ScopeDependencySelector2();
-
-        public boolean selectDependency(Dependency dependency) {
-            throw new IllegalStateException("this does not appear to be called");
-        }
-
-        public DependencySelector deriveChildSelector(DependencyCollectionContext context) {
-            return child;
-        }
-    }
-
-    private static class ScopeDependencySelector2 implements DependencySelector {
-
-        private DependencySelector child = new ScopeDependencySelector3();
-
-        public boolean selectDependency(Dependency dependency) {
-            String scope = dependency.getScope();
-            return !"test".equals(scope) && !"runtime".equals(scope);
-        }
-
-        public DependencySelector deriveChildSelector(DependencyCollectionContext context) {
-            return child;
-        }
-    }
-
-    private static class ScopeDependencySelector3 implements DependencySelector {
-
-        public boolean selectDependency(Dependency dependency) {
-            String scope = dependency.getScope();
-            return !"test".equals(scope) && !"provided".equals(scope) && !"runtime".equals(scope);
-        }
-
-        public DependencySelector deriveChildSelector(DependencyCollectionContext context) {
-            return this;
-        }
-    }
-
     private static class Scanner {
 
         private static enum Accept {
             ACCEPT(true, true),
-            PROVIDED(true, false),
+            PROVIDED(false, false),
             STOP(false, false);
 
             private final boolean more;
