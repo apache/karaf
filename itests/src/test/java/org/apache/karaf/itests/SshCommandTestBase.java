@@ -71,6 +71,18 @@ public class SshCommandTestBase extends KarafTestSupport {
         System.out.println(new String(out.toByteArray()));
     }
 
+    void addViewer(String vieweruser) throws Exception {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        OutputStream pipe = openSshChannel("karaf", "karaf", out);
+        pipe.write(("jaas:realm-manage --realm=karaf"
+                + ";jaas:user-add " + vieweruser + " " + vieweruser
+                + ";jaas:role-add " + vieweruser + " viewer"
+                + ";jaas:update;jaas:realm-manage --realm=karaf;jaas:user-list\n").getBytes());
+        pipe.flush();
+        closeSshChannel(pipe);
+        System.out.println(new String(out.toByteArray()));
+    }
+
     String assertCommand(String user, String command, Result result) throws Exception, IOException {
         if (!command.endsWith("\n"))
             command += "\n";
