@@ -99,6 +99,7 @@ public class BundleManager {
 		InputStream is = getInputStreamForBundle(bundleLocation);
 		try {
 			is.mark(256 * 1024);
+			@SuppressWarnings("resource")
 			JarInputStream jar = new JarInputStream(is);
 			Manifest m = jar.getManifest();
 			if (m == null) {
