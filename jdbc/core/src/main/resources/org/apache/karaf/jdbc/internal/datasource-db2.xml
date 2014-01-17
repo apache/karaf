@@ -9,7 +9,7 @@
 
     <service interface="javax.sql.DataSource" ref="dataSource">
         <service-properties>
-            <entry key="osgi.jndi.service.name" value="/jdbc/${name}"/>
+            <entry key="osgi.jndi.service.name" value="jdbc/${name}"/>
         </service-properties>
     </service>
 

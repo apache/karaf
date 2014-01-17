@@ -16,7 +16,7 @@
 
     <service ref="dataSource" interface="javax.sql.XADataSource">
         <service-properties>
-            <entry key="osgi.jndi.service.name" value="/jdbc/${name}xa"/>
+            <entry key="osgi.jndi.service.name" value="jdbc/${name}xa"/>
         </service-properties>
     </service>
 
