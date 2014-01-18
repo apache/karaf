@@ -63,6 +63,7 @@
         <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-jms_1.1_spec/${geronimo.jms-spec.version}</bundle>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.asm/3.3_2</bundle>
         <bundle start-level="29">mvn:org.apache.openjpa/openjpa/2.2.2</bundle>
+        <feature>jpa</feature>
     </feature>
 
     <feature name="openjpa" description="Apache OpenJPA 2.3.x persistence engine support" version="2.3.0" resolver="(obr)">
@@ -81,6 +82,7 @@
         <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-jms_1.1_spec/${geronimo.jms-spec.version}</bundle>
         <bundle dependency="true">mvn:org.apache.xbean/xbean-asm4-shaded/${xbean.version}</bundle>
         <bundle start-level="29">mvn:org.apache.openjpa/openjpa/2.3.0</bundle>
+        <feature>jpa</feature>
     </feature>
 
     <feature name="hibernate" description="Hibernate 3.x JPA persistence engine support" version="${hibernate3.version}" resolver="(obr)">
@@ -98,6 +100,7 @@
         <bundle start-level="100">mvn:org.hibernate/com.springsource.org.hibernate.annotations/${hibernate.annotations.version}</bundle>
         <bundle start-level="100">mvn:org.hibernate/com.springsource.org.hibernate.ejb/${hibernate.ejb.version}</bundle>
         <bundle start-level="100">mvn:org.hibernate/com.springsource.org.hibernate/${hibernate3.version}</bundle>
+        <feature>jpa</feature>
     </feature>
 
     <feature name="hibernate" description="Hibernate 4.2.x JPA persistence engine support" version="${hibernate42.version}" resolver="(obr)">
@@ -118,6 +121,7 @@
         <bundle start-level="100">mvn:org.hibernate/hibernate-entitymanager/${hibernate42.version}</bundle>
         <bundle start-level="100">mvn:org.hibernate/hibernate-envers/${hibernate42.version}</bundle>
         <bundle start-level="100">mvn:org.hibernate/hibernate-osgi/${hibernate42.version}</bundle>
+        <feature>jpa</feature>
     </feature>
 
     <feature name="hibernate" description="Hibernate 4.3.x JPA persistence engine support" version="${hibernate43.version}" resolver="(obr)">
@@ -138,6 +142,7 @@
         <bundle start-level="100">mvn:org.hibernate/hibernate-core/${hibernate43.version}</bundle>
         <bundle start-level="100">mvn:org.hibernate/hibernate-entitymanager/${hibernate43.version}</bundle>
         <bundle start-level="100">mvn:org.hibernate/hibernate-osgi/${hibernate43.version}</bundle>
+        <feature>jpa</feature>
     </feature>
 
     <feature name="jndi" description="OSGi Service Registry JNDI access" version="${project.version}" resolver="(obr)">
