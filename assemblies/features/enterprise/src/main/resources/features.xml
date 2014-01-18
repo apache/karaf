@@ -157,6 +157,15 @@
         <bundle>mvn:org.apache.karaf.jndi/org.apache.karaf.jndi.command/${project.version}</bundle>
     </feature>
 
+    <feature name="jdbc" description="JDBC service and commands" version="${project.version}" resolver="(obr)">
+        <details>JDBC support providing service, commands, and MBean</details>
+        <feature>transaction</feature>
+        <bundle>mvn:commons-pool/commons-pool/${commons-pool.version}</bundle>
+        <bundle>mvn:commons-dbcp/commons-dbcp/${commons-dbcp.version}</bundle>
+        <bundle>mvn:org.apache.karaf.jdbc/org.apache.karaf.jdbc.core/${project.version}</bundle>
+        <bundle>mvn:org.apache.karaf.jdbc/org.apache.karaf.jdbc.command/${project.version}</bundle>
+    </feature>
+
     <feature name="openwebbeans" description="Apache OpenWebBeans CDI container support" version="${openwebbeans.version}" resolver="(obr)">
         <details>Add support of Apache OpenWebBeans CDI container.</details>
         <feature>http</feature>
