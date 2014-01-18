@@ -53,6 +53,13 @@ public interface JdbcService {
     List<String> datasources() throws Exception;
 
     /**
+     * List the JDBC datasources configuration file names present in the deploy folder.
+     *
+     * @return a list of the JDBC datasources configuration file names.
+     */
+    List<String> datasourceFileNames() throws Exception;
+
+    /**
      * Execute a SQL query on a given JDBC datasource.
      *
      * @param datasource the JDBC datasource name.

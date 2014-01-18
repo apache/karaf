@@ -23,9 +23,9 @@ import org.apache.karaf.shell.console.completer.StringsCompleter;
 import java.util.List;
 
 /**
- * Completer on the JDBC datasources name/identifier
+ * Completer on the JDBC datasources file name.
  */
-public class DataSourcesCompleter implements Completer {
+public class DataSourcesFileNameCompleter implements Completer {
 
     private JdbcService jdbcService;
 
@@ -33,8 +33,8 @@ public class DataSourcesCompleter implements Completer {
     public int complete(String buffer, int cursor, List<String> candidates) {
         StringsCompleter delegate = new StringsCompleter();
         try {
-            for (String datasource : jdbcService.datasources()) {
-                delegate.getStrings().add(datasource);
+            for (String datasourceFileName : jdbcService.datasourceFileNames()) {
+                delegate.getStrings().add(datasourceFileName.replace("datasource-", "").replace(".xml", ""));
             }
         } catch (Exception e) {
             // nothing to do
