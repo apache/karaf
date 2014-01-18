@@ -47,6 +47,7 @@
         <module>management</module>
         <module>jndi</module>
         <module>jdbc</module>
+        <module>jms</module>
         <module>webconsole</module>
         <module>exception</module>
         <module>assemblies</module>
@@ -480,6 +481,16 @@
             <dependency>
                 <groupId>org.apache.karaf.jdbc</groupId>
                 <artifactId>org.apache.karaf.jdbc.command</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.jms</groupId>
+                <artifactId>org.apache.karaf.jms.core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.jms</groupId>
+                <artifactId>org.apache.karaf.jms.command</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -937,6 +948,11 @@
                 <groupId>org.ops4j.pax.url</groupId>
                 <artifactId>pax-url-war</artifactId>
                 <version>${pax.url.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.geronimo.specs</groupId>
+                <artifactId>geronimo-jms_1.1_spec</artifactId>
+                <version>${geronimo.jms-spec.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.geronimo.specs</groupId>
