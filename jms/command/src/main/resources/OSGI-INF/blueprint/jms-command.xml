@@ -25,7 +25,7 @@
                 <property name="jmsService" ref="jmsService"/>
             </action>
             <completers>
-                <ref component-id="connectionFactoriesCompleter"/>
+                <ref component-id="connectionFactoriesNameCompleter"/>
                 <null/>
             </completers>
         </command>
@@ -39,7 +39,7 @@
                 <property name="jmsService" ref="jmsService"/>
             </action>
             <completers>
-                <ref component-id="connectionFactoriesCompleter"/>
+                <ref component-id="connectionFactoriesNameCompleter"/>
                 <null/>
             </completers>
         </command>
@@ -48,7 +48,7 @@
                 <property name="jmsService" ref="jmsService"/>
             </action>
             <completers>
-                <ref component-id="connectionFactoriesCompleter"/>
+                <ref component-id="connectionFactoriesNameCompleter"/>
                 <null/>
             </completers>
         </command>
@@ -62,7 +62,7 @@
                 <property name="jmsService" ref="jmsService"/>
             </action>
             <completers>
-                <ref component-id="connectionFactoriesCompleter"/>
+                <ref component-id="connectionFactoriesFileNameCompleter"/>
                 <null/>
             </completers>
         </command>
@@ -71,7 +71,7 @@
                 <property name="jmsService" ref="jmsService"/>
             </action>
             <completers>
-                <ref component-id="connectionFactoriesCompleter"/>
+                <ref component-id="connectionFactoriesNameCompleter"/>
                 <null/>
             </completers>
         </command>
@@ -80,7 +80,7 @@
                 <property name="jmsService" ref="jmsService"/>
             </action>
             <completers>
-                <ref component-id="connectionFactoriesCompleter"/>
+                <ref component-id="connectionFactoriesNameCompleter"/>
                 <null/>
             </completers>
         </command>
@@ -89,7 +89,7 @@
                 <property name="jmsService" ref="jmsService"/>
             </action>
             <completers>
-                <ref component-id="connectionFactoriesCompleter"/>
+                <ref component-id="connectionFactoriesNameCompleter"/>
                 <null/>
             </completers>
         </command>
@@ -98,7 +98,7 @@
                 <property name="jmsService" ref="jmsService"/>
             </action>
             <completers>
-                <ref component-id="connectionFactoriesCompleter"/>
+                <ref component-id="connectionFactoriesNameCompleter"/>
                 <null/>
             </completers>
         </command>
@@ -107,13 +107,16 @@
                 <property name="jmsService" ref="jmsService"/>
             </action>
             <completers>
-                <ref component-id="connectionFactoriesCompleter"/>
+                <ref component-id="connectionFactoriesNameCompleter"/>
                 <null/>
             </completers>
         </command>
     </command-bundle>
 
-    <bean id="connectionFactoriesCompleter" class="org.apache.karaf.jms.command.completers.ConnectionFactoriesCompleter">
+    <bean id="connectionFactoriesNameCompleter" class="org.apache.karaf.jms.command.completers.ConnectionFactoriesNameCompleter">
+        <property name="jmsService" ref="jmsService"/>
+    </bean>
+    <bean id="connectionFactoriesFileNameCompleter" class="org.apache.karaf.jms.command.completers.ConnectionFactoriesFileNameCompleter">
         <property name="jmsService" ref="jmsService"/>
     </bean>
 

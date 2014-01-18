@@ -28,7 +28,7 @@ public class DataSourcesCommand extends JdbcCommandSupport {
     public Object doExecute() throws Exception {
         ShellTable table = new ShellTable();
 
-        table.column("JNDI Name");
+        table.column("Name");
         table.column("Product");
         table.column("Version");
         table.column("URL");

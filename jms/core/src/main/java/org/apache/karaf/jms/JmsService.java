@@ -33,6 +33,14 @@ public interface JmsService {
     List<String> connectionFactories() throws Exception;
 
     /**
+     * List the JMS connecion factories file names.
+     *
+     * @return the list of JMS connection factory file names.
+     * @throws Exception
+     */
+    List<String> connectionFactoryFileNames() throws Exception;
+
+    /**
      * Create a new JMS connection factory.
      *
      * @param name the JMS connection factory name.
