@@ -96,10 +96,10 @@
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.antlr/${antlr.bundle.version}</bundle>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.cglib/${cglib.bundle.version}</bundle>
         <bundle dependency="true">mvn:org.jboss.javassist/com.springsource.javassist/${javassist.version}</bundle>
-        <bundle start-level="29">mvn:org.hibernate/com.springsource.org.hibernate.annotations.common/${hibernate.annotations.common.version}</bundle>
-        <bundle start-level="29">mvn:org.hibernate/com.springsource.org.hibernate.annotations/${hibernate.annotations.version}</bundle>
-        <bundle start-level="29">mvn:org.hibernate/com.springsource.org.hibernate.ejb/${hibernate.ejb.version}</bundle>
-        <bundle start-level="29">mvn:org.hibernate/com.springsource.org.hibernate/${hibernate3.version}</bundle>
+        <bundle start-level="100">mvn:org.hibernate/com.springsource.org.hibernate.annotations.common/${hibernate.annotations.common.version}</bundle>
+        <bundle start-level="100">mvn:org.hibernate/com.springsource.org.hibernate.annotations/${hibernate.annotations.version}</bundle>
+        <bundle start-level="100">mvn:org.hibernate/com.springsource.org.hibernate.ejb/${hibernate.ejb.version}</bundle>
+        <bundle start-level="100">mvn:org.hibernate/com.springsource.org.hibernate/${hibernate3.version}</bundle>
         <feature>jpa</feature>
     </feature>
 
