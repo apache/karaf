@@ -30,7 +30,7 @@
                 <property name="jdbcService" ref="jdbcService"/>
             </action>
             <completers>
-                <ref component-id="datasourcesCompleter"/>
+                <ref component-id="datasourcesFileNameCompleter"/>
                 <null/>
             </completers>
         </command>
@@ -44,7 +44,7 @@
                 <property name="jdbcService" ref="jdbcService"/>
             </action>
             <completers>
-                <ref component-id="datasourcesCompleter"/>
+                <ref component-id="datasourcesNameCompleter"/>
                 <null/>
             </completers>
         </command>
@@ -53,7 +53,7 @@
                 <property name="jdbcService" ref="jdbcService"/>
             </action>
             <completers>
-                <ref component-id="datasourcesCompleter"/>
+                <ref component-id="datasourcesNameCompleter"/>
                 <null/>
             </completers>
         </command>
@@ -62,7 +62,7 @@
                 <property name="jdbcService" ref="jdbcService"/>
             </action>
             <completers>
-                <ref component-id="datasourcesCompleter"/>
+                <ref component-id="datasourcesNameCompleter"/>
                 <null/>
             </completers>
         </command>
@@ -71,13 +71,16 @@
                 <property name="jdbcService" ref="jdbcService"/>
             </action>
             <completers>
-                <ref component-id="datasourcesCompleter"/>
+                <ref component-id="datasourcesNameCompleter"/>
                 <null/>
             </completers>
         </command>
     </command-bundle>
 
-    <bean id="datasourcesCompleter" class="org.apache.karaf.jdbc.command.completers.DataSourcesCompleter">
+    <bean id="datasourcesNameCompleter" class="org.apache.karaf.jdbc.command.completers.DataSourcesNameCompleter">
+        <property name="jdbcService" ref="jdbcService" />
+    </bean>
+    <bean id="datasourcesFileNameCompleter" class="org.apache.karaf.jdbc.command.completers.DataSourcesFileNameCompleter">
         <property name="jdbcService" ref="jdbcService" />
     </bean>
 

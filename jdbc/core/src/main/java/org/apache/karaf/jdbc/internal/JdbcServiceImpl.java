@@ -173,6 +173,22 @@ public class JdbcServiceImpl implements JdbcService {
     }
 
     @Override
+    public List<String> datasourceFileNames() throws Exception {
+        File karafBase = new File(System.getProperty("karaf.base"));
+        File deployFolder = new File(karafBase, "deploy");
+
+        String[] datasourceFileNames = deployFolder.list(new FilenameFilter() {
+
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.startsWith("datasource-") && name.endsWith(".xml");
+            }
+        });
+
+        return Arrays.asList(datasourceFileNames);
+    }
+
+    @Override
     public Map<String, List<String>> query(String datasource, String query) throws Exception {
         Map<String, List<String>> map = new HashMap<String, List<String>>();
         ServiceReference reference = this.lookupDataSource(datasource);

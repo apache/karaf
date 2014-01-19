@@ -111,7 +111,7 @@ public class JndiServiceImpl implements JndiService {
             }
             if (o instanceof Context) {
                 StringBuilder sb = new StringBuilder();
-                sb.append(pair.getName());
+                sb.append("/" + pair.getName());
                 contexts((Context) o, sb, contexts);
             }
         }

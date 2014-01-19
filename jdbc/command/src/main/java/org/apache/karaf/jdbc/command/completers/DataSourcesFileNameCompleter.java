@@ -14,27 +14,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.jms.command.completers;
+package org.apache.karaf.jdbc.command.completers;
 
-import org.apache.karaf.jms.JmsService;
+import org.apache.karaf.jdbc.JdbcService;
 import org.apache.karaf.shell.console.Completer;
 import org.apache.karaf.shell.console.completer.StringsCompleter;
 
 import java.util.List;
 
 /**
- * Completer on the JMS connection factories.
+ * Completer on the JDBC datasources file name.
  */
-public class ConnectionFactoriesCompleter implements Completer {
+public class DataSourcesFileNameCompleter implements Completer {
 
-    private JmsService jmsService;
+    private JdbcService jdbcService;
 
     @Override
     public int complete(String buffer, int cursor, List<String> candidates) {
         StringsCompleter delegate = new StringsCompleter();
         try {
-            for (String connectionFactory : jmsService.connectionFactories()) {
-                delegate.getStrings().add(connectionFactory);
+            for (String datasourceFileName : jdbcService.datasourceFileNames()) {
+                delegate.getStrings().add(datasourceFileName.replace("datasource-", "").replace(".xml", ""));
             }
         } catch (Exception e) {
             // nothing to do
@@ -42,12 +42,12 @@ public class ConnectionFactoriesCompleter implements Completer {
         return delegate.complete(buffer, cursor, candidates);
     }
 
-    public JmsService getJmsService() {
-        return jmsService;
+    public JdbcService getJdbcService() {
+        return jdbcService;
     }
 
-    public void setJmsService(JmsService jmsService) {
-        this.jmsService = jmsService;
+    public void setJdbcService(JdbcService jdbcService) {
+        this.jdbcService = jdbcService;
     }
 
 }

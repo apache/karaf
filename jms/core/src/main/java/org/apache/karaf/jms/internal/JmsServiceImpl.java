@@ -101,6 +101,22 @@ public class JmsServiceImpl implements JmsService {
     }
 
     @Override
+    public List<String> connectionFactoryFileNames() throws Exception {
+        File karafBase = new File(System.getProperty("karaf.base"));
+        File deployFolder = new File(karafBase, "deploy");
+
+        String[] connectionFactoryFileNames = deployFolder.list(new FilenameFilter() {
+
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.startsWith("connectionfactory-") && name.endsWith(".xml");
+            }
+        });
+
+        return Arrays.asList(connectionFactoryFileNames);
+    }
+
+    @Override
     public Map<String, String> info(String connectionFactory, String username, String password) throws Exception {
         Map<String, String> map = new HashMap<String, String>();
         ServiceReference reference = this.lookupConnectionFactory(connectionFactory);
