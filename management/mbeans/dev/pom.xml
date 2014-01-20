@@ -82,8 +82,7 @@
                         </Import-Package>
                         <Private-Package>
                             org.apache.karaf.management.mbeans.dev.internal,
-                            org.apache.felix.utils.properties,
-                            !*
+                            org.apache.felix.utils.properties
                         </Private-Package>
                     </instructions>
                 </configuration>

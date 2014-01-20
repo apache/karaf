@@ -81,8 +81,7 @@
                             *
                         </Import-Package>
                         <Private-Package>
-                            org.apache.karaf.management.mbeans.obr.internal,
-                            !*
+                            org.apache.karaf.management.mbeans.obr.internal
                         </Private-Package>
                     </instructions>
                 </configuration>

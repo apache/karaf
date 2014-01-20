@@ -91,7 +91,6 @@
                         <Import-Package>
                             *
                         </Import-Package>
-                        <Private-Package>!*</Private-Package>
                     </instructions>
                 </configuration>
             </plugin>

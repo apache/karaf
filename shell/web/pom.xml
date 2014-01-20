@@ -98,8 +98,7 @@
                         </Import-Package>
                         <Private-Package>
                             org.apache.felix.utils.version;-split-package:=merge-first,
-                            org.apache.felix.utils.manifest;-split-package:=merge-first,
-                            !*
+                            org.apache.felix.utils.manifest;-split-package:=merge-first
                         </Private-Package>
                         <_versionpolicy>${bnd.version.policy}</_versionpolicy>
                     </instructions>

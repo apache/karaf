@@ -90,8 +90,7 @@
                         </Import-Package>
                         <Private-Package>
                             org.apache.karaf.management.mbeans.system.internal,
-                            org.apache.felix.utils*,
-                            !*
+                            org.apache.felix.utils*
                         </Private-Package>
                     </instructions>
                 </configuration>

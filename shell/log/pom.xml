@@ -100,7 +100,6 @@
                             org.apache.karaf.shell.console,
                             *
                         </Import-Package>
-                        <Private-Package>!*</Private-Package>
                     </instructions>
                 </configuration>
             </plugin>
