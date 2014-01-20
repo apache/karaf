@@ -22,37 +22,33 @@ import org.junit.Test;
  */
 public class FeatureSshCommandSecurityTest extends SshCommandTestBase {
     @Test
-    public void testDummy() {
-        // The real test below sometimes fails. Comment it out until I've found what the issues is...
-    }
-
     public void testFeatureCommandSecurityViaSsh() throws Exception {
         String vieweruser = "viewer" + System.nanoTime() + "_features";
 
         addViewer(vieweruser);
 
         String r = assertCommand(vieweruser, "feature:list -i --no-format", Result.OK);
-        Assert.assertFalse("Precondition failed, this test uses the transaction subsystem to test features with...",
-                r.contains("transaction"));
+        Assert.assertFalse("Precondition failed, this test uses the eventadmin subsystem to test features with...",
+                r.contains("eventadmin"));
 
-        assertCommand(vieweruser, "feature:install transaction", Result.NOT_FOUND);
+        assertCommand(vieweruser, "feature:install eventadmin", Result.NOT_FOUND);
         String r2 = assertCommand("karaf", "feature:list -i --no-format", Result.OK);
-        Assert.assertFalse("Transaction features should not have been installed, as viewer doesn't have credentials",
-                r2.contains("transaction"));
+        Assert.assertFalse("eventadmin features should not have been installed, as viewer doesn't have credentials",
+                r2.contains("eventadmin"));
 
-        assertCommand("karaf", "feature:install transaction", Result.OK);
+        assertCommand("karaf", "feature:install eventadmin", Result.OK);
         String r3 = assertCommand(vieweruser, "feature:list -i --no-format", Result.OK);
-        Assert.assertTrue("Transaction feature should have been installed by 'karaf' user",
-                r3.contains("transaction"));
+        Assert.assertTrue("eventadmin feature should have been installed by 'karaf' user",
+                r3.contains("eventadmin"));
 
-        assertCommand(vieweruser, "feature:uninstall transaction", Result.NOT_FOUND);
+        assertCommand(vieweruser, "feature:uninstall eventadmin", Result.NOT_FOUND);
         String r4 = assertCommand("karaf", "feature:list -i --no-format", Result.OK);
-        Assert.assertTrue("Transaction feature should still be there, as viewer doesn't have credentials",
-                r4.contains("transaction"));
+        Assert.assertTrue("eventadmin feature should still be there, as viewer doesn't have credentials",
+                r4.contains("eventadmin"));
 
-        assertCommand("karaf", "feature:uninstall transaction", Result.OK);
+        assertCommand("karaf", "feature:uninstall eventadmin", Result.OK);
         String r5 = assertCommand(vieweruser, "feature:list -i --no-format", Result.OK);
-        Assert.assertFalse("The transaction subsystem should have been uninstalled",
-                r5.contains("transaction"));
+        Assert.assertFalse("The eventadmin subsystem should have been uninstalled",
+                r5.contains("eventadmin"));
     }
 }
