@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.karaf.tooling.features.model.BundleRef;
+import org.apache.karaf.tooling.features.model.ConfigFileRef;
 import org.apache.karaf.tooling.features.model.Feature;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -65,7 +66,7 @@ public class AddToRepositoryMojo extends AbstractFeatureMojo {
 
         for (Feature feature : featuresSet) {
             copyBundlesToDestRepository(feature.getBundles());
-            copyArtifactsToDestRepository(feature.getConfigFiles());
+            copyConfigFilesToDestRepository(feature.getConfigFiles());
         }
         
         copyFileBasedDescriptorsToDestRepository();
@@ -75,6 +76,15 @@ public class AddToRepositoryMojo extends AbstractFeatureMojo {
     private void copyBundlesToDestRepository(List<BundleRef> bundleRefs) throws MojoExecutionException {
         for (BundleRef bundle : bundleRefs) {
             Artifact artifact = bundle.getArtifact();
+            if (artifact != null) {
+                copy(artifact, repository);
+            }
+        }
+    }
+    
+    private void copyConfigFilesToDestRepository(List<ConfigFileRef> configRefs) throws MojoExecutionException {
+        for (ConfigFileRef config : configRefs) {
+            Artifact artifact = config.getArtifact();
             if (artifact != null) {
                 copy(artifact, repository);
             }

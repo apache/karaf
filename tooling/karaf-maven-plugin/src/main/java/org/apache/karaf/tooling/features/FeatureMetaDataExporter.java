@@ -26,6 +26,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.StartDocument;
 
 import org.apache.karaf.tooling.features.model.BundleRef;
+import org.apache.karaf.tooling.features.model.ConfigFileRef;
 import org.apache.karaf.tooling.features.model.Feature;
 import org.apache.maven.artifact.Artifact;
 
@@ -83,6 +84,25 @@ public class FeatureMetaDataExporter {
 
             writer.add(factory.createCharacters(bundle.getUrl()));
             endElement("bundle");
+        }
+        for (ConfigFileRef config : feature.getConfigFiles()) {
+            writer.add(factory.createStartElement("", "", "config"));
+            if (config.getArtifact()!= null) {
+                String name = MavenUtil.getFileName(config.getArtifact());
+                writer.add(factory.createAttribute("name", name));
+                Artifact artifact = config.getArtifact();
+                writer.add(factory.createAttribute("groupId", artifact.getGroupId()));
+                writer.add(factory.createAttribute("artifactId", artifact.getArtifactId()));
+                if (artifact.getType() != null) {
+                    writer.add(factory.createAttribute("type", artifact.getType()));
+                }
+                if (artifact.getClassifier() != null) {
+                    writer.add(factory.createAttribute("classifier", artifact.getClassifier()));
+                }
+                writer.add(factory.createAttribute("version", artifact.getBaseVersion()));
+            }
+            writer.add(factory.createCharacters(config.getUrl()));
+            endElement("config");
         }
         endElement("feature");
     }

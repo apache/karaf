@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.karaf.tooling.features.model.BundleRef;
+import org.apache.karaf.tooling.features.model.ConfigFileRef;
 import org.apache.karaf.tooling.features.model.Feature;
 import org.apache.karaf.tooling.features.model.Repository;
 import org.apache.karaf.tooling.utils.MojoSupport;
@@ -220,6 +221,7 @@ public abstract class AbstractFeatureMojo extends MojoSupport {
             getLog().info("Base repo: " + localRepo.getUrl());
             for (Feature feature : featuresSet) {
                 resolveBundles(feature.getBundles());
+                resolveConfigFiles(feature.getConfigFiles());
             }            
         } catch (Exception e) {
             throw new MojoExecutionException("Error populating repository", e);
@@ -233,6 +235,17 @@ public abstract class AbstractFeatureMojo extends MojoSupport {
             if (artifact != null) {
                 // Store artifact in bundle for later export
                 bundle.setArtifact(artifact);
+                resolveArtifact(artifact, remoteRepos);
+            }
+            checkDoGarbageCollect();
+        }
+    }
+    
+    private void resolveConfigFiles(List<ConfigFileRef> configRefs) throws MojoExecutionException {
+        for (ConfigFileRef config : configRefs) {
+            Artifact artifact = resourceToArtifact(config.getUrl(), skipNonMavenProtocols);
+            if (artifact != null) {
+                config.setArtifact(artifact);
                 resolveArtifact(artifact, remoteRepos);
             }
             checkDoGarbageCollect();

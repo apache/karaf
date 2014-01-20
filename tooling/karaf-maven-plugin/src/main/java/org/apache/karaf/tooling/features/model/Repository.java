@@ -118,7 +118,7 @@ public class Repository {
                 NodeList configFileNodes = e.getElementsByTagName("configfile");
                 for (int j = 0; j < configFileNodes.getLength(); j++) {
                     Element c = (Element) configFileNodes.item(j);
-                    f.addConfigFile(c.getTextContent());
+                    f.addConfigFile(new ConfigFileRef(c.getTextContent()));
                 }
                 NodeList bundleNodes = e.getElementsByTagName("bundle");
                 for (int j = 0; j < bundleNodes.getLength(); j++) {
