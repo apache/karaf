@@ -6,8 +6,8 @@ import java.io.ByteArrayOutputStream;
 
 import javax.xml.stream.XMLStreamException;
 
+import org.apache.karaf.tooling.features.model.ArtifactRef;
 import org.apache.karaf.tooling.features.model.BundleRef;
-import org.apache.karaf.tooling.features.model.ConfigFileRef;
 import org.apache.karaf.tooling.features.model.Feature;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DefaultArtifact;
@@ -27,7 +27,7 @@ public class FeatureMetaDataExporterTest {
                                                       new DefaultArtifactHandler());
         bundle.setArtifact(bundleArtifact);
 
-        ConfigFileRef configFile = new ConfigFileRef("mvn:org.apache.example/example/1.0.0/cfg");
+        ArtifactRef configFile = new ArtifactRef("mvn:org.apache.example/example/1.0.0/cfg");
         Artifact configFileArtifact = new DefaultArtifact("org.apache.example", "example", "1.0.0",
                                                           null, "xml", "exampleconfig",
                                                           new DefaultArtifactHandler());
