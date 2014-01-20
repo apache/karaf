@@ -38,6 +38,9 @@ public class BundleSelectorImpl {
         List<Bundle> bundles = new ArrayList<Bundle>();
         if (ids != null && !ids.isEmpty()) {
             for (String id : ids) {
+                if (id == null) {
+                    continue;
+                }
                 addMatchingBundles(id, bundles);
             }
         } else {
