@@ -26,7 +26,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.StartDocument;
 
 import org.apache.karaf.tooling.features.model.BundleRef;
-import org.apache.karaf.tooling.features.model.ConfigFileRef;
+import org.apache.karaf.tooling.features.model.ArtifactRef;
 import org.apache.karaf.tooling.features.model.Feature;
 import org.apache.maven.artifact.Artifact;
 
@@ -85,7 +85,7 @@ public class FeatureMetaDataExporter {
             writer.add(factory.createCharacters(bundle.getUrl()));
             endElement("bundle");
         }
-        for (ConfigFileRef config : feature.getConfigFiles()) {
+        for (ArtifactRef config : feature.getConfigFiles()) {
             writer.add(factory.createStartElement("", "", "config"));
             if (config.getArtifact()!= null) {
                 String name = MavenUtil.getFileName(config.getArtifact());

@@ -19,11 +19,11 @@ package org.apache.karaf.tooling.features.model;
 
 import org.apache.maven.artifact.Artifact;
 
-public class ConfigFileRef {
+public class ArtifactRef {
     String url;
     Artifact artifact;
     
-    public ConfigFileRef(String url) {
+    public ArtifactRef(String url) {
         super();
         this.url = url;
     }

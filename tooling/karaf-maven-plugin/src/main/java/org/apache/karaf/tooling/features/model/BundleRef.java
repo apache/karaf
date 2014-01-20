@@ -24,35 +24,21 @@ import java.util.jar.Manifest;
 
 import org.apache.maven.artifact.Artifact;
 
-public class BundleRef {
-    String url;
+public class BundleRef extends ArtifactRef {
     Integer startLevel;
     Artifact artifact;
     String bundleSymbolicName;
     String bundleVersion;
 
     public BundleRef(String url, Integer startLevel) {
-        super();
-        this.url = url;
+        super(url);
         this.startLevel = startLevel;
-    }
-
-    public String getUrl() {
-        return url;
     }
 
     public Integer getStartLevel() {
         return startLevel;
     }
 
-    public Artifact getArtifact() {
-        return artifact;
-    }
-
-    public void setArtifact(Artifact artifact) {
-        this.artifact = artifact;
-    }
-    
     public void readManifest() {
         JarInputStream bundleJar = null;
         try {

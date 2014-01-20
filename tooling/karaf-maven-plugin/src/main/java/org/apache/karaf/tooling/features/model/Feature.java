@@ -29,7 +29,7 @@ public class Feature {
     private List<String> dependencies = new ArrayList<String>();
     private List<BundleRef> bundles = new ArrayList<BundleRef>();
     private Map<String, Map<String, String>> configs = new HashMap<String, Map<String, String>>();
-    private List<ConfigFileRef> configFiles = new ArrayList<ConfigFileRef>();
+    private List<ArtifactRef> configFiles = new ArrayList<ArtifactRef>();
 
     public Feature(String name) {
         this.name = name;
@@ -59,7 +59,7 @@ public class Feature {
         return configs;
     }
 
-    public List<ConfigFileRef> getConfigFiles() {
+    public List<ArtifactRef> getConfigFiles() {
         return configFiles;
     }
 
@@ -75,7 +75,7 @@ public class Feature {
         configs.put(name, properties);
     }
 
-    public void addConfigFile(ConfigFileRef configFile) {
+    public void addConfigFile(ArtifactRef configFile) {
         configFiles.add(configFile);
     }
 }
