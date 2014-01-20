@@ -40,7 +40,9 @@ public class BundleSelector {
         List<Bundle> bundles = new ArrayList<Bundle>();
         if (ids != null && !ids.isEmpty()) {
             for (String id : ids) {
-
+                if (id == null) {
+                    continue;
+                }
                 // id is a number
                 Pattern pattern = Pattern.compile("^\\d+$");
                 Matcher matcher = pattern.matcher(id);
