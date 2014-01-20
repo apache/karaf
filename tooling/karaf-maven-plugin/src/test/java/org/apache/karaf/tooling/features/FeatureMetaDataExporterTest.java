@@ -18,9 +18,10 @@
  */
 package org.apache.karaf.tooling.features;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
+import java.io.UnsupportedEncodingException;
 
 import javax.xml.stream.XMLStreamException;
 
@@ -35,7 +36,7 @@ import org.junit.Test;
 public class FeatureMetaDataExporterTest {
 
     @Test
-    public void testWriteFeature() throws XMLStreamException {
+    public void testWriteFeature() throws XMLStreamException, UnsupportedEncodingException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         FeatureMetaDataExporter featureMetaDataExporter = new FeatureMetaDataExporter(baos);
         
@@ -58,17 +59,17 @@ public class FeatureMetaDataExporterTest {
         featureMetaDataExporter.writeFeature(feature);
         featureMetaDataExporter.close();
         
-        assertEquals(formatString(expectedValue()), formatString(baos.toString()));
+        assertTrue(formatString(baos.toString("UTF-8")).contains(expectedValue()));
     }
 
     private String expectedValue() {
-        return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-               "<features>" +
+        return formatString(
+              "<features>" +
                    "<feature name=\"example\">" +
                        "<bundle start-level=\"10\" name=\"example-1.0.0.jar\" groupId=\"org.apache.example\" artifactId=\"example\" type=\"jar\" version=\"1.0.0\">mvn:org.apache.example/example/1.0.0</bundle>" +
                        "<config name=\"example-1.0.0-exampleconfig.xml\" groupId=\"org.apache.example\" artifactId=\"example\" type=\"xml\" classifier=\"exampleconfig\" version=\"1.0.0\">mvn:org.apache.example/example/1.0.0/cfg</config>" +
                    "</feature>" +
-               "</features>";
+               "</features>");
     }
     
     private String formatString(String string) {
