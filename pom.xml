@@ -111,7 +111,7 @@
         <asm.version>4.1</asm.version>
         <asm.springsource.version>1.5.3</asm.springsource.version>
         <aspectj.bundle.version>1.7.4_1</aspectj.bundle.version>
-        <bndlib.version>1.50.0</bndlib.version>
+        <bndlib.version>2.2.0</bndlib.version>
         <cglib.bundle.version>3.0_1</cglib.bundle.version>
         <cglib2.version>2.2.0</cglib2.version>
         <commons-beanutils.version>1.8.3</commons-beanutils.version>
@@ -664,7 +664,7 @@
                 <version>${felix.scr.version}</version>
             </dependency>
             <dependency>
-                <groupId>biz.aQute</groupId>
+                <groupId>biz.aQute.bnd</groupId>
                 <artifactId>bndlib</artifactId>
                 <version>${bndlib.version}</version>
             </dependency>
