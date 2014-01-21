@@ -125,7 +125,7 @@
         <injection.bundle.version>1.0</injection.bundle.version>
         <jasypt.bundle.version>1.9.1_1</jasypt.bundle.version>
         <javassist.version>3.9.0.GA</javassist.version>
-        <jetty.version>7.6.8.v20121106</jetty.version>
+        <jetty.version>7.6.9.v20130131</jetty.version>
         <junit.version>4.10</junit.version>
         <junit.bundle.version>4.10_1</junit.bundle.version>
         <org.json.version>20131018</org.json.version>
