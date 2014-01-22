@@ -75,6 +75,7 @@ public class InfoAction extends OsgiCommandSupport {
         printValue("Java Virtual Machine", maxNameLen, runtime.getVmName() + " version " + runtime.getVmVersion());
         printValue("Version", maxNameLen, System.getProperty("java.version"));
         printValue("Vendor", maxNameLen, runtime.getVmVendor());
+        printValue("Pid", maxNameLen, getPid());
         printValue("Uptime", maxNameLen, printDuration(runtime.getUptime()));
         try {
             printValue("Process CPU time", maxNameLen, printDuration(getSunOsValueAsLong(os, "getProcessCpuTime") / 1000000));
@@ -149,6 +150,12 @@ public class InfoAction extends OsgiCommandSupport {
         }
 
         return null;
+    }
+    
+    private String getPid() {
+        String name = ManagementFactory.getRuntimeMXBean().getName();
+        String[] parts = name.split("@");
+        return parts[0];
     }
 
     private long getSunOsValueAsLong(OperatingSystemMXBean os, String name) throws Exception {
