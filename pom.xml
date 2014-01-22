@@ -2255,7 +2255,7 @@
                     <plugin>
                         <groupId>org.apache.rat</groupId>
                         <artifactId>apache-rat-plugin</artifactId>
-                        <version>0.8</version>
+                        <version>0.10</version>
                         <executions>
                             <execution>
                                 <phase>verify</phase>
@@ -2285,6 +2285,7 @@
                                 <exclude>**/goal.txt</exclude>
                                 <exclude>**/grep.txt</exclude>
                                 <exclude>**/edit.txt</exclude>
+                                <exclude>**/wc.txt</exclude>
                                 <exclude>**/foo</exclude>
                                 <exclude>**/org.ops4j.pax.exam.TestContainerFactory</exclude>
                                 <!--manual resources -->
