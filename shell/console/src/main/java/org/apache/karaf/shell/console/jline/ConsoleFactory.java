@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.security.KeyPair;
@@ -29,9 +30,11 @@ import java.nio.charset.Charset;
 import java.security.PrivilegedExceptionAction;
 import java.util.Hashtable;
 import java.util.List;
+
 import javax.security.auth.Subject;
 
 import jline.Terminal;
+
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Function;
@@ -162,6 +165,7 @@ public class ConsoleFactory {
         }
         session.put(".jline.terminal", terminal);
         session.put(SshAgent.SSH_AUTHSOCKET_ENV_NAME, agentId);
+        session.put("pid", getPid());
 
         boolean delayconsole = Boolean.parseBoolean(System.getProperty("karaf.delay.console"));
         if (delayconsole) {
@@ -169,6 +173,12 @@ public class ConsoleFactory {
         } else {
             new Thread(this.console, "Karaf Shell Console Thread").start();
         }
+    }
+    
+    private String getPid() {
+        String name = ManagementFactory.getRuntimeMXBean().getName();
+        String[] parts = name.split("@");
+        return parts[0];
     }
 
     protected String startAgent(String user) {
