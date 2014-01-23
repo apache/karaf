@@ -53,7 +53,7 @@
         <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-jpa_2.0_spec/${geronimo.jpa-spec.version}</bundle>
         <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-servlet_2.5_spec/1.2</bundle>
         <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-el_1.0_spec/1.0.1</bundle>
-        <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
+        <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-jpa_2.0_spec/${geronimo.jpa-spec.version}</bundle>
         <bundle dependency="true">mvn:commons-lang/commons-lang/${commons-lang.version}</bundle>
         <bundle dependency="true">mvn:commons-collections/commons-collections/${commons-collections.version}</bundle>
         <bundle dependency="true">mvn:commons-pool/commons-pool/${commons-pool.version}</bundle>
