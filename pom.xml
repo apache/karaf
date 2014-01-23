@@ -133,7 +133,6 @@
         <commons-collections.version>3.2.1</commons-collections.version>
         <commons-dbcp.version>1.4</commons-dbcp.version>
         <commons-fileupload.version>1.2.2</commons-fileupload.version>
-        <commons-compress.version>1.6</commons-compress.version>
         <commons-io.version>2.4</commons-io.version>
         <commons-jexl.version>2.1.1</commons-jexl.version>
         <commons-lang.version>2.6</commons-lang.version>
@@ -1791,11 +1790,6 @@
                 <groupId>commons-lang</groupId>
                 <artifactId>commons-lang</artifactId>
                 <version>${commons-lang.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.commons</groupId>
-                <artifactId>commons-compress</artifactId>
-                <version>${commons-compress.version}</version>
             </dependency>
             <dependency>
                 <groupId>commons-io</groupId>
