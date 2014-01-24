@@ -112,7 +112,7 @@
         <aspectj.bundle.version>1.7.4_1</aspectj.bundle.version>
         <bndlib.version>2.2.0</bndlib.version>
         <cglib.bundle.version>2.2.2_1</cglib.bundle.version>
-        <commons-beanutils.version>1.8.3</commons-beanutils.version>
+        <commons-beanutils.version>1.9.1</commons-beanutils.version>
         <commons-codec.version>1.9</commons-codec.version>
         <commons-collections.version>3.2.1</commons-collections.version>
         <commons-compress.version>1.6</commons-compress.version>
