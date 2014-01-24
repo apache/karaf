@@ -45,15 +45,10 @@ import org.apache.maven.project.MavenProjectHelper;
 import org.apache.maven.shared.filtering.MavenFileFilter;
 import org.apache.maven.shared.filtering.MavenFilteringException;
 import org.apache.maven.shared.filtering.MavenResourcesFiltering;
+import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.logging.AbstractLogEnabled;
 import org.codehaus.plexus.util.ReaderFactory;
 import org.codehaus.plexus.util.StringUtils;
-import org.sonatype.aether.RepositorySystem;
-import org.sonatype.aether.RepositorySystemSession;
-import org.sonatype.aether.artifact.Artifact;
-import org.sonatype.aether.repository.RemoteRepository;
-import org.sonatype.aether.resolution.ArtifactRequest;
-import org.sonatype.aether.resolution.ArtifactResult;
 import org.xml.sax.SAXException;
 
 import static org.apache.karaf.deployer.kar.KarArtifactInstaller.FEATURE_CLASSIFIER;
@@ -203,30 +198,14 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
     protected MavenProjectHelper projectHelper;
 
     /**
-     * The entry point to Aether, i.e. the component doing all the work.
+     * We can't autowire strongly typed RepositorySystem from aether because it may be Sonatype (Maven 3.0.x)
+     * or Eclipse (Maven 3.1.x) version, so we switch to service locator.
      *
      * @component
      * @required
      * @readonly
      */
-    private RepositorySystem repoSystem;
-
-    /**
-     * The current repository/network configuration of Maven.
-     *
-     * @parameter default-value="${repositorySystemSession}"
-     * @required
-     * @readonly
-     */
-    private RepositorySystemSession repoSession;
-
-    /**
-     * The project's remote repositories to use for the resolution of project dependencies.
-     *
-     * @parameter default-value="${project.remoteProjectRepositories}"
-     * @readonly
-     */
-    private List<RemoteRepository> projectRepos;
+    private PlexusContainer container;
 
     /**
      * @component role="org.apache.maven.shared.filtering.MavenResourcesFiltering" role-hint="default"
@@ -251,17 +230,20 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
     protected MavenFileFilter mavenFileFilter;
 
     //dependencies we are interested in
-    protected Map<Artifact, String> localDependencies;
+    protected Map<?, String> localDependencies;
     //log of what happened during search
     protected String treeListing;
+
+    //an access layer for available aether implementation
+    protected DependencyHelper dependencyHelper;
 
     //maven log
     private Log log;
 
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
-            DependencyHelper dependencyHelper = new DependencyHelper(projectRepos, repoSession, repoSystem);
-            dependencyHelper.getDependencies(project, includeTransitiveDependency);
+            this.dependencyHelper = DependencyHelperFactory.createDependencyHelper(this.container, this.project, this.session, getLog());
+            this.dependencyHelper.getDependencies(project, includeTransitiveDependency);
             this.localDependencies = dependencyHelper.getLocalDependencies();
             this.treeListing = dependencyHelper.getTreeListing();
             File dir = outputFile.getParentFile();
@@ -328,16 +310,16 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
         if (project.getDescription() != null && feature.getDetails() == null) {
             feature.setDetails(project.getDescription());
         }
-        for (Map.Entry<Artifact, String> entry : localDependencies.entrySet()) {
-            Artifact artifact = entry.getKey();
+        for (Map.Entry</*Artifact*/?, String> entry : localDependencies.entrySet()) {
+            Object artifact = entry.getKey();
 
-            if (excludedArtifactIds.contains(artifact.getArtifactId())) {
+            if (excludedArtifactIds.contains(this.dependencyHelper.getArtifactId(artifact))) {
                 continue;
             }
 
-            if (DependencyHelper.isFeature(artifact)) {
-                if (aggregateFeatures && FEATURE_CLASSIFIER.equals(artifact.getClassifier())) {
-                    File featuresFile = resolve(artifact);
+            if (this.dependencyHelper.isArtifactAFeature(artifact)) {
+                if (aggregateFeatures && FEATURE_CLASSIFIER.equals(this.dependencyHelper.getClassifier(artifact))) {
+                    File featuresFile = this.dependencyHelper.resolve(artifact, getLog());
                     if (featuresFile == null || !featuresFile.exists()) {
                         throw new MojoExecutionException("Cannot locate file for feature: " + artifact + " at " + featuresFile);
                     }
@@ -346,8 +328,8 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
                     features.getFeature().addAll(includedFeatures.getFeature());
                 }
             } else if (addBundlesToPrimaryFeature) {
-                String bundleName = MavenUtil.artifactToMvn(artifact);
-                File bundleFile = resolve(artifact);
+                String bundleName = this.dependencyHelper.artifactToMvn(artifact);
+                File bundleFile = this.dependencyHelper.resolve(artifact, getLog());
                 Manifest manifest = getManifest(bundleFile);
 
                 if (manifest == null || !ManifestUtils.isBundle(getManifest(bundleFile))) {
@@ -416,29 +398,6 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
             }
         }
     }
-
-    private File resolve(Artifact artifact) {
-        ArtifactRequest request = new ArtifactRequest();
-        request.setArtifact(artifact);
-        request.setRepositories(projectRepos);
-
-        getLog().debug("Resolving artifact " + artifact +
-                " from " + projectRepos);
-
-        ArtifactResult result;
-        try {
-            result = repoSystem.resolveArtifact(repoSession, request);
-        } catch (org.sonatype.aether.resolution.ArtifactResolutionException e) {
-            getLog().warn("could not resolve " + artifact, e);
-            return null;
-        }
-
-        getLog().debug("Resolved artifact " + artifact + " to " +
-                result.getArtifact().getFile() + " from "
-                + result.getRepository());
-        return result.getArtifact().getFile();
-    }
-
 
     private Features readFeaturesFile(File featuresFile) throws XMLStreamException, JAXBException, IOException {
         Features features;
