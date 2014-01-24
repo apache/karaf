@@ -29,8 +29,8 @@ import java.util.Map;
 
 import jline.Terminal;
 
+import org.apache.felix.gogo.commands.Action;
 import org.apache.felix.service.command.CommandSession;
-import org.apache.karaf.shell.commands.Action;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.CommandException;

@@ -22,10 +22,10 @@ import org.apache.felix.service.command.Function;
 
 public interface CommandWithAction extends Function {
 
-    Class<? extends Action> getActionClass();
+    Class<? extends org.apache.felix.gogo.commands.Action> getActionClass();
 
-    Action createNewAction();
+    org.apache.felix.gogo.commands.Action createNewAction();
 
-    void releaseAction(Action action) throws Exception;
+    void releaseAction(org.apache.felix.gogo.commands.Action action) throws Exception;
 
 }

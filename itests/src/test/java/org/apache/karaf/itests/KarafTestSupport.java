@@ -202,11 +202,11 @@ public class KarafTestSupport {
             e.printStackTrace(System.err);
             response = "SHELL COMMAND TIMED OUT: ";
         } catch (ExecutionException e) {
-        	Throwable cause = e.getCause().getCause();
-        	throw new RuntimeException(cause.getMessage(), cause);
-		} catch (InterruptedException e) {
-			throw new RuntimeException(e.getMessage(), e);
-		}
+            Throwable cause = e.getCause().getCause();
+            throw new RuntimeException(cause.getMessage(), cause);
+	} catch (InterruptedException e) {
+	    throw new RuntimeException(e.getMessage(), e);
+	}
         return response;
     }
 

@@ -26,9 +26,10 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import jline.Terminal;
+
+import org.apache.felix.gogo.commands.Action;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Function;
-import org.apache.karaf.shell.commands.Action;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.basic.AbstractCommand;
 import org.apache.karaf.shell.commands.meta.ActionMetaDataFactory;

@@ -21,8 +21,8 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.felix.gogo.commands.Action;
 import org.apache.felix.service.command.CommandSession;
-import org.apache.karaf.shell.commands.Action;
 import org.apache.karaf.shell.commands.basic.AbstractCommand;
 import org.apache.karaf.shell.commands.basic.ActionPreparator;
 import org.apache.karaf.shell.commands.basic.DefaultActionPreparator;

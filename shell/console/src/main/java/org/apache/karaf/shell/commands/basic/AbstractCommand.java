@@ -20,8 +20,8 @@ package org.apache.karaf.shell.commands.basic;
 
 import java.util.List;
 
+import org.apache.felix.gogo.commands.Action;
 import org.apache.felix.service.command.CommandSession;
-import org.apache.karaf.shell.commands.Action;
 import org.apache.karaf.shell.commands.CommandWithAction;
 
 public abstract class AbstractCommand implements CommandWithAction {
