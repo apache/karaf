@@ -128,8 +128,6 @@
         <jasypt.bundle.version>1.9.1_1</jasypt.bundle.version>
         <javassist.version>3.9.0.GA</javassist.version>
         <jetty.version>8.1.10.v20130312</jetty.version>
-        <junit.version>4.10</junit.version>
-        <junit.bundle.version>4.10_1</junit.bundle.version>
         <geronimo.annotation-spec.version>1.0.1</geronimo.annotation-spec.version>
         <geronimo.jaspic-spec.version>1.1</geronimo.jaspic-spec.version>
         <geronimo.jms-spec.version>1.1.1</geronimo.jms-spec.version>
@@ -793,11 +791,6 @@
                 </exclusions>
             </dependency>
             <dependency>
-                <groupId>org.apache.servicemix.bundles</groupId>
-                <artifactId>org.apache.servicemix.bundles.junit</artifactId>
-                <version>${junit.bundle.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-util</artifactId>
                 <version>${jetty.version}</version>
@@ -1245,7 +1238,7 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.10</version>
+            <version>4.11</version>
             <scope>test</scope>
         </dependency>
         <dependency>

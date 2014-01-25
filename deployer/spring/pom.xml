@@ -67,11 +67,6 @@
             <artifactId>org.apache.felix.fileinstall</artifactId>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.junit</artifactId>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
     <build>
