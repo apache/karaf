@@ -51,14 +51,9 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.junit</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-        	<groupId>org.apache.felix</groupId>
-        	<artifactId>org.apache.felix.utils</artifactId>
-        	<scope>provided</scope>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.utils</artifactId>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 

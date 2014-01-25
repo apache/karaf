@@ -226,12 +226,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.junit</artifactId>
-            <version>${junit3.bundle.version}</version>
-        </dependency>
-
-        <dependency>
             <groupId>org.apache.karaf.region</groupId>
             <artifactId>org.apache.karaf.region.core</artifactId>
         </dependency>

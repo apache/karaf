@@ -143,9 +143,6 @@
         <servlet.spec.groupId>org.apache.geronimo.specs</servlet.spec.groupId>
         <servlet.spec.artifactId>geronimo-servlet_3.0_spec</servlet.spec.artifactId>
         <servlet.spec.version>1.0</servlet.spec.version>
-        <junit3.bundle.version>3.8.2_4</junit3.bundle.version>
-        <junit.bundle.version>4.10_1</junit.bundle.version>
-        <junit.version>4.10</junit.version>
 
         <geronimo.jms-spec.version>1.1.1</geronimo.jms-spec.version>
         <geronimo.jpa-spec.version>1.1</geronimo.jpa-spec.version>
@@ -1817,11 +1814,6 @@
                 <artifactId>org.apache.servicemix.bundles.jasypt</artifactId>
                 <version>${jasypt.bundle.version}</version>
             </dependency>
-            <dependency>
-                <groupId>org.apache.servicemix.bundles</groupId>
-                <artifactId>org.apache.servicemix.bundles.junit</artifactId>
-                <version>${junit.bundle.version}</version>
-            </dependency>
 
             <dependency>
                 <groupId>org.apache.commons</groupId>
@@ -1835,7 +1827,7 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>${junit.version}</version>
+            <version>4.11</version>
             <scope>test</scope>
         </dependency>
         <dependency>
