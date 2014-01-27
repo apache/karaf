@@ -356,7 +356,7 @@
                                     <outputDirectory>target/classes/resources/lib/endorsed</outputDirectory>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.apache.xerces</groupId>
+                                    <groupId>xerces</groupId>
                                     <artifactId>xercesImpl</artifactId>
                                     <outputDirectory>target/classes/resources/lib/endorsed</outputDirectory>
                                 </artifactItem>
