@@ -332,7 +332,7 @@
             <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>org.apache.xerces</groupId>
+            <groupId>xerces</groupId>
             <artifactId>xercesImpl</artifactId>
         </dependency>
         <dependency>
