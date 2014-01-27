@@ -56,6 +56,11 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
+		<configuration>
+		    <instructions>
+		       <Import-Package>org.fusesource.jansi;version="[1.9,2)",*</Import-Package>
+		    </instructions>
+	        </configuration>
             </plugin>
         </plugins>
     </build>
