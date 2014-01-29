@@ -23,8 +23,6 @@ public abstract class JmsCommandSupport extends OsgiCommandSupport {
 
     private JmsService jmsService;
 
-    public abstract Object doExecute() throws Exception;
-
     public JmsService getJmsService() {
         return jmsService;
     }

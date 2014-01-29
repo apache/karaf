@@ -21,11 +21,7 @@ import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
 
 @Command(scope = "jms", name = "move", description = "Move messages from one JMS queue to another one.")
-public class MoveCommand extends JmsCommandSupport {
-
-    @Argument(index = 0, name = "connectionFactory", description = "The JMS connection factory name", required = true, multiValued = false)
-    String connectionFactory;
-
+public class MoveCommand extends JmsConnectionCommandSupport {
     @Argument(index = 1, name = "source", description = "The source JMS queue", required = true, multiValued = false)
     String source;
 
@@ -34,12 +30,6 @@ public class MoveCommand extends JmsCommandSupport {
 
     @Option(name = "-s", aliases = { "--selector" }, description = "Selector to move only some messages", required = false, multiValued = false)
     String selector;
-
-    @Option(name = "-u", aliases = { "--username" }, description = "Username to connect to the JMS broker", required = false, multiValued = false)
-    String username = "karaf";
-
-    @Option(name = "-p", aliases = { "--password" }, description = "Password to connect to the JMS broker", required = false, multiValued = false)
-    String password = "karaf";
 
     public Object doExecute() throws Exception {
         System.out.println(getJmsService().move(connectionFactory, source, destination, selector, username, password) + " message(s) moved");

@@ -39,6 +39,10 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.apache.karaf.jms</groupId>
             <artifactId>org.apache.karaf.jms.core</artifactId>
         </dependency>

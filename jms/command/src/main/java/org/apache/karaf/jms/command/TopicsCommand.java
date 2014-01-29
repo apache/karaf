@@ -16,22 +16,11 @@
  */
 package org.apache.karaf.jms.command;
 
-import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.table.ShellTable;
 
 @Command(scope = "jms", name = "topics", description = "List the JMS topics.")
-public class TopicsCommand extends JmsCommandSupport {
-
-    @Argument(index = 0, name = "connectionFactory", description = "The JMS connection factory name", required = true, multiValued = false)
-    String connectionFactory;
-
-    @Option(name = "-u", aliases = { "--username" }, description = "Username to connect to the JMS broker", required = false, multiValued = false)
-    String username = "karaf";
-
-    @Option(name = "-p", aliases = { "--password" }, description = "Password to connect to the JMS broker", required = false, multiValued = false)
-    String password = "karaf";
+public class TopicsCommand extends JmsConnectionCommandSupport {
 
     public Object doExecute() throws Exception {
         ShellTable table = new ShellTable();

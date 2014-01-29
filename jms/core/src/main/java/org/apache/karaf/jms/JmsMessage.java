@@ -18,7 +18,6 @@ package org.apache.karaf.jms;
 
 import javax.jms.*;
 import java.io.UnsupportedEncodingException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;

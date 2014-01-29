@@ -21,10 +21,7 @@ import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
 
 @Command(scope = "jms", name = "send", description = "Send a message to ")
-public class SendCommand extends JmsCommandSupport {
-
-    @Argument(index = 0, name = "connectionFactory", description = "The JMS connection factory name", required = true, multiValued = false)
-    String connectionFactory;
+public class SendCommand extends JmsConnectionCommandSupport {
 
     @Argument(index = 1, name = "queue", description = "The JMS queue name", required = true, multiValued = false)
     String queue;
@@ -34,12 +31,6 @@ public class SendCommand extends JmsCommandSupport {
 
     @Option(name = "-r", aliases = { "--replyTo" }, description = "Set the message ReplyTo", required = false, multiValued = false)
     String replyTo;
-
-    @Option(name = "-u", aliases = { "--username" }, description = "Username to connect to the JMS broker", required = false, multiValued = false)
-    String username = "karaf";
-
-    @Option(name = "-p", aliases = { "--password" }, description = "Password to connect to the JMS broker", required = false, multiValued = false)
-    String password = "karaf";
 
     public Object doExecute() throws Exception {
         getJmsService().send(connectionFactory, queue, message, replyTo, username, password);

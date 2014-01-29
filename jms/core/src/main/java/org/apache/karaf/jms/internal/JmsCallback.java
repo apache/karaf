@@ -14,24 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.jms.command;
+package org.apache.karaf.jms.internal;
 
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.table.ShellTable;
+import javax.jms.Connection;
+import javax.jms.JMSException;
+import javax.jms.Session;
 
-@Command(scope = "jms", name = "count", description = "Count the number of messages on a JMS queue.")
-public class CountCommand extends JmsConnectionCommandSupport {
-
-    @Argument(index = 1, name = "queue", description = "The JMS queue name", required = true, multiValued = false)
-    String queue;
-
-    public Object doExecute() throws Exception {
-        ShellTable table = new ShellTable();
-        table.column("Messages Count");
-        table.addRow().addContent(getJmsService().count(connectionFactory, queue, username, password));
-        table.print(System.out);
-        return null;
-    }
-
+public interface JmsCallback<E> {
+    public E doInSession(Connection connection, Session session) throws JMSException;
 }

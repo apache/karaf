@@ -25,22 +25,13 @@ import org.apache.karaf.shell.table.ShellTable;
 import java.util.List;
 
 @Command(scope = "jms", name = "browse", description = "Browse a JMS queue")
-public class BrowseCommand extends JmsCommandSupport {
-
-    @Argument(index = 0, name = "connectionFactory", description = "The JMS connection factory name", required = true, multiValued = false)
-    String connectionFactory;
+public class BrowseCommand extends JmsConnectionCommandSupport {
 
     @Argument(index = 1, name = "queue", description = "The JMS queue to browse", required = true, multiValued = false)
     String queue;
 
     @Option(name = "-s", aliases = { "--selector" }, description = "The selector to select the messages to browse", required = false, multiValued = false)
     String selector;
-
-    @Option(name = "-u", aliases = { "--username" }, description = "Username to connect to the JMS broker", required = false, multiValued = false)
-    String username = "karaf";
-
-    @Option(name = "-p", aliases = { "--password" }, description = "Password to connect to the JMS broker", required = false, multiValued = false)
-    String password = "karaf";
 
     @Option(name = "-v", aliases = { "--verbose" }, description = "Display JMS properties", required = false, multiValued = false)
     boolean verbose = false;

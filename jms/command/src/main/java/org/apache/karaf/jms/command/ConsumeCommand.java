@@ -21,10 +21,8 @@ import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
 
 @Command(scope = "jms", name = "consume", description = "Consume messages from a JMS queue.")
-public class ConsumeCommand extends JmsCommandSupport {
+public class ConsumeCommand extends JmsConnectionCommandSupport {
 
-    @Argument(index = 0, name = "connectionFactory", description = "The JMS connection factory name", required = true, multiValued = false)
-    String connectionFactory;
 
     @Argument(index = 1, name = "queue", description = "The JMS queue where to consume messages", required = true, multiValued = false)
     String queue;
@@ -32,16 +30,8 @@ public class ConsumeCommand extends JmsCommandSupport {
     @Option(name = "-s", aliases = { "--selector" }, description = "The selector to use to select the messages to consume", required = false, multiValued = false)
     String selector;
 
-    @Option(name = "-u", aliases = { "--username" }, description = "Username to connect to the JMS broker", required = false, multiValued = false)
-    String username = "karaf";
-
-    @Option(name = "-p", aliases = { "--password" }, description = "Password to connect to the JMS broker", required = false, multiValued = false)
-    String password = "karaf";
-
     public Object doExecute() throws Exception {
-
         System.out.println(getJmsService().consume(connectionFactory, queue, selector, username, password) + " message(s) consumed");
-
         return null;
     }
 

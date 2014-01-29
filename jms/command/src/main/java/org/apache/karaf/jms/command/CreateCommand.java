@@ -26,12 +26,12 @@ public class CreateCommand extends JmsCommandSupport {
     @Argument(index = 0, name = "name", description = "The JMS connection factory name", required = true, multiValued = false)
     String name;
 
-    @Option(name = "-t", aliases = { "--type" }, description = "The JMS connection factory type (ActiveMQ or WebsphereMQ)", required = true, multiValued = false)
-    String type;
+    @Option(name = "-t", aliases = { "--type" }, description = "The JMS connection factory type (ActiveMQ or WebsphereMQ)", required = false, multiValued = false)
+    String type = "ActiveMQ";
 
-    @Option(name = "-u", aliases = { "--url" }, description = "The JMS URL. NB: for WebsphereMQ type, the URL is hostname/port/queuemanager/channel", required = true, multiValued = false)
-    String url;
-
+    @Option(name = "--url", description = "URL of the JMS broker. For WebsphereMQ type, the URL is hostname/port/queuemanager/channel", required = false, multiValued = false)
+    String url = "tcp://localhost:61616";
+    
     public Object doExecute() throws Exception {
         getJmsService().create(name, type, url);
         return null;
