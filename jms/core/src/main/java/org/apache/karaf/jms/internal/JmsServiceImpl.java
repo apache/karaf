@@ -23,6 +23,7 @@ import org.apache.activemq.command.ActiveMQTopic;
 import org.apache.activemq.pool.PooledConnection;
 import org.apache.karaf.jms.JmsMessage;
 import org.apache.karaf.jms.JmsService;
+import org.apache.karaf.util.TemplateUtils;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
@@ -74,7 +75,11 @@ public class JmsServiceImpl implements JmsService {
             properties.put("channel", splitted[3]);
             template = "connectionfactory-webspheremq.xml";
         }
-        TemplateUtil.createFromTemplate(outFile, template, properties);
+        InputStream is = this.getClass().getResourceAsStream(template);
+        if (is == null) {
+            throw new IllegalArgumentException("Template resource " + template + " doesn't exist");
+        }
+        TemplateUtils.createFromTemplate(outFile, is, properties);
     }
 
     private File getConnectionFactoryFile(String name) {

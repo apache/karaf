@@ -54,6 +54,10 @@
             <version>5.9.0</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.apache.karaf.util</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -86,7 +90,8 @@
                             *
                         </Import-Package>
                         <Private-Package>
-                            org.apache.karaf.jms.internal
+                            org.apache.karaf.jms.internal,
+                            org.apache.karaf.util
                         </Private-Package>
                     </instructions>
                 </configuration>

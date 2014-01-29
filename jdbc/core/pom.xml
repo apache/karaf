@@ -43,6 +43,10 @@
             <artifactId>org.osgi.core</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.apache.karaf.util</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -71,7 +75,8 @@
                             org.apache.karaf.jdbc
                         </Export-Package>
                         <Private-Package>
-                            org.apache.karaf.jdbc.internal
+                            org.apache.karaf.jdbc.internal,
+                            org.apache.karaf.util
                         </Private-Package>
                     </instructions>
                 </configuration>

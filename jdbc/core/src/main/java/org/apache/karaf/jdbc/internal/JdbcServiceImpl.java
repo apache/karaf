@@ -17,11 +17,13 @@
 package org.apache.karaf.jdbc.internal;
 
 import org.apache.karaf.jdbc.JdbcService;
+import org.apache.karaf.util.TemplateUtils;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 
 import javax.sql.DataSource;
+
 import java.io.*;
 import java.sql.*;
 import java.util.*;
@@ -52,79 +54,35 @@ public class JdbcServiceImpl implements JdbcService {
         }
 
         public void installBundle(BundleContext bundleContext, String version) throws Exception {
-            if (version != null) {
-                bundleContext.installBundle(this.bundleUrl + version, null).start();
-            } else {
-                bundleContext.installBundle(this.bundleUrl + this.defaultVersion, null).start();
-            }
+            String location = this.bundleUrl + getWithDefault(version, this.defaultVersion);
+            bundleContext.installBundle(location, null).start();
         }
 
-        public void copyDataSourceFile(File outFile, HashMap<String, String> properties) throws Exception {
-            if (!outFile.exists()) {
-                InputStream is = JdbcServiceImpl.class.getResourceAsStream(this.templateFile);
-                if (is == null) {
-                    throw new IllegalArgumentException("Resource " + this.templateFile + " doesn't exist");
-                }
-                try {
-                    // read it line at a time so that we can use the platform line ending when we write it out
-                    PrintStream out = new PrintStream(new FileOutputStream(outFile));
-                    try {
-                        Scanner scanner = new Scanner(is);
-                        while (scanner.hasNextLine()) {
-                            String line = scanner.nextLine();
-                            line = filter(line, properties);
-                            out.println(line);
-                        }
-                    } finally {
-                        safeClose(out);
-                    }
-                } finally {
-                    safeClose(is);
-                }
-            } else {
-                throw new IllegalArgumentException("File " + outFile.getPath() + " already exists. Remove it if you wish to recreate it.");
-            }
+        private String getWithDefault(String st, String defaultSt) {
+            return (st == null)? defaultSt : st;
         }
 
-        private void safeClose(InputStream is) throws IOException {
-            if (is == null)
-                return;
-            try {
-                is.close();
-            } catch (Throwable ignore) {
-                // nothing to do
+        public void copyDataSourceFile(File outFile, HashMap<String, String> properties) {
+            InputStream is = this.getClass().getResourceAsStream(templateFile);
+            if (is == null) {
+                throw new IllegalArgumentException("Template resource " + templateFile + " doesn't exist");
             }
+            TemplateUtils.createFromTemplate(outFile, is, properties);
         }
 
-        private void safeClose(OutputStream is) throws IOException {
-            if (is == null)
-                return;
-            try {
-                is.close();
-            } catch (Throwable ignore) {
-                // nothing to do
-            }
-        }
-
-        private String filter(String line, HashMap<String, String> props) {
-            for (Map.Entry<String, String> i : props.entrySet()) {
-                int p1 = line.indexOf(i.getKey());
-                if (p1 >= 0) {
-                    String l1 = line.substring(0, p1);
-                    String l2 = line.substring(p1 + i.getKey().length());
-                    line = l1 + i.getValue() + l2;
-                }
-            }
-            return line;
-        }
     }
 
     private BundleContext bundleContext;
 
     @Override
     public void create(String name, String type, String driverClassName, String version, String url, String user, String password, boolean tryToInstallBundles) throws Exception {
+        if (type == null) {
+            throw new IllegalStateException("No database type supplied");
+        }
+        TYPES dbType = TYPES.valueOf(type.toUpperCase());
+
         if (tryToInstallBundles) {
-            TYPES.valueOf(type.toUpperCase()).installBundle(bundleContext, version);
+            dbType.installBundle(bundleContext, version);
         }
 
         File karafBase = new File(System.getProperty("karaf.base"));
@@ -132,13 +90,13 @@ public class JdbcServiceImpl implements JdbcService {
         File outFile = new File(deployFolder, "datasource-" + name + ".xml");
 
         HashMap<String, String> properties = new HashMap<String, String>();
-        properties.put("${name}", name);
-        properties.put("${driver}", driverClassName);
-        properties.put("${url}", url);
-        properties.put("${user}", user);
-        properties.put("${password}", password);
+        properties.put("name", name);
+        properties.put("driver", driverClassName);
+        properties.put("url", url);
+        properties.put("user", user);
+        properties.put("password", password);
 
-        TYPES.valueOf(type.toUpperCase()).copyDataSourceFile(outFile, properties);
+        dbType.copyDataSourceFile(outFile, properties);
     }
 
     @Override

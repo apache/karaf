@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.jms.internal;
+package org.apache.karaf.util;
 
 import java.io.Closeable;
 import java.io.File;
@@ -26,25 +26,21 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
-public class TemplateUtil {
-    private TemplateUtil() {
+public class TemplateUtils {
+    private TemplateUtils() {
     }
 
-    public static void createFromTemplate(File outFile, String resource, HashMap<String, String> properties) {
+    public static void createFromTemplate(File outFile, InputStream templateIs, HashMap<String, String> properties) {
         if (outFile.exists()) {
             throw new IllegalArgumentException("File " + outFile.getPath()
                                                + " already exists. Remove it if you wish to recreate it.");
-        }
-        InputStream is = TemplateUtil.class.getResourceAsStream(resource);
-        if (is == null) {
-            throw new IllegalArgumentException("Resource " + resource + " doesn't exist");
         }
         PrintStream out = null;
         Scanner scanner = null;
         try {
             // read it line at a time so that we can use the platform line ending when we write it out
             out = new PrintStream(new FileOutputStream(outFile));
-            scanner = new Scanner(is);
+            scanner = new Scanner(templateIs);
 
             while (scanner.hasNextLine()) {
                 String line = scanner.nextLine();
@@ -56,7 +52,7 @@ public class TemplateUtil {
         } finally {
             safeClose(scanner);
             safeClose(out);
-            safeClose(is);
+            safeClose(templateIs);
         }
     }
 
