@@ -224,7 +224,7 @@
         <org.json.version>20131018</org.json.version>
         <pax.cdi.version>0.6.0</pax.cdi.version>
         <pax.exam.version>3.4.0</pax.exam.version>
-        <pax.logging.version>1.7.2-SNAPSHOT</pax.logging.version>
+        <pax.logging.version>1.7.2</pax.logging.version>
         <pax.base.version>1.4.0</pax.base.version>
         <pax.url.version>1.6.0</pax.url.version>
         <pax.web.version>3.0.6</pax.web.version>
