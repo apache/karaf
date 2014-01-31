@@ -113,9 +113,9 @@ public class JdbcServiceImpl implements JdbcService {
     @Override
     public List<String> datasources() throws Exception {
         List<String> datasources = new ArrayList<String>();
-        ServiceReference[] references = bundleContext.getServiceReferences(DataSource.class.getName(), null);
+        Collection<ServiceReference<DataSource>> references = bundleContext.getServiceReferences(DataSource.class, null);
         if (references != null) {
-            for (ServiceReference reference : references) {
+            for (ServiceReference<DataSource> reference : references) {
                 if (reference.getProperty("osgi.jndi.service.name") != null) {
                     datasources.add((String) reference.getProperty("osgi.jndi.service.name"));
                 } else if (reference.getProperty("datasource") != null) {
@@ -148,15 +148,11 @@ public class JdbcServiceImpl implements JdbcService {
 
     @Override
     public Map<String, List<String>> query(String datasource, String query) throws Exception {
-        Map<String, List<String>> map = new HashMap<String, List<String>>();
-        ServiceReference reference = this.lookupDataSource(datasource);
-        Connection connection = null;
-        Statement statement = null;
+        JdbcConnector jdbcConnector = new JdbcConnector(bundleContext, datasource);
         try {
-            DataSource ds = (DataSource) bundleContext.getService(reference);
-            connection = ds.getConnection();
-            statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery(query);
+            Map<String, List<String>> map = new HashMap<String, List<String>>();
+            Statement statement = jdbcConnector.createStatement();
+            ResultSet resultSet = jdbcConnector.register(statement.executeQuery(query));
             ResultSetMetaData metaData = resultSet.getMetaData();
             for (int c = 1; c <= metaData.getColumnCount(); c++) {
                 map.put(metaData.getColumnLabel(c), new ArrayList<String>());
@@ -166,55 +162,30 @@ public class JdbcServiceImpl implements JdbcService {
                     map.get(metaData.getColumnLabel(c)).add(resultSet.getString(c));
                 }
             }
-            resultSet.close();
+            return map;
         } finally {
-            if (statement != null) {
-                statement.close();
-            }
-            if (connection != null) {
-                connection.close();
-            }
-            if (reference != null) {
-                bundleContext.ungetService(reference);
-            }
+            jdbcConnector.close();
         }
-        return map;
     }
 
     @Override
     public void execute(String datasource, String command) throws Exception {
-        ServiceReference reference = this.lookupDataSource(datasource);
-        Connection connection = null;
-        Statement statement = null;
+        JdbcConnector jdbcConnector = new JdbcConnector(bundleContext, datasource);
         try {
-            DataSource ds = (DataSource) bundleContext.getService(reference);
-            connection = ds.getConnection();
-            statement = connection.createStatement();
-            statement.execute(command);
+            jdbcConnector.createStatement().execute(command);
         } finally {
-            if (statement != null) {
-                statement.close();
-            }
-            if (connection != null) {
-                connection.close();
-            }
-            if (reference != null) {
-                bundleContext.ungetService(reference);
-            }
+            jdbcConnector.close();
         }
     }
 
     @Override
     public Map<String, List<String>> tables(String datasource) throws Exception {
-        Map<String, List<String>> map = new HashMap<String, List<String>>();
-        ServiceReference reference = this.lookupDataSource(datasource);
-        Connection connection = null;
+        JdbcConnector jdbcConnector = new JdbcConnector(bundleContext, datasource);
         try {
-            DataSource ds = (DataSource) bundleContext.getService(reference);
-            connection = ds.getConnection();
-            DatabaseMetaData dbMetaData = connection.getMetaData();
-            ResultSet resultSet = dbMetaData.getTables(null, null, null, null);
+            DatabaseMetaData dbMetaData = jdbcConnector.connect().getMetaData();
+            ResultSet resultSet = jdbcConnector.register(dbMetaData.getTables(null, null, null, null));
             ResultSetMetaData metaData = resultSet.getMetaData();
+            Map<String, List<String>> map = new HashMap<String, List<String>>();
             for (int c = 1; c <= metaData.getColumnCount(); c++) {
                 map.put(metaData.getColumnLabel(c), new ArrayList<String>());
             }
@@ -223,57 +194,28 @@ public class JdbcServiceImpl implements JdbcService {
                     map.get(metaData.getColumnLabel(c)).add(resultSet.getString(c));
                 }
             }
-            resultSet.close();
+            return map;
         } finally {
-            if (connection != null) {
-                connection.close();
-            }
-            if (reference != null) {
-                bundleContext.ungetService(reference);
-            }
+            jdbcConnector.close();
         }
-        return map;
     }
 
     @Override
     public Map<String, String> info(String datasource) throws Exception {
-        Map<String, String> map = new HashMap<String, String>();
-        ServiceReference reference = this.lookupDataSource(datasource);
-        Connection connection = null;
+        JdbcConnector jdbcConnector = new JdbcConnector(bundleContext, datasource);
         try {
-            DataSource ds = (DataSource) bundleContext.getService(reference);
-            connection = ds.getConnection();
-            DatabaseMetaData dbMetaData = connection.getMetaData();
+            DatabaseMetaData dbMetaData = jdbcConnector.connect().getMetaData();
+            Map<String, String> map = new HashMap<String, String>();
             map.put("db.product", dbMetaData.getDatabaseProductName());
             map.put("db.version", dbMetaData.getDatabaseProductVersion());
             map.put("url", dbMetaData.getURL());
             map.put("username", dbMetaData.getUserName());
             map.put("driver.name", dbMetaData.getDriverName());
             map.put("driver.version", dbMetaData.getDriverVersion());
+            return map;
         } finally {
-            if (connection != null) {
-                connection.close();
-            }
-            if (reference != null) {
-                bundleContext.ungetService(reference);
-            }
+            jdbcConnector.close();
         }
-        return map;
-    }
-
-    private ServiceReference lookupDataSource(String name) throws Exception {
-        ServiceReference[] references = bundleContext.getServiceReferences(DataSource.class.getName(), "(|(osgi.jndi.service.name=" + name + ")(datasource=" + name + ")(name=" + name + ")(service.id=" + name + "))");
-        if (references == null || references.length == 0) {
-            throw new IllegalArgumentException("No JDBC datasource found for " + name);
-        }
-        if (references.length > 1) {
-            throw new IllegalArgumentException("Multiple JDBC datasource found for " + name);
-        }
-        return references[0];
-    }
-
-    public BundleContext getBundleContext() {
-        return bundleContext;
     }
 
     public void setBundleContext(BundleContext bundleContext) {

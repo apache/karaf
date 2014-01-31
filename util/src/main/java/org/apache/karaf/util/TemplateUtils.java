@@ -50,7 +50,6 @@ public class TemplateUtils {
         } catch (FileNotFoundException e) {
             throw new RuntimeException("Can not create " + outFile, e);
         } finally {
-            safeClose(scanner);
             safeClose(out);
             safeClose(templateIs);
         }
