@@ -26,7 +26,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.Field;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,7 +35,6 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Map;
 import java.util.Set;
 
 import javax.xml.bind.JAXBException;
@@ -175,7 +173,7 @@ public class InstallKarsMojo extends MojoSupport {
     private boolean addTransitiveFeatures = true;
 
     private URI system;
-    private CommentProperties startupProperties = new CommentProperties();
+    private Properties startupProperties = new Properties();
     private Set<Feature> featureSet = new HashSet<Feature>();
     private List<Dependency> missingDependencies = new ArrayList<Dependency>();
 
@@ -592,50 +590,6 @@ public class InstallKarsMojo extends MojoSupport {
 			// TODO Auto-generated method stub
 			
 		}
-    }
-
-    // when FELIX-2887 is ready we can use plain Properties again
-    private static class CommentProperties extends Properties {
-
-        private Map<String, Layout> layout;
-        private Map<String, String> storage;
-
-        @SuppressWarnings("unchecked")
-        public CommentProperties() {
-            layout = (Map<String, Layout>) getField("layout");
-            storage = (Map<String, String>) getField("storage");
-        }
-
-        private Object getField(String fieldName) {
-            try {
-                Field l = Properties.class.getDeclaredField(fieldName);
-                boolean old = l.isAccessible();
-                l.setAccessible(true);
-                Object layout = l.get(this);
-                l.setAccessible(old);
-                return layout;
-            } catch (Exception e) {
-                throw new RuntimeException("Could not access field " + fieldName, e);
-            }
-        }
-
-        public String put(String key, String comment, String value) {
-            return put(key, Collections.singletonList(comment), value);
-        }
-
-        public List<String> getRaw(String key) {
-            if (layout.containsKey(key)) {
-                if (layout.get(key).getValueLines() != null) {
-                    return new ArrayList<String>(layout.get(key).getValueLines());
-                }
-            }
-            List<String> result = new ArrayList<String>();
-            if (storage.containsKey(key)) {
-                result.add(storage.get(key));
-            }
-            return result;
-        }
-
     }
 
 }
