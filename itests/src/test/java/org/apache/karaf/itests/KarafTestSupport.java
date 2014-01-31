@@ -26,6 +26,7 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.net.URL;
 import java.security.Principal;
 import java.security.PrivilegedExceptionAction;
 import java.util.Arrays;
@@ -108,7 +109,11 @@ public class KarafTestSupport {
     }
 
     public File getConfigFile(String path) {
-    	return new File(this.getClass().getResource(path).getFile());
+        URL res = this.getClass().getResource(path);
+        if (res == null) {
+            throw new RuntimeException("Config resource " + path + " not found");
+        }
+    	return new File(res.getFile());
     }
 
     @Configuration
