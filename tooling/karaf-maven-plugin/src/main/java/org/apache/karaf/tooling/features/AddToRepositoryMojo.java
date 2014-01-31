@@ -40,7 +40,7 @@ import org.apache.maven.plugin.MojoFailureException;
 public class AddToRepositoryMojo extends AbstractFeatureMojo {
 
     /**
-     * @parameter expression="${project.build.directory}/features-repo"
+     * @parameter default-value="${project.build.directory}/features-repo"
      */
     protected File repository;
 

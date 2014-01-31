@@ -16,8 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-
 package org.apache.karaf.tooling.instances;
 
 import java.io.File;
@@ -49,17 +47,16 @@ public class CreateArchiveMojo extends MojoSupport {
     /**
      * The target directory of the project.
      *
-     * @parameter expression="${project.build.directory}"
+     * @parameter default-value="${project.build.directory}"
      * @required
      * @readonly
      */
     private File destDir;
 
-
     /**
      * The location of the server repository.
      *
-     * @parameter expression="${project.build.directory}/assembly"
+     * @parameter default-value="${project.build.directory}/assembly"
      * @required
      */
     private File targetServerDirectory;
@@ -67,7 +64,7 @@ public class CreateArchiveMojo extends MojoSupport {
     /**
      * The target file to set as the project's artifact.
      *
-     * @parameter expression="${project.file}"
+     * @parameter default-value="${project.file}"
      * @required
      */
     private File targetFile;

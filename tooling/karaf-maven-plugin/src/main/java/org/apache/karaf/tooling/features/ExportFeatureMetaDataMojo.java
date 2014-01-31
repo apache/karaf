@@ -59,7 +59,7 @@ public class ExportFeatureMetaDataMojo extends AbstractFeatureMojo {
     /**
      * Name of the file for exported feature meta data
      * 
-     * @parameter expression="${project.build.directory}/features.xml"
+     * @parameter default-value="${project.build.directory}/features.xml"
      */
     private File metaDataFile;
     

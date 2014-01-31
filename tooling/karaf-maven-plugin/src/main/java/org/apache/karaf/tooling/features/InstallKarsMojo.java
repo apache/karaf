@@ -75,17 +75,17 @@ import org.sonatype.aether.util.artifact.DefaultArtifact;
 public class InstallKarsMojo extends MojoSupport {
 
     /**
-     * Directory that resources are copied to during the build.
+     * Base directory used to copy the resources during the build (working directory).
      *
-     * @parameter expression="${project.build.directory}/assembly"
+     * @parameter default-value="${project.build.directory}/assembly"
      * @required
      */
     protected String workDirectory;
 
     /**
-     * features config file.
+     * Features configuration file (etc/org.apache.karaf.features.cfg).
      *
-     * @parameter expression="${project.build.directory}/assembly/etc/org.apache.karaf.features.cfg"
+     * @parameter default-value="${project.build.directory}/assembly/etc/org.apache.karaf.features.cfg"
      * @required
      */
     protected File featuresCfgFile;
@@ -93,13 +93,13 @@ public class InstallKarsMojo extends MojoSupport {
     /**
      * startup.properties file.
      *
-     * @parameter expression="${project.build.directory}/assembly/etc/startup.properties"
+     * @parameter default-value="${project.build.directory}/assembly/etc/startup.properties"
      * @required
      */
     protected File startupPropertiesFile;
 
     /**
-     * default start level for bundles in features that dont' specify it
+     * default start level for bundles in features that don't specify it.
      *
      * @parameter
      */
@@ -112,9 +112,9 @@ public class InstallKarsMojo extends MojoSupport {
     protected boolean dontAddToStartup;
 
     /**
-     * Directory that resources are copied to during the build.
+     * Directory used during build to construction the Karaf system repository.
      *
-     * @parameter expression="${project.build.directory}/assembly/system"
+     * @parameter default-value="${project.build.directory}/assembly/system"
      * @required
      */
     protected File systemDirectory;

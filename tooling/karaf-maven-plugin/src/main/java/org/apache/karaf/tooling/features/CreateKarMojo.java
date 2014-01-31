@@ -76,7 +76,7 @@ public class CreateKarMojo extends MojoSupport {
     /**
      * Directory containing the generated archive.
      *
-     * @parameter expression="${project.build.directory}"
+     * @parameter default-value="${project.build.directory}"
      * @required
      */
     private File outputDirectory = null;
@@ -84,7 +84,7 @@ public class CreateKarMojo extends MojoSupport {
     /**
      * Name of the generated archive.
      *
-     * @parameter expression="${project.build.finalName}"
+     * @parameter default-value="${project.build.finalName}"
      * @required
      */
     private String finalName = null;
@@ -108,7 +108,7 @@ public class CreateKarMojo extends MojoSupport {
      * Location of resources directory for additional content to include in the kar.
      * Note that it includes everything under classes so as to include maven-remote-resources
      *
-     * @parameter expression="${project.build.directory}/classes"
+     * @parameter default-value="${project.build.directory}/classes"
      */
     private File resourcesDir;
 

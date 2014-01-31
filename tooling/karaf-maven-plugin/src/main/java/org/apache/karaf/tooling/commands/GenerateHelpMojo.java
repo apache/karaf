@@ -56,7 +56,7 @@ public class GenerateHelpMojo extends AbstractMojo {
     /**
      * The maven project.
      *
-     * @parameter expression="${project}"
+     * @parameter default-value="${project}"
      * @required
      */
     protected MavenProject project;
@@ -71,7 +71,7 @@ public class GenerateHelpMojo extends AbstractMojo {
     /**
      * The output format
      *
-     * @parameter default-value="docbx" expression="${format}"
+     * @parameter default-value="docbx"
      */
     protected String format;
 
@@ -86,7 +86,7 @@ public class GenerateHelpMojo extends AbstractMojo {
     /**
      * Includes the --help command output in the generated documentation
      *
-     * @parameter default_value="true"
+     * @parameter default-value="true"
      */
     protected boolean includeHelpOption;
 

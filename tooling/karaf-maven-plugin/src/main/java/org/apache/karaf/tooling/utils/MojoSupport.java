@@ -64,7 +64,7 @@ public abstract class MojoSupport extends AbstractMojo {
     /**
      * The Maven project.
      *
-     * @parameter expression="${project}"
+     * @parameter default-value="${project}"
      * @required
      * @readonly
      */
@@ -73,7 +73,7 @@ public abstract class MojoSupport extends AbstractMojo {
     /**
      * Directory that resources are copied to during the build.
      *
-     * @parameter expression="${project.build.directory}/${project.artifactId}-${project.version}-installer"
+     * @parameter default-value="${project.build.directory}/${project.artifactId}-${project.version}-installer"
      * @required
      */
     protected File workDirectory;
@@ -118,7 +118,7 @@ public abstract class MojoSupport extends AbstractMojo {
     /**
      * The Maven session.
      * 
-     * @parameter expression="${session}"
+     * @parameter default-value="${session}"
      * @readonly
      * @required
      */

@@ -187,7 +187,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
     /**
      * (wrapper) The maven project.
      *
-     * @parameter expression="${project}"
+     * @parameter default-value="${project}"
      * @required
      * @readonly
      */
@@ -236,7 +236,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
     protected MavenResourcesFiltering mavenResourcesFiltering;
 
     /**
-     * @parameter expression="${session}"
+     * @parameter default-value="${session}"
      * @required
      * @readonly
      */
@@ -523,7 +523,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
     /**
      * The character encoding scheme to be applied when filtering resources.
      *
-     * @parameter expression="${encoding}" default-value="${project.build.sourceEncoding}"
+     * @parameter default-value="${project.build.sourceEncoding}"
      */
     protected String encoding;
 
@@ -531,7 +531,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
      * Expression preceded with the String won't be interpolated
      * \${foo} will be replaced with ${foo}
      *
-     * @parameter expression="${maven.resources.escapeString}"
+     * @parameter default-value="${maven.resources.escapeString}"
      */
     protected String escapeString = "\\";
 
