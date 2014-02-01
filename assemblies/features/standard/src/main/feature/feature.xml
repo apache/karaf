@@ -107,6 +107,7 @@
     </feature>
 
     <feature name="http-whiteboard" description="Provide HTTP Whiteboard pattern support" version="${project.version}" resolver="(obr)">
+    	<feature version="${project.version}">http</feature>
         <feature version="${pax.web.version}">pax-http-whiteboard</feature>
     </feature>
 
