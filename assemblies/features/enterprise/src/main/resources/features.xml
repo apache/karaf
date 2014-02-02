@@ -103,6 +103,12 @@
         <feature>jpa</feature>
     </feature>
 
+    <feature name="hibernate-envers" description="Hibernate Envers 3.x" version="${hibernate3.version}" resolver="(obr)">
+        <details>Enable Hibernate Envers 3.x</details>
+        <feature version="${hibernate3.version}">hibernate</feature>
+        <bundle start-level="100">mvn:org.hibernate/hibernate-envers/${hibernate3.version}</bundle>
+    </feature>
+
     <feature name="jndi" description="OSGi Service Registry JNDI access" version="${aries.jndi.version}" resolver="(obr)">
         <details>JNDI support provided by Apache Aries JNDI ${aries.jndi.version}</details>
         <bundle start-level="30">mvn:org.apache.xbean/xbean-naming/${xbean.version}</bundle>
