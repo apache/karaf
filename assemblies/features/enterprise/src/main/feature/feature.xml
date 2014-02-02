@@ -85,6 +85,12 @@
         <feature>jpa</feature>
     </feature>
 
+    <feature name="hibernate-envers" description="Hibernate Envers 3.x" version="${hibernate3.version}" resolver="(obr)">
+        <details>Enable Hibernate Envers 3.x</details>
+        <feature version="${hibernate3.version}">hibernate</feature>
+        <bundle start-level="100">mvn:org.hibernate/hibernate-envers/${hibernate3.version}</bundle>
+    </feature>
+
     <feature name="hibernate" description="Hibernate 3.x JPA persistence engine support" version="${hibernate3.version}" resolver="(obr)">
         <details>Enable Hibernate 3.x as persistence engine.</details>
         <bundle dependency="true">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.java-persistence-api-1.1.1/${servicemix.specs.version}</bundle>
@@ -119,9 +125,14 @@
         <bundle dependency="true">mvn:org.hibernate.common/hibernate-commons-annotations/4.0.4.Final</bundle>
         <bundle start-level="100">mvn:org.hibernate/hibernate-core/${hibernate42.version}</bundle>
         <bundle start-level="100">mvn:org.hibernate/hibernate-entitymanager/${hibernate42.version}</bundle>
-        <bundle start-level="100">mvn:org.hibernate/hibernate-envers/${hibernate42.version}</bundle>
         <bundle start-level="100">mvn:org.hibernate/hibernate-osgi/${hibernate42.version}</bundle>
         <feature>jpa</feature>
+    </feature>
+
+    <feature name="hibernate-envers" description="Hibernate Envers 4.2.x" version="${hibernate42.version}" resolver="(obr)">
+        <details>Enable Hibernate Envers 4.2.x</details>
+        <feature version="${hibernate42.version}">hibernate</feature>
+        <bundle start-level="100">mvn:org.hibernate/hibernate-envers/${hibernate42.version}</bundle>
     </feature>
 
     <feature name="hibernate" description="Hibernate 4.3.x JPA persistence engine support" version="${hibernate43.version}" resolver="(obr)">
@@ -143,6 +154,12 @@
         <bundle start-level="100">mvn:org.hibernate/hibernate-entitymanager/${hibernate43.version}</bundle>
         <bundle start-level="100">mvn:org.hibernate/hibernate-osgi/${hibernate43.version}</bundle>
         <feature>jpa</feature>
+    </feature>
+
+    <feature name="hibernate-envers" description="Hibernate Envers 4.3.x" version="${hibernate43.version}" resolver="(obr)">
+        <details>Enable Hibernate Envers 4.3.x</details>
+        <feature version="${hibernate43.version}">hibernate</feature>
+        <bundle start-level="100">mvn:org.hibernate/hibernate-envers/${hibernate43.version}</bundle>
     </feature>
 
     <feature name="jndi" description="OSGi Service Registry JNDI access" version="${project.version}" resolver="(obr)">

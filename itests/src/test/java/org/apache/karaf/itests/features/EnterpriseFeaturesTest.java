@@ -45,6 +45,11 @@ public class EnterpriseFeaturesTest extends KarafTestSupport {
     }
 
     @Test
+    public void installHibernateEnversFeature() throws Exception {
+        installAssertAndUninstallFeature("hibernate-envers");
+    }
+
+    @Test
     public void installJndiFeature() throws Exception {
     	installAssertAndUninstallFeature("jndi");
     }
