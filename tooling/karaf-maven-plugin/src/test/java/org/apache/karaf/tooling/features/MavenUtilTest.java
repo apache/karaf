@@ -20,14 +20,11 @@
 
 package org.apache.karaf.tooling.features;
 
+import org.junit.Ignore;
 import org.junit.Test;
-import org.sonatype.aether.util.artifact.DefaultArtifact;
 
 import static org.apache.karaf.tooling.features.MavenUtil.aetherToMvn;
-import static org.apache.karaf.tooling.features.MavenUtil.artifactToMvn;
 import static org.apache.karaf.tooling.features.MavenUtil.mvnToAether;
-import static org.apache.karaf.tooling.features.MavenUtil.pathFromAether;
-import static org.apache.karaf.tooling.features.MavenUtil.pathFromMaven;
 import static org.junit.Assert.assertEquals;
 
 public class MavenUtilTest {
@@ -47,24 +44,53 @@ public class MavenUtilTest {
     }
 
     @Test
-    public void testPathFromMvn() throws Exception {
-        assertEquals("org/foo/org.foo.bar/1.0-SNAPSHOT/org.foo.bar-1.0-SNAPSHOT.jar", pathFromMaven("mvn:org.foo/org.foo.bar/1.0-SNAPSHOT"));
-        assertEquals("org/foo/org.foo.bar/1.0-SNAPSHOT/org.foo.bar-1.0-SNAPSHOT.kar", pathFromMaven("mvn:org.foo/org.foo.bar/1.0-SNAPSHOT/kar"));
-        assertEquals("org/foo/org.foo.bar/1.0-SNAPSHOT/org.foo.bar-1.0-SNAPSHOT-features.xml", pathFromMaven("mvn:org.foo/org.foo.bar/1.0-SNAPSHOT/xml/features"));
+    public void testPathFromMvnSonatype() throws Exception {
+        Dependency30Helper helper = new Dependency30Helper(null, null, null);
+        assertEquals("org/foo/org.foo.bar/1.0-SNAPSHOT/org.foo.bar-1.0-SNAPSHOT.jar", helper.pathFromMaven("mvn:org.foo/org.foo.bar/1.0-SNAPSHOT"));
+        assertEquals("org/foo/org.foo.bar/1.0-SNAPSHOT/org.foo.bar-1.0-SNAPSHOT.kar", helper.pathFromMaven("mvn:org.foo/org.foo.bar/1.0-SNAPSHOT/kar"));
+        assertEquals("org/foo/org.foo.bar/1.0-SNAPSHOT/org.foo.bar-1.0-SNAPSHOT-features.xml", helper.pathFromMaven("mvn:org.foo/org.foo.bar/1.0-SNAPSHOT/xml/features"));
     }
 
     @Test
-    public void testPathFromAether() throws Exception {
-        assertEquals("org/foo/org.foo.bar/1.0-SNAPSHOT/org.foo.bar-1.0-SNAPSHOT.jar", pathFromAether("org.foo:org.foo.bar:1.0-SNAPSHOT"));
-        assertEquals("org/foo/org.foo.bar/1.0-SNAPSHOT/org.foo.bar-1.0-SNAPSHOT.kar", pathFromAether("org.foo:org.foo.bar:kar:1.0-SNAPSHOT"));
-        assertEquals("org/foo/org.foo.bar/1.0-SNAPSHOT/org.foo.bar-1.0-SNAPSHOT-features.xml", pathFromAether("org.foo:org.foo.bar:xml:features:1.0-SNAPSHOT"));
+    @Ignore("Will work with org.apache.maven:maven-core:3.1.0+")
+    public void testPathFromMvnEclipse() throws Exception {
+        Dependency31Helper helper = new Dependency31Helper(null, null, null);
+        assertEquals("org/foo/org.foo.bar/1.0-SNAPSHOT/org.foo.bar-1.0-SNAPSHOT.jar", helper.pathFromMaven("mvn:org.foo/org.foo.bar/1.0-SNAPSHOT"));
+        assertEquals("org/foo/org.foo.bar/1.0-SNAPSHOT/org.foo.bar-1.0-SNAPSHOT.kar", helper.pathFromMaven("mvn:org.foo/org.foo.bar/1.0-SNAPSHOT/kar"));
+        assertEquals("org/foo/org.foo.bar/1.0-SNAPSHOT/org.foo.bar-1.0-SNAPSHOT-features.xml", helper.pathFromMaven("mvn:org.foo/org.foo.bar/1.0-SNAPSHOT/xml/features"));
     }
 
     @Test
-    public void testArtifactToMvn() throws Exception {
-        assertEquals("mvn:org.foo/org.foo.bar/1.0-SNAPSHOT", artifactToMvn(new DefaultArtifact("org.foo:org.foo.bar:1.0-SNAPSHOT")));
-        assertEquals("mvn:org.foo/org.foo.bar/1.0-SNAPSHOT/kar", artifactToMvn(new DefaultArtifact("org.foo:org.foo.bar:kar:1.0-SNAPSHOT")));
-        assertEquals("mvn:org.foo/org.foo.bar/1.0-SNAPSHOT/xml/features", artifactToMvn(new DefaultArtifact("org.foo:org.foo.bar:xml:features:1.0-SNAPSHOT")));
+    public void testPathFromAetherSonatype() throws Exception {
+        Dependency30Helper helper = new Dependency30Helper(null, null, null);
+        assertEquals("org/foo/org.foo.bar/1.0-SNAPSHOT/org.foo.bar-1.0-SNAPSHOT.jar", helper.pathFromAether("org.foo:org.foo.bar:1.0-SNAPSHOT"));
+        assertEquals("org/foo/org.foo.bar/1.0-SNAPSHOT/org.foo.bar-1.0-SNAPSHOT.kar", helper.pathFromAether("org.foo:org.foo.bar:kar:1.0-SNAPSHOT"));
+        assertEquals("org/foo/org.foo.bar/1.0-SNAPSHOT/org.foo.bar-1.0-SNAPSHOT-features.xml", helper.pathFromAether("org.foo:org.foo.bar:xml:features:1.0-SNAPSHOT"));
+    }
+
+    @Test
+    @Ignore("Will work with org.apache.maven:maven-core:3.1.0+")
+    public void testPathFromAetherEclipse() throws Exception {
+        Dependency31Helper helper = new Dependency31Helper(null, null, null);
+        assertEquals("org/foo/org.foo.bar/1.0-SNAPSHOT/org.foo.bar-1.0-SNAPSHOT.jar", helper.pathFromAether("org.foo:org.foo.bar:1.0-SNAPSHOT"));
+        assertEquals("org/foo/org.foo.bar/1.0-SNAPSHOT/org.foo.bar-1.0-SNAPSHOT.kar", helper.pathFromAether("org.foo:org.foo.bar:kar:1.0-SNAPSHOT"));
+        assertEquals("org/foo/org.foo.bar/1.0-SNAPSHOT/org.foo.bar-1.0-SNAPSHOT-features.xml", helper.pathFromAether("org.foo:org.foo.bar:xml:features:1.0-SNAPSHOT"));
+    }
+
+    @Test
+    public void testSonatypeArtifactToMvn() throws Exception {
+        Dependency30Helper helper = new Dependency30Helper(null, null, null);
+        assertEquals("mvn:org.foo/org.foo.bar/1.0-SNAPSHOT", helper.artifactToMvn(new org.sonatype.aether.util.artifact.DefaultArtifact("org.foo:org.foo.bar:1.0-SNAPSHOT")));
+        assertEquals("mvn:org.foo/org.foo.bar/1.0-SNAPSHOT/kar", helper.artifactToMvn(new org.sonatype.aether.util.artifact.DefaultArtifact("org.foo:org.foo.bar:kar:1.0-SNAPSHOT")));
+        assertEquals("mvn:org.foo/org.foo.bar/1.0-SNAPSHOT/xml/features", helper.artifactToMvn(new org.sonatype.aether.util.artifact.DefaultArtifact("org.foo:org.foo.bar:xml:features:1.0-SNAPSHOT")));
+    }
+
+    @Test
+    public void testEclipseArtifactToMvn() throws Exception {
+        Dependency31Helper helper = new Dependency31Helper(null, null, null);
+        assertEquals("mvn:org.foo/org.foo.bar/1.0-SNAPSHOT", helper.artifactToMvn(new org.eclipse.aether.artifact.DefaultArtifact("org.foo:org.foo.bar:1.0-SNAPSHOT")));
+        assertEquals("mvn:org.foo/org.foo.bar/1.0-SNAPSHOT/kar", helper.artifactToMvn(new org.eclipse.aether.artifact.DefaultArtifact("org.foo:org.foo.bar:kar:1.0-SNAPSHOT")));
+        assertEquals("mvn:org.foo/org.foo.bar/1.0-SNAPSHOT/xml/features", helper.artifactToMvn(new org.eclipse.aether.artifact.DefaultArtifact("org.foo:org.foo.bar:xml:features:1.0-SNAPSHOT")));
     }
 
 }
