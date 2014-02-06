@@ -1,0 +1,26 @@
+<project default="maven" basedir="./..">
+
+	<target name="maven">
+
+		<echo message="basedir : ${basedir}" />
+
+		<!-- note: mvn executable must be present on o/s path -->
+		<condition property="executable" value="mvn.bat">
+			<os family="windows" />
+		</condition>
+		<condition property="executable" value="mvn">
+			<os family="unix" />
+		</condition>
+
+		<exec executable="${executable}">
+
+			<arg value="clean" />
+			<arg value="install" />
+
+			<arg value="--debug" />
+
+		</exec>
+
+	</target>
+
+</project>
