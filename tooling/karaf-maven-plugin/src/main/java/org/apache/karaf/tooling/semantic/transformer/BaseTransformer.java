@@ -1,28 +1,16 @@
-package org.apache.karaf.tooling.semantic.xform;
+package org.apache.karaf.tooling.semantic.transformer;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import org.apache.karaf.tooling.semantic.range.SemanticRange;
-import org.apache.karaf.tooling.semantic.range.SemanticRangeFactory;
-import org.apache.karaf.tooling.semantic.range.SemanticRangeList;
-import org.apache.karaf.tooling.semantic.range.VersionType;
-import org.sonatype.aether.RepositoryException;
-import org.sonatype.aether.artifact.Artifact;
 import org.sonatype.aether.collection.DependencyGraphTransformationContext;
 import org.sonatype.aether.collection.DependencyGraphTransformer;
-import org.sonatype.aether.graph.Dependency;
 import org.sonatype.aether.graph.DependencyNode;
 import org.sonatype.aether.util.graph.transformer.TransformationContextKeys;
-import org.sonatype.aether.version.Version;
-import org.sonatype.aether.version.VersionConstraint;
 
 /**
- * "Object" of "Conflict ID" is an artifact key, that is, artifact w/o version.
+ * "Object" of "Conflict ID" is an integer key.
  * <p>
  * equality == group:artifact:classifier:extensions
  * <p>
@@ -35,28 +23,39 @@ import org.sonatype.aether.version.VersionConstraint;
 public abstract class BaseTransformer implements DependencyGraphTransformer {
 
 	/**
-	 * Topologically sorted artifact keys.
+	 * Topologically sorted integer keys.
 	 */
 	@SuppressWarnings("unchecked")
 	public List<Object> conflictList(
-			DependencyGraphTransformationContext context) {
+			final DependencyGraphTransformationContext context) {
 		final List<Object> conflictList = (List<Object>) context
 				.get(TransformationContextKeys.SORTED_CONFLICT_IDS);
 		return conflictList;
 	}
 
 	/**
-	 * Mapping from versioned artifact into artifact keys.
+	 * Verify presence of cycles.
+	 */
+	@SuppressWarnings("unchecked")
+	public Collection<Collection<Object>> cycles(
+			final DependencyGraphTransformationContext context) {
+		Collection<Collection<Object>> cycles = (Collection<Collection<Object>>) context
+				.get(TransformationContextKeys.CYCLIC_CONFLICT_IDS);
+		return cycles;
+	}
+
+	/**
+	 * Mapping from versioned artifact into integer key.
 	 */
 	@SuppressWarnings("unchecked")
 	public Map<DependencyNode, Object> conflictMap(
-			DependencyGraphTransformationContext context) {
+			final DependencyGraphTransformationContext context) {
 		final Map<DependencyNode, Object> conflictMap = (Map<DependencyNode, Object>) context
 				.get(TransformationContextKeys.CONFLICT_IDS);
 		return conflictMap;
 	}
 
-	protected void log(String text) {
+	protected void log(final String text) {
 		System.err.println(text);
 	}
 

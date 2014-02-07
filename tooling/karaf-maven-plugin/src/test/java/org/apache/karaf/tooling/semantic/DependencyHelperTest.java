@@ -19,54 +19,30 @@
 
 package org.apache.karaf.tooling.semantic;
 
-import static org.junit.Assert.*;
-
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
-import javax.xml.bind.JAXBException;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.stream.XMLStreamException;
-
-import org.apache.karaf.features.FeaturesNamespaces;
-import org.apache.karaf.features.internal.model.Features;
-import org.apache.karaf.features.internal.model.Feature;
-import org.apache.karaf.features.internal.model.JaxbUtil;
 import org.apache.karaf.tooling.features.DependencyHelper;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.repository.internal.MavenRepositorySystemSession;
 import org.junit.Test;
-import org.xml.sax.SAXException;
-
-import org.codehaus.plexus.DefaultPlexusContainer;
 import org.sonatype.aether.RepositorySystem;
 import org.sonatype.aether.RepositorySystemSession;
 import org.sonatype.aether.artifact.Artifact;
 import org.sonatype.aether.collection.CollectRequest;
 import org.sonatype.aether.collection.CollectResult;
-import org.sonatype.aether.collection.DependencyGraphTransformer;
 import org.sonatype.aether.graph.Dependency;
 import org.sonatype.aether.graph.DependencyNode;
-import org.sonatype.aether.graph.Exclusion;
 import org.sonatype.aether.repository.RemoteRepository;
 import org.sonatype.aether.resolution.DependencyRequest;
 import org.sonatype.aether.resolution.DependencyResult;
-import org.sonatype.aether.util.DefaultRepositorySystemSession;
 import org.sonatype.aether.util.artifact.DefaultArtifact;
 import org.sonatype.aether.util.graph.PreorderNodeListGenerator;
 import org.sonatype.aether.util.graph.selector.AndDependencySelector;
 import org.sonatype.aether.util.graph.selector.ExclusionDependencySelector;
 import org.sonatype.aether.util.graph.selector.OptionalDependencySelector;
 import org.sonatype.aether.util.graph.selector.ScopeDependencySelector;
-import org.sonatype.aether.util.graph.transformer.ChainedDependencyGraphTransformer;
-import org.sonatype.aether.util.graph.transformer.ConflictMarker;
-import org.sonatype.aether.util.graph.transformer.JavaDependencyContextRefiner;
-import org.sonatype.aether.util.graph.transformer.JavaEffectiveScopeCalculator;
 
 public class DependencyHelperTest {
 
@@ -75,6 +51,7 @@ public class DependencyHelperTest {
 		final List<RemoteRepository> remoteList = new ArrayList<RemoteRepository>();
 		remoteList.add(UnitHelp.newRepoRemote());
 
+		final List<RemoteRepository> pluginRepos = remoteList;
 		final List<RemoteRepository> projectRepos = remoteList;
 		final RepositorySystem system = UnitHelp.newSystem();
 		final RepositorySystemSession session = UnitHelp.newSession(system);
@@ -94,8 +71,8 @@ public class DependencyHelperTest {
 
 		final MavenProject project = UnitHelp.newProject(uri);
 
-		Collection<String> included = null;
-		Collection<String> excluded = null;
+		final Collection<String> included = null;
+		final Collection<String> excluded = null;
 
 		helper.getDependencies(project, true);
 
@@ -105,24 +82,24 @@ public class DependencyHelperTest {
 
 	}
 
-	public static void main(String[] args) throws Exception {
+	public static void main(final String[] args) throws Exception {
 
 		final String uri = "com.carrotgarden.osgi:carrot-osgi-anno-scr-make:jar:1.1.3";
 
 		final Artifact artifact = new DefaultArtifact(uri);
 
-		Dependency dependency = new Dependency(artifact, "compile");
+		final Dependency dependency = new Dependency(artifact, "compile");
 
-		CollectRequest collectRequest = new CollectRequest(dependency, null);
+		final CollectRequest collectRequest = new CollectRequest(dependency, null);
 
-		RepositorySystem system = UnitHelp.newSystem();
+		final RepositorySystem system = UnitHelp.newSystem();
 
-		MavenRepositorySystemSession session = UnitHelp.newSession(system);
+		final MavenRepositorySystemSession session = UnitHelp.newSession(system);
 
 		session.setOffline(true);
 
-		Collection<String> scopeIncluded = new ArrayList<String>();
-		Collection<String> scopeExcluded = new ArrayList<String>();
+		final Collection<String> scopeIncluded = new ArrayList<String>();
+		final Collection<String> scopeExcluded = new ArrayList<String>();
 
 		scopeIncluded.add("provided");
 
@@ -135,10 +112,10 @@ public class DependencyHelperTest {
 				new ExclusionDependencySelector()) //
 		);
 
-		CollectResult collectResult = system.collectDependencies(session,
+		final CollectResult collectResult = system.collectDependencies(session,
 				collectRequest);
 
-		DependencyNode collectNode = collectResult.getRoot();
+		final DependencyNode collectNode = collectResult.getRoot();
 
 		final DependencyRequest dependencyRequest = new DependencyRequest(
 				collectNode, null);
@@ -152,9 +129,9 @@ public class DependencyHelperTest {
 
 		resolveNode.accept(generator);
 
-		List<Artifact> list = generator.getArtifacts(true);
+		final List<Artifact> list = generator.getArtifacts(true);
 
-		for (Artifact item : list) {
+		for (final Artifact item : list) {
 			System.out.println("item = " + item );
 		}
 
