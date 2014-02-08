@@ -162,6 +162,15 @@
         <bundle start-level="100">mvn:org.hibernate/hibernate-envers/${hibernate43.version}</bundle>
     </feature>
 
+    <feature name="hibernate-validator" description="Hibernate Validator support" version="${hibernate.validator.version}" resolver="(obr)">
+        <bundle dependency="true">mvn:javax.validation/validation-api/1.1.0.Final</bundle>
+        <bundle dependency="true">mvn:com.fasterxml/classmate/1.0.0</bundle>
+        <bundle dependency="true">mvn:javax.el/javax.el-api/2.2.4</bundle>
+        <bundle dependency="true">mvn:org.glassfish.web/javax.el/2.2.4</bundle>
+        <bundle dependency="true">mvn:org.hibernate/hibernate-validator/${hibernate.validator.version}</bundle>
+        <bundle dependency="true">mvn:org.jboss.logging/jboss-logging/3.1.4.GA</bundle>
+    </feature>
+
     <feature name="jndi" description="OSGi Service Registry JNDI access" version="${project.version}" resolver="(obr)">
         <details>JNDI support provided by Apache Aries JNDI ${aries.jndi.version}, including additional service, commands, and MBean.</details>
         <bundle start-level="30">mvn:org.apache.xbean/xbean-naming/${xbean.version}</bundle>

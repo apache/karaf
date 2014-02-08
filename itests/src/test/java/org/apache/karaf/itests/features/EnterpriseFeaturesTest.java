@@ -50,6 +50,11 @@ public class EnterpriseFeaturesTest extends KarafTestSupport {
     }
 
     @Test
+    public void installHibernateValidatorFeature() throws Exception {
+        installAssertAndUninstallFeature("hibernate-validator");
+    }
+
+    @Test
     public void installJndiFeature() throws Exception {
     	installAssertAndUninstallFeature("jndi");
     }
