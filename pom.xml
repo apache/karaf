@@ -159,6 +159,7 @@
         <hibernate3.version>3.3.2.GA</hibernate3.version>
         <hibernate42.version>4.2.7.Final</hibernate42.version>
         <hibernate43.version>4.3.1.Final</hibernate43.version>
+        <hibernate.validator.version>5.0.3.Final</hibernate.validator.version>
 
         <aries.application.version>1.0.0</aries.application.version>
         <aries.application.api.version>1.0.0</aries.application.api.version>
