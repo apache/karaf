@@ -85,6 +85,7 @@
                 <configuration>
                     <instructions>
                         <Import-Package>
+                            com.sun.management*;resolution:=optional,
                             *
                         </Import-Package>
                     </instructions>
