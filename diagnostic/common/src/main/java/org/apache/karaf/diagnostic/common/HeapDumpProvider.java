@@ -29,6 +29,8 @@ import java.lang.management.ManagementFactory;
 public class HeapDumpProvider implements DumpProvider {
 
     public void createDump(DumpDestination destination) throws Exception {
+        FileInputStream in = null;
+        OutputStream out = null;
         try {
             MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
             HotSpotDiagnosticMXBean diagnosticMXBean = ManagementFactory.newPlatformMXBeanProxy(mBeanServer,
@@ -36,21 +38,26 @@ public class HeapDumpProvider implements DumpProvider {
             diagnosticMXBean.dumpHeap("heapdump.txt", false);
             // copy the dump in the destination
             File heapDumpFile = new File("heapdump.txt");
-            FileInputStream in = new FileInputStream(heapDumpFile);
-            OutputStream out = destination.add("heapdump.txt");
+            in = new FileInputStream(heapDumpFile);
+            out = destination.add("heapdump.txt");
             byte[] buffer = new byte[2048];
             while ((in.read(buffer) != -1)) {
                 out.write(buffer);
             }
-            in.close();
-            out.flush();
-            out.close();
             // remove the original dump
             if (heapDumpFile.exists()) {
                 heapDumpFile.delete();
             }
         } catch (Exception e) {
             // nothing to do
+        } finally {
+            if (in != null) {
+                in.close();
+            }
+            if (out != null) {
+                out.flush();
+                out.close();
+            }
         }
     }
 

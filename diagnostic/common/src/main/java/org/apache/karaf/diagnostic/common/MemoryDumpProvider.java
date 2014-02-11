@@ -23,13 +23,10 @@ import java.io.OutputStreamWriter;
 import java.lang.management.MemoryMXBean;
 
 /**
- * Provider which dump the heap to file heap.txt
+ * Provider which provide memory information in memory.txt file
  */
 public class MemoryDumpProvider extends TextDumpProvider {
 
-    /**
-     * Create a new dump entry which contains information about memory usage.
-     */
     public MemoryDumpProvider() {
         super("memory.txt");
     }
