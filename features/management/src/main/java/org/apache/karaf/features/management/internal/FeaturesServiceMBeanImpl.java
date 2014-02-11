@@ -179,6 +179,29 @@ public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
         featuresService.installFeature(name, version, options);
     }
 
+    public TabularData infoFeature(String name) throws Exception {
+        Feature feature = featuresService.getFeature(name);
+        return infoFeature(feature);
+    }
+
+    public TabularData infoFeature(String name, String version) throws Exception {
+        Feature feature = featuresService.getFeature(name, version);
+        return infoFeature(feature);
+    }
+
+    private TabularData infoFeature(Feature feature) throws Exception {
+        JmxFeature jmxFeature = null;
+        if (featuresService.isInstalled(feature)) {
+            jmxFeature = new JmxFeature(feature, true);
+        } else {
+            jmxFeature = new JmxFeature(feature, false);
+        }
+        ArrayList<JmxFeature> features = new ArrayList<JmxFeature>();
+        features.add(jmxFeature);
+        TabularData table = JmxFeature.tableFrom(features);
+        return table;
+    }
+
     public void uninstallFeature(String name) throws Exception {
         featuresService.uninstallFeature(name);
     }
