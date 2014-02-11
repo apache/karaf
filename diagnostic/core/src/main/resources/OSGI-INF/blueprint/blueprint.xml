@@ -44,6 +44,12 @@
     <bean id="threads" class="org.apache.karaf.diagnostic.core.internal.ThreadDumpProvider" />
     <service ref="threads" auto-export="interfaces" />
 
+    <bean id="memory" class="org.apache.karaf.diagnostic.core.internal.MemoryDumpProvider" />
+    <service ref="memory" auto-export="interfaces" />
+
+    <bean id="heap" class="org.apache.karaf.diagnostic.core.internal.HeapDumpProvider" />
+    <service ref="heap" auto-export="interfaces" />
+
     <reference-list id="providers" availability="optional"
         interface="org.apache.karaf.diagnostic.core.DumpProvider" />
 

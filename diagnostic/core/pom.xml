@@ -83,6 +83,7 @@
                         	${project.artifactId}.common
                        	</Export-Package>
                         <Import-Package>
+                            com.sun.management*;resolution:=optional,
                             *
                         </Import-Package>
                         <Private-Package>
