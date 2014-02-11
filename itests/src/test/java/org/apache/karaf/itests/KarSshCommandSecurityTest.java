@@ -28,7 +28,7 @@ import org.ops4j.pax.exam.spi.reactors.PerClass;
 public class KarSshCommandSecurityTest extends SshCommandTestBase {
     private static int counter = 0;
     @Test
-    public void testConfigCommandSecurityViaSsh() throws Exception {
+    public void testKarCommandSecurityViaSsh() throws Exception {
         String vieweruser = "view" + System.nanoTime() + "_" + counter++;
 
         addViewer(vieweruser);
