@@ -45,15 +45,15 @@ import org.osgi.framework.ServiceRegistration;
  * Implementation of {@link FeaturesServiceMBean}.
  */
 public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
-    MBeanRegistration, FeaturesServiceMBean {
+        MBeanRegistration, FeaturesServiceMBean {
 
     private ServiceRegistration<FeaturesListener> registration;
 
     private BundleContext bundleContext;
 
-	private ObjectName objectName;
+    private ObjectName objectName;
 
-	private volatile long sequenceNumber = 0;
+    private volatile long sequenceNumber = 0;
 
     private org.apache.karaf.features.FeaturesService featuresService;
 
@@ -67,8 +67,8 @@ public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
     }
 
     public void postRegister(Boolean registrationDone) {
-        registration = bundleContext.registerService(FeaturesListener.class, 
-        		getFeaturesListener(), new Hashtable<String, String>());
+        registration = bundleContext.registerService(FeaturesListener.class,
+                getFeaturesListener(), new Hashtable<String, String>());
     }
 
     public void preDeregister() throws Exception {
@@ -109,7 +109,7 @@ public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
             List<Repository> allRepositories = Arrays.asList(featuresService.listRepositories());
             ArrayList<JmxRepository> repositories = new ArrayList<JmxRepository>();
             for (Repository repository : allRepositories) {
-                try { 
+                try {
                     repositories.add(new JmxRepository(repository));
                 } catch (Throwable t) {
                     t.printStackTrace();
@@ -169,6 +169,39 @@ public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
         featuresService.installFeature(name, version, options);
     }
 
+    public TabularData infoFeature(String name) throws Exception {
+        try {
+            Feature feature = featuresService.getFeature(name);
+            return infoFeature(feature);
+        } catch (Throwable t) {
+            t.printStackTrace();
+            return null;
+        }
+    }
+
+    public TabularData infoFeature(String name, String version) throws Exception {
+        try {
+            Feature feature = featuresService.getFeature(name, version);
+            return infoFeature(feature);
+        } catch (Throwable t) {
+            t.printStackTrace();
+            return null;
+        }
+    }
+
+    private TabularData infoFeature(Feature feature) throws Exception {
+        JmxFeature jmxFeature = null;
+        if (featuresService.isInstalled(feature)) {
+            jmxFeature = new JmxFeature(feature, true);
+        } else {
+            jmxFeature = new JmxFeature(feature, false);
+        }
+        ArrayList<JmxFeature> features = new ArrayList<JmxFeature>();
+        features.add(jmxFeature);
+        TabularData table = JmxFeature.tableFrom(features);
+        return table;
+    }
+
     public void uninstallFeature(String name) throws Exception {
         featuresService.uninstallFeature(name);
     }
@@ -194,6 +227,7 @@ public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
                     sendNotification(notification);
                 }
             }
+
             public void repositoryEvent(RepositoryEvent event) {
                 if (!event.isReplay()) {
                     Notification notification = new Notification(REPOSITORY_EVENT_TYPE, objectName, sequenceNumber++);
@@ -201,13 +235,13 @@ public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
                     sendNotification(notification);
                 }
             }
-            
+
             public boolean equals(Object o) {
-            	if (this == o) {
-            		return true;
-            	}
-            	return o.equals(this);
-              }
+                if (this == o) {
+                    return true;
+                }
+                return o.equals(this);
+            }
 
         };
     }
@@ -218,11 +252,11 @@ public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
 
     private static MBeanNotificationInfo[] getBroadcastInfo() {
         String type = Notification.class.getCanonicalName();
-        MBeanNotificationInfo info1 = new MBeanNotificationInfo(new String[] {FEATURE_EVENT_EVENT_TYPE},
-            type, "Some features notification");
-        MBeanNotificationInfo info2 = new MBeanNotificationInfo(new String[] {REPOSITORY_EVENT_EVENT_TYPE},
-            type, "Some repository notification");
-        return new MBeanNotificationInfo[] {info1, info2};
+        MBeanNotificationInfo info1 = new MBeanNotificationInfo(new String[]{FEATURE_EVENT_EVENT_TYPE},
+                type, "Some features notification");
+        MBeanNotificationInfo info2 = new MBeanNotificationInfo(new String[]{REPOSITORY_EVENT_EVENT_TYPE},
+                type, "Some repository notification");
+        return new MBeanNotificationInfo[]{info1, info2};
     }
 
 }
