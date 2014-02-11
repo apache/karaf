@@ -35,6 +35,7 @@
             <ext:property name="respectStartLvlDuringFeatureStartup" value="true"/>
             <ext:property name="respectStartLvlDuringFeatureUninstall" value="true"/>
             <ext:property name="featuresBootAsynchronous" value="false"/>
+            <ext:property name="overrides" value="file:$(karaf.etc)/overrides.properties"/>
         </ext:default-properties>
         <ext:location>file:$(karaf.etc)/org.apache.karaf.features.cfg</ext:location>
     </ext:property-placeholder>
@@ -70,6 +71,7 @@
         <property name="respectStartLvlDuringFeatureStartup" value="$[respectStartLvlDuringFeatureStartup]"/>
         <property name="respectStartLvlDuringFeatureUninstall" value="$[respectStartLvlDuringFeatureUninstall]"/>
         <property name="resolverTimeout" value="$[resolverTimeout]"/>
+        <property name="overrides" value="$[overrides]"/>
     </bean>
 
     <bean id="bootFeaturesInstaller" class="org.apache.karaf.features.internal.BootFeaturesInstaller"

@@ -94,6 +94,7 @@ public class FeaturesServiceImpl implements FeaturesService {
     private List<FeaturesListener> listeners = new CopyOnWriteArrayIdentityList<FeaturesListener>();
     private ThreadLocal<Repository> repo = new ThreadLocal<Repository>();
     private EventAdminListener eventAdminListener;
+    private String overrides;
     
     public FeaturesServiceImpl(BundleManager bundleManager) {
         this(bundleManager, null);
@@ -114,6 +115,14 @@ public class FeaturesServiceImpl implements FeaturesService {
 
     public void setRespectStartLvlDuringFeatureStartup(boolean respectStartLvlDuringFeatureStartup) {
         this.respectStartLvlDuringFeatureStartup = respectStartLvlDuringFeatureStartup;
+    }
+
+    public String getOverrides() {
+        return overrides;
+    }
+
+    public void setOverrides(String overrides) {
+        this.overrides = overrides;
     }
 
     public void registerListener(FeaturesListener listener) {
@@ -518,7 +527,7 @@ public class FeaturesServiceImpl implements FeaturesService {
         }
         Set<Long> bundles = new TreeSet<Long>();
         
-        for (BundleInfo bInfo : resolve(feature)) {
+        for (BundleInfo bInfo : Overrides.override(resolve(feature), this.overrides)) {
             int startLevel = getBundleStartLevel(bInfo.getStartLevel(),feature.getStartLevel());
             BundleInstallerResult result = bundleManager.installBundleIfNeeded(bInfo.getLocation(), startLevel, feature.getRegion());
             state.bundles.add(result.bundle);
