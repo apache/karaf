@@ -40,6 +40,10 @@ public interface FeaturesServiceMBean {
 
     void installFeature(String name, String version, boolean noClean, boolean noRefresh) throws Exception;
 
+    TabularData infoFeature(String name) throws Exception;
+
+    TabularData infoFeature(String name, String version) throws Exception;
+
     void uninstallFeature(String name) throws Exception;
 
     void uninstallFeature(String name, String version) throws Exception;
