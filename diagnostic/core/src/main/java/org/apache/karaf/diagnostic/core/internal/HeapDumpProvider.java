@@ -48,9 +48,6 @@ public class HeapDumpProvider implements DumpProvider {
             while ((in.read(buffer) != -1)) {
                 out.write(buffer);
             }
-            in.close();
-            out.flush();
-            out.close();
             // remove the original dump
             if (heapDumpFile.exists()) {
                 heapDumpFile.delete();
