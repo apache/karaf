@@ -40,6 +40,12 @@
     <bean id="threads" class="org.apache.karaf.diagnostic.common.ThreadDumpProvider" />
     <service ref="threads" auto-export="interfaces" />
 
+    <bean id="heapdump" class="org.apache.karaf.diagnostic.common.HeapDumpProvider" />
+    <service ref="heapdump" auto-export="interfaces" />
+
+    <bean id="memory" class="org.apache.karaf.diagnostic.common.MemoryDumpProvider" />
+    <service ref="memory" auto-export="interfaces" />
+
     <bean id="environment" class="org.apache.karaf.diagnostic.common.EnvironmentDumpProvider" >
         <argument ref="blueprintBundleContext" />
     </bean>
