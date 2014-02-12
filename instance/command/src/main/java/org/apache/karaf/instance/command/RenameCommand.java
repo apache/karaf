@@ -16,8 +16,10 @@
  */
 package org.apache.karaf.instance.command;
 
+import org.apache.karaf.instance.command.completers.InstanceCompleter;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Completer;
 import org.apache.karaf.shell.commands.Option;
 
 @Command(scope = "instance", name = "rename", description = "Rename an existing container instance.")
@@ -27,6 +29,7 @@ public class RenameCommand extends InstanceCommandSupport {
     boolean verbose = false;
 
     @Argument(index = 0, name = "name", description = "The name of the container instance to rename", required = true, multiValued = false)
+    @Completer(InstanceCompleter.class)
     String instance = null;
 
     @Argument(index = 1, name = "new-name", description = "The new name of the container instance", required = true, multiValued = false)

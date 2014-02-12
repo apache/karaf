@@ -16,8 +16,10 @@
  */
 package org.apache.karaf.instance.command;
 
+import org.apache.karaf.instance.command.completers.InstanceCompleter;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Completer;
 
 /**
  * Destroy an existing instance.
@@ -26,6 +28,7 @@ import org.apache.karaf.shell.commands.Command;
 public class DestroyCommand extends InstanceCommandSupport
 {
     @Argument(index = 0, name = "name", description= "The name of the container instance to destroy", required = true, multiValued = false)
+    @Completer(InstanceCompleter.class)
     private String instance = null;
 
     protected Object doExecute() throws Exception {

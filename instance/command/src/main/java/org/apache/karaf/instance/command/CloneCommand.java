@@ -16,8 +16,10 @@
  */
 package org.apache.karaf.instance.command;
 
+import org.apache.karaf.instance.command.completers.InstanceCompleter;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Completer;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.instance.core.InstanceSettings;
 
@@ -46,6 +48,7 @@ public class CloneCommand extends InstanceCommandSupport {
     boolean verbose = false;
 
     @Argument(index = 0, name = "name", description = "The name of the source container instance", required = true, multiValued = false)
+    @Completer(InstanceCompleter.class)
     String name;
 
     @Argument(index = 1, name = "cloneName", description = "The name of the cloned container instance", required = true, multiValued = false)

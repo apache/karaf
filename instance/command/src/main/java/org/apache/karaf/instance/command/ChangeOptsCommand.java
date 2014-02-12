@@ -16,13 +16,16 @@
  */
 package org.apache.karaf.instance.command;
 
+import org.apache.karaf.instance.command.completers.InstanceCompleter;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Completer;
 
 @Command(scope = "instance", name = "opts-change", description = "Changes the Java options of an existing container instance.")
 public class ChangeOptsCommand extends InstanceCommandSupport {
 
     @Argument(index = 0, name = "name", description="The name of the container instance", required = true, multiValued = false)
+    @Completer(InstanceCompleter.class)
     private String instance = null;
 
     @Argument(index = 1, name = "javaOpts", description = "The new Java options to set", required = true, multiValued = false)

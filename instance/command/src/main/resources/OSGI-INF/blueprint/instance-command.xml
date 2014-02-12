@@ -25,19 +25,11 @@
             <action class="org.apache.karaf.instance.command.CreateCommand">
                 <property name="instanceService" ref="instanceService" />
             </action>
-            <optional-completers>
-                   <entry key="-f" value-ref="allFeatureCompleter"/>
-                   <entry key="-furl" value-ref="featureUrlCompleter"/>
-            </optional-completers>
         </command>
         <command>
             <action class="org.apache.karaf.instance.command.ConnectCommand">
                 <property name="instanceService" ref="instanceService" />
             </action>
-            <completers>
-                <ref component-id="instanceCompleter" />
-                <null/>
-            </completers>
         </command>
         <command>
             <action class="org.apache.karaf.instance.command.ListCommand">
@@ -48,107 +40,63 @@
             <action class="org.apache.karaf.instance.command.StartCommand">
                 <property name="instanceService" ref="instanceService" />
             </action>
-            <completers>
-                <ref component-id="instanceCompleter" />
-                <null/>
-            </completers>
         </command>
         <command>
             <action class="org.apache.karaf.instance.command.StopCommand">
                 <property name="instanceService" ref="instanceService" />
             </action>
-            <completers>
-                <ref component-id="instanceCompleter" />
-                <null/>
-            </completers>
         </command>
         <command>
             <action class="org.apache.karaf.instance.command.DestroyCommand">
                 <property name="instanceService" ref="instanceService" />
             </action>
-            <completers>
-                <ref component-id="instanceCompleter" />
-                <null/>
-            </completers>
         </command>
         <command>
             <action class="org.apache.karaf.instance.command.RenameCommand">
                 <property name="instanceService" ref="instanceService" />
             </action>
-            <completers>
-                <ref component-id="instanceCompleter" />
-                <null />
-            </completers>
         </command>
         <command>
             <action class="org.apache.karaf.instance.command.CloneCommand">
                 <property name="instanceService" ref="instanceService" />
             </action>
-            <completers>
-                <ref component-id="instanceCompleter" />
-                <null />
-            </completers>
         </command>
         <command>
             <action class="org.apache.karaf.instance.command.ChangeSshPortCommand">
                 <property name="instanceService" ref="instanceService" />
             </action>
-            <completers>
-                <ref component-id="instanceCompleter" />
-                <null/>
-            </completers>
         </command>
         <command>
             <action class="org.apache.karaf.instance.command.ChangeRmiRegistryPortCommand">
                 <property name="instanceService" ref="instanceService" />
             </action>
-            <completers>
-                <ref component-id="instanceCompleter" />
-                <null />
-            </completers>
         </command>
         <command>
             <action class="org.apache.karaf.instance.command.ChangeRmiServerPortCommand">
                 <property name="instanceService" ref="instanceService" />
             </action>
-            <completers>
-                <ref component-id="instanceCompleter" />
-                <null />
-            </completers>
         </command>
         <command>
             <action class="org.apache.karaf.instance.command.ChangeOptsCommand">
                 <property name="instanceService" ref="instanceService" />
             </action>
-            <completers>
-                <ref component-id="instanceCompleter" />
-                <null/>
-            </completers>
         </command>
         <command>
             <action class="org.apache.karaf.instance.command.StatusCommand">
                 <property name="instanceService" ref="instanceService" />
             </action>
-            <completers>
-                <ref component-id="instanceCompleter" />
-                <null/>
-            </completers>
         </command>
     </command-bundle>
 
+    <!-- Services -->
+
     <reference id="instanceService" interface="org.apache.karaf.instance.core.InstanceService" />
-    <reference id="featuresService" interface="org.apache.karaf.features.FeaturesService" />
+
+    <!-- Completers -->
 
     <bean id="instanceCompleter" class="org.apache.karaf.instance.command.completers.InstanceCompleter">
         <property name="instanceService" ref="instanceService" />
     </bean>
-
-    <bean id="allFeatureCompleter" class="org.apache.karaf.features.command.completers.AllFeatureCompleter">
-        <property name="featuresService" ref="featuresService" />
-    </bean>
-
-    <bean id="featureUrlCompleter" class="org.apache.karaf.features.command.completers.InstalledRepoUriCompleter">
-        <property name="featuresService" ref="featuresService" />
-    </bean>
+    <service ref="instanceCompleter" auto-export="all-classes"/>
 
 </blueprint>
