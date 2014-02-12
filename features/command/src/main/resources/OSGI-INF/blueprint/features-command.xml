@@ -98,10 +98,6 @@
     <bean id="installedRepoNameCompleter" class="org.apache.karaf.features.command.completers.InstalledRepoNameCompleter">
         <property name="featuresService" ref="featuresService"/>
     </bean>
-    <service ref="installedRepoNameCompleter" auto-export="all-classes">
-        <service-properties>
-            <entry key="name" value="installedRepoNameCompleter"/>
-        </service-properties>
-    </service>
+    <service ref="installedRepoNameCompleter" auto-export="all-classes"/>
 
 </blueprint>

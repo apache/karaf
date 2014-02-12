@@ -18,13 +18,16 @@ package org.apache.karaf.kar.command;
 
 import java.util.List;
 
+import org.apache.karaf.features.command.completers.InstalledRepoNameCompleter;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Completer;
 
 @Command(scope = "kar", name = "create", description = "Create a kar file for a list of feature repos")
 public class CreateKarCommand extends KarCommandSupport {
     
     @Argument(index = 0, name = "repoName", description = "Repository name. The kar will contain all features of the named repository by default", required = true, multiValued = false)
+    @Completer(InstalledRepoNameCompleter.class)
     private String repoName;
     
     @Argument(index = 1, name = "features", description = "Names of the features to include. If set then only these features will be added", required = false, multiValued = true)

@@ -16,13 +16,16 @@
  */
 package org.apache.karaf.kar.command;
 
+import org.apache.karaf.kar.command.completers.KarCompleter;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Completer;
 
 @Command(scope = "kar", name = "uninstall", description = "Uninstall a KAR file.")
 public class UninstallKarCommand extends KarCommandSupport {
 
     @Argument(index = 0, name = "name", description = "The name of the KAR file to uninstall.", required = true, multiValued = false)
+    @Completer(KarCompleter.class)
     private String name;
 
     public Object doExecute() throws Exception {
