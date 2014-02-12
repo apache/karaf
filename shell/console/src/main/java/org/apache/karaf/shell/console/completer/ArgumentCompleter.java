@@ -43,6 +43,9 @@ import org.apache.karaf.shell.console.CommandSessionHolder;
 import org.apache.karaf.shell.console.CompletableFunction;
 import org.apache.karaf.shell.console.Completer;
 import org.apache.karaf.shell.console.NameScoping;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,6 +67,7 @@ public class ArgumentCompleter implements Completer {
     final Map<Option, Field> fields = new HashMap<Option, Field>();
     final Map<String, Option> options = new HashMap<String, Option>();
     final Map<Integer, Field> arguments = new HashMap<Integer, Field>();
+    final Map<Field, org.apache.karaf.shell.commands.Completer> completerAnnotations = new HashMap<Field, org.apache.karaf.shell.commands.Completer>();
     boolean strict = true;
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -94,6 +98,12 @@ public class ArgumentCompleter implements Completer {
                         arguments.put(key, field);
                     }
                 }
+                if (option != null || argument != null) {
+                    org.apache.karaf.shell.commands.Completer completer = field.getAnnotation(org.apache.karaf.shell.commands.Completer.class);
+                    if (completer != null) {
+                        completerAnnotations.put(field, completer);
+                    }
+                }
             }
         }
         options.put(HelpOption.HELP.name(), HelpOption.HELP);
@@ -102,14 +112,61 @@ public class ArgumentCompleter implements Completer {
         argsCompleters = new ArrayList<Completer>();
 
         if (function instanceof CompletableFunction) {
-            optionalCompleters = ((CompletableFunction) function).getOptionalCompleters();
+            Map<String, Completer> focl = ((CompletableFunction) function).getOptionalCompleters();
             List<Completer> fcl = ((CompletableFunction) function).getCompleters();
-            if (fcl != null) {
-                for (Completer c : fcl) {
-                    argsCompleters.add(c == null ? NullCompleter.INSTANCE : c);
+            if (focl == null && fcl == null) {
+                for (int key = 0; key < arguments.size(); key++) {
+                    Completer completer = null;
+                    Field field = arguments.get(key);
+                    if (field != null) {
+                        org.apache.karaf.shell.commands.Completer ann = completerAnnotations.get(field);
+                        if (ann != null) {
+                            Class clazz = ann.value();
+                            if (clazz != null) {
+                                BundleContext context = FrameworkUtil.getBundle(function.getClass()).getBundleContext();
+                                completer = new ProxyServiceCompleter(context, clazz);
+                            }
+                        }
+                    }
+                    if (completer == null) {
+                        completer = NullCompleter.INSTANCE;
+                    }
+                    argsCompleters.add(completer);
+                }
+                if (argsCompleters.isEmpty()) {
+                    argsCompleters.add(NullCompleter.INSTANCE);
+                }
+                optionalCompleters = new HashMap<String, Completer>();
+                for (Option option : fields.keySet()) {
+                    Completer completer = null;
+                    Field field = fields.get(option);
+                    if (field != null) {
+                        org.apache.karaf.shell.commands.Completer ann = completerAnnotations.get(field);
+                        if (ann != null) {
+                            Class clazz = ann.value();
+                            if (clazz != null) {
+                                BundleContext context = FrameworkUtil.getBundle(function.getClass()).getBundleContext();
+                                completer = new ProxyServiceCompleter(context, clazz);
+                            }
+                        }
+                    }
+                    if (completer == null) {
+                        completer = NullCompleter.INSTANCE;
+                    }
+                    optionalCompleters.put(option.name(), completer);
+                    if (option.aliases() != null) {
+                        for (String alias : option.aliases()) {
+                            optionalCompleters.put(alias, completer);
+                        }
+                    }
                 }
             } else {
-                argsCompleters.add(NullCompleter.INSTANCE);
+                if (fcl != null) {
+                    for (Completer c : fcl) {
+                        argsCompleters.add(c == null ? NullCompleter.INSTANCE : c);
+                    }
+                }
+                optionalCompleters = focl;
             }
         } else {
             optionalCompleters = new HashMap<String, Completer>();
@@ -452,6 +509,32 @@ public class ArgumentCompleter implements Completer {
 
         public int getBufferPosition() {
             return this.bufferPosition;
+        }
+    }
+
+    public static class ProxyServiceCompleter implements Completer {
+        private final BundleContext context;
+        private final Class<? extends Completer> clazz;
+
+        public ProxyServiceCompleter(BundleContext context, Class<? extends Completer> clazz) {
+            this.context = context;
+            this.clazz = clazz;
+        }
+
+        @Override
+        public int complete(String buffer, int cursor, List<String> candidates) {
+            ServiceReference<? extends Completer> ref = context.getServiceReference(clazz);
+            if (ref != null) {
+                Completer completer = context.getService(ref);
+                if (completer != null) {
+                    try {
+                        return completer.complete(buffer, cursor, candidates);
+                    } finally {
+                        context.ungetService(ref);
+                    }
+                }
+            }
+            return -1;
         }
     }
 }
