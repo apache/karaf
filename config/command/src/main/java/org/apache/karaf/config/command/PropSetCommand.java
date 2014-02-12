@@ -18,13 +18,16 @@ package org.apache.karaf.config.command;
 
 import java.util.Dictionary;
 
+import org.apache.karaf.config.command.completers.ConfigurationPropertyCompleter;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Completer;
 
 @Command(scope = "config", name = "property-set", description = "Sets a property in the currently edited configuration.")
 public class PropSetCommand extends ConfigPropertyCommandSupport {
 
     @Argument(index = 0, name = "property", description = "The name of the property to set", required = true, multiValued = false)
+    @Completer(ConfigurationPropertyCompleter.class)
     String prop;
 
     @Argument(index = 1, name = "value", description = "The value of the property", required = true, multiValued = false)

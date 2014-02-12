@@ -32,71 +32,36 @@
             <action class="org.apache.karaf.config.command.DeleteCommand">
                 <property name="configRepository" ref="configRepo"/>
             </action>
-            <completers>
-                <ref component-id="configCompleter" />
-                <null/>
-            </completers>
         </command>
         <command>
             <action class="org.apache.karaf.config.command.EditCommand">
                 <property name="configRepository" ref="configRepo"/>
             </action>
-            <completers>
-                <ref component-id="configCompleter" />
-                <null/>
-            </completers>
         </command>
         <command>
             <action class="org.apache.karaf.config.command.ListCommand">
                 <property name="configRepository" ref="configRepo"/>
             </action>
-            <optional-completers>
-                <entry key="-p" value-ref="configCompleter"/>
-            </optional-completers>
         </command>
         <command>
             <action class="org.apache.karaf.config.command.PropDelCommand">
                 <property name="configRepository" ref="configRepo"/>
             </action>
-            <completers>
-                <ref component-id="configPropertyCompleter" />
-                <null/>
-            </completers>
-            <optional-completers>
-                <entry key="-p" value-ref="configCompleter"/>
-            </optional-completers>
         </command>
         <command>
             <action class="org.apache.karaf.config.command.PropListCommand">
                 <property name="configRepository" ref="configRepo"/>
             </action>
-            <optional-completers>
-                <entry key="-p" value-ref="configCompleter"/>
-            </optional-completers>
         </command>
         <command>
             <action class="org.apache.karaf.config.command.PropSetCommand">
                 <property name="configRepository" ref="configRepo"/>
             </action>
-            <completers>
-                <ref component-id="configPropertyCompleter" />
-                <null/>
-            </completers>
-            <optional-completers>
-                <entry key="-p" value-ref="configCompleter"/>
-            </optional-completers>
         </command>
         <command>
             <action class="org.apache.karaf.config.command.PropAppendCommand">
                 <property name="configRepository" ref="configRepo"/>
             </action>
-            <completers>
-                <ref component-id="configPropertyCompleter" />
-                <null/>
-            </completers>
-            <optional-completers>
-                <entry key="-p" value-ref="configCompleter"/>
-            </optional-completers>
         </command>
         <command>
             <action class="org.apache.karaf.config.command.UpdateCommand">
@@ -108,11 +73,12 @@
     <bean id="configCompleter" class="org.apache.karaf.config.command.completers.ConfigurationCompleter" init-method="init">
         <property name="admin" ref="configAdmin"/>
     </bean>
-    <service ref="configCompleter" interface="org.osgi.service.cm.ConfigurationListener" />
+    <service ref="configCompleter" auto-export="all-classes" />
 
     <bean id="configPropertyCompleter" class="org.apache.karaf.config.command.completers.ConfigurationPropertyCompleter">
         <property name="configAdmin" ref="configAdmin"/>
     </bean>
+    <service ref="configPropertyCompleter" auto-export="all-classes" />
 
     <reference id="configRepo" interface="org.apache.karaf.config.core.ConfigRepository" />
     <reference id="configAdmin" interface="org.osgi.service.cm.ConfigurationAdmin" />

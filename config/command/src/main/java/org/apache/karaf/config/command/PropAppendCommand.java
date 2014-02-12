@@ -18,13 +18,16 @@ package org.apache.karaf.config.command;
 
 import java.util.Dictionary;
 
+import org.apache.karaf.config.command.completers.ConfigurationPropertyCompleter;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Completer;
 
 @Command(scope = "config", name = "property-append", description = "Appends the given value to an existing property or creates the property with the specified name and value.")
 public class PropAppendCommand extends ConfigPropertyCommandSupport {
 
     @Argument(index = 0, name = "name", description = "The name of the property", required = true, multiValued = false)
+    @Completer(ConfigurationPropertyCompleter.class)
     String prop;
 
     @Argument(index = 1, name = "value", description = "The value to append to the property", required = true, multiValued = false)
