@@ -65,12 +65,16 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
         if (!f.exists()) {
             throw new LoginException("Users file not found at " + f);
         }
+
         Properties users;
         try {
             users = new Properties(f);
         } catch (IOException ioe) {
             throw new LoginException("Unable to load user properties file " + f);
         }
+
+        //encrypt all password if necessary
+        EncryptedPassword(users);
 
         Callback[] callbacks = new Callback[2];
 
@@ -119,42 +123,6 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
         String[] infos = userInfos.split(",");
         String storedPassword = infos[0];
         
-        // check if the stored password is flagged as encrypted
-        String encryptedPassword = getEncryptedPassword(storedPassword);
-        if (!storedPassword.equals(encryptedPassword)) {
-            if (debug) {
-                LOGGER.debug("The password isn't flagged as encrypted, encrypt it.");
-            }
-            if (debug) {
-                LOGGER.debug("Rebuild the user informations string.");
-            }
-            userInfos = encryptedPassword + ",";
-            for (int i = 1; i < infos.length; i++) {
-                if (i == (infos.length - 1)) {
-                    userInfos = userInfos + infos[i];
-                } else {
-                    userInfos = userInfos + infos[i] + ",";
-                }
-            }
-            if (debug) {
-                LOGGER.debug("Push back the user informations in the users properties.");
-            }
-            if (user.contains("\\")) {
-                users.remove(user);
-                user = user.replace("\\", "\\\\");
-            }
-            users.put(user, userInfos);
-            try {
-                if (debug) {
-                    LOGGER.debug("Store the users properties file.");
-                }
-                users.save();
-            } catch (IOException ioe) {
-                LOGGER.warn("Unable to write user properties file {}", f, ioe);
-            }
-            storedPassword = encryptedPassword;
-        }
-
         // check the provided password
         if (!checkPassword(password, storedPassword)) {
         	if (!this.detailedLoginExcepion) {
@@ -206,6 +174,54 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
             LOGGER.debug("logout");
         }
         return true;
+    }
+
+    private void EncryptedPassword(Properties users) {
+        for (Object userName : users.keySet()) {
+            String user = (String)userName;
+            String userInfos = null;
+
+            userInfos = (String) users.get(user);
+                        
+            // the password is in the first position
+            String[] infos = userInfos.split(",");
+            String storedPassword = infos[0];
+            
+            // check if the stored password is flagged as encrypted
+            String encryptedPassword = getEncryptedPassword(storedPassword);
+            if (!storedPassword.equals(encryptedPassword)) {
+                if (debug) {
+                    LOGGER.debug("The password isn't flagged as encrypted, encrypt it.");
+                }
+                if (debug) {
+                    LOGGER.debug("Rebuild the user informations string.");
+                }
+                userInfos = encryptedPassword + ",";
+                for (int i = 1; i < infos.length; i++) {
+                    if (i == (infos.length - 1)) {
+                        userInfos = userInfos + infos[i];
+                    } else {
+                        userInfos = userInfos + infos[i] + ",";
+                    }
+                }
+                if (debug) {
+                    LOGGER.debug("Push back the user informations in the users properties.");
+                }
+                if (user.contains("\\")) {
+                    users.remove(user);
+                    user = user.replace("\\", "\\\\");
+                }
+                users.put(user, userInfos);
+                try {
+                    if (debug) {
+                        LOGGER.debug("Store the users properties file.");
+                    }
+                    users.save();
+                } catch (IOException ioe) {
+                    LOGGER.warn("Unable to write user properties file ", ioe);
+                }
+            }
+        }
     }
 
 }
