@@ -48,6 +48,7 @@ public class Overrides {
     private static final Logger LOGGER = LoggerFactory.getLogger(Overrides.class);
 
     private static final String OVERRIDE_RANGE = "range";
+    private static final String VENDOR_WARNING = "Malicious code possibly introduced by patch override, see log for details";
 
     /**
      * Compute a list of bundles to install, taking into account overrides.
@@ -86,6 +87,7 @@ public class Overrides {
                 if (manifest != null) {
                     String bsn = getBundleSymbolicName(manifest);
                     Version ver = getBundleVersion(manifest);
+                    String ven = getBundleVendor(manifest);
                     String url = info.getLocation();
                     for (Clause override : overrides) {
                         Manifest overMan = manifests.get(override.getName());
@@ -111,10 +113,26 @@ public class Overrides {
                             range = VersionRange.parseVersionRange(vr);
                         }
 
+                        String vendor = getBundleVendor(overMan);
 
+                        // Before we do a replace, lets check if vendors change
+                        if (ven == null) {
+                             if (vendor != null) {
+                                 LOGGER.warn(VENDOR_WARNING);
+                             }
+                        } else {
+                             if (vendor == null) {
+                                 LOGGER.warn(VENDOR_WARNING);
+                             } else {
+                                  if (!vendor.equals(ven)) {
+                                      LOGGER.warn(VENDOR_WARNING);
+                                  } 
+                             }
+                        }
                         // The resource matches, so replace it with the overridden resource
                         // if the override is actually a newer version than what we currently have
                         if (range.contains(ver) && ver.compareTo(oVer) < 0) {
+                            LOGGER.info("Overriding original bundle " + url + " to " + override.getName());
                             ver = oVer;
                             url = override.getName();
                         }
@@ -176,6 +194,11 @@ public class Overrides {
         String bsn = manifest.getMainAttributes().getValue(Constants.BUNDLE_SYMBOLICNAME);
         bsn = stripSymbolicName(bsn);
         return bsn;
+    }
+
+    private static String getBundleVendor(Manifest manifest) {
+        String ven = manifest.getMainAttributes().getValue(Constants.BUNDLE_VENDOR);
+        return ven;
     }
 
     private static Manifest getManifest(String url) throws IOException {

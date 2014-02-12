@@ -42,6 +42,9 @@ public class OverridesTest {
     private File b101;
     private File b102;
     private File b110;
+    private File c100;
+    private File c101;
+    private File c110;
 
     @Before
     public void setUp() throws IOException {
@@ -72,6 +75,50 @@ public class OverridesTest {
                 .set("Bundle-Version", "1.1.0")
                 .build(),
                 new FileOutputStream(b110));
+
+        c100 = File.createTempFile("karafc", "-100.jar");
+        copy(TinyBundles.bundle()
+                .set("Bundle-SymbolicName", bsn)
+                .set("Bundle-Version", "1.0.0")
+                .set("Bundle-Vendor", "Apache")
+                .build(),
+                new FileOutputStream(c100));
+
+        c101 = File.createTempFile("karafc", "-101.jar");
+        copy(TinyBundles.bundle()
+                .set("Bundle-SymbolicName", bsn)
+                .set("Bundle-Version", "1.0.1")
+                .set("Bundle-Vendor", "NotApache")
+                .build(),
+                new FileOutputStream(c101)); 
+
+        c110 = File.createTempFile("karafc", "-110.jar");
+        copy(TinyBundles.bundle()
+                .set("Bundle-SymbolicName", bsn)
+                .set("Bundle-Version", "1.1.0")
+                .set("Bundle-Vendor", "NotApache")
+                .build(),
+                new FileOutputStream(c110));
+    }
+
+    @Test
+    public void testDifferentVendors() throws IOException {
+        File props = File.createTempFile("karaf", "properties");
+        Writer w = new FileWriter(props);
+        w.write(c101.toURI().toString());
+        w.write("\n");
+        w.write(c110.toURI().toString());
+        w.write("\n");
+        w.close();
+
+        List<BundleInfo> res = Overrides.override(
+                Arrays.<BundleInfo>asList(new Bundle(c100.toURI().toString())),
+                props.toURI().toString());
+        assertNotNull(res);
+        assertEquals(1, res.size());
+        BundleInfo out = res.get(0);
+        assertNotNull(out);
+        assertEquals(c101.toURI().toString(), out.getLocation());
     }
 
     @Test
