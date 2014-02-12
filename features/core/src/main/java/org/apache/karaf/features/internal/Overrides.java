@@ -48,7 +48,7 @@ public class Overrides {
     private static final Logger LOGGER = LoggerFactory.getLogger(Overrides.class);
 
     private static final String OVERRIDE_RANGE = "range";
-    private static final String VENDOR_WARNING = "Malicious code possibly introduced by patch override, see log for details";
+    private static final String VENDOR_WARNING = "Bundle Vendor has changed, please check if this is intentional. Bundle: ";
 
     /**
      * Compute a list of bundles to install, taking into account overrides.
@@ -118,14 +118,14 @@ public class Overrides {
                         // Before we do a replace, lets check if vendors change
                         if (ven == null) {
                              if (vendor != null) {
-                                 LOGGER.warn(VENDOR_WARNING);
+                                 LOGGER.warn(VENDOR_WARNING + bsn);
                              }
                         } else {
                              if (vendor == null) {
-                                 LOGGER.warn(VENDOR_WARNING);
+                                 LOGGER.warn(VENDOR_WARNING + bsn);
                              } else {
                                   if (!vendor.equals(ven)) {
-                                      LOGGER.warn(VENDOR_WARNING);
+                                      LOGGER.warn(VENDOR_WARNING + bsn);
                                   } 
                              }
                         }
