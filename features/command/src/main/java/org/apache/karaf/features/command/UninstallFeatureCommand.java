@@ -16,9 +16,11 @@
  */
 package org.apache.karaf.features.command;
 
+import org.apache.karaf.features.command.completers.InstalledFeatureCompleter;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.features.FeaturesService;
+import org.apache.karaf.shell.commands.Completer;
 
 import java.util.List;
 
@@ -26,6 +28,7 @@ import java.util.List;
 public class UninstallFeatureCommand extends FeaturesCommandSupport {
 
     @Argument(index = 0, name = "features", description = "The name and version of the features to uninstall. A feature id looks like name/version. The version is optional.", required = true, multiValued = true)
+    @Completer(InstalledFeatureCompleter.class)
     List<String> features;
 
     protected void doExecute(FeaturesService admin) throws Exception {

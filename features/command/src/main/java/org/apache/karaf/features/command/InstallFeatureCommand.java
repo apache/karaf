@@ -19,6 +19,8 @@ package org.apache.karaf.features.command;
 import java.util.EnumSet;
 import java.util.List;
 
+import org.apache.karaf.features.command.completers.AvailableFeatureCompleter;
+import org.apache.karaf.shell.commands.Completer;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.shell.commands.Argument;
@@ -30,6 +32,7 @@ public class InstallFeatureCommand extends FeaturesCommandSupport {
     private static String DEFAULT_VERSION = "0.0.0";
 
     @Argument(index = 0, name = "feature", description = "The name and version of the features to install. A feature id looks like name/version. The version is optional.", required = true, multiValued = true)
+    @Completer(AvailableFeatureCompleter.class)
     List<String> features;
     @Option(name = "-c", aliases = "--no-clean", description = "Do not uninstall bundles on failure", required = false, multiValued = false)
     boolean noClean;

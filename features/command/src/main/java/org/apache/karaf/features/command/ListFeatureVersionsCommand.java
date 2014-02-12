@@ -21,8 +21,10 @@ import java.util.Arrays;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
+import org.apache.karaf.features.command.completers.AllFeatureCompleter;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Completer;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.table.ShellTable;
 
@@ -30,6 +32,7 @@ import org.apache.karaf.shell.table.ShellTable;
 public class ListFeatureVersionsCommand extends FeaturesCommandSupport {
 
 	@Argument(index = 0, name = "feature", description = "Name of feature.", required = true, multiValued = false)
+    @Completer(AllFeatureCompleter.class)
 	String feature;
 
     @Option(name = "--no-format", description = "Disable table rendered output", required = false, multiValued = false)

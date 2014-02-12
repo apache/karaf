@@ -22,8 +22,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.karaf.features.Conditional;
+import org.apache.karaf.features.command.completers.AllFeatureCompleter;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Completer;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.ConfigFileInfo;
@@ -39,6 +41,7 @@ public class InfoFeatureCommand extends FeaturesCommandSupport {
     private static final String CONDITIONAL_CONTENT = "Conditional(%s)";
 
 	@Argument(index = 0, name = "name", description = "The name of the feature", required = true, multiValued = false)
+    @Completer(AllFeatureCompleter.class)
     private String name;
 
     @Argument(index = 1, name = "version", description = "The version of the feature", required = false, multiValued = false)

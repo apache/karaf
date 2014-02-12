@@ -18,8 +18,10 @@ package org.apache.karaf.features.command;
 
 import java.net.URI;
 
+import org.apache.karaf.features.command.completers.InstalledRepoNameCompleter;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Completer;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
@@ -28,6 +30,7 @@ import org.apache.karaf.features.Repository;
 public class RepoRemoveCommand extends FeaturesCommandSupport {
 
     @Argument(index = 0, name = "repository", description = "Name or url of the repository to remove.", required = true, multiValued = false)
+    @Completer(InstalledRepoNameCompleter.class)
     private String repository;
 
     @Option(name = "-u", aliases = { "--uninstall-all" }, description = "Uninstall all features from the repository", required = false, multiValued = false)

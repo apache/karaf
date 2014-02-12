@@ -19,8 +19,10 @@ package org.apache.karaf.features.command;
 import java.net.URI;
 
 import org.apache.karaf.features.FeaturesService;
+import org.apache.karaf.features.command.completers.AvailableRepoNameCompleter;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Completer;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.AbstractAction;
 
@@ -28,6 +30,7 @@ import org.apache.karaf.shell.console.AbstractAction;
 public class RepoAddCommand extends AbstractAction {
 
     @Argument(index = 0, name = "name/url", description = "Shortcut name of the features repository or the full URL", required = true, multiValued = false)
+    @Completer(AvailableRepoNameCompleter.class)
     private String nameOrUrl;
     
     @Argument(index = 1, name = "version", description = "The version of the features repository if using features repository name as first argument. It should be empty if using the URL", required = false, multiValued = false)

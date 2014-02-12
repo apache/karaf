@@ -20,13 +20,16 @@ import java.net.URI;
 
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
+import org.apache.karaf.features.command.completers.InstalledRepoUriCompleter;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Completer;
 import org.apache.karaf.shell.console.AbstractAction;
 
 @Command(scope = "feature", name = "repo-refresh", description = "Refresh a features repository")
 public class RepoRefreshCommand extends AbstractAction {
     @Argument(index = 0, name = "Feature name or uri", description = "Shortcut name of the feature repository or the full URI", required = false, multiValued = false)
+    @Completer(InstalledRepoUriCompleter.class)
     private String nameOrUrl;
     
     @Argument(index = 1, name = "Feature version", description = "The version of the feature if using the feature name. Should be empty if using the uri", required = false, multiValued = false)

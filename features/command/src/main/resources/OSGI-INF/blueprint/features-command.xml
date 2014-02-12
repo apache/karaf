@@ -19,72 +19,47 @@
 -->
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" default-activation="lazy">
 
+    <!-- Commands -->
+
     <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
         <command>
             <action class="org.apache.karaf.features.command.RepoListCommand"/>
         </command>
         <command>
              <action class="org.apache.karaf.features.command.RepoRemoveCommand"/>
-             <completers>
-                 <ref component-id="installedRepoNameCompleter" />
-             </completers>
          </command>
         <command>
             <action class="org.apache.karaf.features.command.RepoAddCommand">
                 <property name="featureFinder" ref="featureFinder" />
                 <property name="featuresService" ref="featuresService" />
             </action>
-            <completers>
-                <ref component-id="availableRepoNameCompleter" />
-                <null/>
-            </completers>
         </command>
         <command>
             <action class="org.apache.karaf.features.command.RepoRefreshCommand">
                 <property name="featureFinder" ref="featureFinder" />
                 <property name="featuresService" ref="featuresService" />
             </action>
-            <completers>
-                <ref component-id="installedRepoUriCompleter" />
-                <null/>
-            </completers>
         </command>
         <command>
             <action class="org.apache.karaf.features.command.InstallFeatureCommand"/>
-            <completers>
-                <ref component-id="uninstalledFeatureCompleter" />
-            </completers>
         </command>
         <command>
             <action class="org.apache.karaf.features.command.UninstallFeatureCommand"/>
-            <completers>
-                <ref component-id="installedFeatureCompleter" />
-            </completers>
         </command>
         <command>
             <action class="org.apache.karaf.features.command.ListFeaturesCommand"/>
         </command>
         <command>
             <action class="org.apache.karaf.features.command.ListFeatureVersionsCommand"/>
-            <completers>
-                <ref component-id="allFeatureCompleter" />
-            </completers>
         </command>
         <command>
             <action class="org.apache.karaf.features.command.InfoFeatureCommand"/>
-            <completers>
-                <ref component-id="allFeatureCompleter" />
-            </completers>
         </command>
     </command-bundle>
 
-    <bean id="availableRepoNameCompleter" class="org.apache.karaf.features.command.completers.AvailableRepoNameCompleter">
-        <property name="featureFinder" ref="featureFinder" />
-    </bean>
+    <!-- Services -->
 
-    <bean id="featureFinder" class="org.apache.karaf.features.command.FeatureFinder">
-    </bean> 
-
+    <bean id="featureFinder" class="org.apache.karaf.features.command.FeatureFinder"/>
     <service ref="featureFinder" interface="org.osgi.service.cm.ManagedService" >
         <service-properties>
             <entry key="service.pid" value="org.apache.karaf.features.repos" />
@@ -93,27 +68,37 @@
 
     <reference id="featuresService" interface="org.apache.karaf.features.FeaturesService" />
 
+    <!-- Completers -->
+
+    <bean id="availableRepoNameCompleter" class="org.apache.karaf.features.command.completers.AvailableRepoNameCompleter">
+        <property name="featureFinder" ref="featureFinder" />
+    </bean>
+    <service ref="availableRepoNameCompleter" auto-export="all-classes"/>
+
     <bean id="uninstalledFeatureCompleter" class="org.apache.karaf.features.command.completers.AvailableFeatureCompleter">
         <property name="featuresService" ref="featuresService" />
     </bean>
+    <service ref="uninstalledFeatureCompleter" auto-export="all-classes"/>
 
     <bean id="installedFeatureCompleter" class="org.apache.karaf.features.command.completers.InstalledFeatureCompleter">
         <property name="featuresService" ref="featuresService" />
     </bean>
+    <service ref="installedFeatureCompleter" auto-export="all-classes"/>
 
     <bean id="allFeatureCompleter" class="org.apache.karaf.features.command.completers.AllFeatureCompleter">
         <property name="featuresService" ref="featuresService" />
     </bean>
+    <service ref="allFeatureCompleter" auto-export="all-classes"/>
 
     <bean id="installedRepoUriCompleter" class="org.apache.karaf.features.command.completers.InstalledRepoUriCompleter">
         <property name="featuresService" ref="featuresService" />
     </bean>
+    <service ref="installedRepoUriCompleter" auto-export="all-classes"/>
     
     <bean id="installedRepoNameCompleter" class="org.apache.karaf.features.command.completers.InstalledRepoNameCompleter">
         <property name="featuresService" ref="featuresService"/>
     </bean>
-    
-    <service ref="installedRepoNameCompleter" interface="org.apache.karaf.shell.console.Completer">
+    <service ref="installedRepoNameCompleter" auto-export="all-classes">
         <service-properties>
             <entry key="name" value="installedRepoNameCompleter"/>
         </service-properties>
