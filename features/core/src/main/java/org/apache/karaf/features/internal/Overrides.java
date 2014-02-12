@@ -132,7 +132,7 @@ public class Overrides {
                         // The resource matches, so replace it with the overridden resource
                         // if the override is actually a newer version than what we currently have
                         if (range.contains(ver) && ver.compareTo(oVer) < 0) {
-                            LOGGER.info("Overriding original bundle " + url + " to " + override.getName());
+                            LOGGER.warn("Overriding original bundle " + url + " to " + override.getName());
                             ver = oVer;
                             url = override.getName();
                         }
