@@ -24,11 +24,6 @@
             <action class="org.apache.karaf.jaas.command.ManageRealmCommand">
                 <property name="realms" ref="realms"/>
             </action>
-            <completers>
-                <ref component-id="realmCompleter" />
-                <ref component-id="moduleClassNameCompleter" />
-                <null/>
-            </completers>
         </command>
         <command>
             <action class="org.apache.karaf.jaas.command.UpdateCommand">
@@ -93,9 +88,11 @@
     <bean id="realmCompleter" class="org.apache.karaf.jaas.command.completers.RealmCompleter">
         <property name="realms" ref="realms"/>
     </bean>
+    <service ref="realmCompleter" auto-export="all-classes"/>
 
-    <bean id="moduleClassNameCompleter" class="org.apache.karaf.jaas.command.completers.LoginModuleNameCompleter">
+    <bean id="loginModuleNameCompleter" class="org.apache.karaf.jaas.command.completers.LoginModuleNameCompleter">
         <property name="realms" ref="realms"/>
     </bean>
+    <service ref="loginModuleNameCompleter" auto-export="all-classes"/>
 
 </blueprint>

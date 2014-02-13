@@ -16,7 +16,10 @@
 package org.apache.karaf.jaas.command;
 
 import org.apache.karaf.jaas.boot.ProxyLoginModule;
+import org.apache.karaf.jaas.command.completers.LoginModuleNameCompleter;
+import org.apache.karaf.jaas.command.completers.RealmCompleter;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Completer;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.jaas.config.JaasRealm;
 import org.apache.karaf.jaas.modules.BackingEngine;
@@ -30,12 +33,14 @@ import java.util.Queue;
 public class ManageRealmCommand extends JaasCommandSupport {
 
     @Option(name = "--realm", description = "JAAS Realm", required = false, multiValued = false)
+    @Completer(RealmCompleter.class)
     String realmName;
 
     @Option(name = "--index", description = "Realm Index", required = false, multiValued = false)
     int index;
 
     @Option(name = "--module", description = "JAAS Login Module Class Name", required = false, multiValued = false)
+    @Completer(LoginModuleNameCompleter.class)
     String moduleName;
 
     @Option(name = "-f", aliases = { "--force" }, description = "Force the management of this realm, even if another one was under management", required = false, multiValued = false)
