@@ -18,6 +18,8 @@ package org.apache.karaf.log.command;
 
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Completer;
+import org.apache.karaf.shell.console.completer.StringsCompleter;
 
 /**
  * Set the log level for a given logger
@@ -26,6 +28,7 @@ import org.apache.karaf.shell.commands.Command;
 public class SetLogLevel extends LogCommandSupport {
     
     @Argument(index = 0, name = "level", description = "The log level to set (TRACE, DEBUG, INFO, WARN, ERROR) or DEFAULT to unset", required = true, multiValued = false)
+    @Completer(value = StringsCompleter.class, values = { "TRACE", "DEBUG", "INFO", "WARN", "ERROR", "DEFAULT" })
     String level;
 
     @Argument(index = 1, name = "logger", description = "Logger name or ROOT (default)", required = false, multiValued = false)

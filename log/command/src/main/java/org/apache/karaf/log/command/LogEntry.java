@@ -18,8 +18,10 @@ package org.apache.karaf.log.command;
 
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Completer;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.AbstractAction;
+import org.apache.karaf.shell.console.completer.StringsCompleter;
 import org.osgi.service.log.LogService;
 
 import java.util.HashMap;
@@ -32,6 +34,7 @@ public class LogEntry extends AbstractAction {
     private String message;
 
     @Option(name = "--level", aliases = {"-l"}, description = "The level the message will be logged at", required = false, multiValued = false)
+    @Completer(value = StringsCompleter.class, values = { "DEBUG", "INFO", "WARNING", "ERROR" })
     private String level = "INFO";
 
     private LogService logService;
