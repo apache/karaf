@@ -122,9 +122,14 @@ public class ArgumentCompleter implements Completer {
                         org.apache.karaf.shell.commands.Completer ann = completerAnnotations.get(field);
                         if (ann != null) {
                             Class clazz = ann.value();
+                            String[] values = ann.values();
                             if (clazz != null) {
-                                BundleContext context = FrameworkUtil.getBundle(function.getClass()).getBundleContext();
-                                completer = new ProxyServiceCompleter(context, clazz);
+                                if (values.length > 0 && clazz == StringsCompleter.class) {
+                                    completer = new StringsCompleter(values, ann.caseSensitive());
+                                } else {
+                                    BundleContext context = FrameworkUtil.getBundle(function.getClass()).getBundleContext();
+                                    completer = new ProxyServiceCompleter(context, clazz);
+                                }
                             }
                         }
                     }
@@ -144,9 +149,14 @@ public class ArgumentCompleter implements Completer {
                         org.apache.karaf.shell.commands.Completer ann = completerAnnotations.get(field);
                         if (ann != null) {
                             Class clazz = ann.value();
+                            String[] values = ann.values();
                             if (clazz != null) {
-                                BundleContext context = FrameworkUtil.getBundle(function.getClass()).getBundleContext();
-                                completer = new ProxyServiceCompleter(context, clazz);
+                                if (values.length > 0 && clazz == StringsCompleter.class) {
+                                    completer = new StringsCompleter(values, ann.caseSensitive());
+                                } else {
+                                    BundleContext context = FrameworkUtil.getBundle(function.getClass()).getBundleContext();
+                                    completer = new ProxyServiceCompleter(context, clazz);
+                                }
                             }
                         }
                     }

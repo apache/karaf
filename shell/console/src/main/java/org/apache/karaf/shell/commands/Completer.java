@@ -27,4 +27,8 @@ public @interface Completer {
 
     Class<? extends org.apache.karaf.shell.console.Completer> value();
 
+    String[] values() default { };
+
+    boolean caseSensitive() default false;
+
 }
