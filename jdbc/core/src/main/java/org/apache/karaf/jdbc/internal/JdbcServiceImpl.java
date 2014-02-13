@@ -22,6 +22,7 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 
 import javax.sql.DataSource;
+import javax.sql.XADataSource;
 import java.io.*;
 import java.sql.*;
 import java.util.*;
@@ -152,7 +153,8 @@ public class JdbcServiceImpl implements JdbcService {
 
     public List<String> datasources() throws Exception {
         List<String> datasources = new ArrayList<String>();
-        ServiceReference[] references = bundleContext.getServiceReferences(DataSource.class.getName(), null);
+        ServiceReference[] references = bundleContext.getServiceReferences((String) null, "(|(" + Constants.OBJECTCLASS + "=" + DataSource.class.getName() + ")("
+                + Constants.OBJECTCLASS + "=" + XADataSource.class.getName() + "))");
         if (references != null) {
             for (ServiceReference reference : references) {
                 if (reference.getProperty("osgi.jndi.service.name") != null) {
@@ -189,8 +191,13 @@ public class JdbcServiceImpl implements JdbcService {
         Connection connection = null;
         Statement statement = null;
         try {
-            DataSource ds = (DataSource) bundleContext.getService(reference);
-            connection = ds.getConnection();
+            Object ds = bundleContext.getService(reference);
+            if (ds instanceof DataSource) {
+                connection = ((DataSource) ds).getConnection();
+            }
+            if (ds instanceof XADataSource) {
+                connection = ((XADataSource) ds).getXAConnection().getConnection();
+            }
             statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(query);
             ResultSetMetaData metaData = resultSet.getMetaData();
@@ -222,8 +229,13 @@ public class JdbcServiceImpl implements JdbcService {
         Connection connection = null;
         Statement statement = null;
         try {
-            DataSource ds = (DataSource) bundleContext.getService(reference);
-            connection = ds.getConnection();
+            Object ds = bundleContext.getService(reference);
+            if (ds instanceof DataSource) {
+                connection = ((DataSource) ds).getConnection();
+            }
+            if (ds instanceof XADataSource) {
+                connection = ((XADataSource) ds).getXAConnection().getConnection();
+            }
             statement = connection.createStatement();
             statement.execute(command);
         } finally {
@@ -244,8 +256,13 @@ public class JdbcServiceImpl implements JdbcService {
         ServiceReference reference = this.lookupDataSource(datasource);
         Connection connection = null;
         try {
-            DataSource ds = (DataSource) bundleContext.getService(reference);
-            connection = ds.getConnection();
+            Object ds = bundleContext.getService(reference);
+            if (ds instanceof DataSource) {
+                connection = ((DataSource) ds).getConnection();
+            }
+            if (ds instanceof XADataSource) {
+                connection = ((XADataSource) ds).getXAConnection().getConnection();
+            }
             DatabaseMetaData dbMetaData = connection.getMetaData();
             ResultSet resultSet = dbMetaData.getTables(null, null, null, null);
             ResultSetMetaData metaData = resultSet.getMetaData();
@@ -274,8 +291,13 @@ public class JdbcServiceImpl implements JdbcService {
         ServiceReference reference = this.lookupDataSource(datasource);
         Connection connection = null;
         try {
-            DataSource ds = (DataSource) bundleContext.getService(reference);
-            connection = ds.getConnection();
+            Object ds = bundleContext.getService(reference);
+            if (ds instanceof DataSource) {
+                connection = ((DataSource) ds).getConnection();
+            }
+            if (ds instanceof XADataSource) {
+                connection = ((XADataSource) ds).getXAConnection().getConnection();
+            }
             DatabaseMetaData dbMetaData = connection.getMetaData();
             map.put("db.product", dbMetaData.getDatabaseProductName());
             map.put("db.version", dbMetaData.getDatabaseProductVersion());
@@ -295,7 +317,10 @@ public class JdbcServiceImpl implements JdbcService {
     }
 
     private ServiceReference lookupDataSource(String name) throws Exception {
-        ServiceReference[] references = bundleContext.getServiceReferences(DataSource.class.getName(), "(|(osgi.jndi.service.name=" + name + ")(datasource=" + name + ")(name=" + name + ")(service.id=" + name + "))");
+        ServiceReference[] references = bundleContext.getServiceReferences((String) null,
+                "(&(|(" + Constants.OBJECTCLASS + "=" + DataSource.class.getName() + ")"
+                        + "(" + Constants.OBJECTCLASS + "=" + XADataSource.class.getName() + "))"
+                        + "(|(osgi.jndi.service.name=" + name + ")(datasource=" + name + ")(name=" + name + ")(service.id=" + name + ")))");
         if (references == null || references.length == 0) {
             throw new IllegalArgumentException("No JDBC datasource found for " + name);
         }
