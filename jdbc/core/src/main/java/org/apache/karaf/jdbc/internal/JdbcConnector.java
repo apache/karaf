@@ -18,18 +18,17 @@ package org.apache.karaf.jdbc.internal;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Collection;
+import java.sql.*;
 import java.util.Deque;
 import java.util.LinkedList;
 
 import javax.sql.DataSource;
+import javax.sql.XAConnection;
+import javax.sql.XADataSource;
 
 import org.apache.karaf.util.StreamUtils;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
@@ -38,7 +37,7 @@ public class JdbcConnector implements Closeable {
     private String datasourceName;
     private Connection connection;
     private Deque<Closeable> resources;
-    private ServiceReference<DataSource> reference;
+    private ServiceReference<?> reference;
 
     public JdbcConnector(BundleContext bundleContext, String datasourceName) {
         this.bundleContext = bundleContext;
@@ -48,8 +47,13 @@ public class JdbcConnector implements Closeable {
     
     public Connection connect() throws SQLException {
         reference = lookupDataSource(datasourceName);
-        DataSource ds = (DataSource) bundleContext.getService(reference);
-        connection = ds.getConnection();
+        Object datasource = bundleContext.getService(reference);
+        if (datasource instanceof DataSource) {
+            connection = ((DataSource) datasource).getConnection();
+        }
+        if (datasource instanceof XADataSource) {
+            connection = ((XADataSource) datasource).getXAConnection().getConnection();
+        }
         return connection;
     }
     
@@ -57,7 +61,13 @@ public class JdbcConnector implements Closeable {
         if (connection == null) {
             connect();
         }
-        return register(connection.createStatement());
+        if (connection instanceof Connection) {
+            return register(((Connection) connection).createStatement());
+        }
+        if (connection instanceof XAConnection) {
+            return register(((XAConnection) connection).getConnection().createStatement());
+        }
+        return null;
     }
 
     public Connection register(final Connection connection) {
@@ -106,20 +116,23 @@ public class JdbcConnector implements Closeable {
     }
     
 
-    private ServiceReference<DataSource> lookupDataSource(String name) {
-        Collection<ServiceReference<DataSource>> references;
+    private ServiceReference<?> lookupDataSource(String name) {
+        ServiceReference<?>[] references;
         try {
-            references = bundleContext.getServiceReferences(DataSource.class, "(|(osgi.jndi.service.name=" + name + ")(datasource=" + name + ")(name=" + name + ")(service.id=" + name + "))");
+            references = bundleContext.getServiceReferences((String) null,
+                    "(&(|(" + Constants.OBJECTCLASS + "=" + DataSource.class.getName() + ")"
+                    + "(" + Constants.OBJECTCLASS + "=" + XADataSource.class.getName() + "))"
+                    + "(|(osgi.jndi.service.name=" + name + ")(datasource=" + name + ")(name=" + name + ")(service.id=" + name + ")))");
         } catch (InvalidSyntaxException e) {
             throw new IllegalArgumentException("Error finding datasource with name " + name, e);
         }
-        if (references == null || references.size() == 0) {
+        if (references == null || references.length == 0) {
             throw new IllegalArgumentException("No JDBC datasource found for " + name);
         }
-        if (references.size() > 1) {
+        if (references.length > 1) {
             throw new IllegalArgumentException("Multiple JDBC datasource found for " + name);
         }
-        return references.iterator().next();
+        return references[0];
     }
 
     @Override

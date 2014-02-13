@@ -18,11 +18,13 @@ package org.apache.karaf.jdbc.internal;
 
 import org.apache.karaf.jdbc.JdbcService;
 import org.apache.karaf.util.TemplateUtils;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 
 import javax.sql.DataSource;
+import javax.sql.XADataSource;
 
 import java.io.*;
 import java.sql.*;
@@ -113,9 +115,11 @@ public class JdbcServiceImpl implements JdbcService {
     @Override
     public List<String> datasources() throws Exception {
         List<String> datasources = new ArrayList<String>();
-        Collection<ServiceReference<DataSource>> references = bundleContext.getServiceReferences(DataSource.class, null);
+
+        ServiceReference<?>[] references = bundleContext.getServiceReferences((String) null, "(|(" + Constants.OBJECTCLASS + "=" + DataSource.class.getName() + ")("
+        + Constants.OBJECTCLASS + "=" + XADataSource.class.getName() + "))");
         if (references != null) {
-            for (ServiceReference<DataSource> reference : references) {
+            for (ServiceReference reference : references) {
                 if (reference.getProperty("osgi.jndi.service.name") != null) {
                     datasources.add((String) reference.getProperty("osgi.jndi.service.name"));
                 } else if (reference.getProperty("datasource") != null) {
@@ -182,6 +186,7 @@ public class JdbcServiceImpl implements JdbcService {
     public Map<String, List<String>> tables(String datasource) throws Exception {
         JdbcConnector jdbcConnector = new JdbcConnector(bundleContext, datasource);
         try {
+
             DatabaseMetaData dbMetaData = jdbcConnector.connect().getMetaData();
             ResultSet resultSet = jdbcConnector.register(dbMetaData.getTables(null, null, null, null));
             ResultSetMetaData metaData = resultSet.getMetaData();
