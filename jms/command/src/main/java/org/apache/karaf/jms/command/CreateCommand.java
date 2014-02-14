@@ -18,7 +18,9 @@ package org.apache.karaf.jms.command;
 
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Completer;
 import org.apache.karaf.shell.commands.Option;
+import org.apache.karaf.shell.console.completer.StringsCompleter;
 
 @Command(scope = "jms", name = "create", description = "Create a JMS connection factory.")
 public class CreateCommand extends JmsCommandSupport {
@@ -27,6 +29,7 @@ public class CreateCommand extends JmsCommandSupport {
     String name;
 
     @Option(name = "-t", aliases = { "--type" }, description = "The JMS connection factory type (ActiveMQ or WebsphereMQ)", required = false, multiValued = false)
+    @Completer(value = StringsCompleter.class, values = { "activemq", "webspheremq" })
     String type = "ActiveMQ";
 
     @Option(name = "--url", description = "URL of the JMS broker. For WebsphereMQ type, the URL is hostname/port/queuemanager/channel", required = false, multiValued = false)

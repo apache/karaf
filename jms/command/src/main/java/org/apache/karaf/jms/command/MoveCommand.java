@@ -22,6 +22,7 @@ import org.apache.karaf.shell.commands.Option;
 
 @Command(scope = "jms", name = "move", description = "Move messages from one JMS queue to another one.")
 public class MoveCommand extends JmsConnectionCommandSupport {
+
     @Argument(index = 1, name = "source", description = "The source JMS queue", required = true, multiValued = false)
     String source;
 

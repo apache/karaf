@@ -23,7 +23,6 @@ import org.apache.karaf.shell.commands.Option;
 @Command(scope = "jms", name = "consume", description = "Consume messages from a JMS queue.")
 public class ConsumeCommand extends JmsConnectionCommandSupport {
 
-
     @Argument(index = 1, name = "queue", description = "The JMS queue where to consume messages", required = true, multiValued = false)
     String queue;
 

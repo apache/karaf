@@ -16,13 +16,16 @@
  */
 package org.apache.karaf.jms.command;
 
+import org.apache.karaf.jms.command.completers.ConnectionFactoriesFileNameCompleter;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Completer;
 
 @Command(scope = "jms", name = "delete", description = "Delete a JMS connection factory")
 public class DeleteCommand extends JmsCommandSupport {
 
     @Argument(index = 0, name = "name", description = "The JMS connection factory name", required = true, multiValued = false)
+    @Completer(ConnectionFactoriesFileNameCompleter.class)
     String name;
 
     public Object doExecute() throws Exception {

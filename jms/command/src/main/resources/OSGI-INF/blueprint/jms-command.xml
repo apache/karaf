@@ -24,10 +24,6 @@
             <action class="org.apache.karaf.jms.command.BrowseCommand">
                 <property name="jmsService" ref="jmsService"/>
             </action>
-            <completers>
-                <ref component-id="connectionFactoriesNameCompleter"/>
-                <null/>
-            </completers>
         </command>
         <command>
             <action class="org.apache.karaf.jms.command.ConnectionFactoriesCommand">
@@ -38,19 +34,11 @@
             <action class="org.apache.karaf.jms.command.ConsumeCommand">
                 <property name="jmsService" ref="jmsService"/>
             </action>
-            <completers>
-                <ref component-id="connectionFactoriesNameCompleter"/>
-                <null/>
-            </completers>
         </command>
         <command>
             <action class="org.apache.karaf.jms.command.CountCommand">
                 <property name="jmsService" ref="jmsService"/>
             </action>
-            <completers>
-                <ref component-id="connectionFactoriesNameCompleter"/>
-                <null/>
-            </completers>
         </command>
         <command>
             <action class="org.apache.karaf.jms.command.CreateCommand">
@@ -61,63 +49,42 @@
             <action class="org.apache.karaf.jms.command.DeleteCommand">
                 <property name="jmsService" ref="jmsService"/>
             </action>
-            <completers>
-                <ref component-id="connectionFactoriesFileNameCompleter"/>
-                <null/>
-            </completers>
         </command>
         <command>
             <action class="org.apache.karaf.jms.command.InfoCommand">
                 <property name="jmsService" ref="jmsService"/>
             </action>
-            <completers>
-                <ref component-id="connectionFactoriesNameCompleter"/>
-                <null/>
-            </completers>
         </command>
         <command>
             <action class="org.apache.karaf.jms.command.MoveCommand">
                 <property name="jmsService" ref="jmsService"/>
             </action>
-            <completers>
-                <ref component-id="connectionFactoriesNameCompleter"/>
-                <null/>
-            </completers>
         </command>
         <command>
             <action class="org.apache.karaf.jms.command.QueuesCommand">
                 <property name="jmsService" ref="jmsService"/>
             </action>
-            <completers>
-                <ref component-id="connectionFactoriesNameCompleter"/>
-                <null/>
-            </completers>
         </command>
         <command>
             <action class="org.apache.karaf.jms.command.SendCommand">
                 <property name="jmsService" ref="jmsService"/>
             </action>
-            <completers>
-                <ref component-id="connectionFactoriesNameCompleter"/>
-                <null/>
-            </completers>
         </command>
         <command>
             <action class="org.apache.karaf.jms.command.TopicsCommand">
                 <property name="jmsService" ref="jmsService"/>
             </action>
-            <completers>
-                <ref component-id="connectionFactoriesNameCompleter"/>
-                <null/>
-            </completers>
         </command>
     </command-bundle>
 
     <bean id="connectionFactoriesNameCompleter" class="org.apache.karaf.jms.command.completers.ConnectionFactoriesNameCompleter">
         <property name="jmsService" ref="jmsService"/>
     </bean>
+    <service ref="connectionFactoriesNameCompleter" auto-export="all-classes"/>
+
     <bean id="connectionFactoriesFileNameCompleter" class="org.apache.karaf.jms.command.completers.ConnectionFactoriesFileNameCompleter">
         <property name="jmsService" ref="jmsService"/>
     </bean>
+    <service ref="connectionFactoriesFileNameCompleter" auto-export="all-classes"/>
 
 </blueprint>
