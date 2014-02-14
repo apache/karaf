@@ -67,7 +67,6 @@ public class ArgumentCompleter implements Completer {
     final Map<Option, Field> fields = new HashMap<Option, Field>();
     final Map<String, Option> options = new HashMap<String, Option>();
     final Map<Integer, Field> arguments = new HashMap<Integer, Field>();
-    final Map<Field, org.apache.karaf.shell.commands.Completer> completerAnnotations = new HashMap<Field, org.apache.karaf.shell.commands.Completer>();
     boolean strict = true;
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -98,12 +97,6 @@ public class ArgumentCompleter implements Completer {
                         arguments.put(key, field);
                     }
                 }
-                if (option != null || argument != null) {
-                    org.apache.karaf.shell.commands.Completer completer = field.getAnnotation(org.apache.karaf.shell.commands.Completer.class);
-                    if (completer != null) {
-                        completerAnnotations.put(field, completer);
-                    }
-                }
             }
         }
         options.put(HelpOption.HELP.name(), HelpOption.HELP);
@@ -115,11 +108,14 @@ public class ArgumentCompleter implements Completer {
             Map<String, Completer> focl = ((CompletableFunction) function).getOptionalCompleters();
             List<Completer> fcl = ((CompletableFunction) function).getCompleters();
             if (focl == null && fcl == null) {
+                boolean multi = false;
                 for (int key = 0; key < arguments.size(); key++) {
                     Completer completer = null;
                     Field field = arguments.get(key);
                     if (field != null) {
-                        org.apache.karaf.shell.commands.Completer ann = completerAnnotations.get(field);
+                        Argument argument = field.getAnnotation(Argument.class);
+                        multi = (argument != null && argument.multiValued());
+                        org.apache.karaf.shell.commands.Completer ann = field.getAnnotation(org.apache.karaf.shell.commands.Completer.class);
                         if (ann != null) {
                             Class clazz = ann.value();
                             String[] values = ann.values();
@@ -138,7 +134,7 @@ public class ArgumentCompleter implements Completer {
                     }
                     argsCompleters.add(completer);
                 }
-                if (argsCompleters.isEmpty()) {
+                if (argsCompleters.isEmpty() || !multi) {
                     argsCompleters.add(NullCompleter.INSTANCE);
                 }
                 optionalCompleters = new HashMap<String, Completer>();
@@ -146,7 +142,7 @@ public class ArgumentCompleter implements Completer {
                     Completer completer = null;
                     Field field = fields.get(option);
                     if (field != null) {
-                        org.apache.karaf.shell.commands.Completer ann = completerAnnotations.get(field);
+                        org.apache.karaf.shell.commands.Completer ann = field.getAnnotation(org.apache.karaf.shell.commands.Completer.class);
                         if (ann != null) {
                             Class clazz = ann.value();
                             String[] values = ann.values();
