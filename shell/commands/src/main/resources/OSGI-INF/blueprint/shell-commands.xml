@@ -101,10 +101,6 @@
             <action class="org.apache.karaf.shell.commands.impl.WatchAction">
                 <property name="commandProcessor" ref="commandProcessor"/>
             </action>
-            <completers>
-                <ref component-id="commandCompleter" />
-                <null/>
-            </completers>
         </command>
         <command>
             <action class="org.apache.karaf.shell.commands.impl.WcAction"/>
@@ -117,6 +113,7 @@
     </command-bundle>
 
    <bean id="commandCompleter" class="org.apache.karaf.shell.console.completer.CommandsCompleter"/>
+   <service ref="commandCompleter" auto-export="all-classes"/>
 
    <bean class="org.osgi.util.tracker.BundleTracker" init-method="open"
         destroy-method="close">

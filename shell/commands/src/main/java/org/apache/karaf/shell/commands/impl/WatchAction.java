@@ -28,8 +28,10 @@ import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Completer;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.AbstractAction;
+import org.apache.karaf.shell.console.completer.CommandsCompleter;
 
 @Command(scope = "shell", name = "watch", description = "Watches & refreshes the output of a command")
 public class WatchAction extends AbstractAction {
@@ -41,6 +43,7 @@ public class WatchAction extends AbstractAction {
     private boolean append = false;
 
     @Argument(index = 0, name = "command", description = "The command to watch / refresh", required = true, multiValued = true)
+    @Completer(CommandsCompleter.class)
     private String[] arguments;
 
     CommandProcessor commandProcessor;
