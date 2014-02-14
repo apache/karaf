@@ -16,13 +16,16 @@
  */
 package org.apache.karaf.jndi.command;
 
+import org.apache.karaf.jndi.command.completers.NamesCompleter;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Completer;
 
 @Command(scope = "jndi", name = "unbind", description = "Unbind a JNDI name.")
 public class UnbindCommand extends JndiCommandSupport {
 
     @Argument(index = 0, name = "name", description = "The JNDI name to unbind", required = true, multiValued = false)
+    @Completer(NamesCompleter.class)
     String name;
 
     public Object doExecute() throws Exception {

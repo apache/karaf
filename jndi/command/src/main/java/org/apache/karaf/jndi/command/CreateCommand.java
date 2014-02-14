@@ -16,13 +16,16 @@
  */
 package org.apache.karaf.jndi.command;
 
+import org.apache.karaf.jndi.command.completers.ContextsCompleter;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Completer;
 
 @Command(scope = "jndi",  name = "create", description = "Create a new JNDI sub-context.")
 public class CreateCommand extends JndiCommandSupport {
 
     @Argument(index = 0, name = "context", description = "The JNDI sub-context name", required = true, multiValued = false)
+    @Completer(ContextsCompleter.class)
     String context;
 
     public Object doExecute() throws Exception {

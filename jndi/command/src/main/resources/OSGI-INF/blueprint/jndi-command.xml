@@ -24,76 +24,52 @@
             <action class="org.apache.karaf.jndi.command.AliasCommand">
                 <property name="jndiService" ref="jndiService" />
             </action>
-            <completers>
-                <ref component-id="namesCompleter" />
-                <ref component-id="contextsCompleter" />
-                <null />
-            </completers>
         </command>
         <command>
             <action class="org.apache.karaf.jndi.command.ContextsCommand">
                 <property name="jndiService" ref="jndiService" />
             </action>
-            <completers>
-                <ref component-id="contextsCompleter" />
-                <null />
-            </completers>
         </command>
         <command>
             <action class="org.apache.karaf.jndi.command.NamesCommand">
                 <property name="jndiService" ref="jndiService" />
             </action>
-            <completers>
-                <ref component-id="contextsCompleter" />
-                <null />
-            </completers>
         </command>
         <command>
             <action class="org.apache.karaf.jndi.command.CreateCommand">
                 <property name="jndiService" ref="jndiService"/>
             </action>
-            <completers>
-                <ref component-id="contextsCompleter" />
-                <null />
-            </completers>
         </command>
         <command>
             <action class="org.apache.karaf.jndi.command.DeleteCommand">
                 <property name="jndiService" ref="jndiService"/>
             </action>
-            <completers>
-                <ref component-id="contextsCompleter" />
-                <null />
-            </completers>
         </command>
         <command>
             <action class="org.apache.karaf.jndi.command.BindCommand">
                 <property name="jndiService" ref="jndiService"/>
             </action>
-            <completers>
-                <ref component-id="servicesIdCompleter" />
-                <ref component-id="contextsCompleter" />
-                <null />
-            </completers>
         </command>
         <command>
             <action class="org.apache.karaf.jndi.command.UnbindCommand">
                 <property name="jndiService" ref="jndiService" />
             </action>
-            <completers>
-                <ref component-id="namesCompleter" />
-            </completers>
         </command>
     </command-bundle>
 
     <bean id="namesCompleter" class="org.apache.karaf.jndi.command.completers.NamesCompleter">
         <property name="jndiService" ref="jndiService" />
     </bean>
+    <service ref="namesCompleter" auto-export="all-classes"/>
+
     <bean id="contextsCompleter" class="org.apache.karaf.jndi.command.completers.ContextsCompleter">
         <property name="jndiService" ref="jndiService" />
     </bean>
+    <service ref="contextsCompleter" auto-export="all-classes"/>
+
     <bean id="servicesIdCompleter" class="org.apache.karaf.jndi.command.completers.ServicesIdCompleter">
         <property name="bundleContext" ref="blueprintBundleContext" />
     </bean>
+    <service ref="servicesIdCompleter" auto-export="all-classes"/>
 
 </blueprint>

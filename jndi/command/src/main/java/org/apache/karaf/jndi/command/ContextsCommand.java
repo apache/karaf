@@ -16,8 +16,10 @@
  */
 package org.apache.karaf.jndi.command;
 
+import org.apache.karaf.jndi.command.completers.ContextsCompleter;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Completer;
 import org.apache.karaf.shell.table.ShellTable;
 
 import java.util.List;
@@ -26,6 +28,7 @@ import java.util.List;
 public class ContextsCommand extends JndiCommandSupport {
 
     @Argument(index = 0, name = "context", description = "The base JNDI context", required = false, multiValued = false)
+    @Completer(ContextsCompleter.class)
     String context;
 
     public Object doExecute() throws Exception {

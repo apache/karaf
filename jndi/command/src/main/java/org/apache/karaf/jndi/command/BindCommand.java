@@ -16,16 +16,21 @@
  */
 package org.apache.karaf.jndi.command;
 
+import org.apache.karaf.jndi.command.completers.ContextsCompleter;
+import org.apache.karaf.jndi.command.completers.ServicesIdCompleter;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Completer;
 
 @Command(scope = "jndi", name = "bind", description = "Bind an OSGi service in the JNDI context")
 public class BindCommand extends JndiCommandSupport {
 
     @Argument(index = 0, name = "service", description = "The ID of the OSGi service to bind", required = true, multiValued = false)
+    @Completer(ServicesIdCompleter.class)
     Long serviceId;
 
     @Argument(index = 1, name = "name", description = "The JNDI name to bind the OSGi service", required = true, multiValued = false)
+    @Completer(ContextsCompleter.class)
     String name;
 
     public Object doExecute() throws Exception {
