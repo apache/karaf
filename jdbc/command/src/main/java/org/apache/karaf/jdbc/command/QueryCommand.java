@@ -16,8 +16,10 @@
  */
 package org.apache.karaf.jdbc.command;
 
+import org.apache.karaf.jdbc.command.completers.DataSourcesNameCompleter;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Completer;
 import org.apache.karaf.shell.table.Row;
 import org.apache.karaf.shell.table.ShellTable;
 
@@ -28,6 +30,7 @@ import java.util.Map;
 public class QueryCommand extends JdbcCommandSupport {
 
     @Argument(index = 0, name = "datasource", description = "The JDBC datasource to use", required = true, multiValued = false)
+    @Completer(DataSourcesNameCompleter.class)
     String datasource;
 
     @Argument(index = 1, name = "query", description = "The SQL query to execute", required = true, multiValued = false)

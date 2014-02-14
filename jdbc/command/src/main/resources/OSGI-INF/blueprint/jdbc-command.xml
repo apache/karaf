@@ -29,10 +29,6 @@
             <action class="org.apache.karaf.jdbc.command.DeleteCommand">
                 <property name="jdbcService" ref="jdbcService"/>
             </action>
-            <completers>
-                <ref component-id="datasourcesFileNameCompleter"/>
-                <null/>
-            </completers>
         </command>
         <command>
             <action class="org.apache.karaf.jdbc.command.DataSourcesCommand">
@@ -43,45 +39,32 @@
             <action class="org.apache.karaf.jdbc.command.QueryCommand">
                 <property name="jdbcService" ref="jdbcService"/>
             </action>
-            <completers>
-                <ref component-id="datasourcesNameCompleter"/>
-                <null/>
-            </completers>
         </command>
         <command>
             <action class="org.apache.karaf.jdbc.command.ExecuteCommand">
                 <property name="jdbcService" ref="jdbcService"/>
             </action>
-            <completers>
-                <ref component-id="datasourcesNameCompleter"/>
-                <null/>
-            </completers>
         </command>
         <command>
             <action class="org.apache.karaf.jdbc.command.InfoCommand">
                 <property name="jdbcService" ref="jdbcService"/>
             </action>
-            <completers>
-                <ref component-id="datasourcesNameCompleter"/>
-                <null/>
-            </completers>
         </command>
         <command>
             <action class="org.apache.karaf.jdbc.command.TablesCommand">
                 <property name="jdbcService" ref="jdbcService"/>
             </action>
-            <completers>
-                <ref component-id="datasourcesNameCompleter"/>
-                <null/>
-            </completers>
         </command>
     </command-bundle>
 
-    <bean id="datasourcesNameCompleter" class="org.apache.karaf.jdbc.command.completers.DataSourcesNameCompleter">
+    <bean id="dataSourcesNameCompleter" class="org.apache.karaf.jdbc.command.completers.DataSourcesNameCompleter">
         <property name="jdbcService" ref="jdbcService" />
     </bean>
-    <bean id="datasourcesFileNameCompleter" class="org.apache.karaf.jdbc.command.completers.DataSourcesFileNameCompleter">
+    <service ref="dataSourcesNameCompleter" auto-export="all-classes"/>
+
+    <bean id="dataSourcesFileNameCompleter" class="org.apache.karaf.jdbc.command.completers.DataSourcesFileNameCompleter">
         <property name="jdbcService" ref="jdbcService" />
     </bean>
+    <service ref="dataSourcesFileNameCompleter" auto-export="all-classes"/>
 
 </blueprint>

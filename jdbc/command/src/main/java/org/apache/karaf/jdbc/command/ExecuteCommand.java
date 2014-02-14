@@ -16,13 +16,16 @@
  */
 package org.apache.karaf.jdbc.command;
 
+import org.apache.karaf.jdbc.command.completers.DataSourcesNameCompleter;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Completer;
 
 @Command(scope = "jdbc", name = "execute", description = "Execute a SQL command on a given JDBC datasource")
 public class ExecuteCommand extends JdbcCommandSupport {
 
     @Argument(index = 0, name = "datasource", description = "The JDBC datasource", required = true, multiValued = false)
+    @Completer(DataSourcesNameCompleter.class)
     String datasource;
 
     @Argument(index = 1, name = "command", description = "The SQL command to execute", required = true, multiValued = false)
