@@ -21,6 +21,7 @@ import java.util.List;
 import org.apache.felix.service.command.Function;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
+import org.apache.karaf.shell.console.Completer;
 import org.apache.karaf.shell.util.ShellUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
@@ -61,7 +62,7 @@ public class ListBundleServices extends BundlesCommand {
         for (ServiceReference<?> serviceRef : refs) {
             String[] objectClass = (String[]) serviceRef.getProperty(Constants.OBJECTCLASS);
 
-            boolean print = showAll || !isCommand(objectClass);
+            boolean print = showAll || !isCommandOrCompleter(objectClass);
 
             // Print header if we have not already done so.
             if (!headerPrinted) {
@@ -89,9 +90,10 @@ public class ListBundleServices extends BundlesCommand {
         }
     }
 
-    private boolean isCommand(String[] objectClasses) {
+    private boolean isCommandOrCompleter(String[] objectClasses) {
         for (String objectClass : objectClasses) {
-            if (objectClass.equals(Function.class.getName())) {
+            if (objectClass.equals(Function.class.getName())
+                    || objectClass.equals(Completer.class.getName())) {
                 return true;
             }
         }
