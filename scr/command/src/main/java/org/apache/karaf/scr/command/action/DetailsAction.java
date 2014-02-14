@@ -21,8 +21,10 @@ import org.apache.felix.scr.Reference;
 import org.apache.felix.scr.ScrService;
 import org.apache.karaf.scr.command.ScrCommandConstants;
 import org.apache.karaf.scr.command.ScrUtils;
+import org.apache.karaf.scr.command.completer.DetailsCompleter;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Completer;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentConstants;
@@ -35,7 +37,8 @@ import java.util.Hashtable;
 @Command(scope = ScrCommandConstants.SCR_COMMAND, name = ScrCommandConstants.DETAILS_FUNCTION, description = "Displays a list of available components")
 public class DetailsAction extends ScrActionSupport {
 
-    @Argument(index = 0, name = "name", description = "The name of the Component to display the detials of", required = true, multiValued = false)
+    @Argument(index = 0, name = "name", description = "The name of the Component to display the details of", required = true, multiValued = false)
+    @Completer(DetailsCompleter.class)
     String name;
 
     @SuppressWarnings("rawtypes")

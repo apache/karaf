@@ -35,7 +35,7 @@ import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.List;
 
-public abstract class ScrActionSupport extends SubShellAction {
+public abstract class ScrActionSupport extends AbstractAction {
 
     @Option(name = ScrActionSupport.SHOW_ALL_OPTION, aliases = {ScrActionSupport.SHOW_ALL_ALIAS}, description = "Show all Components including the System Components (hidden by default)", required = false, multiValued = false)
     boolean showHidden = false;
@@ -48,7 +48,6 @@ public abstract class ScrActionSupport extends SubShellAction {
     private ScrService scrService;
 
     public ScrActionSupport() {
-        setSubShell("scr");
     }
 
     @Override

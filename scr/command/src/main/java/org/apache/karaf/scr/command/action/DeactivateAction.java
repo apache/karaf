@@ -16,11 +16,13 @@
  */
 package org.apache.karaf.scr.command.action;
 
+import org.apache.karaf.scr.command.completer.DeactivateCompleter;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.felix.scr.Component;
 import org.apache.felix.scr.ScrService;
 import org.apache.karaf.scr.command.ScrCommandConstants;
+import org.apache.karaf.shell.commands.Completer;
 
 /**
  * Deactivates the given component by supplying its component name.
@@ -29,6 +31,7 @@ import org.apache.karaf.scr.command.ScrCommandConstants;
 public class DeactivateAction extends ScrActionSupport {
 
     @Argument(index = 0, name = "name", description = "The name of the Component to deactivate ", required = true, multiValued = false)
+    @Completer(DeactivateCompleter.class)
     String name;
 
     @Override

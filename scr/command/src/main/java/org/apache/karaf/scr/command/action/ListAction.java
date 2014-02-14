@@ -31,8 +31,8 @@ import java.util.Arrays;
 @Command(scope = ScrCommandConstants.SCR_COMMAND, name = ScrCommandConstants.LIST_FUNCTION, description = "Displays a list of available components")
 public class ListAction extends ScrActionSupport {
 
-
     private final IdComparator idComparator = new IdComparator();
+
     @Override
     protected Object doScrAction(ScrService scrService) throws Exception {
         if (logger.isDebugEnabled()) {
