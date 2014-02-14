@@ -26,6 +26,7 @@ import java.util.Map;
 import org.apache.felix.service.command.Function;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Completer;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.apache.karaf.shell.util.ShellUtil;
@@ -36,8 +37,10 @@ import org.osgi.framework.ServiceReference;
 
 @Command(scope = "service", name = "list", description = "Lists OSGi services.")
 public class ListServices extends OsgiCommandSupport {
-    @Argument(index = 0, name = "objectClass", description = "Name of service objectClass to filter for", required = false, 
+
+    @Argument(index = 0, name = "objectClass", description = "Name of service objectClass to filter for", required = false,
         multiValued = false)
+    @Completer(ObjectClassCompleter.class)
     String objectClass;
     
     @Option(name = "-a", aliases = {}, description = "Shows all services. (By default Karaf commands are hidden)", required = false, multiValued = false)
