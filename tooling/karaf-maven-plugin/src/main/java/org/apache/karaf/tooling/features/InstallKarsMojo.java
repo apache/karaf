@@ -282,6 +282,10 @@ public class InstallKarsMojo extends MojoSupport {
             for (Bundle bundle : feature.getBundle()) {
                 if (!bundle.isDependency()) {
                     String key = bundle.getLocation();
+                    // remove wrap: protocol to resolve from maven
+                    if (key.startsWith("wrap:")) {
+                        key = key.substring(5);
+                    }
                     String path = MavenUtil.pathFromMaven(key);
                     File test = new File(system.resolve(path));
                     if (!test.exists()) {
