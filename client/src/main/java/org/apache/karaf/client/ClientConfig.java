@@ -68,7 +68,7 @@ public class ClientConfig {
                     retryDelay = Integer.parseInt(args[++i]);
                 } else if (args[i].equals("-b")) {
                     batch = true;
-                } else if (args[i].equals("-f ")) {
+                } else if (args[i].equals("-f")) {
                     file = args[++i];
                 } else if (args[i].equals("--help")) {
                     showHelp();
