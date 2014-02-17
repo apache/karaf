@@ -38,26 +38,45 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Exports an Action as a command using a template for the action injects
+ * Wraps an Action as a command using a template for the action injects
  */
 @SuppressWarnings("deprecation")
-public class CommandExporter extends AbstractCommand implements CompletableFunction {
-    private static Logger logger = LoggerFactory.getLogger(CommandExporter.class);
+public class ActionCommand extends AbstractCommand implements CompletableFunction {
+    private static Logger logger = LoggerFactory.getLogger(ActionCommand.class);
 
     private Action actionTemplate;
     private List<Completer> completers = new ArrayList<Completer>();
 
-    public CommandExporter(Action actionTemplate)
-    {
+    public ActionCommand(Action actionTemplate) {
         this.actionTemplate = actionTemplate;
         addCompleters();
     }
+    
+    public ServiceRegistration<?> registerService(BundleContext context) {
+        Class<? extends Action> actionClass = actionTemplate.getClass();
+        Command cmd = actionClass.getAnnotation(Command.class);
+        if (cmd == null) {
+            throw new IllegalArgumentException("Action class " + actionClass
+                                               + " is not annotated with @Command");
+        }
+        String[] interfaces = new String[] {
+            Function.class.getName(), 
+            CommandWithAction.class.getName(),
+            AbstractCommand.class.getName()
+        };
+        Hashtable<String, String> props = new Hashtable<String, String>();
+        props.put(CommandProcessor.COMMAND_SCOPE, cmd.scope());
+        props.put(CommandProcessor.COMMAND_FUNCTION, cmd.name());
+        logger.info("Registering command " + cmd.scope() + ":" + cmd.name() + " in the name of bundle " + context.getBundle().getBundleId());
+        return context.registerService(interfaces, this, props);
+    }
 
-    public Class<? extends Action> getActionClass()
-    {
+    @Override
+    public Class<? extends Action> getActionClass() {
         return actionTemplate.getClass();
     }
 
+    @Override
     public Action createNewAction() {
         try {
             Action newAction = actionTemplate.getClass().newInstance();
@@ -70,54 +89,6 @@ public class CommandExporter extends AbstractCommand implements CompletableFunct
         }
     }
 
-    private void copyFields(Action newAction) {
-        Field[] fields = actionTemplate.getClass().getDeclaredFields();
-        for (Field field : fields) {
-            try {
-                field.setAccessible(true);
-                Object value = field.get(actionTemplate);
-                field.set(newAction, value);
-            } catch (Exception e) {
-                throw new RuntimeException(e.getMessage(), e);
-            }
-        }
-    }
-
-    @SuppressWarnings("rawtypes")
-    public static ServiceRegistration export(BundleContext context, Action actionTemplate)
-    {
-        Class<? extends Action> actionClass = actionTemplate.getClass();
-        logger.info(actionClass.getName());
-        Command cmd = actionClass.getAnnotation(Command.class);
-        if (cmd == null)
-        {
-            throw new IllegalArgumentException("Action class is not annotated with @Command");
-        }
-        Hashtable<String, String> props = new Hashtable<String, String>();
-        props.put(CommandProcessor.COMMAND_SCOPE, cmd.scope());
-        props.put(CommandProcessor.COMMAND_FUNCTION, cmd.name());
-        CommandExporter command = new CommandExporter(actionTemplate);
-        return context.registerService(new String[]{
-                                                    Function.class.getName(),
-                                                    CommandWithAction.class.getName(),
-                                                    AbstractCommand.class.getName()
-                                                    }, 
-                                       command, props);
-    }
-
-    private void addCompleters() {
-        for (Field field : actionTemplate.getClass().getDeclaredFields()) {
-            field.setAccessible(true);
-            if (Completer.class.isAssignableFrom(field.getType())) {
-                try {
-                    this.completers.add((Completer)field.get(actionTemplate));
-                } catch (Exception e) {
-                    logger.warn("Error setting completer from field " + field.getName());
-                }
-            }
-        }
-    }
-
     @Override
     public List<Completer> getCompleters() {
         return completers;
@@ -126,6 +97,36 @@ public class CommandExporter extends AbstractCommand implements CompletableFunct
     @Override
     public Map<String, Completer> getOptionalCompleters() {
         return null;
+    }
+
+    private void copyFields(Action newAction) {
+        Field[] fields = actionTemplate.getClass().getDeclaredFields();
+        for (Field field : fields) {
+            try {
+                if (!field.isAccessible()) {
+                    field.setAccessible(true);
+                }
+                Object value = field.get(actionTemplate);
+                field.set(newAction, value);
+            } catch (Exception e) {
+                throw new RuntimeException(e.getMessage(), e);
+            }
+        }
+    }
+
+    private void addCompleters() {
+        for (Field field : actionTemplate.getClass().getDeclaredFields()) {
+            if (Completer.class.isAssignableFrom(field.getType())) {
+                try {
+                    if (!field.isAccessible()) {
+                        field.setAccessible(true);
+                    }
+                    this.completers.add((Completer)field.get(actionTemplate));
+                } catch (Exception e) {
+                    logger.warn("Error setting completer from field " + field.getName());
+                }
+            }
+        }
     }
 
 }
