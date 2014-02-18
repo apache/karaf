@@ -48,13 +48,20 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
     static final String USER_FILE = "users";
 
     private String usersFile;
-
+    
+    private PropertiesInstaller propertiesInstaller;
+    
+    
     public void initialize(Subject sub, CallbackHandler handler, Map sharedState, Map options) {
         super.initialize(sub,handler,options);
         usersFile = (String) options.get(USER_FILE);
         if (debug) {
             LOGGER.debug("Initialized debug={} usersFile={}", debug, usersFile);
         }
+        propertiesInstaller = new PropertiesInstaller(this, usersFile);
+        if (this.bundleContext != null) {
+            this.bundleContext.registerService("org.apache.felix.fileinstall.ArtifactInstaller", propertiesInstaller, null);
+        }       
     }
 
     public boolean login() throws LoginException {
@@ -74,7 +81,7 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
         }
 
         //encrypt all password if necessary
-        EncryptedPassword(users);
+        encryptedPassword(users);
 
         Callback[] callbacks = new Callback[2];
 
@@ -176,7 +183,8 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
         return true;
     }
 
-    private void EncryptedPassword(Properties users) {
+    
+    void encryptedPassword(Properties users) {
         for (Object userName : users.keySet()) {
             String user = (String)userName;
             String userInfos = null;
