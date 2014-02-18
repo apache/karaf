@@ -31,6 +31,7 @@ import org.apache.felix.gogo.commands.Action;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Function;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.CommandWithAction;
 import org.apache.karaf.shell.commands.basic.AbstractCommand;
 import org.apache.karaf.shell.commands.meta.ActionMetaDataFactory;
 import org.apache.karaf.shell.console.HelpProvider;
@@ -92,9 +93,9 @@ public class CommandListHelpProvider implements HelpProvider {
             String description = null;
             Function function = (Function) session.get(name);
             function = unProxy(function);
-            if (function instanceof AbstractCommand) {
+            if (function instanceof CommandWithAction) {
                 try {
-                    Class<? extends Action> actionClass = ((AbstractCommand) function).getActionClass();                    
+                    Class<? extends Action> actionClass = ((CommandWithAction) function).getActionClass();
                     Command ann = new ActionMetaDataFactory().getCommand(actionClass);
                     description = ann.description();
                 } catch (Throwable e) {
