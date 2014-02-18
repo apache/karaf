@@ -492,6 +492,16 @@ public class InstallKarsMojo extends MojoSupport {
         }
 
         @Override
+        public URI getRepositoryUriFor(String name, String version) {
+            return null;
+        }
+
+        @Override
+        public String[] getRepositoryNames() {
+            return new String[0];
+        }
+
+        @Override
         public void installFeature(String name) throws Exception {
         }
 
