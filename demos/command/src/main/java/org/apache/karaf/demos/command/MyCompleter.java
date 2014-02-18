@@ -21,6 +21,7 @@ package org.apache.karaf.demos.command;
 
 import org.apache.karaf.shell.console.completer.StringsCompleter;
 import org.apache.karaf.shell.console.Completer;
+import org.apache.karaf.shell.inject.Service;
 
 import java.util.List;
 
@@ -30,6 +31,7 @@ import java.util.List;
 * </p>
 */
 
+@Service
 public class MyCompleter implements Completer {
 
     /**

@@ -20,6 +20,13 @@
 
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
 
+    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.2.0"
+                    scan="org.apache.karaf.demos.command" />
+
+    <!-- Old style way of declaring commands
+         This may be needed for actions that need complicated injections
+         based on blueprint.
+
     <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
         <command>
             <action class="org.apache.karaf.demos.command.MyCommand"/>
@@ -31,5 +38,6 @@
     </command-bundle>
 
     <bean id="myCompleter" class="org.apache.karaf.demos.command.MyCompleter"/>
+    -->
 
 </blueprint>

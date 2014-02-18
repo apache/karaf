@@ -21,12 +21,16 @@ package org.apache.karaf.demos.command;
 
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Argument;
+import org.apache.karaf.shell.commands.Completer;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
+import org.apache.karaf.shell.inject.Service;
 
 @Command(scope = "mycommand", name = "hello", description="Says hello")
+@Service
 public class MyCommand extends OsgiCommandSupport {
 
     @Argument(index = 0, name = "arg", description = "The command argument", required = false, multiValued = false)
+    @Completer(MyCompleter.class)
     String arg = null;
 
     @Override

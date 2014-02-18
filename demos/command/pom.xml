@@ -71,6 +71,7 @@
                             org.apache.felix.service.command,
                             org.apache.karaf.shell.commands,
                             org.apache.karaf.shell.console,
+                            org.apache.karaf.shell.inject,
                             *
                         </Import-Package>
                     </instructions>
