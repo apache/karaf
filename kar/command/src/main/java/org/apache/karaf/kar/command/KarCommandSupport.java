@@ -18,9 +18,11 @@ package org.apache.karaf.kar.command;
 
 import org.apache.karaf.kar.KarService;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
+import org.apache.karaf.shell.inject.Reference;
 
 public abstract class KarCommandSupport extends OsgiCommandSupport {
 
+    @Reference
     private KarService karService;
     
     public KarService getKarService() {

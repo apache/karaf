@@ -21,48 +21,7 @@
            xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
            default-activation="lazy">
 
-    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
-        <command>
-            <action class="org.apache.karaf.log.command.DisplayLog">
-                <property name="logService" ref="logService" />
-                <property name="formatter" ref="formatter"/>
-            </action>
-        </command>
-        <command>
-            <action class="org.apache.karaf.log.command.DisplayException">
-                <property name="logService" ref="logService" />
-            </action>
-        </command>
-        <command>
-            <action class="org.apache.karaf.log.command.ClearLog">
-                <property name="logService" ref="logService" />
-            </action>
-        </command>
-        <command>
-            <action class="org.apache.karaf.log.command.GetLogLevel">
-                <property name="logService" ref="logService" />
-            </action>
-        </command>
-        <command>
-            <action class="org.apache.karaf.log.command.SetLogLevel" >
-                <property name="logService" ref="logService" />
-            </action>
-        </command>
-        <command>
-            <action class="org.apache.karaf.log.command.LogTail">
-                <property name="logService" ref="logService" />
-                <property name="formatter" ref="formatter"/>
-            </action>
-        </command>
-        <command>
-            <action class="org.apache.karaf.log.command.LogEntry">
-                <argument ref="osgiLogService" />
-            </action>
-        </command>
-    </command-bundle>
-
-    <reference id="formatter" interface="org.apache.karaf.log.core.LogEventFormatter"/>
-    <reference id="logService" interface="org.apache.karaf.log.core.LogService"/>
-    <reference id="osgiLogService" interface="org.osgi.service.log.LogService"/>
+    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.2.0"
+                    scan="org.apache.karaf.log.command.*" />
 
 </blueprint>

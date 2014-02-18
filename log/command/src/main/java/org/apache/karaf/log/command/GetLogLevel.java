@@ -19,6 +19,7 @@ package org.apache.karaf.log.command;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
+import org.apache.karaf.shell.inject.Service;
 import org.apache.karaf.shell.table.ShellTable;
 
 import java.util.Enumeration;
@@ -29,6 +30,7 @@ import java.util.Map;
  * Get the log level
  */
 @Command(scope = "log", name = "get", description = "Shows the currently set log level.")
+@Service
 public class GetLogLevel extends LogCommandSupport {
 
     @Argument(index = 0, name = "logger", description = "The name of the logger, ALL or ROOT (default)", required = false, multiValued = false)

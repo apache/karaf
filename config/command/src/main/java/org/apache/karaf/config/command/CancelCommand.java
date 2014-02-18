@@ -17,8 +17,10 @@
 package org.apache.karaf.config.command;
 
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.inject.Service;
 
 @Command(scope = "config", name = "cancel", description = "Cancels the changes to the configuration being edited.")
+@Service
 public class CancelCommand extends ConfigCommandSupport {
 
     protected Object doExecute() throws Exception {

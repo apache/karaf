@@ -29,8 +29,10 @@ import org.apache.felix.bundlerepository.Resource;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
+import org.apache.karaf.shell.inject.Service;
 
 @Command(scope = "obr", name = "resolve", description = "Shows the resolution output for a given set of requirements.")
+@Service
 public class ResolveCommand extends ObrCommandSupport {
 
     @Option(name = "-w", aliases = "--why", description = "Display the reason of the inclusion of the resource")

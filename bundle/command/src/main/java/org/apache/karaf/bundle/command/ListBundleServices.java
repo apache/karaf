@@ -22,12 +22,14 @@ import org.apache.felix.service.command.Function;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.Completer;
+import org.apache.karaf.shell.inject.Service;
 import org.apache.karaf.shell.util.ShellUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 
 @Command(scope = "bundle", name = "services", description = "Lists OSGi services per Bundle")
+@Service
 public class ListBundleServices extends BundlesCommand {
 
     @Option(name = "-a", aliases = {}, description = "Shows all services. (By default Karaf commands are hidden)", required = false, multiValued = false)

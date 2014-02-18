@@ -19,8 +19,10 @@ package org.apache.karaf.jms.command;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
+import org.apache.karaf.shell.inject.Service;
 
 @Command(scope = "jms", name = "send", description = "Send a message to ")
+@Service
 public class SendCommand extends JmsConnectionCommandSupport {
 
     @Argument(index = 1, name = "queue", description = "The JMS queue name", required = true, multiValued = false)

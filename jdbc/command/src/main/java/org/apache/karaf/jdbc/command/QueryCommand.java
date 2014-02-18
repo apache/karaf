@@ -20,6 +20,7 @@ import org.apache.karaf.jdbc.command.completers.DataSourcesNameCompleter;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Completer;
+import org.apache.karaf.shell.inject.Service;
 import org.apache.karaf.shell.table.Row;
 import org.apache.karaf.shell.table.ShellTable;
 
@@ -27,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 @Command(scope = "jdbc", name = "query", description = "Execute a SQL query on a JDBC datasource")
+@Service
 public class QueryCommand extends JdbcCommandSupport {
 
     @Argument(index = 0, name = "datasource", description = "The JDBC datasource to use", required = true, multiValued = false)

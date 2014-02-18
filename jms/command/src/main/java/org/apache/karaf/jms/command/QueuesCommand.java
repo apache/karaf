@@ -17,9 +17,11 @@
 package org.apache.karaf.jms.command;
 
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.inject.Service;
 import org.apache.karaf.shell.table.ShellTable;
 
 @Command(scope = "jms", name = "queues", description = "List the JMS queues.")
+@Service
 public class QueuesCommand extends JmsConnectionCommandSupport {
 
     public Object doExecute() throws Exception {

@@ -24,6 +24,7 @@ import java.util.regex.Pattern;
 
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
+import org.apache.karaf.shell.inject.Service;
 import org.apache.karaf.shell.util.ShellUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
@@ -34,6 +35,7 @@ import org.osgi.framework.wiring.BundleWire;
 import org.osgi.framework.wiring.BundleWiring;
 
 @Command(scope = "bundle", name = "requirements", description = "Displays OSGi requirements of a given bundles.")
+@Service
 public class Requirements extends BundlesCommand {
 
     public static final String NONSTANDARD_SERVICE_NAMESPACE = "service";

@@ -21,8 +21,10 @@ import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Completer;
 import org.apache.karaf.shell.commands.Option;
+import org.apache.karaf.shell.inject.Service;
 
 @Command(scope = "config", name = "delete", description = "Delete a configuration.")
+@Service
 public class DeleteCommand extends ConfigCommandSupport {
 
     @Argument(index = 0, name = "pid", description = "PID of the configuration", required = true, multiValued = false)

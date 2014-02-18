@@ -19,14 +19,18 @@ package org.apache.karaf.kar.command.completers;
 import org.apache.karaf.kar.KarService;
 import org.apache.karaf.shell.console.Completer;
 import org.apache.karaf.shell.console.completer.StringsCompleter;
+import org.apache.karaf.shell.inject.Reference;
+import org.apache.karaf.shell.inject.Service;
 
 import java.util.List;
 
 /**
  * Completer on all installed KAR files.
  */
+@Service
 public class KarCompleter implements Completer {
-    
+
+    @Reference
     private KarService karService;
     
     public int complete(String buffer, int cursor, @SuppressWarnings("rawtypes") List candidates) {

@@ -25,8 +25,10 @@ import org.apache.karaf.shell.commands.Completer;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.inject.Service;
 
 @Command(scope = "instance", name = "connect", description = "Connects to an existing container instance.")
+@Service
 public class ConnectCommand extends InstanceCommandSupport {
 
     @Option(name="-u", aliases={"--username"}, description="Remote user name", required = false, multiValued = false)

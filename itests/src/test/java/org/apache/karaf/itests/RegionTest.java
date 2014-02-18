@@ -35,7 +35,7 @@ public class RegionTest extends KarafTestSupport {
 
     @Test
     public void addRegionCommand() throws Exception {
-        System.out.println(executeCommand("region:addregion itest"));
+        System.out.println(executeCommand("region:region-add itest"));
         String infoOutput = executeCommand("region:info");
         System.out.println(infoOutput);
         assertTrue("Region itest should be present", infoOutput.contains("itest"));

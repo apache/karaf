@@ -19,8 +19,10 @@ package org.apache.karaf.jms.command;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
+import org.apache.karaf.shell.inject.Service;
 
 @Command(scope = "jms", name = "move", description = "Move messages from one JMS queue to another one.")
+@Service
 public class MoveCommand extends JmsConnectionCommandSupport {
 
     @Argument(index = 1, name = "source", description = "The source JMS queue", required = true, multiValued = false)

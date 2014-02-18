@@ -18,9 +18,11 @@ package org.apache.karaf.bundle.command;
 
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
+import org.apache.karaf.shell.inject.Service;
 import org.osgi.framework.Bundle;
 
 @Command(scope = "bundle", name = "stop", description = "Stop bundles.")
+@Service
 public class Stop extends BundlesCommandWithConfirmation {
     
 	@Option(name = "-t", aliases={"--transient"}, description="Keep the bundle as auto-start", required = false, multiValued = false)

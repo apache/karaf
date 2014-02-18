@@ -34,7 +34,7 @@ public class ListCommandTest {
 		IMocksControl control = EasyMock.createControl();
 		RepositoryAdmin repoAdmin = control.createMock(RepositoryAdmin.class);
 		ListCommand command = new ListCommand();
-		command.setRepoAdmin(repoAdmin);
+		command.setRepositoryAdmin(repoAdmin);
 		
 		Resource[] resources = new Resource[] {
 			createResource("My bundle", "my.bundle", "1.0.0"),

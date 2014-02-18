@@ -18,6 +18,8 @@ package org.apache.karaf.jndi.command.completers;
 
 import org.apache.karaf.shell.console.Completer;
 import org.apache.karaf.shell.console.completer.StringsCompleter;
+import org.apache.karaf.shell.inject.Reference;
+import org.apache.karaf.shell.inject.Service;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -28,8 +30,10 @@ import java.util.List;
 /**
  * Completer on the OSGi services ID.
  */
+@Service
 public class ServicesIdCompleter implements Completer {
 
+    @Reference
     private BundleContext bundleContext;
 
     public int complete(String buffer, int cursor, List candidates) {

@@ -19,18 +19,21 @@
 
 package org.apache.karaf.service.command;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.karaf.shell.console.Completer;
 import org.apache.karaf.shell.console.completer.StringsCompleter;
+import org.apache.karaf.shell.inject.Reference;
+import org.apache.karaf.shell.inject.Service;
 import org.osgi.framework.BundleContext;
 
+@Service
 public class ObjectClassCompleter implements Completer {
 
-    private final StringsCompleter delegate = new StringsCompleter();
-
+    @Reference
     private BundleContext context;
 
     public void setContext(BundleContext context) {
@@ -39,16 +42,14 @@ public class ObjectClassCompleter implements Completer {
 
     @SuppressWarnings("rawtypes")
     public int complete(final String buffer, final int cursor, final List candidates) {
-        delegate.getStrings().clear();
         Map<String, Integer> serviceNamesMap = ListServices.getServiceNamesMap(context);
         Set<String> serviceNames = serviceNamesMap.keySet();
+        List<String> strings = new ArrayList<String>();
         for (String name : serviceNames) {
-            delegate.getStrings().add(ObjectClassMatcher.getShortName(name));
+            strings.add(ObjectClassMatcher.getShortName(name));
         }
-        delegate.getStrings().addAll(serviceNames);
-        return delegate.complete(buffer, cursor, candidates);
+        strings.addAll(serviceNames);
+        return new StringsCompleter(strings).complete(buffer, cursor, candidates);
     }
-
-
 
 }

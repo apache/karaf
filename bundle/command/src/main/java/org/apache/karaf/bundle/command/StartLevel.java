@@ -19,10 +19,12 @@ package org.apache.karaf.bundle.command;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import jline.console.ConsoleReader;
+import org.apache.karaf.shell.inject.Service;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.startlevel.BundleStartLevel;
 
 @Command(scope = "bundle", name = "start-level", description = "Gets or sets the start level of a bundle.")
+@Service
 public class StartLevel extends BundleCommandWithConfirmation {
 
     @Argument(index = 1, name = "startLevel", description = "The bundle's new start level", required = false, multiValued = false)

@@ -18,9 +18,11 @@ package org.apache.karaf.jdbc.command;
 
 import org.apache.karaf.jdbc.JdbcService;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
+import org.apache.karaf.shell.inject.Reference;
 
 public abstract class JdbcCommandSupport extends OsgiCommandSupport {
 
+    @Reference
     private JdbcService jdbcService;
 
     public abstract Object doExecute() throws Exception;

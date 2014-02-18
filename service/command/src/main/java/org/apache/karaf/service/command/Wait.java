@@ -22,6 +22,7 @@ import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
+import org.apache.karaf.shell.inject.Service;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkUtil;
@@ -32,6 +33,7 @@ import org.osgi.util.tracker.ServiceTracker;
  * Command that can be used to wait for an OSGi service.
  */
 @Command(scope = "service", name = "wait", description = "Wait for a given OSGi service.")
+@Service
 public class Wait extends OsgiCommandSupport {
 
     @Option(name = "-e", aliases = { "--exception" }, description = "throw an exception if the service is not found after the timeout")

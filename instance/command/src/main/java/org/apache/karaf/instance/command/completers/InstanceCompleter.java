@@ -22,13 +22,17 @@ import org.apache.karaf.instance.core.Instance;
 import org.apache.karaf.instance.core.InstanceService;
 import org.apache.karaf.shell.console.completer.StringsCompleter;
 import org.apache.karaf.shell.console.Completer;
+import org.apache.karaf.shell.inject.Reference;
+import org.apache.karaf.shell.inject.Service;
 
 /**
  * Displays a list of configured server instances for the instance commands.
  *
  */
+@Service
 public class InstanceCompleter implements Completer {
 
+    @Reference
     private InstanceService instanceService;
 
     public void setInstanceService(InstanceService instanceService) {

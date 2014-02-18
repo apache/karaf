@@ -21,8 +21,10 @@ import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Completer;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.completer.StringsCompleter;
+import org.apache.karaf.shell.inject.Service;
 
 @Command(scope = "jdbc", name = "create", description = "Create a JDBC datasource")
+@Service
 public class CreateCommand extends JdbcCommandSupport {
 
     @Argument(index = 0, name = "name", description = "The JDBC datasource name", required = true, multiValued = false)

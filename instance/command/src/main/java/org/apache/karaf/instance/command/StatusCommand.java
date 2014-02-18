@@ -22,8 +22,10 @@ import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Completer;
 import org.apache.karaf.shell.commands.Option;
+import org.apache.karaf.shell.inject.Service;
 
 @Command(scope = "instance", name = "status", description = "Check the current status of an instance.")
+@Service
 public class StatusCommand extends InstanceCommandSupport {
 
     @Argument(index = 0, name = "name", description = "The name of the instance", required = true, multiValued = false)

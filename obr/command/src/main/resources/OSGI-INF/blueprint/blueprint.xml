@@ -19,46 +19,7 @@
 -->
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" default-activation="lazy">
 
-    <reference id="repoAdmin"
-        interface="org.apache.felix.bundlerepository.RepositoryAdmin"
-        availability="optional" />
-
-    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
-        <command>
-            <action class="org.apache.karaf.obr.command.AddUrlCommand" />
-        </command>
-        <command>
-            <action class="org.apache.karaf.obr.command.DeployCommand" />
-        </command>
-        <command>
-            <action class="org.apache.karaf.obr.command.FindCommand" />
-        </command>
-        <command>
-            <action class="org.apache.karaf.obr.command.InfoCommand" />
-        </command>
-        <command>
-            <action class="org.apache.karaf.obr.command.ListCommand">
-                <property name="repoAdmin" ref="repoAdmin" />
-            </action>
-        </command>
-        <command>
-            <action class="org.apache.karaf.obr.command.ListUrlCommand" />
-        </command>
-        <command>
-            <action class="org.apache.karaf.obr.command.RefreshUrlCommand" />
-        </command>
-        <command>
-            <action class="org.apache.karaf.obr.command.RemoveUrlCommand" />
-        </command>
-        <command>
-            <action class="org.apache.karaf.obr.command.ResolveCommand" />
-        </command>
-        <command>
-            <action class="org.apache.karaf.obr.command.SourceCommand" />
-        </command>
-        <command>
-            <action class="org.apache.karaf.obr.command.StartCommand" />
-        </command>
-    </command-bundle>
+    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.2.0"
+                    scan="org.apache.karaf.obr.command.*" />
 
 </blueprint>

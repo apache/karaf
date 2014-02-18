@@ -23,6 +23,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.karaf.shell.inject.Init;
+import org.apache.karaf.shell.inject.Reference;
+import org.apache.karaf.shell.inject.Service;
 import org.apache.karaf.shell.console.completer.StringsCompleter;
 import org.apache.karaf.shell.console.Completer;
 import org.osgi.service.cm.Configuration;
@@ -31,21 +34,24 @@ import org.osgi.service.cm.ConfigurationEvent;
 import org.osgi.service.cm.ConfigurationListener;
 
 /**
- * {@link jline.Completor} for Configuration Admin configurations.
+ * {@link Completer} for Configuration Admin configurations.
  *
  * Displays a list of existing config instance configurations for completion.
  *
  */
+@Service
 public class ConfigurationCompleter implements Completer, ConfigurationListener {
 
     private final StringsCompleter delegate = new StringsCompleter();
 
+    @Reference
     private ConfigurationAdmin admin;
 
     public void setAdmin(ConfigurationAdmin admin) {
         this.admin = admin;
     }
 
+    @Init
     public void init() {
         Configuration[] configs;
         try {

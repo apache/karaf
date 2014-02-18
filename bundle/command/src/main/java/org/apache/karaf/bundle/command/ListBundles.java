@@ -22,11 +22,14 @@ import org.apache.karaf.bundle.core.BundleState;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
+import org.apache.karaf.shell.inject.Reference;
+import org.apache.karaf.shell.inject.Service;
 import org.apache.karaf.shell.table.ShellTable;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.startlevel.FrameworkStartLevel;
 
 @Command(scope = "bundle", name = "list", description = "Lists all installed bundles.")
+@Service
 public class ListBundles extends OsgiCommandSupport {
 
     @Option(name = "-l", aliases = {}, description = "Show the locations", required = false, multiValued = false)
@@ -44,6 +47,7 @@ public class ListBundles extends OsgiCommandSupport {
     @Option(name = "--no-format", description = "Disable table rendered output", required = false, multiValued = false)
     boolean noFormat;
 
+    @Reference
     private BundleService bundleService;
 
     public void setBundleService(BundleService bundleService) {

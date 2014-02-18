@@ -25,10 +25,13 @@ import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.shell.commands.Option;
+import org.apache.karaf.shell.inject.Reference;
+import org.apache.karaf.shell.inject.Service;
 import org.apache.karaf.shell.table.ShellTable;
 
 @Command(scope = "obr", name = "list", description = "Lists OBR bundles, optionally providing the given packages.")
-public class ListCommand implements Action {
+@Service
+public class ListCommand extends ObrCommandSupport {
 
     @Argument(index = 0, name = "packages", description = "A list of packages separated by whitespaces.", required = false, multiValued = true)
     List<String> packages;
@@ -36,14 +39,8 @@ public class ListCommand implements Action {
     @Option(name = "--no-format", description = "Disable table rendered output", required = false, multiValued = false)
     boolean noFormat;
 
-    RepositoryAdmin repoAdmin;
-
-    public void setRepoAdmin(RepositoryAdmin repoAdmin) {
-        this.repoAdmin = repoAdmin;
-    }
-
     @Override
-    public Object execute(CommandSession session) throws Exception {
+    void doExecute(RepositoryAdmin admin) throws Exception {
         StringBuilder substr = new StringBuilder();
 
         if (packages != null) {
@@ -59,7 +56,7 @@ public class ListCommand implements Action {
         } else {
             query = "(|(presentationname=*" + substr + "*)(symbolicname=*" + substr + "*))";
         }
-        Resource[] resources = repoAdmin.discoverResources(query);
+        Resource[] resources = admin.discoverResources(query);
         int maxPName = 4;
         int maxSName = 13;
         int maxVersion = 7;
@@ -82,8 +79,6 @@ public class ListCommand implements Action {
         }
 
         table.print(System.out, !noFormat);
-
-        return null;
     }
 
     private String emptyIfNull(Object st) {

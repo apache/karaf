@@ -21,9 +21,11 @@ import java.util.List;
 
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.console.MultiException;
+import org.apache.karaf.shell.inject.Service;
 import org.osgi.framework.Bundle;
 
 @Command(scope = "bundle", name = "restart", description = "Restarts bundles.")
+@Service
 public class Restart extends BundlesCommandWithConfirmation {
     
     public Restart() {

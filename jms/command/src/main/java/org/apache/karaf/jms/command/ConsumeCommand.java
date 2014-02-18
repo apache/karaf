@@ -19,8 +19,10 @@ package org.apache.karaf.jms.command;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
+import org.apache.karaf.shell.inject.Service;
 
 @Command(scope = "jms", name = "consume", description = "Consume messages from a JMS queue.")
+@Service
 public class ConsumeCommand extends JmsConnectionCommandSupport {
 
     @Argument(index = 1, name = "queue", description = "The JMS queue where to consume messages", required = true, multiValued = false)

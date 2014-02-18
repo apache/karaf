@@ -18,6 +18,7 @@ package org.apache.karaf.bundle.command;
 
 import org.apache.karaf.bundle.core.BundleService;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.inject.Service;
 import org.osgi.framework.Bundle;
 
 /**
@@ -25,6 +26,7 @@ import org.osgi.framework.Bundle;
  * wired imports.
  */
 @Command(scope = "bundle", name = "dynamic-import", description = "Enables/disables dynamic-import for a given bundle.")
+@Service
 public class DynamicImport extends BundleCommand {
 
     public DynamicImport() {

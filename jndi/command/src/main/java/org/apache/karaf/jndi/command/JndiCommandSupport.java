@@ -18,9 +18,11 @@ package org.apache.karaf.jndi.command;
 
 import org.apache.karaf.jndi.JndiService;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
+import org.apache.karaf.shell.inject.Reference;
 
 public abstract class JndiCommandSupport extends OsgiCommandSupport {
 
+    @Reference
     private JndiService jndiService;
 
     public JndiService getJndiService() {

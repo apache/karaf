@@ -17,10 +17,13 @@
 package org.apache.karaf.system.commands;
 
 import org.apache.karaf.shell.console.AbstractAction;
+import org.apache.karaf.shell.console.OsgiCommandSupport;
+import org.apache.karaf.shell.inject.Reference;
 import org.apache.karaf.system.SystemService;
 
-public abstract class AbstractSystemAction extends AbstractAction {
+public abstract class AbstractSystemAction extends OsgiCommandSupport {
 
+    @Reference
     protected SystemService systemService;
 
     public void setSystemService(SystemService systemService) {

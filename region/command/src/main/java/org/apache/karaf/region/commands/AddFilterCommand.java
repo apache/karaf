@@ -24,6 +24,7 @@ import org.apache.aries.util.VersionRange;
 import org.apache.aries.util.manifest.ManifestHeaderProcessor;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.inject.Service;
 import org.eclipse.equinox.region.Region;
 import org.eclipse.equinox.region.RegionDigraph;
 import org.eclipse.equinox.region.RegionFilter;
@@ -33,6 +34,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 
 @Command(scope = "region", name = "filter-add", description = "Adds a filter between two regions.")
+@Service
 public class AddFilterCommand extends RegionCommandSupport {
 
     @Argument(index = 0, name = "from", description = "The from region.", required = true, multiValued = false)

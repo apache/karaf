@@ -20,11 +20,13 @@ import java.util.List;
 
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.inject.Service;
 import org.eclipse.equinox.region.Region;
 import org.eclipse.equinox.region.RegionDigraph;
 import org.osgi.framework.Bundle;
 
 @Command(scope = "region", name = "bundle-add", description = "Adds a list of known bundles by id to a specified region.")
+@Service
 public class AddBundleCommand extends RegionCommandSupport {
 
     @Argument(index = 0, name = "region", description = "Region to add the bundles to", required = true, multiValued = false)

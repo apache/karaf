@@ -24,9 +24,11 @@ import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.MultiException;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
+import org.apache.karaf.shell.inject.Service;
 import org.osgi.framework.Bundle;
 
 @Command(scope = "bundle", name = "install", description = "Installs one or more bundles.")
+@Service
 public class Install extends OsgiCommandSupport {
 
     @Argument(index = 0, name = "urls", description = "Bundle URLs separated by whitespaces", required = true, multiValued = true)

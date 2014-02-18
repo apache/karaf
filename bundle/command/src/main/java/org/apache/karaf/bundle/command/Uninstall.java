@@ -17,9 +17,11 @@
 package org.apache.karaf.bundle.command;
 
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.inject.Service;
 import org.osgi.framework.Bundle;
 
 @Command(scope = "bundle", name = "uninstall", description = "Uninstall bundles.")
+@Service
 public class Uninstall extends BundlesCommandWithConfirmation {
     
     public Uninstall() {

@@ -20,6 +20,7 @@ package org.apache.karaf.bundle.command;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
+import org.apache.karaf.shell.inject.Service;
 import org.apache.karaf.shell.util.ShellUtil;
 import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.framework.Bundle;
@@ -28,6 +29,7 @@ import java.util.Collection;
 import java.util.List;
 
 @Command(scope = "bundle", name = "find-class", description = "Locates a specified class in any deployed bundle")
+@Service
 public class FindClass extends OsgiCommandSupport {
 
     @Argument(index = 0, name = "className", description = "Class name or partial class name to be found", required = true, multiValued = false)

@@ -18,6 +18,7 @@ package org.apache.karaf.bundle.command;
 
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
+import org.apache.karaf.shell.inject.Service;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.wiring.BundleWiring;
 
@@ -25,6 +26,7 @@ import java.util.Collection;
 import java.util.List;
 
 @Command(scope = "bundle", name = "classes", description = "Displays a list of classes contained in the bundle")
+@Service
 public class Classes extends BundlesCommand {
 
     @Option(name = "-a", aliases={"--display-all-files"}, description="List all classes and files in the bundle", required = false, multiValued = false)

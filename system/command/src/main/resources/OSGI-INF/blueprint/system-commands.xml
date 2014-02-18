@@ -19,40 +19,7 @@
 -->
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" default-activation="lazy">
 
-    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
-        <command>
-            <action class="org.apache.karaf.system.commands.Shutdown">
-                <property name="systemService" ref="systemService"/>
-            </action>
-        </command>
-        <command>
-            <action class="org.apache.karaf.system.commands.StartLevel">
-                <property name="systemService" ref="systemService"/>
-            </action>
-        </command>
-        <command>
-            <action class="org.apache.karaf.system.commands.Name">
-                <property name="systemService" ref="systemService"/>
-            </action>
-        </command>
-        <command>
-            <action class="org.apache.karaf.system.commands.Version">
-                <property name="systemService" ref="systemService"/>
-            </action>
-        </command>
-        <command>
-            <action class="org.apache.karaf.system.commands.FrameworkOptions" >
-                <property name="systemService" ref="systemService"/>
-            </action>
-        </command>
-        <command>
-            <action class="org.apache.karaf.system.commands.SystemProperty" >
-                <property name="systemService" ref="systemService"/>
-                <property name="bundleContext" ref="blueprintBundleContext"/>
-            </action>
-        </command>
-    </command-bundle>
-
-    <reference id="systemService" interface="org.apache.karaf.system.SystemService"/>
+    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.2.0"
+                    scan="org.apache.karaf.system.commands.*" />
 
 </blueprint>

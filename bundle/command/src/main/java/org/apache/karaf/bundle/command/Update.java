@@ -21,9 +21,11 @@ import java.net.URL;
 
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.inject.Service;
 import org.osgi.framework.Bundle;
 
 @Command(scope = "bundle", name = "update", description = "Update bundle.")
+@Service
 public class Update extends BundleCommandWithConfirmation {
 
     @Argument(index = 1, name = "location", description = "The bundles update location", required = false, multiValued = false)

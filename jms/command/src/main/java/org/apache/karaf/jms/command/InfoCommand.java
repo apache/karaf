@@ -19,9 +19,11 @@ package org.apache.karaf.jms.command;
 import java.util.Map;
 
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.inject.Service;
 import org.apache.karaf.shell.table.ShellTable;
 
 @Command(scope = "jms", name = "info", description = "Provides details about a JMS connection factory.")
+@Service
 public class InfoCommand extends JmsConnectionCommandSupport {
 
     public Object doExecute() throws Exception {

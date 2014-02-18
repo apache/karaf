@@ -19,28 +19,8 @@
 -->
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
     default-activation="lazy">
-    <reference id="regionDigraph"
-        interface="org.eclipse.equinox.region.RegionDigraph"
-        availability="mandatory" />
 
-    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.0.0">
-        <command name="region/addBundle">
-            <action class="org.apache.karaf.region.commands.AddBundleCommand" />
-        </command>
-        <command name="region/addFilter">
-            <action class="org.apache.karaf.region.commands.AddFilterCommand" />
-        </command>
-        <command name="region/addRegion">
-            <action class="org.apache.karaf.region.commands.AddRegionCommand" />
-        </command>
-        <command name="region/info">
-            <action class="org.apache.karaf.region.commands.InfoCommand" />
-        </command>
-        <!--<command name="region/list">-->
-            <!--<action class="org.apache.karaf.shell.region.ListCommand">-->
-                <!--<property name="repoAdmin" ref="repoAdmin" />-->
-            <!--</action>-->
-        <!--</command>-->
-    </command-bundle>
+    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.2.0"
+                    scan="org.apache.karaf.region.commands.*" />
 
 </blueprint>

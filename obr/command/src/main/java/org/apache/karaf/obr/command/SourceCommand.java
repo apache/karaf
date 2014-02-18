@@ -25,8 +25,10 @@ import org.apache.karaf.obr.command.util.FileUtil;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
+import org.apache.karaf.shell.inject.Service;
 
 @Command(scope = "obr", name = "source", description = "Downloads the sources for an OBR bundle.")
+@Service
 public class SourceCommand extends ObrCommandSupport {
 
     @Option(name = "-x", aliases = {}, description = "Extract the archive", required = false, multiValued = false)

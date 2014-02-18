@@ -22,12 +22,15 @@ import org.apache.karaf.shell.commands.Completer;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.AbstractAction;
 import org.apache.karaf.shell.console.completer.StringsCompleter;
+import org.apache.karaf.shell.inject.Reference;
+import org.apache.karaf.shell.inject.Service;
 import org.osgi.service.log.LogService;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @Command(scope = "log", name = "log", description = "Log a message.")
+@Service
 public class LogEntry extends AbstractAction {
 
     @Argument(index = 0, name = "message", description = "The message to log", required = true, multiValued = false)
@@ -37,13 +40,12 @@ public class LogEntry extends AbstractAction {
     @Completer(value = StringsCompleter.class, values = { "DEBUG", "INFO", "WARNING", "ERROR" })
     private String level = "INFO";
 
+    @Reference
     private LogService logService;
 
     private final Map<String,Integer> mappings = new HashMap<String,Integer>();
 
-    public LogEntry(LogService logService) {
-        this.logService = logService;
-
+    public LogEntry() {
         mappings.put("ERROR",1);
         mappings.put("WARNING",2);
         mappings.put("INFO",3);
@@ -65,4 +67,7 @@ public class LogEntry extends AbstractAction {
         return level;
     }
 
+    public void setLogService(LogService logService) {
+        this.logService = logService;
+    }
 }

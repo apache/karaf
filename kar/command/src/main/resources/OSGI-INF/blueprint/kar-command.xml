@@ -17,34 +17,7 @@
     -->
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" default-activation="lazy">
 
-    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
-        <command>
-            <action class="org.apache.karaf.kar.command.ListKarCommand">
-                <property name="karService" ref="karService"/>
-            </action>
-        </command>
-        <command>
-            <action class="org.apache.karaf.kar.command.InstallKarCommand">
-                <property name="karService" ref="karService"/>
-            </action>
-        </command>
-        <command>
-            <action class="org.apache.karaf.kar.command.UninstallKarCommand">
-                <property name="karService" ref="karService"/>
-            </action>
-        </command>
-        <command>
-            <action class="org.apache.karaf.kar.command.CreateKarCommand">
-                <property name="karService" ref="karService"/>
-            </action>
-        </command>
-    </command-bundle>
-
-    <reference id="karService" interface="org.apache.karaf.kar.KarService"/>
-
-    <bean id="karCompleter" class="org.apache.karaf.kar.command.completers.KarCompleter">
-        <property name="karService" ref="karService"/>
-    </bean>
-    <service ref="karCompleter" auto-export="all-classes"/>
+    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.2.0"
+                    scan="org.apache.karaf.kar.command.*" />
 
 </blueprint>

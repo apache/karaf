@@ -35,6 +35,7 @@ import org.apache.felix.utils.version.VersionRange;
 import org.apache.felix.utils.version.VersionTable;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
+import org.apache.karaf.shell.inject.Service;
 import org.apache.karaf.shell.util.ShellUtil;
 import org.fusesource.jansi.Ansi;
 import org.osgi.framework.Bundle;
@@ -44,6 +45,7 @@ import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.BundleWiring;
 
 @Command(scope = "bundle", name = "headers", description = "Displays OSGi headers of a given bundles.")
+@Service
 public class Headers extends BundlesCommand {
 
     protected final static String BUNDLE_PREFIX = "Bundle-";

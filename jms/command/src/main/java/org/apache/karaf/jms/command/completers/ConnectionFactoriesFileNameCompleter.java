@@ -19,14 +19,18 @@ package org.apache.karaf.jms.command.completers;
 import org.apache.karaf.jms.JmsService;
 import org.apache.karaf.shell.console.Completer;
 import org.apache.karaf.shell.console.completer.StringsCompleter;
+import org.apache.karaf.shell.inject.Reference;
+import org.apache.karaf.shell.inject.Service;
 
 import java.util.List;
 
 /**
  * Completer on the JMS connection factory file names.
  */
+@Service
 public class ConnectionFactoriesFileNameCompleter implements Completer {
 
+    @Reference
     private JmsService jmsService;
 
     @Override

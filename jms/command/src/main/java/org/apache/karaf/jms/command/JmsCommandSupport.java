@@ -18,9 +18,11 @@ package org.apache.karaf.jms.command;
 
 import org.apache.karaf.jms.JmsService;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
+import org.apache.karaf.shell.inject.Reference;
 
 public abstract class JmsCommandSupport extends OsgiCommandSupport {
 
+    @Reference
     private JmsService jmsService;
 
     public JmsService getJmsService() {

@@ -18,9 +18,11 @@ package org.apache.karaf.log.command;
 
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.inject.Service;
 import org.ops4j.pax.logging.spi.PaxLoggingEvent;
 
 @Command(scope = "log", name = "exception-display", description = "Displays the last occurred exception from the log.")
+@Service
 public class DisplayException extends LogCommandSupport {
 
     @Argument(index = 0, name = "logger", description = "The name of the logger. This can be ROOT, ALL, or the name of a logger specified in the org.ops4j.pax.logger.cfg file.", required = false, multiValued = false)

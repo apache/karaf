@@ -22,8 +22,10 @@ import org.apache.karaf.config.command.completers.ConfigurationPropertyCompleter
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Completer;
+import org.apache.karaf.shell.inject.Service;
 
 @Command(scope = "config", name = "property-append", description = "Appends the given value to an existing property or creates the property with the specified name and value.")
+@Service
 public class PropAppendCommand extends ConfigPropertyCommandSupport {
 
     @Argument(index = 0, name = "name", description = "The name of the property", required = true, multiValued = false)

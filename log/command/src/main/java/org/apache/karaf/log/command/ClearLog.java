@@ -17,11 +17,13 @@
 package org.apache.karaf.log.command;
 
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.inject.Service;
 
 /**
  * Clear the last log entries.
  */
 @Command(scope = "log", name = "clear", description = "Clear log entries.")
+@Service
 public class ClearLog extends LogCommandSupport {
    
     protected Object doExecute() throws Exception {

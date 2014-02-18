@@ -18,8 +18,11 @@ package org.apache.karaf.log.command;
 
 import org.apache.karaf.log.core.LogService;
 import org.apache.karaf.shell.console.AbstractAction;
+import org.apache.karaf.shell.inject.Reference;
 
 public abstract class LogCommandSupport extends AbstractAction {
+
+    @Reference
     protected LogService logService;
 
     public void setLogService(LogService logService) {

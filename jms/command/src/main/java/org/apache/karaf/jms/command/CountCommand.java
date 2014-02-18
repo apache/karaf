@@ -18,9 +18,11 @@ package org.apache.karaf.jms.command;
 
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.inject.Service;
 import org.apache.karaf.shell.table.ShellTable;
 
 @Command(scope = "jms", name = "count", description = "Count the number of messages on a JMS queue.")
+@Service
 public class CountCommand extends JmsConnectionCommandSupport {
 
     @Argument(index = 1, name = "queue", description = "The JMS queue name", required = true, multiValued = false)

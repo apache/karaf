@@ -19,22 +19,18 @@ package org.apache.karaf.system.commands;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
+import org.apache.karaf.shell.inject.Service;
 import org.apache.karaf.system.SystemService;
 
 /**
  * Get/set the system start level.
  */
 @Command(scope = "system", name = "start-level", description = "Gets or sets the system start level.")
-public class StartLevel extends OsgiCommandSupport {
+@Service
+public class StartLevel extends AbstractSystemAction {
 
     @Argument(index = 0, name = "level", description = "The new system start level to set", required = false, multiValued = false)
     Integer level;
-
-    private SystemService systemService;
-
-    public void setSystemService(SystemService systemService) {
-        this.systemService = systemService;
-    }
 
     protected Object doExecute() throws Exception {
         if (level == null) {

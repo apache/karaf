@@ -20,8 +20,10 @@ import org.apache.karaf.kar.command.completers.KarCompleter;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Completer;
+import org.apache.karaf.shell.inject.Service;
 
 @Command(scope = "kar", name = "uninstall", description = "Uninstall a KAR file.")
+@Service
 public class UninstallKarCommand extends KarCommandSupport {
 
     @Argument(index = 0, name = "name", description = "The name of the KAR file to uninstall.", required = true, multiValued = false)

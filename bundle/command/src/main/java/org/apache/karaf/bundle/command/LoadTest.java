@@ -29,6 +29,7 @@ import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
+import org.apache.karaf.shell.inject.Service;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkEvent;
@@ -36,6 +37,7 @@ import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.wiring.FrameworkWiring;
 
 @Command(scope = "bundle", name = "load-test", description = "Load test bundle lifecycle")
+@Service
 public class LoadTest extends OsgiCommandSupport {
 
     @Option(name = "--threads", description = "number of concurrent threads")

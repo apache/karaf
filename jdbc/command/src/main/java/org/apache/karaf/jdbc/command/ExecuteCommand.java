@@ -20,8 +20,10 @@ import org.apache.karaf.jdbc.command.completers.DataSourcesNameCompleter;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Completer;
+import org.apache.karaf.shell.inject.Service;
 
 @Command(scope = "jdbc", name = "execute", description = "Execute a SQL command on a given JDBC datasource")
+@Service
 public class ExecuteCommand extends JdbcCommandSupport {
 
     @Argument(index = 0, name = "datasource", description = "The JDBC datasource", required = true, multiValued = false)

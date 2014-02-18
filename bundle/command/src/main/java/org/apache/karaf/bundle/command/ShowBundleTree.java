@@ -32,6 +32,7 @@ import org.apache.felix.utils.version.VersionTable;
 import org.apache.karaf.bundle.command.bundletree.Node;
 import org.apache.karaf.bundle.command.bundletree.Tree;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.inject.Service;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.framework.wiring.BundleCapability;
@@ -47,6 +48,7 @@ import org.slf4j.LoggerFactory;
  * a given bundle.
  */
 @Command(scope = "bundle", name = "tree-show", description = "Shows the tree of bundles based on the wiring information.")
+@Service
 public class ShowBundleTree extends BundleCommand {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ShowBundleTree.class);

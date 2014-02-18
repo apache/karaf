@@ -19,8 +19,10 @@ package org.apache.karaf.config.command;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.inject.Service;
 
 @Command(scope = "config", name = "property-list", description = "Lists properties from the currently edited configuration.")
+@Service
 public class PropListCommand extends ConfigPropertyCommandSupport {
 
     @SuppressWarnings("rawtypes")

@@ -21,6 +21,8 @@ import java.io.File;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.AbstractAction;
+import org.apache.karaf.shell.inject.Reference;
+import org.apache.karaf.shell.inject.Service;
 import org.apache.karaf.wrapper.WrapperService;
 import org.apache.karaf.wrapper.internal.WrapperServiceImpl;
 import org.fusesource.jansi.Ansi;
@@ -29,6 +31,7 @@ import org.fusesource.jansi.Ansi;
  * Installs the Karaf instance as a service in your operating system.
  */
 @Command(scope = "wrapper", name = "install", description = "Install the container as a system service in the OS.")
+@Service
 public class Install extends AbstractAction {
 
 	@Option(name = "-n", aliases = { "--name" }, description = "The service name that will be used when installing the service. (Default: karaf)", required = false, multiValued = false)
@@ -43,6 +46,7 @@ public class Install extends AbstractAction {
 	@Option(name = "-s", aliases = { "--start-type" }, description = "Mode in which the service is installed. AUTO_START or DEMAND_START (Default: AUTO_START)", required = false, multiValued = false)
 	private String startType = "AUTO_START";
 
+    @Reference
 	private WrapperService wrapperService = new WrapperServiceImpl();
 
 	public void setWrapperService(WrapperService wrapperService) {

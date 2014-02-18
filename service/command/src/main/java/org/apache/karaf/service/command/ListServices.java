@@ -29,6 +29,7 @@ import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Completer;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
+import org.apache.karaf.shell.inject.Service;
 import org.apache.karaf.shell.util.ShellUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -36,6 +37,7 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 
 @Command(scope = "service", name = "list", description = "Lists OSGi services.")
+@Service
 public class ListServices extends OsgiCommandSupport {
 
     @Argument(index = 0, name = "objectClass", description = "Name of service objectClass to filter for", required = false,

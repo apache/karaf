@@ -19,12 +19,14 @@ package org.apache.karaf.system.commands;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
+import org.apache.karaf.shell.inject.Service;
 import org.apache.karaf.system.FrameworkType;
 
 /**
  * Command for enabling/disabling debug logging on the OSGi framework
  */
 @Command(scope = "system", name = "framework", description = "OSGi Framework options.")
+@Service
 public class FrameworkOptions extends AbstractSystemAction {
 
     @Option(name = "-debug", aliases={"--enable-debug"}, description="Enable debug for the OSGi framework", required = false, multiValued = false)

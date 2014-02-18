@@ -19,14 +19,18 @@ package org.apache.karaf.jndi.command.completers;
 import org.apache.karaf.jndi.JndiService;
 import org.apache.karaf.shell.console.Completer;
 import org.apache.karaf.shell.console.completer.StringsCompleter;
+import org.apache.karaf.shell.inject.Reference;
+import org.apache.karaf.shell.inject.Service;
 
 import java.util.List;
 
 /**
  * Completer to the JNDI names.
  */
+@Service
 public class NamesCompleter implements Completer {
 
+    @Reference
     private JndiService jndiService;
 
     public int complete(String buffer, int cursor, List candidates) {

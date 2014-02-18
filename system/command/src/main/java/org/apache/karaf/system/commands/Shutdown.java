@@ -20,12 +20,14 @@ import jline.console.ConsoleReader;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
+import org.apache.karaf.shell.inject.Service;
 import org.apache.karaf.system.SystemService;
 
 /**
  * Command to shut down Karaf container.
  */
 @Command(scope = "system", name = "shutdown", description = "Shutdown Karaf.")
+@Service
 public class Shutdown extends AbstractSystemAction {
 
     @Option(name = "-f", aliases = "--force", description = "Force the shutdown without confirmation message.", required = false, multiValued = false)

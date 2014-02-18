@@ -20,11 +20,13 @@ import org.apache.karaf.jdbc.command.completers.DataSourcesNameCompleter;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Completer;
+import org.apache.karaf.shell.inject.Service;
 import org.apache.karaf.shell.table.ShellTable;
 
 import java.util.Map;
 
 @Command(scope = "jdbc", name = "info", description = "Display details about a JDBC datasource")
+@Service
 public class InfoCommand extends JdbcCommandSupport {
 
     @Argument(index = 0, name = "datasource", description = "The JDBC datasource name", required = true, multiValued = false)

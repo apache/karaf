@@ -20,11 +20,13 @@ import org.apache.karaf.jms.JmsMessage;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
+import org.apache.karaf.shell.inject.Service;
 import org.apache.karaf.shell.table.ShellTable;
 
 import java.util.List;
 
 @Command(scope = "jms", name = "browse", description = "Browse a JMS queue")
+@Service
 public class BrowseCommand extends JmsConnectionCommandSupport {
 
     @Argument(index = 1, name = "queue", description = "The JMS queue to browse", required = true, multiValued = false)

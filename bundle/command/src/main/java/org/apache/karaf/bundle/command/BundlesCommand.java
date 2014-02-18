@@ -21,6 +21,7 @@ import java.util.List;
 import org.apache.karaf.bundle.core.BundleService;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
+import org.apache.karaf.shell.inject.Reference;
 import org.apache.karaf.shell.util.ShellUtil;
 import org.osgi.framework.Bundle;
 
@@ -31,6 +32,7 @@ public abstract class BundlesCommand extends OsgiCommandSupport {
     
     boolean defaultAllBundles = true;
 
+    @Reference
     BundleService bundleService;
     
     public BundlesCommand(boolean defaultAllBundles) {
@@ -61,8 +63,8 @@ public abstract class BundlesCommand extends OsgiCommandSupport {
       
     protected abstract void doExecute(List<Bundle> bundles) throws Exception;
 
-    public void setBundleService(BundleService bundleSelector) {
-        this.bundleService = bundleSelector;
+    public void setBundleService(BundleService bundleService) {
+        this.bundleService = bundleService;
     }
 
 }

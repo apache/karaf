@@ -21,10 +21,12 @@ import java.io.PrintStream;
 import java.util.concurrent.*;
 
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.inject.Service;
 import org.ops4j.pax.logging.spi.PaxAppender;
 import org.ops4j.pax.logging.spi.PaxLoggingEvent;
 
 @Command(scope = "log", name = "tail", description = "Continuously display log entries. Use ctrl-c to quit this command")
+@Service
 public class LogTail extends DisplayLog {
 
     private ExecutorService executorService = Executors.newSingleThreadExecutor();

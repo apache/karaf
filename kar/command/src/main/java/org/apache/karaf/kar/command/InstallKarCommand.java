@@ -18,10 +18,12 @@ package org.apache.karaf.kar.command;
 
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.inject.Service;
 
 import java.net.URI;
 
 @Command(scope = "kar", name = "install", description = "Installs a KAR file.")
+@Service
 public class InstallKarCommand extends KarCommandSupport {
     
     @Argument(index = 0, name = "url", description = "The URL of the KAR file to install.", required = true, multiValued = false)

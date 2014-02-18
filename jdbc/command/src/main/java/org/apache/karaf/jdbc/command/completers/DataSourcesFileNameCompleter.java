@@ -19,14 +19,18 @@ package org.apache.karaf.jdbc.command.completers;
 import org.apache.karaf.jdbc.JdbcService;
 import org.apache.karaf.shell.console.Completer;
 import org.apache.karaf.shell.console.completer.StringsCompleter;
+import org.apache.karaf.shell.inject.Reference;
+import org.apache.karaf.shell.inject.Service;
 
 import java.util.List;
 
 /**
  * Completer on the JDBC datasources file name.
  */
+@Service
 public class DataSourcesFileNameCompleter implements Completer {
 
+    @Reference
     private JdbcService jdbcService;
 
     @Override

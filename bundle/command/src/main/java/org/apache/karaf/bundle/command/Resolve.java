@@ -19,10 +19,12 @@ package org.apache.karaf.bundle.command;
 import java.util.List;
 
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.inject.Service;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.wiring.FrameworkWiring;
 
 @Command(scope = "bundle", name = "resolve", description = "Resolve bundles.")
+@Service
 public class Resolve extends BundlesCommand {
 
     public Resolve() {

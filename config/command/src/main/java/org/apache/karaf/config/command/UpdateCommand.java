@@ -19,8 +19,10 @@ package org.apache.karaf.config.command;
 import java.util.Dictionary;
 
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.inject.Service;
 
 @Command(scope = "config", name = "update", description = "Saves and propagates changes from the configuration being edited.")
+@Service
 public class UpdateCommand extends ConfigCommandSupport {
 
     @SuppressWarnings({ "rawtypes", "unchecked" })

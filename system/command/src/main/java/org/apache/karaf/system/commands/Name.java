@@ -18,11 +18,13 @@ package org.apache.karaf.system.commands;
 
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.inject.Service;
 
 /**
  * Command to shut down Karaf container.
  */
 @Command(scope = "system", name = "name", description = "Show or change Karaf instance name.")
+@Service
 public class Name extends AbstractSystemAction {
 
     @Argument(name = "name", index = 0, description = "New name for the instance", required = false, multiValued = false)

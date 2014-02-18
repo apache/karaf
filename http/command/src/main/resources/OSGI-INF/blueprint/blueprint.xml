@@ -19,14 +19,7 @@
 -->
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" default-activation="lazy">
 
-    <reference id="servletService" interface="org.apache.karaf.http.core.ServletService" />
+	<command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.2.0"
+                    scan="org.apache.karaf.http.command.*" />
 
-	<command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
-        <command>
-            <action class="org.apache.karaf.http.command.ServletListCommand">
-            	<argument ref="servletService" />
-            </action>
-        </command>
-    </command-bundle>
-    
 </blueprint>

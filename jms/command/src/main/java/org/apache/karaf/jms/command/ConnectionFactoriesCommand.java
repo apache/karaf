@@ -17,11 +17,13 @@
 package org.apache.karaf.jms.command;
 
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.inject.Service;
 import org.apache.karaf.shell.table.ShellTable;
 
 import java.util.List;
 
 @Command(scope = "jms", name = "connectionfactories", description = "List the JMS connection factories")
+@Service
 public class ConnectionFactoriesCommand extends JmsCommandSupport {
 
     public Object doExecute() throws Exception {

@@ -20,10 +20,12 @@ import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
+import org.apache.karaf.shell.inject.Service;
 
 import java.util.List;
 
 @Command(scope = "obr", name = "start", description = "Deploys and starts a list of bundles using OBR.")
+@Service
 public class StartCommand extends ObrCommandSupport {
 
     @Argument(index = 0, name = "bundles", description = "List of bundles to deploy (separated by whitespaces)", required = true, multiValued = true)

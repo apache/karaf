@@ -23,11 +23,15 @@ import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.AbstractAction;
+import org.apache.karaf.shell.console.OsgiCommandSupport;
+import org.apache.karaf.shell.inject.Reference;
+import org.apache.karaf.shell.inject.Service;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 
 @Command(scope = "bundle", name = "watch", description = "Watches and updates bundles", detailedDescription = "Watches the local maven repo for changes in snapshot jars and redploys changed jars")
-public class Watch extends AbstractAction {
+@Service
+public class Watch extends OsgiCommandSupport {
 
     @Argument(index = 0, name = "urls", description = "The bundle IDs or URLs", required = false, multiValued = true)
     List<String> urls;
@@ -47,6 +51,7 @@ public class Watch extends AbstractAction {
     @Option(name = "--list", description = "Displays the watch list", required = false, multiValued = false)
     protected boolean list;
 
+    @Reference
     private BundleWatcher bundleWatcher;
 
     public void setBundleWatcher(BundleWatcher bundleWatcher) {

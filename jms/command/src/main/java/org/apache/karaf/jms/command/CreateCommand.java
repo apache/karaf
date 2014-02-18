@@ -21,8 +21,10 @@ import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Completer;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.completer.StringsCompleter;
+import org.apache.karaf.shell.inject.Service;
 
 @Command(scope = "jms", name = "create", description = "Create a JMS connection factory.")
+@Service
 public class CreateCommand extends JmsCommandSupport {
 
     @Argument(index = 0, name = "name", description = "The JMS connection factory name", required = true, multiValued = false)

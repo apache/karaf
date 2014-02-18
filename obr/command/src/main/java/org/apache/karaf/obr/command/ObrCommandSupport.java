@@ -33,6 +33,7 @@ import org.apache.felix.bundlerepository.Requirement;
 import org.apache.felix.bundlerepository.Resolver;
 import org.apache.felix.bundlerepository.Resource;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
+import org.apache.karaf.shell.inject.Reference;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -42,23 +43,15 @@ public abstract class ObrCommandSupport extends OsgiCommandSupport {
 
     protected static final char VERSION_DELIM = ',';
 
-    protected Object doExecute() throws Exception {
-        ServiceReference<RepositoryAdmin> ref = getBundleContext().getServiceReference(RepositoryAdmin.class);
-        if (ref == null) {
-            System.out.println("RepositoryAdmin service is unavailable.");
-            return null;
-        }
-        try {
-            RepositoryAdmin admin = getBundleContext().getService(ref);
-            if (admin == null) {
-                System.out.println("RepositoryAdmin service is unavailable.");
-                return null;
-            }
+    @Reference
+    private RepositoryAdmin repositoryAdmin;
 
-            doExecute(admin);
-        } finally {
-            getBundleContext().ungetService(ref);
-        }
+    public void setRepositoryAdmin(RepositoryAdmin repositoryAdmin) {
+        this.repositoryAdmin = repositoryAdmin;
+    }
+
+    protected Object doExecute() throws Exception {
+        doExecute(repositoryAdmin);
         return null;
     }
 

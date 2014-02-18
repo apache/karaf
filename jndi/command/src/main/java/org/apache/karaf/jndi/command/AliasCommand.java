@@ -21,8 +21,10 @@ import org.apache.karaf.jndi.command.completers.NamesCompleter;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Completer;
+import org.apache.karaf.shell.inject.Service;
 
 @Command(scope = "jndi", name = "alias", description = "Create a JNDI alias on a given name.")
+@Service
 public class AliasCommand extends JndiCommandSupport {
 
     @Argument(index = 0, name = "name", description = "The JNDI name", required = true, multiValued = false)

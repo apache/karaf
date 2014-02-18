@@ -22,8 +22,10 @@ import org.apache.karaf.features.command.completers.InstalledRepoNameCompleter;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Completer;
+import org.apache.karaf.shell.inject.Service;
 
 @Command(scope = "kar", name = "create", description = "Create a kar file for a list of feature repos")
+@Service
 public class CreateKarCommand extends KarCommandSupport {
     
     @Argument(index = 0, name = "repoName", description = "Repository name. The kar will contain all features of the named repository by default", required = true, multiValued = false)

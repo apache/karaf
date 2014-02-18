@@ -22,11 +22,13 @@ import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Completer;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.instance.core.InstanceSettings;
+import org.apache.karaf.shell.inject.Service;
 
 /**
  * Clone an existing instance.
  */
 @Command(scope = "instance", name = "clone", description = "Clones an existing container instance.")
+@Service
 public class CloneCommand extends InstanceCommandSupport {
 
     @Option(name = "-s", aliases = {"--ssh-port"}, description = "Port number for remote secure shell connection", required = false, multiValued = false)

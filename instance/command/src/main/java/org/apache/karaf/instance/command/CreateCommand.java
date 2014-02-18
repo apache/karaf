@@ -25,11 +25,13 @@ import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Completer;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.instance.core.InstanceSettings;
+import org.apache.karaf.shell.inject.Service;
 
 /**
  * Creates a new instance.
  */
 @Command(scope = "instance", name = "create", description = "Creates a new container instance.")
+@Service
 public class CreateCommand extends InstanceCommandSupport
 {
     @Option(name = "-s", aliases = {"--ssh-port"}, description = "Port number for remote secure shell connection", required = false, multiValued = false)

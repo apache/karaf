@@ -19,9 +19,11 @@ package org.apache.karaf.instance.command;
 import org.apache.karaf.instance.core.Instance;
 import org.apache.karaf.instance.core.InstanceService;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
+import org.apache.karaf.shell.inject.Reference;
 
 public abstract class InstanceCommandSupport extends OsgiCommandSupport {
 
+    @Reference
     private InstanceService instanceService;
 
     public InstanceService getInstanceService() {

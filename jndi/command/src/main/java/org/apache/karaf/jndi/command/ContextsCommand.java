@@ -20,11 +20,13 @@ import org.apache.karaf.jndi.command.completers.ContextsCompleter;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Completer;
+import org.apache.karaf.shell.inject.Service;
 import org.apache.karaf.shell.table.ShellTable;
 
 import java.util.List;
 
 @Command(scope = "jndi", name = "contexts", description = "List the JNDI sub-contexts.")
+@Service
 public class ContextsCommand extends JndiCommandSupport {
 
     @Argument(index = 0, name = "context", description = "The base JNDI context", required = false, multiValued = false)

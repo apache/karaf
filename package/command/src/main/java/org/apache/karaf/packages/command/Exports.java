@@ -27,6 +27,8 @@ import org.apache.karaf.packages.core.PackageVersion;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
+import org.apache.karaf.shell.inject.Reference;
+import org.apache.karaf.shell.inject.Service;
 import org.apache.karaf.shell.table.Col;
 import org.apache.karaf.shell.table.ShellTable;
 import org.osgi.framework.Bundle;
@@ -35,18 +37,19 @@ import org.osgi.framework.wiring.BundleCapability;
 import org.osgi.framework.wiring.BundleRevision;
 
 @Command(scope = "package", name = "exports", description = "Lists exported packages and the bundles that export them")
+@Service
 public class Exports extends OsgiCommandSupport {
 
-    private PackageService packageService;
-    
     @Option(name = "-d", description = "Only show packages that are exported by more than one bundle", required = false, multiValued = false)
     private boolean onlyDuplicates;
 
     @Option(name = "--no-format", description = "Disable table rendered output", required = false, multiValued = false)
     boolean noFormat;
 
-    public Exports(PackageService packageService) {
-        super();
+    @Reference
+    private PackageService packageService;
+
+    public void setPackageService(PackageService packageService) {
         this.packageService = packageService;
     }
 

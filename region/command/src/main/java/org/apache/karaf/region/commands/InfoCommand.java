@@ -23,12 +23,14 @@ import java.util.Map;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
+import org.apache.karaf.shell.inject.Service;
 import org.eclipse.equinox.region.Region;
 import org.eclipse.equinox.region.RegionDigraph;
 import org.eclipse.equinox.region.RegionFilter;
 import org.osgi.framework.Bundle;
 
 @Command(scope = "region", name = "info", description = "Prints information about region digraph.")
+@Service
 public class InfoCommand extends RegionCommandSupport {
 
     @Option(name = "-v", aliases = "--verbose", required = false, description = "Show all info.")

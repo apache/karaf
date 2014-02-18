@@ -29,6 +29,8 @@ import java.util.Set;
 
 import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.config.command.ConfigCommandSupport;
+import org.apache.karaf.shell.inject.Reference;
+import org.apache.karaf.shell.inject.Service;
 import org.apache.karaf.shell.console.CommandSessionHolder;
 import org.apache.karaf.shell.console.Completer;
 import org.apache.karaf.shell.console.completer.ArgumentCompleter;
@@ -38,11 +40,12 @@ import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 
 /**
- * {@link jline.Completor} for Configuration Admin properties.
+ * {@link Completer} for Configuration Admin properties.
  *
  * Displays a list of existing properties based on the current configuration being edited.
  *
  */
+@Service
 public class ConfigurationPropertyCompleter implements Completer {
 
     private final StringsCompleter delegate = new StringsCompleter();
@@ -50,6 +53,7 @@ public class ConfigurationPropertyCompleter implements Completer {
     private static final String OPTION = "-p";
     private static final String ALIAS = "--pid";
 
+    @Reference
     private ConfigurationAdmin configAdmin;
 
     @SuppressWarnings("rawtypes")

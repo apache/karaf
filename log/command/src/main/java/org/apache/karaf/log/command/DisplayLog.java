@@ -22,12 +22,15 @@ import org.apache.karaf.log.core.LogEventFormatter;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
+import org.apache.karaf.shell.inject.Reference;
+import org.apache.karaf.shell.inject.Service;
 import org.ops4j.pax.logging.spi.PaxLoggingEvent;
 
 /**
  * Displays the last log entries
  */
 @Command(scope = "log", name = "display", description = "Displays log entries.")
+@Service
 public class DisplayLog extends LogCommandSupport {
 
     @Option(name = "-n", aliases = {}, description="Number of entries to display", required = false, multiValued = false)
@@ -42,6 +45,7 @@ public class DisplayLog extends LogCommandSupport {
     @Argument(index = 0, name = "logger", description = "The name of the logger. This can be ROOT, ALL, or the name of a logger specified in the org.ops4j.pax.logger.cfg file.", required = false, multiValued = false)
     String logger;
 
+    @Reference
     protected LogEventFormatter formatter;
     
     public void setFormatter(LogEventFormatter formatter) {

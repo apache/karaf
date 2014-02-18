@@ -19,6 +19,7 @@ package org.apache.karaf.config.command;
 import java.util.Dictionary;
 
 import org.apache.karaf.config.core.ConfigRepository;
+import org.apache.karaf.shell.inject.Reference;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 
 /**
@@ -28,9 +29,12 @@ import org.apache.karaf.shell.console.OsgiCommandSupport;
  * calling another method to actually process the command.
  */
 public abstract class ConfigCommandSupport extends OsgiCommandSupport {
+
     public static final String PROPERTY_CONFIG_PID = "ConfigCommand.PID";
     public static final String PROPERTY_CONFIG_PROPS = "ConfigCommand.Props";
     public static final String PROPERTY_FACTORY = "ConfigCommand.Factory";
+
+    @Reference
     protected ConfigRepository configRepository;
 
     @SuppressWarnings("rawtypes")

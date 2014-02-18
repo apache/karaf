@@ -17,12 +17,14 @@
 package org.apache.karaf.jdbc.command;
 
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.inject.Service;
 import org.apache.karaf.shell.table.ShellTable;
 
 import java.util.List;
 import java.util.Map;
 
 @Command(scope = "jdbc", name = "datasources", description = "List the JDBC datasources")
+@Service
 public class DataSourcesCommand extends JdbcCommandSupport {
 
     public Object doExecute() throws Exception {

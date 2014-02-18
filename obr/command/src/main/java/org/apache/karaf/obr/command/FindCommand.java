@@ -22,6 +22,7 @@ import org.apache.felix.bundlerepository.Requirement;
 import org.apache.felix.bundlerepository.Resource;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.inject.Service;
 
 import java.io.PrintStream;
 import java.lang.reflect.Array;
@@ -30,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 
 @Command(scope = "obr", name = "find", description = "Find OBR bundles for a given filter.")
+@Service
 public class FindCommand extends ObrCommandSupport {
 
     @Argument(index = 0, name = "requirements", description = "Requirement", required = true, multiValued = true)

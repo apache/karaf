@@ -22,8 +22,10 @@ import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Completer;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.instance.core.Instance;
+import org.apache.karaf.shell.inject.Service;
 
 @Command(scope = "instance", name = "start", description = "Start an existing container instance.")
+@Service
 public class StartCommand extends InstanceCommandSupport {
                       
     @Option(name = "-d", aliases = { "--debug"}, description = "Start the instance in debug mode", required = false, multiValued = false)

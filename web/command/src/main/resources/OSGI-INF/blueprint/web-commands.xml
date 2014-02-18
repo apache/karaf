@@ -19,24 +19,7 @@
 -->        
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" default-activation="lazy">
 
-    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
-        <command>
-            <action class="org.apache.karaf.web.commands.List">
-                <property name="webContainerService" ref="webContainerService"/>
-            </action>
-        </command>
-        <command>
-            <action class="org.apache.karaf.web.commands.Start">
-                <property name="webContainerService" ref="webContainerService"/>
-            </action>
-        </command>
-        <command>
-            <action class="org.apache.karaf.web.commands.Stop">
-                <property name="webContainerService" ref="webContainerService"/>
-            </action>
-        </command>
-    </command-bundle>
+    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.2.0"
+                    scan="org.apache.karaf.web.commands.*" />
 
-    <reference id="webContainerService" interface="org.apache.karaf.web.WebContainerService"/>
-    
 </blueprint>        

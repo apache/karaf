@@ -20,8 +20,10 @@ import org.apache.karaf.jndi.command.completers.ContextsCompleter;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Completer;
+import org.apache.karaf.shell.inject.Service;
 
 @Command(scope = "jndi", name = "delete", description = "Delete a JNDI sub-context.")
+@Service
 public class DeleteCommand extends JndiCommandSupport {
 
     @Argument(index = 0, name = "context", description = "The JNDI sub-context name", required = true, multiValued = false)

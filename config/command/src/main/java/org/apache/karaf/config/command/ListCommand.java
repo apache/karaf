@@ -21,9 +21,11 @@ import java.util.Enumeration;
 
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.inject.Service;
 import org.osgi.service.cm.Configuration;
 
 @Command(scope = "config", name = "list", description = "Lists existing configurations.")
+@Service
 public class ListCommand extends ConfigCommandSupport {
 
     @Argument(index = 0, name = "query", description = "Query in LDAP syntax. Example: \"(service.pid=org.apache.karaf.log)\"", required = false, multiValued = false)

@@ -17,8 +17,10 @@
 package org.apache.karaf.system.commands;
 
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.inject.Service;
 
 @Command(scope = "system", name = "version", description = "Display the instance version")
+@Service
 public class Version extends AbstractSystemAction {
 
     protected Object doExecute() throws Exception {

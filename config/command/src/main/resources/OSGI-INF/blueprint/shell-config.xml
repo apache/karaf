@@ -22,65 +22,7 @@
            xmlns:ext="http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.0.0"
            default-activation="lazy">
 
-    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
-        <command>
-            <action class="org.apache.karaf.config.command.CancelCommand">
-                <property name="configRepository" ref="configRepo"/>
-            </action>
-        </command>
-        <command>
-            <action class="org.apache.karaf.config.command.DeleteCommand">
-                <property name="configRepository" ref="configRepo"/>
-            </action>
-        </command>
-        <command>
-            <action class="org.apache.karaf.config.command.EditCommand">
-                <property name="configRepository" ref="configRepo"/>
-            </action>
-        </command>
-        <command>
-            <action class="org.apache.karaf.config.command.ListCommand">
-                <property name="configRepository" ref="configRepo"/>
-            </action>
-        </command>
-        <command>
-            <action class="org.apache.karaf.config.command.PropDelCommand">
-                <property name="configRepository" ref="configRepo"/>
-            </action>
-        </command>
-        <command>
-            <action class="org.apache.karaf.config.command.PropListCommand">
-                <property name="configRepository" ref="configRepo"/>
-            </action>
-        </command>
-        <command>
-            <action class="org.apache.karaf.config.command.PropSetCommand">
-                <property name="configRepository" ref="configRepo"/>
-            </action>
-        </command>
-        <command>
-            <action class="org.apache.karaf.config.command.PropAppendCommand">
-                <property name="configRepository" ref="configRepo"/>
-            </action>
-        </command>
-        <command>
-            <action class="org.apache.karaf.config.command.UpdateCommand">
-                <property name="configRepository" ref="configRepo"/>
-            </action>
-        </command>
-    </command-bundle>
-
-    <bean id="configCompleter" class="org.apache.karaf.config.command.completers.ConfigurationCompleter" init-method="init">
-        <property name="admin" ref="configAdmin"/>
-    </bean>
-    <service ref="configCompleter" auto-export="all-classes" />
-
-    <bean id="configPropertyCompleter" class="org.apache.karaf.config.command.completers.ConfigurationPropertyCompleter">
-        <property name="configAdmin" ref="configAdmin"/>
-    </bean>
-    <service ref="configPropertyCompleter" auto-export="all-classes" />
-
-    <reference id="configRepo" interface="org.apache.karaf.config.core.ConfigRepository" />
-    <reference id="configAdmin" interface="org.osgi.service.cm.ConfigurationAdmin" />
+    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.2.0"
+                    scan="org.apache.karaf.config.command.*" />
 
 </blueprint>

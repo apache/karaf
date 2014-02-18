@@ -23,9 +23,11 @@ import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Completer;
 import org.apache.karaf.shell.commands.Option;
+import org.apache.karaf.shell.inject.Service;
 import org.osgi.service.cm.Configuration;
 
 @Command(scope = "config", name = "edit", description = "Creates or edits a configuration.", detailedDescription="classpath:edit.txt")
+@Service
 public class EditCommand extends ConfigCommandSupport {
 
     @Argument(index = 0, name = "pid", description = "PID of the configuration or of the factory if --factory is given. Pid can also be specified as ldap query", required = true, multiValued = false)

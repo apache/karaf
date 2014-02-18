@@ -20,8 +20,10 @@ import org.apache.karaf.jms.command.completers.ConnectionFactoriesFileNameComple
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Completer;
+import org.apache.karaf.shell.inject.Service;
 
 @Command(scope = "jms", name = "delete", description = "Delete a JMS connection factory")
+@Service
 public class DeleteCommand extends JmsCommandSupport {
 
     @Argument(index = 0, name = "name", description = "The JMS connection factory name", required = true, multiValued = false)

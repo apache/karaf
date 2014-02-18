@@ -23,21 +23,21 @@ import org.apache.karaf.http.core.ServletService;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
+import org.apache.karaf.shell.inject.Reference;
+import org.apache.karaf.shell.inject.Service;
 import org.apache.karaf.shell.table.Col;
 import org.apache.karaf.shell.table.ShellTable;
 
 @Command(scope = "http", name = "list", description = "Lists details for servlets.")
+@Service
 public class ServletListCommand extends OsgiCommandSupport {
 
     @Option(name = "--no-format", description = "Disable table rendered output", required = false, multiValued = false)
     boolean noFormat;
 
+    @Reference
     private ServletService servletService;
     
-    public ServletListCommand(ServletService servletService) {
-        this.servletService = servletService;
-    }
-
     @Override
     protected Object doExecute() throws Exception {
         ShellTable table = new ShellTable();
@@ -56,4 +56,7 @@ public class ServletListCommand extends OsgiCommandSupport {
         return null;
     }
 
+    public void setServletService(ServletService servletService) {
+        this.servletService = servletService;
+    }
 }

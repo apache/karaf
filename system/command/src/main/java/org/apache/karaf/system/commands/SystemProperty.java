@@ -19,6 +19,7 @@ package org.apache.karaf.system.commands;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
+import org.apache.karaf.shell.inject.Service;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 
@@ -31,6 +32,7 @@ import java.util.*;
  * Command that allow access to system properties easily.
  */
 @Command(scope = "system", name = "property", description = "Get or set a system property.")
+@Service
 public class SystemProperty extends AbstractSystemAction {
 
     @Option(name = "-p", aliases = {"--persistent"}, description = "Persist the new value to the etc/system.properties file")
@@ -47,12 +49,6 @@ public class SystemProperty extends AbstractSystemAction {
 
     @Argument(index = 1, name = "value", required = false, description = "New value for the system property")
     String value;
-
-    private BundleContext bundleContext;
-
-    public void setBundleContext(BundleContext bundleContext) {
-        this.bundleContext = bundleContext;
-    }
 
     @Override
     protected Object doExecute() throws Exception {

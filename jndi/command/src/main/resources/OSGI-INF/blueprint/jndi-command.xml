@@ -17,59 +17,7 @@
     -->
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" default-activation="lazy">
 
-    <reference id="jndiService" interface="org.apache.karaf.jndi.JndiService" />
-
-    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
-        <command>
-            <action class="org.apache.karaf.jndi.command.AliasCommand">
-                <property name="jndiService" ref="jndiService" />
-            </action>
-        </command>
-        <command>
-            <action class="org.apache.karaf.jndi.command.ContextsCommand">
-                <property name="jndiService" ref="jndiService" />
-            </action>
-        </command>
-        <command>
-            <action class="org.apache.karaf.jndi.command.NamesCommand">
-                <property name="jndiService" ref="jndiService" />
-            </action>
-        </command>
-        <command>
-            <action class="org.apache.karaf.jndi.command.CreateCommand">
-                <property name="jndiService" ref="jndiService"/>
-            </action>
-        </command>
-        <command>
-            <action class="org.apache.karaf.jndi.command.DeleteCommand">
-                <property name="jndiService" ref="jndiService"/>
-            </action>
-        </command>
-        <command>
-            <action class="org.apache.karaf.jndi.command.BindCommand">
-                <property name="jndiService" ref="jndiService"/>
-            </action>
-        </command>
-        <command>
-            <action class="org.apache.karaf.jndi.command.UnbindCommand">
-                <property name="jndiService" ref="jndiService" />
-            </action>
-        </command>
-    </command-bundle>
-
-    <bean id="namesCompleter" class="org.apache.karaf.jndi.command.completers.NamesCompleter">
-        <property name="jndiService" ref="jndiService" />
-    </bean>
-    <service ref="namesCompleter" auto-export="all-classes"/>
-
-    <bean id="contextsCompleter" class="org.apache.karaf.jndi.command.completers.ContextsCompleter">
-        <property name="jndiService" ref="jndiService" />
-    </bean>
-    <service ref="contextsCompleter" auto-export="all-classes"/>
-
-    <bean id="servicesIdCompleter" class="org.apache.karaf.jndi.command.completers.ServicesIdCompleter">
-        <property name="bundleContext" ref="blueprintBundleContext" />
-    </bean>
-    <service ref="servicesIdCompleter" auto-export="all-classes"/>
+    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.2.0"
+                    scan="org.apache.karaf.jndi.command.*" />
 
 </blueprint>
