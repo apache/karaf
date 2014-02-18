@@ -50,12 +50,6 @@ public class EnterpriseFeaturesTest extends KarafTestSupport {
     }
 
     @Test
-    @Ignore
-    public void testHibernateEnversFeature() throws Exception {
-        installAndAssertFeature("hibernate-envers");
-    }
-
-    @Test
     public void testHibernateValidatorFeature() throws Exception {
         installAndAssertFeature("hibernate-validator");
     }
