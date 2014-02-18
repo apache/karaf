@@ -82,4 +82,11 @@
     </bean>
     <service ref="secureCommandConfigTransformer" interface="org.osgi.service.cm.ConfigurationListener"/>
 
+    <!-- Console commands extender -->
+    <bean id="consoleExtender"
+          class="org.apache.karaf.shell.inject.impl.InjectionExtender"
+          init-method="init" destroy-method="destroy">
+        <property name="bundleContext" ref="blueprintBundleContext"/>
+    </bean>
+
 </blueprint>

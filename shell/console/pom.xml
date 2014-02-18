@@ -82,6 +82,11 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.utils</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.apache.sshd</groupId>
             <artifactId>sshd-core</artifactId>
         </dependency>
@@ -129,6 +134,7 @@
                     <instructions>
                         <Import-Package>
                             !org.apache.felix.gogo.runtime.*,
+                            !org.apache.karaf.shell.inject.impl,
                             org.osgi.service.event;resolution:=optional,
                             org.apache.karaf.branding;resolution:=optional,
                             org.apache.sshd.agent*;resolution:=optional,
@@ -159,6 +165,9 @@
                         <Private-Package>
                         	org.apache.karaf.shell.console.impl*,
                             org.apache.karaf.shell.security.impl*,
+                            org.apache.karaf.shell.inject.impl*,
+                            org.apache.felix.utils.extender,
+                            org.apache.felix.utils.manifest
                         </Private-Package>
                         <Main-Class>
                             org.apache.karaf.shell.console.impl.Main
