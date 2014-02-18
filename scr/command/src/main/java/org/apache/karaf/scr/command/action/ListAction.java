@@ -22,6 +22,7 @@ import org.apache.karaf.scr.command.ScrCommandConstants;
 import org.apache.karaf.scr.command.ScrUtils;
 import org.apache.karaf.scr.command.support.IdComparator;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.inject.Service;
 
 import java.util.Arrays;
 
@@ -29,6 +30,7 @@ import java.util.Arrays;
  * Lists all the components currently installed.
  */
 @Command(scope = ScrCommandConstants.SCR_COMMAND, name = ScrCommandConstants.LIST_FUNCTION, description = "Displays a list of available components")
+@Service
 public class ListAction extends ScrActionSupport {
 
     private final IdComparator idComparator = new IdComparator();

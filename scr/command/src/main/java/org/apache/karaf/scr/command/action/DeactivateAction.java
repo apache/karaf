@@ -23,11 +23,15 @@ import org.apache.felix.scr.Component;
 import org.apache.felix.scr.ScrService;
 import org.apache.karaf.scr.command.ScrCommandConstants;
 import org.apache.karaf.shell.commands.Completer;
+import org.apache.karaf.shell.inject.Destroy;
+import org.apache.karaf.shell.inject.Init;
+import org.apache.karaf.shell.inject.Service;
 
 /**
  * Deactivates the given component by supplying its component name.
  */
 @Command(scope = ScrCommandConstants.SCR_COMMAND, name = ScrCommandConstants.DEACTIVATE_FUNCTION, description = "Deactivates a Component for the given name")
+@Service
 public class DeactivateAction extends ScrActionSupport {
 
     @Argument(index = 0, name = "name", description = "The name of the Component to deactivate ", required = true, multiValued = false)

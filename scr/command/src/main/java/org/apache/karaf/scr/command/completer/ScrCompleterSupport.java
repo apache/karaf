@@ -23,6 +23,7 @@ import org.apache.felix.scr.ScrService;
 import org.apache.karaf.scr.command.action.ScrActionSupport;
 import org.apache.karaf.shell.console.Completer;
 import org.apache.karaf.shell.console.completer.StringsCompleter;
+import org.apache.karaf.shell.inject.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +31,7 @@ public abstract class ScrCompleterSupport implements Completer {
 
     protected final transient Logger logger = LoggerFactory.getLogger(ScrCompleterSupport.class);
 
+    @Reference
     private ScrService scrService;
 
     /**

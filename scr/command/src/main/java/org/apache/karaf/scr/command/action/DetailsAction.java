@@ -25,6 +25,7 @@ import org.apache.karaf.scr.command.completer.DetailsCompleter;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Completer;
+import org.apache.karaf.shell.inject.Service;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentConstants;
@@ -35,6 +36,7 @@ import java.util.Hashtable;
  * Displays the details associated with a given component by supplying its component name.
  */
 @Command(scope = ScrCommandConstants.SCR_COMMAND, name = ScrCommandConstants.DETAILS_FUNCTION, description = "Displays a list of available components")
+@Service
 public class DetailsAction extends ScrActionSupport {
 
     @Argument(index = 0, name = "name", description = "The name of the Component to display the details of", required = true, multiValued = false)

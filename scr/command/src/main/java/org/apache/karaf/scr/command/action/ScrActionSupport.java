@@ -25,6 +25,7 @@ import org.apache.karaf.shell.console.AbstractAction;
 import org.apache.karaf.shell.console.CommandSessionHolder;
 import org.apache.karaf.shell.console.SubShellAction;
 import org.apache.karaf.shell.console.completer.ArgumentCompleter;
+import org.apache.karaf.shell.inject.Reference;
 import org.fusesource.jansi.Ansi;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
@@ -45,6 +46,7 @@ public abstract class ScrActionSupport extends AbstractAction {
     
     protected final Logger logger = LoggerFactory.getLogger(getClass().getName());
 
+    @Reference
     private ScrService scrService;
 
     public ScrActionSupport() {
