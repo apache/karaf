@@ -149,6 +149,7 @@
                             org.apache.karaf.shell.console.commands;version=2.3.0,
                         	org.apache.karaf.shell.console.completer;version=${project.version},
                             org.apache.karaf.shell.console.completer;version=2.3.0,
+                            org.apache.karaf.shell.inject;version=${project.version},
                         	org.apache.karaf.shell.util;version=${project.version},
                             org.apache.karaf.shell.util;version=2.3.0,
                             org.apache.felix.gogo*;version=${felix.gogo.version},
