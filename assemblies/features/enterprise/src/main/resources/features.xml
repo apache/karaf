@@ -103,12 +103,6 @@
         <feature>jpa</feature>
     </feature>
 
-    <feature name="hibernate-envers" description="Hibernate Envers 3.x" version="${hibernate3.version}" resolver="(obr)">
-        <details>Enable Hibernate Envers 3.x</details>
-        <feature version="${hibernate3.version}">hibernate</feature>
-        <bundle start-level="100">mvn:org.hibernate/hibernate-envers/${hibernate3.version}</bundle>
-    </feature>
-
     <feature name="hibernate" description="Hibernate 4.2.x JPA persistence engine support" version="${hibernate42.version}" resolver="(obr)">
         <details>Enable Hibernate 4.2.x as persistence engine.</details>
         <feature>transaction</feature>
