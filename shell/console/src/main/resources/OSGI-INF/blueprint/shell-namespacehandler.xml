@@ -33,4 +33,10 @@
         </service-properties>
     </service>
 
+    <service ref="namespaceHandler" interface="org.apache.aries.blueprint.NamespaceHandler">
+        <service-properties>
+            <entry key="osgi.service.blueprint.namespace" value="http://karaf.apache.org/xmlns/shell/v1.2.0" />
+        </service-properties>
+    </service>
+
 </blueprint>
