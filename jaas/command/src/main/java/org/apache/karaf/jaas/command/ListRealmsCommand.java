@@ -20,12 +20,14 @@ import org.apache.karaf.jaas.boot.ProxyLoginModule;
 import org.apache.karaf.jaas.config.JaasRealm;
 import org.apache.karaf.jaas.modules.BackingEngine;
 import org.apache.karaf.shell.commands.Option;
+import org.apache.karaf.shell.inject.Service;
 import org.apache.karaf.shell.table.ShellTable;
 
 import javax.security.auth.login.AppConfigurationEntry;
 import java.util.List;
 
 @Command(scope = "jaas", name = "realm-list", description = "List JAAS realms")
+@Service
 public class ListRealmsCommand extends JaasCommandSupport {
 
     @Option(name = "--no-format", description = "Disable table rendered output", required = false, multiValued = false)

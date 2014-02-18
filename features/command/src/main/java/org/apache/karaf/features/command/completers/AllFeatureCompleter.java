@@ -17,10 +17,12 @@
 package org.apache.karaf.features.command.completers;
 
 import org.apache.karaf.features.Feature;
+import org.apache.karaf.shell.inject.Service;
 
 /**
- * {@link jline.Completor} for available features.
+ * {@link org.apache.karaf.shell.console.Completer} for available features.
  */
+@Service
 public class AllFeatureCompleter extends FeatureCompleterSupport {
 
     @Override

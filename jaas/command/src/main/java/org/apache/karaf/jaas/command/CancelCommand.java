@@ -17,10 +17,12 @@ package org.apache.karaf.jaas.command;
 
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.jaas.modules.BackingEngine;
+import org.apache.karaf.shell.inject.Service;
 
 import java.util.LinkedList;
 
 @Command(scope = "jaas", name = "cancel", description = "Cancel the modification of a JAAS realm")
+@Service
 public class CancelCommand extends JaasCommandSupport {
 
     @Override

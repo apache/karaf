@@ -21,12 +21,14 @@ import java.util.List;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.console.AbstractAction;
+import org.apache.karaf.shell.inject.Service;
 import org.apache.karaf.util.process.PumpStreamHandler;
 
 /**
  * Execute system processes.
  */
 @Command(scope = "shell", name = "exec", description = "Executes system processes.")
+@Service
 public class ExecuteAction extends AbstractAction {
 
     @Argument(index = 0, name = "command", description = "Execution command with arguments", required = true, multiValued = true)

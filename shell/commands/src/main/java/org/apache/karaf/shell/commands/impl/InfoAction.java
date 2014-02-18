@@ -40,15 +40,15 @@ import java.util.Properties;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.InfoProvider;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
+import org.apache.karaf.shell.inject.Service;
 import org.fusesource.jansi.Ansi;
 
 @Command(scope = "shell", name = "info", description = "Prints system information.")
+@Service
 public class InfoAction extends OsgiCommandSupport {
 
     private NumberFormat fmtI = new DecimalFormat("###,###", new DecimalFormatSymbols(Locale.ENGLISH));
     private NumberFormat fmtD = new DecimalFormat("###,##0.000", new DecimalFormatSymbols(Locale.ENGLISH));
-
-    private List<InfoProvider> infoProviders = new LinkedList<InfoProvider>();
 
     protected Object doExecute() throws Exception {
         int maxNameLen;
@@ -119,6 +119,7 @@ public class InfoAction extends OsgiCommandSupport {
 
         //Display Information from external information providers.
         Map<String, Map<Object, Object>> properties = new HashMap<String, Map<Object, Object>>();
+        List<InfoProvider> infoProviders = getAllServices(InfoProvider.class);
         if (infoProviders != null) {
 
             // dump all properties to Map, KARAF-425
@@ -220,11 +221,4 @@ public class InfoAction extends OsgiCommandSupport {
         return sb.toString();
     }
 
-    public List<InfoProvider> getInfoProviders() {
-        return infoProviders;
-    }
-
-    public void setInfoProviders(List<InfoProvider> infoProviders) {
-        this.infoProviders = infoProviders;
-    }
 }

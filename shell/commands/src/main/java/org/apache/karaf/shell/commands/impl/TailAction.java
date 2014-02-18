@@ -29,8 +29,10 @@ import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.AbstractAction;
+import org.apache.karaf.shell.inject.Service;
 
 @Command(scope = "shell", name = "tail", description = "Displays the last lines of a file.")
+@Service
 public class TailAction extends AbstractAction {
 
     private static final int DEFAULT_NUMBER_OF_LINES = 10;

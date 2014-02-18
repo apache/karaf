@@ -18,8 +18,10 @@ package org.apache.karaf.jaas.command;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.jaas.modules.BackingEngine;
+import org.apache.karaf.shell.inject.Service;
 
 @Command(scope = "jaas", name = "role-delete", description = "Delete a role from a user")
+@Service
 public class RoleDeleteCommand extends JaasCommandSupport {
 
     @Argument(index = 0, name = "username", description = "User Name", required = true, multiValued = false)

@@ -18,31 +18,24 @@ package org.apache.karaf.features.command;
 
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
-import org.osgi.framework.ServiceReference;
+import org.apache.karaf.shell.inject.Reference;
 
 public abstract class FeaturesCommandSupport extends OsgiCommandSupport {
 
-    protected Object doExecute() throws Exception {
-        ServiceReference<FeaturesService> ref = getBundleContext().getServiceReference(FeaturesService.class);
-        if (ref == null) {
-            System.out.println("FeaturesService service is unavailable.");
-            return null;
-        }
-        try {
-            FeaturesService admin = (FeaturesService) getBundleContext().getService(ref);
-            if (admin == null) {
-                System.out.println("FeaturesService service is unavailable.");
-                return null;
-            }
+    @Reference
+    private FeaturesService featuresService;
 
-            doExecute(admin);
+    protected Object doExecute() throws Exception {
+        if (featuresService == null) {
+            featuresService = getService(FeaturesService.class);
         }
-        finally {
-            getBundleContext().ungetService(ref);
-        }
+        doExecute(featuresService);
         return null;
     }
 
     protected abstract void doExecute(FeaturesService admin) throws Exception;
 
+    public void setFeaturesService(FeaturesService featuresService) {
+        this.featuresService = featuresService;
+    }
 }

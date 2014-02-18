@@ -22,6 +22,7 @@ import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.shell.console.Completer;
 import org.apache.karaf.shell.console.completer.StringsCompleter;
+import org.apache.karaf.shell.inject.Reference;
 
 /**
  * Base completer for feature commands.
@@ -31,6 +32,7 @@ public abstract class FeatureCompleterSupport implements Completer {
     /**
      * Feature service.
      */
+    @Reference
     protected FeaturesService featuresService;
 
     public void setFeaturesService(FeaturesService featuresService) {

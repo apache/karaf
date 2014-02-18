@@ -20,12 +20,14 @@ import jline.console.history.History;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.AbstractAction;
+import org.apache.karaf.shell.inject.Service;
 import org.fusesource.jansi.Ansi;
 
 /**
  * History command
  */
 @Command(scope = "shell", name="history", description="Prints command history.")
+@Service
 public class HistoryAction extends AbstractAction {
 
     @Option(name = "-c", aliases = { "--clear" }, description = "Clears the shell command history.", required = false, multiValued = false)

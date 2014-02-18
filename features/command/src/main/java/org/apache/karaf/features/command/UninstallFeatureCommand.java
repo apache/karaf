@@ -21,10 +21,12 @@ import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.shell.commands.Completer;
+import org.apache.karaf.shell.inject.Service;
 
 import java.util.List;
 
 @Command(scope = "feature", name = "uninstall", description = "Uninstalls a feature with the specified name and version.")
+@Service
 public class UninstallFeatureCommand extends FeaturesCommandSupport {
 
     @Argument(index = 0, name = "features", description = "The name and version of the features to uninstall. A feature id looks like name/version. The version is optional.", required = true, multiValued = true)

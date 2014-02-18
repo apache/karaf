@@ -75,6 +75,7 @@ import static java.lang.String.format;
  * installing the needed bundles.
  */
 public class FeaturesServiceImpl implements FeaturesService {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(FeaturesServiceImpl.class);
 
     private static final int KARAF_BUNDLE_START_LEVEL =
@@ -95,6 +96,7 @@ public class FeaturesServiceImpl implements FeaturesService {
     private ThreadLocal<Repository> repo = new ThreadLocal<Repository>();
     private EventAdminListener eventAdminListener;
     private String overrides;
+    private FeatureFinder featureFinder;
     
     public FeaturesServiceImpl(BundleManager bundleManager) {
         this(bundleManager, null);
@@ -123,6 +125,14 @@ public class FeaturesServiceImpl implements FeaturesService {
 
     public void setOverrides(String overrides) {
         this.overrides = overrides;
+    }
+
+    public FeatureFinder getFeatureFinder() {
+        return featureFinder;
+    }
+
+    public void setFeatureFinder(FeatureFinder featureFinder) {
+        this.featureFinder = featureFinder;
     }
 
     public void registerListener(FeaturesListener listener) {
@@ -753,6 +763,16 @@ public class FeaturesServiceImpl implements FeaturesService {
             }
             return feature;
         }
+    }
+
+    @Override
+    public URI getRepositoryUriFor(String name, String version) {
+        return featureFinder.getUriFor(name, version);
+    }
+
+    @Override
+    public String[] getRepositoryNames() {
+        return featureFinder.getNames();
     }
 
     protected Map<String, Map<String, Feature>> getFeatures() throws Exception {

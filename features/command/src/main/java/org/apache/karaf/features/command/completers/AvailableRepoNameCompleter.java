@@ -19,23 +19,28 @@ package org.apache.karaf.features.command.completers;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.karaf.features.command.FeatureFinder;
+import org.apache.karaf.features.FeaturesService;
+import org.apache.karaf.features.internal.FeatureFinder;
 import org.apache.karaf.shell.console.Completer;
 import org.apache.karaf.shell.console.completer.StringsCompleter;
+import org.apache.karaf.shell.inject.Reference;
+import org.apache.karaf.shell.inject.Service;
 
 /**
  * Shows the list of feature repos that can be installed with their short name
  */
+@Service
 public class AvailableRepoNameCompleter implements Completer {
 
-    FeatureFinder featureFinder;
+    @Reference
+    private FeaturesService featuresService;
 
-    public void setFeatureFinder(FeatureFinder featureFinder) {
-        this.featureFinder = featureFinder;
+    public void setFeaturesService(FeaturesService featuresService) {
+        this.featuresService = featuresService;
     }
 
     public int complete(final String buffer, final int cursor, @SuppressWarnings("rawtypes") final List candidates) {
-        StringsCompleter delegate = new StringsCompleter(Arrays.asList(featureFinder.getNames()));
+        StringsCompleter delegate = new StringsCompleter(Arrays.asList(featuresService.getRepositoryNames()));
         return delegate.complete(buffer, cursor, candidates);
     }
 

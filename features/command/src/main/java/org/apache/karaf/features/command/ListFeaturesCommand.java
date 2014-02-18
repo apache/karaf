@@ -26,9 +26,11 @@ import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
+import org.apache.karaf.shell.inject.Service;
 import org.apache.karaf.shell.table.ShellTable;
 
 @Command(scope = "feature", name = "list", description = "Lists all existing features available from the defined repositories.")
+@Service
 public class ListFeaturesCommand extends FeaturesCommandSupport {
 
     @Option(name = "-i", aliases = {"--installed"}, description = "Display a list of all installed features only", required = false, multiValued = false)

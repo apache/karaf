@@ -72,7 +72,16 @@
         <property name="respectStartLvlDuringFeatureUninstall" value="$[respectStartLvlDuringFeatureUninstall]"/>
         <property name="resolverTimeout" value="$[resolverTimeout]"/>
         <property name="overrides" value="$[overrides]"/>
+        <property name="featureFinder" ref="featureFinder" />
     </bean>
+
+
+    <bean id="featureFinder" class="org.apache.karaf.features.internal.FeatureFinder"/>
+    <service ref="featureFinder" interface="org.osgi.service.cm.ManagedService" >
+        <service-properties>
+            <entry key="service.pid" value="org.apache.karaf.features.repos" />
+        </service-properties>
+    </service>
 
     <bean id="bootFeaturesInstaller" class="org.apache.karaf.features.internal.BootFeaturesInstaller"
           init-method="start">

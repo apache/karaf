@@ -20,12 +20,14 @@ import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.AbstractAction;
+import org.apache.karaf.shell.inject.Service;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @Command(scope = "shell", name = "date", description = "Display the current time in the given FORMAT")
+@Service
 public class DateAction extends AbstractAction {
 
     @Option(name = "-d", aliases = { "--date" }, description = "Display time described, not now", multiValued = false, required = false)

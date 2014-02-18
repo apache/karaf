@@ -23,6 +23,7 @@ import org.apache.karaf.shell.commands.Completer;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.jaas.config.JaasRealm;
 import org.apache.karaf.jaas.modules.BackingEngine;
+import org.apache.karaf.shell.inject.Service;
 
 import javax.security.auth.login.AppConfigurationEntry;
 import java.util.LinkedList;
@@ -30,6 +31,7 @@ import java.util.List;
 import java.util.Queue;
 
 @Command(scope = "jaas", name = "realm-manage", description = "Manage users and roles of a JAAS Realm")
+@Service
 public class ManageRealmCommand extends JaasCommandSupport {
 
     @Option(name = "--realm", description = "JAAS Realm", required = false, multiValued = false)

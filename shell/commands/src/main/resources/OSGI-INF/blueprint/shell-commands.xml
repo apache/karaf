@@ -19,98 +19,8 @@
 -->
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" default-activation="lazy">
 
-    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
-        <command>
-            <action class="org.apache.karaf.shell.commands.impl.AliasAction"/>
-        </command>
-        <command>
-            <action class="org.apache.karaf.shell.commands.impl.CatAction"/>
-        </command>
-        <command>
-            <action class="org.apache.karaf.shell.commands.impl.ClearAction"/>
-        </command>
-        <command>
-            <action class="org.apache.karaf.shell.commands.impl.CompletionAction"/>
-        </command>
-        <command>
-            <action class="org.apache.karaf.shell.commands.impl.DateAction"/>
-        </command>
-        <command>
-            <action class="org.apache.karaf.shell.commands.impl.EachAction"/>
-        </command>
-        <command>
-            <action class="org.apache.karaf.shell.commands.impl.EchoAction"/>
-        </command>
-        <command>
-            <action class="org.apache.karaf.shell.commands.impl.ExecuteAction"/>
-        </command>
-        <command>
-            <action class="org.apache.karaf.shell.commands.impl.GrepAction"/>
-        </command>
-        <command>
-            <action class="org.apache.karaf.shell.commands.impl.HistoryAction"/>
-        </command>
-        <command>
-            <action class="org.apache.karaf.shell.commands.impl.HeadAction"/>
-        </command>
-        <command>
-            <action class="org.apache.karaf.shell.commands.impl.IfAction"/>
-        </command>
-        <command>
-            <action class="org.apache.karaf.shell.commands.impl.InfoAction">
-                <property name="infoProviders" ref="infoProviders"/>
-            </action>
-        </command>
-        <command>
-            <action class="org.apache.karaf.shell.commands.impl.JavaAction"/>
-        </command>
-        <command>
-            <action class="org.apache.karaf.shell.commands.impl.MoreAction"/>
-        </command>
-        <command>
-            <action class="org.apache.karaf.shell.commands.impl.NewAction"/>
-        </command>
-        <command>
-            <action class="org.apache.karaf.shell.commands.impl.PrintStackTracesAction"/>
-        </command>
-        <command>
-            <action class="org.apache.karaf.shell.commands.impl.LogoutAction"/>
-        </command>
-        <command>
-            <action class="org.apache.karaf.shell.commands.impl.PrintfAction"/>
-        </command>
-        <command>
-            <action class="org.apache.karaf.shell.commands.impl.SleepAction"/>
-        </command>
-        <command>
-            <action class="org.apache.karaf.shell.commands.impl.SortAction"/>
-        </command>
-        <command>
-            <action class="org.apache.karaf.shell.commands.impl.SourceAction"/>
-        </command>
-        <command>
-            <action class="org.apache.karaf.shell.commands.impl.TacAction"/>
-        </command>
-        <command>
-            <action class="org.apache.karaf.shell.commands.impl.TailAction"/>
-        </command>
-        <command>
-            <action class="org.apache.karaf.shell.commands.impl.ThreadsAction"/>
-        </command>
-        <command>
-            <action class="org.apache.karaf.shell.commands.impl.WatchAction">
-                <property name="commandProcessor" ref="commandProcessor"/>
-            </action>
-        </command>
-        <command>
-            <action class="org.apache.karaf.shell.commands.impl.WcAction"/>
-        </command>
-        <command>
-            <action class="org.apache.karaf.shell.commands.impl.EditAction">
-                <property name="editorFactory" ref="editorFactory"/>
-            </action>
-        </command>
-    </command-bundle>
+    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.2.0"
+                    scan="org.apache.karaf.shell.commands.impl" />
 
    <bean id="commandCompleter" class="org.apache.karaf.shell.console.completer.CommandsCompleter"/>
    <service ref="commandCompleter" auto-export="all-classes"/>
@@ -126,11 +36,4 @@
         </argument>
     </bean>
 
-    <reference-list id="infoProviders" interface="org.apache.karaf.shell.commands.impl.info.InfoProvider"
-        availability="optional">
-    </reference-list>
-
-    <reference id="commandProcessor" interface="org.apache.felix.service.command.CommandProcessor"/>
-    <reference id="editorFactory" interface="org.jledit.EditorFactory"/>
- 
 </blueprint>

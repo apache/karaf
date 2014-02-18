@@ -31,11 +31,13 @@ import java.util.List;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.console.AbstractAction;
+import org.apache.karaf.shell.inject.Service;
 
 /**
  * TODO
  */
 @Command(scope = "shell", name = "source", description = "Run a script")
+@Service
 public class SourceAction extends AbstractAction {
 
     @Argument(index = 0, name = "script", description = "A URI pointing to the script", required = true, multiValued = false)

@@ -20,11 +20,13 @@ import org.apache.felix.service.command.Function;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.console.AbstractAction;
+import org.apache.karaf.shell.inject.Service;
 
 /**
  * Execute a closure on a list of arguments.
  */
 @Command(scope = "shell", name = "if", description = "If/Then/Else block.")
+@Service
 public class IfAction extends AbstractAction {
 
     @Argument(name = "condition", index = 0, multiValued = false, required = true, description = "The condition")

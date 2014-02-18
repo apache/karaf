@@ -22,15 +22,19 @@ import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
 import org.apache.karaf.shell.console.Completer;
 import org.apache.karaf.shell.console.completer.StringsCompleter;
+import org.apache.karaf.shell.inject.Reference;
+import org.apache.karaf.shell.inject.Service;
 
 /**
- * {@link jline.Completor} for Feature Repository URLs.
+ * {@link Completer} for Feature Repository URLs.
  *
  * Displays a list of currently installed Feature repositories.
  *
  */
+@Service
 public class InstalledRepoNameCompleter implements Completer {
 
+    @Reference
     private FeaturesService featuresService;
 
     public void setFeaturesService(FeaturesService featuresService) {

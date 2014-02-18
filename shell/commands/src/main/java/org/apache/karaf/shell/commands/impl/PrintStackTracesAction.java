@@ -20,12 +20,14 @@ import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.console.AbstractAction;
 import org.apache.karaf.shell.console.SessionProperties;
+import org.apache.karaf.shell.inject.Service;
 
 /**
  * Command for showing the full tree of bundles that have been used to resolve
  * a given bundle.
  */
 @Command(scope = "shell", name = "stack-traces-print", description = "Prints the full stack trace in the console when the execution of a command throws an exception.")
+@Service
 public class PrintStackTracesAction extends AbstractAction {
 
     @Argument(name = "print", description="Print stack traces or not", required = false, multiValued = false)

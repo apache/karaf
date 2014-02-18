@@ -31,11 +31,14 @@ import jline.Terminal;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.console.AbstractAction;
+import org.apache.karaf.shell.inject.Reference;
+import org.apache.karaf.shell.inject.Service;
 import org.apache.karaf.util.StreamUtils;
 import org.jledit.ConsoleEditor;
 import org.jledit.EditorFactory;
 
 @Command(scope = "shell", name = "edit", description = "Calls a text editor.")
+@Service
 public class EditAction extends AbstractAction {
 
     private final Pattern URL_PATTERN = Pattern.compile("[^: ]+:[^ ]+");
@@ -43,6 +46,7 @@ public class EditAction extends AbstractAction {
     @Argument(index = 0, name = "url", description = "The url of the resource to edit.", required = true, multiValued = false)
     private String url;
 
+    @Reference
     private EditorFactory editorFactory;
 
     @Override

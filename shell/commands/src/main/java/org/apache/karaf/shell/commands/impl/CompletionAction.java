@@ -20,11 +20,13 @@ import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.console.AbstractAction;
 import org.apache.karaf.shell.console.SessionProperties;
+import org.apache.karaf.shell.inject.Service;
 
 /**
  * Command to change the completion mode while using the shell console.
  */
 @Command(scope = "shell", name = "completion", description = "Display or change the completion mode on the current console session.")
+@Service
 public class CompletionAction extends AbstractAction {
 
     @Argument(index = 0, name = "mode", description = "The completion mode to set. The valid completion modes are: global, first, subshell.", required = false, multiValued = false)

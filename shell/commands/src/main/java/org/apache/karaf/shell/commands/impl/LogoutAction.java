@@ -19,8 +19,10 @@ package org.apache.karaf.shell.commands.impl;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.console.AbstractAction;
 import org.apache.karaf.shell.console.CloseShellException;
+import org.apache.karaf.shell.inject.Service;
 
 @Command(scope = "shell", name = "logout", description = "Disconnects shell from current session.")
+@Service
 public class LogoutAction extends AbstractAction {
 
     protected Object doExecute() throws Exception {

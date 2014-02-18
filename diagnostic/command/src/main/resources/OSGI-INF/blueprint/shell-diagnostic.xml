@@ -19,17 +19,7 @@
 -->
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" default-activation="lazy">
 
-    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
-        <command>
-            <action class="org.apache.karaf.diagnostic.command.DumpCommand">
-                <property name="providers" ref="providers"/>
-            </action>
-        </command>
-    </command-bundle>
-
-
-    <reference-list id="providers" interface="org.apache.karaf.diagnostic.core.DumpProvider"
-        availability="optional">
-    </reference-list>
+    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.2.0"
+                    scan="org.apache.karaf.diagnostic.command.*" />
 
 </blueprint>

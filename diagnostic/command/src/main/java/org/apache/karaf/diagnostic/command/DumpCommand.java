@@ -38,11 +38,6 @@ import org.apache.karaf.shell.console.OsgiCommandSupport;
 public class DumpCommand extends OsgiCommandSupport {
 
     /**
-     * Registered dump providers.
-     */
-    private List<DumpProvider> providers = new LinkedList<DumpProvider>();
-
-    /**
      * Output format of the filename if not defined otherwise
      */
     private SimpleDateFormat dumpFormat = new SimpleDateFormat("yyyy-MM-dd_HHmmss");
@@ -62,6 +57,8 @@ public class DumpCommand extends OsgiCommandSupport {
     @Override
     protected Object doExecute() throws Exception {
         DumpDestination destination;
+
+        List<DumpProvider> providers = getAllServices(DumpProvider.class);
 
         if (providers.isEmpty()) {
             session.getConsole().println("Unable to create dump. No providers were found");
@@ -93,12 +90,4 @@ public class DumpCommand extends OsgiCommandSupport {
         return null;
     }
 
-    /**
-     * Sets dump providers to use.
-     * 
-     * @param providers Providers.
-     */
-    public void setProviders(List<DumpProvider> providers) {
-        this.providers = providers;
-    }
 }

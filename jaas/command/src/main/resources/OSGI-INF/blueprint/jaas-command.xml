@@ -19,70 +19,11 @@
 -->
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
 
-    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
-        <command>
-            <action class="org.apache.karaf.jaas.command.ManageRealmCommand">
-                <property name="realms" ref="realms"/>
-            </action>
-        </command>
-        <command>
-            <action class="org.apache.karaf.jaas.command.UpdateCommand">
-                <property name="backingEngineService" ref="engineService"/>
-            </action>
-        </command>
-        <command>
-            <action class="org.apache.karaf.jaas.command.CancelCommand"/>
-        </command>
-        <command>
-            <action class="org.apache.karaf.jaas.command.ListPendingCommand"/>
-        </command>
-        <command>
-            <action class="org.apache.karaf.jaas.command.ListUsersCommand">
-                <property name="backingEngineService" ref="engineService"/>
-            </action>
-        </command>
-        <command>
-            <action class="org.apache.karaf.jaas.command.ListRealmsCommand">
-                <property name="realms" ref="realms"/>
-            </action>
-        </command>
-        <command>
-            <action class="org.apache.karaf.jaas.command.UserAddCommand"/>
-        </command>
-        <command>
-            <action class="org.apache.karaf.jaas.command.UserDeleteCommand"/>
-        </command>
-        <command>
-            <action class="org.apache.karaf.jaas.command.RoleAddCommand"/>
-        </command>
-        <command>
-            <action class="org.apache.karaf.jaas.command.RoleDeleteCommand"/>
-        </command>
-        <command>
-            <action class="org.apache.karaf.jaas.command.GroupAddCommand"/>
-        </command>
-        <command>
-            <action class="org.apache.karaf.jaas.command.GroupDeleteCommand"/>
-        </command>
-        <command>
-            <action class="org.apache.karaf.jaas.command.GroupRoleAddCommand"/>
-        </command>
-        <command>
-            <action class="org.apache.karaf.jaas.command.GroupRoleDeleteCommand"/>
-        </command>
-    </command-bundle>
+    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.2.0"
+                    scan="org.apache.karaf.jaas.command" />
 
     <!-- JAAS Realms -->
     <reference-list id="realms" interface="org.apache.karaf.jaas.config.JaasRealm" availability="optional"/>
-
-    <!-- Backing Engine Service -->
-    <bean id="engineService" class="org.apache.karaf.jaas.modules.BackingEngineService">
-        <property name="engineFactories" ref="engineFactories"/>
-    </bean>
-
-    <!-- Backing Engine Factories -->
-    <reference-list id="engineFactories" interface="org.apache.karaf.jaas.modules.BackingEngineFactory"
-                    availability="optional"/>
 
     <!-- Completers -->
     <bean id="realmCompleter" class="org.apache.karaf.jaas.command.completers.RealmCompleter">

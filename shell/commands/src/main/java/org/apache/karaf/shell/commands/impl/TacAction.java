@@ -28,12 +28,14 @@ import java.io.Writer;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.AbstractAction;
+import org.apache.karaf.shell.inject.Service;
 
 /**
  * Grab the text from the standard input and return it as a string.
  * Also write this text to a file if specified
  */
 @Command(scope = "shell", name = "tac", description = "Captures the STDIN and returns it as a string. Optionally writes the content to a file.")
+@Service
 public class TacAction extends AbstractAction {
 
     @Option(name = "-f", aliases = {}, description = "Outputs the content to the given file", required = false, multiValued = false)

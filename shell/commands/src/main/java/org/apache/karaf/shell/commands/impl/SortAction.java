@@ -38,11 +38,13 @@ import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.AbstractAction;
+import org.apache.karaf.shell.inject.Service;
 
 /**
  * Sort lines of text
  */
 @Command(scope = "shell", name = "sort", description = "Writes sorted concatenation of all files to standard output.")
+@Service
 public class SortAction extends AbstractAction {
 
     @Option(name = "-f", aliases = { "-ignore-case" }, description = "fold lower case to upper case characters", required = false, multiValued = false)

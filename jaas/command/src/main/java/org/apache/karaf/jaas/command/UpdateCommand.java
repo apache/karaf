@@ -18,12 +18,14 @@ package org.apache.karaf.jaas.command;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.jaas.config.JaasRealm;
 import org.apache.karaf.jaas.modules.BackingEngine;
+import org.apache.karaf.shell.inject.Service;
 
 import javax.security.auth.login.AppConfigurationEntry;
 import java.util.LinkedList;
 import java.util.Queue;
 
 @Command(scope = "jaas", name = "update", description = "Apply pending modification on the edited JAAS Realm")
+@Service
 public class UpdateCommand extends JaasCommandSupport {
 
     @Override
@@ -36,7 +38,7 @@ public class UpdateCommand extends JaasCommandSupport {
             return null;
         }
 
-        BackingEngine engine = backingEngineService.get(entry);
+        BackingEngine engine = getBackingEngine(entry);
 
         if (engine == null) {
             System.err.println("Can't update the JAAS realm (no backing engine service registered)");

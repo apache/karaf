@@ -32,6 +32,7 @@ import org.apache.karaf.shell.commands.Completer;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.AbstractAction;
 import org.apache.karaf.shell.console.completer.CommandsCompleter;
+import org.apache.karaf.shell.inject.Reference;
 
 @Command(scope = "shell", name = "watch", description = "Watches & refreshes the output of a command")
 public class WatchAction extends AbstractAction {
@@ -46,7 +47,9 @@ public class WatchAction extends AbstractAction {
     @Completer(CommandsCompleter.class)
     private String[] arguments;
 
+    @Reference
     CommandProcessor commandProcessor;
+
     private ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
 
     @Override

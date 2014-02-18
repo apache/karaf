@@ -82,4 +82,9 @@ public interface FeaturesService {
     Feature getFeature(String name) throws Exception;
 
 	void refreshRepository(URI uri) throws Exception;
+
+    public URI getRepositoryUriFor(String name, String version);
+
+    public String[] getRepositoryNames();
+
 }

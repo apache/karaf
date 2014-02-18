@@ -24,10 +24,11 @@ import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Completer;
 import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.console.AbstractAction;
+import org.apache.karaf.shell.inject.Service;
 
 @Command(scope = "feature", name = "repo-add", description = "Add a features repository")
-public class RepoAddCommand extends AbstractAction {
+@Service
+public class RepoAddCommand extends FeaturesCommandSupport {
 
     @Argument(index = 0, name = "name/url", description = "Shortcut name of the features repository or the full URL", required = true, multiValued = false)
     @Completer(AvailableRepoNameCompleter.class)
@@ -38,27 +39,16 @@ public class RepoAddCommand extends AbstractAction {
 
     @Option(name = "-i", aliases = { "--install" }, description = "Install all features contained in the features repository", required = false, multiValued = false)
     private boolean install;
-    
-    private FeatureFinder featureFinder;
-    private FeaturesService featuresService;
-    
-    public void setFeatureFinder(FeatureFinder featureFinder) {
-        this.featureFinder = featureFinder;
-    }
 
-    public void setFeaturesService(FeaturesService featuresService) {
-        this.featuresService = featuresService;
-    }
-
-    protected Object doExecute() throws Exception {
+    @Override
+    protected void doExecute(FeaturesService featuresService) throws Exception {
         String effectiveVersion = (version == null) ? "LATEST" : version;
-        URI uri = featureFinder.getUriFor(nameOrUrl, effectiveVersion);
+        URI uri = featuresService.getRepositoryUriFor(nameOrUrl, effectiveVersion);
         if (uri == null) {
             uri = new URI(nameOrUrl);
         }
         System.out.println("Adding feature url " + uri);
         featuresService.addRepository(uri, install);
-        return null;
     }
 
 }

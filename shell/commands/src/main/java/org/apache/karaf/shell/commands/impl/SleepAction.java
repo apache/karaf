@@ -20,8 +20,10 @@ import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.AbstractAction;
+import org.apache.karaf.shell.inject.Service;
 
 @Command(scope = "shell", name = "sleep", description = "Sleeps for a bit then wakes up.")
+@Service
 public class SleepAction extends AbstractAction {
 
     @Argument(index = 0, name = "duration", description = "The amount of time to sleep. The default time unit is millisecond, use -s option to use second instead.", required = true, multiValued = false)

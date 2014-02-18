@@ -18,11 +18,13 @@ package org.apache.karaf.shell.commands.impl;
 
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.console.AbstractAction;
+import org.apache.karaf.shell.inject.Service;
 
 /**
  * A command to clear the console buffer
  */
 @Command(scope = "shell", name = "clear", description = "Clears the console buffer.")
+@Service
 public class ClearAction extends AbstractAction {
 
 	protected Object doExecute() throws Exception {

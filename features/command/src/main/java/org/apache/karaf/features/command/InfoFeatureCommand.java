@@ -32,8 +32,10 @@ import org.apache.karaf.features.ConfigFileInfo;
 import org.apache.karaf.features.Dependency;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
+import org.apache.karaf.shell.inject.Service;
 
 @Command(scope = "feature", name = "info", description = "Shows information about selected feature.")
+@Service
 public class InfoFeatureCommand extends FeaturesCommandSupport {
 
     private static final String INDENT = "  ";

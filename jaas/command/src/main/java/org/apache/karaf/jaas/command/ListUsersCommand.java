@@ -22,6 +22,7 @@ import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.apache.karaf.jaas.config.JaasRealm;
 import org.apache.karaf.jaas.modules.BackingEngine;
 import org.apache.karaf.shell.commands.Option;
+import org.apache.karaf.shell.inject.Service;
 import org.apache.karaf.shell.table.ShellTable;
 
 import javax.security.auth.login.AppConfigurationEntry;
@@ -29,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Command(scope = "jaas", name = "user-list", description = "List the users of the selected JAAS realm/login module")
+@Service
 public class ListUsersCommand extends JaasCommandSupport {
 
     @Option(name = "--no-format", description = "Disable table rendered output", required = false, multiValued = false)
@@ -44,7 +46,7 @@ public class ListUsersCommand extends JaasCommandSupport {
             return null;
         }
 
-        BackingEngine engine = backingEngineService.get(entry);
+        BackingEngine engine = getBackingEngine(entry);
 
         if (engine == null) {
             System.err.println("Can't get the list of users (no backing engine service found)");

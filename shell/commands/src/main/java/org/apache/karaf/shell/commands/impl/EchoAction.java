@@ -22,8 +22,10 @@ import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.AbstractAction;
+import org.apache.karaf.shell.inject.Service;
 
 @Command(scope = "shell", name = "echo", description="Echoes or prints arguments to STDOUT.")
+@Service
 public class EchoAction extends AbstractAction
 {
     @Option(name = "-n", aliases = {}, description = "Do not print the trailing newline character", required = false, multiValued = false)

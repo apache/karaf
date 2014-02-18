@@ -23,6 +23,7 @@ import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.AbstractAction;
+import org.apache.karaf.shell.inject.Service;
 
 /**
  * Execute a Java standard application.
@@ -32,6 +33,7 @@ import org.apache.karaf.shell.console.AbstractAction;
  * to execute instead.
  */
 @Command(scope = "shell", name = "java", description = "Executes a Java standard application.")
+@Service
 public class JavaAction extends AbstractAction {
 
     @Option(name = "-m", aliases = {"--method"}, description = "Invoke a named method", required = false, multiValued = false)

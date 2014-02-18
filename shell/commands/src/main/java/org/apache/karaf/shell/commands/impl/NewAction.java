@@ -22,6 +22,7 @@ import org.apache.karaf.shell.commands.converter.DefaultConverter;
 import org.apache.karaf.shell.commands.converter.GenericType;
 import org.apache.karaf.shell.commands.converter.ReifiedType;
 import org.apache.karaf.shell.console.AbstractAction;
+import org.apache.karaf.shell.inject.Service;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
@@ -39,6 +40,7 @@ import java.util.Map;
  * Instantiate a new object
  */
 @Command(scope = "shell", name = "new", description = "Creates a new java object.")
+@Service
 public class NewAction extends AbstractAction {
 
     @Argument(name = "class", index = 0, multiValued = false, required = true, description = "The object class")

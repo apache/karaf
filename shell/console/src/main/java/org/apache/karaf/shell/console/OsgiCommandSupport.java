@@ -26,6 +26,7 @@ import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.shell.commands.Action;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
 public abstract class OsgiCommandSupport extends AbstractAction implements Action, BundleContextAware {
@@ -51,15 +52,22 @@ public abstract class OsgiCommandSupport extends AbstractAction implements Actio
         this.bundleContext = bundleContext;
     }
 
-    protected <T> List<T> getAllServices(Class<T> clazz, String filter) throws Exception {
-        Collection<ServiceReference<T>> references = getBundleContext().getServiceReferences(clazz, filter);
-        if (references == null) {
-            return null;
+    protected <T> List<T> getAllServices(Class<T> clazz) {
+        try {
+            return getAllServices(clazz, null);
+        } catch (InvalidSyntaxException e) {
+            throw new IllegalStateException(e);
         }
+    }
+
+    protected <T> List<T> getAllServices(Class<T> clazz, String filter) throws InvalidSyntaxException {
+        Collection<ServiceReference<T>> references = getBundleContext().getServiceReferences(clazz, filter);
         List<T> services = new ArrayList<T>();
-        for (ServiceReference<T> ref : references) {
-            T t = getService(clazz, ref);
-            services.add(t);
+        if (references != null) {
+            for (ServiceReference<T> ref : references) {
+                T t = getService(clazz, ref);
+                services.add(t);
+            }
         }
         return services;
     }

@@ -19,11 +19,13 @@ import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.jaas.boot.ProxyLoginModule;
 import org.apache.karaf.jaas.config.JaasRealm;
 import org.apache.karaf.jaas.modules.BackingEngine;
+import org.apache.karaf.shell.inject.Service;
 
 import javax.security.auth.login.AppConfigurationEntry;
 import java.util.Queue;
 
 @Command(scope = "jaas", name = "pending-list", description = "List the pending modification on the active JAAS Realm/Login Module")
+@Service
 public class ListPendingCommand extends JaasCommandSupport {
 
     @Override

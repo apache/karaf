@@ -18,8 +18,10 @@ package org.apache.karaf.jaas.command;
 import org.apache.karaf.jaas.modules.BackingEngine;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.inject.Service;
 
 @Command(scope = "jaas", name = "group-add", description = "Make a user part of a group")
+@Service
 public class GroupAddCommand extends JaasCommandSupport {
 
     @Argument(index = 0, name = "username", description = "Username", required = true, multiValued = false)

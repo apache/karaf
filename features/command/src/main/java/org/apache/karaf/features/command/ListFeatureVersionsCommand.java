@@ -26,9 +26,11 @@ import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Completer;
 import org.apache.karaf.shell.commands.Option;
+import org.apache.karaf.shell.inject.Service;
 import org.apache.karaf.shell.table.ShellTable;
 
 @Command(scope = "feature", name = "version-list", description = "Lists all versions of a feature available from the currently available repositories.")
+@Service
 public class ListFeatureVersionsCommand extends FeaturesCommandSupport {
 
 	@Argument(index = 0, name = "feature", description = "Name of feature.", required = true, multiValued = false)

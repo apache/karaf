@@ -19,9 +19,11 @@ package org.apache.karaf.jaas.command.completers;
 import org.apache.karaf.jaas.config.JaasRealm;
 import org.apache.karaf.shell.console.Completer;
 import org.apache.karaf.shell.console.completer.StringsCompleter;
+import org.apache.karaf.shell.inject.Service;
 
 import java.util.List;
 
+@Service
 public class RealmCompleter implements Completer {
 
     private List<JaasRealm> realms;

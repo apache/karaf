@@ -30,10 +30,12 @@ import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.AbstractAction;
+import org.apache.karaf.shell.inject.Service;
 import org.fusesource.jansi.Ansi;
 
 
 @Command(scope = "shell", name="grep", description="Prints lines matching the given pattern.", detailedDescription="classpath:grep.txt")
+@Service
 public class GrepAction extends AbstractAction {
 
     public static enum ColorOption {

@@ -18,7 +18,7 @@ package org.apache.karaf.jaas.command;
 import org.apache.karaf.jaas.boot.ProxyLoginModule;
 import org.apache.karaf.jaas.config.JaasRealm;
 import org.apache.karaf.jaas.modules.BackingEngine;
-import org.apache.karaf.jaas.modules.BackingEngineService;
+import org.apache.karaf.jaas.modules.BackingEngineFactory;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 
 import javax.security.auth.login.AppConfigurationEntry;
@@ -32,8 +32,6 @@ public abstract class JaasCommandSupport extends OsgiCommandSupport {
     public static final String JAAS_CMDS = "JaasCommand.COMMANDS";
 
     private List<JaasRealm> realms;
-
-    protected BackingEngineService backingEngineService;
 
     protected abstract Object doExecute(BackingEngine engine) throws Exception;
 
@@ -59,20 +57,29 @@ public abstract class JaasCommandSupport extends OsgiCommandSupport {
         return null;
     }
 
-    public List<JaasRealm> getRealms() {
-        return realms;
-    }
-
     public void setRealms(List<JaasRealm> realms) {
         this.realms = realms;
     }
 
-    public BackingEngineService getBackingEngineService() {
-        return backingEngineService;
+    public List<JaasRealm> getRealms() {
+        if (realms == null) {
+            return getAllServices(JaasRealm.class);
+        } else {
+            return realms;
+        }
     }
 
-    public void setBackingEngineService(BackingEngineService backingEngineService) {
-        this.backingEngineService = backingEngineService;
+    public BackingEngine getBackingEngine(AppConfigurationEntry entry) {
+        List<BackingEngineFactory> engineFactories = getAllServices(BackingEngineFactory.class);
+        if (engineFactories != null) {
+            for (BackingEngineFactory factory : engineFactories) {
+                String loginModuleClass = (String) entry.getOptions().get(ProxyLoginModule.PROPERTY_MODULE);
+                if (factory.getModuleClass().equals(loginModuleClass)) {
+                    return factory.build(entry.getOptions());
+                }
+            }
+        }
+        return null;
     }
 
 }

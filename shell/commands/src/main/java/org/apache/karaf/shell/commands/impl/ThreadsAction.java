@@ -31,6 +31,7 @@ import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.AbstractAction;
+import org.apache.karaf.shell.inject.Service;
 import org.apache.karaf.shell.table.ShellTable;
 
 /**
@@ -38,6 +39,7 @@ import org.apache.karaf.shell.table.ShellTable;
  * a given bundle.
  */
 @Command(scope = "shell", name = "threads", description = "Prints the current threads (optionally with stacktraces)")
+@Service
 public class ThreadsAction extends AbstractAction {
 
     @Option(name = "--tree" , description = "Display threads as a tree")

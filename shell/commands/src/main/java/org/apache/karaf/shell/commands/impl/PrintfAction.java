@@ -21,8 +21,10 @@ import java.util.Collection;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.console.AbstractAction;
+import org.apache.karaf.shell.inject.Service;
 
 @Command(scope = "shell", name = "printf", description = "Formats and prints arguments.")
+@Service
 public class PrintfAction extends AbstractAction {
 
     @Argument(index = 0, name = "format", description = "The format pattern to use", required = true, multiValued = false)

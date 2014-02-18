@@ -32,11 +32,13 @@ import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.AbstractAction;
+import org.apache.karaf.shell.inject.Service;
 
 /**
  * Concatenate and print files and/or URLs.
  */
 @Command(scope = "shell", name = "cat", description = "Displays the content of a file or URL.")
+@Service
 public class CatAction extends AbstractAction {
 
     @Option(name = "-n", aliases = {}, description = "Number the output lines, starting at 1.", required = false, multiValued = false)

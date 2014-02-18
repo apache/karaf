@@ -28,8 +28,10 @@ import jline.Terminal;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.AbstractAction;
+import org.apache.karaf.shell.inject.Service;
 
 @Command(scope = "shell", name = "more", description = "File pager.")
+@Service
 public class MoreAction extends AbstractAction {
 
     @Option(name = "--lines", description = "stop after N lines")

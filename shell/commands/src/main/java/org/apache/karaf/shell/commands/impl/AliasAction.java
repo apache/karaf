@@ -19,8 +19,10 @@ package org.apache.karaf.shell.commands.impl;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.console.AbstractAction;
+import org.apache.karaf.shell.inject.Service;
 
 @Command(scope = "shell", name = "alias", description = "Create an alias to a command")
+@Service
 public class AliasAction extends AbstractAction {
 
     @Argument(index = 0, name = "command", description = "The command to alias, e.g. 'ldn = { log:display -n $args }'", required = true, multiValued = false)

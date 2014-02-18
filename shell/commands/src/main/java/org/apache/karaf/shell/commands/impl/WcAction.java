@@ -20,11 +20,13 @@ import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.AbstractAction;
+import org.apache.karaf.shell.inject.Service;
 
 import java.io.*;
 import java.util.List;
 
 @Command(scope = "shell", name = "wc", description = "Print newline, word, and byte counts for each file.")
+@Service
 public class WcAction extends AbstractAction {
 
     @Option(name = "-l", aliases = { "--lines" }, description = "Print the newline counts.", required = false, multiValued = false)

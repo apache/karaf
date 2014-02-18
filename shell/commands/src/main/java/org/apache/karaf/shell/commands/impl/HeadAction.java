@@ -29,8 +29,10 @@ import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.AbstractAction;
+import org.apache.karaf.shell.inject.Service;
 
 @Command(scope = "shell", name = "head", description = "Displays the first lines of a file.")
+@Service
 public class HeadAction extends AbstractAction {
 
     private static final int DEFAULT_NUMBER_OF_LINES = 10;

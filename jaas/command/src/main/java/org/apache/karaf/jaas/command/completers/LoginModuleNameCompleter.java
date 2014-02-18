@@ -23,7 +23,9 @@ import org.apache.karaf.jaas.boot.ProxyLoginModule;
 import org.apache.karaf.jaas.config.JaasRealm;
 import org.apache.karaf.shell.console.Completer;
 import org.apache.karaf.shell.console.completer.StringsCompleter;
+import org.apache.karaf.shell.inject.Service;
 
+@Service
 public class LoginModuleNameCompleter implements Completer {
 
     private List<JaasRealm> realms;
