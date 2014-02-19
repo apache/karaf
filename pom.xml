@@ -59,9 +59,7 @@
         <module>webconsole</module>
         <module>exception</module>
         <module>scheduler</module>
-		<!--
         <module>scr</module>
-		-->
         <module>diagnostic</module>
         <module>obr</module>
         <module>jndi</module>
@@ -1928,6 +1926,21 @@
                             -->
                         </instructions>
                     </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.karaf.tooling</groupId>
+                    <artifactId>karaf-scr-maven-plugin</artifactId>
+                    <version>${project.version}</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>scr</goal>
+                            </goals>
+                            <configuration>
+                                <ranking>${karaf.service.ranking}</ranking>
+                            </configuration>
+                        </execution>
+                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>

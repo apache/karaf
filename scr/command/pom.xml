@@ -35,6 +35,7 @@
 
     <properties>
         <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
+        <karaf.service.ranking>1</karaf.service.ranking>
     </properties>
 
     <dependencies>
@@ -69,11 +70,6 @@
             <artifactId>bndlib</artifactId>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.scr</groupId>
-            <artifactId>org.apache.karaf.scr.support</artifactId>
-            <scope>provided</scope>
-        </dependency>
     </dependencies>
 
     <build>
@@ -94,21 +90,12 @@
         </resources>
         <plugins>
             <plugin>
+                <groupId>org.apache.karaf.tooling</groupId>
+                <artifactId>karaf-scr-maven-plugin</artifactId>
+           </plugin>
+            <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <configuration>
-                    <instructions>
-                        <Service-Component>*</Service-Component>
-                        <_plugin>org.apache.karaf.scr.support.InjectAnnotations</_plugin>
-                    </instructions>
-                </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.apache.karaf.scr</groupId>
-                        <artifactId>org.apache.karaf.scr.support</artifactId>
-                        <version>${project.version}</version>
-                    </dependency>
-                </dependencies>
             </plugin>
         </plugins>
     </build>

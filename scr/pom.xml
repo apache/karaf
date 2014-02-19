@@ -34,7 +34,6 @@
     <name>Apache Karaf :: Declarative Services (DS)</name>
 
     <modules>
-        <module>support</module>
         <module>command</module>
         <module>management</module>
         <module>examples</module>
