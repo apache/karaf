@@ -15,6 +15,145 @@
  * limitations under the License.
  */
 
+                    Apache Karaf 2.3.4
+                    ==================
+
+  Overview
+  --------
+
+ This patch update to the 2.3.x line contains multiple bug fixes, improvements, and dependency updates including; Clone and status commands for instances, Hibernate feature, improved managment & debugging, and dependency updates to Aries Blueprint core 1.4.0, json 20131018, bndlib 2.2.0, and various updates to maven plugins. 
+
+  Changelog
+  ---------
+
+** Bug
+    * [KARAF-2188] - JPA bundle error out at shutdown
+    * [KARAF-2189] - blueprint disable service too soon at shutdown
+    * [KARAF-2289] - AJAX Error when editing some configurations in webconsole
+    * [KARAF-2313] - The feature:list command does not support multiple versions of the same feature
+    * [KARAF-2366] - Cannot Update Factory Configuration Not Backed By A File With The "config:" Command
+    * [KARAF-2381] - The shell log:set command not as documented
+    * [KARAF-2400] - config:prop* command's '-b' option not as documented
+    * [KARAF-2475] - Config bound to bundle after uninstall
+    * [KARAF-2476] - Special characters are dropped when generating the LDAP the user and role filters
+    * [KARAF-2479] - ensure we escape \ in LDAP filter  correctly
+    * [KARAF-2492] - Possible UnsatisfiedLinkError when using dev:restart with native libraries
+    * [KARAF-2497] - NPE in PropertiesLoginModule
+    * [KARAF-2502] - karaf-service script does not properly set the RUN_AS_GROUP variable if a primary group is not set
+    * [KARAF-2515] - Prevent NPE in log:tail
+    * [KARAF-2516] - log:tail | grep foo - throws interrupted exception when using ctrl + c
+    * [KARAF-2523] - Karaf JDBC lock doesn't work with M$ SQLServer
+    * [KARAF-2528] - don't allow authentication = none if LDAP user or password is provided
+    * [KARAF-2529] - Use connection credentials when searching for roles in LDAP
+    * [KARAF-2530] - Build failure on Mac....
+    * [KARAF-2531] - NPE in log:tail after a log:clear
+    * [KARAF-2540] - LDAP authentication defaults to null if not specified
+    * [KARAF-2541] - On Mac OS locate the JAVA_HOME
+    * [KARAF-2552] - Running log:tail on admin:console causes full CPU usage.
+    * [KARAF-2558] - Unit Tests in error when building from trunk  on Windows platform
+    * [KARAF-2577] - --help option doesn't work with command through bin/admin or bin/instance script
+    * [KARAF-2607] - PropertiesBackingEngine allows duplicate roles to be assigned to user
+    * [KARAF-2621] - PropertiesLoginModuleTest.testNonExistantPropertiesFile fails on windows
+    * [KARAF-2622] - shouldn't encrypt public key for PublickeyLoginModule
+    * [KARAF-2624] - Karaf script for AIX should use JVM option: -Xdump:heap instead of IBM_JAVA_HEAPDUMP_TEXT to control production heapdumps
+    * [KARAF-2635] - Deployment errors/warnings for bundles within "deploy" directory should be logged
+    * [KARAF-2664] - Add http.agent in etc/system.properties by default
+    * [KARAF-2672] - When changing the same config pid with propset -p twice only the last change is persisted
+    * [KARAF-2678] - txlog files locked during admin clone on windows
+    * [KARAF-2679] - Blueprint and Spring url handlers are not thread safe
+    * [KARAF-2683] - Fix OpenJPA features
+    * [KARAF-2685] - Set the hibernate bundles start-level greater than the default one
+    * [KARAF-2694] - NPE when use osgi:uninstall
+    * [KARAF-2729] - DerbyXA datasource (from template) is not visible with jdbc:datasources
+    * [KARAF-2730] - Provide full exception details when karaf doesn't startup
+    * [KARAF-2738] - Wrong groupId for xercesImpl
+
+** Dependency upgrade
+    * [KARAF-2232] - Upgrade to Aries Blueprint Core 1.2.0
+    * [KARAF-2329] - Upgrade to jline 2.11
+    * [KARAF-2332] - Upgrade to jansi 1.11
+    * [KARAF-2393] - Upgrade to Felix Maven Bundle plugin 2.4.0
+    * [KARAF-2510] - Upgrade to Aries Blueprint CM 1.0.2
+    * [KARAF-2534] - Upgrade to aries-proxy-impl 1.0.2, blueprint-core 1.3.0 and blueprint-cm 1.0.3
+    * [KARAF-2553] - Upgrade to commons-compress 1.6
+    * [KARAF-2554] - Upgrade to Felix ConfigAdmin 1.8.0 (won't fix, remains at 1.6.0)
+    * [KARAF-2555] - Upgrade to Felix Metatype 1.0.8
+    * [KARAF-2559] - Upgrade to Felix SCR 1.8.0
+    * [KARAF-2560] - Upgrade to Felix Utils 1.4.0
+    * [KARAF-2564] - Upgrade to Felix WebConsole Event plugin 1.1.0
+    * [KARAF-2580] - Upgrade to XBean 3.15
+    * [KARAF-2582] - Upgrade to json 20131018
+    * [KARAF-2583] - Upgrade to ServiceMix Specs 2.3.0
+    * [KARAF-2584] - Upgrade to XBean 3.16
+    * [KARAF-2643] - Upgrade to Felix FileInstall 3.2.8
+    * [KARAF-2644] - Upgrade to Felix Utils 1.4.2
+    * [KARAF-2661] - Upgrade to ServiceMix Specs 2.4.0
+    * [KARAF-2682] - Upgrade to Pax Web 1.1.16
+    * [KARAF-2693] - Upgrade to Pax Logging 1.7.2
+    * [KARAF-2695] - Upgrade to commons-codec 1.9
+    * [KARAF-2697] - Upgrade to Aries Blueprint Core 1.4.0
+    * [KARAF-2701] - Upgrade to Jetty 7.6.9.v20130131
+    * [KARAF-2702] - Upgrade to bndlib 2.2.0
+    * [KARAF-2703] - Upgrade to maven-assembly-plugin 2.4
+    * [KARAF-2704] - Upgrade to maven-compiler-plugin 3.1
+    * [KARAF-2705] - Upgrade to maven-dependency-plugin 2.8
+    * [KARAF-2706] - Upgrade to maven-deploy-plugin 2.8.1
+    * [KARAF-2708] - Upgrade to maven-enforcer-plugin 1.3.1
+    * [KARAF-2709] - Upgrade to maven-idea-plugin 2.2.1
+    * [KARAF-2711] - Upgrade to maven-javadoc-plugin 2.9.1
+    * [KARAF-2713] - Upgrade to maven-jxr-plugin 2.4
+    * [KARAF-2714] - Upgrade to maven-project-info-reports-plugin 2.7
+    * [KARAF-2715] - Upgrade to maven-release-plugin 2.4.2
+    * [KARAF-2716] - Upgrade to maven-remote-resources-plugin 1.5
+    * [KARAF-2717] - Upgrade to maven-resources-plugin 2.6
+    * [KARAF-2718] - Upgrade to maven-shade-plugin 2.2
+    * [KARAF-2719] - Upgrade to maven-site-plugin 3.3
+    * [KARAF-2720] - Upgrade to maven-source-plugin 2.2.1
+    * [KARAF-2721] - Upgrade to maven-surefire-report-plugin 2.16
+    * [KARAF-2722] - Upgrade to maven-war-plugin 2.4
+    * [KARAF-2723] - Upgrade to maven-rat-plugin 0.10 and fix rat issues
+    * [KARAF-2724] - Upgrade to build-helper-maven-plugin 1.8
+    * [KARAF-2733] - Upgrade to commons-beanutils 1.9.1
+    * [KARAF-2736] - Upgrade to Aries Transaction Manager 1.1.0
+    * [KARAF-2737] - Upgrade to Felix SCR 1.8.2
+
+** Improvement
+    * [KARAF-2138] - Add a status check script and karaf script argument
+    * [KARAF-2449] - Include heap dump in the zip created by dev:create-dump
+    * [KARAF-2450] - Create "service-wrapper" alias to the wrapper feature
+    * [KARAF-2474] - Provide a command for dumping the System, and OSGi properties
+    * [KARAF-2482] - Provide equivalent to features:info in FeaturesMBean
+    * [KARAF-2483] - Add -p (--persist) option to the log:set command
+    * [KARAF-2499] - Karaf should exit if the data directory is deleted
+    * [KARAF-2500] - Karaf should monitor the lock file existence
+    * [KARAF-2503] - Allow to limit the number of entries the history command remembers
+    * [KARAF-2507] - Add alias to display features installed or features uninstalled
+    * [KARAF-2512] - features:info should display feature description
+    * [KARAF-2517] - Add Spring or Blueprint state in the BundleMBean
+    * [KARAF-2535] - Introduce blueprint-web feature
+    * [KARAF-2539] - Add --clear option to history command
+    * [KARAF-2547] - karaf/stop script should be catching 'Connection refused' and display a message
+    * [KARAF-2575] - Add missing commands in bin/instance
+    * [KARAF-2609] - Provides etc/org.apache.karaf.kar.cfg file in the distribution
+    * [KARAF-2649] - Add Spring Security features
+    * [KARAF-2660] - Upgrade to javax.annotation 1.2.0
+    * [KARAF-2666] - Provide hibernate features
+    * [KARAF-2691] - Karaf shell info command to display the pid
+    * [KARAF-2700] - Upgrade to Felix Metatype 1.0.10
+    * [KARAF-2746] - Hibernate feature enhancements
+    * [KARAF-2748] - BundleSelector should be more "selective"
+    * [KARAF-2751] - Add Hibernate-Validator feature
+    * [KARAF-2754] - all password should be encrypted when encryption.enabled is true
+
+** New Feature
+    * [KARAF-2576] - Add instance:status/admin:status command to check the status of an instance
+    * [KARAF-2642] - CLONE - Provide additional enterprise features
+
+
+** Task
+    * [KARAF-2662] - Upgrade to pax-url 1.3.7
+
+
                     Apache Karaf 2.3.3
                     ==================
 

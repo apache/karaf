@@ -103,12 +103,6 @@
         <feature>jpa</feature>
     </feature>
 
-    <feature name="hibernate-envers" description="Hibernate Envers 3.x" version="${hibernate3.version}" resolver="(obr)">
-        <details>Enable Hibernate Envers 3.x</details>
-        <feature version="${hibernate3.version}">hibernate</feature>
-        <bundle start-level="100">mvn:org.hibernate/hibernate-envers/${hibernate3.version}</bundle>
-    </feature>
-
     <feature name="hibernate-validator" description="Hibernate Validator support" version="${hibernate.validator.version}" resolver="(obr)">
         <bundle dependency="true">mvn:javax.validation/validation-api/1.1.0.Final</bundle>
         <bundle dependency="true">mvn:com.fasterxml/classmate/1.0.0</bundle>

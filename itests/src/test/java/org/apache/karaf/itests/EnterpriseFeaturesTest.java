@@ -14,6 +14,7 @@
 package org.apache.karaf.itests;
 
 import org.junit.Test;
+import org.junit.Ignore;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.ExamReactorStrategy;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
@@ -46,11 +47,6 @@ public class EnterpriseFeaturesTest extends KarafTestSupport {
     @Test
     public void testHibernateFeature() throws Exception {
         installAndAssertFeature("hibernate");
-    }
-
-    @Test
-    public void testHibernateEnversFeature() throws Exception {
-        installAndAssertFeature("hibernate-envers");
     }
 
     @Test
