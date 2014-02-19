@@ -13,6 +13,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -26,6 +27,8 @@ import org.apache.felix.service.command.Function;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.CommandWithAction;
 import org.apache.karaf.shell.console.CompletableFunction;
+import org.apache.karaf.shell.inject.Destroy;
+import org.apache.karaf.shell.inject.Init;
 import org.apache.karaf.shell.inject.Reference;
 import org.apache.karaf.shell.inject.Service;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
@@ -77,7 +80,7 @@ public class ScrCommandMojo extends AbstractMojo {
 
                 Command cmd = clazz.getAnnotation(Command.class);
                 if (cmd != null) {
-                    System.out.println("\nFound command: " + clazz.getName() + "\n\t" + cmd.scope() + ":" + cmd.name() + "\n");
+//                    System.out.println("\nFound command: " + clazz.getName() + "\n\t" + cmd.scope() + ":" + cmd.name() + "\n");
 
                     StringBuilder sb = new StringBuilder();
                     sb.append("<?xml version='1.1'?>\n");
@@ -111,13 +114,21 @@ public class ScrCommandMojo extends AbstractMojo {
                     w.close();
                     hasCommand = true;
                 } else {
-                    System.out.println("\nFound service: " + clazz.getName() + "\n");
+//                    System.out.println("\nFound service: " + clazz.getName() + "\n");
 
                     StringBuilder sb = new StringBuilder();
                     sb.append("<?xml version='1.1'?>\n");
+
+                    String[] lf = getLifecycleMethods(clazz);
                     sb.append("<scr:component xmlns:scr=\"http://www.osgi.org/xmlns/scr/v1.1.0\" name=\"")
-                            .append(clazz.getName())
-                            .append("\" activate=\"activate\" deactivate=\"deactivate\">\n");
+                            .append(clazz.getName()).append("\"");
+                    if (lf[0] != null) {
+                        sb.append(" activate=\"activate\"");
+                    }
+                    if (lf[1] != null) {
+                        sb.append(" deactivate=\"deactivate\"");
+                    }
+                    sb.append(">\n");
                     sb.append("  <implementation class=\"").append(clazz.getName()).append("\"/>\n");
                     sb.append("  <service>\n");
                     List<Class> allClasses = new ArrayList<Class>();
@@ -176,6 +187,31 @@ public class ScrCommandMojo extends AbstractMojo {
         }
     }
 
+    private String[] getLifecycleMethods(Class<?> clazz) {
+        Method activate = null;
+        Method deactivate = null;
+        for (Method method : clazz.getMethods()) {
+            if (method.getAnnotation(Init.class) != null) {
+                if (activate == null) {
+                    activate = method;
+                } else {
+                    throw new IllegalArgumentException("Multiple methods annotated with @Init found");
+                }
+            }
+            if (method.getAnnotation(Destroy.class) != null) {
+                if (deactivate == null) {
+                    deactivate = method;
+                } else {
+                    throw new IllegalArgumentException("Multiple methods annotated with @Destroy found");
+                }
+            }
+        }
+        return new String[] {
+                activate != null ? activate.getName() : null,
+                deactivate != null ? deactivate.getName() : null
+        };
+    }
+
     private String[] getBindMethods(Class<?> clazz, String key, Class type) {
         String cap = key.substring(0, 1).toUpperCase() + key.substring(1);
         Method bind = null;
@@ -225,12 +261,23 @@ public class ScrCommandMojo extends AbstractMojo {
     }
 
     private ClassLoader getClassLoader() throws MojoFailureException, DependencyResolutionRequiredException, MalformedURLException {
-        List<URL> urls = new ArrayList<URL>();
-        for (Object object : project.getCompileClasspathElements()) {
-            String path = (String) object;
-            urls.add(new File(path).toURL());
+        List<String> roots = Arrays.asList(project.getBuild().getOutputDirectory());
+        List<String> paths = project.getCompileClasspathElements();
+        List<URL> parentUrls = new ArrayList<URL>();
+        List<URL> childUrls = new ArrayList<URL>();
+
+//        System.out.println("Roots: " + roots);
+//        System.out.println("Paths: " + paths);
+        for (String path : paths) {
+            URL url = new File(path).toURL();
+            if (roots.contains(path)) {
+                childUrls.add(url);
+            } else {
+                parentUrls.add(url);
+            }
         }
-        ClassLoader classLoader = new URLClassLoader(urls.toArray(new URL[] {}), getClass().getClassLoader());
+        ClassLoader classLoader = new URLClassLoader(childUrls.toArray(new URL[] {}),
+                new URLClassLoader(parentUrls.toArray(new URL[] {}), getClass().getClassLoader()));
         return classLoader;
     }
 
@@ -242,7 +289,7 @@ public class ScrCommandMojo extends AbstractMojo {
             header = pkg;
         }
         project.getProperties().setProperty("Private-Package", header);
-        System.out.println("\nPrivate-Package: " + header + "\n");
+//        System.out.println("\nPrivate-Package: " + header + "\n");
     }
 
     /**
@@ -274,7 +321,7 @@ public class ScrCommandMojo extends AbstractMojo {
                 sb.append(entry);
             }
             project.getProperties().setProperty("Service-Component", sb.toString());
-            System.out.println("\nService-Component: " + sb.toString() + "\n");
+//            System.out.println("\nService-Component: " + sb.toString() + "\n");
         }
     }
 
