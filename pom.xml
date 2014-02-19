@@ -59,7 +59,9 @@
         <module>webconsole</module>
         <module>exception</module>
         <module>scheduler</module>
+		<!--
         <module>scr</module>
+		-->
         <module>diagnostic</module>
         <module>obr</module>
         <module>jndi</module>
