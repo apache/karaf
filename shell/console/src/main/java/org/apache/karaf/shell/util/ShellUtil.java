@@ -18,6 +18,11 @@
  */
 package org.apache.karaf.shell.util;
 
+import static org.apache.karaf.shell.util.SimpleAnsi.COLOR_DEFAULT;
+import static org.apache.karaf.shell.util.SimpleAnsi.COLOR_RED;
+import static org.apache.karaf.shell.util.SimpleAnsi.INTENSITY_BOLD;
+import static org.apache.karaf.shell.util.SimpleAnsi.INTENSITY_NORMAL;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -27,11 +32,10 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 
-import jline.console.ConsoleReader;
+
 import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.shell.commands.CommandException;
 import org.apache.karaf.shell.console.SessionProperties;
-import org.fusesource.jansi.Ansi;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -125,28 +129,6 @@ public class ShellUtil {
         return level <= sbsl;
     }
 
-    /**
-     * Ask the user to confirm the access to a system bundle
-     *
-     * @param bundleId
-     * @param session
-     * @return true if the user confirm
-     * @throws IOException
-     */
-    public static boolean accessToSystemBundleIsAllowed(long bundleId, CommandSession session) throws IOException {
-        for (; ; ) {
-            ConsoleReader reader = (ConsoleReader) session.get(".jline.reader");
-            String msg = "You are about to access system bundle " + bundleId + ".  Do you wish to continue (yes/no): ";
-            String str = reader.readLine(msg);
-            if ("yes".equalsIgnoreCase(str)) {
-                return true;
-            }
-            if ("no".equalsIgnoreCase(str)) {
-                return false;
-            }
-        }
-    }
-
     public static String loadClassPathResource(Class<?> clazz, String path) {
         InputStream is = clazz.getResourceAsStream(path);
         if (is == null) {
@@ -203,24 +185,20 @@ public class ShellUtil {
             if (t instanceof CommandException) {
                 session.getConsole().println(((CommandException) t).getNiceHelp());
             } else if (isCommandNotFound) {
-                String str = Ansi.ansi()
-                        .fg(Ansi.Color.RED)
-                        .a("Command not found: ")
-                        .a(Ansi.Attribute.INTENSITY_BOLD)
-                        .a(t.getClass().getMethod("getCommand").invoke(t))
-                        .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
-                        .fg(Ansi.Color.DEFAULT).toString();
+                String str = COLOR_RED + "Command not found: " 
+                         + INTENSITY_BOLD + t.getClass().getMethod("getCommand").invoke(t) + INTENSITY_NORMAL
+                         + COLOR_DEFAULT;
                 session.getConsole().println(str);
             }
             if (getBoolean(session, SessionProperties.PRINT_STACK_TRACES)) {
-                session.getConsole().print(Ansi.ansi().fg(Ansi.Color.RED).toString());
+                session.getConsole().print(COLOR_RED);
                 t.printStackTrace(session.getConsole());
-                session.getConsole().print(Ansi.ansi().fg(Ansi.Color.DEFAULT).toString());
+                session.getConsole().print(COLOR_DEFAULT);
             } else if (!(t instanceof CommandException) && !isCommandNotFound) {
-                session.getConsole().print(Ansi.ansi().fg(Ansi.Color.RED).toString());
+                session.getConsole().print(COLOR_RED);
                 session.getConsole().println("Error executing command: "
                         + (t.getMessage() != null ? t.getMessage() : t.getClass().getName()));
-                session.getConsole().print(Ansi.ansi().fg(Ansi.Color.DEFAULT).toString());
+                session.getConsole().print(COLOR_DEFAULT);
             }
         } catch (Exception ignore) {
             // ignore

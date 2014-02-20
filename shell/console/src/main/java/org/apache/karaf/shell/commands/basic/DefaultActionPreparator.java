@@ -18,6 +18,10 @@
  */
 package org.apache.karaf.shell.commands.basic;
 
+import static org.apache.karaf.shell.util.SimpleAnsi.COLOR_RED;
+import static org.apache.karaf.shell.util.SimpleAnsi.INTENSITY_BOLD;
+import static org.apache.karaf.shell.util.SimpleAnsi.INTENSITY_NORMAL;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -26,8 +30,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import jline.Terminal;
 
 import org.apache.felix.gogo.commands.Action;
 import org.apache.felix.service.command.CommandSession;
@@ -41,7 +43,8 @@ import org.apache.karaf.shell.commands.converter.GenericType;
 import org.apache.karaf.shell.commands.meta.ActionMetaData;
 import org.apache.karaf.shell.commands.meta.ActionMetaDataFactory;
 import org.apache.karaf.shell.console.NameScoping;
-import org.fusesource.jansi.Ansi;
+import org.apache.karaf.shell.util.CommandSessionUtil;
+import org.apache.karaf.shell.util.SimpleAnsi;
 
 public class DefaultActionPreparator implements ActionPreparator {
 
@@ -57,22 +60,14 @@ public class DefaultActionPreparator implements ActionPreparator {
             return true;
         }
 
-        String commandErrorSt = (command2 != null) ? Ansi.ansi()
-                .fg(Ansi.Color.RED)
-                .a("Error executing command ")
-                .a(command2.scope())
-                .a(":")
-                .a(Ansi.Attribute.INTENSITY_BOLD)
-                .a(command2.name())
-                .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
-                .fg(Ansi.Color.DEFAULT)
-                .a(": ")
-                .toString() : "";
+        String commandErrorSt = (command2 != null) ? COLOR_RED
+                + "Error executing command " + command2.scope() + ":" 
+                + INTENSITY_BOLD + command2.name() + INTENSITY_NORMAL
+                + SimpleAnsi.COLOR_DEFAULT + ": " : "";
         for (Iterator<Object> it = params.iterator(); it.hasNext(); ) {
             Object param = it.next();
             if (HelpOption.HELP.name().equals(param)) {
-                Terminal term = session != null ? (Terminal) session.get(".jline.terminal") : null;
-                int termWidth = term != null ? term.getWidth() : 80;
+                int termWidth = CommandSessionUtil.getWidth(session);
                 boolean globalScope = NameScoping.isGlobalScope(session, actionMetaData.getCommand().scope());
                 actionMetaData.printUsage(action, System.out, globalScope, termWidth);
                 return false;
@@ -105,15 +100,9 @@ public class DefaultActionPreparator implements ActionPreparator {
                     }
                 }
                 if (option == null) {
-                    throw new CommandException(commandErrorSt + 
-                                Ansi.ansi()
-                                        .a("undefined option ")
-                                        .a(Ansi.Attribute.INTENSITY_BOLD)
-                                        .a(param)
-                                        .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
-                                        .newline()
-                                        .a("Try <command> --help' for more information.")
-                                        .toString(),
+                    throw new CommandException(commandErrorSt 
+                                + "undefined option " + INTENSITY_BOLD + param + INTENSITY_NORMAL + "\n"
+                                + "Try <command> --help' for more information.",
                                         "Undefined option: " + param);
                 }
                 Field field = options.get(option);
@@ -124,8 +113,8 @@ public class DefaultActionPreparator implements ActionPreparator {
                     value = it.next();
                 }
                 if (value == null) {
-                        throw new CommandException(commandErrorSt +
-                                Ansi.ansi().a("missing value for option ").bold().a(param).boldOff().toString(),
+                        throw new CommandException(commandErrorSt
+                                + "missing value for option " + INTENSITY_BOLD + param + INTENSITY_NORMAL,
                                 "Missing value for option: " + param
                         );
                 }
@@ -144,7 +133,7 @@ public class DefaultActionPreparator implements ActionPreparator {
                 processOptions = false;
                 if (argIndex >= orderedArguments.size()) {
                         throw new CommandException(commandErrorSt +
-                                Ansi.ansi().a("too many arguments specified").toString(),
+                                "too many arguments specified",
                                 "Too many arguments specified"
                         );
                 }
@@ -169,7 +158,7 @@ public class DefaultActionPreparator implements ActionPreparator {
         for (Option option : options.keySet()) {
             if (option.required() && optionValues.get(option) == null) {
                     throw new CommandException(commandErrorSt +
-                            Ansi.ansi().a("option ").bold().a(option.name()).boldOff().a(" is required").toString(),
+                            "option " + INTENSITY_BOLD + option.name() + INTENSITY_NORMAL + " is required",
                             "Option " + option.name() + " is required"
                     );
             }
@@ -177,7 +166,7 @@ public class DefaultActionPreparator implements ActionPreparator {
         for (Argument argument : orderedArguments) {
             if (argument.required() && argumentValues.get(argument) == null) {
                     throw new CommandException(commandErrorSt +
-                            Ansi.ansi().a("argument ").bold().a(argument.name()).boldOff().a(" is required").toString(),
+                            "argument " + INTENSITY_BOLD + argument.name() + INTENSITY_NORMAL + " is required",
                             "Argument " + argument.name() + " is required"
                     );
             }
@@ -191,8 +180,8 @@ public class DefaultActionPreparator implements ActionPreparator {
                 value = convert(action, session, entry.getValue(), field.getGenericType());
             } catch (Exception e) {
                     throw new CommandException(commandErrorSt +
-                            Ansi.ansi().a("unable to convert option ").bold().a(entry.getKey().name()).boldOff().a(" with value '").a(entry.getValue()).a("' to type ")
-                                .a(new GenericType(field.getGenericType()).toString()).toString(),
+                            "unable to convert option " + INTENSITY_BOLD + entry.getKey().name() + INTENSITY_NORMAL + " with value '"
+                            + entry.getValue() + "' to type " + new GenericType(field.getGenericType()).toString(),
                             "Unable to convert option " + entry.getKey().name() + " with value '"
                                     + entry.getValue() + "' to type " + new GenericType(field.getGenericType()).toString(),
                             e
@@ -208,9 +197,8 @@ public class DefaultActionPreparator implements ActionPreparator {
                 value = convert(action, session, entry.getValue(), field.getGenericType());
             } catch (Exception e) {
                     throw new CommandException(commandErrorSt +
-                            Ansi.ansi()
-                                    .a("unable to convert argument ").bold().a(entry.getKey().name()).boldOff().a(" with value '").a(entry.getValue())
-                                    .a("' to type ").a(new GenericType(field.getGenericType()).toString()).toString(),
+                            "unable to convert argument " + INTENSITY_BOLD + entry.getKey().name() + INTENSITY_NORMAL + " with value '"
+                            + entry.getValue() + "' to type " + new GenericType(field.getGenericType()).toString(),
                             "Unable to convert argument " + entry.getKey().name() + " with value '"
                                     + entry.getValue() + "' to type " + new GenericType(field.getGenericType()).toString(),
                             e

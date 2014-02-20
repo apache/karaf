@@ -18,6 +18,11 @@
  */
 package org.apache.felix.gogo.commands.basic;
 
+import static org.apache.karaf.shell.util.SimpleAnsi.COLOR_DEFAULT;
+import static org.apache.karaf.shell.util.SimpleAnsi.COLOR_RED;
+import static org.apache.karaf.shell.util.SimpleAnsi.INTENSITY_BOLD;
+import static org.apache.karaf.shell.util.SimpleAnsi.INTENSITY_NORMAL;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -31,7 +36,6 @@ import java.io.PrintStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import jline.Terminal;
 import org.apache.felix.gogo.commands.CommandException;
 import org.apache.felix.gogo.commands.Option;
 import org.apache.felix.gogo.commands.Action;
@@ -41,7 +45,7 @@ import org.apache.felix.gogo.commands.converter.DefaultConverter;
 import org.apache.felix.gogo.commands.converter.GenericType;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.shell.console.NameScoping;
-import org.fusesource.jansi.Ansi;
+import org.apache.karaf.shell.util.CommandSessionUtil;
 
 @Deprecated
 public class DefaultActionPreparator implements ActionPreparator {
@@ -172,22 +176,14 @@ public class DefaultActionPreparator implements ActionPreparator {
                 if (option == null) {
                     Command command = action.getClass().getAnnotation(Command.class);
                     if (command != null) {
-                        throw new CommandException(
-                                Ansi.ansi()
-                                        .fg(Ansi.Color.RED)
-                                        .a("Error executing command ")
-                                        .a(command.scope())
-                                        .a(":")
-                                        .a(Ansi.Attribute.INTENSITY_BOLD)
-                                        .a(command.name())
-                                        .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
-                                        .a(" undefined option ")
-                                        .a(Ansi.Attribute.INTENSITY_BOLD)
-                                        .a(param)
-                                        .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
-                                        .fg(Ansi.Color.DEFAULT)
-                                        .toString(),
-                                "Undefined option: " + param
+                        throw new CommandException(COLOR_RED
+                                                   + "Error executing command "
+                                                   + command.scope() + ":" 
+                                                   + INTENSITY_BOLD + command.name() + INTENSITY_NORMAL
+                                                   + " undefined option "
+                                                   + INTENSITY_BOLD + param + INTENSITY_NORMAL
+                                                   + COLOR_DEFAULT,
+                                                   "Undefined option: " + param
                         );
                     } else {
                         throw new CommandException("Undefined option: " + param);
@@ -203,22 +199,14 @@ public class DefaultActionPreparator implements ActionPreparator {
                 if (value == null) {
                     Command command = action.getClass().getAnnotation(Command.class);
                     if (command != null) {
-                        throw new CommandException(
-                                Ansi.ansi()
-                                        .fg(Ansi.Color.RED)
-                                        .a("Error executing command ")
-                                        .a(command.scope())
-                                        .a(":")
-                                        .a(Ansi.Attribute.INTENSITY_BOLD)
-                                        .a(command.name())
-                                        .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
-                                        .a(" missing value for option ")
-                                        .a(Ansi.Attribute.INTENSITY_BOLD)
-                                        .a(param)
-                                        .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
-                                        .fg(Ansi.Color.DEFAULT)
-                                        .toString(),
-                                "Missing value for option: " + param
+                        throw new CommandException(COLOR_RED
+                                                   + "Error executing command "
+                                                   + command.scope() + ":" 
+                                                   + INTENSITY_BOLD + command.name() + INTENSITY_NORMAL
+                                                   + " missing value for option "
+                                                   + INTENSITY_BOLD + param + INTENSITY_NORMAL
+                                                   + COLOR_DEFAULT,
+                                                   "Missing value for option: " + param
                         );
                     } else {
                         throw new CommandException("Missing value for option: " + param);
@@ -239,19 +227,14 @@ public class DefaultActionPreparator implements ActionPreparator {
                 if (argIndex >= orderedArguments.size()) {
                     Command command = action.getClass().getAnnotation(Command.class);
                     if (command != null) {
-                        throw new CommandException(
-                                Ansi.ansi()
-                                        .fg(Ansi.Color.RED)
-                                        .a("Error executing command ")
-                                        .a(command.scope())
-                                        .a(":")
-                                        .a(Ansi.Attribute.INTENSITY_BOLD)
-                                        .a(command.name())
-                                        .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
-                                        .a(": too many arguments specified")
-                                        .fg(Ansi.Color.DEFAULT)
-                                        .toString(),
-                                "Too many arguments specified"
+                        throw new CommandException(COLOR_RED
+                                                   + "Error executing command "
+                                                   + command.scope() + ":" 
+                                                   + INTENSITY_BOLD + command.name() + INTENSITY_NORMAL
+                                                   + ": too many arguments specified"
+                                                   + INTENSITY_BOLD + param + INTENSITY_NORMAL
+                                                   + COLOR_DEFAULT,
+                                                   "Too many arguments specified"
                         );
                     } else {
                         throw new CommandException("Too many arguments specified");
@@ -278,22 +261,14 @@ public class DefaultActionPreparator implements ActionPreparator {
             if (option.required() && optionValues.get(option) == null) {
                 Command command = action.getClass().getAnnotation(Command.class);
                 if (command != null) {
-                    throw new CommandException(
-                            Ansi.ansi()
-                                    .fg(Ansi.Color.RED)
-                                    .a("Error executing command ")
-                                    .a(command.scope())
-                                    .a(":")
-                                    .a(Ansi.Attribute.INTENSITY_BOLD)
-                                    .a(command.name())
-                                    .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
-                                    .a(": option ")
-                                    .a(Ansi.Attribute.INTENSITY_BOLD)
-                                    .a(option.name())
-                                    .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
-                                    .a(" is required")
-                                    .fg(Ansi.Color.DEFAULT)
-                                    .toString(),
+                    throw new CommandException(COLOR_RED
+                                               + "Error executing command "
+                                               + command.scope() + ":" 
+                                               + INTENSITY_BOLD + command.name() + INTENSITY_NORMAL
+                                               + ": option "
+                                               + INTENSITY_BOLD + option.name() + INTENSITY_NORMAL
+                                               + " is required"
+                                               + COLOR_DEFAULT,
                             "Option " + option.name() + " is required"
                     );
                 } else {
@@ -305,23 +280,15 @@ public class DefaultActionPreparator implements ActionPreparator {
             if (argument.required() && argumentValues.get(argument) == null) {
                 Command command = action.getClass().getAnnotation(Command.class);
                 if (command != null) {
-                    throw new CommandException(
-                            Ansi.ansi()
-                                    .fg(Ansi.Color.RED)
-                                    .a("Error executing command ")
-                                    .a(command.scope())
-                                    .a(":")
-                                    .a(Ansi.Attribute.INTENSITY_BOLD)
-                                    .a(command.name())
-                                    .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
-                                    .a(": argument ")
-                                    .a(Ansi.Attribute.INTENSITY_BOLD)
-                                    .a(argument.name())
-                                    .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
-                                    .a(" is required")
-                                    .fg(Ansi.Color.DEFAULT)
-                                    .toString(),
-                            "Argument " + argument.name() + " is required"
+                    throw new CommandException(COLOR_RED
+                                               + "Error executing command "
+                                               + command.scope() + ":" 
+                                               + INTENSITY_BOLD + command.name() + INTENSITY_NORMAL
+                                               + ": argument "
+                                               + INTENSITY_BOLD + argument.name() + INTENSITY_NORMAL
+                                               + " is required"
+                                               + COLOR_DEFAULT,
+                                               "Argument " + argument.name() + " is required"
                     );
                 } else {
                     throw new CommandException("Argument " + argument.name() + " is required");
@@ -337,25 +304,15 @@ public class DefaultActionPreparator implements ActionPreparator {
             } catch (Exception e) {
                 Command command = action.getClass().getAnnotation(Command.class);
                 if (command != null) {
-                    throw new CommandException(
-                            Ansi.ansi()
-                                    .fg(Ansi.Color.RED)
-                                    .a("Error executing command ")
-                                    .a(command.scope())
-                                    .a(":")
-                                    .a(Ansi.Attribute.INTENSITY_BOLD)
-                                    .a(command.name())
-                                    .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
-                                    .a(": unable to convert option ")
-                                    .a(Ansi.Attribute.INTENSITY_BOLD)
-                                    .a(entry.getKey().name())
-                                    .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
-                                    .a(" with value '")
-                                    .a(entry.getValue())
-                                    .a("' to type ")
-                                    .a(new GenericType(field.getGenericType()).toString())
-                                    .fg(Ansi.Color.DEFAULT)
-                                    .toString(),
+                    throw new CommandException(COLOR_RED
+                                               + "Error executing command "
+                                               + command.scope() + ":" 
+                                               + INTENSITY_BOLD + command.name() + INTENSITY_NORMAL
+                                               + ": unable to convert option "
+                                               + INTENSITY_BOLD + entry.getKey().name() + INTENSITY_NORMAL
+                                               + " with value '" + entry.getValue() + "' to type "
+                                               + new GenericType(field.getGenericType()).toString()
+                                               + COLOR_DEFAULT,
                             "Unable to convert option " + entry.getKey().name() + " with value '"
                                     + entry.getValue() + "' to type " + new GenericType(field.getGenericType()).toString(),
                             e
@@ -377,25 +334,15 @@ public class DefaultActionPreparator implements ActionPreparator {
             } catch (Exception e) {
                 Command command = action.getClass().getAnnotation(Command.class);
                 if (command != null) {
-                    throw new CommandException(
-                            Ansi.ansi()
-                                    .fg(Ansi.Color.RED)
-                                    .a("Error executing command ")
-                                    .a(command.scope())
-                                    .a(":")
-                                    .a(Ansi.Attribute.INTENSITY_BOLD)
-                                    .a(command.name())
-                                    .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
-                                    .a(": unable to convert argument ")
-                                    .a(Ansi.Attribute.INTENSITY_BOLD)
-                                    .a(entry.getKey().name())
-                                    .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
-                                    .a(" with value '")
-                                    .a(entry.getValue())
-                                    .a("' to type ")
-                                    .a(new GenericType(field.getGenericType()).toString())
-                                    .fg(Ansi.Color.DEFAULT)
-                                    .toString(),
+                    throw new CommandException(COLOR_RED
+                                               + "Error executing command "
+                                               + command.scope() + ":" 
+                                               + INTENSITY_BOLD + command.name() + INTENSITY_NORMAL
+                                               + ": unable to convert argument "
+                                               + INTENSITY_BOLD + entry.getKey().name() + INTENSITY_NORMAL
+                                               + " with value '" + entry.getValue() + "' to type "
+                                               + new GenericType(field.getGenericType()).toString()
+                                               + COLOR_DEFAULT,
                             "Unable to convert argument " + entry.getKey().name() + " with value '"
                                     + entry.getValue() + "' to type " + new GenericType(field.getGenericType()).toString(),
                             e
@@ -415,7 +362,7 @@ public class DefaultActionPreparator implements ActionPreparator {
     protected void printUsage(CommandSession session, Action action, Map<Option, Field> optionsMap, Map<Argument, Field> argsMap, PrintStream out) {
         Command command = action.getClass().getAnnotation(Command.class);
         if (command != null) {
-            Terminal term = session != null ? (Terminal) session.get(".jline.terminal") : null;
+            
             List<Argument> arguments = new ArrayList<Argument>(argsMap.keySet());
             Collections.sort(arguments, new Comparator<Argument>() {
                 public int compare(Argument o1, Argument o2) {
@@ -426,13 +373,13 @@ public class DefaultActionPreparator implements ActionPreparator {
             options.add(HELP);
             boolean globalScope = NameScoping.isGlobalScope(session, command.scope());
             if (command != null && (command.description() != null || command.name() != null)) {
-                out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("DESCRIPTION").a(Ansi.Attribute.RESET));
+                out.println(INTENSITY_BOLD + "DESCRIPTION" + INTENSITY_NORMAL);
                 out.print("        ");
                 if (command.name() != null) {
                     if (globalScope) {
-                        out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a(command.name()).a(Ansi.Attribute.RESET));
+                        out.println(INTENSITY_BOLD + command.name() + INTENSITY_NORMAL);
                     } else {
-                        out.println(Ansi.ansi().a(command.scope()).a(":").a(Ansi.Attribute.INTENSITY_BOLD).a(command.name()).a(Ansi.Attribute.RESET));
+                        out.println(command.scope() + ":" + INTENSITY_BOLD + command.name() + INTENSITY_NORMAL);
                     }
                     out.println();
                 }
@@ -461,17 +408,18 @@ public class DefaultActionPreparator implements ActionPreparator {
                     }
                 }
             }
-
-            out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("SYNTAX").a(Ansi.Attribute.RESET));
+            int width = CommandSessionUtil.getWidth(session);
+            out.println(INTENSITY_BOLD + "SYNTAX" + INTENSITY_NORMAL);
             out.print("        ");
             out.println(syntax.toString());
             out.println();
             if (arguments.size() > 0) {
-                out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("ARGUMENTS").a(Ansi.Attribute.RESET));
+                out.println(INTENSITY_BOLD + "ARGUMENTS" + INTENSITY_NORMAL);
                 for (Argument argument : arguments) {
                     out.print("        ");
-                    out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a(argument.name()).a(Ansi.Attribute.RESET));
-                    printFormatted("                ", argument.description(), term != null ? term.getWidth() : 80, out);
+                    out.println(INTENSITY_BOLD + argument.name() + INTENSITY_NORMAL);
+                    
+                    printFormatted("                ", argument.description(), width, out);
                     if (!argument.required()) {
                         if (argument.valueToShowInHelp() != null && argument.valueToShowInHelp().length() != 0) {
                             try {
@@ -491,15 +439,15 @@ public class DefaultActionPreparator implements ActionPreparator {
                 out.println();
             }
             if (options.size() > 0) {
-                out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("OPTIONS").a(Ansi.Attribute.RESET));
+                out.println(INTENSITY_BOLD + "OPTIONS" + INTENSITY_NORMAL);
                 for (Option option : options) {
                     String opt = option.name();
                     for (String alias : option.aliases()) {
                         opt += ", " + alias;
                     }
                     out.print("        ");
-                    out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a(opt).a(Ansi.Attribute.RESET));
-                    printFormatted("                ", option.description(), term != null ? term.getWidth() : 80, out);
+                    out.println(INTENSITY_BOLD + opt + INTENSITY_NORMAL);
+                    printFormatted("                ", option.description(), width, out);
                     if (option.valueToShowInHelp() != null && option.valueToShowInHelp().length() != 0) {
                         try {
                             if (Option.DEFAULT_STRING.equals(option.valueToShowInHelp())) {
@@ -517,9 +465,9 @@ public class DefaultActionPreparator implements ActionPreparator {
                 out.println();
             }
             if (command.detailedDescription().length() > 0) {
-                out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("DETAILS").a(Ansi.Attribute.RESET));
+                out.println(INTENSITY_BOLD + "DETAILS" + INTENSITY_NORMAL);
                 String desc = loadDescription(action.getClass(), command.detailedDescription());
-                printFormatted("        ", desc, term != null ? term.getWidth() : 80, out);
+                printFormatted("        ", desc, width, out);
             }
         }
     }

@@ -18,6 +18,9 @@
  */
 package org.apache.karaf.shell.commands.meta;
 
+import static org.apache.karaf.shell.util.SimpleAnsi.INTENSITY_BOLD;
+import static org.apache.karaf.shell.util.SimpleAnsi.INTENSITY_NORMAL;
+
 import java.io.PrintStream;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -36,7 +39,7 @@ import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.Completer;
 import org.apache.karaf.shell.util.IndentFormatter;
 import org.apache.karaf.shell.util.ShellUtil;
-import org.fusesource.jansi.Ansi;
+import org.apache.karaf.shell.util.SimpleAnsi;
 
 public class ActionMetaData {
 
@@ -93,13 +96,13 @@ public class ActionMetaData {
             Set<Option> optionsSet = new HashSet<Option>(options.keySet());
             optionsSet.add(HelpOption.HELP);
             if (command != null && (command.description() != null || command.name() != null)) {
-                out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("DESCRIPTION").a(Ansi.Attribute.RESET));
+                out.println(INTENSITY_BOLD + "DESCRIPTION" + INTENSITY_NORMAL);
                 out.print("        ");
                 if (command.name() != null) {
                     if (globalScope) {
-                        out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a(command.name()).a(Ansi.Attribute.RESET));
+                        out.println(INTENSITY_BOLD + command.name() + INTENSITY_NORMAL);
                     } else {
-                        out.println(Ansi.ansi().a(command.scope()).a(":").a(Ansi.Attribute.INTENSITY_BOLD).a(command.name()).a(Ansi.Attribute.RESET));
+                        out.println(command.scope() + ":" + INTENSITY_BOLD + command.name() + INTENSITY_NORMAL);
                     }
                     out.println();
                 }
@@ -129,15 +132,15 @@ public class ActionMetaData {
                 }
             }
 
-            out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("SYNTAX").a(Ansi.Attribute.RESET));
+            out.println(INTENSITY_BOLD + "SYNTAX" + INTENSITY_NORMAL);
             out.print("        ");
             out.println(syntax.toString());
             out.println();
             if (arguments.size() > 0) {
-                out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("ARGUMENTS").a(Ansi.Attribute.RESET));
+                out.println(INTENSITY_BOLD + "ARGUMENTS" + INTENSITY_NORMAL);
                 for (Argument argument : argumentsSet) {
                     out.print("        ");
-                    out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a(argument.name()).a(Ansi.Attribute.RESET));
+                    out.println(INTENSITY_BOLD + argument.name() + INTENSITY_NORMAL);
                     IndentFormatter.printFormatted("                ", argument.description(), termWidth, out);
                     if (!argument.required()) {
                         if (argument.valueToShowInHelp() != null && argument.valueToShowInHelp().length() != 0) {
@@ -156,14 +159,14 @@ public class ActionMetaData {
                 out.println();
             }
             if (options.size() > 0) {
-                out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("OPTIONS").a(Ansi.Attribute.RESET));
+                out.println(INTENSITY_BOLD + "OPTIONS" + INTENSITY_NORMAL);
                 for (Option option : optionsSet) {
                     String opt = option.name();
                     for (String alias : option.aliases()) {
                         opt += ", " + alias;
                     }
                     out.print("        ");
-                    out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a(opt).a(Ansi.Attribute.RESET));
+                    out.println(INTENSITY_BOLD + opt + INTENSITY_NORMAL);
                     IndentFormatter.printFormatted("                ", option.description(), termWidth, out);
                     if (option.valueToShowInHelp() != null && option.valueToShowInHelp().length() != 0) {
                         if (Option.DEFAULT_STRING.equals(option.valueToShowInHelp())) {
@@ -180,7 +183,7 @@ public class ActionMetaData {
                 out.println();
             }
             if (command.detailedDescription().length() > 0) {
-                out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("DETAILS").a(Ansi.Attribute.RESET));
+                out.println(INTENSITY_BOLD + "DETAILS" + INTENSITY_NORMAL);
                 String desc = getDetailedDescription();
                 IndentFormatter.printFormatted("        ", desc, termWidth, out);
             }
