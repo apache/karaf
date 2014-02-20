@@ -23,6 +23,7 @@ import java.util.Hashtable;
 import org.apache.felix.service.command.Function;
 import org.apache.karaf.shell.commands.Action;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.CommandWithAction;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.BundleContext;
 
@@ -62,8 +63,7 @@ public class SimpleCommand extends AbstractCommand {
         }
     }
 
-
-    public static ServiceRegistration<Function> export(BundleContext context, Class<? extends Action> actionClass)
+    public static ServiceRegistration export(BundleContext context, Class<? extends Action> actionClass)
     {
         Command cmd = actionClass.getAnnotation(Command.class);
         if (cmd == null)
@@ -71,10 +71,12 @@ public class SimpleCommand extends AbstractCommand {
             throw new IllegalArgumentException("Action class is not annotated with @Command");
         }
         Hashtable<String, String> props = new Hashtable<String, String>();
-        props.put("bundles.command.scope", cmd.scope());
-        props.put("bundles.command.function", cmd.name());
+        props.put("osgi.command.scope", cmd.scope());
+        props.put("osgi.command.function", cmd.name());
         SimpleCommand command = new SimpleCommand(actionClass);
-        return context.registerService(Function.class, command, props);
+        return context.registerService(
+                new String[] { Function.class.getName(), CommandWithAction.class.getName() },
+                command, props);
     }
 
 }
