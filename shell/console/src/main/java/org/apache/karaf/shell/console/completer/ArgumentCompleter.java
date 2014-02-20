@@ -22,6 +22,7 @@ import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
@@ -101,72 +102,16 @@ public class ArgumentCompleter implements Completer {
         }
         options.put(HelpOption.HELP.name(), HelpOption.HELP);
         optionsCompleter = new StringsCompleter(options.keySet());
+
         // Build arguments completers
-        argsCompleters = new ArrayList<Completer>();
+        List<Completer> argsCompleters = null;
+        Map<String, Completer> optionalCompleters = null;
 
         if (function instanceof CompletableFunction) {
             Map<String, Completer> focl = ((CompletableFunction) function).getOptionalCompleters();
             List<Completer> fcl = ((CompletableFunction) function).getCompleters();
-            if (focl == null && fcl == null) {
-                boolean multi = false;
-                for (int key = 0; key < arguments.size(); key++) {
-                    Completer completer = null;
-                    Field field = arguments.get(key);
-                    if (field != null) {
-                        Argument argument = field.getAnnotation(Argument.class);
-                        multi = (argument != null && argument.multiValued());
-                        org.apache.karaf.shell.commands.Completer ann = field.getAnnotation(org.apache.karaf.shell.commands.Completer.class);
-                        if (ann != null) {
-                            Class clazz = ann.value();
-                            String[] values = ann.values();
-                            if (clazz != null) {
-                                if (values.length > 0 && clazz == StringsCompleter.class) {
-                                    completer = new StringsCompleter(values, ann.caseSensitive());
-                                } else {
-                                    BundleContext context = FrameworkUtil.getBundle(function.getClass()).getBundleContext();
-                                    completer = new ProxyServiceCompleter(context, clazz);
-                                }
-                            }
-                        }
-                    }
-                    if (completer == null) {
-                        completer = NullCompleter.INSTANCE;
-                    }
-                    argsCompleters.add(completer);
-                }
-                if (argsCompleters.isEmpty() || !multi) {
-                    argsCompleters.add(NullCompleter.INSTANCE);
-                }
-                optionalCompleters = new HashMap<String, Completer>();
-                for (Option option : fields.keySet()) {
-                    Completer completer = null;
-                    Field field = fields.get(option);
-                    if (field != null) {
-                        org.apache.karaf.shell.commands.Completer ann = field.getAnnotation(org.apache.karaf.shell.commands.Completer.class);
-                        if (ann != null) {
-                            Class clazz = ann.value();
-                            String[] values = ann.values();
-                            if (clazz != null) {
-                                if (values.length > 0 && clazz == StringsCompleter.class) {
-                                    completer = new StringsCompleter(values, ann.caseSensitive());
-                                } else {
-                                    BundleContext context = FrameworkUtil.getBundle(function.getClass()).getBundleContext();
-                                    completer = new ProxyServiceCompleter(context, clazz);
-                                }
-                            }
-                        }
-                    }
-                    if (completer == null) {
-                        completer = NullCompleter.INSTANCE;
-                    }
-                    optionalCompleters.put(option.name(), completer);
-                    if (option.aliases() != null) {
-                        for (String alias : option.aliases()) {
-                            optionalCompleters.put(alias, completer);
-                        }
-                    }
-                }
-            } else {
+            if (focl != null || fcl != null) {
+                argsCompleters = new ArrayList<Completer>();
                 if (fcl != null) {
                     for (Completer c : fcl) {
                         argsCompleters.add(c == null ? NullCompleter.INSTANCE : c);
@@ -174,9 +119,88 @@ public class ArgumentCompleter implements Completer {
                 }
                 optionalCompleters = focl;
             }
-        } else {
+        }
+        if (argsCompleters == null) {
+            final Map<Integer, Object> values = getCompleterValues(function);
+            argsCompleters = new ArrayList<Completer>();
+            boolean multi = false;
+            for (int key = 0; key < arguments.size(); key++) {
+                Completer completer = null;
+                Field field = arguments.get(key);
+                if (field != null) {
+                    Argument argument = field.getAnnotation(Argument.class);
+                    multi = (argument != null && argument.multiValued());
+                    org.apache.karaf.shell.commands.Completer ann = field.getAnnotation(org.apache.karaf.shell.commands.Completer.class);
+                    if (ann != null) {
+                        Class clazz = ann.value();
+                        String[] value = ann.values();
+                        if (clazz != null) {
+                            if (value.length > 0 && clazz == StringsCompleter.class) {
+                                completer = new StringsCompleter(value, ann.caseSensitive());
+                            } else {
+                                BundleContext context = FrameworkUtil.getBundle(function.getClass()).getBundleContext();
+                                completer = new ProxyServiceCompleter(context, clazz);
+                            }
+                        }
+                    } else if (values.containsKey(key)) {
+                        Object value = values.get(key);
+                        if (value instanceof String[]) {
+                            completer = new StringsCompleter((String[]) value);
+                        } else if (value instanceof Collection) {
+                            completer = new StringsCompleter((Collection<String>) value);
+                        } else {
+                            LOGGER.warn("Could not use value " + value + " as set of completions!");
+                        }
+                    } else {
+                        completer = getDefaultCompleter(session, field);
+                    }
+                }
+                if (completer == null) {
+                    completer = NullCompleter.INSTANCE;
+                }
+                argsCompleters.add(completer);
+            }
+            if (argsCompleters.isEmpty() || !multi) {
+                argsCompleters.add(NullCompleter.INSTANCE);
+            }
             optionalCompleters = new HashMap<String, Completer>();
-            final Map<Integer, Method> methods = new HashMap<Integer, Method>();
+            for (Option option : fields.keySet()) {
+                Completer completer = null;
+                Field field = fields.get(option);
+                if (field != null) {
+                    org.apache.karaf.shell.commands.Completer ann = field.getAnnotation(org.apache.karaf.shell.commands.Completer.class);
+                    if (ann != null) {
+                        Class clazz = ann.value();
+                        String[] value = ann.values();
+                        if (clazz != null) {
+                            if (value.length > 0 && clazz == StringsCompleter.class) {
+                                completer = new StringsCompleter(value, ann.caseSensitive());
+                            } else {
+                                BundleContext context = FrameworkUtil.getBundle(function.getClass()).getBundleContext();
+                                completer = new ProxyServiceCompleter(context, clazz);
+                            }
+                        }
+                    }
+                }
+                if (completer == null) {
+                    completer = NullCompleter.INSTANCE;
+                }
+                optionalCompleters.put(option.name(), completer);
+                if (option.aliases() != null) {
+                    for (String alias : option.aliases()) {
+                        optionalCompleters.put(alias, completer);
+                    }
+                }
+            }
+        }
+        this.argsCompleters = argsCompleters;
+        this.optionalCompleters = optionalCompleters;
+    }
+
+    private Map<Integer, Object> getCompleterValues(CommandWithAction function) {
+        final Map<Integer, Object> values = new HashMap<Integer, Object>();
+        Action action = null;
+        try {
             for (Class<?> type = function.getActionClass(); type != null; type = type.getSuperclass()) {
                 for (Method method : type.getDeclaredMethods()) {
                     CompleterValues completerMethod = method.getAnnotation(CompleterValues.class);
@@ -185,65 +209,62 @@ public class ArgumentCompleter implements Completer {
                         Integer key = index;
                         if (index >= arguments.size() || index < 0) {
                             LOGGER.warn("Index out of range on @CompleterValues on class " + type.getName() + " for index: " + key + " see: " + method);
-                        }
-                        if (methods.containsKey(key)) {
+                        } else if (values.containsKey(key)) {
                             LOGGER.warn("Duplicate @CompleterMethod annotations on class " + type.getName() + " for index: " + key + " see: " + method);
                         } else {
-                            methods.put(key, method);
+                            try {
+                                Object value;
+                                if (Modifier.isStatic(method.getModifiers())) {
+                                    value = method.invoke(null);
+                                } else {
+                                    if (action == null) {
+                                        action = function.createNewAction();
+                                    }
+                                    value = method.invoke(action);
+                                }
+                                values.put(key, value);
+                            } catch (IllegalAccessException e) {
+                                LOGGER.warn("Could not invoke @CompleterMethod on " + function + ". " + e, e);
+                            } catch (InvocationTargetException e) {
+                                Throwable target = e.getTargetException();
+                                if (target == null) {
+                                    target = e;
+                                }
+                                LOGGER.warn("Could not invoke @CompleterMethod on " + function + ". " + target, target);
+                            }
                         }
                     }
                 }
             }
-            for (int i = 0, size = arguments.size(); i < size; i++) {
-                Completer argCompleter = NullCompleter.INSTANCE;
-                Method method = methods.get(i);
-                if (method != null) {
-                    // lets invoke the method
-                    Action action = function.createNewAction();
-                    try {
-                        Object value = method.invoke(action);
-                        if (value instanceof String[]) {
-                            argCompleter = new StringsCompleter((String[]) value);
-                        } else if (value instanceof Collection) {
-                            argCompleter = new StringsCompleter((Collection<String>) value);
-                        } else {
-                            LOGGER.warn("Could not use value " + value + " as set of completions!");
-                        }
-                    } catch (IllegalAccessException e) {
-                        LOGGER.warn("Could not invoke @CompleterMethod on " + function + ". " + e, e);
-                    } catch (InvocationTargetException e) {
-                        Throwable target = e.getTargetException();
-                        if (target == null) {
-                            target = e;
-                        }
-                        LOGGER.warn("Could not invoke @CompleterMethod on " + function + ". " + target, target);
-                    } finally {
-                        try {
-                            function.releaseAction(action);
-                        } catch (Exception e) {
-                            LOGGER.warn("Failed to release action: " + action + ". " + e, e);
-                        }
-                    }
-                } else {
-                    Field field = arguments.get(i);
-                    Class<?> type = field.getType();
-                    if (type.isAssignableFrom(File.class)) {
-                        argCompleter = new FileCompleter(session);
-                    } else if (type.isAssignableFrom(Boolean.class) || type.isAssignableFrom(boolean.class)) {
-                        argCompleter = new StringsCompleter(new String[] {"false", "true"}, false);
-                    } else if (type.isAssignableFrom(Enum.class)) {
-                        Set<String> values = new HashSet<String>();
-                        for (Object o : EnumSet.allOf((Class<Enum>) type)) {
-                            values.add(o.toString());
-                        }
-                        argCompleter = new StringsCompleter(values, false);
-                    } else {
-                        // TODO any other completers we can add?
-                    }
+        } finally {
+            if (action != null) {
+                try {
+                    function.releaseAction(action);
+                } catch (Exception e) {
+                    LOGGER.warn("Failed to release action: " + action + ". " + e, e);
                 }
-                argsCompleters.add(argCompleter);
             }
         }
+        return values;
+    }
+
+    private Completer getDefaultCompleter(CommandSession session, Field field) {
+        Completer completer = null;
+        Class<?> type = field.getType();
+        if (type.isAssignableFrom(File.class)) {
+            completer = new FileCompleter(session);
+        } else if (type.isAssignableFrom(Boolean.class) || type.isAssignableFrom(boolean.class)) {
+            completer = new StringsCompleter(new String[] {"false", "true"}, false);
+        } else if (type.isAssignableFrom(Enum.class)) {
+            Set<String> values = new HashSet<String>();
+            for (Object o : EnumSet.allOf((Class<Enum>) type)) {
+                values.add(o.toString());
+            }
+            completer = new StringsCompleter(values, false);
+        } else {
+            // TODO any other completers we can add?
+        }
+        return completer;
     }
 
     private String[] getNames(CommandSession session, String scopedCommand) {
