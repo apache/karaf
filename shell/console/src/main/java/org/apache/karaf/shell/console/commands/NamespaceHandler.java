@@ -248,10 +248,12 @@ public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHan
             // Create completer
             for (Class<?> cl = clazz; cl != Object.class; cl = cl.getSuperclass()) {
                 for (Field field : cl.getDeclaredFields()) {
-                    if (field.getType() == BundleContext.class) {
-                        completer.addProperty(field.getName(), createRef(context, "blueprintBundleContext"));
-                    } else {
-                        completer.addProperty(field.getName(), createRef(context, createServiceRef(context, field.getType()).getId()));
+                    if (field.getAnnotation(Reference.class) != null) {
+                        if (field.getType() == BundleContext.class) {
+                            completer.addProperty(field.getName(), createRef(context, "blueprintBundleContext"));
+                        } else {
+                            completer.addProperty(field.getName(), createRef(context, createServiceRef(context, field.getType()).getId()));
+                        }
                     }
                 }
                 for (Method method : cl.getDeclaredMethods()) {
