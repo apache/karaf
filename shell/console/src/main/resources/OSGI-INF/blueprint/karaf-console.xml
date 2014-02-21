@@ -31,8 +31,10 @@
 
     <bean id="consoleFactoryService" class="org.apache.karaf.shell.console.impl.jline.ConsoleFactoryService">
         <argument ref="blueprintBundleContext"/>
+        <argument ref="commandProcessor"/>
+        <argument ref="threadIO"/>
     </bean>
-    <service interface="org.apache.karaf.shell.console.ConsoleFactory" ref="consoleFactoryService"/>
+    <service interface="org.apache.karaf.shell.console.factory.ConsoleFactory" ref="consoleFactoryService"/>
 
     <bean id="consoleFactory" class="org.apache.karaf.shell.console.impl.jline.LocalConsoleManager"
           destroy-method="stop">
@@ -41,8 +43,6 @@
         <argument ref="blueprintBundleContext"/>
         <argument ref="terminalFactory"/>
         <argument ref="consoleFactoryService"/>
-        <argument ref="commandProcessor"/>
-        <argument ref="threadIO"/>
     </bean>
 
     <bean id="converters" class="org.apache.karaf.shell.console.impl.Converters">

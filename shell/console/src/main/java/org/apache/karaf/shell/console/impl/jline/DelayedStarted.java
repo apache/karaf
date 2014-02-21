@@ -36,10 +36,10 @@ class DelayedStarted extends Thread implements FrameworkListener {
 	private final Runnable console;
 	private final BundleContext bundleContext;
 
-    DelayedStarted(Runnable console, BundleContext bundleContext, InputStream in) {
-        super("Karaf Shell Console Thread");
-		this.console = console;
-		this.bundleContext = bundleContext;
+    DelayedStarted(Runnable console, String name, BundleContext bundleContext, InputStream in) {
+        super(name);
+        this.console = console;
+        this.bundleContext = bundleContext;
         this.in = in;
         int defaultStartLevel = Integer.parseInt(System.getProperty(Constants.FRAMEWORK_BEGINNING_STARTLEVEL));
         int startLevel = bundleContext.getBundle(0).adapt(FrameworkStartLevel.class).getStartLevel();

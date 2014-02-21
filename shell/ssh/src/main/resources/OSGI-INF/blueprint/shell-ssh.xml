@@ -24,13 +24,11 @@
            default-activation="lazy">
 
     <type-converters>
-        <bean class="org.apache.karaf.shell.ssh.ShellFactoryImpl" factory-method="getConverter" >
-        	
-        </bean>
+        <bean class="org.apache.karaf.shell.ssh.ShellFactoryImpl" factory-method="getConverter" />
         <bean class="org.apache.karaf.shell.ssh.UserAuthFactoriesFactory" factory-method="getConverter" />
     </type-converters>
     
-    <reference id="consoleFactory" interface="org.apache.karaf.shell.console.ConsoleFactory" />
+    <reference id="consoleFactory" interface="org.apache.karaf.shell.console.factory.ConsoleFactory" />
 
     <ext:property-placeholder placeholder-prefix="$[" placeholder-suffix="]">
         <ext:default-properties>
@@ -93,9 +91,7 @@
         </property>
         <property name="shellFactory">
             <bean class="org.apache.karaf.shell.ssh.ShellFactoryImpl">
-            	<argument ref="commandProcessor"/>
             	<argument ref="consoleFactory"/>
-                <argument ref="threadIO"/>
             </bean>
         </property>
         <property name="commandFactory">
@@ -148,10 +144,6 @@
         <property name="idleTimeout" value="${sshIdleTimeout}"/>
     </bean>
 
-    <reference id="commandProcessor" interface="org.apache.felix.service.command.CommandProcessor">
-    </reference>
-
-    <reference id="threadIO" interface="org.apache.felix.service.threadio.ThreadIO">
-    </reference>
+    <reference id="commandProcessor" interface="org.apache.felix.service.command.CommandProcessor"/>
 
 </blueprint>

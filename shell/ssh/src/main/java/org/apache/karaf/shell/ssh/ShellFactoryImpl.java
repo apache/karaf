@@ -24,18 +24,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.security.PrivilegedAction;
 import java.util.Map;
 
 import javax.security.auth.Subject;
 
 import jline.Terminal;
 
-import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
+import org.apache.karaf.jaas.modules.JaasHelper;
 import org.apache.karaf.shell.console.Console;
-import org.apache.karaf.shell.console.ConsoleFactory;
-import org.apache.felix.service.command.Function;
-import org.apache.felix.service.threadio.ThreadIO;
+import org.apache.karaf.shell.console.factory.ConsoleFactory;
+import org.apache.karaf.shell.util.ShellUtil;
 import org.apache.sshd.common.Factory;
 import org.apache.sshd.server.Command;
 import org.apache.sshd.server.Environment;
@@ -49,14 +49,10 @@ import org.osgi.service.blueprint.container.ReifiedType;
  * Shell.
  */
 public class ShellFactoryImpl implements Factory<Command> {
-    private CommandProcessor commandProcessor;
     private ConsoleFactory consoleFactory;
-    private ThreadIO threadIO;
 
-    public ShellFactoryImpl(CommandProcessor commandProcessor, ConsoleFactory consoleFactory, ThreadIO threadIO) {
-        this.commandProcessor = commandProcessor;
+    public ShellFactoryImpl(ConsoleFactory consoleFactory) {
         this.consoleFactory = consoleFactory;
-        this.threadIO = threadIO;
     }
 
     public Command create() {
@@ -110,13 +106,18 @@ public class ShellFactoryImpl implements Factory<Command> {
                 if (encoding != null && encoding.indexOf('.') > 0) {
                     encoding = encoding.substring(encoding.indexOf('.') + 1);
                 }
-                Console console = consoleFactory.create(commandProcessor, threadIO, in,
+                final Console console = consoleFactory.create(in,
                         lfToCrLfPrintStream(out), lfToCrLfPrintStream(err), terminal, encoding, destroyCallback);
                 final CommandSession session = console.getSession();
                 for (Map.Entry<String, String> e : env.getEnv().entrySet()) {
                     session.put(e.getKey(), e.getValue());
                 }
-                consoleFactory.startConsoleAs(console, subject, "ssh");
+                JaasHelper.doAs(subject, new PrivilegedAction<Object>() {
+                    public Object run() {
+                        new Thread(console, "Karaf ssh console user " + ShellUtil.getCurrentUserName()).start();
+                        return null;
+                    }
+                });
             } catch (Exception e) {
                 throw (IOException) new IOException("Unable to start shell").initCause(e);
             }

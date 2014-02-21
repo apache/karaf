@@ -25,6 +25,7 @@ import org.apache.felix.service.command.Converter;
 import org.apache.felix.service.command.Function;
 import org.apache.felix.service.threadio.ThreadIO;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
+import org.apache.karaf.shell.util.ShellUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
@@ -32,6 +33,8 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
 import javax.security.auth.Subject;
+
+import java.nio.file.attribute.UserPrincipal;
 import java.security.AccessControlContext;
 import java.security.AccessController;
 import java.util.ArrayList;
@@ -62,7 +65,7 @@ public class SecuredCommandProcessorImpl extends CommandProcessorImpl {
 
         Set<RolePrincipal> rolePrincipals = sub.getPrincipals(RolePrincipal.class);
         if (rolePrincipals.size() == 0)
-            throw new SecurityException("Current user has no associated roles.");
+            throw new SecurityException("Current user " + ShellUtil.getCurrentUserName() + " has no associated roles.");
 
         // TODO cater for custom roles
         StringBuilder sb = new StringBuilder();

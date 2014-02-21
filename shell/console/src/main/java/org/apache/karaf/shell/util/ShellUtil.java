@@ -26,8 +26,13 @@ import static org.apache.karaf.shell.commands.ansi.SimpleAnsi.INTENSITY_NORMAL;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.security.AccessControlContext;
+import java.security.AccessController;
+
+import javax.security.auth.Subject;
 
 import org.apache.felix.service.command.CommandSession;
+import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.apache.karaf.shell.commands.CommandException;
 import org.apache.karaf.shell.console.SessionProperties;
 import org.osgi.framework.Bundle;
@@ -171,4 +176,14 @@ public class ShellUtil {
         }
     }
 
+    public static String getCurrentUserName() {
+        AccessControlContext acc = AccessController.getContext();
+        final Subject subject = Subject.getSubject(acc);
+        if (subject != null && subject.getPrincipals(UserPrincipal.class).iterator().hasNext()) {
+            return subject.getPrincipals(UserPrincipal.class).iterator().next().getName();
+        } else {
+            return null;
+        }
+    }
+    
 }

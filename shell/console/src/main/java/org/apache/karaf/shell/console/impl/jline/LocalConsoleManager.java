@@ -19,25 +19,23 @@
 package org.apache.karaf.shell.console.impl.jline;
 
 import java.nio.charset.Charset;
+import java.security.PrivilegedAction;
 
 import javax.security.auth.Subject;
 
 import jline.Terminal;
-import org.apache.felix.service.command.CommandProcessor;
+
 import org.apache.felix.service.command.CommandSession;
-import org.apache.felix.service.threadio.ThreadIO;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
+import org.apache.karaf.jaas.modules.JaasHelper;
 import org.apache.karaf.shell.console.Console;
-import org.apache.karaf.shell.console.ConsoleFactory;
+import org.apache.karaf.shell.console.factory.ConsoleFactory;
+import org.apache.karaf.shell.util.ShellUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class LocalConsoleManager {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(LocalConsoleManager.class);
 
     private ConsoleFactory consoleFactory;
     private BundleContext bundleContext;
@@ -45,24 +43,18 @@ public class LocalConsoleManager {
     private Console console;
     private boolean start;
     private final int defaultStartLevel;
-    private CommandProcessor commandProcessor;
-    private ThreadIO threadIO;
-    private ServiceRegistration registration;
+    private ServiceRegistration<?> registration;
 
     public LocalConsoleManager(boolean start, 
             String defaultStartLevel,
             BundleContext bundleContext, 
             TerminalFactory terminalFactory, 
-            ConsoleFactory consoleFactory,
-            CommandProcessor commandProcessor,
-            ThreadIO threadIO) throws Exception {
+            ConsoleFactory consoleFactory) throws Exception {
         this.start = start;
         this.defaultStartLevel = Integer.parseInt(defaultStartLevel);
         this.bundleContext = bundleContext;
         this.terminalFactory = terminalFactory;
         this.consoleFactory = consoleFactory;
-        this.commandProcessor = commandProcessor;
-        this.threadIO = threadIO;
         start();
     }
 
@@ -70,6 +62,58 @@ public class LocalConsoleManager {
         if (!start) {
             return;
         }
+        
+
+        final Terminal terminal = terminalFactory.getTerminal();
+        final Runnable callback = new Runnable() {
+            public void run() {
+                try {
+                    bundleContext.getBundle(0).stop();
+                } catch (Exception e) {
+                    // Ignore
+                }
+            }
+        };
+
+        
+        final Subject subject = createLocalKarafSubject();    
+        this.console = JaasHelper.<Console>doAs(subject, new PrivilegedAction<Console>() {
+            public Console run() {
+                String encoding = getEncoding();
+                console = consoleFactory.create(
+                                      StreamWrapUtil.reWrapIn(terminal, System.in), 
+                                      StreamWrapUtil.reWrap(System.out), 
+                                      StreamWrapUtil.reWrap(System.err),
+                                      terminal, 
+                                      encoding, 
+                                      callback);
+                String name = "Karaf local console user " + ShellUtil.getCurrentUserName();
+                boolean delayconsole = Boolean.parseBoolean(System.getProperty("karaf.delay.console"));
+                if (delayconsole) {
+                    DelayedStarted watcher = new DelayedStarted(console, name, bundleContext, System.in);
+                    new Thread(watcher).start();
+                } else {
+                    new Thread(console, name).start();
+                }
+                return console;
+            }
+        });
+        registration = bundleContext.registerService(CommandSession.class, console.getSession(), null);
+
+    }
+
+    private String getEncoding() {
+        String ctype = System.getenv("LC_CTYPE");
+        String encoding = ctype;
+        if (encoding != null && encoding.indexOf('.') > 0) {
+            encoding = encoding.substring(encoding.indexOf('.') + 1);
+        } else {
+            encoding = System.getProperty("input.encoding", Charset.defaultCharset().name());
+        }
+        return encoding;
+    }
+
+    private Subject createLocalKarafSubject() {
         final Subject subject = new Subject();
         subject.getPrincipals().add(new UserPrincipal("karaf"));
 
@@ -79,41 +123,7 @@ public class LocalConsoleManager {
                 subject.getPrincipals().add(new RolePrincipal(role.trim()));
             }
         }
-
-        final Terminal terminal = terminalFactory.getTerminal();
-        Runnable callback = new Runnable() {
-            public void run() {
-                try {
-                    bundleContext.getBundle(0).stop();
-                } catch (Exception e) {
-                    // Ignore
-                }
-            }
-        };
-        String ctype = System.getenv("LC_CTYPE");
-        String encoding = ctype;
-        if (encoding != null && encoding.indexOf('.') > 0) {
-            encoding = encoding.substring(encoding.indexOf('.') + 1);
-        } else {
-            encoding = System.getProperty("input.encoding", Charset.defaultCharset().name());
-        }
-        this.console = consoleFactory.createLocal(this.commandProcessor, this.threadIO, terminal, encoding, callback);
-
-        registration = bundleContext.registerService(CommandSession.class, console.getSession(), null);
-
-        Runnable consoleStarter = new Runnable() {
-            public void run() {
-                consoleFactory.startConsoleAs(console, subject, "Local");
-            }
-        };
-        
-        boolean delayconsole = Boolean.parseBoolean(System.getProperty("karaf.delay.console"));
-        if (delayconsole) {
-            DelayedStarted watcher = new DelayedStarted(consoleStarter, bundleContext, System.in);
-            new Thread(watcher).start();
-        } else {
-            consoleStarter.run();
-        }
+        return subject;
     }
 
     public void stop() throws Exception {

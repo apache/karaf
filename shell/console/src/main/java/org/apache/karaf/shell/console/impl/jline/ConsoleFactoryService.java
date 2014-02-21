@@ -21,12 +21,9 @@ package org.apache.karaf.shell.console.impl.jline;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.lang.management.ManagementFactory;
-import java.security.PrivilegedAction;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
-
-import javax.security.auth.Subject;
 
 import jline.Terminal;
 
@@ -34,10 +31,10 @@ import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Function;
 import org.apache.felix.service.threadio.ThreadIO;
-import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.apache.karaf.jaas.modules.JaasHelper;
 import org.apache.karaf.shell.console.Console;
-import org.apache.karaf.shell.console.ConsoleFactory;
+import org.apache.karaf.shell.console.factory.ConsoleFactory;
+import org.apache.karaf.shell.util.ShellUtil;
 import org.osgi.framework.BundleContext;
 
 public class ConsoleFactoryService implements ConsoleFactory {
@@ -50,27 +47,23 @@ public class ConsoleFactoryService implements ConsoleFactory {
 
     private final BundleContext bundleContext;
 
-    public ConsoleFactoryService(BundleContext bc) {
+    private CommandProcessor processor;
+
+    private ThreadIO threadIO;
+
+    public ConsoleFactoryService(BundleContext bc, CommandProcessor processor, ThreadIO threadIO) {
         bundleContext = bc;
+        this.processor = processor;
+        this.threadIO = threadIO;
     }
     
     @Override
-    public Console createLocal(CommandProcessor processor, ThreadIO threadIO, final Terminal terminal, String encoding, Runnable closeCallback) {
-        return create(processor,
-                threadIO,
-                StreamWrapUtil.reWrapIn(terminal, System.in), 
-                StreamWrapUtil.reWrap(System.out), 
-                StreamWrapUtil.reWrap(System.err), 
-                terminal,
-                encoding,
-                closeCallback);
-    }
-
-    @Override
-    public Console create(CommandProcessor processor, ThreadIO threadIO, InputStream in, PrintStream out, PrintStream err, final Terminal terminal,
+    public Console create(InputStream in, PrintStream out, PrintStream err, final Terminal terminal,
             String encoding, Runnable closeCallback) {
         ConsoleImpl console = new ConsoleImpl(processor, threadIO, in, out, err, terminal, encoding, closeCallback, bundleContext);
         CommandSession session = console.getSession();
+        
+        session.put("USER", ShellUtil.getCurrentUserName());
         session.put("APPLICATION", System.getProperty("karaf.name", "root"));
         session.put("#LINES", new Function() {
             public Object execute(CommandSession session, List<Object> arguments) throws Exception {
@@ -102,37 +95,5 @@ public class ConsoleFactoryService implements ConsoleFactory {
             session.put(key, System.getProperty(key));
         }
     }
-    
-    @Override
-    public void startConsoleAs(final Console console, final Subject subject, String consoleType) {
-        final String userName = getUserName(subject);
-        new Thread(console, "Karaf Console " + consoleType + " user " + userName) {
-            @Override
-            public void run() {
-                if (subject != null) {
-                    CommandSession session = console.getSession();
-                    session.put("USER", userName);
-                    JaasHelper.doAs(subject, new PrivilegedAction<Object>() {
-                        public Object run() {
-                            doRun();
-                            return null;
-                        }
-                    });
-                } else {
-                    doRun();
-                }
-            }
-            protected void doRun() {
-                super.run();
-            }
-        }.start();
-    }
 
-    private String getUserName(final Subject subject) {
-        if (subject != null && subject.getPrincipals().iterator().hasNext()) {
-            return subject.getPrincipals(UserPrincipal.class).iterator().next().getName();
-        } else {
-            return null;
-        }
-    }
 }

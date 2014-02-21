@@ -16,20 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.karaf.shell.console;
+package org.apache.karaf.shell.console.factory;
 
 import java.io.InputStream;
 import java.io.PrintStream;
 
-import javax.security.auth.Subject;
-
 import jline.Terminal;
 
-import org.apache.felix.service.command.CommandProcessor;
-import org.apache.felix.service.threadio.ThreadIO;
+import org.apache.karaf.shell.console.Console;
 
 public interface ConsoleFactory {
-    Console create(CommandProcessor processor, ThreadIO threadIO, InputStream in, PrintStream out, PrintStream err, final Terminal term, String encoding, Runnable closeCallback);
-    Console createLocal(CommandProcessor processor, ThreadIO threadIO, Terminal terminal, String encoding, Runnable closeCallback);
-    void startConsoleAs(Console console, Subject subject, String threadName);
+    Console create(InputStream in, PrintStream out, PrintStream err, final Terminal term, String encoding, Runnable closeCallback);
 }
