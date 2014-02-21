@@ -121,6 +121,13 @@ public class BundleWatcherImpl implements Runnable, BundleListener, BundleWatche
                 } catch (InterruptedException e) {
                     running.set(false);
                 }
+                for (Bundle bundle : updated) {
+                    try {
+                        bundle.start(Bundle.START_TRANSIENT);
+                    } catch (BundleException ex) {
+                        logger.warn("Error starting bundle", ex);
+                    }
+                }
             }
             try {
                 Thread.sleep(interval);
@@ -142,6 +149,7 @@ public class BundleWatcherImpl implements Runnable, BundleListener, BundleWatche
             try {
                 logger.info("[Watch] Updating watched bundle: " + bundle.getSymbolicName() + " ("
                             + bundle.getVersion() + ")");
+                bundle.stop(Bundle.STOP_TRANSIENT);
                 bundle.update(is);
                 updated.add(bundle);
             } finally {
