@@ -22,7 +22,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Properties;
+import org.apache.karaf.util.properties.Properties;
 
 import org.apache.karaf.main.lock.SimpleFileLock;
 import org.apache.karaf.main.util.Utils;

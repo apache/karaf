@@ -20,7 +20,7 @@ package org.apache.karaf.main.lock;
 
 import static org.junit.Assert.assertTrue;
 
-import java.util.Properties;
+import org.apache.karaf.util.properties.Properties;
 
 import org.apache.karaf.main.lock.DefaultJDBCLock;
 import org.apache.karaf.main.lock.DerbyJDBCLock;

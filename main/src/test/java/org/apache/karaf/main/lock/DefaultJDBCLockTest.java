@@ -21,7 +21,7 @@ package org.apache.karaf.main.lock;
 import static org.junit.Assert.assertEquals;
 
 import java.sql.Connection;
-import java.util.Properties;
+import org.apache.karaf.util.properties.Properties;
 
 import org.apache.karaf.main.lock.DefaultJDBCLock;
 import org.junit.Before;

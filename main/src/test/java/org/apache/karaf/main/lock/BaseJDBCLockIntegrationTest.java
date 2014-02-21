@@ -23,7 +23,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Properties;
+import org.apache.karaf.util.properties.Properties;
 import java.util.logging.Logger;
 
 import org.apache.karaf.main.util.BootstrapLogManager;

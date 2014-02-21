@@ -19,7 +19,7 @@
 package org.apache.karaf.main.util;
 
 import java.io.File;
-import java.util.Properties;
+import org.apache.karaf.util.properties.Properties;
 import java.util.logging.Handler;
 
 import junit.framework.Assert;

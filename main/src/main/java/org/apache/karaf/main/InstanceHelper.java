@@ -19,7 +19,6 @@
 package org.apache.karaf.main;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -28,7 +27,6 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.net.InetAddress;
 import java.net.ServerSocket;
-import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -62,7 +60,7 @@ public class InstanceHelper {
                     }
                 }
                 FileLockUtils.execute(propertiesFile, new FileLockUtils.RunnableWithProperties() {
-                    public void run(org.apache.felix.utils.properties.Properties props) throws IOException {
+                    public void run(org.apache.karaf.util.properties.Properties props) throws IOException {
                         if (props.isEmpty()) {
                             if (isRoot) {
                                 props.setProperty("count", "1");
