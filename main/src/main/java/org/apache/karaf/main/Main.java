@@ -31,7 +31,7 @@ import java.security.Security;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.Properties;
+import org.apache.karaf.util.properties.Properties;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -363,10 +363,8 @@ public class Main {
     
     public List<BundleInfo> readBundlesFromStartupProperties(File startupPropsFile) {
         Properties startupProps = PropertiesLoader.loadPropertiesOrFail(startupPropsFile);
-        Enumeration<Object> keyIt = startupProps.keys();
         List<BundleInfo> bundeList = new ArrayList<BundleInfo>();
-        while (keyIt.hasMoreElements()) {
-            String key = (String) keyIt.nextElement();
+        for (String key : startupProps.keySet()) {
             try {
                 BundleInfo bi = new BundleInfo();
                 bi.uri = new URI(key);

@@ -22,7 +22,7 @@ package org.apache.karaf.main.lock;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Properties;
+import org.apache.karaf.util.properties.Properties;
 
 import org.apache.karaf.main.lock.OracleJDBCLock;
 import org.junit.Before;

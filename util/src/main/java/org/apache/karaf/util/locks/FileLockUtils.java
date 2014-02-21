@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.karaf.util.properties;
+package org.apache.karaf.util.locks;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -24,7 +24,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileLock;
-import org.apache.felix.utils.properties.Properties;
+import org.apache.karaf.util.properties.Properties;
 
 public final class FileLockUtils {
 

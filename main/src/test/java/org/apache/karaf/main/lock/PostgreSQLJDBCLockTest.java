@@ -23,7 +23,7 @@ import org.junit.Test;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Properties;
+import org.apache.karaf.util.properties.Properties;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.assertEquals;

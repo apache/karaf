@@ -22,7 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileLock;
-import java.util.Properties;
+import org.apache.karaf.util.properties.Properties;
 import java.util.logging.Logger;
 
 import org.apache.karaf.main.util.BootstrapLogManager;
