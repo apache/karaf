@@ -18,7 +18,6 @@
  */
 package org.apache.karaf.shell.console.completer;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -29,22 +28,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.concurrent.Callable;
 
-import org.apache.aries.proxy.ProxyManager;
+import org.apache.felix.gogo.runtime.CommandProxy;
 import org.apache.felix.service.command.CommandProcessor;
-import org.apache.karaf.shell.commands.CommandWithAction;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Function;
+import org.apache.karaf.shell.commands.CommandWithAction;
 import org.apache.karaf.shell.console.CommandSessionHolder;
 import org.apache.karaf.shell.console.Completer;
 import org.apache.karaf.shell.console.SessionProperties;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
-import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -211,7 +207,9 @@ public class CommandsCompleter implements Completer {
         return index > 0 ? name.substring(index + 1) : name;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({
+        "unchecked", "deprecation"
+    })
     protected Map<String, Completer>[] checkData() {
         // Copy the set to avoid concurrent modification exceptions
         // TODO: fix that in gogo instead
@@ -287,39 +285,16 @@ public class CommandsCompleter implements Completer {
     }
 
     public static Function unProxy(Function function) {
-        try {
-            if ("org.apache.felix.gogo.runtime.CommandProxy".equals(function.getClass().getName())) {
-                Field contextField = function.getClass().getDeclaredField("context");
-                Field referenceField = function.getClass().getDeclaredField("reference");
-                contextField.setAccessible(true);
-                referenceField.setAccessible(true);
-                BundleContext context = (BundleContext) contextField.get(function);
-                ServiceReference reference = (ServiceReference) referenceField.get(function);
-                Object target = context != null ? context.getService(reference) : null;
-                try {
-                    if (target instanceof Function) {
-                        return unProxy((Function) target);
-                    }
-                } finally {
-                    if (context != null) {
-                        context.ungetService(reference);
-                    }
-                }
-            }
-            Bundle bundle = FrameworkUtil.getBundle(CommandsCompleter.class);
-            BundleContext bc = bundle.getBundleContext();
-            ServiceReference<ProxyManager> ref = bc.getServiceReference(ProxyManager.class);
-            ProxyManager pm = ref != null ? bc.getService(ref) : null;
-            if (pm != null) {
-                Callable call = pm.unwrap(function);
-                if (call != null) {
-                    return unProxy((Function) call.call());
-                }
-                bc.ungetService(ref);
-            }
-        } catch (Throwable t) {
+        if (function == null || function.getClass() != CommandProxy.class) {
+            return function;
         }
-        return function;
+        CommandProxy proxy = (CommandProxy)function;
+        Object target = proxy.getTarget();
+        try {
+            return target instanceof Function ? (Function)target : function;
+        } finally {
+            proxy.ungetTarget();
+        }
     }
 
     private class CommandTracker {
