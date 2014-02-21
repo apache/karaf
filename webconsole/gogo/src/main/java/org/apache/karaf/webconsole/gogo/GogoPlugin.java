@@ -31,6 +31,8 @@ import java.io.PipedOutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.net.URL;
+import java.security.AccessControlContext;
+import java.security.AccessController;
 import java.util.zip.GZIPOutputStream;
 
 import javax.security.auth.Subject;
@@ -40,7 +42,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.threadio.ThreadIO;
-import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.apache.karaf.shell.console.Console;
 import org.apache.karaf.shell.console.ConsoleFactory;
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
@@ -195,8 +196,9 @@ public class GogoPlugin extends AbstractWebConsolePlugin {
                 out = new PipedInputStream();
                 PrintStream pipedOut = new PrintStream(new PipedOutputStream(out), true);
 
-                final Subject subject = new Subject();
-                subject.getPrincipals().add(new UserPrincipal("karaf"));
+                AccessControlContext acc = AccessController.getContext();
+                final Subject subject = Subject.getSubject(acc);
+                
                 Console console = consoleFactory.create(commandProcessor,
                         threadIO,
                         new PipedInputStream(in),
