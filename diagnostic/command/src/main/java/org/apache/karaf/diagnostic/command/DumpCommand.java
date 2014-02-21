@@ -30,11 +30,13 @@ import org.apache.karaf.diagnostic.core.DumpProvider;
 import org.apache.karaf.diagnostic.core.common.DirectoryDumpDestination;
 import org.apache.karaf.diagnostic.core.common.ZipDumpDestination;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
+import org.apache.karaf.shell.inject.Service;
 
 /**
  * Command to create dump from shell.
  */
 @Command(scope = "dev", name = "dump-create", description = "Creates zip archive with diagnostic info.")
+@Service
 public class DumpCommand extends OsgiCommandSupport {
 
     /**
@@ -85,7 +87,7 @@ public class DumpCommand extends OsgiCommandSupport {
             provider.createDump(destination);
         }
         destination.save();
-        session.getConsole().println("Diagnostic dump created.");
+        session.getConsole().println("Diagnostic dump created at " + target.getAbsolutePath() + ".");
 
         return null;
     }
