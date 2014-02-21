@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.karaf.shell.commands;
+package org.apache.karaf.shell.commands.basic;
 
 import java.util.List;
 import java.util.Arrays;
@@ -26,6 +26,12 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
 import junit.framework.TestCase;
+
+import org.apache.karaf.shell.commands.Action;
+import org.apache.karaf.shell.commands.Argument;
+import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.CommandException;
+import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.commands.basic.SimpleCommand;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.shell.console.ExitAction;

@@ -163,6 +163,7 @@
                             org.apache.felix.service.threadio;version=${felix.gogo.version};status=provisional;mandatory:=status,
                         </Export-Package>
                         <Private-Package>
+                        	org.apache.karaf.shell.commands.ansi,
                         	org.apache.karaf.shell.console.impl*,
                             org.apache.karaf.shell.security.impl*,
                             org.apache.karaf.shell.inject.impl*,

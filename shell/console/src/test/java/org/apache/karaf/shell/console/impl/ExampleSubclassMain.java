@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.shell.console;
+package org.apache.karaf.shell.console.impl;
 
 import java.io.InputStream;
 import java.io.PrintStream;

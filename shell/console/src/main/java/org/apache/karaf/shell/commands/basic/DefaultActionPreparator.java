@@ -18,9 +18,10 @@
  */
 package org.apache.karaf.shell.commands.basic;
 
-import static org.apache.karaf.shell.util.SimpleAnsi.COLOR_RED;
-import static org.apache.karaf.shell.util.SimpleAnsi.INTENSITY_BOLD;
-import static org.apache.karaf.shell.util.SimpleAnsi.INTENSITY_NORMAL;
+import static org.apache.karaf.shell.commands.ansi.SimpleAnsi.COLOR_DEFAULT;
+import static org.apache.karaf.shell.commands.ansi.SimpleAnsi.COLOR_RED;
+import static org.apache.karaf.shell.commands.ansi.SimpleAnsi.INTENSITY_BOLD;
+import static org.apache.karaf.shell.commands.ansi.SimpleAnsi.INTENSITY_NORMAL;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
@@ -43,8 +44,6 @@ import org.apache.karaf.shell.commands.converter.GenericType;
 import org.apache.karaf.shell.commands.meta.ActionMetaData;
 import org.apache.karaf.shell.commands.meta.ActionMetaDataFactory;
 import org.apache.karaf.shell.console.NameScoping;
-import org.apache.karaf.shell.util.CommandSessionUtil;
-import org.apache.karaf.shell.util.SimpleAnsi;
 
 public class DefaultActionPreparator implements ActionPreparator {
 
@@ -63,11 +62,11 @@ public class DefaultActionPreparator implements ActionPreparator {
         String commandErrorSt = (command2 != null) ? COLOR_RED
                 + "Error executing command " + command2.scope() + ":" 
                 + INTENSITY_BOLD + command2.name() + INTENSITY_NORMAL
-                + SimpleAnsi.COLOR_DEFAULT + ": " : "";
+                + COLOR_DEFAULT + ": " : "";
         for (Iterator<Object> it = params.iterator(); it.hasNext(); ) {
             Object param = it.next();
             if (HelpOption.HELP.name().equals(param)) {
-                int termWidth = CommandSessionUtil.getWidth(session);
+                int termWidth = getWidth(session);
                 boolean globalScope = NameScoping.isGlobalScope(session, actionMetaData.getCommand().scope());
                 actionMetaData.printUsage(action, System.out, globalScope, termWidth);
                 return false;
@@ -217,4 +216,8 @@ public class DefaultActionPreparator implements ActionPreparator {
         return new DefaultConverter(action.getClass().getClassLoader()).convert(value, toType);
     }
 
+    private int getWidth(CommandSession session) {
+        Object cols = session.get("COLUMNS");
+        return  (cols != null && cols instanceof Integer) ? (Integer)cols : 80;
+    }
 }

@@ -18,7 +18,7 @@
  */
 package org.apache.felix.gogo.commands;
 
-import org.apache.karaf.shell.util.SimpleAnsi;
+import org.apache.karaf.shell.commands.ansi.SimpleAnsi;
 
 /**
  * Base class for exceptions thrown when executing commands.

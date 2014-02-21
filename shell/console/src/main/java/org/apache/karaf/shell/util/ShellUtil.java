@@ -18,20 +18,14 @@
  */
 package org.apache.karaf.shell.util;
 
-import static org.apache.karaf.shell.util.SimpleAnsi.COLOR_DEFAULT;
-import static org.apache.karaf.shell.util.SimpleAnsi.COLOR_RED;
-import static org.apache.karaf.shell.util.SimpleAnsi.INTENSITY_BOLD;
-import static org.apache.karaf.shell.util.SimpleAnsi.INTENSITY_NORMAL;
+import static org.apache.karaf.shell.commands.ansi.SimpleAnsi.COLOR_DEFAULT;
+import static org.apache.karaf.shell.commands.ansi.SimpleAnsi.COLOR_RED;
+import static org.apache.karaf.shell.commands.ansi.SimpleAnsi.INTENSITY_BOLD;
+import static org.apache.karaf.shell.commands.ansi.SimpleAnsi.INTENSITY_NORMAL;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
-
 
 import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.shell.commands.CommandException;
@@ -127,34 +121,6 @@ public class ShellUtil {
             }
         }
         return level <= sbsl;
-    }
-
-    public static String loadClassPathResource(Class<?> clazz, String path) {
-        InputStream is = clazz.getResourceAsStream(path);
-        if (is == null) {
-            is = clazz.getClassLoader().getResourceAsStream(path);
-        }
-        if (is == null) {
-            return "Unable to load description from " + path;
-        }
-
-        try {
-            Reader r = new InputStreamReader(is);
-            StringWriter sw = new StringWriter();
-            int c;
-            while ((c = r.read()) != -1) {
-                sw.append((char) c);
-            }
-            return sw.toString();
-        } catch (IOException e) {
-            return "Unable to load description from " + path;
-        } finally {
-            try {
-                is.close();
-            } catch (IOException e) {
-                // Ignore
-            }
-        }
     }
 
     public static boolean getBoolean(CommandSession session, String name) {

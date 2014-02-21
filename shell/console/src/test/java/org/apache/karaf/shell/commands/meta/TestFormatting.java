@@ -16,21 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.karaf.shell.util;
+package org.apache.karaf.shell.commands.meta;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
 import junit.framework.TestCase;
 
-import org.apache.karaf.shell.util.IndentFormatter;
+import org.apache.karaf.shell.commands.meta.ActionMetaData;
 
 public class TestFormatting extends TestCase {
     
     public void testFormat() throws Exception {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        IndentFormatter.printFormatted("  ",
-                "  This is a test with a long paragraph\n\n  with an indented paragraph\nAnd another one\n", 20, new PrintStream(baos, true));
+        ActionMetaData.printFormatted("  ", "  This is a test with a long paragraph\n\n  with an indented paragraph\nAnd another one\n", 20, new PrintStream(baos, true), true);
         System.err.println(baos.toString());
     }
 }

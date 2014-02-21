@@ -18,10 +18,10 @@
  */
 package org.apache.felix.gogo.commands.basic;
 
-import static org.apache.karaf.shell.util.SimpleAnsi.COLOR_DEFAULT;
-import static org.apache.karaf.shell.util.SimpleAnsi.COLOR_RED;
-import static org.apache.karaf.shell.util.SimpleAnsi.INTENSITY_BOLD;
-import static org.apache.karaf.shell.util.SimpleAnsi.INTENSITY_NORMAL;
+import static org.apache.karaf.shell.commands.ansi.SimpleAnsi.COLOR_DEFAULT;
+import static org.apache.karaf.shell.commands.ansi.SimpleAnsi.COLOR_RED;
+import static org.apache.karaf.shell.commands.ansi.SimpleAnsi.INTENSITY_BOLD;
+import static org.apache.karaf.shell.commands.ansi.SimpleAnsi.INTENSITY_NORMAL;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -45,7 +45,6 @@ import org.apache.felix.gogo.commands.converter.DefaultConverter;
 import org.apache.felix.gogo.commands.converter.GenericType;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.shell.console.NameScoping;
-import org.apache.karaf.shell.util.CommandSessionUtil;
 
 @Deprecated
 public class DefaultActionPreparator implements ActionPreparator {
@@ -408,7 +407,7 @@ public class DefaultActionPreparator implements ActionPreparator {
                     }
                 }
             }
-            int width = CommandSessionUtil.getWidth(session);
+            int width = getWidth(session);
             out.println(INTENSITY_BOLD + "SYNTAX" + INTENSITY_NORMAL);
             out.print("        ");
             out.println(syntax.toString());
@@ -560,4 +559,8 @@ public class DefaultActionPreparator implements ActionPreparator {
         return new DefaultConverter(action.getClass().getClassLoader()).convert(value, toType);
     }
 
+    private int getWidth(CommandSession session) {
+        Object cols = session.get("COLUMNS");
+        return  (cols != null && cols instanceof Integer) ? (Integer)cols : 80;
+    }
 }

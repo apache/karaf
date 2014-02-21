@@ -18,10 +18,15 @@
  */
 package org.apache.karaf.shell.commands.meta;
 
-import static org.apache.karaf.shell.util.SimpleAnsi.INTENSITY_BOLD;
-import static org.apache.karaf.shell.util.SimpleAnsi.INTENSITY_NORMAL;
+import static org.apache.karaf.shell.commands.ansi.SimpleAnsi.INTENSITY_BOLD;
+import static org.apache.karaf.shell.commands.ansi.SimpleAnsi.INTENSITY_NORMAL;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.io.Reader;
+import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,16 +35,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.felix.gogo.commands.Action;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.HelpOption;
 import org.apache.karaf.shell.commands.Option;
+import org.apache.karaf.shell.commands.ansi.SimpleAnsi;
 import org.apache.karaf.shell.console.Completer;
-import org.apache.karaf.shell.util.IndentFormatter;
-import org.apache.karaf.shell.util.ShellUtil;
-import org.apache.karaf.shell.util.SimpleAnsi;
 
 public class ActionMetaData {
 
@@ -141,7 +146,7 @@ public class ActionMetaData {
                 for (Argument argument : argumentsSet) {
                     out.print("        ");
                     out.println(INTENSITY_BOLD + argument.name() + INTENSITY_NORMAL);
-                    IndentFormatter.printFormatted("                ", argument.description(), termWidth, out);
+                    ActionMetaData.printFormatted("                ", argument.description(), termWidth, out, true);
                     if (!argument.required()) {
                         if (argument.valueToShowInHelp() != null && argument.valueToShowInHelp().length() != 0) {
                             if (Argument.DEFAULT_STRING.equals(argument.valueToShowInHelp())) {
@@ -167,7 +172,7 @@ public class ActionMetaData {
                     }
                     out.print("        ");
                     out.println(INTENSITY_BOLD + opt + INTENSITY_NORMAL);
-                    IndentFormatter.printFormatted("                ", option.description(), termWidth, out);
+                    ActionMetaData.printFormatted("                ", option.description(), termWidth, out, true);
                     if (option.valueToShowInHelp() != null && option.valueToShowInHelp().length() != 0) {
                         if (Option.DEFAULT_STRING.equals(option.valueToShowInHelp())) {
                             Object o = getDefaultValue(action, option);
@@ -185,7 +190,7 @@ public class ActionMetaData {
             if (command.detailedDescription().length() > 0) {
                 out.println(INTENSITY_BOLD + "DETAILS" + INTENSITY_NORMAL);
                 String desc = getDetailedDescription();
-                IndentFormatter.printFormatted("        ", desc, termWidth, out);
+                ActionMetaData.printFormatted("        ", desc, termWidth, out, true);
             }
         }
     }
@@ -215,7 +220,7 @@ public class ActionMetaData {
     
     private String loadDescription(Class<?> clazz, String desc) {
         if (desc != null && desc.startsWith("classpath:")) {
-            desc = ShellUtil.loadClassPathResource(clazz, desc.substring("classpath:".length()));
+            desc = loadClassPathResource(clazz, desc.substring("classpath:".length()));
         }
         return desc;
     }
@@ -231,6 +236,61 @@ public class ActionMetaData {
 
     private void printDefaultsTo(PrintStream out, String value) {
         out.println("                (defaults to " + value + ")");
+    }
+
+    static void printFormatted(String prefix, String str, int termWidth, PrintStream out, boolean prefixFirstLine) {
+        int pfxLen = prefix.length();
+        int maxwidth = termWidth - pfxLen;
+        Pattern wrap = Pattern.compile("(\\S\\S{" + maxwidth + ",}|.{1," + maxwidth + "})(\\s+|$)");
+        int cur = 0;
+        while (cur >= 0) {
+            int lst = str.indexOf('\n', cur);
+            String s = (lst >= 0) ? str.substring(cur, lst) : str.substring(cur);
+            if (s.length() == 0) {
+                out.println();
+            } else {
+                Matcher m = wrap.matcher(s);
+                while (m.find()) {
+                    if (cur > 0 || prefixFirstLine) {
+                        out.print(prefix);
+                    }
+                    out.println(m.group());
+                }
+            }
+            if (lst >= 0) {
+                cur = lst + 1;
+            } else {
+                break;
+            }
+        }
+    }
+
+    private String loadClassPathResource(Class<?> clazz, String path) {
+        InputStream is = clazz.getResourceAsStream(path);
+        if (is == null) {
+            is = clazz.getClassLoader().getResourceAsStream(path);
+        }
+        if (is == null) {
+            return "Unable to load description from " + path;
+        }
+    
+        try {
+            Reader r = new InputStreamReader(is);
+            StringWriter sw = new StringWriter();
+            int c;
+            while ((c = r.read()) != -1) {
+                sw.append((char) c);
+            }
+            return sw.toString();
+        } catch (IOException e) {
+            return "Unable to load description from " + path;
+        } finally {
+            try {
+                is.close();
+            } catch (IOException e) {
+                // Ignore
+            }
+        }
     }
 
 }
