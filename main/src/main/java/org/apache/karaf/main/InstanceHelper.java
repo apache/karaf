@@ -32,7 +32,7 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.karaf.util.properties.FileLockUtils;
+import org.apache.karaf.util.locks.FileLockUtils;
 import org.osgi.framework.launch.Framework;
 
 public class InstanceHelper {

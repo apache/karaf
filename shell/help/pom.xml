@@ -110,7 +110,7 @@
                         </Export-Package>
                         <Private-Package>
                             org.apache.karaf.util.process;-split-package:=merge-first,
-                            org.apache.karaf.util;-split-package:=merge-first,
+                            org.apache.karaf.util.properties;-split-package:=merge-first,
                             org.apache.karaf.shell.help.impl*
                         </Private-Package>
                     </instructions>

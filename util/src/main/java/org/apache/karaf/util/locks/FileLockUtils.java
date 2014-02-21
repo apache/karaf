@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.karaf.util.properties;
+package org.apache.karaf.util.locks;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
