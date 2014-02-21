@@ -22,7 +22,7 @@ package org.apache.karaf.main.lock;
 import static org.junit.Assert.assertFalse;
 
 import java.sql.Connection;
-import java.util.Properties;
+import org.apache.karaf.util.properties.Properties;
 
 import org.apache.karaf.main.lock.MySQLJDBCLock;
 import org.junit.Before;

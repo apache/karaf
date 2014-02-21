@@ -18,7 +18,7 @@
  */
 package org.apache.karaf.main.lock;
 
-import java.util.Properties;
+import org.apache.karaf.util.properties.Properties;
 
 /**
  * Represents an exclusive lock on a database,

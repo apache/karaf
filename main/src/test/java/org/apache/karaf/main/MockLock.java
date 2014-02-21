@@ -1,6 +1,6 @@
 package org.apache.karaf.main;
 
-import java.util.Properties;
+import org.apache.karaf.util.properties.Properties;
 import java.util.logging.Logger;
 
 import org.apache.karaf.main.lock.Lock;

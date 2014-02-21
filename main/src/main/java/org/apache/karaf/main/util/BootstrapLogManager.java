@@ -24,7 +24,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Properties;
+import org.apache.karaf.util.properties.Properties;
+import org.apache.karaf.util.properties.InterpolationHelper;
+
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 import java.util.logging.StreamHandler;
@@ -70,7 +72,7 @@ public class BootstrapLogManager {
         }
         
         String filename = getLogFilePath();
-        filename = SubstHelper.substVars(filename, LOG4J_APPENDER_FILE, null, configProps);
+        filename = InterpolationHelper.substVars(filename, LOG4J_APPENDER_FILE, null, configProps);
         File logFile = new File(filename);
         try {
 			return new SimpleFileHandler(logFile);

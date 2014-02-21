@@ -26,11 +26,12 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Enumeration;
-import java.util.Properties;
+import org.apache.karaf.util.properties.Properties;
 import java.util.StringTokenizer;
 
-import org.apache.karaf.main.util.SubstHelper;
 import org.apache.karaf.main.util.Utils;
+
+import static org.apache.karaf.util.properties.InterpolationHelper.substVars;
 
 public class PropertiesLoader {
 
@@ -71,13 +72,14 @@ public class PropertiesLoader {
 
         Properties configProps = loadPropertiesFile(configPropURL, false);
         copySystemProperties(configProps);
+        configProps.substitute();
 
         // Perform variable substitution for system properties.
-        for (Enumeration<?> e = configProps.propertyNames(); e.hasMoreElements();) {
-            String name = (String) e.nextElement();
-            configProps.setProperty(name,
-                    SubstHelper.substVars(configProps.getProperty(name), name, null, configProps));
-        }
+//        for (Enumeration<?> e = configProps.propertyNames(); e.hasMoreElements();) {
+//            String name = (String) e.nextElement();
+//            configProps.setProperty(name,
+//                    SubstHelper.substVars(configProps.getProperty(name), name, null, configProps));
+//        }
 
         return configProps;
     }
@@ -100,7 +102,7 @@ public class PropertiesLoader {
      * @throws IOException
      */
     static void loadSystemProperties(File file) throws IOException {
-        Properties props = new Properties();
+        Properties props = new Properties(false);
         try {
             InputStream is = new FileInputStream(file);
             props.load(is);
@@ -114,10 +116,10 @@ public class PropertiesLoader {
 			if (name.startsWith(OVERRIDE_PREFIX)) {
 				String overrideName = name.substring(OVERRIDE_PREFIX.length());
 				String value = props.getProperty(name);
-				System.setProperty(overrideName, SubstHelper.substVars(value, name, null, props));
+				System.setProperty(overrideName, substVars(value, name, null, props));
 			} else {
 				String value = System.getProperty(name, props.getProperty(name));
-				System.setProperty(name, SubstHelper.substVars(value, name, null, props));
+				System.setProperty(name, substVars(value, name, null, props));
 			}
         }
     }
@@ -144,7 +146,7 @@ public class PropertiesLoader {
     }
 
     private static Properties loadPropertiesFile(URL configPropURL, boolean failIfNotFound) throws Exception {
-        Properties configProps = new Properties();
+        Properties configProps = new Properties(null, false);
         InputStream is = null;
         try {
             is = configPropURL.openConnection().getInputStream();
@@ -198,12 +200,8 @@ public class PropertiesLoader {
     }
 
     private static void trimValues(Properties configProps) {
-        for (Enumeration<?> e = configProps.propertyNames(); e.hasMoreElements();) {
-            Object key = e.nextElement();
-            if (key instanceof String) {
-                String v = configProps.getProperty((String) key);
-                configProps.put(key, v.trim());
-            }
+        for (String key : configProps.keySet()) {
+            configProps.put(key, configProps.get(key).trim());
         }
     }
 }

@@ -110,7 +110,7 @@ public class InstanceServiceImpl implements InstanceService {
         this.stopTimeout = stopTimeout;
     }
 
-    private State loadData(org.apache.felix.utils.properties.Properties storage) {
+    private State loadData(org.apache.karaf.util.properties.Properties storage) {
         State state = new State();
         int count = getInt(storage, "count", 0);
         state.defaultSshPortStart = getInt(storage, "ssh.port", state.defaultSshPortStart);
@@ -142,7 +142,7 @@ public class InstanceServiceImpl implements InstanceService {
         return state;
     }
 
-    private void saveData(State state, org.apache.felix.utils.properties.Properties storage) {
+    private void saveData(State state, org.apache.karaf.util.properties.Properties storage) {
         storage.put("ssh.port", Integer.toString(state.defaultSshPortStart));
         storage.put("rmi.registry.port", Integer.toString(state.defaultRmiRegistryPortStart));
         storage.put("rmi.server.port", Integer.toString(state.defaultRmiServerPortStart));
@@ -166,7 +166,7 @@ public class InstanceServiceImpl implements InstanceService {
         }
     }
 
-    private boolean getBool(org.apache.felix.utils.properties.Properties storage, String name, boolean def) {
+    private boolean getBool(org.apache.karaf.util.properties.Properties storage, String name, boolean def) {
         Object value = storage.get(name);
         if (value != null) {
             return Boolean.parseBoolean(value.toString());
@@ -175,7 +175,7 @@ public class InstanceServiceImpl implements InstanceService {
         }
     }
 
-    private int getInt(org.apache.felix.utils.properties.Properties storage, String name, int def) {
+    private int getInt(org.apache.karaf.util.properties.Properties storage, String name, int def) {
         Object value = storage.get(name);
         if (value != null) {
             return Integer.parseInt(value.toString());
@@ -184,7 +184,7 @@ public class InstanceServiceImpl implements InstanceService {
         }
     }
 
-    private String getString(org.apache.felix.utils.properties.Properties storage, String name, String def) {
+    private String getString(org.apache.karaf.util.properties.Properties storage, String name, String def) {
         Object value = storage.get(name);
         return value != null ? value.toString() : def;
     }
@@ -209,7 +209,7 @@ public class InstanceServiceImpl implements InstanceService {
             }
             try {
                 return FileLockUtils.execute(storageFile, new FileLockUtils.CallableWithProperties<T>() {
-                    public T call(org.apache.felix.utils.properties.Properties properties) throws IOException {
+                    public T call(org.apache.karaf.util.properties.Properties properties) throws IOException {
                         State state = loadData(properties);
                         T t = callback.call(state);
                         saveData(state, properties);
@@ -355,14 +355,14 @@ public class InstanceServiceImpl implements InstanceService {
 
     void addFeaturesFromSettings(File featuresCfg, final InstanceSettings settings) throws IOException {
         FileLockUtils.execute(featuresCfg, new FileLockUtils.RunnableWithProperties() {
-            public void run(org.apache.felix.utils.properties.Properties properties) throws IOException {
+            public void run(org.apache.karaf.util.properties.Properties properties) throws IOException {
                 appendToPropList(properties, "featuresBoot", settings.getFeatures());
                 appendToPropList(properties, "featuresRepositories", settings.getFeatureURLs());
             }
         });
     }
 
-    private void appendToPropList(org.apache.felix.utils.properties.Properties p, String key, List<String> elements) {
+    private void appendToPropList(org.apache.karaf.util.properties.Properties p, String key, List<String> elements) {
         if (elements == null) {
             return;
         }
@@ -708,7 +708,7 @@ public class InstanceServiceImpl implements InstanceService {
         File f = new File(instance.loc, path);
         try {
             return FileLockUtils.execute(f, new FileLockUtils.CallableWithProperties<Integer>() {
-                public Integer call(org.apache.felix.utils.properties.Properties properties) throws IOException {
+                public Integer call(org.apache.karaf.util.properties.Properties properties) throws IOException {
                     return Integer.parseInt(properties.get(key).toString());
                 }
             });
@@ -730,7 +730,7 @@ public class InstanceServiceImpl implements InstanceService {
                 }
                 File f = new File(instance.loc, path);
                 FileLockUtils.execute(f, new FileLockUtils.RunnableWithProperties() {
-                    public void run(org.apache.felix.utils.properties.Properties properties) throws IOException {
+                    public void run(org.apache.karaf.util.properties.Properties properties) throws IOException {
                         properties.put(key, Integer.toString(port));
                     }
                 });

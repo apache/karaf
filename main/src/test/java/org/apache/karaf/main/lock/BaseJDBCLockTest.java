@@ -28,7 +28,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Properties;
+import org.apache.karaf.util.properties.Properties;
 
 import org.apache.karaf.main.util.BootstrapLogManager;
 import org.easymock.EasyMock;
@@ -81,7 +81,7 @@ public abstract class BaseJDBCLockTest {
         props.put("karaf.lock.jdbc.password", password);
         props.put("karaf.lock.jdbc.table", tableName);
         props.put("karaf.lock.jdbc.clustername", clustername);
-        props.put("karaf.lock.jdbc.timeout", timeout);
+        props.put("karaf.lock.jdbc.timeout", Integer.toString(timeout));
     }
     
     @Test
