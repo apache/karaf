@@ -1,3 +1,21 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.apache.karaf.tooling.scr;
 
 import java.io.File;
@@ -206,7 +224,7 @@ public class ScrCommandMojo extends AbstractMojo {
                 }
             }
         }
-        return new String[] {
+        return new String[]{
                 activate != null ? activate.getName() : null,
                 deactivate != null ? deactivate.getName() : null
         };
@@ -230,7 +248,7 @@ public class ScrCommandMojo extends AbstractMojo {
             } catch (NoSuchMethodException e0) {
             }
         }
-        return new String[] {
+        return new String[]{
                 bind != null ? bind.getName() : null,
                 unbind != null ? unbind.getName() : null
         };
@@ -276,8 +294,8 @@ public class ScrCommandMojo extends AbstractMojo {
                 parentUrls.add(url);
             }
         }
-        ClassLoader classLoader = new URLClassLoader(childUrls.toArray(new URL[] {}),
-                new URLClassLoader(parentUrls.toArray(new URL[] {}), getClass().getClassLoader()));
+        ClassLoader classLoader = new URLClassLoader(childUrls.toArray(new URL[]{}),
+                new URLClassLoader(parentUrls.toArray(new URL[]{}), getClass().getClassLoader()));
         return classLoader;
     }
 
@@ -296,24 +314,24 @@ public class ScrCommandMojo extends AbstractMojo {
      * Set the service component header based on the scr files.
      */
     private void setServiceComponentHeader(final List<String> files) {
-        if ( files != null && files.size() > 0 ) {
+        if (files != null && files.size() > 0) {
             final String svcHeader = project.getProperties().getProperty("Service-Component");
             final Set<String> xmlFiles = new HashSet<String>();
-            if ( svcHeader != null ) {
+            if (svcHeader != null) {
                 final StringTokenizer st = new StringTokenizer(svcHeader, ",");
-                while ( st.hasMoreTokens() ) {
+                while (st.hasMoreTokens()) {
                     final String token = st.nextToken();
                     xmlFiles.add(token.trim());
                 }
             }
 
-            for(final String path : files) {
+            for (final String path : files) {
                 xmlFiles.add(path);
             }
             final StringBuilder sb = new StringBuilder();
             boolean first = true;
-            for(final String entry : xmlFiles) {
-                if ( !first ) {
+            for (final String entry : xmlFiles) {
+                if (!first) {
                     sb.append(", ");
                 } else {
                     first = false;

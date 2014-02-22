@@ -42,6 +42,7 @@ import org.slf4j.LoggerFactory;
  */
 @SuppressWarnings("deprecation")
 public class ActionCommand extends AbstractCommand implements CompletableFunction {
+
     private static Logger logger = LoggerFactory.getLogger(ActionCommand.class);
 
     private Action actionTemplate;
@@ -51,18 +52,18 @@ public class ActionCommand extends AbstractCommand implements CompletableFunctio
         this.actionTemplate = actionTemplate;
         addCompleters();
     }
-    
+
     public ServiceRegistration<?> registerService(BundleContext context) {
         Class<? extends Action> actionClass = actionTemplate.getClass();
         Command cmd = actionClass.getAnnotation(Command.class);
         if (cmd == null) {
             throw new IllegalArgumentException("Action class " + actionClass
-                                               + " is not annotated with @Command");
+                    + " is not annotated with @Command");
         }
-        String[] interfaces = new String[] {
-            Function.class.getName(), 
-            CommandWithAction.class.getName(),
-            AbstractCommand.class.getName()
+        String[] interfaces = new String[]{
+                Function.class.getName(),
+                CommandWithAction.class.getName(),
+                AbstractCommand.class.getName()
         };
         Hashtable<String, String> props = new Hashtable<String, String>();
         props.put(CommandProcessor.COMMAND_SCOPE, cmd.scope());
@@ -121,7 +122,7 @@ public class ActionCommand extends AbstractCommand implements CompletableFunctio
                     if (!field.isAccessible()) {
                         field.setAccessible(true);
                     }
-                    this.completers.add((Completer)field.get(actionTemplate));
+                    this.completers.add((Completer) field.get(actionTemplate));
                 } catch (Exception e) {
                     logger.warn("Error setting completer from field " + field.getName());
                 }
