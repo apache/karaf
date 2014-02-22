@@ -29,7 +29,7 @@ public class DiagnosticTest extends KarafTestSupport {
 
     @Test
     public void dumpCreateCommand() throws Exception {
-        assertContains("Diagnostic dump created.", executeCommand("dev:dump-create"));
+        assertContains("Diagnostic dump created", executeCommand("dev:dump-create"));
     }
 
     @Test
