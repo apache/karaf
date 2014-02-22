@@ -53,10 +53,6 @@
             <groupId>org.apache.karaf.shell</groupId>
             <artifactId>org.apache.karaf.shell.console</artifactId>
         </dependency>
-<!--         <dependency> -->
-<!--             <groupId>org.apache.karaf</groupId> -->
-<!--             <artifactId>org.apache.karaf.util</artifactId> -->
-<!--         </dependency> -->
         <dependency>
             <groupId>tanukisoft</groupId>
             <artifactId>wrapper</artifactId>
@@ -115,6 +111,7 @@
                         <Import-Package>
                             !org.apache.felix.utils.properties,
                             !org.apache.karaf.util.properties,
+                            !org.apache.karaf.util.locks,
                             !org.apache.karaf.info,
                             *
                         </Import-Package>
