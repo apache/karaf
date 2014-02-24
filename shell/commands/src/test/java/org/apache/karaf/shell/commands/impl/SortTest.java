@@ -18,6 +18,10 @@
  */
 package org.apache.karaf.shell.commands.impl;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Collections;
@@ -60,6 +64,28 @@ public class SortTest extends TestCase {
 
         Collections.sort(strings, new SortAction.SortComparator(false, true, false, false, '\0', Arrays.asList("4")));
         assertTrue(Arrays.asList(s2, s1, s0).equals(strings));
+    }
+
+    public void testSortToStdout() throws Exception {
+        String newLine = System.getProperty("line.separator");
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        byte[] input = ("abc" + newLine + "def" + newLine).getBytes();
+        new SortAction().sort(new ByteArrayInputStream(input), new PrintStream(baos));
+        assertEquals(new String(input), new String(baos.toByteArray()));
+    }
+
+    public void testUniqSortToStdout() throws Exception {
+        String newLine = System.getProperty("line.separator");
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        String inputString = "def" + newLine + "def" + newLine + "abc" + newLine + "abc" + newLine + "def" + newLine;
+        byte[] input = inputString.getBytes();
+        String outputString = ("abc" + newLine + "def" + newLine);
+        SortAction sort = new SortAction();
+        Field unique = SortAction.class.getDeclaredField("unique");
+        unique.setAccessible(true);
+        unique.set(sort, true);
+        sort.sort(new ByteArrayInputStream(input), new PrintStream(baos));
+        assertEquals(outputString, new String(baos.toByteArray()));
     }
 
 }
