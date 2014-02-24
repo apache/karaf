@@ -69,7 +69,7 @@ public class ConsoleFactoryService implements ConsoleFactory {
     @Override
     public Console create(CommandProcessor processor, ThreadIO threadIO, InputStream in, PrintStream out, PrintStream err, final Terminal terminal,
             String encoding, Runnable closeCallback) {
-        ConsoleImpl console = new ConsoleImpl(processor, threadIO, in, out, err, terminal, encoding, closeCallback, bundleContext);
+        ConsoleImpl console = new ConsoleImpl(processor, threadIO, in, out, err, terminal, encoding, closeCallback, bundleContext, true);
         CommandSession session = console.getSession();
         session.put("APPLICATION", System.getProperty("karaf.name", "root"));
         session.put("#LINES", new Function() {

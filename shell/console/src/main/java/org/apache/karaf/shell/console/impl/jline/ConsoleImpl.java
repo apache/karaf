@@ -79,6 +79,7 @@ public class ConsoleImpl implements Console {
     private InputStream in;
     private PrintStream out;
     private PrintStream err;
+    private boolean secured;
     private Thread thread;
     private final BundleContext bundleContext;
 
@@ -90,15 +91,21 @@ public class ConsoleImpl implements Console {
                        Terminal term,
                        String encoding,
                        Runnable closeCallback,
-                       BundleContext bc) {
+                       BundleContext bc,
+                       boolean secured) {
         this.threadIO = threadIO;
         this.in = in;
         this.out = out;
         this.err = err;
+        this.secured = secured;
         this.queue = new ArrayBlockingQueue<Integer>(1024);
         this.terminal = term == null ? new UnsupportedTerminal() : term;
         this.consoleInput = new ConsoleInputStream();
-        this.session = new DelegateSession();
+        if (secured) {
+            this.session = new DelegateSession();
+        } else {
+            this.session = processor.createSession(consoleInput, out, err);
+        }
         this.session.put("SCOPE", "shell:bundle:*");
         this.session.put("SUBSHELL", "");
         this.setCompletionMode();
@@ -130,7 +137,7 @@ public class ConsoleImpl implements Console {
                 ((MemoryHistory)reader.getHistory()).setMaxSize(Integer.parseInt(maxSizeStr));   
             }
         }
-        
+
         session.put(".jline.reader", reader);
         session.put(".jline.history", reader.getHistory());
         Completer completer = createCompleter();
@@ -150,6 +157,10 @@ public class ConsoleImpl implements Console {
     protected File getHistoryFile() {
         String defaultHistoryPath = new File(System.getProperty("user.home"), ".karaf/karaf.history").toString();
         return new File(System.getProperty("karaf.history", defaultHistoryPath));
+    }
+
+    public boolean isSecured() {
+        return secured;
     }
 
     public CommandSession getSession() {
@@ -178,7 +189,10 @@ public class ConsoleImpl implements Console {
     public void run() {
         try {
             threadIO.setStreams(consoleInput, out, err);
-            SecuredCommandProcessorImpl secCP = createSecuredCommandProcessor();
+            SecuredCommandProcessorImpl secCP = null;
+            if (secured) {
+                secCP = createSecuredCommandProcessor();
+            }
             thread = Thread.currentThread();
             CommandSessionHolder.setSession(session);
             running = true;
@@ -210,10 +224,12 @@ public class ConsoleImpl implements Console {
                     ShellUtil.logException(session, t);
                 }
             }
-            try {
-                secCP.close();
-            } catch (Throwable t) {
-                // Ignore
+            if (secured) {
+                try {
+                    secCP.close();
+                } catch (Throwable t) {
+                    // Ignore
+                }
             }
             close(true);
         } finally {

@@ -74,7 +74,7 @@ public class ConsoleImplTest {
         }).anyTimes();
         EasyMock.replay(bc);
 
-        final ConsoleImpl console = new ConsoleImpl(null, new ThreadIOImpl(), System.in, System.out, System.err, null, "UTF-8", null, bc);
+        final ConsoleImpl console = new ConsoleImpl(null, new ThreadIOImpl(), System.in, System.out, System.err, null, "UTF-8", null, bc, true);
         assertTrue(console.session instanceof DelegateSession);
 
         console.session.put("foo", "bar");
