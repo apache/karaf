@@ -43,7 +43,7 @@ public class BundleSelectorImpl {
                 }
                 addMatchingBundles(id, bundles);
             }
-        } else {
+        } else if (defaultAllBundles) {
             Collections.addAll(bundles, bundleContext.getBundles());
         }
         return bundles;
