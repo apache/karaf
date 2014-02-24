@@ -23,13 +23,14 @@ import org.apache.karaf.scr.command.ScrUtils;
 import org.apache.karaf.scr.command.support.IdComparator;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.table.ShellTable;
 
 import java.util.Arrays;
 
 /**
- * Lists all the components currently installed.
+ * List all the components currently installed.
  */
-@Command(scope = ScrCommandConstants.SCR_COMMAND, name = ScrCommandConstants.LIST_FUNCTION, description = "Displays a list of available components")
+@Command(scope = ScrCommandConstants.SCR_COMMAND, name = ScrCommandConstants.LIST_FUNCTION, description = "Display available components")
 @Service
 public class ListAction extends ScrActionSupport {
 
@@ -37,33 +38,27 @@ public class ListAction extends ScrActionSupport {
 
     @Override
     protected Object doScrAction(ScrService scrService) throws Exception {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Executing the List Action");
-        }
-        System.out.println(getBoldString("   ID   State             Component Name"));
+        ShellTable table = new ShellTable();
+        table.column("ID");
+        table.column("State");
+        table.column("Component Name");
+
         Component[] components = scrService.getComponents();
         Arrays.sort(components, idComparator);
         for (Component component : ScrUtils.emptyIfNull(Component.class, components)) {
             if (showHidden) {
                 // we display all because we are overridden
-                printComponent(component);
+                table.addRow().addContent(component.getId(), ScrUtils.getState(component.getState()), component.getName());
             } else {
                 if (ScrActionSupport.isHiddenComponent(component)) {
                     // do nothing
                 } else {
                     // we aren't hidden so print it
-                    printComponent(component);
+                    table.addRow().addContent(component.getId(), ScrUtils.getState(component.getState()), component.getName());
                 }
             }
         }
         return null;
-    }
-
-    private void printComponent(Component component) {
-        String name = component.getName();
-        String id = buildLeftPadBracketDisplay(component.getId() + "", 4);
-        String state = buildRightPadBracketDisplay(ScrUtils.getState(component.getState()), 16);
-        System.out.println("[" + id + "] [" + state + "] " + name);
     }
 
 }

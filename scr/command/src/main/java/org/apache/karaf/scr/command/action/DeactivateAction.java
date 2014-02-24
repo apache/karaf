@@ -40,10 +40,8 @@ public class DeactivateAction extends ScrActionSupport {
 
     @Override
     protected Object doScrAction(ScrService scrService) throws Exception {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Deactivate Action");
-            logger.debug("  Deactivating the Component: " + name);
-        }
+        logger.debug("Deactivate Action");
+        logger.debug("  Deactivating the Component: " + name);
         Component[] components = scrService.getComponents(name);
         if (components != null && components.length > 0) {
             for (int i = 0; i < components.length; i++) {

@@ -102,18 +102,6 @@ public abstract class ScrActionSupport extends AbstractAction {
         return answer;
     }
 
-    public String getBoldString(String value) {
-        return Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a(value).a(Ansi.Attribute.INTENSITY_BOLD_OFF).toString();
-    }
-
-    public String buildRightPadBracketDisplay(String s, int max) {
-        return String.format("%1$-" + max + "s", s);
-    }
-
-    public String buildLeftPadBracketDisplay(String s, int max) {
-        return String.format("%1$-" + max + "s", s);
-    }
-
     /**
      * Get the bundleContext Object associated with this instance of
      * ScrActionSupport.

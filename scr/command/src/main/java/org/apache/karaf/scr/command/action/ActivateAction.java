@@ -39,10 +39,8 @@ public class ActivateAction extends ScrActionSupport {
 
     @Override
     protected Object doScrAction(ScrService scrService) throws Exception {
-        if(logger.isDebugEnabled()){
-            logger.debug("Activate Action");
-            logger.debug("  Activating the Component: " + name);
-        }
+        logger.debug("Activate Action");
+        logger.debug("  Activating the Component: " + name);
         Component[] components = scrService.getComponents(name);
         for (Component component : ScrUtils.emptyIfNull(Component.class, components)) {
             component.enable();
