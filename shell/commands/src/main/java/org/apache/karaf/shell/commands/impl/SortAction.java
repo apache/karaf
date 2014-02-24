@@ -128,11 +128,10 @@ public class SortAction extends AbstractAction {
         Collections.sort(strings, new SortComparator(caseInsensitive, reverse, ignoreBlanks, numeric, sep, sortFields));
         String last = null;
         for (String s : strings) {
-            if (last == null) {
-                last = s;
-            } else if (!unique || !s.equals(last)) {
+            if (!unique || last == null || !s.equals(last)) {
                 out.println(s);
             }
+            last = s;
         }
     }
 
