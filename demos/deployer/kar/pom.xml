@@ -56,7 +56,7 @@
                             <goal>features-create-kar</goal>
                         </goals>
                         <configuration>
-                            <featuresFile>src/main/resources/features.xml</featuresFile>
+                            <featuresFile>${project.basedir}/src/main/resources/features.xml</featuresFile>
                         </configuration>
                     </execution>
                 </executions>

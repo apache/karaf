@@ -22,6 +22,8 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.karaf.deployer.kar.KarArtifactInstaller;
 import org.apache.karaf.features.BundleInfo;
@@ -40,6 +42,8 @@ import org.apache.maven.artifact.repository.metadata.Snapshot;
 import org.apache.maven.artifact.repository.metadata.SnapshotVersion;
 import org.apache.maven.artifact.repository.metadata.Versioning;
 import org.apache.maven.artifact.repository.metadata.io.xpp3.MetadataXpp3Writer;
+import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
+import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.codehaus.plexus.archiver.jar.JarArchiver;
@@ -118,7 +122,7 @@ public class CreateKarMojo extends MojoSupport {
      *
      * @parameter default-value="${project.build.directory}/feature/feature.xml"
      */
-    private File featuresFile;
+    private String featuresFile;
 
 
     /**
@@ -128,15 +132,33 @@ public class CreateKarMojo extends MojoSupport {
      */
     private String repositoryPath = "repository/";
 
+    private static final Pattern mvnPattern = Pattern.compile("mvn:([^/ ]+)/([^/ ]+)/([^/ ]*)(/([^/ ]+)(/([^/ ]+))?)?");
+
 
     //
     // Mojo
     //
 
     public void execute() throws MojoExecutionException, MojoFailureException {
-        List<Artifact> resources = readResources();
+        File featuresFileResolved = resolveFile(featuresFile);
+        String groupId = project.getGroupId();
+        String artifactId = project.getArtifactId();
+        String version = project.getVersion();
+
+        if (isMavenUrl(featuresFile)) {
+            Artifact artifactTemp = resourceToArtifact(featuresFile, false);
+            if (artifactTemp.getGroupId() != null)
+                groupId = artifactTemp.getGroupId();
+            if (artifactTemp.getArtifactHandler() != null)
+                artifactId = artifactTemp.getArtifactId();
+            if (artifactTemp.getVersion() != null)
+                version = artifactTemp.getVersion();
+        }
+
+        List<Artifact> resources = readResources(featuresFileResolved);
+
         // Build the archive
-        File archive = createArchive(resources);
+        File archive = createArchive(resources, featuresFileResolved, groupId, artifactId, version);
 
         // if no classifier is specified and packaging is not kar, display a warning
         // and attach artifact
@@ -154,13 +176,40 @@ public class CreateKarMojo extends MojoSupport {
         }
     }
 
+    private File resolveFile(String file) {
+        File fileResolved = null;
+
+        if (isMavenUrl(file)) {
+            fileResolved = new File(fromMaven(file));
+            try {
+                Artifact artifactTemp = resourceToArtifact(file, false);
+                if (!fileResolved.exists()) {
+                    try {
+                        resolver.resolve(artifactTemp, remoteRepos, localRepo);
+                        fileResolved = artifactTemp.getFile();
+                    } catch (ArtifactResolutionException e) {
+                        getLog().error("Artifact was not resolved", e);
+                    } catch (ArtifactNotFoundException e) {
+                        getLog().error("Artifact was not found", e);
+                    }
+                }
+            } catch (MojoExecutionException e) {
+                getLog().error(e);
+            }
+        } else {
+            fileResolved = new File(file);
+        }
+
+        return fileResolved;
+    }
+
     /**
      * Read bundles and configuration files in the features file.
      *
      * @return
      * @throws MojoExecutionException
      */
-    private List<Artifact> readResources() throws MojoExecutionException {
+    private List<Artifact> readResources(File featuresFile) throws MojoExecutionException {
         List<Artifact> resources = new ArrayList<Artifact>();
         try {
             InputStream in = new FileInputStream(featuresFile);
@@ -193,7 +242,7 @@ public class CreateKarMojo extends MojoSupport {
      * @param bundles
      */
     @SuppressWarnings("deprecation")
-	private File createArchive(List<Artifact> bundles) throws MojoExecutionException {
+	private File createArchive(List<Artifact> bundles, File featuresFile, String groupId, String artifactId, String version) throws MojoExecutionException {
         ArtifactRepositoryLayout layout = new DefaultRepositoryLayout();
         File archiveFile = getArchiveFile(outputDirectory, finalName, classifier);
 
@@ -220,7 +269,7 @@ public class CreateKarMojo extends MojoSupport {
 //            archive.addManifestEntry(Constants.BUNDLE_SYMBOLICNAME, project.getArtifactId());
 
             //include the feature.xml
-			Artifact featureArtifact = factory.createArtifactWithClassifier(project.getGroupId(), project.getArtifactId(), project.getVersion(), "xml", KarArtifactInstaller.FEATURE_CLASSIFIER);
+			Artifact featureArtifact = factory.createArtifactWithClassifier(groupId, artifactId, version, "xml", KarArtifactInstaller.FEATURE_CLASSIFIER);
             jarArchiver.addFile(featuresFile, repositoryPath + layout.pathOf(featureArtifact));
 
             if (featureArtifact.isSnapshot()) {
@@ -299,6 +348,56 @@ public class CreateKarMojo extends MojoSupport {
         } catch (Exception e) {
             throw new MojoExecutionException("Failed to create archive", e);
         }
+    }
+
+    protected static boolean isMavenUrl(String name) {
+        Matcher m = mvnPattern.matcher(name);
+        return m.matches();
+    }
+
+    /**
+     * Return a path for an artifact:
+     * - if the input is already a path (doesn't contain ':'), the same path is returned.
+     * - if the input is a Maven URL, the input is converted to a default repository location path, type and classifier
+     *   are optional.
+     *
+     * @param name artifact data
+     * @return path as supplied or a default Maven repository path
+     */
+    private static String fromMaven(String name) {
+        Matcher m = mvnPattern.matcher(name);
+        if (!m.matches()) {
+            return name;
+        }
+
+        StringBuilder b = new StringBuilder();
+        b.append(m.group(1));
+        for (int i = 0; i < b.length(); i++) {
+            if (b.charAt(i) == '.') {
+                b.setCharAt(i, '/');
+            }
+        }
+        b.append("/"); // groupId
+        String artifactId = m.group(2);
+        String version = m.group(3);
+        String extension = m.group(5);
+        String classifier = m.group(7);
+        b.append(artifactId).append("/"); // artifactId
+        b.append(version).append("/"); // version
+        b.append(artifactId).append("-").append(version);
+        if (present(classifier)) {
+            b.append("-").append(classifier);
+        }
+        if (present(classifier)) {
+            b.append(".").append(extension);
+        } else {
+            b.append(".jar");
+        }
+        return b.toString();
+    }
+
+    private static boolean present(String part) {
+        return part != null && !part.isEmpty();
     }
 
     protected static File getArchiveFile(final File basedir, final String finalName, String classifier) {
