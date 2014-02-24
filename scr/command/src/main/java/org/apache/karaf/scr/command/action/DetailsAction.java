@@ -23,6 +23,7 @@ import org.apache.karaf.scr.command.ScrCommandConstants;
 import org.apache.karaf.scr.command.ScrUtils;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
+import org.fusesource.jansi.Ansi;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentConstants;
@@ -30,12 +31,12 @@ import org.osgi.service.component.ComponentConstants;
 import java.util.Hashtable;
 
 /**
- * Displays the details associated with a given component by supplying its component name.
+ * Display the details associated with a given component by supplying its component name.
  */
-@Command(scope = ScrCommandConstants.SCR_COMMAND, name = ScrCommandConstants.DETAILS_FUNCTION, description = "Displays a list of available components")
+@Command(scope = ScrCommandConstants.SCR_COMMAND, name = ScrCommandConstants.DETAILS_FUNCTION, description = "Display available components")
 public class DetailsAction extends ScrActionSupport {
 
-    @Argument(index = 0, name = "name", description = "The name of the Component to display the detials of", required = true, multiValued = false)
+    @Argument(index = 0, name = "name", description = "The component name", required = true, multiValued = false)
     String name;
 
     @SuppressWarnings("rawtypes")
@@ -44,7 +45,7 @@ public class DetailsAction extends ScrActionSupport {
         if (logger.isDebugEnabled()) {
             logger.debug("Executing the Details Action");
         }
-        System.out.println(getBoldString("Component Details"));
+        System.out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("Component Details").a(Ansi.Attribute.INTENSITY_BOLD_OFF));
         Component[] components = scrService.getComponents(name);
         for (Component component : ScrUtils.emptyIfNull(Component.class, components)) {
             printDetail("  Name                : ", component.getName());
@@ -52,14 +53,14 @@ public class DetailsAction extends ScrActionSupport {
 
             Hashtable props = (Hashtable)component.getProperties();
             if (!props.isEmpty()) {
-                System.out.println(getBoldString("  Properties          : "));
+                System.out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("  Properties          : ").a(Ansi.Attribute.INTENSITY_BOLD_OFF));
                 for (Object key : props.keySet()) {
                     Object value = props.get(key);
                     printDetail("    ", key + "=" + value);
                 }
             }
             Reference[] references = component.getReferences();
-            System.out.println(getBoldString("References"));
+            System.out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("References").a(Ansi.Attribute.INTENSITY_BOLD_OFF));
 
             for (Reference reference : ScrUtils.emptyIfNull(Reference.class, references)) {
                 printDetail("  Reference           : ", reference.getName());
@@ -101,7 +102,7 @@ public class DetailsAction extends ScrActionSupport {
     }
 
     private void printDetail(String header, String value) {
-        System.out.println(getBoldString(header) + value);
+        System.out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a(header).a(Ansi.Attribute.INTENSITY_BOLD_OFF).a(value));
     }
 
 }
