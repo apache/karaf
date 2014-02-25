@@ -43,14 +43,14 @@ public class MavenUtil {
 
     private static final DefaultRepositoryLayout layout = new DefaultRepositoryLayout();
     private static final Pattern aetherPattern = Pattern.compile("([^: ]+):([^: ]+)(:([^: ]*)(:([^: ]+))?)?:([^: ]+)");
-    private static final Pattern mvnPattern = Pattern.compile("mvn:([^/ ]+)/([^/ ]+)/([^/ ]*)(/([^/ ]+)(/([^/ ]+))?)?");
+    private static final Pattern mvnPattern = Pattern.compile("(?:wrap:)?mvn:([^/ ]+)/([^/ ]+)/([^/\\$ ]*)(/([^/\\$ ]+)(/([^/\\$ ]+))?)?(\\$.+)?");
 
     /**
      * Convert PAX URL mvn format to aether coordinate format.
      * N.B. we do not handle repository-url in mvn urls.
      * N.B. version is required in mvn urls.
      *
-     * @param name PAX URL mvn format: mvn-uri := 'mvn:' [ repository-url '!' ] group-id '/' artifact-id [ '/' [version] [ '/' [type] [ '/' classifier ] ] ] ]
+     * @param name PAX URL mvn format: mvn-uri := [ 'wrap:' ] 'mvn:' [ repository-url '!' ] group-id '/' artifact-id [ '/' [version] [ '/' [type] [ '/' classifier ] ] ] ]
      * @return aether coordinate format: <groupId>:<artifactId>[:<extension>[:<classifier>]]:<version>
      */
     static String mvnToAether(String name) {

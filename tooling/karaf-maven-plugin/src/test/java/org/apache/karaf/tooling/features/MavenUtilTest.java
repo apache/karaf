@@ -37,6 +37,9 @@ public class MavenUtilTest {
         assertEquals("org.foo:org.foo.bar:1.0-SNAPSHOT", mvnToAether("mvn:org.foo/org.foo.bar/1.0-SNAPSHOT"));
         assertEquals("org.foo:org.foo.bar:kar:1.0-SNAPSHOT", mvnToAether("mvn:org.foo/org.foo.bar/1.0-SNAPSHOT/kar"));
         assertEquals("org.foo:org.foo.bar:xml:features:1.0-SNAPSHOT", mvnToAether("mvn:org.foo/org.foo.bar/1.0-SNAPSHOT/xml/features"));
+        assertEquals("org.foo:org.foo.bar:1.0-SNAPSHOT", mvnToAether("wrap:mvn:org.foo/org.foo.bar/1.0-SNAPSHOT"));
+        assertEquals("org.foo:org.foo.bar:kar:1.0-SNAPSHOT", mvnToAether("wrap:mvn:org.foo/org.foo.bar/1.0-SNAPSHOT/kar"));
+        assertEquals("org.foo:org.foo.bar:xml:features:1.0-SNAPSHOT", mvnToAether("wrap:mvn:org.foo/org.foo.bar/1.0-SNAPSHOT/xml/features"));
     }
 
     @Test
