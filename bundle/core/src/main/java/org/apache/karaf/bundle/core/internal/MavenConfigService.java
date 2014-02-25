@@ -17,14 +17,15 @@
 package org.apache.karaf.bundle.core.internal;
 
 import java.io.File;
-import java.io.IOException;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.Dictionary;
 
-import org.ops4j.pax.url.maven.commons.MavenConfiguration;
-import org.ops4j.pax.url.maven.commons.MavenConfigurationImpl;
-import org.ops4j.pax.url.maven.commons.MavenRepositoryURL;
-import org.ops4j.pax.url.mvn.ServiceConstants;
-import org.ops4j.util.property.DictionaryPropertyResolver;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
@@ -32,7 +33,7 @@ import org.slf4j.LoggerFactory;
 
 public class MavenConfigService {
 
-	private final Logger logger = LoggerFactory.getLogger(BundleWatcherImpl.class);
+	private final Logger logger = LoggerFactory.getLogger(MavenConfigService.class);
 	private final ConfigurationAdmin configurationAdmin;
 
 	public MavenConfigService(ConfigurationAdmin configurationAdmin) {
@@ -40,35 +41,56 @@ public class MavenConfigService {
 	}
 
     public File getLocalRepository() {
-        // Attempt to retrieve local repository location from MavenConfiguration
-        MavenConfiguration configuration = retrieveMavenConfiguration();
-        if (configuration != null) {
-            MavenRepositoryURL localRepositoryURL = configuration.getLocalRepository();
-            if (localRepositoryURL != null) {
-                return localRepositoryURL.getFile().getAbsoluteFile();
-            }
-        }
-        // If local repository not found assume default.
-        String localRepo = System.getProperty("user.home") + File.separator + ".m2" + File.separator + "repository";
-        return new File(localRepo).getAbsoluteFile();
-    }
-
-    private MavenConfiguration retrieveMavenConfiguration() {
-        MavenConfiguration mavenConfiguration = null;
+        String path = null;
         try {
-            Configuration configuration = configurationAdmin.getConfiguration(ServiceConstants.PID);
+            Configuration configuration = configurationAdmin.getConfiguration("org.ops4j.pax.url.mvn");
             if (configuration != null) {
-                @SuppressWarnings("rawtypes")
-				Dictionary dictonary = configuration.getProperties();
-                if (dictonary != null) {
-                    DictionaryPropertyResolver resolver = new DictionaryPropertyResolver(dictonary);
-                    mavenConfiguration = new MavenConfigurationImpl(resolver, ServiceConstants.PID);
-                }
+                Dictionary<String, Object> dict = configuration.getProperties();
+                path = getLocalRepoFromConfig(dict);
+
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             logger.error("Error retrieving maven configuration", e);
         }
-        return mavenConfiguration;
+        if (path == null) {
+            path = System.getProperty("user.home") + File.separator + ".m2" + File.separator + "repository";
+        }
+        int index = path.indexOf('@');
+        if (index > 0) {
+            return new File(path.substring(index)).getAbsoluteFile();
+        } else {
+            return new File(path).getAbsoluteFile();
+        }
+    }
+
+    static String getLocalRepoFromConfig(Dictionary<String, Object> dict) throws XMLStreamException, FileNotFoundException {
+        String path = null;
+        if (dict != null) {
+            path = (String) dict.get("org.ops4j.pax.url.mvn.localRepository");
+            if (path == null) {
+                String settings = (String) dict.get("org.ops4j.pax.url.mvn.settings");
+                if (settings != null) {
+                    File file = new File(settings);
+                    XMLStreamReader reader = XMLInputFactory.newFactory().createXMLStreamReader(new FileInputStream(file));
+                    try {
+                        int event;
+                        String elementName = null;
+                        while ((event = reader.next()) != XMLStreamConstants.END_DOCUMENT) {
+                            if (event == XMLStreamConstants.START_ELEMENT) {
+                                elementName = reader.getLocalName();
+                            } else if (event == XMLStreamConstants.END_ELEMENT) {
+                                elementName = null;
+                            } else if (event == XMLStreamConstants.CHARACTERS && "localRepository".equals(elementName))  {
+                                path = reader.getText().trim();
+                            }
+                        }
+                    } finally {
+                        reader.close();
+                    }
+                }
+            }
+        }
+        return path;
     }
 
 }

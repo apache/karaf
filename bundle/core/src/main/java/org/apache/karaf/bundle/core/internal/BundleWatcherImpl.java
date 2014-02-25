@@ -33,7 +33,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.karaf.bundle.core.BundleService;
 import org.apache.karaf.bundle.core.BundleWatcher;
-import org.ops4j.pax.url.mvn.Parser;
+import org.apache.karaf.util.maven.Parser;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
@@ -42,7 +42,6 @@ import org.osgi.framework.BundleListener;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.wiring.FrameworkWiring;
-import org.osgi.service.packageadmin.PackageAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
