@@ -116,10 +116,12 @@
                         <Export-Package>
                         	!*
                         </Export-Package>
-                        <!-- We have to avoid importing instance.core.internal as Execute.java 
-                             accesses the InstanceServiceImpl (but only outside OSGi) -->
+                        <!-- We have to avoid importing instance.core.internal and jansi
+                             as Execute.java accesses the InstanceServiceImpl and jansi
+                             (but only outside OSGi) -->
                         <Import-Package>
-                        	!org.apache.karaf.instance.core.internal, 
+                        	!org.apache.karaf.instance.core.internal,
+                            !org.fusesource.jansi,
                         	*
                         </Import-Package>
                         <Private-Package>

@@ -171,6 +171,9 @@
                             org.apache.felix.utils.extender,
                             org.apache.felix.utils.manifest
                         </Private-Package>
+                        <Bundle-Activator>
+                            org.apache.felix.gogo.runtime.activator.Activator
+                        </Bundle-Activator>
                         <Main-Class>
                             org.apache.karaf.shell.console.impl.Main
                         </Main-Class>
