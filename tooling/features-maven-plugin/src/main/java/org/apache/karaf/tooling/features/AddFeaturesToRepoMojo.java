@@ -38,12 +38,14 @@ import java.util.Set;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.felix.utils.version.VersionRange;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.osgi.framework.Version;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -228,6 +230,7 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
         throws Exception {
         // let's ensure a mvn: based url is sitting in the local repo before we try reading it
         Artifact descriptor = resourceToArtifact(uri, true);
+        
         if (descriptor != null) {
             resolveBundle(descriptor, remoteRepos);
         }
@@ -293,6 +296,19 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
             if (version != null) {
                 // looking for a specific feature with name and version
                 f = featuresMap.get(feature + "/" + version);
+                if (f == null) {
+                    //it's probably is a version range so try to use VersionRange Utils
+                    VersionRange versionRange = new VersionRange(version);
+                    for (String key : featuresMap.keySet()) {
+                        String[] nameVersion = key.split("/");
+                        if (feature.equals(nameVersion[0])) {
+                            Version ver = new Version(featuresMap.get(key).getVersion());
+                            if (versionRange.contains(ver)) {
+                                f = featuresMap.get(key);
+                            }
+                        }
+                    }
+                }
             } else {
                 // looking for the feature name (with the greatest version)
                 for (String key : featuresMap.keySet()) {
@@ -477,7 +493,12 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
                     NodeList featureNodes = e.getElementsByTagName("feature");
                     for (int j = 0; j < featureNodes.getLength(); j++) {
                         Element b = (Element) featureNodes.item(j);
-                        f.addDependency(b.getTextContent());
+                        if (b.getAttribute("version") != null 
+                            && b.getAttribute("version").length() > 0) {
+                            f.addDependency(b.getTextContent() + "/" + b.getAttribute("version"));
+                        } else {
+                            f.addDependency(b.getTextContent());
+                        }
                     }
                     NodeList configNodes = e.getElementsByTagName("config");
                     for (int j = 0; j < configNodes.getLength(); j++) {
