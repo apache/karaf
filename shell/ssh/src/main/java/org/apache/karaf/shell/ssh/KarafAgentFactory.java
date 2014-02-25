@@ -35,10 +35,8 @@ import org.apache.sshd.agent.local.AgentImpl;
 import org.apache.sshd.agent.local.AgentServerProxy;
 import org.apache.sshd.agent.local.ChannelAgentForwarding;
 import org.apache.sshd.common.Channel;
-import org.apache.sshd.common.FactoryManager;
 import org.apache.sshd.common.NamedFactory;
 import org.apache.sshd.common.Session;
-import org.apache.sshd.common.session.ConnectionService;
 import org.apache.sshd.server.session.ServerSession;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
@@ -65,8 +63,8 @@ public class KarafAgentFactory implements SshAgentFactory {
         return new ChannelAgentForwarding.Factory();
     }
 
-    public SshAgent createClient(FactoryManager manager) throws IOException {
-        String proxyId = manager.getProperties().get(SshAgent.SSH_AUTHSOCKET_ENV_NAME);
+    public SshAgent createClient(Session session) throws IOException {
+        String proxyId = session.getFactoryManager().getProperties().get(SshAgent.SSH_AUTHSOCKET_ENV_NAME);
         if (proxyId == null) {
             throw new IllegalStateException("No " + SshAgent.SSH_AUTHSOCKET_ENV_NAME + " environment variable set");
         }
@@ -81,12 +79,11 @@ public class KarafAgentFactory implements SshAgentFactory {
         throw new IllegalStateException("No ssh agent found");
     }
 
-    public SshAgentServer createServer(ConnectionService service) throws IOException {
-        Session session = service.getSession();
+    public SshAgentServer createServer(Session session) throws IOException {
         if (!(session instanceof ServerSession)) {
             throw new IllegalStateException("The session used to create an agent server proxy must be a server session");
         }
-        final AgentServerProxy proxy = new AgentServerProxy(service);
+        final AgentServerProxy proxy = new AgentServerProxy((ServerSession) session);
         proxies.put(proxy.getId(), proxy);
         return new SshAgentServer() {
             public String getId() {
