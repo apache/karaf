@@ -1,50 +1,6 @@
 <settings>
-    <!--
-      <mirrors>
-        <mirror>
-          <id>nexus</id>
-          <mirrorOf>*</mirrorOf>
-          <url>http://192.168.0.128:8081/nexus/content/groups/public</url>
-        </mirror>
-      </mirrors>
-    -->
-    <servers>
-    </servers>
     <localRepository>foo/bar</localRepository>
     <profiles>
-        <profile>
-            <id>signing-key</id>
-            <properties>
-                <gpg.passphrase>paulaudesixtinemarieamelie</gpg.passphrase>
-                <gpg.keyname>B4493B94</gpg.keyname>
-                <!--
-                <release-paxurl-altGitURL>scm:git:file:///Users/gnodet/work/git/org.ops4j.pax.url</release-paxurl-altGitURL>
-                <release-altGitURL>scm:git:file:///Users/gnodet/work/git/org.ops4j.pax.web</release-altGitURL>
-                <altDeploymentRepository>apache.releases.https::default::https://repository.apache.org/service/local/staging/deploy/maven2/</altDeploymentRepository>
-                -->
-            </properties>
-        </profile>
-        <profile>
-            <id>nexus</id>
-            <!--Enable snapshots for the built in central repo to direct -->
-            <!--all requests to nexus via the mirror -->
-            <repositories>
-                <repository>
-                    <id>central</id>
-                    <url>http://central</url>
-                    <releases><enabled>true</enabled></releases>
-                    <snapshots><enabled>true</enabled></snapshots>
-                </repository>
-            </repositories>
-            <pluginRepositories>
-                <pluginRepository>
-                    <id>central</id>
-                    <url>http://central</url>
-                    <releases><enabled>true</enabled></releases>
-                    <snapshots><enabled>true</enabled></snapshots>
-                </pluginRepository>
-            </pluginRepositories>
-        </profile>
         <profile>
             <id>downloadSources</id>
             <properties>
@@ -53,12 +9,6 @@
         </profile>
     </profiles>
     <activeProfiles>
-        <!--make the profile active all the time -->
-        <!--
-            <activeProfile>nexus</activeProfile>
-            <activeProfile>fuse-repo</activeProfile>
-        -->
-        <activeProfile>signing-key</activeProfile>
         <activeProfile>downloadSources</activeProfile>
     </activeProfiles>
 </settings>
