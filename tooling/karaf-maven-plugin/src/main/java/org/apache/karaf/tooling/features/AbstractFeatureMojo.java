@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.felix.utils.version.VersionRange;
 import org.apache.karaf.tooling.features.model.ArtifactRef;
 import org.apache.karaf.tooling.features.model.Feature;
 import org.apache.karaf.tooling.features.model.Repository;
@@ -33,6 +34,8 @@ import org.apache.karaf.tooling.utils.MojoSupport;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.MojoExecutionException;
+
+import org.osgi.framework.Version;
 
 /**
  * Common functionality for mojos that need to reolve features
@@ -185,6 +188,19 @@ public abstract class AbstractFeatureMojo extends MojoSupport {
         if (version != null) {
             // looking for a specific feature with name and version
             f = featuresMap.get(feature + "/" + version);
+            if (f == null) {
+                //it's probably is a version range so try to use VersionRange Utils
+                VersionRange versionRange = new VersionRange(version);
+                for (String key : featuresMap.keySet()) {
+                    String[] nameVersion = key.split("/");
+                    if (feature.equals(nameVersion[0])) {
+                        Version ver = new Version(featuresMap.get(key).getVersion());
+                        if (versionRange.contains(ver)) {
+                            f = featuresMap.get(key);
+                        }
+                    }
+                }
+            }
         } else {
             // looking for the first feature name (whatever the version is)
             for (String key : featuresMap.keySet()) {

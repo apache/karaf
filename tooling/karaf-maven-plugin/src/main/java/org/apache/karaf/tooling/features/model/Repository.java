@@ -99,7 +99,12 @@ public class Repository {
                 NodeList featureNodes = e.getElementsByTagName("feature");
                 for (int j = 0; j < featureNodes.getLength(); j++) {
                     Element b = (Element) featureNodes.item(j);
-                    f.addDependency(b.getTextContent());
+                    if (b.getAttribute("version") != null 
+                        && b.getAttribute("version").length() > 0) {
+                        f.addDependency(b.getTextContent() + "/" + b.getAttribute("version"));
+                    } else {
+                        f.addDependency(b.getTextContent());
+                    }
                 }
                 NodeList configNodes = e.getElementsByTagName("config");
                 for (int j = 0; j < configNodes.getLength(); j++) {
