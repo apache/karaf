@@ -40,7 +40,7 @@ public class JdbcServiceImpl implements JdbcService {
         DERBY("mvn:org.apache.derby/derby/", "10.8.2.2", "datasource-derby.xml"),
         GENERIC(null, null, "datasource-generic.xml"),
         H2("mvn:com.h2database/h2/", "1.3.163", "datasource-h2.xml"),
-        HSQL("mvn:com.h2database/h2/", "1.3.163", "datasource-hsql.xml"),
+        HSQL("mvn:org.hsqldb/hsqldb/", "2.3.2", "datasource-hsql.xml"),
         MYSQL("mvn:mysql/mysql-connector-java/", "5.1.18", "datasource-mysql.xml"),
         ORACLE("wrap:mvn:ojdbc/ojdbc/", "11.2.0.2.0", "datasource-oracle.xml"),
         POSTGRES("wrap:mvn:postgresql/postgresql/", "9.1-901.jdbc4", "datasource-postgres.xml");
