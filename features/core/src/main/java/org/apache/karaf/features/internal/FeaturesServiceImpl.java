@@ -970,7 +970,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
             sb.append("). Please specify the version to uninstall.");
             throw new Exception(sb.toString());
         }
-        uninstallFeature(name, versions.get(0));
+        uninstallFeature(name, versions.get(0), options);
     }
 
     public void uninstallFeature(String name, String version) throws Exception {

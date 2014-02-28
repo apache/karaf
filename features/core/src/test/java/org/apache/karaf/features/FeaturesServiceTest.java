@@ -193,7 +193,6 @@ public class FeaturesServiceTest extends TestCase {
 
         // UnInstalls f1 and 0.2
         expect(bundleContext.getBundle(123456)).andReturn(installedBundle);
-        packageAdmin.refreshPackages(null);
         installedBundle.uninstall();
 
         expect(bundleContext.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
@@ -218,9 +217,9 @@ public class FeaturesServiceTest extends TestCase {
         }
 
         svc.uninstallFeature("f1", "0.1", EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
-        svc.uninstallFeature("f1");
-    }    
-    
+        svc.uninstallFeature("f1", EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
+    }
+
     // Tests Add and Remove Repository
     public void testAddAndRemoveRepository() throws Exception {
 
