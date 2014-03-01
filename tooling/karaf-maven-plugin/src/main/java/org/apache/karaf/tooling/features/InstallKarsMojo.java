@@ -337,7 +337,7 @@ public class InstallKarsMojo extends MojoSupport {
         target.getParentFile().mkdirs();
         copy(source, target);
     }
-    
+
     private boolean acceptScope(Artifact artifact) {
         return "compile".equals(artifact.getScope()) || "runtime".equals(artifact.getScope());
     }
@@ -391,6 +391,28 @@ public class InstallKarsMojo extends MojoSupport {
                         properties.put(FEATURES_REPOSITORIES, existingFeatureRepos);
                     }
                     Features repo = readFeatures(uri);
+                    for (String innerRepository : repo.getRepository()) {
+                        String innerRepositoryPath = MavenUtil.pathFromMaven(innerRepository);
+                        File innerRepositoryTargetInSystemRepository = new File(system.resolve(innerRepositoryPath));
+                        if (!innerRepositoryTargetInSystemRepository.exists()) {
+                            File innerRepositorySourceFile = resolve(innerRepository);
+                            innerRepositoryTargetInSystemRepository.getParentFile().mkdirs();
+                            copy(innerRepositorySourceFile, innerRepositoryTargetInSystemRepository);
+
+                            // add metadata for snapshot
+                            Artifact innerRepositoryArtifact = MavenUtil.mvnToArtifact(innerRepository);
+                            if (innerRepositoryArtifact.isSnapshot()) {
+                                getLog().debug("Feature repository " + innerRepository + " is a SNAPSHOT, generate the maven-metadata-local.xml file");
+                                File metadataTarget = new File(innerRepositoryTargetInSystemRepository.getParentFile(), "maven-metadata-local.xml");
+                                try {
+                                    MavenUtil.generateMavenMetadata(innerRepositoryArtifact, metadataTarget);
+                                } catch (Exception e) {
+                                    getLog().warn("Could not create maven-metadata-local.xml", e);
+                                    getLog().warn("It means that this SNAPSHOT could be overwritten by an older one present on remote repositories");
+                                }
+                            }
+                        }
+                    }
                     for (Feature feature : repo.getFeature()) {
                         featureSet.add(feature);
                         if (startupFeatures != null && startupFeatures.contains(feature.getName())) {
@@ -453,7 +475,7 @@ public class InstallKarsMojo extends MojoSupport {
         }
 
         private String retrieveProperty(Properties properties, String key) {
-            return properties.containsKey(key) && properties.get(key) != null ?  properties.get(key) + "," : "";
+            return properties.containsKey(key) && properties.get(key) != null ? properties.get(key) + "," : "";
         }
 
         private Features readFeatures(URI uri) throws XMLStreamException, JAXBException, IOException {
@@ -524,7 +546,7 @@ public class InstallKarsMojo extends MojoSupport {
                 String location = bundle.getLocation();
                 String startLevel = Integer.toString(bundle.getStartLevel() == 0 ? defaultStartLevel : bundle.getStartLevel());
                 if (startupProperties.containsKey(location)) {
-                    int oldStartLevel = Integer.decode((String)startupProperties.get(location));
+                    int oldStartLevel = Integer.decode((String) startupProperties.get(location));
                     if (oldStartLevel > bundle.getStartLevel()) {
                         startupProperties.put(location, startLevel);
                     }
@@ -557,7 +579,7 @@ public class InstallKarsMojo extends MojoSupport {
 
         @Override
         public void installFeatures(Set<org.apache.karaf.features.Feature> features, EnumSet<Option> options)
-            throws Exception {
+                throws Exception {
         }
 
         @Override
@@ -599,11 +621,11 @@ public class InstallKarsMojo extends MojoSupport {
             return null;
         }
 
-		@Override
-		public void refreshRepository(URI uri) throws Exception {
-			// TODO Auto-generated method stub
-			
-		}
+        @Override
+        public void refreshRepository(URI uri) throws Exception {
+            // TODO Auto-generated method stub
+
+        }
     }
 
 }
