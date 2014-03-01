@@ -150,6 +150,7 @@ public class FeaturesServiceTest extends TestCase {
         
         BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
         Bundle installedBundle = EasyMock.createMock(Bundle.class);
+        PackageAdmin packageAdmin = EasyMock.createMock(PackageAdmin.class);
 
         expect(bundleContext.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
 
@@ -158,6 +159,7 @@ public class FeaturesServiceTest extends TestCase {
         FeaturesServiceImpl svc = new FeaturesServiceImpl();
         svc.setBundleContext(bundleContext);
         svc.addRepository(uri);
+        svc.setPackageAdmin(packageAdmin);
         
         verify(bundleContext, installedBundle);
 
@@ -195,7 +197,7 @@ public class FeaturesServiceTest extends TestCase {
 
         expect(bundleContext.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
 
-        replay(bundleContext, installedBundle);
+        replay(bundleContext, installedBundle, packageAdmin);
 
         try {
             svc.uninstallFeature("f1");
@@ -214,10 +216,10 @@ public class FeaturesServiceTest extends TestCase {
             // ok
         }
 
-        svc.uninstallFeature("f1", "0.1");
-        svc.uninstallFeature("f1");
-    }    
-    
+        svc.uninstallFeature("f1", "0.1", EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
+        svc.uninstallFeature("f1", EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
+    }
+
     // Tests Add and Remove Repository
     public void testAddAndRemoveRepository() throws Exception {
 
