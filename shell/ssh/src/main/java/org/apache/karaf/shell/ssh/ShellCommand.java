@@ -85,6 +85,7 @@ public class ShellCommand implements Command, SessionAware {
     }
 
     public void start(final Environment env) throws IOException {
+        int exitStatus = 0;
         try {
             final CommandSession session = commandProcessor.createSession(in, new PrintStream(out), new PrintStream(err));
             session.put("SCOPE", "shell:osgi:*");
@@ -120,10 +121,11 @@ public class ShellCommand implements Command, SessionAware {
                 ShellUtil.logException(session, t);
             }
         } catch (Exception e) {
+            exitStatus = 1;
             throw (IOException) new IOException("Unable to start shell").initCause(e);
         } finally {
             StreamUtils.close(in, out, err);
-            callback.onExit(0);
+            callback.onExit(exitStatus);
         }
     }
 
