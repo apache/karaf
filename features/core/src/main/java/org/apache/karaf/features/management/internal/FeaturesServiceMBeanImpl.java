@@ -28,11 +28,7 @@ import javax.management.Notification;
 import javax.management.ObjectName;
 import javax.management.openmbean.TabularData;
 
-import org.apache.karaf.features.Feature;
-import org.apache.karaf.features.FeatureEvent;
-import org.apache.karaf.features.FeaturesListener;
-import org.apache.karaf.features.Repository;
-import org.apache.karaf.features.RepositoryEvent;
+import org.apache.karaf.features.*;
 import org.apache.karaf.features.management.FeaturesServiceMBean;
 import org.apache.karaf.features.management.codec.JmxFeature;
 import org.apache.karaf.features.management.codec.JmxFeatureEvent;
@@ -206,8 +202,24 @@ public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
         featuresService.uninstallFeature(name);
     }
 
+    public void uninstallFeature(String name, boolean noRefresh) throws Exception {
+        EnumSet<org.apache.karaf.features.FeaturesService.Option> options = EnumSet.noneOf(org.apache.karaf.features.FeaturesService.Option.class);
+        if (noRefresh) {
+            options.add(org.apache.karaf.features.FeaturesService.Option.NoAutoRefreshBundles);
+        }
+        featuresService.uninstallFeature(name, options);
+    }
+
     public void uninstallFeature(String name, String version) throws Exception {
         featuresService.uninstallFeature(name, version);
+    }
+
+    public void uninstallFeature(String name, String version, boolean noRefresh) throws Exception {
+        EnumSet<org.apache.karaf.features.FeaturesService.Option> options = EnumSet.noneOf(org.apache.karaf.features.FeaturesService.Option.class);
+        if (noRefresh) {
+            options.add(org.apache.karaf.features.FeaturesService.Option.NoAutoRefreshBundles);
+        }
+        featuresService.uninstallFeature(name, version, options);
     }
 
     public void setBundleContext(BundleContext bundleContext) {

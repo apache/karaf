@@ -51,6 +51,7 @@ import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
+import org.osgi.service.packageadmin.PackageAdmin;
 
 public class FeaturesServiceTest extends TestBase {
     private static final String FEATURE_WITH_INVALID_BUNDLE = "<features name='test' xmlns='http://karaf.apache.org/xmlns/features/v1.0.0'>"
@@ -143,7 +144,7 @@ public class FeaturesServiceTest extends TestBase {
         expect(bundleManager.installBundleIfNeeded("bundle-0.1", 0, null)).andReturn(new BundleInstallerResult(bundlef101, false));
         expect(bundleManager.getBundleContext()).andReturn(bundleContext);
         ignoreRefreshes(bundleManager);
-        bundleManager.uninstall(Collections.EMPTY_LIST);        
+        bundleManager.uninstall(Collections.EMPTY_LIST, true);
         EasyMock.expectLastCall().times(2);
         
         
@@ -215,7 +216,7 @@ public class FeaturesServiceTest extends TestBase {
         expect(bundleManager.getBundleContext()).andReturn(bundleContext).anyTimes();
         expect(bundleContext.getBundle(12345)).andReturn(bundlef101).anyTimes();
         ignoreRefreshes(bundleManager);
-        bundleManager.uninstall(Collections.EMPTY_LIST);
+        bundleManager.uninstall(Collections.EMPTY_LIST, true);
        
         EasyMock.expectLastCall().anyTimes();
         replay(bundleManager);
@@ -237,7 +238,7 @@ public class FeaturesServiceTest extends TestBase {
         expect(bundleManager.installBundleIfNeeded(bundleUri, 0, null)).andReturn(new BundleInstallerResult(installedBundle, true));
         expect(bundleManager.getBundleContext()).andReturn(bundleContext);
         ignoreRefreshes(bundleManager);
-        bundleManager.uninstall(Collections.EMPTY_LIST);
+        bundleManager.uninstall(Collections.EMPTY_LIST, true);
         EasyMock.expectLastCall().times(2);
         return bundleManager;
     }
@@ -296,9 +297,9 @@ public class FeaturesServiceTest extends TestBase {
         expect(bundleManager.installBundleIfNeeded("bundle-0.2", 0, null)).andReturn(new BundleInstallerResult(bundleVer02, true));
         expect(bundleManager.getBundleContext()).andReturn(bundleContext);
         ignoreRefreshes(bundleManager);
-        bundleManager.uninstall(Collections.EMPTY_LIST);        
+        bundleManager.uninstall(Collections.EMPTY_LIST, true);
+
         EasyMock.expectLastCall().times(2);
-        
 
         replay(bundleManager);
         FeaturesServiceImpl svc = new FeaturesServiceImpl(bundleManager);
@@ -329,7 +330,7 @@ public class FeaturesServiceTest extends TestBase {
         expect(bundleManager.installBundleIfNeeded(bundleVer01Uri, 0, null)).andReturn(new BundleInstallerResult(bundleVer01, false));
         expect(bundleManager.getBundleContext()).andReturn(bundleContext);
         ignoreRefreshes(bundleManager);
-        bundleManager.uninstall(Collections.EMPTY_LIST);        
+        bundleManager.uninstall(Collections.EMPTY_LIST, true);
         
         EasyMock.expectLastCall().times(2);
 
