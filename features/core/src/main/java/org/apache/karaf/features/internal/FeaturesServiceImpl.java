@@ -637,6 +637,10 @@ public class FeaturesServiceImpl implements FeaturesService {
     }
 
     public void uninstallFeature(String name) throws Exception {
+        uninstallFeature(name, EnumSet.noneOf(Option.class));
+    }
+
+    public void uninstallFeature(String name, EnumSet<Option> options) throws Exception {
         List<String> versions = new ArrayList<String>();
         for (Feature f : installed.keySet()) {
             if (name.equals(f.getName())) {
@@ -657,14 +661,22 @@ public class FeaturesServiceImpl implements FeaturesService {
             sb.append("). Please specify the version to uninstall.");
             throw new Exception(sb.toString());
         }
-        uninstallFeature(name, versions.get(0));
+        uninstallFeature(name, versions.get(0), options);
     }
-    
+
     public void uninstallFeature(String name, String version) throws Exception {
+        uninstallFeature(name, version, EnumSet.noneOf(Option.class));
+    }
+
+    public void uninstallFeature(String name, String version, EnumSet<Option> options) throws Exception {
     	Feature feature = getFeature(name, version);
         if (feature == null || !installed.containsKey(feature)) {
-            throw new Exception("Feature named '" + name 
-            		+ "' with version '" + version + "' is not installed");
+            throw new Exception("Feature named '" + name + "' with version '" + version + "' is not installed");
+        }
+        boolean verbose = options != null && options.contains(Option.Verbose);
+        boolean refresh = options == null || !options.contains(Option.NoAutoRefreshBundles);
+        if (verbose) {
+            System.out.println("Uninstalling feature " + feature.getName() + " " + feature.getVersion());
         }
         // Grab all the bundles installed by this feature
         // and remove all those who will still be in use.
@@ -702,7 +714,7 @@ public class FeaturesServiceImpl implements FeaturesService {
                 }
             });
         }
-        bundleManager.uninstall(bundlesDescendSortedByStartLvl);
+        bundleManager.uninstall(bundlesDescendSortedByStartLvl, refresh);
         callListeners(new FeatureEvent(feature, FeatureEvent.EventType.FeatureUninstalled, false));
         saveState();
     }
