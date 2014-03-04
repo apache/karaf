@@ -19,15 +19,13 @@
 
 package org.apache.karaf.tooling.semantic;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.karaf.tooling.semantic.GenerateSemanticMojo;
-import org.apache.karaf.tooling.semantic.MojoContext;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.logging.Logger;
 import org.junit.Test;
@@ -40,13 +38,13 @@ public class GenerateSemanticMojoTest {
 	@Test
 	public void dependency1() throws Exception {
 
-		Logger logger = UnitHelp.logger();
+		final Logger logger = UnitHelp.logger();
 
 		logger.info("===");
 
-		String uri = "com.carrotgarden.osgi:carrot-osgi-anno-scr-make:pom:1.1.3";
+		final String uri = "com.carrotgarden.osgi:carrot-osgi-anno-scr-make:pom:1.1.3";
 
-		MavenProject project = UnitHelp.newProject(uri);
+		final MavenProject project = UnitHelp.newProject(uri);
 
 		Set<String> scopeIncluded;
 		{
@@ -63,31 +61,31 @@ public class GenerateSemanticMojoTest {
 			scopeExcluded.add("test");
 		}
 
-		RepositorySystem system = UnitHelp.newSystem();
-		RepositorySystemSession session = UnitHelp.newSession(system);
+		final RepositorySystem system = UnitHelp.newSystem();
+		final RepositorySystemSession session = UnitHelp.newSession(system);
 
-		Map<String, String> resolverSettings = new HashMap<String, String>();
+		final Map<String, String> resolverSettings = new HashMap<String, String>();
 
-		Set<String> packagingIncluded = new HashSet<String>();
+		final Set<String> packagingIncluded = new HashSet<String>();
 		{
 			packagingIncluded.add("bundle");
 		}
 
-		Set<String> typeIncluded = new HashSet<String>();
+		final Set<String> typeIncluded = new HashSet<String>();
 		{
 			typeIncluded.add("jar");
 		}
 
-		MojoContext context = new MojoContext(logger, project, scopeIncluded,
+		final MojoContext context = new MojoContext(logger, project, scopeIncluded,
 				scopeExcluded, system, session, UnitHelp.newRepoRemoteList(),
-				resolverSettings, packagingIncluded, typeIncluded);
+				resolverSettings, packagingIncluded, typeIncluded, true);
 
-		Map<Artifact, String> dependencyMap = GenerateSemanticMojo
+		final Map<Artifact, String> dependencyMap = GenerateSemanticMojo
 				.prepare(context);
 
-		for (Map.Entry<Artifact, String> entry : dependencyMap.entrySet()) {
-			Artifact artifact = entry.getKey();
-			String scope = entry.getValue();
+		for (final Map.Entry<Artifact, String> entry : dependencyMap.entrySet()) {
+			final Artifact artifact = entry.getKey();
+			final String scope = entry.getValue();
 			logger.info(artifact + " @ " + scope);
 		}
 
@@ -98,13 +96,13 @@ public class GenerateSemanticMojoTest {
 	@Test
 	public void dependency2() throws Exception {
 
-		Logger logger = UnitHelp.logger();
+		final Logger logger = UnitHelp.logger();
 
 		logger.info("===");
 
-		String uri = "com.carrotgarden.osgi:carrot-osgi-anno-scr-make:pom:1.1.3";
+		final String uri = "com.carrotgarden.osgi:carrot-osgi-anno-scr-make:pom:1.1.3";
 
-		MavenProject project = UnitHelp.newProject(uri);
+		final MavenProject project = UnitHelp.newProject(uri);
 
 		Set<String> scopeIncluded;
 		{
@@ -121,31 +119,31 @@ public class GenerateSemanticMojoTest {
 			scopeExcluded.add("test");
 		}
 
-		RepositorySystem system = UnitHelp.newSystem();
-		RepositorySystemSession session = UnitHelp.newSession(system);
+		final RepositorySystem system = UnitHelp.newSystem();
+		final RepositorySystemSession session = UnitHelp.newSession(system);
 
-		Map<String, String> resolverSettings = new HashMap<String, String>();
+		final Map<String, String> resolverSettings = new HashMap<String, String>();
 
-		Set<String> packagingIncluded = new HashSet<String>();
+		final Set<String> packagingIncluded = new HashSet<String>();
 		{
 			packagingIncluded.add("bundle");
 		}
 
-		Set<String> typeIncluded = new HashSet<String>();
+		final Set<String> typeIncluded = new HashSet<String>();
 		{
 			typeIncluded.add("jar");
 		}
 
-		MojoContext context = new MojoContext(logger, project, scopeIncluded,
+		final MojoContext context = new MojoContext(logger, project, scopeIncluded,
 				scopeExcluded, system, session, UnitHelp.newRepoRemoteList(),
-				resolverSettings, packagingIncluded,typeIncluded);
+				resolverSettings, packagingIncluded, typeIncluded, true);
 
-		Map<Artifact, String> dependencyMap = GenerateSemanticMojo
+		final Map<Artifact, String> dependencyMap = GenerateSemanticMojo
 				.prepare(context);
 
-		for (Map.Entry<Artifact, String> entry : dependencyMap.entrySet()) {
-			Artifact artifact = entry.getKey();
-			String scope = entry.getValue();
+		for (final Map.Entry<Artifact, String> entry : dependencyMap.entrySet()) {
+			final Artifact artifact = entry.getKey();
+			final String scope = entry.getValue();
 			logger.info(artifact + " @ " + scope);
 		}
 
@@ -156,13 +154,13 @@ public class GenerateSemanticMojoTest {
 	@Test
 	public void dependency3() throws Exception {
 
-		Logger logger = UnitHelp.logger();
+		final Logger logger = UnitHelp.logger();
 
 		logger.info("===");
 
-		String uri = "com.barchart.version.tester:tester-one-zoo:pom:1.0.7";
+		final String uri = "com.barchart.version.tester:tester-one-zoo:pom:1.0.7";
 
-		MavenProject project = UnitHelp.newProject(uri);
+		final MavenProject project = UnitHelp.newProject(uri);
 
 		Set<String> scopeIncluded;
 		{
@@ -179,35 +177,149 @@ public class GenerateSemanticMojoTest {
 			scopeExcluded.add("test");
 		}
 
-		RepositorySystem system = UnitHelp.newSystem();
-		RepositorySystemSession session = UnitHelp.newSession(system);
+		final RepositorySystem system = UnitHelp.newSystem();
+		final RepositorySystemSession session = UnitHelp.newSession(system);
 
-		Map<String, String> resolverSettings = new HashMap<String, String>();
+		final Map<String, String> resolverSettings = new HashMap<String, String>();
 
-		Set<String> packagingIncluded = new HashSet<String>();
+		final Set<String> packagingIncluded = new HashSet<String>();
 		{
 			packagingIncluded.add("bundle");
 		}
 
-		Set<String> typeIncluded = new HashSet<String>();
+		final Set<String> typeIncluded = new HashSet<String>();
 		{
 			typeIncluded.add("jar");
 		}
 
-		MojoContext context = new MojoContext(logger, project, scopeIncluded,
+		final MojoContext context = new MojoContext(logger, project, scopeIncluded,
 				scopeExcluded, system, session, UnitHelp.newRepoRemoteList(),
-				resolverSettings, packagingIncluded, typeIncluded);
+				resolverSettings, packagingIncluded, typeIncluded, true);
 
-		Map<Artifact, String> dependencyMap = GenerateSemanticMojo
+		final Map<Artifact, String> dependencyMap = GenerateSemanticMojo
 				.prepare(context);
 
-		for (Map.Entry<Artifact, String> entry : dependencyMap.entrySet()) {
-			Artifact artifact = entry.getKey();
-			String scope = entry.getValue();
+		for (final Map.Entry<Artifact, String> entry : dependencyMap.entrySet()) {
+			final Artifact artifact = entry.getKey();
+			final String scope = entry.getValue();
 			logger.info(artifact + " @ " + scope);
 		}
 
 		assertEquals(3, dependencyMap.size());
+
+	}
+
+	@Test
+	public void dependency4() throws Exception {
+
+		final Logger logger = UnitHelp.logger();
+
+		logger.info("===");
+
+		final String uri = "org.apache.karaf.kar:org.apache.karaf.kar.core:pom:3.0.0";
+
+		final MavenProject project = UnitHelp.newProject(uri);
+
+		Set<String> scopeIncluded;
+		{
+			scopeIncluded = new HashSet<String>();
+			scopeIncluded.add("compile");
+		}
+
+		Set<String> scopeExcluded;
+		{
+			scopeExcluded = new HashSet<String>();
+			scopeExcluded.add("provided");
+			scopeExcluded.add("system");
+			scopeExcluded.add("test");
+		}
+
+		final RepositorySystem system = UnitHelp.newSystem();
+		final RepositorySystemSession session = UnitHelp.newSession(system);
+
+		final Map<String, String> resolverSettings = new HashMap<String, String>();
+
+		final Set<String> packagingIncluded = new HashSet<String>();
+		{
+			packagingIncluded.add("bundle");
+		}
+
+		final Set<String> typeIncluded = new HashSet<String>();
+		{
+			typeIncluded.add("jar");
+		}
+
+		final MojoContext context = new MojoContext(logger, project, scopeIncluded,
+				scopeExcluded, system, session, UnitHelp.newRepoRemoteList(),
+				resolverSettings, packagingIncluded, typeIncluded, false);
+
+		final Map<Artifact, String> dependencyMap = GenerateSemanticMojo
+				.prepare(context);
+
+		for (final Map.Entry<Artifact, String> entry : dependencyMap.entrySet()) {
+			final Artifact artifact = entry.getKey();
+			final String scope = entry.getValue();
+			logger.info(artifact + " @ " + scope);
+		}
+
+		assertEquals(4, dependencyMap.size());
+
+	}
+
+	@Test
+	public void dependency5() throws Exception {
+
+		final Logger logger = UnitHelp.logger();
+
+		logger.info("===");
+
+		final String uri = "org.apache.karaf.kar:org.apache.karaf.kar.core:pom:3.0.0";
+
+		final MavenProject project = UnitHelp.newProject(uri);
+
+		Set<String> scopeIncluded;
+		{
+			scopeIncluded = new HashSet<String>();
+			scopeIncluded.add("compile");
+		}
+
+		Set<String> scopeExcluded;
+		{
+			scopeExcluded = new HashSet<String>();
+			scopeExcluded.add("provided");
+			scopeExcluded.add("system");
+			scopeExcluded.add("test");
+		}
+
+		final RepositorySystem system = UnitHelp.newSystem();
+		final RepositorySystemSession session = UnitHelp.newSession(system);
+
+		final Map<String, String> resolverSettings = new HashMap<String, String>();
+
+		final Set<String> packagingIncluded = new HashSet<String>();
+		{
+			packagingIncluded.add("bundle");
+		}
+
+		final Set<String> typeIncluded = new HashSet<String>();
+		{
+			typeIncluded.add("jar");
+		}
+
+		final MojoContext context = new MojoContext(logger, project, scopeIncluded,
+				scopeExcluded, system, session, UnitHelp.newRepoRemoteList(),
+				resolverSettings, packagingIncluded, typeIncluded, true);
+
+		final Map<Artifact, String> dependencyMap = GenerateSemanticMojo
+				.prepare(context);
+
+		for (final Map.Entry<Artifact, String> entry : dependencyMap.entrySet()) {
+			final Artifact artifact = entry.getKey();
+			final String scope = entry.getValue();
+			logger.info(artifact + " @ " + scope);
+		}
+
+		assertEquals(11, dependencyMap.size());
 
 	}
 

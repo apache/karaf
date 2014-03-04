@@ -3,6 +3,7 @@ package org.apache.karaf.tooling.semantic;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.logging.Logger;
 import org.sonatype.aether.RepositorySystem;
@@ -21,18 +22,20 @@ public class MojoContext {
 	public final Map<String, String> resolverSettings;
 	public final Set<String> packagingIncluded;
 	public final Set<String> typeIncluded;
+	public final boolean includeTransitive;
 
 	public MojoContext( //
-			Logger logger, //
-			MavenProject project, //
-			Set<String> scopeIncluded, //
-			Set<String> scopeExcluded, //
-			RepositorySystem system, //
-			RepositorySystemSession session, //
-			List<RemoteRepository> projectRepos, //
-			Map<String, String> resolverSettings, //
-			Set<String> packagingIncluded, //
-			Set<String> typeIncluded //
+			final Logger logger, //
+			final MavenProject project, //
+			final Set<String> scopeIncluded, //
+			final Set<String> scopeExcluded, //
+			final RepositorySystem system, //
+			final RepositorySystemSession session, //
+			final List<RemoteRepository> projectRepos, //
+			final Map<String, String> resolverSettings, //
+			final Set<String> packagingIncluded, //
+			final Set<String> typeIncluded, //
+			final boolean includeTransitive //
 	) {
 		this.logger = logger;
 		this.project = project;
@@ -44,6 +47,7 @@ public class MojoContext {
 		this.resolverSettings = resolverSettings;
 		this.packagingIncluded = packagingIncluded;
 		this.typeIncluded=typeIncluded;
+		this.includeTransitive = includeTransitive;
 	}
-	
+
 }

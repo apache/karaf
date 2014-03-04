@@ -40,6 +40,7 @@ import org.sonatype.aether.collection.CollectRequest;
 import org.sonatype.aether.collection.CollectResult;
 import org.sonatype.aether.collection.DependencySelector;
 import org.sonatype.aether.graph.Dependency;
+import org.sonatype.aether.graph.DependencyFilter;
 import org.sonatype.aether.graph.DependencyNode;
 import org.sonatype.aether.resolution.DependencyRequest;
 import org.sonatype.aether.resolution.DependencyResult;
@@ -53,13 +54,13 @@ import org.sonatype.aether.util.graph.transformer.ChainedDependencyGraphTransfor
 
 /**
  * Generates the semantic features XML file for packaging=pom
- * 
+ *
  * @goal features-generate-semantic
  * @phase package
  * @requiresDependencyResolution runtime
  * @inheritByDefault true
  * @description TODO
- * 
+ *
  * @author Andrei Pozolotin
  */
 public class GenerateSemanticMojo extends GenerateDescriptorMojo {
@@ -67,13 +68,13 @@ public class GenerateSemanticMojo extends GenerateDescriptorMojo {
 	/**
 	 * FIXME normal equals does not work.
 	 */
-	public static boolean equals(Dependency one, Dependency two) {
+	public static boolean equals(final Dependency one, final Dependency two) {
 		return one.toString().equals(two.toString());
 	}
 
 	/**
 	 * Root artifact packaging to include. Default include: bundle.
-	 * 
+	 *
 	 * @parameter
 	 */
 	protected Set<String> packagingIncluded;
@@ -84,7 +85,7 @@ public class GenerateSemanticMojo extends GenerateDescriptorMojo {
 
 	/**
 	 * Dependency scope to include. Default include: compile.
-	 * 
+	 *
 	 * @parameter
 	 */
 	protected Set<String> scopeIncluded;
@@ -96,7 +97,7 @@ public class GenerateSemanticMojo extends GenerateDescriptorMojo {
 	/**
 	 * Dependency scope to exclude. Default exclude: runtime, provided, system,
 	 * test.
-	 * 
+	 *
 	 * @parameter
 	 */
 	protected Set<String> scopeExcluded;
@@ -110,7 +111,7 @@ public class GenerateSemanticMojo extends GenerateDescriptorMojo {
 
 	/**
 	 * Dependency extension to include. Default include: jar.
-	 * 
+	 *
 	 * @parameter
 	 */
 	protected Set<String> typeIncluded;
@@ -122,27 +123,27 @@ public class GenerateSemanticMojo extends GenerateDescriptorMojo {
 	/**
 	 * Customize resolver operation.
 	 * <p>
-	 * 
+	 *
 	 * @see CustomTransformer
-	 * 
+	 *
 	 * @parameter
 	 */
 	protected Map<String, String> resolverSettings = new HashMap<String, String>();
 
 	/**
 	 */
-	public static Map<Artifact, String> prepare(MojoContext context)
+	public static Map<Artifact, String> prepare(final MojoContext context)
 			throws Exception {
 
-		Artifact artifact = RepositoryUtils.toArtifact(context.project
+		final Artifact artifact = RepositoryUtils.toArtifact(context.project
 				.getArtifact());
 
-		Dependency root = new Dependency(artifact, "compile");
+		final Dependency root = new Dependency(artifact, "compile");
 
-		CollectRequest collectRequest = new CollectRequest(root,
+		final CollectRequest collectRequest = new CollectRequest(root,
 				context.projectRepos);
 
-		DependencySelector selector = new AndDependencySelector(
+		final DependencySelector selector = new AndDependencySelector(
 				new DependencySelector[] {
 						new OptionalDependencySelector(),
 						new ScopeDependencySelector(context.scopeIncluded,
@@ -150,60 +151,81 @@ public class GenerateSemanticMojo extends GenerateDescriptorMojo {
 						new ExclusionDependencySelector(),
 						new ExtensionDependencySelector(context.typeIncluded), });
 
-		DefaultRepositorySystemSession localSession = new DefaultRepositorySystemSession(
+		final DefaultRepositorySystemSession localSession = new DefaultRepositorySystemSession(
 				context.session);
 
 		localSession.setDependencySelector(selector);
 
 		//
 
-		ConflictMarker marker = new ConflictMarker();
-		ConflictIdSorter sorter = new ConflictIdSorter();
+		final ConflictMarker marker = new ConflictMarker();
+		final ConflictIdSorter sorter = new ConflictIdSorter();
 
-		CustomTransformer customer = new CustomTransformer(
+		final CustomTransformer customer = new CustomTransformer(
 				context.resolverSettings);
 
-		ConflictResolver.VersionSelector versionSelector = new NearestVersionSelector();
-		ConflictResolver.ScopeSelector scopeSelector = new JavaScopeSelector();
-		ConflictResolver.OptionalitySelector optionalitySelector = new SimpleOptionalitySelector();
-		ConflictResolver.ScopeDeriver scopeDeriver = new JavaScopeDeriver();
+		final ConflictResolver.VersionSelector versionSelector = new NearestVersionSelector();
+		final ConflictResolver.ScopeSelector scopeSelector = new JavaScopeSelector();
+		final ConflictResolver.OptionalitySelector optionalitySelector = new SimpleOptionalitySelector();
+		final ConflictResolver.ScopeDeriver scopeDeriver = new JavaScopeDeriver();
 
-		ConflictResolver resolver = new ConflictResolver(versionSelector,
+		final ConflictResolver resolver = new ConflictResolver(versionSelector,
 				scopeSelector, optionalitySelector, scopeDeriver);
 
-		ChainedDependencyGraphTransformer transformer = new ChainedDependencyGraphTransformer(
+		final ChainedDependencyGraphTransformer transformer = new ChainedDependencyGraphTransformer(
 				marker, sorter, customer, resolver);
 
 		localSession.setDependencyGraphTransformer(transformer);
 
 		//
 
-		CollectResult collectResult = context.system.collectDependencies(
+		final CollectResult collectResult = context.system.collectDependencies(
 				localSession, collectRequest);
 
-		DependencyNode collectNode = collectResult.getRoot();
+		final DependencyNode collectNode = collectResult.getRoot();
 
-		DependencyRequest dependencyRequest = new DependencyRequest(
-				collectNode, null);
+		final DependencyRequest dependencyRequest = new DependencyRequest(
+				collectNode, new DependencyFilter() {
 
-		DependencyResult resolveResult = context.system.resolveDependencies(
+					@Override
+					public boolean accept(final DependencyNode node, final List<DependencyNode> parents) {
+
+						// Include everything
+						if (context.includeTransitive)
+							return true;
+
+						// Always include root
+						if (parents.size() == 0)
+							return true;
+
+						// Check if it is a direct dependency
+						if (parents.get(0).getDependency().getArtifact().equals(artifact))
+							return true;
+
+						return false;
+
+					}
+
+				});
+
+		final DependencyResult resolveResult = context.system.resolveDependencies(
 				localSession, dependencyRequest);
 
-		DependencyNode resolveNode = resolveResult.getRoot();
+		final DependencyNode resolveNode = resolveResult.getRoot();
 
-		PostorderNodeListGenerator generator = new PostorderNodeListGenerator();
+		final PostorderNodeListGenerator generator = new PostorderNodeListGenerator();
 
 		resolveNode.accept(generator);
 
-		List<Dependency> dependencyList = generator.getDependencies(false);
+		final List<Dependency> dependencyList = generator.getDependencies(false);
 
-		Map<Artifact, String> dependencyMap = new LinkedHashMap<Artifact, String>();
+		final Map<Artifact, String> dependencyMap = new LinkedHashMap<Artifact, String>();
 
-		for (Dependency dependency : dependencyList) {
+		for (final Dependency dependency : dependencyList) {
 
-			boolean isRootNode = equals(root, dependency);
+			final boolean isRootNode = equals(root, dependency);
 
-			boolean isPackagingIncluded = context.packagingIncluded
+			final boolean isPackagingIncluded = context.packagingIncluded
 					.contains(context.project.getPackaging());
 
 			if (isRootNode) {
@@ -225,9 +247,10 @@ public class GenerateSemanticMojo extends GenerateDescriptorMojo {
 	@Override
 	protected void prepare() throws Exception {
 
-		MojoContext context = new MojoContext(getLogger(), project,
+		final MojoContext context = new MojoContext(getLogger(), project,
 				scopeIncluded, scopeExcluded, repoSystem, repoSession,
-				projectRepos, resolverSettings, packagingIncluded, typeIncluded);
+				projectRepos, resolverSettings, packagingIncluded, typeIncluded,
+				includeTransitiveDependency);
 
 		this.localDependencies = prepare(context);
 
