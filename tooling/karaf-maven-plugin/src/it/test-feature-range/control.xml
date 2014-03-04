@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<features xmlns="http://karaf.apache.org/xmlns/features/v1.2.0" name="test-feature-range">
+    <feature name="test-feature-range" version="1.0-SNAPSHOT" description="test-feature-range">
+        <details>test-feature-range</details>
+        <bundle>mvn:com.barchart.version.tester/tester-one-api/3.1.2</bundle>
+        <bundle>mvn:com.barchart.version.tester/tester-one-api-consumer/4.0.4</bundle>
+        <bundle>mvn:com.barchart.version.tester/tester-one-api-provider/5.3.2</bundle>
+    </feature>
+</features>

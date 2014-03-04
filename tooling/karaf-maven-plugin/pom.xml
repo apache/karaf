@@ -46,12 +46,12 @@
         <dependency>
            <groupId>org.sonatype.aether</groupId>
            <artifactId>aether-api</artifactId>
-           <version>1.11</version>
+           <version>1.13</version>
          </dependency>
          <dependency>
            <groupId>org.sonatype.aether</groupId>
            <artifactId>aether-util</artifactId>
-           <version>1.11</version>
+           <version>1.13</version>
          </dependency>
         <dependency>
             <groupId>org.apache.maven</groupId>

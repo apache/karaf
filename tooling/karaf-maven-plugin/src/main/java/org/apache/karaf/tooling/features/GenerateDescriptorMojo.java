@@ -97,7 +97,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
      *
      * @parameter default-value="${project.build.directory}/feature/feature.xml"
      */
-    private File outputFile;
+    protected File outputFile;
 
     /**
      * (wrapper) Exclude some artifacts from the generated feature.
@@ -118,14 +118,14 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
      *
      * @parameter default-value="xml"
      */
-    private String attachmentArtifactType = "xml";
+    protected String attachmentArtifactType = "xml";
 
     /**
      * (wrapper) The artifact classifier for attaching the generated file to the project
      *
      * @parameter default-value="features"
      */
-    private String attachmentArtifactClassifier = "features";
+    protected String attachmentArtifactClassifier = "features";
 
     /**
      * Specifies whether features dependencies of this project will be included inline of the the
@@ -170,7 +170,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
      *
      * @parameter default-value="true"
      */
-    private boolean includeTransitiveDependency;
+    protected boolean includeTransitiveDependency;
 
     /**
      * The standard behavior is to add dependencies as <code>&lt;bundle&gt;</code> elements to a <code>&lt;feature&gt;</code>
@@ -209,7 +209,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
      * @required
      * @readonly
      */
-    private RepositorySystem repoSystem;
+    protected RepositorySystem repoSystem;
 
     /**
      * The current repository/network configuration of Maven.
@@ -218,7 +218,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
      * @required
      * @readonly
      */
-    private RepositorySystemSession repoSession;
+    protected RepositorySystemSession repoSession;
 
     /**
      * The project's remote repositories to use for the resolution of project dependencies.
@@ -226,7 +226,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
      * @parameter default-value="${project.remoteProjectRepositories}"
      * @readonly
      */
-    private List<RemoteRepository> projectRepos;
+    protected List<RemoteRepository> projectRepos;
 
     /**
      * @component role="org.apache.maven.shared.filtering.MavenResourcesFiltering" role-hint="default"
@@ -258,12 +258,16 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
     //maven log
     private Log log;
 
+    protected void prepare() throws Exception {
+		DependencyHelper dependencyHelper = new DependencyHelper(projectRepos, repoSession, repoSystem);
+		dependencyHelper.getDependencies(project, includeTransitiveDependency);
+		this.localDependencies = dependencyHelper.getLocalDependencies();
+		this.treeListing = dependencyHelper.getTreeListing();
+    }
+    
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
-            DependencyHelper dependencyHelper = new DependencyHelper(projectRepos, repoSession, repoSystem);
-            dependencyHelper.getDependencies(project, includeTransitiveDependency);
-            this.localDependencies = dependencyHelper.getLocalDependencies();
-            this.treeListing = dependencyHelper.getTreeListing();
+        	prepare();
             File dir = outputFile.getParentFile();
             if (dir.isDirectory() || dir.mkdirs()) {
                 PrintStream out = new PrintStream(new FileOutputStream(outputFile));
@@ -287,7 +291,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
     /*
      * Write all project dependencies as feature
      */
-    private void writeFeatures(PrintStream out) throws ArtifactResolutionException, ArtifactNotFoundException,
+    protected void writeFeatures(PrintStream out) throws ArtifactResolutionException, ArtifactNotFoundException,
             IOException, JAXBException, SAXException, ParserConfigurationException, XMLStreamException, MojoExecutionException {
         getLogger().info("Generating feature descriptor file " + outputFile.getAbsolutePath());
         //read in an existing feature.xml
