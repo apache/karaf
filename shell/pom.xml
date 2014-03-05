@@ -35,6 +35,7 @@
 
     <modules>
         <module>commands</module>
+        <module>core</module>
         <module>console</module>
         <module>ssh</module>
         <module>help</module>
