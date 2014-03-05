@@ -38,25 +38,15 @@
 	</properties>
 
 	<dependencies>
-	    <dependency>
-            <groupId>org.apache.karaf.shell</groupId>
-            <artifactId>org.apache.karaf.shell.table</artifactId>
-        </dependency>
 		<dependency>
 			<groupId>org.apache.karaf.shell</groupId>
-			<artifactId>org.apache.karaf.shell.console</artifactId>
+			<artifactId>org.apache.karaf.shell.core</artifactId>
 		</dependency>
         <dependency>
             <groupId>org.apache.karaf.http</groupId>
             <artifactId>org.apache.karaf.http.core</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.gogo.runtime</artifactId>
-            <scope>provided</scope>
-        </dependency>
-		
 		<dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
@@ -108,20 +98,12 @@
 					<instructions>
 						<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
 						<Export-Package>${project.artifactId}*;version=${project.version}</Export-Package>
-						<Import-Package>
-                            org.apache.aries.blueprint,
-                            org.osgi.service.blueprint.container,
-                            org.osgi.service.blueprint.reflect,
-							org.apache.felix.service.command,
-							org.apache.karaf.shell.commands,
-							org.apache.karaf.shell.console,
-							*
-                        </Import-Package>
 						<Private-Package>
 							org.apache.felix.utils.version,
 							org.apache.felix.utils.manifest,
 							org.apache.karaf.util;-split-package:=merge-first
                         </Private-Package>
+                        <Karaf-Commands>*</Karaf-Commands>
 						<_versionpolicy>${bnd.version.policy}</_versionpolicy>
 					</instructions>
 				</configuration>

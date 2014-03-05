@@ -16,22 +16,29 @@
  */
 package org.apache.karaf.jndi.command;
 
+import org.apache.karaf.jndi.JndiService;
 import org.apache.karaf.jndi.command.completers.ContextsCompleter;
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Completer;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Completion;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 
 @Command(scope = "jndi", name = "delete", description = "Delete a JNDI sub-context.")
 @Service
-public class DeleteCommand extends JndiCommandSupport {
+public class DeleteCommand implements Action {
 
     @Argument(index = 0, name = "context", description = "The JNDI sub-context name", required = true, multiValued = false)
-    @Completer(ContextsCompleter.class)
+    @Completion(ContextsCompleter.class)
     String context;
 
-    public Object doExecute() throws Exception {
-        this.getJndiService().delete(context);
+    @Reference
+    JndiService jndiService;
+
+    @Override
+    public Object execute() throws Exception {
+        jndiService.delete(context);
         return null;
     }
 

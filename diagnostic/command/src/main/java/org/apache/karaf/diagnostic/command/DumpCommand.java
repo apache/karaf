@@ -22,22 +22,23 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.diagnostic.core.DumpDestination;
 import org.apache.karaf.diagnostic.core.DumpProvider;
 import org.apache.karaf.diagnostic.core.common.DirectoryDumpDestination;
 import org.apache.karaf.diagnostic.core.common.ZipDumpDestination;
-import org.apache.karaf.shell.console.OsgiCommandSupport;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 
 /**
  * Command to create dump from shell.
  */
 @Command(scope = "dev", name = "dump-create", description = "Creates zip archive with diagnostic info.")
 @Service
-public class DumpCommand extends OsgiCommandSupport {
+public class DumpCommand implements Action {
 
     /**
      * Output format of the filename if not defined otherwise
@@ -56,14 +57,15 @@ public class DumpCommand extends OsgiCommandSupport {
     @Argument(name = "name", description = "Name of created zip or directory", required = false)
     String fileName;
 
+    @Reference
+    List<DumpProvider> providers;
+
     @Override
-    protected Object doExecute() throws Exception {
+    public Object execute() throws Exception {
         DumpDestination destination;
 
-        List<DumpProvider> providers = getAllServices(DumpProvider.class);
-
         if (providers.isEmpty()) {
-            session.getConsole().println("Unable to create dump. No providers were found");
+            System.out.println("Unable to create dump. No providers were found");
             return null;
         }
 
@@ -87,7 +89,7 @@ public class DumpCommand extends OsgiCommandSupport {
             provider.createDump(destination);
         }
         destination.save();
-        session.getConsole().println("Diagnostic dump created at " + target.getAbsolutePath() + ".");
+        System.out.println("Diagnostic dump created at " + target.getAbsolutePath() + ".");
 
         return null;
     }

@@ -18,9 +18,10 @@ package org.apache.karaf.config.command;
 
 import java.util.Dictionary;
 
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+
 
 @Command(scope = "config", name = "property-delete", description = "Deletes a property from the configuration being edited.")
 @Service

@@ -16,18 +16,19 @@
  */
 package org.apache.karaf.jdbc.command;
 
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.inject.Service;
-import org.apache.karaf.shell.table.ShellTable;
-
 import java.util.List;
 import java.util.Map;
+
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.support.table.ShellTable;
 
 @Command(scope = "jdbc", name = "datasources", description = "List the JDBC datasources")
 @Service
 public class DataSourcesCommand extends JdbcCommandSupport {
 
-    public Object doExecute() throws Exception {
+    @Override
+    public Object execute() throws Exception {
         ShellTable table = new ShellTable();
 
         table.column("Name");

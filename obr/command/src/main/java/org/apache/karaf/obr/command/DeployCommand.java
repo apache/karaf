@@ -19,10 +19,10 @@ package org.apache.karaf.obr.command;
 import java.util.List;
 
 import org.apache.felix.bundlerepository.RepositoryAdmin;
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 
 @Command(scope = "obr", name = "deploy", description = "Deploys a list of bundles using OBR service.")
 @Service

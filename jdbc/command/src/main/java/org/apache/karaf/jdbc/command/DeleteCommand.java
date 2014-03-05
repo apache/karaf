@@ -17,20 +17,21 @@
 package org.apache.karaf.jdbc.command;
 
 import org.apache.karaf.jdbc.command.completers.DataSourcesFileNameCompleter;
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Completer;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Completion;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 
 @Command(scope = "jdbc", name = "delete", description = "Delete a JDBC datasource")
 @Service
 public class DeleteCommand extends JdbcCommandSupport {
 
     @Argument(index = 0, name = "name", description = "The JDBC datasource name (the one used at creation time)", required = true, multiValued = false)
-    @Completer(DataSourcesFileNameCompleter.class)
+    @Completion(DataSourcesFileNameCompleter.class)
     String name;
 
-    public Object doExecute() throws Exception {
+    @Override
+    public Object execute() throws Exception {
         this.getJdbcService().delete(name);
         return null;
     }

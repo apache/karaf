@@ -92,12 +92,8 @@
                 <configuration>
                     <instructions>
                         <Export-Package>
-                            org.apache.karaf.packages.core
+                            org.apache.karaf.packages.core;-noimport:=true
                         </Export-Package>
-                        <Import-Package>
-                            org.apache.felix.service.command;status=provisional,
-                            *
-                        </Import-Package>
                         <Private-Package>
                             org.apache.karaf.packages.core.internal,
                             org.apache.felix.utils.version,

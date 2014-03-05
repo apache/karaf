@@ -107,11 +107,9 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Export-Package>org.apache.karaf.bundle.core</Export-Package>
-                        <Import-Package>
-                            org.apache.felix.service.command;status=provisional,
-                            *
-                        </Import-Package>
+                        <Export-Package>
+                            org.apache.karaf.bundle.core;-noimport:=true
+                        </Export-Package>
                         <Private-Package>
                             org.apache.karaf.bundle.core.internal,
                             org.apache.karaf.util.maven,

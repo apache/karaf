@@ -20,8 +20,8 @@ import java.util.Dictionary;
 import java.util.Properties;
 
 import org.apache.karaf.config.command.completers.ConfigurationCompleter;
-import org.apache.karaf.shell.commands.Completer;
-import org.apache.karaf.shell.commands.Option;
+import org.apache.karaf.shell.api.action.Completion;
+import org.apache.karaf.shell.api.action.Option;
 
 /**
  * Abstract class which commands that are related to property processing should extend.
@@ -29,7 +29,7 @@ import org.apache.karaf.shell.commands.Option;
 public abstract class ConfigPropertyCommandSupport extends ConfigCommandSupport {
 
     @Option(name = "-p", aliases = "--pid", description = "The configuration pid", required = false, multiValued = false)
-    @Completer(ConfigurationCompleter.class)
+    @Completion(ConfigurationCompleter.class)
     protected String pid;
 
     @SuppressWarnings("rawtypes")

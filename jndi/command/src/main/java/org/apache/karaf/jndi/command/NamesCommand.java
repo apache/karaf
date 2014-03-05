@@ -16,24 +16,31 @@
  */
 package org.apache.karaf.jndi.command;
 
+import org.apache.karaf.jndi.JndiService;
 import org.apache.karaf.jndi.command.completers.ContextsCompleter;
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Completer;
-import org.apache.karaf.shell.inject.Service;
-import org.apache.karaf.shell.table.ShellTable;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Completion;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.support.table.ShellTable;
 
 import java.util.Map;
 
 @Command(scope = "jndi", name = "names", description = "List the JNDI names.")
 @Service
-public class NamesCommand extends JndiCommandSupport {
+public class NamesCommand implements Action {
 
     @Argument(index = 0, name = "context", description = "The JNDI context to display the names", required = false, multiValued = false)
-    @Completer(ContextsCompleter.class)
+    @Completion(ContextsCompleter.class)
     String context;
 
-    public Object doExecute() throws Exception {
+    @Reference
+    JndiService jndiService;
+
+    @Override
+    public Object execute() throws Exception {
         ShellTable table = new ShellTable();
 
         table.column("JNDI Name");
@@ -41,9 +48,9 @@ public class NamesCommand extends JndiCommandSupport {
 
         Map<String, String> names;
         if (context == null) {
-            names = this.getJndiService().names();
+            names = jndiService.names();
         } else {
-            names = this.getJndiService().names(context);
+            names = jndiService.names(context);
         }
 
         for (String name : names.keySet()) {

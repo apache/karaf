@@ -27,14 +27,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.config.command.ConfigCommandSupport;
-import org.apache.karaf.shell.inject.Reference;
-import org.apache.karaf.shell.inject.Service;
-import org.apache.karaf.shell.console.CommandSessionHolder;
-import org.apache.karaf.shell.console.Completer;
-import org.apache.karaf.shell.console.completer.ArgumentCompleter;
-import org.apache.karaf.shell.console.completer.StringsCompleter;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.api.console.CommandLine;
+import org.apache.karaf.shell.api.console.Completer;
+import org.apache.karaf.shell.api.console.Session;
+import org.apache.karaf.shell.support.completers.StringsCompleter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -57,30 +56,26 @@ public class ConfigurationPropertyCompleter implements Completer {
     private ConfigurationAdmin configAdmin;
 
     @SuppressWarnings("rawtypes")
-    public int complete(final String buffer, final int cursor, final List candidates) {
-        CommandSession session = CommandSessionHolder.getSession();
+    public int complete(final Session session, final CommandLine commandLine, final List<String> candidates) {
         if (session != null) {
-            String pid = getPid(session);
+            String pid = getPid(session, commandLine);
             Set<String> propertyNames = getPropertyNames(pid);
             delegate.getStrings().clear();
             if (propertyNames != null && !propertyNames.isEmpty()) {
                 delegate.getStrings().addAll(propertyNames);
             }
         }
-        return delegate.complete(buffer,cursor,candidates);
+        return delegate.complete(session, commandLine, candidates);
     }
 
     /**
-     * Retrieves the pid stored in the {@link CommandSession} or passed as an argument.
-     * Argument takes precedence from pid stored in the {@link CommandSession}.
-     * @param commandSession
-     * @return
+     * Retrieves the pid stored in the {@link Session} or passed as an argument.
+     * Argument takes precedence from pid stored in the {@link Session}.
      */
-    private String getPid(CommandSession commandSession) {
-        String pid = (String) commandSession.get(ConfigCommandSupport.PROPERTY_CONFIG_PID);
-        ArgumentCompleter.ArgumentList list = (ArgumentCompleter.ArgumentList) commandSession.get(ArgumentCompleter.ARGUMENTS_LIST);
-        if (list != null && list.getArguments() != null && list.getArguments().length > 0) {
-            List<String> arguments = Arrays.asList(list.getArguments());
+    private String getPid(Session session, CommandLine commandLine) {
+        String pid = (String) session.get(ConfigCommandSupport.PROPERTY_CONFIG_PID);
+        if (commandLine.getArguments().length > 0) {
+            List<String> arguments = Arrays.asList(commandLine.getArguments());
             if (arguments.contains(OPTION)) {
                 int index = arguments.indexOf(OPTION);
                 if (arguments.size() > index) {

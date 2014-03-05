@@ -19,11 +19,11 @@ package org.apache.karaf.config.command;
 import java.util.Dictionary;
 
 import org.apache.karaf.config.command.completers.ConfigurationCompleter;
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Completer;
-import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Completion;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.osgi.service.cm.Configuration;
 
 @Command(scope = "config", name = "edit", description = "Creates or edits a configuration.", detailedDescription="classpath:edit.txt")
@@ -31,7 +31,7 @@ import org.osgi.service.cm.Configuration;
 public class EditCommand extends ConfigCommandSupport {
 
     @Argument(index = 0, name = "pid", description = "PID of the configuration or of the factory if --factory is given. Pid can also be specified as ldap query", required = true, multiValued = false)
-    @Completer(ConfigurationCompleter.class)
+    @Completion(ConfigurationCompleter.class)
     String pid;
 
     @Option(name = "--force", aliases = {}, description = "Force the edition of this config, even if another one was under edition", required = false, multiValued = false)

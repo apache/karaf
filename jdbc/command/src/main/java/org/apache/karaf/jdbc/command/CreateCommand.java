@@ -16,12 +16,12 @@
  */
 package org.apache.karaf.jdbc.command;
 
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Completer;
-import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.console.completer.StringsCompleter;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Completion;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.support.completers.StringsCompleter;
 
 @Command(scope = "jdbc", name = "create", description = "Create a JDBC datasource")
 @Service
@@ -31,7 +31,7 @@ public class CreateCommand extends JdbcCommandSupport {
     String name;
 
     @Option(name = "-t", aliases = { "--type" }, description = "The JDBC datasource type (generic, MySQL, Oracle, Postgres, H2, HSQL, Derby)", required = false, multiValued = false)
-    @Completer(value = StringsCompleter.class, values = { "db2", "derby", "generic", "h2", "hsql", "mysql", "oracle", "postgres" })
+    @Completion(value = StringsCompleter.class, values = { "db2", "derby", "generic", "h2", "hsql", "mysql", "oracle", "postgres" })
     String type;
 
     @Option(name = "-d", aliases = { "--driver" }, description = "The classname of the JDBC driver to use. NB: this option is used only the type generic", required = false, multiValued = false)
@@ -52,7 +52,8 @@ public class CreateCommand extends JdbcCommandSupport {
     @Option(name = "-i", aliases = { "--install-bundles" }, description = "Try to install the bundles providing the JDBC driver", required = false, multiValued = false)
     boolean installBundles = false;
 
-    public Object doExecute() throws Exception {
+    @Override
+    public Object execute() throws Exception {
         this.getJdbcService().create(name, type, driver, version, url, username, password, installBundles);
         return null;
     }

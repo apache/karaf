@@ -15,19 +15,20 @@
  */
 package org.apache.karaf.jaas.command;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.security.auth.login.AppConfigurationEntry;
+
 import org.apache.karaf.jaas.boot.principal.GroupPrincipal;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
-import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.apache.karaf.jaas.config.JaasRealm;
 import org.apache.karaf.jaas.modules.BackingEngine;
-import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.inject.Service;
-import org.apache.karaf.shell.table.ShellTable;
-
-import javax.security.auth.login.AppConfigurationEntry;
-import java.util.ArrayList;
-import java.util.List;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.support.table.ShellTable;
 
 @Command(scope = "jaas", name = "user-list", description = "List the users of the selected JAAS realm/login module")
 @Service
@@ -37,7 +38,7 @@ public class ListUsersCommand extends JaasCommandSupport {
     boolean noFormat;
 
     @Override
-    protected Object doExecute() throws Exception {
+    public Object execute() throws Exception {
         JaasRealm realm = (JaasRealm) session.get(JAAS_REALM);
         AppConfigurationEntry entry = (AppConfigurationEntry) session.get(JAAS_ENTRY);
 

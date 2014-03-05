@@ -16,24 +16,32 @@
  */
 package org.apache.karaf.system.commands;
 
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.inject.Service;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-
 import java.io.File;
 import java.io.PrintStream;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.Properties;
+import java.util.Set;
+import java.util.Vector;
+
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.system.SystemService;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 
 /**
  * Command that allow access to system properties easily.
  */
 @Command(scope = "system", name = "property", description = "Get or set a system property.")
 @Service
-public class SystemProperty extends AbstractSystemAction {
+public class SystemProperty implements Action {
 
     @Option(name = "-p", aliases = {"--persistent"}, description = "Persist the new value to the etc/system.properties file")
     boolean persistent;
@@ -50,8 +58,14 @@ public class SystemProperty extends AbstractSystemAction {
     @Argument(index = 1, name = "value", required = false, description = "New value for the system property")
     String value;
 
+    @Reference
+    BundleContext bundleContext;
+
+    @Reference
+    SystemService systemService;
+
     @Override
-    protected Object doExecute() throws Exception {
+    public Object execute() throws Exception {
         if (key == null && value == null) {
             Properties props = (Properties) System.getProperties().clone();
 

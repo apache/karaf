@@ -18,25 +18,31 @@ package org.apache.karaf.region.commands;
 
 import java.io.PrintStream;
 
-import org.apache.karaf.shell.console.OsgiCommandSupport;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.eclipse.equinox.region.Region;
 import org.eclipse.equinox.region.RegionDigraph;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
 
-public abstract class RegionCommandSupport extends OsgiCommandSupport {
+public abstract class RegionCommandSupport implements Action {
 
     protected static final char VERSION_DELIM = ',';
 
-    protected Object doExecute() throws Exception {
+    @Reference
+    BundleContext bundleContext;
+
+    @Override
+    public Object execute() throws Exception {
         // Get repository instance service.
-        ServiceReference ref = getBundleContext().getServiceReference(RegionDigraph.class.getName());
+        ServiceReference ref = bundleContext.getServiceReference(RegionDigraph.class.getName());
         if (ref == null) {
             System.out.println("RegionDigraph service is unavailable.");
             return null;
         }
         try {
-            RegionDigraph admin = (RegionDigraph) getBundleContext().getService(ref);
+            RegionDigraph admin = (RegionDigraph) bundleContext.getService(ref);
             if (admin == null) {
                 System.out.println("RegionDigraph service is unavailable.");
                 return null;
@@ -45,7 +51,7 @@ public abstract class RegionCommandSupport extends OsgiCommandSupport {
             doExecute(admin);
         }
         finally {
-            getBundleContext().ungetService(ref);
+            bundleContext.ungetService(ref);
         }
         return null;
     }

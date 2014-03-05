@@ -16,10 +16,11 @@
  */
 package org.apache.karaf.jms.command;
 
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.inject.Service;
-import org.apache.karaf.shell.table.ShellTable;
+
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.support.table.ShellTable;
 
 @Command(scope = "jms", name = "count", description = "Count the number of messages on a JMS queue.")
 @Service
@@ -28,7 +29,8 @@ public class CountCommand extends JmsConnectionCommandSupport {
     @Argument(index = 1, name = "queue", description = "The JMS queue name", required = true, multiValued = false)
     String queue;
 
-    public Object doExecute() throws Exception {
+    @Override
+    public Object execute() throws Exception {
         ShellTable table = new ShellTable();
         table.column("Messages Count");
         table.addRow().addContent(getJmsService().count(connectionFactory, queue, username, password));

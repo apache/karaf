@@ -23,14 +23,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.felix.service.command.Function;
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Completer;
-import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.console.OsgiCommandSupport;
-import org.apache.karaf.shell.inject.Service;
-import org.apache.karaf.shell.util.ShellUtil;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Completion;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.support.ShellUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -38,11 +38,11 @@ import org.osgi.framework.ServiceReference;
 
 @Command(scope = "service", name = "list", description = "Lists OSGi services.")
 @Service
-public class ListServices extends OsgiCommandSupport {
+public class ListServices implements Action {
 
     @Argument(index = 0, name = "objectClass", description = "Name of service objectClass to filter for", required = false,
         multiValued = false)
-    @Completer(ObjectClassCompleter.class)
+    @Completion(ObjectClassCompleter.class)
     String objectClass;
     
     @Option(name = "-a", aliases = {}, description = "Shows all services. (By default Karaf commands are hidden)", required = false, multiValued = false)
@@ -51,13 +51,17 @@ public class ListServices extends OsgiCommandSupport {
     @Option(name = "-n", aliases = {}, description = "Shows only service class names", required = false, multiValued = false)
     boolean onlyNames;
 
-    protected Object doExecute() throws Exception {
+    @Reference
+    BundleContext bundleContext;
+
+    @Override
+    public Object execute() throws Exception {
         if (onlyNames) {
             listNames();
             return null;
         }
         List<ServiceReference<?>> serviceRefs = new ArrayList<ServiceReference<?>>();
-        Bundle[] bundles = getBundleContext().getBundles();
+        Bundle[] bundles = bundleContext.getBundles();
         for (Bundle bundle : bundles) {
             ServiceReference<?>[] services = bundle.getRegisteredServices();
             if (services != null) {
@@ -81,7 +85,7 @@ public class ListServices extends OsgiCommandSupport {
     }
     
     private void listNames() {
-        Map<String, Integer> serviceNames = getServiceNamesMap(getBundleContext());
+        Map<String, Integer> serviceNames = getServiceNamesMap(bundleContext);
         ArrayList<String> serviceNamesList = new ArrayList<String>(serviceNames.keySet());
         Collections.sort(serviceNamesList);
         for (String name : serviceNamesList) {
@@ -129,7 +133,7 @@ public class ListServices extends OsgiCommandSupport {
 
     private boolean isCommand(String[] objectClasses) {
         for (String objectClass : objectClasses) {
-            if (objectClass.equals(Function.class.getName())) {
+            if (objectClass.equals("org.apache.felix.service.command.Function")) {
                 return true;
             }
         }
@@ -152,5 +156,8 @@ public class ListServices extends OsgiCommandSupport {
             return classes1[0].compareTo(classes2[0]);
         }
     }
-    
+
+    public void setBundleContext(BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
+    }
 }

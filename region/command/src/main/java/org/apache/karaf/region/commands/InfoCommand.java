@@ -20,10 +20,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.eclipse.equinox.region.Region;
 import org.eclipse.equinox.region.RegionDigraph;
 import org.eclipse.equinox.region.RegionFilter;
@@ -73,7 +73,7 @@ public class InfoCommand extends RegionCommandSupport {
         System.out.println(region.getName());
         if (verbose || bundles) {
             for (Long id : region.getBundleIds()) {
-                Bundle b = getBundleContext().getBundle(id);
+                Bundle b = bundleContext.getBundle(id);
                 System.out.println("  " + id + "  " + getStateString(b) + b);
             }
         }

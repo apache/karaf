@@ -16,10 +16,10 @@
  */
 package org.apache.karaf.jms.command;
 
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 
 @Command(scope = "jms", name = "consume", description = "Consume messages from a JMS queue.")
 @Service
@@ -31,7 +31,8 @@ public class ConsumeCommand extends JmsConnectionCommandSupport {
     @Option(name = "-s", aliases = { "--selector" }, description = "The selector to use to select the messages to consume", required = false, multiValued = false)
     String selector;
 
-    public Object doExecute() throws Exception {
+    @Override
+    public Object execute() throws Exception {
         System.out.println(getJmsService().consume(connectionFactory, queue, selector, username, password) + " message(s) consumed");
         return null;
     }

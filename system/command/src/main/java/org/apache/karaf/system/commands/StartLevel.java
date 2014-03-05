@@ -16,10 +16,11 @@
  */
 package org.apache.karaf.system.commands;
 
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.console.OsgiCommandSupport;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.system.SystemService;
 
 /**
@@ -27,12 +28,16 @@ import org.apache.karaf.system.SystemService;
  */
 @Command(scope = "system", name = "start-level", description = "Gets or sets the system start level.")
 @Service
-public class StartLevel extends AbstractSystemAction {
+public class StartLevel implements Action {
 
     @Argument(index = 0, name = "level", description = "The new system start level to set", required = false, multiValued = false)
     Integer level;
 
-    protected Object doExecute() throws Exception {
+    @Reference
+    SystemService systemService;
+
+    @Override
+    public Object execute() throws Exception {
         if (level == null) {
             System.out.println("Level " + systemService.getStartLevel());
         } else {

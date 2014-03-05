@@ -20,7 +20,7 @@ package org.apache.karaf.shell.commands.impl.info;
 
 import java.util.Properties;
 
-import org.apache.karaf.shell.commands.InfoProvider;
+import org.apache.karaf.shell.commands.info.InfoProvider;
 
 public class PojoInfoProvider implements InfoProvider {
 

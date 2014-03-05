@@ -19,11 +19,13 @@ package org.apache.karaf.log.command;
 import java.io.PrintStream;
 
 import org.apache.karaf.log.core.LogEventFormatter;
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.inject.Reference;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.log.core.LogService;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.ops4j.pax.logging.spi.PaxLoggingEvent;
 
 /**
@@ -31,28 +33,28 @@ import org.ops4j.pax.logging.spi.PaxLoggingEvent;
  */
 @Command(scope = "log", name = "display", description = "Displays log entries.")
 @Service
-public class DisplayLog extends LogCommandSupport {
+public class DisplayLog implements Action {
 
     @Option(name = "-n", aliases = {}, description="Number of entries to display", required = false, multiValued = false)
-    protected int entries;
+    int entries;
 
     @Option(name = "-p", aliases = {}, description="Pattern for formatting the output", required = false, multiValued = false)
-    protected String overridenPattern;
+    String overridenPattern;
 
     @Option(name = "--no-color", description="Disable syntax coloring of log events", required = false, multiValued = false)
-    protected boolean noColor;
+    boolean noColor;
 
     @Argument(index = 0, name = "logger", description = "The name of the logger. This can be ROOT, ALL, or the name of a logger specified in the org.ops4j.pax.logger.cfg file.", required = false, multiValued = false)
     String logger;
 
     @Reference
-    protected LogEventFormatter formatter;
-    
-    public void setFormatter(LogEventFormatter formatter) {
-        this.formatter = formatter;
-    }
+    LogService logService;
 
-    protected Object doExecute() throws Exception {
+    @Reference
+    LogEventFormatter formatter;
+
+    @Override
+    public Object execute() throws Exception {
         
         final PrintStream out = System.out;
 

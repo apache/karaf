@@ -15,23 +15,23 @@
  */
 package org.apache.karaf.jaas.command;
 
+import java.util.Arrays;
+import java.util.Properties;
+
+import org.apache.karaf.jaas.config.JaasRealm;
+import org.apache.karaf.jaas.config.impl.Config;
+import org.apache.karaf.jaas.config.impl.Module;
+import org.apache.karaf.shell.api.console.Session;
+import org.junit.Test;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+
 import static org.easymock.EasyMock.anyObject;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
-
-import org.apache.felix.service.command.CommandSession;
-import org.apache.karaf.jaas.config.JaasRealm;
-import org.apache.karaf.jaas.config.impl.Config;
-import org.apache.karaf.jaas.config.impl.Module;
-import org.junit.Test;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-
-import java.util.Arrays;
-import java.util.Properties;
 
 public class ManageRealmCommandTest {
 
@@ -63,14 +63,15 @@ public class ManageRealmCommandTest {
      */
     private void doVerifyIndex(ManageRealmCommand cmd, int index, Config[] realms) throws Exception {
 
+        // prepare mocks
+        Session session = createMock(Session.class);
+        BundleContext bundleContext = createMock(BundleContext.class);
+        Bundle bundle = createMock(Bundle.class);
+
         // prepare command
         cmd.index = index;
         cmd.setRealms(Arrays.<JaasRealm> asList(realms));
-
-        // prepare mocks
-        CommandSession session = createMock(CommandSession.class);
-        BundleContext bundleContext = createMock(BundleContext.class);
-        Bundle bundle = createMock(Bundle.class);
+        cmd.setSession(session);
 
         for (Config realm : realms)
             realm.setBundleContext(bundleContext);
@@ -90,7 +91,7 @@ public class ManageRealmCommandTest {
 
         // start the test
         replay(mocks);
-        cmd.execute(session);
+        cmd.execute();
         verify(mocks);
     }
 

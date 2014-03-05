@@ -17,23 +17,24 @@
 package org.apache.karaf.jdbc.command;
 
 import org.apache.karaf.jdbc.command.completers.DataSourcesNameCompleter;
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Completer;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Completion;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 
 @Command(scope = "jdbc", name = "execute", description = "Execute a SQL command on a given JDBC datasource")
 @Service
 public class ExecuteCommand extends JdbcCommandSupport {
 
     @Argument(index = 0, name = "datasource", description = "The JDBC datasource", required = true, multiValued = false)
-    @Completer(DataSourcesNameCompleter.class)
+    @Completion(DataSourcesNameCompleter.class)
     String datasource;
 
     @Argument(index = 1, name = "command", description = "The SQL command to execute", required = true, multiValued = false)
     String command;
 
-    public Object doExecute() throws Exception {
+    @Override
+    public Object execute() throws Exception {
         this.getJdbcService().execute(datasource, command);
         return null;
     }

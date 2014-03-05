@@ -17,15 +17,13 @@
 package org.apache.karaf.jdbc.command;
 
 import org.apache.karaf.jdbc.JdbcService;
-import org.apache.karaf.shell.console.OsgiCommandSupport;
-import org.apache.karaf.shell.inject.Reference;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
 
-public abstract class JdbcCommandSupport extends OsgiCommandSupport {
+public abstract class JdbcCommandSupport implements Action {
 
     @Reference
     private JdbcService jdbcService;
-
-    public abstract Object doExecute() throws Exception;
 
     public JdbcService getJdbcService() {
         return jdbcService;

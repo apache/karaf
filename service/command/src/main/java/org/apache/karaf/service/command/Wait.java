@@ -18,11 +18,13 @@ package org.apache.karaf.service.command;
 
 import java.util.concurrent.TimeoutException;
 
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.console.OsgiCommandSupport;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkUtil;
@@ -34,7 +36,7 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 @Command(scope = "service", name = "wait", description = "Wait for a given OSGi service.")
 @Service
-public class Wait extends OsgiCommandSupport {
+public class Wait implements Action {
 
     @Option(name = "-e", aliases = { "--exception" }, description = "throw an exception if the service is not found after the timeout")
     boolean exception;
@@ -45,9 +47,12 @@ public class Wait extends OsgiCommandSupport {
     @Argument(name = "service", description="The service class or filter", required = true, multiValued = false)
     String service;
 
+    @Reference
+    BundleContext bundleContext;
+
     @Override
-    protected Object doExecute() throws Exception {
-        ServiceTracker tracker = null;
+    public Object execute() throws Exception {
+        ServiceTracker<?,?> tracker = null;
         try {
             String filter = service;
             if (!filter.startsWith("(")) {
@@ -57,7 +62,7 @@ public class Wait extends OsgiCommandSupport {
                 filter = "(" + filter + ")";
             }
             Filter osgiFilter = FrameworkUtil.createFilter(filter);
-            tracker = new ServiceTracker(bundleContext, osgiFilter, null);
+            tracker = new ServiceTracker<Object, Object>(bundleContext, osgiFilter, null);
             tracker.open(true);
             Object svc = tracker.getService();
             if (timeout >= 0) {

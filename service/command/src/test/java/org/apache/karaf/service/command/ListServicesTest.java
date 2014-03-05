@@ -28,7 +28,7 @@ public class ListServicesTest {
     public void listAll() throws Exception {
         ListServices listServices = new ListServices();
         listServices.setBundleContext(new TestBundleFactory().createBundleContext());
-        listServices.doExecute();
+        listServices.execute();
     }
     
 

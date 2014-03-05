@@ -16,10 +16,11 @@
  */
 package org.apache.karaf.jms.command;
 
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.inject.Service;
+
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 
 @Command(scope = "jms", name = "move", description = "Move messages from one JMS queue to another one.")
 @Service
@@ -34,7 +35,8 @@ public class MoveCommand extends JmsConnectionCommandSupport {
     @Option(name = "-s", aliases = { "--selector" }, description = "Selector to move only some messages", required = false, multiValued = false)
     String selector;
 
-    public Object doExecute() throws Exception {
+    @Override
+    public Object execute() throws Exception {
         System.out.println(getJmsService().move(connectionFactory, source, destination, selector, username, password) + " message(s) moved");
         return null;
     }

@@ -16,18 +16,21 @@
  */
 package org.apache.karaf.system.commands;
 
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.system.FrameworkType;
+import org.apache.karaf.system.SystemService;
 
 /**
  * Command for enabling/disabling debug logging on the OSGi framework
  */
 @Command(scope = "system", name = "framework", description = "OSGi Framework options.")
 @Service
-public class FrameworkOptions extends AbstractSystemAction {
+public class FrameworkOptions implements Action {
 
     @Option(name = "-debug", aliases={"--enable-debug"}, description="Enable debug for the OSGi framework", required = false, multiValued = false)
     boolean debug;
@@ -38,8 +41,11 @@ public class FrameworkOptions extends AbstractSystemAction {
     @Argument(name = "framework", required = false, description = "Name of the OSGi framework to use")
     String framework;
 
+    @Reference
+    SystemService systemService;
+
     @Override
-    protected Object doExecute() throws Exception {
+    public Object execute() throws Exception {
 
         if (!debug^nodebug && framework == null) {
             System.out.printf("Current OSGi framework is %s%n", systemService.getFramework().name());

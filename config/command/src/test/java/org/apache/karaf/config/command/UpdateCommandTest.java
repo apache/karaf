@@ -27,7 +27,6 @@ import junit.framework.TestCase;
 
 import org.apache.karaf.config.core.ConfigRepository;
 import org.easymock.EasyMock;
-import org.osgi.framework.BundleContext;
 
 /**
  * Test cases for {@link EditCommand}
@@ -41,40 +40,34 @@ public class UpdateCommandTest extends TestCase {
 		Dictionary<String, Object> props = new Hashtable<String, Object>();
 
         UpdateCommand command = new UpdateCommand();
-        BundleContext context = EasyMock.createMock(BundleContext.class);
-        command.setBundleContext(context);
         ConfigRepository configRepo = EasyMock.createMock(ConfigRepository.class);
         configRepo.update(EasyMock.eq(PID), EasyMock.eq(props));
         EasyMock.expectLastCall();
 		command.setConfigRepository(configRepo);
-        expect(context.getBundle(0)).andReturn(null).anyTimes();
-        
+
         MockCommandSession session = createMockSessionForFactoryEdit(PID, false, props);
-        replay(context);
+        command.setSession(session);
         replay(configRepo);
 
-        command.execute(session);
-        EasyMock.verify(context, configRepo);
+        command.execute();
+        EasyMock.verify(configRepo);
     }
     
     public void testupdateOnNewFactoryPid() throws Exception {
 		Dictionary<String, Object> props = new Hashtable<String, Object>();
 
         UpdateCommand command = new UpdateCommand();
-        BundleContext context = EasyMock.createMock(BundleContext.class);
-        command.setBundleContext(context);
         ConfigRepository configRepo = EasyMock.createMock(ConfigRepository.class);
         expect(configRepo.createFactoryConfiguration(EasyMock.eq(FACTORY_PID), EasyMock.eq(props)))
         	.andReturn(PID + ".35326647");
 		command.setConfigRepository(configRepo);
-        expect(context.getBundle(0)).andReturn(null).anyTimes();
-        
+
         MockCommandSession session = createMockSessionForFactoryEdit(FACTORY_PID, true, props);
-        replay(context);
+        command.setSession(session);
         replay(configRepo);
 
-        command.execute(session);
-        EasyMock.verify(context, configRepo);
+        command.execute();
+        EasyMock.verify(configRepo);
     }
 
 	private MockCommandSession createMockSessionForFactoryEdit(String pid, boolean isFactory, 

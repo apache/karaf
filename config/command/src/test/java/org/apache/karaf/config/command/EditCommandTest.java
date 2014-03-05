@@ -16,23 +16,19 @@
  */
 package org.apache.karaf.config.command;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-
 import java.util.Dictionary;
 import java.util.Properties;
 
 import junit.framework.TestCase;
-
-import org.apache.felix.service.command.CommandSession;
-import org.apache.karaf.config.command.ConfigCommandSupport;
-import org.apache.karaf.config.command.EditCommand;
 import org.apache.karaf.config.core.impl.ConfigRepositoryImpl;
-import org.easymock.EasyMock;
+import org.apache.karaf.shell.api.console.Session;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
+
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
 
 /**
  * Test cases for {@link EditCommand}
@@ -44,23 +40,17 @@ public class EditCommandTest extends TestCase {
     private EditCommand command;
     private BundleContext context;
     private ConfigurationAdmin admin;
-    private CommandSession session;
+    private Session session;
 
     @Override
     protected void setUp() throws Exception {
         command = new EditCommand();
 
-        
-        context = EasyMock.createMock(BundleContext.class);
-        command.setBundleContext(context);
-        
         admin = createMock(ConfigurationAdmin.class);
         command.setConfigRepository(new ConfigRepositoryImpl(admin));
-        expect(context.getBundle(0)).andReturn(null).anyTimes();
 
-        replay(context);
-        
         session = new MockCommandSession();
+        command.setSession(session);
     }
     
     public void testExecuteOnExistingPid() throws Exception {        
@@ -74,7 +64,7 @@ public class EditCommandTest extends TestCase {
         replay(config);
         
         command.pid = PID; 
-        command.execute(session);
+        command.execute();
         
         // the PID and Dictionary should have been set on the session
         assertEquals("The PID should be set on the session",
@@ -94,7 +84,7 @@ public class EditCommandTest extends TestCase {
         replay(config);
         
         command.pid = PID; 
-        command.execute(session);
+        command.execute();
 
         // the PID and an empty Dictionary should have been set on the session        
         assertEquals("The PID should be set on the session",

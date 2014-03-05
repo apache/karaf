@@ -17,10 +17,10 @@
 package org.apache.karaf.jms.command;
 
 import org.apache.karaf.jms.JmsService;
-import org.apache.karaf.shell.console.OsgiCommandSupport;
-import org.apache.karaf.shell.inject.Reference;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
 
-public abstract class JmsCommandSupport extends OsgiCommandSupport {
+public abstract class JmsCommandSupport implements Action {
 
     @Reference
     private JmsService jmsService;

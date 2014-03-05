@@ -22,9 +22,9 @@ import java.util.Map;
 
 import org.apache.aries.util.VersionRange;
 import org.apache.aries.util.manifest.ManifestHeaderProcessor;
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.eclipse.equinox.region.Region;
 import org.eclipse.equinox.region.RegionDigraph;
 import org.eclipse.equinox.region.RegionFilter;
@@ -50,7 +50,7 @@ public class AddFilterCommand extends RegionCommandSupport {
         Region rFrom = getRegion(regionDigraph, fromRegion);
         Region rTo = getRegion(regionDigraph, toRegion);
         RegionFilterBuilder builder = regionDigraph.createRegionFilterBuilder();
-        BundleContext framework = getBundleContext().getBundle(0).getBundleContext();
+        BundleContext framework = bundleContext.getBundle(0).getBundleContext();
         if (items != null) {
             for (String item : items) {
                 try {

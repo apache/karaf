@@ -19,9 +19,9 @@ package org.apache.karaf.config.command;
 import java.util.Dictionary;
 import java.util.Enumeration;
 
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.osgi.service.cm.Configuration;
 
 @Command(scope = "config", name = "list", description = "Lists existing configurations.")

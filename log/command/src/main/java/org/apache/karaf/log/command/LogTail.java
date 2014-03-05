@@ -18,10 +18,16 @@ package org.apache.karaf.log.command;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.concurrent.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.log.core.LogService;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.api.console.Session;
 import org.ops4j.pax.logging.spi.PaxAppender;
 import org.ops4j.pax.logging.spi.PaxLoggingEvent;
 
@@ -29,9 +35,16 @@ import org.ops4j.pax.logging.spi.PaxLoggingEvent;
 @Service
 public class LogTail extends DisplayLog {
 
+    @Reference
+    Session session;
+
+    @Reference
+    LogService logService;
+
     private ExecutorService executorService = Executors.newSingleThreadExecutor();
-    
-    protected Object doExecute() throws Exception {
+
+    @Override
+    public Object execute() throws Exception {
         PrintEventThread printThread = new PrintEventThread();
         executorService.execute(printThread);
         new Thread(new ReadKeyBoardThread(this, Thread.currentThread())).start();

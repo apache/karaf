@@ -44,7 +44,7 @@ public class ListCommandTest {
 			andReturn(resources);
 		
 		control.replay();
-		command.execute(null);
+		command.execute();
 		control.verify();
 	}
 

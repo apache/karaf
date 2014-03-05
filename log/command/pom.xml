@@ -44,17 +44,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.karaf.shell</groupId>
-            <artifactId>org.apache.karaf.shell.console</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.shell</groupId>
-            <artifactId>org.apache.karaf.shell.table</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.gogo.runtime</artifactId>
-            <scope>provided</scope>
+            <artifactId>org.apache.karaf.shell.core</artifactId>
         </dependency>
 
         <dependency>
@@ -105,7 +95,15 @@
                         <Import-Package>
                             *
                         </Import-Package>
-                        <Private-Package>org.apache.karaf.log.command*</Private-Package>
+                        <Export-Package>
+                            !*
+                        </Export-Package>
+                        <Private-Package>
+                            org.apache.karaf.log.command*
+                        </Private-Package>
+                        <Karaf-Commands>
+                            org.apache.karaf.log.command*
+                        </Karaf-Commands>
                     </instructions>
                 </configuration>
             </plugin>

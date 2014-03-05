@@ -15,16 +15,15 @@
  */
 package org.apache.karaf.jaas.command;
 
-import org.apache.karaf.shell.commands.Command;
+import javax.security.auth.login.AppConfigurationEntry;
+
 import org.apache.karaf.jaas.boot.ProxyLoginModule;
 import org.apache.karaf.jaas.config.JaasRealm;
 import org.apache.karaf.jaas.modules.BackingEngine;
-import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.inject.Service;
-import org.apache.karaf.shell.table.ShellTable;
-
-import javax.security.auth.login.AppConfigurationEntry;
-import java.util.List;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.support.table.ShellTable;
 
 @Command(scope = "jaas", name = "realm-list", description = "List JAAS realms")
 @Service
@@ -38,9 +37,8 @@ public class ListRealmsCommand extends JaasCommandSupport {
         return null;
     }
 
-    protected Object doExecute() throws Exception {
-        List<JaasRealm> realms = getRealms();
-
+    @Override
+    public Object execute() throws Exception {
         ShellTable table = new ShellTable();
         table.column("Index");
         table.column("Realm Name");

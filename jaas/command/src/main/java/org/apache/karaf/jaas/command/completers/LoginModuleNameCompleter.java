@@ -18,19 +18,26 @@ package org.apache.karaf.jaas.command.completers;
 
 import java.util.LinkedList;
 import java.util.List;
+
 import javax.security.auth.login.AppConfigurationEntry;
+
 import org.apache.karaf.jaas.boot.ProxyLoginModule;
 import org.apache.karaf.jaas.config.JaasRealm;
-import org.apache.karaf.shell.console.Completer;
-import org.apache.karaf.shell.console.completer.StringsCompleter;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.api.console.CommandLine;
+import org.apache.karaf.shell.api.console.Completer;
+import org.apache.karaf.shell.api.console.Session;
+import org.apache.karaf.shell.support.completers.StringsCompleter;
 
 @Service
 public class LoginModuleNameCompleter implements Completer {
 
+    @Reference
     private List<JaasRealm> realms;
 
-    public int complete(String buffer, int cursor, List<String> candidates) {
+    @Override
+    public int complete(Session session, CommandLine commandLine, List<String> candidates) {
         StringsCompleter delegate = new StringsCompleter();
         try {
             if (realms != null && !realms.isEmpty())
@@ -42,7 +49,7 @@ public class LoginModuleNameCompleter implements Completer {
         } catch (Exception e) {
             // Ignore
         }
-        return delegate.complete(buffer, cursor, candidates);
+        return delegate.complete(session, commandLine, candidates);
     }
 
     /**
@@ -60,14 +67,6 @@ public class LoginModuleNameCompleter implements Completer {
 
         }
         return moduleClassNames;
-    }
-
-    public List<JaasRealm> getRealms() {
-        return realms;
-    }
-
-    public void setRealms(List<JaasRealm> realms) {
-        this.realms = realms;
     }
 
 }

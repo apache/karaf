@@ -16,20 +16,19 @@
  */
 package org.apache.karaf.web.commands;
 
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.console.OsgiCommandSupport;
-import org.apache.karaf.shell.inject.Reference;
-import org.apache.karaf.shell.inject.Service;
-import org.apache.karaf.shell.table.Col;
-import org.apache.karaf.shell.table.ShellTable;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.support.table.Col;
+import org.apache.karaf.shell.support.table.ShellTable;
 import org.apache.karaf.web.WebBundle;
 import org.apache.karaf.web.WebContainerService;
 
-
 @Command(scope = "web", name = "list", description = "Lists details for war bundles.")
 @Service
-public class List extends OsgiCommandSupport {
+public class List implements Action {
 
     @Option(name = "--no-format", description = "Disable table rendered output", required = false, multiValued = false)
     boolean noFormat;
@@ -40,8 +39,9 @@ public class List extends OsgiCommandSupport {
     public void setWebContainerService(WebContainerService webContainerService) {
         this.webContainerService = webContainerService;
     }
-    
-    public Object doExecute() throws Exception {
+
+    @Override
+    public Object execute() throws Exception {
     	ShellTable table = new ShellTable();
         table.column(new Col("ID"));
         table.column(new Col("State"));

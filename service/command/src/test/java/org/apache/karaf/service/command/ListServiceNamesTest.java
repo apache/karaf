@@ -28,7 +28,7 @@ public class ListServiceNamesTest {
         ListServices listServices = new ListServices();
         listServices.setBundleContext(new TestBundleFactory().createBundleContext());
         listServices.onlyNames = true;
-        listServices.doExecute();
+        listServices.execute();
     }
 
 }

@@ -20,17 +20,17 @@ import java.util.Arrays;
 
 import org.apache.karaf.http.core.ServletInfo;
 import org.apache.karaf.http.core.ServletService;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.console.OsgiCommandSupport;
-import org.apache.karaf.shell.inject.Reference;
-import org.apache.karaf.shell.inject.Service;
-import org.apache.karaf.shell.table.Col;
-import org.apache.karaf.shell.table.ShellTable;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.support.table.Col;
+import org.apache.karaf.shell.support.table.ShellTable;
 
 @Command(scope = "http", name = "list", description = "Lists details for servlets.")
 @Service
-public class ServletListCommand extends OsgiCommandSupport {
+public class ServletListCommand implements Action {
 
     @Option(name = "--no-format", description = "Disable table rendered output", required = false, multiValued = false)
     boolean noFormat;
@@ -39,7 +39,7 @@ public class ServletListCommand extends OsgiCommandSupport {
     private ServletService servletService;
     
     @Override
-    protected Object doExecute() throws Exception {
+    public Object execute() throws Exception {
         ShellTable table = new ShellTable();
         table.column(new Col("ID"));
         table.column(new Col("Servlet"));

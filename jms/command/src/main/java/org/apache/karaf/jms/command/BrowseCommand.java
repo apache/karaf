@@ -16,14 +16,14 @@
  */
 package org.apache.karaf.jms.command;
 
-import org.apache.karaf.jms.JmsMessage;
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.inject.Service;
-import org.apache.karaf.shell.table.ShellTable;
-
 import java.util.List;
+
+import org.apache.karaf.jms.JmsMessage;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.support.table.ShellTable;
 
 @Command(scope = "jms", name = "browse", description = "Browse a JMS queue")
 @Service
@@ -38,7 +38,8 @@ public class BrowseCommand extends JmsConnectionCommandSupport {
     @Option(name = "-v", aliases = { "--verbose" }, description = "Display JMS properties", required = false, multiValued = false)
     boolean verbose = false;
 
-    public Object doExecute() throws Exception {
+    @Override
+    public Object execute() throws Exception {
 
         ShellTable table = new ShellTable();
         table.column("Message ID");

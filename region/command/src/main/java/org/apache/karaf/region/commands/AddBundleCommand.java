@@ -18,9 +18,9 @@ package org.apache.karaf.region.commands;
 
 import java.util.List;
 
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.eclipse.equinox.region.Region;
 import org.eclipse.equinox.region.RegionDigraph;
 import org.osgi.framework.Bundle;
@@ -40,7 +40,7 @@ public class AddBundleCommand extends RegionCommandSupport {
         for (Long id : ids) {
             for (Region existing: regionDigraph.getRegions()) {
                 if (existing.contains(id)) {
-                    Bundle b = getBundleContext().getBundle(id);
+                    Bundle b = bundleContext.getBundle(id);
                     System.out.println("Removing bundle " + id + " from region " + existing.getName());
                     existing.removeBundle(b);
                     break;

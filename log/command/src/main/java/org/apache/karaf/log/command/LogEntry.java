@@ -16,14 +16,14 @@
  */
 package org.apache.karaf.log.command;
 
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Completer;
-import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.console.AbstractAction;
-import org.apache.karaf.shell.console.completer.StringsCompleter;
-import org.apache.karaf.shell.inject.Reference;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Completion;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.support.completers.StringsCompleter;
 import org.osgi.service.log.LogService;
 
 import java.util.HashMap;
@@ -31,31 +31,30 @@ import java.util.Map;
 
 @Command(scope = "log", name = "log", description = "Log a message.")
 @Service
-public class LogEntry extends AbstractAction {
+public class LogEntry implements Action {
 
     @Argument(index = 0, name = "message", description = "The message to log", required = true, multiValued = false)
     private String message;
 
     @Option(name = "--level", aliases = {"-l"}, description = "The level the message will be logged at", required = false, multiValued = false)
-    @Completer(value = StringsCompleter.class, values = { "DEBUG", "INFO", "WARNING", "ERROR" })
+    @Completion(value = StringsCompleter.class, values = { "DEBUG", "INFO", "WARNING", "ERROR" })
     private String level = "INFO";
 
     @Reference
-    private LogService logService;
+    LogService logService;
 
     private final Map<String,Integer> mappings = new HashMap<String,Integer>();
 
     public LogEntry() {
-        mappings.put("ERROR",1);
-        mappings.put("WARNING",2);
-        mappings.put("INFO",3);
-        mappings.put("DEBUG",4);
+        mappings.put("ERROR", 1);
+        mappings.put("WARNING", 2);
+        mappings.put("INFO", 3);
+        mappings.put("DEBUG", 4);
     }
 
     @Override
-    protected Object doExecute() throws Exception {
+    public Object execute() throws Exception {
         logService.log(toLevel(level.toUpperCase()), message);
-
         return null;
     }
 
@@ -67,7 +66,4 @@ public class LogEntry extends AbstractAction {
         return level;
     }
 
-    public void setLogService(LogService logService) {
-        this.logService = logService;
-    }
 }

@@ -20,18 +20,18 @@ import java.util.SortedMap;
 
 import org.apache.karaf.packages.core.PackageRequirement;
 import org.apache.karaf.packages.core.PackageService;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.console.OsgiCommandSupport;
-import org.apache.karaf.shell.inject.Reference;
-import org.apache.karaf.shell.inject.Service;
-import org.apache.karaf.shell.table.Col;
-import org.apache.karaf.shell.table.ShellTable;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.support.table.Col;
+import org.apache.karaf.shell.support.table.ShellTable;
 import org.osgi.framework.Bundle;
 
 @Command(scope = "package", name = "imports", description = "Lists imported packages and the bundles that import them")
 @Service
-public class Imports extends OsgiCommandSupport {
+public class Imports implements Action {
     
     @Option(name = "-p", description = "Only show package instead of full filter", required = false, multiValued = false)
     boolean onlyPackage;
@@ -42,11 +42,8 @@ public class Imports extends OsgiCommandSupport {
     @Reference
     private PackageService packageService;
 
-    public void setPackageService(PackageService packageService) {
-        this.packageService = packageService;
-    }
-
-    protected Object doExecute() throws Exception {
+    @Override
+    public Object execute() throws Exception {
         SortedMap<String, PackageRequirement> imports = packageService.getImports();
         ShellTable table = new ShellTable();
         table.column(new Col(onlyPackage ? "Package name" : "Filter"));

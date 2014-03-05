@@ -16,21 +16,29 @@
  */
 package org.apache.karaf.system.commands;
 
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.inject.Service;
+
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.system.SystemService;
 
 /**
  * Command to shut down Karaf container.
  */
 @Command(scope = "system", name = "name", description = "Show or change Karaf instance name.")
 @Service
-public class Name extends AbstractSystemAction {
+public class Name implements Action {
 
     @Argument(name = "name", index = 0, description = "New name for the instance", required = false, multiValued = false)
     String name;
 
-    protected Object doExecute() throws Exception {
+    @Reference
+    SystemService systemService;
+
+    @Override
+    public Object execute() throws Exception {
         if (name == null) {
             System.out.println(systemService.getName());
         } else {

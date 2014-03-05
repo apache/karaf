@@ -24,21 +24,22 @@ import java.util.TreeMap;
 
 import org.apache.karaf.packages.core.PackageService;
 import org.apache.karaf.packages.core.PackageVersion;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.console.OsgiCommandSupport;
-import org.apache.karaf.shell.inject.Reference;
-import org.apache.karaf.shell.inject.Service;
-import org.apache.karaf.shell.table.Col;
-import org.apache.karaf.shell.table.ShellTable;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.support.table.Col;
+import org.apache.karaf.shell.support.table.ShellTable;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.Version;
 import org.osgi.framework.wiring.BundleCapability;
 import org.osgi.framework.wiring.BundleRevision;
 
 @Command(scope = "package", name = "exports", description = "Lists exported packages and the bundles that export them")
 @Service
-public class Exports extends OsgiCommandSupport {
+public class Exports implements Action {
 
     @Option(name = "-d", description = "Only show packages that are exported by more than one bundle", required = false, multiValued = false)
     private boolean onlyDuplicates;
@@ -49,11 +50,11 @@ public class Exports extends OsgiCommandSupport {
     @Reference
     private PackageService packageService;
 
-    public void setPackageService(PackageService packageService) {
-        this.packageService = packageService;
-    }
+    @Reference
+    private BundleContext bundleContext;
 
-    protected Object doExecute() throws Exception {
+    @Override
+    public Object execute() throws Exception {
     	if (onlyDuplicates) {
     		checkDuplicateExports();
     	} else {

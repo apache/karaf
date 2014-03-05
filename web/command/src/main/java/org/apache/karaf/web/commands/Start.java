@@ -16,16 +16,16 @@
  */
 package org.apache.karaf.web.commands;
 
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.console.OsgiCommandSupport;
-import org.apache.karaf.shell.inject.Reference;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.web.WebContainerService;
 
 @Command(scope = "web", name = "start", description = "Start the web context of given bundles.")
 @Service
-public class Start extends OsgiCommandSupport {
+public class Start implements Action {
 
     @Argument(index = 0, name = "ids", description = "The list of bundle IDs separated by whitespaces", required = true, multiValued = true)
     java.util.List<Long> ids;
@@ -36,8 +36,9 @@ public class Start extends OsgiCommandSupport {
     public void setWebContainerService(WebContainerService webContainerService) {
         this.webContainerService = webContainerService;
     }
-    
-    public Object doExecute() throws Exception {
+
+    @Override
+    public Object execute() throws Exception {
         webContainerService.start(ids);
         return null;
     }

@@ -16,11 +16,13 @@
  */
 package org.apache.karaf.system.commands;
 
-import jline.console.ConsoleReader;
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.system.SystemService;
 
 /**
@@ -28,7 +30,7 @@ import org.apache.karaf.system.SystemService;
  */
 @Command(scope = "system", name = "shutdown", description = "Shutdown Karaf.")
 @Service
-public class Shutdown extends AbstractSystemAction {
+public class Shutdown implements Action {
 
     @Option(name = "-f", aliases = "--force", description = "Force the shutdown without confirmation message.", required = false, multiValued = false)
     boolean force = false;
@@ -52,7 +54,14 @@ public class Shutdown extends AbstractSystemAction {
             " to wait. The word now is an alias for +0.", required = false, multiValued = false)
     String time;
 
-    protected Object doExecute() throws Exception {
+    @Reference
+    SystemService systemService;
+
+    @Reference
+    Session session;
+
+    @Override
+    public Object execute() throws Exception {
 
         if (force) {
             if (reboot) {
@@ -71,8 +80,7 @@ public class Shutdown extends AbstractSystemAction {
             } else {
                 msg = String.format("Confirm: halt instance %s (yes/no): ", karafName);
             }
-            ConsoleReader reader = (ConsoleReader) session.get(".jline.reader");
-            String str = reader.readLine(msg);
+            String str = session.readLine(msg, null);
             if (str.equalsIgnoreCase("yes")) {
                 if (reboot) {
                     systemService.reboot(time, determineSwipeType());

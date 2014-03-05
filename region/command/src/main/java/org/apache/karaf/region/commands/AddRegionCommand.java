@@ -18,9 +18,9 @@ package org.apache.karaf.region.commands;
 
 import java.util.List;
 
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.eclipse.equinox.region.RegionDigraph;
 
 @Command(scope = "region", name = "region-add", description = "Adds a list of regions to the region digraph service.")

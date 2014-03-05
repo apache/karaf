@@ -16,7 +16,7 @@
  */
 package org.apache.karaf.shell.commands.impl.info;
 
-import org.apache.karaf.shell.commands.InfoProvider;
+import org.apache.karaf.shell.commands.info.InfoProvider;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;

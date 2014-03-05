@@ -17,18 +17,18 @@
 package org.apache.karaf.config.command;
 
 import org.apache.karaf.config.command.completers.ConfigurationCompleter;
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Completer;
-import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Completion;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 
 @Command(scope = "config", name = "delete", description = "Delete a configuration.")
 @Service
 public class DeleteCommand extends ConfigCommandSupport {
 
     @Argument(index = 0, name = "pid", description = "PID of the configuration", required = true, multiValued = false)
-    @Completer(ConfigurationCompleter.class)
+    @Completion(ConfigurationCompleter.class)
     String pid;
 
     @Option(name = "--force", aliases = {}, description = "Force the edition of this config, even if another one was under edition", required = false, multiValued = false)

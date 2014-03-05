@@ -15,18 +15,18 @@
  */
 package org.apache.karaf.jaas.command;
 
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.jaas.modules.BackingEngine;
-import org.apache.karaf.shell.inject.Service;
-
 import java.util.LinkedList;
+
+import org.apache.karaf.jaas.modules.BackingEngine;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 
 @Command(scope = "jaas", name = "cancel", description = "Cancel the modification of a JAAS realm")
 @Service
 public class CancelCommand extends JaasCommandSupport {
 
     @Override
-    protected Object doExecute() throws Exception {
+    public Object execute() throws Exception {
         //Cleanup the session
         session.put(JAAS_REALM, null);
         session.put(JAAS_ENTRY, null);

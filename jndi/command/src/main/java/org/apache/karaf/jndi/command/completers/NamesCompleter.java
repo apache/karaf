@@ -17,10 +17,12 @@
 package org.apache.karaf.jndi.command.completers;
 
 import org.apache.karaf.jndi.JndiService;
-import org.apache.karaf.shell.console.Completer;
-import org.apache.karaf.shell.console.completer.StringsCompleter;
-import org.apache.karaf.shell.inject.Reference;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.api.console.CommandLine;
+import org.apache.karaf.shell.api.console.Completer;
+import org.apache.karaf.shell.api.console.Session;
+import org.apache.karaf.shell.support.completers.StringsCompleter;
 
 import java.util.List;
 
@@ -33,7 +35,8 @@ public class NamesCompleter implements Completer {
     @Reference
     private JndiService jndiService;
 
-    public int complete(String buffer, int cursor, List candidates) {
+    @Override
+    public int complete(Session session, CommandLine commandLine, List<String> candidates) {
         StringsCompleter delegate = new StringsCompleter();
         try {
             for (String name : jndiService.names().keySet()) {
@@ -42,7 +45,7 @@ public class NamesCompleter implements Completer {
         } catch (Exception e) {
             // nothing to do
         }
-        return delegate.complete(buffer, cursor, candidates);
+        return delegate.complete(session, commandLine, candidates);
     }
 
     public JndiService getJndiService() {

@@ -16,17 +16,22 @@
  */
 package org.apache.karaf.config.command;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.felix.service.command.CommandSession;
+import org.apache.karaf.shell.api.console.History;
+import org.apache.karaf.shell.api.console.Registry;
+import org.apache.karaf.shell.api.console.Session;
+import org.apache.karaf.shell.api.console.SessionFactory;
+import org.apache.karaf.shell.api.console.Terminal;
 
 /*
  * A mock CommandSession implementation that only cares about the properties set on the session
  */
-class MockCommandSession implements CommandSession {
+class MockCommandSession implements Session {
 
     private Map<String, Object> properties = new HashMap<String, Object>();
 
@@ -34,17 +39,7 @@ class MockCommandSession implements CommandSession {
         // not implemented
     }
 
-    public Object convert(Class<?> type, Object instance) {
-        // not implemented
-        return null;
-    }
-
     public Object execute(CharSequence commandline) throws Exception {
-        // not implemented
-        return null;
-    }
-
-    public CharSequence format(Object target, int level) {
         // not implemented
         return null;
     }
@@ -65,5 +60,40 @@ class MockCommandSession implements CommandSession {
 
     public void put(String name, Object value) {
         properties.put(name, value);
+    }
+
+    @Override
+    public String readLine(String prompt, Character mask) throws IOException {
+        return null;
+    }
+
+    @Override
+    public Terminal getTerminal() {
+        return null;
+    }
+
+    @Override
+    public History getHistory() {
+        return null;
+    }
+
+    @Override
+    public Registry getRegistry() {
+        return null;
+    }
+
+    @Override
+    public SessionFactory getFactory() {
+        return null;
+    }
+
+    @Override
+    public String resolveCommand(String name) {
+        return null;
+    }
+
+    @Override
+    public void run() {
+
     }
 }

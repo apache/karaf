@@ -15,33 +15,41 @@
  */
 package org.apache.karaf.jaas.command;
 
+import java.util.List;
+import java.util.Queue;
+
+import javax.security.auth.login.AppConfigurationEntry;
+
 import org.apache.karaf.jaas.boot.ProxyLoginModule;
 import org.apache.karaf.jaas.config.JaasRealm;
 import org.apache.karaf.jaas.modules.BackingEngine;
 import org.apache.karaf.jaas.modules.BackingEngineFactory;
-import org.apache.karaf.shell.console.OsgiCommandSupport;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.console.Session;
 
-import javax.security.auth.login.AppConfigurationEntry;
-import java.util.List;
-import java.util.Queue;
-
-public abstract class JaasCommandSupport extends OsgiCommandSupport {
+public abstract class JaasCommandSupport implements Action {
 
     public static final String JAAS_REALM = "JaasCommand.REALM";
     public static final String JAAS_ENTRY = "JaasCommand.ENTRY";
     public static final String JAAS_CMDS = "JaasCommand.COMMANDS";
 
-    private List<JaasRealm> realms;
+    @Reference
+    List<BackingEngineFactory> engineFactories;
+
+    @Reference
+    List<JaasRealm> realms;
+
+    @Reference
+    Session session;
 
     protected abstract Object doExecute(BackingEngine engine) throws Exception;
 
     /**
      * Add the command to the command queue.
-     *
-     * @return
-     * @throws Exception
      */
-    protected Object doExecute() throws Exception {
+    @Override
+    public Object execute() throws Exception {
         JaasRealm realm = (JaasRealm) session.get(JAAS_REALM);
         AppConfigurationEntry entry = (AppConfigurationEntry) session.get(JAAS_ENTRY);
         @SuppressWarnings("unchecked")
@@ -57,20 +65,7 @@ public abstract class JaasCommandSupport extends OsgiCommandSupport {
         return null;
     }
 
-    public void setRealms(List<JaasRealm> realms) {
-        this.realms = realms;
-    }
-
-    public List<JaasRealm> getRealms() {
-        if (realms == null) {
-            return getAllServices(JaasRealm.class);
-        } else {
-            return realms;
-        }
-    }
-
     public BackingEngine getBackingEngine(AppConfigurationEntry entry) {
-        List<BackingEngineFactory> engineFactories = getAllServices(BackingEngineFactory.class);
         if (engineFactories != null) {
             for (BackingEngineFactory factory : engineFactories) {
                 String loginModuleClass = (String) entry.getOptions().get(ProxyLoginModule.PROPERTY_MODULE);
@@ -82,4 +77,11 @@ public abstract class JaasCommandSupport extends OsgiCommandSupport {
         return null;
     }
 
+    public void setRealms(List<JaasRealm> realms) {
+        this.realms = realms;
+    }
+
+    public void setSession(Session session) {
+        this.session = session;
+    }
 }

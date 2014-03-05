@@ -19,8 +19,9 @@ package org.apache.karaf.config.command;
 import java.util.Dictionary;
 
 import org.apache.karaf.config.core.ConfigRepository;
-import org.apache.karaf.shell.inject.Reference;
-import org.apache.karaf.shell.console.OsgiCommandSupport;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.console.Session;
 
 /**
  * Abstract class from which all commands related to the ConfigurationAdmin
@@ -28,7 +29,7 @@ import org.apache.karaf.shell.console.OsgiCommandSupport;
  * This command retrieves a reference to the ConfigurationAdmin service before
  * calling another method to actually process the command.
  */
-public abstract class ConfigCommandSupport extends OsgiCommandSupport {
+public abstract class ConfigCommandSupport implements Action {
 
     public static final String PROPERTY_CONFIG_PID = "ConfigCommand.PID";
     public static final String PROPERTY_CONFIG_PROPS = "ConfigCommand.Props";
@@ -36,6 +37,16 @@ public abstract class ConfigCommandSupport extends OsgiCommandSupport {
 
     @Reference
     protected ConfigRepository configRepository;
+
+    @Reference
+    protected Session session;
+
+    @Override
+    public Object execute() throws Exception {
+        return doExecute();
+    }
+
+    protected abstract Object doExecute() throws Exception;
 
     @SuppressWarnings("rawtypes")
     protected Dictionary getEditedProps() throws Exception {
@@ -46,4 +57,7 @@ public abstract class ConfigCommandSupport extends OsgiCommandSupport {
         this.configRepository = configRepository;
     }
 
+    public void setSession(Session session) {
+        this.session = session;
+    }
 }

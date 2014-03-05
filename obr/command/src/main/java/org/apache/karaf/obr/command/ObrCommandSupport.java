@@ -32,25 +32,29 @@ import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.felix.bundlerepository.Requirement;
 import org.apache.felix.bundlerepository.Resolver;
 import org.apache.felix.bundlerepository.Resource;
-import org.apache.karaf.shell.console.OsgiCommandSupport;
-import org.apache.karaf.shell.inject.Reference;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 import org.osgi.framework.Version;
 
-public abstract class ObrCommandSupport extends OsgiCommandSupport {
+public abstract class ObrCommandSupport implements Action {
 
     protected static final char VERSION_DELIM = ',';
 
     @Reference
     private RepositoryAdmin repositoryAdmin;
 
+    @Reference
+    BundleContext bundleContext;
+
     public void setRepositoryAdmin(RepositoryAdmin repositoryAdmin) {
         this.repositoryAdmin = repositoryAdmin;
     }
 
-    protected Object doExecute() throws Exception {
+    @Override
+    public Object execute() throws Exception {
         doExecute(repositoryAdmin);
         return null;
     }
@@ -60,7 +64,7 @@ public abstract class ObrCommandSupport extends OsgiCommandSupport {
     protected Resource[] searchRepository(RepositoryAdmin admin, String targetId, String targetVersion) throws InvalidSyntaxException {
         // Try to see if the targetId is a bundle ID.
         try {
-            Bundle bundle = getBundleContext().getBundle(Long.parseLong(targetId));
+            Bundle bundle = bundleContext.getBundle(Long.parseLong(targetId));
             targetId = bundle.getSymbolicName();
         } catch (NumberFormatException ex) {
             // It was not a number, so ignore.

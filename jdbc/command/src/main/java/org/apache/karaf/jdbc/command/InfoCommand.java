@@ -17,11 +17,11 @@
 package org.apache.karaf.jdbc.command;
 
 import org.apache.karaf.jdbc.command.completers.DataSourcesNameCompleter;
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Completer;
-import org.apache.karaf.shell.inject.Service;
-import org.apache.karaf.shell.table.ShellTable;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Completion;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.support.table.ShellTable;
 
 import java.util.Map;
 
@@ -30,10 +30,11 @@ import java.util.Map;
 public class InfoCommand extends JdbcCommandSupport {
 
     @Argument(index = 0, name = "datasource", description = "The JDBC datasource name", required = true, multiValued = false)
-    @Completer(DataSourcesNameCompleter.class)
+    @Completion(DataSourcesNameCompleter.class)
     String datasource;
 
-    public Object doExecute() throws Exception {
+    @Override
+    public Object execute() throws Exception {
         ShellTable table = new ShellTable();
 
         table.column("Property");

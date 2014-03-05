@@ -16,12 +16,12 @@
  */
 package org.apache.karaf.jms.command;
 
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Completer;
-import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.console.completer.StringsCompleter;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Completion;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.support.completers.StringsCompleter;
 
 @Command(scope = "jms", name = "create", description = "Create a JMS connection factory.")
 @Service
@@ -31,13 +31,14 @@ public class CreateCommand extends JmsCommandSupport {
     String name;
 
     @Option(name = "-t", aliases = { "--type" }, description = "The JMS connection factory type (ActiveMQ or WebsphereMQ)", required = false, multiValued = false)
-    @Completer(value = StringsCompleter.class, values = { "activemq", "webspheremq" })
+    @Completion(value = StringsCompleter.class, values = { "activemq", "webspheremq" })
     String type = "ActiveMQ";
 
     @Option(name = "--url", description = "URL of the JMS broker. For WebsphereMQ type, the URL is hostname/port/queuemanager/channel", required = false, multiValued = false)
     String url = "tcp://localhost:61616";
-    
-    public Object doExecute() throws Exception {
+
+    @Override
+    public Object execute() throws Exception {
         getJmsService().create(name, type, url);
         return null;
     }

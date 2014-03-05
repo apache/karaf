@@ -16,13 +16,15 @@
  */
 package org.apache.karaf.jms.command.completers;
 
-import org.apache.karaf.jms.JmsService;
-import org.apache.karaf.shell.console.Completer;
-import org.apache.karaf.shell.console.completer.StringsCompleter;
-import org.apache.karaf.shell.inject.Reference;
-import org.apache.karaf.shell.inject.Service;
-
 import java.util.List;
+
+import org.apache.karaf.jms.JmsService;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.api.console.CommandLine;
+import org.apache.karaf.shell.api.console.Completer;
+import org.apache.karaf.shell.api.console.Session;
+import org.apache.karaf.shell.support.completers.StringsCompleter;
 
 /**
  * Completer on the JMS connection factory file names.
@@ -34,7 +36,7 @@ public class ConnectionFactoriesFileNameCompleter implements Completer {
     private JmsService jmsService;
 
     @Override
-    public int complete(String buffer, int cursor, List<String> candidates) {
+    public int complete(Session session, CommandLine commandLine, List<String> candidates) {
         StringsCompleter delegate = new StringsCompleter();
         try {
             for (String connectionFactory : jmsService.connectionFactoryFileNames()) {
@@ -43,7 +45,7 @@ public class ConnectionFactoriesFileNameCompleter implements Completer {
         } catch (Exception e) {
             // nothing to do
         }
-        return delegate.complete(buffer, cursor, candidates);
+        return delegate.complete(session, commandLine, candidates);
     }
 
     public JmsService getJmsService() {

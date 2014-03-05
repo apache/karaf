@@ -16,15 +16,17 @@
  */
 package org.apache.karaf.jms.command;
 
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.inject.Service;
-import org.apache.karaf.shell.table.ShellTable;
+
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.support.table.ShellTable;
 
 @Command(scope = "jms", name = "topics", description = "List the JMS topics.")
 @Service
 public class TopicsCommand extends JmsConnectionCommandSupport {
 
-    public Object doExecute() throws Exception {
+    @Override
+    public Object execute() throws Exception {
         ShellTable table = new ShellTable();
 
         table.column("JMS Topics");

@@ -17,9 +17,9 @@
 package org.apache.karaf.jms.command;
 
 import org.apache.karaf.jms.command.completers.ConnectionFactoriesNameCompleter;
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Completer;
-import org.apache.karaf.shell.commands.Option;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Completion;
+import org.apache.karaf.shell.api.action.Option;
 
 /**
  * For commands that need a connection factory and authentication information 
@@ -27,7 +27,7 @@ import org.apache.karaf.shell.commands.Option;
 public abstract class JmsConnectionCommandSupport extends JmsCommandSupport {
 
     @Argument(index = 0, name = "connectionFactory", description = "The JMS connection factory name", required = true, multiValued = false)
-    @Completer(ConnectionFactoriesNameCompleter.class)
+    @Completion(ConnectionFactoriesNameCompleter.class)
     String connectionFactory;
 
     @Option(name = "-u", aliases = { "--username" }, description = "Username to connect to the JMS broker", required = false, multiValued = false)

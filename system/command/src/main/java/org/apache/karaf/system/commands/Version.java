@@ -16,14 +16,21 @@
  */
 package org.apache.karaf.system.commands;
 
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.system.SystemService;
 
 @Command(scope = "system", name = "version", description = "Display the instance version")
 @Service
-public class Version extends AbstractSystemAction {
+public class Version implements Action {
 
-    protected Object doExecute() throws Exception {
+    @Reference
+    SystemService systemService;
+
+    @Override
+    public Object execute() throws Exception {
         System.out.println(systemService.getVersion());
         return null;
     }

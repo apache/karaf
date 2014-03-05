@@ -19,9 +19,9 @@ package org.apache.karaf.obr.command;
 import java.util.List;
 
 import org.apache.felix.bundlerepository.RepositoryAdmin;
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 
 @Command(scope = "obr", name = "url-add", description = "Adds a list of repository URLs to the OBR service.")
 @Service

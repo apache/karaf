@@ -15,34 +15,34 @@
  */
 package org.apache.karaf.jaas.command;
 
+import java.util.LinkedList;
+import java.util.Queue;
+
+import javax.security.auth.login.AppConfigurationEntry;
+
 import org.apache.karaf.jaas.boot.ProxyLoginModule;
 import org.apache.karaf.jaas.command.completers.LoginModuleNameCompleter;
 import org.apache.karaf.jaas.command.completers.RealmCompleter;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Completer;
-import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.jaas.config.JaasRealm;
 import org.apache.karaf.jaas.modules.BackingEngine;
-import org.apache.karaf.shell.inject.Service;
-
-import javax.security.auth.login.AppConfigurationEntry;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Completion;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 
 @Command(scope = "jaas", name = "realm-manage", description = "Manage users and roles of a JAAS Realm")
 @Service
 public class ManageRealmCommand extends JaasCommandSupport {
 
     @Option(name = "--realm", description = "JAAS Realm", required = false, multiValued = false)
-    @Completer(RealmCompleter.class)
+    @Completion(RealmCompleter.class)
     String realmName;
 
     @Option(name = "--index", description = "Realm Index", required = false, multiValued = false)
     int index;
 
     @Option(name = "--module", description = "JAAS Login Module Class Name", required = false, multiValued = false)
-    @Completer(LoginModuleNameCompleter.class)
+    @Completion(LoginModuleNameCompleter.class)
     String moduleName;
 
     @Option(name = "-f", aliases = { "--force" }, description = "Force the management of this realm, even if another one was under management", required = false, multiValued = false)
@@ -50,7 +50,7 @@ public class ManageRealmCommand extends JaasCommandSupport {
 
     @SuppressWarnings("unchecked")
     @Override
-    protected Object doExecute() throws Exception {
+    public Object execute() throws Exception {
         if (realmName == null && index <= 0) {
             System.err.println("A valid realm or the realm index need to be specified");
             return null;
@@ -69,7 +69,6 @@ public class ManageRealmCommand extends JaasCommandSupport {
 
             if (index > 0) {
                 // user provided the index, get the realm AND entry from the index
-                List<JaasRealm> realms = getRealms();
                 if (realms != null && realms.size() > 0) {
                     int i = 1;
                     realms_loop: for (JaasRealm r : realms) {
@@ -88,7 +87,6 @@ public class ManageRealmCommand extends JaasCommandSupport {
                     }
                 }
             } else {
-                List<JaasRealm> realms = getRealms();
                 if (realms != null && realms.size() > 0) {
                     for (JaasRealm r : realms) {
                         if (r.getName().equals(realmName)) {

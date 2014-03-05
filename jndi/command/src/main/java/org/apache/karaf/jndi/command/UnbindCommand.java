@@ -16,22 +16,29 @@
  */
 package org.apache.karaf.jndi.command;
 
+import org.apache.karaf.jndi.JndiService;
 import org.apache.karaf.jndi.command.completers.NamesCompleter;
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Completer;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Completion;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 
 @Command(scope = "jndi", name = "unbind", description = "Unbind a JNDI name.")
 @Service
-public class UnbindCommand extends JndiCommandSupport {
+public class UnbindCommand implements Action {
 
     @Argument(index = 0, name = "name", description = "The JNDI name to unbind", required = true, multiValued = false)
-    @Completer(NamesCompleter.class)
+    @Completion(NamesCompleter.class)
     String name;
 
-    public Object doExecute() throws Exception {
-        getJndiService().unbind(name);
+    @Reference
+    JndiService jndiService;
+
+    @Override
+    public Object execute() throws Exception {
+        jndiService.unbind(name);
         return null;
     }
 

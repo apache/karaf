@@ -16,22 +16,23 @@
  */
 package org.apache.karaf.log.command;
 
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.inject.Service;
-import org.apache.karaf.shell.table.ShellTable;
-
-import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.Map;
+
+import org.apache.karaf.log.core.LogService;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.support.table.ShellTable;
 
 /**
  * Get the log level
  */
 @Command(scope = "log", name = "get", description = "Shows the currently set log level.")
 @Service
-public class GetLogLevel extends LogCommandSupport {
+public class GetLogLevel implements Action {
 
     @Argument(index = 0, name = "logger", description = "The name of the logger, ALL or ROOT (default)", required = false, multiValued = false)
     String logger;
@@ -39,7 +40,11 @@ public class GetLogLevel extends LogCommandSupport {
     @Option(name = "--no-format", description = "Disable table rendered output", required = false, multiValued = false)
     boolean noFormat;
 
-    protected Object doExecute() throws Exception {
+    @Reference
+    LogService logService;
+
+    @Override
+    public Object execute() throws Exception {
         Map<String, String> loggers = logService.getLevel(logger);
 
         ShellTable table = new ShellTable();

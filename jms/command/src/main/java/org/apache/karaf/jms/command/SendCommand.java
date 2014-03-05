@@ -16,10 +16,11 @@
  */
 package org.apache.karaf.jms.command;
 
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.inject.Service;
+
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 
 @Command(scope = "jms", name = "send", description = "Send a message to ")
 @Service
@@ -34,7 +35,8 @@ public class SendCommand extends JmsConnectionCommandSupport {
     @Option(name = "-r", aliases = { "--replyTo" }, description = "Set the message ReplyTo", required = false, multiValued = false)
     String replyTo;
 
-    public Object doExecute() throws Exception {
+    @Override
+    public Object execute() throws Exception {
         getJmsService().send(connectionFactory, queue, message, replyTo, username, password);
         return null;
     }

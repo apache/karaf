@@ -16,33 +16,40 @@
  */
 package org.apache.karaf.jndi.command;
 
+import org.apache.karaf.jndi.JndiService;
 import org.apache.karaf.jndi.command.completers.ContextsCompleter;
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Completer;
-import org.apache.karaf.shell.inject.Service;
-import org.apache.karaf.shell.table.ShellTable;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Completion;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.support.table.ShellTable;
 
 import java.util.List;
 
 @Command(scope = "jndi", name = "contexts", description = "List the JNDI sub-contexts.")
 @Service
-public class ContextsCommand extends JndiCommandSupport {
+public class ContextsCommand implements Action {
 
     @Argument(index = 0, name = "context", description = "The base JNDI context", required = false, multiValued = false)
-    @Completer(ContextsCompleter.class)
+    @Completion(ContextsCompleter.class)
     String context;
 
-    public Object doExecute() throws Exception {
+    @Reference
+    JndiService jndiService;
+
+    @Override
+    public Object execute() throws Exception {
         ShellTable table = new ShellTable();
 
         table.column("JNDI Sub-Context");
 
         List<String> contexts;
         if (context == null) {
-            contexts = this.getJndiService().contexts();
+            contexts = jndiService.contexts();
         } else {
-            contexts = this.getJndiService().contexts(context);
+            contexts = jndiService.contexts(context);
         }
 
         for (String c : contexts) {

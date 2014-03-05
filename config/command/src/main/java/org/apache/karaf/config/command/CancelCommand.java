@@ -16,8 +16,8 @@
  */
 package org.apache.karaf.config.command;
 
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 
 @Command(scope = "config", name = "cancel", description = "Cancels the changes to the configuration being edited.")
 @Service

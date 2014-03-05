@@ -24,10 +24,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.karaf.shell.console.Completer;
-import org.apache.karaf.shell.console.completer.StringsCompleter;
-import org.apache.karaf.shell.inject.Reference;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.api.console.CommandLine;
+import org.apache.karaf.shell.api.console.Completer;
+import org.apache.karaf.shell.api.console.Session;
+import org.apache.karaf.shell.support.completers.StringsCompleter;
 import org.osgi.framework.BundleContext;
 
 @Service
@@ -41,7 +43,8 @@ public class ObjectClassCompleter implements Completer {
     }
 
     @SuppressWarnings("rawtypes")
-    public int complete(final String buffer, final int cursor, final List candidates) {
+    @Override
+    public int complete(final Session session, final CommandLine commandLine, final List<String> candidates) {
         Map<String, Integer> serviceNamesMap = ListServices.getServiceNamesMap(context);
         Set<String> serviceNames = serviceNamesMap.keySet();
         List<String> strings = new ArrayList<String>();
@@ -49,7 +52,7 @@ public class ObjectClassCompleter implements Completer {
             strings.add(ObjectClassMatcher.getShortName(name));
         }
         strings.addAll(serviceNames);
-        return new StringsCompleter(strings).complete(buffer, cursor, candidates);
+        return new StringsCompleter(strings).complete(session, commandLine, candidates);
     }
 
 }
