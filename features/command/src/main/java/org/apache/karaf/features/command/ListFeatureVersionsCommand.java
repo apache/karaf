@@ -22,19 +22,19 @@ import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
 import org.apache.karaf.features.command.completers.AllFeatureCompleter;
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Completer;
-import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.inject.Service;
 import org.apache.karaf.shell.table.ShellTable;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Completion;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 
 @Command(scope = "feature", name = "version-list", description = "Lists all versions of a feature available from the currently available repositories.")
 @Service
 public class ListFeatureVersionsCommand extends FeaturesCommandSupport {
 
 	@Argument(index = 0, name = "feature", description = "Name of feature.", required = true, multiValued = false)
-    @Completer(AllFeatureCompleter.class)
+    @Completion(AllFeatureCompleter.class)
 	String feature;
 
     @Option(name = "--no-format", description = "Disable table rendered output", required = false, multiValued = false)

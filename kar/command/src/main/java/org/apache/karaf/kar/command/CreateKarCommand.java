@@ -19,24 +19,31 @@ package org.apache.karaf.kar.command;
 import java.util.List;
 
 import org.apache.karaf.features.command.completers.InstalledRepoNameCompleter;
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Completer;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.kar.KarService;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Completion;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 
 @Command(scope = "kar", name = "create", description = "Create a kar file for a list of feature repos")
 @Service
-public class CreateKarCommand extends KarCommandSupport {
+public class CreateKarCommand implements Action {
     
     @Argument(index = 0, name = "repoName", description = "Repository name. The kar will contain all features of the named repository by default", required = true, multiValued = false)
-    @Completer(InstalledRepoNameCompleter.class)
+    @Completion(InstalledRepoNameCompleter.class)
     private String repoName;
     
     @Argument(index = 1, name = "features", description = "Names of the features to include. If set then only these features will be added", required = false, multiValued = true)
     private List<String> features;
-    
-    public Object doExecute() throws Exception {
-        this.getKarService().create(repoName, features, System.out);
+
+    @Reference
+    private KarService karService;
+
+    @Override
+    public Object execute() throws Exception {
+        karService.create(repoName, features, System.out);
         return null;
     }
     

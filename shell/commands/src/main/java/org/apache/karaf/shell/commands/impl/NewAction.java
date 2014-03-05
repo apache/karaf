@@ -16,14 +16,6 @@
  */
 package org.apache.karaf.shell.commands.impl;
 
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.converter.DefaultConverter;
-import org.apache.karaf.shell.commands.converter.GenericType;
-import org.apache.karaf.shell.commands.converter.ReifiedType;
-import org.apache.karaf.shell.console.AbstractAction;
-import org.apache.karaf.shell.inject.Service;
-
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -36,12 +28,20 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.support.converter.DefaultConverter;
+import org.apache.karaf.shell.support.converter.GenericType;
+import org.apache.karaf.shell.support.converter.ReifiedType;
+
 /**
  * Instantiate a new object
  */
 @Command(scope = "shell", name = "new", description = "Creates a new java object.")
 @Service
-public class NewAction extends AbstractAction {
+public class NewAction implements Action {
 
     @Argument(name = "class", index = 0, multiValued = false, required = true, description = "The object class")
     Class clazz;
@@ -54,7 +54,7 @@ public class NewAction extends AbstractAction {
     protected DefaultConverter converter = new DefaultConverter(getClass().getClassLoader());
 
     @Override
-    protected Object doExecute() throws Exception {
+    public Object execute() throws Exception {
         if (args == null) {
             args = Collections.emptyList();
         }

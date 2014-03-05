@@ -47,6 +47,13 @@ public class KarafJaasAuthenticator implements PasswordAuthenticator, PublickeyA
 
     private String realm;
 
+    public KarafJaasAuthenticator() {
+    }
+
+    public KarafJaasAuthenticator(String realm) {
+        this.realm = realm;
+    }
+
     public String getRealm() {
         return realm;
     }

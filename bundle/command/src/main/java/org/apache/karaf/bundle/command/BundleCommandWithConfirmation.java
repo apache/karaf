@@ -16,7 +16,7 @@
  */
 package org.apache.karaf.bundle.command;
 
-import org.apache.karaf.shell.commands.Option;
+import org.apache.karaf.shell.api.action.Option;
 
 /**
  * Unique bundle command with confirmation while accessing system bundle.
@@ -30,7 +30,7 @@ public abstract class BundleCommandWithConfirmation extends BundleCommand {
         super(true);
     }
 
-    protected Object doExecute() throws Exception {
+    public Object execute() throws Exception {
         return doExecute(force);
     }
 

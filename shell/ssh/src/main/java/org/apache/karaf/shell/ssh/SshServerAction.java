@@ -18,17 +18,18 @@
  */
 package org.apache.karaf.shell.ssh;
 
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Option;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.sshd.SshServer;
-import org.apache.karaf.shell.console.BlueprintContainerAware;
-import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.osgi.service.blueprint.container.BlueprintContainer;
 
 @Command(scope = "ssh", name = "sshd", description = "Creates a SSH server")
-public class SshServerAction extends OsgiCommandSupport implements BlueprintContainerAware
+@Service
+public class SshServerAction implements Action
 {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -41,29 +42,21 @@ public class SshServerAction extends OsgiCommandSupport implements BlueprintCont
     @Option(name = "-i", aliases = { "--idle-timeout" }, description = "The session idle timeout (Default: 1800000ms)", required = false, multiValued = false)
     private long idleTimeout = 1800000;
 
-    private BlueprintContainer container;
+    @Reference
+    private SshServer server;
 
-    private String sshServerId;
-
-    public void setBlueprintContainer(final BlueprintContainer container) {
-        assert container != null;
-        this.container = container;
+    public void setServer(SshServer server) {
+        this.server = server;
     }
 
-    public void setSshServerId(String sshServerId) {
-        this.sshServerId = sshServerId;
-    }
-
-    protected Object doExecute() throws Exception {
-        SshServer server = (SshServer) container.getComponentInstance(sshServerId);
-
+    public Object execute() throws Exception {
         log.debug("Created server: {}", server);
 
         // port number
         server.setPort(port);
 
         // idle timeout
-        server.getProperties().put(SshServer.IDLE_TIMEOUT, new Long(idleTimeout).toString());
+        server.getProperties().put(SshServer.IDLE_TIMEOUT, Long.toString(idleTimeout));
 
         // starting the SSHd server
         server.start();

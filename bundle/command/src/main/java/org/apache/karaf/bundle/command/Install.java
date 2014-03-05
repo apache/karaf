@@ -19,17 +19,19 @@ package org.apache.karaf.bundle.command;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.console.MultiException;
-import org.apache.karaf.shell.console.OsgiCommandSupport;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.support.MultiException;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 
 @Command(scope = "bundle", name = "install", description = "Installs one or more bundles.")
 @Service
-public class Install extends OsgiCommandSupport {
+public class Install implements Action {
 
     @Argument(index = 0, name = "urls", description = "Bundle URLs separated by whitespaces", required = true, multiValued = true)
     List<String> urls;
@@ -37,12 +39,16 @@ public class Install extends OsgiCommandSupport {
     @Option(name = "-s", aliases={"--start"}, description="Starts the bundles after installation", required = false, multiValued = false)
     boolean start;
 
-    protected Object doExecute() throws Exception {
+    @Reference
+    BundleContext bundleContext;
+
+    @Override
+    public Object execute() throws Exception {
         List<Exception> exceptions = new ArrayList<Exception>();
         List<Bundle> bundles = new ArrayList<Bundle>();
         for (String url : urls) {
             try {
-                bundles.add(getBundleContext().installBundle(url, null));
+                bundles.add(bundleContext.installBundle(url, null));
             } catch (Exception e) {
                 exceptions.add(new Exception("Unable to install bundle " + url, e));
             }

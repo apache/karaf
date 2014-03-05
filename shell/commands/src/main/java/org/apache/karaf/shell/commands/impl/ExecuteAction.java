@@ -18,23 +18,28 @@ package org.apache.karaf.shell.commands.impl;
 
 import java.util.List;
 
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.console.AbstractAction;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.util.process.PumpStreamHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Execute system processes.
  */
 @Command(scope = "shell", name = "exec", description = "Executes system processes.")
 @Service
-public class ExecuteAction extends AbstractAction {
+public class ExecuteAction implements Action {
+
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     @Argument(index = 0, name = "command", description = "Execution command with arguments", required = true, multiValued = true)
     private List<String> args;
 
-    protected Object doExecute() throws Exception {
+    @Override
+    public Object execute() throws Exception {
         ProcessBuilder builder = new ProcessBuilder(args);
 
         PumpStreamHandler handler = new PumpStreamHandler(System.in, System.out, System.err, "Command" + args.toString());

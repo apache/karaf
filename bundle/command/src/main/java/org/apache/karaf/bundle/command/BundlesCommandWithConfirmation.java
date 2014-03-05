@@ -19,8 +19,8 @@ package org.apache.karaf.bundle.command;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.console.MultiException;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.support.MultiException;
 import org.osgi.framework.Bundle;
 
 /**

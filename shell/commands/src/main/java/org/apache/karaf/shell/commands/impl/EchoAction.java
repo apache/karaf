@@ -18,15 +18,15 @@ package org.apache.karaf.shell.commands.impl;
 
 import java.util.List;
 
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.console.AbstractAction;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 
 @Command(scope = "shell", name = "echo", description="Echoes or prints arguments to STDOUT.")
 @Service
-public class EchoAction extends AbstractAction
+public class EchoAction implements Action
 {
     @Option(name = "-n", aliases = {}, description = "Do not print the trailing newline character", required = false, multiValued = false)
     private boolean noTrailingNewline = false;
@@ -34,7 +34,8 @@ public class EchoAction extends AbstractAction
     @Argument(index = 0, name = "arguments", description="Arguments to display separated by whitespaces", required = false, multiValued = true)
     private List<String> args;
 
-    protected Object doExecute() throws Exception {
+    @Override
+    public Object execute() throws Exception {
         if (args != null) {
             boolean first = true;
             for (String arg : args) {

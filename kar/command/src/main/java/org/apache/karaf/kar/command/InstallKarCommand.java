@@ -16,21 +16,27 @@
  */
 package org.apache.karaf.kar.command;
 
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.kar.KarService;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 
 import java.net.URI;
 
 @Command(scope = "kar", name = "install", description = "Installs a KAR file.")
 @Service
-public class InstallKarCommand extends KarCommandSupport {
-    
+public class InstallKarCommand implements Action {
+
     @Argument(index = 0, name = "url", description = "The URL of the KAR file to install.", required = true, multiValued = false)
     private String url;
-    
-    public Object doExecute() throws Exception {
-        this.getKarService().install(new URI(url));
+
+    @Reference
+    private KarService karService;
+
+    public Object execute() throws Exception {
+        karService.install(new URI(url));
         return null;
     }
     

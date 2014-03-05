@@ -16,22 +16,29 @@
  */
 package org.apache.karaf.kar.command;
 
+import org.apache.karaf.kar.KarService;
 import org.apache.karaf.kar.command.completers.KarCompleter;
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Completer;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Completion;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 
 @Command(scope = "kar", name = "uninstall", description = "Uninstall a KAR file.")
 @Service
-public class UninstallKarCommand extends KarCommandSupport {
+public class UninstallKarCommand implements Action {
 
     @Argument(index = 0, name = "name", description = "The name of the KAR file to uninstall.", required = true, multiValued = false)
-    @Completer(KarCompleter.class)
+    @Completion(KarCompleter.class)
     private String name;
 
-    public Object doExecute() throws Exception {
-        this.getKarService().uninstall(name);
+    @Reference
+    private KarService karService;
+
+    @Override
+    public Object execute() throws Exception {
+        karService.uninstall(name);
         return null;
     }
     

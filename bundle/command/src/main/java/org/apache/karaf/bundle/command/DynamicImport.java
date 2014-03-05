@@ -16,9 +16,8 @@
  */
 package org.apache.karaf.bundle.command;
 
-import org.apache.karaf.bundle.core.BundleService;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.osgi.framework.Bundle;
 
 /**

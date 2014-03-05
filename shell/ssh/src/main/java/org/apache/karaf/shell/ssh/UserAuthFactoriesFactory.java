@@ -23,8 +23,6 @@ import org.apache.sshd.server.UserAuth;
 import org.apache.sshd.server.auth.UserAuthKeyboardInteractive;
 import org.apache.sshd.server.auth.UserAuthPassword;
 import org.apache.sshd.server.auth.UserAuthPublicKey;
-import org.osgi.service.blueprint.container.ComponentDefinitionException;
-import org.osgi.service.blueprint.container.ReifiedType;
 
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
@@ -34,7 +32,7 @@ import java.util.Set;
 
 /**
  * <p>A factory for user authentication factories to set on
- * {@link SshServer#setUserAuthFactories(java.util.List)} based on a
+ * {@link org.apache.sshd.SshServer#setUserAuthFactories(java.util.List)} based on a
  * comma-separated list of authentication methods.</p>
  *
  * <p>Currently, the following methods are supported:</p>
@@ -55,33 +53,6 @@ public class UserAuthFactoriesFactory {
     private Set<String> methodSet;
     private List<NamedFactory<UserAuth>> factories;
 
-    public static Converter getConverter() {
-        return new Converter();
-    }
-
-    /**
-     * This blueprint type converter silently converts instances of
-     * <code>Class X implements NameFactory</code>
-     * to the reified type <code>cNameFactory</code>
-     * and therefore helps blueprint to set the returned factories on
-     * {@link SshServerAction#setUserAuthFactories(List)} without complaining
-     * about type conversion errors.
-     */
-    public static class Converter implements org.osgi.service.blueprint.container.Converter {
-
-        public boolean canConvert(Object sourceObject, ReifiedType targetType) {
-            return NamedFactory.class.isAssignableFrom(sourceObject.getClass())
-                    && UserAuth.class.equals(((ParameterizedType) sourceObject.getClass().getGenericInterfaces()[0]).getActualTypeArguments()[0])
-                    && NamedFactory.class.equals(targetType.getRawClass())
-                    && UserAuth.class.equals(targetType.getActualTypeArgument(0).getRawClass());
-        }
-
-        public Object convert(Object sourceObject, ReifiedType targetType) throws Exception {
-            return sourceObject;
-        }
-
-    }
-
     public void setAuthMethods(String methods) {
         this.methodSet = new HashSet<String>();
         this.factories = new ArrayList<NamedFactory<UserAuth>>();
@@ -94,7 +65,7 @@ public class UserAuthFactoriesFactory {
             } else if (PUBLICKEY_METHOD.equals(am)) {
                 this.factories.add(new UserAuthPublicKey.Factory());
             } else {
-                throw new ComponentDefinitionException("Invalid authentication method " + am + " specified");
+                throw new IllegalArgumentException("Invalid authentication method " + am + " specified");
             }
             this.methodSet.add(am);
         }

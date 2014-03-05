@@ -23,12 +23,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.apache.karaf.instance.command.*;
-import org.apache.karaf.shell.commands.Action;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.basic.DefaultActionPreparator;
+import org.apache.karaf.instance.command.ChangeOptsCommand;
+import org.apache.karaf.instance.command.ChangeRmiRegistryPortCommand;
+import org.apache.karaf.instance.command.ChangeRmiServerPortCommand;
 import org.apache.karaf.instance.command.ChangeSshPortCommand;
+import org.apache.karaf.instance.command.CloneCommand;
+import org.apache.karaf.instance.command.CreateCommand;
+import org.apache.karaf.instance.command.DestroyCommand;
+import org.apache.karaf.instance.command.InstanceCommandSupport;
+import org.apache.karaf.instance.command.ListCommand;
+import org.apache.karaf.instance.command.RenameCommand;
+import org.apache.karaf.instance.command.StartCommand;
+import org.apache.karaf.instance.command.StatusCommand;
+import org.apache.karaf.instance.command.StopCommand;
 import org.apache.karaf.instance.core.internal.InstanceServiceImpl;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.impl.action.command.DefaultActionPreparator;
 import org.fusesource.jansi.AnsiConsole;
 
 public class Execute {
@@ -136,7 +147,7 @@ public class Execute {
         InstanceServiceImpl instanceService = new InstanceServiceImpl();
         instanceService.setStorageLocation(storageFile);
         command.setInstanceService(instanceService);
-        command.execute(null);
+        command.execute();
     }
 
     private static void listCommands() {

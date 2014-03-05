@@ -28,18 +28,22 @@ import java.net.MalformedURLException;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.console.AbstractAction;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Concatenate and print files and/or URLs.
  */
 @Command(scope = "shell", name = "cat", description = "Displays the content of a file or URL.")
 @Service
-public class CatAction extends AbstractAction {
+public class CatAction implements Action {
+
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     @Option(name = "-n", aliases = {}, description = "Number the output lines, starting at 1.", required = false, multiValued = false)
     private boolean displayLineNumbers;
@@ -50,7 +54,8 @@ public class CatAction extends AbstractAction {
     @Argument(index = 0, name = "paths or urls", description = "A list of file paths or urls to display separated by whitespace (use - for STDIN)", required = false, multiValued = true)
     private List<String> paths;
 
-    protected Object doExecute() throws Exception {
+    @Override
+    public Object execute() throws Exception {
         if (stdin) {
             paths = Collections.singletonList("-");
         }

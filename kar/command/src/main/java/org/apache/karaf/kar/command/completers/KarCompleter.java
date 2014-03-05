@@ -16,13 +16,15 @@
  */
 package org.apache.karaf.kar.command.completers;
 
-import org.apache.karaf.kar.KarService;
-import org.apache.karaf.shell.console.Completer;
-import org.apache.karaf.shell.console.completer.StringsCompleter;
-import org.apache.karaf.shell.inject.Reference;
-import org.apache.karaf.shell.inject.Service;
-
 import java.util.List;
+
+import org.apache.karaf.kar.KarService;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.api.console.CommandLine;
+import org.apache.karaf.shell.api.console.Completer;
+import org.apache.karaf.shell.api.console.Session;
+import org.apache.karaf.shell.support.completers.StringsCompleter;
 
 /**
  * Completer on all installed KAR files.
@@ -33,7 +35,7 @@ public class KarCompleter implements Completer {
     @Reference
     private KarService karService;
     
-    public int complete(String buffer, int cursor, @SuppressWarnings("rawtypes") List candidates) {
+    public int complete(Session session, CommandLine commandLine, List<String> candidates) {
         StringsCompleter delegate = new StringsCompleter();
         try {
             for (String karName : karService.list()) {
@@ -42,15 +44,7 @@ public class KarCompleter implements Completer {
         } catch (Exception e) {
             // ignore
         }
-        return delegate.complete(buffer, cursor, candidates);
-    }
-    
-    public void setKarService(KarService karService) {
-        this.karService = karService;
-    }
-    
-    public KarService getKarService() {
-        return this.karService;
+        return delegate.complete(session, commandLine, candidates);
     }
     
 }

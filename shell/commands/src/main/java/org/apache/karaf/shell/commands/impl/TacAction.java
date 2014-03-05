@@ -25,10 +25,12 @@ import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.console.AbstractAction;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.console.Session;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 
 /**
  * Grab the text from the standard input and return it as a string.
@@ -36,12 +38,16 @@ import org.apache.karaf.shell.inject.Service;
  */
 @Command(scope = "shell", name = "tac", description = "Captures the STDIN and returns it as a string. Optionally writes the content to a file.")
 @Service
-public class TacAction extends AbstractAction {
+public class TacAction implements Action {
 
     @Option(name = "-f", aliases = {}, description = "Outputs the content to the given file", required = false, multiValued = false)
     private File file;
 
-    protected Object doExecute() throws Exception {
+    @Reference
+    Session session;
+
+    @Override
+    public Object execute() throws Exception {
         StringWriter sw = new StringWriter();
         Writer[] writers;
         if (file != null) {

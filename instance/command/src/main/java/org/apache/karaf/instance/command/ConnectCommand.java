@@ -21,11 +21,13 @@ package org.apache.karaf.instance.command;
 import java.util.List;
 
 import org.apache.karaf.instance.command.completers.InstanceCompleter;
-import org.apache.karaf.shell.commands.Completer;
-import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Completion;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.api.console.Session;
 
 @Command(scope = "instance", name = "connect", description = "Connects to an existing container instance.")
 @Service
@@ -38,11 +40,14 @@ public class ConnectCommand extends InstanceCommandSupport {
     private String password;
 
     @Argument(index = 0, name="name", description="The name of the container instance", required = true, multiValued = false)
-    @Completer(InstanceCompleter.class)
+    @Completion(InstanceCompleter.class)
     private String instance = null;
 
     @Argument(index = 1, name = "command", description = "Optional command to execute", required = false, multiValued = true)
     private List<String> command;
+
+    @Reference
+    Session session;
 
     protected Object doExecute() throws Exception {
         String cmdStr = "";

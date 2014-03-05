@@ -16,23 +16,24 @@
  */
 package org.apache.karaf.shell.commands.impl;
 
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.console.AbstractAction;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 
 /**
  * A command to clear the console buffer
  */
 @Command(scope = "shell", name = "clear", description = "Clears the console buffer.")
 @Service
-public class ClearAction extends AbstractAction {
+public class ClearAction implements Action {
 
-	protected Object doExecute() throws Exception {
+    @Override
+    public Object execute() throws Exception {
 		System.out.print("\33[2J");
 		System.out.flush();
 		System.out.print("\33[1;1H");
 		System.out.flush();
-		return null;
-	}	
+        return null;
+	}
 
 }

@@ -25,9 +25,9 @@ import java.util.List;
 import org.apache.karaf.bundle.command.wikidoc.AnsiPrintingWikiVisitor;
 import org.apache.karaf.bundle.command.wikidoc.WikiParser;
 import org.apache.karaf.bundle.command.wikidoc.WikiVisitor;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.inject.Service;
-import org.apache.karaf.shell.util.ShellUtil;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.support.ShellUtil;
 import org.osgi.framework.Bundle;
 
 @Command(scope = "bundle", name = "info", description = "Displays detailed information of a given bundles.")

@@ -26,7 +26,6 @@ import java.security.KeyPair;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.felix.service.command.CommandSession;
 import org.apache.sshd.agent.SshAgent;
 import org.apache.sshd.agent.SshAgentFactory;
 import org.apache.sshd.agent.SshAgentServer;
@@ -38,7 +37,6 @@ import org.apache.sshd.common.Channel;
 import org.apache.sshd.common.NamedFactory;
 import org.apache.sshd.common.Session;
 import org.apache.sshd.server.session.ServerSession;
-import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,16 +46,6 @@ public class KarafAgentFactory implements SshAgentFactory {
 
     private final Map<String, AgentServerProxy> proxies = new ConcurrentHashMap<String, AgentServerProxy>();
     private final Map<String, SshAgent> locals = new ConcurrentHashMap<String, SshAgent>();
-
-    private BundleContext bundleContext;
-
-    public BundleContext getBundleContext() {
-        return bundleContext;
-    }
-
-    public void setBundleContext(BundleContext bundleContext) {
-        this.bundleContext = bundleContext;
-    }
 
     public NamedFactory<Channel> getChannelForwardingFactory() {
         return new ChannelAgentForwarding.Factory();
@@ -97,11 +85,11 @@ public class KarafAgentFactory implements SshAgentFactory {
         };
     }
 
-    public void registerCommandSession(CommandSession session) {
+    public void registerSession(org.apache.karaf.shell.api.console.Session session) {
         try {
             String user = (String) session.get("USER");
             SshAgent agent = new AgentImpl();
-            URL url = bundleContext.getBundle().getResource("karaf.key");
+            URL url = getClass().getClassLoader().getResource("karaf.key");
             InputStream is = url.openStream();
             ObjectInputStream r = new ObjectInputStream(is);
             KeyPair keyPair = (KeyPair) r.readObject();
@@ -114,7 +102,7 @@ public class KarafAgentFactory implements SshAgentFactory {
         }
     }
 
-    public void unregisterCommandSession(CommandSession session) {
+    public void unregisterSession(org.apache.karaf.shell.api.console.Session session) {
         try {
             if (session != null && session.get(SshAgent.SSH_AUTHSOCKET_ENV_NAME) != null) {
                 String agentId = (String) session.get(SshAgent.SSH_AUTHSOCKET_ENV_NAME);

@@ -17,17 +17,18 @@
 package org.apache.karaf.features.command;
 
 import org.apache.karaf.features.FeaturesService;
-import org.apache.karaf.shell.console.OsgiCommandSupport;
-import org.apache.karaf.shell.inject.Reference;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
 
-public abstract class FeaturesCommandSupport extends OsgiCommandSupport {
+public abstract class FeaturesCommandSupport implements Action {
 
     @Reference
     private FeaturesService featuresService;
 
-    protected Object doExecute() throws Exception {
+    @Override
+    public Object execute() throws Exception {
         if (featuresService == null) {
-            featuresService = getService(FeaturesService.class);
+            throw new IllegalStateException("FeaturesService not found");
         }
         doExecute(featuresService);
         return null;

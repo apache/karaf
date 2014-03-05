@@ -16,14 +16,15 @@
  */
 package org.apache.karaf.bundle.command;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-import org.apache.felix.service.command.Function;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.console.Completer;
-import org.apache.karaf.shell.inject.Service;
-import org.apache.karaf.shell.util.ShellUtil;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.support.ShellUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
@@ -40,6 +41,11 @@ public class ListBundleServices extends BundlesCommand {
     
     @Option(name = "-p", aliases = {}, description = "Shows the properties of the services", required = false, multiValued = false)
     boolean showProperties = false;
+
+    Set<String> hidden = new HashSet<String>(Arrays.asList(new String[] {
+        "org.apache.felix.service.command.Function",
+        "org.apache.karaf.shell.console.Completer"
+    }));
     
     public ListBundleServices() {
         super(true);
@@ -94,8 +100,7 @@ public class ListBundleServices extends BundlesCommand {
 
     private boolean isCommandOrCompleter(String[] objectClasses) {
         for (String objectClass : objectClasses) {
-            if (objectClass.equals(Function.class.getName())
-                    || objectClass.equals(Completer.class.getName())) {
+            if (hidden.contains(objectClass)) {
                 return true;
             }
         }

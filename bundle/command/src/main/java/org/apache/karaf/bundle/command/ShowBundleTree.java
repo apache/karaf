@@ -16,8 +16,6 @@
  */
 package org.apache.karaf.bundle.command;
 
-import static java.lang.String.format;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -31,8 +29,8 @@ import org.apache.felix.utils.version.VersionRange;
 import org.apache.felix.utils.version.VersionTable;
 import org.apache.karaf.bundle.command.bundletree.Node;
 import org.apache.karaf.bundle.command.bundletree.Tree;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.framework.wiring.BundleCapability;
@@ -42,6 +40,8 @@ import org.osgi.framework.wiring.BundleWire;
 import org.osgi.framework.wiring.BundleWiring;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static java.lang.String.format;
 
 /**
  * Command for showing the full tree of bundles that have been used to resolve

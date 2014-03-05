@@ -16,15 +16,19 @@
  */
 package org.apache.karaf.shell.commands.impl;
 
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.console.AbstractAction;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Command(scope = "shell", name = "sleep", description = "Sleeps for a bit then wakes up.")
 @Service
-public class SleepAction extends AbstractAction {
+public class SleepAction implements Action {
+
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     @Argument(index = 0, name = "duration", description = "The amount of time to sleep. The default time unit is millisecond, use -s option to use second instead.", required = true, multiValued = false)
     private long time = -1;
@@ -32,7 +36,8 @@ public class SleepAction extends AbstractAction {
     @Option(name = "-s", aliases = { "--second" }, description = "Use a duration time in seconds instead of milliseconds.", required = false, multiValued = false)
     private boolean second = false;
 
-    protected Object doExecute() throws Exception {
+    @Override
+    public Object execute() throws Exception {
         if (second) {
             log.info("Sleeping for {} second(s)", time);
             time = time * 1000;

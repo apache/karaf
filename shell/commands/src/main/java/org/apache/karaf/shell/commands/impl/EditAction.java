@@ -27,19 +27,20 @@ import java.net.URLConnection;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
-import jline.Terminal;
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.console.AbstractAction;
-import org.apache.karaf.shell.inject.Reference;
-import org.apache.karaf.shell.inject.Service;
+import jline.TerminalSupport;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.console.Terminal;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.util.StreamUtils;
 import org.jledit.ConsoleEditor;
 import org.jledit.EditorFactory;
 
 @Command(scope = "shell", name = "edit", description = "Calls a text editor.")
 @Service
-public class EditAction extends AbstractAction {
+public class EditAction implements Action {
 
     private final Pattern URL_PATTERN = Pattern.compile("[^: ]+:[^ ]+");
 
@@ -49,8 +50,11 @@ public class EditAction extends AbstractAction {
     @Reference
     private EditorFactory editorFactory;
 
+    @Reference
+    Terminal terminal;
+
     @Override
-    protected Object doExecute() throws Exception {
+    public Object execute() throws Exception {
         URLConnection connection = null;
         InputStream is = null;
         OutputStream os = null;
@@ -137,6 +141,7 @@ public class EditAction extends AbstractAction {
         if (os != null) {
             StreamUtils.close(os);
         }
+
         return null;
     }
 
@@ -146,13 +151,22 @@ public class EditAction extends AbstractAction {
      * @return
      * @throws Exception
      */
-    private Terminal getTerminal() throws Exception {
-        Object terminalObject = session.get(".jline.terminal");
-        if (terminalObject instanceof Terminal) {
-            return (Terminal) terminalObject;
+    private jline.Terminal getTerminal() throws Exception {
+        try {
+            return (jline.Terminal) terminal.getClass().getMethod("getTerminal").invoke(terminal);
+        } catch (Throwable t) {
+            return new TerminalSupport(true) {
+                @Override
+                public int getWidth() {
+                    return terminal.getWidth();
+                }
 
+                @Override
+                public int getHeight() {
+                    return terminal.getHeight();
+                }
+            };
         }
-        throw new IllegalStateException("Could not get Terminal from CommandSession.");
     }
 
     /**

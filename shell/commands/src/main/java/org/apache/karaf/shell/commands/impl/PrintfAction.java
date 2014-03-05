@@ -18,14 +18,14 @@ package org.apache.karaf.shell.commands.impl;
 
 import java.util.Collection;
 
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.console.AbstractAction;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 
 @Command(scope = "shell", name = "printf", description = "Formats and prints arguments.")
 @Service
-public class PrintfAction extends AbstractAction {
+public class PrintfAction implements Action {
 
     @Argument(index = 0, name = "format", description = "The format pattern to use", required = true, multiValued = false)
     private String format;
@@ -33,8 +33,10 @@ public class PrintfAction extends AbstractAction {
     @Argument(index = 1, name = "arguments", description = "The arguments for the given format pattern", required = true, multiValued = true)
     private Collection<Object> arguments = null;
 
-    protected Object doExecute() throws Exception {
+    @Override
+    public Object execute() throws Exception {
         System.out.printf(format, arguments.toArray());
         return null;
     }
+
 }

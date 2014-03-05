@@ -25,17 +25,21 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.console.AbstractAction;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Command(scope = "shell", name = "head", description = "Displays the first lines of a file.")
 @Service
-public class HeadAction extends AbstractAction {
+public class HeadAction implements Action {
 
     private static final int DEFAULT_NUMBER_OF_LINES = 10;
+
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     @Option(name = "-n", aliases = {}, description = "The number of lines to display, starting at 1.", required = false, multiValued = false)
     private int numberOfLines;
@@ -43,7 +47,8 @@ public class HeadAction extends AbstractAction {
     @Argument(index = 0, name = "paths or urls", description = "A list of file paths or urls to display separated by whitespaces.", required = false, multiValued = true)
     private List<String> paths;
 
-    protected Object doExecute() throws Exception {
+    @Override
+    public Object execute() throws Exception {
         //If no paths provided assume standar input
         if (paths == null || paths.size() == 0) {
             if (log.isDebugEnabled()) {

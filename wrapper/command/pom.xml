@@ -86,17 +86,11 @@
                             org.apache.karaf.wrapper,
                             javax.management,
                             javax.management.loading,
-                            org.apache.aries.blueprint,
-                            org.osgi.service.blueprint.container,
-                            org.osgi.service.blueprint.reflect,
-                            org.apache.felix.service.command,
-                            org.apache.karaf.shell.commands,
-                            org.apache.karaf.shell.console,
                             *
                         </Import-Package>
-                        <Private-Package>
-                            org.apache.karaf.wrapper.internal
-                        </Private-Package>
+                        <Karaf-Commands>
+                            org.apache.karaf.wrapper.commands
+                        </Karaf-Commands>
                     </instructions>
                 </configuration>
             </plugin>

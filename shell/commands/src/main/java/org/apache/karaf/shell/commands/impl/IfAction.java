@@ -16,18 +16,20 @@
  */
 package org.apache.karaf.shell.commands.impl;
 
-import org.apache.felix.service.command.Function;
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.console.AbstractAction;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.api.console.Function;
+import org.apache.karaf.shell.api.console.Session;
 
 /**
  * Execute a closure on a list of arguments.
  */
 @Command(scope = "shell", name = "if", description = "If/Then/Else block.")
 @Service
-public class IfAction extends AbstractAction {
+public class IfAction implements Action {
 
     @Argument(name = "condition", index = 0, multiValued = false, required = true, description = "The condition")
     Function condition;
@@ -38,8 +40,11 @@ public class IfAction extends AbstractAction {
     @Argument(name = "ifFalse", index = 2, multiValued = false, required = false, description = "The function to execute if the condition is false")
     Function ifFalse;
 
+    @Reference
+    Session session;
+
     @Override
-    protected Object doExecute() throws Exception {
+    public Object execute() throws Exception {
         Object result = condition.execute(session, null);
         if (isTrue(result)) {
             return ifTrue.execute(session, null);

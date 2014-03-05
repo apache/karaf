@@ -18,10 +18,10 @@ package org.apache.karaf.instance.command;
 
 import org.apache.karaf.instance.core.Instance;
 import org.apache.karaf.instance.core.InstanceService;
-import org.apache.karaf.shell.console.OsgiCommandSupport;
-import org.apache.karaf.shell.inject.Reference;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
 
-public abstract class InstanceCommandSupport extends OsgiCommandSupport {
+public abstract class InstanceCommandSupport implements Action {
 
     @Reference
     private InstanceService instanceService;
@@ -42,4 +42,10 @@ public abstract class InstanceCommandSupport extends OsgiCommandSupport {
         return i;
     }
 
+    @Override
+    public Object execute() throws Exception {
+        return doExecute();
+    }
+
+    protected abstract Object doExecute() throws Exception;
 }

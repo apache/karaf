@@ -17,31 +17,36 @@ package org.apache.karaf.bundle.command;
  * limitations under the License.
  */
 
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.console.OsgiCommandSupport;
-import org.apache.karaf.shell.inject.Service;
-import org.apache.karaf.shell.util.ShellUtil;
-import org.osgi.framework.wiring.BundleWiring;
-import org.osgi.framework.Bundle;
-
 import java.util.Collection;
-import java.util.List;
+
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.support.ShellUtil;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.wiring.BundleWiring;
 
 @Command(scope = "bundle", name = "find-class", description = "Locates a specified class in any deployed bundle")
 @Service
-public class FindClass extends OsgiCommandSupport {
+public class FindClass implements Action {
 
     @Argument(index = 0, name = "className", description = "Class name or partial class name to be found", required = true, multiValued = false)
     String className;
 
-    protected Object doExecute() throws Exception {
+    @Reference
+    BundleContext bundleContext;
+
+    @Override
+    public Object execute() throws Exception {
         findResource();
         return null;
     }
 
     protected void findResource() {
-        Bundle[] bundles = getBundleContext().getBundles();
+        Bundle[] bundles = bundleContext.getBundles();
         String filter = "*" + className + "*";
         for (Bundle bundle:bundles){
             BundleWiring wiring = bundle.adapt(BundleWiring.class);

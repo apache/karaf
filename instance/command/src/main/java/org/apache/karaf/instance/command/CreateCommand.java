@@ -20,12 +20,12 @@ import java.util.List;
 
 import org.apache.karaf.features.command.completers.AllFeatureCompleter;
 import org.apache.karaf.features.command.completers.InstalledRepoUriCompleter;
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Completer;
-import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.instance.core.InstanceSettings;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Completion;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 
 /**
  * Creates a new instance.
@@ -51,12 +51,12 @@ public class CreateCommand extends InstanceCommandSupport
     
     @Option(name = "-f", aliases = {"--feature"},
             description = "Initial features. This option can be specified multiple times to enable multiple initial features", required = false, multiValued = true)
-    @Completer(AllFeatureCompleter.class)
+    @Completion(AllFeatureCompleter.class)
     List<String> features;
     
     @Option(name = "-furl", aliases = {"--featureURL"}, 
             description = "Additional feature descriptor URLs. This option can be specified multiple times to add multiple URLs", required = false, multiValued = true)
-    @Completer(InstalledRepoUriCompleter.class)
+    @Completion(InstalledRepoUriCompleter.class)
     List<String> featureURLs;
 
     @Option(name = "-v", aliases = {"--verbose"}, description = "Display actions performed by the command (disabled by default)", required = false, multiValued = false)

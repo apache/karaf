@@ -44,7 +44,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.karaf.shell</groupId>
-            <artifactId>org.apache.karaf.shell.console</artifactId>
+            <artifactId>org.apache.karaf.shell.core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.karaf.bundle</groupId>
@@ -107,6 +107,7 @@
                             org.apache.felix.utils.version;-split-package:=merge-first,
                             org.apache.felix.utils.manifest;-split-package:=merge-first
                         </Private-Package>
+                        <Karaf-Commands>org.apache.karaf.bundle.command.*</Karaf-Commands>
                     </instructions>
                 </configuration>
             </plugin>

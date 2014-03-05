@@ -29,30 +29,27 @@ import java.util.Map;
 
 import javax.security.auth.Subject;
 
-import jline.Terminal;
-
-import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.jaas.modules.JaasHelper;
-import org.apache.karaf.shell.console.Console;
-import org.apache.karaf.shell.console.factory.ConsoleFactory;
-import org.apache.karaf.shell.util.ShellUtil;
+import org.apache.karaf.shell.api.console.Session;
+import org.apache.karaf.shell.api.console.SessionFactory;
+import org.apache.karaf.shell.api.console.Terminal;
+import org.apache.karaf.shell.support.ShellUtil;
 import org.apache.sshd.common.Factory;
 import org.apache.sshd.server.Command;
 import org.apache.sshd.server.Environment;
 import org.apache.sshd.server.ExitCallback;
 import org.apache.sshd.server.SessionAware;
 import org.apache.sshd.server.session.ServerSession;
-import org.osgi.service.blueprint.container.ReifiedType;
 
 /**
  * SSHD {@link org.apache.sshd.server.Command} factory which provides access to
  * Shell.
  */
 public class ShellFactoryImpl implements Factory<Command> {
-    private ConsoleFactory consoleFactory;
+    private SessionFactory sessionFactory;
 
-    public ShellFactoryImpl(ConsoleFactory consoleFactory) {
-        this.consoleFactory = consoleFactory;
+    public ShellFactoryImpl(SessionFactory sessionFactory) {
+        this.sessionFactory = sessionFactory;
     }
 
     public Command create() {
@@ -106,15 +103,14 @@ public class ShellFactoryImpl implements Factory<Command> {
                 if (encoding != null && encoding.indexOf('.') > 0) {
                     encoding = encoding.substring(encoding.indexOf('.') + 1);
                 }
-                final Console console = consoleFactory.create(in,
+                final Session session = sessionFactory.create(in,
                         lfToCrLfPrintStream(out), lfToCrLfPrintStream(err), terminal, encoding, destroyCallback);
-                final CommandSession session = console.getSession();
                 for (Map.Entry<String, String> e : env.getEnv().entrySet()) {
                     session.put(e.getKey(), e.getValue());
                 }
                 JaasHelper.doAs(subject, new PrivilegedAction<Object>() {
                     public Object run() {
-                        new Thread(console, "Karaf ssh console user " + ShellUtil.getCurrentUserName()).start();
+                        new Thread(session, "Karaf ssh console user " + ShellUtil.getCurrentUserName()).start();
                         return null;
                     }
                 });
@@ -155,23 +151,6 @@ public class ShellFactoryImpl implements Factory<Command> {
             } catch (IOException e) {
                 // Ignore
             }
-        }
-    }
-
-    public static Converter getConverter() {
-        return new Converter();
-    }
-
-    public static class Converter implements org.osgi.service.blueprint.container.Converter {
-
-        public boolean canConvert(Object sourceObject, ReifiedType targetType) {
-            return ShellFactoryImpl.class.isAssignableFrom(sourceObject.getClass())
-                    && Factory.class.equals(targetType.getRawClass())
-                    && Command.class.equals(targetType.getActualTypeArgument(0).getRawClass());
-        }
-
-        public Object convert(Object sourceObject, ReifiedType targetType) throws Exception {
-            return sourceObject;
         }
     }
 

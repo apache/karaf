@@ -40,7 +40,7 @@
     <dependencies>
         <dependency>
             <groupId>org.apache.karaf.shell</groupId>
-            <artifactId>org.apache.karaf.shell.console</artifactId>
+            <artifactId>org.apache.karaf.shell.core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.karaf.shell</groupId>
@@ -113,6 +113,9 @@
                             org.apache.karaf.util;-split-package:=merge-first,
                             org.apache.karaf.shell.commands.impl*
                         </Private-Package>
+                        <Karaf-Commands>
+                            org.apache.karaf.shell.commands.impl
+                        </Karaf-Commands>
                     </instructions>
                 </configuration>
             </plugin>

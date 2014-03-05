@@ -17,16 +17,17 @@
 package org.apache.karaf.bundle.command;
 
 import org.apache.karaf.bundle.core.BundleService;
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.console.OsgiCommandSupport;
-import org.apache.karaf.shell.inject.Reference;
-import org.apache.karaf.shell.util.ShellUtil;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.support.ShellUtil;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 
 /**
  * Unique bundle command.
  */
-public abstract class BundleCommand extends OsgiCommandSupport {
+public abstract class BundleCommand implements Action {
 
     @Argument(index = 0, name = "id", description = "The bundle ID or name or name/version", required = true, multiValued = false)
     String id;
@@ -36,11 +37,14 @@ public abstract class BundleCommand extends OsgiCommandSupport {
     @Reference
     BundleService bundleService;
 
+    @Reference
+    BundleContext bundleContext;
+
     public BundleCommand(boolean defaultAllBundles) {
         this.defaultAllBundles = defaultAllBundles;
     }
 
-    protected Object doExecute() throws Exception {
+    public Object execute() throws Exception {
         return doExecute(true);
     }
 

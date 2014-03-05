@@ -28,17 +28,23 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.console.AbstractAction;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.console.Session;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * TODO
  */
 @Command(scope = "shell", name = "source", description = "Run a script")
 @Service
-public class SourceAction extends AbstractAction {
+public class SourceAction implements Action {
+
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     @Argument(index = 0, name = "script", description = "A URI pointing to the script", required = true, multiValued = false)
     private String script;
@@ -46,8 +52,11 @@ public class SourceAction extends AbstractAction {
     @Argument(index = 1, name = "args", description = "Arguments for the script", required = false, multiValued = true)
     private List<Object> args;
 
+    @Reference
+    Session session;
+
     @Override
-    protected Object doExecute() throws Exception {
+    public Object execute() throws Exception {
         BufferedReader reader = null;
         Object arg0 = session.get("0");
         try {
@@ -75,7 +84,7 @@ public class SourceAction extends AbstractAction {
                 session.put( Integer.toString(i+1), args.get(i) );
             }
 
-            return session.execute(w.toString());
+            session.execute(w.toString());
         } finally {
             for (int i = 0; args != null && i < args.size(); i++) {
                 session.put( Integer.toString(i+1), null );
@@ -89,5 +98,6 @@ public class SourceAction extends AbstractAction {
                 }
             }
         }
+        return null;
     }
 }

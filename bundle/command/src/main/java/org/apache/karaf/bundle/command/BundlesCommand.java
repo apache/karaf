@@ -19,13 +19,14 @@ package org.apache.karaf.bundle.command;
 import java.util.List;
 
 import org.apache.karaf.bundle.core.BundleService;
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.console.OsgiCommandSupport;
-import org.apache.karaf.shell.inject.Reference;
-import org.apache.karaf.shell.util.ShellUtil;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.support.ShellUtil;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 
-public abstract class BundlesCommand extends OsgiCommandSupport {
+public abstract class BundlesCommand implements Action {
 
     @Argument(index = 0, name = "ids", description = "The list of bundle (identified by IDs or name or name/version) separated by whitespaces", required = false, multiValued = true)
     List<String> ids;
@@ -33,13 +34,21 @@ public abstract class BundlesCommand extends OsgiCommandSupport {
     boolean defaultAllBundles = true;
 
     @Reference
+    BundleContext bundleContext;
+
+    @Reference
     BundleService bundleService;
     
     public BundlesCommand(boolean defaultAllBundles) {
         this.defaultAllBundles = defaultAllBundles;
     }
-    
-    protected Object doExecute() throws Exception {
+
+    public void setBundleContext(BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
+    }
+
+    @Override
+    public Object execute() throws Exception {
         doExecute(true);
         return null;
     }

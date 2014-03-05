@@ -19,13 +19,13 @@ package org.apache.karaf.features.command;
 import java.util.EnumSet;
 import java.util.List;
 
-import org.apache.karaf.features.command.completers.AvailableFeatureCompleter;
-import org.apache.karaf.shell.commands.Completer;
-import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.features.FeaturesService;
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.features.command.completers.AvailableFeatureCompleter;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Completion;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 
 @Command(scope = "feature", name = "install", description = "Installs a feature with the specified name and version.")
 @Service
@@ -34,7 +34,7 @@ public class InstallFeatureCommand extends FeaturesCommandSupport {
     private static String DEFAULT_VERSION = "0.0.0";
 
     @Argument(index = 0, name = "feature", description = "The name and version of the features to install. A feature id looks like name/version. The version is optional.", required = true, multiValued = true)
-    @Completer(AvailableFeatureCompleter.class)
+    @Completion(AvailableFeatureCompleter.class)
     List<String> features;
     @Option(name = "-c", aliases = "--no-clean", description = "Do not uninstall bundles on failure", required = false, multiValued = false)
     boolean noClean;

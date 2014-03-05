@@ -38,7 +38,7 @@ public class ListServicesTest {
     @Test
     public void listAllShort() throws Exception {
         System.out.println("listAllShort");
-        listServices.doExecute();
+        listServices.execute();
     }
 
     
@@ -46,7 +46,7 @@ public class ListServicesTest {
     public void listAllLong() throws Exception {
         System.out.println("listAllLong");
         listServices.ids = Arrays.asList(new String[]{"1", "2"});
-        listServices.doExecute();
+        listServices.execute();
     }
 
     @Test
@@ -54,7 +54,7 @@ public class ListServicesTest {
         System.out.println("listAllLongServicesUse");
         listServices.ids = Arrays.asList(new String[]{"1", "2"});
         listServices.inUse = true;
-        listServices.doExecute();
+        listServices.execute();
     }
 
 

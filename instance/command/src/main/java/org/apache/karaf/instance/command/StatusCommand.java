@@ -18,18 +18,17 @@ package org.apache.karaf.instance.command;
 
 import org.apache.karaf.instance.command.completers.InstanceCompleter;
 import org.apache.karaf.instance.core.Instance;
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Completer;
-import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Completion;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 
 @Command(scope = "instance", name = "status", description = "Check the current status of an instance.")
 @Service
 public class StatusCommand extends InstanceCommandSupport {
 
     @Argument(index = 0, name = "name", description = "The name of the instance", required = true, multiValued = false)
-    @Completer(InstanceCompleter.class)
+    @Completion(InstanceCompleter.class)
     private String name;
 
     protected Object doExecute() throws Exception {

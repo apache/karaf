@@ -19,11 +19,13 @@ package org.apache.karaf.shell.commands.impl;
 import java.lang.reflect.Method;
 import java.util.List;
 
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.console.AbstractAction;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Execute a Java standard application.
@@ -34,7 +36,9 @@ import org.apache.karaf.shell.inject.Service;
  */
 @Command(scope = "shell", name = "java", description = "Executes a Java standard application.")
 @Service
-public class JavaAction extends AbstractAction {
+public class JavaAction implements Action {
+
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     @Option(name = "-m", aliases = {"--method"}, description = "Invoke a named method", required = false, multiValued = false)
     private String methodName = "main";
@@ -45,7 +49,8 @@ public class JavaAction extends AbstractAction {
     @Argument(index = 1, name = "arguments", description="Arguments to pass to the method of the given class", required = false, multiValued = false)
     private List<String> args;
 
-    protected Object doExecute() throws Exception {
+    @Override
+    public Object execute() throws Exception {
         boolean info = log.isInfoEnabled();
 
         Class type = Thread.currentThread().getContextClassLoader().loadClass(className);

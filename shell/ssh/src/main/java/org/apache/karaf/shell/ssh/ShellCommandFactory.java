@@ -18,20 +18,20 @@
  */
 package org.apache.karaf.shell.ssh;
 
-import org.apache.felix.service.command.CommandProcessor;
+import org.apache.karaf.shell.api.console.SessionFactory;
 import org.apache.sshd.server.Command;
 import org.apache.sshd.server.CommandFactory;
 
 public class ShellCommandFactory implements CommandFactory {
 
-    private CommandProcessor commandProcessor;
+    private SessionFactory sessionFactory;
 
-    public void setCommandProcessor(CommandProcessor commandProcessor) {
-        this.commandProcessor = commandProcessor;
+    public ShellCommandFactory(SessionFactory sessionFactory) {
+        this.sessionFactory = sessionFactory;
     }
 
     public Command createCommand(String command) {
-        return new ShellCommand(commandProcessor, command);
+        return new ShellCommand(sessionFactory, command);
     }
 
 }

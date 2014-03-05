@@ -16,19 +16,25 @@
  */
 package org.apache.karaf.shell.commands.impl;
 
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.console.AbstractAction;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.console.Session;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 
 @Command(scope = "shell", name = "alias", description = "Create an alias to a command")
 @Service
-public class AliasAction extends AbstractAction {
+public class AliasAction implements Action {
 
     @Argument(index = 0, name = "command", description = "The command to alias, e.g. 'ldn = { log:display -n $args }'", required = true, multiValued = false)
     private String alias;
 
-    protected Object doExecute() throws Exception {
+    @Reference
+    private Session session;
+
+    @Override
+    public Object execute() throws Exception {
         session.execute(alias);
         return null;
     }

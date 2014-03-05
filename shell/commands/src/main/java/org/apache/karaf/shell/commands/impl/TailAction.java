@@ -25,15 +25,19 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.LinkedList;
 
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.console.AbstractAction;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Command(scope = "shell", name = "tail", description = "Displays the last lines of a file.")
 @Service
-public class TailAction extends AbstractAction {
+public class TailAction implements Action {
+
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     private static final int DEFAULT_NUMBER_OF_LINES = 10;
 
@@ -51,7 +55,8 @@ public class TailAction extends AbstractAction {
     @Argument(index = 0, name = "path or url", description = "A file path or url to display.", required = false, multiValued = false)
     private String path;
 
-    protected Object doExecute() throws Exception {
+    @Override
+    public Object execute() throws Exception {
         //If no paths provided assume standar input
         if (path == null || path.trim().length() == 0) {
             if (log.isDebugEnabled()) {
@@ -89,7 +94,6 @@ public class TailAction extends AbstractAction {
                 }
             }
         }
-
         return null;
     }
 

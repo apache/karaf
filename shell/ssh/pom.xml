@@ -40,7 +40,7 @@
     <dependencies>
         <dependency>
             <groupId>org.apache.karaf.shell</groupId>
-            <artifactId>org.apache.karaf.shell.console</artifactId>
+            <artifactId>org.apache.karaf.shell.core</artifactId>
         </dependency>
 
         <dependency>
@@ -101,22 +101,12 @@
                 <configuration>
                     <instructions>
                         <Import-Package>
-                            org.apache.aries.blueprint,
-                            org.osgi.service.blueprint.container,
-                            org.osgi.service.blueprint.reflect,
-                            org.apache.felix.service.command,
-                            org.apache.karaf.shell.commands,
-                            org.apache.karaf.shell.console,
-                            org.apache.mina.util,
-                            org.apache.sshd.server.keyprovider,
-                            org.apache.sshd.server.jaas,
-                            org.apache.sshd.server.sftp,
-                            !org.apache.sshd.server.sftp.SftpSubsystem,
                             *
                         </Import-Package>
                         <Private-Package>
                             org.apache.karaf.util
                         </Private-Package>
+                        <Bundle-Activator>org.apache.karaf.shell.ssh.Activator</Bundle-Activator>
                     </instructions>
                 </configuration>
             </plugin>

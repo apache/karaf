@@ -34,18 +34,22 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.console.AbstractAction;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Sort lines of text
  */
 @Command(scope = "shell", name = "sort", description = "Writes sorted concatenation of all files to standard output.")
 @Service
-public class SortAction extends AbstractAction {
+public class SortAction implements Action {
+
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     @Option(name = "-f", aliases = { "-ignore-case" }, description = "fold lower case to upper case characters", required = false, multiValued = false)
     private boolean caseInsensitive;
@@ -71,8 +75,8 @@ public class SortAction extends AbstractAction {
     @Argument(index = 0, name = "files", description = "A list of files separated by whitespaces", required = false, multiValued = true)
     private List<String> paths;
 
-
-    public Object doExecute() throws Exception {
+    @Override
+    public Object execute() throws Exception {
         if (paths != null && paths.size() > 0) {
             List<String> lines = new ArrayList<String>();
             for (String filename : paths) {

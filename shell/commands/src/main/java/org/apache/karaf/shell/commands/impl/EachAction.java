@@ -19,18 +19,20 @@ package org.apache.karaf.shell.commands.impl;
 import java.util.Collection;
 import java.util.Collections;
 
-import org.apache.felix.service.command.Function;
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.console.AbstractAction;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.api.console.Function;
+import org.apache.karaf.shell.api.console.Session;
 
 /**
  * Execute a closure on a list of arguments.
  */
 @Command(scope = "shell", name = "each", description = "Execute a closure on a list of arguments.")
 @Service
-public class EachAction extends AbstractAction {
+public class EachAction implements Action {
 
     @Argument(name = "values", index = 0, multiValued = false, required = true, description = "The collection of arguments to iterate on")
     Collection<Object> values;
@@ -38,8 +40,11 @@ public class EachAction extends AbstractAction {
     @Argument(name = "function", index = 1, multiValued = false, required = true, description = "The function to execute")
     Function function;
 
+    @Reference
+    Session session;
+
     @Override
-    protected Object doExecute() throws Exception {
+    public Object execute() throws Exception {
         for (Object v : values) {
             function.execute(session, Collections.singletonList(v));
         }

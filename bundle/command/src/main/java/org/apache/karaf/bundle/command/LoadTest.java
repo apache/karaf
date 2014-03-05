@@ -24,12 +24,12 @@ import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import jline.console.ConsoleReader;
-import org.apache.felix.service.command.CommandSession;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.console.OsgiCommandSupport;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.console.Session;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkEvent;
@@ -38,7 +38,7 @@ import org.osgi.framework.wiring.FrameworkWiring;
 
 @Command(scope = "bundle", name = "load-test", description = "Load test bundle lifecycle")
 @Service
-public class LoadTest extends OsgiCommandSupport {
+public class LoadTest implements Action {
 
     @Option(name = "--threads", description = "number of concurrent threads")
     int threads = 2;
@@ -55,12 +55,18 @@ public class LoadTest extends OsgiCommandSupport {
     @Option(name = "--excludes", description = "List of bundles (ids or symbolic names) to exclude")
     List<String> excludes = Arrays.asList("0", "org.ops4j.pax.url.mvn", "org.ops4j.pax.logging.pax-logging-api", "org.ops4j.pax.logging.pax-logging-service");
 
+    @Reference
+    Session session;
+
+    @Reference
+    BundleContext bundleContext;
+
     @Override
-    protected Object doExecute() throws Exception {
+    public Object execute() throws Exception {
         if (!confirm(session)) {
             return null;
         }
-        final BundleContext bundleContext = getBundleContext().getBundle(0).getBundleContext();
+        final BundleContext bundleContext = this.bundleContext.getBundle(0).getBundleContext();
         final FrameworkWiring wiring = bundleContext.getBundle().adapt(FrameworkWiring.class);
         final CountDownLatch latch = new CountDownLatch(threads);
         final Bundle[] bundles = bundleContext.getBundles();
@@ -159,11 +165,10 @@ public class LoadTest extends OsgiCommandSupport {
         return null;
     }
 
-    private boolean confirm(CommandSession session) throws IOException {
+    private boolean confirm(Session session) throws IOException {
         for (;;) {
-            ConsoleReader reader = (ConsoleReader) session.get(".jline.reader");
             String msg = "You are about to perform a start/stop/refresh load test on bundles.\nDo you wish to continue (yes/no): ";
-            String str = reader.readLine(msg);
+            String str = session.readLine(msg, null);
             if ("yes".equalsIgnoreCase(str)) {
                 return true;
             }

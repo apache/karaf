@@ -24,23 +24,34 @@ import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
 
-import jline.Terminal;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.console.AbstractAction;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.console.Session;
+import org.apache.karaf.shell.api.console.Terminal;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Command(scope = "shell", name = "more", description = "File pager.")
 @Service
-public class MoreAction extends AbstractAction {
+public class MoreAction implements Action {
+
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     @Option(name = "--lines", description = "stop after N lines")
     int lines;
 
+    @Reference
+    Terminal terminal;
+
+    @Reference
+    Session session;
+
     @Override
-    protected Object doExecute() throws Exception {
-        Terminal term = (Terminal) session.get(".jline.terminal");
-        if (term == null || !isTty(System.out)) {
+    public Object execute() throws Exception {
+        if (terminal == null || !isTty(System.out)) {
             BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
             String line;
             while ((line = reader.readLine()) != null) {
@@ -49,13 +60,13 @@ public class MoreAction extends AbstractAction {
             }
             return null;
         } else {
-            boolean echo = term.isEchoEnabled();
-            term.setEchoEnabled(false);
+            boolean echo = terminal.isEchoEnabled();
+            terminal.setEchoEnabled(false);
             try {
                 if (lines == 0) {
-                    lines = term.getHeight();
+                    lines = terminal.getHeight();
                 }
-                LineSplitter reader = new LineSplitter(new BufferedReader(new InputStreamReader(System.in)), term.getWidth());
+                LineSplitter reader = new LineSplitter(new BufferedReader(new InputStreamReader(System.in)), terminal.getWidth());
                 int count = 0;
                 int c;
                 do {
@@ -100,14 +111,13 @@ public class MoreAction extends AbstractAction {
                         }
                     }
                 } while (c != 'q');
-                return null;
             } catch (InterruptedException ie) {
-            	log.debug("Interupted by user");
-            	return null;
+            	log.debug("Interrupted by user");
             } finally {
-                term.setEchoEnabled(echo);
+                terminal.setEchoEnabled(echo);
             }
         }
+        return null;
     }
 
     public static class LineSplitter {
@@ -145,6 +155,18 @@ public class MoreAction extends AbstractAction {
             return current == session.getConsole();
         } catch (Throwable t) {
             return false;
+        }
+    }
+
+    /**
+     * This is for long running commands to be interrupted by ctrl-c
+     *
+     * @throws InterruptedException
+     */
+    public static void checkInterrupted() throws InterruptedException {
+        Thread.yield();
+        if (Thread.currentThread().isInterrupted()) {
+            throw new InterruptedException();
         }
     }
 

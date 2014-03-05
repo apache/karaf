@@ -31,26 +31,33 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.Callable;
 
-import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.InfoProvider;
-import org.apache.karaf.shell.console.OsgiCommandSupport;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.fusesource.jansi.Ansi;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 
 @Command(scope = "shell", name = "info", description = "Prints system information.")
 @Service
-public class InfoAction extends OsgiCommandSupport {
+public class InfoAction implements Action {
 
     private NumberFormat fmtI = new DecimalFormat("###,###", new DecimalFormatSymbols(Locale.ENGLISH));
     private NumberFormat fmtD = new DecimalFormat("###,##0.000", new DecimalFormatSymbols(Locale.ENGLISH));
 
-    protected Object doExecute() throws Exception {
+//    @Reference
+    List<InfoProvider> infoProviders;
+
+    @Override
+    public Object execute() throws Exception {
         int maxNameLen;
 
         RuntimeMXBean runtime = ManagementFactory.getRuntimeMXBean();
@@ -67,8 +74,10 @@ public class InfoAction extends OsgiCommandSupport {
         printValue("Karaf version", maxNameLen, System.getProperty("karaf.version"));
         printValue("Karaf home", maxNameLen, System.getProperty("karaf.home"));
         printValue("Karaf base", maxNameLen, System.getProperty("karaf.base"));
-        printValue("OSGi Framework", maxNameLen, bundleContext.getBundle(0).getSymbolicName() + " - " +
-                bundleContext.getBundle(0).getVersion());
+        String osgi = getOsgiFramework();
+        if (osgi != null) {
+            printValue("OSGi Framework", maxNameLen, osgi);
+        }
         System.out.println();
 
         System.out.println("JVM");
@@ -119,9 +128,7 @@ public class InfoAction extends OsgiCommandSupport {
 
         //Display Information from external information providers.
         Map<String, Map<Object, Object>> properties = new HashMap<String, Map<Object, Object>>();
-        List<InfoProvider> infoProviders = getAllServices(InfoProvider.class);
         if (infoProviders != null) {
-
             // dump all properties to Map, KARAF-425
             for (InfoProvider provider : infoProviders) {
                 if (!properties.containsKey(provider.getName())) {
@@ -149,7 +156,6 @@ public class InfoAction extends OsgiCommandSupport {
                 }
             }
         }
-
         return null;
     }
 
@@ -219,6 +225,23 @@ public class InfoAction extends OsgiCommandSupport {
             sb.append(' ');
         }
         return sb.toString();
+    }
+
+    String getOsgiFramework() {
+        try {
+            Callable<String> call = new Callable<String>() {
+                @Override
+                public String call() throws Exception {
+                    BundleContext context = FrameworkUtil.getBundle(getClass()).getBundleContext();
+                    Bundle sysBundle = context.getBundle(0);
+                    return sysBundle.getSymbolicName() + "-" + sysBundle.getVersion();
+                }
+            };
+            return call.call();
+        } catch (Throwable t) {
+            // We're not in OSGi, just safely return null
+            return null;
+        }
     }
 
 }

@@ -14,25 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.kar.command;
+package org.apache.karaf.shell.commands;
 
-import org.apache.karaf.kar.KarService;
-import org.apache.karaf.shell.console.OsgiCommandSupport;
-import org.apache.karaf.shell.inject.Reference;
+import java.util.Properties;
 
-public abstract class KarCommandSupport extends OsgiCommandSupport {
+/**
+ * A bundle can publish a service with this interface to offer some informations for the shell:info command
+ */
+public interface InfoProvider {
 
-    @Reference
-    private KarService karService;
-    
-    public KarService getKarService() {
-        return this.karService;
-    }
-    
-    public void setKarService(KarService karService) {
-        this.karService = karService;
-    }
-    
-    public abstract Object doExecute() throws Exception;
+    public String getName();
+
+    public Properties getProperties();
 
 }

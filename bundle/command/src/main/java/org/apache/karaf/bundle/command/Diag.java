@@ -20,9 +20,9 @@ import java.util.List;
 
 import org.apache.karaf.bundle.core.BundleInfo;
 import org.apache.karaf.bundle.core.BundleState;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.inject.Service;
-import org.apache.karaf.shell.util.ShellUtil;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.support.ShellUtil;
 import org.osgi.framework.Bundle;
 
 @Command(scope = "bundle", name = "diag", description = "Displays diagnostic information why a bundle is not Active")

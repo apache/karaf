@@ -16,23 +16,23 @@
  */
 package org.apache.karaf.features.command;
 
-import org.apache.karaf.features.command.completers.InstalledFeatureCompleter;
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.features.FeaturesService;
-import org.apache.karaf.shell.commands.Completer;
-import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.inject.Service;
-
 import java.util.EnumSet;
 import java.util.List;
+
+import org.apache.karaf.features.FeaturesService;
+import org.apache.karaf.features.command.completers.InstalledFeatureCompleter;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Completion;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 
 @Command(scope = "feature", name = "uninstall", description = "Uninstalls a feature with the specified name and version.")
 @Service
 public class UninstallFeatureCommand extends FeaturesCommandSupport {
 
     @Argument(index = 0, name = "features", description = "The name and version of the features to uninstall. A feature id looks like name/version. The version is optional.", required = true, multiValued = true)
-    @Completer(InstalledFeatureCompleter.class)
+    @Completion(InstalledFeatureCompleter.class)
     List<String> features;
 
     @Option(name = "-r", aliases = "--no-auto-refresh", description = "Do not automatically refresh bundles", required = false, multiValued = false)

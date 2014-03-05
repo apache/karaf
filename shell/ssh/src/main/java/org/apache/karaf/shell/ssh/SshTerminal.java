@@ -18,24 +18,16 @@
  */
 package org.apache.karaf.shell.ssh;
 
-import jline.TerminalSupport;
+import org.apache.karaf.shell.api.console.Terminal;
 import org.apache.sshd.server.Environment;
 
-public class SshTerminal extends TerminalSupport {
+public class SshTerminal implements Terminal {
 
     private Environment environment;
 
 
     public SshTerminal(Environment environment) {
-        super(true);
-        setAnsiSupported(true);
         this.environment = environment;
-    }
-
-    public void init() throws Exception {
-    }
-
-    public void restore() throws Exception {
     }
 
     @Override
@@ -46,7 +38,7 @@ public class SshTerminal extends TerminalSupport {
         } catch (Throwable t) {
             // Ignore
         }
-        return width > 0 ? width : super.getWidth();
+        return width > 0 ? width : 80;
     }
 
     @Override
@@ -57,7 +49,21 @@ public class SshTerminal extends TerminalSupport {
         } catch (Throwable t) {
             // Ignore
         }
-        return height > 0 ? height : super.getHeight();
+        return height > 0 ? height : 24;
     }
 
+    @Override
+    public boolean isAnsiSupported() {
+        return true;
+    }
+
+    @Override
+    public boolean isEchoEnabled() {
+        return true;
+    }
+
+    @Override
+    public void setEchoEnabled(boolean enabled) {
+        // TODO: how to disable echo over ssh ?
+    }
 }

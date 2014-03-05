@@ -26,17 +26,17 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.console.AbstractAction;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.fusesource.jansi.Ansi;
 
 
 @Command(scope = "shell", name="grep", description="Prints lines matching the given pattern.", detailedDescription="classpath:grep.txt")
 @Service
-public class GrepAction extends AbstractAction {
+public class GrepAction implements Action {
 
     public static enum ColorOption {
         never,
@@ -82,8 +82,8 @@ public class GrepAction extends AbstractAction {
     @Option(name = "-C", aliases = { "--context" }, description = "Print NUM lines of output context.  Places a line containing -- between contiguous groups of matches.", required = false, multiValued = false)
     private int context = 0;
 
-
-    protected Object doExecute() throws Exception {
+    @Override
+    public Object execute() throws Exception {
         if (after < 0) {
             after = context;
         }

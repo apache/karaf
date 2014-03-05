@@ -18,8 +18,8 @@ package org.apache.karaf.bundle.command;
 
 import java.util.List;
 
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.wiring.FrameworkWiring;
 
@@ -32,7 +32,7 @@ public class Resolve extends BundlesCommand {
     }
 
     protected void doExecute(List<Bundle> bundles) throws Exception {
-        FrameworkWiring wiring = getBundleContext().getBundle(0).adapt(FrameworkWiring.class);
+        FrameworkWiring wiring = bundleContext.getBundle(0).adapt(FrameworkWiring.class);
         wiring.resolveBundles(bundles == null || bundles.isEmpty() ? null : bundles);
     }
 

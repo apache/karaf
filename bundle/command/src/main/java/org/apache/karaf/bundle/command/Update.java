@@ -19,9 +19,9 @@ package org.apache.karaf.bundle.command;
 import java.io.InputStream;
 import java.net.URL;
 
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.osgi.framework.Bundle;
 
 @Command(scope = "bundle", name = "update", description = "Update bundle.")

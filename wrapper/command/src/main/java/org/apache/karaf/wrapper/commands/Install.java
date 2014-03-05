@@ -18,21 +18,22 @@ package org.apache.karaf.wrapper.commands;
 
 import java.io.File;
 
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.console.AbstractAction;
-import org.apache.karaf.shell.inject.Reference;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.wrapper.WrapperService;
-import org.apache.karaf.wrapper.internal.WrapperServiceImpl;
-import org.fusesource.jansi.Ansi;
+
+import static org.apache.karaf.shell.support.ansi.SimpleAnsi.INTENSITY_BOLD;
+import static org.apache.karaf.shell.support.ansi.SimpleAnsi.INTENSITY_NORMAL;
 
 /**
  * Installs the Karaf instance as a service in your operating system.
  */
 @Command(scope = "wrapper", name = "install", description = "Install the container as a system service in the OS.")
 @Service
-public class Install extends AbstractAction {
+public class Install implements Action {
 
 	@Option(name = "-n", aliases = { "--name" }, description = "The service name that will be used when installing the service. (Default: karaf)", required = false, multiValued = false)
 	private String name = "karaf";
@@ -47,13 +48,10 @@ public class Install extends AbstractAction {
 	private String startType = "AUTO_START";
 
     @Reference
-	private WrapperService wrapperService = new WrapperServiceImpl();
+	private WrapperService wrapperService;
 
-	public void setWrapperService(WrapperService wrapperService) {
-		this.wrapperService = wrapperService;
-	}
-
-	protected Object doExecute() throws Exception {
+    @Override
+	public Object execute() throws Exception {
         File[] wrapperPaths = wrapperService.install(name, displayName, description, startType);
 
         String os = System.getProperty("os.name", "Unknown");
@@ -67,7 +65,7 @@ public class Install extends AbstractAction {
         System.out.println("");
         if (os.startsWith("Win")) {
             System.out.println("");
-            System.out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("MS Windows system detected:").a(Ansi.Attribute.RESET).toString());
+            System.out.println(INTENSITY_BOLD + "MS Windows system detected:" + INTENSITY_NORMAL);
             System.out.println("To install the service, run: ");
             System.out.println("  C:> " + serviceFile.getPath() + " install");
             System.out.println("");
@@ -82,7 +80,7 @@ public class Install extends AbstractAction {
             System.out.println("");
         } else if (os.startsWith("Mac OS X")) {
             System.out.println("");
-            System.out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("Mac OS X system detected:").a(Ansi.Attribute.RESET).toString());
+            System.out.println(INTENSITY_BOLD + "Mac OS X system detected:" + INTENSITY_NORMAL);
             System.out.println("to add bin/org.apache.karaf.KARAF as user service move this file into ~/Library/LaunchAgents/");  
             System.out.println("> mv bin/org.apache.karaf.KARAF.plist ~/Library/LaunchAgents/");
             System.out.println("");
@@ -110,7 +108,7 @@ public class Install extends AbstractAction {
 
             if (redhatRelease.exists()) {
                 System.out.println("");
-                System.out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("RedHat/Fedora/CentOS Linux system detected:").a(Ansi.Attribute.RESET).toString());
+                System.out.println(INTENSITY_BOLD + "RedHat/Fedora/CentOS Linux system detected:" + INTENSITY_NORMAL);
                 System.out.println("  To install the service:");
                 System.out.println("    $ ln -s " + serviceFile.getPath() + " /etc/init.d/");
                 System.out.println("    $ chkconfig " + serviceFile.getName() + " --add");
@@ -132,7 +130,7 @@ public class Install extends AbstractAction {
                 System.out.println("    $ rm /etc/init.d/" + serviceFile.getPath());
             } else if (debianVersion.exists()) {
                 System.out.println("");
-                System.out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("Ubuntu/Debian Linux system detected:").a(Ansi.Attribute.RESET).toString());
+                System.out.println(INTENSITY_BOLD + "Ubuntu/Debian Linux system detected:" + INTENSITY_NORMAL);
                 System.out.println("  To install the service:");
                 System.out.println("    $ ln -s " + serviceFile.getPath() + " /etc/init.d/");
                 System.out.println("");
@@ -152,7 +150,7 @@ public class Install extends AbstractAction {
                 System.out.println("    $ rm /etc/init.d/" + serviceFile.getName());
             } else {
 				System.out.println("");
-                System.out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("On Redhat/Fedora/CentOS Systems:").a(Ansi.Attribute.RESET).toString());
+                System.out.println(INTENSITY_BOLD + "On Redhat/Fedora/CentOS Systems:" + INTENSITY_NORMAL);
 				System.out.println("  To install the service:");
 				System.out.println("    $ ln -s "+serviceFile.getPath()+" /etc/init.d/");
 				System.out.println("    $ chkconfig "+serviceFile.getName()+" --add");
@@ -174,7 +172,7 @@ public class Install extends AbstractAction {
 				System.out.println("    $ rm /etc/init.d/"+serviceFile.getName());
 
 				System.out.println("");
-                System.out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("On Ubuntu/Debian Systems:").a(Ansi.Attribute.RESET).toString());
+                System.out.println(INTENSITY_BOLD + "On Ubuntu/Debian Systems:" + INTENSITY_NORMAL);
 				System.out.println("  To install the service:");
 				System.out.println("    $ ln -s "+serviceFile.getPath()+" /etc/init.d/");
 				System.out.println("");

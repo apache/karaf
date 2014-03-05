@@ -23,8 +23,7 @@ import java.io.InputStream;
 import java.util.Arrays;
 
 import junit.framework.TestCase;
-import org.apache.karaf.shell.commands.basic.DefaultActionPreparator;
-import org.apache.karaf.shell.commands.impl.GrepAction;
+import org.apache.karaf.shell.impl.action.command.DefaultActionPreparator;
 
 public class GrepTest extends TestCase {
 
@@ -37,7 +36,7 @@ public class GrepTest extends TestCase {
             GrepAction grep = new GrepAction();
             DefaultActionPreparator preparator = new DefaultActionPreparator();
             preparator.prepare(grep, null, Arrays.<Object>asList("-C", "100", "2"));
-            grep.doExecute();
+            grep.execute();
         } finally {
             System.setIn(input);
         }

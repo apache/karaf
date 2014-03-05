@@ -16,11 +16,11 @@
  */
 package org.apache.karaf.shell.commands.impl;
 
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.console.AbstractAction;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -28,7 +28,7 @@ import java.util.Date;
 
 @Command(scope = "shell", name = "date", description = "Display the current time in the given FORMAT")
 @Service
-public class DateAction extends AbstractAction {
+public class DateAction implements Action {
 
     @Option(name = "-d", aliases = { "--date" }, description = "Display time described, not now", multiValued = false, required = false)
     private String date;
@@ -36,7 +36,8 @@ public class DateAction extends AbstractAction {
     @Argument(index = 0, name = "format", description = "Output format", multiValued = false, required = false)
     private String format;
 
-    protected Object doExecute() throws Exception {
+    @Override
+    public Object execute() throws Exception {
         Date d;
         if (date == null || date.equalsIgnoreCase("now")) {
             d = new Date();

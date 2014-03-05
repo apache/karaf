@@ -25,18 +25,18 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import jline.Terminal;
-
 import org.apache.felix.utils.manifest.Attribute;
 import org.apache.felix.utils.manifest.Clause;
 import org.apache.felix.utils.manifest.Directive;
 import org.apache.felix.utils.manifest.Parser;
 import org.apache.felix.utils.version.VersionRange;
 import org.apache.felix.utils.version.VersionTable;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.inject.Service;
-import org.apache.karaf.shell.util.ShellUtil;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.api.console.Terminal;
+import org.apache.karaf.shell.support.ShellUtil;
 import org.fusesource.jansi.Ansi;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
@@ -57,6 +57,9 @@ public class Headers extends BundlesCommand {
 
     @Option(name = "--indent", description = "Indentation method")
     int indent = -1;
+
+    @Reference
+    Terminal terminal;
     
     public Headers() {
         super(true);
@@ -228,8 +231,7 @@ public class Headers extends BundlesCommand {
     }
 
     protected int getTermWidth() {
-        Terminal term = (Terminal) session.get(".jline.terminal");
-        return term != null ? term.getWidth() : 80;
+        return terminal.getWidth();
 
     }
 

@@ -20,10 +20,12 @@ import java.util.List;
 
 import org.apache.karaf.instance.core.Instance;
 import org.apache.karaf.instance.core.InstanceService;
-import org.apache.karaf.shell.console.completer.StringsCompleter;
-import org.apache.karaf.shell.console.Completer;
-import org.apache.karaf.shell.inject.Reference;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.api.console.CommandLine;
+import org.apache.karaf.shell.api.console.Completer;
+import org.apache.karaf.shell.api.console.Session;
+import org.apache.karaf.shell.support.completers.StringsCompleter;
 
 /**
  * Displays a list of configured server instances for the instance commands.
@@ -39,12 +41,12 @@ public class InstanceCompleter implements Completer {
         this.instanceService = instanceService;
     }
 
-    public int complete(String buffer, int cursor, List candidates) {
+    public int complete(Session session, CommandLine commandLine, List<String> candidates) {
         StringsCompleter delegate = new StringsCompleter();
         for (Instance instance : instanceService.getInstances()) {
             delegate.getStrings().add(instance.getName());
         }
-        return delegate.complete(buffer, cursor, candidates);
+        return delegate.complete(session, commandLine, candidates);
     }
 
 }

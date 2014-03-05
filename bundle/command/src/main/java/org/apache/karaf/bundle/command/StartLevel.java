@@ -16,10 +16,11 @@
  */
 package org.apache.karaf.bundle.command;
 
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import jline.console.ConsoleReader;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.console.Session;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.startlevel.BundleStartLevel;
 
@@ -29,6 +30,9 @@ public class StartLevel extends BundleCommandWithConfirmation {
 
     @Argument(index = 1, name = "startLevel", description = "The bundle's new start level", required = false, multiValued = false)
     Integer level;
+
+    @Reference
+    Session session;
 
     protected void doExecute(Bundle bundle) throws Exception {
         // Get package instance service.
@@ -42,9 +46,8 @@ public class StartLevel extends BundleCommandWithConfirmation {
         }
         else if ((level < 50) && (bsl.getStartLevel() > 50) && !force){
             for (;;) {
-                ConsoleReader reader = (ConsoleReader) session.get(".jline.reader");
                 String msg = "You are about to designate bundle as a system bundle.  Do you wish to continue (yes/no): ";
-                String str = reader.readLine(msg);
+                String str = session.readLine(msg, null);
                 if ("yes".equalsIgnoreCase(str)) {
                     bsl.setStartLevel(level);
                     break;

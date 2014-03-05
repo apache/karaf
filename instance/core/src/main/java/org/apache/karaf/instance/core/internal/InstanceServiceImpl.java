@@ -94,6 +94,13 @@ public class InstanceServiceImpl implements InstanceService {
         Map<String, InstanceState> instances;
     }
 
+    public InstanceServiceImpl() {
+        String prop = System.getProperty("karaf.instances");
+        if (prop != null) {
+            storageLocation = new File(prop);
+        }
+    }
+
     public File getStorageLocation() {
         return storageLocation;
     }

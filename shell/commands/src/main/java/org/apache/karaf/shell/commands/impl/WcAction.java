@@ -16,18 +16,18 @@
  */
 package org.apache.karaf.shell.commands.impl;
 
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.console.AbstractAction;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 
 import java.io.*;
 import java.util.List;
 
 @Command(scope = "shell", name = "wc", description = "Print newline, word, and byte counts for each file.")
 @Service
-public class WcAction extends AbstractAction {
+public class WcAction implements Action {
 
     @Option(name = "-l", aliases = { "--lines" }, description = "Print the newline counts.", required = false, multiValued = false)
     private boolean lines;
@@ -45,7 +45,7 @@ public class WcAction extends AbstractAction {
     private List<File> files;
 
     @Override
-    protected Object doExecute() throws Exception {
+    public Object execute() throws Exception {
         this.setDefaultOptions();
 
         String outputString;
@@ -58,7 +58,6 @@ public class WcAction extends AbstractAction {
         }
 
         System.out.println(outputString);
-
         return null;
     }
 

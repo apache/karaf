@@ -26,26 +26,26 @@ public class ThreadsTest {
     public void testThreadlist() throws Exception {
         ThreadsAction action = new ThreadsAction();
         action.list = true;
-        action.doExecute();
+        action.execute();
     }
     
     @Test
     public void testThreadInfo() throws Exception {
         ThreadsAction action = new ThreadsAction();
         action.id = 1L;
-        action.doExecute();
+        action.execute();
     }
 
     @Test
     public void testThreadTree() throws Exception {
         ThreadsAction action = new ThreadsAction();
         action.tree = true;
-        action.doExecute();
+        action.execute();
     }
 
     @Test
     public void testThreadDump() throws Exception {
         ThreadsAction action = new ThreadsAction();
-        action.doExecute();
+        action.execute();
     }
 }

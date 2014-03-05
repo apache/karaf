@@ -19,13 +19,15 @@
 -->
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" default-activation="lazy">
 
+    <!--
     <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.2.0"
                     scan="org.apache.karaf.shell.commands.impl" />
 
    <bean id="commandCompleter" class="org.apache.karaf.shell.console.completer.CommandsCompleter"/>
    <service ref="commandCompleter" auto-export="all-classes"/>
+    -->
 
-   <bean class="org.osgi.util.tracker.BundleTracker" init-method="open"
+    <bean class="org.osgi.util.tracker.BundleTracker" init-method="open"
         destroy-method="close">
         <argument ref="blueprintBundleContext" />
         <argument value="32" />

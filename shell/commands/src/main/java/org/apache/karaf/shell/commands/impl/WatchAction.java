@@ -24,18 +24,22 @@ import java.io.PrintStream;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import org.apache.felix.service.command.CommandProcessor;
-import org.apache.felix.service.command.CommandSession;
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Completer;
-import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.console.AbstractAction;
-import org.apache.karaf.shell.console.completer.CommandsCompleter;
-import org.apache.karaf.shell.inject.Reference;
+
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Completion;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.api.console.Session;
+import org.apache.karaf.shell.api.console.SessionFactory;
+import org.apache.karaf.shell.support.ShellUtil;
+import org.apache.karaf.shell.support.completers.CommandsCompleter;
 
 @Command(scope = "shell", name = "watch", description = "Watches & refreshes the output of a command")
-public class WatchAction extends AbstractAction {
+@Service
+public class WatchAction implements Action {
 
     @Option(name = "-n", aliases = {"--interval"}, description = "The interval between executions of the command in seconds", required = false, multiValued = false)
     private long interval = 1;
@@ -44,25 +48,27 @@ public class WatchAction extends AbstractAction {
     private boolean append = false;
 
     @Argument(index = 0, name = "command", description = "The command to watch / refresh", required = true, multiValued = true)
-    @Completer(CommandsCompleter.class)
+    @Completion(CommandsCompleter.class)
     private String[] arguments;
 
     @Reference
-    CommandProcessor commandProcessor;
+    Session session;
+
+    @Reference
+    SessionFactory sessionFactory;
 
     private ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
 
     @Override
-    protected Object doExecute() throws Exception {
+    public Object execute() throws Exception {
         if (arguments == null || arguments.length == 0) {
             System.err.println("Argument expected");
-            return null;
         } else {
             StringBuilder command = new StringBuilder();
-            for (String arg:arguments) {
+            for (String arg : arguments) {
                 command.append(arg).append(" ");
             }
-            WatchTask watchTask = new WatchTask(commandProcessor, command.toString().trim());
+            WatchTask watchTask = new WatchTask(command.toString().trim());
             executorService.scheduleAtFixedRate(watchTask, 0, interval, TimeUnit.SECONDS);
             try {
                 session.getKeyboard().read();
@@ -70,23 +76,21 @@ public class WatchAction extends AbstractAction {
             } finally {
                 executorService.shutdownNow();
                 watchTask.close();
-                return null;
             }
         }
+        return null;
     }
 
     public class WatchTask implements Runnable {
 
-        private final CommandProcessor processor;
         private final String command;
 
-        CommandSession session;
+        Session session;
         ByteArrayOutputStream byteArrayOutputStream = null;
         PrintStream printStream = null;
         boolean doDisplay = true;
 
-        public WatchTask(CommandProcessor processor, String command) {
-            this.processor = processor;
+        public WatchTask(String command) {
             this.command = command;
         }
 
@@ -94,10 +98,15 @@ public class WatchAction extends AbstractAction {
             try {
                 byteArrayOutputStream = new ByteArrayOutputStream();
                 printStream = new PrintStream(byteArrayOutputStream);
-                session = commandProcessor.createSession(null, printStream, printStream);
-                session.put("SCOPE", "shell:bundle:*");
+                session = sessionFactory.create(null, printStream, printStream);
+                session.put(Session.SCOPE, WatchAction.this.session.get(Session.SCOPE));
+                session.put(Session.SUBSHELL, WatchAction.this.session.get(Session.SUBSHELL));
                 String output = "";
-                session.execute(command);
+                try {
+                    session.execute(command);
+                } catch (Exception e) {
+                    ShellUtil.logException(session, e);
+                }
                 output = byteArrayOutputStream.toString();
                 if (doDisplay) {
                     if (!append) {
@@ -130,11 +139,4 @@ public class WatchAction extends AbstractAction {
         }
     }
 
-    public CommandProcessor getCommandProcessor() {
-        return commandProcessor;
-    }
-
-    public void setCommandProcessor(CommandProcessor commandProcessor) {
-        this.commandProcessor = commandProcessor;
-    }
 }
