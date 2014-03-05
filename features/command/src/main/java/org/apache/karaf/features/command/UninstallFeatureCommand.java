@@ -18,8 +18,10 @@ package org.apache.karaf.features.command;
 
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
+import org.apache.felix.gogo.commands.Option;
 import org.apache.karaf.features.FeaturesService;
 
+import java.util.EnumSet;
 import java.util.List;
 
 @Command(scope = "features", name = "uninstall", description = "Uninstalls a feature with the specified name and version.")
@@ -28,8 +30,21 @@ public class UninstallFeatureCommand extends FeaturesCommandSupport {
     @Argument(index = 0, name = "features", description = "The name and version of the features to uninstall. A feature id looks like name/version. The version is optional.", required = true, multiValued = true)
     List<String> features;
 
+    @Option(name = "-r", aliases = "--no-auto-refresh", description = "Do not automatically refresh bundles", required = false, multiValued = false)
+    boolean noRefresh;
+
+    @Option(name = "-v", aliases = "--verbose", description = "Explain what is being done", required = false, multiValued = false)
+    boolean verbose;
+
     protected void doExecute(FeaturesService admin) throws Exception {
         // iterate in the provided feature
+        EnumSet<FeaturesService.Option> options = EnumSet.noneOf(FeaturesService.Option.class);
+        if (noRefresh) {
+            options.add(FeaturesService.Option.NoAutoRefreshBundles);
+        }
+        if (verbose) {
+            options.add(FeaturesService.Option.Verbose);
+        }
         for (String feature : features) {
             String[] split = feature.split("/");
             String name = split[0];
@@ -38,9 +53,9 @@ public class UninstallFeatureCommand extends FeaturesCommandSupport {
                 version = split[1];
             }
     	    if (version != null && version.length() > 0) {
-    		    admin.uninstallFeature(name, version);
+    		    admin.uninstallFeature(name, version, options);
     	    } else {
-    		    admin.uninstallFeature(name );
+    		    admin.uninstallFeature(name, options);
     	    }
         }
     }

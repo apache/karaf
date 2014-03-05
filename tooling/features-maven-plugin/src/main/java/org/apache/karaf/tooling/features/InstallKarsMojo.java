@@ -162,7 +162,13 @@ public class InstallKarsMojo extends MojoSupport {
         public void uninstallFeature(String name) throws Exception {
         }
 
+        public void uninstallFeature(String name, EnumSet<Option> options) {
+        }
+
         public void uninstallFeature(String name, String version) throws Exception {
+        }
+
+        public void uninstallFeature(String name, String version, EnumSet<Option> options) {
         }
 
         public Feature[] listFeatures() throws Exception {
