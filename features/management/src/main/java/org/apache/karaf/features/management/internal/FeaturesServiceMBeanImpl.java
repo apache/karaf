@@ -206,8 +206,24 @@ public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
         featuresService.uninstallFeature(name);
     }
 
+    public void uninstallFeature(String name, boolean noRefresh) throws Exception {
+        EnumSet<FeaturesService.Option> options = EnumSet.noneOf(FeaturesService.Option.class);
+        if (noRefresh) {
+            options.add(FeaturesService.Option.NoAutoRefreshBundles);
+        }
+        featuresService.uninstallFeature(name, options);
+    }
+
     public void uninstallFeature(String name, String version) throws Exception {
         featuresService.uninstallFeature(name, version);
+    }
+
+    public void uninstallFeature(String name, String version, boolean noRefresh) throws Exception {
+        EnumSet<FeaturesService.Option> options = EnumSet.noneOf(FeaturesService.Option.class);
+        if (noRefresh) {
+            options.add(FeaturesService.Option.NoAutoRefreshBundles);
+        }
+        featuresService.uninstallFeature(name, version, options);
     }
 
     public void setBundleContext(BundleContext bundleContext) {
