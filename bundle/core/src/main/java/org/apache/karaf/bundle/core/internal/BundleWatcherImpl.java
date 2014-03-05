@@ -98,6 +98,8 @@ public class BundleWatcherImpl implements Runnable, BundleListener, BundleWatche
                 }
             }
             if (watchedBundles.size() > 0) {
+                // Get the wiring before any in case of a refresh of a dependency
+                FrameworkWiring wiring = bundleContext.getBundle(0).adapt(FrameworkWiring.class);
                 File localRepository = this.localRepoDetector.getLocalRepository();
                 List<Bundle> updated = new ArrayList<Bundle>();
                 for (Bundle bundle : watchedBundles) {
@@ -111,7 +113,6 @@ public class BundleWatcherImpl implements Runnable, BundleListener, BundleWatche
                 }
                 try {
                     final CountDownLatch latch = new CountDownLatch(1);
-                    FrameworkWiring wiring = bundleContext.getBundle(0).adapt(FrameworkWiring.class);
                     wiring.refreshBundles(updated, new FrameworkListener() {
                         public void frameworkEvent(FrameworkEvent event) {
                             latch.countDown();
