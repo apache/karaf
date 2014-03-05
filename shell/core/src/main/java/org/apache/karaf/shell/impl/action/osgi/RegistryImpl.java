@@ -44,7 +44,7 @@ public class RegistryImpl implements Registry {
     @Override
     public <T> void register(Callable<T> factory, Class<T> clazz) {
         synchronized (services) {
-            services.put(factory, new Factory<T>(clazz, factory));
+            services.put(clazz, new Factory<T>(clazz, factory));
         }
     }
 
@@ -70,7 +70,14 @@ public class RegistryImpl implements Registry {
                     if (clazz.isAssignableFrom(((Factory) service).clazz)) {
                         if (isVisible(service)) {
                             try {
-                                return clazz.cast(((Factory) service).callable.call());
+                                Object value = ((Factory) service).callable.call();
+                                if (value instanceof List) {
+                                    for (Object v : (List) value) {
+                                        return clazz.cast(v);
+                                    }
+                                } else {
+                                    return clazz.cast(value);
+                                }
                             } catch (Exception e) {
                                 // TODO: log exception
                             }
@@ -98,7 +105,14 @@ public class RegistryImpl implements Registry {
                     if (clazz.isAssignableFrom(((Factory) service).clazz)) {
                         if (isVisible(service)) {
                             try {
-                                list.add(clazz.cast(((Factory) service).callable.call()));
+                                Object value = ((Factory) service).callable.call();
+                                if (value instanceof List) {
+                                    for (Object v : (List) value) {
+                                        list.add(clazz.cast(v));
+                                    }
+                                } else {
+                                    list.add(clazz.cast(value));
+                                }
                             } catch (Exception e) {
                                 // TODO: log exception
                             }

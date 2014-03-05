@@ -20,9 +20,12 @@ package org.apache.karaf.shell.impl.action.command;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Command;
@@ -71,10 +74,12 @@ public class ManagerImpl implements Manager {
                     GenericType type = new GenericType(field.getGenericType());
                     Object value;
                     if (type.getRawClass() == List.class) {
-                        value = registry.getServices(type.getActualTypeArgument(0).getRawClass());
-                        if (value == null && registry != this.dependencies) {
-                            value = this.dependencies.getServices(type.getActualTypeArgument(0).getRawClass());
+                        Set<Object> set = new HashSet<Object>();
+                        set.addAll(registry.getServices(type.getActualTypeArgument(0).getRawClass()));
+                        if (registry != this.dependencies) {
+                            set.addAll(this.dependencies.getServices(type.getActualTypeArgument(0).getRawClass()));
                         }
+                        value = new ArrayList<Object>(set);
                     } else {
                         value = registry.getService(type.getRawClass());
                         if (value == null && registry != this.dependencies) {

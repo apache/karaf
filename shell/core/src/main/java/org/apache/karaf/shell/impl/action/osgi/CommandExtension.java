@@ -55,7 +55,7 @@ public class CommandExtension implements Extension, Satisfiable {
     private final ManagerImpl manager;
     private final Registry registry;
     private final CountDownLatch started;
-    private final MultiServiceTracker tracker;
+    private final AggregateServiceTracker tracker;
     private final List<Satisfiable> satisfiables = new ArrayList<Satisfiable>();
 
 
@@ -66,7 +66,7 @@ public class CommandExtension implements Extension, Satisfiable {
         this.manager = new ManagerImpl(this.registry, registry);
         this.registry.register(this.manager);
         this.started = new CountDownLatch(1);
-        this.tracker = new MultiServiceTracker(bundle.getBundleContext(), this);
+        this.tracker = new AggregateServiceTracker(bundle.getBundleContext(), this);
     }
 
     @Override
@@ -142,7 +142,7 @@ public class CommandExtension implements Extension, Satisfiable {
         for (Class<?> cl = clazz; cl != Object.class; cl = cl.getSuperclass()) {
             for (Field field : cl.getDeclaredFields()) {
                 if (field.getAnnotation(Reference.class) != null) {
-                    GenericType type = new GenericType(field.getType());
+                    GenericType type = new GenericType(field.getGenericType());
                     Class clazzRef = type.getRawClass() == List.class ? type.getActualTypeArgument(0).getRawClass() : type.getRawClass();
                     if (clazzRef != BundleContext.class
                             && clazzRef != Session.class
@@ -151,7 +151,7 @@ public class CommandExtension implements Extension, Satisfiable {
                             && clazzRef != Registry.class
                             && clazzRef != SessionFactory.class
                             && !registry.hasService(clazzRef)) {
-                        track(clazzRef);
+                        track(type);
                     }
                 }
             }
@@ -159,14 +159,26 @@ public class CommandExtension implements Extension, Satisfiable {
         satisfiables.add(new AutoRegister(clazz));
     }
 
-    protected void track(final Class clazzRef) {
-        tracker.track(clazzRef);
-        registry.register(new Callable() {
-            @Override
-            public Object call() throws Exception {
-                return tracker.getService(clazzRef);
-            }
-        }, clazzRef);
+    protected void track(final GenericType type) {
+        if (type.getRawClass() == List.class) {
+            final Class clazzRef = type.getActualTypeArgument(0).getRawClass();
+            tracker.track(clazzRef, true);
+            registry.register(new Callable() {
+                @Override
+                public Object call() throws Exception {
+                    return tracker.getServices(clazzRef);
+                }
+            }, clazzRef);
+        } else {
+            final Class clazzRef = type.getRawClass();
+            tracker.track(clazzRef, false);
+            registry.register(new Callable() {
+                @Override
+                public Object call() throws Exception {
+                    return tracker.getService(clazzRef);
+                }
+            }, clazzRef);
+        }
     }
 
     public class AutoRegister implements Satisfiable {
