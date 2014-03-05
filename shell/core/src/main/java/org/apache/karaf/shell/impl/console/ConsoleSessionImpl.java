@@ -213,6 +213,7 @@ public class ConsoleSessionImpl implements Session {
         if (!running) {
             return;
         }
+        out.println();
         if (reader.getHistory() instanceof PersistentHistory) {
             try {
                 ((PersistentHistory) reader.getHistory()).flush();
@@ -558,7 +559,8 @@ public class ConsoleSessionImpl implements Session {
                         if (c == -1) {
                             return;
                         } else if (c == 4 && !ShellUtil.getBoolean(ConsoleSessionImpl.this, Session.IGNORE_INTERRUPTS)) {
-                            err.println("^D");
+                            err.print("^D");
+                            err.flush();
                             return;
                         } else if (c == 3 && !ShellUtil.getBoolean(ConsoleSessionImpl.this, Session.IGNORE_INTERRUPTS)) {
                             err.println("^C");

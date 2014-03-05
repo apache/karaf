@@ -69,8 +69,8 @@ public class Activator implements BundleActivator {
     @Override
     public void stop(BundleContext context) throws Exception {
         sessionFactoryRegistration.unregister();
-        sessionFactory.stop();
         localConsoleManager.stop();
+        sessionFactory.stop();
         actionExtender.stop(context);
         threadIO.stop();
         terminalFactory.destroy();
