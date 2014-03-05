@@ -28,6 +28,21 @@
     <name>${artifactId}-feature</name>
     <description>${artifactId} details</description>
 
+    <repositories>
+        <!-- OPS4J SNAPSHOT repository -->
+        <repository>
+            <id>ops4j.sonatype.snapshots.deploy</id>
+            <name>OPS4J snapshot repository</name>
+            <url>https://oss.sonatype.org/content/repositories/ops4j-snapshots/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
     <dependencies>
         <dependency>
             <groupId>org.apache.karaf.features</groupId>
