@@ -6,3 +6,4 @@
 target
 eclipse-classes
 bin
+dependency-reduced-pom.xml
