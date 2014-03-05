@@ -51,11 +51,11 @@ import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 import javax.security.auth.Subject;
 
-import org.apache.felix.service.command.CommandProcessor;
-import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.features.BootFinished;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
+import org.apache.karaf.shell.api.console.Session;
+import org.apache.karaf.shell.api.console.SessionFactory;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.ops4j.pax.exam.Configuration;
@@ -161,8 +161,8 @@ public class KarafTestSupport {
         String response;
         final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         final PrintStream printStream = new PrintStream(byteArrayOutputStream);
-        final CommandProcessor commandProcessor = getOsgiService(CommandProcessor.class);
-        final CommandSession commandSession = commandProcessor.createSession(System.in, printStream, System.err);
+        final SessionFactory sessionFactory = getOsgiService(SessionFactory.class);
+        final Session session = sessionFactory.create(System.in, printStream, System.err);
 
         final Callable<String> commandCallable = new Callable<String>() {
             @Override
@@ -171,7 +171,7 @@ public class KarafTestSupport {
                     if (!silent) {
                         System.err.println(command);
                     }
-                    commandSession.execute(command);
+                    session.execute(command);
                 } catch (Exception e) {
                     throw new RuntimeException(e.getMessage(), e);
                 }

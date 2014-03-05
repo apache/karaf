@@ -17,69 +17,14 @@
     limitations under the License.
 
 -->
-<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
-           xmlns:ext="http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.0.0">
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
 
-    <ext:property-placeholder placeholder-prefix="$[" placeholder-suffix="]">
-        <ext:default-properties>
-            <ext:property name="karaf.startLocalConsole" value="true"/>
-        </ext:default-properties>
-    </ext:property-placeholder>
-
-    <reference id="commandProcessor" interface="org.apache.felix.service.command.CommandProcessor"/>
-    <reference id="threadIO" interface="org.apache.felix.service.threadio.ThreadIO" />
-
-    <bean id="consoleFactoryService" class="org.apache.karaf.shell.console.impl.jline.ConsoleFactoryService">
-        <argument ref="blueprintBundleContext"/>
-        <argument ref="commandProcessor"/>
-        <argument ref="threadIO"/>
+    <bean id="commandTracker" class="org.apache.karaf.shell.compat.CommandTracker"
+            init-method="init" destroy-method="destroy">
+        <property name="context" ref="blueprintBundleContext" />
+        <property name="sessionFactory">
+            <reference interface="org.apache.karaf.shell.api.console.SessionFactory" />
+        </property>
     </bean>
-    <service interface="org.apache.karaf.shell.console.factory.ConsoleFactory" ref="consoleFactoryService"/>
-
-    <bean id="consoleFactory" class="org.apache.karaf.shell.console.impl.jline.LocalConsoleManager"
-          destroy-method="stop">
-        <argument value="$[karaf.startLocalConsole]"/>
-        <argument value="$[org.osgi.framework.startlevel.beginning]"/>
-        <argument ref="blueprintBundleContext"/>
-        <argument ref="terminalFactory"/>
-        <argument ref="consoleFactoryService"/>
-    </bean>
-
-    <bean id="converters" class="org.apache.karaf.shell.console.impl.Converters">
-        <argument ref="blueprintBundleContext"/>
-    </bean>
-    <service ref="converters" interface="org.apache.felix.service.command.Converter"/>
-
-    <bean id="terminalFactory" class="org.apache.karaf.shell.console.impl.jline.TerminalFactory"
-          destroy-method="destroy"/>
-
-    <service>
-        <interfaces>
-            <value>org.apache.felix.service.command.Function</value>
-            <value>org.apache.karaf.shell.console.CompletableFunction</value>
-        </interfaces>
-        <service-properties>
-            <entry key="osgi.command.scope" value="*"/>
-            <entry key="osgi.command.function" value="exit"/>
-        </service-properties>
-        <bean class="org.apache.karaf.shell.console.commands.BlueprintCommand">
-            <property name="blueprintContainer" ref="blueprintContainer"/>
-            <property name="blueprintConverter" ref="blueprintConverter"/>
-            <property name="actionId" value="exit"/>
-        </bean>
-    </service>
-
-    <bean id="exit" class="org.apache.karaf.shell.console.ExitAction" activation="lazy" scope="prototype"/>
-
-    <!-- Get a reference to the Configuration Admin Service -->
-    <reference id="configAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"/>
-
-    <!-- For role-based security on the shell commands -->
-    <bean id="secureCommandConfigTransformer"
-          class="org.apache.karaf.shell.security.impl.SecuredCommandConfigTransformer"
-          init-method="init">
-        <property name="configAdmin" ref="configAdmin"/>
-    </bean>
-    <service ref="secureCommandConfigTransformer" interface="org.osgi.service.cm.ConfigurationListener"/>
 
 </blueprint>

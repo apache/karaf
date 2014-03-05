@@ -9,8 +9,6 @@ Maven URL:
 
 h1. Description
 
-This bundle provides the integration of Apache Felix Gogo, shell, and console.
-
-It provides the default Karaf branding including the default welcome message.
+This bundle provides the compatibility layer with Karaf 2.x and 3.x console.
 
 h1. See also

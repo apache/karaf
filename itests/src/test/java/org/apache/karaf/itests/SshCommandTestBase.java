@@ -21,7 +21,7 @@ import java.io.PipedOutputStream;
 import java.util.Arrays;
 import java.util.HashSet;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 import org.apache.karaf.features.Feature;
 import org.apache.sshd.ClientChannel;
