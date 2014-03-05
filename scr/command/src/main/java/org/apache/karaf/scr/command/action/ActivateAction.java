@@ -17,14 +17,14 @@
 package org.apache.karaf.scr.command.action;
 
 import org.apache.karaf.scr.command.completer.ActivateCompleter;
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
 import org.apache.felix.scr.Component;
 import org.apache.felix.scr.ScrService;
 import org.apache.karaf.scr.command.ScrCommandConstants;
 import org.apache.karaf.scr.command.ScrUtils;
-import org.apache.karaf.shell.commands.Completer;
-import org.apache.karaf.shell.inject.Service;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Completion;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 
 /**
  * Activates the given component by supplying its component name.
@@ -34,7 +34,7 @@ import org.apache.karaf.shell.inject.Service;
 public class ActivateAction extends ScrActionSupport {
 
     @Argument(index = 0, name = "name", description = "The name of the Component to activate ", required = true, multiValued = false)
-    @Completer(ActivateCompleter.class)
+    @Completion(ActivateCompleter.class)
     String name;
 
     @Override

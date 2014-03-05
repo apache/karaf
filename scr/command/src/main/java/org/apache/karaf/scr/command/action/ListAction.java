@@ -21,9 +21,9 @@ import org.apache.felix.scr.ScrService;
 import org.apache.karaf.scr.command.ScrCommandConstants;
 import org.apache.karaf.scr.command.ScrUtils;
 import org.apache.karaf.scr.command.support.IdComparator;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.inject.Service;
-import org.apache.karaf.shell.table.ShellTable;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.support.table.ShellTable;
 
 import java.util.Arrays;
 
@@ -58,6 +58,8 @@ public class ListAction extends ScrActionSupport {
                 }
             }
         }
+        table.print(System.out);
+
         return null;
     }
 

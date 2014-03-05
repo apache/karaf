@@ -21,9 +21,11 @@ import java.util.List;
 import org.apache.felix.scr.Component;
 import org.apache.felix.scr.ScrService;
 import org.apache.karaf.scr.command.action.ScrActionSupport;
-import org.apache.karaf.shell.console.Completer;
-import org.apache.karaf.shell.console.completer.StringsCompleter;
-import org.apache.karaf.shell.inject.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.console.CommandLine;
+import org.apache.karaf.shell.api.console.Completer;
+import org.apache.karaf.shell.api.console.Session;
+import org.apache.karaf.shell.support.completers.StringsCompleter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,17 +40,17 @@ public abstract class ScrCompleterSupport implements Completer {
      * Overrides the super method noted below. See super documentation for
      * details.
      *
-     * @see org.apache.karaf.shell.console.Completer#complete(java.lang.String,
-     *      int, java.util.List)
+     * @see org.apache.karaf.shell.api.console.Completer#complete(org.apache.karaf.shell.api.console.Session, org.apache.karaf.shell.api.console.CommandLine, java.util.List)
      */
-    public int complete(String buffer, int cursor, List<String> candidates) {
+    @Override
+    public int complete(Session session, CommandLine commandLine, List<String> candidates) {
         StringsCompleter delegate = new StringsCompleter();
         try {
             for (Component component : scrService.getComponents()) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Component Name to work on: " + component.getName());
                 }
-                if (ScrActionSupport.showHiddenComponent(component)) {
+                if (ScrActionSupport.showHiddenComponent(commandLine, component)) {
                     // we display all because we are overridden
                     if (availableComponent(component)) {
                         delegate.getStrings().add(component.getName());
@@ -67,7 +69,7 @@ public abstract class ScrCompleterSupport implements Completer {
         } catch (Exception e) {
             logger.warn("Exception completing the command request: " + e.getLocalizedMessage());
         }
-        return delegate.complete(buffer, cursor, candidates);
+        return delegate.complete(session, commandLine, candidates);
     }
 
     public abstract boolean availableComponent(Component component) throws Exception;
