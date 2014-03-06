@@ -169,6 +169,9 @@
                         <Main-Class>
                             org.apache.karaf.shell.impl.console.standalone.Main
                         </Main-Class>
+                        <Embed-Dependency>
+                            org.apache.karaf.jaas.modules;inline="org/apache/karaf/jaas/modules/JaasHelper.class"
+                        </Embed-Dependency>
                     </instructions>
                     <unpackBundle>true</unpackBundle>
                 </configuration>
