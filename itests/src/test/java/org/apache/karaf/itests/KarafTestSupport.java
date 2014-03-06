@@ -19,6 +19,7 @@ import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.tooling.exam.options.LogLevelOption;
 import org.junit.Assert;
+import org.ops4j.net.FreePort;
 import org.ops4j.pax.exam.MavenUtils;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.TestProbeBuilder;
@@ -26,6 +27,8 @@ import org.ops4j.pax.exam.junit.Configuration;
 import org.ops4j.pax.exam.junit.ProbeBuilder;
 import org.osgi.framework.*;
 import org.osgi.util.tracker.ServiceTracker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.management.remote.JMXConnector;
@@ -34,17 +37,22 @@ import javax.management.remote.JMXServiceURL;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.PrintStream;
 import java.util.*;
 import java.util.concurrent.*;
 
 import static org.apache.karaf.tooling.exam.options.KarafDistributionOption.karafDistributionConfiguration;
+import static org.apache.karaf.tooling.exam.options.KarafDistributionOption.editConfigurationFilePut;
 import static org.apache.karaf.tooling.exam.options.KarafDistributionOption.keepRuntimeFolder;
 import static org.apache.karaf.tooling.exam.options.KarafDistributionOption.logLevel;
 
 import static org.ops4j.pax.exam.CoreOptions.maven;
 
 public class KarafTestSupport {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(KarafTestSupport.class);
+    private static final int RMI_BASE_PORT = 33221;
 
     static final Long COMMAND_TIMEOUT = 10000L;
     static final Long SERVICE_TIMEOUT = 30000L;
@@ -65,10 +73,19 @@ public class KarafTestSupport {
 
     @Configuration
     public Option[] config() {
+
+        // ports to override values from etc/org.apache.karaf.management.cfg
+        int rmiRegistryPort = new FreePort(RMI_BASE_PORT+1, RMI_BASE_PORT+100).getPort();
+        int rmiServerPort = new FreePort(rmiRegistryPort+1, rmiRegistryPort+100).getPort();
+        LOGGER.info("Port selected for Karaf RMI Registry: {}", rmiRegistryPort);
+        LOGGER.info("Port selected for JMX Server connection: {}", rmiServerPort);
+
         return new Option[]{
                 karafDistributionConfiguration().frameworkUrl(maven().groupId("org.apache.karaf").artifactId("apache-karaf").versionAsInProject().type("tar.gz"))
                         .karafVersion(MavenUtils.getArtifactVersion("org.apache.karaf", "apache-karaf")).name("Apache Karaf").unpackDirectory(new File("target/exam")),
                 keepRuntimeFolder(),
+                editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiRegistryPort", Integer.toString(rmiRegistryPort)),
+                editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiServerPort", Integer.toString(rmiServerPort)),
                 logLevel(LogLevelOption.LogLevel.ERROR)};
     }
 
@@ -199,7 +216,23 @@ public class KarafTestSupport {
     }
 
     public JMXConnector getJMXConnector() throws Exception {
-        JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:1099/karaf-root");
+        String karafHome = System.getProperty("karaf.home");
+        File managementProperties = new File(karafHome + "/etc", "org.apache.karaf.management.cfg");
+        String rmiServerAddress = "";
+        String rmiRegistryAddress = "localhost:1099";
+        if (managementProperties.exists()) {
+            Properties props = new Properties();
+            props.load(new FileInputStream(managementProperties));
+            if (props.containsKey("rmiServerPort")) {
+                rmiServerAddress = "localhost:" + props.getProperty("rmiServerPort");
+            }
+            if (props.containsKey("rmiRegistryPort")) {
+                rmiRegistryAddress = "localhost:" + props.getProperty("rmiRegistryPort");
+            }
+        }
+        String jmxConnectionInfo = String.format("service:jmx:rmi://%s/jndi/rmi://%s/karaf-root", rmiServerAddress,
+            rmiRegistryAddress);
+        JMXServiceURL url = new JMXServiceURL(jmxConnectionInfo);
         Hashtable env = new Hashtable();
         String[] credentials = new String[]{"karaf", "karaf"};
         env.put("jmx.remote.credentials", credentials);
