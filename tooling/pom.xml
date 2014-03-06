@@ -34,7 +34,6 @@
     <name>Apache Karaf :: Tooling</name>
 
     <modules>
-        <module>karaf-scr-maven-plugin</module>
         <module>karaf-maven-plugin</module>
     </modules>
 

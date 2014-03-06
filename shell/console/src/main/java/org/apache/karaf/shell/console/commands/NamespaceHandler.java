@@ -18,11 +18,8 @@
  */
 package org.apache.karaf.shell.console.commands;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -34,20 +31,11 @@ import org.apache.aries.blueprint.mutable.MutableCollectionMetadata;
 import org.apache.aries.blueprint.mutable.MutableIdRefMetadata;
 import org.apache.aries.blueprint.mutable.MutablePassThroughMetadata;
 import org.apache.aries.blueprint.mutable.MutableRefMetadata;
-import org.apache.aries.blueprint.mutable.MutableReferenceMetadata;
 import org.apache.aries.blueprint.mutable.MutableServiceMetadata;
 import org.apache.aries.blueprint.mutable.MutableValueMetadata;
-import org.apache.felix.gogo.commands.Action;
-import org.apache.karaf.shell.console.Completer;
 import org.apache.karaf.shell.console.SubShellAction;
 import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.inject.Destroy;
-import org.apache.karaf.shell.inject.Init;
-import org.apache.karaf.shell.inject.Reference;
-import org.apache.karaf.shell.inject.Service;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.blueprint.container.ComponentDefinitionException;
 import org.osgi.service.blueprint.reflect.BeanArgument;
 import org.osgi.service.blueprint.reflect.BeanMetadata;
@@ -58,12 +46,9 @@ import org.osgi.service.blueprint.reflect.MapMetadata;
 import org.osgi.service.blueprint.reflect.Metadata;
 import org.osgi.service.blueprint.reflect.NullMetadata;
 import org.osgi.service.blueprint.reflect.RefMetadata;
-import org.osgi.service.blueprint.reflect.ReferenceMetadata;
 import org.osgi.service.blueprint.reflect.ServiceMetadata;
 import org.osgi.service.blueprint.reflect.ValueMetadata;
-import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -90,7 +75,6 @@ public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHan
 
     public static final String SHELL_NAMESPACE_1_0_0 = "http://karaf.apache.org/xmlns/shell/v1.0.0";
     public static final String SHELL_NAMESPACE_1_1_0 = "http://karaf.apache.org/xmlns/shell/v1.1.0";
-    public static final String SHELL_NAMESPACE_1_2_0 = "http://karaf.apache.org/xmlns/shell/v1.2.0";
 
     private int nameCounter = 0;
 
@@ -99,10 +83,8 @@ public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHan
             return getClass().getResource("karaf-shell-1.0.0.xsd");
         } else if(SHELL_NAMESPACE_1_1_0.equals(namespace)) {
             return getClass().getResource("karaf-shell-1.1.0.xsd");
-        } else if(SHELL_NAMESPACE_1_2_0.equals(namespace)) {
-            return getClass().getResource("karaf-shell-1.2.0.xsd");
         }
-        return getClass().getResource("karaf-shell-1.2.0.xsd");
+        return getClass().getResource("karaf-shell-1.1.0.xsd");
     }
 
 	public Set<Class> getManagedClasses() {
@@ -117,14 +99,6 @@ public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHan
 
     public Metadata parse(Element element, ParserContext context) {
         if (nodeNameEquals(element, COMMAND_BUNDLE)) {
-            NamedNodeMap attrs = element.getAttributes();
-            for (int i = 0; i < attrs.getLength(); i++) {
-                Node child = attrs.item(i);
-                if (child instanceof Attr) {
-                    Attr childAttr = (Attr) child;
-                    parseChildAttr(childAttr, context);
-                }
-            }
             NodeList children = element.getChildNodes();
             for (int i = 0; i < children.getLength(); i++) {
                 Node child  = children.item(i);
@@ -137,164 +111,6 @@ public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHan
             return null;
         } else {
             throw new IllegalStateException("Unexpected element " + element.getNodeName());
-        }
-    }
-
-    private void parseChildAttr(Attr attr, ParserContext context) {
-        if (nodeNameEquals(attr, SCAN)) {
-            scan(attr, context);
-        }
-    }
-
-    private void scan(Attr attr, ParserContext context) {
-        try {
-            Bundle bundle = getBundle(context);
-            BundleWiring wiring = bundle.adapt(BundleWiring.class);
-            for (String pkg : attr.getValue().split(" ")) {
-                String name = pkg;
-                int options = BundleWiring.LISTRESOURCES_LOCAL;
-                name = name.replace('.', '/');
-                if (name.endsWith("*")) {
-                    options |= BundleWiring.LISTRESOURCES_RECURSE;
-                    name = name.substring(0, name.length() - 1);
-                }
-                if (!name.startsWith("/")) {
-                    name = "/" + name;
-                }
-                if (name.endsWith("/")) {
-                    name = name.substring(0, name.length() - 1);
-                }
-                Collection<String> classes = wiring.listResources(name, "*.class", options);
-                for (String className : classes) {
-                    className = className.replace('/', '.').replace(".class", "");
-                    inspectClass(context, bundle.loadClass(className));
-                }
-            }
-        } catch (ComponentDefinitionException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new ComponentDefinitionException("Unable to scan commands", e);
-        }
-    }
-
-    private void inspectClass(ParserContext context, Class<?> clazz) throws Exception {
-        Service reg = clazz.getAnnotation(Service.class);
-        if (reg == null) {
-            return;
-        }
-        if (Action.class.isAssignableFrom(clazz)) {
-            final Command cmd = clazz.getAnnotation(Command.class);
-            if (cmd == null) {
-                throw new IllegalArgumentException("Command " + clazz.getName() + " is not annotated with @Command");
-            }
-            String scope = cmd.scope();
-            String function = cmd.name();
-            // Create action
-            MutableBeanMetadata action = context.createMetadata(MutableBeanMetadata.class);
-            action.setId(getName());
-            action.setActivation(MutableBeanMetadata.ACTIVATION_LAZY);
-            action.setScope(MutableBeanMetadata.SCOPE_PROTOTYPE);
-            action.setRuntimeClass(clazz);
-            for (Class<?> cl = clazz; cl != Object.class; cl = cl.getSuperclass()) {
-                for (Field field : cl.getDeclaredFields()) {
-                    if (field.getAnnotation(Reference.class) != null) {
-                        if (field.getType() == BundleContext.class) {
-                            action.addProperty(field.getName(), createRef(context, "blueprintBundleContext"));
-                        } else {
-                            action.addProperty(field.getName(), createRef(context, createServiceRef(context, field.getType()).getId()));
-                        }
-                    }
-                }
-                for (Method method : cl.getDeclaredMethods()) {
-                    if (method.getAnnotation(Init.class) != null) {
-                        if (action.getInitMethod() == null) {
-                            action.setInitMethod(method.getName());
-                        }
-                    }
-                    if (method.getAnnotation(Destroy.class) != null) {
-                        if (action.getDestroyMethod() == null) {
-                            action.setDestroyMethod(method.getName());
-                        }
-                    }
-                }
-            }
-            context.getComponentDefinitionRegistry().registerComponentDefinition(action);
-            // Create command
-            MutableBeanMetadata command = context.createMetadata(MutableBeanMetadata.class);
-            command.setRuntimeClass(BlueprintCommand.class);
-            command.addProperty(BLUEPRINT_CONTAINER, createRef(context, BLUEPRINT_CONTAINER));
-            command.addProperty(BLUEPRINT_CONVERTER, createRef(context, BLUEPRINT_CONVERTER));
-            command.addProperty(ACTION_ID, createIdRef(context, action.getId()));
-            // Create command service
-            MutableServiceMetadata commandService = context.createMetadata(MutableServiceMetadata.class);
-            commandService.setActivation(MutableServiceMetadata.ACTIVATION_LAZY);
-            commandService.setId(getName());
-            commandService.setAutoExport(ServiceMetadata.AUTO_EXPORT_ALL_CLASSES);
-            commandService.setServiceComponent(command);
-            commandService.addServiceProperty(createStringValue(context, "osgi.command.scope"),
-                    createStringValue(context, scope));
-            commandService.addServiceProperty(createStringValue(context, "osgi.command.function"),
-                    createStringValue(context, function));
-            context.getComponentDefinitionRegistry().registerComponentDefinition(commandService);
-
-            // create the sub-shell action
-            createSubShell(context, scope);
-        }
-        if (Completer.class.isAssignableFrom(clazz)) {
-            MutableBeanMetadata completer = context.createMetadata(MutableBeanMetadata.class);
-            completer.setId(getName());
-            completer.setActivation(MutableBeanMetadata.ACTIVATION_LAZY);
-            completer.setScope(MutableBeanMetadata.SCOPE_SINGLETON);
-            completer.setRuntimeClass(clazz);
-            // Create completer
-            for (Class<?> cl = clazz; cl != Object.class; cl = cl.getSuperclass()) {
-                for (Field field : cl.getDeclaredFields()) {
-                    if (field.getAnnotation(Reference.class) != null) {
-                        if (field.getType() == BundleContext.class) {
-                            completer.addProperty(field.getName(), createRef(context, "blueprintBundleContext"));
-                        } else {
-                            completer.addProperty(field.getName(), createRef(context, createServiceRef(context, field.getType()).getId()));
-                        }
-                    }
-                }
-                for (Method method : cl.getDeclaredMethods()) {
-                    if (method.getAnnotation(Init.class) != null) {
-                        if (completer.getInitMethod() == null) {
-                            completer.setInitMethod(method.getName());
-                        }
-                    }
-                    if (method.getAnnotation(Destroy.class) != null) {
-                        if (completer.getDestroyMethod() == null) {
-                            completer.setDestroyMethod(method.getName());
-                        }
-                    }
-                }
-            }
-            context.getComponentDefinitionRegistry().registerComponentDefinition(completer);
-            // Create completer service
-            MutableServiceMetadata completerService = context.createMetadata(MutableServiceMetadata.class);
-            completerService.setActivation(MutableServiceMetadata.ACTIVATION_LAZY);
-            completerService.setId(getName());
-            completerService.setAutoExport(ServiceMetadata.AUTO_EXPORT_ALL_CLASSES);
-            completerService.setServiceComponent(createRef(context, completer.getId()));
-            context.getComponentDefinitionRegistry().registerComponentDefinition(completerService);
-        }
-    }
-
-    private ComponentMetadata createServiceRef(ParserContext context, Class<?> cls) {
-        String id = ".serviceref." + cls.getName();
-        ComponentMetadata metadata = context.getComponentDefinitionRegistry().getComponentDefinition(id);
-        if (metadata == null) {
-            MutableReferenceMetadata m = context.createMetadata(MutableReferenceMetadata.class);
-            m.setRuntimeInterface(cls);
-            m.setInterface(cls.getName());
-            m.setActivation(ReferenceMetadata.ACTIVATION_EAGER);
-            m.setAvailability(ReferenceMetadata.AVAILABILITY_MANDATORY);
-            m.setId(id);
-            context.getComponentDefinitionRegistry().registerComponentDefinition(m);
-            return m;
-        } else {
-            return metadata;
         }
     }
 

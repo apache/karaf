@@ -19,22 +19,23 @@
 
 package org.apache.karaf.demos.command;
 
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Completer;
-import org.apache.karaf.shell.console.OsgiCommandSupport;
-import org.apache.karaf.shell.inject.Service;
+
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Completion;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 
 @Command(scope = "mycommand", name = "hello", description="Says hello")
 @Service
-public class MyCommand extends OsgiCommandSupport {
+public class MyCommand implements Action {
 
     @Argument(index = 0, name = "arg", description = "The command argument", required = false, multiValued = false)
-    @Completer(MyCompleter.class)
+    @Completion(MyCompleter.class)
     String arg = null;
 
     @Override
-    protected Object doExecute() throws Exception {
+    public Object execute() throws Exception {
         System.out.println("Executing My Command Demo");
         return null;
     }

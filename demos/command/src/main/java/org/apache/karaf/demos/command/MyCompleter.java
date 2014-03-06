@@ -19,11 +19,13 @@
 
 package org.apache.karaf.demos.command;
 
-import org.apache.karaf.shell.console.completer.StringsCompleter;
-import org.apache.karaf.shell.console.Completer;
-import org.apache.karaf.shell.inject.Service;
-
 import java.util.List;
+
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.api.console.CommandLine;
+import org.apache.karaf.shell.api.console.Completer;
+import org.apache.karaf.shell.api.console.Session;
+import org.apache.karaf.shell.support.completers.StringsCompleter;
 
 /**
 * <p>
@@ -34,17 +36,12 @@ import java.util.List;
 @Service
 public class MyCompleter implements Completer {
 
-    /**
-     * @param buffer it's the beginning string typed by the user
-     * @param cursor it's the position of the cursor
-     * @param candidates the list of completions proposed to the user
-     */
-    public int complete(String buffer, int cursor, List candidates) {
+    public int complete(Session session, CommandLine commandLine, List<String> candidates) {
 
         StringsCompleter delegate = new StringsCompleter();
         delegate.getStrings().add("one");
         delegate.getStrings().add("two");
         delegate.getStrings().add("three");
-        return delegate.complete(buffer, cursor, candidates);
+        return delegate.complete(session, commandLine, candidates);
     }
 }
