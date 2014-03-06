@@ -35,8 +35,8 @@ import org.apache.sshd.ClientChannel;
 import org.apache.sshd.ClientSession;
 import org.apache.sshd.SshClient;
 import org.apache.sshd.agent.SshAgent;
+import org.apache.sshd.client.UserInteraction;
 import org.apache.sshd.client.channel.ChannelShell;
-import org.apache.sshd.client.future.ConnectFuture;
 import org.apache.sshd.common.util.NoCloseInputStream;
 import org.apache.sshd.common.util.NoCloseOutputStream;
 import org.osgi.service.blueprint.container.BlueprintContainer;
@@ -114,43 +114,34 @@ public class SshAction extends OsgiCommandSupport implements BlueprintContainerA
             agentSocket = this.session.get(SshAgent.SSH_AUTHSOCKET_ENV_NAME).toString();
             client.getProperties().put(SshAgent.SSH_AUTHSOCKET_ENV_NAME,agentSocket);
         }
+        client.setUserInteraction(new UserInteraction() {
+            public void welcome(String banner) {
+                System.out.println(banner);
+            }
+            public String[] interactive(String destination, String name, String instruction, String[] prompt, boolean[] echo) {
+                String[] answers = new String[prompt.length];
+                try {
+                    for (int i = 0; i < prompt.length; i++) {
+                        answers[i] = readLine(prompt[i] + " ", echo[i] ? null : '*');
+                    }
+                } catch (IOException e) {
+                }
+                return answers;
+            }
+        });
 
         try {
-            ConnectFuture future = client.connect(hostname, port);
-            future.await();
-            sshSession = future.getSession();
+            ClientSession sshSession = client.connect(username, hostname, port).await().getSession();
 
             Object oldIgnoreInterrupts = this.session.get(Console.IGNORE_INTERRUPTS);
 
             try {
                 System.out.println("Connected");
 
-                boolean authed = false;
-                if (agentSocket != null) {
-                    sshSession.authAgent(username);
-                    int ret = sshSession.waitFor(ClientSession.WAIT_AUTH | ClientSession.CLOSED | ClientSession.AUTHED, 0);
-                    if ((ret & ClientSession.AUTHED) == 0) {
-                        System.err.println("Agent authentication failed, falling back to password authentication.");
-                    } else {
-                        authed = true;
-                    }
+                if (password != null) {
+                    sshSession.addPasswordIdentity(password);
                 }
-                if (!authed) {
-                    if (password == null) {
-                        log.debug("Prompting user for password");
-                        password = readLine("Password: ");
-                    }
-                    sshSession.authPassword(username, password);
-                    int ret = sshSession.waitFor(ClientSession.WAIT_AUTH | ClientSession.CLOSED | ClientSession.AUTHED, 0);
-                    if ((ret & ClientSession.AUTHED) == 0) {
-                        System.err.println("Password authentication failed");
-                    } else {
-                        authed = true;
-                    }
-                }
-                if (!authed) {
-                    return null;
-                }
+                sshSession.auth().verify();
 
                 this.session.put( Console.IGNORE_INTERRUPTS, Boolean.TRUE );
 
@@ -181,7 +172,7 @@ public class SshAction extends OsgiCommandSupport implements BlueprintContainerA
                 }
                 channel.setOut(new NoCloseOutputStream(System.out));
                 channel.setErr(new NoCloseOutputStream(System.err));
-                channel.open();
+                channel.open().verify();
                 channel.waitFor(ClientChannel.CLOSED, 0);
             } finally {
                 session.put(Console.IGNORE_INTERRUPTS, oldIgnoreInterrupts);
