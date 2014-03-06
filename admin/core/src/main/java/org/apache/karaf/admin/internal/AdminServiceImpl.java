@@ -394,21 +394,18 @@ public class AdminServiceImpl implements AdminService {
                     opts = DEFAULT_JAVA_OPTS;
                 }
                 String karafOpts = System.getProperty("karaf.opts", "");
-
-                File libDir = new File(System.getProperty("karaf.home"), "lib");
-                File[] jars = libDir.listFiles(new FilenameFilter() {
-                    public boolean accept(File dir, String name) {
-                        return name.endsWith(".jar");
-                    }
-                });
-                StringBuilder classpath = new StringBuilder();
-                for (File jar : jars) {
-                    if (classpath.length() > 0) {
-                        classpath.append(System.getProperty("path.separator"));
-                    }
-                    classpath.append(jar.getCanonicalPath());
-                }
                 String location = instance.loc;
+                
+                File libDir = new File(System.getProperty("karaf.home"), "lib");
+                File childLibDir = new File(location, "lib");
+                
+                StringBuilder classpath = classpathFromLibDir(libDir);
+                StringBuilder childClasspath = classpathFromLibDir(childLibDir);
+                if (childClasspath.length() > 0 && !libDir.equals(childLibDir)) {
+                    classpath.append(System.getProperty("path.separator"));
+                    classpath.append(childClasspath);
+                }                                
+
                 String command = "\""
                         + new File(System.getProperty("java.home"), ScriptUtils.isWindows() ? "bin\\java.exe" : "bin/java").getCanonicalPath()
                         + "\" " + opts
@@ -431,6 +428,24 @@ public class AdminServiceImpl implements AdminService {
                         .start();
                 instance.pid = process.getPid();
                 return null;
+            }
+
+            private StringBuilder classpathFromLibDir(File libDir) throws IOException {
+                File[] jars = libDir.listFiles(new FilenameFilter() {
+                    public boolean accept(File dir, String name) {
+                        return name.endsWith(".jar");
+                    }
+                });
+                StringBuilder classpath = new StringBuilder();
+                if (jars != null) {
+                    for (File jar : jars) {
+                        if (classpath.length() > 0) {
+                            classpath.append(System.getProperty("path.separator"));
+                        }
+                        classpath.append(jar.getCanonicalPath());
+                    }
+                }
+                return classpath;
             }
         });
     }
