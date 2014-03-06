@@ -24,8 +24,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.felix.service.command.CommandSession;
+import org.apache.felix.utils.properties.InterpolationHelper;
 import org.apache.karaf.shell.console.HelpProvider;
-import org.apache.karaf.util.properties.InterpolationHelper;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;

@@ -20,9 +20,8 @@ package org.apache.karaf.main.lock;
 
 import static org.junit.Assert.assertTrue;
 
-import org.apache.karaf.util.properties.Properties;
+import org.apache.felix.utils.properties.Properties;
 
-import org.apache.karaf.main.lock.DefaultJDBCLock;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;

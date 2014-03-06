@@ -22,9 +22,8 @@ package org.apache.karaf.main.lock;
 import static org.junit.Assert.assertFalse;
 
 import java.sql.Connection;
-import org.apache.karaf.util.properties.Properties;
+import org.apache.felix.utils.properties.Properties;
 
-import org.apache.karaf.main.lock.MySQLJDBCLock;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
