@@ -45,10 +45,10 @@ import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.console.Session;
-import org.apache.karaf.shell.support.converter.DefaultConverter;
-import org.apache.karaf.shell.support.converter.GenericType;
 import org.apache.karaf.shell.support.CommandException;
 import org.apache.karaf.shell.support.NameScoping;
+import org.apache.karaf.shell.support.converter.DefaultConverter;
+import org.apache.karaf.shell.support.converter.GenericType;
 
 import static org.apache.karaf.shell.support.ansi.SimpleAnsi.COLOR_DEFAULT;
 import static org.apache.karaf.shell.support.ansi.SimpleAnsi.COLOR_RED;

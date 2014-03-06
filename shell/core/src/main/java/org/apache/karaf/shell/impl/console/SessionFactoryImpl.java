@@ -20,16 +20,12 @@ package org.apache.karaf.shell.impl.console;
 
 import java.io.InputStream;
 import java.io.PrintStream;
-import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 import org.apache.felix.gogo.runtime.CommandProcessorImpl;
-import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Function;
 import org.apache.felix.service.threadio.ThreadIO;
 import org.apache.karaf.shell.api.console.Command;
@@ -40,7 +36,6 @@ import org.apache.karaf.shell.api.console.Terminal;
 import org.apache.karaf.shell.impl.console.commands.ExitCommand;
 import org.apache.karaf.shell.impl.console.commands.SubShellCommand;
 import org.apache.karaf.shell.impl.console.commands.help.HelpCommand;
-import org.apache.karaf.shell.support.ShellUtil;
 
 public class SessionFactoryImpl extends RegistryImpl implements SessionFactory, Registry {
 

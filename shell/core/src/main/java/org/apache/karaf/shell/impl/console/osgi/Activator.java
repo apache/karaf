@@ -22,8 +22,8 @@ import java.io.Closeable;
 
 import org.apache.felix.gogo.runtime.threadio.ThreadIOImpl;
 import org.apache.karaf.shell.api.console.SessionFactory;
-import org.apache.karaf.shell.impl.action.osgi.CommandExtender;
 import org.apache.karaf.shell.impl.action.command.ManagerImpl;
+import org.apache.karaf.shell.impl.action.osgi.CommandExtender;
 import org.apache.karaf.shell.impl.console.SessionFactoryImpl;
 import org.apache.karaf.shell.impl.console.TerminalFactory;
 import org.apache.karaf.shell.impl.console.osgi.secured.SecuredSessionFactoryImpl;

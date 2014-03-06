@@ -21,7 +21,6 @@ package org.apache.karaf.shell.impl.console.osgi;
 import java.io.Closeable;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 import org.apache.felix.gogo.api.CommandSessionListener;
 import org.apache.felix.service.command.CommandSession;

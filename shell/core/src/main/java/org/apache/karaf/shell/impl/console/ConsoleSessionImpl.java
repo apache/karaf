@@ -52,7 +52,6 @@ import org.apache.karaf.shell.api.console.Registry;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.api.console.SessionFactory;
 import org.apache.karaf.shell.api.console.Terminal;
-import org.apache.karaf.shell.impl.console.parsing.Parser;
 import org.apache.karaf.shell.support.ShellUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

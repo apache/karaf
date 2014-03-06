@@ -38,15 +38,14 @@ import java.util.List;
 import org.apache.felix.gogo.runtime.threadio.ThreadIOImpl;
 import org.apache.felix.service.threadio.ThreadIO;
 import org.apache.karaf.shell.api.action.lifecycle.Manager;
-import org.apache.karaf.shell.api.console.Registry;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.api.console.SessionFactory;
 import org.apache.karaf.shell.api.console.Terminal;
 import org.apache.karaf.shell.impl.action.command.ManagerImpl;
-import org.apache.karaf.shell.support.NameScoping;
 import org.apache.karaf.shell.impl.console.JLineTerminal;
 import org.apache.karaf.shell.impl.console.SessionFactoryImpl;
 import org.apache.karaf.shell.impl.console.TerminalFactory;
+import org.apache.karaf.shell.support.NameScoping;
 import org.apache.karaf.shell.support.ShellUtil;
 import org.fusesource.jansi.AnsiConsole;
 
