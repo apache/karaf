@@ -1,6 +1,6 @@
 package org.apache.karaf.main;
 
-import org.apache.karaf.util.properties.Properties;
+import org.apache.felix.utils.properties.Properties;
 import java.util.logging.Logger;
 
 import org.apache.karaf.main.lock.Lock;

@@ -25,7 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.karaf.util.properties.InterpolationHelper;
+import org.apache.felix.utils.properties.InterpolationHelper;
 import org.apache.karaf.shell.api.console.Command;
 import org.apache.karaf.shell.api.console.CommandLine;
 import org.apache.karaf.shell.api.console.Completer;

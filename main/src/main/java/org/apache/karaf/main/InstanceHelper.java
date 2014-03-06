@@ -30,6 +30,7 @@ import java.net.ServerSocket;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.util.locks.FileLockUtils;
 import org.osgi.framework.launch.Framework;
 
@@ -60,7 +61,7 @@ public class InstanceHelper {
                     }
                 }
                 FileLockUtils.execute(propertiesFile, new FileLockUtils.RunnableWithProperties() {
-                    public void run(org.apache.karaf.util.properties.Properties props) throws IOException {
+                    public void run(Properties props) throws IOException {
                         if (props.isEmpty()) {
                             if (isRoot) {
                                 props.setProperty("count", "1");

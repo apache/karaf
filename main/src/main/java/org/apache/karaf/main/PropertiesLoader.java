@@ -26,12 +26,12 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Enumeration;
-import org.apache.karaf.util.properties.Properties;
+import org.apache.felix.utils.properties.Properties;
 import java.util.StringTokenizer;
 
 import org.apache.karaf.main.util.Utils;
 
-import static org.apache.karaf.util.properties.InterpolationHelper.substVars;
+import static org.apache.felix.utils.properties.InterpolationHelper.substVars;
 
 public class PropertiesLoader {
 

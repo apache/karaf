@@ -26,9 +26,8 @@ import static org.junit.Assert.*;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import org.apache.karaf.util.properties.Properties;
+import org.apache.felix.utils.properties.Properties;
 
-import org.apache.karaf.main.lock.OracleJDBCLock;
 import org.junit.Before;
 import org.junit.Test;
 

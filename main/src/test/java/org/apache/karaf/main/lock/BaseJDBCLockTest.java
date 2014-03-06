@@ -28,7 +28,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import org.apache.karaf.util.properties.Properties;
+import org.apache.felix.utils.properties.Properties;
 
 import org.apache.karaf.main.util.BootstrapLogManager;
 import org.easymock.EasyMock;

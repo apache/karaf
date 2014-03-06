@@ -24,8 +24,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import org.apache.karaf.util.properties.Properties;
-import org.apache.karaf.util.properties.InterpolationHelper;
+import org.apache.felix.utils.properties.Properties;
+import org.apache.felix.utils.properties.InterpolationHelper;
 
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
