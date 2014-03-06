@@ -26,6 +26,7 @@ import java.io.Writer;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.felix.utils.manifest.Clause;
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.internal.model.Bundle;
 import org.junit.Before;
@@ -199,6 +200,26 @@ public class OverridesTest {
         BundleInfo out = res.get(0);
         assertNotNull(out);
         assertEquals(b100.toURI().toString(), out.getLocation());
+    }
+
+    @Test
+    public void testLoadOverrides() {
+        List<Clause> overrides = Overrides.loadOverrides(getClass().getResource("overrides.properties").toExternalForm());
+        assertEquals(2, overrides.size());
+
+        Clause karafAdminCommand = null;
+        Clause karafAdminCore = null;
+        for (Clause clause : overrides) {
+            if (clause.getName().equals("mvn:org.apache.karaf.admin/org.apache.karaf.admin.command/2.3.0.redhat-61033X")) {
+                karafAdminCommand = clause;
+            }
+            if (clause.getName().equals("mvn:org.apache.karaf.admin/org.apache.karaf.admin.core/2.3.0.redhat-61033X")) {
+                karafAdminCore = clause;
+            }
+        }
+        assertNotNull("Missing admin.command bundle override", karafAdminCommand);
+        assertNotNull("Missing admin.core bundle override", karafAdminCore);
+        assertNotNull("Missing range on admin.core override", karafAdminCore.getAttribute(Overrides.OVERRIDE_RANGE));
     }
 
     /**

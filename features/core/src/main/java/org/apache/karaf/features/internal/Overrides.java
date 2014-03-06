@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,7 +48,7 @@ public class Overrides {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Overrides.class);
 
-    private static final String OVERRIDE_RANGE = "range";
+    protected static final String OVERRIDE_RANGE = "range";
     private static final String VENDOR_WARNING = "Bundle Vendor has changed, please check if this is intentional. Bundle: ";
 
     /**
@@ -169,10 +170,8 @@ public class Overrides {
                     while ((line = reader.readLine()) != null) {
                         line = line.trim();
                         if (!line.isEmpty() && !line.startsWith("#")) {
-                            Clause[] cs = Parser.parseHeader(line);
-                            for (Clause c : cs) {
-                                overrides.add(c);
-                            }
+                            Clause[] cs = Parser.parseClauses(new String[]{line});
+                            Collections.addAll(overrides, cs);
                         }
                     }
                 } finally {
