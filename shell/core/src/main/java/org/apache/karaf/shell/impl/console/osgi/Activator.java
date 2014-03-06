@@ -18,6 +18,8 @@
  */
 package org.apache.karaf.shell.impl.console.osgi;
 
+import java.io.Closeable;
+
 import org.apache.felix.gogo.runtime.threadio.ThreadIOImpl;
 import org.apache.karaf.shell.api.console.SessionFactory;
 import org.apache.karaf.shell.impl.action.osgi.CommandExtender;
@@ -40,6 +42,8 @@ public class Activator implements BundleActivator {
 
     private CommandExtender actionExtender;
 
+    private Closeable eventAdminListener;
+
     private TerminalFactory terminalFactory;
     private LocalConsoleManager localConsoleManager;
 
@@ -51,6 +55,13 @@ public class Activator implements BundleActivator {
         sessionFactory = new SecuredSessionFactoryImpl(context, threadIO);
         sessionFactory.getCommandProcessor().addConverter(new Converters(context));
         sessionFactory.getCommandProcessor().addConstant(".context", context.getBundle(0).getBundleContext());
+        try {
+            EventAdminListener listener = new EventAdminListener(context);
+            sessionFactory.getCommandProcessor().addListener(listener);
+            eventAdminListener = listener;
+        } catch (NoClassDefFoundError error) {
+            // Ignore the listener if EventAdmin package isn't present
+        }
 
         sessionFactory.register(new ManagerImpl(sessionFactory, sessionFactory));
 
@@ -74,5 +85,8 @@ public class Activator implements BundleActivator {
         actionExtender.stop(context);
         threadIO.stop();
         terminalFactory.destroy();
+        if (eventAdminListener != null) {
+            eventAdminListener.close();
+        }
     }
 }
