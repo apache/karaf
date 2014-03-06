@@ -33,7 +33,7 @@ import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 
-import org.apache.mina.util.Base64;
+import org.apache.sshd.common.util.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -34,8 +34,8 @@ import org.apache.sshd.SshClient;
 import org.apache.sshd.agent.SshAgent;
 import org.apache.sshd.agent.local.AgentImpl;
 import org.apache.sshd.agent.local.LocalAgentFactory;
+import org.apache.sshd.client.UserInteraction;
 import org.apache.sshd.client.channel.ChannelShell;
-import org.apache.sshd.client.future.AuthFuture;
 import org.apache.sshd.client.future.ConnectFuture;
 import org.apache.sshd.common.RuntimeSshException;
 import org.fusesource.jansi.AnsiConsole;
@@ -76,40 +76,41 @@ public class Main {
         Terminal terminal = null;
         int exitStatus = 0;
         try {
+            final Console console = System.console();
             client = SshClient.setUpDefaultClient();
             setupAgent(config.getUser(), client);
+            client.setUserInteraction(new UserInteraction() {
+                public void welcome(String banner) {
+                    System.out.println(banner);
+                }
+
+                public String[] interactive(String destination, String name, String instruction, String[] prompt, boolean[] echo) {
+                    String[] answers = new String[prompt.length];
+                    try {
+                        for (int i = 0; i < prompt.length; i++) {
+                            if (console != null) {
+                                if (echo[i]) {
+                                    answers[i] = console.readLine(prompt[i] + " ");
+                                } else {
+                                    answers[i] = new String(console.readPassword(prompt[i] + " "));
+                                }
+                            }
+                        }
+                    } catch (IOError e) {
+                    }
+                    return answers;
+                }
+            });
             client.start();
-            ClientSession session = connectWithRetries(client, config);
-            Console console = System.console();
             if (console != null) {
                 console.printf("Logging in as %s\n", config.getUser());
             }
-            if (!session.authAgent(config.getUser()).await().isSuccess()) {
-                AuthFuture authFuture;
-                boolean useDefault = config.getPassword() != null;
-                do {
-                    String password;
-                    if (useDefault) {
-                        password = config.getPassword();
-                        useDefault = false;
-                    } else {
-                        if (console != null) {
-                            char[] readPassword = console.readPassword("Password: ");
-                            if (readPassword != null) {
-                                password = new String(readPassword);
-                            } else {
-                                return;
-                            }
-                        } else {
-                            throw new Exception("Unable to prompt password: could not get system console");
-                        }
-                    }
-                    authFuture = session.authPassword(config.getUser(), password);
-                } while (authFuture.await().isFailure());
-                if (!authFuture.isSuccess()) {
-                    throw new Exception("Authentication failure");
-                }
+            ClientSession session = connectWithRetries(client, config);
+            if (config.getPassword() != null) {
+                session.addPasswordIdentity(config.getPassword());
             }
+            session.auth().verify();
+
             ClientChannel channel;
             if (config.getCommand().length() > 0) {
                 channel = session.createChannel("exec", config.getCommand() + "\n");
@@ -172,7 +173,7 @@ public class Main {
         ClientSession session = null;
         int retries = 0;
         do {
-            ConnectFuture future = client.connect(config.getHost(), config.getPort());
+            ConnectFuture future = client.connect(config.getUser(), config.getHost(), config.getPort());
             future.await();
             try {
                 session = future.getSession();

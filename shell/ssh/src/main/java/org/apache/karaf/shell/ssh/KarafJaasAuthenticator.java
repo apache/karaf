@@ -19,7 +19,6 @@
 package org.apache.karaf.shell.ssh;
 
 import java.io.IOException;
-import java.security.Principal;
 import java.security.PublicKey;
 
 import javax.security.auth.Subject;
@@ -28,10 +27,8 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
-import javax.security.auth.login.FailedLoginException;
 import javax.security.auth.login.LoginContext;
 
-import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.modules.publickey.PublickeyCallback;
 import org.apache.sshd.common.Session;
 import org.apache.sshd.server.PasswordAuthenticator;
