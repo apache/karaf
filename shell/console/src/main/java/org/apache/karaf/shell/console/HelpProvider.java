@@ -19,6 +19,7 @@ package org.apache.karaf.shell.console;
 
 import org.apache.felix.service.command.CommandSession;
 
+@Deprecated
 public interface HelpProvider {
     
     String getHelp(CommandSession session, String path);

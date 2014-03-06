@@ -52,6 +52,7 @@ import org.slf4j.LoggerFactory;
 
 import static org.apache.karaf.shell.console.completer.CommandsCompleter.unProxy;
 
+@Deprecated
 public class ArgumentCompleter implements Completer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ArgumentCompleter.class);

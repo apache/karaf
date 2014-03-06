@@ -36,6 +36,7 @@ import org.osgi.framework.ServiceListener;
 /**
  * Completes command names
  */
+@Deprecated
 public class CommandNamesCompleter implements Completer {
 
     public static final String COMMANDS = ".commands";

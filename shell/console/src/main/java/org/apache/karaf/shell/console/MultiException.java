@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("serial")
+@Deprecated
 public class MultiException extends Exception {
 
     private List<Exception> exceptions = new ArrayList<Exception>();

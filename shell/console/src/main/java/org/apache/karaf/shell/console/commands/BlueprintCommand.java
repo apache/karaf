@@ -34,6 +34,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.blueprint.container.BlueprintContainer;
 import org.osgi.service.blueprint.container.Converter;
 
+@Deprecated
 public class
         BlueprintCommand extends AbstractCommand implements CompletableFunction
 {

@@ -41,6 +41,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+@Deprecated
 public class SecuredCommandProcessorImpl extends CommandProcessorImpl {
 
     private final BundleContext bundleContext;

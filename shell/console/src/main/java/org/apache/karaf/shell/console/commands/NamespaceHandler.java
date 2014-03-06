@@ -68,6 +68,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 
+@Deprecated
 public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHandler {
 
     public static final String ID = "id";

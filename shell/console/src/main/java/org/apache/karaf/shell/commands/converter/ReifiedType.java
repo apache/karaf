@@ -35,6 +35,7 @@ package org.apache.karaf.shell.commands.converter;
  *
  * @Immutable
  */
+@Deprecated
 public class ReifiedType {
 	final static ReifiedType ALL = new ReifiedType(Object.class);
 

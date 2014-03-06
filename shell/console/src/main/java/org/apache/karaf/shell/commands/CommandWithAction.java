@@ -20,6 +20,7 @@ package org.apache.karaf.shell.commands;
 
 import org.apache.felix.service.command.Function;
 
+@Deprecated
 public interface CommandWithAction extends Function {
 
     Class<? extends org.apache.felix.gogo.commands.Action> getActionClass();

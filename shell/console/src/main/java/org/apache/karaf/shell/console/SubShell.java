@@ -18,6 +18,7 @@
  */
 package org.apache.karaf.shell.console;
 
+@Deprecated
 public interface SubShell {
 
     /**

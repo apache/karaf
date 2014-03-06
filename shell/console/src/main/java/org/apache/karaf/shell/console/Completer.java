@@ -20,6 +20,7 @@ package org.apache.karaf.shell.console;
 
 import java.util.List;
 
+@Deprecated
 public interface Completer {
 
     int complete(String buffer, int cursor, List<String> candidates);

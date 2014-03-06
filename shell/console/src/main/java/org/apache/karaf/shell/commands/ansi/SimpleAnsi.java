@@ -21,6 +21,7 @@ package org.apache.karaf.shell.commands.ansi;
 import org.fusesource.jansi.Ansi;
 import org.fusesource.jansi.Ansi.Color;
 
+@Deprecated
 public class SimpleAnsi {
     public static String COLOR_RED = Ansi.ansi().fg(Color.RED).toString();
     public static String COLOR_DEFAULT = Ansi.ansi().fg(Color.DEFAULT).toString();

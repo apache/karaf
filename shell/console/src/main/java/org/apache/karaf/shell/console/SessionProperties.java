@@ -18,6 +18,7 @@
  */
 package org.apache.karaf.shell.console;
 
+@Deprecated
 public class SessionProperties {
 
     public static final String PRINT_STACK_TRACES = "karaf.printStackTraces";

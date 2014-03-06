@@ -23,6 +23,7 @@ import java.util.List;
 import org.apache.felix.gogo.commands.Action;
 import org.apache.felix.service.command.CommandSession;
 
+@Deprecated
 public interface ActionPreparator {
 
     /**

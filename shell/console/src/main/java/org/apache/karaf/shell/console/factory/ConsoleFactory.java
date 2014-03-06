@@ -25,6 +25,7 @@ import jline.Terminal;
 
 import org.apache.karaf.shell.console.Console;
 
+@Deprecated
 public interface ConsoleFactory {
     Console create(InputStream in, PrintStream out, PrintStream err, final Terminal term, String encoding, Runnable closeCallback);
 }

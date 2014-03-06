@@ -21,6 +21,7 @@ package org.apache.karaf.shell.console.commands;
 import org.osgi.service.blueprint.container.Converter;
 import org.osgi.service.blueprint.container.ReifiedType;
 
+@Deprecated
 public class NumberToStringConverter implements Converter {
 
     @Override

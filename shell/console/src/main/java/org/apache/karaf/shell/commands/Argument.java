@@ -28,6 +28,7 @@ import java.lang.annotation.ElementType;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD})
+@Deprecated
 public @interface Argument
 {
     public static final String DEFAULT_STRING= "DEFAULT";

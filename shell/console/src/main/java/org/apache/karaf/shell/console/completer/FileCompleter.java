@@ -43,6 +43,7 @@ import org.apache.karaf.shell.console.Completer;
  * @author <a href="mailto:jason@planet57.com">Jason Dillon</a>
  * @since 2.3
  */
+@Deprecated
 public class FileCompleter implements Completer
 {
     private static String OS = System.getProperty("os.name").toLowerCase();

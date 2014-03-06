@@ -29,6 +29,7 @@ import java.util.Map;
 import org.osgi.framework.Bundle;
 import org.osgi.service.blueprint.container.ReifiedType;
 
+@Deprecated
 public class GenericType extends ReifiedType {
 
 	private static final GenericType[] EMPTY = new GenericType[0];

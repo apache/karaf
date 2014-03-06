@@ -22,6 +22,7 @@ package org.apache.karaf.shell.console;
 /**
  * Switch to a sub-shell.
  */
+@Deprecated
 public class SubShellAction extends AbstractAction {
     
     private String subShell;

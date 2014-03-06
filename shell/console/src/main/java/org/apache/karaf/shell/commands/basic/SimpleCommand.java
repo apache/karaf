@@ -30,6 +30,7 @@ import org.osgi.framework.BundleContext;
 /**
  * A very simple {@link Function} which creates {@link Action} based on a class name.
  */
+@Deprecated
 public class SimpleCommand extends AbstractCommand {
 
     private Class<? extends Action> actionClass;

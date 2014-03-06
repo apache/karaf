@@ -42,6 +42,7 @@ import org.osgi.framework.startlevel.BundleStartLevel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Deprecated
 public class ShellUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ShellUtil.class);

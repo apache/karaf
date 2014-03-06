@@ -24,6 +24,7 @@ import org.apache.karaf.shell.commands.Command;
  * Exit from the current sub-shell and get back to the previous one.
  */
 @Command(scope = "*", name = "exit", description = "Exit from the current shell")
+@Deprecated
 public class ExitAction extends AbstractAction {
     
     public Object doExecute() throws Exception {

@@ -45,6 +45,7 @@ import org.apache.karaf.shell.commands.meta.ActionMetaData;
 import org.apache.karaf.shell.commands.meta.ActionMetaDataFactory;
 import org.apache.karaf.shell.console.NameScoping;
 
+@Deprecated
 public class DefaultActionPreparator implements ActionPreparator {
 
     public boolean prepare(Action action, CommandSession session, List<Object> params) throws Exception {

@@ -23,6 +23,7 @@ import java.util.Map;
 
 import org.apache.felix.service.command.Function;
 
+@Deprecated
 public interface CompletableFunction extends Function {
 
     List<Completer> getCompleters();

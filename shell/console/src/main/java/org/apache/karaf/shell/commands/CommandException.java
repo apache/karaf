@@ -25,6 +25,7 @@ import org.apache.karaf.shell.commands.ansi.SimpleAnsi;
  * Base class for exceptions thrown when executing commands.
  */
 @SuppressWarnings("serial")
+@Deprecated
 public class CommandException extends Exception {
 
     private String help;

@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.*;
 
+@Deprecated
 public class SecuredCommandConfigTransformer implements ConfigurationListener {
 
     static final String PROXY_COMMAND_ACL_PID_PREFIX = "org.apache.karaf.command.acl.";

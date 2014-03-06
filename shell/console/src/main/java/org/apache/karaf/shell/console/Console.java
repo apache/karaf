@@ -20,6 +20,7 @@ package org.apache.karaf.shell.console;
 
 import org.apache.felix.service.command.CommandSession;
 
+@Deprecated
 public interface Console extends Runnable {
 
     CommandSession getSession();

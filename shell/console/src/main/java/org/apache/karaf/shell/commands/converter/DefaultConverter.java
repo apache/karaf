@@ -51,6 +51,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.lang.reflect.InvocationTargetException;
 
+@Deprecated
 public class DefaultConverter
 {
 

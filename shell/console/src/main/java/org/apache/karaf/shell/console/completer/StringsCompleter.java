@@ -29,6 +29,7 @@ import org.apache.karaf.shell.console.Completer;
 /**
  * Completer for a set of strings.
  */
+@Deprecated
 public class StringsCompleter
     implements Completer
 {

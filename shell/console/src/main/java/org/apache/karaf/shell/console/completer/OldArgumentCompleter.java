@@ -44,6 +44,7 @@ import org.apache.karaf.shell.console.NameScoping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Deprecated
 public class OldArgumentCompleter implements Completer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OldArgumentCompleter.class);

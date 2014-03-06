@@ -29,6 +29,7 @@ import org.apache.karaf.shell.console.Completer;
 /**
  * Completer which contains multipule completers and aggregates them together.
  */
+@Deprecated
 public class AggregateCompleter implements Completer
 {
     private final Collection<Completer> completers;

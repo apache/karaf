@@ -23,6 +23,7 @@ package org.apache.karaf.shell.console.completer;
 import java.util.ArrayList;
 import java.util.List;
 
+@Deprecated
 public class Parser {
 
     int current = 0;

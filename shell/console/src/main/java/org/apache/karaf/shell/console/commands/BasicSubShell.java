@@ -19,6 +19,7 @@ package org.apache.karaf.shell.console.commands;
 
 import org.apache.karaf.shell.console.SubShell;
 
+@Deprecated
 public class BasicSubShell implements SubShell {
     
     private String name;

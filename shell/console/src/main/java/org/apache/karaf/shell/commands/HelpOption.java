@@ -20,6 +20,7 @@ package org.apache.karaf.shell.commands;
 
 import java.lang.annotation.Annotation;
 
+@Deprecated
 public class HelpOption {
 
     public static final Option HELP = new Option() {

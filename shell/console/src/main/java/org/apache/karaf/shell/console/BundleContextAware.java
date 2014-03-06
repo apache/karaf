@@ -20,6 +20,7 @@ package org.apache.karaf.shell.console;
 
 import org.osgi.framework.BundleContext;
 
+@Deprecated
 public interface BundleContextAware {
 
     void setBundleContext(BundleContext bundleContext);

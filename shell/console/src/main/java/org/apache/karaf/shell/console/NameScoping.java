@@ -23,6 +23,7 @@ import org.apache.felix.service.command.CommandSession;
 /**
  * A helper class for name scoping
  */
+@Deprecated
 public class NameScoping {
 
     public static final String MULTI_SCOPE_MODE_KEY = "MULTI_SCOPE_MODE";

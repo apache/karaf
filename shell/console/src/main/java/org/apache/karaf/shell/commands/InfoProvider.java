@@ -21,6 +21,7 @@ import java.util.Properties;
 /**
  * A bundle can publish a service with this interface to offer some informations for the shell:info command
  */
+@Deprecated
 public interface InfoProvider {
 
 	public String getName();

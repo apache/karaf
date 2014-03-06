@@ -20,6 +20,7 @@ package org.apache.karaf.shell.console;
 
 import org.osgi.service.blueprint.container.BlueprintContainer;
 
+@Deprecated
 public interface BlueprintContainerAware {
 
     void setBlueprintContainer(BlueprintContainer blueprintContainer);

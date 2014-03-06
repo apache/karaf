@@ -29,6 +29,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
+@Deprecated
 public abstract class OsgiCommandSupport extends AbstractAction implements Action, BundleContextAware {
 
     protected BundleContext bundleContext;
