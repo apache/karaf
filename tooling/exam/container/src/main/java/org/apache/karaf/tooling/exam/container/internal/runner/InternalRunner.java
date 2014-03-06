@@ -86,12 +86,18 @@ public class InternalRunner {
      * Wait till the framework process exits.
      */
     public void waitForExit() {
-        synchronized (m_frameworkProcess) {
-            try {
-                m_frameworkProcess.waitFor();
-                shutdown();
-            } catch (Throwable e) {
-                shutdown();
+        if (m_shutdownHook != null) {
+            synchronized (m_shutdownHook) {
+                if (m_shutdownHook != null) {
+                    synchronized (m_frameworkProcess) {
+                        try {
+                            m_frameworkProcess.waitFor();
+                            shutdown();
+                        } catch (Throwable e) {
+                            shutdown();
+                        }
+                    }
+                }
             }
         }
     }
