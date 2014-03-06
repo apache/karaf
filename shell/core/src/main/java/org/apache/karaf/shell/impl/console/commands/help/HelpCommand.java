@@ -33,6 +33,7 @@ import org.apache.karaf.shell.api.console.Registry;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.api.console.SessionFactory;
 import org.apache.karaf.shell.support.CommandException;
+import org.apache.karaf.shell.support.completers.ArgumentCommandLine;
 import org.apache.karaf.shell.support.completers.StringsCompleter;
 
 import static org.apache.karaf.shell.support.ansi.SimpleAnsi.COLOR_DEFAULT;
@@ -180,46 +181,6 @@ public class HelpCommand implements Command {
             help = help.substring(0, help.length()  -1);
         }
         return help;
-    }
-
-    static class ArgumentCommandLine implements CommandLine {
-        private final String argument;
-        private final int position;
-
-        ArgumentCommandLine(String argument, int position) {
-            this.argument = argument;
-            this.position = position;
-        }
-
-        @Override
-        public int getCursorArgumentIndex() {
-            return 0;
-        }
-
-        @Override
-        public String getCursorArgument() {
-            return argument;
-        }
-
-        @Override
-        public int getArgumentPosition() {
-            return position;
-        }
-
-        @Override
-        public String[] getArguments() {
-            return new String[] { argument };
-        }
-
-        @Override
-        public int getBufferPosition() {
-            return position;
-        }
-
-        @Override
-        public String getBuffer() {
-            return argument;
-        }
     }
 
 }

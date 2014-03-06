@@ -36,6 +36,7 @@ import org.apache.karaf.shell.api.console.Completer;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.api.console.SessionFactory;
 import org.apache.karaf.shell.support.completers.AggregateCompleter;
+import org.apache.karaf.shell.support.completers.ArgumentCommandLine;
 import org.apache.karaf.shell.support.completers.StringsCompleter;
 
 /**
@@ -46,6 +47,12 @@ public class CommandsCompleter extends org.apache.karaf.shell.support.completers
     private final SessionFactory factory;
     private final Map<String, Completer> globalCompleters = new HashMap<String, Completer>();
     private final Map<String, Completer> localCompleters = new HashMap<String, Completer>();
+    private final Completer aliasesCompleter = new SimpleCommandCompleter() {
+        @Override
+        protected Collection<String> getNames(Session session) {
+            return getAliases(session);
+        }
+    };
     private final List<Command> commands = new ArrayList<Command>();
 
     public CommandsCompleter(SessionFactory factory) {
@@ -95,7 +102,7 @@ public class CommandsCompleter extends org.apache.karaf.shell.support.completers
                 }
             }
             List<Completer> compl = new ArrayList<Completer>();
-            compl.add(new StringsCompleter(getAliases(session)));
+            compl.add(aliasesCompleter);
             compl.addAll(allCompleters[0].values());
             int res = new AggregateCompleter(compl).complete(session, commandLine, candidates);
             Collections.sort(candidates);
@@ -103,7 +110,7 @@ public class CommandsCompleter extends org.apache.karaf.shell.support.completers
         }
 
         List<Completer> compl = new ArrayList<Completer>();
-        compl.add(new StringsCompleter(getAliases(session)));
+        compl.add(aliasesCompleter);
         compl.addAll(allCompleters[0].values());
         int res = new AggregateCompleter(compl).complete(session, commandLine, candidates);
         Collections.sort(candidates);
@@ -205,13 +212,13 @@ public class CommandsCompleter extends org.apache.karaf.shell.support.completers
                 Completer cl = command.getCompleter(true);
                 if (cg == null) {
                     if (Session.SCOPE_GLOBAL.equals(command.getScope())) {
-                        cg = new StringsCompleter(new String[] { command.getName() });
+                        cg = new FixedSimpleCommandCompleter(Arrays.asList(command.getName()));
                     } else {
-                        cg = new StringsCompleter(new String[] { key, command.getName() });
+                        cg = new FixedSimpleCommandCompleter(Arrays.asList(key, command.getName()));
                     }
                 }
                 if (cl == null) {
-                    cl = new StringsCompleter(new String[] { command.getName() });
+                    cl = new FixedSimpleCommandCompleter(Arrays.asList(command.getName()));
                 }
                 global.put(key, cg);
                 local.put(key, cl);
@@ -250,6 +257,48 @@ public class CommandsCompleter extends org.apache.karaf.shell.support.completers
             }
         }
         return aliases;
+    }
+
+    static abstract class SimpleCommandCompleter implements Completer {
+
+        @Override
+        public int complete(Session session, CommandLine commandLine, List<String> candidates) {
+            String[] args = commandLine.getArguments();
+            int argIndex = commandLine.getCursorArgumentIndex();
+            StringsCompleter completer = new StringsCompleter(getNames(session));
+            if (argIndex == 0) {
+                int res = completer.complete(session, new ArgumentCommandLine(args[argIndex], commandLine.getArgumentPosition()), candidates);
+                if (res > -1) {
+                    res += commandLine.getBufferPosition() - commandLine.getArgumentPosition();
+                }
+                return res;
+            } else if (!verifyCompleter(session, completer, args[0])) {
+                return -1;
+            }
+            return 0;
+        }
+
+        protected abstract Collection<String> getNames(Session session);
+
+        private boolean verifyCompleter(Session session, Completer completer, String argument) {
+            List<String> candidates = new ArrayList<String>();
+            return completer.complete(session, new ArgumentCommandLine(argument, argument.length()), candidates) != -1 && !candidates.isEmpty();
+        }
+
+    }
+
+    static class FixedSimpleCommandCompleter extends SimpleCommandCompleter {
+
+        private final Collection<String> names;
+
+        FixedSimpleCommandCompleter(Collection<String> names) {
+            this.names = names;
+        }
+
+        @Override
+        protected Collection<String> getNames(Session session) {
+            return names;
+        }
     }
 
 }

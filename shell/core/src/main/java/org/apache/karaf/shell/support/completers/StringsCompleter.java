@@ -82,9 +82,11 @@ public class StringsCompleter
         // buffer could be null
         assert candidates != null;
 
-        String buffer = commandLine.getBuffer();
+        String buffer = commandLine.getCursorArgument();
         if (buffer == null) {
             buffer = "";
+        } else {
+            buffer = buffer.substring(0, commandLine.getArgumentPosition());
         }
         if (!caseSensitive) {
             buffer = buffer.toLowerCase();
@@ -108,6 +110,6 @@ public class StringsCompleter
             candidates.set(0, candidates.get(0) + " ");
         }
 
-        return candidates.isEmpty() ? -1 : 0;
+        return candidates.isEmpty() ? -1 : commandLine.getBufferPosition() - commandLine.getArgumentPosition();
     }
 }

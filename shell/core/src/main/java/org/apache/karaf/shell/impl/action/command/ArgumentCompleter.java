@@ -35,6 +35,7 @@ import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.console.CommandLine;
 import org.apache.karaf.shell.api.console.Completer;
 import org.apache.karaf.shell.api.console.Session;
+import org.apache.karaf.shell.support.completers.ArgumentCommandLine;
 import org.apache.karaf.shell.support.completers.FileCompleter;
 import org.apache.karaf.shell.support.completers.NullCompleter;
 import org.apache.karaf.shell.support.completers.StringsCompleter;
@@ -275,13 +276,11 @@ public class ArgumentCompleter implements Completer {
             comp = argsCompleters.get(indexArg >= argsCompleters.size() ? argsCompleters.size() - 1 : indexArg);
         }
 
-        int ret = comp.complete(session, new ArgumentCommandLine(list.getCursorArgument(), argpos), candidates);
+        int pos = comp.complete(session, list, candidates);
 
-        if (ret == -1) {
+        if (pos == -1) {
             return -1;
         }
-
-        int pos = ret + (list.getBufferPosition() - argpos);
 
         /**
          *  Special case: when completing in the middle of a line, and the
@@ -343,43 +342,4 @@ public class ArgumentCompleter implements Completer {
         return Character.isWhitespace(buffer.charAt(pos));
     }
 
-    static class ArgumentCommandLine implements CommandLine {
-        private final String argument;
-        private final int position;
-
-        ArgumentCommandLine(String argument, int position) {
-            this.argument = argument;
-            this.position = position;
-        }
-
-        @Override
-        public int getCursorArgumentIndex() {
-            return 0;
-        }
-
-        @Override
-        public String getCursorArgument() {
-            return argument;
-        }
-
-        @Override
-        public int getArgumentPosition() {
-            return position;
-        }
-
-        @Override
-        public String[] getArguments() {
-            return new String[] { argument };
-        }
-
-        @Override
-        public int getBufferPosition() {
-            return position;
-        }
-
-        @Override
-        public String getBuffer() {
-            return argument;
-        }
-    }
 }
