@@ -34,8 +34,8 @@ import org.apache.sshd.ClientChannel;
 import org.apache.sshd.ClientSession;
 import org.apache.sshd.SshClient;
 import org.apache.sshd.agent.SshAgent;
+import org.apache.sshd.client.UserInteraction;
 import org.apache.sshd.client.channel.ChannelShell;
-import org.apache.sshd.client.future.ConnectFuture;
 import org.apache.sshd.common.util.NoCloseInputStream;
 import org.apache.sshd.common.util.NoCloseOutputStream;
 import org.slf4j.Logger;
@@ -120,54 +120,33 @@ public class SshAction implements Action {
             agentSocket = this.session.get(SshAgent.SSH_AUTHSOCKET_ENV_NAME).toString();
             client.getProperties().put(SshAgent.SSH_AUTHSOCKET_ENV_NAME,agentSocket);
         }
+        client.setUserInteraction(new UserInteraction() {
+            public void welcome(String banner) {
+                System.out.println(banner);
+            }
+            public String[] interactive(String destination, String name, String instruction, String[] prompt, boolean[] echo) {
+                String[] answers = new String[prompt.length];
+                try {
+                    for (int i = 0; i < prompt.length; i++) {
+                        answers[i] = session.readLine(prompt[i] + " ", echo[i] ? null : '*');
+                    }
+                } catch (IOException e) {
+                }
+                return answers;
+            }
+        });
 
         try {
-            ConnectFuture future = client.connect(hostname, port);
-            future.await();
-            ClientSession sshSession = future.getSession();
+            ClientSession sshSession = client.connect(username, hostname, port).await().getSession();
 
             Object oldIgnoreInterrupts = this.session.get(Session.IGNORE_INTERRUPTS);
 
             try {
 
-                boolean authed = false;
-                if (agentSocket != null) {
-                    try {
-                        sshSession.authAgent(username);
-                    } catch (IllegalStateException ise) {
-                        System.err.println(keyChangedMessage);
-                        return null;
-                    }
-                    int ret = sshSession.waitFor(ClientSession.WAIT_AUTH | ClientSession.CLOSED | ClientSession.AUTHED, 0);
-                    if ((ret & ClientSession.AUTHED) == 0) {
-                        System.err.println("Agent authentication failed, falling back to password authentication.");
-                    } else {
-                        authed = true;
-                    }
+                if (password != null) {
+                    sshSession.addPasswordIdentity(password);
                 }
-                if (!authed) {
-                    if (password == null) {
-                        log.debug("Prompting user for password");
-                        password = session.readLine("Password: ", '*');
-                    } else {
-                        log.debug("Password provided using command line option");
-                    }
-                    try {
-                        sshSession.authPassword(username, password);
-                    } catch (IllegalStateException ise) {
-                        System.err.println(keyChangedMessage);
-                        return null;
-                    }
-                    int ret = sshSession.waitFor(ClientSession.WAIT_AUTH | ClientSession.CLOSED | ClientSession.AUTHED, 0);
-                    if ((ret & ClientSession.AUTHED) == 0) {
-                        System.err.println("Password authentication failed");
-                    } else {
-                        authed = true;
-                    }
-                }
-                if (!authed) {
-                    return null;
-                }
+                sshSession.auth().verify();
 
                 System.out.println("Connected");
                 this.session.put( Session.IGNORE_INTERRUPTS, Boolean.TRUE );
@@ -199,7 +178,7 @@ public class SshAction implements Action {
                 }
                 channel.setOut(new NoCloseOutputStream(System.out));
                 channel.setErr(new NoCloseOutputStream(System.err));
-                channel.open();
+                channel.open().verify();
                 channel.waitFor(ClientChannel.CLOSED, 0);
             } finally {
                 session.put( Session.IGNORE_INTERRUPTS, oldIgnoreInterrupts );

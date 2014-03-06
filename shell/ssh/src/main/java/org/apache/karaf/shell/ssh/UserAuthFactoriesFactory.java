@@ -53,7 +53,7 @@ public class UserAuthFactoriesFactory {
     private Set<String> methodSet;
     private List<NamedFactory<UserAuth>> factories;
 
-    public void setAuthMethods(String methods) {
+   public void setAuthMethods(String methods) {
         this.methodSet = new HashSet<String>();
         this.factories = new ArrayList<NamedFactory<UserAuth>>();
         String[] ams = methods.split(",");
