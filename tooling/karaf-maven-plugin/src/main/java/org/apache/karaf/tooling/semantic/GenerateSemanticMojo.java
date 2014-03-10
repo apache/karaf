@@ -45,6 +45,7 @@ import org.sonatype.aether.graph.DependencyNode;
 import org.sonatype.aether.resolution.DependencyRequest;
 import org.sonatype.aether.resolution.DependencyResult;
 import org.sonatype.aether.util.DefaultRepositorySystemSession;
+import org.sonatype.aether.util.artifact.DefaultArtifact;
 import org.sonatype.aether.util.graph.PostorderNodeListGenerator;
 import org.sonatype.aether.util.graph.selector.AndDependencySelector;
 import org.sonatype.aether.util.graph.selector.ExclusionDependencySelector;
@@ -135,8 +136,14 @@ public class GenerateSemanticMojo extends GenerateDescriptorMojo {
 	public static Map<Artifact, String> prepare(final MojoContext context)
 			throws Exception {
 
-		final Artifact artifact = RepositoryUtils.toArtifact(context.project
-				.getArtifact());
+		Artifact resolved = RepositoryUtils.toArtifact(context.project.getArtifact());
+
+		if (!"pom".equals(resolved.getExtension())) {
+			resolved = new DefaultArtifact(resolved.getGroupId(), resolved.getArtifactId(), resolved.getClassifier(),
+					"pom", resolved.getVersion());
+		}
+
+		final Artifact artifact = resolved;
 
 		final Dependency root = new Dependency(artifact, "compile");
 
@@ -194,9 +201,13 @@ public class GenerateSemanticMojo extends GenerateDescriptorMojo {
 						if (context.includeTransitive)
 							return true;
 
-						// Always include root
-						if (parents.size() == 0)
-							return true;
+						// Always include root if it contains code
+						if (parents.size() == 0) {
+							if ("jar".equals(node.getDependency().getArtifact().getExtension()))
+								return true;
+							else
+								return false;
+						}
 
 						// Check if it is a direct dependency
 						if (parents.get(0).getDependency().getArtifact().equals(artifact))
