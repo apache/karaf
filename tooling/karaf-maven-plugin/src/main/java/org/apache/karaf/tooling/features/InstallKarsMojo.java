@@ -18,8 +18,6 @@
  */
 package org.apache.karaf.tooling.features;
 
-import static java.lang.String.format;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -55,13 +53,6 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.sonatype.aether.RepositorySystem;
-import org.sonatype.aether.RepositorySystemSession;
-import org.sonatype.aether.repository.RemoteRepository;
-import org.sonatype.aether.resolution.ArtifactRequest;
-import org.sonatype.aether.resolution.ArtifactResolutionException;
-import org.sonatype.aether.resolution.ArtifactResult;
-import org.sonatype.aether.util.artifact.DefaultArtifact;
 
 /**
  * Installs kar dependencies into a server-under-construction in target/assembly
@@ -140,30 +131,6 @@ public class InstallKarsMojo extends MojoSupport {
      */
     private List<String> installedFeatures;
 
-    // Aether support
-    /**
-     * The entry point to Aether, i.e. the component doing all the work.
-     *
-     * @component
-     */
-    private RepositorySystem repoSystem;
-
-    /**
-     * The current repository/network configuration of Maven.
-     *
-     * @parameter default-value="${repositorySystemSession}"
-     * @readonly
-     */
-    private RepositorySystemSession repoSession;
-
-    /**
-     * The project's remote repositories to use for the resolution of plugins and their dependencies.
-     *
-     * @parameter default-value="${project.remoteProjectRepositories}"
-     * @readonly
-     */
-    private List<RemoteRepository> remoteRepos;
-
     /**
      * When a feature depends on another feature, try to find it in another referenced feature-file and install that one
      * too.
@@ -177,6 +144,9 @@ public class InstallKarsMojo extends MojoSupport {
     private Set<Feature> featureSet = new HashSet<Feature>();
     private List<Dependency> missingDependencies = new ArrayList<Dependency>();
 
+    // an access layer for available Aether implementation
+    protected DependencyHelper dependencyHelper;
+
     /**
      * list of features to  install into local repo.
      */
@@ -185,6 +155,7 @@ public class InstallKarsMojo extends MojoSupport {
     @SuppressWarnings("deprecation")
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
+        this.dependencyHelper = DependencyHelperFactory.createDependencyHelper(this.container, this.project, this.mavenSession, getLog());
         systemDirectory.mkdirs();
         system = systemDirectory.toURI();
         if (startupPropertiesFile.exists()) {
@@ -227,7 +198,7 @@ public class InstallKarsMojo extends MojoSupport {
                 }
             }
             if ("features".equals(artifact.getClassifier()) && acceptScope(artifact)) {
-                String uri = MavenUtil.artifactToMvn(artifact);
+                String uri = this.dependencyHelper.artifactToMvn(artifact);
 
                 File source = artifact.getFile();
                 DefaultRepositoryLayout layout = new DefaultRepositoryLayout();
@@ -270,7 +241,7 @@ public class InstallKarsMojo extends MojoSupport {
         Set<?> keySet = startupProperties.keySet();
         for (Object keyObject : keySet) {
             String key = (String) keyObject;
-            String path = MavenUtil.pathFromMaven(key);
+            String path = this.dependencyHelper.pathFromMaven(key);
             File target = new File(system.resolve(path));
             if (!target.exists()) {
                 install(key, target);
@@ -286,16 +257,16 @@ public class InstallKarsMojo extends MojoSupport {
                     if (key.startsWith("wrap:")) {
                         key = key.substring(5);
                     }
-                    String path = MavenUtil.pathFromMaven(key);
+                    String path = this.dependencyHelper.pathFromMaven(key);
                     File test = new File(system.resolve(path));
                     if (!test.exists()) {
                         File target = new File(system.resolve(path));
                         if (!target.exists()) {
                             install(key, target);
-                            Artifact artifact = MavenUtil.mvnToArtifact(key);
+                            Artifact artifact = this.dependencyHelper.mvnToArtifact(key);
                             if (artifact.isSnapshot()) {
                                 // generate maven-metadata-local.xml for the artifact
-                                File metadataSource = new File(resolve(key).getParentFile(), "maven-metadata-local.xml");
+                                File metadataSource = new File(this.dependencyHelper.resolveById(key, getLog()).getParentFile(), "maven-metadata-local.xml");
                                 File metadataTarget = new File(target.getParentFile(), "maven-metadata-local.xml");
                                 metadataTarget.getParentFile().mkdirs();
                                 try {
@@ -333,36 +304,13 @@ public class InstallKarsMojo extends MojoSupport {
     }
 
     private void install(String key, File target) throws MojoFailureException {
-        File source = resolve(key);
+        File source = this.dependencyHelper.resolveById(key, getLog());
         target.getParentFile().mkdirs();
         copy(source, target);
     }
 
     private boolean acceptScope(Artifact artifact) {
         return "compile".equals(artifact.getScope()) || "runtime".equals(artifact.getScope());
-    }
-
-    public File resolve(String id) throws MojoFailureException {
-        id = MavenUtil.mvnToAether(id);
-        ArtifactRequest request = new ArtifactRequest();
-        request.setArtifact(new DefaultArtifact(id));
-        request.setRepositories(remoteRepos);
-
-        getLog().debug("Resolving artifact " + id +
-                " from " + remoteRepos);
-
-        ArtifactResult result;
-        try {
-            result = repoSystem.resolveArtifact(repoSession, request);
-        } catch (ArtifactResolutionException e) {
-            getLog().warn("could not resolve " + id, e);
-            throw new MojoFailureException(format("Couldn't resolve artifact %s", id), e);
-        }
-
-        getLog().debug("Resolved artifact " + id + " to " +
-                result.getArtifact().getFile() + " from "
-                + result.getRepository());
-        return result.getArtifact().getFile();
     }
 
     private class OfflineFeaturesService implements FeaturesService {
@@ -392,15 +340,15 @@ public class InstallKarsMojo extends MojoSupport {
                     }
                     Features repo = readFeatures(uri);
                     for (String innerRepository : repo.getRepository()) {
-                        String innerRepositoryPath = MavenUtil.pathFromMaven(innerRepository);
+                        String innerRepositoryPath = dependencyHelper.pathFromMaven(innerRepository);
                         File innerRepositoryTargetInSystemRepository = new File(system.resolve(innerRepositoryPath));
                         if (!innerRepositoryTargetInSystemRepository.exists()) {
-                            File innerRepositorySourceFile = resolve(innerRepository);
+                            File innerRepositorySourceFile = dependencyHelper.resolveById(innerRepository, getLog());
                             innerRepositoryTargetInSystemRepository.getParentFile().mkdirs();
                             copy(innerRepositorySourceFile, innerRepositoryTargetInSystemRepository);
 
                             // add metadata for snapshot
-                            Artifact innerRepositoryArtifact = MavenUtil.mvnToArtifact(innerRepository);
+                            Artifact innerRepositoryArtifact = dependencyHelper.mvnToArtifact(innerRepository);
                             if (innerRepositoryArtifact.isSnapshot()) {
                                 getLog().debug("Feature repository " + innerRepository + " is a SNAPSHOT, generate the maven-metadata-local.xml file");
                                 File metadataTarget = new File(innerRepositoryTargetInSystemRepository.getParentFile(), "maven-metadata-local.xml");
@@ -478,10 +426,10 @@ public class InstallKarsMojo extends MojoSupport {
             return properties.containsKey(key) && properties.get(key) != null ? properties.get(key) + "," : "";
         }
 
-        private Features readFeatures(URI uri) throws XMLStreamException, JAXBException, IOException {
+        private Features readFeatures(URI uri) throws MojoExecutionException, XMLStreamException, JAXBException, IOException {
             File repoFile;
             if (uri.toString().startsWith("mvn:")) {
-                URI featuresPath = system.resolve(MavenUtil.pathFromMaven(uri.toString()));
+                URI featuresPath = system.resolve(dependencyHelper.pathFromMaven(uri.toString()));
                 repoFile = new File(featuresPath);
             } else {
                 repoFile = new File(uri);
