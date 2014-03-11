@@ -26,7 +26,6 @@ import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.maven.RepositoryUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.artifact.repository.metadata.Metadata;
@@ -34,14 +33,13 @@ import org.apache.maven.artifact.repository.metadata.Snapshot;
 import org.apache.maven.artifact.repository.metadata.SnapshotVersion;
 import org.apache.maven.artifact.repository.metadata.Versioning;
 import org.apache.maven.artifact.repository.metadata.io.xpp3.MetadataXpp3Writer;
-import org.sonatype.aether.util.artifact.DefaultArtifact;
 
 /**
  * Util method for Maven manipulation (URL convert, metadata generation, etc).
  */
 public class MavenUtil {
 
-    private static final DefaultRepositoryLayout layout = new DefaultRepositoryLayout();
+    static final DefaultRepositoryLayout layout = new DefaultRepositoryLayout();
     private static final Pattern aetherPattern = Pattern.compile("([^: ]+):([^: ]+)(:([^: ]*)(:([^: ]+))?)?:([^: ]+)");
     private static final Pattern mvnPattern = Pattern.compile("(?:wrap:)?mvn:([^/ ]+)/([^/ ]+)/([^/\\$ ]*)(/([^/\\$ ]+)(/([^/\\$ ]+))?)?(\\$.+)?");
 
@@ -116,71 +114,8 @@ public class MavenUtil {
         return b.toString();
     }
 
-    /**
-     * Convert a PAX URL mvn format into a filesystem path.
-     *
-     * @param name PAX URL mvn format (mvn:<groupId>/<artifactId>/<version>/<type>/<classifier>)
-     * @return a filesystem path
-     */
-    static String pathFromMaven(String name) {
-        if (name.indexOf(':') == -1) {
-            return name;
-        }
-        name = mvnToAether(name);
-        return pathFromAether(name);
-    }
-
-    /**
-     * Convert a Aether coordinate format into a filesystem path.
-     *
-     * @param name the Aether coordinate format (<groupId>:<artifactId>[:<extension>[:<classifier>]]:<version>)
-     * @return the filesystem path
-     */
-    static String pathFromAether(String name) {
-        DefaultArtifact artifact = new DefaultArtifact(name);
-        Artifact mavenArtifact = RepositoryUtils.toArtifact(artifact);
-        return layout.pathOf(mavenArtifact);
-    }
-
-    /**
-     * Convert a Maven <code>Artifact</code> into a PAX URL mvn format.
-     *
-     * @param artifact the Maven <code>Artifact</code>.
-     * @return the corresponding PAX URL mvn format (mvn:<groupId>/<artifactId>/<version>/<type>/<classifier>)
-     */
-    static String artifactToMvn(Artifact artifact) {
-        return artifactToMvn(RepositoryUtils.toArtifact(artifact));
-    }
-
-    /**
-     * Convert an Aether <code>org.sonatype.aether.artifact.Artifact</code> into a PAX URL mvn format.
-     *
-     * @param artifact the Aether <code>org.sonatype.aether.artifact.Artifact</code>.
-     * @return the corresponding PAX URL mvn format (mvn:<groupId>/<artifactId>/<version>/<type>/<classifier>)
-     */
-    static String artifactToMvn(org.sonatype.aether.artifact.Artifact artifact) {
-        String bundleName;
-        if (artifact.getExtension().equals("jar") && isEmpty(artifact.getClassifier())) {
-            bundleName = String.format("mvn:%s/%s/%s", artifact.getGroupId(), artifact.getArtifactId(), artifact.getBaseVersion());
-        } else {
-            if (isEmpty(artifact.getClassifier())) {
-                bundleName = String.format("mvn:%s/%s/%s/%s", artifact.getGroupId(), artifact.getArtifactId(), artifact.getBaseVersion(), artifact.getExtension());
-            } else {
-                bundleName = String.format("mvn:%s/%s/%s/%s/%s", artifact.getGroupId(), artifact.getArtifactId(), artifact.getBaseVersion(), artifact.getExtension(), artifact.getClassifier());
-            }
-        }
-        return bundleName;
-    }
-
-    private static boolean isEmpty(String classifier) {
+    static boolean isEmpty(String classifier) {
         return classifier == null || classifier.length() == 0;
-    }
-    
-    static Artifact mvnToArtifact(String name) {
-        name = mvnToAether(name);
-        DefaultArtifact artifact = new DefaultArtifact(name);
-        Artifact mavenArtifact = RepositoryUtils.toArtifact(artifact);
-        return mavenArtifact;
     }
 
     /**

@@ -50,6 +50,7 @@ import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.project.MavenProjectHelper;
 import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.settings.Proxy;
+import org.codehaus.plexus.PlexusContainer;
 
 @SuppressWarnings({"deprecation", "rawtypes", "unchecked"})
 public abstract class MojoSupport extends AbstractMojo {
@@ -123,6 +124,18 @@ public abstract class MojoSupport extends AbstractMojo {
      * @required
      */
     protected MavenSession mavenSession;
+
+    /**
+     * <p>We can't autowire strongly typed RepositorySystem from Aether because it may be Sonatype (Maven 3.0.x)
+     * or Eclipse (Maven 3.1.x/3.2.x) version, so we switch to service locator by autowiring entire {@link PlexusContainer}</p>
+     *
+     * <p>It's a bit of a hack but we have not choice when we want to be usable both in Maven 3.0.x and 3.1.x/3.2.x</p>
+     *
+     * @component
+     * @required
+     * @readonly
+     */
+    protected PlexusContainer container;
 
     protected MavenProject getProject() {
         return project;
