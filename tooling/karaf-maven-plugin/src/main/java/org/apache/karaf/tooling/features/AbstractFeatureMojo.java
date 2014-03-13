@@ -194,7 +194,11 @@ public abstract class AbstractFeatureMojo extends MojoSupport {
                 for (String key : featuresMap.keySet()) {
                     String[] nameVersion = key.split("/");
                     if (feature.equals(nameVersion[0])) {
-                        Version ver = new Version(featuresMap.get(key).getVersion());
+                        String verStr = featuresMap.get(key).getVersion();
+                        if (verStr.endsWith("-SNAPSHOT")) {
+                            verStr = verStr.replace("-SNAPSHOT", ".SNAPSHOT");
+                        }
+                        Version ver = new Version(verStr);
                         if (versionRange.contains(ver)) {
                             f = featuresMap.get(key);
                         }
