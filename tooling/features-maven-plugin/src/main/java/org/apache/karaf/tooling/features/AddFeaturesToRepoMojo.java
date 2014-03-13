@@ -308,7 +308,9 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
 			    }
 			    Version ver = new Version(verStr);
                             if (versionRange.contains(ver)) {
-                                f = featuresMap.get(key);
+                                if (f == null || new Version(f.getVersion()).compareTo(new Version(featuresMap.get(key).getVersion())) < 0) {
+                                    f = featuresMap.get(key);
+                                }
                             }
                         }
                     }
@@ -318,7 +320,7 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
                 for (String key : featuresMap.keySet()) {
                     String[] nameVersion = key.split("/");
                     if (feature.equals(nameVersion[0])) {
-                        if (f == null || f.getVersion().compareTo(featuresMap.get(key).getVersion()) < 0) {
+                        if (f == null || new Version(f.getVersion()).compareTo(new Version(featuresMap.get(key).getVersion())) < 0) {
                             f = featuresMap.get(key);
                         }
                     }
