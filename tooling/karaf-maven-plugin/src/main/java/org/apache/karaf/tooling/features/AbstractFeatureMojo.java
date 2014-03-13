@@ -200,7 +200,9 @@ public abstract class AbstractFeatureMojo extends MojoSupport {
                         }
                         Version ver = new Version(verStr);
                         if (versionRange.contains(ver)) {
-                            f = featuresMap.get(key);
+                            if (f == null || new Version(f.getVersion()).compareTo(new Version(featuresMap.get(key).getVersion())) < 0) {
+                                f = featuresMap.get(key);
+                            }
                         }
                     }
                 }
