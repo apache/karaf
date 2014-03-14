@@ -20,7 +20,7 @@
     <bean id="dataSource" class="com.mysql.jdbc.jdbc2.optional.MysqlDataSource">
         <property name="url" value="${url}"/>
         <property name="user" value="${user}"/>
-        <property name="password" value="${test}"/>
+        <property name="password" value="${password}"/>
     </bean>
 
     <service interface="javax.sql.DataSource" ref="dataSource">
