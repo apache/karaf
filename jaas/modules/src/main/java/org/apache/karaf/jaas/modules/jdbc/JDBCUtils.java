@@ -25,7 +25,7 @@ public final class JDBCUtils {
 
     public static final String DATASOURCE = "datasource";
     public static final String JNDI = "jndi:";
-    public static final String OSGI = "bundles:";
+    public static final String OSGI = "osgi:";
 
     private JDBCUtils() {
 
