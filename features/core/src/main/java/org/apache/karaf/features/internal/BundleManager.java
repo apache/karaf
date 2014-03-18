@@ -428,7 +428,7 @@ public class BundleManager {
         EventAdminListener listener = null;
         try {
             getClass().getClassLoader().loadClass(
-                    "org.bundles.service.event.EventAdmin");
+                    "org.osgi.service.event.EventAdmin");
             listener = new EventAdminListener(bundleContext);
         } catch (Throwable t) {
             // Ignore, if the EventAdmin package is not available, just don't

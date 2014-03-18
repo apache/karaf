@@ -171,7 +171,11 @@
     </feature>
 
     <feature name="eventadmin" description="OSGi Event Admin service specification for event-based communication" version="${project.version}" resolver="(obr)">
-        <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.eventadmin/${felix.eventadmin.version}</bundle>
+        <config name="org.apache.felix.eventadmin.impl.EventAdmin">
+            org.apache.felix.eventadmin.AddTimestamp=true
+            org.apache.felix.eventadmin.AddSubject=true
+        </config>
+        <bundle start-level="30">mvn:org.apache.karaf.services/org.apache.karaf.services.eventadmin/${project.version}</bundle>
         <conditional>
             <condition>webconsole</condition>
             <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.webconsole.plugins.event/${felix.eventadmin.webconsole.plugin.version}</bundle>

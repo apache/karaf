@@ -70,6 +70,7 @@
         <module>demos</module>
         <module>archetypes</module>
         <module>itests</module>
+        <module>services</module>
     </modules>
 
     <scm>
@@ -720,6 +721,12 @@
             <dependency>
                 <groupId>org.apache.karaf.scheduler</groupId>
                 <artifactId>org.apache.karaf.scheduler.core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.karaf.services</groupId>
+                <artifactId>org.apache.karaf.services.eventadmin</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

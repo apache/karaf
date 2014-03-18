@@ -465,8 +465,8 @@
 
         <!-- eventadmin deps -->
         <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.eventadmin</artifactId>
+            <groupId>org.apache.karaf.services</groupId>
+            <artifactId>org.apache.karaf.services.eventadmin</artifactId>
             <scope>provided</scope>
         </dependency>
 
