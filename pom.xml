@@ -1354,11 +1354,13 @@
                 <groupId>org.ops4j.pax.url</groupId>
                 <artifactId>pax-url-obr</artifactId>
                 <version>${pax.url.version}</version>
+                <classifier>uber</classifier>
             </dependency>
             <dependency>
                 <groupId>org.ops4j.pax.url</groupId>
                 <artifactId>pax-url-war</artifactId>
                 <version>${pax.url.version}</version>
+                <classifier>uber</classifier>
             </dependency>
 
             <dependency>
@@ -1425,6 +1427,7 @@
                 <groupId>org.ops4j.pax.url</groupId>
                 <artifactId>pax-url-wrap</artifactId>
                 <version>${pax.url.version}</version>
+                <classifier>uber</classifier>
             </dependency>
             <dependency>
                 <groupId>${servlet.spec.groupId}</groupId>

@@ -82,16 +82,6 @@
 
         <!-- listed in source feature.xml with explicit startlevel -->
         <dependency>
-            <groupId>biz.aQute.bnd</groupId>
-            <artifactId>bndlib</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-api</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
             <groupId>org.ops4j.pax.logging</groupId>
             <artifactId>pax-logging-api</artifactId>
         </dependency>
@@ -100,16 +90,12 @@
             <artifactId>pax-logging-service</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.ops4j.base</groupId>
-            <artifactId>ops4j-base-lang</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.ops4j.pax.url</groupId>
             <artifactId>pax-url-aether</artifactId>
             <exclusions>
                 <exclusion>
                     <groupId>org.ops4j.pax.url</groupId>
-                    <artifactId>pax-url-maven-commons</artifactId>
+                    <artifactId>pax-url-commons</artifactId>
                 </exclusion>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -156,20 +142,23 @@
         <dependency>
             <groupId>org.ops4j.pax.url</groupId>
             <artifactId>pax-url-wrap</artifactId>
+            <classifier>uber</classifier>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-api</artifactId>
                 </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.ops4j.pax.swissbox</groupId>
-            <artifactId>pax-swissbox-bnd</artifactId>
-            <exclusions>
                 <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-api</artifactId>
+                    <groupId>org.ops4j.base</groupId>
+                    <artifactId>ops4j-base-net</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.ops4j.pax.swissbox</groupId>
+                    <artifactId>pax-swissbox-bnd</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.ops4j.pax.url</groupId>
+                    <artifactId>pax-url-commons</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
