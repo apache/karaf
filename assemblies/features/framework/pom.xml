@@ -105,16 +105,6 @@
         </dependency>
         <dependency>
             <groupId>org.ops4j.pax.url</groupId>
-            <artifactId>pax-url-maven-commons</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-api</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.ops4j.pax.url</groupId>
             <artifactId>pax-url-aether</artifactId>
             <exclusions>
                 <exclusion>
@@ -124,6 +114,42 @@
                 <exclusion>
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.eclipse.aether</groupId>
+                    <artifactId>aether-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.eclipse.aether</groupId>
+                    <artifactId>aether-spi</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.eclipse.aether</groupId>
+                    <artifactId>aether-util</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.eclipse.aether</groupId>
+                    <artifactId>aether-impl</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.eclipse.aether</groupId>
+                    <artifactId>aether-connector-basic</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.eclipse.aether</groupId>
+                    <artifactId>aether-transport-wagon</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.maven</groupId>
+                    <artifactId>maven-settings-builder</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.sonatype.plexus</groupId>
+                    <artifactId>plexus-sec-dispatcher</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.sonatype.plexus</groupId>
+                    <artifactId>plexus-cipher</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>

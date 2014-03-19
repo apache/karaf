@@ -149,6 +149,7 @@
         <geronimo.jpa-spec.version>1.1</geronimo.jpa-spec.version>
         <geronimo.jta-spec.version>1.1.1</geronimo.jta-spec.version>
         <geronimo.annotation-spec.version>1.0.1</geronimo.annotation-spec.version>
+        <geronimo.atinject-spec.version>1.0</geronimo.atinject-spec.version>
         <geronimo.jaspic-spec.version>1.1</geronimo.jaspic-spec.version>
         <easymock.version>3.2</easymock.version>
         <equinox.version>3.8.2.v20130124-134944</equinox.version>
@@ -228,7 +229,7 @@
         <pax.exam.version>3.4.0</pax.exam.version>
         <pax.logging.version>1.7.2</pax.logging.version>
         <pax.base.version>1.4.0</pax.base.version>
-        <pax.url.version>1.6.0</pax.url.version>
+        <pax.url.version>2.0.0-SNAPSHOT</pax.url.version>
         <pax.web.version>3.0.7-SNAPSHOT</pax.web.version>
         <pax.swissbox.version>1.7.0</pax.swissbox.version>
         <pax.tinybundle.version>2.0.0</pax.tinybundle.version>
@@ -1210,6 +1211,11 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.geronimo.specs</groupId>
+                <artifactId>geronimo-atinject_1.0_spec</artifactId>
+                <version>${geronimo.atinject-spec.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.geronimo.specs</groupId>
                 <artifactId>geronimo-jaspic_1.0_spec</artifactId>
                 <version>${geronimo.jaspic-spec.version}</version>
             </dependency>
@@ -1359,11 +1365,6 @@
                 <groupId>org.ops4j.base</groupId>
                 <artifactId>ops4j-base-lang</artifactId>
                 <version>${pax.base.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.ops4j.pax.url</groupId>
-                <artifactId>pax-url-maven-commons</artifactId>
-                <version>${pax.url.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.ops4j.pax.url</groupId>
