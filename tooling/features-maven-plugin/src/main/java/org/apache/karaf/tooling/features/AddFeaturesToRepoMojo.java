@@ -39,6 +39,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.felix.utils.version.VersionRange;
+import org.apache.felix.utils.version.VersionTable;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
@@ -303,12 +304,9 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
                         String[] nameVersion = key.split("/");
                         if (feature.equals(nameVersion[0])) {
                             String verStr = featuresMap.get(key).getVersion();
-			    if (verStr.endsWith("-SNAPSHOT")) {
-			        verStr = verStr.replace("-SNAPSHOT", ".SNAPSHOT");
-			    }
-			    Version ver = new Version(verStr);
+            			    Version ver = VersionTable.getVersion(verStr);
                             if (versionRange.contains(ver)) {
-                                if (f == null || new Version(f.getVersion()).compareTo(new Version(featuresMap.get(key).getVersion())) < 0) {
+                                if (f == null || VersionTable.getVersion(f.getVersion()).compareTo(VersionTable.getVersion(featuresMap.get(key).getVersion())) < 0) {
                                     f = featuresMap.get(key);
                                 }
                             }
@@ -320,7 +318,7 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
                 for (String key : featuresMap.keySet()) {
                     String[] nameVersion = key.split("/");
                     if (feature.equals(nameVersion[0])) {
-                        if (f == null || new Version(f.getVersion()).compareTo(new Version(featuresMap.get(key).getVersion())) < 0) {
+                        if (f == null || VersionTable.getVersion(f.getVersion()).compareTo(VersionTable.getVersion(featuresMap.get(key).getVersion())) < 0) {
                             f = featuresMap.get(key);
                         }
                     }
