@@ -103,6 +103,9 @@
                             org.apache.karaf.util;-split-package:=merge-first,
                             org.apache.karaf.shell.commands.impl*
                         </Private-Package>
+                        <Bundle-Activator>
+                            org.apache.karaf.shell.commands.impl.info.Activator
+                        </Bundle-Activator>
                         <Karaf-Commands>
                             org.apache.karaf.shell.commands.impl
                         </Karaf-Commands>

@@ -32,7 +32,7 @@ import java.util.StringTokenizer;
 /**
  * Bundle tracker which check manifest headers for information.
  */
-public class InfoBundleTrackerCustomizer implements BundleTrackerCustomizer {
+public class InfoBundleTrackerCustomizer implements BundleTrackerCustomizer<ServiceRegistration<InfoProvider>> {
 
     /**
      * Logger.
@@ -40,19 +40,10 @@ public class InfoBundleTrackerCustomizer implements BundleTrackerCustomizer {
     private Logger logger = LoggerFactory.getLogger(InfoBundleTrackerCustomizer.class);
 
     /**
-     * Bundle context.
-     */
-    private final BundleContext context;
-
-    public InfoBundleTrackerCustomizer(BundleContext context) {
-        this.context = context;
-    }
-
-    /**
      * {@inheritDoc}
      */
     @SuppressWarnings("unchecked")
-    public Object addingBundle(Bundle bundle, BundleEvent event) {
+    public ServiceRegistration<InfoProvider> addingBundle(Bundle bundle, BundleEvent event) {
         Dictionary headers = bundle.getHeaders();
         String headerEntry = (String) headers.get("Karaf-Info");
 
@@ -64,18 +55,15 @@ public class InfoBundleTrackerCustomizer implements BundleTrackerCustomizer {
             }
             return null;
         }
-        return bundle.getBundleContext().registerService(InfoProvider.class.getName(),
+        return bundle.getBundleContext().registerService(InfoProvider.class,
                 provider, null);
     }
 
-    public void modifiedBundle(Bundle bundle, BundleEvent event, Object object) {
+    public void modifiedBundle(Bundle bundle, BundleEvent event, ServiceRegistration<InfoProvider> object) {
     }
 
-    public void removedBundle(Bundle bundle, BundleEvent event, Object object) {
-        if (object instanceof ServiceRegistration) {
-            ServiceRegistration service = (ServiceRegistration) object;
-            service.unregister();
-        }
+    public void removedBundle(Bundle bundle, BundleEvent event, ServiceRegistration<InfoProvider> object) {
+        object.unregister();
     }
 
     private InfoProvider createInfo(String entry) {
