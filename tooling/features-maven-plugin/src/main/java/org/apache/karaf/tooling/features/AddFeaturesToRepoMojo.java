@@ -325,7 +325,7 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
                 }
             }
             if (f == null) {
-                throw new IllegalArgumentException("Unable to find the feature '" + feature + "'");
+                throw new IllegalArgumentException("Unable to find the feature '" + feature + (version != null ? "/" + version : "")  + "'");
             }
             // only add the feature to transitives if it is not
             // listed in the features list defined by the config
