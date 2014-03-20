@@ -107,9 +107,10 @@
                 <configuration>
                     <instructions>
                         <Export-Package>
-                            org.apache.karaf.features,
-                            org.apache.karaf.features.management,
-                            org.apache.karaf.features.management.codec
+                            org.apache.karaf.features;
+                            org.apache.karaf.features.management;
+                            org.apache.karaf.features.management.codec;
+                                -noimport:=true
                         </Export-Package>
                         <Import-Package>
                             *
@@ -117,11 +118,16 @@
                         <Private-Package>
                             org.apache.karaf.features.internal,
                             org.apache.karaf.features.internal.model,
+                            org.apache.karaf.features.internal.osgi,
                             org.apache.karaf.features.management.internal,
                             org.apache.felix.utils.version,
                             org.apache.felix.utils.manifest,
-                            org.apache.karaf.util.collections
+                            org.apache.karaf.util.collections,
+                            org.apache.karaf.util.tracker
                         </Private-Package>
+                        <Bundle-Activator>
+                            org.apache.karaf.features.internal.osgi.Activator
+                        </Bundle-Activator>
                     </instructions>
                 </configuration>
             </plugin>

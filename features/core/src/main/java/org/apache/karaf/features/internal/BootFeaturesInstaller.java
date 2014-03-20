@@ -63,7 +63,7 @@ public class BootFeaturesInstaller {
      * Install boot features
      * @throws Exception
      */
-    public void start() throws Exception {
+    public void start() {
         if (boot != null) {
             if (bootAsynchronous) {
                 new Thread() {
