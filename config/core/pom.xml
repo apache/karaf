@@ -53,6 +53,11 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.apache.karaf.util</artifactId>
+        </dependency>
         
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -90,8 +95,13 @@
                             *
                         </Import-Package>
                         <Private-Package>
-                            org.apache.karaf.config.core.impl
+                            org.apache.karaf.config.core.impl,
+                            org.apache.karaf.config.core.impl.osgi,
+                            org.apache.karaf.util.tracker
                         </Private-Package>
+                        <Bundle-Activator>
+                            org.apache.karaf.config.core.impl.osgi.Activator
+                        </Bundle-Activator>
                     </instructions>
                 </configuration>
             </plugin>
