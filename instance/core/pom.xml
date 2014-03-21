@@ -152,9 +152,13 @@
                             org.apache.karaf.jpm,
                             org.apache.karaf.jpm.impl,
                             org.apache.karaf.instance.core.internal,
+                            org.apache.karaf.instance.core.internal.osgi,
                             org.apache.felix.utils.properties;-split-package:=merge-first,
                             org.apache.karaf.util.locks
                         </Private-Package>
+                        <Bundle-Activator>
+                            org.apache.karaf.instance.core.internal.osgi.Activator
+                        </Bundle-Activator>
                     </instructions>
                 </configuration>
             </plugin>

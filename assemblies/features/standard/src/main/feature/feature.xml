@@ -141,7 +141,6 @@
     </feature>
 
     <feature name="instance" description="Provide Instance support" version="${project.version}">
-        <feature version="${project.version}">aries-blueprint</feature>
         <bundle start-level="30" start="true">mvn:org.apache.karaf.instance/org.apache.karaf.instance.core/${project.version}</bundle>
         <bundle start-level="30" start="true">mvn:org.apache.karaf.instance/org.apache.karaf.instance.command/${project.version}</bundle>
     </feature>
