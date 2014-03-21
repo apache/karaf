@@ -82,11 +82,11 @@ public class BootFeaturesInstaller {
     }
     
 	void installBootFeatures() {
-	    List<Feature> installedFeatures = Arrays.asList(featuresService.listInstalledFeatures());
-		List<Set<String>> stagedFeatureNames = parseBootFeatures(boot);
-        List<Set<Feature>> stagedFeatures = toFeatureSetList(stagedFeatureNames);
-
         try {
+            List<Feature> installedFeatures = Arrays.asList(featuresService.listInstalledFeatures());
+            List<Set<String>> stagedFeatureNames = parseBootFeatures(boot);
+            List<Set<Feature>> stagedFeatures = toFeatureSetList(stagedFeatureNames);
+
             for (Set<Feature> features : stagedFeatures) {
                 features.removeAll(installedFeatures);
                 featuresService.installFeatures(features, EnumSet.of(Option.NoCleanIfFailure, Option.ContinueBatchOnFailure));                

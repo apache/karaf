@@ -342,7 +342,7 @@ public class KarafTestSupport {
         return connector;
     }
 
-    public void assertFeatureInstalled(String featureName) {
+    public void assertFeatureInstalled(String featureName) throws Exception {
         Feature[] features = featureService.listInstalledFeatures();
         for (Feature feature : features) {
             if (featureName.equals(feature.getName())) {
@@ -352,7 +352,7 @@ public class KarafTestSupport {
         Assert.fail("Feature " + featureName + " should be installed but is not");
     }
 
-    public void assertFeaturesInstalled(String ... expectedFeatures) {
+    public void assertFeaturesInstalled(String ... expectedFeatures) throws Exception {
         Set<String> expectedFeaturesSet = new HashSet<String>(Arrays.asList(expectedFeatures));
         Feature[] features = featureService.listInstalledFeatures();
         Set<String> installedFeatures = new HashSet<String>();

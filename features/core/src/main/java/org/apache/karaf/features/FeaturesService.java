@@ -77,7 +77,7 @@ public interface FeaturesService {
 
     Feature[] listFeatures() throws Exception;
 
-    Feature[] listInstalledFeatures();
+    Feature[] listInstalledFeatures() throws Exception;
 
     boolean isInstalled(Feature f);
 

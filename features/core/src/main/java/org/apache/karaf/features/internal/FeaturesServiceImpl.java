@@ -137,11 +137,15 @@ public class FeaturesServiceImpl implements FeaturesService {
 
     public void registerListener(FeaturesListener listener) {
         listeners.add(listener);
-        for (Repository repository : listRepositories()) {
-            listener.repositoryEvent(new RepositoryEvent(repository, RepositoryEvent.EventType.RepositoryAdded, true));
-        }
-        for (Feature feature : listInstalledFeatures()) {
-            listener.featureEvent(new FeatureEvent(feature, FeatureEvent.EventType.FeatureInstalled, true));
+        try {
+            for (Repository repository : listRepositories()) {
+                listener.repositoryEvent(new RepositoryEvent(repository, RepositoryEvent.EventType.RepositoryAdded, true));
+            }
+            for (Feature feature : listInstalledFeatures()) {
+                listener.featureEvent(new FeatureEvent(feature, FeatureEvent.EventType.FeatureInstalled, true));
+            }
+        } catch (Exception e) {
+            LOGGER.error("Error notifying listener about the current state", e);
         }
     }
 
@@ -747,7 +751,7 @@ public class FeaturesServiceImpl implements FeaturesService {
     }
 
     public Feature[] listFeatures() throws Exception {
-        Collection<Feature> features = new ArrayList<Feature>();
+        Set<Feature> features = new HashSet<Feature>();
         for (Map<String, Feature> featureWithDifferentVersion : getFeatures().values()) {
 			for (Feature f : featureWithDifferentVersion.values()) {
                 features.add(f);
@@ -756,9 +760,16 @@ public class FeaturesServiceImpl implements FeaturesService {
         return features.toArray(new Feature[features.size()]);
     }
 
-    public Feature[] listInstalledFeatures() {
-        Set<Feature> result = installed.keySet();
-        return result.toArray(new Feature[result.size()]);
+    public Feature[] listInstalledFeatures() throws Exception {
+        Set<Feature> features = new HashSet<Feature>();
+        for (Map<String, Feature> featureWithDifferentVersion : getFeatures().values()) {
+            for (Feature f : featureWithDifferentVersion.values()) {
+                if (installed.containsKey(f)) {
+                    features.add(f);
+                }
+            }
+        }
+        return features.toArray(new Feature[features.size()]);
     }
 
     public boolean isInstalled(Feature f) {
