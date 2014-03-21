@@ -410,7 +410,9 @@ public class InstanceServiceImpl implements InstanceService {
                 if (opts == null || opts.length() == 0) {
                     opts = DEFAULT_JAVA_OPTS;
                 }
-                String karafOpts = System.getProperty("karaf.opts", "");
+
+                // fallback and read karafOpts from KARAF_OPTS environment if no System property present
+                String karafOpts = System.getProperty("karaf.opts", System.getenv("KARAF_OPTS"));
 
                 File libDir = new File(System.getProperty("karaf.home"), "lib");
                 File[] jars = libDir.listFiles(new FilenameFilter() {
