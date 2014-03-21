@@ -22,16 +22,16 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.karaf.jaas</groupId>
-        <artifactId>jaas</artifactId>
+        <groupId>org.apache.karaf.jaas.blueprint</groupId>
+        <artifactId>blueprint</artifactId>
         <version>3.1.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>org.apache.karaf.jaas.config</artifactId>
+    <artifactId>org.apache.karaf.jaas.blueprint.config</artifactId>
     <packaging>bundle</packaging>
-    <name>Apache Karaf :: JAAS :: Config</name>
-    <description>This bundle provides the configuration facility for the JAAS security framework.</description>
+    <name>Apache Karaf :: JAAS :: Blueprint :: Config</name>
+    <description>This bundle provides a blueprint namespace handler for configuring JAAS</description>
 
     <properties>
         <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
@@ -39,34 +39,18 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.apache.karaf.jaas</groupId>
-            <artifactId>org.apache.karaf.jaas.boot</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf</groupId>
-            <artifactId>org.apache.karaf.util</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.springframework.osgi</groupId>
-            <artifactId>spring-osgi-core</artifactId>
+            <groupId>org.apache.karaf.jaas</groupId>
+            <artifactId>org.apache.karaf.jaas.boot</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.aries.blueprint</groupId>
-            <artifactId>org.apache.aries.blueprint.api</artifactId>
-            <scope>provided</scope>
+            <groupId>org.apache.karaf.jaas</groupId>
+            <artifactId>org.apache.karaf.jaas.config</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.aries.blueprint</groupId>
@@ -76,21 +60,6 @@
     </dependencies>
 
     <build>
-        <resources>
-            <resource>
-                <directory>${project.basedir}/src/main/resources</directory>
-                <includes>
-                    <include>**/*</include>
-                </includes>
-            </resource>
-            <resource>
-                <directory>${project.basedir}/src/main/resources</directory>
-                <filtering>true</filtering>
-                <includes>
-                    <include>**/*.info</include>
-                </includes>
-            </resource>
-        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.felix</groupId>
@@ -98,22 +67,16 @@
                 <configuration>
                     <instructions>
                         <Export-Package>
-                            ${project.artifactId};version=${project.version},
-                            ${project.artifactId}.impl;version=${project.version}
+                            ${project.artifactId};version=${project.version}
                         </Export-Package>
                         <Import-Package>
-                            !${project.artifactId}.*,
+                            !${project.artifactId},
                             *
                         </Import-Package>
-                        <Private-Package>
-                            org.apache.karaf.util.collections
-                        </Private-Package>
-                        <Bundle-Activator>
-                            org.apache.karaf.jaas.config.impl.Activator
-                        </Bundle-Activator>
                     </instructions>
                 </configuration>
             </plugin>
         </plugins>
     </build>
+
 </project>

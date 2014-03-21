@@ -38,7 +38,12 @@
     </properties>
     
     <dependencies>
-    
+
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.apache.karaf.jaas</groupId>
             <artifactId>org.apache.karaf.jaas.modules</artifactId>    
@@ -69,14 +74,6 @@
             <groupId>org.apache.aries.blueprint</groupId>
             <artifactId>org.apache.aries.blueprint.core</artifactId>
             <scope>provided</scope>
-        </dependency>
-
-        <!-- 4.2.0 is needed in order to have aries util work correctly within pojosr -->
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.core</artifactId>
-            <version>4.2.0</version>
-            <scope>test</scope>
         </dependency>
 
         <dependency>
@@ -153,12 +150,14 @@
                 <configuration>
                     <instructions>
                         <Import-Package>
-                            org.apache.aries.blueprint,
-                            org.osgi.service.blueprint.container,
-                            org.osgi.service.blueprint.reflect,
                             *
                         </Import-Package>
-                        <Private-Package>org.apache.karaf.jaas.jasypt.impl</Private-Package>
+                        <Private-Package>
+                            org.apache.karaf.jaas.jasypt.impl
+                        </Private-Package>
+                        <Bundle-Activator>
+                            org.apache.karaf.jaas.jasypt.impl.Activator
+                        </Bundle-Activator>
                     </instructions>
                 </configuration>
             </plugin>

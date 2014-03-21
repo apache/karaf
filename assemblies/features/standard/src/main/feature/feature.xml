@@ -146,10 +146,13 @@
     </feature>
 
     <feature name="jaas" description="Provide JAAS support" version="${project.version}">
-        <feature version="${project.version}">aries-blueprint</feature>
         <bundle start-level="30" start="true">mvn:org.apache.karaf.jaas/org.apache.karaf.jaas.config/${project.version}</bundle>
         <bundle start-level="30" start="true">mvn:org.apache.karaf.jaas/org.apache.karaf.jaas.modules/${project.version}</bundle>
         <bundle start-level="30" start="true">mvn:org.apache.karaf.jaas/org.apache.karaf.jaas.command/${project.version}</bundle>
+        <conditional>
+            <condition>aries-blueprint</condition>
+            <bundle start-level="30" start="true">mvn:org.apache.karaf.jaas.blueprint/org.apache.karaf.jaas.blueprint.config/${project.version}</bundle>
+        </conditional>
     </feature>
 
     <feature name="log" description="Provide Log support" version="${project.version}">
@@ -282,6 +285,10 @@
         <bundle dependency="true" start-level="30">mvn:commons-lang/commons-lang/${commons-lang.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jasypt/${jasypt.bundle.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.jaas/org.apache.karaf.jaas.jasypt/${project.version}</bundle>
+        <conditional>
+            <condition>aries-blueprint</condition>
+            <bundle start-level="30" start="true">mvn:org.apache.karaf.jaas.blueprint/org.apache.karaf.jaas.blueprint.jasypt/${project.version}</bundle>
+        </conditional>
     </feature>
 
     <feature name="scr" description="Declarative Service support" version="${project.version}" resolver="(obr)">

@@ -22,16 +22,16 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.karaf.jaas</groupId>
-        <artifactId>jaas</artifactId>
+        <groupId>org.apache.karaf.jaas.blueprint</groupId>
+        <artifactId>blueprint</artifactId>
         <version>3.1.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>org.apache.karaf.jaas.modules</artifactId>
+    <artifactId>org.apache.karaf.jaas.blueprint.jasypt</artifactId>
     <packaging>bundle</packaging>
-    <name>Apache Karaf :: JAAS :: Modules</name>
-    <description>This bundle provides JAAS modules which can be used in Karaf (LDAP, JDBC, etc).</description>
+    <name>Apache Karaf :: JAAS :: Blueprint :: Jasypt</name>
+    <description>This bundle provides a blueprint namespace handler for configuring Jasypt</description>
 
     <properties>
         <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
@@ -40,53 +40,76 @@
     <dependencies>
         <dependency>
             <groupId>org.apache.karaf.jaas</groupId>
-            <artifactId>org.apache.karaf.jaas.config</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.jaas</groupId>
-            <artifactId>org.apache.karaf.jaas.boot</artifactId>
-            <scope>provided</scope>
+            <artifactId>org.apache.karaf.jaas.modules</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.utils</artifactId>
-            <scope>provided</scope>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.jasypt</artifactId>
         </dependency>
-
         <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.fileinstall</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.core</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.compendium</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.osgi</groupId>
-            <artifactId>spring-osgi-core</artifactId>
+            <groupId>org.apache.aries.blueprint</groupId>
+            <artifactId>org.apache.aries.blueprint.core</artifactId>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.apache.aries.blueprint</groupId>
-            <artifactId>org.apache.aries.blueprint.api</artifactId>
-            <scope>provided</scope>
+            <artifactId>org.apache.aries.blueprint.cm</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.configadmin</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Force osgi 4.2 so that blueprint bundle tracker works correctly -->
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <version>4.2.0</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.googlecode.pojosr</groupId>
+            <artifactId>de.kalpatec.pojosr.framework</artifactId>
+            <version>0.1.6</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.ops4j.pax.tinybundles</groupId>
+            <artifactId>tinybundles</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.aries.proxy</groupId>
+            <artifactId>org.apache.aries.proxy.impl</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>${slf4j.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+            <version>${slf4j.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -112,18 +135,8 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Import-Package>
-                            javax.net,
-                            org.apache.karaf.jaas.config,
-                            *
-                        </Import-Package>
-                        <Private-Package>
-                            org.apache.karaf.jaas.modules.impl,
-                            org.apache.felix.utils.properties
-                        </Private-Package>
-                        <Bundle-Activator>
-                            org.apache.karaf.jaas.modules.impl.Activator
-                        </Bundle-Activator>
+                        <Export-Package></Export-Package>
+                        <Import-Package>*</Import-Package>
                     </instructions>
                 </configuration>
             </plugin>

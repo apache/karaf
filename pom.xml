@@ -695,6 +695,16 @@
                 <artifactId>org.apache.karaf.jaas.modules</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.jaas.blueprint</groupId>
+                <artifactId>org.apache.karaf.jaas.blueprint.config</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.jaas.blueprint</groupId>
+                <artifactId>org.apache.karaf.jaas.blueprint.jasypt</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>org.apache.karaf.webconsole</groupId>
