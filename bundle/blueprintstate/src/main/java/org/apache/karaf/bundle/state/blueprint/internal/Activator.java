@@ -14,25 +14,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.bundle.state.spring.internal;
+package org.apache.karaf.bundle.state.blueprint.internal;
 
 import org.apache.karaf.bundle.core.BundleStateService;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleListener;
 import org.osgi.framework.ServiceRegistration;
-import org.springframework.osgi.context.event.OsgiBundleApplicationContextListener;
+import org.osgi.service.blueprint.container.BlueprintListener;
 
 public class Activator implements BundleActivator {
 
     private ServiceRegistration registration;
 
     public void start(BundleContext bundleContext) {
-		SpringStateService services = new SpringStateService();
+        BlueprintStateService service = new BlueprintStateService();
 	    String[] classes = new String[] {
-				OsgiBundleApplicationContextListener.class.getName(),
-				BundleStateService.class.getName()
+                BlueprintListener.class.getName(),
+				BundleStateService.class.getName(),
+                BundleListener.class.getName()
 			};
-        registration = bundleContext.registerService(classes, services, null);
+        registration = bundleContext.registerService(classes, service, null);
 	}
 
     public void stop(BundleContext context) {

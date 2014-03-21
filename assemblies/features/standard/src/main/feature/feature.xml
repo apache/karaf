@@ -61,6 +61,10 @@
         <bundle start-level="20">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.cm/${aries.blueprint.cm.version}</bundle>
         <bundle start-level="20">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.core.compatibility/${aries.blueprint.core.compatibility.version}</bundle>
         <bundle start-level="20">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.core/${aries.blueprint.core.version}</bundle>
+        <conditional>
+            <condition>bundle</condition>
+            <bundle start-level="30">mvn:org.apache.karaf.bundle/org.apache.karaf.bundle.blueprintstate/${project.version}</bundle>
+        </conditional>
     </feature>
 
     <feature name="aries-annotation" description="Aries Annotations" version="${project.version}">
@@ -121,7 +125,6 @@
     </feature>
 
     <feature name="bundle" description="Provide Bundle support" version="${project.version}">
-        <feature version="${project.version}">aries-blueprint</feature>
         <bundle start-level="30" start="true">mvn:org.apache.karaf.bundle/org.apache.karaf.bundle.core/${project.version}</bundle>
         <bundle start-level="30" start="true">mvn:org.apache.karaf.bundle/org.apache.karaf.bundle.command/${project.version}</bundle>
     </feature>

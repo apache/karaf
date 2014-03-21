@@ -32,7 +32,7 @@ public class ListServicesTest {
         listServices = new ListBundleServices();
         BundleContext bundleContext = new TestBundleFactory().createBundleContext();
         listServices.setBundleContext(bundleContext);
-        listServices.setBundleService(new BundleServiceImpl(bundleContext, Collections.EMPTY_LIST));
+        listServices.setBundleService(new BundleServiceImpl(bundleContext));
     }
     
     @Test

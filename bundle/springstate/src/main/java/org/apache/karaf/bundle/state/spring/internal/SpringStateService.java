@@ -26,7 +26,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.karaf.bundle.core.BundleState;
 import org.apache.karaf.bundle.core.BundleStateService;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
 import org.slf4j.Logger;
@@ -44,7 +43,7 @@ public class SpringStateService implements OsgiBundleApplicationContextListener,
 
     private final Map<Long, OsgiBundleApplicationContextEvent> states;
 
-    public SpringStateService(BundleContext bundleContext) {
+    public SpringStateService() {
         this.states = new ConcurrentHashMap<Long, OsgiBundleApplicationContextEvent>();
     }
 

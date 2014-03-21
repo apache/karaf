@@ -28,10 +28,10 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>org.apache.karaf.bundle.core</artifactId>
+    <artifactId>org.apache.karaf.bundle.blueprintstate</artifactId>
     <packaging>bundle</packaging>
-    <name>Apache Karaf :: Bundle :: Core</name>
-    <description>Bundle Services and API</description>
+    <name>Apache Karaf :: Bundle :: BlueprintStateService</name>
+    <description>Provide State Support for Blueprint bundles</description>
 
     <properties>
         <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
@@ -40,24 +40,14 @@
     <dependencies>
 
         <dependency>
-            <groupId>org.apache.aries.blueprint</groupId>
-            <artifactId>org.apache.aries.blueprint.api</artifactId>
+            <groupId>org.apache.karaf.bundle</groupId>
+            <artifactId>org.apache.karaf.bundle.core</artifactId>
             <scope>provided</scope>
         </dependency>
-		
+
 		<dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.compendium</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.ops4j.pax.url</groupId>
-            <artifactId>pax-url-aether</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -67,15 +57,8 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.karaf</groupId>
-            <artifactId>org.apache.karaf.util</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.utils</artifactId>
-            <scope>provided</scope>
+            <groupId>org.apache.aries.blueprint</groupId>
+            <artifactId>org.apache.aries.blueprint.api</artifactId>
         </dependency>
 
         <dependency>
@@ -105,22 +88,10 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Export-Package>
-                            org.apache.karaf.bundle.core;-noimport:=true
-                        </Export-Package>
-                        <Private-Package>
-                            org.apache.karaf.bundle.core.internal,
-                            org.apache.karaf.bundle.core.internal.osgi,
-                            org.apache.karaf.util.maven,
-                            org.apache.karaf.util.tracker,
-                            org.apache.felix.utils.version,
-                            org.apache.felix.utils.manifest
-                        </Private-Package>
-                        <Bundle-Activator>
-                            org.apache.karaf.bundle.core.internal.osgi.Activator
-                        </Bundle-Activator>
+                        <Bundle-Activator>org.apache.karaf.bundle.state.blueprint.internal.Activator</Bundle-Activator>
                     </instructions>
                 </configuration>
             </plugin>

@@ -393,6 +393,11 @@
                 <artifactId>org.apache.karaf.bundle.springstate</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.bundle</groupId>
+                <artifactId>org.apache.karaf.bundle.blueprintstate</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>org.apache.karaf.package</groupId>

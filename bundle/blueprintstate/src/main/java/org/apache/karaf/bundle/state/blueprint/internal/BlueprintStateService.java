@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.bundle.core.internal;
+package org.apache.karaf.bundle.state.blueprint.internal;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -36,14 +36,14 @@ import org.slf4j.LoggerFactory;
  * TODO: use event instance to receive WAIT topics notifications from blueprint
  * extender
  */
-public class BlueprintListener implements org.osgi.service.blueprint.container.BlueprintListener, BundleListener,
+public class BlueprintStateService implements org.osgi.service.blueprint.container.BlueprintListener, BundleListener,
     BundleStateService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(BlueprintListener.class);
+    private static final Logger LOG = LoggerFactory.getLogger(BlueprintStateService.class);
 
     private final Map<Long, BlueprintEvent> states;
 
-    public BlueprintListener() {
+    public BlueprintStateService() {
         states = new ConcurrentHashMap<Long, BlueprintEvent>();
     }
 

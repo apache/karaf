@@ -26,6 +26,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.karaf.bundle.core.BundleInfo;
 import org.apache.karaf.bundle.core.BundleService;
@@ -54,11 +55,18 @@ public class BundleServiceImpl implements BundleService {
     private static final String ORIGINAL_WIRES = "Original-Wires";
 
     private final BundleContext bundleContext;
-    private final List<BundleStateService> stateServices;
+    private final List<BundleStateService> stateServices = new CopyOnWriteArrayList<BundleStateService>();
 
-    public BundleServiceImpl(BundleContext bundleContext, List<BundleStateService> stateServices) {
+    public BundleServiceImpl(BundleContext bundleContext) {
         this.bundleContext = bundleContext;
-        this.stateServices = stateServices;
+    }
+
+    public void registerBundleStateService(BundleStateService service) {
+        stateServices.add(service);
+    }
+
+    public void unregisterBundleStateService(BundleStateService service) {
+        stateServices.remove(service);
     }
 
     @Override
