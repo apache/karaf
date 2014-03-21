@@ -164,40 +164,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.karaf.features</groupId>
-            <artifactId>org.apache.karaf.features.command</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.bundle</groupId>
-            <artifactId>org.apache.karaf.bundle.command</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.karaf.shell</groupId>
-            <artifactId>org.apache.karaf.shell.core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.shell</groupId>
-            <artifactId>org.apache.karaf.shell.console</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.shell</groupId>
-            <artifactId>org.apache.karaf.shell.table</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.karaf.system</groupId>
-            <artifactId>org.apache.karaf.system.core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.system</groupId>
-            <artifactId>org.apache.karaf.system.command</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.shell</groupId>
-            <artifactId>org.apache.karaf.shell.commands</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.fileinstall</artifactId>
         </dependency>
@@ -207,43 +173,14 @@
         </dependency>
 
         <dependency>
-            <groupId>org.ow2.asm</groupId>
-            <artifactId>asm-all</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.aries.blueprint</groupId>
-            <artifactId>org.apache.aries.blueprint.api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.aries.blueprint</groupId>
-            <artifactId>org.apache.aries.blueprint.cm</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.aries.blueprint</groupId>
-            <artifactId>org.apache.aries.blueprint.core.compatibility</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.aries.blueprint</groupId>
-            <artifactId>org.apache.aries.blueprint.core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.aries.proxy</groupId>
-            <artifactId>org.apache.aries.proxy.api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.aries.proxy</groupId>
-            <artifactId>org.apache.aries.proxy.impl</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.aries</groupId>
-            <artifactId>org.apache.aries.util</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>org.apache.karaf.region</groupId>
             <artifactId>org.apache.karaf.region.core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>org.apache.karaf.features.core</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -421,6 +358,9 @@
                             <excludedArtifactIds>
                                 <excludedArtifactId>slf4j-api</excludedArtifactId>
                                 <excludedArtifactId>mina-core</excludedArtifactId>
+                                <excludedArtifactId>sshd-core</excludedArtifactId>
+                                <excludedArtifactId>jline</excludedArtifactId>
+                                <excludedArtifactId>core</excludedArtifactId>
                             </excludedArtifactIds>
                         </configuration>
                     </execution>
