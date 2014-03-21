@@ -23,7 +23,7 @@ package org.apache.karaf.region.persist.internal;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.karaf.region.persist.RegionsPersistence;
-import org.apache.karaf.region.persist.internal.util.SingleServiceTracker;
+import org.apache.karaf.util.tracker.SingleServiceTracker;
 import org.eclipse.equinox.region.RegionDigraph;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;

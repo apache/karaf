@@ -56,6 +56,12 @@
         </dependency>
 
         <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.apache.karaf.util</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.compendium</artifactId>
             <scope>provided</scope>
@@ -107,8 +113,13 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Bundle-Activator>org.apache.karaf.region.persist.internal.Activator</Bundle-Activator>
-                        <Export-Package>org.apache.karaf.region.persist;version=${project.version};-split-package:=merge-first</Export-Package>
+                        <Bundle-Activator>
+                            org.apache.karaf.region.persist.internal.Activator
+                        </Bundle-Activator>
+                        <Private-Package>
+                            org.apache.karaf.region.persist.internal.*,
+                            org.apache.karaf.util.tracker
+                        </Private-Package>
                     </instructions>
                 </configuration>
             </plugin>

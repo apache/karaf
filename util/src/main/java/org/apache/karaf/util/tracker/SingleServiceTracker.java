@@ -18,7 +18,7 @@
  */
 
 
-package org.apache.karaf.region.persist.internal.util;
+package org.apache.karaf.util.tracker;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;

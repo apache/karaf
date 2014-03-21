@@ -154,6 +154,7 @@
                         <Private-Package>
                             org.apache.karaf.service.guard.tools,
                             org.apache.karaf.shell.impl.*,
+                            org.apache.karaf.util.tracker,
                             org.apache.felix.utils.properties,
                             org.apache.felix.utils.extender,
                             org.apache.felix.utils.manifest,

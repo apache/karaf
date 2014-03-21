@@ -29,9 +29,9 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.karaf.shell.api.action.lifecycle.Manager;
-import org.apache.karaf.shell.ssh.util.SingleServiceTracker;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.api.console.SessionFactory;
+import org.apache.karaf.util.tracker.SingleServiceTracker;
 import org.apache.sshd.SshServer;
 import org.apache.sshd.common.NamedFactory;
 import org.apache.sshd.server.command.ScpCommandFactory;
