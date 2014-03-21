@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.felix.utils.version.VersionRange;
+import org.apache.felix.utils.version.VersionTable;
 import org.apache.karaf.tooling.features.model.ArtifactRef;
 import org.apache.karaf.tooling.features.model.Feature;
 import org.apache.karaf.tooling.features.model.Repository;
@@ -195,12 +196,9 @@ public abstract class AbstractFeatureMojo extends MojoSupport {
                     String[] nameVersion = key.split("/");
                     if (feature.equals(nameVersion[0])) {
                         String verStr = featuresMap.get(key).getVersion();
-                        if (verStr.endsWith("-SNAPSHOT")) {
-                            verStr = verStr.replace("-SNAPSHOT", ".SNAPSHOT");
-                        }
-                        Version ver = new Version(verStr);
+                        Version ver = VersionTable.getVersion(verStr);
                         if (versionRange.contains(ver)) {
-                            if (f == null || new Version(f.getVersion()).compareTo(new Version(featuresMap.get(key).getVersion())) < 0) {
+                            if (f == null || VersionTable.getVersion(f.getVersion()).compareTo(VersionTable.getVersion(featuresMap.get(key).getVersion())) < 0) {    
                                 f = featuresMap.get(key);
                             }
                         }
