@@ -89,5 +89,9 @@ public class ConditionalFeaturesTest extends KarafTestSupport {
           //ignore as the eventadmin activator might throw an error.
         }
         assertBundleInstalled("org.apache.felix.webconsole.plugins.event");
+
+        //Remove eventadmin
+        featureService.uninstallFeature("eventadmin");
+        assertBundleNotInstalled("org.apache.felix.webconsole.plugins.event");
     }
 }

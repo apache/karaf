@@ -401,20 +401,14 @@ public class FeaturesServiceImpl implements FeaturesService {
             	try {
                     doInstallFeature(s, f, verbose);
                     doInstallFeatureConditionals(s, f, verbose);
-                    state.bundleInfos.putAll(s.bundleInfos);
-                    state.bundles.addAll(s.bundles);
-                    state.features.putAll(s.features);
-                    state.installed.addAll(s.installed);
-                    state.bundleStartLevels.putAll(s.bundleStartLevels);
-
                     //Check if current feature satisfies the conditionals of existing features
                     for (Feature installedFeature : listInstalledFeatures()) {
-                        for (Conditional conditional : installedFeature.getConditional()) {
-                            if (dependenciesSatisfied(conditional.getCondition(), state)) {
-                                doInstallFeatureConditionals(s, installedFeature, verbose);
-                            }
-                        }
+                        doInstallFeatureConditionals(s, installedFeature, verbose);
                     }
+                    for (Feature installedFeature : state.features.keySet()) {
+                        doInstallFeatureConditionals(s, installedFeature, verbose);
+                    }
+
                     state.bundleInfos.putAll(s.bundleInfos);
                     state.bundles.addAll(s.bundles);
                     state.features.putAll(s.features);
@@ -568,16 +562,19 @@ public class FeaturesServiceImpl implements FeaturesService {
 
     protected void doInstallFeatureConditionals(InstallationState state, Feature feature,  boolean verbose) throws Exception {
         //Check conditions of the current feature.
-        for (Conditional conditional : feature.getConditional()) {
+        feature = getFeature(feature.getName(), feature.getVersion());
+        if (feature != null) {
+            for (Conditional conditional : feature.getConditional()) {
 
-            if (dependenciesSatisfied(conditional.getCondition(), state)) {
-                InstallationState s = new InstallationState();
-                doInstallFeature(s, conditional.asFeature(feature.getName(), feature.getVersion()), verbose);
-                state.bundleInfos.putAll(s.bundleInfos);
-                state.bundles.addAll(s.bundles);
-                state.features.putAll(s.features);
-                state.installed.addAll(s.installed);
-                state.bundleStartLevels.putAll(s.bundleStartLevels);
+                if (dependenciesSatisfied(conditional.getCondition(), state)) {
+                    InstallationState s = new InstallationState();
+                    doInstallFeature(s, conditional.asFeature(feature.getName(), feature.getVersion()), verbose);
+                    state.bundleInfos.putAll(s.bundleInfos);
+                    state.bundles.addAll(s.bundles);
+                    state.features.putAll(s.features);
+                    state.installed.addAll(s.installed);
+                    state.bundleStartLevels.putAll(s.bundleStartLevels);
+                }
             }
         }
     }
@@ -675,8 +672,10 @@ public class FeaturesServiceImpl implements FeaturesService {
         }
         boolean verbose = options != null && options.contains(Option.Verbose);
         boolean refresh = options == null || !options.contains(Option.NoAutoRefreshBundles);
+        String msg = "Uninstalling feature " + feature.getName() + " " + feature.getVersion();
+        LOGGER.info(msg);
         if (verbose) {
-            System.out.println("Uninstalling feature " + feature.getName() + " " + feature.getVersion());
+            System.out.println(msg);
         }
         // Grab all the bundles installed by this feature
         // and remove all those who will still be in use.
@@ -687,9 +686,37 @@ public class FeaturesServiceImpl implements FeaturesService {
         for (Conditional conditional : feature.getConditional()) {
             Feature conditionalFeature = conditional.asFeature(feature.getName(),feature.getVersion());
             if (installed.containsKey(conditionalFeature)) {
+                msg = "Uninstalling feature " + conditionalFeature.getName() + " " + conditionalFeature.getVersion();
+                LOGGER.info(msg);
+                if (verbose) {
+                    System.out.println(msg);
+                }
             	bundles.addAll(installed.remove(conditionalFeature));
             } else {
             	LOGGER.info("Conditional feature {}, hasn't been installed!");
+            }
+        }
+        for (Feature f : new HashSet<Feature>(installed.keySet())) {
+            f = getFeature(f.getName(), f.getVersion());
+            if (f != null) {
+                for (Conditional conditional : f.getConditional()) {
+                    boolean satisfied = true;
+                    for (Dependency dep : conditional.getCondition()) {
+                        Feature df = getFeatureForDependency(dep);
+                        satisfied &= installed.containsKey(df);
+                    }
+                    if (!satisfied) {
+                        Feature conditionalFeature = conditional.asFeature(f.getName(), f.getVersion());
+                        if (installed.containsKey(conditionalFeature)) {
+                            msg = "Uninstalling feature " + conditionalFeature.getName() + " " + conditionalFeature.getVersion();
+                            LOGGER.info(msg);
+                            if (verbose) {
+                                System.out.println(msg);
+                            }
+                            bundles.addAll(installed.remove(conditionalFeature));
+                        }
+                    }
+                }
             }
         }
 
