@@ -240,6 +240,7 @@
         <spring.osgi.version>1.2.1</spring.osgi.version>
         <spring31.version>3.1.4.RELEASE</spring31.version>
         <spring32.version>3.2.8.RELEASE_1</spring32.version>
+        <spring40.version>4.0.2.RELEASE_1</spring40.version>
         <spring.security31.version>3.1.4.RELEASE</spring.security31.version>
 
         <sshd.version>0.10.1</sshd.version>
