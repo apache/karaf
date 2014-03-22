@@ -96,9 +96,13 @@
                         </Export-Package>
                         <Private-Package>
                             org.apache.karaf.packages.core.internal,
+                            org.apache.karaf.packages.core.internal.osgi,
                             org.apache.felix.utils.version,
                             org.apache.felix.utils.manifest
                         </Private-Package>
+                        <Bundle-Activator>
+                            org.apache.karaf.packages.core.internal.osgi.Activator
+                        </Bundle-Activator>
                     </instructions>
                 </configuration>
             </plugin>

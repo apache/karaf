@@ -168,7 +168,6 @@
     </feature>
 
     <feature name="package" version="${project.version}" resolver="(obr)" description="Package commands and mbeans">
-        <feature version="${project.version}">aries-blueprint</feature>
         <bundle start-level="30">mvn:org.apache.karaf.package/org.apache.karaf.package.core/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.package/org.apache.karaf.package.command/${project.version}</bundle>
     </feature>
