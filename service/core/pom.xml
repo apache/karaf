@@ -68,11 +68,15 @@
                 <configuration>
                     <instructions>
                         <Export-Package>
-                            org.apache.karaf.service.core
+                            org.apache.karaf.service.core;-noimport:=true
                         </Export-Package>
                         <Private-Package>
-                            org.apache.karaf.service.core.internal
+                            org.apache.karaf.service.core.internal,
+                            org.apache.karaf.service.core.internal.osgi
                         </Private-Package>
+                        <Bundle-Activator>
+                            org.apache.karaf.service.core.internal.osgi.Activator
+                        </Bundle-Activator>
                     </instructions>
                 </configuration>
             </plugin>
