@@ -85,9 +85,13 @@
                         </Export-Package>
                         <Private-Package>
                             org.apache.karaf.system.internal,
+                            org.apache.karaf.system.internal.osgi,
                             org.apache.karaf.system.management.internal,
                             org.apache.felix.utils.properties
                         </Private-Package>
+                        <Bundle-Activator>
+                            org.apache.karaf.system.internal.osgi.Activator
+                        </Bundle-Activator>
                     </instructions>
                 </configuration>
             </plugin>

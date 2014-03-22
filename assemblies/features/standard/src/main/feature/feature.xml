@@ -180,7 +180,6 @@
     </feature>
 
     <feature name="system" description="Provide System support" version="${project.version}">
-        <feature version="${project.version}">aries-blueprint</feature>
         <bundle start-level="30" start="true">mvn:org.apache.karaf.system/org.apache.karaf.system.core/${project.version}</bundle>
         <bundle start-level="30" start="true">mvn:org.apache.karaf.system/org.apache.karaf.system.command/${project.version}</bundle>
     </feature>
