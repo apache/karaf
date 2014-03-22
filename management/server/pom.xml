@@ -69,6 +69,17 @@
             <artifactId>org.apache.karaf.service.guard</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.apache.karaf.util</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
 
         <dependency>
             <groupId>org.easymock</groupId>
@@ -103,8 +114,12 @@
                         <Export-Package>org.apache.karaf.management;version=${project.version};-split-package:=merge-first</Export-Package>
                         <Private-Package>
                             org.apache.karaf.management.internal,
-                            org.apache.karaf.service.guard.tools
+                            org.apache.karaf.service.guard.tools,
+                            org.apache.karaf.util.tracker
                         </Private-Package>
+                        <Bundle-Activator>
+                            org.apache.karaf.management.internal.Activator
+                        </Bundle-Activator>
                     </instructions>
                 </configuration>
             </plugin>
