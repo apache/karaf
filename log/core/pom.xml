@@ -59,6 +59,11 @@
             <artifactId>pax-logging-api</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.apache.karaf.util</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -91,8 +96,13 @@
                         </Import-Package>
                         <Private-Package>
                             org.apache.karaf.log.core.internal,
-                            org.apache.karaf.log.core.internal.layout
+                            org.apache.karaf.log.core.internal.layout,
+                            org.apache.karaf.log.core.internal.osgi,
+                            org.apache.karaf.util.tracker
                         </Private-Package>
+                        <Bundle-Activator>
+                            org.apache.karaf.log.core.internal.osgi.Activator
+                        </Bundle-Activator>
                     </instructions>
                 </configuration>
             </plugin>

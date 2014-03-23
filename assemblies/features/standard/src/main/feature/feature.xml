@@ -155,7 +155,6 @@
     </feature>
 
     <feature name="log" description="Provide Log support" version="${project.version}">
-        <feature version="${project.version}">aries-blueprint</feature>
         <bundle start-level="30" start="true">mvn:org.apache.karaf.log/org.apache.karaf.log.core/${project.version}</bundle>
         <bundle start-level="30" start="true">mvn:org.apache.karaf.log/org.apache.karaf.log.command/${project.version}</bundle>
     </feature>
