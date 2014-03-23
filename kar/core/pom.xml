@@ -101,9 +101,14 @@
                         </Export-Package>
                         <Private-Package>
                             org.apache.karaf.kar.internal,
+                            org.apache.karaf.kar.internal.osgi,
                             org.apache.karaf.util.maven,
+                            org.apache.karaf.util.tracker,
                             org.apache.felix.utils.properties
                         </Private-Package>
+                        <Bundle-Activator>
+                            org.apache.karaf.kar.internal.osgi.Activator
+                        </Bundle-Activator>
                     </instructions>
                 </configuration>
             </plugin>
