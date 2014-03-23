@@ -135,7 +135,6 @@
     </feature>
 
     <feature name="diagnostic" description="Provide Diagnostic support" version="${project.version}">
-        <feature version="${project.version}">aries-blueprint</feature>
         <bundle start-level="30" start="true">mvn:org.apache.karaf.diagnostic/org.apache.karaf.diagnostic.core/${project.version}</bundle>
         <bundle start-level="30" start="true">mvn:org.apache.karaf.diagnostic/org.apache.karaf.diagnostic.command/${project.version}</bundle>
     </feature>

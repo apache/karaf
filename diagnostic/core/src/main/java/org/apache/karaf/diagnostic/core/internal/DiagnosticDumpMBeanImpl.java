@@ -15,6 +15,7 @@ package org.apache.karaf.diagnostic.core.internal;
 
 import java.io.File;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
@@ -34,7 +35,7 @@ public class DiagnosticDumpMBeanImpl extends StandardMBean implements Diagnostic
     /**
      * Dump providers.
      */
-    private List<DumpProvider> providers;
+    private final List<DumpProvider> providers = new CopyOnWriteArrayList<DumpProvider>();
 
     /**
      * Creates new diagnostic mbean.
@@ -78,13 +79,11 @@ public class DiagnosticDumpMBeanImpl extends StandardMBean implements Diagnostic
         }
     }
 
-    /**
-     * Sets dump providers.
-     *
-     * @param providers Dump providers.
-     */
-    public void setProviders(List<DumpProvider> providers) {
-        this.providers = providers;
+    public void registerProvider(DumpProvider provider) {
+        providers.add(provider);
     }
 
+    public void unregisterProvider(DumpProvider provider) {
+        providers.add(provider);
+    }
 }

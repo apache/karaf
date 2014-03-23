@@ -36,9 +36,9 @@ import org.osgi.service.cm.ConfigurationAdmin;
  */
 public class LogDumpProvider implements DumpProvider {
 
-    private BundleContext bundleContext;
+    private final BundleContext bundleContext;
 
-    public void setBundleContext(BundleContext bundleContext) {
+    public LogDumpProvider(BundleContext bundleContext) {
         this.bundleContext = bundleContext;
     }
 
