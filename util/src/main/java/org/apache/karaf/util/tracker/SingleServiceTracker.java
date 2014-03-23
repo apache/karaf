@@ -20,6 +20,7 @@
 
 package org.apache.karaf.util.tracker;
 
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -99,25 +100,32 @@ public final class SingleServiceTracker<T> {
     }
 
     private void findMatchingReference(ServiceReference original) {
-        boolean clear = true;
-        ServiceReference ref = ctx.getServiceReference(className);
-        if (ref != null && (filter == null || filter.match(ref))) {
-            @SuppressWarnings("unchecked")
-            T service = (T) ctx.getService(ref);
-            if (service != null) {
-                clear = false;
-
-                // We do the unget out of the lock so we don't exit this class while holding a lock.
-                if (!!!update(original, ref, service)) {
-                    ctx.ungetService(ref);
+        try {
+            boolean clear = true;
+            ServiceReference[] refs = ctx.getServiceReferences(className, filterString);
+            if (refs != null && refs.length > 0) {
+                if (refs.length > 1) {
+                    Arrays.sort(refs);
                 }
-            }
-        } else if (original == null) {
-            clear = false;
-        }
+                @SuppressWarnings("unchecked")
+                T service = (T) ctx.getService(refs[0]);
+                if (service != null) {
+                    clear = false;
 
-        if (clear) {
-            update(original, null, null);
+                    // We do the unget out of the lock so we don't exit this class while holding a lock.
+                    if (!!!update(original, refs[0], service)) {
+                        ctx.ungetService(refs[0]);
+                    }
+                }
+            } else if (original == null) {
+                clear = false;
+            }
+
+            if (clear) {
+                update(original, null, null);
+            }
+        } catch (InvalidSyntaxException e) {
+            // this can never happen. (famous last words :)
         }
     }
 

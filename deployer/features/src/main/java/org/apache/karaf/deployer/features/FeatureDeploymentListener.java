@@ -98,7 +98,7 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
         }
     }
 
-    public void destroy() throws Exception {
+    public void destroy() {
         bundleContext.removeBundleListener(this);
     }
 

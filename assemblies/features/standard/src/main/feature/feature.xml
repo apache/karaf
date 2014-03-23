@@ -96,11 +96,20 @@
     </feature>
 
     <feature name="deployer" description="Karaf Deployer" version="${project.version}">
-        <feature version="${project.version}">aries-blueprint</feature>
-        <bundle start="true" start-level="24">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.spring/${project.version}</bundle>
-        <bundle start="true" start-level="24">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.blueprint/${project.version}</bundle>
         <bundle start="true" start-level="24">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.wrap/${project.version}</bundle>
         <bundle start="true" start-level="26">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.features/${project.version}</bundle>
+        <conditional>
+            <condition>aries-blueprint</condition>
+            <bundle start="true" start-level="24">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.blueprint/${project.version}</bundle>
+        </conditional>
+        <conditional>
+            <condition>spring</condition>
+            <bundle start="true" start-level="24">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.spring/${project.version}</bundle>
+        </conditional>
+        <conditional>
+            <condition>kar</condition>
+            <bundle start="true" start-level="24">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.kar/${project.version}</bundle>
+        </conditional>
     </feature>
 
     <!-- NB: this file is not the one really used. This file is used by the karaf-maven-plugin to define the start-level of bundles in the generated feature.xml -->
@@ -205,10 +214,6 @@
     <feature name="kar" description="Provide KAR (KARaf archive) support" version="${project.version}" resolver="(obr)">
         <bundle start-level="30">mvn:org.apache.karaf.kar/org.apache.karaf.kar.core/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.kar/org.apache.karaf.kar.command/${project.version}</bundle>
-        <conditional>
-            <condition>deployer</condition>
-            <bundle start-level="30">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.kar/${project.version}</bundle>
-        </conditional>
     </feature>
 
     <feature name="webconsole" description="Base support of the Karaf WebConsole" version="${project.version}" resolver="(obr)">

@@ -77,12 +77,16 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Export-Package />
                         <Private-Package>
                             org.apache.karaf.deployer.wrap,
-                            org.apache.karaf.util
+                            org.apache.karaf.deployer.wrap.osgi,
+                            org.apache.karaf.util,
+                            org.apache.karaf.util.tracker
                         </Private-Package>
+                        <Bundle-Activator>
+                            org.apache.karaf.deployer.wrap.osgi.Activator
+                        </Bundle-Activator>
                         <_versionpolicy>${bnd.version.policy}</_versionpolicy>
                     </instructions>
                 </configuration>
