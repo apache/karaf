@@ -45,11 +45,15 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.util.tracker.ServiceTracker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Activate this bundle
  */
 public class Activator implements BundleActivator, ManagedService {
+
+    static final Logger LOGGER = LoggerFactory.getLogger(Activator.class);
 
     ServiceRegistration registration;
 
@@ -128,7 +132,7 @@ public class Activator implements BundleActivator, ManagedService {
             try {
                 server.start();
             } catch (IOException e) {
-                e.printStackTrace();
+                LOGGER.warn("Exception caught while starting SSH server", e);
             }
         }
     }
@@ -144,7 +148,7 @@ public class Activator implements BundleActivator, ManagedService {
             try {
                 srv.stop();
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                LOGGER.warn("Exception caught while stopping SSH server", e);
             }
         }
     }
@@ -158,8 +162,7 @@ public class Activator implements BundleActivator, ManagedService {
                 try {
                     server.stop();
                 } catch (InterruptedException e) {
-                    // TODO: log exception
-                    e.printStackTrace();
+                    LOGGER.warn("Exception caught while stopping SSH server", e);
                 }
             }
         }
@@ -249,20 +252,6 @@ public class Activator implements BundleActivator, ManagedService {
             servers.add(server);
         }
         return server;
-    }
-
-    public void bindCommandSession(Session session) {
-        sessions.add(session);
-        if (agentFactory != null) {
-            agentFactory.registerSession(session);
-        }
-    }
-
-    public void unbindCommandSession(Session session) {
-        sessions.remove(session);
-        if (agentFactory != null) {
-            agentFactory.unregisterSession(session);
-        }
     }
 
 }
