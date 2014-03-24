@@ -27,6 +27,8 @@ public class RegionTest extends KarafTestSupport {
 
     @Test
     public void infoCommand() throws Exception {
+        installAndAssertFeature("region");
+
         String infoOutput = executeCommand("region:info");
         System.out.println(infoOutput);
         assertTrue("Region org.eclipse.equinox.region.kernel should be present", infoOutput.contains("org.eclipse.equinox.region.kernel"));
@@ -35,6 +37,8 @@ public class RegionTest extends KarafTestSupport {
 
     @Test
     public void addRegionCommand() throws Exception {
+        installAndAssertFeature("region");
+
         System.out.println(executeCommand("region:region-add itest"));
         String infoOutput = executeCommand("region:info");
         System.out.println(infoOutput);

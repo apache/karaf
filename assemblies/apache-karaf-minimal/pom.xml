@@ -115,7 +115,19 @@
                         <feature>wrapper</feature>
                     </installedFeatures>
                     <bootFeatures>
-                        <feature>framework</feature>
+                        <feature>jaas</feature>
+                        <feature>ssh</feature>
+                        <feature>management</feature>
+                        <feature>bundle</feature>
+                        <feature>config</feature>
+                        <feature>deployer</feature>
+                        <feature>diagnostic</feature>
+                        <feature>instance</feature>
+                        <feature>kar</feature>
+                        <feature>log</feature>
+                        <feature>package</feature>
+                        <feature>service</feature>
+                        <feature>system</feature>
                     </bootFeatures>
                 </configuration>
             </plugin>

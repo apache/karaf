@@ -34,7 +34,8 @@ public class FeatureTest extends KarafTestSupport {
 
     @Test
     public void bootFeatures() throws Exception {
-        assertFeaturesInstalled("standard", "config", "region", "package", "kar", "management");
+        assertFeaturesInstalled("jaas", "ssh", "management", "bundle", "config", "deployer", "diagnostic",
+                                "instance", "kar", "log", "package", "service", "system");
     }
 
     @Test

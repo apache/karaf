@@ -160,14 +160,21 @@
                         <feature>wrapper</feature>
                     </installedFeatures>
                     <bootFeatures>
-                        <feature>standard</feature>
-                        <feature>management</feature>
+                        <feature>aries-blueprint</feature>
+                        <feature>shell-compat</feature>
+                        <feature>jaas</feature>
                         <feature>ssh</feature>
+                        <feature>management</feature>
+                        <feature>bundle</feature>
                         <feature>config</feature>
-                        <feature>deployers</feature>
-                        <feature>region</feature>
-                        <feature>package</feature>
+                        <feature>deployer</feature>
+                        <feature>diagnostic</feature>
+                        <feature>instance</feature>
                         <feature>kar</feature>
+                        <feature>log</feature>
+                        <feature>package</feature>
+                        <feature>service</feature>
+                        <feature>system</feature>
                     </bootFeatures>
                 </configuration>
             </plugin>

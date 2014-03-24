@@ -25,27 +25,9 @@
         <bundle start="true" start-level="10">mvn:org.apache.karaf.service/org.apache.karaf.service.guard/${project.version}</bundle>
     </feature>
 
-    <feature name="standard" description="Karaf standard feature" version="${project.version}">
-        <feature>aries-blueprint</feature>
-        <feature>jaas</feature>
-        <feature>ssh</feature>
-        <feature>shell-compat</feature>
-        <feature>bundle</feature>
-        <feature>config</feature>
-        <feature>deployer</feature>
-        <feature>diagnostic</feature>
-        <feature>instance</feature>
-        <feature>log</feature>
-        <feature>service</feature>
-        <feature>system</feature>
-        <feature>package</feature>
-        <conditional>
-            <condition>webconsole</condition>
-            <bundle start-level="30">mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.instance/${project.version}</bundle>
-            <bundle start-level="30">mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.features/${project.version}</bundle>
-            <bundle start-level="30">mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.gogo/${project.version}</bundle>
-            <bundle start-level="30">mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.http/${project.version}</bundle>
-        </conditional>
+    <feature version="${project.version}" description="Services Security for Karaf" name="service-security">
+        <feature version="${project.version}">aries-proxy</feature>
+        <bundle start="true" start-level="10">mvn:org.apache.karaf.service/org.apache.karaf.service.guard/${project.version}</bundle>
     </feature>
 
     <feature name="aries-proxy" description="Aries Proxy" version="${project.version}">
@@ -224,6 +206,9 @@
         <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.metatype/${felix.metatype.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.branding/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.console/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.features/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.gogo/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.http/${project.version}</bundle>
         <conditional>
             <condition>eventadmin</condition>
             <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.webconsole.plugins.event/${felix.eventadmin.webconsole.plugin.version}</bundle>
@@ -231,6 +216,10 @@
         <conditional>
             <condition>scr</condition>
             <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.webconsole.plugins.ds/${felix.scr.webconsole.plugin.version}</bundle>
+        </conditional>
+        <conditional>
+            <condition>instance</condition>
+            <bundle start-level="30">mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.instance/${project.version}</bundle>
         </conditional>
     </feature>
 
