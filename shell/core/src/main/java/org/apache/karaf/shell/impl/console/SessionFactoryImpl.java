@@ -64,21 +64,23 @@ public class SessionFactoryImpl extends RegistryImpl implements SessionFactory, 
 
     @Override
     public void register(Object service) {
-        if (service instanceof Command) {
-            Command command = (Command) service;
-            String scope = command.getScope();
-            String name = command.getName();
-            if (!Session.SCOPE_GLOBAL.equals(scope)) {
-                if (!subshells.containsKey(scope)) {
-                    SubShellCommand subShell = new SubShellCommand(scope);
-                    subshells.put(scope, subShell);
-                    register(subShell);
+        synchronized (services) {
+            if (service instanceof Command) {
+                Command command = (Command) service;
+                String scope = command.getScope();
+                String name = command.getName();
+                if (!Session.SCOPE_GLOBAL.equals(scope)) {
+                    if (!subshells.containsKey(scope)) {
+                        SubShellCommand subShell = new SubShellCommand(scope);
+                        subshells.put(scope, subShell);
+                        register(subShell);
+                    }
+                    subshells.get(scope).increment();
                 }
-                subshells.get(scope).increment();
+                commandProcessor.addCommand(scope, wrap(command), name);
             }
-            commandProcessor.addCommand(scope, wrap(command), name);
+            super.register(service);
         }
-        super.register(service);
     }
 
     protected Function wrap(Command command) {
@@ -87,16 +89,18 @@ public class SessionFactoryImpl extends RegistryImpl implements SessionFactory, 
 
     @Override
     public void unregister(Object service) {
-        super.unregister(service);
-        if (service instanceof Command) {
-            Command command = (Command) service;
-            String scope = command.getScope();
-            String name = command.getName();
-            commandProcessor.removeCommand(scope, name);
-            if (!Session.SCOPE_GLOBAL.equals(scope)) {
-                if (subshells.get(scope).decrement() == 0) {
-                    SubShellCommand subShell = subshells.remove(scope);
-                    unregister(subShell);
+        synchronized (services) {
+            super.unregister(service);
+            if (service instanceof Command) {
+                Command command = (Command) service;
+                String scope = command.getScope();
+                String name = command.getName();
+                commandProcessor.removeCommand(scope, name);
+                if (!Session.SCOPE_GLOBAL.equals(scope)) {
+                    if (subshells.get(scope).decrement() == 0) {
+                        SubShellCommand subShell = subshells.remove(scope);
+                        unregister(subShell);
+                    }
                 }
             }
         }
@@ -104,7 +108,7 @@ public class SessionFactoryImpl extends RegistryImpl implements SessionFactory, 
 
     @Override
     public Session create(InputStream in, PrintStream out, PrintStream err, Terminal term, String encoding, Runnable closeCallback) {
-        synchronized (this) {
+        synchronized (sessions) {
             if (closed) {
                 throw new IllegalStateException("SessionFactory has been closed");
             }
@@ -116,7 +120,7 @@ public class SessionFactoryImpl extends RegistryImpl implements SessionFactory, 
 
     @Override
     public Session create(InputStream in, PrintStream out, PrintStream err) {
-        synchronized (this) {
+        synchronized (sessions) {
             if (closed) {
                 throw new IllegalStateException("SessionFactory has been closed");
             }
@@ -127,7 +131,7 @@ public class SessionFactoryImpl extends RegistryImpl implements SessionFactory, 
     }
 
     public void stop() {
-        synchronized (this) {
+        synchronized (sessions) {
             closed = true;
             for (Session session : sessions) {
                 session.close();

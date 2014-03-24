@@ -29,8 +29,8 @@ import org.apache.karaf.shell.api.console.Registry;
 
 public class RegistryImpl implements Registry {
 
-    private final Registry parent;
-    private final Map<Object, Object> services = new LinkedHashMap<Object, Object>();
+    protected final Registry parent;
+    protected final Map<Object, Object> services = new LinkedHashMap<Object, Object>();
 
     public RegistryImpl(Registry parent) {
         this.parent = parent;
