@@ -222,6 +222,10 @@ public class ConsoleSessionImpl implements Session {
         }
         running = false;
         pipe.interrupt();
+        if (thread != Thread.currentThread()) {
+            thread.interrupt();
+        }
+        reader.shutdown();
         if (closeCallback != null) {
             closeCallback.run();
         }
