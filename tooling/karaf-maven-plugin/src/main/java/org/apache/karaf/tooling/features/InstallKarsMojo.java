@@ -423,7 +423,8 @@ public class InstallKarsMojo extends MojoSupport {
         }
 
         private String retrieveProperty(Properties properties, String key) {
-            return properties.containsKey(key) && properties.get(key) != null ? properties.get(key) + "," : "";
+            String val = properties.getProperty(key);
+            return val != null && val.length() > 0 ? val + "," : "";
         }
 
         private Features readFeatures(URI uri) throws MojoExecutionException, XMLStreamException, JAXBException, IOException {
