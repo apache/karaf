@@ -62,6 +62,20 @@ public class KarafMBeanServerBuilder extends MBeanServerBuilder {
                 }
                 guard.invoke(proxy, method, args);
             }
+            if (method.getName().equals("equals")
+                    && method.getParameterTypes().length == 1
+                    && method.getParameterTypes()[0] == Object.class) {
+                Object target = args[0];
+                if (target != null && Proxy.isProxyClass(target.getClass())) {
+                    InvocationHandler handler = Proxy.getInvocationHandler(target);
+                    if (handler instanceof MBeanInvocationHandler) {
+                        args[0] = ((MBeanInvocationHandler) handler).wrapped;
+                    }
+                }
+            } else if (method.getName().equals("finalize") && method.getParameterTypes().length == 0) {
+                // special case finalize, don't route through to delegate because that will get its own call
+                return null;
+            }
             try {
                 return method.invoke(wrapped, args);
             } catch (InvocationTargetException ite) {
