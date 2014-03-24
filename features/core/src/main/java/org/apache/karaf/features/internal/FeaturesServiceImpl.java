@@ -63,6 +63,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -82,7 +83,7 @@ public class FeaturesServiceImpl implements FeaturesService {
 
     private final BundleManager bundleManager;
     private final FeatureConfigInstaller configManager;
-    
+    private final AtomicBoolean stopped = new AtomicBoolean();
 
     private boolean respectStartLvlDuringFeatureStartup;
     private boolean respectStartLvlDuringFeatureUninstall;
@@ -852,6 +853,7 @@ public class FeaturesServiceImpl implements FeaturesService {
     }
 
     public void stop() throws Exception {
+        stopped.set(true);
         uris = new HashSet<URI>(repositories.keySet());
         while (!repositories.isEmpty()) {
             internalRemoveRepository(repositories.keySet().iterator().next());
@@ -859,6 +861,10 @@ public class FeaturesServiceImpl implements FeaturesService {
     }
 
     protected void saveState() {
+        // Never save the state after the service has been stopped
+        if (stopped.get()) {
+            return;
+        }
         OutputStream os = null;
         try {
             File file = bundleManager.getDataFile("FeaturesServiceState.properties");
