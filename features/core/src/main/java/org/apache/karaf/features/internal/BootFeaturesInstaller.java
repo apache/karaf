@@ -152,7 +152,12 @@ public class BootFeaturesInstaller {
     }
 
     private Set<String> parseFeatureList(String group) {
-        HashSet<String> features = new HashSet<String>(Arrays.asList(group.trim().split("\\s*,\\s*")));
+        HashSet<String> features = new HashSet<String>();
+        for (String feature : Arrays.asList(group.trim().split("\\s*,\\s*"))) {
+            if (feature.length() > 0) {
+                features.add(feature);
+            }
+        }
         return features;
     }
 
