@@ -161,10 +161,14 @@ public final class SingleServiceTracker<T> {
         if (open.compareAndSet(true, false)) {
             ctx.removeServiceListener(listener);
 
+            ServiceReference deadRef;
             synchronized (this) {
-                ServiceReference deadRef = ref.getAndSet(null);
+                deadRef = ref.getAndSet(null);
                 service.set(null);
-                if (deadRef != null) ctx.ungetService(deadRef);
+            }
+            if (deadRef != null) {
+                serviceListener.serviceLost();
+                ctx.ungetService(deadRef);
             }
         }
     }
