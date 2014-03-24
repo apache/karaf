@@ -19,6 +19,7 @@
 package org.apache.karaf.shell.impl.console;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,7 @@ public class RegistryImpl implements Registry {
 
     protected final Registry parent;
     protected final Map<Object, Object> services = new LinkedHashMap<Object, Object>();
+    private final Map<String, List<Command>> commands = new HashMap<String, List<Command>>();
 
     public RegistryImpl(Registry parent) {
         this.parent = parent;
@@ -39,6 +41,17 @@ public class RegistryImpl implements Registry {
     @Override
     public List<Command> getCommands() {
         return getServices(Command.class);
+    }
+
+    @Override
+    public boolean hasCommand(String scope, String name) {
+        if (parent != null && parent.hasCommand(scope, name)) {
+            return true;
+        }
+        synchronized (services) {
+            List<Command> cmds = commands.get(scope + ":" + name);
+            return cmds != null && !cmds.isEmpty();
+        }
     }
 
     @Override
@@ -52,6 +65,16 @@ public class RegistryImpl implements Registry {
     public void register(Object service) {
         synchronized (services) {
             services.put(service, service);
+            if (service instanceof Command) {
+                Command cmd = (Command) service;
+                String key = cmd.getScope() + ":" + cmd.getName();
+                List<Command> cmds = commands.get(key);
+                if (cmds == null) {
+                    cmds = new ArrayList<Command>();
+                    commands.put(key, cmds);
+                }
+                cmds.add(cmd);
+            }
         }
     }
 
@@ -59,6 +82,17 @@ public class RegistryImpl implements Registry {
     public void unregister(Object service) {
         synchronized (services) {
             services.remove(service);
+            if (service instanceof Command) {
+                Command cmd = (Command) service;
+                String key = cmd.getScope() + ":" + cmd.getName();
+                List<Command> cmds = commands.get(key);
+                if (cmds != null) {
+                    cmds.remove(cmd);
+                    if (cmds.isEmpty()) {
+                        commands.remove(key);
+                    }
+                }
+            }
         }
     }
 

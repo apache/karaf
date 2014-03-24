@@ -36,6 +36,15 @@ public interface Registry {
     List<Command> getCommands();
 
     /**
+     *
+     * @param scope
+     * @param name
+     * @return
+     * @throws InterruptedException
+     */
+    boolean hasCommand(String scope, String name);
+
+    /**
      * Register a delayed service (or factory).
      * In cases where instances must be created for each injection,
      * a {@link Callable} can be registered and each injection will

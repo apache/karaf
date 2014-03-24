@@ -96,6 +96,9 @@ public class KarafTestSupport {
     @Inject
     protected FeaturesService featureService;
 
+    @Inject
+    protected SessionFactory sessionFactory;
+
     /**
      * To make sure the tests run only when the boot features are fully installed
      */
@@ -279,14 +282,17 @@ public class KarafTestSupport {
             command = command.substring(0, spaceIdx);
         }
         int colonIndx = command.indexOf(':');
-
+        String scope = (colonIndx > 0) ? command.substring(0, colonIndx) : "*";
+        String name  = (colonIndx > 0) ? command.substring(colonIndx + 1) : command;
         try {
-            if (colonIndx > 0) {
-                String scope = command.substring(0, colonIndx);
-                String function = command.substring(colonIndx + 1);
-                waitForService("(&(osgi.command.scope=" + scope + ")(osgi.command.function=" + function + "))", SERVICE_TIMEOUT);
-            } else {
-                waitForService("(osgi.command.function=" + command + ")", SERVICE_TIMEOUT);
+            long start = System.currentTimeMillis();
+            long cur   = start;
+            while (cur - start < SERVICE_TIMEOUT) {
+                if (sessionFactory.getRegistry().hasCommand(scope, name)) {
+                    return;
+                }
+                Thread.sleep(100);
+                cur = System.currentTimeMillis();
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
