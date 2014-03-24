@@ -42,14 +42,14 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
-import org.apache.karaf.shell.console.Console;
-import org.apache.karaf.shell.console.factory.ConsoleFactory;
+import org.apache.karaf.shell.api.console.Session;
+import org.apache.karaf.shell.api.console.SessionFactory;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * WebConsole plugin for {@link Console}.
+ * WebConsole plugin for {@link Session}.
  */
 public class GogoPlugin extends AbstractWebConsolePlugin {
 
@@ -61,7 +61,7 @@ public class GogoPlugin extends AbstractWebConsolePlugin {
     public static final int TERM_HEIGHT = 39;
 
     private BundleContext bundleContext;
-    private ConsoleFactory consoleFactory;
+    private SessionFactory sessionFactory;
 
     @Override
     protected boolean isHtmlRequest(HttpServletRequest request) {
@@ -72,8 +72,8 @@ public class GogoPlugin extends AbstractWebConsolePlugin {
         this.bundleContext = bundleContext;
     }
 
-    public void setConsoleFactory(ConsoleFactory consoleFactory) {
-        this.consoleFactory = consoleFactory;
+    public void setSessionFactory(SessionFactory sessionFactory) {
+        this.sessionFactory = sessionFactory;
     }
 
     public void start() {
@@ -185,14 +185,14 @@ public class GogoPlugin extends AbstractWebConsolePlugin {
                 out = new PipedInputStream();
                 PrintStream pipedOut = new PrintStream(new PipedOutputStream(out), true);
                 
-                Console console = consoleFactory.create(
+                Session session = sessionFactory.create(
                         new PipedInputStream(in),
                         pipedOut,
                         pipedOut,
                         new WebTerminal(TERM_WIDTH, TERM_HEIGHT),
                         null,
                         null);
-                new Thread(console, "Karaf web console user " + getCurrentUserName()).start();
+                new Thread(session, "Karaf web console user " + getCurrentUserName()).start();
             } catch (IOException e) {
                 e.printStackTrace();
                 throw e;

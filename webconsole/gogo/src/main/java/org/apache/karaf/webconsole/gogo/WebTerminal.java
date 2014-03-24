@@ -16,25 +16,32 @@
  */
 package org.apache.karaf.webconsole.gogo;
 
-import jline.TerminalSupport;
+ import org.apache.karaf.shell.api.console.Terminal;
 
-public class WebTerminal extends TerminalSupport {
+public class WebTerminal implements Terminal {
 
     private int width;
     private int height;
+    private boolean echo = true;
 
     public WebTerminal(int width, int height) {
-        super(true);
         this.width = width;
         this.height = height;
     }
 
-    public void init() throws Exception {
-        // nothing to do
+    @Override
+    public boolean isAnsiSupported() {
+        return true;
     }
 
-    public void restore() throws Exception {
-        // nothing to do
+    @Override
+    public boolean isEchoEnabled() {
+        return echo;
+    }
+
+    @Override
+    public void setEchoEnabled(boolean enabled) {
+        echo = enabled;
     }
 
     public int getWidth() {

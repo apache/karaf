@@ -19,11 +19,11 @@
 -->
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" default-activation="lazy">
 
-	<reference id="consoleFactory" interface="org.apache.karaf.shell.console.factory.ConsoleFactory"/>
+	<reference id="sessionFactory" interface="org.apache.karaf.shell.api.console.SessionFactory"/>
 
     <bean id="gogoPlugin" class="org.apache.karaf.webconsole.gogo.GogoPlugin" init-method="start" destroy-method="stop">
         <property name="bundleContext" ref="blueprintBundleContext" />
-        <property name="consoleFactory" ref="consoleFactory"/>
+        <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
     <service ref="gogoPlugin" interface="javax.servlet.Servlet" >
         <service-properties>
