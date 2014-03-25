@@ -316,7 +316,12 @@ public class ConsoleSessionImpl implements Session {
 
     @Override
     public String readLine(String prompt, Character mask) throws IOException {
-        return reader.readLine(prompt, mask);
+        reader.setHistoryEnabled(false);
+        try {
+            return reader.readLine(prompt, mask);
+        } finally {
+            reader.setHistoryEnabled(true);
+        }
     }
 
     private String loadCompletionMode() {
