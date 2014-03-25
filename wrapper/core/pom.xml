@@ -104,6 +104,7 @@
                         </Export-Package>
                         <Private-Package>
                             org.apache.karaf.wrapper.internal,
+                            org.apache.karaf.wrapper.internal.osgi,
                             org.apache.karaf.wrapper.management.internal,
                             org.tanukisoftware.wrapper*,
                             org.apache.karaf.main*
@@ -114,6 +115,9 @@
                             !org.apache.karaf.info,
                             *
                         </Import-Package>
+                        <Bundle-Activator>
+                            org.apache.karaf.wrapper.internal.osgi.Activator
+                        </Bundle-Activator>
                     </instructions>
                 </configuration>
             </plugin>
