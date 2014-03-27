@@ -230,6 +230,22 @@ public class InstallCommand extends AbstractAction {
 
                     mkdir(lib);
                     copyResourceTo(new File(lib, "libwrapper.so"), "solaris/x86/libwrapper.so", false);
+                } else if (arch.equalsIgnoreCase("x86_64")) {
+                    mkdir(bin);
+
+                    File file = new File(bin, name + "-wrapper");
+                    copyResourceTo(file, "solaris/x86_64/karaf-wrapper", false);
+                    chmod(file, "a+x");
+
+                    serviceFile = new File(bin, name + "-service");
+                    copyFilteredResourceTo(serviceFile, "unix/karaf-service", props);
+                    chmod(serviceFile, "a+x");
+
+                    wrapperConf = new File(etc, name + "-wrapper.conf");
+                    copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props);
+
+                    mkdir(lib);
+                    copyResourceTo(new File(lib, "libwrapper.so"), "solaris/x86_64/libwrapper.so", false);
                 } else {
                     mkdir(bin);
 
