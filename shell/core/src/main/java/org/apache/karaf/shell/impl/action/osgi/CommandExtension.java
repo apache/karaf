@@ -71,6 +71,9 @@ public class CommandExtension implements Extension, Satisfiable {
 
     @Override
     public void found() {
+        LOGGER.info("Registering commands for bundle {}/{}",
+                bundle.getSymbolicName(),
+                bundle.getVersion());
         for (Satisfiable s : satisfiables) {
             s.found();
         }
@@ -117,7 +120,10 @@ public class CommandExtension implements Extension, Satisfiable {
             }
             tracker.open();
             if (!tracker.isSatisfied()) {
-                LOGGER.info("Command registration delayed. Missing dependencies: " + tracker.getMissingServices());
+                LOGGER.info("Command registration delayed for bundle {}/{}. Missing dependencies: {}",
+                        bundle.getSymbolicName(),
+                        bundle.getVersion(),
+                        tracker.getMissingServices());
             }
         } finally {
             started.countDown();
