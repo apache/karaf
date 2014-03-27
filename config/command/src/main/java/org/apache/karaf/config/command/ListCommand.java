@@ -18,6 +18,8 @@ package org.apache.karaf.config.command;
 
 import java.util.Dictionary;
 import java.util.Enumeration;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
@@ -33,7 +35,12 @@ public class ListCommand extends ConfigCommandSupport {
     protected Object doExecute() throws Exception {
         Configuration[] configs = configRepository.getConfigAdmin().listConfigurations(query);
         if (configs != null) {
+            Map<String, Configuration> sortedConfigs = new TreeMap<String, Configuration>();
             for (Configuration config : configs) {
+                sortedConfigs.put(config.getPid(), config);
+            }
+            for (String pid : sortedConfigs.keySet()) {
+                Configuration config = sortedConfigs.get(pid);
                 System.out.println("----------------------------------------------------------------");
                 System.out.println("Pid:            " + config.getPid());
                 if (config.getFactoryPid() != null) {
@@ -43,9 +50,13 @@ public class ListCommand extends ConfigCommandSupport {
                 if (config.getProperties() != null) {
                     System.out.println("Properties:");
                     Dictionary props = config.getProperties();
+                    Map<String, Object> sortedProps = new TreeMap<String, Object>();
                     for (Enumeration e = props.keys(); e.hasMoreElements();) {
                         Object key = e.nextElement();
-                        System.out.println("   " + key + " = " + props.get(key));
+                        sortedProps.put(key.toString(), props.get(key));
+                    }
+                    for (String key : sortedProps.keySet()) {
+                        System.out.println("   " + key + " = " + sortedProps.get(key));
                     }
                 }
             }
