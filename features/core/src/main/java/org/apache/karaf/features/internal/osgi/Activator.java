@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -36,8 +37,10 @@ import org.apache.karaf.features.internal.BundleManager;
 import org.apache.karaf.features.internal.FeatureConfigInstaller;
 import org.apache.karaf.features.internal.FeatureFinder;
 import org.apache.karaf.features.internal.FeaturesServiceImpl;
+import org.apache.karaf.features.internal.PersistentBundleManager;
 import org.apache.karaf.features.management.internal.FeaturesServiceMBeanImpl;
 import org.apache.karaf.region.persist.RegionsPersistence;
+import org.apache.karaf.util.locks.FileLockUtils;
 import org.apache.karaf.util.tracker.SingleServiceTracker;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -58,7 +61,7 @@ public class Activator implements BundleActivator, SingleServiceTracker.SingleSe
 
     private ExecutorService executor = Executors.newSingleThreadExecutor();
     private BundleContext bundleContext;
-    private SingleServiceTracker<RegionsPersistence> regionsPersistenceTracker;
+    private SingleServiceTracker regionsPersistenceTracker;
     private SingleServiceTracker<URLStreamHandlerService> mvnUrlHandlerTracker;
     private SingleServiceTracker<ConfigurationAdmin> configurationAdminTracker;
     private ServiceTracker<FeaturesListener, FeaturesListener> featuresListenerTracker;
@@ -71,8 +74,8 @@ public class Activator implements BundleActivator, SingleServiceTracker.SingleSe
     @Override
     public void start(BundleContext context) throws Exception {
         bundleContext = context;
-        regionsPersistenceTracker = new SingleServiceTracker<RegionsPersistence>(
-                bundleContext, RegionsPersistence.class, this
+        regionsPersistenceTracker = new SingleServiceTracker(
+                bundleContext, "org.apache.karaf.region.persist.RegionsPersistence", this
         );
         mvnUrlHandlerTracker = new SingleServiceTracker<URLStreamHandlerService>(
                 bundleContext, URLStreamHandlerService.class, "(url.handler.protocol=mvn)", this
@@ -96,7 +99,7 @@ public class Activator implements BundleActivator, SingleServiceTracker.SingleSe
 
     protected void doStart() {
         ConfigurationAdmin configurationAdmin = configurationAdminTracker.getService();
-        RegionsPersistence regionsPersistence = regionsPersistenceTracker.getService();
+        Object regionsPersistence = regionsPersistenceTracker.getService();
         URLStreamHandlerService mvnUrlHandler = mvnUrlHandlerTracker.getService();
 
         if (configurationAdmin == null || mvnUrlHandler == null) {
@@ -118,7 +121,19 @@ public class Activator implements BundleActivator, SingleServiceTracker.SingleSe
         props.put(Constants.SERVICE_PID, "org.apache.karaf.features.repos");
         featureFinderRegistration = bundleContext.registerService(ManagedService.class, featureFinder, props);
 
-        BundleManager bundleManager = new BundleManager(bundleContext, regionsPersistence);
+        BundleManager bundleManager;
+        if (regionsPersistence != null) {
+            final Object rg = regionsPersistence;
+            // Use an inner class to isolate from the region persistence package
+            bundleManager = new Callable<BundleManager>() {
+                @Override
+                public BundleManager call() {
+                    return new PersistentBundleManager(bundleContext, (RegionsPersistence) rg);
+                }
+            }.call();
+        } else {
+            bundleManager = new BundleManager(bundleContext);
+        }
         FeatureConfigInstaller configInstaller = new FeatureConfigInstaller(configurationAdmin);
         String featuresRepositories = getString(configuration, "featuresRepositories", "");
         boolean respectStartLvlDuringFeatureStartup = getBoolean(configuration, "respectStartLvlDuringFeatureStartup", true);

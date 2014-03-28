@@ -165,7 +165,7 @@ public class FeaturesServiceImplTest extends TestBase {
 
     @Test
     public void testGetOptionalImportsOnly() {
-        BundleManager bundleManager = new BundleManager(null, null, 0l);
+        BundleManager bundleManager = new BundleManager(null, 0l);
 
         List<Clause> result = bundleManager.getOptionalImports("org.apache.karaf,org.apache.karaf.optional;resolution:=optional");
         assertEquals("One optional import expected", 1, result.size());

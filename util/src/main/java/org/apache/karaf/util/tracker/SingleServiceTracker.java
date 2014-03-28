@@ -66,6 +66,12 @@ public final class SingleServiceTracker<T> {
         }
     };
 
+    public SingleServiceTracker(BundleContext context, String className, SingleServiceListener sl) {
+        ctx = context;
+        this.className = className;
+        serviceListener = sl;
+    }
+
     public SingleServiceTracker(BundleContext context, Class<T> clazz, SingleServiceListener sl) {
         ctx = context;
         this.className = clazz.getName();

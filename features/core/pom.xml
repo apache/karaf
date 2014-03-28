@@ -113,6 +113,7 @@
                                 -noimport:=true
                         </Export-Package>
                         <Import-Package>
+                            org.apache.karaf.region.persist;resolution:=optional,
                             *
                         </Import-Package>
                         <Private-Package>

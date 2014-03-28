@@ -65,30 +65,18 @@ public class BundleManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BundleManager.class);
     private final BundleContext bundleContext;
-    private final RegionsPersistence regionsPersistence;
     private final long refreshTimeout;
 
     public BundleManager(BundleContext bundleContext) {
-        this(bundleContext, null);
+        this(bundleContext, 5000);
     }
 
-    public BundleManager(BundleContext bundleContext, RegionsPersistence regionsPersistence) {
-        this(bundleContext, regionsPersistence, 5000);
-    }
-
-    public BundleManager(BundleContext bundleContext, RegionsPersistence regionsPersistence, long refreshTimeout) {
+    public BundleManager(BundleContext bundleContext, long refreshTimeout) {
         this.bundleContext = bundleContext;
-        this.regionsPersistence = regionsPersistence;
         this.refreshTimeout = refreshTimeout;
     }
 
     public BundleInstallerResult installBundleIfNeeded(String bundleLocation, int startLevel, String regionName) throws IOException, BundleException {
-        BundleInstallerResult result = doInstallBundleIfNeeded(bundleLocation, startLevel);
-        installToRegion(regionName, result.bundle, result.isNew);
-        return result;
-    }
-
-    private BundleInstallerResult doInstallBundleIfNeeded(String bundleLocation, int startLevel) throws IOException, BundleException {
         InputStream is = getInputStreamForBundle(bundleLocation);
         try {
             is.mark(256 * 1024);
@@ -176,16 +164,6 @@ public class BundleManager {
             throw e;
         }
         return is;
-    }
-
-    private void installToRegion(String region, Bundle b, boolean isNew) throws BundleException {
-        if (region != null && isNew) {
-            if (regionsPersistence != null) {
-                regionsPersistence.install(b, region);
-            } else {
-                throw new RuntimeException("Unable to find RegionsPersistence service, while installing " + region);
-            }
-        }
     }
 
     /**

@@ -361,6 +361,8 @@
                                 <excludedArtifactId>sshd-core</excludedArtifactId>
                                 <excludedArtifactId>jline</excludedArtifactId>
                                 <excludedArtifactId>core</excludedArtifactId>
+                                <excludedArtifactId>org.apache.karaf.region.core</excludedArtifactId>
+                                <excludedArtifactId>region</excludedArtifactId>
                             </excludedArtifactIds>
                         </configuration>
                     </execution>

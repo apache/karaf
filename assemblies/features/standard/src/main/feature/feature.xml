@@ -151,7 +151,7 @@
 
     <feature name="region" description="Provide Region Support" version="${project.version}">
         <bundle start-level="30">mvn:org.eclipse.equinox/region/${equinox.region.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.karaf.region/org.apache.karaf.region.persist/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.karaf.region/org.apache.karaf.region.core/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.region/org.apache.karaf.region.command/${project.version}</bundle>
     </feature>
 
