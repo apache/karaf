@@ -43,7 +43,6 @@
             <groupId>test</groupId>
             <artifactId>aggregate-recursive-module-a</artifactId>
             <version>1.0-SNAPSHOT</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>test</groupId>
