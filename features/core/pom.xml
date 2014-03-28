@@ -116,6 +116,9 @@
                             org.apache.karaf.region.persist;resolution:=optional,
                             *
                         </Import-Package>
+                        <DynamicImport-Package>
+                            org.apache.karaf.region.persist
+                        </DynamicImport-Package>
                         <Private-Package>
                             org.apache.karaf.features.internal,
                             org.apache.karaf.features.internal.model,

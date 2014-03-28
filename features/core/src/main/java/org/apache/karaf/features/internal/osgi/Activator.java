@@ -222,8 +222,8 @@ public class Activator implements BundleActivator, SingleServiceTracker.SingleSe
                 doStop();
                 try {
                     doStart();
-                } catch (Exception e) {
-                    LOGGER.warn("Error starting FeaturesService", e);
+                } catch (Throwable t) {
+                    LOGGER.warn("Error starting FeaturesService", t);
                     doStop();
                 }
             }
