@@ -30,7 +30,7 @@ import org.ops4j.pax.exam.spi.reactors.PerClass;
 @ExamReactorStrategy(PerClass.class)
 public class SystemTest extends KarafTestSupport {
 
-    private static final String KARAF_VERSION = "3";
+    private static final String KARAF_VERSION = "4";
 
     @Test
     public void nameCommand() throws Exception {

@@ -249,7 +249,7 @@
         <xbean.version>3.16</xbean.version>
         <xerces.version>2.11.0</xerces.version>
         <javax.mail.version>1.4.5</javax.mail.version>
-        <http.feature.version>[3,4)</http.feature.version>
+        <http.feature.version>[4,5)</http.feature.version>
         <weld.version>2.1.1.Final</weld.version>
   
         <!-- Furter used maven plugin versions; e.g. in the docs -->

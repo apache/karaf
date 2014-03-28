@@ -14,6 +14,7 @@
 package org.apache.karaf.itests.features;
 
 import org.apache.karaf.itests.KarafTestSupport;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -70,11 +71,13 @@ public class EnterpriseFeaturesTest extends KarafTestSupport {
     }
 
     @Test
+    @Ignore("Pax-cdi depends on scr feature [2.3,3.5) so it does not work with 4.0")
     public void installOpenWebBeansFeature() throws Exception {
         installAssertAndUninstallFeature("openwebbeans");
     }
 
     @Test
+    @Ignore("Pax-cdi depends on scr feature [2.3,3.5) so it does not work with 4.0")
     public void installWeldFeature() throws Exception {
         installAssertAndUninstallFeature("weld");
     }
