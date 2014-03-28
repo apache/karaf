@@ -43,6 +43,12 @@
             <artifactId>org.osgi.core</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.apache.karaf.util</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -72,7 +78,8 @@
                         </Export-Package>
                         <Private-Package>
                             org.apache.karaf.service.core.internal,
-                            org.apache.karaf.service.core.internal.osgi
+                            org.apache.karaf.service.core.internal.osgi,
+                            org.apache.karaf.util.tracker
                         </Private-Package>
                         <Bundle-Activator>
                             org.apache.karaf.service.core.internal.osgi.Activator

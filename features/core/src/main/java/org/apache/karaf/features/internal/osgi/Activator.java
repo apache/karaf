@@ -19,14 +19,10 @@ package org.apache.karaf.features.internal.osgi;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import javax.management.NotCompliantMBeanException;
 
@@ -40,71 +36,25 @@ import org.apache.karaf.features.internal.FeaturesServiceImpl;
 import org.apache.karaf.features.internal.PersistentBundleManager;
 import org.apache.karaf.features.management.internal.FeaturesServiceMBeanImpl;
 import org.apache.karaf.region.persist.RegionsPersistence;
-import org.apache.karaf.util.locks.FileLockUtils;
-import org.apache.karaf.util.tracker.SingleServiceTracker;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
+import org.apache.karaf.util.tracker.BaseActivator;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.url.URLStreamHandlerService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public class Activator implements BundleActivator, SingleServiceTracker.SingleServiceListener {
+public class Activator extends BaseActivator {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Activator.class);
-
-    private ExecutorService executor = Executors.newSingleThreadExecutor();
-    private BundleContext bundleContext;
-    private SingleServiceTracker regionsPersistenceTracker;
-    private SingleServiceTracker<URLStreamHandlerService> mvnUrlHandlerTracker;
-    private SingleServiceTracker<ConfigurationAdmin> configurationAdminTracker;
     private ServiceTracker<FeaturesListener, FeaturesListener> featuresListenerTracker;
-
     private FeaturesServiceImpl featuresService;
-    private ServiceRegistration<ManagedService> featureFinderRegistration;
-    private ServiceRegistration<FeaturesService> featuresServiceRegistration;
-    private ServiceRegistration featuresServiceMBeanRegistration;
 
     @Override
-    public void start(BundleContext context) throws Exception {
-        bundleContext = context;
-        regionsPersistenceTracker = new SingleServiceTracker(
-                bundleContext, "org.apache.karaf.region.persist.RegionsPersistence", this
-        );
-        mvnUrlHandlerTracker = new SingleServiceTracker<URLStreamHandlerService>(
-                bundleContext, URLStreamHandlerService.class, "(url.handler.protocol=mvn)", this
-        );
-        configurationAdminTracker = new SingleServiceTracker<ConfigurationAdmin>(
-                bundleContext, ConfigurationAdmin.class, this
-        );
-        regionsPersistenceTracker.open();
-        mvnUrlHandlerTracker.open();
-        configurationAdminTracker.open();
-    }
-
-    @Override
-    public void stop(BundleContext context) throws Exception {
-        configurationAdminTracker.close();
-        mvnUrlHandlerTracker.close();
-        regionsPersistenceTracker.close();
-        executor.shutdown();
-        executor.awaitTermination(30, TimeUnit.SECONDS);
-    }
-
-    protected void doStart() {
-        ConfigurationAdmin configurationAdmin = configurationAdminTracker.getService();
-        Object regionsPersistence = regionsPersistenceTracker.getService();
-        URLStreamHandlerService mvnUrlHandler = mvnUrlHandlerTracker.getService();
-
-        if (configurationAdmin == null || mvnUrlHandler == null) {
-            return;
-        }
+    protected void doOpen() throws Exception {
+        trackService("org.apache.karaf.region.persist.RegionsPersistence");
+        trackService(URLStreamHandlerService.class, "(url.handler.protocol=mvn)");
+        trackService(ConfigurationAdmin.class);
 
         Properties configuration = new Properties();
         File configFile = new File(System.getProperty("karaf.etc"), "org.apache.karaf.features.cfg");
@@ -112,14 +62,25 @@ public class Activator implements BundleActivator, SingleServiceTracker.SingleSe
             try {
                 configuration.load(new FileReader(configFile));
             } catch (IOException e) {
-                LOGGER.warn("Error reading configuration file " + configFile.toString(), e);
+                logger.warn("Error reading configuration file " + configFile.toString(), e);
             }
+        }
+        updated((Dictionary) configuration);
+    }
+
+    protected void doStart() throws NotCompliantMBeanException {
+        ConfigurationAdmin configurationAdmin = getTrackedService(ConfigurationAdmin.class);
+        Object regionsPersistence = getTrackedService("org.apache.karaf.region.persist.RegionsPersistence");
+        URLStreamHandlerService mvnUrlHandler = getTrackedService(URLStreamHandlerService.class);
+
+        if (configurationAdmin == null || mvnUrlHandler == null) {
+            return;
         }
 
         FeatureFinder featureFinder = new FeatureFinder();
         Hashtable<String, Object> props = new Hashtable<String, Object>();
         props.put(Constants.SERVICE_PID, "org.apache.karaf.features.repos");
-        featureFinderRegistration = bundleContext.registerService(ManagedService.class, featureFinder, props);
+        register(ManagedService.class, featureFinder, props);
 
         BundleManager bundleManager;
         if (regionsPersistence != null) {
@@ -135,11 +96,11 @@ public class Activator implements BundleActivator, SingleServiceTracker.SingleSe
             bundleManager = new BundleManager(bundleContext);
         }
         FeatureConfigInstaller configInstaller = new FeatureConfigInstaller(configurationAdmin);
-        String featuresRepositories = getString(configuration, "featuresRepositories", "");
-        boolean respectStartLvlDuringFeatureStartup = getBoolean(configuration, "respectStartLvlDuringFeatureStartup", true);
-        boolean respectStartLvlDuringFeatureUninstall = getBoolean(configuration, "respectStartLvlDuringFeatureUninstall", true);
-        long resolverTimeout = getLong(configuration, "resolverTimeout", 5000);
-        String overrides = getString(configuration, "overrides", new File(System.getProperty("karaf.etc"), "overrides.properties").toString());
+        String featuresRepositories = getString("featuresRepositories", "");
+        boolean respectStartLvlDuringFeatureStartup = getBoolean("respectStartLvlDuringFeatureStartup", true);
+        boolean respectStartLvlDuringFeatureUninstall = getBoolean("respectStartLvlDuringFeatureUninstall", true);
+        long resolverTimeout = getLong("resolverTimeout", 5000);
+        String overrides = getString("overrides", new File(System.getProperty("karaf.etc"), "overrides.properties").toString());
         featuresService = new FeaturesServiceImpl(bundleManager, configInstaller);
         featuresService.setUrls(featuresRepositories);
         featuresService.setRespectStartLvlDuringFeatureStartup(respectStartLvlDuringFeatureStartup);
@@ -148,7 +109,7 @@ public class Activator implements BundleActivator, SingleServiceTracker.SingleSe
         featuresService.setOverrides(overrides);
         featuresService.setFeatureFinder(featureFinder);
         featuresService.start();
-        featuresServiceRegistration = bundleContext.registerService(FeaturesService.class, featuresService, null);
+        register(FeaturesService.class, featuresService);
 
         featuresListenerTracker = new ServiceTracker<FeaturesListener, FeaturesListener>(
                 bundleContext, FeaturesListener.class, new ServiceTrackerCustomizer<FeaturesListener, FeaturesListener>() {
@@ -170,25 +131,15 @@ public class Activator implements BundleActivator, SingleServiceTracker.SingleSe
         );
         featuresListenerTracker.open();
 
-        String featuresBoot = getString(configuration, "featuresBoot", "");
-        boolean featuresBootAsynchronous = getBoolean(configuration, "featuresBootAsynchronous", false);
+        String featuresBoot = getString("featuresBoot", "");
+        boolean featuresBootAsynchronous = getBoolean("featuresBootAsynchronous", false);
         BootFeaturesInstaller bootFeaturesInstaller = new BootFeaturesInstaller(bundleContext, featuresService, featuresBoot, featuresBootAsynchronous);
         bootFeaturesInstaller.start();
 
-        try {
-            FeaturesServiceMBeanImpl featuresServiceMBean = new FeaturesServiceMBeanImpl();
-            featuresServiceMBean.setBundleContext(bundleContext);
-            featuresServiceMBean.setFeaturesService(featuresService);
-            props = new Hashtable<String, Object>();
-            props.put("jmx.objectname", "org.apache.karaf:type=feature,name=" + System.getProperty("karaf.name"));
-            featuresServiceMBeanRegistration = bundleContext.registerService(
-                    getInterfaceNames(featuresServiceMBean),
-                    featuresServiceMBean,
-                    props
-            );
-        } catch (NotCompliantMBeanException e) {
-            LOGGER.warn("Error creating FeaturesService mbean", e);
-        }
+        FeaturesServiceMBeanImpl featuresServiceMBean = new FeaturesServiceMBeanImpl();
+        featuresServiceMBean.setBundleContext(bundleContext);
+        featuresServiceMBean.setFeaturesService(featuresService);
+        registerMBean(featuresServiceMBean, "type=feature");
     }
 
     protected void doStop() {
@@ -196,75 +147,11 @@ public class Activator implements BundleActivator, SingleServiceTracker.SingleSe
             featuresListenerTracker.close();
             featuresListenerTracker = null;
         }
-        if (featureFinderRegistration != null) {
-            featureFinderRegistration.unregister();
-            featureFinderRegistration = null;
-        }
-        if (featuresServiceRegistration != null) {
-            featuresServiceRegistration.unregister();
-            featuresServiceRegistration = null;
-        }
-        if (featuresServiceMBeanRegistration != null) {
-            featuresServiceMBeanRegistration.unregister();
-            featuresServiceMBeanRegistration = null;
-        }
+        super.doStop();
         if (featuresService != null) {
             featuresService.stop();
             featuresService = null;
         }
-    }
-
-    @Override
-    public void serviceFound() {
-        executor.submit(new Runnable() {
-            @Override
-            public void run() {
-                doStop();
-                try {
-                    doStart();
-                } catch (Throwable t) {
-                    LOGGER.warn("Error starting FeaturesService", t);
-                    doStop();
-                }
-            }
-        });
-    }
-
-    @Override
-    public void serviceLost() {
-        serviceFound();
-    }
-
-    @Override
-    public void serviceReplaced() {
-        serviceFound();
-    }
-
-    private String[] getInterfaceNames(Object object) {
-        List<String> names = new ArrayList<String>();
-        for (Class cl = object.getClass(); cl != Object.class; cl = cl.getSuperclass()) {
-            addSuperInterfaces(names, cl);
-        }
-        return names.toArray(new String[names.size()]);
-    }
-
-    private void addSuperInterfaces(List<String> names, Class clazz) {
-        for (Class cl : clazz.getInterfaces()) {
-            names.add(cl.getName());
-            addSuperInterfaces(names, cl);
-        }
-    }
-
-    private String getString(Properties configuration, String key, String value) {
-        return configuration.getProperty(key, value);
-    }
-
-    private boolean getBoolean(Properties configuration, String key, boolean value) {
-        return Boolean.parseBoolean(getString(configuration, key, Boolean.toString(value)));
-    }
-
-    private long getLong(Properties configuration, String key, long value) {
-        return Long.parseLong(getString(configuration, key, Long.toString(value)));
     }
 
 }

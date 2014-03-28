@@ -17,65 +17,28 @@
  */
 package org.apache.karaf.deployer.kar.osgi;
 
-import java.util.Hashtable;
-
 import org.apache.felix.fileinstall.ArtifactInstaller;
 import org.apache.felix.fileinstall.ArtifactListener;
 import org.apache.karaf.deployer.kar.KarArtifactInstaller;
 import org.apache.karaf.kar.KarService;
-import org.apache.karaf.util.tracker.SingleServiceTracker;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
+import org.apache.karaf.util.tracker.BaseActivator;
 
-public class Activator implements BundleActivator, SingleServiceTracker.SingleServiceListener {
-
-    private BundleContext bundleContext;
-    private ServiceRegistration urlTransformerRegistration;
-    private SingleServiceTracker<KarService> karServiceTracker;
+public class Activator extends BaseActivator {
 
     @Override
-    public void start(BundleContext context) throws Exception {
-        bundleContext = context;
-        karServiceTracker = new SingleServiceTracker<KarService>(
-                context, KarService.class, this);
-        karServiceTracker.open();
+    protected void doOpen() throws Exception {
+        trackService(KarService.class);
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
-        karServiceTracker.close();
-    }
-
-    @Override
-    public void serviceFound() {
-        KarService service = karServiceTracker.getService();
-        if (urlTransformerRegistration == null && service != null) {
+    protected void doStart() throws Exception {
+        KarService service = getTrackedService(KarService.class);
+        if (service != null) {
             KarArtifactInstaller installer = new KarArtifactInstaller();
             installer.setKarService(service);
-            Hashtable<String, Object> props = new Hashtable<String, Object>();
-            urlTransformerRegistration = bundleContext.registerService(
-                    new String[] {
-                            ArtifactInstaller.class.getName(),
-                            ArtifactListener.class.getName()
-                    },
-                    installer,
-                    null);
+            register(new String[] { ArtifactInstaller.class.getName(), ArtifactListener.class.getName() },
+                     installer);
         }
-    }
-
-    @Override
-    public void serviceLost() {
-        if (urlTransformerRegistration != null) {
-            urlTransformerRegistration.unregister();
-            urlTransformerRegistration = null;
-        }
-    }
-
-    @Override
-    public void serviceReplaced() {
-        serviceLost();
-        serviceFound();
     }
 
 }

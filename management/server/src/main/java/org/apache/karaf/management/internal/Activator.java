@@ -16,19 +16,10 @@
  */
 package org.apache.karaf.management.internal;
 
-import java.util.ArrayList;
-import java.util.Dictionary;
 import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.management.MBeanServer;
-import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 
 import org.apache.karaf.jaas.config.KeystoreManager;
@@ -37,136 +28,51 @@ import org.apache.karaf.management.JaasAuthenticator;
 import org.apache.karaf.management.KarafMBeanServerGuard;
 import org.apache.karaf.management.MBeanServerFactory;
 import org.apache.karaf.management.RmiRegistryFactory;
-import org.apache.karaf.util.tracker.SingleServiceTracker;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.framework.ServiceRegistration;
+import org.apache.karaf.util.tracker.BaseActivator;
 import org.osgi.service.cm.ConfigurationAdmin;
-import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public class Activator implements BundleActivator, ManagedService, SingleServiceTracker.SingleServiceListener {
+public class Activator extends BaseActivator implements ManagedService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Activator.class);
-
-    private ExecutorService executor = Executors.newSingleThreadExecutor();
-    private AtomicBoolean scheduled = new AtomicBoolean();
-    private BundleContext bundleContext;
-    private Dictionary<String, ?> configuration;
-    private ServiceRegistration registration;
-    private SingleServiceTracker<ConfigurationAdmin> configAdminTracker;
-    private SingleServiceTracker<KeystoreManager> keystoreManagerTracker;
-    private ServiceRegistration<MBeanServer> serverRegistration;
-    private ServiceRegistration securityRegistration;
     private ConnectorServerFactory connectorServerFactory;
     private RmiRegistryFactory rmiRegistryFactory;
     private MBeanServerFactory mbeanServerFactory;
 
     @Override
-    public void start(BundleContext context) throws Exception {
-        bundleContext = context;
-        scheduled.set(true);
-
-        Hashtable<String, Object> props = new Hashtable<String, Object>();
-        props.put(Constants.SERVICE_PID, "org.apache.karaf.management");
-        registration = bundleContext.registerService(ManagedService.class, this, props);
-
-        configAdminTracker = new SingleServiceTracker<ConfigurationAdmin>(
-                bundleContext, ConfigurationAdmin.class, this);
-        keystoreManagerTracker = new SingleServiceTracker<KeystoreManager>(
-                bundleContext, KeystoreManager.class, this);
-        configAdminTracker.open();
-        keystoreManagerTracker.open();
-
-        scheduled.set(false);
-        reconfigure();
-    }
-
-    @Override
-    public void stop(BundleContext context) throws Exception {
-        keystoreManagerTracker.close();
-        configAdminTracker.close();
-        registration.unregister();
-        executor.shutdown();
-        executor.awaitTermination(30, TimeUnit.SECONDS);
-    }
-
-    @Override
-    public void updated(Dictionary<String, ?> properties) throws ConfigurationException {
-        this.configuration = properties;
-        reconfigure();
-    }
-
-    @Override
-    public void serviceFound() {
-        reconfigure();
-    }
-
-    @Override
-    public void serviceLost() {
-        reconfigure();
-    }
-
-    @Override
-    public void serviceReplaced() {
-        reconfigure();
-    }
-
-    protected void reconfigure() {
-        if (scheduled.compareAndSet(false, true)) {
-            executor.submit(new Runnable() {
-                @Override
-                public void run() {
-                    scheduled.set(false);
-                    doStop();
-                    try {
-                        doStart();
-                    } catch (Exception e) {
-                        LOGGER.warn("Error starting management layer", e);
-                        doStop();
-                    }
-                }
-            });
-        }
+    protected void doOpen() throws Exception {
+        manage("org.apache.karaf.management");
+        trackService(ConfigurationAdmin.class);
+        trackService(KeystoreManager.class);
     }
 
     protected void doStart() throws Exception {
-        // This can happen while the bundle is starting as we register
-        // the ManagedService before creating the service trackers
-        if (configAdminTracker == null || keystoreManagerTracker == null) {
-            return;
-        }
         // Verify dependencies
-        ConfigurationAdmin configurationAdmin = configAdminTracker.getService();
-        KeystoreManager keystoreManager = keystoreManagerTracker.getService();
-        Dictionary<String, ?> config = configuration;
+        ConfigurationAdmin configurationAdmin = getTrackedService(ConfigurationAdmin.class);
+        KeystoreManager keystoreManager = getTrackedService(KeystoreManager.class);
         if (configurationAdmin == null || keystoreManager == null) {
             return;
         }
 
-        String rmiRegistryHost = getString(config, "rmiRegistryHost", "");
-        int rmiRegistryPort = getInt(config, "rmiRegistryPort", 1099);
-        String rmiServerHost = getString(config, "rmiServerHost", "0.0.0.0");
-        int rmiServerPort = getInt(config, "rmiServerPort", 44444);
+        String rmiRegistryHost = getString("rmiRegistryHost", "");
+        int rmiRegistryPort = getInt("rmiRegistryPort", 1099);
+        String rmiServerHost = getString("rmiServerHost", "0.0.0.0");
+        int rmiServerPort = getInt("rmiServerPort", 44444);
 
-        String jmxRealm = getString(config, "jmxRealm", "karaf");
-        String serviceUrl = getString(config, "serviceUrl",
+        String jmxRealm = getString("jmxRealm", "karaf");
+        String serviceUrl = getString("serviceUrl",
                 "service:jmx:rmi://0.0.0.0:" + rmiServerPort + "/jndi/rmi://0.0.0.0:" + rmiRegistryPort + "/karaf-" + System.getProperty("karaf.name"));
 
-        boolean daemon = getBoolean(config, "daemon", true);
-        boolean threaded = getBoolean(config, "threaded", true);
-        ObjectName objectName = new ObjectName(getString(config, "objectName", "connector:name=rmi"));
-        long keyStoreAvailabilityTimeout = getLong(config, "keyStoreAvailabilityTimeout", 5000);
-        String authenticatorType = getString(config, "authenticatorType", "password");
-        boolean secured = getBoolean(config, "secured", false);
-        String secureAlgorithm = getString(config, "secureAlgorithm", "default");
-        String secureProtocol = getString(config, "secureProtocol", "TLS");
-        String keyStore = getString(config, "keyStore", "karaf.ks");
-        String keyAlias = getString(config, "keyAlias", "karaf");
-        String trustStore = getString(config, "trustStore", "karaf.ts");
+        boolean daemon = getBoolean("daemon", true);
+        boolean threaded = getBoolean("threaded", true);
+        ObjectName objectName = new ObjectName(getString("objectName", "connector:name=rmi"));
+        long keyStoreAvailabilityTimeout = getLong("keyStoreAvailabilityTimeout", 5000);
+        String authenticatorType = getString("authenticatorType", "password");
+        boolean secured = getBoolean("secured", false);
+        String secureAlgorithm = getString("secureAlgorithm", "default");
+        String secureProtocol = getString("secureProtocol", "TLS");
+        String keyStore = getString("keyStore", "karaf.ks");
+        String keyAlias = getString("keyAlias", "karaf");
+        String trustStore = getString("trustStore", "karaf.ts");
 
         KarafMBeanServerGuard guard = new KarafMBeanServerGuard();
         guard.setConfigAdmin(configurationAdmin);
@@ -210,37 +116,20 @@ public class Activator implements BundleActivator, ManagedService, SingleService
         connectorServerFactory.setKeystoreManager(keystoreManager);
         connectorServerFactory.init();
 
-        try {
-            JMXSecurityMBeanImpl securityMBean = new JMXSecurityMBeanImpl();
-            securityMBean.setMBeanServer(mbeanServer);
-            Hashtable<String, Object> props = new Hashtable<String, Object>();
-            props.put("jmx.objectname", "org.apache.karaf:type=security,area=jmx,name=" + System.getProperty("karaf.name"));
-            securityRegistration = bundleContext.registerService(
-                    getInterfaceNames(securityMBean),
-                    securityMBean,
-                    props
-            );
-        } catch (NotCompliantMBeanException e) {
-            LOGGER.warn("Error creating JMX security mbean", e);
-        }
+        JMXSecurityMBeanImpl securityMBean = new JMXSecurityMBeanImpl();
+        securityMBean.setMBeanServer(mbeanServer);
+        registerMBean(securityMBean, "type=security,area=jmx");
 
-        serverRegistration = bundleContext.registerService(MBeanServer.class, mbeanServer, null);
+        register(MBeanServer.class, mbeanServer);
     }
 
     protected void doStop() {
-        if (securityRegistration != null) {
-            securityRegistration.unregister();
-            securityRegistration = null;
-        }
-        if (serverRegistration != null) {
-            serverRegistration.unregister();
-            serverRegistration = null;
-        }
+        super.doStop();
         if (connectorServerFactory != null) {
             try {
                 connectorServerFactory.destroy();
             } catch (Exception e) {
-                LOGGER.warn("Error destroying ConnectorServerFactory", e);
+                logger.warn("Error destroying ConnectorServerFactory", e);
             }
             connectorServerFactory = null;
         }
@@ -248,7 +137,7 @@ public class Activator implements BundleActivator, ManagedService, SingleService
             try {
                 mbeanServerFactory.destroy();
             } catch (Exception e) {
-                LOGGER.warn("Error destroying MBeanServerFactory", e);
+                logger.warn("Error destroying MBeanServerFactory", e);
             }
             mbeanServerFactory = null;
         }
@@ -256,71 +145,10 @@ public class Activator implements BundleActivator, ManagedService, SingleService
             try {
                 rmiRegistryFactory.destroy();
             } catch (Exception e) {
-                LOGGER.warn("Error destroying RMIRegistryFactory", e);
+                logger.warn("Error destroying RMIRegistryFactory", e);
             }
             rmiRegistryFactory = null;
         }
-    }
-
-    private String[] getInterfaceNames(Object object) {
-        List<String> names = new ArrayList<String>();
-        for (Class cl = object.getClass(); cl != Object.class; cl = cl.getSuperclass()) {
-            addSuperInterfaces(names, cl);
-        }
-        return names.toArray(new String[names.size()]);
-    }
-
-    private void addSuperInterfaces(List<String> names, Class clazz) {
-        for (Class cl : clazz.getInterfaces()) {
-            names.add(cl.getName());
-            addSuperInterfaces(names, cl);
-        }
-    }
-
-    private int getInt(Dictionary<String, ?> config, String key, int def) {
-        if (config != null) {
-            Object val = config.get(key);
-            if (val instanceof Number) {
-                return ((Number) val).intValue();
-            } else if (val != null) {
-                return Integer.parseInt(val.toString());
-            }
-        }
-        return def;
-    }
-
-    private long getLong(Dictionary<String, ?> config, String key, long def) {
-        if (config != null) {
-            Object val = config.get(key);
-            if (val instanceof Number) {
-                return ((Number) val).longValue();
-            } else if (val != null) {
-                return Long.parseLong(val.toString());
-            }
-        }
-        return def;
-    }
-
-    private boolean getBoolean(Dictionary<String, ?> config, String key, boolean def) {
-        if (config != null) {
-            Object val = config.get(key);
-            if (val instanceof Boolean) {
-                return (Boolean) val;
-            } else if (val != null) {
-                return Boolean.parseBoolean(val.toString());
-            }
-        }
-        return def;
-    }
-
-    private String getString(Dictionary<String, ?> config, String key, String def) {
-        if (config != null) {
-            Object val = config.get(key);
-            if (val != null) {
-                return val.toString();
-            }
-        }
-        return def;
     }
 
 }

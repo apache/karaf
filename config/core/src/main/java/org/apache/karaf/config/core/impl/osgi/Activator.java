@@ -16,133 +16,31 @@
  */
 package org.apache.karaf.config.core.impl.osgi;
 
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Properties;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-
-import javax.management.NotCompliantMBeanException;
-
 import org.apache.karaf.config.core.ConfigRepository;
 import org.apache.karaf.config.core.impl.ConfigMBeanImpl;
 import org.apache.karaf.config.core.impl.ConfigRepositoryImpl;
-import org.apache.karaf.util.tracker.SingleServiceTracker;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
+import org.apache.karaf.util.tracker.BaseActivator;
 import org.osgi.service.cm.ConfigurationAdmin;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public class Activator implements BundleActivator, SingleServiceTracker.SingleServiceListener {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(Activator.class);
-
-    private ExecutorService executor = Executors.newSingleThreadExecutor();
-    private BundleContext bundleContext;
-    private SingleServiceTracker<ConfigurationAdmin> configurationAdminTracker;
-
-    private ServiceRegistration<ConfigRepository> configRepositoryRegistration;
-    private ServiceRegistration configRepositoryMBeanRegistration;
+public class Activator extends BaseActivator {
 
     @Override
-    public void start(BundleContext context) throws Exception {
-        bundleContext = context;
-        configurationAdminTracker = new SingleServiceTracker<ConfigurationAdmin>(
-                bundleContext, ConfigurationAdmin.class, this
-        );
-        configurationAdminTracker.open();
+    protected void doOpen() throws Exception {
+        trackService(ConfigurationAdmin.class);
     }
 
-    @Override
-    public void stop(BundleContext context) throws Exception {
-        configurationAdminTracker.close();
-        executor.shutdown();
-        executor.awaitTermination(30, TimeUnit.SECONDS);
-    }
-
-    protected void doStart() {
-        ConfigurationAdmin configurationAdmin = configurationAdminTracker.getService();
-
+    protected void doStart() throws Exception {
+        ConfigurationAdmin configurationAdmin = getTrackedService(ConfigurationAdmin.class);
         if (configurationAdmin == null) {
             return;
         }
 
         ConfigRepository configRepository = new ConfigRepositoryImpl(configurationAdmin);
-        configRepositoryRegistration = bundleContext.registerService(ConfigRepository.class, configRepository, null);
+        register(ConfigRepository.class, configRepository);
 
-        try {
-            ConfigMBeanImpl configMBean = new ConfigMBeanImpl();
-            configMBean.setConfigRepo(configRepository);
-            Hashtable<String, Object> props = new Hashtable<String, Object>();
-            props.put("jmx.objectname", "org.apache.karaf:type=config,name=" + System.getProperty("karaf.name"));
-            configRepositoryMBeanRegistration = bundleContext.registerService(
-                    getInterfaceNames(configMBean),
-                    configMBean,
-                    props
-            );
-        } catch (NotCompliantMBeanException e) {
-            LOGGER.warn("Error creating ConfigRepository mbean", e);
-        }
-    }
-
-    protected void doStop() {
-        if (configRepositoryRegistration != null) {
-            configRepositoryRegistration.unregister();
-            configRepositoryRegistration = null;
-        }
-        if (configRepositoryMBeanRegistration != null) {
-            configRepositoryMBeanRegistration.unregister();
-            configRepositoryMBeanRegistration = null;
-        }
-    }
-
-    @Override
-    public void serviceFound() {
-        executor.submit(new Runnable() {
-            @Override
-            public void run() {
-                doStop();
-                try {
-                    doStart();
-                } catch (Exception e) {
-                    LOGGER.warn("Error starting FeaturesService", e);
-                    doStop();
-                }
-            }
-        });
-    }
-
-    @Override
-    public void serviceLost() {
-        serviceFound();
-    }
-
-    @Override
-    public void serviceReplaced() {
-        serviceFound();
-    }
-
-    private String[] getInterfaceNames(Object object) {
-        List<String> names = new ArrayList<String>();
-        for (Class cl = object.getClass(); cl != Object.class; cl = cl.getSuperclass()) {
-            addSuperInterfaces(names, cl);
-        }
-        return names.toArray(new String[names.size()]);
-    }
-
-    private void addSuperInterfaces(List<String> names, Class clazz) {
-        for (Class cl : clazz.getInterfaces()) {
-            names.add(cl.getName());
-            addSuperInterfaces(names, cl);
-        }
-    }
-
-    private String getString(Properties configuration, String key, String value) {
-        return configuration.getProperty(key, value);
+        ConfigMBeanImpl configMBean = new ConfigMBeanImpl();
+        configMBean.setConfigRepo(configRepository);
+        registerMBean(configMBean, "type=config");
     }
 
 }

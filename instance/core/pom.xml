@@ -154,7 +154,8 @@
                             org.apache.karaf.instance.core.internal,
                             org.apache.karaf.instance.core.internal.osgi,
                             org.apache.felix.utils.properties;-split-package:=merge-first,
-                            org.apache.karaf.util.locks
+                            org.apache.karaf.util.locks,
+                            org.apache.karaf.util.tracker
                         </Private-Package>
                         <Bundle-Activator>
                             org.apache.karaf.instance.core.internal.osgi.Activator
