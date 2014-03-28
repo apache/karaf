@@ -77,6 +77,7 @@ public class LocalConsoleManager {
                                       new JLineTerminal(terminal),
                                       encoding, 
                                       callback);
+                registration = bundleContext.registerService(Session.class, session, null);
                 String name = "Karaf local console user " + ShellUtil.getCurrentUserName();
                 boolean delayconsole = Boolean.parseBoolean(System.getProperty("karaf.delay.console"));
                 if (delayconsole) {
