@@ -15,6 +15,7 @@ package org.apache.karaf.itests;
 
 import static org.junit.Assert.assertTrue;
 import static org.ops4j.pax.exam.CoreOptions.maven;
+import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.configureSecurity;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.karafDistributionConfiguration;
@@ -131,7 +132,9 @@ public class KarafTestSupport {
             replaceConfigurationFile("etc/org.ops4j.pax.logging.cfg", getConfigFile("/etc/org.ops4j.pax.logging.cfg")),
             editConfigurationFilePut("etc/org.ops4j.pax.web.cfg", "org.osgi.service.http.port", HTTP_PORT),
             editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiRegistryPort", RMI_REG_PORT),
-            editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiServerPort", RMI_SERVER_PORT)
+            editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiServerPort", RMI_SERVER_PORT),
+            editConfigurationFilePut("etc/system.properties", "spring32.version", System.getProperty("spring32.version")),
+            editConfigurationFilePut("etc/system.properties", "spring40.version", System.getProperty("spring40.version"))
         };
     }
 
@@ -357,6 +360,16 @@ public class KarafTestSupport {
         Assert.fail("Feature " + featureName + " should be installed but is not");
     }
 
+    public void assertFeatureInstalled(String featureName, String featureVersion) throws Exception {
+        Feature[] features = featureService.listInstalledFeatures();
+        for (Feature feature : features) {
+            if (featureName.equals(feature.getName()) && featureVersion.equals(feature.getVersion())) {
+                return;
+            }
+        }
+        Assert.fail("Feature " + featureName + "/" + featureVersion + " should be installed but is not");
+    }
+
     public void assertFeaturesInstalled(String ... expectedFeatures) throws Exception {
         Set<String> expectedFeaturesSet = new HashSet<String>(Arrays.asList(expectedFeatures));
         Feature[] features = featureService.listInstalledFeatures();
@@ -396,6 +409,16 @@ public class KarafTestSupport {
     protected void installAndAssertFeature(String feature) throws Exception {
         featureService.installFeature(feature);
         assertFeatureInstalled(feature);
+    }
+
+    protected void installAssertAndUninstallFeature(String feature, String version) throws Exception {
+        Set<Feature> featuresBefore = new HashSet<Feature>(Arrays.asList(featureService.listInstalledFeatures()));
+        try {
+            featureService.installFeature(feature, version);
+            assertFeatureInstalled(feature, version);
+        } finally {
+            uninstallNewFeatures(featuresBefore);
+        }
     }
 
     protected void installAssertAndUninstallFeature(String... feature) throws Exception {

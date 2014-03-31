@@ -14,97 +14,66 @@
 package org.apache.karaf.itests.features;
 
 import org.apache.karaf.itests.KarafTestSupport;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
-import org.ops4j.pax.exam.spi.reactors.PerClass;
+import org.ops4j.pax.exam.spi.reactors.PerMethod;
 
 @RunWith(PaxExam.class)
-@ExamReactorStrategy(PerClass.class)
-public class SpringFeaturesTest extends KarafTestSupport {
+@ExamReactorStrategy(PerMethod.class)
+public class Spring4FeaturesTest extends KarafTestSupport {
 
     @Test
     public void installSpringFeature() throws Exception {
-        installAssertAndUninstallFeature("spring");
+        installAssertAndUninstallFeature("spring", System.getProperty("spring40.version"));
     }
 
     @Test
     public void installSpringAspectsFeature() throws Exception {
-        installAssertAndUninstallFeature("spring-aspects");
-    }
-
-    @Test
-    public void installSpringDmFeature() throws Exception {
-        installAssertAndUninstallFeature("spring-dm");
-    }
-
-    @Test
-    public void installSpringDmWebFeature() throws Exception {
-        installAssertAndUninstallFeature("spring-dm-web");
+        installAssertAndUninstallFeature("spring-aspects", System.getProperty("spring40.version"));
     }
 
     @Test
     public void installSpringInstrumentFeature() throws Exception {
-        installAssertAndUninstallFeature("spring-instrument");
+        installAssertAndUninstallFeature("spring-instrument", System.getProperty("spring40.version"));
     }
 
     @Test
     public void installSpringJdbcFeature() throws Exception {
-        installAssertAndUninstallFeature("spring-jdbc");
+        installAssertAndUninstallFeature("spring-jdbc", System.getProperty("spring40.version"));
     }
 
     @Test
     public void installSpringJmsFeature() throws Exception {
-        installAssertAndUninstallFeature("spring-jms");
-    }
-
-    @Test
-    public void installSpringStrutsFeature() throws Exception {
-        installAssertAndUninstallFeature("spring-struts");
+        installAssertAndUninstallFeature("spring-jms", System.getProperty("spring40.version"));
     }
 
     @Test
     public void installSpringTestFeature() throws Exception {
-        installAssertAndUninstallFeature("spring-test");
+        installAssertAndUninstallFeature("spring-test", System.getProperty("spring40.version"));
     }
 
     @Test
     public void installSpringOrmFeature() throws Exception {
-        installAssertAndUninstallFeature("spring-orm");
+        installAssertAndUninstallFeature("spring-orm", System.getProperty("spring40.version"));
     }
 
     @Test
     public void installSpringOxmFeature() throws Exception {
-        installAssertAndUninstallFeature("spring-oxm");
+        installAssertAndUninstallFeature("spring-oxm", System.getProperty("spring40.version"));
     }
 
     @Test
     public void installSpringTxFeature() throws Exception {
-        installAssertAndUninstallFeature("spring-tx");
+        installAssertAndUninstallFeature("spring-tx", System.getProperty("spring40.version"));
     }
 
     @Test
     public void installSpringWebFeature() throws Exception {
-        installAssertAndUninstallFeature("spring-web");
+        installAssertAndUninstallFeature("spring-web", System.getProperty("spring40.version"));
     }
 
-    @Test
-    @Ignore
-    public void installSpringWebPortletFeature() throws Exception {
-        installAssertAndUninstallFeature("spring-web-portlet");
-    }
-
-    @Test
-    public void installSpringSecurityFeature() throws Exception {
-        installAssertAndUninstallFeature("spring-security");
-    }
-
-    @Test
-    @Ignore
-    public void installGeminiBlueprintFeature() throws Exception {
-        installAssertAndUninstallFeature("gemini-blueprint");
-    }
+    // TODO add combined/all Spring features installation tests
 
 }
