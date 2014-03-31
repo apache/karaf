@@ -45,7 +45,6 @@ import org.apache.karaf.main.lock.NoLock;
 import org.apache.karaf.main.util.ArtifactResolver;
 import org.apache.karaf.main.util.BootstrapLogManager;
 import org.apache.karaf.main.util.SimpleMavenResolver;
-import org.apache.karaf.main.util.StringMap;
 import org.apache.karaf.main.util.Utils;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -237,7 +236,7 @@ public class Main {
         // Start up the OSGI framework
         ClassLoader classLoader = createClassLoader(resolver);
         FrameworkFactory factory = loadFrameworkFactory(classLoader);
-        framework = factory.newFramework(new StringMap(config.props, false));
+        framework = factory.newFramework(config.props);
 
         // Hack to set felix logger
         try {
