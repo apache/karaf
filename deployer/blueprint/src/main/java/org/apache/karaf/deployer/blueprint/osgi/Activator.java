@@ -23,37 +23,18 @@ import org.apache.felix.fileinstall.ArtifactListener;
 import org.apache.felix.fileinstall.ArtifactUrlTransformer;
 import org.apache.karaf.deployer.blueprint.BlueprintDeploymentListener;
 import org.apache.karaf.deployer.blueprint.BlueprintURLHandler;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
+import org.apache.karaf.util.tracker.BaseActivator;
 import org.osgi.service.url.URLStreamHandlerService;
 
-public class Activator implements BundleActivator {
-
-    private ServiceRegistration urlHandlerRegistration;
-    private ServiceRegistration urlTransformerRegistration;
+public class Activator extends BaseActivator {
 
     @Override
-    public void start(BundleContext context) throws Exception {
+    protected void doStart() throws Exception {
         Hashtable<String, Object> props = new Hashtable<String, Object>();
         props.put("url.handler.protocol", "blueprint");
-        urlHandlerRegistration = context.registerService(
-                URLStreamHandlerService.class,
-                new BlueprintURLHandler(),
-                props);
-
-        urlTransformerRegistration = context.registerService(
-                new String[] {
-                        ArtifactUrlTransformer.class.getName(),
-                        ArtifactListener.class.getName()
-                },
-                new BlueprintDeploymentListener(),
-                null);
+        register(URLStreamHandlerService.class, new BlueprintURLHandler(), props);
+        register(new String[]{ArtifactUrlTransformer.class.getName(), ArtifactListener.class.getName()},
+                new BlueprintDeploymentListener());
     }
 
-    @Override
-    public void stop(BundleContext context) throws Exception {
-        urlTransformerRegistration.unregister();
-        urlHandlerRegistration.unregister();
-    }
 }

@@ -96,7 +96,8 @@
                         <Private-Package>
                             org.apache.karaf.deployer.spring,
                             org.apache.karaf.deployer.spring.osgi,
-                            org.apache.karaf.util
+                            org.apache.karaf.util,
+                            org.apache.karaf.util.tracker
                         </Private-Package>
                         <Bundle-Activator>
                             org.apache.karaf.deployer.spring.osgi.Activator

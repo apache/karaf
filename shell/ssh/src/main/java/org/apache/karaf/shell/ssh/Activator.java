@@ -27,10 +27,13 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.apache.karaf.shell.api.action.lifecycle.Manager;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.api.console.SessionFactory;
+import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.SingleServiceTracker;
 import org.apache.sshd.SshServer;
 import org.apache.sshd.common.NamedFactory;
@@ -51,58 +54,22 @@ import org.slf4j.LoggerFactory;
 /**
  * Activate this bundle
  */
-public class Activator implements BundleActivator, ManagedService {
+public class Activator extends BaseActivator implements ManagedService {
 
     static final Logger LOGGER = LoggerFactory.getLogger(Activator.class);
 
-    ServiceRegistration registration;
-
-    List<Session> sessions = new CopyOnWriteArrayList<Session>();
-
-    BundleContext bundleContext;
-    SingleServiceTracker<SessionFactory> sessionFactoryTracker;
     ServiceTracker<Session, Session> sessionTracker;
-    Dictionary<String, ?> configuration;
-
-    final KarafAgentFactory agentFactory = new KarafAgentFactory();
-
+    KarafAgentFactory agentFactory;
     SessionFactory sessionFactory;
     SshClientFactory sshClientFactory;
-    final Callable<SshServer> sshServerFactory = new Callable<SshServer>() {
-        @Override
-        public SshServer call() throws Exception {
-            return createSshServer(sessionFactory);
-        }
-    };
     SshServer server;
-    final List<SshServer> servers = new ArrayList<SshServer>();
 
-
-    public void start(BundleContext context) throws Exception {
-        bundleContext = context;
-
-        Hashtable<String, Object> props = new Hashtable<String, Object>();
-        props.put(Constants.SERVICE_PID, "org.apache.karaf.shell");
-        registration = bundleContext.registerService(ManagedService.class, this, props);
-
-        sshClientFactory = new SshClientFactory(agentFactory, new File(context.getProperty("user.home"), ".sshkaraf/known_hosts"));
-
-        sessionFactoryTracker = new SingleServiceTracker<SessionFactory>(bundleContext, SessionFactory.class, new SingleServiceTracker.SingleServiceListener() {
-            @Override
-            public void serviceFound() {
-                bindSessionFactory(sessionFactoryTracker.getService());
-            }
-            @Override
-            public void serviceLost() {
-                unbindSessionFactory();
-            }
-            @Override
-            public void serviceReplaced() {
-                serviceLost();
-                serviceFound();
-            }
-        });
-        sessionFactoryTracker.open();
+    @Override
+    protected void doOpen() throws Exception {
+        agentFactory = new KarafAgentFactory();
+        sshClientFactory = new SshClientFactory(agentFactory, new File(bundleContext.getProperty("user.home"), ".sshkaraf/known_hosts"));
+        manage("org.apache.karaf.shell");
+        trackService(SessionFactory.class);
 
         sessionTracker = new ServiceTracker<Session, Session>(bundleContext, Session.class, null) {
             @Override
@@ -118,16 +85,25 @@ public class Activator implements BundleActivator, ManagedService {
             }
         };
         sessionTracker.open();
-
     }
 
-    private void bindSessionFactory(final SessionFactory sessionFactory) {
-        this.sessionFactory = sessionFactory;
-        this.sessionFactory.getRegistry().register(sshServerFactory, SshServer.class);
-        this.sessionFactory.getRegistry().register(sshClientFactory);
-        this.sessionFactory.getRegistry().getService(Manager.class).register(SshServerAction.class);
-        this.sessionFactory.getRegistry().getService(Manager.class).register(SshAction.class);
-        if (Boolean.parseBoolean(Activator.this.bundleContext.getProperty("karaf.startRemoteShell"))) {
+    @Override
+    protected void doClose() {
+        sessionTracker.close();
+        super.doClose();
+    }
+
+    @Override
+    protected void doStart() throws Exception {
+        SessionFactory sf = getTrackedService(SessionFactory.class);
+        if (sf == null) {
+            return;
+        }
+
+        sessionFactory = sf;
+        sessionFactory.getRegistry().register(sshClientFactory);
+        sessionFactory.getRegistry().getService(Manager.class).register(SshAction.class);
+        if (Boolean.parseBoolean(bundleContext.getProperty("karaf.startRemoteShell"))) {
             server = createSshServer(sessionFactory);
             try {
                 server.start();
@@ -137,77 +113,22 @@ public class Activator implements BundleActivator, ManagedService {
         }
     }
 
-    private void unbindSessionFactory() {
-        this.sessionFactory.getRegistry().getService(Manager.class).unregister(SshAction.class);
-        this.sessionFactory.getRegistry().getService(Manager.class).unregister(SshServerAction.class);
-        this.sessionFactory.getRegistry().unregister(sshClientFactory);
-        this.sessionFactory.getRegistry().unregister(sshServerFactory);
-        SshServer srv = server;
-        server = null;
-        if (srv != null) {
+    @Override
+    protected void doStop() {
+        if (sessionFactory != null) {
+            sessionFactory.getRegistry().getService(Manager.class).unregister(SshAction.class);
+            sessionFactory.getRegistry().unregister(sshClientFactory);
+            sessionFactory = null;
+        }
+        if (server != null) {
             try {
-                srv.stop();
+                server.stop();
             } catch (InterruptedException e) {
                 LOGGER.warn("Exception caught while stopping SSH server", e);
             }
+            server = null;
         }
-    }
-
-    public void stop(BundleContext context) {
-        registration.unregister();
-        sessionTracker.close();
-        sessionFactoryTracker.close();
-        synchronized (servers) {
-            for (SshServer server : servers) {
-                try {
-                    server.stop();
-                } catch (InterruptedException e) {
-                    LOGGER.warn("Exception caught while stopping SSH server", e);
-                }
-            }
-        }
-    }
-
-    @Override
-    public void updated(Dictionary<String, ?> configuration) throws ConfigurationException {
-        this.configuration = configuration;
-    }
-
-    private int getInt(String key, int def) {
-        Dictionary<String, ?> config = this.configuration;
-        if (config != null) {
-            Object val = config.get(key);
-            if (val instanceof Number) {
-                return ((Number) val).intValue();
-            } else if (val != null) {
-                return Integer.parseInt(val.toString());
-            }
-        }
-        return def;
-    }
-
-    private long getLong(String key, long def) {
-        Dictionary<String, ?> config = this.configuration;
-        if (config != null) {
-            Object val = config.get(key);
-            if (val instanceof Number) {
-                return ((Number) val).longValue();
-            } else if (val != null) {
-                return Long.parseLong(val.toString());
-            }
-        }
-        return def;
-    }
-
-    private String getString(String key, String def) {
-        Dictionary<String, ?> config = this.configuration;
-        if (config != null) {
-            Object val = config.get(key);
-            if (val != null) {
-                return val.toString();
-            }
-        }
-        return def;
+        super.doStop();
     }
 
     protected SshServer createSshServer(SessionFactory sessionFactory) {
@@ -248,9 +169,6 @@ public class Activator implements BundleActivator, ManagedService {
         server.setAgentFactory(agentFactory);
         server.getProperties().put(SshServer.IDLE_TIMEOUT, Long.toString(sshIdleTimeout));
 
-        synchronized (servers) {
-            servers.add(server);
-        }
         return server;
     }
 
