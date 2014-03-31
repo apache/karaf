@@ -294,7 +294,7 @@ public class Main {
     }
 
     private void monitor() {
-        new Thread() {
+        new Thread("Karaf Lock Monitor Thread") {
             public void run() {
                 doMonitor();
             }
