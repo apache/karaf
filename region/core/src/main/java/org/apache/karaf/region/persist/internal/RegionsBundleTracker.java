@@ -20,7 +20,7 @@
 
 package org.apache.karaf.region.persist.internal;
 
-import org.apache.karaf.region.persist.RegionsPersistence;
+import org.apache.karaf.features.RegionsPersistence;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
@@ -39,24 +39,24 @@ public class RegionsBundleTracker {
     void start(BundleContext bundleContext, RegionsPersistence regionsPersistence) {
         this.regionsPersistence = regionsPersistence;
         int stateMask = Bundle.INSTALLED;
-        bundleTracker = new BundleTracker(bundleContext, stateMask, new BundleTrackerCustomizer() {
+        bundleTracker = new BundleTracker<Bundle>(bundleContext, stateMask, new BundleTrackerCustomizer<Bundle>() {
             @Override
-            public Object addingBundle(Bundle bundle, BundleEvent bundleEvent) {
+            public Bundle addingBundle(Bundle bundle, BundleEvent bundleEvent) {
                 return RegionsBundleTracker.this.addingBundle(bundle);
             }
 
             @Override
-            public void modifiedBundle(Bundle bundle, BundleEvent bundleEvent, Object o) {
+            public void modifiedBundle(Bundle bundle, BundleEvent bundleEvent, Bundle o) {
             }
 
             @Override
-            public void removedBundle(Bundle bundle, BundleEvent bundleEvent, Object o) {
+            public void removedBundle(Bundle bundle, BundleEvent bundleEvent, Bundle o) {
             }
         });
         bundleTracker.open();
     }
 
-    private Object addingBundle(Bundle bundle) {
+    private Bundle addingBundle(Bundle bundle) {
         String region = bundle.getHeaders().get("Region");
         if (region != null) {
             try {

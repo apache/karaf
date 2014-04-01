@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.karaf.region.persist;
+package org.apache.karaf.features;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;

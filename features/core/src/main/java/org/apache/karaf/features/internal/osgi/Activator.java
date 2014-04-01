@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Properties;
-import java.util.concurrent.Callable;
 
 import javax.management.NotCompliantMBeanException;
 
@@ -33,10 +32,10 @@ import org.apache.karaf.features.internal.BundleManager;
 import org.apache.karaf.features.internal.FeatureConfigInstaller;
 import org.apache.karaf.features.internal.FeatureFinder;
 import org.apache.karaf.features.internal.FeaturesServiceImpl;
-import org.apache.karaf.features.internal.PersistentBundleManager;
 import org.apache.karaf.features.management.internal.FeaturesServiceMBeanImpl;
-import org.apache.karaf.region.persist.RegionsPersistence;
+import org.apache.karaf.features.RegionsPersistence;
 import org.apache.karaf.util.tracker.BaseActivator;
+import org.apache.karaf.util.tracker.SingleServiceTracker;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -49,10 +48,10 @@ public class Activator extends BaseActivator {
 
     private ServiceTracker<FeaturesListener, FeaturesListener> featuresListenerTracker;
     private FeaturesServiceImpl featuresService;
+    private SingleServiceTracker<RegionsPersistence> regionsTracker;
 
     @Override
     protected void doOpen() throws Exception {
-        trackService("org.apache.karaf.region.persist.RegionsPersistence");
         trackService(URLStreamHandlerService.class, "(url.handler.protocol=mvn)");
         trackService(ConfigurationAdmin.class);
 
@@ -70,7 +69,6 @@ public class Activator extends BaseActivator {
 
     protected void doStart() throws NotCompliantMBeanException {
         ConfigurationAdmin configurationAdmin = getTrackedService(ConfigurationAdmin.class);
-        Object regionsPersistence = getTrackedService("org.apache.karaf.region.persist.RegionsPersistence");
         URLStreamHandlerService mvnUrlHandler = getTrackedService(URLStreamHandlerService.class);
 
         if (configurationAdmin == null || mvnUrlHandler == null) {
@@ -82,19 +80,25 @@ public class Activator extends BaseActivator {
         props.put(Constants.SERVICE_PID, "org.apache.karaf.features.repos");
         register(ManagedService.class, featureFinder, props);
 
-        BundleManager bundleManager;
-        if (regionsPersistence != null) {
-            final Object rg = regionsPersistence;
-            // Use an inner class to isolate from the region persistence package
-            bundleManager = new Callable<BundleManager>() {
-                @Override
-                public BundleManager call() {
-                    return new PersistentBundleManager(bundleContext, (RegionsPersistence) rg);
-                }
-            }.call();
-        } else {
-            bundleManager = new BundleManager(bundleContext);
-        }
+        final BundleManager bundleManager = new BundleManager(bundleContext);
+        regionsTracker = new SingleServiceTracker<RegionsPersistence>(bundleContext, RegionsPersistence.class,
+                new SingleServiceTracker.SingleServiceListener() {
+                    @Override
+                    public void serviceFound() {
+                        bundleManager.setRegionsPersistence(regionsTracker.getService());
+                    }
+                    @Override
+                    public void serviceLost() {
+                        serviceFound();
+                    }
+                    @Override
+                    public void serviceReplaced() {
+                        serviceFound();
+                    }
+                });
+        regionsTracker.open();
+
+
         FeatureConfigInstaller configInstaller = new FeatureConfigInstaller(configurationAdmin);
         String featuresRepositories = getString("featuresRepositories", "");
         boolean respectStartLvlDuringFeatureStartup = getBoolean("respectStartLvlDuringFeatureStartup", true);
@@ -143,6 +147,10 @@ public class Activator extends BaseActivator {
     }
 
     protected void doStop() {
+        if (regionsTracker != null) {
+            regionsTracker.close();
+            regionsTracker = null;
+        }
         if (featuresListenerTracker != null) {
             featuresListenerTracker.close();
             featuresListenerTracker = null;

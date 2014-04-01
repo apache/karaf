@@ -22,7 +22,7 @@ package org.apache.karaf.region.persist.internal;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.apache.karaf.region.persist.RegionsPersistence;
+import org.apache.karaf.features.RegionsPersistence;
 import org.apache.karaf.util.tracker.SingleServiceTracker;
 import org.eclipse.equinox.region.RegionDigraph;
 import org.osgi.framework.Bundle;
@@ -82,8 +82,10 @@ public class Activator implements BundleActivator {
     public void stop(BundleContext bundleContext) throws Exception {
         tracker.close();
         persistence.set(null);
-        bundleTracker.set(null);
+        RegionsBundleTracker tracker = bundleTracker.getAndSet(null);
+        if (tracker != null) {
+            tracker.stop();
+        }
     }
-
 
 }

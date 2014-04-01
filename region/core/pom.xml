@@ -62,6 +62,11 @@
         </dependency>
 
         <dependency>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>org.apache.karaf.features.core</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.eclipse.equinox</groupId>
             <artifactId>region</artifactId>
             <version>1.0.0.v20110506</version>
@@ -104,9 +109,6 @@
                         <Bundle-Activator>
                             org.apache.karaf.region.persist.internal.Activator
                         </Bundle-Activator>
-                        <Export-Package>
-                            org.apache.karaf.region.persist;version="${project.version}"
-                        </Export-Package>
                         <Private-Package>
                             org.apache.karaf.region.persist.internal.*,
                             org.apache.karaf.util.tracker
