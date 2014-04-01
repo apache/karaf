@@ -23,7 +23,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
-import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
@@ -31,24 +30,24 @@ import org.osgi.framework.ServiceReference;
 
 /**
  * Track a single service by its type.
+ * When tracking a single service, the dependency is always considered mandatory.
  *
  * @param <T>
  */
-public final class SingleServiceTracker<T> {
+public abstract class SingleServiceTracker<T> {
 
     private final BundleContext ctx;
-    private final String className;
+    private final Class<T> clazz;
     private final AtomicReference<T> service = new AtomicReference<T>();
-    private final AtomicReference<ServiceReference> ref = new AtomicReference<ServiceReference>();
+    private final AtomicReference<ServiceReference<T>> ref = new AtomicReference<ServiceReference<T>>();
     private final AtomicBoolean open = new AtomicBoolean(false);
-    private final Satisfiable serviceListener;
-    private Filter filter;
 
     private final ServiceListener listener = new ServiceListener() {
+        @SuppressWarnings("unchecked")
         public void serviceChanged(ServiceEvent event) {
             if (open.get()) {
                 if (event.getType() == ServiceEvent.UNREGISTERING) {
-                    ServiceReference deadRef = event.getServiceReference();
+                    ServiceReference<T> deadRef = (ServiceReference<T>) event.getServiceReference();
                     if (deadRef.equals(ref.get())) {
                         findMatchingReference(deadRef);
                     }
@@ -59,25 +58,17 @@ public final class SingleServiceTracker<T> {
         }
     };
 
-    public SingleServiceTracker(BundleContext context, Class<T> clazz, Satisfiable sl) {
+    public SingleServiceTracker(BundleContext context, Class<T> clazz) {
         ctx = context;
-        this.className = clazz.getName();
-        serviceListener = sl;
+        this.clazz = clazz;
     }
 
-    public T getService() {
-        return service.get();
-    }
-
-    public ServiceReference getServiceReference() {
-        return ref.get();
-    }
+    protected abstract void updateState(T oldSvc, T newSvc);
 
     public void open() {
         if (open.compareAndSet(false, true)) {
             try {
-                String filterString = '(' + Constants.OBJECTCLASS + '=' + className + ')';
-                if (filter != null) filterString = "(&" + filterString + filter + ')';
+                String filterString = '(' + Constants.OBJECTCLASS + '=' + clazz.getName() + ')';
                 ctx.addServiceListener(listener, filterString);
                 findMatchingReference(null);
             } catch (InvalidSyntaxException e) {
@@ -86,12 +77,24 @@ public final class SingleServiceTracker<T> {
         }
     }
 
-    private void findMatchingReference(ServiceReference original) {
+    public void close() {
+        if (open.compareAndSet(true, false)) {
+            ctx.removeServiceListener(listener);
+
+            synchronized (this) {
+                ServiceReference<T> deadRef = ref.getAndSet(null);
+                service.set(null);
+                if (deadRef != null) ctx.ungetService(deadRef);
+            }
+        }
+    }
+
+    private void findMatchingReference(ServiceReference<T> original) {
         boolean clear = true;
-        ServiceReference ref = ctx.getServiceReference(className);
-        if (ref != null && (filter == null || filter.match(ref))) {
+        ServiceReference<T> ref = ctx.getServiceReference(clazz);
+        if (ref != null) {
             @SuppressWarnings("unchecked")
-            T service = (T) ctx.getService(ref);
+            T service = ctx.getService(ref);
             if (service != null) {
                 clear = false;
 
@@ -109,60 +112,35 @@ public final class SingleServiceTracker<T> {
         }
     }
 
-    private boolean update(ServiceReference deadRef, ServiceReference newRef, T service) {
+    private boolean update(ServiceReference<T> deadRef, ServiceReference<T> newRef, T service) {
         boolean result = false;
-        int foundLostReplaced = -1;
 
         // Make sure we don't try to get a lock on null
         Object lock;
-
         // we have to choose our lock.
         if (newRef != null) lock = newRef;
         else if (deadRef != null) lock = deadRef;
         else lock = this;
 
+        T old = null;
         // This lock is here to ensure that no two threads can set the ref and service
         // at the same time.
         synchronized (lock) {
             if (open.get()) {
                 result = this.ref.compareAndSet(deadRef, newRef);
                 if (result) {
-                    this.service.set(service);
-
-                    if (deadRef == null && newRef != null) foundLostReplaced = 0;
-                    if (deadRef != null && newRef == null) foundLostReplaced = 1;
-                    if (deadRef != null && newRef != null) foundLostReplaced = 2;
+                    old = this.service.getAndSet(service);
                 }
             }
         }
 
-        if (serviceListener != null) {
-            if (foundLostReplaced == 0) serviceListener.found();
-            else if (foundLostReplaced == 1) serviceListener.lost();
-            else if (foundLostReplaced == 2) serviceListener.updated();
-        }
+        updateState(old, service);
 
         return result;
     }
 
-    public void close() {
-        if (open.compareAndSet(true, false)) {
-            ctx.removeServiceListener(listener);
-
-            synchronized (this) {
-                ServiceReference deadRef = ref.getAndSet(null);
-                service.set(null);
-                if (deadRef != null) ctx.ungetService(deadRef);
-            }
-        }
-    }
-
-    public boolean isSatisfied() {
-        return service.get() != null;
-    }
-
-    public String getClassName() {
-        return className;
+    public Class getTrackedClass() {
+        return clazz;
     }
 
 }

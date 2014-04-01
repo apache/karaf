@@ -42,6 +42,7 @@ public class CommandExtender extends AbstractExtender {
     private Registry registry;
 
     public CommandExtender(Registry registry) {
+        setSynchronous(true);
         this.registry = registry;
         this.registry.register(new ManagerImpl(this.registry, this.registry));
     }

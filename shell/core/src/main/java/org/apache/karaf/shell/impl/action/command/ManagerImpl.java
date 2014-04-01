@@ -87,7 +87,7 @@ public class ManagerImpl implements Manager {
                         }
                     }
                     if (!allowCustomServices && value == null) {
-                        throw new RuntimeException("No service matching " + field.getType().getName());
+                        throw new IllegalStateException("No service matching " + field.getType().getName());
                     }
                     field.setAccessible(true);
                     field.set(instance, value);

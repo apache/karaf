@@ -22,6 +22,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -29,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.felix.utils.extender.Extension;
 import org.apache.felix.utils.manifest.Clause;
 import org.apache.felix.utils.manifest.Parser;
+import org.apache.karaf.shell.api.action.lifecycle.Manager;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.History;
@@ -47,50 +49,28 @@ import org.slf4j.LoggerFactory;
 /**
  * Commands extension
  */
-public class CommandExtension implements Extension, Satisfiable {
+public class CommandExtension implements Extension {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CommandExtension.class);
 
     private final Bundle bundle;
-    private final ManagerImpl manager;
     private final Registry registry;
     private final CountDownLatch started;
     private final AggregateServiceTracker tracker;
-    private final List<Satisfiable> satisfiables = new ArrayList<Satisfiable>();
+    private final List<Class> classes = new ArrayList<Class>();
+    private Manager manager;
 
 
     public CommandExtension(Bundle bundle, Registry registry) {
         this.bundle = bundle;
-        this.registry = new RegistryImpl(registry);
-        this.registry.register(bundle.getBundleContext());
-        this.manager = new ManagerImpl(this.registry, registry);
-        this.registry.register(this.manager);
+        this.registry = registry;
         this.started = new CountDownLatch(1);
-        this.tracker = new AggregateServiceTracker(bundle.getBundleContext(), this);
-    }
-
-    @Override
-    public void found() {
-        LOGGER.info("Registering commands for bundle {}/{}",
-                bundle.getSymbolicName(),
-                bundle.getVersion());
-        for (Satisfiable s : satisfiables) {
-            s.found();
-        }
-    }
-
-    @Override
-    public void updated() {
-        for (Satisfiable s : satisfiables) {
-            s.updated();
-        }
-    }
-
-    @Override
-    public void lost() {
-        for (Satisfiable s : satisfiables) {
-            s.lost();
-        }
+        this.tracker = new AggregateServiceTracker(bundle.getBundleContext()) {
+            @Override
+            protected void updateState(State state) {
+                CommandExtension.this.updateState(state);
+            }
+        };
     }
 
     public void start() throws Exception {
@@ -118,12 +98,14 @@ public class CommandExtension implements Extension, Satisfiable {
                     inspectClass(bundle.loadClass(className));
                 }
             }
-            tracker.open();
-            if (!tracker.isSatisfied()) {
+            AggregateServiceTracker.State state = tracker.open();
+            if (!state.isSatisfied()) {
                 LOGGER.info("Command registration delayed for bundle {}/{}. Missing dependencies: {}",
                         bundle.getSymbolicName(),
                         bundle.getVersion(),
-                        tracker.getMissingServices());
+                        state.getMissingServices());
+            } else {
+                updateState(state);
             }
         } finally {
             started.countDown();
@@ -137,6 +119,51 @@ public class CommandExtension implements Extension, Satisfiable {
             LOGGER.warn("The wait for bundle being started before destruction has been interrupted.", e);
         }
         tracker.close();
+    }
+
+    private synchronized void updateState(AggregateServiceTracker.State state) {
+        boolean wasSatisfied = manager != null;
+        boolean isSatisfied = state != null && state.isSatisfied();
+        String action;
+        if (wasSatisfied && isSatisfied) {
+            action = "Updating";
+        } else if (wasSatisfied) {
+            action = "Unregistering";
+        } else if (isSatisfied) {
+            action = "Registering";
+        } else {
+            action = null;
+        }
+        LOGGER.info("{} commands for bundle {}/{}",
+                action,
+                bundle.getSymbolicName(),
+                bundle.getVersion());
+        if (wasSatisfied) {
+            for (Class clazz : classes) {
+                manager.unregister(clazz);
+            }
+            manager = null;
+        }
+        if (isSatisfied) {
+            Registry reg = new RegistryImpl(registry);
+            manager = new ManagerImpl(reg, registry);
+            reg.register(bundle.getBundleContext());
+            reg.register(manager);
+            for (Map.Entry<Class, Object> entry : state.getSingleServices().entrySet()) {
+                reg.register(entry.getValue());
+            }
+            for (final Map.Entry<Class, List> entry : state.getMultiServices().entrySet()) {
+                reg.register(new Callable() {
+                    @Override
+                    public Object call() throws Exception {
+                        return entry.getValue();
+                    }
+                }, entry.getKey());
+            }
+            for (Class clazz : classes) {
+                manager.register(clazz);
+            }
+        }
     }
 
     private void inspectClass(final Class<?> clazz) throws Exception {
@@ -162,59 +189,17 @@ public class CommandExtension implements Extension, Satisfiable {
                 }
             }
         }
-        satisfiables.add(new AutoRegister(clazz));
+        classes.add(clazz);
     }
 
     protected void track(final GenericType type) {
         if (type.getRawClass() == List.class) {
             final Class clazzRef = type.getActualTypeArgument(0).getRawClass();
             tracker.track(clazzRef, true);
-            registry.register(new Callable() {
-                @Override
-                public Object call() throws Exception {
-                    return tracker.getServices(clazzRef);
-                }
-            }, clazzRef);
         } else {
             final Class clazzRef = type.getRawClass();
             tracker.track(clazzRef, false);
-            registry.register(new Callable() {
-                @Override
-                public Object call() throws Exception {
-                    return tracker.getService(clazzRef);
-                }
-            }, clazzRef);
         }
-    }
-
-    public class AutoRegister implements Satisfiable {
-
-        private final Class<?> clazz;
-
-        public AutoRegister(Class<?> clazz) {
-            this.clazz = clazz;
-        }
-
-        @Override
-        public void found() {
-            try {
-                manager.register(clazz);
-            } catch (Exception e) {
-                throw new RuntimeException("Unable to create service " + clazz.getName(), e);
-            }
-        }
-
-        @Override
-        public void updated() {
-            lost();
-            found();
-        }
-
-        @Override
-        public void lost() {
-            manager.unregister(clazz);
-        }
-
     }
 
 }
