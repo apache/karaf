@@ -32,6 +32,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.wiring.FrameworkWiring;
@@ -135,7 +136,18 @@ public class LoadTest implements Action {
                                         }
                                         Thread.sleep(rand.nextInt(delay));
                                     } catch (Exception e) {
-                                        e.printStackTrace();
+                                        boolean ignore = false;
+                                        if (e instanceof BundleException && e.getMessage() != null) {
+                                            String msg = e.getMessage();
+                                            if ("Cannot acquire global lock to update the bundle.".equals(msg) ||
+                                                    "Unable to acquire global lock for resolve.".equals(msg) ||
+                                                    msg.matches("Bundle .* cannot be update, since it is either starting or stopping.")) {
+                                                ignore = true;
+                                            }
+                                        }
+                                        if (!ignore) {
+                                            e.printStackTrace();
+                                        }
                                     } finally {
                                         locks[b].set(false);
                                     }

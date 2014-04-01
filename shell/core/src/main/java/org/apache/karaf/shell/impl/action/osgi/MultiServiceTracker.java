@@ -19,13 +19,14 @@
 package org.apache.karaf.shell.impl.action.osgi;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
-import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
@@ -33,84 +34,54 @@ import org.osgi.framework.ServiceReference;
 
 /**
  * Track multiple service by its type.
+ * When tracking multiple services, the dependency is always considered optional.
  *
  * @param <T>
  */
-public final class MultiServiceTracker<T> {
+public abstract class MultiServiceTracker<T> {
 
     private final BundleContext ctx;
-    private final String className;
-    private final List<T> services = new CopyOnWriteArrayList<T>();
-    private final List<ServiceReference> refs = new CopyOnWriteArrayList<ServiceReference>();
+    private final Class<T> clazz;
+    private final Map<ServiceReference<T>, T> refs = new HashMap<ServiceReference<T>, T>();
     private final AtomicBoolean open = new AtomicBoolean(false);
-    private final Satisfiable serviceListener;
-    private Filter filter;
 
     private final ServiceListener listener = new ServiceListener() {
+        @SuppressWarnings("unchecked")
         public void serviceChanged(ServiceEvent event) {
             if (open.get()) {
                 if (event.getType() == ServiceEvent.UNREGISTERING) {
-                    removeRef(event.getServiceReference());
+                    removeRef((ServiceReference<T>) event.getServiceReference());
                 } else if (event.getType() == ServiceEvent.REGISTERED) {
-                    addRef(event.getServiceReference());
+                    addRef((ServiceReference<T>) event.getServiceReference());
                 }
+                updateState();
             }
         }
     };
 
-    public MultiServiceTracker(BundleContext context, Class<T> clazz, Satisfiable sl) {
+    public MultiServiceTracker(BundleContext context, Class<T> clazz) {
         ctx = context;
-        this.className = clazz.getName();
-        serviceListener = sl;
+        this.clazz = clazz;
     }
 
-    public List<T> getServices() {
-        return services;
-    }
-
-    public List<ServiceReference> getServiceReferences() {
-        return refs;
-    }
+    protected abstract void updateState(List<T> services);
 
     public void open() {
         if (open.compareAndSet(false, true)) {
             try {
-                String filterString = '(' + Constants.OBJECTCLASS + '=' + className + ')';
-                if (filter != null) filterString = "(&" + filterString + filter + ')';
+                String filterString = '(' + Constants.OBJECTCLASS + '=' + clazz.getName() + ')';
                 ctx.addServiceListener(listener, filterString);
-                ServiceReference[] refs = ctx.getServiceReferences(className, filter != null ? filter.toString() : null);
+                Collection<ServiceReference<T>> refs = ctx.getServiceReferences(clazz, null);
                 if (refs != null) {
-                    for (ServiceReference ref : refs) {
+                    for (ServiceReference<T> ref : refs) {
                         addRef(ref);
                     }
                 }
             } catch (InvalidSyntaxException e) {
                 // this can never happen. (famous last words :)
             }
-            serviceListener.found();
+            updateState();
         }
-    }
-
-    private void addRef(ServiceReference ref) {
-        T service = (T) ctx.getService(ref);
-        synchronized (refs) {
-            if (refs.add(ref)) {
-                services.add(service);
-                return;
-            }
-        }
-        ctx.ungetService(ref);
-        serviceListener.updated();
-    }
-
-    private void removeRef(ServiceReference ref) {
-        synchronized (refs) {
-            if (!refs.remove(ref)) {
-                return;
-            }
-        }
-        ctx.ungetService(ref);
-        serviceListener.updated();
     }
 
     public void close() {
@@ -119,9 +90,8 @@ public final class MultiServiceTracker<T> {
 
             List<ServiceReference> oldRefs;
             synchronized (refs) {
-                oldRefs = new ArrayList<ServiceReference>(refs);
+                oldRefs = new ArrayList<ServiceReference>(refs.keySet());
                 refs.clear();
-                services.clear();
             }
             for (ServiceReference ref : oldRefs) {
                 ctx.ungetService(ref);
@@ -129,12 +99,32 @@ public final class MultiServiceTracker<T> {
         }
     }
 
-    public boolean isSatisfied() {
-        return true;
+    private void updateState() {
+        List<T> svcs = new ArrayList<T>();
+        synchronized (refs) {
+            svcs.addAll(refs.values());
+        }
+        updateState(svcs);
     }
 
-    public String getClassName() {
-        return className;
+    private void addRef(ServiceReference<T> ref) {
+        T service = ctx.getService(ref);
+        synchronized (refs) {
+            if (!refs.containsKey(ref)) {
+                refs.put(ref, service);
+                return;
+            }
+        }
+        ctx.ungetService(ref);
+    }
+
+    private void removeRef(ServiceReference<T> ref) {
+        synchronized (refs) {
+            if (refs.remove(ref) == null) {
+                return;
+            }
+        }
+        ctx.ungetService(ref);
     }
 
 }

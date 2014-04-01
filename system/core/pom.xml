@@ -51,6 +51,10 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.apache.karaf.util</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.utils</artifactId>
             <scope>provided</scope>
@@ -87,6 +91,7 @@
                             org.apache.karaf.system.internal,
                             org.apache.karaf.system.internal.osgi,
                             org.apache.karaf.system.management.internal,
+                            org.apache.karaf.util.tracker,
                             org.apache.felix.utils.properties
                         </Private-Package>
                         <Bundle-Activator>

@@ -31,7 +31,8 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-import org.apache.karaf.region.persist.RegionsPersistence;
+
+import org.apache.karaf.features.RegionsPersistence;
 import org.apache.karaf.region.persist.internal.model.FilterAttributeType;
 import org.apache.karaf.region.persist.internal.model.FilterBundleType;
 import org.apache.karaf.region.persist.internal.model.FilterNamespaceType;

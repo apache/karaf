@@ -27,64 +27,64 @@ public class EnterpriseFeaturesTest extends KarafTestSupport {
 
     @Test
     public void installTransactionFeature() throws Exception {
-        installAssertAndUninstallFeature("transaction");
+        installAssertAndUninstallFeatures("transaction");
     }
 
     @Test
     public void installJpaFeature() throws Exception {
-    	installAssertAndUninstallFeature("jpa");
+    	installAssertAndUninstallFeatures("jpa");
     }
 
     @Test
     public void installOpenJpaFeature() throws Exception {
-        installAssertAndUninstallFeature("openjpa");
+        installAssertAndUninstallFeatures("openjpa");
     }
 
     @Test
     public void installHibernateFeature() throws Exception {
-        installAssertAndUninstallFeature("hibernate");
+        installAssertAndUninstallFeatures("hibernate");
     }
 
     @Test
     public void installHibernateEnversFeature() throws Exception {
-        installAssertAndUninstallFeature("hibernate-envers");
+        installAssertAndUninstallFeatures("hibernate-envers");
     }
 
     @Test
     public void installHibernateValidatorFeature() throws Exception {
-        installAssertAndUninstallFeature("hibernate-validator");
+        installAssertAndUninstallFeatures("hibernate-validator");
     }
 
     @Test
     public void installJndiFeature() throws Exception {
-    	installAssertAndUninstallFeature("jndi");
+    	installAssertAndUninstallFeatures("jndi");
     }
 
     @Test
     public void installJdbcFeature() throws Exception {
-        installAssertAndUninstallFeature("jdbc");
+        installAssertAndUninstallFeatures("jdbc");
     }
 
     @Test
     public void installJmsFeature() throws Exception {
-        installAssertAndUninstallFeature("jms");
+        installAssertAndUninstallFeatures("jms");
     }
 
     @Test
     @Ignore("Pax-cdi depends on scr feature [2.3,3.5) so it does not work with 4.0")
     public void installOpenWebBeansFeature() throws Exception {
-        installAssertAndUninstallFeature("openwebbeans");
+        installAssertAndUninstallFeatures("openwebbeans");
     }
 
     @Test
     @Ignore("Pax-cdi depends on scr feature [2.3,3.5) so it does not work with 4.0")
     public void installWeldFeature() throws Exception {
-        installAssertAndUninstallFeature("weld");
+        installAssertAndUninstallFeatures("weld");
     }
 
     @Test
     public void installApplicationWithoutIsolationFeature() throws Exception {
-    	installAssertAndUninstallFeature("application-without-isolation");
+    	installAssertAndUninstallFeatures("application-without-isolation");
     }
 
 }

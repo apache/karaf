@@ -61,6 +61,12 @@
             <artifactId>org.apache.felix.utils</artifactId>
             <scope>provided</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.apache.karaf.util</artifactId>
+            <scope>provided</scope>
+        </dependency>
         
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -97,6 +103,7 @@
                         <Private-Package>
                             org.apache.karaf.packages.core.internal,
                             org.apache.karaf.packages.core.internal.osgi,
+                            org.apache.karaf.util.tracker,
                             org.apache.felix.utils.version,
                             org.apache.felix.utils.manifest
                         </Private-Package>

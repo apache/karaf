@@ -36,12 +36,12 @@ public class Spring3FeaturesTest extends KarafTestSupport {
 
     @Test
     public void installSpringDmFeature() throws Exception {
-        installAssertAndUninstallFeature("spring-dm");
+        installAssertAndUninstallFeatures("spring-dm");
     }
 
     @Test
     public void installSpringDmWebFeature() throws Exception {
-        installAssertAndUninstallFeature("spring-dm-web");
+        installAssertAndUninstallFeatures("spring-dm-web");
     }
 
     @Test
@@ -96,12 +96,12 @@ public class Spring3FeaturesTest extends KarafTestSupport {
 
     @Test
     public void installSpringSecurityFeature() throws Exception {
-        installAssertAndUninstallFeature("spring-security");
+        installAssertAndUninstallFeatures("spring-security");
     }
 
     @Test
     public void installGeminiBlueprintFeature() throws Exception {
-        installAssertAndUninstallFeature("gemini-blueprint");
+        installAssertAndUninstallFeatures("gemini-blueprint");
     }
 
     // TODO add combined/all Spring features installation tests

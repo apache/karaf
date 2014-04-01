@@ -42,8 +42,8 @@ import org.apache.felix.utils.manifest.Clause;
 import org.apache.felix.utils.manifest.Parser;
 import org.apache.felix.utils.version.VersionRange;
 import org.apache.karaf.features.FeaturesService.Option;
+import org.apache.karaf.features.RegionsPersistence;
 import org.apache.karaf.features.Resolver;
-import org.apache.karaf.region.persist.RegionsPersistence;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -66,6 +66,7 @@ public class BundleManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(BundleManager.class);
     private final BundleContext bundleContext;
     private final long refreshTimeout;
+    private RegionsPersistence regionsPersistence;
 
     public BundleManager(BundleContext bundleContext) {
         this(bundleContext, 5000);
@@ -76,7 +77,25 @@ public class BundleManager {
         this.refreshTimeout = refreshTimeout;
     }
 
+    public void setRegionsPersistence(RegionsPersistence regionsPersistence) {
+        this.regionsPersistence = regionsPersistence;
+    }
+
     public BundleInstallerResult installBundleIfNeeded(String bundleLocation, int startLevel, String regionName) throws IOException, BundleException {
+        BundleInstallerResult result = doInstallBundleIfNeeded(bundleLocation, startLevel, regionName);
+        installToRegion(regionName, result.bundle, result.isNew);
+        return result;
+    }
+
+    private void installToRegion(String region, Bundle bundle, boolean isNew) throws BundleException {
+        if (region != null && isNew) {
+            if (regionsPersistence != null) {
+                regionsPersistence.install(bundle, region);
+            }
+        }
+    }
+
+    private BundleInstallerResult doInstallBundleIfNeeded(String bundleLocation, int startLevel, String regionName) throws IOException, BundleException {
         InputStream is = getInputStreamForBundle(bundleLocation);
         try {
             is.mark(256 * 1024);

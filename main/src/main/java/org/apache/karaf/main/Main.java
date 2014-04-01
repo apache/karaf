@@ -22,7 +22,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -31,6 +33,7 @@ import java.security.Security;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.felix.utils.properties.Properties;
+
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -42,7 +45,6 @@ import org.apache.karaf.main.lock.NoLock;
 import org.apache.karaf.main.util.ArtifactResolver;
 import org.apache.karaf.main.util.BootstrapLogManager;
 import org.apache.karaf.main.util.SimpleMavenResolver;
-import org.apache.karaf.main.util.StringMap;
 import org.apache.karaf.main.util.Utils;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -50,6 +52,7 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
 import org.osgi.framework.startlevel.BundleStartLevel;
@@ -233,7 +236,32 @@ public class Main {
         // Start up the OSGI framework
         ClassLoader classLoader = createClassLoader(resolver);
         FrameworkFactory factory = loadFrameworkFactory(classLoader);
-        framework = factory.newFramework(new StringMap(config.props, false));
+        framework = factory.newFramework(config.props);
+
+        // Hack to set felix logger
+        try {
+            Field field = framework.getClass().getDeclaredField("m_logger");
+            field.setAccessible(true);
+            Object logger = field.get(framework);
+            Method method = logger.getClass().getDeclaredMethod("setLogger", Object.class);
+            method.setAccessible(true);
+            method.invoke(logger, new Object() {
+                public void log(ServiceReference sr, int level, String message, Throwable exception) {
+                    Level lvl;
+                    switch (level) {
+                        case 1:  lvl = Level.SEVERE; break;
+                        case 2:  lvl = Level.WARNING; break;
+                        case 3:  lvl = Level.INFO; break;
+                        case 4:  lvl = Level.FINE; break;
+                        default: lvl = Level.FINEST; break;
+                    }
+                    Logger.getLogger("Felix").log(lvl, message, exception);
+                }
+            });
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
+
         framework.init();
         framework.getBundleContext().addFrameworkListener(lockCallback);
         framework.start();
@@ -266,7 +294,7 @@ public class Main {
     }
 
     private void monitor() {
-        new Thread() {
+        new Thread("Karaf Lock Monitor Thread") {
             public void run() {
                 doMonitor();
             }

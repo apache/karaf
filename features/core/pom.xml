@@ -44,11 +44,6 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.karaf.region</groupId>
-            <artifactId>org.apache.karaf.region.core</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.compendium</artifactId>
             <scope>provided</scope>
@@ -112,13 +107,6 @@
                             org.apache.karaf.features.management.codec;
                                 -noimport:=true
                         </Export-Package>
-                        <Import-Package>
-                            org.apache.karaf.region.persist;resolution:=optional,
-                            *
-                        </Import-Package>
-                        <DynamicImport-Package>
-                            org.apache.karaf.region.persist
-                        </DynamicImport-Package>
                         <Private-Package>
                             org.apache.karaf.features.internal,
                             org.apache.karaf.features.internal.model,

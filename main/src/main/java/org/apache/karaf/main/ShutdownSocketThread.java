@@ -39,6 +39,7 @@ class ShutdownSocketThread extends Thread {
 	private Framework framework;
 
     public ShutdownSocketThread(String shutdown, ServerSocket shutdownSocket, Framework framework) {
+        super("Karaf Shutdown Socket Thread");
 		this.shutdown = shutdown;
 		this.shutdownSocket = shutdownSocket;
 		this.framework = framework;

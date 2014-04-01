@@ -21,54 +21,28 @@ import java.util.Hashtable;
 
 import org.apache.felix.fileinstall.ArtifactUrlTransformer;
 import org.apache.karaf.deployer.wrap.WrapDeploymentListener;
+import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.SingleServiceTracker;
-import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.url.URLStreamHandlerService;
 
-public class Activator implements BundleActivator, SingleServiceTracker.SingleServiceListener {
+public class Activator extends BaseActivator {
 
     private BundleContext bundleContext;
     private ServiceRegistration<ArtifactUrlTransformer> urlTransformerRegistration;
     private SingleServiceTracker<URLStreamHandlerService> urlHandlerTracker;
 
     @Override
-    public void start(BundleContext context) throws Exception {
-        bundleContext = context;
-        urlHandlerTracker = new SingleServiceTracker<URLStreamHandlerService>(
-                context, URLStreamHandlerService.class,
-                "(url.handler.protocol=wrap)", this);
-        urlHandlerTracker.open();
+    protected void doOpen() throws Exception {
+        trackService(URLStreamHandlerService.class, "(url.handler.protocol=wrap)");
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
-        urlHandlerTracker.close();
-    }
-
-    @Override
-    public void serviceFound() {
-        if (urlTransformerRegistration == null) {
-            Hashtable<String, Object> props = new Hashtable<String, Object>();
-            props.put("service.ranking", -1);
-            urlTransformerRegistration = bundleContext.registerService(
-                    ArtifactUrlTransformer.class,
-                    new WrapDeploymentListener(),
-                    props);
-        }
-    }
-
-    @Override
-    public void serviceLost() {
-        if (urlTransformerRegistration != null) {
-            urlTransformerRegistration.unregister();
-            urlTransformerRegistration = null;
-        }
-    }
-
-    @Override
-    public void serviceReplaced() {
+    protected void doStart() throws Exception {
+        Hashtable<String, Object> props = new Hashtable<String, Object>();
+        props.put("service.ranking", -1);
+        register(ArtifactUrlTransformer.class, new WrapDeploymentListener(), props);
     }
 
 }

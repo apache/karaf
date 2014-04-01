@@ -16,50 +16,16 @@
  */
 package org.apache.karaf.service.core.internal.osgi;
 
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.List;
-
 import org.apache.karaf.service.core.internal.ServicesMBeanImpl;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
+import org.apache.karaf.util.tracker.BaseActivator;
 
-public class Activator implements BundleActivator {
-
-    private ServiceRegistration mbeanRegistration;
+public class Activator extends BaseActivator {
 
     @Override
-    public void start(BundleContext context) throws Exception {
+    protected void doStart() throws Exception {
         ServicesMBeanImpl mbean = new ServicesMBeanImpl();
-        mbean.setBundleContext(context);
-        Hashtable<String, Object> props = new Hashtable<String, Object>();
-        props.put("jmx.objectname", "org.apache.karaf:type=service,name=" + System.getProperty("karaf.name"));
-        mbeanRegistration = context.registerService(
-                getInterfaceNames(mbean),
-                mbean,
-                props
-        );
-    }
-
-    @Override
-    public void stop(BundleContext context) throws Exception {
-        mbeanRegistration.unregister();
-    }
-
-    private String[] getInterfaceNames(Object object) {
-        List<String> names = new ArrayList<String>();
-        for (Class cl = object.getClass(); cl != Object.class; cl = cl.getSuperclass()) {
-            addSuperInterfaces(names, cl);
-        }
-        return names.toArray(new String[names.size()]);
-    }
-
-    private void addSuperInterfaces(List<String> names, Class clazz) {
-        for (Class cl : clazz.getInterfaces()) {
-            names.add(cl.getName());
-            addSuperInterfaces(names, cl);
-        }
+        mbean.setBundleContext(bundleContext);
+        registerMBean(mbean, "type=service");
     }
 
 }
