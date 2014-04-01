@@ -421,7 +421,7 @@ public class KarafTestSupport {
         }
     }
 
-    protected void installAssertAndUninstallFeature(String... feature) throws Exception {
+    protected void installAssertAndUninstallFeatures(String... feature) throws Exception {
     	Set<Feature> featuresBefore = new HashSet<Feature>(Arrays.asList(featureService.listInstalledFeatures()));
     	try {
 			for (String curFeature : feature) {

@@ -30,98 +30,98 @@ public class StandardFeaturesTest extends KarafTestSupport {
 	 * @throws Exception
 	 */
 	public void checkInteractionOfHttpAndAriesAnnotationFeature() throws Exception {
-		installAssertAndUninstallFeature("aries-annotation", "pax-http");
-		installAssertAndUninstallFeature("pax-http", "aries-annotation");
+		installAssertAndUninstallFeatures("aries-annotation", "pax-http");
+		installAssertAndUninstallFeatures("pax-http", "aries-annotation");
     }
 
     @Test
     public void installAriesAnnotationFeature() throws Exception {
-        installAssertAndUninstallFeature("aries-annotation");
+        installAssertAndUninstallFeatures("aries-annotation");
     }
 
     @Test
     public void installAriesBlueprintWebFeature() throws Exception {
-        installAssertAndUninstallFeature("blueprint-web");
+        installAssertAndUninstallFeatures("blueprint-web");
     }
     
     @Test
     public void installWrapperFeature() throws Exception {
-        installAssertAndUninstallFeature("wrapper");
+        installAssertAndUninstallFeatures("wrapper");
     }
     
     @Test
     public void installObrFeature() throws Exception {
-        installAssertAndUninstallFeature("obr");
+        installAssertAndUninstallFeatures("obr");
     }
 
     @Test
     public void installConfigFeature() throws Exception {
-        installAssertAndUninstallFeature("config");
+        installAssertAndUninstallFeatures("config");
     }
     
     @Test
     public void installRegionFeature() throws Exception {
-        installAssertAndUninstallFeature("region");
+        installAssertAndUninstallFeatures("region");
     }
     
     @Test
     public void installPackageFeature() throws Exception {
-        installAssertAndUninstallFeature("package");
+        installAssertAndUninstallFeatures("package");
     }
 
     @Test
     public void installHttpFeature() throws Exception {
-        installAssertAndUninstallFeature("http");
+        installAssertAndUninstallFeatures("http");
     }
 
     @Test
     public void installHttpWhiteboardFeature() throws Exception {
-        installAssertAndUninstallFeature("http-whiteboard");
+        installAssertAndUninstallFeatures("http-whiteboard");
     }
 
     @Test
     public void installWarFeature() throws Exception {
-        installAssertAndUninstallFeature("war");
+        installAssertAndUninstallFeatures("war");
     }
     
     @Test
     public void installKarFeature() throws Exception {
-        installAssertAndUninstallFeature("kar");
+        installAssertAndUninstallFeatures("kar");
     }
 
     @Test
     public void installWebConsoleFeature() throws Exception {
-        installAssertAndUninstallFeature("webconsole");
+        installAssertAndUninstallFeatures("webconsole");
     }
 
     @Test
     public void installSSHFeature() throws Exception {
-        installAssertAndUninstallFeature("ssh");
+        installAssertAndUninstallFeatures("ssh");
     }
     
     @Test
     public void installManagementFeature() throws Exception {
-        installAssertAndUninstallFeature("management");
+        installAssertAndUninstallFeatures("management");
     }
     
     @Test
     public void installSchedulerFeature() throws Exception {
-        installAssertAndUninstallFeature("scheduler");
+        installAssertAndUninstallFeatures("scheduler");
     }
 
     @Test
     public void installEventAdminFeature() throws Exception {
-        installAssertAndUninstallFeature("eventadmin");
+        installAssertAndUninstallFeatures("eventadmin");
     }
 
     @Test
     public void installJasyptEncryptionFeature() throws Exception {
-        installAssertAndUninstallFeature("jasypt-encryption");
+        installAssertAndUninstallFeatures("jasypt-encryption");
     }
 
     @Test
     public void installScrFeature() throws Exception {
-        installAssertAndUninstallFeature("scr");
+        installAssertAndUninstallFeatures("scr");
     }
 
 }
