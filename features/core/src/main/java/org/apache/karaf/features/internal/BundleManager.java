@@ -67,6 +67,7 @@ public class BundleManager {
     private final BundleContext bundleContext;
     private final RegionsPersistence regionsPersistence;
     private final long refreshTimeout;
+    private List<String> defaultProtocols = Arrays.asList("http", "https", "ftp", "file", "jar");
 
     public BundleManager(BundleContext bundleContext) {
         this(bundleContext, null);
@@ -195,22 +196,24 @@ public class BundleManager {
      * @param protocol
      */
     private void waitForUrlHandler(String protocol) {
-        try {
-            Filter filter = bundleContext.createFilter("(&(" + Constants.OBJECTCLASS + "=" + URLStreamHandlerService.class.getName() + ")(url.handler.protocol=" + protocol + "))");
-            if (filter == null) {
-                return;
-            }
-            ServiceTracker<URLStreamHandlerService, URLStreamHandlerService> urlHandlerTracker = new ServiceTracker<URLStreamHandlerService, URLStreamHandlerService>(bundleContext, filter, null);
+        if (!defaultProtocols.contains(protocol)) {
             try {
-                urlHandlerTracker.open();
-                urlHandlerTracker.waitForService(30000);
-            } catch (InterruptedException e) {
-                LOGGER.debug("Interrupted while waiting for URL handler for protocol {}.", protocol);
-            } finally {
-                urlHandlerTracker.close();
+                Filter filter = bundleContext.createFilter("(&(" + Constants.OBJECTCLASS + "=" + URLStreamHandlerService.class.getName() + ")(url.handler.protocol=" + protocol + "))");
+                if (filter == null) {
+                    return;
+                }
+                ServiceTracker<URLStreamHandlerService, URLStreamHandlerService> urlHandlerTracker = new ServiceTracker<URLStreamHandlerService, URLStreamHandlerService>(bundleContext, filter, null);
+                try {
+                    urlHandlerTracker.open();
+                    urlHandlerTracker.waitForService(30000);
+                } catch (InterruptedException e) {
+                    LOGGER.debug("Interrupted while waiting for URL handler for protocol {}.", protocol);
+                } finally {
+                    urlHandlerTracker.close();
+                }
+            } catch (Exception ex) {
+                LOGGER.error("Error creating service tracker.", ex);
             }
-        } catch (Exception ex) {
-            LOGGER.error("Error creating service tracker.", ex);
         }
     }
 
