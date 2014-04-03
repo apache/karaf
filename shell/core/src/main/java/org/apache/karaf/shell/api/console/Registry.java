@@ -40,9 +40,8 @@ public interface Registry {
      * @param scope
      * @param name
      * @return
-     * @throws InterruptedException
      */
-    boolean hasCommand(String scope, String name);
+    Command getCommand(String scope, String name);
 
     /**
      * Register a delayed service (or factory).

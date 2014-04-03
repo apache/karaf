@@ -132,7 +132,7 @@ public class CommandExtension implements Extension {
         } else if (isSatisfied) {
             action = "Registering";
         } else {
-            action = null;
+            return;
         }
         LOGGER.info("{} commands for bundle {}/{}",
                 action,

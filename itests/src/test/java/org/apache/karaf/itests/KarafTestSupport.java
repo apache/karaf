@@ -291,7 +291,7 @@ public class KarafTestSupport {
             long start = System.currentTimeMillis();
             long cur   = start;
             while (cur - start < SERVICE_TIMEOUT) {
-                if (sessionFactory.getRegistry().hasCommand(scope, name)) {
+                if (sessionFactory.getRegistry().getCommand(scope, name) != null) {
                     return;
                 }
                 Thread.sleep(100);

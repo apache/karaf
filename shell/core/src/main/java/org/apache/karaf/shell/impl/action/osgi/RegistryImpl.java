@@ -44,14 +44,20 @@ public class RegistryImpl implements Registry {
     }
 
     @Override
-    public boolean hasCommand(String scope, String name) {
-        if (parent != null && parent.hasCommand(scope, name)) {
-            return true;
+    public Command getCommand(String scope, String name) {
+        if (parent != null) {
+            Command command = parent.getCommand(scope, name);
+            if (command != null) {
+                return command;
+            }
         }
         synchronized (services) {
             List<Command> cmds = commands.get(scope + ":" + name);
-            return cmds != null && !cmds.isEmpty();
+            if (cmds != null && !cmds.isEmpty()) {
+                return cmds.get(0);
+            }
         }
+        return null;
     }
 
     @Override

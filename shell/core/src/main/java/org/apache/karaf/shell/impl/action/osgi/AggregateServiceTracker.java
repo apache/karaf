@@ -144,7 +144,7 @@ public abstract class AggregateServiceTracker {
         public List<String> getMissingServices() {
             List<String> missing = new ArrayList<String>();
             for (SingleServiceTracker tracker : singleTrackers.values()) {
-                if (single.containsKey(tracker.getTrackedClass())) {
+                if (!single.containsKey(tracker.getTrackedClass())) {
                     missing.add(tracker.getTrackedClass().getName());
                 }
             }
