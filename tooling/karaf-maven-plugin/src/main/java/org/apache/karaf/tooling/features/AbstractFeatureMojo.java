@@ -239,8 +239,12 @@ public abstract class AbstractFeatureMojo extends MojoSupport {
     
             getLog().info("Base repo: " + localRepo.getUrl());
             for (Feature feature : featuresSet) {
-                resolveArtifacts(feature.getBundles());
-                resolveArtifacts(feature.getConfigFiles());
+                try {
+                    resolveArtifacts(feature.getBundles());
+                    resolveArtifacts(feature.getConfigFiles());
+                } catch (RuntimeException e) {
+                    throw new RuntimeException("Error resolving feature " + feature.getName() + "/" + feature.getVersion(), e);
+                }
             }            
         } catch (Exception e) {
             throw new MojoExecutionException("Error populating repository", e);
@@ -253,7 +257,11 @@ public abstract class AbstractFeatureMojo extends MojoSupport {
             Artifact artifact = resourceToArtifact(artifactRef.getUrl(), skipNonMavenProtocols);
             if (artifact != null) {
                 artifactRef.setArtifact(artifact);
-                resolveArtifact(artifact, remoteRepos);
+                try {
+                    resolveArtifact(artifact, remoteRepos);
+                } catch (RuntimeException e) {
+                    throw new RuntimeException("Error resolving artifact " + artifactRef.getUrl(), e);
+                }
             }
             checkDoGarbageCollect();
         }
