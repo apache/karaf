@@ -226,7 +226,6 @@
         <xerces.version>2.11.0</xerces.version>
         <javax.mail.version>1.4.5</javax.mail.version>
         <weld.version>2.1.1.Final</weld.version>
-        <http.feature.version>[2,3)</http.feature.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <appendedResourcesDirectory>${basedir}/etc/appended-resources</appendedResourcesDirectory>
         <bnd.version.policy>[$(version;==;$(@)),$(version;+;$(@)))</bnd.version.policy>
