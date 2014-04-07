@@ -84,6 +84,7 @@ public class ShellCommand implements Command, SessionAware {
     }
 
     public void start(final Environment env) throws IOException {
+        int exitStatus = 0;
         try {
             final Session session = sessionFactory.create(in, new PrintStream(out), new PrintStream(err));
             for (Map.Entry<String,String> e : env.getEnv().entrySet()) {
@@ -115,13 +116,15 @@ public class ShellCommand implements Command, SessionAware {
 //                    session.getConsole().println(session.format(result, Converter.INSPECT));
                 }
             } catch (Throwable t) {
+                exitStatus = 1;
                 ShellUtil.logException(session, t);
             }
         } catch (Exception e) {
+            exitStatus = 1;
             throw (IOException) new IOException("Unable to start shell").initCause(e);
         } finally {
             StreamUtils.close(in, out, err);
-            callback.onExit(0);
+            callback.onExit(exitStatus);
         }
     }
 

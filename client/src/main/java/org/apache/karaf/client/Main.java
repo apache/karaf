@@ -74,6 +74,7 @@ public class Main {
 
         SshClient client = null;
         Terminal terminal = null;
+        int exitStatus = 0;
         try {
             final Console console = System.console();
             client = SshClient.setUpDefaultClient();
@@ -135,6 +136,9 @@ public class Main {
             channel.setErr(AnsiConsole.wrapOutputStream(System.err));
             channel.open();
             channel.waitFor(ClientChannel.CLOSED, 0);
+            if (channel.getExitStatus() != null) {
+                exitStatus = channel.getExitStatus();
+            }
         } catch (Throwable t) {
             if (config.getLevel() > SimpleLogger.WARN) {
                 t.printStackTrace();
@@ -154,7 +158,7 @@ public class Main {
             } catch (Throwable t) {
             }
         }
-        System.exit(0);
+        System.exit(exitStatus);
     }
 
     private static void setupAgent(String user, SshClient client) {
