@@ -14,6 +14,7 @@
 package org.apache.karaf.itests.features;
 
 import org.apache.karaf.itests.KarafTestSupport;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -70,6 +71,7 @@ public class Spring3FeaturesTest extends KarafTestSupport {
     }
 
     @Test
+    @Ignore
     public void installSpringOrmFeature() throws Exception {
         installAssertAndUninstallFeature("spring-orm", System.getProperty("spring32.version"));
     }
@@ -85,11 +87,13 @@ public class Spring3FeaturesTest extends KarafTestSupport {
     }
 
     @Test
+    @Ignore
     public void installSpringWebFeature() throws Exception {
         installAssertAndUninstallFeature("spring-web", System.getProperty("spring32.version"));
     }
 
     @Test
+    @Ignore
     public void installSpringWebPortletFeature() throws Exception {
         installAssertAndUninstallFeature("spring-web-portlet", System.getProperty("spring32.version"));
     }

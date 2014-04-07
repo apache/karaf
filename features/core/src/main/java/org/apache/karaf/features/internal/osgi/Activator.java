@@ -17,22 +17,25 @@
 package org.apache.karaf.features.internal.osgi;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Properties;
 
-import javax.management.NotCompliantMBeanException;
-
 import org.apache.karaf.features.FeaturesListener;
 import org.apache.karaf.features.FeaturesService;
-import org.apache.karaf.features.internal.BootFeaturesInstaller;
-import org.apache.karaf.features.internal.BundleManager;
-import org.apache.karaf.features.internal.FeatureConfigInstaller;
-import org.apache.karaf.features.internal.FeatureFinder;
-import org.apache.karaf.features.internal.FeaturesServiceImpl;
-import org.apache.karaf.features.management.internal.FeaturesServiceMBeanImpl;
+import org.apache.karaf.features.internal.service.EventAdminListener;
+import org.apache.karaf.features.internal.service.FeatureConfigInstaller;
+import org.apache.karaf.features.internal.service.FeatureFinder;
+import org.apache.karaf.features.internal.service.BootFeaturesInstaller;
+import org.apache.karaf.features.internal.service.FeaturesServiceImpl;
+import org.apache.karaf.features.internal.service.StateStorage;
+import org.apache.karaf.features.internal.management.FeaturesServiceMBeanImpl;
 import org.apache.karaf.features.RegionsPersistence;
 import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.SingleServiceTracker;
@@ -49,6 +52,12 @@ public class Activator extends BaseActivator {
     private ServiceTracker<FeaturesListener, FeaturesListener> featuresListenerTracker;
     private FeaturesServiceImpl featuresService;
     private SingleServiceTracker<RegionsPersistence> regionsTracker;
+
+    public Activator() {
+        // Special case here, as we don't want the activator to wait for current job to finish,
+        // else it would forbid the features service to refresh itself
+        setSchedulerStopTimeout(0);
+    }
 
     @Override
     protected void doOpen() throws Exception {
@@ -67,7 +76,7 @@ public class Activator extends BaseActivator {
         updated((Dictionary) configuration);
     }
 
-    protected void doStart() throws NotCompliantMBeanException {
+    protected void doStart() throws Exception {
         ConfigurationAdmin configurationAdmin = getTrackedService(ConfigurationAdmin.class);
         URLStreamHandlerService mvnUrlHandler = getTrackedService(URLStreamHandlerService.class);
 
@@ -80,39 +89,62 @@ public class Activator extends BaseActivator {
         props.put(Constants.SERVICE_PID, "org.apache.karaf.features.repos");
         register(ManagedService.class, featureFinder, props);
 
-        final BundleManager bundleManager = new BundleManager(bundleContext);
-        regionsTracker = new SingleServiceTracker<RegionsPersistence>(bundleContext, RegionsPersistence.class,
-                new SingleServiceTracker.SingleServiceListener() {
-                    @Override
-                    public void serviceFound() {
-                        bundleManager.setRegionsPersistence(regionsTracker.getService());
-                    }
-                    @Override
-                    public void serviceLost() {
-                        serviceFound();
-                    }
-                    @Override
-                    public void serviceReplaced() {
-                        serviceFound();
-                    }
-                });
-        regionsTracker.open();
+        // TODO: region support
+//        final BundleManager bundleManager = new BundleManager(bundleContext);
+//        regionsTracker = new SingleServiceTracker<RegionsPersistence>(bundleContext, RegionsPersistence.class,
+//                new SingleServiceTracker.SingleServiceListener() {
+//                    @Override
+//                    public void serviceFound() {
+//                        bundleManager.setRegionsPersistence(regionsTracker.getService());
+//                    }
+//                    @Override
+//                    public void serviceLost() {
+//                        serviceFound();
+//                    }
+//                    @Override
+//                    public void serviceReplaced() {
+//                        serviceFound();
+//                    }
+//                });
+//        regionsTracker.open();
 
 
         FeatureConfigInstaller configInstaller = new FeatureConfigInstaller(configurationAdmin);
-        String featuresRepositories = getString("featuresRepositories", "");
-        boolean respectStartLvlDuringFeatureStartup = getBoolean("respectStartLvlDuringFeatureStartup", true);
-        boolean respectStartLvlDuringFeatureUninstall = getBoolean("respectStartLvlDuringFeatureUninstall", true);
-        long resolverTimeout = getLong("resolverTimeout", 5000);
+        // TODO: honor respectStartLvlDuringFeatureStartup and respectStartLvlDuringFeatureUninstall
+//        boolean respectStartLvlDuringFeatureStartup = getBoolean("respectStartLvlDuringFeatureStartup", true);
+//        boolean respectStartLvlDuringFeatureUninstall = getBoolean("respectStartLvlDuringFeatureUninstall", true);
         String overrides = getString("overrides", new File(System.getProperty("karaf.etc"), "overrides.properties").toString());
-        featuresService = new FeaturesServiceImpl(bundleManager, configInstaller);
-        featuresService.setUrls(featuresRepositories);
-        featuresService.setRespectStartLvlDuringFeatureStartup(respectStartLvlDuringFeatureStartup);
-        featuresService.setRespectStartLvlDuringFeatureUninstall(respectStartLvlDuringFeatureUninstall);
-        featuresService.setResolverTimeout(resolverTimeout);
-        featuresService.setOverrides(overrides);
-        featuresService.setFeatureFinder(featureFinder);
-        featuresService.start();
+        StateStorage stateStorage = new StateStorage() {
+            @Override
+            protected InputStream getInputStream() throws IOException {
+                File file = bundleContext.getDataFile("FeaturesServiceState.properties");
+                if (file.exists()) {
+                    return new FileInputStream(file);
+                } else {
+                    return null;
+                }
+            }
+
+            @Override
+            protected OutputStream getOutputStream() throws IOException {
+                File file = bundleContext.getDataFile("FeaturesServiceState.properties");
+                return new FileOutputStream(file);
+            }
+        };
+        EventAdminListener eventAdminListener;
+        try {
+            eventAdminListener = new EventAdminListener(bundleContext);
+        } catch (Throwable t) {
+            eventAdminListener = null;
+        }
+        featuresService = new FeaturesServiceImpl(
+                                bundleContext.getBundle(),
+                                bundleContext.getBundle(0).getBundleContext(),
+                                stateStorage,
+                                featureFinder,
+                                eventAdminListener,
+                                configInstaller,
+                                overrides);
         register(FeaturesService.class, featuresService);
 
         featuresListenerTracker = new ServiceTracker<FeaturesListener, FeaturesListener>(
@@ -135,9 +167,12 @@ public class Activator extends BaseActivator {
         );
         featuresListenerTracker.open();
 
+        String featuresRepositories = getString("featuresRepositories", "");
         String featuresBoot = getString("featuresBoot", "");
         boolean featuresBootAsynchronous = getBoolean("featuresBootAsynchronous", false);
-        BootFeaturesInstaller bootFeaturesInstaller = new BootFeaturesInstaller(bundleContext, featuresService, featuresBoot, featuresBootAsynchronous);
+        BootFeaturesInstaller bootFeaturesInstaller = new BootFeaturesInstaller(
+                bundleContext, featuresService,
+                featuresRepositories, featuresBoot, featuresBootAsynchronous);
         bootFeaturesInstaller.start();
 
         FeaturesServiceMBeanImpl featuresServiceMBean = new FeaturesServiceMBeanImpl();
@@ -157,7 +192,6 @@ public class Activator extends BaseActivator {
         }
         super.doStop();
         if (featuresService != null) {
-            featuresService.stop();
             featuresService = null;
         }
     }

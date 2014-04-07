@@ -148,6 +148,9 @@
                         <Export-Package>
                             org.apache.karaf.instance.core,
                         </Export-Package>
+                        <Provide-Capability>
+                            service-reference;effective:=active;objectClass=org.apache.karaf.instance.core.InstanceService
+                        </Provide-Capability>
                         <Private-Package>
                             org.apache.karaf.jpm,
                             org.apache.karaf.jpm.impl,

@@ -172,6 +172,7 @@
         <felix.scr.version>1.8.2</felix.scr.version>
         <felix.scr.webconsole.plugin.version>1.0.0</felix.scr.webconsole.plugin.version>
         <felix.scr.annotation.version>1.6.0</felix.scr.annotation.version>
+        <felix.resolver.version>1.0.0</felix.resolver.version>
 
         <aries.application.version>1.0.0</aries.application.version>
         <aries.application.api.version>1.0.0</aries.application.api.version>
@@ -997,6 +998,11 @@
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.scr</artifactId>
                 <version>${felix.scr.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>org.apache.felix.resolver</artifactId>
+                <version>${felix.resolver.version}</version>
             </dependency>
 
             <dependency>

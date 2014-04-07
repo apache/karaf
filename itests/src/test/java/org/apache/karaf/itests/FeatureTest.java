@@ -64,14 +64,14 @@ public class FeatureTest extends KarafTestSupport {
 
     @Test
     public void installUninstallCommand() throws Exception {
-        String featureInstallOutput = executeCommand("feature:install -v eventadmin", new RolePrincipal("admin"));
+        String featureInstallOutput = executeCommand("feature:install -v wrapper", new RolePrincipal("admin"));
         System.out.println(featureInstallOutput);
         assertFalse(featureInstallOutput.isEmpty());
-        String featureListOutput = executeCommand("feature:list -i | grep eventadmin");
+        String featureListOutput = executeCommand("feature:list -i | grep wrapper");
         System.out.println(featureListOutput);
         assertFalse(featureListOutput.isEmpty());
-        System.out.println(executeCommand("feature:uninstall eventadmin", new RolePrincipal("admin")));
-        featureListOutput = executeCommand("feature:list -i | grep eventadmin");
+        System.out.println(executeCommand("feature:uninstall wrapper", new RolePrincipal("admin")));
+        featureListOutput = executeCommand("feature:list -i | grep wrapper");
         System.out.println(featureListOutput);
         assertTrue(featureListOutput.isEmpty());
     }
@@ -83,8 +83,8 @@ public class FeatureTest extends KarafTestSupport {
             connector = this.getJMXConnector();
             MBeanServerConnection connection = connector.getMBeanServerConnection();
             ObjectName name = new ObjectName("org.apache.karaf:type=feature,name=root");
-            connection.invoke(name, "installFeature", new Object[] { "eventadmin" }, new String[]{ "java.lang.String" });
-            connection.invoke(name, "uninstallFeature", new Object[] { "eventadmin" }, new String[]{ "java.lang.String" });
+            connection.invoke(name, "installFeature", new Object[] { "wrapper" }, new String[]{ "java.lang.String" });
+            connection.invoke(name, "uninstallFeature", new Object[] { "wrapper" }, new String[]{ "java.lang.String" });
         } finally {
         	close(connector);
         }

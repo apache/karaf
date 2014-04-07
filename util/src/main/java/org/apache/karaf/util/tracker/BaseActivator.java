@@ -45,10 +45,20 @@ public class BaseActivator implements BundleActivator, SingleServiceTracker.Sing
             new LinkedBlockingQueue<Runnable>());
     private AtomicBoolean scheduled = new AtomicBoolean();
 
+    private long schedulerStopTimeout = TimeUnit.MILLISECONDS.convert(30, TimeUnit.SECONDS);
+
     private List<ServiceRegistration> registrations;
     private Map<String, SingleServiceTracker> trackers = new HashMap<String, SingleServiceTracker>();
     private ServiceRegistration managedServiceRegistration;
     private Dictionary<String, ?> configuration;
+
+    public long getSchedulerStopTimeout() {
+        return schedulerStopTimeout;
+    }
+
+    public void setSchedulerStopTimeout(long schedulerStopTimeout) {
+        this.schedulerStopTimeout = schedulerStopTimeout;
+    }
 
     @Override
     public void start(BundleContext context) throws Exception {
@@ -72,7 +82,7 @@ public class BaseActivator implements BundleActivator, SingleServiceTracker.Sing
         scheduled.set(true);
         doClose();
         executor.shutdown();
-        executor.awaitTermination(30, TimeUnit.SECONDS);
+        executor.awaitTermination(schedulerStopTimeout, TimeUnit.MILLISECONDS);
         doStop();
     }
 

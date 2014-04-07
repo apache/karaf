@@ -33,8 +33,11 @@
             aries.transaction.howl.bufferSizeKBytes = 4
         </config>
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.aries.transaction/org.apache.aries.transaction.blueprint/${aries.transaction.blueprint.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.transaction/org.apache.aries.transaction.manager/${aries.transaction.manager.version}</bundle>
+        <conditional>
+            <condition>aries-blueprint</condition>
+            <bundle start-level="30">mvn:org.apache.aries.transaction/org.apache.aries.transaction.blueprint/${aries.transaction.blueprint.version}</bundle>
+        </conditional>
     </feature>
 
     <feature name="jpa" description="OSGi Persistence Container" version="${aries.jpa.version}" resolver="(obr)">
@@ -42,9 +45,12 @@
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jpa_2.0_spec/${geronimo.jpa-spec.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.jpa/org.apache.aries.jpa.api/${aries.jpa.api.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.aries.jpa/org.apache.aries.jpa.blueprint.aries/${aries.jpa.blueprint.aries.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.jpa/org.apache.aries.jpa.container/${aries.jpa.container.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.jpa/org.apache.aries.jpa.container.context/${aries.jpa.container.context.version}</bundle>
+        <conditional>
+            <condition>aries-blueprint</condition>
+            <bundle start-level="30">mvn:org.apache.aries.jpa/org.apache.aries.jpa.blueprint.aries/${aries.jpa.blueprint.aries.version}</bundle>
+        </conditional>
     </feature>
 
     <feature name="openjpa" description="Apache OpenJPA 2.2.x persistence engine support" version="2.2.2" resolver="(obr)">
@@ -161,12 +167,14 @@
         <bundle dependency="true">mvn:com.fasterxml/classmate/1.0.0</bundle>
         <bundle dependency="true">mvn:javax.el/javax.el-api/2.2.4</bundle>
         <bundle dependency="true">mvn:org.glassfish.web/javax.el/2.2.4</bundle>
-        <bundle dependency="true">mvn:org.hibernate/hibernate-validator/${hibernate.validator.version}</bundle>
         <bundle dependency="true">mvn:org.jboss.logging/jboss-logging/3.1.4.GA</bundle>
+        <bundle>mvn:org.hibernate/hibernate-validator/${hibernate.validator.version}</bundle>
     </feature>
 
     <feature name="jndi" description="OSGi Service Registry JNDI access" version="${project.version}" resolver="(obr)">
         <details>JNDI support provided by Apache Aries JNDI ${aries.jndi.version}, including additional service, commands, and MBean.</details>
+        <feature>aries-proxy</feature>
+        <feature>aries-blueprint</feature>
         <bundle start-level="30">mvn:org.apache.xbean/xbean-naming/${xbean.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.jndi/org.apache.karaf.jndi.core/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.jndi/org.apache.aries.jndi.api/${aries.jndi.api.version}</bundle>
@@ -180,6 +188,7 @@
     <feature name="jdbc" description="JDBC service and commands" version="${project.version}" resolver="(obr)">
         <details>JDBC support providing service, commands, and MBean.</details>
         <feature>transaction</feature>
+        <feature>aries-blueprint</feature>
         <bundle>mvn:commons-pool/commons-pool/${commons-pool.version}</bundle>
         <bundle>mvn:commons-dbcp/commons-dbcp/${commons-dbcp.version}</bundle>
         <bundle>mvn:org.apache.karaf.jdbc/org.apache.karaf.jdbc.core/${project.version}</bundle>
@@ -189,6 +198,7 @@
     <feature name="jms" description="JMS service and commands" version="${project.version}" resolver="(obr)">
         <details>JMS support provinding service, commands, and MBean.</details>
         <feature>transaction</feature>
+        <feature>aries-blueprint</feature>
         <bundle>mvn:org.apache.geronimo.specs/geronimo-jms_1.1_spec/${geronimo.jms-spec.version}</bundle>
         <bundle>mvn:org.apache.karaf.jms/org.apache.karaf.jms.core/${project.version}</bundle>
         <bundle>mvn:org.apache.karaf.jms/org.apache.karaf.jms.command/${project.version}</bundle>
@@ -212,6 +222,7 @@
         <details>Support of the Aries EBA archives</details>
         <!-- pre-requisites-->
         <feature version="${project.version}">obr</feature>
+        <feature>aries-blueprint</feature>
         <!-- common -->
         <bundle start-level="30">mvn:org.apache.aries.application/org.apache.aries.application.resolver.obr/${aries.application.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.application/org.apache.aries.application.install/${aries.application.version}</bundle>

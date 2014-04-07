@@ -51,6 +51,9 @@ import javax.xml.bind.annotation.XmlType;
  *         &lt;element name="configfile" type="{http://karaf.apache.org/xmlns/features/v1.0.0}configFile" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="feature" type="{http://karaf.apache.org/xmlns/features/v1.0.0}dependency" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="bundle" type="{http://karaf.apache.org/xmlns/features/v1.0.0}bundle" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="conditional" type="{http://karaf.apache.org/xmlns/features/v1.0.0}conditional" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="capability" type="{http://karaf.apache.org/xmlns/features/v1.0.0}capability" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="requirement" type="{http://karaf.apache.org/xmlns/features/v1.0.0}requirement" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *       &lt;attribute name="name" use="required" type="{http://karaf.apache.org/xmlns/features/v1.0.0}featureName" />
  *       &lt;attribute name="version" type="{http://www.w3.org/2001/XMLSchema}string" default="0.0.0" />
@@ -70,10 +73,12 @@ import javax.xml.bind.annotation.XmlType;
     "configfile",
     "feature",
     "bundle",
-    "conditional"
+    "conditional",
+    "capability",
+    "requirement"
 })
 public class Feature extends Content implements org.apache.karaf.features.Feature {
-    public static String SPLIT_FOR_NAME_AND_VERSION = "_split_for_name_and_version_";
+    public static String SPLIT_FOR_NAME_AND_VERSION = "/";
     public static String DEFAULT_VERSION = "0.0.0";
 
 
@@ -93,6 +98,8 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
     @XmlAttribute
     protected String region;
     protected List<Conditional> conditional;
+    protected List<Capability> capability;
+    protected List<Requirement> requirement;
 
     public Feature() {
     }
@@ -108,7 +115,7 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
 
 
     public static org.apache.karaf.features.Feature valueOf(String str) {
-    	if (str.indexOf(SPLIT_FOR_NAME_AND_VERSION) >= 0) {
+    	if (str.contains(SPLIT_FOR_NAME_AND_VERSION)) {
     		String strName = str.substring(0, str.indexOf(SPLIT_FOR_NAME_AND_VERSION));
         	String strVersion = str.substring(str.indexOf(SPLIT_FOR_NAME_AND_VERSION)
         			+ SPLIT_FOR_NAME_AND_VERSION.length(), str.length());
@@ -122,7 +129,7 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
 
 
     public String getId() {
-        return getName() + "-" + getVersion();
+        return getName() + SPLIT_FOR_NAME_AND_VERSION + getVersion();
     }
 
     /**
@@ -159,7 +166,7 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
      */
     public String getVersion() {
         if (version == null) {
-            return "0.0.0";
+            return DEFAULT_VERSION;
         } else {
             return version;
         }
@@ -300,7 +307,7 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
      * <p/>
      * <p/>
      * Objects of the following type(s) are allowed in the list
-     * {@link Dependency }
+     * {@link Conditional }
      */
     public List<Conditional> getConditional() {
         if (conditional == null) {
@@ -309,9 +316,22 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
         return this.conditional;
     }
 
+    public List<Capability> getCapabilities() {
+        if (capability == null) {
+            capability = new ArrayList<Capability>();
+        }
+        return this.capability;
+    }
+
+    public List<Requirement> getRequirements() {
+        if (requirement == null) {
+            requirement = new ArrayList<Requirement>();
+        }
+        return this.requirement;
+    }
+
     public String toString() {
-    	String ret = getName() + SPLIT_FOR_NAME_AND_VERSION + getVersion();
-    	return ret;
+    	return getId();
     }
 
     @Override

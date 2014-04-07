@@ -133,6 +133,6 @@ public interface FeaturesServiceMBean {
      * The item names in the CompositeData representing the event raised for
      * feature events within the OSGi container by this bean
      */
-    String[] REPOSITORY_EVENT = { REPOSITORY_NAME, REPOSITORY_URI, REPOSITORY_EVENT_EVENT_TYPE };
+    String[] REPOSITORY_EVENT = { REPOSITORY_URI, REPOSITORY_EVENT_EVENT_TYPE };
 
 }

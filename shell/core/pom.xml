@@ -165,6 +165,9 @@
                             org.apache.felix.service.command,
                             org.apache.felix.service.threadio,
                         </Private-Package>
+                        <Provide-Capability>
+                            service-reference;effective:=active;objectClass=org.apache.karaf.shell.api.console.SessionFactory
+                        </Provide-Capability>
                         <Bundle-Activator>
                             org.apache.karaf.shell.impl.console.osgi.Activator
                         </Bundle-Activator>

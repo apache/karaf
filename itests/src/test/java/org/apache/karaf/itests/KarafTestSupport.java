@@ -302,7 +302,7 @@ public class KarafTestSupport {
         }
     }
 
-    private void waitForService(String filter, long timeout) throws InvalidSyntaxException, InterruptedException {
+    protected void waitForService(String filter, long timeout) throws InvalidSyntaxException, InterruptedException {
         ServiceTracker<Object, Object> st = new ServiceTracker<Object, Object>(bundleContext, bundleContext.createFilter(filter), null);
         try {
             st.open();
@@ -351,23 +351,27 @@ public class KarafTestSupport {
     }
 
     public void assertFeatureInstalled(String featureName) throws Exception {
-        Feature[] features = featureService.listInstalledFeatures();
-        for (Feature feature : features) {
-            if (featureName.equals(feature.getName())) {
-                return;
-            }
+        String name;
+        String version;
+        if (featureName.contains("/")) {
+            name = featureName.substring(0, featureName.indexOf("/"));
+            version = featureName.substring(featureName.indexOf("/") + 1);
+        } else {
+            name = featureName;
+            version = null;
         }
-        Assert.fail("Feature " + featureName + " should be installed but is not");
+        assertFeatureInstalled(name, version);
     }
 
     public void assertFeatureInstalled(String featureName, String featureVersion) throws Exception {
+        Feature featureToAssert = featureService.getFeature(featureName, featureVersion);
         Feature[] features = featureService.listInstalledFeatures();
         for (Feature feature : features) {
-            if (featureName.equals(feature.getName()) && featureVersion.equals(feature.getVersion())) {
+            if (featureToAssert.equals(feature)) {
                 return;
             }
         }
-        Assert.fail("Feature " + featureName + "/" + featureVersion + " should be installed but is not");
+        Assert.fail("Feature " + featureName + (featureVersion != null ? "/" + featureVersion : "") + " should be installed but is not");
     }
 
     public void assertFeaturesInstalled(String ... expectedFeatures) throws Exception {
@@ -412,24 +416,28 @@ public class KarafTestSupport {
     }
 
     protected void installAssertAndUninstallFeature(String feature, String version) throws Exception {
-        Set<Feature> featuresBefore = new HashSet<Feature>(Arrays.asList(featureService.listInstalledFeatures()));
-        try {
-            featureService.installFeature(feature, version);
-            assertFeatureInstalled(feature, version);
-        } finally {
-            uninstallNewFeatures(featuresBefore);
-        }
+        installAssertAndUninstallFeatures(feature + "/" + version);
     }
 
     protected void installAssertAndUninstallFeatures(String... feature) throws Exception {
-    	Set<Feature> featuresBefore = new HashSet<Feature>(Arrays.asList(featureService.listInstalledFeatures()));
+        boolean success = false;
     	try {
 			for (String curFeature : feature) {
 				featureService.installFeature(curFeature);
 			    assertFeatureInstalled(curFeature);
 			}
+            success = true;
 		} finally {
-			uninstallNewFeatures(featuresBefore);
+            for (String curFeature : feature) {
+                System.out.println("Uninstalling " + curFeature);
+                try {
+                    featureService.uninstallFeature(curFeature);
+                } catch (Exception e) {
+                    if (success) {
+                        throw e;
+                    }
+                }
+            }
 		}
     }
 

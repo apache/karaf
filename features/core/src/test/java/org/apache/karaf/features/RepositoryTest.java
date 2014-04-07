@@ -19,7 +19,9 @@ package org.apache.karaf.features;
 import java.net.URI;
 
 import junit.framework.TestCase;
-import org.apache.karaf.features.internal.RepositoryImpl;
+import org.apache.karaf.features.internal.resolver.FeatureResource;
+import org.apache.karaf.features.internal.service.RepositoryImpl;
+import org.osgi.resource.Resource;
 
 
 public class RepositoryTest extends TestCase {
@@ -107,7 +109,25 @@ public class RepositoryTest extends TestCase {
         assertEquals(true, features[2].getConfigurationFiles().get(0).isOverride());
         assertEquals("cfloc", features[2].getConfigurationFiles().get(0).getLocation());
     }
-    
+
+    public void testLoadRepoWithCapabilitiesAndRequirement() throws Exception {
+        RepositoryImpl r = new RepositoryImpl(getClass().getResource("repo3.xml").toURI());
+        // Check features
+        Feature[] features = r.getFeatures();
+        assertNotNull(features);
+        assertEquals(1, features.length);
+        assertNotNull(features[0]);
+        assertEquals("f1", features[0].getName());
+        assertEquals(1, features[0].getCapabilities().size());
+        assertEquals("cap", features[0].getCapabilities().get(0).getValue().trim());
+        assertEquals(1, features[0].getRequirements().size());
+        assertEquals("req", features[0].getRequirements().get(0).getValue().trim());
+
+        Resource res = FeatureResource.build(features[0], null, null);
+        assertEquals(1, res.getCapabilities("cap").size());
+        assertEquals(1, res.getRequirements("req").size());
+    }
+
     public void testShowWrongUriInException() throws Exception {
         String uri = "src/test/resources/org/apache/karaf/shell/features/repo1.xml";
         RepositoryImpl r = new RepositoryImpl(new URI(uri));

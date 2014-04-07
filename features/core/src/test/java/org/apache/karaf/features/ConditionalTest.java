@@ -16,15 +16,14 @@
  */
 package org.apache.karaf.features;
 
-import java.net.URI;
 import junit.framework.TestCase;
-import org.apache.karaf.features.internal.RepositoryImpl;
+import org.apache.karaf.features.internal.service.RepositoryImpl;
 
 
 public class ConditionalTest extends TestCase {
 
     public void testLoad() throws Exception {
-        RepositoryImpl r = new RepositoryImpl(getClass().getResource("internal/f06.xml").toURI());
+        RepositoryImpl r = new RepositoryImpl(getClass().getResource("internal/service/f06.xml").toURI());
         // Check repo
         Feature[] features = r.getFeatures();
         assertNotNull(features);

@@ -272,8 +272,6 @@ public class FeaturesPlugin extends AbstractWebConsolePlugin {
             jw.array();
             for (Repository r : repositories) {
                 jw.object();
-                jw.key("name");
-                jw.value(r.getName());
                 jw.key("url");
                 String uri = r.getURI().toString();
                 jw.value(uri);

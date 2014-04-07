@@ -65,6 +65,11 @@
             <artifactId>org.apache.karaf.util</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.resolver</artifactId>
+            <scope>provided</scope>
+        </dependency>
 
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -107,15 +112,19 @@
                             org.apache.karaf.features.management.codec;
                                 -noimport:=true
                         </Export-Package>
+                        <Provide-Capability>
+                            service-reference;effective:=active;objectClass=org.apache.karaf.features.FeaturesService
+                        </Provide-Capability>
                         <Private-Package>
-                            org.apache.karaf.features.internal,
-                            org.apache.karaf.features.internal.model,
-                            org.apache.karaf.features.internal.osgi,
-                            org.apache.karaf.features.management.internal,
+                            org.apache.karaf.features.internal.*,
+                            org.apache.felix.resolver,
                             org.apache.felix.utils.version,
                             org.apache.felix.utils.manifest,
                             org.apache.karaf.util.collections,
-                            org.apache.karaf.util.tracker
+                            org.apache.karaf.util.json,
+                            org.apache.karaf.util.tracker,
+                            org.osgi.service.resolver,
+                            org.osgi.service.repository
                         </Private-Package>
                         <Bundle-Activator>
                             org.apache.karaf.features.internal.osgi.Activator

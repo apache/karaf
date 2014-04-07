@@ -70,7 +70,7 @@ public class ConditionalFeaturesTest extends KarafTestSupport {
     @Test
     public void testWebconsole() throws Exception {
         try {
-            featureService.uninstallFeature("eventadmin");
+            featureService.uninstallFeature("scr");
         } catch (Exception e) {
         }
         featureService.installFeature("webconsole");

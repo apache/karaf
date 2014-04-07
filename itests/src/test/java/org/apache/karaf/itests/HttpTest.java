@@ -26,6 +26,7 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
+import org.osgi.framework.Constants;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
@@ -38,6 +39,7 @@ public class HttpTest extends KarafTestSupport {
 
     @Test
     public void list() throws Exception {
+        waitForService("(objectClass=javax.servlet.ServletContext)", 5000);
         assertContains("/system/console", executeCommand("http:list"));
     }
 
