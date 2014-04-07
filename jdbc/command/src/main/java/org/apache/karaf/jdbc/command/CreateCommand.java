@@ -26,7 +26,7 @@ public class CreateCommand extends JdbcCommandSupport {
     @Argument(index = 0, name = "name", description = "The JDBC datasource name", required = true, multiValued = false)
     String name;
 
-    @Option(name = "-t", aliases = { "--type" }, description = "The JDBC datasource type (generic, MySQL, Oracle, Postgres, H2, HSQL, Derby)", required = false, multiValued = false)
+    @Option(name = "-t", aliases = { "--type" }, description = "The JDBC datasource type (generic, MySQL, Oracle, Postgres, H2, HSQL, Derby, MSSQL)", required = false, multiValued = false)
     String type;
 
     @Option(name = "-d", aliases = { "--driver" }, description = "The classname of the JDBC driver to use. NB: this option is used only the type generic", required = false, multiValued = false)
