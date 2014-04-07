@@ -107,12 +107,14 @@
 
     <properties>
         <aopalliance.bundle.version>1.0_6</aopalliance.bundle.version>
+        <ant.bundle.version>1.8.2_2</ant.bundle.version>
         <antlr.bundle.version>2.7.7_5</antlr.bundle.version>
         <asm.version>4.1</asm.version>
         <asm.springsource.version>1.5.3</asm.springsource.version>
         <aspectj.bundle.version>1.7.4_1</aspectj.bundle.version>
         <bndlib.version>2.2.0</bndlib.version>
         <cglib.bundle.version>2.2.2_1</cglib.bundle.version>
+        <cglib2.version>2.2.0</cglib2.version>
         <commons-beanutils.version>1.9.1</commons-beanutils.version>
         <commons-codec.version>1.9</commons-codec.version>
         <commons-collections.version>3.2.1</commons-collections.version>
@@ -125,7 +127,7 @@
         <dom4j.bundle.version>1.6.1_5</dom4j.bundle.version>
         <injection.bundle.version>1.0</injection.bundle.version>
         <jasypt.bundle.version>1.9.1_1</jasypt.bundle.version>
-        <javassist.version>3.9.0.GA</javassist.version>
+        <javassist.version>3.18.1-GA</javassist.version>
         <jetty.version>7.6.9.v20130131</jetty.version>
         <junit.version>4.10</junit.version>
         <junit.bundle.version>4.10_1</junit.bundle.version>
@@ -158,6 +160,8 @@
         <hibernate.annotations.version>3.4.0.GA</hibernate.annotations.version>
         <hibernate.ejb.version>3.4.0.GA</hibernate.ejb.version>
         <hibernate3.version>3.3.2.GA</hibernate3.version>
+        <hibernate42.version>4.2.7.Final</hibernate42.version>
+        <hibernate43.version>4.3.1.Final</hibernate43.version>
         <hibernate.validator.version>5.0.3.Final</hibernate.validator.version>
 
         <aries.application.version>1.0.0</aries.application.version>
