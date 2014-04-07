@@ -97,6 +97,7 @@ public class ShellCommandFactory implements CommandFactory {
         }
 
         public void start(final Environment env) throws IOException {
+            int exitStatus = 0;
             try {
                 final CommandSession session = commandProcessor.createSession(in, new PrintStream(out), new PrintStream(err));
                 session.put("SCOPE", "shell:osgi:*");
@@ -129,6 +130,7 @@ public class ShellCommandFactory implements CommandFactory {
                         session.getConsole().println(session.format(result, Converter.INSPECT));
                     }
                 } catch (Throwable t) {
+                    exitStatus = 1;
                     try {
                         boolean isCommandNotFound = "org.apache.felix.gogo.runtime.CommandNotFoundException".equals(t.getClass().getName());
                         if (isCommandNotFound) {
@@ -149,7 +151,7 @@ public class ShellCommandFactory implements CommandFactory {
                                     .fg(Ansi.Color.DEFAULT).toString();
                             session.getConsole().println(str);
                         }
-                        if ( getBoolean(session, Console.PRINT_STACK_TRACES)) {
+                        if (getBoolean(session, Console.PRINT_STACK_TRACES)) {
                             session.getConsole().print(Ansi.ansi().fg(Ansi.Color.RED).toString());
                             t.printStackTrace(session.getConsole());
                             session.getConsole().print(Ansi.ansi().fg(Ansi.Color.DEFAULT).toString());
@@ -166,10 +168,11 @@ public class ShellCommandFactory implements CommandFactory {
                     }
                 }
             } catch (Exception e) {
+                exitStatus = 1;
                 throw (IOException) new IOException("Unable to start shell").initCause(e);
             } finally {
                 close(in, out, err);
-                callback.onExit(0);
+                callback.onExit(exitStatus);
             }
         }
 
