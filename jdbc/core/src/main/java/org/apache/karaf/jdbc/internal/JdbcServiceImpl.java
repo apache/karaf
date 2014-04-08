@@ -39,6 +39,7 @@ public class JdbcServiceImpl implements JdbcService {
         H2("mvn:com.h2database/h2/", "1.3.163", "datasource-h2.xml"),
         HSQL("mvn:org.hsqldb/hsqldb/", "2.3.2", "datasource-hsql.xml"),
         MYSQL("mvn:mysql/mysql-connector-java/", "5.1.18", "datasource-mysql.xml"),
+        MSSQL("wrap:mvn:net.sourceforge.jtds/jtds/", "1.2.4", "datasource-mssql.xml"),
         ORACLE("wrap:mvn:ojdbc/ojdbc/", "11.2.0.2.0", "datasource-oracle.xml"),
         POSTGRES("wrap:mvn:postgresql/postgresql/", "9.1-901.jdbc4", "datasource-postgres.xml");
 
