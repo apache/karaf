@@ -37,7 +37,7 @@ public interface JdbcMBean {
      * Create a JDBC datasource.
      *
      * @param name the JDBC datasource name.
-     * @param type the JDBC datasource type (generic, MySQL, Oracle, Postgres, H2, HSQL, Derby).
+     * @param type the JDBC datasource type (generic, MySQL, MSSQL, Oracle, Postgres, H2, HSQL, Derby).
      * @param driver the JDBC datasource driver class name (can be null).
      * @param version the target JDBC driver version (can be null).
      * @param url the JDBC URL.
