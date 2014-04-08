@@ -485,7 +485,9 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
                         BundleInfo bundleInfo = state.bundleInfos.get(bundleId);
                         if (bundleInfo == null || bundleInfo.isStart()) {
                             try {
-                                b.start();
+                                if (!options.contains(Option.NoAutoStartBundles)) {
+                                    b.start();
+                                }
                             } catch (BundleException be) {
                                 String msg = format("Could not start bundle %s in feature(s) %s: %s", b.getLocation(), getFeaturesContainingBundleList(b), be.getMessage());
                                 throw new Exception(msg, be);
