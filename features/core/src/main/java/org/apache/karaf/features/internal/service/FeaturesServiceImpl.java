@@ -73,6 +73,7 @@ import org.osgi.framework.wiring.BundleRequirement;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.FrameworkWiring;
 import org.osgi.resource.Resource;
+import org.osgi.resource.Wire;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -541,9 +542,11 @@ public class FeaturesServiceImpl implements FeaturesService {
 
     public void doAddFeatures(Set<String> features, EnumSet<Option> options) throws Exception {
         Set<String> required;
+        Set<String> installed;
         Set<Long> managed;
         synchronized (lock) {
             required = new HashSet<String>(state.features);
+            installed = new HashSet<String>(state.installedFeatures);
             managed = new HashSet<Long>(state.managedBundles);
         }
         List<String> featuresToAdd = new ArrayList<String>();
@@ -569,14 +572,16 @@ public class FeaturesServiceImpl implements FeaturesService {
         }
         print(sb.toString(), options.contains(Option.Verbose));
         required.addAll(featuresToAdd);
-        doInstallFeaturesInThread(required, managed, options);
+        doInstallFeaturesInThread(required, installed, managed, options);
     }
 
     public void doRemoveFeatures(Set<String> features, EnumSet<Option> options) throws Exception {
         Set<String> required;
+        Set<String> installed;
         Set<Long> managed;
         synchronized (lock) {
             required = new HashSet<String>(state.features);
+            installed = new HashSet<String>(state.installedFeatures);
             managed = new HashSet<Long>(state.managedBundles);
         }
         List<String> featuresToRemove = new ArrayList<String>();
@@ -622,7 +627,7 @@ public class FeaturesServiceImpl implements FeaturesService {
         }
         print(sb.toString(), options.contains(Option.Verbose));
         required.removeAll(featuresToRemove);
-        doInstallFeaturesInThread(required, managed, options);
+        doInstallFeaturesInThread(required, installed, managed, options);
     }
 
     protected String normalize(String feature) {
@@ -642,6 +647,7 @@ public class FeaturesServiceImpl implements FeaturesService {
      * to bundles not being started after the refresh.
      */
     public void doInstallFeaturesInThread(final Set<String> features,
+                                          final Set<String> installed,
                                           final Set<Long> managed,
                                           final EnumSet<Option> options) throws Exception {
         ExecutorService executor = Executors.newCachedThreadPool();
@@ -649,7 +655,7 @@ public class FeaturesServiceImpl implements FeaturesService {
             executor.submit(new Callable<Object>() {
                 @Override
                 public Object call() throws Exception {
-                    doInstallFeatures(features, managed, options);
+                    doInstallFeatures(features, installed, managed, options);
                     return null;
                 }
             }).get();
@@ -669,7 +675,11 @@ public class FeaturesServiceImpl implements FeaturesService {
         }
     }
 
-    public void doInstallFeatures(Set<String> features, Set<Long> managed, EnumSet<Option> options) throws Exception {
+    public void doInstallFeatures(Set<String> features,    // all request features
+                                  Set<String> installed,   // installed features
+                                  Set<Long> managed,       // currently managed bundles
+                                  EnumSet<Option> options  // installation options
+                    ) throws Exception {
         // TODO: make this configurable  through ConfigAdmin
         // TODO: this needs to be tested a bit
         // TODO: note that this only applies to managed and updateable bundles
@@ -719,7 +729,8 @@ public class FeaturesServiceImpl implements FeaturesService {
                          Collections.<String>emptySet(),
                          overrides,
                          Collections.<String>emptySet());
-        Collection<Resource> allResources = builder.resolve(systemBundles, false);
+        Map<Resource, List<Wire>> resolution = builder.resolve(systemBundles, false);
+        Collection<Resource> allResources = resolution.keySet();
         Map<String, StreamProvider> providers = builder.getProviders();
 
         // Install conditionals
@@ -762,7 +773,8 @@ public class FeaturesServiceImpl implements FeaturesService {
                              Collections.<String>emptySet(),
                              overrides,
                              Collections.<String>emptySet());
-            allResources = builder.resolve(systemBundles, false);
+            resolution = builder.resolve(systemBundles, false);
+            allResources = resolution.keySet();
             providers = builder.getProviders();
         }
 
@@ -784,6 +796,22 @@ public class FeaturesServiceImpl implements FeaturesService {
             }
         }
 
+        // TODO: handle bundleInfo.isStart()
+
+        // Get all resources that will be used to satisfy the old features set
+        Set<Resource> resourceLinkedToOldFeatures = new HashSet<Resource>();
+        if (noStart) {
+            for (Resource resource : resolution.keySet()) {
+                String name = FeatureNamespace.getName(resource);
+                if (name != null) {
+                    Version version = FeatureNamespace.getVersion(resource);
+                    String id = version != null ? name + "/" + version : name;
+                    if (installed.contains(id)) {
+                        addTransitive(resource, resourceLinkedToOldFeatures, resolution);
+                    }
+                }
+            }
+        }
 
         //
         // Compute deployment
@@ -878,7 +906,9 @@ public class FeaturesServiceImpl implements FeaturesService {
                 InputStream is = getBundleInputStream(resource, providers);
                 Bundle bundle = systemBundleContext.installBundle(uri, is);
                 managed.add(bundle.getBundleId());
-                toStart.add(bundle);
+                if (!noStart || resourceLinkedToOldFeatures.contains(resource)) {
+                    toStart.add(bundle);
+                }
                 deployment.resToBnd.put(resource, bundle);
                 // save a checksum of installed snapshot bundle
                 if (isUpdateable(resource) && !deployment.newCheckums.containsKey(bundle.getLocation())) {
@@ -989,9 +1019,7 @@ public class FeaturesServiceImpl implements FeaturesService {
                 for (Bundle bundle : bs) {
                     LOGGER.info("  " + bundle.getSymbolicName() + " / " + bundle.getVersion());
                     try {
-                        if (!noStart) {
-                            bundle.start();
-                        }
+                        bundle.start();
                     } catch (BundleException e) {
                         exceptions.add(e);
                     }
@@ -1004,6 +1032,14 @@ public class FeaturesServiceImpl implements FeaturesService {
         }
 
         print("Done.", verbose);
+    }
+
+    private void addTransitive(Resource resource, Set<Resource> resources, Map<Resource, List<Wire>> resolution) {
+        if (resources.add(resource)) {
+            for (Wire wire : resolution.get(resource)) {
+                addTransitive(wire.getProvider(), resources, resolution);
+            }
+        }
     }
 
     protected BundleInfo mergeBundleInfo(BundleInfo bi, BundleInfo oldBi) {

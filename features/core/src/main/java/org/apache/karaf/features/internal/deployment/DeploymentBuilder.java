@@ -153,7 +153,7 @@ public class DeploymentBuilder {
         return resources;
     }
 
-    public Collection<Resource> resolve(List<Resource> systemBundles,
+    public Map<Resource, List<Wire>> resolve(List<Resource> systemBundles,
                                         boolean resolveOptionalImports) throws ResolutionException {
         // Resolve
         for (int i = 0; i < systemBundles.size(); i++) {
@@ -171,8 +171,7 @@ public class DeploymentBuilder {
                 new AggregateRepository(repos),
                 resolveOptionalImports);
 
-        Map<Resource, List<Wire>> resolution = resolver.resolve(context);
-        return resolution.keySet();
+        return resolver.resolve(context);
     }
 
     public void requireFeature(String feature, ResourceImpl resource) throws IOException {
