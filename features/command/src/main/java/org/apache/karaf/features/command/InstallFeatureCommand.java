@@ -40,6 +40,8 @@ public class InstallFeatureCommand extends FeaturesCommandSupport {
     boolean noClean;
     @Option(name = "-r", aliases = "--no-auto-refresh", description = "Do not automatically refresh bundles", required = false, multiValued = false)
     boolean noRefresh;
+    @Option(name = "-s", aliases = "--no-auto-start", description = "Do not start the bundles", required = false, multiValued = false)
+    boolean noStart;
     @Option(name = "-v", aliases = "--verbose", description = "Explain what is being done", required = false, multiValued = false)
     boolean verbose;
 
@@ -55,6 +57,9 @@ public class InstallFeatureCommand extends FeaturesCommandSupport {
                 version = DEFAULT_VERSION;
     	    }
             EnumSet<FeaturesService.Option> options = EnumSet.of(FeaturesService.Option.PrintBundlesToRefresh);
+            if (noStart) {
+                options.add(FeaturesService.Option.NoAutoStartBundles);
+            }
             if (noRefresh) {
                 options.add(FeaturesService.Option.NoAutoRefreshBundles);
             }

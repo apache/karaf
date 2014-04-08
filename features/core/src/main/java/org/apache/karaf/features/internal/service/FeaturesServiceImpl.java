@@ -686,6 +686,8 @@ public class FeaturesServiceImpl implements FeaturesService {
         // TODO: make this configurable at runtime
         boolean noRefresh = false;
 
+        boolean noStart = options.contains(Option.NoAutoStartBundles);
+
         // TODO: make this configurable  through ConfigAdmin
         // TODO: though opening it as some important effects
         String featureResolutionRange = "${range;[====,====]}";
@@ -987,7 +989,9 @@ public class FeaturesServiceImpl implements FeaturesService {
                 for (Bundle bundle : bs) {
                     LOGGER.info("  " + bundle.getSymbolicName() + " / " + bundle.getVersion());
                     try {
-                        bundle.start();
+                        if (!noStart) {
+                            bundle.start();
+                        }
                     } catch (BundleException e) {
                         exceptions.add(e);
                     }

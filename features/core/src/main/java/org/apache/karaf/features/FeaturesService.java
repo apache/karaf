@@ -29,6 +29,7 @@ public interface FeaturesService {
         NoCleanIfFailure,
         PrintBundlesToRefresh,
         NoAutoRefreshBundles,
+        NoAutoStartBundles,
         ContinueBatchOnFailure,
         Verbose
     }
