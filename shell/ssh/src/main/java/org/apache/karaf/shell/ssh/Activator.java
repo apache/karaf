@@ -122,7 +122,7 @@ public class Activator extends BaseActivator implements ManagedService {
         String sshHost        = getString("sshHost", "0.0.0.0");
         long sshIdleTimeout   = getLong("sshIdleTimeout", 1800000);
         String sshRealm       = getString("sshRealm", "karaf");
-        String hostKey        = getString("hostKey", System.getProperty("karaf.base") + "/etc/host.key");
+        String hostKey        = getString("hostKey", System.getProperty("karaf.etc") + "/host.key");
         String authMethods    = getString("authMethods", "keyboard-interactive,password,publickey");
         int keySize           = getInt("keySize", 1024);
         String algorithm      = getString("algorithm", "DSA");

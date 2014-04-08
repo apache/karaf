@@ -31,7 +31,7 @@ import java.util.Map;
 
 public class KarafRealm implements JaasRealm, ManagedService {
 
-    private static final String KARAF_ETC = System.getProperty("karaf.base") + File.separatorChar + "etc";
+    private static final String KARAF_ETC = System.getProperty("karaf.etc");
     private static final String REALM = "karaf";
     private static final String PROPERTIES_MODULE = "org.apache.karaf.jaas.modules.properties.PropertiesLoginModule";
     private static final String PUBLIC_KEY_MODULE = "org.apache.karaf.jaas.modules.publickey.PublickeyLoginModule";
