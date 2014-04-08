@@ -429,7 +429,9 @@ public class FeaturesServiceImpl implements FeaturesService {
             }
             for (Bundle b : bundlesSortedByStartLvl) {
                 LOGGER.debug("Starting bundle: {}", b.getSymbolicName());
-                startBundle(state, b);
+                if (!options.contains(Option.NoAutoStartBundles)) {
+                    startBundle(state, b);
+                }
             }
             // Clean up for batch
             if (!options.contains(Option.NoCleanIfFailure)) {

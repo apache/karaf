@@ -150,6 +150,20 @@ public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
         featuresService.installFeature(name, options);
     }
 
+    public void installFeature(String name, boolean noClean, boolean noRefresh, boolean noStart) throws Exception {
+        EnumSet<org.apache.karaf.features.FeaturesService.Option> options = EnumSet.noneOf(org.apache.karaf.features.FeaturesService.Option.class);
+        if (noClean) {
+            options.add(org.apache.karaf.features.FeaturesService.Option.NoCleanIfFailure);
+        }
+        if (noRefresh) {
+            options.add(org.apache.karaf.features.FeaturesService.Option.NoAutoRefreshBundles);
+        }
+        if (noStart) {
+            options.add(org.apache.karaf.features.FeaturesService.Option.NoAutoStartBundles);
+        }
+        featuresService.installFeature(name, options);
+    }
+
     public void installFeature(String name, String version) throws Exception {
         featuresService.installFeature(name, version);
     }
@@ -161,6 +175,20 @@ public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
         }
         if (noRefresh) {
             options.add(org.apache.karaf.features.FeaturesService.Option.NoAutoRefreshBundles);
+        }
+        featuresService.installFeature(name, version, options);
+    }
+
+    public void installFeature(String name, String version, boolean noClean, boolean noRefresh, boolean noStart) throws Exception {
+        EnumSet<org.apache.karaf.features.FeaturesService.Option> options = EnumSet.noneOf(org.apache.karaf.features.FeaturesService.Option.class);
+        if (noClean) {
+            options.add(org.apache.karaf.features.FeaturesService.Option.NoCleanIfFailure);
+        }
+        if (noRefresh) {
+            options.add(org.apache.karaf.features.FeaturesService.Option.NoAutoRefreshBundles);
+        }
+        if (noStart) {
+            options.add(org.apache.karaf.features.FeaturesService.Option.NoAutoStartBundles);
         }
         featuresService.installFeature(name, version, options);
     }
