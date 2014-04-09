@@ -197,12 +197,19 @@ public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHan
 
         context.getComponentDefinitionRegistry().registerComponentDefinition(commandService);
 
-        // create the sub-shell action
-        createSubShell(context, scope);
+        String subShellName = null;
+        if (scope != null && !scope.isEmpty()) {
+            // if it's shell 1.0.0 schema and scope is contained in the descriptor itself
+            subShellName = ".subshell." + scope;
+        }
+
+        if (subShellName == null || !context.getComponentDefinitionRegistry().containsComponentDefinition(subShellName)) {
+            // if the scope is unknown or if the scope has not been defined before
+            createSubShell(context, scope, subShellName);
+        }
     }
 
-    private void createSubShell(ParserContext context, String scope) {
-        String subShellName = ".subshell." + scope;
+    private void createSubShell(ParserContext context, String scope, String subShellName) {
         if (context.getComponentDefinitionRegistry().containsComponentDefinition(subShellName)) {
             return;
         }
