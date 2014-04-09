@@ -29,13 +29,90 @@
     </parent>
 
     <groupId>org.apache.karaf.diagnostic</groupId>
-    <artifactId>diagnostic</artifactId>
-    <packaging>pom</packaging>
-    <name>Apache Karaf :: Diagnostic</name>
+    <artifactId>org.apache.karaf.diagnostic.core</artifactId>
+    <packaging>bundle</packaging>
+    <name>Apache Karaf :: Diagnostic :: Core</name>
+    <description>Core implementation using Karaf diagnostic using the diagnostic common services</description>
 
-    <modules>
-        <module>core</module>
-        <module>command</module>
-    </modules>
+    <properties>
+        <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.apache.karaf.util</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>org.apache.karaf.features.core</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.karaf.shell</groupId>
+            <artifactId>org.apache.karaf.shell.core</artifactId>
+            <optional>true</optional>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/*.info</include>
+                </includes>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <configuration>
+                    <instructions>
+                        <Export-Package>
+                            org.apache.karaf.diagnostic.command,
+                        	org.apache.karaf.diagnostic.core,
+                            org.apache.karaf.diagnostic.core.common
+                       	</Export-Package>
+                        <Import-Package>
+                            com.sun.management*;resolution:=optional,
+                            *
+                        </Import-Package>
+                        <Private-Package>
+                            org.apache.karaf.diagnostic.core.internal,
+                            org.apache.karaf.diagnostic.core.internal.osgi,
+                            org.apache.karaf.util.tracker
+                        </Private-Package>
+                        <Bundle-Activator>
+                            org.apache.karaf.diagnostic.core.internal.osgi.Activator
+                        </Bundle-Activator>
+                        <Karaf-Commands>*</Karaf-Commands>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
