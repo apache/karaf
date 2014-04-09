@@ -10,7 +10,7 @@
         (the "License"); you may not use this file except in compliance with
         the License.  You may obtain a copy of the License at
 
-           http://www.apache.org/licenses/LICENSE-2.0
+            http://www.apache.org/licenses/LICENSE-2.0
 
         Unless required by applicable law or agreed to in writing, software
         distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,13 +29,172 @@
     </parent>
 
     <groupId>org.apache.karaf.instance</groupId>
-    <artifactId>instance</artifactId>
-    <packaging>pom</packaging>
-    <name>Apache Karaf :: Instance</name>
+    <artifactId>org.apache.karaf.instance.core</artifactId>
+    <packaging>bundle</packaging>
+    <name>Apache Karaf :: Instance :: Core</name>
+    <description>Core implementation of the instance feature to manipulate Karaf child instances.</description>
 
-    <modules>
-        <module>core</module>
-        <module>command</module>
-    </modules>
+    <properties>
+        <appendedResourcesDirectory>${project.basedir}/../../etc/appended-resources</appendedResourcesDirectory>
+    </properties>
 
+    <dependencies>
+
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.utils</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.karaf.shell</groupId>
+            <artifactId>org.apache.karaf.shell.core</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.apache.karaf.util</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>org.apache.karaf.features.core</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-jdk14</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/*.info</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>${project.build.directory}/generated-resources</directory>
+                <includes>
+                    <include>**/*.*</include>
+                </includes>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-resources</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/generated-resources/org/apache/karaf/instance/</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.basedir}/../assemblies/features/framework/src/main/resources</directory>
+                                    <excludes>
+                                        <exclude>**/org.apache.karaf.management.cfg</exclude>
+                                        <exclude>**/org.apache.karaf.shell.cfg</exclude>
+                                        <exclude>**/system.properties</exclude>
+                                    </excludes>
+                                </resource>
+                                <resource>
+                                    <directory>${project.basedir}/../assemblies/features/framework/src/main/filtered-resources</directory>
+                                    <filtering>true</filtering>
+                                    <includes>
+                                        <include>**/*.properties</include>
+                                        <include>**/*.cfg</include>
+                                        <include>**/*.xml</include>
+                                        <include>**/*.info</include>
+                                    </includes>
+                                </resource>
+                                <resource>
+                                	<directory>${project.basedir}/../assemblies/features/framework/src/main/snapshot</directory>
+                                	<filtering>true</filtering>
+                                    <includes>
+                                        <include>**/*.cfg</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <configuration>
+                    <instructions>
+                        <Export-Package>
+                            org.apache.karaf.instance.core
+                        </Export-Package>
+                        <!-- We have to avoid importing instance.core.internal and jansi
+                             as Execute.java accesses the InstanceServiceImpl and jansi
+                             (but only outside OSGi) -->
+                        <Import-Package>
+                            !org.apache.karaf.shell.impl.action.command,
+                            !org.apache.karaf.instance.core.internal,
+                            *
+                        </Import-Package>
+                        <Provide-Capability>
+                            service-reference;effective:=active;objectClass=org.apache.karaf.instance.core.InstanceService
+                        </Provide-Capability>
+                        <Private-Package>
+                            org.apache.karaf.jpm,
+                            org.apache.karaf.jpm.impl,
+                            org.apache.karaf.instance.main,
+                            org.apache.karaf.instance.command,
+                            org.apache.karaf.instance.command.completers,
+                            org.apache.karaf.instance.core.internal,
+                            org.apache.karaf.instance.core.internal.osgi,
+                            org.apache.felix.utils.properties;-split-package:=merge-first,
+                            org.apache.karaf.util.locks,
+                            org.apache.karaf.util.tracker
+                        </Private-Package>
+                        <Bundle-Activator>
+                            org.apache.karaf.instance.core.internal.osgi.Activator
+                        </Bundle-Activator>
+                        <Karaf-Commands>org.apache.karaf.instance.command.*</Karaf-Commands>
+                    </instructions>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                  <excludes>
+                    <!-- this is not a unit test but an application used for testing -->
+                    <exclude>**/MainTest.java</exclude>
+                  </excludes>
+                </configuration>
+           </plugin>
+        </plugins>
+    </build>
 </project>
