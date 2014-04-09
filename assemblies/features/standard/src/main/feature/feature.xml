@@ -125,7 +125,6 @@
 
     <feature name="config" description="Provide OSGi ConfigAdmin support" version="${project.version}">
         <bundle start-level="30" start="true">mvn:org.apache.karaf.config/org.apache.karaf.config.core/${project.version}</bundle>
-        <bundle start-level="30" start="true">mvn:org.apache.karaf.config/org.apache.karaf.config.command/${project.version}</bundle>
     </feature>
 
     <feature name="diagnostic" description="Provide Diagnostic support" version="${project.version}">
