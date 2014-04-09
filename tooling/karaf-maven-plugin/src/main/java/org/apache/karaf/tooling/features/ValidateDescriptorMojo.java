@@ -17,6 +17,7 @@
  */
 package org.apache.karaf.tooling.features;
 
+import aQute.bnd.header.OSGiHeader;
 import org.apache.felix.utils.manifest.Clause;
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Dependency;
@@ -344,12 +345,7 @@ public class ValidateDescriptorMojo extends MojoSupport {
         }
 
         String packages = (String) properties.get(jreVersion);
-        for (String pkg : packages.split(";")) {
-            systemExports.add(pkg.trim());
-        }
-        for (String pkg : packages.split(",")) {
-            systemExports.add(pkg.trim());
-        }
+        systemExports.addAll(OSGiHeader.parseHeader(packages).keySet());
     }
 
     /*
