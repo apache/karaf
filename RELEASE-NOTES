@@ -14,6 +14,63 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+ 
+                    Apache Karaf 2.3.5
+                    ==================
+
+  Overview
+  --------
+
+  This is an update patch for Apache Karaf 2.3.4, containing many bug fixes, dependency updates, and improvements. New feature highlights include: monitoring etc/user.properties with Felix fileInstall, and adding MSSQL datasource type. It is recommended that users update their deployment after reviewing the changelog below.
+
+  Changelog
+  ---------
+
+** Bug
+    * [KARAF-1074] - features-maven-plugin collects wrong artifacts
+    * [KARAF-1075] - pid is set as the factorypid when creating a factory configuration instance from the feature file
+    * [KARAF-1146] - features-maven-plugin collects wrong artifacts
+    * [KARAF-2391] - Add generic capabilities provided by the framework
+    * [KARAF-2674] - Provide Spring 4.0.2.RELEASE_1 feature
+    * [KARAF-2781] - Enable rat profile by default
+    * [KARAF-2785] - First line of sorted input not printed in sort command
+    * [KARAF-2797] - Allow FeaturesService to specify options during feature uninstallation
+    * [KARAF-2798] - jdbc:create -i -t HSQL installs wrong db-engine
+    * [KARAF-2799] - shutdown (-f) does not work 
+    * [KARAF-2806] - The bundle:watch commands fails when updating o.a.k.bundle.core bundle
+    * [KARAF-2819] - datasource-xxx.xml contains wrong password after jdbc:create
+    * [KARAF-2820] - features-maven-plugin:add-features-to-repo adds wrong transitive feature version
+    * [KARAF-2821] - features-maven-plugin:add-features-to-repo is broken in 2.3.5-SNAPSHOT
+    * [KARAF-2826] - Upgrade to Pax Web 1.1.17
+    * [KARAF-2837] - The config.properties in features-maven-plugin is out-of-data.
+    * [KARAF-2838] - features-maven-plugin:add-features-to-repo can't compare SNAPSHOT versions in 2.3.5-SNAPSHOT
+    * [KARAF-2840] - Creating child container using admin service should use KARAF_OPTS
+    * [KARAF-2880] - jms:* commands don't consume messages
+    * [KARAF-2898] - Maven feature validation did not accept WAR bundle (WAB) artifacts.
+
+** Dependency upgrade
+    * [KARAF-2769] - Upgrade to Pax CDI 0.7.0
+    * [KARAF-2853] - Upgrade to Apache POM 14
+    * [KARAF-2867] - Upgrade to Pax Web 1.1.17
+    * [KARAF-2869] - Upgrade to Pax CDI 0.7.0
+
+** Improvement
+    * [KARAF-2623] - Karaf client script only returns a non zero status if there is exception
+    * [KARAF-2638] - Speed up karaf startup a bit by setting the specs timeout to 0
+    * [KARAF-2791] - AddFeaturesToRepoMojo should support read version from dependency features
+    * [KARAF-2801] - Fix camel-extras features repository URL
+    * [KARAF-2808] - Child containers should be able to have additional libs on the classpath
+    * [KARAF-2832] - Fix exception when using the features-maven-plugin with non osgi compliant features version
+    * [KARAF-2842] - Add an option to feature:install to install the bundles without starting it
+    * [KARAF-2870] - Karaf Enterprise: Backport Hibernate 4.x to Karaf 2.3.x
+
+** New Feature
+    * [KARAF-2760] - monitor etc/user.properties change with felix FileInstaller
+    * [KARAF-2848] - Add MSSQL datasource type
+
+** Task
+    * [KARAF-2767] - Update to commons-fileupload 1.3.1
+
 
                     Apache Karaf 2.3.4
                     ==================
