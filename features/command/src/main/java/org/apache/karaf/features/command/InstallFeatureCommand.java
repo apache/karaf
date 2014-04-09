@@ -44,6 +44,8 @@ public class InstallFeatureCommand extends FeaturesCommandSupport {
     boolean noStart;
     @Option(name = "-v", aliases = "--verbose", description = "Explain what is being done", required = false, multiValued = false)
     boolean verbose;
+    @Option(name = "-t", aliases = "--simulate", description = "Perform a simulation only", required = false, multiValued = false)
+    boolean simulate;
 
     protected void doExecute(FeaturesService admin) throws Exception {
         for (String feature : features) {
@@ -57,6 +59,9 @@ public class InstallFeatureCommand extends FeaturesCommandSupport {
                 version = DEFAULT_VERSION;
     	    }
             EnumSet<FeaturesService.Option> options = EnumSet.of(FeaturesService.Option.PrintBundlesToRefresh);
+            if (simulate) {
+                options.add(FeaturesService.Option.Simulate);
+            }
             if (noStart) {
                 options.add(FeaturesService.Option.NoAutoStartBundles);
             }

@@ -33,6 +33,7 @@ public interface FeaturesService {
         NoAutoRefreshBundles,
         NoAutoStartBundles,
         ContinueBatchOnFailure,
+        Simulate,
         Verbose
     }
 

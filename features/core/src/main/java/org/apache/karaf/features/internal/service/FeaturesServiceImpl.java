@@ -735,6 +735,7 @@ public class FeaturesServiceImpl implements FeaturesService {
         boolean noRefresh = options.contains(Option.NoAutoRefreshBundles);
         boolean noStart = options.contains(Option.NoAutoStartBundles);
         boolean verbose = options.contains(Option.Verbose);
+        boolean simulate = options.contains(Option.Simulate);
 
         // Get a list of resolved and unmanaged bundles to use as capabilities during resolution
         List<Resource> systemBundles = new ArrayList<Resource>();
@@ -818,8 +819,11 @@ public class FeaturesServiceImpl implements FeaturesService {
         //
         // Log deployment
         //
-        logDeployment(deployment);
+        logDeployment(deployment, verbose);
 
+        if (simulate) {
+            return;
+        }
 
         Set<Bundle> toRefresh = new HashSet<Bundle>();
         Set<Bundle> toStart = new HashSet<Bundle>();
@@ -1054,24 +1058,24 @@ public class FeaturesServiceImpl implements FeaturesService {
         }
     }
 
-    protected void logDeployment(Deployment deployment) {
-        LOGGER.info("Changes to perform:");
+    protected void logDeployment(Deployment deployment, boolean verbose) {
+        print("Changes to perform:", verbose);
         if (!deployment.toDelete.isEmpty()) {
-            LOGGER.info("  Bundles to uninstall:");
+            print("  Bundles to uninstall:", verbose);
             for (Bundle bundle : deployment.toDelete) {
-                LOGGER.info("    " + bundle.getSymbolicName() + " / " + bundle.getVersion());
+                print("    " + bundle.getSymbolicName() + " / " + bundle.getVersion(), verbose);
             }
         }
         if (!deployment.toUpdate.isEmpty()) {
-            LOGGER.info("  Bundles to update:");
+            print("  Bundles to update:", verbose);
             for (Map.Entry<Bundle, Resource> entry : deployment.toUpdate.entrySet()) {
-                LOGGER.info("    " + entry.getKey().getSymbolicName() + " / " + entry.getKey().getVersion() + " with " + UriNamespace.getUri(entry.getValue()));
+                print("    " + entry.getKey().getSymbolicName() + " / " + entry.getKey().getVersion() + " with " + UriNamespace.getUri(entry.getValue()), verbose);
             }
         }
         if (!deployment.toInstall.isEmpty()) {
-            LOGGER.info("  Bundles to install:");
+            print("  Bundles to install:", verbose);
             for (Resource resource : deployment.toInstall) {
-                LOGGER.info("    " + UriNamespace.getUri(resource));
+                print("    " + UriNamespace.getUri(resource), verbose);
             }
         }
     }
