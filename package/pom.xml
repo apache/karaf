@@ -10,7 +10,7 @@
         (the "License"); you may not use this file except in compliance with
         the License.  You may obtain a copy of the License at
 
-            http://www.apache.org/licenses/LICENSE-2.0
+           http://www.apache.org/licenses/LICENSE-2.0
 
         Unless required by applicable law or agreed to in writing, software
         distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,13 +29,102 @@
     </parent>
 
     <groupId>org.apache.karaf.package</groupId>
-    <artifactId>package</artifactId>
-    <packaging>pom</packaging>
-    <name>Apache Karaf :: Bundle</name>
+    <artifactId>org.apache.karaf.package.core</artifactId>
+    <packaging>bundle</packaging>
+    <name>Apache Karaf :: Package :: Core</name>
+    <description>Package Services and API</description>
 
-    <modules>
-        <module>core</module>
-        <module>command</module>
-    </modules>
+    <properties>
+        <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
+    </properties>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>org.apache.aries.blueprint</groupId>
+            <artifactId>org.apache.aries.blueprint.api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.utils</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.apache.karaf.util</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.karaf.shell</groupId>
+            <artifactId>org.apache.karaf.shell.core</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-jdk14</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/*.info</include>
+                </includes>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <configuration>
+                    <instructions>
+                        <Export-Package>
+                            org.apache.karaf.packages.core;-noimport:=true
+                        </Export-Package>
+                        <Private-Package>
+                            org.apache.karaf.packages.command,
+                            org.apache.karaf.packages.core.internal,
+                            org.apache.karaf.packages.core.internal.osgi,
+                            org.apache.karaf.util.tracker,
+                            org.apache.felix.utils.version,
+                            org.apache.felix.utils.manifest
+                        </Private-Package>
+                        <Bundle-Activator>
+                            org.apache.karaf.packages.core.internal.osgi.Activator
+                        </Bundle-Activator>
+                        <Karaf-Commands>
+                            org.apache.karaf.packages.command
+                        </Karaf-Commands>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
