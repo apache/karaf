@@ -937,6 +937,7 @@ public class FeaturesServiceImpl implements FeaturesService {
                 if (!noStart || resourceLinkedToOldFeatures.contains(resource)) {
                     toStart.add(bundle);
                 }
+                toRefresh.add(bundle);
                 deployment.resToBnd.put(resource, bundle);
                 // save a checksum of installed snapshot bundle
                 if (UPDATE_SNAPSHOTS_CRC.equals(updateSnaphots)

@@ -162,6 +162,7 @@
                     <bootFeatures>
                         <feature>aries-blueprint</feature>
                         <feature>shell-compat</feature>
+                        <feature>shell</feature>
                         <feature>jaas</feature>
                         <feature>ssh</feature>
                         <feature>management</feature>
