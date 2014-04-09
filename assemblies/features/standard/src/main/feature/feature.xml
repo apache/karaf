@@ -161,7 +161,6 @@
 
     <feature name="service" description="Provide Service support" version="${project.version}">
         <bundle start-level="30" start="true">mvn:org.apache.karaf.service/org.apache.karaf.service.core/${project.version}</bundle>
-        <bundle start-level="30" start="true">mvn:org.apache.karaf.service/org.apache.karaf.service.command/${project.version}</bundle>
     </feature>
 
     <feature name="system" description="Provide System support" version="${project.version}">

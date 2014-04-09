@@ -48,6 +48,11 @@
             <artifactId>org.apache.karaf.util</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.shell</groupId>
+            <artifactId>org.apache.karaf.shell.core</artifactId>
+            <optional>true</optional>
+        </dependency>
 
     </dependencies>
 
@@ -77,6 +82,7 @@
                             org.apache.karaf.service.core;-noimport:=true
                         </Export-Package>
                         <Private-Package>
+                            org.apache.karaf.service.command,
                             org.apache.karaf.service.core.internal,
                             org.apache.karaf.service.core.internal.osgi,
                             org.apache.karaf.util.tracker
@@ -84,6 +90,7 @@
                         <Bundle-Activator>
                             org.apache.karaf.service.core.internal.osgi.Activator
                         </Bundle-Activator>
+                        <Karaf-Commands>org.apache.karaf.service.command</Karaf-Commands>
                     </instructions>
                 </configuration>
             </plugin>
