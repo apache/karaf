@@ -79,6 +79,12 @@
         </dependency>
 
         <dependency>
+            <groupId>org.apache.karaf.shell</groupId>
+            <artifactId>org.apache.karaf.shell.core</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-jdk14</artifactId>
             <scope>test</scope>
@@ -111,6 +117,7 @@
                             org.apache.karaf.bundle.core;-noimport:=true
                         </Export-Package>
                         <Private-Package>
+                            org.apache.karaf.bundle.command*,
                             org.apache.karaf.bundle.core.internal,
                             org.apache.karaf.bundle.core.internal.osgi,
                             org.apache.karaf.util.maven,
@@ -121,6 +128,7 @@
                         <Bundle-Activator>
                             org.apache.karaf.bundle.core.internal.osgi.Activator
                         </Bundle-Activator>
+                        <Karaf-Commands>org.apache.karaf.bundle.command.*</Karaf-Commands>
                     </instructions>
                 </configuration>
             </plugin>
