@@ -41,9 +41,15 @@ public class UninstallFeatureCommand extends FeaturesCommandSupport {
     @Option(name = "-v", aliases = "--verbose", description = "Explain what is being done", required = false, multiValued = false)
     boolean verbose;
 
+    @Option(name = "-t", aliases = "--simulate", description = "Perform a simulation only", required = false, multiValued = false)
+    boolean simulate;
+
     protected void doExecute(FeaturesService admin) throws Exception {
         // iterate in the provided feature
         EnumSet<FeaturesService.Option> options = EnumSet.noneOf(FeaturesService.Option.class);
+        if (simulate) {
+            options.add(FeaturesService.Option.Simulate);
+        }
         if (noRefresh) {
             options.add(FeaturesService.Option.NoAutoRefreshBundles);
         }

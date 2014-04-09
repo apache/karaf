@@ -42,8 +42,6 @@ import java.util.concurrent.Executors;
 import org.apache.felix.utils.version.VersionRange;
 import org.apache.felix.utils.version.VersionTable;
 import org.apache.karaf.features.BundleInfo;
-import org.apache.karaf.features.Conditional;
-import org.apache.karaf.features.Dependency;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeatureEvent;
 import org.apache.karaf.features.FeaturesListener;
@@ -85,17 +83,57 @@ import static org.apache.felix.resolver.Util.getVersion;
  */
 public class FeaturesServiceImpl implements FeaturesService {
 
+    public static final String UPDATE_SNAPSHOTS_NONE = "none";
+    public static final String UPDATE_SNAPSHOTS_CRC = "crc";
+    public static final String UPDATE_SNAPSHOTS_ALWAYS = "always";
+    public static final String DEFAULT_UPDATE_SNAPSHOTS = UPDATE_SNAPSHOTS_CRC;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(FeaturesServiceImpl.class);
     private static final String SNAPSHOT = "SNAPSHOT";
     private static final String MAVEN = "mvn:";
 
+    /**
+     * Our bundle.
+     * We use it to check bundle operations affecting our own bundle.
+     */
     private final Bundle bundle;
+
+    /**
+     * The system bundle context.
+     * For all bundles related operations, we use the system bundle context
+     * to allow this bundle to be stopped and still allow the deployment to
+     * take place.
+     */
     private final BundleContext systemBundleContext;
+    /**
+     * Used to load and save the {@link State} of this service.
+     */
     private final StateStorage storage;
     private final FeatureFinder featureFinder;
     private final EventAdminListener eventAdminListener;
     private final FeatureConfigInstaller configInstaller;
     private final String overrides;
+    public static final String DEFAULT_FEATURE_RESOLUTION_RANGE = "${range;[====,====]}";
+    /**
+     * Range to use when a version is specified on a feature dependency.
+     * The default is {@link FeaturesServiceImpl#DEFAULT_FEATURE_RESOLUTION_RANGE}
+     */
+    private final String featureResolutionRange;
+    public static final String DEFAULT_BUNDLE_UPDATE_RANGE = "${range;[==,=+)}";
+    /**
+     * Range to use when verifying if a bundle should be updated or
+     * new bundle installed.
+     * The default is {@link FeaturesServiceImpl#DEFAULT_BUNDLE_UPDATE_RANGE}
+     */
+    private final String bundleUpdateRange;
+    /**
+     * Use CRC to check snapshot bundles and update them if changed.
+     * Either:
+     *   - none : never update snapshots
+     *   - always : always update snapshots
+     *   - crc : use CRC to detect changes
+     */
+    private final String updateSnaphots;
 
     private final List<FeaturesListener> listeners = new CopyOnWriteArrayIdentityList<FeaturesListener>();
 
@@ -106,14 +144,16 @@ public class FeaturesServiceImpl implements FeaturesService {
     private Map<String, Map<String, Feature>> featureCache;
 
 
-
     public FeaturesServiceImpl(Bundle bundle,
                                BundleContext systemBundleContext,
                                StateStorage storage,
                                FeatureFinder featureFinder,
                                EventAdminListener eventAdminListener,
                                FeatureConfigInstaller configInstaller,
-                               String overrides) {
+                               String overrides,
+                               String featureResolutionRange,
+                               String bundleUpdateRange,
+                               String updateSnaphots) {
         this.bundle = bundle;
         this.systemBundleContext = systemBundleContext;
         this.storage = storage;
@@ -121,6 +161,9 @@ public class FeaturesServiceImpl implements FeaturesService {
         this.eventAdminListener = eventAdminListener;
         this.configInstaller = configInstaller;
         this.overrides = overrides;
+        this.featureResolutionRange = featureResolutionRange;
+        this.bundleUpdateRange = bundleUpdateRange;
+        this.updateSnaphots = updateSnaphots;
         loadState();
     }
 
@@ -141,6 +184,12 @@ public class FeaturesServiceImpl implements FeaturesService {
     protected void saveState() {
         try {
             synchronized (lock) {
+                // Make sure we don't store bundle checksums if
+                // it has been disabled through configadmin
+                // so that we don't keep out-of-date checksums.
+                if (!UPDATE_SNAPSHOTS_CRC.equalsIgnoreCase(updateSnaphots)) {
+                    state.bundleChecksums.clear();
+                }
                 storage.save(state);
             }
         } catch (IOException e) {
@@ -680,32 +729,13 @@ public class FeaturesServiceImpl implements FeaturesService {
                                   Set<Long> managed,       // currently managed bundles
                                   EnumSet<Option> options  // installation options
                     ) throws Exception {
-        // TODO: make this configurable  through ConfigAdmin
-        // TODO: this needs to be tested a bit
-        // TODO: note that this only applies to managed and updateable bundles
-        boolean updateSnaphots = true;
 
-        // TODO: make this configurable at runtime
-        // TODO: note that integration tests will fail if set to false
-        // TODO: but I think it should be the default anyway
-        boolean noRefreshUnmanaged = true;
-
-        // TODO: make this configurable at runtime
-        boolean noRefreshManaged = true;
-
-        // TODO: make this configurable at runtime
-        boolean noRefresh = false;
-
+        boolean noRefreshUnmanaged = options.contains(Option.NoAutoRefreshUnmanagedBundles);
+        boolean noRefreshManaged = options.contains(Option.NoAutoRefreshManagedBundles);
+        boolean noRefresh = options.contains(Option.NoAutoRefreshBundles);
         boolean noStart = options.contains(Option.NoAutoStartBundles);
-
-        // TODO: make this configurable  through ConfigAdmin
-        // TODO: though opening it as some important effects
-        String featureResolutionRange = "${range;[====,====]}";
-
-        // TODO: make this configurable through ConfigAdmin
-        String bundleUpdateRange = "${range;[==,=+)}";
-
         boolean verbose = options.contains(Option.Verbose);
+        boolean simulate = options.contains(Option.Simulate);
 
         // Get a list of resolved and unmanaged bundles to use as capabilities during resolution
         List<Resource> systemBundles = new ArrayList<Resource>();
@@ -736,48 +766,6 @@ public class FeaturesServiceImpl implements FeaturesService {
         // Install conditionals
         List<String> installedFeatureIds = getFeatureIds(allResources);
         List<Feature> installedFeatures = getFeatures(repositories, installedFeatureIds);
-
-        // TODO: is there are a way to use fragments or on-demand resources
-        // TODO: in the resolver to use a single resolution ?
-        boolean resolveAgain = false;
-        Set<String> featuresAndConditionals = new TreeSet<String>(features);
-        for (Feature feature : installedFeatures) {
-            for (Conditional cond : feature.getConditional()) {
-                boolean condSatisfied = true;
-                for (Dependency dep : cond.getCondition()) {
-                    boolean depSatisfied = false;
-                    String name = dep.getName();
-                    VersionRange range = new VersionRange(dep.getVersion(), false, true);
-                    for (Feature f : installedFeatures) {
-                        if (f.getName().equals(name)) {
-                            if (range.contains(VersionTable.getVersion(f.getVersion()))) {
-                                depSatisfied = true;
-                                break;
-                            }
-                        }
-                    }
-                    if (!depSatisfied) {
-                        condSatisfied = false;
-                        break;
-                    }
-                }
-                if (condSatisfied) {
-                    featuresAndConditionals.add(cond.asFeature(feature.getName(), feature.getVersion()).getId());
-                    resolveAgain = true;
-                }
-            }
-        }
-        if (resolveAgain) {
-            builder.download(featuresAndConditionals,
-                             Collections.<String>emptySet(),
-                             Collections.<String>emptySet(),
-                             overrides,
-                             Collections.<String>emptySet());
-            resolution = builder.resolve(systemBundles, false);
-            allResources = resolution.keySet();
-            providers = builder.getProviders();
-        }
-
 
         //
         // Compute list of installable resources (those with uris)
@@ -820,7 +808,7 @@ public class FeaturesServiceImpl implements FeaturesService {
         synchronized (lock) {
             bundleChecksums.putAll(state.bundleChecksums);
         }
-        Deployment deployment = computeDeployment(managed, updateSnaphots, bundles, providers, resources, bundleChecksums, bundleUpdateRange);
+        Deployment deployment = computeDeployment(managed, bundles, providers, resources, bundleChecksums);
 
         if (deployment.toDelete.isEmpty() &&
                 deployment.toUpdate.isEmpty() &&
@@ -831,8 +819,11 @@ public class FeaturesServiceImpl implements FeaturesService {
         //
         // Log deployment
         //
-        logDeployment(deployment);
+        logDeployment(deployment, verbose);
 
+        if (simulate) {
+            return;
+        }
 
         Set<Bundle> toRefresh = new HashSet<Bundle>();
         Set<Bundle> toStart = new HashSet<Bundle>();
@@ -911,7 +902,8 @@ public class FeaturesServiceImpl implements FeaturesService {
                 }
                 deployment.resToBnd.put(resource, bundle);
                 // save a checksum of installed snapshot bundle
-                if (isUpdateable(resource) && !deployment.newCheckums.containsKey(bundle.getLocation())) {
+                if (UPDATE_SNAPSHOTS_CRC.equals(updateSnaphots)
+                        && isUpdateable(resource) && !deployment.newCheckums.containsKey(bundle.getLocation())) {
                     deployment.newCheckums.put(bundle.getLocation(), ChecksumUtils.checksum(getBundleInputStream(resource, providers)));
                 }
                 BundleInfo bi = bundleInfos.get(uri);
@@ -1031,6 +1023,8 @@ public class FeaturesServiceImpl implements FeaturesService {
             }
         }
 
+        // TODO: call listeners for features added and removed
+
         print("Done.", verbose);
     }
 
@@ -1064,36 +1058,34 @@ public class FeaturesServiceImpl implements FeaturesService {
         }
     }
 
-    protected void logDeployment(Deployment deployment) {
-        LOGGER.info("Changes to perform:");
+    protected void logDeployment(Deployment deployment, boolean verbose) {
+        print("Changes to perform:", verbose);
         if (!deployment.toDelete.isEmpty()) {
-            LOGGER.info("  Bundles to uninstall:");
+            print("  Bundles to uninstall:", verbose);
             for (Bundle bundle : deployment.toDelete) {
-                LOGGER.info("    " + bundle.getSymbolicName() + " / " + bundle.getVersion());
+                print("    " + bundle.getSymbolicName() + " / " + bundle.getVersion(), verbose);
             }
         }
         if (!deployment.toUpdate.isEmpty()) {
-            LOGGER.info("  Bundles to update:");
+            print("  Bundles to update:", verbose);
             for (Map.Entry<Bundle, Resource> entry : deployment.toUpdate.entrySet()) {
-                LOGGER.info("    " + entry.getKey().getSymbolicName() + " / " + entry.getKey().getVersion() + " with " + UriNamespace.getUri(entry.getValue()));
+                print("    " + entry.getKey().getSymbolicName() + " / " + entry.getKey().getVersion() + " with " + UriNamespace.getUri(entry.getValue()), verbose);
             }
         }
         if (!deployment.toInstall.isEmpty()) {
-            LOGGER.info("  Bundles to install:");
+            print("  Bundles to install:", verbose);
             for (Resource resource : deployment.toInstall) {
-                LOGGER.info("    " + UriNamespace.getUri(resource));
+                print("    " + UriNamespace.getUri(resource), verbose);
             }
         }
     }
 
     protected Deployment computeDeployment(
                                 Set<Long> managed,
-                                boolean updateSnaphots,
                                 Bundle[] bundles,
                                 Map<String, StreamProvider> providers,
                                 List<Resource> resources,
-                                Map<String, Long> bundleChecksums,
-                                String bundleUpdateRange) throws IOException {
+                                Map<String, Long> bundleChecksums) throws IOException {
         Deployment deployment = new Deployment();
 
         // TODO: regions
@@ -1116,21 +1108,28 @@ public class FeaturesServiceImpl implements FeaturesService {
                 if (resource != null) {
                     // In case of snapshots, check if the snapshot is out of date
                     // and flag it as to update
-                    if (updateSnaphots && managed.contains(bundle.getBundleId()) && isUpdateable(resource)) {
-                        // if the checksum are different
-                        InputStream is = null;
-                        try {
-                            is = getBundleInputStream(resource, providers);
-                            long newCrc = ChecksumUtils.checksum(is);
-                            long oldCrc = bundleChecksums.containsKey(bundle.getLocation()) ? bundleChecksums.get(bundle.getLocation()) : 0l;
-                            if (newCrc != oldCrc) {
-                                LOGGER.debug("New snapshot available for " + bundle.getLocation());
-                                deployment.toUpdate.put(bundle, resource);
-                                deployment.newCheckums.put(bundle.getLocation(), newCrc);
-                            }
-                        } finally {
-                            if (is != null) {
-                                is.close();
+                    if (managed.contains(bundle.getBundleId()) && isUpdateable(resource)) {
+                        // Always update snapshots
+                        if (UPDATE_SNAPSHOTS_ALWAYS.equalsIgnoreCase(updateSnaphots)) {
+                            LOGGER.debug("Update snapshot for " + bundle.getLocation());
+                            deployment.toUpdate.put(bundle, resource);
+                        }
+                        else if (UPDATE_SNAPSHOTS_CRC.equalsIgnoreCase(updateSnaphots)) {
+                            // if the checksum are different
+                            InputStream is = null;
+                            try {
+                                is = getBundleInputStream(resource, providers);
+                                long newCrc = ChecksumUtils.checksum(is);
+                                long oldCrc = bundleChecksums.containsKey(bundle.getLocation()) ? bundleChecksums.get(bundle.getLocation()) : 0l;
+                                if (newCrc != oldCrc) {
+                                    LOGGER.debug("New snapshot available for " + bundle.getLocation());
+                                    deployment.toUpdate.put(bundle, resource);
+                                    deployment.newCheckums.put(bundle.getLocation(), newCrc);
+                                }
+                            } finally {
+                                if (is != null) {
+                                    is.close();
+                                }
                             }
                         }
                     }

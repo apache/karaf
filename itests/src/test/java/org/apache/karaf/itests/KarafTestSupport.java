@@ -34,6 +34,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
+import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -411,7 +412,7 @@ public class KarafTestSupport {
 	}
 
     protected void installAndAssertFeature(String feature) throws Exception {
-        featureService.installFeature(feature);
+        featureService.installFeature(feature, EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
         assertFeatureInstalled(feature);
     }
 
@@ -423,7 +424,7 @@ public class KarafTestSupport {
         boolean success = false;
     	try {
 			for (String curFeature : feature) {
-				featureService.installFeature(curFeature);
+				featureService.installFeature(curFeature, EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
 			    assertFeatureInstalled(curFeature);
 			}
             success = true;
@@ -431,7 +432,7 @@ public class KarafTestSupport {
             for (String curFeature : feature) {
                 System.out.println("Uninstalling " + curFeature);
                 try {
-                    featureService.uninstallFeature(curFeature);
+                    featureService.uninstallFeature(curFeature, EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
                 } catch (Exception e) {
                     if (success) {
                         throw e;
@@ -455,7 +456,8 @@ public class KarafTestSupport {
 			if (!featuresBefore.contains(curFeature)) {
 				try {
 					System.out.println("Uninstalling " + curFeature.getName());
-					featureService.uninstallFeature(curFeature.getName(), curFeature.getVersion());
+					featureService.uninstallFeature(curFeature.getName(), curFeature.getVersion(),
+                                                    EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
 				} catch (Exception e) {
 					LOG.error(e.getMessage(), e);
 				}
