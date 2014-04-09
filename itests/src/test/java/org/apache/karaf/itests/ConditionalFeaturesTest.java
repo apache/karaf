@@ -17,6 +17,9 @@
 package org.apache.karaf.itests;
 
 
+import java.util.EnumSet;
+
+import org.apache.karaf.features.FeaturesService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -58,22 +61,22 @@ public class ConditionalFeaturesTest extends KarafTestSupport {
     @Test
     public void testScr() throws Exception {
         //Remove management and install scr
-        featureService.uninstallFeature("management");
-        featureService.installFeature("scr");
+        featureService.uninstallFeature("management", EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
+        featureService.installFeature("scr", EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
         assertBundleNotInstalled("org.apache.karaf.scr.management");
 
         //Add management back
-        featureService.installFeature("management");
+        featureService.installFeature("management", EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
         assertBundleInstalled("org.apache.karaf.scr.management");
     }
 
     @Test
     public void testWebconsole() throws Exception {
         try {
-            featureService.uninstallFeature("scr");
+            featureService.uninstallFeature("scr", EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
         } catch (Exception e) {
         }
-        featureService.installFeature("webconsole");
+        featureService.installFeature("webconsole", EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
 
         assertBundleInstalled("org.apache.karaf.webconsole.features");
         assertBundleInstalled("org.apache.karaf.webconsole.instance");
@@ -84,14 +87,14 @@ public class ConditionalFeaturesTest extends KarafTestSupport {
 
         //Add eventadmin
         try {
-            featureService.installFeature("eventadmin");
+            featureService.installFeature("eventadmin", EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
         } catch (Exception ex) {
           //ignore as the eventadmin activator might throw an error.
         }
         assertBundleInstalled("org.apache.felix.webconsole.plugins.event");
 
         //Remove eventadmin
-        featureService.uninstallFeature("eventadmin");
+        featureService.uninstallFeature("eventadmin", EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
         assertBundleNotInstalled("org.apache.felix.webconsole.plugins.event");
     }
 }

@@ -28,6 +28,8 @@ public interface FeaturesService {
     enum Option {
         NoCleanIfFailure,
         PrintBundlesToRefresh,
+        NoAutoRefreshManagedBundles,
+        NoAutoRefreshUnmanagedBundles,
         NoAutoRefreshBundles,
         NoAutoStartBundles,
         ContinueBatchOnFailure,

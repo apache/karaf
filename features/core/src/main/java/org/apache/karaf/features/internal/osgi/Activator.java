@@ -49,6 +49,9 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 public class Activator extends BaseActivator {
 
+    public static final String FEATURES_REPOS_PID = "org.apache.karaf.features.repos";
+    public static final String FEATURES_SERVICE_CONFIG_FILE = "org.apache.karaf.features.cfg";
+
     private ServiceTracker<FeaturesListener, FeaturesListener> featuresListenerTracker;
     private FeaturesServiceImpl featuresService;
     private SingleServiceTracker<RegionsPersistence> regionsTracker;
@@ -65,7 +68,7 @@ public class Activator extends BaseActivator {
         trackService(ConfigurationAdmin.class);
 
         Properties configuration = new Properties();
-        File configFile = new File(System.getProperty("karaf.etc"), "org.apache.karaf.features.cfg");
+        File configFile = new File(System.getProperty("karaf.etc"), FEATURES_SERVICE_CONFIG_FILE);
         if (configFile.isFile() && configFile.canRead()) {
             try {
                 configuration.load(new FileReader(configFile));
@@ -86,7 +89,7 @@ public class Activator extends BaseActivator {
 
         FeatureFinder featureFinder = new FeatureFinder();
         Hashtable<String, Object> props = new Hashtable<String, Object>();
-        props.put(Constants.SERVICE_PID, "org.apache.karaf.features.repos");
+        props.put(Constants.SERVICE_PID, FEATURES_REPOS_PID);
         register(ManagedService.class, featureFinder, props);
 
         // TODO: region support
@@ -113,7 +116,10 @@ public class Activator extends BaseActivator {
         // TODO: honor respectStartLvlDuringFeatureStartup and respectStartLvlDuringFeatureUninstall
 //        boolean respectStartLvlDuringFeatureStartup = getBoolean("respectStartLvlDuringFeatureStartup", true);
 //        boolean respectStartLvlDuringFeatureUninstall = getBoolean("respectStartLvlDuringFeatureUninstall", true);
-        String overrides = getString("overrides", new File(System.getProperty("karaf.etc"), "overrides.properties").toString());
+        String overrides = getString("overrides", new File(System.getProperty("karaf.etc"), "overrides.properties").toURI().toString());
+        String featureResolutionRange = getString("featureResolutionRange", FeaturesServiceImpl.DEFAULT_FEATURE_RESOLUTION_RANGE);
+        String bundleUpdateRange = getString("bundleUpdateRange", FeaturesServiceImpl.DEFAULT_BUNDLE_UPDATE_RANGE);
+        String updateSnapshots = getString("updateSnapshots", FeaturesServiceImpl.DEFAULT_UPDATE_SNAPSHOTS);
         StateStorage stateStorage = new StateStorage() {
             @Override
             protected InputStream getInputStream() throws IOException {
@@ -144,7 +150,10 @@ public class Activator extends BaseActivator {
                                 featureFinder,
                                 eventAdminListener,
                                 configInstaller,
-                                overrides);
+                                overrides,
+                                featureResolutionRange,
+                                bundleUpdateRange,
+                                updateSnapshots);
         register(FeaturesService.class, featuresService);
 
         featuresListenerTracker = new ServiceTracker<FeaturesListener, FeaturesListener>(
