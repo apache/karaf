@@ -147,7 +147,6 @@
 
     <feature name="log" description="Provide Log support" version="${project.version}">
         <bundle start-level="30" start="true">mvn:org.apache.karaf.log/org.apache.karaf.log.core/${project.version}</bundle>
-        <bundle start-level="30" start="true">mvn:org.apache.karaf.log/org.apache.karaf.log.command/${project.version}</bundle>
     </feature>
 
     <feature name="region" description="Provide Region Support" version="${project.version}">

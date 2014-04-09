@@ -29,13 +29,94 @@
     </parent>
 
     <groupId>org.apache.karaf.log</groupId>
-    <artifactId>log</artifactId>
-    <packaging>pom</packaging>
-    <name>Apache Karaf :: Log</name>
+    <artifactId>org.apache.karaf.log.core</artifactId>
+    <packaging>bundle</packaging>
+    <name>Apache Karaf :: Log :: Core</name>
+    <description>Core Seervices and JMX MBean to manipulate the Karaf log layer</description>
 
-    <modules>
-        <module>core</module>
-        <module>command</module>
-    </modules>
+    <properties>
+        <appendedResourcesDirectory>${basedir}/../../../etc/appended-resources/</appendedResourcesDirectory>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.ops4j.pax.logging</groupId>
+            <artifactId>pax-logging-service</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.logging</groupId>
+            <artifactId>pax-logging-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.apache.karaf.util</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.shell</groupId>
+            <artifactId>org.apache.karaf.shell.core</artifactId>
+            <optional>true</optional>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/*.info</include>
+                </includes>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <configuration>
+                    <instructions>
+                        <Export-Package>
+                            org.apache.karaf.log.core
+                        </Export-Package>
+                        <Import-Package>
+                            *
+                        </Import-Package>
+                        <Private-Package>
+                            org.apache.karaf.log.command,
+                            org.apache.karaf.log.core.internal,
+                            org.apache.karaf.log.core.internal.layout,
+                            org.apache.karaf.log.core.internal.osgi,
+                            org.apache.karaf.util.tracker
+                        </Private-Package>
+                        <Bundle-Activator>
+                            org.apache.karaf.log.core.internal.osgi.Activator
+                        </Bundle-Activator>
+                        <Karaf-Commands>
+                            org.apache.karaf.log.command*
+                        </Karaf-Commands>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
