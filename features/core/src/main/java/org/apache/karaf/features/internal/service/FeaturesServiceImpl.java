@@ -737,48 +737,6 @@ public class FeaturesServiceImpl implements FeaturesService {
         List<String> installedFeatureIds = getFeatureIds(allResources);
         List<Feature> installedFeatures = getFeatures(repositories, installedFeatureIds);
 
-        // TODO: is there are a way to use fragments or on-demand resources
-        // TODO: in the resolver to use a single resolution ?
-        boolean resolveAgain = false;
-        Set<String> featuresAndConditionals = new TreeSet<String>(features);
-        for (Feature feature : installedFeatures) {
-            for (Conditional cond : feature.getConditional()) {
-                boolean condSatisfied = true;
-                for (Dependency dep : cond.getCondition()) {
-                    boolean depSatisfied = false;
-                    String name = dep.getName();
-                    VersionRange range = new VersionRange(dep.getVersion(), false, true);
-                    for (Feature f : installedFeatures) {
-                        if (f.getName().equals(name)) {
-                            if (range.contains(VersionTable.getVersion(f.getVersion()))) {
-                                depSatisfied = true;
-                                break;
-                            }
-                        }
-                    }
-                    if (!depSatisfied) {
-                        condSatisfied = false;
-                        break;
-                    }
-                }
-                if (condSatisfied) {
-                    featuresAndConditionals.add(cond.asFeature(feature.getName(), feature.getVersion()).getId());
-                    resolveAgain = true;
-                }
-            }
-        }
-        if (resolveAgain) {
-            builder.download(featuresAndConditionals,
-                             Collections.<String>emptySet(),
-                             Collections.<String>emptySet(),
-                             overrides,
-                             Collections.<String>emptySet());
-            resolution = builder.resolve(systemBundles, false);
-            allResources = resolution.keySet();
-            providers = builder.getProviders();
-        }
-
-
         //
         // Compute list of installable resources (those with uris)
         //

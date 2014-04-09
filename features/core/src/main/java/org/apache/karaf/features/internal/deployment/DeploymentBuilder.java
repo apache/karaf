@@ -81,6 +81,7 @@ public class DeploymentBuilder {
     Downloader downloader;
     ResourceImpl requirements;
     Map<String, Resource> resources;
+    Set<Resource> optionals;
     Map<String, StreamProvider> providers;
 
     Set<Feature> featuresToRegister = new HashSet<Feature>();
@@ -112,6 +113,7 @@ public class DeploymentBuilder {
                          Set<String> optionals)
                 throws IOException, MultiException, InterruptedException, ResolutionException, BundleException {
         this.resources = new ConcurrentHashMap<String, Resource>();
+        this.optionals = new HashSet<Resource>();
         this.providers = new ConcurrentHashMap<String, StreamProvider>();
         this.requirements = new ResourceImpl("dummy", "dummy", Version.emptyVersion);
         // First, gather all bundle resources
@@ -139,10 +141,13 @@ public class DeploymentBuilder {
         for (Feature feature : featuresToRegister) {
             Resource resource = FeatureResource.build(feature, featureRange, resources);
             resources.put("feature:" + feature.getName() + "/" + feature.getVersion(), resource);
+            for (Conditional cond : feature.getConditional()) {
+                this.optionals.add(FeatureResource.build(feature, cond, featureRange, resources));
+            }
         }
         // Build requirements
         for (String feature : features) {
-            requireFeature(feature, requirements);
+            requireFeature(feature);
         }
         for (String bundle : bundles) {
             requireResource(bundle);
@@ -167,14 +172,14 @@ public class DeploymentBuilder {
         ResolverImpl resolver = new ResolverImpl(new Slf4jResolverLog(LOGGER));
         ResolveContext context = new ResolveContextImpl(
                 Collections.<Resource>singleton(requirements),
-                Collections.<Resource>emptySet(),
+                this.optionals,
                 new AggregateRepository(repos),
                 resolveOptionalImports);
 
         return resolver.resolve(context);
     }
 
-    public void requireFeature(String feature, ResourceImpl resource) throws IOException {
+    public void requireFeature(String feature) throws IOException {
         // Find name and version range
         String[] split = feature.split("/");
         String name = split[0].trim();
@@ -188,8 +193,8 @@ public class DeploymentBuilder {
         attrs.put(IdentityNamespace.IDENTITY_NAMESPACE, name);
         attrs.put(IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE, FeatureNamespace.TYPE_FEATURE);
         attrs.put(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE, range);
-        resource.addRequirement(
-                new RequirementImpl(resource, IdentityNamespace.IDENTITY_NAMESPACE,
+        requirements.addRequirement(
+                new RequirementImpl(requirements, IdentityNamespace.IDENTITY_NAMESPACE,
                         Collections.<String, String>emptyMap(), attrs)
         );
     }
