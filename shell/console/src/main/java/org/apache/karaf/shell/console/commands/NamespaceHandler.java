@@ -182,49 +182,60 @@ public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHan
             commandService.addServiceProperty(createStringValue(context, "osgi.command.function"),
                                               getInvocationValue(context, "getName", action.getClassName()));
         }
-        
+
         context.getComponentDefinitionRegistry().registerComponentDefinition(commandService);
 
-        String subShellName = ".subshell." + scope;
-        if (!context.getComponentDefinitionRegistry().containsComponentDefinition(subShellName)) {
-            // create the sub-shell action
-            MutableBeanMetadata subShellAction = context.createMetadata(MutableBeanMetadata.class);
-            subShellAction.setRuntimeClass(SubShellAction.class);
-            subShellAction.setActivation(MutableBeanMetadata.ACTIVATION_LAZY);
-            subShellAction.setScope(MutableBeanMetadata.SCOPE_PROTOTYPE);
-            subShellAction.setId(getName());
-            if (scope != null && !scope.isEmpty()) {
-                // it's shell 1.0.0 schema, scope is contained in the descriptor itself
-                subShellAction.addProperty("subShell", createStringValue(context, scope));
-            } else {
-                // it's shell 1.1.0 schema, we inject the scope from the command
-                subShellAction.addProperty("subShell", getInvocationValue(context, "getScope", action.getClassName()));
-            }
-            context.getComponentDefinitionRegistry().registerComponentDefinition(subShellAction);
-            // generate the sub-shell command
-            MutableBeanMetadata subShellCommand = context.createMetadata(MutableBeanMetadata.class);
-            subShellCommand.setId(getName());
-            subShellCommand.setRuntimeClass(BlueprintCommand.class);
-            subShellCommand.addProperty(BLUEPRINT_CONTAINER, createRef(context, BLUEPRINT_CONTAINER));
-            subShellCommand.addProperty(BLUEPRINT_CONVERTER, createRef(context, BLUEPRINT_CONVERTER));
-            subShellCommand.addProperty(ACTION_ID, createIdRef(context, subShellAction.getId()));
-            context.getComponentDefinitionRegistry().registerComponentDefinition(subShellCommand);
-            // generate the sub-shell OSGi service
-            MutableServiceMetadata subShellCommandService = context.createMetadata(MutableServiceMetadata.class);
-            subShellCommandService.setActivation(MutableServiceMetadata.ACTIVATION_LAZY);
-            subShellCommandService.setId(subShellName);
-            subShellCommandService.setAutoExport(ServiceMetadata.AUTO_EXPORT_ALL_CLASSES);
-            subShellCommandService.setServiceComponent(subShellCommand);
-            subShellCommandService.addServiceProperty(createStringValue(context, "osgi.command.scope"), createStringValue(context, "*"));
-            if (scope != null && !scope.isEmpty()) {
-                // it's shell 1.0.0 schema, scope is contained in the descriptor itself
-                subShellCommandService.addServiceProperty(createStringValue(context, "osgi.command.function"), createStringValue(context, scope));
-            } else {
-                // it's shell 1.1.0 schema, we inject the scope from the command
-                subShellCommandService.addServiceProperty(createStringValue(context, "osgi.command.function"), getInvocationValue(context, "getScope", action.getClassName()));
-            }
-            context.getComponentDefinitionRegistry().registerComponentDefinition(subShellCommandService);
+        String subShellName = null;
+        if (scope != null && !scope.isEmpty()) {
+            // if it's shell 1.0.0 schema and scope is contained in the descriptor itself
+            subShellName = ".subshell." + scope;
         }
+
+        if (subShellName == null || !context.getComponentDefinitionRegistry().containsComponentDefinition(subShellName)) {
+            // if the scope is unknown or if the scope has not been defined before
+            setupSubShell(context, action, scope, subShellName);
+
+        }
+    }
+
+    private void setupSubShell(ParserContext context, MutableBeanMetadata action, String scope, String subShellName) {
+        // create the sub-shell action
+        MutableBeanMetadata subShellAction = context.createMetadata(MutableBeanMetadata.class);
+        subShellAction.setRuntimeClass(SubShellAction.class);
+        subShellAction.setActivation(MutableBeanMetadata.ACTIVATION_LAZY);
+        subShellAction.setScope(MutableBeanMetadata.SCOPE_PROTOTYPE);
+        subShellAction.setId(getName());
+        if (scope != null && !scope.isEmpty()) {
+            // it's shell 1.0.0 schema, scope is contained in the descriptor itself
+            subShellAction.addProperty("subShell", createStringValue(context, scope));
+        } else {
+            // it's shell 1.1.0 schema, we inject the scope from the command
+            subShellAction.addProperty("subShell", getInvocationValue(context, "getScope", action.getClassName()));
+        }
+        context.getComponentDefinitionRegistry().registerComponentDefinition(subShellAction);
+        // generate the sub-shell command
+        MutableBeanMetadata subShellCommand = context.createMetadata(MutableBeanMetadata.class);
+        subShellCommand.setId(getName());
+        subShellCommand.setRuntimeClass(BlueprintCommand.class);
+        subShellCommand.addProperty(BLUEPRINT_CONTAINER, createRef(context, BLUEPRINT_CONTAINER));
+        subShellCommand.addProperty(BLUEPRINT_CONVERTER, createRef(context, BLUEPRINT_CONVERTER));
+        subShellCommand.addProperty(ACTION_ID, createIdRef(context, subShellAction.getId()));
+        context.getComponentDefinitionRegistry().registerComponentDefinition(subShellCommand);
+        // generate the sub-shell OSGi service
+        MutableServiceMetadata subShellCommandService = context.createMetadata(MutableServiceMetadata.class);
+        subShellCommandService.setActivation(MutableServiceMetadata.ACTIVATION_LAZY);
+        subShellCommandService.setId(subShellName == null ? getName() : subShellName);
+        subShellCommandService.setAutoExport(ServiceMetadata.AUTO_EXPORT_ALL_CLASSES);
+        subShellCommandService.setServiceComponent(subShellCommand);
+        subShellCommandService.addServiceProperty(createStringValue(context, "osgi.command.scope"), createStringValue(context, "*"));
+        if (scope != null && !scope.isEmpty()) {
+            // it's shell 1.0.0 schema, scope is contained in the descriptor itself
+            subShellCommandService.addServiceProperty(createStringValue(context, "osgi.command.function"), createStringValue(context, scope));
+        } else {
+            // it's shell 1.1.0 schema, we inject the scope from the command
+            subShellCommandService.addServiceProperty(createStringValue(context, "osgi.command.function"), getInvocationValue(context, "getScope", action.getClassName()));
+        }
+        context.getComponentDefinitionRegistry().registerComponentDefinition(subShellCommandService);
     }
 
     private MutableBeanMetadata getInvocationValue(ParserContext context, String method, String className) {
