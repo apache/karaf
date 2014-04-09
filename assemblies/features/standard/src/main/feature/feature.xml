@@ -195,7 +195,6 @@
 
     <feature name="kar" description="Provide KAR (KARaf archive) support" version="${project.version}" resolver="(obr)">
         <bundle start-level="30">mvn:org.apache.karaf.kar/org.apache.karaf.kar.core/${project.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.karaf.kar/org.apache.karaf.kar.command/${project.version}</bundle>
     </feature>
 
     <feature name="webconsole" description="Base support of the Karaf WebConsole" version="${project.version}" resolver="(obr)">

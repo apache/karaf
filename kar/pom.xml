@@ -29,13 +29,99 @@
     </parent>
 
     <groupId>org.apache.karaf.kar</groupId>
-    <artifactId>kar</artifactId>
-    <packaging>pom</packaging>
-    <name>Apache Karaf :: KAR</name>
+    <artifactId>org.apache.karaf.kar.core</artifactId>
+    <packaging>bundle</packaging>
+    <name>Apache Karaf :: KAR :: Core</name>
+    <description>This bundle provides core implementation of the KAR management service.</description>
 
-    <modules>
-        <module>core</module>
-        <module>command</module>
-    </modules>
+    <properties>
+        <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.utils</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.apache.karaf.util</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.swissbox</groupId>
+            <artifactId>pax-swissbox-property</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>org.apache.karaf.features.core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.shell</groupId>
+            <artifactId>org.apache.karaf.shell.core</artifactId>
+            <optional>true</optional>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/*.info</include>
+                </includes>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <configuration>
+                    <instructions>
+                        <Export-Package>
+                            org.apache.karaf.kar
+                        </Export-Package>
+                        <Private-Package>
+                            org.apache.karaf.kar.command,
+                            org.apache.karaf.kar.command.completers,
+                            org.apache.karaf.kar.internal,
+                            org.apache.karaf.kar.internal.osgi,
+                            org.apache.karaf.util.maven,
+                            org.apache.karaf.util.tracker,
+                            org.apache.felix.utils.properties
+                        </Private-Package>
+                        <Bundle-Activator>
+                            org.apache.karaf.kar.internal.osgi.Activator
+                        </Bundle-Activator>
+                        <Karaf-Commands>org.apache.karaf.kar.command.*</Karaf-Commands>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
