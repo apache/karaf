@@ -95,10 +95,9 @@ public class BootFeaturesInstaller {
                 }
             }
 
-            List<Set<String>> stagedFeatureNames = parseBootFeatures(features);
-            List<Set<Feature>> stagedFeatures = toFeatureSetList(stagedFeatureNames);
-            for (Set<Feature> features : stagedFeatures) {
-                featuresService.installFeatures(features, EnumSet.of(FeaturesService.Option.NoCleanIfFailure, FeaturesService.Option.ContinueBatchOnFailure));
+            List<Set<String>> stagedFeatures = parseBootFeatures(features);
+            for (Set<String> features : stagedFeatures) {
+                featuresService.installFeatures(features, EnumSet.of(FeaturesService.Option.NoFailOnFeatureNotFound));
             }
             featuresService.bootDone();
             publishBootFinished();
@@ -116,27 +115,6 @@ public class BootFeaturesInstaller {
             }
             LOGGER.error("Error installing boot features", e);
         }
-    }
-
-    private List<Set<Feature>> toFeatureSetList(List<Set<String>> stagedFeatures) {
-        ArrayList<Set<Feature>> result = new ArrayList<Set<Feature>>();
-        for (Set<String> features : stagedFeatures) {
-            HashSet<Feature> featureSet = new HashSet<Feature>();
-            for (String featureName : features) {
-                try {
-                    Feature feature = getFeature(featureName);
-                    if (feature == null) {
-                        LOGGER.error("Error Boot feature " + featureName + " not found");
-                    } else {
-                        featureSet.add(feature);
-                    }
-                } catch (Exception e) {
-                    LOGGER.error("Error getting feature for feature string " + featureName, e);
-                }
-            }
-            result.add(featureSet);
-        }
-        return result;
     }
 
     /**

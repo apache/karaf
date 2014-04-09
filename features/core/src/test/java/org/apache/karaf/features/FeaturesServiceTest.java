@@ -35,6 +35,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -368,9 +369,12 @@ public class FeaturesServiceTest extends TestBase {
         FeaturesServiceImpl svc = new FeaturesServiceImpl(null, bundleContext, new Storage(), null, null, null, null, null, null, null);
         svc.addRepository(uri);
         try {
-            List<Feature> features = Arrays.asList(svc.listFeatures());
+            List<String> features = new ArrayList<String>();
+            for (Feature feature : svc.listFeatures()) {
+                features.add(feature.getId());
+            }
             Collections.reverse(features);
-            svc.installFeatures(new CopyOnWriteArraySet<Feature>(features),
+            svc.installFeatures(new CopyOnWriteArraySet<String>(features),
                                 EnumSet.noneOf(FeaturesService.Option.class));
             fail("Call should have thrown an exception");
         } catch (MalformedURLException e) {

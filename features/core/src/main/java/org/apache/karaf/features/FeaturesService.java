@@ -26,13 +26,11 @@ import java.util.Set;
 public interface FeaturesService {
 
     enum Option {
-        NoCleanIfFailure,
-        PrintBundlesToRefresh,
+        NoFailOnFeatureNotFound,
         NoAutoRefreshManagedBundles,
         NoAutoRefreshUnmanagedBundles,
         NoAutoRefreshBundles,
         NoAutoStartBundles,
-        ContinueBatchOnFailure,
         Simulate,
         Verbose
     }
@@ -55,9 +53,11 @@ public interface FeaturesService {
     
     void restoreRepository(URI uri) throws Exception;
 
-    Repository[] listRepositories();
+    Repository[] listRequiredRepositories() throws Exception;
+
+    Repository[] listRepositories() throws Exception;
     
-    Repository getRepository(String repoName);
+    Repository getRepository(String repoName) throws Exception;
 
     void installFeature(String name) throws Exception;
 
@@ -69,7 +69,7 @@ public interface FeaturesService {
 
     void installFeature(Feature f, EnumSet<Option> options) throws Exception;
 
-    void installFeatures(Set<Feature> features, EnumSet<Option> options) throws Exception;
+    void installFeatures(Set<String> features, EnumSet<Option> options) throws Exception;
 
     void uninstallFeature(String name, EnumSet<Option> options) throws Exception;
 
@@ -79,9 +79,15 @@ public interface FeaturesService {
     
     void uninstallFeature(String name, String version) throws Exception;
 
+    void uninstallFeatures(Set<String> features, EnumSet<Option> options) throws Exception;
+
     Feature[] listFeatures() throws Exception;
 
+    Feature[] listRequiredFeatures() throws Exception;
+
     Feature[] listInstalledFeatures() throws Exception;
+
+    boolean isRequired(Feature f);
 
     boolean isInstalled(Feature f);
 

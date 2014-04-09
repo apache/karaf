@@ -50,9 +50,6 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
@@ -204,10 +201,10 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
                             for (Repository repo : featuresService.listRepositories()) {
                                 if (repo.getURI().equals(url.toURI())) {
                                     Set<Feature> features = new HashSet<Feature>(Arrays.asList(repo.getFeatures()));
-                                    Set<Feature> autoInstallFeatures = new HashSet<Feature>();
+                                    Set<String> autoInstallFeatures = new HashSet<String>();
                                     for(Feature feature:features) {
                                         if(feature.getInstall() != null && feature.getInstall().equals(Feature.DEFAULT_INSTALL_MODE)){
-                                            autoInstallFeatures.add(feature);
+                                            autoInstallFeatures.add(feature.getId());
                                         }
                                     }
                                     featuresService.installFeatures(autoInstallFeatures, EnumSet.noneOf(FeaturesService.Option.class));

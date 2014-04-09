@@ -36,6 +36,9 @@ public class ListFeaturesCommand extends FeaturesCommandSupport {
     @Option(name = "-i", aliases = {"--installed"}, description = "Display a list of all installed features only", required = false, multiValued = false)
     boolean onlyInstalled;
 
+    @Option(name = "-r", aliases = {"--required"}, description = "Display a list of all required features only", required = false, multiValued = false)
+    boolean onlyRequired;
+
     @Option(name = "-o", aliases = {"--ordered"}, description = "Display a list using alphabetical order ", required = false, multiValued = false)
     boolean ordered;
 
@@ -48,6 +51,7 @@ public class ListFeaturesCommand extends FeaturesCommandSupport {
         ShellTable table = new ShellTable();
         table.column("Name");
         table.column("Version");
+        table.column("Required");
         table.column("Installed");
         table.column("Repository");
         table.column("Description").maxSize(50);
@@ -64,9 +68,14 @@ public class ListFeaturesCommand extends FeaturesCommandSupport {
                     // Filter out not installed features if we only want to see the installed ones
                     continue;
                 }
+                if (onlyRequired && !featuresService.isRequired(f)) {
+                    // Filter out not installed features if we only want to see the installed ones
+                    continue;
+                }
                 table.addRow().addContent(
                         f.getName(),
                         f.getVersion(),
+                        featuresService.isRequired(f) ? "x" : "",
                         featuresService.isInstalled(f) ? "x" : "",
                         r.getName(),
                         f.getDescription());

@@ -17,10 +17,11 @@
 package org.apache.karaf.features.command;
 
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
 
 import org.apache.karaf.features.FeaturesService;
-import org.apache.karaf.features.command.completers.InstalledFeatureCompleter;
+import org.apache.karaf.features.command.completers.RequiredFeatureCompleter;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Completion;
@@ -32,7 +33,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 public class UninstallFeatureCommand extends FeaturesCommandSupport {
 
     @Argument(index = 0, name = "features", description = "The name and version of the features to uninstall. A feature id looks like name/version. The version is optional.", required = true, multiValued = true)
-    @Completion(InstalledFeatureCompleter.class)
+    @Completion(RequiredFeatureCompleter.class)
     List<String> features;
 
     @Option(name = "-r", aliases = "--no-auto-refresh", description = "Do not automatically refresh bundles", required = false, multiValued = false)
@@ -56,18 +57,6 @@ public class UninstallFeatureCommand extends FeaturesCommandSupport {
         if (verbose) {
             options.add(FeaturesService.Option.Verbose);
         }
-        for (String feature : features) {
-            String[] split = feature.split("/");
-            String name = split[0];
-            String version = null;
-            if (split.length == 2) {
-                version = split[1];
-            }
-    	    if (version != null && version.length() > 0) {
-    		    admin.uninstallFeature(name, version, options);
-    	    } else {
-    		    admin.uninstallFeature(name, options);
-    	    }
-        }
+        admin.uninstallFeatures(new HashSet<String>(features), options);
     }
 }

@@ -201,7 +201,7 @@ public class KarServiceImpl implements KarService {
      *
      * @param featuresRepositories the list of features XML.
      */
-    private void installFeatures(List<URI> featuresRepositories) {
+    private void installFeatures(List<URI> featuresRepositories) throws Exception {
         for (Repository repository : featuresService.listRepositories()) {
             for (URI karFeatureRepoUri : featuresRepositories) {
                 if (repository.getURI().equals(karFeatureRepoUri)) {
@@ -351,7 +351,7 @@ public class KarServiceImpl implements KarService {
      *
      * @param featuresRepositories the list of features XML.
      */
-    private void uninstallFeatures(List<URI> featuresRepositories) {
+    private void uninstallFeatures(List<URI> featuresRepositories) throws Exception {
         for (Repository repository : featuresService.listRepositories()) {
             for (URI karFeatureRepoUri : featuresRepositories) {
                 if (repository.getURI().equals(karFeatureRepoUri)) {

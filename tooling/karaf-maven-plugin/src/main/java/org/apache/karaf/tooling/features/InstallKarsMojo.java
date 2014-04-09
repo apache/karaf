@@ -176,7 +176,7 @@ public class InstallKarsMojo extends MojoSupport {
             }
         }
 
-        FeaturesService featuresService = new OfflineFeaturesService();
+        OfflineFeaturesService featuresService = new OfflineFeaturesService();
 
         Collection<Artifact> dependencies = project.getDependencyArtifacts();
         StringBuilder buf = new StringBuilder();
@@ -188,7 +188,6 @@ public class InstallKarsMojo extends MojoSupport {
                     Kar kar = new Kar(file.toURI());
                     kar.extract(new File(system.getPath()), new File(workDirectory));
                     for (URI repoUri : kar.getFeatureRepos()) {
-                        featuresService.removeRepository(repoUri);
                         featuresService.addRepository(repoUri);
                     }
                 } catch (Exception e) {
@@ -313,15 +312,10 @@ public class InstallKarsMojo extends MojoSupport {
         return "compile".equals(artifact.getScope()) || "runtime".equals(artifact.getScope());
     }
 
-    private class OfflineFeaturesService implements FeaturesService {
+    private class OfflineFeaturesService {
         private static final String FEATURES_REPOSITORIES = "featuresRepositories";
         private static final String FEATURES_BOOT = "featuresBoot";
 
-        @Override
-        public void validateRepository(URI uri) throws Exception {
-        }
-
-        @Override
         public void addRepository(URI uri) throws Exception {
             if (dontAddToStartup) {
                 getLog().info("Adding feature repository to system: " + uri);
@@ -364,7 +358,7 @@ public class InstallKarsMojo extends MojoSupport {
                     for (Feature feature : repo.getFeature()) {
                         featureSet.add(feature);
                         if (startupFeatures != null && startupFeatures.contains(feature.getName())) {
-                            installFeature(feature, null);
+                            installFeature(feature);
                         } else if (bootFeatures != null && bootFeatures.contains(feature.getName())) {
                             localRepoFeatures.add(feature);
                             missingDependencies.addAll(feature.getDependencies());
@@ -392,7 +386,7 @@ public class InstallKarsMojo extends MojoSupport {
                 getLog().info("Installing feature " + uri + " to system and startup.properties");
                 Features features = readFeatures(uri);
                 for (Feature feature : features.getFeature()) {
-                    installFeature(feature, null);
+                    installFeature(feature);
                 }
             }
         }
@@ -418,10 +412,6 @@ public class InstallKarsMojo extends MojoSupport {
             }
         }
 
-        @Override
-        public void addRepository(URI uri, boolean install) throws Exception {
-        }
-
         private String retrieveProperty(Properties properties, String key) {
             String val = properties.getProperty(key);
             return val != null && val.length() > 0 ? val + "," : "";
@@ -445,51 +435,7 @@ public class InstallKarsMojo extends MojoSupport {
             return features;
         }
 
-        @Override
-        public void removeRepository(URI uri) {
-        }
-
-        @Override
-        public void removeRepository(URI uri, boolean install) {
-        }
-
-        @Override
-        public void restoreRepository(URI uri) throws Exception {
-        }
-
-        @Override
-        public Repository[] listRepositories() {
-            return new Repository[0];
-        }
-
-        @Override
-        public URI getRepositoryUriFor(String name, String version) {
-            return null;
-        }
-
-        @Override
-        public String[] getRepositoryNames() {
-            return new String[0];
-        }
-
-        @Override
-        public void installFeature(String name) throws Exception {
-        }
-
-        @Override
-        public void installFeature(String name, EnumSet<Option> options) throws Exception {
-        }
-
-        @Override
-        public void installFeature(String name, String version) throws Exception {
-        }
-
-        @Override
-        public void installFeature(String name, String version, EnumSet<Option> options) throws Exception {
-        }
-
-        @Override
-        public void installFeature(org.apache.karaf.features.Feature feature, EnumSet<Option> options) throws Exception {
+        public void installFeature(org.apache.karaf.features.Feature feature) throws Exception {
             List<String> comment = Arrays.asList(new String[]{"", "# feature: " + feature.getName() + " version: " + feature.getVersion()});
             for (BundleInfo bundle : feature.getBundles()) {
                 String location = bundle.getLocation();
@@ -526,63 +472,6 @@ public class InstallKarsMojo extends MojoSupport {
             return true;
         }
 
-        @Override
-        public void installFeatures(Set<org.apache.karaf.features.Feature> features, EnumSet<Option> options)
-                throws Exception {
-        }
-
-        @Override
-        public void uninstallFeature(String name) throws Exception {
-        }
-
-        @Override
-        public void uninstallFeature(String name, EnumSet<Option> options) {
-        }
-
-        @Override
-        public void uninstallFeature(String name, String version) throws Exception {
-        }
-
-        @Override
-        public void uninstallFeature(String name, String version, EnumSet<Option> options) {
-        }
-
-        @Override
-        public Feature[] listFeatures() throws Exception {
-            return new Feature[0];
-        }
-
-        @Override
-        public Feature[] listInstalledFeatures() {
-            return new Feature[0];
-        }
-
-        @Override
-        public boolean isInstalled(org.apache.karaf.features.Feature f) {
-            return false;
-        }
-
-        @Override
-        public org.apache.karaf.features.Feature getFeature(String name, String version) throws Exception {
-            return null;
-        }
-
-        @Override
-        public org.apache.karaf.features.Feature getFeature(String name) throws Exception {
-            return null;
-        }
-
-        @Override
-        public Repository getRepository(String repoName) {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public void refreshRepository(URI uri) throws Exception {
-            // TODO Auto-generated method stub
-
-        }
     }
 
 }

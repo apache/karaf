@@ -23,11 +23,11 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
  * {@link org.apache.karaf.shell.console.Completer} for installed features.
  */
 @Service
-public class InstalledFeatureCompleter extends FeatureCompleterSupport {
+public class RequiredFeatureCompleter extends FeatureCompleterSupport {
 
     @Override
     protected boolean acceptsFeature(Feature feature) {
-        return featuresService.isInstalled(feature);
+        return featuresService.isRequired(feature);
     }
 
 }

@@ -44,15 +44,8 @@ public class BootFeaturesInstallerTest extends TestBase {
     @Test
     public void testDefaultBootFeatures() throws Exception  {
         FeaturesServiceImpl impl = EasyMock.createMock(FeaturesServiceImpl.class);
-        Feature configFeature = feature("config", "1.0.0");
-        Feature standardFeature = feature("standard", "1.0.0");
-        Feature regionFeature = feature("region", "1.0.0");
-        expect(impl.listInstalledFeatures()).andStubReturn(new Feature[]{});
-        expect(impl.getFeature("config", "0.0.0")).andReturn(configFeature);
-        expect(impl.getFeature("standard", "0.0.0")).andReturn(standardFeature);
-        expect(impl.getFeature("region", "0.0.0")).andReturn(regionFeature);
 
-        impl.installFeatures(setOf(configFeature, standardFeature, regionFeature), EnumSet.of(Option.NoCleanIfFailure, Option.ContinueBatchOnFailure));
+        impl.installFeatures(setOf("config", "standard", "region"), EnumSet.of(Option.NoFailOnFeatureNotFound));
         EasyMock.expectLastCall();
 
         impl.bootDone();
@@ -64,41 +57,13 @@ public class BootFeaturesInstallerTest extends TestBase {
         EasyMock.verify(impl);        
     }
 
-    /**
-     * This test checks KARAF-388 which allows you to specify version of boot feature.
-     * @throws Exception 
-     */
-    @Test
-    public void testStartDoesNotFailWithNonExistentVersion() throws Exception  {
-        FeaturesServiceImpl impl = EasyMock.createMock(FeaturesServiceImpl.class);
-        Feature sshFeature = feature("ssh", "1.0.0");
-        expect(impl.getFeature("ssh", "1.0.0")).andReturn(sshFeature);
-        expect(impl.getFeature("transaction", "1.2")).andReturn(null);
-        
-        // Only the ssh feature should get installed
-        impl.installFeatures(setOf(sshFeature), EnumSet.of(Option.NoCleanIfFailure, Option.ContinueBatchOnFailure));
-        EasyMock.expectLastCall();
-
-        impl.bootDone();
-        EasyMock.expectLastCall();
-        
-        replay(impl);
-        BootFeaturesInstaller bootFeatures = new BootFeaturesInstaller(null, impl , "", "transaction;version=1.2,ssh;version=1.0.0", false);
-        bootFeatures.installBootFeatures();
-        EasyMock.verify(impl);        
-    }
-    
     @Test
     public void testStagedBoot() throws Exception  {
         FeaturesServiceImpl impl = EasyMock.createStrictMock(FeaturesServiceImpl.class);
-        Feature sshFeature = feature("ssh", "1.0.0");
-        Feature transactionFeature = feature("transaction", "2.0.0");
-        expect(impl.getFeature("transaction", "0.0.0")).andStubReturn(transactionFeature);
-        expect(impl.getFeature("ssh", "0.0.0")).andStubReturn(sshFeature);
 
-        impl.installFeatures(setOf(transactionFeature), EnumSet.of(Option.NoCleanIfFailure, Option.ContinueBatchOnFailure));
+        impl.installFeatures(setOf("transaction"), EnumSet.of(Option.NoFailOnFeatureNotFound));
         EasyMock.expectLastCall();
-        impl.installFeatures(setOf(sshFeature), EnumSet.of(Option.NoCleanIfFailure, Option.ContinueBatchOnFailure));
+        impl.installFeatures(setOf("ssh"), EnumSet.of(Option.NoFailOnFeatureNotFound));
         EasyMock.expectLastCall();
 
         impl.bootDone();

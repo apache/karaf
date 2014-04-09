@@ -54,7 +54,7 @@ public class RepoListCommand extends FeaturesCommandSupport {
      	table.print(System.out, !noFormat);
     }
 
-    private void reloadAllRepos(FeaturesService featuresService) throws MultiException {
+    private void reloadAllRepos(FeaturesService featuresService) throws Exception {
         System.out.println("Reloading all repositories from their urls");
         System.out.println();
         List<Exception> exceptions = new ArrayList<Exception>();

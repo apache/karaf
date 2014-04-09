@@ -88,6 +88,9 @@ public class FeaturesServiceImpl implements FeaturesService {
     public static final String UPDATE_SNAPSHOTS_ALWAYS = "always";
     public static final String DEFAULT_UPDATE_SNAPSHOTS = UPDATE_SNAPSHOTS_CRC;
 
+    public static final String DEFAULT_FEATURE_RESOLUTION_RANGE = "${range;[====,====]}";
+    public static final String DEFAULT_BUNDLE_UPDATE_RANGE = "${range;[==,=+)}";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(FeaturesServiceImpl.class);
     private static final String SNAPSHOT = "SNAPSHOT";
     private static final String MAVEN = "mvn:";
@@ -113,13 +116,11 @@ public class FeaturesServiceImpl implements FeaturesService {
     private final EventAdminListener eventAdminListener;
     private final FeatureConfigInstaller configInstaller;
     private final String overrides;
-    public static final String DEFAULT_FEATURE_RESOLUTION_RANGE = "${range;[====,====]}";
     /**
      * Range to use when a version is specified on a feature dependency.
      * The default is {@link FeaturesServiceImpl#DEFAULT_FEATURE_RESOLUTION_RANGE}
      */
     private final String featureResolutionRange;
-    public static final String DEFAULT_BUNDLE_UPDATE_RANGE = "${range;[==,=+)}";
     /**
      * Range to use when verifying if a bundle should be updated or
      * new bundle installed.
@@ -361,20 +362,33 @@ public class FeaturesServiceImpl implements FeaturesService {
     }
 
     @Override
-    public Repository[] listRepositories() {
-        // TODO: catching this exception is ugly: refactor the api
-        try {
-            getFeatures();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    public Repository[] listRepositories() throws Exception {
+        // Make sure the cache is loaded
+        getFeatures();
         synchronized (lock) {
             return repositoryCache.values().toArray(new Repository[repositoryCache.size()]);
         }
     }
 
     @Override
-    public Repository getRepository(String name) {
+    public Repository[] listRequiredRepositories() throws Exception {
+        // Make sure the cache is loaded
+        getFeatures();
+        synchronized (lock) {
+            List<Repository> repos = new ArrayList<Repository>();
+            for (Map.Entry<String, Repository> entry : repositoryCache.entrySet()) {
+                if (state.repositories.contains(entry.getKey())) {
+                    repos.add(entry.getValue());
+                }
+            }
+            return repos.toArray(new Repository[repos.size()]);
+        }
+    }
+
+    @Override
+    public Repository getRepository(String name) throws Exception {
+        // Make sure the cache is loaded
+        getFeatures();
         synchronized (lock) {
             for (Repository repo : this.repositoryCache.values()) {
                 if (name.equals(repo.getName())) {
@@ -516,10 +530,35 @@ public class FeaturesServiceImpl implements FeaturesService {
     }
 
     @Override
+    public Feature[] listRequiredFeatures() throws Exception {
+        Set<Feature> features = new HashSet<Feature>();
+        Map<String, Map<String, Feature>> allFeatures = getFeatures();
+        synchronized (lock) {
+            for (Map<String, Feature> featureWithDifferentVersion : allFeatures.values()) {
+                for (Feature f : featureWithDifferentVersion.values()) {
+                    if (isRequired(f)) {
+                        features.add(f);
+                    }
+                }
+            }
+        }
+        return features.toArray(new Feature[features.size()]);
+    }
+
+
+    @Override
     public boolean isInstalled(Feature f) {
         String id = normalize(f.getId());
         synchronized (lock) {
             return state.installedFeatures.contains(id);
+        }
+    }
+
+    @Override
+    public boolean isRequired(Feature f) {
+        String id = normalize(f.getId());
+        synchronized (lock) {
+            return state.features.contains(id);
         }
     }
 
@@ -536,7 +575,7 @@ public class FeaturesServiceImpl implements FeaturesService {
     }
 
     public void installFeature(String name, EnumSet<Option> options) throws Exception {
-        doAddFeatures(Collections.singleton(name), options);
+        installFeatures(Collections.singleton(name), options);
     }
 
     public void installFeature(String name, String version, EnumSet<Option> options) throws Exception {
@@ -545,14 +584,6 @@ public class FeaturesServiceImpl implements FeaturesService {
 
     public void installFeature(Feature feature, EnumSet<Option> options) throws Exception {
         installFeature(feature.getId());
-    }
-
-    public void installFeatures(Set<Feature> features, EnumSet<Option> options) throws Exception {
-        Set<String> fs = new HashSet<String>();
-        for (Feature f : features) {
-            fs.add(f.getId());
-        }
-        doAddFeatures(fs, options);
     }
 
     @Override
@@ -572,7 +603,7 @@ public class FeaturesServiceImpl implements FeaturesService {
 
     @Override
     public void uninstallFeature(String name, EnumSet<Option> options) throws Exception {
-        doRemoveFeatures(Collections.singleton(name), options);
+        uninstallFeatures(Collections.singleton(name), options);
     }
 
 
@@ -589,7 +620,7 @@ public class FeaturesServiceImpl implements FeaturesService {
 
 
 
-    public void doAddFeatures(Set<String> features, EnumSet<Option> options) throws Exception {
+    public void installFeatures(Set<String> features, EnumSet<Option> options) throws Exception {
         Set<String> required;
         Set<String> installed;
         Set<Long> managed;
@@ -606,9 +637,12 @@ public class FeaturesServiceImpl implements FeaturesService {
             String version = feature.substring(feature.indexOf("/") + 1);
             Feature f = getFeatureMatching(featuresMap.get(name), version);
             if (f == null) {
-                throw new IllegalArgumentException("No matching features for " + feature);
+                if (!options.contains(Option.NoFailOnFeatureNotFound)) {
+                    throw new IllegalArgumentException("No matching features for " + feature);
+                }
+            } else {
+                featuresToAdd.add(normalize(f.getId()));
             }
-            featuresToAdd.add(normalize(f.getId()));
         }
         featuresToAdd = new ArrayList<String>(new LinkedHashSet<String>(featuresToAdd));
         StringBuilder sb = new StringBuilder();
@@ -624,7 +658,7 @@ public class FeaturesServiceImpl implements FeaturesService {
         doInstallFeaturesInThread(required, installed, managed, options);
     }
 
-    public void doRemoveFeatures(Set<String> features, EnumSet<Option> options) throws Exception {
+    public void uninstallFeatures(Set<String> features, EnumSet<Option> options) throws Exception {
         Set<String> required;
         Set<String> installed;
         Set<Long> managed;
@@ -822,6 +856,9 @@ public class FeaturesServiceImpl implements FeaturesService {
         logDeployment(deployment, verbose);
 
         if (simulate) {
+            // TODO: it would be nice to print bundles that will be refreshed
+            // TODO: it could be done by checking the differences between
+            // TODO: the resolution result and the actual wiring state
             return;
         }
 

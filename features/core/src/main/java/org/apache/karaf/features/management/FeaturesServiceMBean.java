@@ -34,15 +34,15 @@ public interface FeaturesServiceMBean {
 
     void installFeature(String name) throws Exception;
 
-    void installFeature(String name, boolean noClean, boolean noRefresh) throws Exception;
+    void installFeature(String name, boolean noRefresh) throws Exception;
 
-    void installFeature(String name, boolean noClean, boolean noRefresh, boolean noStart) throws Exception;
+    void installFeature(String name, boolean noRefresh, boolean noStart) throws Exception;
 
     void installFeature(String name, String version) throws Exception;
 
-    void installFeature(String name, String version, boolean noClean, boolean noRefresh) throws Exception;
+    void installFeature(String name, String version, boolean noRefresh) throws Exception;
 
-    void installFeature(String name, String version, boolean noClean, boolean noRefresh, boolean noStart) throws Exception;
+    void installFeature(String name, String version, boolean noRefresh, boolean noStart) throws Exception;
 
     TabularData infoFeature(String name) throws Exception;
 

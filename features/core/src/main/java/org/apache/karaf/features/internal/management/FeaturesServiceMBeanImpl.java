@@ -139,22 +139,16 @@ public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
         featuresService.installFeature(name);
     }
 
-    public void installFeature(String name, boolean noClean, boolean noRefresh) throws Exception {
+    public void installFeature(String name, boolean noRefresh) throws Exception {
         EnumSet<org.apache.karaf.features.FeaturesService.Option> options = EnumSet.noneOf(org.apache.karaf.features.FeaturesService.Option.class);
-        if (noClean) {
-            options.add(org.apache.karaf.features.FeaturesService.Option.NoCleanIfFailure);
-        }
         if (noRefresh) {
             options.add(org.apache.karaf.features.FeaturesService.Option.NoAutoRefreshBundles);
         }
         featuresService.installFeature(name, options);
     }
 
-    public void installFeature(String name, boolean noClean, boolean noRefresh, boolean noStart) throws Exception {
+    public void installFeature(String name, boolean noRefresh, boolean noStart) throws Exception {
         EnumSet<org.apache.karaf.features.FeaturesService.Option> options = EnumSet.noneOf(org.apache.karaf.features.FeaturesService.Option.class);
-        if (noClean) {
-            options.add(org.apache.karaf.features.FeaturesService.Option.NoCleanIfFailure);
-        }
         if (noRefresh) {
             options.add(org.apache.karaf.features.FeaturesService.Option.NoAutoRefreshBundles);
         }
@@ -168,22 +162,16 @@ public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
         featuresService.installFeature(name, version);
     }
 
-    public void installFeature(String name, String version, boolean noClean, boolean noRefresh) throws Exception {
+    public void installFeature(String name, String version, boolean noRefresh) throws Exception {
         EnumSet<org.apache.karaf.features.FeaturesService.Option> options = EnumSet.noneOf(org.apache.karaf.features.FeaturesService.Option.class);
-        if (noClean) {
-            options.add(org.apache.karaf.features.FeaturesService.Option.NoCleanIfFailure);
-        }
         if (noRefresh) {
             options.add(org.apache.karaf.features.FeaturesService.Option.NoAutoRefreshBundles);
         }
         featuresService.installFeature(name, version, options);
     }
 
-    public void installFeature(String name, String version, boolean noClean, boolean noRefresh, boolean noStart) throws Exception {
+    public void installFeature(String name, String version, boolean noRefresh, boolean noStart) throws Exception {
         EnumSet<org.apache.karaf.features.FeaturesService.Option> options = EnumSet.noneOf(org.apache.karaf.features.FeaturesService.Option.class);
-        if (noClean) {
-            options.add(org.apache.karaf.features.FeaturesService.Option.NoCleanIfFailure);
-        }
         if (noRefresh) {
             options.add(org.apache.karaf.features.FeaturesService.Option.NoAutoRefreshBundles);
         }
