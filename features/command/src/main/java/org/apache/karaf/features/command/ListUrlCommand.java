@@ -52,23 +52,25 @@ public class ListUrlCommand extends FeaturesCommandSupport {
 
         if ((repos != null) && (repos.length > 0)) {
             for (int i = 0; i < repos.length; i++) {
-                URI uri = repos[i].getURI();
+                if (repos[i] != null) {
+                    URI uri = repos[i].getURI();
 
-                String line = "";
-                line += repos[i].isValid() ? "  true " : "  false";
+                    String line = "";
+                    line += repos[i].isValid() ? "  true " : "  false";
 
-                if (validation) {
-                    try {
-                        admin.validateRepository(uri);
-                        // append valid flag if validation mode is tuned on
-                        line += "     true   ";
-                    } catch (Exception e) {
-                        line += "     false  ";
-                        verboseOutput += uri + ":" + e.getMessage() + "\n";
+                    if (validation) {
+                        try {
+                            admin.validateRepository(uri);
+                            // append valid flag if validation mode is tuned on
+                            line += "     true   ";
+                        } catch (Exception e) {
+                            line += "     false  ";
+                            verboseOutput += uri + ":" + e.getMessage() + "\n";
+                        }
                     }
-                }
 
-                System.out.println(line + "   " + uri);
+                    System.out.println(line + "   " + uri);
+                }
             }
 
             if (verbose) {
