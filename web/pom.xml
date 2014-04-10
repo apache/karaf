@@ -29,13 +29,86 @@
     </parent>
 
     <groupId>org.apache.karaf.web</groupId>
-    <artifactId>web</artifactId>
-    <packaging>pom</packaging>
-    <name>Apache Karaf :: Web</name>
+    <artifactId>org.apache.karaf.web.core</artifactId>
+    <packaging>bundle</packaging>
+    <name>Apache Karaf :: Web :: Core</name>
+    <description>
+        This bundle provide the core service to manipulate the web container/bundles.
+    </description>
 
-    <modules>
-        <module>core</module>
-        <module>command</module>
-    </modules>
+    <properties>
+        <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.web</groupId>
+            <artifactId>pax-web-spi</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.apache.karaf.util</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.shell</groupId>
+            <artifactId>org.apache.karaf.shell.core</artifactId>
+            <optional>true</optional>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/*.info</include>
+                </includes>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <configuration>
+                    <instructions>
+                        <Export-Package>
+                            org.apache.karaf.web,
+                            org.apache.karaf.web.management
+                        </Export-Package>
+                        <Private-Package>
+                            org.apache.karaf.web.commands,
+                            org.apache.karaf.web.internal,
+                            org.apache.karaf.web.internal.osgi,
+                            org.apache.karaf.web.management.internal,
+                            org.apache.karaf.util.tracker
+                        </Private-Package>
+                        <Bundle-Activator>
+                            org.apache.karaf.web.internal.osgi.Activator
+                        </Bundle-Activator>
+                        <Karaf-Commands>*</Karaf-Commands>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
