@@ -29,13 +29,89 @@
     </parent>
 
     <groupId>org.apache.karaf.http</groupId>
-    <artifactId>http</artifactId>
-    <packaging>pom</packaging>
-    <name>Apache Karaf :: HTTP</name>
+    <artifactId>org.apache.karaf.http.core</artifactId>
+    <packaging>bundle</packaging>
+    <name>Apache Karaf :: HTTP :: Core</name>
+    <description>This bundle provides HTTP core services</description>
 
-    <modules>
-        <module>core</module>
-        <module>command</module>
-    </modules>
+    <properties>
+        <appendedResourcesDirectory>${basedir}/../../../etc/appended-resources/</appendedResourcesDirectory>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-spi</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>${servlet.spec.groupId}</groupId>
+			<artifactId>${servlet.spec.artifactId}</artifactId>
+			<scope>provided</scope>
+		</dependency>
+        <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.apache.karaf.util</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.utils</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.shell</groupId>
+            <artifactId>org.apache.karaf.shell.core</artifactId>
+            <optional>true</optional>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/*.info</include>
+                </includes>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <configuration>
+                    <instructions>
+                        <Export-Package>
+                            org.apache.karaf.http.core,
+                        </Export-Package>
+                        <Private-Package>
+                            org.apache.karaf.http.command,
+                            org.apache.karaf.http.core.internal,
+                            org.apache.karaf.http.core.internal.osgi,
+                            org.apache.karaf.util.tracker,
+                            org.apache.felix.utils.version,
+                            org.apache.felix.utils.manifest,
+                        </Private-Package>
+                        <Bundle-Activator>
+                            org.apache.karaf.http.core.internal.osgi.Activator
+                        </Bundle-Activator>
+                        <Karaf-Commands>*</Karaf-Commands>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
