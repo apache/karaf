@@ -109,7 +109,6 @@
     </feature>
 
     <feature name="obr" description="Provide OSGi Bundle Repository (OBR) support" version="${project.version}">
-        <feature>aries-blueprint</feature>
         <bundle start-level="30">mvn:org.apache.felix/org.osgi.service.obr/${felix.obr.version}</bundle>
         <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.bundlerepository/${felix.bundlerepository.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.obr/org.apache.karaf.obr.core/${project.version}</bundle>

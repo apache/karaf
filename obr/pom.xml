@@ -50,6 +50,11 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.apache.karaf.util</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.apache.karaf.shell</groupId>
             <artifactId>org.apache.karaf.shell.core</artifactId>
             <optional>true</optional>
@@ -83,8 +88,14 @@
                         </Export-Package>
                         <Private-Package>
                             org.apache.karaf.obr.command,
+                            org.apache.karaf.obr.command.util,
                             org.apache.karaf.obr.core.internal,
+                            org.apache.karaf.obr.core.internal.osgi,
+                            org.apache.karaf.util.tracker
                         </Private-Package>
+                        <Bundle-Activator>
+                            org.apache.karaf.obr.core.internal.osgi.Activator
+                        </Bundle-Activator>
                         <Karaf-Commands>*</Karaf-Commands>
                     </instructions>
                 </configuration>
