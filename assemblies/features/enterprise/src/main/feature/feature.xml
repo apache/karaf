@@ -182,7 +182,6 @@
         <bundle start-level="30">mvn:org.apache.aries.jndi/org.apache.aries.jndi.rmi/${aries.jndi.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.jndi/org.apache.aries.jndi.url/${aries.jndi.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.jndi/org.apache.aries.jndi.legacy.support/${aries.jndi.version}</bundle>
-        <bundle>mvn:org.apache.karaf.jndi/org.apache.karaf.jndi.command/${project.version}</bundle>
     </feature>
 
     <feature name="jdbc" description="JDBC service and commands" version="${project.version}" resolver="(obr)">
