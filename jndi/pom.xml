@@ -52,6 +52,11 @@
             <artifactId>org.apache.aries.proxy.api</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.apache.karaf.util</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.apache.karaf.shell</groupId>
             <artifactId>org.apache.karaf.shell.core</artifactId>
             <optional>true</optional>
@@ -85,9 +90,15 @@
                         </Export-Package>
                         <Private-Package>
                             org.apache.karaf.jndi.command,
-                            org.apache.karaf.jndi.internal
+                            org.apache.karaf.jndi.command.completers,
+                            org.apache.karaf.jndi.internal,
+                            org.apache.karaf.jndi.internal.osgi,
+                            org.apache.karaf.util.tracker
                         </Private-Package>
                         <Karaf-Commands>*</Karaf-Commands>
+                        <Bundle-Activator>
+                            org.apache.karaf.jndi.internal.osgi.Activator
+                        </Bundle-Activator>
                     </instructions>
                 </configuration>
             </plugin>

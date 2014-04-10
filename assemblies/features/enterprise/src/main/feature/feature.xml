@@ -174,14 +174,13 @@
     <feature name="jndi" description="OSGi Service Registry JNDI access" version="${project.version}" resolver="(obr)">
         <details>JNDI support provided by Apache Aries JNDI ${aries.jndi.version}, including additional service, commands, and MBean.</details>
         <feature>aries-proxy</feature>
-        <feature>aries-blueprint</feature>
         <bundle start-level="30">mvn:org.apache.xbean/xbean-naming/${xbean.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.karaf.jndi/org.apache.karaf.jndi.core/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.jndi/org.apache.aries.jndi.api/${aries.jndi.api.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.jndi/org.apache.aries.jndi.core/${aries.jndi.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.jndi/org.apache.aries.jndi.rmi/${aries.jndi.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.jndi/org.apache.aries.jndi.url/${aries.jndi.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.jndi/org.apache.aries.jndi.legacy.support/${aries.jndi.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.karaf.jndi/org.apache.karaf.jndi.core/${project.version}</bundle>
     </feature>
 
     <feature name="jdbc" description="JDBC service and commands" version="${project.version}" resolver="(obr)">
