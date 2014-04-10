@@ -69,6 +69,8 @@ import org.osgi.framework.startlevel.BundleStartLevel;
 import org.osgi.framework.wiring.BundleCapability;
 import org.osgi.framework.wiring.BundleRequirement;
 import org.osgi.framework.wiring.BundleRevision;
+import org.osgi.framework.wiring.BundleWire;
+import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.framework.wiring.FrameworkWiring;
 import org.osgi.resource.Resource;
 import org.osgi.resource.Wire;
@@ -793,7 +795,7 @@ public class FeaturesServiceImpl implements FeaturesService {
                          Collections.<String>emptySet(),
                          overrides,
                          Collections.<String>emptySet());
-        Map<Resource, List<Wire>> resolution = builder.resolve(systemBundles, false);
+        Map<Resource, List<Wire>> resolution = builder.resolve(systemBundles, true);
         Collection<Resource> allResources = resolution.keySet();
         Map<String, StreamProvider> providers = builder.getProviders();
 
@@ -858,14 +860,76 @@ public class FeaturesServiceImpl implements FeaturesService {
         //
         logDeployment(deployment, verbose);
 
+        //
+        // Compute the set of bundles to refresh
+        //
+        Set<Bundle> toRefresh = new HashSet<Bundle>();
+        toRefresh.addAll(deployment.toDelete);
+        toRefresh.addAll(deployment.toUpdate.keySet());
+
+        if (!noRefreshManaged) {
+            int size;
+            do {
+                size = toRefresh.size();
+                for (Bundle bundle : bundles) {
+                    // Continue if we already know about this bundle
+                    if (toRefresh.contains(bundle)) {
+                        continue;
+                    }
+                    // Ignore non resolved bundle
+                    BundleWiring wiring = bundle.adapt(BundleWiring.class);
+                    if (wiring == null) {
+                        continue;
+                    }
+                    // Get through the old resolution and flag this bundle
+                    // if it was wired to a bundle to be refreshed
+                    for (BundleWire wire : wiring.getRequiredWires(null)) {
+                        if (toRefresh.contains(wire.getProvider().getBundle())) {
+                            toRefresh.add(bundle);
+                            break;
+                        }
+                    }
+                    // Get through the new resolution and flag this bundle
+                    // if it's wired to any new bundle
+                    List<Wire> newWires = resolution.get(wiring.getRevision());
+                    if (newWires != null) {
+                        for (Wire wire : newWires) {
+                            Bundle b = null;
+                            if (wire.getProvider() instanceof BundleRevision) {
+                                b = ((BundleRevision) wire.getProvider()).getBundle();
+                            } else {
+                                b = deployment.resToBnd.get(wire.getProvider());
+                            }
+                            if (b == null || toRefresh.contains(b)) {
+                                toRefresh.add(bundle);
+                                break;
+                            }
+                        }
+                    }
+                }
+            } while (toRefresh.size() > size);
+        }
+        if (noRefreshUnmanaged) {
+            Set<Bundle> newSet = new HashSet<Bundle>();
+            for (Bundle bundle : toRefresh) {
+                if (managed.contains(bundle.getBundleId())) {
+                    newSet.add(bundle);
+                }
+            }
+            toRefresh = newSet;
+        }
+
+
         if (simulate) {
-            // TODO: it would be nice to print bundles that will be refreshed
-            // TODO: it could be done by checking the differences between
-            // TODO: the resolution result and the actual wiring state
+            if (!toRefresh.isEmpty()) {
+                print("  Bundles to refresh:", verbose);
+                for (Bundle bundle : toRefresh) {
+                    print("    " + bundle.getSymbolicName() + " / " + bundle.getVersion(), verbose);
+                }
+            }
             return;
         }
 
-        Set<Bundle> toRefresh = new HashSet<Bundle>();
         Set<Bundle> toStart = new HashSet<Bundle>();
 
         //
@@ -908,7 +972,6 @@ public class FeaturesServiceImpl implements FeaturesService {
                 print("  " + bundle.getSymbolicName() + " / " + bundle.getVersion(), verbose);
                 bundle.uninstall();
                 managed.remove(bundle.getBundleId());
-                toRefresh.add(bundle);
             }
         }
         if (!deployment.toUpdate.isEmpty()) {
@@ -920,7 +983,6 @@ public class FeaturesServiceImpl implements FeaturesService {
                 print("  " + uri, verbose);
                 InputStream is = getBundleInputStream(resource, providers);
                 bundle.update(is);
-                toRefresh.add(bundle);
                 toStart.add(bundle);
                 BundleInfo bi = bundleInfos.get(uri);
                 if (bi != null && bi.getStartLevel() > 0) {
@@ -940,7 +1002,6 @@ public class FeaturesServiceImpl implements FeaturesService {
                 if (!noStart || resourceLinkedToOldFeatures.contains(resource)) {
                     toStart.add(bundle);
                 }
-                toRefresh.add(bundle);
                 deployment.resToBnd.put(resource, bundle);
                 // save a checksum of installed snapshot bundle
                 if (UPDATE_SNAPSHOTS_CRC.equals(updateSnaphots)
@@ -982,23 +1043,9 @@ public class FeaturesServiceImpl implements FeaturesService {
             }
         }
 
-        if (!noRefreshManaged) {
-            findBundlesWithOptionalPackagesToRefresh(toRefresh);
-            findBundlesWithFragmentsToRefresh(toRefresh);
-        }
-
-        if (noRefreshUnmanaged) {
-            Set<Bundle> newSet = new HashSet<Bundle>();
-            for (Bundle bundle : toRefresh) {
-                if (managed.contains(bundle.getBundleId())) {
-                    newSet.add(bundle);
-                }
-            }
-            toRefresh = newSet;
-        }
-
         // TODO: remove this hack, but it avoids loading the class after the bundle is refreshed
-        RequirementSort sort = new RequirementSort();
+        new CopyOnWriteArrayIdentityList().iterator();
+        new RequirementSort();
 
         if (!noRefresh) {
             toStop = new HashSet<Bundle>();
@@ -1345,83 +1392,6 @@ public class FeaturesServiceImpl implements FeaturesService {
             throw new IllegalStateException("Resource " + uri + " has no StreamProvider");
         }
         return provider.open();
-    }
-
-    protected void findBundlesWithOptionalPackagesToRefresh(Set<Bundle> toRefresh) {
-        // First pass: include all bundles contained in these features
-        if (toRefresh.isEmpty()) {
-            return;
-        }
-        Set<Bundle> bundles = new HashSet<Bundle>(Arrays.asList(systemBundleContext.getBundles()));
-        bundles.removeAll(toRefresh);
-        if (bundles.isEmpty()) {
-            return;
-        }
-        // Second pass: for each bundle, check if there is any unresolved optional package that could be resolved
-        for (Bundle bundle : bundles) {
-            BundleRevision rev = bundle.adapt(BundleRevision.class);
-            boolean matches = false;
-            if (rev != null) {
-                for (BundleRequirement req : rev.getDeclaredRequirements(null)) {
-                    if (PackageNamespace.PACKAGE_NAMESPACE.equals(req.getNamespace())
-                            && PackageNamespace.RESOLUTION_OPTIONAL.equals(req.getDirectives().get(PackageNamespace.REQUIREMENT_RESOLUTION_DIRECTIVE))) {
-                        // This requirement is an optional import package
-                        for (Bundle provider : toRefresh) {
-                            BundleRevision providerRev = provider.adapt(BundleRevision.class);
-                            if (providerRev != null) {
-                                for (BundleCapability cap : providerRev.getDeclaredCapabilities(null)) {
-                                    if (req.matches(cap)) {
-                                        matches = true;
-                                        break;
-                                    }
-                                }
-                            }
-                            if (matches) {
-                                break;
-                            }
-                        }
-                    }
-                    if (matches) {
-                        break;
-                    }
-                }
-            }
-            if (matches) {
-                toRefresh.add(bundle);
-            }
-        }
-    }
-
-    protected void findBundlesWithFragmentsToRefresh(Set<Bundle> toRefresh) {
-        if (toRefresh.isEmpty()) {
-            return;
-        }
-        Set<Bundle> bundles = new HashSet<Bundle>(Arrays.asList(systemBundleContext.getBundles()));
-        bundles.removeAll(toRefresh);
-        if (bundles.isEmpty()) {
-            return;
-        }
-        for (Bundle bundle : new ArrayList<Bundle>(toRefresh)) {
-            BundleRevision rev = bundle.adapt(BundleRevision.class);
-            if (rev != null) {
-                for (BundleRequirement req : rev.getDeclaredRequirements(null)) {
-                    if (BundleRevision.HOST_NAMESPACE.equals(req.getNamespace())) {
-                        for (Bundle hostBundle : bundles) {
-                            if (!toRefresh.contains(hostBundle)) {
-                                BundleRevision hostRev = hostBundle.adapt(BundleRevision.class);
-                                if (hostRev != null) {
-                                    for (BundleCapability cap : hostRev.getDeclaredCapabilities(null)) {
-                                        if (req.matches(cap)) {
-                                            toRefresh.add(hostBundle);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
     }
 
     protected void refreshPackages(Collection<Bundle> bundles) throws InterruptedException {
