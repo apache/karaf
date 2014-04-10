@@ -114,9 +114,7 @@
         <bundle start-level="30">mvn:org.apache.felix/org.osgi.service.obr/${felix.obr.version}</bundle>
         <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.bundlerepository/${felix.bundlerepository.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.obr/org.apache.karaf.obr.core/${project.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.karaf.obr/org.apache.karaf.obr.command/${project.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.url/pax-url-obr/${pax.url.version}/jar/uber</bundle>
-        <bundle start-level="31">mvn:org.apache.karaf.features/org.apache.karaf.features.obr/${project.version}</bundle>
     </feature>
 
     <feature name="bundle" description="Provide Bundle support" version="${project.version}">
