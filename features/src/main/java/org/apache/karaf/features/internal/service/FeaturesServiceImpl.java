@@ -799,7 +799,10 @@ public class FeaturesServiceImpl implements FeaturesService {
 
         // Install conditionals
         List<String> installedFeatureIds = getFeatureIds(allResources);
-        List<Feature> installedFeatures = getFeatures(repositories, installedFeatureIds);
+        List<String> newFeatures = new ArrayList<String>(installedFeatureIds);
+        newFeatures.removeAll(installed);
+        List<String> delFeatures = new ArrayList<String>(installed);
+        delFeatures.removeAll(installedFeatureIds);
 
         //
         // Compute list of installable resources (those with uris)
@@ -955,25 +958,12 @@ public class FeaturesServiceImpl implements FeaturesService {
         //
         // Update and save state
         //
-        List<String> newFeatures = new ArrayList<String>();
         synchronized (lock) {
-            List<String> allFeatures = new ArrayList<String>();
-            for (Resource resource : allResources) {
-                String name = FeatureNamespace.getName(resource);
-                if (name != null) {
-                    Version version = FeatureNamespace.getVersion(resource);
-                    String id = version != null ? name + "/" + version : name;
-                    allFeatures.add(id);
-                    if (!state.installedFeatures.contains(id)) {
-                        newFeatures.add(id);
-                    }
-                }
-            }
             state.bundleChecksums.putAll(deployment.newCheckums);
             state.features.clear();
             state.features.addAll(features);
             state.installedFeatures.clear();
-            state.installedFeatures.addAll(allFeatures);
+            state.installedFeatures.addAll(installedFeatureIds);
             state.managedBundles.clear();
             state.managedBundles.addAll(managed);
             saveState();
@@ -1061,7 +1051,13 @@ public class FeaturesServiceImpl implements FeaturesService {
             }
         }
 
-        // TODO: call listeners for features added and removed
+        // Call listeners
+        for (Feature feature : getFeatures(repositories, delFeatures)) {
+            callListeners(new FeatureEvent(feature, FeatureEvent.EventType.FeatureUninstalled, false));
+        }
+        for (Feature feature : getFeatures(repositories, newFeatures)) {
+            callListeners(new FeatureEvent(feature, FeatureEvent.EventType.FeatureInstalled, false));
+        }
 
         print("Done.", verbose);
     }
