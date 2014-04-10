@@ -47,7 +47,9 @@ public class RepoListCommand extends FeaturesCommandSupport {
 
         Repository[] repos = featuresService.listRepositories();
      	for (Repository repo : repos) {
-     	    table.addRow().addContent(repo.getName(), repo.getURI().toString()); 
+            if (repo != null) {
+     	        table.addRow().addContent(repo.getName(), repo.getURI().toString()); 
+            }
      	}
      	table.print(System.out, !noFormat);
     }
