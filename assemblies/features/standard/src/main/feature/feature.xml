@@ -165,7 +165,6 @@
 
     <feature name="system" description="Provide System support" version="${project.version}">
         <bundle start-level="30" start="true">mvn:org.apache.karaf.system/org.apache.karaf.system.core/${project.version}</bundle>
-        <bundle start-level="30" start="true">mvn:org.apache.karaf.system/org.apache.karaf.system.command/${project.version}</bundle>
     </feature>
 
     <feature name="http" version="${project.version}" resolver="(obr)" description="Implementation of the OSGI HTTP Service">
