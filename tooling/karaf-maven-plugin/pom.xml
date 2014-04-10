@@ -181,6 +181,9 @@
                     <debug>true</debug>
                     <projectsDirectory>src/it</projectsDirectory>
                     <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
+                    <pomExcludes>
+                        <pomExclude>test-check-dependencies-failure/pom.xml</pomExclude>
+                    </pomExcludes>
                     <pomIncludes>
                         <pomInclude>*/pom.xml</pomInclude>
                     </pomIncludes>
