@@ -10,7 +10,7 @@
         (the "License"); you may not use this file except in compliance with
         the License.  You may obtain a copy of the License at
 
-           http://www.apache.org/licenses/LICENSE-2.0
+            http://www.apache.org/licenses/LICENSE-2.0
 
         Unless required by applicable law or agreed to in writing, software
         distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,13 +29,105 @@
     </parent>
 
     <groupId>org.apache.karaf.wrapper</groupId>
-    <artifactId>wrapper</artifactId>
-    <packaging>pom</packaging>
-    <name>Apache Karaf :: Wrapper</name>
+    <artifactId>org.apache.karaf.wrapper.core</artifactId>
+    <packaging>bundle</packaging>
+    <name>Apache Karaf :: Wrapper :: Core</name>
+    <description>
+        Core implementation and integration of the Java Service Wrapper.
+        It provides a complete integration of Karaf with your Operating System.
+    </description>
 
-    <modules>
-        <module>core</module>
-        <module>command</module>
-    </modules>
+    <properties>
+        <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.apache.karaf.main</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.shell</groupId>
+            <artifactId>org.apache.karaf.shell.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>tanukisoft</groupId>
+            <artifactId>wrapper</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-jdk14</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/*.info</include>
+                </includes>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>Main</mainClass>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <configuration>
+                    <instructions>
+                        <Export-Package>
+                            org.apache.karaf.wrapper,
+                            org.apache.karaf.wrapper.management
+                        </Export-Package>
+                        <Private-Package>
+                            org.apache.karaf.wrapper.commands,
+                            org.apache.karaf.wrapper.internal,
+                            org.apache.karaf.wrapper.internal.osgi,
+                            org.apache.karaf.wrapper.management.internal,
+                            org.tanukisoftware.wrapper*,
+                            org.apache.karaf.main*,
+                            org.apache.karaf.util.tracker
+                        </Private-Package>
+                        <Import-Package>
+                            !org.apache.felix.utils.properties,
+                            !org.apache.karaf.util.locks,
+                            !org.apache.karaf.info,
+                            *
+                        </Import-Package>
+                        <Bundle-Activator>
+                            org.apache.karaf.wrapper.internal.osgi.Activator
+                        </Bundle-Activator>
+                        <Karaf-Commands>
+                            org.apache.karaf.wrapper.commands
+                        </Karaf-Commands>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
