@@ -790,7 +790,7 @@ public class FeaturesServiceImpl implements FeaturesService {
                          Collections.<String>emptySet(),
                          overrides,
                          Collections.<String>emptySet());
-        Map<Resource, List<Wire>> resolution = builder.resolve(systemBundles, true);
+        Map<Resource, List<Wire>> resolution = builder.resolve(systemBundles);
         Collection<Resource> allResources = resolution.keySet();
         Map<String, StreamProvider> providers = builder.getProviders();
 

@@ -44,8 +44,20 @@ public class FeatureResource extends ResourceImpl {
     public static Resource build(Feature feature, Conditional conditional, String featureRange, Map<String, Resource> locToRes) throws BundleException {
         Feature fcond = conditional.asFeature(feature.getName(), feature.getVersion());
         FeatureResource resource = (FeatureResource) build(fcond, featureRange, locToRes);
-        for (Dependency dep : conditional.getCondition()) {
-            addDependency(resource, dep, featureRange);
+        for (String cond : conditional.getCondition()) {
+            if (cond.startsWith("req:")) {
+                cond = cond.substring("req:".length());
+                List<Requirement> reqs = ResourceBuilder.parseRequirement(resource, cond);
+                resource.addRequirements(reqs);
+            } else {
+                org.apache.karaf.features.internal.model.Dependency dep = new org.apache.karaf.features.internal.model.Dependency();
+                String[] p = cond.split("/");
+                dep.setName(p[0]);
+                if (p.length > 1) {
+                    dep.setVersion(p[1]);
+                }
+                addDependency(resource, dep, featureRange);
+            }
         }
         org.apache.karaf.features.internal.model.Dependency dep = new org.apache.karaf.features.internal.model.Dependency();
         dep.setName(feature.getName());

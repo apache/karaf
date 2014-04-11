@@ -219,7 +219,7 @@ public class InfoFeatureCommand extends FeaturesCommandSupport {
 
                 if (conditional) {
                     for (Conditional cond : resolved.getConditional()) {
-                        List<? extends Dependency> condition = cond.getCondition();
+                        List<String> condition = cond.getCondition();
                         List<BundleInfo> conditionalBundles = cond.getBundles();
                         for (BundleInfo bundleInfo : conditionalBundles) {
                             bundleLocation.add(bundleInfo.getLocation() + "(condition:"+condition+")");
@@ -278,13 +278,11 @@ public class InfoFeatureCommand extends FeaturesCommandSupport {
 
     private String getConditionDescription(Conditional cond) {
         StringBuffer sb = new StringBuffer();
-        Iterator<? extends Dependency> di = cond.getCondition().iterator();
-        while (di.hasNext()) {
-            Dependency dep = di.next();
-            sb.append(dep.getName()).append("/").append(dep.getVersion());
-            if (di.hasNext()) {
+        for (String dep : cond.getCondition()) {
+            if (sb.length() > 0) {
                 sb.append(" ");
             }
+            sb.append(dep);
         }
         return sb.toString();
     }

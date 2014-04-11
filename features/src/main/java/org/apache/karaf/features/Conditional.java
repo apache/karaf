@@ -21,7 +21,7 @@ import java.util.Map;
 
 public interface Conditional {
 
-    List<? extends Dependency> getCondition();
+    List<String> getCondition();
 
     List<Dependency> getDependencies();
 

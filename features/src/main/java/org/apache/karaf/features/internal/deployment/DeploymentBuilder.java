@@ -158,8 +158,7 @@ public class DeploymentBuilder {
         return resources;
     }
 
-    public Map<Resource, List<Wire>> resolve(List<Resource> systemBundles,
-                                        boolean resolveOptionalImports) throws ResolutionException {
+    public Map<Resource, List<Wire>> resolve(List<Resource> systemBundles) throws ResolutionException {
         // Resolve
         for (int i = 0; i < systemBundles.size(); i++) {
             resources.put("system-bundle-" + i, systemBundles.get(i));
@@ -172,11 +171,32 @@ public class DeploymentBuilder {
         ResolverImpl resolver = new ResolverImpl(new Slf4jResolverLog(LOGGER));
         ResolveContext context = new ResolveContextImpl(
                 Collections.<Resource>singleton(requirements),
-                this.optionals,
+                Collections.<Resource>emptySet(),
                 new AggregateRepository(repos),
-                resolveOptionalImports);
+                false);
+        Map<Resource, List<Wire>> best = resolver.resolve(context);
 
-        return resolver.resolve(context);
+        // TODO: we actually need to use multiple passes for conditionals
+        // TODO: but it may be optimized by passing the old wiring instead
+        // TODO: of computing everything again
+        Set<Resource> resources = new HashSet<Resource>();
+        resources.add(requirements);
+        for (Resource optional : optionals) {
+            try {
+                Set<Resource> newSet = new HashSet<Resource>(resources);
+                newSet.add(optional);
+                context = new ResolveContextImpl(
+                        newSet,
+                        Collections.<Resource>emptySet(),
+                        new AggregateRepository(repos),
+                        false);
+                best = resolver.resolve(context);
+                resources = newSet;
+            } catch (ResolutionException e) {
+                // Ignore this resource
+            }
+        }
+        return best;
     }
 
     public void requireFeature(String feature) throws IOException {
