@@ -1,0 +1,30 @@
+h1. Synopsis
+
+${project.name}
+
+${project.description}
+
+Maven URL:
+[mvn:${project.groupId}/${project.artifactId}/${project.version}]
+
+h1. Description
+
+This bundle provides the Karaf shell commands to manipulate features.
+
+The following commands are available:
+
+* features:addUrl - Adds a list of repository URLs to the features service.
+* features:info- Shows information about selected information.
+* features:install- Installs a feature with the specified name and version.
+* features:list - Lists all existing features available from the defined repositories.
+* features:listVersions- Lists all versions of a feature available from the currently available repositories.
+* features:listRepositories- Displays a list of all defined repositories.
+* features:listUrl- Displays a list of all defined repository URLs.
+* features:refreshUrl- Reloads the list of available features from the repositories.
+* features:removeRepository- Removes the specified repository features service.
+* features:removeUrl- Removes the given list of repository URLs from the features service.
+* features:uninstall- Uninstalls a feature with the specified name and version.
+
+h1. See also
+
+Commands- and Provisioning- sections of the Karaf User Guide.
