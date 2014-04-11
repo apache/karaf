@@ -30,6 +30,7 @@ import org.apache.felix.utils.version.VersionTable;
 import org.apache.karaf.bundle.command.bundletree.Node;
 import org.apache.karaf.bundle.command.bundletree.Tree;
 import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
@@ -52,6 +53,10 @@ import static java.lang.String.format;
 public class ShowBundleTree extends BundleCommand {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ShowBundleTree.class);
+
+    @Option(name = "-v", aliases = { "--version" }, description = "Show bundle versions")
+    private boolean versions;
+
     private Tree<Bundle> tree;
 
     public ShowBundleTree() {
@@ -104,9 +109,16 @@ public class ShowBundleTree extends BundleCommand {
         tree.write(System.out, new Tree.Converter<Bundle>() {
 
             public String toString(Node<Bundle> node) {
-                return String.format("%s [%s]",
-                                     node.getValue().getSymbolicName(),
-                                     node.getValue().getBundleId());
+                if (versions) {
+                    return String.format("%s / [%s] [%s]",
+                            node.getValue().getSymbolicName(),
+                            node.getValue().getVersion().toString(),
+                            node.getValue().getBundleId());
+                } else {
+                    return String.format("%s [%s]",
+                            node.getValue().getSymbolicName(),
+                            node.getValue().getBundleId());
+                }
             }
         });
     }
