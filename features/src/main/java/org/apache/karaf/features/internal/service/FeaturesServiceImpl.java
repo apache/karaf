@@ -64,10 +64,7 @@ import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.Version;
-import org.osgi.framework.namespace.PackageNamespace;
 import org.osgi.framework.startlevel.BundleStartLevel;
-import org.osgi.framework.wiring.BundleCapability;
-import org.osgi.framework.wiring.BundleRequirement;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.BundleWire;
 import org.osgi.framework.wiring.BundleWiring;
@@ -1043,7 +1040,7 @@ public class FeaturesServiceImpl implements FeaturesService {
 
         // TODO: remove this hack, but it avoids loading the class after the bundle is refreshed
         new CopyOnWriteArrayIdentityList().iterator();
-        new RequirementSort();
+        RequirementSort.sort(Collections.<Resource>emptyList());
 
         if (!noRefresh) {
             toStop = new HashSet<Bundle>();
