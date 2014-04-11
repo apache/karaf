@@ -23,6 +23,7 @@ import static org.junit.Assert.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.List;
 
 import javax.xml.bind.JAXBException;
@@ -41,9 +42,9 @@ public class GenerateDescriptorMojoTest {
     @Test
     public void testReadXml100() throws JAXBException, SAXException, ParserConfigurationException, XMLStreamException {
 
-        InputStream in = getClass().getClassLoader().getResourceAsStream("input-features-1.0.0.xml");
+        URL url = getClass().getClassLoader().getResource("input-features-1.0.0.xml");
 
-        Features featuresRoot = JaxbUtil.unmarshal(in, false);
+        Features featuresRoot = JaxbUtil.unmarshal(url.toExternalForm(), false);
 
         assertEquals(featuresRoot.getRepository().size(), 1);
 
@@ -61,9 +62,9 @@ public class GenerateDescriptorMojoTest {
     @Test
     public void testReadXml1() throws Exception {
 
-        InputStream in = getClass().getClassLoader().getResourceAsStream("input-features-1.1.0.xml");
+        URL url = getClass().getClassLoader().getResource("input-features-1.1.0.xml");
 
-        Features featuresRoot = JaxbUtil.unmarshal(in, false);
+        Features featuresRoot = JaxbUtil.unmarshal(url.toExternalForm(), false);
 
         List<Feature> featuresList = featuresRoot.getFeature();
 

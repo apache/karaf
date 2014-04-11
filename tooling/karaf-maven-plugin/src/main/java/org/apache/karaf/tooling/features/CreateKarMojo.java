@@ -212,23 +212,18 @@ public class CreateKarMojo extends MojoSupport {
     private List<Artifact> readResources(File featuresFile) throws MojoExecutionException {
         List<Artifact> resources = new ArrayList<Artifact>();
         try {
-            InputStream in = new FileInputStream(featuresFile);
-            try {
-                Features features = JaxbUtil.unmarshal(in, false);
-                for (Feature feature : features.getFeature()) {
-                    for (BundleInfo bundle : feature.getBundles()) {
-                        if (ignoreDependencyFlag || (!ignoreDependencyFlag && !bundle.isDependency())) {
-                            resources.add(resourceToArtifact(bundle.getLocation(), false));
-                        }
-                    }
-                    for (ConfigFileInfo configFile : feature.getConfigurationFiles()) {
-                        resources.add(resourceToArtifact(configFile.getLocation(), false));
+            Features features = JaxbUtil.unmarshal(featuresFile.toURI().toASCIIString(), false);
+            for (Feature feature : features.getFeature()) {
+                for (BundleInfo bundle : feature.getBundles()) {
+                    if (ignoreDependencyFlag || (!ignoreDependencyFlag && !bundle.isDependency())) {
+                        resources.add(resourceToArtifact(bundle.getLocation(), false));
                     }
                 }
-                return resources;
-            } finally {
-                in.close();
+                for (ConfigFileInfo configFile : feature.getConfigurationFiles()) {
+                    resources.add(resourceToArtifact(configFile.getLocation(), false));
+                }
             }
+            return resources;
         } catch (MojoExecutionException e) {
             throw e;
         } catch (Exception e) {

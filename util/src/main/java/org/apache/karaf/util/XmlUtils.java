@@ -16,17 +16,25 @@
  */
 package org.apache.karaf.util;
 
-import com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl;
-import org.w3c.dom.Document;
-import org.xml.sax.ErrorHandler;
-import org.xml.sax.SAXException;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.*;
-import java.io.File;
-import java.io.IOException;
+import javax.xml.parsers.SAXParserFactory;
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+
+import org.w3c.dom.Document;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
 
 /**
  * Utils class to manipulate XML document in a thread safe way.
@@ -35,11 +43,21 @@ public class XmlUtils {
 
     private static final ThreadLocal<DocumentBuilderFactory> DOCUMENT_BUILDER_FACTORY = new ThreadLocal<DocumentBuilderFactory>();
     private static final ThreadLocal<TransformerFactory> TRANSFORMER_FACTORY = new ThreadLocal<TransformerFactory>();
+    private static final ThreadLocal<SAXParserFactory> SAX_PARSER_FACTORY = new ThreadLocal<SAXParserFactory>();
 
     public static Document parse(String uri) throws TransformerException, IOException, SAXException, ParserConfigurationException {
         DocumentBuilder db = documentBuilder();
         try {
             return db.parse(uri);
+        } finally {
+            db.reset();
+        }
+    }
+
+    public static Document parse(InputStream stream) throws TransformerException, IOException, SAXException, ParserConfigurationException {
+        DocumentBuilder db = documentBuilder();
+        try {
+            return db.parse(stream);
         } finally {
             db.reset();
         }
@@ -82,36 +100,40 @@ public class XmlUtils {
         }
     }
 
-    private static DocumentBuilder documentBuilder() throws ParserConfigurationException {
-        DocumentBuilderFactory dbf;
-        if (DOCUMENT_BUILDER_FACTORY.get() == null) {
+    public static XMLReader xmlReader() throws ParserConfigurationException, SAXException {
+        SAXParserFactory spf = SAX_PARSER_FACTORY.get();
+        if (spf == null) {
+            spf = SAXParserFactory.newInstance();
+            spf.setNamespaceAware(true);
+            SAX_PARSER_FACTORY.set(spf);
+        }
+        return spf.newSAXParser().getXMLReader();
+    }
+
+    public static DocumentBuilder documentBuilder() throws ParserConfigurationException {
+        DocumentBuilderFactory dbf = DOCUMENT_BUILDER_FACTORY.get();
+        if (dbf == null) {
             dbf = DocumentBuilderFactory.newInstance();
             dbf.setNamespaceAware(true);
             DOCUMENT_BUILDER_FACTORY.set(dbf);
-        } else {
-            dbf = DOCUMENT_BUILDER_FACTORY.get();
         }
         return dbf.newDocumentBuilder();
     }
 
-    private static Transformer transformer() throws TransformerConfigurationException {
-        TransformerFactory tf;
-        if (TRANSFORMER_FACTORY.get() == null) {
+    public static Transformer transformer() throws TransformerConfigurationException {
+        TransformerFactory tf = TRANSFORMER_FACTORY.get();
+        if (tf == null) {
             tf = TransformerFactory.newInstance();
             TRANSFORMER_FACTORY.set(tf);
-        } else {
-            tf = TRANSFORMER_FACTORY.get();
         }
         return tf.newTransformer();
     }
 
     private static Transformer transformer(Source xsltSource) throws TransformerConfigurationException {
-        TransformerFactory tf;
-        if (TRANSFORMER_FACTORY.get() == null) {
+        TransformerFactory tf = TRANSFORMER_FACTORY.get();
+        if (tf == null) {
             tf = TransformerFactory.newInstance();
             TRANSFORMER_FACTORY.set(tf);
-        } else {
-            tf = TRANSFORMER_FACTORY.get();
         }
         return tf.newTransformer(xsltSource);
     }

@@ -425,14 +425,7 @@ public class InstallKarsMojo extends MojoSupport {
             } else {
                 repoFile = new File(uri);
             }
-            InputStream in = new FileInputStream(repoFile);
-            Features features;
-            try {
-                features = JaxbUtil.unmarshal(in, false);
-            } finally {
-                in.close();
-            }
-            return features;
+            return JaxbUtil.unmarshal(repoFile.toURI().toASCIIString(), false);
         }
 
         public void installFeature(org.apache.karaf.features.Feature feature) throws Exception {

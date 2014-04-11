@@ -42,13 +42,8 @@ public class RepositoryImpl implements Repository {
         return uri;
     }
 
-    public String getName() {
-        // TODO: catching this exception is ugly
-        try {
-            load();
-        } catch (IOException e) {
-            throw new RuntimeException("Unable to load repository", e);
-        }
+    public String getName() throws IOException {
+        load();
         return features.getName();
     }
 
@@ -70,6 +65,10 @@ public class RepositoryImpl implements Repository {
 
 
     public void load() throws IOException {
+        load(false);
+    }
+
+    public void load(boolean validate) throws IOException {
         if (features == null) {
             try {
                 InputStream inputStream = uri.toURL().openStream();
@@ -83,7 +82,7 @@ public class RepositoryImpl implements Repository {
     				}
     			};
                 try {
-                    features = JaxbUtil.unmarshal(inputStream, false);
+                    features = JaxbUtil.unmarshal(uri.toASCIIString(), inputStream, validate);
                 } finally {
                     inputStream.close();
                 }

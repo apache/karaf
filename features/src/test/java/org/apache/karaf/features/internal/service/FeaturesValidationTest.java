@@ -16,20 +16,29 @@
  */
 package org.apache.karaf.features.internal.service;
 
+import java.io.InputStream;
+import java.net.URL;
+
+import org.apache.karaf.features.Repository;
+import org.apache.karaf.features.internal.model.Features;
+import org.apache.karaf.features.internal.model.JaxbUtil;
 import org.junit.Test;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 public class FeaturesValidationTest {
 
     @Test
-    public void testNoNs() throws Exception {
-        FeatureValidationUtil.validate(getClass().getResource("f01.xml").toURI());
+    public void testNs10() throws Exception {
+        FeatureValidationUtil.validate(getClass().getResource("f02.xml").toURI());
     }
 
     @Test
-    public void testNs10() throws Exception {
-        FeatureValidationUtil.validate(getClass().getResource("f02.xml").toURI());
+    public void testNs10Unmarshall() throws Exception {
+        URL url = getClass().getResource("f02.xml");
+        Features features = JaxbUtil.unmarshal(url.toExternalForm(), true);
+        assertNotNull(features);
     }
 
     @Test
@@ -38,13 +47,22 @@ public class FeaturesValidationTest {
     }
 
     @Test
+    public void testNs10NoNameUnmarshall() throws Exception {
+        URL url = getClass().getResource("f03.xml");
+        Features features = JaxbUtil.unmarshal(url.toExternalForm(), true);
+        assertNotNull(features);
+    }
+
+    @Test
     public void testNs11() throws Exception {
         FeatureValidationUtil.validate(getClass().getResource("f04.xml").toURI());
     }
 
     @Test
-    public void testNs12() throws Exception {
-        FeatureValidationUtil.validate(getClass().getResource("f06.xml").toURI());
+    public void testNs11Unmarshall() throws Exception {
+        URL url = getClass().getResource("f04.xml");
+        Features features = JaxbUtil.unmarshal(url.toExternalForm(), true);
+        assertNotNull(features);
     }
 
     @Test
@@ -58,8 +76,27 @@ public class FeaturesValidationTest {
     }
 
     @Test
+    public void testNs12() throws Exception {
+        FeatureValidationUtil.validate(getClass().getResource("f06.xml").toURI());
+    }
+
+    @Test
+    public void testNs12Unmarshall() throws Exception {
+        URL url = getClass().getResource("f06.xml");
+        Features features = JaxbUtil.unmarshal(url.toExternalForm(), true);
+        assertNotNull(features);
+    }
+
+    @Test
     public void testNs13() throws Exception {
         FeatureValidationUtil.validate(getClass().getResource("f07.xml").toURI());
+    }
+
+    @Test
+    public void testNs13Unmarshall() throws Exception {
+        URL url = getClass().getResource("f07.xml");
+        Features features = JaxbUtil.unmarshal(url.toExternalForm(), true);
+        assertNotNull(features);
     }
 
 }

@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.features;
 
+import java.io.IOException;
 import java.net.URI;
 
 /**
@@ -23,7 +24,7 @@ import java.net.URI;
  */
 public interface Repository {
 
-    String getName();
+    String getName() throws IOException;
 
     URI getURI();
 

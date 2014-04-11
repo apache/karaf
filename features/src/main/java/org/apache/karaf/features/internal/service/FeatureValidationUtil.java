@@ -15,37 +15,14 @@
  */
 package org.apache.karaf.features.internal.service;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
-import java.net.URLConnection;
 
-import javax.xml.XMLConstants;
-import javax.xml.namespace.QName;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamSource;
-import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
-import javax.xml.validation.Validator;
-
-import org.apache.karaf.features.FeaturesNamespaces;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
+import org.apache.karaf.features.internal.model.JaxbUtil;
 
 /**
  * Utility class which fires XML Schema validation.
  */
 public class FeatureValidationUtil {
-
-    public static final QName FEATURES_0_0 = new QName("features");
-    public static final QName FEATURES_1_0 = new QName("http://karaf.apache.org/xmlns/features/v1.0.0", "features");
-    public static final QName FEATURES_1_1 = new QName("http://karaf.apache.org/xmlns/features/v1.1.0", "features");
-    public static final QName FEATURES_1_2 = new QName("http://karaf.apache.org/xmlns/features/v1.2.0", "features");
-    private static final Logger LOGGER = LoggerFactory.getLogger(FeatureValidationUtil.class);
 
     /**
      * Runs schema validation.
@@ -54,60 +31,7 @@ public class FeatureValidationUtil {
      * @throws Exception When validation fails.
      */
     public static void validate(URI uri) throws Exception {
-        Document doc = load(uri);
-
-        QName name = new QName(doc.getDocumentElement().getNamespaceURI(), doc.getDocumentElement().getLocalName());
-
-        if (FeaturesNamespaces.FEATURES_0_0_0.equals(name)) {
-            LOGGER.warn("Old style feature file without namespace found (URI: {}). This format is deprecated and support for it will soon be removed", uri);
-            return;
-        } else if (FeaturesNamespaces.FEATURES_1_0_0.equals(name)) {
-            validate(doc, "/org/apache/karaf/features/karaf-features-1.0.0.xsd");
-        } else if (FeaturesNamespaces.FEATURES_1_1_0.equals(name)) {
-            validate(doc, "/org/apache/karaf/features/karaf-features-1.1.0.xsd");
-        } else if (FeaturesNamespaces.FEATURES_1_2_0.equals(name)) {
-            validate(doc, "/org/apache/karaf/features/karaf-features-1.2.0.xsd");
-        } else if (FeaturesNamespaces.FEATURES_1_3_0.equals(name)) {
-            validate(doc, "/org/apache/karaf/features/karaf-features-1.3.0.xsd");
-        }
-        else {
-            throw new IllegalArgumentException("Unrecognized root element: " + name);
-        }
-    }
-
-    private static Document load(URI uri) throws IOException, SAXException, ParserConfigurationException {
-        InputStream stream = null;
-        try {
-            URLConnection conn;
-            try {
-                conn = uri.toURL().openConnection();
-            } catch (IllegalArgumentException e) {
-                throw new IllegalArgumentException("invalid URI: " + uri, e);
-            }
-            conn.setDefaultUseCaches(false);
-            stream = conn.getInputStream();
-            // load document and check the root element for namespace declaration
-            DocumentBuilderFactory dFactory = DocumentBuilderFactory.newInstance();
-            dFactory.setNamespaceAware(true);
-            return dFactory.newDocumentBuilder().parse(stream);
-        } finally {
-            if (stream != null) {
-                stream.close();
-            }
-        }
-    }
-
-    private static void validate(Document doc, String schemaLocation) throws SAXException {
-        SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-        // root element has namespace - we can use schema validation
-        Schema schema = factory.newSchema(new StreamSource(FeatureValidationUtil.class.getResourceAsStream(schemaLocation)));
-        // create schema by reading it from an XSD file:
-        Validator validator = schema.newValidator();
-        try {
-            validator.validate(new DOMSource(doc));
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Unable to validate " + doc.getDocumentURI(), e);
-        }
+        JaxbUtil.unmarshal(uri.toASCIIString(), true);
     }
 
 }

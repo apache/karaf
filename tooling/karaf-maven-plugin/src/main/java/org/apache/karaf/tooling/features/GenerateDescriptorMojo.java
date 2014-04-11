@@ -401,14 +401,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
     }
 
     private Features readFeaturesFile(File featuresFile) throws XMLStreamException, JAXBException, IOException {
-        Features features;
-        InputStream in = new FileInputStream(featuresFile);
-        try {
-            features = JaxbUtil.unmarshal(in, false);
-        } finally {
-            in.close();
-        }
-        return features;
+        return JaxbUtil.unmarshal(featuresFile.toURI().toASCIIString(), false);
     }
 
     public void setLog(Log log) {

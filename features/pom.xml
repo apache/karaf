@@ -129,12 +129,16 @@
                             org.apache.felix.resolver,
                             org.apache.felix.utils.version,
                             org.apache.felix.utils.manifest,
+                            org.apache.karaf.util,
                             org.apache.karaf.util.collections,
                             org.apache.karaf.util.json,
                             org.apache.karaf.util.tracker,
                             org.osgi.service.resolver,
                             org.osgi.service.repository
                         </Private-Package>
+                        <Embed-Dependency>
+                            org.apache.karaf.util;inline="org/apache/karaf/util/XmlUtils*.class"
+                        </Embed-Dependency>
                         <Bundle-Activator>
                             org.apache.karaf.features.internal.osgi.Activator
                         </Bundle-Activator>

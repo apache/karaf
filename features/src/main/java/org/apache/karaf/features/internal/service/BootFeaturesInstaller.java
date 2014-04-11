@@ -89,7 +89,7 @@ public class BootFeaturesInstaller {
                     try {
                         featuresService.addRepository(URI.create(repo));
                     } catch (Exception e) {
-                        LOGGER.error("Error installing boot feature repository " + repo);
+                        LOGGER.error("Error installing boot feature repository " + repo, e);
                     }
                 }
             }

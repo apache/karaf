@@ -281,10 +281,8 @@ public class FeaturesServiceImpl implements FeaturesService {
     //
 
     public Repository loadRepository(URI uri) throws Exception {
-        // TODO: merge validation and loading by loading the DOM, validating, unmarshalling
-        FeatureValidationUtil.validate(uri);
         RepositoryImpl repo = new RepositoryImpl(uri);
-        repo.load();
+        repo.load(true);
         return repo;
     }
 

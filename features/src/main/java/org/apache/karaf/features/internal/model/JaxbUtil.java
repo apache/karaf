@@ -23,19 +23,27 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Writer;
+import java.net.URL;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.ValidationEvent;
-import javax.xml.bind.ValidationEventHandler;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-import javax.xml.stream.XMLInputFactory;
+import javax.xml.namespace.QName;
+import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.sax.SAXSource;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
 
 import org.apache.karaf.features.FeaturesNamespaces;
+import org.apache.karaf.util.XmlUtils;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -45,7 +53,6 @@ import org.xml.sax.helpers.XMLFilterImpl;
 
 public class JaxbUtil {
 
-    public static final XMLInputFactory XMLINPUT_FACTORY = XMLInputFactory.newInstance();
     private static final JAXBContext FEATURES_CONTEXT;
     static {
         try {
@@ -75,45 +82,113 @@ public class JaxbUtil {
     /**
      * Read in a Features from the input stream.
      *
-     * @param in       input stream to read
+     * @param uri      uri to read
      * @param validate whether to validate the input.
      * @return a Features read from the input stream
-     * @throws ParserConfigurationException is the SAX parser can not be configured
-     * @throws SAXException                 if there is an xml problem
-     * @throws JAXBException                if the xml cannot be marshalled into a T.
      */
-    public static Features unmarshal(InputStream in, boolean validate) {
-        InputSource inputSource = new InputSource(in);
+    public static Features unmarshal(String uri, boolean validate) {
+        if (validate) {
+            return unmarshalValidate(uri, null);
+        } else {
+            return unmarshalNoValidate(uri, null);
+        }
+    }
 
-        SAXParserFactory factory = SAXParserFactory.newInstance();
-        factory.setNamespaceAware(true);
-        factory.setValidating(validate);
-        SAXParser parser;
+    public static Features unmarshal(String uri, InputStream stream, boolean validate) {
+        if (validate) {
+            return unmarshalValidate(uri, stream);
+        } else {
+            return unmarshalNoValidate(uri, stream);
+        }
+    }
+
+    private static Features unmarshalValidate(String uri, InputStream stream) {
         try {
-            parser = factory.newSAXParser();
-        
-
-        Unmarshaller unmarshaller = FEATURES_CONTEXT.createUnmarshaller();
-        unmarshaller.setEventHandler(new ValidationEventHandler() {
-            public boolean handleEvent(ValidationEvent validationEvent) {
-                System.out.println(validationEvent);
-                return false;
+            Document doc;
+            if (stream != null) {
+                doc = XmlUtils.parse(stream);
+                doc.setDocumentURI(uri);
+            } else {
+                doc = XmlUtils.parse(uri);
             }
-        });
 
-        XMLFilter xmlFilter = new NoSourceAndNamespaceFilter(parser.getXMLReader());
-        xmlFilter.setContentHandler(unmarshaller.getUnmarshallerHandler());
+            Schema schema = getSchema(doc.getDocumentElement().getNamespaceURI());
+            try {
+                schema.newValidator().validate(new DOMSource(doc));
+            } catch (SAXException e) {
+                throw new IllegalArgumentException("Unable to validate " + uri, e);
+            }
 
-        SAXSource source = new SAXSource(xmlFilter, inputSource);
+            fixDom(doc, doc.getDocumentElement());
+            Unmarshaller unmarshaller = FEATURES_CONTEXT.createUnmarshaller();
+            return (Features) unmarshaller.unmarshal(new DOMSource(doc));
 
-        return (Features)unmarshaller.unmarshal(source);
-        
-        } catch (ParserConfigurationException e) {
-            throw new RuntimeException(e);
-        } catch (JAXBException e) {
-            throw new RuntimeException(e);
-        } catch (SAXException e) {
-            throw new RuntimeException(e);
+
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to load " + uri, e);
+        }
+    }
+
+    private static Map<String, Schema> schemas = new ConcurrentHashMap<String, Schema>();
+    private static Schema getSchema(String namespace) throws SAXException {
+        Schema schema = schemas.get(namespace);
+        if (schema == null) {
+            String schemaLocation;
+            if (FeaturesNamespaces.URI_1_0_0.equals(namespace)) {
+                schemaLocation = "/org/apache/karaf/features/karaf-features-1.0.0.xsd";
+            } else if (FeaturesNamespaces.URI_1_1_0.equals(namespace)) {
+                schemaLocation = "/org/apache/karaf/features/karaf-features-1.1.0.xsd";
+            } else if (FeaturesNamespaces.URI_1_2_0.equals(namespace)) {
+                schemaLocation = "/org/apache/karaf/features/karaf-features-1.2.0.xsd";
+            } else if (FeaturesNamespaces.URI_1_3_0.equals(namespace)) {
+                schemaLocation = "/org/apache/karaf/features/karaf-features-1.3.0.xsd";
+            } else {
+                throw new IllegalArgumentException("Unsupported namespace: " + namespace);
+            }
+
+            SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+            // root element has namespace - we can use schema validation
+            URL url = JaxbUtil.class.getResource(schemaLocation);
+            if (url == null) {
+                throw new IllegalStateException("Could not find resource: " + schemaLocation);
+            }
+            schema = factory.newSchema(new StreamSource(url.toExternalForm()));
+            schemas.put(namespace, schema);
+        }
+        return schema;
+    }
+
+
+    private static void fixDom(Document doc, Node node) {
+        if (node.getNamespaceURI() != null && !FeaturesNamespaces.URI_CURRENT.equals(node.getNamespaceURI())) {
+            doc.renameNode(node, FeaturesNamespaces.URI_CURRENT, node.getLocalName());
+        }
+        NodeList children = node.getChildNodes();
+        for (int i = 0; i < children.getLength(); i++) {
+            fixDom(doc, children.item(i));
+        }
+    }
+
+    private static Features unmarshalNoValidate(String uri, InputStream stream) {
+        try {
+            Unmarshaller unmarshaller = FEATURES_CONTEXT.createUnmarshaller();
+            XMLFilter xmlFilter = new NoSourceAndNamespaceFilter(XmlUtils.xmlReader());
+            xmlFilter.setContentHandler(unmarshaller.getUnmarshallerHandler());
+
+
+            InputSource is = new InputSource(uri);
+            if (stream != null) {
+                is.setByteStream(stream);
+            }
+            SAXSource source = new SAXSource(xmlFilter, new InputSource(uri));
+            return (Features) unmarshaller.unmarshal(source);
+
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to load " + uri, e);
         }
     }
 
