@@ -51,18 +51,8 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.karaf.features</groupId>
-            <artifactId>org.apache.karaf.features.command</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>org.apache.karaf.instance</groupId>
             <artifactId>org.apache.karaf.instance.core</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.instance</groupId>
-            <artifactId>org.apache.karaf.instance.command</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -86,28 +76,13 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.karaf.diagnostic</groupId>
-            <artifactId>org.apache.karaf.diagnostic.command</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>org.apache.karaf.log</groupId>
             <artifactId>org.apache.karaf.log.core</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.karaf.log</groupId>
-            <artifactId>org.apache.karaf.log.command</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>org.apache.karaf.service</groupId>
             <artifactId>org.apache.karaf.service.core</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.service</groupId>
-            <artifactId>org.apache.karaf.service.command</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -144,11 +119,6 @@
             <artifactId>org.apache.karaf.wrapper.core</artifactId>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.wrapper</groupId>
-            <artifactId>org.apache.karaf.wrapper.command</artifactId>
-            <scope>provided</scope>
-        </dependency>
 
         <!-- obr deps -->
         <dependency>
@@ -174,11 +144,6 @@
         <dependency>
             <groupId>org.apache.karaf.obr</groupId>
             <artifactId>org.apache.karaf.obr.core</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.obr</groupId>
-            <artifactId>org.apache.karaf.obr.command</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -209,11 +174,6 @@
             <artifactId>org.apache.karaf.config.core</artifactId>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.config</groupId>
-            <artifactId>org.apache.karaf.config.command</artifactId>
-            <scope>provided</scope>
-        </dependency>
 
         <!-- region deps -->
         <dependency>
@@ -223,12 +183,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.karaf.region</groupId>
-            <artifactId>org.apache.karaf.region.persist</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.region</groupId>
-            <artifactId>org.apache.karaf.region.command</artifactId>
+            <artifactId>org.apache.karaf.region.core</artifactId>
             <scope>provided</scope>
         </dependency>
 
@@ -270,11 +225,6 @@
             <artifactId>org.apache.karaf.package.core</artifactId>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.package</groupId>
-            <artifactId>org.apache.karaf.package.command</artifactId>
-            <scope>provided</scope>
-        </dependency>
 
         <!-- http deps -->
         <dependency>
@@ -300,11 +250,6 @@
         <dependency>
             <groupId>org.apache.karaf.http</groupId>
             <artifactId>org.apache.karaf.http.core</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.http</groupId>
-            <artifactId>org.apache.karaf.http.command</artifactId>
             <scope>provided</scope>
         </dependency>
 
@@ -362,21 +307,11 @@
             <artifactId>org.apache.karaf.web.core</artifactId>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.web</groupId>
-            <artifactId>org.apache.karaf.web.command</artifactId>
-            <scope>provided</scope>
-        </dependency>
 
         <!-- kar deps -->
         <dependency>
             <groupId>org.apache.karaf.kar</groupId>
             <artifactId>org.apache.karaf.kar.core</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.kar</groupId>
-            <artifactId>org.apache.karaf.kar.command</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
