@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.felix.utils.manifest.Attribute;
 import org.apache.felix.utils.manifest.Clause;
@@ -48,6 +49,7 @@ import org.osgi.framework.wiring.BundleWiring;
 @Service
 public class Headers extends BundlesCommand {
 
+    protected final static String KARAF_PREFIX = "Karaf-";
     protected final static String BUNDLE_PREFIX = "Bundle-";
     protected final static String PACKAGE_SUFFFIX = "-Package";
     protected final static String SERVICE_SUFFIX = "-Service";
@@ -90,10 +92,11 @@ public class Headers extends BundlesCommand {
 
     protected String generateFormattedOutput(Bundle bundle) {
         StringBuilder output = new StringBuilder();
-        Map<String, Object> otherAttribs = new HashMap<String, Object>();
-        Map<String, Object> bundleAttribs = new HashMap<String, Object>();
-        Map<String, Object> serviceAttribs = new HashMap<String, Object>();
-        Map<String, Object> packagesAttribs = new HashMap<String, Object>();
+        Map<String, Object> otherAttribs = new TreeMap<String, Object>();
+        Map<String, Object> karafAttribs = new TreeMap<String, Object>();
+        Map<String, Object> bundleAttribs = new TreeMap<String, Object>();
+        Map<String, Object> serviceAttribs = new TreeMap<String, Object>();
+        Map<String, Object> packagesAttribs = new TreeMap<String, Object>();
         Dictionary<String, String> dict = bundle.getHeaders();
         Enumeration<String> keys = dict.keys();
 
@@ -101,7 +104,10 @@ public class Headers extends BundlesCommand {
         while (keys.hasMoreElements()) {
             String k = (String) keys.nextElement();
             Object v = dict.get(k);
-            if (k.startsWith(BUNDLE_PREFIX)) {
+            if (k.startsWith(KARAF_PREFIX)) {
+                // starts with Karaf-xxx
+                karafAttribs.put(k, v);
+            } else if (k.startsWith(BUNDLE_PREFIX)) {
                 // starts with Bundle-xxx
                 bundleAttribs.put(k, v);
             } else if (k.endsWith(SERVICE_SUFFIX) || k.endsWith(CAPABILITY_SUFFIX)) {
@@ -124,6 +130,8 @@ public class Headers extends BundlesCommand {
         // -----------------------
         // all other attributes
         //
+        // all Karaf attributes
+        //
         // all Bundle attributes
         //
         // all Service attributes
@@ -135,6 +143,15 @@ public class Headers extends BundlesCommand {
             output.append(String.format("%s = %s\n", e.getKey(), ShellUtil.getValueString(e.getValue())));
         }
         if (otherAttribs.size() > 0) {
+            output.append('\n');
+        }
+
+        it = karafAttribs.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<String, Object> e = it.next();
+            output.append(String.format("%s = %s\n", e.getKey(), ShellUtil.getValueString(e.getValue())));
+        }
+        if (karafAttribs.size() > 0) {
             output.append('\n');
         }
 
