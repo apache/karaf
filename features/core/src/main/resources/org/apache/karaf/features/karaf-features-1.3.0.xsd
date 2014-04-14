@@ -81,14 +81,6 @@ The help text shown for this feature when using feature:info console command.
         <xs:attribute name="name" type="tns:featureName" use="required" />
         <xs:attribute name="version" type="xs:string" default="0.0.0" />
         <xs:attribute name="description" type="xs:string" />
-        <xs:attribute name="resolver" type="tns:resolver">
-            <xs:annotation>
-                <xs:documentation><![CDATA[
-Optional alternative resolver to use for determining the list of bundles to install for a given feature.
-                ]]>
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
         <xs:attribute name="install" type="tns:install">
             <xs:annotation>
                 <xs:documentation><![CDATA[
@@ -251,18 +243,6 @@ Feature name should be non empty string.
         </xs:restriction>
     </xs:simpleType>
 
-    <xs:simpleType name="resolver">
-        <xs:annotation>
-            <xs:documentation><![CDATA[
-Resolver to use. Karaf will look for OSGi service which have following properties:
-objectClass: org.apache.karaf.features.Resolver
-name: the value
-            ]]></xs:documentation>
-        </xs:annotation>
-        <xs:restriction base="xs:string">
-            <xs:minLength value="1" />
-        </xs:restriction>
-    </xs:simpleType>
     <xs:simpleType name="install">
         <xs:annotation>
             <xs:documentation><![CDATA[

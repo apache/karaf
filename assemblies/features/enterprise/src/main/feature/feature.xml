@@ -22,7 +22,7 @@
 
     <repository>mvn:org.ops4j.pax.cdi/pax-cdi-features/${pax.cdi.version}/xml/features</repository>
 
-    <feature name="transaction" description="OSGi Transaction Manager" version="${aries.transaction.version}" resolver="(obr)">
+    <feature name="transaction" description="OSGi Transaction Manager" version="${aries.transaction.version}">
         <details>JTA implementation provided by Apache Aries Transaction ${aries.transaction.version}</details>
         <config name="org.apache.aries.transaction">
             aries.transaction.recoverable = true
@@ -40,7 +40,7 @@
         </conditional>
     </feature>
 
-    <feature name="jpa" description="OSGi Persistence Container" version="${aries.jpa.version}" resolver="(obr)">
+    <feature name="jpa" description="OSGi Persistence Container" version="${aries.jpa.version}">
         <details>JPA implementation provided by Apache Aries JPA ${aries.jpa.version}. NB: this feature doesn"t provide the JPA engine, you have to install one by yourself (OpenJPA for instance)</details>
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jpa_2.0_spec/${geronimo.jpa-spec.version}</bundle>
@@ -53,7 +53,7 @@
         </conditional>
     </feature>
 
-    <feature name="openjpa" description="Apache OpenJPA 2.2.x persistence engine support" version="2.2.2" resolver="(obr)">
+    <feature name="openjpa" description="Apache OpenJPA 2.2.x persistence engine support" version="2.2.2">
         <details>Enable Apache OpenJPA as persistence engine.</details>
         <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-annotation_1.0_spec/1.1.1</bundle>
         <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-jpa_2.0_spec/${geronimo.jpa-spec.version}</bundle>
@@ -72,7 +72,7 @@
         <feature>jpa</feature>
     </feature>
 
-    <feature name="openjpa" description="Apache OpenJPA 2.3.x persistence engine support" version="2.3.0" resolver="(obr)">
+    <feature name="openjpa" description="Apache OpenJPA 2.3.x persistence engine support" version="2.3.0">
         <details>Enable Apache OpenJPA as persistence engine.</details>
         <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-annotation_1.0_spec/1.1.1</bundle>
         <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-jpa_2.0_spec/${geronimo.jpa-spec.version}</bundle>
@@ -91,7 +91,7 @@
         <feature>jpa</feature>
     </feature>
 
-    <feature name="hibernate" description="Hibernate 3.x JPA persistence engine support" version="${hibernate3.version}" resolver="(obr)">
+    <feature name="hibernate" description="Hibernate 3.x JPA persistence engine support" version="${hibernate3.version}">
         <details>Enable Hibernate 3.x as persistence engine.</details>
         <bundle dependency="true">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.java-persistence-api-1.1.1/${servicemix.specs.version}</bundle>
         <bundle dependency="true">mvn:commons-collections/commons-collections/${commons-collections.version}</bundle>
@@ -109,7 +109,7 @@
         <feature>jpa</feature>
     </feature>
 
-    <feature name="hibernate" description="Hibernate 4.2.x JPA persistence engine support" version="${hibernate42.version}" resolver="(obr)">
+    <feature name="hibernate" description="Hibernate 4.2.x JPA persistence engine support" version="${hibernate42.version}">
         <details>Enable Hibernate 4.2.x as persistence engine.</details>
         <feature>transaction</feature>
         <feature>http</feature>
@@ -129,13 +129,13 @@
         <feature>jpa</feature>
     </feature>
 
-    <feature name="hibernate-envers" description="Hibernate Envers 4.2.x" version="${hibernate42.version}" resolver="(obr)">
+    <feature name="hibernate-envers" description="Hibernate Envers 4.2.x" version="${hibernate42.version}">
         <details>Enable Hibernate Envers 4.2.x</details>
         <feature version="${hibernate42.version}">hibernate</feature>
         <bundle start-level="100">mvn:org.hibernate/hibernate-envers/${hibernate42.version}</bundle>
     </feature>
 
-    <feature name="hibernate" description="Hibernate 4.3.x JPA persistence engine support" version="${hibernate43.version}" resolver="(obr)">
+    <feature name="hibernate" description="Hibernate 4.3.x JPA persistence engine support" version="${hibernate43.version}">
         <details>Enable Hibernate 4.3.x as persistence engine.</details>
         <feature>transaction</feature>
         <feature>http</feature>
@@ -156,13 +156,13 @@
         <feature>jpa</feature>
     </feature>
 
-    <feature name="hibernate-envers" description="Hibernate Envers 4.3.x" version="${hibernate43.version}" resolver="(obr)">
+    <feature name="hibernate-envers" description="Hibernate Envers 4.3.x" version="${hibernate43.version}">
         <details>Enable Hibernate Envers 4.3.x</details>
         <feature version="${hibernate43.version}">hibernate</feature>
         <bundle start-level="100">mvn:org.hibernate/hibernate-envers/${hibernate43.version}</bundle>
     </feature>
 
-    <feature name="hibernate-validator" description="Hibernate Validator support" version="${hibernate.validator.version}" resolver="(obr)">
+    <feature name="hibernate-validator" description="Hibernate Validator support" version="${hibernate.validator.version}">
         <bundle dependency="true">mvn:javax.validation/validation-api/1.1.0.Final</bundle>
         <bundle dependency="true">mvn:com.fasterxml/classmate/1.0.0</bundle>
         <bundle dependency="true">mvn:javax.el/javax.el-api/2.2.4</bundle>
@@ -171,7 +171,7 @@
         <bundle>mvn:org.hibernate/hibernate-validator/${hibernate.validator.version}</bundle>
     </feature>
 
-    <feature name="jndi" description="OSGi Service Registry JNDI access" version="${project.version}" resolver="(obr)">
+    <feature name="jndi" description="OSGi Service Registry JNDI access" version="${project.version}">
         <details>JNDI support provided by Apache Aries JNDI ${aries.jndi.version}, including additional service, commands, and MBean.</details>
         <feature>aries-proxy</feature>
         <bundle start-level="30">mvn:org.apache.xbean/xbean-naming/${xbean.version}</bundle>
@@ -183,7 +183,7 @@
         <bundle start-level="30">mvn:org.apache.karaf.jndi/org.apache.karaf.jndi.core/${project.version}</bundle>
     </feature>
 
-    <feature name="jdbc" description="JDBC service and commands" version="${project.version}" resolver="(obr)">
+    <feature name="jdbc" description="JDBC service and commands" version="${project.version}">
         <details>JDBC support providing service, commands, and MBean.</details>
         <feature>transaction</feature>
         <bundle>mvn:commons-pool/commons-pool/${commons-pool.version}</bundle>
@@ -199,7 +199,7 @@
         </requirement>
     </feature>
 
-    <feature name="jms" description="JMS service and commands" version="${project.version}" resolver="(obr)">
+    <feature name="jms" description="JMS service and commands" version="${project.version}">
         <details>JMS support provinding service, commands, and MBean.</details>
         <feature>transaction</feature>
         <feature>aries-blueprint</feature>
@@ -207,7 +207,7 @@
         <bundle>mvn:org.apache.karaf.jms/org.apache.karaf.jms.core/${project.version}</bundle>
     </feature>
 
-    <feature name="openwebbeans" description="Apache OpenWebBeans CDI container support" version="${openwebbeans.version}" resolver="(obr)">
+    <feature name="openwebbeans" description="Apache OpenWebBeans CDI container support" version="${openwebbeans.version}">
         <details>Add support of Apache OpenWebBeans CDI container.</details>
         <feature>http</feature>
         <feature>pax-cdi-openwebbeans</feature>
@@ -215,7 +215,7 @@
         <bundle>mvn:org.apache.openwebbeans/openwebbeans-osgi/${openwebbeans.version}</bundle>
     </feature>
 
-    <feature name="weld" description="JBoss Weld CDI container support" version="${weld.version}" resolver="(obr)">
+    <feature name="weld" description="JBoss Weld CDI container support" version="${weld.version}">
         <details>Add support of JBoss Weld CDI container.</details>
         <feature>pax-cdi-weld</feature>
         <bundle>mvn:org.jboss.weld/weld-osgi-bundle/${weld.version}</bundle>

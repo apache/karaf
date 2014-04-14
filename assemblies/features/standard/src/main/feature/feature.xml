@@ -153,7 +153,7 @@
         <bundle start-level="30">mvn:org.apache.karaf.region/org.apache.karaf.region.core/${project.version}</bundle>
     </feature>
 
-    <feature name="package" version="${project.version}" resolver="(obr)" description="Package commands and mbeans">
+    <feature name="package" version="${project.version}" description="Package commands and mbeans">
         <bundle start-level="30">mvn:org.apache.karaf.package/org.apache.karaf.package.core/${project.version}</bundle>
     </feature>
 
@@ -165,31 +165,31 @@
         <bundle start-level="30" start="true">mvn:org.apache.karaf.system/org.apache.karaf.system.core/${project.version}</bundle>
     </feature>
 
-    <feature name="http" version="${project.version}" resolver="(obr)" description="Implementation of the OSGI HTTP Service">
+    <feature name="http" version="${project.version}" description="Implementation of the OSGI HTTP Service">
         <feature>pax-http</feature>
         <bundle start-level="30">mvn:org.apache.karaf.http/org.apache.karaf.http.core/${project.version}</bundle>
     </feature>
 
-    <feature name="http-whiteboard" description="Provide HTTP Whiteboard pattern support" version="${project.version}" resolver="(obr)">
+    <feature name="http-whiteboard" description="Provide HTTP Whiteboard pattern support" version="${project.version}">
     	<feature>http</feature>
         <feature>pax-http-whiteboard</feature>
     </feature>
 
-    <feature name="war" description="Turn Karaf as a full WebContainer" version="${project.version}" resolver="(obr)">
+    <feature name="war" description="Turn Karaf as a full WebContainer" version="${project.version}">
         <feature>http</feature>
         <feature>pax-war</feature>
         <bundle start-level="30">mvn:org.apache.karaf.web/org.apache.karaf.web.core/${project.version}</bundle>
     </feature>
     
-    <feature name="jetty" version="8.1.9.v20130131" resolver="(obr)">
+    <feature name="jetty" version="8.1.9.v20130131">
     	<feature>pax-jetty</feature>
     </feature>
 
-    <feature name="kar" description="Provide KAR (KARaf archive) support" version="${project.version}" resolver="(obr)">
+    <feature name="kar" description="Provide KAR (KARaf archive) support" version="${project.version}">
         <bundle start-level="30">mvn:org.apache.karaf.kar/org.apache.karaf.kar.core/${project.version}</bundle>
     </feature>
 
-    <feature name="webconsole" description="Base support of the Karaf WebConsole" version="${project.version}" resolver="(obr)">
+    <feature name="webconsole" description="Base support of the Karaf WebConsole" version="${project.version}">
         <config name="org.apache.karaf.webconsole">
             realm=karaf
         </config>
@@ -246,11 +246,11 @@
         </conditional>
     </feature>
 
-    <feature name="scheduler" description="Provide a scheduler service in Karaf to fire events" version="${project.version}" resolver="(obr)">
+    <feature name="scheduler" description="Provide a scheduler service in Karaf to fire events" version="${project.version}">
         <bundle start-level="30">mvn:org.apache.karaf.scheduler/org.apache.karaf.scheduler.core/${project.version}</bundle>
     </feature>
 
-    <feature name="eventadmin" description="OSGi Event Admin service specification for event-based communication" version="${project.version}" resolver="(obr)">
+    <feature name="eventadmin" description="OSGi Event Admin service specification for event-based communication" version="${project.version}">
         <config name="org.apache.felix.eventadmin.impl.EventAdmin">
             org.apache.felix.eventadmin.AddTimestamp=true
             org.apache.felix.eventadmin.AddSubject=true
@@ -262,7 +262,7 @@
         </conditional>
     </feature>
 
-    <feature name="jasypt-encryption" description="Advanced encryption support for Karaf security" version="${project.version}" resolver="(obr)">
+    <feature name="jasypt-encryption" description="Advanced encryption support for Karaf security" version="${project.version}">
         <bundle dependency="true" start-level="30">mvn:commons-codec/commons-codec/${commons-codec.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:commons-lang/commons-lang/${commons-lang.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jasypt/${jasypt.bundle.version}</bundle>
@@ -273,7 +273,7 @@
         </conditional>
     </feature>
 
-    <feature name="scr" description="Declarative Service support" version="${project.version}" resolver="(obr)">
+    <feature name="scr" description="Declarative Service support" version="${project.version}">
         <feature>eventadmin</feature>
         <bundle dependency="true" start-level="30">mvn:org.apache.felix/org.apache.felix.metatype/${felix.metatype.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.felix/org.apache.felix.scr/${felix.scr.version}</bundle>
@@ -289,7 +289,7 @@
     </feature>
 
     <feature name="blueprint-web" description="Provides an OSGI-aware Servlet ContextListener for bootstrapping
-        blueprint inside web-bundle containers" version="${project.version}" resolver="(obr)">
+        blueprint inside web-bundle containers" version="${project.version}">
         <feature>war</feature>
         <bundle>mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.webosgi/${aries.blueprint.web.version}</bundle>
     </feature>
