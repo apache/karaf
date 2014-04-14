@@ -84,8 +84,13 @@
                             org.apache.karaf.jdbc.command,
                             org.apache.karaf.jdbc.command.completers,
                             org.apache.karaf.jdbc.internal,
-                            org.apache.karaf.util
+                            org.apache.karaf.jdbc.internal.osgi,
+                            org.apache.karaf.util,
+                            org.apache.karaf.util.tracker
                         </Private-Package>
+                        <Bundle-Activator>
+                            org.apache.karaf.jdbc.internal.osgi.Activator
+                        </Bundle-Activator>
                         <Karaf-Commands>*</Karaf-Commands>
                     </instructions>
                 </configuration>
