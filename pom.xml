@@ -155,6 +155,7 @@
         <equinox.version>3.8.2.v20130124-134944</equinox.version>
         <bndlib.version>2.2.0</bndlib.version>
         <equinox.region.version>1.1.0.v20120522-1841</equinox.region.version>
+        <equinox.coordinator.version>1.1.0.v20120522-1841</equinox.coordinator.version>
         <felix.bundlerepository.version>1.6.6</felix.bundlerepository.version>
         <felix.configadmin.version>1.8.0</felix.configadmin.version>
         <felix.fileinstall.version>3.2.8</felix.fileinstall.version>
@@ -200,6 +201,7 @@
         <aries.jndi.api.version>1.0.0</aries.jndi.api.version>
         <aries.proxy.version>1.0.2</aries.proxy.version>
         <aries.proxy.api.version>1.0.0</aries.proxy.api.version>
+        <aries.subsystem.version>1.0.0</aries.subsystem.version>
         <aries.transaction.version>1.0.1</aries.transaction.version>
         <aries.transaction.manager.version>1.1.0</aries.transaction.manager.version>
         <aries.transaction.blueprint.version>1.0.1</aries.transaction.blueprint.version>
@@ -1128,6 +1130,12 @@
                 <artifactId>org.eclipse.equinox.region</artifactId>
                 <version>${equinox.region.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.eclipse.equinox</groupId>
+                <artifactId>org.eclipse.equinox.coordinator</artifactId>
+                <version>${equinox.coordinator.version}</version>
+                <scope>provided</scope>
+            </dependency>
 
             <dependency>
                 <groupId>org.eclipse.gemini</groupId>
@@ -1658,6 +1666,12 @@
                 <groupId>org.apache.aries.jpa</groupId>
                 <artifactId>org.apache.aries.jpa.container.context</artifactId>
                 <version>${aries.jpa.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.aries.subsystem</groupId>
+                <artifactId>org.apache.aries.subsystem</artifactId>
+                <version>${aries.subsystem.version}</version>
             </dependency>
 
             <dependency>

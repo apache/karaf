@@ -240,4 +240,17 @@
         <bundle start-level="30">mvn:org.apache.aries.application/org.apache.aries.application.runtime/${aries.application.version}</bundle>
     </feature>
 
+    <feature name="subsystems" description="Support for OSGi subsystems" version="${aries.subsystem.version}">
+        <details>Support for Aries OSGi subsystems</details>
+        <!-- blueprint is required for application.modeller -->
+        <feature>aries-blueprint</feature>
+        <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.resolver/${felix.resolver.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.karaf.services/org.apache.karaf.services.coordinator/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.equinox/org.eclipse.equinox.region/${equinox.region.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.application/org.apache.aries.application.api/${aries.application.api.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.application/org.apache.aries.application.utils/${aries.application.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.application/org.apache.aries.application.modeller/${aries.application.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.subsystem/org.apache.aries.subsystem/${aries.subsystem.version}</bundle>
+    </feature>
+
 </features>

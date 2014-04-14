@@ -87,4 +87,9 @@ public class EnterpriseFeaturesTest extends KarafTestSupport {
     	installAssertAndUninstallFeatures("application-without-isolation");
     }
 
+    @Test
+    public void installSubsystems() throws Exception {
+        installAssertAndUninstallFeatures("subsystems");
+    }
+
 }
