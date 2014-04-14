@@ -16,7 +16,7 @@
       See the License for the specific language governing permissions and
       limitations under the License.
 -->
-<features name="spring-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
+<features name="spring-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.3.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.3.0 http://karaf.apache.org/xmlns/features/v1.3.0">
 
     <!-- NB: this file is not the one really used. This file is used by the karaf-maven-plugin to define the start-level of bundles in the generated feature.xml -->
 
@@ -287,6 +287,9 @@
         <bundle start-level="30">mvn:org.eclipse.gemini/org.eclipse.gemini.blueprint.io/${gemini.blueprint.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.gemini/org.eclipse.gemini.blueprint.core/${gemini.blueprint.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.gemini/org.eclipse.gemini.blueprint.extender/${gemini.blueprint.version}</bundle>
+        <capability>
+            osgi.extender; osgi.extender="osgi.blueprint";uses:="org.osgi.service.blueprint.container,org.osgi.service.blueprint.reflect";version:Version="1.0"
+        </capability>
     </feature>
 
 </features>

@@ -16,7 +16,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<features name="enterprise-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
+<features name="enterprise-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.3.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.3.0 http://karaf.apache.org/xmlns/features/v1.3.0">
 
     <!-- NB: this file is not the one really used. This file is used by the karaf-maven-plugin to define the start-level of bundles in the generated feature.xml -->
 
@@ -186,10 +186,17 @@
     <feature name="jdbc" description="JDBC service and commands" version="${project.version}" resolver="(obr)">
         <details>JDBC support providing service, commands, and MBean.</details>
         <feature>transaction</feature>
-        <feature>aries-blueprint</feature>
         <bundle>mvn:commons-pool/commons-pool/${commons-pool.version}</bundle>
         <bundle>mvn:commons-dbcp/commons-dbcp/${commons-dbcp.version}</bundle>
         <bundle>mvn:org.apache.karaf.jdbc/org.apache.karaf.jdbc.core/${project.version}</bundle>
+        <!--
+           Requirement on Blueprint.
+           We don't use a feature dependency to allow the choice between aries-blueprint and gemini-blueprint.
+           This means that you need to install one of the above to be able to install the jdbc feature.
+        -->
+        <requirement>
+            osgi.extender;filter:="(&amp;(osgi.extender=osgi.blueprint)(version>=1.0))"
+        </requirement>
     </feature>
 
     <feature name="jms" description="JMS service and commands" version="${project.version}" resolver="(obr)">
