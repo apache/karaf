@@ -284,9 +284,9 @@
 
     <feature name="gemini-blueprint" description="Gemini Blueprint Extender" version="${gemini.blueprint.version}" resolver="(obr)">
         <feature version="[3,4)">spring</feature>
-        <bundle start-level="30">mvn:org.eclipse.gemini.blueprint/gemini-blueprint-io/${gemini.blueprint.version}</bundle>
-        <bundle start-level="30">mvn:org.eclipse.gemini.blueprint/gemini-blueprint-core/${gemini.blueprint.version}</bundle>
-        <bundle start-level="30">mvn:org.eclipse.gemini.blueprint/gemini-blueprint-extender/${gemini.blueprint.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.gemini/org.eclipse.gemini.blueprint.io/${gemini.blueprint.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.gemini/org.eclipse.gemini.blueprint.core/${gemini.blueprint.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.gemini/org.eclipse.gemini.blueprint.extender/${gemini.blueprint.version}</bundle>
     </feature>
 
 </features>
