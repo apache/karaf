@@ -154,7 +154,7 @@
         <easymock.version>3.2</easymock.version>
         <equinox.version>3.8.2.v20130124-134944</equinox.version>
         <bndlib.version>2.2.0</bndlib.version>
-        <equinox.region.version>1.0.0.v20110506</equinox.region.version>
+        <equinox.region.version>1.1.0.v20120522-1841</equinox.region.version>
         <felix.bundlerepository.version>1.6.6</felix.bundlerepository.version>
         <felix.configadmin.version>1.8.0</felix.configadmin.version>
         <felix.fileinstall.version>3.2.8</felix.fileinstall.version>
@@ -1125,7 +1125,7 @@
 
             <dependency>
                 <groupId>org.eclipse.equinox</groupId>
-                <artifactId>region</artifactId>
+                <artifactId>org.eclipse.equinox.region</artifactId>
                 <version>${equinox.region.version}</version>
             </dependency>
 

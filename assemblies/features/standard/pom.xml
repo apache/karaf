@@ -178,7 +178,7 @@
         <!-- region deps -->
         <dependency>
             <groupId>org.eclipse.equinox</groupId>
-            <artifactId>region</artifactId>
+            <artifactId>org.eclipse.equinox.region</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
