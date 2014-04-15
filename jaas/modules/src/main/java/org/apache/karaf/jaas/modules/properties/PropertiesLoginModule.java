@@ -45,7 +45,7 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
 
     private String usersFile;
     
-    private PropertiesInstaller propertiesInstaller;
+    private static PropertiesInstaller propertiesInstaller;
     
     
     public void initialize(Subject sub, CallbackHandler handler, Map sharedState, Map options) {
@@ -54,10 +54,16 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
         if (debug) {
             LOG.debug("Initialized debug=" + debug + " usersFile=" + usersFile);
         }
-        propertiesInstaller = new PropertiesInstaller(this, usersFile);
-        if (this.bundleContext != null) {
-            this.bundleContext.registerService("org.apache.felix.fileinstall.ArtifactInstaller", propertiesInstaller, null);
-        }       
+       
+        if (propertiesInstaller == null || !usersFile.equals(propertiesInstaller.getUsersFileName()) ) {
+       
+            LOG.debug("Register PropertiesInstaller service");
+            
+            propertiesInstaller = new PropertiesInstaller(this, usersFile);
+            if (this.bundleContext != null) {
+                this.bundleContext.registerService("org.apache.felix.fileinstall.ArtifactInstaller", propertiesInstaller, null);
+            }
+        }
     }
 
     public boolean login() throws LoginException {
