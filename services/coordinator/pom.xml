@@ -59,14 +59,12 @@
                             org.osgi.service.coordinator;version="1.0.0"
                         </Export-Package>
                         <Private-Package>
-                            org.eclipse.equinox.coordinator
+                            org.eclipse.equinox.coordinator,
+                            org.eclipse.osgi.util
                         </Private-Package>
                         <Export-Service>
                             org.osgi.service.coordinator.Coordinator
                         </Export-Service>
-                        <Embed-Dependency>
-                            org.eclipse.osgi;inline="org/eclipse/osgi/util/NLS*.class"
-                        </Embed-Dependency>
                     </instructions>
                 </configuration>
             </plugin>
@@ -83,11 +81,6 @@
             <groupId>org.eclipse.equinox</groupId>
             <artifactId>org.eclipse.equinox.coordinator</artifactId>
             <version>1.1.0.v20120522-1841</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse</groupId>
-            <artifactId>org.eclipse.osgi</artifactId>
             <scope>provided</scope>
         </dependency>
     </dependencies>
