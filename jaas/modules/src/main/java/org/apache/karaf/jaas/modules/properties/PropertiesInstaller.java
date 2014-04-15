@@ -66,5 +66,9 @@ public class PropertiesInstaller implements ArtifactInstaller {
     public void uninstall(File artifact) throws Exception {
         LOGGER.warn("the users.properties was removed");
     }
+    
+    public String getUsersFileName() {
+        return this.usersFileName;
+    }
 
 }
