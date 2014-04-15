@@ -59,9 +59,10 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
             LOGGER.debug("Initialized debug={} usersFile={}", debug, usersFile);
         }
        
-        if (propertiesInstaller == null || !usersFile.equals(propertiesInstaller.getUsersFileName()) ) {
+        if (propertiesInstaller == null 
+            || (usersFile != null && !usersFile.equals(propertiesInstaller.getUsersFileName())) ) {
        
-            LOG.debug("Register PropertiesInstaller service");
+            LOGGER.debug("Register PropertiesInstaller service");
             
             propertiesInstaller = new PropertiesInstaller(this, usersFile);
             if (this.bundleContext != null) {
