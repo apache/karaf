@@ -45,7 +45,7 @@ public class JDBCBackingEngineFactory implements BackingEngineFactory {
         String deleteRoleStatement = (String) options.get(JDBCLoginModule.DELETE_ROLE_STATEMENT);
         String deleteAllUserRolesStatement = (String) options.get(JDBCLoginModule.DELETE_ROLES_STATEMENT);
         String deleteUserStatement = (String) options.get(JDBCLoginModule.DELETE_USER_STATEMENT);
-        String selectUsersQuery = (String) options.get(JDBCLoginModule.PASSWORD_QUERY);
+        String selectUsersQuery = (String) options.get(JDBCLoginModule.USER_QUERY);
         String selectRolesQuery = (String) options.get(JDBCLoginModule.ROLE_QUERY);
 
         try {
