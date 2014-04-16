@@ -193,7 +193,7 @@ public class JDBCBackingEngine implements BackingEngine {
                 //Remove from users
                 listUserStatement = connection.prepareStatement(selectUsersQuery);
                 usersResultSet = listUserStatement.executeQuery();
-                while (!usersResultSet.next()) {
+                while (usersResultSet.next()) {
                     String username = usersResultSet.getString("USERNAME");
                     users.add(new UserPrincipal(username));
                 }
@@ -243,7 +243,7 @@ public class JDBCBackingEngine implements BackingEngine {
 
                 rolesResultSet = listRolesStatement.executeQuery();
 
-                while (!rolesResultSet.next()) {
+                while (rolesResultSet.next()) {
                     String role = rolesResultSet.getString(1);
                     roles.add(new RolePrincipal(role));
                 }
