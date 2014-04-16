@@ -50,6 +50,8 @@ public abstract class BundleCommand extends OsgiCommandSupport {
             } else {
                 System.err.println("Access to system bundle " + id + " is discouraged. You may override with -f");
             }
+        } else {
+            System.err.println("Bundle " + id + " is not found");
         }
         return null;
     }

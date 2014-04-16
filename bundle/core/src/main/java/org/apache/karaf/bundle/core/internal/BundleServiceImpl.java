@@ -71,8 +71,7 @@ public class BundleServiceImpl implements BundleService {
         List<String> ids = new ArrayList<String>(1);
         ids.add(id);
         List<Bundle> bundles = selectBundles(ids, defaultAllBundles);
-        if (bundles.isEmpty()) {
-            System.err.println("Bundle " + id + " is not found");
+        if (bundles.isEmpty()) {            
             return null;
         } else {
             return bundles.get(0);
