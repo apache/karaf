@@ -16,23 +16,24 @@
  */
 package org.apache.karaf.bundle.command;
 
+import java.util.List;
+
 import org.apache.karaf.bundle.core.BundleService;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.support.ShellUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
-/**
- * Unique bundle command.
- */
-public abstract class BundleCommand implements Action {
+@Command(scope = "bundle", name = "id", description = "Gets the bundle ID.")
+@Service
+public class Id implements Action {
 
-    @Argument(index = 0, name = "id", description = "The bundle ID or name or name/version", required = true, multiValued = false)
-    String id;
-
-    boolean defaultAllBundles = true;
+    @Argument(index = 0, name = "name", description = "The bundle name, name/version, or location", required = true, multiValued = false)
+    String name;
 
     @Reference
     BundleService bundleService;
@@ -40,32 +41,36 @@ public abstract class BundleCommand implements Action {
     @Reference
     BundleContext bundleContext;
 
-    public BundleCommand(boolean defaultAllBundles) {
-        this.defaultAllBundles = defaultAllBundles;
-    }
-
     public Object execute() throws Exception {
         return doExecute(true);
     }
 
     protected Object doExecute(boolean force) throws Exception {
-        Bundle bundle = bundleService.getBundle(id, defaultAllBundles);
-        if (bundle != null) {
-            if (force || !ShellUtil.isASystemBundle(bundleContext, bundle)) {
-                doExecute(bundle);
+        Bundle bundle = bundleService.getBundle(name, true);
+        
+        // if name or name/version were not successful, let's try searching by location
+        if (bundle == null) {
+            for (int i = 0; i < bundleContext.getBundles().length; i++) {
+                Bundle b = bundleContext.getBundles()[i];
+                if (name.equals(b.getLocation())) {
+                    bundle = b;
+                    break;
+                }
+            }
+        }
+        if (bundle != null) {            
+            if (force || !ShellUtil.isASystemBundle(bundleContext, bundle)) {                
+                return bundle.getBundleId();
             } else {
-                System.err.println("Access to system bundle " + id + " is discouraged. You may override with -f");
+                System.err.println("Access to system bundle " + name + " is discouraged. You may override with -f");
             }
         } else {
-            System.err.println("Bundle " + id + " is not found");
+            System.err.println("Bundle " + name + " is not found");
         }
         return null;
     }
 
-    protected abstract void doExecute(Bundle bundle) throws Exception;
-
     public void setBundleService(BundleService bundleService) {
         this.bundleService = bundleService;
     }
-
 }
