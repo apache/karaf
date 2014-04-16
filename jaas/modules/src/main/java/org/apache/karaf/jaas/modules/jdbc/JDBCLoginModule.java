@@ -41,6 +41,7 @@ public class JDBCLoginModule extends AbstractKarafLoginModule {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(PropertiesLoginModule.class);
 
     public static final String PASSWORD_QUERY = "query.password";
+    public static final String USER_QUERY = "query.user";
     public static final String ROLE_QUERY = "query.role";
     public static final String INSERT_USER_STATEMENT = "insert.user";
     public static final String INSERT_ROLE_STATEMENT = "insert.role";
