@@ -41,6 +41,9 @@ public class SshServerAction extends OsgiCommandSupport implements BlueprintCont
     @Option(name = "-i", aliases = { "--idle-timeout" }, description = "The session idle timeout (Default: 1800000ms)", required = false, multiValued = false)
     private long idleTimeout = 1800000;
 
+    @Option(name = "-w", aliases = { "--welcome-banner" }, description = "The welcome banner to display when logging in", required = false, multiValued = false)
+    private String welcomeBanner;
+
     private BlueprintContainer container;
 
     private String sshServerId;
@@ -64,6 +67,11 @@ public class SshServerAction extends OsgiCommandSupport implements BlueprintCont
 
         // idle timeout
         server.getProperties().put(SshServer.IDLE_TIMEOUT, new Long(idleTimeout).toString());
+
+        // welcome banner
+        if (welcomeBanner != null) {
+            server.getProperties().put(SshServer.WELCOME_BANNER, welcomeBanner);
+        } 
 
         // starting the SSHd server
         server.start();
