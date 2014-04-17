@@ -31,6 +31,8 @@ public class SshServerFactory {
 
     private SshServer server;
 
+    private String welcomeBanner;
+
     public SshServerFactory(SshServer server) {
         this.server = server;
     }
@@ -51,10 +53,21 @@ public class SshServerFactory {
         this.idleTimeout = idleTimeout;
     }
 
+    public String getWelcomeBanner() {
+        return welcomeBanner;
+    }
+
+    public void setWelcomeBanner(String welcomeBanner) {
+        this.welcomeBanner = welcomeBanner;
+    }
+    
     public void start() {
         if (start) {
             try {
                 server.getProperties().put(SshServer.IDLE_TIMEOUT, new Long(idleTimeout).toString());
+                if (getWelcomeBanner() != null && !getWelcomeBanner().isEmpty()) {
+                    server.getProperties().put(SshServer.WELCOME_BANNER, getWelcomeBanner());
+                }
                 server.start();
             } catch (Exception e) {
                 LOGGER.info("Error updating SSH server", e);

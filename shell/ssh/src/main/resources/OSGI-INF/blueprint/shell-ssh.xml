@@ -49,6 +49,7 @@
             <cm:property name="algorithm" value="DSA"/>
             <cm:property name="macs" value="hmac-sha1" />
             <cm:property name="ciphers" value="aes256-ctr,aes192-ctr,aes128-ctr,arcfour256" />
+            <cm:property name="welcomeBanner" value="" />
         </cm:default-properties>
     </cm:property-placeholder>
 
@@ -144,6 +145,7 @@
         <argument ref="sshServer"/>
         <property name="start" value="$[karaf.startRemoteShell]"/>
         <property name="idleTimeout" value="${sshIdleTimeout}"/>
+        <property name="welcomeBanner" value="${welcomeBanner}"/>
     </bean>
 
     <reference id="commandProcessor" interface="org.apache.felix.service.command.CommandProcessor">
