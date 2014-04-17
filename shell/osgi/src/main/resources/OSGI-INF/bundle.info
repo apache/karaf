@@ -12,6 +12,7 @@
     The following commands are available:
     \u001B[36mosgi:bundle-level\u001B[0m Gets or sets the start level of a given bundle.
     \u001B[36mosgi:headers\u001B[0m Displays OSGi headers of a given bundle.
+    \u001B[36mosgi:id\u001B[0m Gets the bundle ID of a given bundle.
     \u001B[36mosgi:info\u001B[0m Displays detailed information of a given bundle.
     \u001B[36mosgi:installs\u001B[0m Installs one or more bundles.
     \u001B[36mosgi:list\u001B[0m Lists all installed bundles.

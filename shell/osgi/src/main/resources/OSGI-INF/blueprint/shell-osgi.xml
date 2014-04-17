@@ -35,6 +35,9 @@
         <command name="osgi/info">
             <action class="org.apache.karaf.shell.osgi.Info"/>
         </command>
+        <command name="osgi/id">
+            <action class="org.apache.karaf.shell.osgi.Id"/>
+        </command>
         <command name="osgi/install">
             <action class="org.apache.karaf.shell.osgi.InstallBundle"/>
         </command>
