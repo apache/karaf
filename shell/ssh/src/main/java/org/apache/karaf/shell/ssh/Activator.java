@@ -128,7 +128,8 @@ public class Activator extends BaseActivator implements ManagedService {
         String algorithm      = getString("algorithm", "DSA");
         String macs           = getString("macs", "hmac-sha1");
         String ciphers        = getString("ciphers", "aes256-ctr,aes192-ctr,aes128-ctr,arcfour256");
-
+        String welcomeBanner  = getString("welcomeBanner", null);
+        
         SimpleGeneratorHostKeyProvider keyPairProvider = new SimpleGeneratorHostKeyProvider();
         keyPairProvider.setPath(hostKey);
         keyPairProvider.setKeySize(keySize);
@@ -154,7 +155,9 @@ public class Activator extends BaseActivator implements ManagedService {
         server.setUserAuthFactories(authFactoriesFactory.getFactories());
         server.setAgentFactory(agentFactory);
         server.getProperties().put(SshServer.IDLE_TIMEOUT, Long.toString(sshIdleTimeout));
-
+        if (welcomeBanner != null) {
+            server.getProperties().put(SshServer.WELCOME_BANNER, welcomeBanner);
+        } 
         return server;
     }
 
