@@ -25,9 +25,11 @@ import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.support.MultiException;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.startlevel.BundleStartLevel;
 
 @Command(scope = "bundle", name = "install", description = "Installs one or more bundles.")
 @Service
@@ -39,11 +41,21 @@ public class Install implements Action {
     @Option(name = "-s", aliases={"--start"}, description="Starts the bundles after installation", required = false, multiValued = false)
     boolean start;
 
+    @Option(name = "-l", aliases={"--start-level"}, description="Sets the start level of the bundles", required = false, multiValued = false)
+    Integer level;
+    
+    @Option(name = "--force", aliases = {"-f"}, description = "Forces the command to execute", required = false, multiValued = false)
+    boolean force;
+    
+    @Reference
+    Session session;
+    
     @Reference
     BundleContext bundleContext;
 
     @Override
     public Object execute() throws Exception {
+        // install the bundles
         List<Exception> exceptions = new ArrayList<Exception>();
         List<Bundle> bundles = new ArrayList<Bundle>();
         for (String url : urls) {
@@ -53,6 +65,26 @@ public class Install implements Action {
                 exceptions.add(new Exception("Unable to install bundle " + url, e));
             }
         }
+        
+        // optionally set the start level of the bundles
+        if (level != null) {
+            if (level < 50 && !force){
+                for (;;) {
+                    String msg = "You are about to designate bundle as a system bundle.  Do you still wish to set the start level (yes/no): ";
+                    String str = session.readLine(msg, null);
+                    if ("yes".equalsIgnoreCase(str)) {
+                        setStartLevel(bundles);    
+                        break;
+                    } else if ("no".equalsIgnoreCase(str)) {
+                        break;
+                    }
+                }                
+            } else {
+                setStartLevel(bundles);    
+            }
+        }
+        
+        // optionally start the bundles
         if (start) {
             for (Bundle bundle : bundles) {
                 try {
@@ -62,6 +94,8 @@ public class Install implements Action {
                 }
             }
         }
+        
+        // print the installed bundles
         if (bundles.size() == 1) {
             System.out.println("Bundle ID: " + bundles.get(0).getBundleId());
         } else {
@@ -76,6 +110,17 @@ public class Install implements Action {
         }
         MultiException.throwIf("Error installing bundles", exceptions);
         return null;
+    }
+
+    private void setStartLevel(List<Bundle> bundles) {
+        for (Bundle bundle : bundles) {
+            BundleStartLevel bsl = bundle.adapt(BundleStartLevel.class);
+            if (bsl == null) {
+                System.out.println("StartLevel service is unavailable for bundle id " + bundle);
+                return;
+            }
+            bsl.setStartLevel(level);
+        }
     }
 
 }
