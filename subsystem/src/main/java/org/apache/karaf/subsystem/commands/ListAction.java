@@ -36,6 +36,7 @@ public class ListAction extends SubsystemSupport implements Action {
         table.column("SymbolicName");
         table.column("Version");
         table.column("State");
+        table.column("Type");
         table.column("Parents");
         table.column("Children");
 
@@ -45,12 +46,21 @@ public class ListAction extends SubsystemSupport implements Action {
                     ss.getSymbolicName(),
                     ss.getVersion(),
                     ss.getState().toString(),
+                    getType(ss),
                     getSubsytemIds(ss.getParents()),
                     getSubsytemIds(ss.getChildren())
             );
         }
         table.print(System.out);
         return null;
+    }
+
+    private String getType(Subsystem subsystem) {
+        String type = subsystem.getType();
+        if (type.startsWith("osgi.subsystem.")) {
+            type = type.substring("osgi.subsystem.".length());
+        }
+        return type;
     }
 
 }

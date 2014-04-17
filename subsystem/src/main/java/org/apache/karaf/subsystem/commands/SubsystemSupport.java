@@ -104,8 +104,12 @@ public abstract class SubsystemSupport {
     protected List<Long> getSubsytemIds(Collection<Subsystem> subsystems) {
         List<Long> ids = new ArrayList<Long>();
         for (Subsystem ss : subsystems) {
-            ids.add(ss.getSubsystemId());
+            long id = ss.getSubsystemId();
+            if (!ids.contains(id)) {
+                ids.add(id);
+            }
         }
+        Collections.sort(ids);
         return ids;
     }
 
