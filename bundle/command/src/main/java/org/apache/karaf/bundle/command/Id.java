@@ -19,29 +19,24 @@ package org.apache.karaf.bundle.command;
 import java.util.List;
 
 import org.apache.karaf.bundle.core.BundleService;
-import org.apache.karaf.shell.api.action.Action;
-import org.apache.karaf.shell.api.action.Argument;
-import org.apache.karaf.shell.api.action.Command;
-import org.apache.karaf.shell.api.action.lifecycle.Reference;
-import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.apache.karaf.shell.support.ShellUtil;
+import org.apache.karaf.shell.commands.Argument;
+import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.console.OsgiCommandSupport;
+import org.apache.karaf.shell.util.ShellUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
 @Command(scope = "bundle", name = "id", description = "Gets the bundle ID.")
-@Service
-public class Id implements Action {
+public class Id extends OsgiCommandSupport {
 
     @Argument(index = 0, name = "name", description = "The bundle name, name/version, or location", required = true, multiValued = false)
     String name;
 
-    @Reference
     BundleService bundleService;
 
-    @Reference
     BundleContext bundleContext;
 
-    public Object execute() throws Exception {
+    protected Object doExecute() throws Exception {
         return doExecute(true);
     }
 

@@ -15,6 +15,7 @@ The following commands are available:
 * bundle:classes - Displays a list of classes contained in the bundle
 * bundle:find-class - Locates a specified class in any deployed bundle
 * bundle:headers - Display OSGi headers of a given bundle.
+* bundle:id - Gets the bundle ID.
 * bundle:info - Display detailed information of a given bundle.
 * bundle:install - Install one or more bundles.
 * bundle:list - List all installed bundles.

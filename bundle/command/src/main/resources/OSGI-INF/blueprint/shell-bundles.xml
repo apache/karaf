@@ -124,6 +124,12 @@
             </action> 
         </command>
         <command>
+            <action class="org.apache.karaf.bundle.command.Id">
+                <property name="bundleService" ref="bundleService"/>
+                <property name="bundleContext" ref="blueprintBundleContext" />
+            </action> 
+        </command>        
+        <command>
             <action class="org.apache.karaf.bundle.command.Watch" >
                 <property name="bundleWatcher" ref="bundleWatcher"/>
             </action>
