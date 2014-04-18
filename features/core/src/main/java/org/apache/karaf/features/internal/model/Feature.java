@@ -75,7 +75,8 @@ import javax.xml.bind.annotation.XmlType;
     "bundle",
     "conditional",
     "capability",
-    "requirement"
+    "requirement",
+    "scoping"
 })
 public class Feature extends Content implements org.apache.karaf.features.Feature {
     public static String SPLIT_FOR_NAME_AND_VERSION = "/";
@@ -95,11 +96,10 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
     protected String install;
     @XmlAttribute(name = "start-level")
     protected Integer startLevel;
-    @XmlAttribute
-    protected String region;
     protected List<Conditional> conditional;
     protected List<Capability> capability;
     protected List<Requirement> requirement;
+    protected Scoping scoping;
 
     public Feature() {
     }
@@ -280,15 +280,6 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
         this.startLevel = value;
     }
 
-
-    public String getRegion() {
-        return region;
-    }
-
-    public void setRegion(String region) {
-        this.region = region;
-    }
-
     /**
      * Gets the value of the conditional property.
      * <p/>
@@ -328,6 +319,14 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
             requirement = new ArrayList<Requirement>();
         }
         return this.requirement;
+    }
+
+    public Scoping getScoping() {
+        return scoping;
+    }
+
+    public void setScoping(Scoping scoping) {
+        this.scoping = scoping;
     }
 
     public String toString() {

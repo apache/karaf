@@ -27,8 +27,10 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Properties;
 
+import org.apache.felix.resolver.ResolverImpl;
 import org.apache.karaf.features.FeaturesListener;
 import org.apache.karaf.features.FeaturesService;
+import org.apache.karaf.features.internal.resolver.Slf4jResolverLog;
 import org.apache.karaf.features.internal.service.EventAdminListener;
 import org.apache.karaf.features.internal.service.FeatureConfigInstaller;
 import org.apache.karaf.features.internal.service.FeatureFinder;
@@ -36,25 +38,35 @@ import org.apache.karaf.features.internal.service.BootFeaturesInstaller;
 import org.apache.karaf.features.internal.service.FeaturesServiceImpl;
 import org.apache.karaf.features.internal.service.StateStorage;
 import org.apache.karaf.features.internal.management.FeaturesServiceMBeanImpl;
-import org.apache.karaf.features.RegionsPersistence;
 import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.SingleServiceTracker;
+import org.eclipse.equinox.internal.region.DigraphHelper;
+import org.eclipse.equinox.internal.region.StandardRegionDigraph;
+import org.eclipse.equinox.internal.region.management.StandardManageableRegionDigraph;
+import org.eclipse.equinox.region.RegionDigraph;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.hooks.bundle.CollisionHook;
+import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ManagedService;
+import org.osgi.service.resolver.Resolver;
 import org.osgi.service.url.URLStreamHandlerService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.LoggerFactory;
 
 public class Activator extends BaseActivator {
 
     public static final String FEATURES_REPOS_PID = "org.apache.karaf.features.repos";
     public static final String FEATURES_SERVICE_CONFIG_FILE = "org.apache.karaf.features.cfg";
 
+    private static final String STATE_FILE = "state.json";
+
     private ServiceTracker<FeaturesListener, FeaturesListener> featuresListenerTracker;
     private FeaturesServiceImpl featuresService;
-    private SingleServiceTracker<RegionsPersistence> regionsTracker;
+    private StandardRegionDigraph digraph;
+    private StandardManageableRegionDigraph digraphMBean;
 
     public Activator() {
         // Special case here, as we don't want the activator to wait for current job to finish,
@@ -87,32 +99,28 @@ public class Activator extends BaseActivator {
             return;
         }
 
+        // Resolver
+        register(Resolver.class, new ResolverImpl(new Slf4jResolverLog(LoggerFactory.getLogger(ResolverImpl.class))));
+
+        // RegionDigraph
+        digraph = DigraphHelper.loadDigraph(bundleContext);
+        register(ResolverHookFactory.class, digraph.getResolverHookFactory());
+        register(CollisionHook.class, DigraphHelper.getCollisionHook(digraph));
+        register(org.osgi.framework.hooks.bundle.FindHook.class, digraph.getBundleFindHook());
+        register(org.osgi.framework.hooks.bundle.EventHook.class, digraph.getBundleEventHook());
+        register(org.osgi.framework.hooks.service.FindHook.class, digraph.getServiceFindHook());
+        register(org.osgi.framework.hooks.service.EventHook.class, digraph.getServiceEventHook());
+        register(RegionDigraph.class, digraph);
+        digraphMBean = new StandardManageableRegionDigraph(digraph, "org.apache.karaf", bundleContext);
+        digraphMBean.registerMBean();
+
+
         FeatureFinder featureFinder = new FeatureFinder();
         Hashtable<String, Object> props = new Hashtable<String, Object>();
         props.put(Constants.SERVICE_PID, FEATURES_REPOS_PID);
         register(ManagedService.class, featureFinder, props);
 
-        // TODO: region support
-//        final BundleManager bundleManager = new BundleManager(bundleContext);
-//        regionsTracker = new SingleServiceTracker<RegionsPersistence>(bundleContext, RegionsPersistence.class,
-//                new SingleServiceTracker.SingleServiceListener() {
-//                    @Override
-//                    public void serviceFound() {
-//                        bundleManager.setRegionsPersistence(regionsTracker.getService());
-//                    }
-//                    @Override
-//                    public void serviceLost() {
-//                        serviceFound();
-//                    }
-//                    @Override
-//                    public void serviceReplaced() {
-//                        serviceFound();
-//                    }
-//                });
-//        regionsTracker.open();
-
-
-        FeatureConfigInstaller configInstaller = new FeatureConfigInstaller(configurationAdmin);
+       FeatureConfigInstaller configInstaller = new FeatureConfigInstaller(configurationAdmin);
         // TODO: honor respectStartLvlDuringFeatureStartup and respectStartLvlDuringFeatureUninstall
 //        boolean respectStartLvlDuringFeatureStartup = getBoolean("respectStartLvlDuringFeatureStartup", true);
 //        boolean respectStartLvlDuringFeatureUninstall = getBoolean("respectStartLvlDuringFeatureUninstall", true);
@@ -123,7 +131,7 @@ public class Activator extends BaseActivator {
         StateStorage stateStorage = new StateStorage() {
             @Override
             protected InputStream getInputStream() throws IOException {
-                File file = bundleContext.getDataFile("FeaturesServiceState.properties");
+                File file = bundleContext.getDataFile(STATE_FILE);
                 if (file.exists()) {
                     return new FileInputStream(file);
                 } else {
@@ -133,7 +141,7 @@ public class Activator extends BaseActivator {
 
             @Override
             protected OutputStream getOutputStream() throws IOException {
-                File file = bundleContext.getDataFile("FeaturesServiceState.properties");
+                File file = bundleContext.getDataFile(STATE_FILE);
                 return new FileOutputStream(file);
             }
         };
@@ -150,6 +158,7 @@ public class Activator extends BaseActivator {
                                 featureFinder,
                                 eventAdminListener,
                                 configInstaller,
+                                digraph,
                                 overrides,
                                 featureResolutionRange,
                                 bundleUpdateRange,
@@ -191,9 +200,9 @@ public class Activator extends BaseActivator {
     }
 
     protected void doStop() {
-        if (regionsTracker != null) {
-            regionsTracker.close();
-            regionsTracker = null;
+        if (digraphMBean != null) {
+            digraphMBean.unregisterMbean();
+            digraphMBean = null;
         }
         if (featuresListenerTracker != null) {
             featuresListenerTracker.close();
@@ -202,6 +211,14 @@ public class Activator extends BaseActivator {
         super.doStop();
         if (featuresService != null) {
             featuresService = null;
+        }
+        if (digraph != null) {
+            try {
+                DigraphHelper.saveDigraph(bundleContext, digraph);
+            } catch (Exception e) {
+                // Ignore
+            }
+            digraph = null;
         }
     }
 

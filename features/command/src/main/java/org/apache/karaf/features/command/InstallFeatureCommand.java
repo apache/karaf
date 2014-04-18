@@ -50,6 +50,9 @@ public class InstallFeatureCommand extends FeaturesCommandSupport {
     @Option(name = "-t", aliases = "--simulate", description = "Perform a simulation only", required = false, multiValued = false)
     boolean simulate;
 
+    @Option(name = "-g", aliases = "--region", description = "Region to install to")
+    String region;
+
     protected void doExecute(FeaturesService admin) throws Exception {
         EnumSet<FeaturesService.Option> options = EnumSet.noneOf(FeaturesService.Option.class);
         if (simulate) {
@@ -64,6 +67,6 @@ public class InstallFeatureCommand extends FeaturesCommandSupport {
         if (verbose) {
             options.add(FeaturesService.Option.Verbose);
         }
-        admin.installFeatures(new HashSet<String>(features), options);
+        admin.installFeatures(new HashSet<String>(features), region, options);
     }
 }

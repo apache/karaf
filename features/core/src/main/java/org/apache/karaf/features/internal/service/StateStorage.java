@@ -20,17 +20,14 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Enumeration;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.apache.karaf.features.Feature;
+import org.apache.karaf.features.internal.util.JsonReader;
+import org.apache.karaf.features.internal.util.JsonWriter;
 
 public abstract class StateStorage {
 
@@ -42,14 +39,13 @@ public abstract class StateStorage {
         InputStream is = getInputStream();
         if (is != null) {
             try {
-                Properties props = new Properties();
-                props.load(is);
-                state.bootDone.set(loadBool(props, "bootDone"));
-                state.repositories.addAll(loadSet(props, "repositories."));
-                state.features.addAll(loadSet(props, "features."));
-                state.installedFeatures.addAll(loadSet(props, "installed."));
-                state.managedBundles.addAll(toLongSet(loadSet(props, "managed.")));
-                state.bundleChecksums.putAll(toStringLongMap(loadMap(props, "checksums.")));
+                Map json = (Map) JsonReader.read(is);
+                state.bootDone.set((Boolean) json.get("bootDone"));
+                state.repositories.addAll(toStringSet((Collection) json.get("repositories")));
+                state.features.putAll(toStringStringSetMap((Map) json.get("features")));
+                state.installedFeatures.putAll(toStringStringSetMap((Map) json.get("installed")));
+                state.managedBundles.putAll(toStringLongSetMap((Map) json.get("managed")));
+                state.bundleChecksums.putAll(toLongLongMap((Map) json.get("checksums")));
             } finally {
                 close(is);
             }
@@ -60,14 +56,14 @@ public abstract class StateStorage {
         OutputStream os = getOutputStream();
         if (os != null) {
             try {
-                Properties props = new Properties();
-                saveBool(props, "bootDone", state.bootDone.get());
-                saveSet(props, "repositories.", state.repositories);
-                saveSet(props, "features.", state.features);
-                saveSet(props, "installed.", state.installedFeatures);
-                saveSet(props, "managed.", toStringSet(state.managedBundles));
-                saveMap(props, "checksums.", toStringStringMap(state.bundleChecksums));
-                props.store(os, "FeaturesService State");
+                Map<String, Object> json = new HashMap<String, Object>();
+                json.put("bootDone", state.bootDone.get());
+                json.put("repositories", state.repositories);
+                json.put("features", state.features);
+                json.put("installed", state.installedFeatures);
+                json.put("managed", state.managedBundles);
+                json.put("checksums", toStringLongMap(state.bundleChecksums));
+                JsonWriter.write(os, json);
             } finally {
                 close(os);
             }
@@ -77,92 +73,63 @@ public abstract class StateStorage {
     protected abstract InputStream getInputStream() throws IOException;
     protected abstract OutputStream getOutputStream() throws IOException;
 
-    protected boolean loadBool(Properties props, String key) {
-        return Boolean.parseBoolean(props.getProperty(key));
+    protected Map<String, Set<String>> toStringStringSetMap(Map<?,?> map) {
+        Map<String, Set<String>> nm = new HashMap<String, Set<String>>();
+        for (Map.Entry entry : map.entrySet()) {
+            nm.put(entry.getKey().toString(), toStringSet((Collection) entry.getValue()));
+        }
+        return nm;
     }
 
-    protected void saveBool(Properties props, String key, boolean val) {
-        props.setProperty(key, Boolean.toString(val));
+    protected Map<String, Set<Long>> toStringLongSetMap(Map<?,?> map) {
+        Map<String, Set<Long>> nm = new HashMap<String, Set<Long>>();
+        for (Map.Entry entry : map.entrySet()) {
+            nm.put(entry.getKey().toString(), toLongSet((Collection) entry.getValue()));
+        }
+        return nm;
     }
 
-    protected Set<String> toStringSet(Set<Long> set) {
+    protected Set<String> toStringSet(Collection<?> col) {
         Set<String> ns = new TreeSet<String>();
-        for (long l : set) {
-            ns.add(Long.toString(l));
+        for (Object o : col) {
+            ns.add(o.toString());
         }
         return ns;
     }
 
-    protected Set<Long> toLongSet(Set<String> set) {
+    protected Set<Long> toLongSet(Collection<?> set) {
         Set<Long> ns = new TreeSet<Long>();
-        for (String s : set) {
-            ns.add(Long.parseLong(s));
+        for (Object o : set) {
+            ns.add(toLong(o));
         }
         return ns;
     }
 
-    protected void saveSet(Properties props, String prefix, Set<String> set) {
-        List<String> l = new ArrayList<String>(set);
-        props.put(prefix + "count", Integer.toString(l.size()));
-        for (int i = 0; i < l.size(); i++) {
-            props.put(prefix + "item." + i, l.get(i));
-        }
-    }
-
-    protected Set<String> loadSet(Properties props, String prefix) {
-        Set<String> l = new HashSet<String>();
-        String countStr = (String) props.get(prefix + "count");
-        if (countStr != null) {
-            int count = Integer.parseInt(countStr);
-            for (int i = 0; i < count; i++) {
-                l.add((String) props.get(prefix + "item." + i));
-            }
-        }
-        return l;
-    }
-
-    protected Map<String, String> toStringStringMap(Map<String, Long> map) {
-        Map<String, String> nm = new HashMap<String, String>();
-        for (Map.Entry<String, Long> entry : map.entrySet()) {
-            nm.put(entry.getKey(), Long.toString(entry.getValue()));
+    protected Map<Long, Long> toLongLongMap(Map<?,?> map) {
+        Map<Long, Long> nm = new HashMap<Long, Long>();
+        for (Map.Entry entry : map.entrySet()) {
+            nm.put(toLong(entry.getKey()), toLong(entry.getValue()));
         }
         return nm;
     }
 
-    protected Map<String, Long> toStringLongMap(Map<String, String> map) {
+    protected Map<String, Long> toStringLongMap(Map<?,?> map) {
         Map<String, Long> nm = new HashMap<String, Long>();
-        for (Map.Entry<String, String> entry : map.entrySet()) {
-            nm.put(entry.getKey(), Long.parseLong(entry.getValue()));
+        for (Map.Entry entry : map.entrySet()) {
+            nm.put(entry.getKey().toString(), toLong(entry.getValue()));
         }
         return nm;
     }
 
-
-    protected void saveMap(Properties props, String prefix, Map<String, String> map) {
-        List<Map.Entry<String, String>> l = new ArrayList<Map.Entry<String, String>>(map.entrySet());
-        props.put(prefix + "count", Integer.toString(l.size()));
-        for (int i = 0; i < l.size(); i++) {
-            props.put(prefix + "key." + i, l.get(i).getKey());
-            props.put(prefix + "val." + i, l.get(i).getValue());
+    static long toLong(Object o) {
+        if (o instanceof Number) {
+            return ((Number) o).longValue();
+        } else {
+            return Long.parseLong(o.toString());
         }
     }
 
-    protected Map<String, String> loadMap(Properties props, String prefix) {
-        Map<String, String> l = new HashMap<String, String>();
-        String countStr = (String) props.get(prefix + "count");
-        if (countStr != null) {
-            int count = Integer.parseInt(countStr);
-            for (int i = 0; i < count; i++) {
-                String key = (String) props.get(prefix + "key." + i);
-                String val = (String) props.get(prefix + "val." + i);
-                l.put(key, val);
-            }
-        }
-        return l;
-    }
-
-
-    protected void close(Closeable closeable) {
+    static void close(Closeable closeable) {
         if (closeable != null) {
             try {
                 closeable.close();

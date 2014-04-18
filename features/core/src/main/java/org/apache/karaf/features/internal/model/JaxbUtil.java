@@ -41,6 +41,8 @@ import javax.xml.validation.SchemaFactory;
 
 import org.apache.karaf.features.FeaturesNamespaces;
 import org.apache.karaf.util.XmlUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -53,6 +55,7 @@ import org.xml.sax.helpers.XMLFilterImpl;
 
 public class JaxbUtil {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(JaxbUtil.class);
     private static final JAXBContext FEATURES_CONTEXT;
     static {
         try {
@@ -112,11 +115,16 @@ public class JaxbUtil {
                 doc = XmlUtils.parse(uri);
             }
 
-            Schema schema = getSchema(doc.getDocumentElement().getNamespaceURI());
-            try {
-                schema.newValidator().validate(new DOMSource(doc));
-            } catch (SAXException e) {
-                throw new IllegalArgumentException("Unable to validate " + uri, e);
+            String nsuri = doc.getDocumentElement().getNamespaceURI();
+            if (nsuri == null) {
+                LOGGER.warn("Old style feature file without namespace found (URI: {}). This format is deprecated and support for it will soon be removed", uri);
+            } else {
+                Schema schema = getSchema(nsuri);
+                try {
+                    schema.newValidator().validate(new DOMSource(doc));
+                } catch (SAXException e) {
+                    throw new IllegalArgumentException("Unable to validate " + uri, e);
+                }
             }
 
             fixDom(doc, doc.getDocumentElement());
@@ -162,12 +170,14 @@ public class JaxbUtil {
 
 
     private static void fixDom(Document doc, Node node) {
-        if (node.getNamespaceURI() != null && !FeaturesNamespaces.URI_CURRENT.equals(node.getNamespaceURI())) {
-            doc.renameNode(node, FeaturesNamespaces.URI_CURRENT, node.getLocalName());
-        }
-        NodeList children = node.getChildNodes();
-        for (int i = 0; i < children.getLength(); i++) {
-            fixDom(doc, children.item(i));
+        if (node.getNodeType() == Node.ELEMENT_NODE) {
+            if (!FeaturesNamespaces.URI_CURRENT.equals(node.getNamespaceURI())) {
+                doc.renameNode(node, FeaturesNamespaces.URI_CURRENT, node.getLocalName());
+            }
+            NodeList children = node.getChildNodes();
+            for (int i = 0; i < children.getLength(); i++) {
+                fixDom(doc, children.item(i));
+            }
         }
     }
 
@@ -176,7 +186,6 @@ public class JaxbUtil {
             Unmarshaller unmarshaller = FEATURES_CONTEXT.createUnmarshaller();
             XMLFilter xmlFilter = new NoSourceAndNamespaceFilter(XmlUtils.xmlReader());
             xmlFilter.setContentHandler(unmarshaller.getUnmarshallerHandler());
-
 
             InputSource is = new InputSource(uri);
             if (stream != null) {

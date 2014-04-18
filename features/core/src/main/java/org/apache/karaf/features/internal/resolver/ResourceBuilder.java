@@ -35,12 +35,13 @@ import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.resource.Capability;
 import org.osgi.resource.Requirement;
 import org.osgi.resource.Resource;
+import org.osgi.service.repository.ContentNamespace;
 
 public class ResourceBuilder {
 
     public static final String RESOLUTION_DYNAMIC = "dynamic";
 
-    public static Resource build(String uri, Map<String, String> headerMap)
+    public static ResourceImpl build(String uri, Map<String, String> headerMap)
             throws BundleException {
 
         // Verify that only manifest version 2 is specified.
@@ -74,8 +75,8 @@ public class ResourceBuilder {
         ResourceImpl resource = new ResourceImpl(bundleSymbolicName, type, bundleVersion);
         if (uri != null) {
             Map<String, Object> attrs = new HashMap<String, Object>();
-            attrs.put(UriNamespace.URI_NAMESPACE, uri);
-            resource.addCapability(new CapabilityImpl(resource, UriNamespace.URI_NAMESPACE, Collections.<String, String>emptyMap(), attrs));
+            attrs.put(ContentNamespace.CAPABILITY_URL_ATTRIBUTE, uri);
+            resource.addCapability(new CapabilityImpl(resource, ContentNamespace.CONTENT_NAMESPACE, Collections.<String, String>emptyMap(), attrs));
         }
 
         // Add a bundle and host capability to all

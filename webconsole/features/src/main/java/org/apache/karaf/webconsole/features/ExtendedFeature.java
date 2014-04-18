@@ -26,6 +26,7 @@ import org.apache.karaf.features.ConfigFileInfo;
 import org.apache.karaf.features.Dependency;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.Requirement;
+import org.apache.karaf.features.Scoping;
 
 public class ExtendedFeature implements Feature {
 
@@ -139,8 +140,7 @@ public class ExtendedFeature implements Feature {
     }
 
     @Override
-    public String getRegion() {
-        return feature.getRegion();
+    public Scoping getScoping() {
+        return feature.getScoping();
     }
-
 }

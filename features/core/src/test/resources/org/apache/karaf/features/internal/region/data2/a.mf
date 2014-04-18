@@ -1,0 +1,7 @@
+Manifest-Version: 1
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: a
+Bundle-Version: 1.0.0
+Provide-Capability: ns;ns=a
+Require-Capability: ns;filter:="(ns=b)"
+

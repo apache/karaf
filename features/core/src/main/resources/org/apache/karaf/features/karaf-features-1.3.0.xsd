@@ -61,23 +61,26 @@ Feature definition.
 Definition of the Feature.
             ]]></xs:documentation>
         </xs:annotation>
-        <xs:choice minOccurs="0" maxOccurs="unbounded">
-            <xs:element name="details" minOccurs="0" type="xs:string">
-                <xs:annotation>
-                    <xs:documentation><![CDATA[
-The help text shown for this feature when using feature:info console command.
-                    ]]>
-                    </xs:documentation>
-                </xs:annotation>
-            </xs:element>
-            <xs:element name="config" type="tns:config" />
-            <xs:element name="configfile" type="tns:configFile" />
-            <xs:element name="feature" type="tns:dependency" />
-            <xs:element name="bundle" type="tns:bundle" />
-            <xs:element name="conditional" type="tns:conditional" />
-            <xs:element name="requirement" type="tns:requirement" />
-            <xs:element name="capability" type="tns:capability" />
-        </xs:choice>
+        <xs:sequence>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:element name="details" minOccurs="0" type="xs:string">
+                    <xs:annotation>
+                        <xs:documentation><![CDATA[
+    The help text shown for this feature when using feature:info console command.
+                        ]]>
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+                <xs:element name="config" type="tns:config" />
+                <xs:element name="configfile" type="tns:configFile" />
+                <xs:element name="feature" type="tns:dependency" />
+                <xs:element name="bundle" type="tns:bundle" />
+                <xs:element name="conditional" type="tns:conditional" />
+                <xs:element name="requirement" type="tns:requirement" />
+                <xs:element name="capability" type="tns:capability" />
+            </xs:choice>
+            <xs:element name="scoping" minOccurs="0" maxOccurs="1" type="tns:scoping" />
+        </xs:sequence>
         <xs:attribute name="name" type="tns:featureName" use="required" />
         <xs:attribute name="version" type="xs:string" default="0.0.0" />
         <xs:attribute name="description" type="xs:string" />
@@ -228,6 +231,27 @@ Additional capability of this feature.
         </xs:annotation>
         <xs:simpleContent>
             <xs:extension base="xs:string">
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <xs:complexType name="scoping">
+        <xs:annotation>
+            <xs:documentation><![CDATA[
+Scoping definition for this feature.
+            ]]></xs:documentation>
+        </xs:annotation>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="import" type="tns:scopeFilter"/>
+            <xs:element name="export" type="tns:scopeFilter"/>
+        </xs:choice>
+        <xs:attribute name="acceptDependencies" type="xs:boolean"/>
+    </xs:complexType>
+
+    <xs:complexType name="scopeFilter">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="namespace"  type="xs:string" use="required"/>
             </xs:extension>
         </xs:simpleContent>
     </xs:complexType>

@@ -32,6 +32,4 @@ public interface Repository {
 
     Feature[] getFeatures() throws Exception;
     
-    boolean isValid();
-
 }

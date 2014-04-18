@@ -71,6 +71,8 @@ public interface FeaturesService {
 
     void installFeatures(Set<String> features, EnumSet<Option> options) throws Exception;
 
+    void installFeatures(Set<String> features, String region, EnumSet<Option> options) throws Exception;
+
     void uninstallFeature(String name, EnumSet<Option> options) throws Exception;
 
     void uninstallFeature(String name) throws Exception;
@@ -80,6 +82,8 @@ public interface FeaturesService {
     void uninstallFeature(String name, String version) throws Exception;
 
     void uninstallFeatures(Set<String> features, EnumSet<Option> options) throws Exception;
+
+    void uninstallFeatures(Set<String> features, String region, EnumSet<Option> options) throws Exception;
 
     Feature[] listFeatures() throws Exception;
 

@@ -162,28 +162,11 @@
             <classifier>uber</classifier>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.features</groupId>
-            <artifactId>org.apache.karaf.features.obr</artifactId>
-            <scope>provided</scope>
-        </dependency>
 
         <!-- config deps -->
         <dependency>
             <groupId>org.apache.karaf.config</groupId>
             <artifactId>org.apache.karaf.config.core</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <!-- region deps -->
-        <dependency>
-            <groupId>org.eclipse.equinox</groupId>
-            <artifactId>org.eclipse.equinox.region</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.region</groupId>
-            <artifactId>org.apache.karaf.region.core</artifactId>
             <scope>provided</scope>
         </dependency>
 

@@ -16,36 +16,25 @@
  */
 package org.apache.karaf.features.internal.service;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.Writer;
-import java.net.URI;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.felix.utils.manifest.Clause;
 import org.apache.felix.utils.manifest.Parser;
-import org.apache.karaf.features.BundleInfo;
-import org.apache.karaf.features.internal.model.Bundle;
 import org.apache.karaf.features.internal.resolver.ResourceBuilder;
-import org.apache.karaf.features.internal.resolver.UriNamespace;
 import org.junit.Before;
 import org.junit.Test;
-import org.ops4j.pax.tinybundles.core.TinyBundles;
 import org.osgi.framework.BundleException;
 import org.osgi.resource.Resource;
 
-import static org.apache.karaf.features.internal.resolver.UriNamespace.getUri;
+import static org.apache.karaf.features.internal.resolver.ResourceUtils.getUri;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 public class OverridesTest {
 

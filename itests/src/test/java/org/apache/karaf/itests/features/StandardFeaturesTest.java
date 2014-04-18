@@ -60,11 +60,6 @@ public class StandardFeaturesTest extends KarafTestSupport {
     }
     
     @Test
-    public void installRegionFeature() throws Exception {
-        installAssertAndUninstallFeatures("region");
-    }
-    
-    @Test
     public void installPackageFeature() throws Exception {
         installAssertAndUninstallFeatures("package");
     }

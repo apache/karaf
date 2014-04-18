@@ -72,6 +72,12 @@
         </dependency>
 
         <dependency>
+            <groupId>org.eclipse.equinox</groupId>
+            <artifactId>org.eclipse.equinox.region</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-jdk14</artifactId>
             <scope>test</scope>
@@ -110,8 +116,15 @@
                             org.apache.karaf.features;
                             org.apache.karaf.features.management;
                             org.apache.karaf.features.management.codec;
-                                -noimport:=true
+                                -noimport:=true,
+                            org.osgi.service.resolver;-split-package:=merge-first,
+                            org.osgi.service.repository,
+                            org.eclipse.equinox.region.*
                         </Export-Package>
+                        <Import-Package>
+                            !org.eclipse.osgi.service.resolver,
+                            *
+                        </Import-Package>
                         <Provide-Capability>
                             service-reference;effective:=active;objectClass=org.apache.karaf.features.FeaturesService
                         </Provide-Capability>
@@ -123,8 +136,7 @@
                             org.apache.karaf.util.collections,
                             org.apache.karaf.util.json,
                             org.apache.karaf.util.tracker,
-                            org.osgi.service.resolver,
-                            org.osgi.service.repository
+                            org.eclipse.equinox.internal.region.*;-split-package:=merge-first,
                         </Private-Package>
                         <Embed-Dependency>
                             org.apache.karaf.util;inline="org/apache/karaf/util/XmlUtils*.class"

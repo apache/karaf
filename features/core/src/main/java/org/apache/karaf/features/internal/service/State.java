@@ -22,13 +22,34 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static org.apache.karaf.features.internal.util.MapUtils.copyMapSet;
+
 public class State {
 
     public final AtomicBoolean bootDone = new AtomicBoolean();
     public final Set<String> repositories = new TreeSet<String>();
-    public final Set<String> features = new TreeSet<String>();
-    public final Set<String> installedFeatures = new TreeSet<String>();
-    public final Set<Long> managedBundles = new TreeSet<Long>();
-    public final Map<String, Long> bundleChecksums = new HashMap<String, Long>();
+    public final Map<String, Set<String>> features = new HashMap<String, Set<String>>();
+    public final Map<String, Set<String>> installedFeatures = new HashMap<String, Set<String>>();
+    public final Map<String, Set<Long>> managedBundles = new HashMap<String, Set<Long>>();
+    public final Map<Long, Long> bundleChecksums = new HashMap<Long, Long>();
+
+    public State copy() {
+        State state = new State();
+        state.bootDone.set(bootDone.get());
+        copySet(repositories, state.repositories);
+        copyMapSet(features, state.features);
+        copyMapSet(installedFeatures, state.installedFeatures);
+        copyMapSet(managedBundles, state.managedBundles);
+        copyMap(bundleChecksums, state.bundleChecksums);
+        return state;
+    }
+
+    static <T> void copySet(Set<T> from, Set<T> to) {
+        to.addAll(from);
+    }
+
+    static <S, T> void copyMap(Map<S, T> from, Map<S, T> to) {
+        to.putAll(from);
+    }
 
 }

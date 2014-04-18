@@ -54,10 +54,10 @@ public interface Feature {
     
     int getStartLevel();
 
-    String getRegion();
-
     List<? extends Capability> getCapabilities();
 
     List<? extends Requirement> getRequirements();
+
+    Scoping getScoping();
 
 }

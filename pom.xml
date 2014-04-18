@@ -40,7 +40,6 @@
         <module>main</module>
         <module>features</module>
         <module>kar</module>
-        <module>region</module>
         <module>bundle</module>
         <module>config</module>
         <module>instance</module>
@@ -526,11 +525,6 @@
                 <artifactId>org.apache.karaf.features.command</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <dependency>
-                <groupId>org.apache.karaf.features</groupId>
-                <artifactId>org.apache.karaf.features.obr</artifactId>
-                <version>${project.version}</version>
-            </dependency>
 
             <dependency>
                 <groupId>org.apache.karaf.diagnostic</groupId>
@@ -559,12 +553,6 @@
             <dependency>
                 <groupId>org.apache.karaf.wrapper</groupId>
                 <artifactId>org.apache.karaf.wrapper.core</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.karaf.region</groupId>
-                <artifactId>org.apache.karaf.region.core</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -2248,6 +2236,8 @@
                                 <exclude>manual/**/*.css</exclude>
                                 <exclude>manual/**/*.ssp</exclude>
                                 <exclude>manual/**/*.conf</exclude>
+                                <!-- test manifests -->
+                                <exclude>**/*.mf</exclude>
                             </excludes>
                         </configuration>
                     </plugin>

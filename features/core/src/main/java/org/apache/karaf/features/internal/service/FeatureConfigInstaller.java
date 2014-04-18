@@ -45,6 +45,26 @@ public class FeatureConfigInstaller {
 		this.configAdmin = configAdmin;
 	}
 
+    public void installFeatureConfigs(Feature feature) throws IOException, InvalidSyntaxException {
+        for (String config : feature.getConfigurations().keySet()) {
+            Dictionary<String,String> props = new Hashtable<String, String>(feature.getConfigurations().get(config));
+            String[] pid = parsePid(config);
+            Configuration cfg = findExistingConfiguration(configAdmin, pid[0], pid[1]);
+            if (cfg == null) {
+                cfg = createConfiguration(configAdmin, pid[0], pid[1]);
+                String key = createConfigurationKey(pid[0], pid[1]);
+                props.put(CONFIG_KEY, key);
+                if (cfg.getBundleLocation() != null) {
+                    cfg.setBundleLocation(null);
+                }
+                cfg.update(props);
+            }
+        }
+        for (ConfigFileInfo configFile : feature.getConfigurationFiles()) {
+            installConfigurationFile(configFile.getLocation(), configFile.getFinalname(), configFile.isOverride());
+        }
+    }
+
     private String[] parsePid(String pid) {
         int n = pid.indexOf('-');
         if (n > 0) {
@@ -79,26 +99,6 @@ public class FeatureConfigInstaller {
             return configurations[0];
         }
         return null;
-    }
-
-    void installFeatureConfigs(Feature feature) throws IOException, InvalidSyntaxException {
-        for (String config : feature.getConfigurations().keySet()) {
-            Dictionary<String,String> props = new Hashtable<String, String>(feature.getConfigurations().get(config));
-            String[] pid = parsePid(config);
-            Configuration cfg = findExistingConfiguration(configAdmin, pid[0], pid[1]);
-            if (cfg == null) {
-                cfg = createConfiguration(configAdmin, pid[0], pid[1]);
-                String key = createConfigurationKey(pid[0], pid[1]);
-                props.put(CONFIG_KEY, key);
-                if (cfg.getBundleLocation() != null) {
-                    cfg.setBundleLocation(null);
-                }
-                cfg.update(props);
-            }
-        }
-        for (ConfigFileInfo configFile : feature.getConfigurationFiles()) {
-            installConfigurationFile(configFile.getLocation(), configFile.getFinalname(), configFile.isOverride());
-        }
     }
 
     private String createConfigurationKey(String pid, String factoryPid) {

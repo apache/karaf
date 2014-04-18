@@ -24,7 +24,7 @@ import org.osgi.framework.namespace.IdentityNamespace;
 import org.osgi.resource.Capability;
 import org.osgi.resource.Resource;
 
-class IdentityCapability extends BaseClause implements Capability
+public class IdentityCapability extends BaseClause implements Capability
 {
     private final Resource m_resource;
     private final Map<String, String> m_dirs;

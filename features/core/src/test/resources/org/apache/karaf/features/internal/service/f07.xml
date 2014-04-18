@@ -30,6 +30,17 @@
         <capability>
             service-reference;effective:=active;objectClass=org.apache.aries.proxy.ProxyManager
         </capability>
+        <scoping>
+            <export namespace="osgi.service">
+                (objectClass=org.apache.aries.proxy.ProxyManager)
+            </export>
+            <export namespace="osgi.wiring.package">
+                (|(osgi.wiring.package=org.apache.aries.proxy)(osgi.wiring.package=org.apache.aries.proxy.*))
+            </export>
+            <import namespace="org.eclipse.equinox.allow.all">
+                (|(!(all=*))(all=*))
+            </import>
+        </scoping>
     </feature>
 </features>
 

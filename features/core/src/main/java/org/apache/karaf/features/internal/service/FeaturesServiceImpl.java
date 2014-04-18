@@ -48,14 +48,16 @@ import org.apache.karaf.features.FeaturesListener;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
 import org.apache.karaf.features.RepositoryEvent;
-import org.apache.karaf.features.internal.deployment.DeploymentBuilder;
-import org.apache.karaf.features.internal.deployment.StreamProvider;
-import org.apache.karaf.features.internal.resolver.FeatureNamespace;
-import org.apache.karaf.features.internal.resolver.UriNamespace;
+import org.apache.karaf.features.internal.download.StreamProvider;
+import org.apache.karaf.features.internal.region.ResourceComparator;
+import org.apache.karaf.features.internal.region.SubsystemResolver;
 import org.apache.karaf.features.internal.util.ChecksumUtils;
 import org.apache.karaf.features.internal.util.Macro;
 import org.apache.karaf.features.internal.util.MultiException;
 import org.apache.karaf.util.collections.CopyOnWriteArrayIdentityList;
+import org.eclipse.equinox.region.Region;
+import org.eclipse.equinox.region.RegionDigraph;
+import org.eclipse.equinox.region.RegionFilterBuilder;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -64,6 +66,7 @@ import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.Version;
+import org.osgi.framework.namespace.IdentityNamespace;
 import org.osgi.framework.startlevel.BundleStartLevel;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.BundleWire;
@@ -76,11 +79,17 @@ import org.slf4j.LoggerFactory;
 
 import static org.apache.felix.resolver.Util.getSymbolicName;
 import static org.apache.felix.resolver.Util.getVersion;
+import static org.apache.karaf.features.internal.util.MapUtils.addToMapSet;
+import static org.apache.karaf.features.internal.util.MapUtils.copyMapSet;
+import static org.apache.karaf.features.internal.resolver.ResourceUtils.*;
+import static org.apache.karaf.features.internal.util.MapUtils.removeFromMapSet;
 
 /**
  *
  */
 public class FeaturesServiceImpl implements FeaturesService {
+
+    public static final String ROOT_REGION = "root";
 
     public static final String UPDATE_SNAPSHOTS_NONE = "none";
     public static final String UPDATE_SNAPSHOTS_CRC = "crc";
@@ -114,6 +123,7 @@ public class FeaturesServiceImpl implements FeaturesService {
     private final FeatureFinder featureFinder;
     private final EventAdminListener eventAdminListener;
     private final FeatureConfigInstaller configInstaller;
+    private final RegionDigraph digraph;
     private final String overrides;
     /**
      * Range to use when a version is specified on a feature dependency.
@@ -150,6 +160,7 @@ public class FeaturesServiceImpl implements FeaturesService {
                                FeatureFinder featureFinder,
                                EventAdminListener eventAdminListener,
                                FeatureConfigInstaller configInstaller,
+                               RegionDigraph digraph,
                                String overrides,
                                String featureResolutionRange,
                                String bundleUpdateRange,
@@ -160,6 +171,7 @@ public class FeaturesServiceImpl implements FeaturesService {
         this.featureFinder = featureFinder;
         this.eventAdminListener = eventAdminListener;
         this.configInstaller = configInstaller;
+        this.digraph = digraph;
         this.overrides = overrides;
         this.featureResolutionRange = featureResolutionRange;
         this.bundleUpdateRange = bundleUpdateRange;
@@ -221,7 +233,7 @@ public class FeaturesServiceImpl implements FeaturesService {
             Set<String> installedFeatures = new TreeSet<String>();
             synchronized (lock) {
                 repositories.addAll(state.repositories);
-                installedFeatures.addAll(state.installedFeatures);
+                installedFeatures.addAll(state.installedFeatures.keySet());
             }
             for (String uri : repositories) {
                 Repository repository = new RepositoryImpl(URI.create(uri));
@@ -547,15 +559,17 @@ public class FeaturesServiceImpl implements FeaturesService {
     public boolean isInstalled(Feature f) {
         String id = normalize(f.getId());
         synchronized (lock) {
-            return state.installedFeatures.contains(id);
+            Set<String> installed = state.installedFeatures.get(ROOT_REGION);
+            return installed != null && installed.contains(id);
         }
     }
 
     @Override
     public boolean isRequired(Feature f) {
-        String id = normalize(f.getId());
+        String id = f.getName() + "/" + new VersionRange(f.getVersion(), true);
         synchronized (lock) {
-            return state.features.contains(id);
+            Set<String> features = state.features.get(ROOT_REGION);
+            return features != null && features.contains(id);
         }
     }
 
@@ -563,24 +577,34 @@ public class FeaturesServiceImpl implements FeaturesService {
     // Installation and uninstallation of features
     //
 
+    @Override
     public void installFeature(String name) throws Exception {
         installFeature(name, EnumSet.noneOf(Option.class));
     }
 
+    @Override
     public void installFeature(String name, String version) throws Exception {
         installFeature(version != null ? name + "/" + version : name, EnumSet.noneOf(Option.class));
     }
 
+    @Override
     public void installFeature(String name, EnumSet<Option> options) throws Exception {
         installFeatures(Collections.singleton(name), options);
     }
 
+    @Override
     public void installFeature(String name, String version, EnumSet<Option> options) throws Exception {
         installFeature(version != null ? name + "/" + version : name, options);
     }
 
+    @Override
     public void installFeature(Feature feature, EnumSet<Option> options) throws Exception {
         installFeature(feature.getId());
+    }
+
+    @Override
+    public void installFeatures(Set<String> features, EnumSet<Option> options) throws Exception {
+        installFeatures(features, ROOT_REGION, options);
     }
 
     @Override
@@ -603,6 +627,11 @@ public class FeaturesServiceImpl implements FeaturesService {
         uninstallFeatures(Collections.singleton(name), options);
     }
 
+    @Override
+    public void uninstallFeatures(Set<String> features, EnumSet<Option> options) throws Exception {
+        uninstallFeatures(features, ROOT_REGION, options);
+    }
+
 
     //
     //
@@ -613,18 +642,12 @@ public class FeaturesServiceImpl implements FeaturesService {
     //
 
 
-
-
-
-
-    public void installFeatures(Set<String> features, EnumSet<Option> options) throws Exception {
-        Set<String> required;
-        Set<String> installed;
-        Set<Long> managed;
-        synchronized (lock) {
-            required = new HashSet<String>(state.features);
-            installed = new HashSet<String>(state.installedFeatures);
-            managed = new HashSet<Long>(state.managedBundles);
+    @Override
+    public void installFeatures(Set<String> features, String region, EnumSet<Option> options) throws Exception {
+        State state = copyState();
+        Map<String, Set<String>> required = copyMapSet(state.features);
+        if (region == null || region.isEmpty()) {
+            region = ROOT_REGION;
         }
         List<String> featuresToAdd = new ArrayList<String>();
         Map<String, Map<String, Feature>> featuresMap = getFeatures();
@@ -638,7 +661,8 @@ public class FeaturesServiceImpl implements FeaturesService {
                     throw new IllegalArgumentException("No matching features for " + feature);
                 }
             } else {
-                featuresToAdd.add(normalize(f.getId()));
+                String req = f.getName() + "/" + new VersionRange(f.getVersion(), true);
+                featuresToAdd.add(req);
             }
         }
         featuresToAdd = new ArrayList<String>(new LinkedHashSet<String>(featuresToAdd));
@@ -651,18 +675,25 @@ public class FeaturesServiceImpl implements FeaturesService {
             sb.append(featuresToAdd.get(i));
         }
         print(sb.toString(), options.contains(Option.Verbose));
-        required.addAll(featuresToAdd);
-        doInstallFeaturesInThread(required, installed, managed, options);
+        Set<String> fl = required.get(region);
+        if (fl == null) {
+            fl = new HashSet<String>();
+            required.put(region,fl);
+        }
+        fl.addAll(featuresToAdd);
+        doInstallFeaturesInThread(required, state, options);
     }
 
-    public void uninstallFeatures(Set<String> features, EnumSet<Option> options) throws Exception {
-        Set<String> required;
-        Set<String> installed;
-        Set<Long> managed;
-        synchronized (lock) {
-            required = new HashSet<String>(state.features);
-            installed = new HashSet<String>(state.installedFeatures);
-            managed = new HashSet<Long>(state.managedBundles);
+    public void uninstallFeatures(Set<String> features, String region, EnumSet<Option> options) throws Exception {
+        State state = copyState();
+        Map<String, Set<String>> required = copyMapSet(state.features);
+        if (region == null || region.isEmpty()) {
+            region = ROOT_REGION;
+        }
+        Set<String> fl = required.get(region);
+        if (fl == null) {
+            fl = new HashSet<String>();
+            required.put(region,fl);
         }
         List<String> featuresToRemove = new ArrayList<String>();
         for (String feature : new HashSet<String>(features)) {
@@ -670,15 +701,18 @@ public class FeaturesServiceImpl implements FeaturesService {
             feature = normalize(feature);
             if (feature.endsWith("/0.0.0")) {
                 String nameSep = feature.substring(0, feature.indexOf("/") + 1);
-                for (String f : required) {
+                for (String f : fl) {
                     if (normalize(f).startsWith(nameSep)) {
                         toRemove.add(f);
                     }
                 }
             } else {
-                toRemove.add(feature);
+                String name = feature.substring(0, feature.indexOf("/"));
+                String version = feature.substring(feature.indexOf("/") + 1);
+                String req = name + "/" + new VersionRange(version, true);
+                toRemove.add(req);
             }
-            toRemove.retainAll(required);
+            toRemove.retainAll(fl);
             if (toRemove.isEmpty()) {
                 throw new IllegalArgumentException("Feature named '" + feature + "' is not installed");
             } else if (toRemove.size() > 1) {
@@ -706,8 +740,17 @@ public class FeaturesServiceImpl implements FeaturesService {
             sb.append(featuresToRemove.get(i));
         }
         print(sb.toString(), options.contains(Option.Verbose));
-        required.removeAll(featuresToRemove);
-        doInstallFeaturesInThread(required, installed, managed, options);
+        fl.removeAll(featuresToRemove);
+        if (fl.isEmpty()) {
+            required.remove(fl);
+        }
+        doInstallFeaturesInThread(required, state, options);
+    }
+
+    private State copyState() {
+        synchronized (lock) {
+            return this.state.copy();
+        }
     }
 
     protected String normalize(String feature) {
@@ -726,16 +769,15 @@ public class FeaturesServiceImpl implements FeaturesService {
      * the command may be interrupted while waiting for the refresh to be done, leading
      * to bundles not being started after the refresh.
      */
-    public void doInstallFeaturesInThread(final Set<String> features,
-                                          final Set<String> installed,
-                                          final Set<Long> managed,
+    public void doInstallFeaturesInThread(final Map<String, Set<String>> features,
+                                          final State state,
                                           final EnumSet<Option> options) throws Exception {
         ExecutorService executor = Executors.newCachedThreadPool();
         try {
             executor.submit(new Callable<Object>() {
                 @Override
                 public Object call() throws Exception {
-                    doInstallFeatures(features, installed, managed, options);
+                    doInstallFeatures(features, state, options);
                     return null;
                 }
             }).get();
@@ -755,10 +797,9 @@ public class FeaturesServiceImpl implements FeaturesService {
         }
     }
 
-    public void doInstallFeatures(Set<String> features,    // all request features
-                                  Set<String> installed,   // installed features
-                                  Set<Long> managed,       // currently managed bundles
-                                  EnumSet<Option> options  // installation options
+    public void doInstallFeatures(Map<String, Set<String>> features,  // all request features
+                                  State                    state,     // current state
+                                  EnumSet<Option>          options    // installation options
                     ) throws Exception {
 
         boolean noRefreshUnmanaged = options.contains(Option.NoAutoRefreshUnmanagedBundles);
@@ -768,43 +809,56 @@ public class FeaturesServiceImpl implements FeaturesService {
         boolean verbose = options.contains(Option.Verbose);
         boolean simulate = options.contains(Option.Simulate);
 
+        Map<String, Set<String>> installed = state.installedFeatures;
+        Map<String, Set<Long>> managed = state.managedBundles;
+
         // Get a list of resolved and unmanaged bundles to use as capabilities during resolution
-        List<Resource> systemBundles = new ArrayList<Resource>();
+        List<BundleRevision> systemBundles = new ArrayList<BundleRevision>();
         Bundle[] bundles = systemBundleContext.getBundles();
         for (Bundle bundle : bundles) {
-            if (bundle.getState() >= Bundle.RESOLVED && !managed.contains(bundle.getBundleId())) {
-                Resource res = bundle.adapt(BundleRevision.class);
-                systemBundles.add(res);
+            if (bundle.getState() >= Bundle.RESOLVED) {
+                boolean bm = false;
+                for (Set<Long> m : managed.values()) {
+                    bm |= m.contains(bundle.getBundleId());
+                }
+                if (!bm) {
+                    BundleRevision res = bundle.adapt(BundleRevision.class);
+                    systemBundles.add(res);
+                }
             }
         }
         // Resolve
         // TODO: requirements
         // TODO: bundles
-        // TODO: regions: on isolated regions, we may need different resolution for each region
+        // TODO: overrides
         Set<String>  overrides    = Overrides.loadOverrides(this.overrides);
         Repository[] repositories = listRepositories();
-        DeploymentBuilder builder = createDeploymentBuilder(repositories);
-        builder.setFeatureRange(featureResolutionRange);
-        builder.download(features,
-                         Collections.<String>emptySet(),
-                         Collections.<String>emptySet(),
-                         overrides,
-                         Collections.<String>emptySet());
-        Map<Resource, List<Wire>> resolution = builder.resolve(systemBundles);
-        Collection<Resource> allResources = resolution.keySet();
-        Map<String, StreamProvider> providers = builder.getProviders();
 
-        // Install conditionals
+        if (!installed.containsKey(ROOT_REGION)) {
+            installed.put(ROOT_REGION, new HashSet<String>());
+        }
+
+        SubsystemResolver resolver = new SubsystemResolver();
+        Map<Resource, List<Wire>> resolution = resolver.resolve(
+                Arrays.asList(repositories),
+                features,
+                systemBundles,
+                featureResolutionRange);
+        Collection<Resource> allResources = resolution.keySet();
+        Map<String, StreamProvider> providers = resolver.getProviders();
+
+        Map<String, Set<String>> installedFeatures = getInstalledFeatures(resolver);
+
         List<String> installedFeatureIds = getFeatureIds(allResources);
         List<String> newFeatures = new ArrayList<String>(installedFeatureIds);
-        newFeatures.removeAll(installed);
-        List<String> delFeatures = new ArrayList<String>(installed);
+        newFeatures.removeAll(installed.get(ROOT_REGION));
+        List<String> delFeatures = new ArrayList<String>(installed.get(ROOT_REGION));
         delFeatures.removeAll(installedFeatureIds);
 
         //
         // Compute list of installable resources (those with uris)
         //
-        List<Resource> resources = getBundles(allResources);
+        Map<Resource, String> resources = resolver.getBundles();
 
         // Compute information for each bundle
         Map<String, BundleInfo> bundleInfos = new HashMap<String, BundleInfo>();
@@ -823,14 +877,10 @@ public class FeaturesServiceImpl implements FeaturesService {
         // Get all resources that will be used to satisfy the old features set
         Set<Resource> resourceLinkedToOldFeatures = new HashSet<Resource>();
         if (noStart) {
-            for (Resource resource : resolution.keySet()) {
-                String name = FeatureNamespace.getName(resource);
-                if (name != null) {
-                    Version version = FeatureNamespace.getVersion(resource);
-                    String id = version != null ? name + "/" + version : name;
-                    if (installed.contains(id)) {
-                        addTransitive(resource, resourceLinkedToOldFeatures, resolution);
-                    }
+            for (Resource resource : resolver.getFeatures().keySet()) {
+                String id = getFeatureId(resource);
+                if (installed.get(ROOT_REGION).contains(id)) {
+                    addTransitive(resource, resourceLinkedToOldFeatures, resolution);
                 }
             }
         }
@@ -838,15 +888,10 @@ public class FeaturesServiceImpl implements FeaturesService {
         //
         // Compute deployment
         //
-        Map<String, Long> bundleChecksums = new HashMap<String, Long>();
-        synchronized (lock) {
-            bundleChecksums.putAll(state.bundleChecksums);
-        }
-        Deployment deployment = computeDeployment(managed, bundles, providers, resources, bundleChecksums);
+        // TODO: compute bundles/region mapping to support multiple bundles and bunde moving into a different region
+        Deployment deployment = computeDeployment(resolver, state);
 
-        if (deployment.toDelete.isEmpty() &&
-                deployment.toUpdate.isEmpty() &&
-                deployment.toInstall.isEmpty()) {
+        if (deployment.regions.isEmpty()) {
             print("No deployment change.", verbose);
             return;
         }
@@ -859,8 +904,10 @@ public class FeaturesServiceImpl implements FeaturesService {
         // Compute the set of bundles to refresh
         //
         Set<Bundle> toRefresh = new HashSet<Bundle>();
-        toRefresh.addAll(deployment.toDelete);
-        toRefresh.addAll(deployment.toUpdate.keySet());
+        for (RegionDeployment regionDeployment : deployment.regions.values()) {
+            toRefresh.addAll(regionDeployment.toDelete);
+            toRefresh.addAll(regionDeployment.toUpdate.keySet());
+        }
 
         if (!noRefreshManaged) {
             int size;
@@ -907,8 +954,11 @@ public class FeaturesServiceImpl implements FeaturesService {
         if (noRefreshUnmanaged) {
             Set<Bundle> newSet = new HashSet<Bundle>();
             for (Bundle bundle : toRefresh) {
-                if (managed.contains(bundle.getBundleId())) {
-                    newSet.add(bundle);
+                for (Set<Long> m : managed.values()) {
+                    if (m.contains(bundle.getBundleId())) {
+                        newSet.add(bundle);
+                        break;
+                    }
                 }
             }
             toRefresh = newSet;
@@ -932,12 +982,14 @@ public class FeaturesServiceImpl implements FeaturesService {
         //
 
         // TODO: handle update on the features service itself
-        if (deployment.toUpdate.containsKey(bundle) ||
-                deployment.toDelete.contains(bundle)) {
+        RegionDeployment rootRegionDeployment = deployment.regions.get(ROOT_REGION);
+        if (rootRegionDeployment != null &&
+                (rootRegionDeployment.toUpdate.containsKey(bundle)
+                        || rootRegionDeployment.toDelete.contains(bundle))) {
 
             LOGGER.warn("Updating or uninstalling of the FeaturesService is not supported");
-            deployment.toUpdate.remove(bundle);
-            deployment.toDelete.remove(bundle);
+            rootRegionDeployment.toUpdate.remove(bundle);
+            rootRegionDeployment.toDelete.remove(bundle);
 
         }
 
@@ -945,10 +997,14 @@ public class FeaturesServiceImpl implements FeaturesService {
         // Perform bundle operations
         //
 
+        //
         // Stop bundles by chunks
+        //
         Set<Bundle> toStop = new HashSet<Bundle>();
-        toStop.addAll(deployment.toUpdate.keySet());
-        toStop.addAll(deployment.toDelete);
+        for (RegionDeployment regionDeployment : deployment.regions.values()) {
+            toStop.addAll(regionDeployment.toUpdate.keySet());
+            toStop.addAll(regionDeployment.toDelete);
+        }
         removeFragmentsAndBundlesInState(toStop, Bundle.UNINSTALLED | Bundle.RESOLVED | Bundle.STOPPING);
         if (!toStop.isEmpty()) {
             print("Stopping bundles:", verbose);
@@ -961,67 +1017,162 @@ public class FeaturesServiceImpl implements FeaturesService {
                 }
             }
         }
-        if (!deployment.toDelete.isEmpty()) {
+
+        //
+        // Delete bundles
+        //
+        boolean hasToDelete = false;
+        for (RegionDeployment regionDeployment : deployment.regions.values()) {
+            if ((hasToDelete = !regionDeployment.toDelete.isEmpty())) {
+                break;
+            }
+        }
+        if (hasToDelete) {
             print("Uninstalling bundles:", verbose);
-            for (Bundle bundle : deployment.toDelete) {
-                print("  " + bundle.getSymbolicName() + " / " + bundle.getVersion(), verbose);
-                bundle.uninstall();
-                managed.remove(bundle.getBundleId());
-            }
-        }
-        if (!deployment.toUpdate.isEmpty()) {
-            print("Updating bundles:", verbose);
-            for (Map.Entry<Bundle, Resource> entry : deployment.toUpdate.entrySet()) {
-                Bundle bundle = entry.getKey();
-                Resource resource = entry.getValue();
-                String uri = UriNamespace.getUri(resource);
-                print("  " + uri, verbose);
-                InputStream is = getBundleInputStream(resource, providers);
-                bundle.update(is);
-                toStart.add(bundle);
-                BundleInfo bi = bundleInfos.get(uri);
-                if (bi != null && bi.getStartLevel() > 0) {
-                    bundle.adapt(BundleStartLevel.class).setStartLevel(bi.getStartLevel());
+            for (Map.Entry<String, RegionDeployment> entry : deployment.regions.entrySet()) {
+                String name = entry.getKey();
+                RegionDeployment regionDeployment = entry.getValue();
+                for (Bundle bundle : regionDeployment.toDelete) {
+                    print("  " + bundle.getSymbolicName() + " / " + bundle.getVersion(), verbose);
+                    bundle.uninstall();
+                    removeFromMapSet(managed, name, bundle.getBundleId());
                 }
-                // TODO: handle region
-            }
-        }
-        if (!deployment.toInstall.isEmpty()) {
-            print("Installing bundles:", verbose);
-            for (Resource resource : deployment.toInstall) {
-                String uri = UriNamespace.getUri(resource);
-                print("  " + uri, verbose);
-                InputStream is = getBundleInputStream(resource, providers);
-                Bundle bundle = systemBundleContext.installBundle(uri, is);
-                managed.add(bundle.getBundleId());
-                if (!noStart || resourceLinkedToOldFeatures.contains(resource)) {
-                    toStart.add(bundle);
-                }
-                deployment.resToBnd.put(resource, bundle);
-                // save a checksum of installed snapshot bundle
-                if (UPDATE_SNAPSHOTS_CRC.equals(updateSnaphots)
-                        && isUpdateable(resource) && !deployment.newCheckums.containsKey(bundle.getLocation())) {
-                    deployment.newCheckums.put(bundle.getLocation(), ChecksumUtils.checksum(getBundleInputStream(resource, providers)));
-                }
-                BundleInfo bi = bundleInfos.get(uri);
-                if (bi != null && bi.getStartLevel() > 0) {
-                    bundle.adapt(BundleStartLevel.class).setStartLevel(bi.getStartLevel());
-                }
-                // TODO: handle region
             }
         }
 
         //
+        // Update regions
+        //
+        // TODO: this replace the whole digraph with the computed one
+        // TODO: we need to be smarter and allow user modifications or
+        // TODO: externally managed regions such as the one managed
+        // TODO: by aries subsystems
+        RegionDigraph clone = this.digraph.copy();
+        RegionDigraph computedDigraph = resolver.getDigraph();
+        for (Region r : clone.getRegions()) {
+            clone.removeRegion(r);
+        }
+        Map<String, String> flats = resolver.getFlatSubsystemsMap();
+        for (Region r : computedDigraph.getRegions()) {
+            if (r.getName().equals(flats.get(r.getName()))) {
+                clone.createRegion(r.getName());
+            }
+        }
+        for (Region r : computedDigraph.getRegions()) {
+            for (RegionDigraph.FilteredRegion fr : computedDigraph.getEdges(r)) {
+                String rt = flats.get(r.getName());
+                String rh = flats.get(fr.getRegion().getName());
+                if (!rh.equals(rt)) {
+                    Region tail = clone.getRegion(rt);
+                    Region head = clone.getRegion(rh);
+                    RegionFilterBuilder rfb = clone.createRegionFilterBuilder();
+                    for (Map.Entry<String, Collection<String>> entry : fr.getFilter().getSharingPolicy().entrySet()) {
+                        // Discard osgi.identity namespace
+                        if (!IdentityNamespace.IDENTITY_NAMESPACE.equals(entry.getKey())) {
+                            for (String f : entry.getValue()) {
+                                rfb.allow(entry.getKey(), f);
+                            }
+                        }
+                    }
+                    clone.connect(tail, rfb.build(), head);
+                }
+            }
+        }
+        // Spread bundles across regions
+        Region root = clone.getRegion(ROOT_REGION);
+        for (BundleRevision revision : systemBundles) {
+            root.addBundle(revision.getBundle());
+        }
+        for (Resource resource : resources.keySet()) {
+            Bundle bundle = deployment.resToBnd.get(resource);
+            if (bundle != null) {
+                String region = resources.get(resource);
+                clone.getRegion(region).addBundle(bundle);
+            }
+        }
+        this.digraph.replace(clone);
+
+        //
+        // Update bundles
+        //
+        boolean hasToUpdate = false;
+        for (RegionDeployment regionDeployment : deployment.regions.values()) {
+            if ((hasToUpdate = !regionDeployment.toUpdate.isEmpty())) {
+                break;
+            }
+        }
+        if (hasToUpdate) {
+            print("Updating bundles:", verbose);
+            for (RegionDeployment regionDeployment : deployment.regions.values()) {
+                for (Map.Entry<Bundle, Resource> entry : regionDeployment.toUpdate.entrySet()) {
+                    Bundle bundle = entry.getKey();
+                    Resource resource = entry.getValue();
+                    String uri = getUri(resource);
+                    print("  " + uri, verbose);
+                    InputStream is = getBundleInputStream(resource, providers);
+                    bundle.update(is);
+                    toStart.add(bundle);
+                    BundleInfo bi = bundleInfos.get(uri);
+                    if (bi != null && bi.getStartLevel() > 0) {
+                        bundle.adapt(BundleStartLevel.class).setStartLevel(bi.getStartLevel());
+                    }
+                }
+            }
+        }
+        //
+        // Install bundles
+        //
+        boolean hasToInstall = false;
+        for (RegionDeployment regionDeployment : deployment.regions.values()) {
+            if ((hasToInstall = !regionDeployment.toInstall.isEmpty())) {
+                break;
+            }
+        }
+        if (hasToInstall) {
+            print("Installing bundles:", verbose);
+            for (Map.Entry<String, RegionDeployment> entry : deployment.regions.entrySet()) {
+                String name = entry.getKey();
+                Region region = digraph.getRegion(name);
+                RegionDeployment regionDeployment = entry.getValue();
+                for (Resource resource : regionDeployment.toInstall) {
+                    String uri = getUri(resource);
+                    print("  " + uri, verbose);
+                    InputStream is = getBundleInputStream(resource, providers);
+                    Bundle bundle;
+                    if (ROOT_REGION.equals(name)) {
+                        bundle = region.installBundleAtLocation(uri, is);
+                    } else {
+                        bundle = region.installBundle(uri, is);
+                    }
+                    addToMapSet(managed, name, bundle.getBundleId());
+                    if (!noStart || resourceLinkedToOldFeatures.contains(resource)) {
+                        toStart.add(bundle);
+                    }
+                    deployment.resToBnd.put(resource, bundle);
+                    // save a checksum of installed snapshot bundle
+                    if (UPDATE_SNAPSHOTS_CRC.equals(updateSnaphots)
+                            && isUpdateable(resource) && !deployment.newCheckums.containsKey(bundle.getBundleId())) {
+                        deployment.newCheckums.put(bundle.getBundleId(), ChecksumUtils.checksum(getBundleInputStream(resource, providers)));
+                    }
+                    BundleInfo bi = bundleInfos.get(uri);
+                    if (bi != null && bi.getStartLevel() > 0) {
+                        bundle.adapt(BundleStartLevel.class).setStartLevel(bi.getStartLevel());
+                    }
+                }
+            }
+        }
+
+       //
         // Update and save state
         //
         synchronized (lock) {
-            state.bundleChecksums.putAll(deployment.newCheckums);
-            state.features.clear();
-            state.features.addAll(features);
-            state.installedFeatures.clear();
-            state.installedFeatures.addAll(installedFeatureIds);
-            state.managedBundles.clear();
-            state.managedBundles.addAll(managed);
+            this.state.bundleChecksums.putAll(deployment.newCheckums);
+            this.state.features.clear();
+            this.state.features.putAll(features);
+            this.state.installedFeatures.clear();
+            this.state.installedFeatures.putAll(installedFeatures);
+            this.state.managedBundles.clear();
+            this.state.managedBundles.putAll(managed);
             saveState();
         }
 
@@ -1134,122 +1285,145 @@ public class FeaturesServiceImpl implements FeaturesService {
         }
     }
 
-    protected void logDeployment(Deployment deployment, boolean verbose) {
+    protected void logDeployment(Deployment overallDeployment, boolean verbose) {
         print("Changes to perform:", verbose);
-        if (!deployment.toDelete.isEmpty()) {
-            print("  Bundles to uninstall:", verbose);
-            for (Bundle bundle : deployment.toDelete) {
-                print("    " + bundle.getSymbolicName() + " / " + bundle.getVersion(), verbose);
+        for (Map.Entry<String, RegionDeployment> region : overallDeployment.regions.entrySet()) {
+            RegionDeployment deployment = region.getValue();
+            print("  Region: " + region.getKey(), verbose);
+            if (!deployment.toDelete.isEmpty()) {
+                print("    Bundles to uninstall:", verbose);
+                for (Bundle bundle : deployment.toDelete) {
+                    print("      " + bundle.getSymbolicName() + " / " + bundle.getVersion(), verbose);
+                }
             }
-        }
-        if (!deployment.toUpdate.isEmpty()) {
-            print("  Bundles to update:", verbose);
-            for (Map.Entry<Bundle, Resource> entry : deployment.toUpdate.entrySet()) {
-                print("    " + entry.getKey().getSymbolicName() + " / " + entry.getKey().getVersion() + " with " + UriNamespace.getUri(entry.getValue()), verbose);
+            if (!deployment.toUpdate.isEmpty()) {
+                print("    Bundles to update:", verbose);
+                for (Map.Entry<Bundle, Resource> entry : deployment.toUpdate.entrySet()) {
+                    print("      " + entry.getKey().getSymbolicName() + " / " + entry.getKey().getVersion() + " with " + getUri(entry.getValue()), verbose);
+                }
             }
-        }
-        if (!deployment.toInstall.isEmpty()) {
-            print("  Bundles to install:", verbose);
-            for (Resource resource : deployment.toInstall) {
-                print("    " + UriNamespace.getUri(resource), verbose);
+            if (!deployment.toInstall.isEmpty()) {
+                print("    Bundles to install:", verbose);
+                for (Resource resource : deployment.toInstall) {
+                    print("      " + getUri(resource), verbose);
+                }
             }
         }
     }
 
     protected Deployment computeDeployment(
-                                Set<Long> managed,
-                                Bundle[] bundles,
-                                Map<String, StreamProvider> providers,
-                                List<Resource> resources,
-                                Map<String, Long> bundleChecksums) throws IOException {
-        Deployment deployment = new Deployment();
+                                SubsystemResolver resolver,
+                                State state) throws IOException {
 
-        // TODO: regions
-        List<Resource> toDeploy = new ArrayList<Resource>(resources);
+        Deployment result = new Deployment();
 
-        // First pass: go through all installed bundles and mark them
-        // as either to ignore or delete
-        for (Bundle bundle : bundles) {
-            if (bundle.getSymbolicName() != null && bundle.getBundleId() != 0) {
-                Resource resource = null;
-                for (Resource res : toDeploy) {
-                    if (bundle.getSymbolicName().equals(getSymbolicName(res))) {
-                        if (bundle.getVersion().equals(getVersion(res))) {
-                            resource = res;
-                            break;
-                        }
-                    }
-                }
-                // We found a matching bundle
-                if (resource != null) {
-                    // In case of snapshots, check if the snapshot is out of date
-                    // and flag it as to update
-                    if (managed.contains(bundle.getBundleId()) && isUpdateable(resource)) {
-                        // Always update snapshots
-                        if (UPDATE_SNAPSHOTS_ALWAYS.equalsIgnoreCase(updateSnaphots)) {
-                            LOGGER.debug("Update snapshot for " + bundle.getLocation());
-                            deployment.toUpdate.put(bundle, resource);
-                        }
-                        else if (UPDATE_SNAPSHOTS_CRC.equalsIgnoreCase(updateSnaphots)) {
-                            // if the checksum are different
-                            InputStream is = null;
-                            try {
-                                is = getBundleInputStream(resource, providers);
-                                long newCrc = ChecksumUtils.checksum(is);
-                                long oldCrc = bundleChecksums.containsKey(bundle.getLocation()) ? bundleChecksums.get(bundle.getLocation()) : 0l;
-                                if (newCrc != oldCrc) {
-                                    LOGGER.debug("New snapshot available for " + bundle.getLocation());
-                                    deployment.toUpdate.put(bundle, resource);
-                                    deployment.newCheckums.put(bundle.getLocation(), newCrc);
-                                }
-                            } finally {
-                                if (is != null) {
-                                    is.close();
-                                }
+        Map<String, Set<Resource>> bundlesPerRegions = resolver.getBundlesPerRegions();
+
+        // Gather all regions, including old ones and new ones
+        Set<String> regions = new HashSet<String>();
+        regions.addAll(state.managedBundles.keySet());
+        regions.addAll(bundlesPerRegions.keySet());
+
+        for (String region : regions) {
+
+            RegionDeployment deployment = new RegionDeployment();
+
+            // Get the list of bundles currently assigned in the region
+            Set<Long> managed = state.managedBundles.get(region);
+            if (managed == null) {
+                managed = Collections.emptySet();
+            }
+
+            // Compute the list of resources to deploy in the region
+            Set<Resource> bundlesInRegion = bundlesPerRegions.get(region);
+            List<Resource> toDeploy = bundlesInRegion != null
+                            ? new ArrayList<Resource>(bundlesInRegion) : new ArrayList<Resource>();
+
+            // First pass: go through all installed bundles and mark them
+            // as either to ignore or delete
+            for (long bundleId : managed) {
+                // Look for the installed bundle
+                Bundle bundle = systemBundleContext.getBundle(bundleId);
+                // Bundle has been manually uninstalled ?
+                if (bundle != null) {
+                    // Look for a matching resource
+                    Resource resource = null;
+                    for (Resource res : toDeploy) {
+                        if (bundle.getSymbolicName().equals(getSymbolicName(res))) {
+                            if (bundle.getVersion().equals(getVersion(res))) {
+                                resource = res;
+                                break;
                             }
                         }
                     }
-                    // We're done for this resource
-                    toDeploy.remove(resource);
-                    deployment.resToBnd.put(resource, bundle);
-                // There's no matching resource
-                // If the bundle is managed, we need to delete it
-                } else if (managed.contains(bundle.getBundleId())) {
-                    deployment.toDelete.add(bundle);
+                    // We found a matching bundle
+                    if (resource != null) {
+                        // In case of snapshots, check if the snapshot is out of date
+                        // and flag it as to update
+                        if (isUpdateable(resource)) {
+                            // Always update snapshots
+                            if (UPDATE_SNAPSHOTS_ALWAYS.equalsIgnoreCase(updateSnaphots)) {
+                                LOGGER.debug("Update snapshot for " + bundle.getLocation());
+                                deployment.toUpdate.put(bundle, resource);
+                            } else if (UPDATE_SNAPSHOTS_CRC.equalsIgnoreCase(updateSnaphots)) {
+                                // if the checksum are different
+                                InputStream is = null;
+                                try {
+                                    is = getBundleInputStream(resource, resolver.getProviders());
+                                    long newCrc = ChecksumUtils.checksum(is);
+                                    long oldCrc = state.bundleChecksums.containsKey(bundle.getBundleId()) ? state.bundleChecksums.get(bundle.getBundleId()) : 0l;
+                                    if (newCrc != oldCrc) {
+                                        LOGGER.debug("New snapshot available for " + bundle.getLocation());
+                                        deployment.toUpdate.put(bundle, resource);
+                                        result.newCheckums.put(bundle.getBundleId(), newCrc);
+                                    }
+                                } finally {
+                                    if (is != null) {
+                                        is.close();
+                                    }
+                                }
+                            }
+                        }
+                        // We're done for this resource
+                        toDeploy.remove(resource);
+                        result.resToBnd.put(resource, bundle);
+                        // There's no matching resource
+                        // If the bundle is managed, we need to delete it
+                    } else if (managed.contains(bundle.getBundleId())) {
+                        deployment.toDelete.add(bundle);
+                    }
                 }
+            }
+
+            // Second pass on remaining resources
+            for (Resource resource : toDeploy) {
+                TreeMap<Version, Bundle> matching = new TreeMap<Version, Bundle>();
+                VersionRange range = new VersionRange(Macro.transform(bundleUpdateRange, getVersion(resource).toString()));
+                for (Bundle bundle : deployment.toDelete) {
+                    if (bundle.getSymbolicName().equals(getSymbolicName(resource)) && range.contains(bundle.getVersion())) {
+                        matching.put(bundle.getVersion(), bundle);
+                    }
+                }
+                if (!matching.isEmpty()) {
+                    Bundle bundle = matching.lastEntry().getValue();
+                    deployment.toUpdate.put(bundle, resource);
+                    deployment.toDelete.remove(bundle);
+                    result.resToBnd.put(resource, bundle);
+                } else {
+                    deployment.toInstall.add(resource);
+                }
+            }
+            Collections.sort(deployment.toInstall, new ResourceComparator());
+
+            // Add this region if there is something to do
+            if (!deployment.toDelete.isEmpty()
+                    || !deployment.toUpdate.isEmpty()
+                    || !deployment.toInstall.isEmpty()) {
+                result.regions.put(region, deployment);
             }
         }
 
-        // Second pass on remaining resources
-        for (Resource resource : toDeploy) {
-            TreeMap<Version, Bundle> matching = new TreeMap<Version, Bundle>();
-            VersionRange range = new VersionRange(Macro.transform(bundleUpdateRange, getVersion(resource).toString()));
-            for (Bundle bundle : deployment.toDelete) {
-                if (bundle.getSymbolicName().equals(getSymbolicName(resource)) && range.contains(bundle.getVersion())) {
-                    matching.put(bundle.getVersion(), bundle);
-                }
-            }
-            if (!matching.isEmpty()) {
-                Bundle bundle = matching.lastEntry().getValue();
-                deployment.toUpdate.put(bundle, resource);
-                deployment.toDelete.remove(bundle);
-                deployment.resToBnd.put(resource, bundle);
-            } else {
-                deployment.toInstall.add(resource);
-            }
-        }
-        return deployment;
-    }
-
-    protected List<Resource> getBundles(Collection<Resource> allResources) {
-        Map<String, Resource> deploy = new TreeMap<String, Resource>();
-        for (Resource res : allResources) {
-            String uri = UriNamespace.getUri(res);
-            if (uri != null) {
-                deploy.put(uri, res);
-            }
-        }
-        return new ArrayList<Resource>(deploy.values());
+        return result;
     }
 
     protected List<Feature> getFeatures(Repository[] repositories, List<String> featureIds) throws Exception {
@@ -1265,28 +1439,33 @@ public class FeaturesServiceImpl implements FeaturesService {
         return installedFeatures;
     }
 
+    protected Map<String, Set<String>> getInstalledFeatures(SubsystemResolver resolver) {
+        Map<String, Set<String>> installed = new HashMap<String, Set<String>>();
+        Map<String, Set<Resource>> mapping = resolver.getFeaturesPerRegions();
+        for (Map.Entry<String, Set<Resource>> entry : mapping.entrySet()) {
+            for (Resource resource : entry.getValue()) {
+                addToMapSet(installed, entry.getKey(), getFeatureId(resource));
+            }
+        }
+        return installed;
+    }
+
     protected List<String> getFeatureIds(Collection<Resource> allResources) {
         List<String> installedFeatureIds = new ArrayList<String>();
         for (Resource resource : allResources) {
-            String name = FeatureNamespace.getName(resource);
-            if (name != null) {
-                Version version = FeatureNamespace.getVersion(resource);
-                String id = version != null ? name + "/" + version : name;
+            String id = getFeatureId(resource);
+            if (id != null) {
                 installedFeatureIds.add(id);
             }
         }
         return installedFeatureIds;
     }
 
-    protected DeploymentBuilder createDeploymentBuilder(Repository[] repositories) {
-        return new DeploymentBuilder(new SimpleDownloader(), Arrays.asList(repositories));
-    }
-
-
     protected boolean isUpdateable(Resource resource) {
-        return (getVersion(resource).getQualifier().endsWith(SNAPSHOT) ||
-                UriNamespace.getUri(resource).contains(SNAPSHOT) ||
-                !UriNamespace.getUri(resource).contains(MAVEN));
+        String uri = getUri(resource);
+        return getVersion(resource).getQualifier().endsWith(SNAPSHOT) 
+                || uri.contains(SNAPSHOT) 
+                || !uri.contains(MAVEN);
     }
 
     protected List<Bundle> getBundlesToStart(Collection<Bundle> bundles) {
@@ -1378,7 +1557,7 @@ public class FeaturesServiceImpl implements FeaturesService {
     }
 
     protected InputStream getBundleInputStream(Resource resource, Map<String, StreamProvider> providers) throws IOException {
-        String uri = UriNamespace.getUri(resource);
+        String uri = getUri(resource);
         if (uri == null) {
             throw new IllegalStateException("Resource has no uri");
         }
@@ -1406,8 +1585,12 @@ public class FeaturesServiceImpl implements FeaturesService {
 
 
     static class Deployment {
-        Map<String, Long> newCheckums = new HashMap<String, Long>();
+        Map<Long, Long> newCheckums = new HashMap<Long, Long>();
         Map<Resource, Bundle> resToBnd = new HashMap<Resource, Bundle>();
+        Map<String, RegionDeployment> regions = new HashMap<String, RegionDeployment>();
+    }
+
+    static class RegionDeployment {
         List<Resource> toInstall = new ArrayList<Resource>();
         List<Bundle> toDelete = new ArrayList<Bundle>();
         Map<Bundle, Resource> toUpdate = new HashMap<Bundle, Resource>();

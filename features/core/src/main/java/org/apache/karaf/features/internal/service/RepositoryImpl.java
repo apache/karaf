@@ -47,7 +47,7 @@ public class RepositoryImpl implements Repository {
         return features.getName();
     }
 
-    public URI[] getRepositories() throws Exception {
+    public URI[] getRepositories() throws IOException {
         load();
         URI[] result = new URI[features.getRepository().size()];
         for (int i = 0; i < features.getRepository().size(); i++) {
@@ -58,7 +58,7 @@ public class RepositoryImpl implements Repository {
         return result;
     }
 
-    public org.apache.karaf.features.Feature[] getFeatures() throws Exception {
+    public org.apache.karaf.features.Feature[] getFeatures() throws IOException {
         load();
         return features.getFeature().toArray(new org.apache.karaf.features.Feature[features.getFeature().size()]);
     }
@@ -94,9 +94,5 @@ public class RepositoryImpl implements Repository {
         }
     }
 
-    @Override
-    public boolean isValid() {
-        throw new UnsupportedOperationException();
-    }
 }
 

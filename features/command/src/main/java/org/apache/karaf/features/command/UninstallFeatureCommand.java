@@ -45,6 +45,9 @@ public class UninstallFeatureCommand extends FeaturesCommandSupport {
     @Option(name = "-t", aliases = "--simulate", description = "Perform a simulation only", required = false, multiValued = false)
     boolean simulate;
 
+    @Option(name = "-g", aliases = "--region", description = "Region to install to")
+    String region;
+
     protected void doExecute(FeaturesService admin) throws Exception {
         // iterate in the provided feature
         EnumSet<FeaturesService.Option> options = EnumSet.noneOf(FeaturesService.Option.class);
@@ -57,6 +60,6 @@ public class UninstallFeatureCommand extends FeaturesCommandSupport {
         if (verbose) {
             options.add(FeaturesService.Option.Verbose);
         }
-        admin.uninstallFeatures(new HashSet<String>(features), options);
+        admin.uninstallFeatures(new HashSet<String>(features), region, options);
     }
 }
