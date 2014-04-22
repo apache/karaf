@@ -30,8 +30,6 @@ import org.eclipse.equinox.region.Region;
 import org.eclipse.equinox.region.RegionDigraph;
 import org.eclipse.equinox.region.RegionFilter;
 import org.osgi.framework.BundleException;
-import org.osgi.framework.Constants;
-import org.osgi.framework.namespace.IdentityNamespace;
 import org.osgi.resource.Capability;
 import org.osgi.resource.Requirement;
 import org.osgi.resource.Resource;
@@ -39,6 +37,14 @@ import org.osgi.resource.Wiring;
 import org.osgi.service.repository.Repository;
 import org.osgi.service.resolver.HostedCapability;
 import org.osgi.service.resolver.ResolveContext;
+
+import static org.eclipse.equinox.region.RegionFilter.VISIBLE_BUNDLE_NAMESPACE;
+import static org.osgi.framework.Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE;
+import static org.osgi.framework.Constants.BUNDLE_VERSION_ATTRIBUTE;
+import static org.osgi.framework.Constants.RESOLUTION_DIRECTIVE;
+import static org.osgi.framework.Constants.RESOLUTION_OPTIONAL;
+import static org.osgi.framework.namespace.IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE;
+import static org.osgi.framework.namespace.IdentityNamespace.IDENTITY_NAMESPACE;
 
 public class SubsystemResolveContext extends ResolveContext {
 
@@ -145,9 +151,9 @@ public class SubsystemResolveContext extends ResolveContext {
 
     @Override
     public boolean isEffective(Requirement requirement) {
-        String resolution = requirement.getDirectives().get(Constants.RESOLUTION_DIRECTIVE);
-        return requirement.getNamespace().equals(IdentityNamespace.IDENTITY_NAMESPACE)
-                || !Constants.RESOLUTION_OPTIONAL.equals(resolution);
+        String resolution = requirement.getDirectives().get(RESOLUTION_DIRECTIVE);
+        return requirement.getNamespace().equals(IDENTITY_NAMESPACE)
+                || !RESOLUTION_OPTIONAL.equals(resolution);
     }
 
     @Override
@@ -172,13 +178,13 @@ public class SubsystemResolveContext extends ResolveContext {
                 return true;
             }
             Resource resource = candidate.getResource();
-            List<Capability> identities = resource.getCapabilities(IdentityNamespace.IDENTITY_NAMESPACE);
+            List<Capability> identities = resource.getCapabilities(IDENTITY_NAMESPACE);
             if (identities != null && !identities.isEmpty()) {
                 Capability identity = identities.iterator().next();
                 Map<String, Object> attrs = new HashMap<String, Object>();
-                attrs.put(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE, identity.getAttributes().get(IdentityNamespace.IDENTITY_NAMESPACE));
-                attrs.put(Constants.BUNDLE_VERSION_ATTRIBUTE, identity.getAttributes().get(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE));
-                return filter.isAllowed(RegionFilter.VISIBLE_BUNDLE_NAMESPACE, attrs);
+                attrs.put(BUNDLE_SYMBOLICNAME_ATTRIBUTE, identity.getAttributes().get(IDENTITY_NAMESPACE));
+                attrs.put(BUNDLE_VERSION_ATTRIBUTE, identity.getAttributes().get(CAPABILITY_VERSION_ATTRIBUTE));
+                return filter.isAllowed(VISIBLE_BUNDLE_NAMESPACE, attrs);
             }
             return false;
         }

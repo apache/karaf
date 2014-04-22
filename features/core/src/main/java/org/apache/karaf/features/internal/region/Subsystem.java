@@ -43,7 +43,6 @@ import org.apache.karaf.features.internal.resolver.ResourceBuilder;
 import org.apache.karaf.features.internal.resolver.ResourceImpl;
 import org.apache.karaf.features.internal.resolver.ResourceUtils;
 import org.apache.karaf.features.internal.service.Overrides;
-import org.eclipse.equinox.region.RegionFilter;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
 import org.osgi.resource.Capability;
@@ -54,6 +53,7 @@ import static org.apache.karaf.features.internal.resolver.ResourceUtils.TYPE_FEA
 import static org.apache.karaf.features.internal.resolver.ResourceUtils.TYPE_SUBSYSTEM;
 import static org.apache.karaf.features.internal.resolver.ResourceUtils.addIdentityRequirement;
 import static org.apache.karaf.features.internal.util.MapUtils.addToMapSet;
+import static org.eclipse.equinox.region.RegionFilter.VISIBLE_ALL_NAMESPACE;
 import static org.osgi.framework.namespace.IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE;
 import static org.osgi.framework.namespace.IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE;
 import static org.osgi.framework.namespace.IdentityNamespace.IDENTITY_NAMESPACE;
@@ -71,7 +71,7 @@ public class Subsystem extends ResourceImpl {
     // Everything is visible
     private static final Map<String, Set<String>> SHARE_ALL_POLICY =
             Collections.singletonMap(
-                    RegionFilter.VISIBLE_ALL_NAMESPACE,
+                    VISIBLE_ALL_NAMESPACE,
                     Collections.singleton(ALL_FILTER));
 
     // Nothing (but systems) is visible

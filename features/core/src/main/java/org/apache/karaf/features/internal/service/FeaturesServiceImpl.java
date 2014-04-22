@@ -67,7 +67,6 @@ import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.Version;
-import org.osgi.framework.namespace.IdentityNamespace;
 import org.osgi.framework.startlevel.BundleStartLevel;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.BundleWire;
@@ -80,10 +79,17 @@ import org.slf4j.LoggerFactory;
 
 import static org.apache.felix.resolver.Util.getSymbolicName;
 import static org.apache.felix.resolver.Util.getVersion;
+import static org.apache.karaf.features.internal.resolver.ResourceUtils.getFeatureId;
+import static org.apache.karaf.features.internal.resolver.ResourceUtils.getUri;
 import static org.apache.karaf.features.internal.util.MapUtils.addToMapSet;
 import static org.apache.karaf.features.internal.util.MapUtils.copyMapSet;
-import static org.apache.karaf.features.internal.resolver.ResourceUtils.*;
 import static org.apache.karaf.features.internal.util.MapUtils.removeFromMapSet;
+import static org.osgi.framework.Bundle.ACTIVE;
+import static org.osgi.framework.Bundle.RESOLVED;
+import static org.osgi.framework.Bundle.STARTING;
+import static org.osgi.framework.Bundle.STOPPING;
+import static org.osgi.framework.Bundle.STOP_TRANSIENT;
+import static org.osgi.framework.Bundle.UNINSTALLED;
 
 /**
  *
@@ -878,11 +884,6 @@ public class FeaturesServiceImpl implements FeaturesService {
         List<String> delFeatures = new ArrayList<String>(installed.get(ROOT_REGION));
         delFeatures.removeAll(installedFeatureIds);
 
-        //
-        // Compute list of installable resources (those with uris)
-        //
-        Map<Resource, String> resources = resolver.getBundles();
-
         // Compute information for each bundle
         Map<String, BundleInfo> bundleInfos = new HashMap<String, BundleInfo>();
         for (Feature feature : getFeatures(repositories, getFeatureIds(allResources))) {
@@ -1025,14 +1026,14 @@ public class FeaturesServiceImpl implements FeaturesService {
             toStop.addAll(regionDeployment.toUpdate.keySet());
             toStop.addAll(regionDeployment.toDelete);
         }
-        removeFragmentsAndBundlesInState(toStop, Bundle.UNINSTALLED | Bundle.RESOLVED | Bundle.STOPPING);
+        removeFragmentsAndBundlesInState(toStop, UNINSTALLED | RESOLVED | STOPPING);
         if (!toStop.isEmpty()) {
             print("Stopping bundles:", verbose);
             while (!toStop.isEmpty()) {
                 List<Bundle> bs = getBundlesToStop(toStop);
                 for (Bundle bundle : bs) {
                     print("  " + bundle.getSymbolicName() + " / " + bundle.getVersion(), verbose);
-                    bundle.stop(Bundle.STOP_TRANSIENT);
+                    bundle.stop(STOP_TRANSIENT);
                     toStop.remove(bundle);
                 }
             }
@@ -1241,14 +1242,14 @@ public class FeaturesServiceImpl implements FeaturesService {
         if (!noRefresh) {
             toStop = new HashSet<Bundle>();
             toStop.addAll(toRefresh);
-            removeFragmentsAndBundlesInState(toStop, Bundle.UNINSTALLED | Bundle.RESOLVED | Bundle.STOPPING);
+            removeFragmentsAndBundlesInState(toStop, UNINSTALLED | RESOLVED | STOPPING);
             if (!toStop.isEmpty()) {
                 print("Stopping bundles:", verbose);
                 while (!toStop.isEmpty()) {
                     List<Bundle> bs = getBundlesToStop(toStop);
                     for (Bundle bundle : bs) {
                         print("  " + bundle.getSymbolicName() + " / " + bundle.getVersion(), verbose);
-                        bundle.stop(Bundle.STOP_TRANSIENT);
+                        bundle.stop(STOP_TRANSIENT);
                         toStop.remove(bundle);
                         toStart.add(bundle);
                     }
@@ -1267,7 +1268,7 @@ public class FeaturesServiceImpl implements FeaturesService {
         }
 
         // Compute bundles to start
-        removeFragmentsAndBundlesInState(toStart, Bundle.UNINSTALLED | Bundle.ACTIVE | Bundle.STARTING);
+        removeFragmentsAndBundlesInState(toStart, UNINSTALLED | ACTIVE | STARTING);
         if (!toStart.isEmpty()) {
             // Compute correct start order
             List<Exception> exceptions = new ArrayList<Exception>();

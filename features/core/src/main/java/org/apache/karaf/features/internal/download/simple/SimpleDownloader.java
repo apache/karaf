@@ -35,6 +35,8 @@ import org.apache.karaf.features.internal.download.Downloader;
 import org.apache.karaf.features.internal.download.StreamProvider;
 import org.apache.karaf.features.internal.util.MultiException;
 
+ import static java.util.jar.JarFile.MANIFEST_NAME;
+
 public class SimpleDownloader implements DownloadManager, Downloader {
 
     protected final MultiException exception = new MultiException("Error");
@@ -102,7 +104,7 @@ public class SimpleDownloader implements DownloadManager, Downloader {
                 ZipInputStream zis = new ZipInputStream(is);
                 ZipEntry entry;
                 while ((entry = zis.getNextEntry()) != null) {
-                    if ("META-INF/MANIFEST.MF".equals(entry.getName())) {
+                    if (MANIFEST_NAME.equals(entry.getName())) {
                         Attributes attributes = new Manifest(zis).getMainAttributes();
                         Map<String, String> headers = new HashMap<String, String>();
                         for (Map.Entry attr : attributes.entrySet()) {
