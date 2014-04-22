@@ -38,6 +38,7 @@ import org.apache.karaf.features.internal.service.RepositoryImpl;
 import org.apache.karaf.features.internal.download.simple.SimpleDownloader;
 import org.junit.Test;
 import org.osgi.framework.namespace.IdentityNamespace;
+import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.resource.Capability;
 import org.osgi.resource.Resource;
 import org.osgi.resource.Wire;
@@ -63,7 +64,7 @@ public class SubsystemTest {
         SubsystemResolver resolver = new SubsystemResolver(new TestDownloadManager("data1"));
         resolver.resolve(Collections.<Repository>singletonList(repo),
                          features,
-                         Collections.<Resource>emptyList(),
+                         Collections.<String, Set<BundleRevision>>emptyMap(),
                          Collections.<String>emptySet(),
                          FeaturesServiceImpl.DEFAULT_FEATURE_RESOLUTION_RANGE);
 
@@ -93,7 +94,7 @@ public class SubsystemTest {
         SubsystemResolver resolver = new SubsystemResolver(new TestDownloadManager("data2"));
         resolver.resolve(Collections.<Repository>singletonList(repo),
                          features,
-                         Collections.<Resource>emptyList(),
+                         Collections.<String, Set<BundleRevision>>emptyMap(),
                          Collections.<String>emptySet(),
                          FeaturesServiceImpl.DEFAULT_FEATURE_RESOLUTION_RANGE);
 
@@ -113,7 +114,7 @@ public class SubsystemTest {
         SubsystemResolver resolver = new SubsystemResolver(new TestDownloadManager("data3"));
         resolver.resolve(Collections.<Repository>singletonList(repo),
                 features,
-                Collections.<Resource>emptyList(),
+                Collections.<String, Set<BundleRevision>>emptyMap(),
                 Collections.singleton("b"),
                 FeaturesServiceImpl.DEFAULT_FEATURE_RESOLUTION_RANGE);
 
