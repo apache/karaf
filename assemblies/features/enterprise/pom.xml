@@ -167,10 +167,15 @@
             <artifactId>org.apache.aries.application.runtime</artifactId>
             <scope>provided</scope>
         </dependency>
-        <!-- coordinator -->
+        <!-- subsystems -->
         <dependency>
             <groupId>org.apache.karaf.services</groupId>
             <artifactId>org.apache.karaf.services.coordinator</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.subsystem</groupId>
+            <artifactId>org.apache.karaf.subsystem.core</artifactId>
             <scope>provided</scope>
         </dependency>
     </dependencies>

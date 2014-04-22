@@ -668,6 +668,12 @@
             </dependency>
 
             <dependency>
+                <groupId>org.apache.karaf.subsystem</groupId>
+                <artifactId>org.apache.karaf.subsystem.core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>org.apache.karaf.scr</groupId>
                 <artifactId>org.apache.karaf.scr.command</artifactId>
                 <version>${project.version}</version>
