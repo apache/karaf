@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 
 import org.apache.felix.resolver.ResolverImpl;
 import org.apache.felix.resolver.Util;
@@ -79,6 +78,7 @@ public class SubsystemResolver {
             List<Repository> repositories,
             Map<String, Set<String>> features,
             Collection<? extends Resource> system,
+            Set<String> overrides,
             String featureResolutionRange
     ) throws Exception {
         // Build subsystems on the fly
@@ -114,7 +114,7 @@ public class SubsystemResolver {
         for (Repository repo : repositories) {
             allFeatures.addAll(Arrays.asList(repo.getFeatures()));
         }
-        root.preResolve(allFeatures, manager, featureResolutionRange);
+        root.preResolve(allFeatures, manager, overrides, featureResolutionRange);
 
         // Add system resources
         for (Resource res : system) {

@@ -38,7 +38,7 @@ public class FeatureResource extends ResourceImpl {
 
     private final Feature feature;
 
-    public static FeatureResource build(Feature feature, Conditional conditional, String featureRange, Map<String, Resource> locToRes) throws BundleException {
+    public static FeatureResource build(Feature feature, Conditional conditional, String featureRange, Map<String, ? extends Resource> locToRes) throws BundleException {
         Feature fcond = conditional.asFeature(feature.getName(), feature.getVersion());
         FeatureResource resource = build(fcond, featureRange, locToRes);
         for (String cond : conditional.getCondition()) {
@@ -63,7 +63,7 @@ public class FeatureResource extends ResourceImpl {
         return resource;
     }
 
-    public static FeatureResource build(Feature feature, String featureRange, Map<String, Resource> locToRes) throws BundleException {
+    public static FeatureResource build(Feature feature, String featureRange, Map<String, ? extends Resource> locToRes) throws BundleException {
         FeatureResource resource = new FeatureResource(feature);
         for (BundleInfo info : feature.getBundles()) {
             if (!info.isDependency()) {

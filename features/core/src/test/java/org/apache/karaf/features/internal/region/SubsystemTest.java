@@ -64,6 +64,7 @@ public class SubsystemTest {
         resolver.resolve(Collections.<Repository>singletonList(repo),
                          features,
                          Collections.<Resource>emptyList(),
+                         Collections.<String>emptySet(),
                          FeaturesServiceImpl.DEFAULT_FEATURE_RESOLUTION_RANGE);
 
         verify(resolver, expected);
@@ -93,7 +94,28 @@ public class SubsystemTest {
         resolver.resolve(Collections.<Repository>singletonList(repo),
                          features,
                          Collections.<Resource>emptyList(),
+                         Collections.<String>emptySet(),
                          FeaturesServiceImpl.DEFAULT_FEATURE_RESOLUTION_RANGE);
+
+        verify(resolver, expected);
+    }
+
+    @Test
+    public void testOverrides() throws Exception {
+        RepositoryImpl repo = new RepositoryImpl(getClass().getResource("data3/features.xml").toURI());
+
+        Map<String, Set<String>> features = new HashMap<String, Set<String>>();
+        addToMapSet(features, "root/apps1", "f1");
+
+        Map<String, Set<String>> expected = new HashMap<String, Set<String>>();
+        addToMapSet(expected, "root/apps1", "a/1.0.1");
+
+        SubsystemResolver resolver = new SubsystemResolver(new TestDownloadManager("data3"));
+        resolver.resolve(Collections.<Repository>singletonList(repo),
+                features,
+                Collections.<Resource>emptyList(),
+                Collections.singleton("b"),
+                FeaturesServiceImpl.DEFAULT_FEATURE_RESOLUTION_RANGE);
 
         verify(resolver, expected);
     }

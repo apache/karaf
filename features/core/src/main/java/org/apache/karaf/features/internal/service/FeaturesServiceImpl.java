@@ -831,7 +831,6 @@ public class FeaturesServiceImpl implements FeaturesService {
         // Resolve
         // TODO: requirements
         // TODO: bundles
-        // TODO: overrides
         Set<String>  overrides    = Overrides.loadOverrides(this.overrides);
         Repository[] repositories = listRepositories();
 
@@ -844,6 +843,7 @@ public class FeaturesServiceImpl implements FeaturesService {
                 Arrays.asList(repositories),
                 features,
                 systemBundles,
+                overrides,
                 featureResolutionRange);
         Collection<Resource> allResources = resolution.keySet();
         Map<String, StreamProvider> providers = resolver.getProviders();

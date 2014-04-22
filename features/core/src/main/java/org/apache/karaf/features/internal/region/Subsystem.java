@@ -42,6 +42,7 @@ import org.apache.karaf.features.internal.resolver.RequirementImpl;
 import org.apache.karaf.features.internal.resolver.ResourceBuilder;
 import org.apache.karaf.features.internal.resolver.ResourceImpl;
 import org.apache.karaf.features.internal.resolver.ResourceUtils;
+import org.apache.karaf.features.internal.service.Overrides;
 import org.eclipse.equinox.region.RegionFilter;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
@@ -205,9 +206,10 @@ public class Subsystem extends ResourceImpl {
     @SuppressWarnings("InfiniteLoopStatement")
     public void preResolve(Collection<Feature> features,
                            DownloadManager manager,
+                           Set<String> overrides,
                            String featureResolutionRange) throws Exception {
         for (Subsystem child : children) {
-            child.preResolve(features, manager, featureResolutionRange);
+            child.preResolve(features, manager, overrides, featureResolutionRange);
         }
         List<Requirement> processed = new ArrayList<Requirement>();
         while (true) {
@@ -229,7 +231,7 @@ public class Subsystem extends ResourceImpl {
                                 Subsystem fs = getChild(ssName);
                                 if (fs == null) {
                                     fs = new Subsystem(ssName, feature, this);
-                                    fs.preResolve(features, manager, featureResolutionRange);
+                                    fs.preResolve(features, manager, overrides, featureResolutionRange);
                                     installable.add(fs);
                                     children.add(fs);
                                 }
@@ -241,7 +243,7 @@ public class Subsystem extends ResourceImpl {
             }
         }
         if (feature != null) {
-            final Map<String, Resource> bundles = new ConcurrentHashMap<String, Resource>();
+            final Map<String, ResourceImpl> bundles = new ConcurrentHashMap<String, ResourceImpl>();
             final Downloader downloader = manager.createDownloader();
             final Map<BundleInfo, Boolean> infos = new HashMap<BundleInfo, Boolean>();
             for (Conditional cond : feature.getConditional()) {
@@ -255,21 +257,37 @@ public class Subsystem extends ResourceImpl {
             for (Map.Entry<BundleInfo, Boolean> entry : infos.entrySet()) {
                 final BundleInfo bi = entry.getKey();
                 final String loc = bi.getLocation();
-                final boolean mandatory = entry.getValue();
                 downloader.download(loc, new DownloadCallback() {
                     @Override
                     public void downloaded(StreamProvider provider) throws Exception {
                         ResourceImpl res = createResource(loc, provider.getMetadata());
                         bundles.put(loc, res);
-                        if (bi.isDependency()) {
-                            addDependency(res, false);
-                        } else {
-                            doAddDependency(res, mandatory);
-                        }
+                    }
+                });
+            }
+            for (String override : overrides) {
+                final String loc = Overrides.extractUrl(override);
+                downloader.download(loc, new DownloadCallback() {
+                    @Override
+                    public void downloaded(StreamProvider provider) throws Exception {
+                        ResourceImpl res = createResource(loc, provider.getMetadata());
+                        bundles.put(loc, res);
                     }
                 });
             }
             downloader.await();
+            Overrides.override(bundles, overrides);
+            for (Map.Entry<BundleInfo, Boolean> entry : infos.entrySet()) {
+                final BundleInfo bi = entry.getKey();
+                final String loc = bi.getLocation();
+                final boolean mandatory = entry.getValue();
+                ResourceImpl res = bundles.get(loc);
+                if (bi.isDependency()) {
+                    addDependency(res, false);
+                } else {
+                    doAddDependency(res, mandatory);
+                }
+            }
             for (Dependency dep : feature.getDependencies()) {
                 Subsystem ss = this;
                 while (!ss.isAcceptDependencies()) {

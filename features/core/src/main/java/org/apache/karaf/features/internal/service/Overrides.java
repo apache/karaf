@@ -65,12 +65,12 @@ public class Overrides {
      * @param resources the list of resources to resolve
      * @param overrides list of bundle overrides
      */
-    public static void override(Map<String, Resource> resources, Collection<String> overrides) {
+    public static <T extends Resource> void override(Map<String, T> resources, Collection<String> overrides) {
         // Do override replacement
         for (Clause override : Parser.parseClauses(overrides.toArray(new String[overrides.size()]))) {
             String url = override.getName();
             String vr  = override.getAttribute(OVERRIDE_RANGE);
-            Resource over = resources.get(url);
+            T over = resources.get(url);
             if (over == null) {
                 // Ignore invalid overrides
                 continue;
