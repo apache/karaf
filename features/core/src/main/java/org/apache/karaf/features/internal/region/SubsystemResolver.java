@@ -41,6 +41,7 @@ import org.eclipse.equinox.region.RegionDigraph;
 import org.eclipse.equinox.region.RegionFilterBuilder;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.resource.Capability;
 import org.osgi.resource.Requirement;
 import org.osgi.resource.Resource;
@@ -77,7 +78,7 @@ public class SubsystemResolver {
     public Map<Resource, List<Wire>> resolve(
             List<Repository> repositories,
             Map<String, Set<String>> features,
-            Collection<? extends Resource> system,
+            Map<String, Set<BundleRevision>> system,
             Set<String> overrides,
             String featureResolutionRange
     ) throws Exception {
@@ -117,8 +118,22 @@ public class SubsystemResolver {
         root.preResolve(allFeatures, manager, overrides, featureResolutionRange);
 
         // Add system resources
-        for (Resource res : system) {
-            root.addSystemResource(res);
+        for (Map.Entry<String, Set<BundleRevision>> entry : system.entrySet()) {
+            Subsystem ss = null;
+            String[] parts = entry.getKey().split("/");
+            String path = parts[0];
+            if (path.equals(root.getName())) {
+                ss = root;
+            }
+            for (int i = 1; ss != null && i < parts.length; i++) {
+                path += "/" + parts[i];
+                ss = ss.getChild(path);
+            }
+            if (ss != null) {
+                for (Resource res : entry.getValue()) {
+                    ss.addSystemResource(res);
+                }
+            }
         }
 
         // Populate digraph and resolve
@@ -145,6 +160,41 @@ public class SubsystemResolver {
 
     public Map<Resource, List<Wire>> getWiring() {
         return wiring;
+    }
+
+    public RegionDigraph getFlatDigraph() throws BundleException, InvalidSyntaxException {
+        RegionDigraph clone = this.digraph.copy();
+        RegionDigraph computedDigraph = digraph;
+        for (Region r : clone.getRegions()) {
+            clone.removeRegion(r);
+        }
+        Map<String, String> flats = getFlatSubsystemsMap();
+        for (Region r : computedDigraph.getRegions()) {
+            if (r.getName().equals(flats.get(r.getName()))) {
+                clone.createRegion(r.getName());
+            }
+        }
+        for (Region r : computedDigraph.getRegions()) {
+            for (RegionDigraph.FilteredRegion fr : computedDigraph.getEdges(r)) {
+                String rt = flats.get(r.getName());
+                String rh = flats.get(fr.getRegion().getName());
+                if (!rh.equals(rt)) {
+                    Region tail = clone.getRegion(rt);
+                    Region head = clone.getRegion(rh);
+                    RegionFilterBuilder rfb = clone.createRegionFilterBuilder();
+                    for (Map.Entry<String, Collection<String>> entry : fr.getFilter().getSharingPolicy().entrySet()) {
+                        // Discard osgi.identity namespace
+                        if (!IDENTITY_NAMESPACE.equals(entry.getKey())) {
+                            for (String f : entry.getValue()) {
+                                rfb.allow(entry.getKey(), f);
+                            }
+                        }
+                    }
+                    clone.connect(tail, rfb.build(), head);
+                }
+            }
+        }
+        return clone;
     }
 
     public Map<String, String> getFlatSubsystemsMap() {

@@ -811,27 +811,49 @@ public class FeaturesServiceImpl implements FeaturesService {
         boolean simulate = options.contains(Option.Simulate);
 
         Map<String, Set<String>> installed = state.installedFeatures;
-        Map<String, Set<Long>> managed = state.managedBundles;
+        Map<String, Set<Long>> managed = copyMapSet(state.managedBundles);
 
-        // Get a list of resolved and unmanaged bundles to use as capabilities during resolution
-        List<BundleRevision> systemBundles = new ArrayList<BundleRevision>();
         Bundle[] bundles = systemBundleContext.getBundles();
-        for (Bundle bundle : bundles) {
-            if (bundle.getState() >= Bundle.RESOLVED) {
-                boolean bm = false;
-                for (Set<Long> m : managed.values()) {
-                    bm |= m.contains(bundle.getBundleId());
+
+        // Get a map of unmanaged bundles to use as capabilities during resolution
+        Map<String, Set<BundleRevision>> unmanagedBundles = new HashMap<String, Set<BundleRevision>>();
+        Map<String, Map<String, Map<String, Set<String>>>> policies = new HashMap<String, Map<String, Map<String, Set<String>>>>();
+        {
+            RegionDigraph clone = digraph.copy();
+            for (Region region : clone.getRegions()) {
+                // Get bundles
+                Set<Long> ids = new HashSet<Long>(region.getBundleIds());
+                if (managed.containsKey(region.getName())) {
+                    ids.removeAll(managed.get(region.getName()));
                 }
-                if (!bm) {
-                    BundleRevision res = bundle.adapt(BundleRevision.class);
-                    systemBundles.add(res);
+                if (!ids.isEmpty()) {
+                    Set<BundleRevision> revs = new HashSet<BundleRevision>();
+                    for (Bundle bundle : bundles) {
+                        if (ids.contains(bundle.getBundleId())) {
+                            revs.add(bundle.adapt(BundleRevision.class));
+                        }
+                    }
+                    unmanagedBundles.put(region.getName(), revs);
                 }
+                // Get policies
+                Map<String, Map<String, Set<String>>> edges = new HashMap<String, Map<String, Set<String>>>();
+                for (RegionDigraph.FilteredRegion fr : clone.getEdges(region)) {
+                    Map<String, Set<String>> policy = new HashMap<String, Set<String>>();
+                    Map<String, Collection<String>> current = fr.getFilter().getSharingPolicy();
+                    for (String ns : current.keySet()) {
+                        for (String f : current.get(ns)) {
+                            addToMapSet(policy, ns, f);
+                        }
+                    }
+                    edges.put(fr.getRegion().getName(), policy);
+                }
+                policies.put(region.getName(), edges);
             }
         }
+
         // Resolve
         // TODO: requirements
         // TODO: bundles
-        Set<String>  overrides    = Overrides.loadOverrides(this.overrides);
         Repository[] repositories = listRepositories();
 
         if (!installed.containsKey(ROOT_REGION)) {
@@ -842,8 +864,8 @@ public class FeaturesServiceImpl implements FeaturesService {
         Map<Resource, List<Wire>> resolution = resolver.resolve(
                 Arrays.asList(repositories),
                 features,
-                systemBundles,
-                overrides,
+                unmanagedBundles,
+                Overrides.loadOverrides(this.overrides),
                 featureResolutionRange);
         Collection<Resource> allResources = resolution.keySet();
         Map<String, StreamProvider> providers = resolver.getProviders();
@@ -1043,54 +1065,75 @@ public class FeaturesServiceImpl implements FeaturesService {
         //
         // Update regions
         //
-        // TODO: this replace the whole digraph with the computed one
-        // TODO: we need to be smarter and allow user modifications or
-        // TODO: externally managed regions such as the one managed
-        // TODO: by aries subsystems
-        RegionDigraph clone = this.digraph.copy();
-        RegionDigraph computedDigraph = resolver.getDigraph();
-        for (Region r : clone.getRegions()) {
-            clone.removeRegion(r);
-        }
-        Map<String, String> flats = resolver.getFlatSubsystemsMap();
-        for (Region r : computedDigraph.getRegions()) {
-            if (r.getName().equals(flats.get(r.getName()))) {
-                clone.createRegion(r.getName());
-            }
-        }
-        for (Region r : computedDigraph.getRegions()) {
-            for (RegionDigraph.FilteredRegion fr : computedDigraph.getEdges(r)) {
-                String rt = flats.get(r.getName());
-                String rh = flats.get(fr.getRegion().getName());
-                if (!rh.equals(rt)) {
-                    Region tail = clone.getRegion(rt);
-                    Region head = clone.getRegion(rh);
-                    RegionFilterBuilder rfb = clone.createRegionFilterBuilder();
-                    for (Map.Entry<String, Collection<String>> entry : fr.getFilter().getSharingPolicy().entrySet()) {
-                        // Discard osgi.identity namespace
-                        if (!IdentityNamespace.IDENTITY_NAMESPACE.equals(entry.getKey())) {
-                            for (String f : entry.getValue()) {
-                                rfb.allow(entry.getKey(), f);
-                            }
-                        }
-                    }
-                    clone.connect(tail, rfb.build(), head);
+        {
+            RegionDigraph clone = digraph.copy();
+            RegionDigraph computedDigraph = resolver.getFlatDigraph();
+            // Iterate through previously managed regions and
+            // delete those that do not contain any bundles anymore
+            for (String name : state.managedBundles.keySet()) {
+                if (!managed.containsKey(name) && !unmanagedBundles.containsKey(name)) {
+                    policies.remove(name);
                 }
             }
-        }
-        // Spread bundles across regions
-        Region root = clone.getRegion(ROOT_REGION);
-        for (BundleRevision revision : systemBundles) {
-            root.addBundle(revision.getBundle());
-        }
-        for (Resource resource : resources.keySet()) {
-            Bundle bundle = deployment.resToBnd.get(resource);
-            if (bundle != null) {
-                String region = resources.get(resource);
-                clone.getRegion(region).addBundle(bundle);
+            // Fix broken filters
+            for (String name : policies.keySet()) {
+                policies.get(name).keySet().retainAll(policies.keySet());
             }
+            // Update managed regions
+            for (Region computedRegion : computedDigraph.getRegions()) {
+                String name = computedRegion.getName();
+                Map<String, Map<String, Set<String>>> policy = policies.get(name);
+                if (policy == null) {
+                    policy = new HashMap<String, Map<String, Set<String>>>();
+                    policies.put(name, policy);
+                }
+                for (RegionDigraph.FilteredRegion fr : computedDigraph.getEdges(computedRegion)) {
+                    String r2 = fr.getRegion().getName();
+                    Map<String, Set<String>> filters = new HashMap<String, Set<String>>();
+                    Map<String, Collection<String>> current = fr.getFilter().getSharingPolicy();
+                    for (String ns : current.keySet()) {
+                        for (String f : current.get(ns)) {
+                            addToMapSet(filters, ns, f);
+                        }
+                    }
+                    policy.put(r2, filters);
+                }
+            }
+            // Apply all changes
+            for (Region region : clone.getRegions()) {
+                clone.removeRegion(region);
+            }
+            for (String name : policies.keySet()) {
+                clone.createRegion(name);
+            }
+            for (String r1Name : policies.keySet()) {
+                Region r1 = clone.getRegion(r1Name);
+                Map<String, Map<String, Set<String>>> policy = policies.get(r1Name);
+                for (String r2Name : policy.keySet()) {
+                    Region r2 = clone.getRegion(r2Name);
+                    RegionFilterBuilder rfb = clone.createRegionFilterBuilder();
+                    for (String ns : policy.get(r2Name).keySet()) {
+                        for (String f : policy.get(r2Name).get(ns)) {
+                            rfb.allow(ns, f);
+                        }
+                    }
+                    clone.connect(r1, rfb.build(), r2);
+                }
+                // Dispatch bundles
+                if (unmanagedBundles.containsKey(r1Name)) {
+                    for (BundleRevision rev : unmanagedBundles.get(r1Name)) {
+                        r1.addBundle(rev.getBundle());
+                    }
+                }
+                if (managed.containsKey(r1Name)) {
+                    for (long id : managed.get(r1Name)) {
+                        r1.addBundle(id);
+                    }
+                }
+            }
+            this.digraph.replace(clone);
         }
-        this.digraph.replace(clone);
+
 
         //
         // Update bundles
