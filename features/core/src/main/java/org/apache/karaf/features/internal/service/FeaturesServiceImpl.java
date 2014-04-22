@@ -895,8 +895,6 @@ public class FeaturesServiceImpl implements FeaturesService {
             }
         }
 
-        // TODO: handle bundleInfo.isStart()
-
         // Get all resources that will be used to satisfy the old features set
         Set<Resource> resourceLinkedToOldFeatures = new HashSet<Resource>();
         if (noStart) {
@@ -1188,9 +1186,6 @@ public class FeaturesServiceImpl implements FeaturesService {
                         bundle = region.installBundle(uri, is);
                     }
                     addToMapSet(managed, name, bundle.getBundleId());
-                    if (!noStart || resourceLinkedToOldFeatures.contains(resource)) {
-                        toStart.add(bundle);
-                    }
                     deployment.resToBnd.put(resource, bundle);
                     // save a checksum of installed snapshot bundle
                     if (UPDATE_SNAPSHOTS_CRC.equals(updateSnaphots)
@@ -1200,6 +1195,13 @@ public class FeaturesServiceImpl implements FeaturesService {
                     BundleInfo bi = bundleInfos.get(uri);
                     if (bi != null && bi.getStartLevel() > 0) {
                         bundle.adapt(BundleStartLevel.class).setStartLevel(bi.getStartLevel());
+                    }
+                    if (resourceLinkedToOldFeatures.contains(resource)) {
+                        toStart.add(bundle);
+                    } else if (!noStart) {
+                        if (bi == null || bi.isStart()) {
+                            toStart.add(bundle);
+                        }
                     }
                 }
             }
@@ -1306,9 +1308,12 @@ public class FeaturesServiceImpl implements FeaturesService {
         }
     }
 
-    protected BundleInfo mergeBundleInfo(BundleInfo bi, BundleInfo oldBi) {
-        // TODO: we need a proper merge strategy when a bundle
-        // TODO: comes from different features
+    protected BundleInfo mergeBundleInfo(BundleInfo bi1, BundleInfo bi2) {
+        org.apache.karaf.features.internal.model.Bundle bi = new org.apache.karaf.features.internal.model.Bundle();
+        bi.setLocation(bi1.getLocation());
+        bi.setDependency(bi1.isDependency() && bi2.isDependency());
+        bi.setStart(bi1.isStart() || bi2.isStart());
+        bi.setStartLevel(Math.min(bi1.getStartLevel(), bi2.getStartLevel()));
         return bi;
     }
 
