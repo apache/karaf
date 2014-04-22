@@ -36,7 +36,7 @@
         <bundle start-level="20">mvn:org.apache.aries.proxy/org.apache.aries.proxy.api/${aries.proxy.api.version}</bundle>
         <bundle start-level="20">mvn:org.apache.aries.proxy/org.apache.aries.proxy.impl/${aries.proxy.version}</bundle>
         <capability>
-            service-reference;effective:=active;objectClass=org.apache.aries.proxy.ProxyManager
+            osgi.service;effective:=active;objectClass=org.apache.aries.proxy.ProxyManager
         </capability>
     </feature>
 

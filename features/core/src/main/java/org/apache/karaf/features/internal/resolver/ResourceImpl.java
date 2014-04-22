@@ -17,7 +17,9 @@
 package org.apache.karaf.features.internal.resolver;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.osgi.framework.Version;
 import org.osgi.framework.namespace.IdentityNamespace;
@@ -39,7 +41,13 @@ public class ResourceImpl implements Resource {
     public ResourceImpl(String name, String type, Version version)
     {
         m_caps = new ArrayList<Capability>();
-        m_caps.add(0, new IdentityCapability(this, name, type, version));
+        Map<String, String> dirs = new HashMap<String, String>();
+        Map<String, Object> attrs = new HashMap<String, Object>();
+        attrs.put(IdentityNamespace.IDENTITY_NAMESPACE, name);
+        attrs.put(IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE, type);
+        attrs.put(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE, version);
+        CapabilityImpl identity = new CapabilityImpl(this, IdentityNamespace.IDENTITY_NAMESPACE, dirs, attrs);
+        m_caps.add(identity);
         m_reqs = new ArrayList<Requirement>();
     }
 

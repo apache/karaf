@@ -28,7 +28,7 @@
             <bundle>mvn:org.springframework/spring-web/2.5.6.SEC02</bundle>
         </conditional>
         <capability>
-            service-reference;effective:=active;objectClass=org.apache.aries.proxy.ProxyManager
+            osgi.service;effective:=active;objectClass=org.apache.aries.proxy.ProxyManager
         </capability>
         <scoping>
             <export namespace="osgi.service">

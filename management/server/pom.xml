@@ -118,7 +118,7 @@
                             org.apache.karaf.util.tracker
                         </Private-Package>
                         <Provide-Capability>
-                            service-reference;effective:=active;objectClass=javax.management.MBeanServer
+                            osgi.service;effective:=active;objectClass=javax.management.MBeanServer
                         </Provide-Capability>
                         <Bundle-Activator>
                             org.apache.karaf.management.internal.Activator

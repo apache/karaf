@@ -126,7 +126,7 @@
                             *
                         </Import-Package>
                         <Provide-Capability>
-                            service-reference;effective:=active;objectClass=org.apache.karaf.features.FeaturesService
+                            osgi.service;effective:=active;objectClass=org.apache.karaf.features.FeaturesService
                         </Provide-Capability>
                         <Private-Package>
                             org.apache.karaf.features.internal.*,
