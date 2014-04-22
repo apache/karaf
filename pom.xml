@@ -661,6 +661,11 @@
                 <artifactId>org.apache.karaf.services.eventadmin</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.services</groupId>
+                <artifactId>org.apache.karaf.services.coordinator</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>org.apache.karaf.scr</groupId>

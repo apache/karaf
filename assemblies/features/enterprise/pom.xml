@@ -167,6 +167,12 @@
             <artifactId>org.apache.aries.application.runtime</artifactId>
             <scope>provided</scope>
         </dependency>
+        <!-- coordinator -->
+        <dependency>
+            <groupId>org.apache.karaf.services</groupId>
+            <artifactId>org.apache.karaf.services.coordinator</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
