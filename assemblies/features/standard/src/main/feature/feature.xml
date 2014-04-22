@@ -51,7 +51,7 @@
             <bundle start-level="30">mvn:org.apache.karaf.bundle/org.apache.karaf.bundle.blueprintstate/${project.version}</bundle>
         </conditional>
         <capability>
-            service-reference;effective:=active;objectClass=org.apache.aries.blueprint.services.ParserService,
+            osgi.service;effective:=active;objectClass=org.apache.aries.blueprint.services.ParserService,
             osgi.extender; osgi.extender="osgi.blueprint";uses:="org.osgi.service.blueprint.container,org.osgi.service.blueprint.reflect";version:Version="1.0"
         </capability>
     </feature>
