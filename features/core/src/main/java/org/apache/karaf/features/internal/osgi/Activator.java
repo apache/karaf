@@ -121,9 +121,6 @@ public class Activator extends BaseActivator {
         register(ManagedService.class, featureFinder, props);
 
        FeatureConfigInstaller configInstaller = new FeatureConfigInstaller(configurationAdmin);
-        // TODO: honor respectStartLvlDuringFeatureStartup and respectStartLvlDuringFeatureUninstall
-//        boolean respectStartLvlDuringFeatureStartup = getBoolean("respectStartLvlDuringFeatureStartup", true);
-//        boolean respectStartLvlDuringFeatureUninstall = getBoolean("respectStartLvlDuringFeatureUninstall", true);
         String overrides = getString("overrides", new File(System.getProperty("karaf.etc"), "overrides.properties").toURI().toString());
         String featureResolutionRange = getString("featureResolutionRange", FeaturesServiceImpl.DEFAULT_FEATURE_RESOLUTION_RANGE);
         String bundleUpdateRange = getString("bundleUpdateRange", FeaturesServiceImpl.DEFAULT_BUNDLE_UPDATE_RANGE);

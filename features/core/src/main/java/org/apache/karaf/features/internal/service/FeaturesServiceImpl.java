@@ -31,6 +31,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.Callable;
@@ -888,7 +889,6 @@ public class FeaturesServiceImpl implements FeaturesService {
         //
         // Compute deployment
         //
-        // TODO: compute bundles/region mapping to support multiple bundles and bunde moving into a different region
         Deployment deployment = computeDeployment(resolver, state);
 
         if (deployment.regions.isEmpty()) {
@@ -1469,19 +1469,22 @@ public class FeaturesServiceImpl implements FeaturesService {
     }
 
     protected List<Bundle> getBundlesToStart(Collection<Bundle> bundles) {
-        // TODO: make this pluggable ?
-        // TODO: honor respectStartLvlDuringFeatureStartup
+        // Restart the features service last, regardless of any other consideration
+        // so that we don't end up with the service trying to do stuff before we're done
+        boolean restart = bundles.remove(bundle);
+
+        SortedMap<Integer, Set<Bundle>> bundlesPerStartLevel = new TreeMap<Integer, Set<Bundle>>();
+        for (Bundle bundle : bundles) {
+            int sl = bundle.adapt(BundleStartLevel.class).getStartLevel();
+            addToMapSet(bundlesPerStartLevel, sl, bundle);
+        }
+        bundles = bundlesPerStartLevel.remove(bundlesPerStartLevel.firstKey());
 
         // We hit FELIX-2949 if we don't use the correct order as Felix resolver isn't greedy.
         // In order to minimize that, we make sure we resolve the bundles in the order they
         // are given back by the resolution, meaning that all root bundles (i.e. those that were
         // not flagged as dependencies in features) are started before the others.   This should
         // make sure those important bundles are started first and minimize the problem.
-
-        // Restart the features service last, regardless of any other consideration
-        // so that we don't end up with the service trying to do stuff before we're done
-        boolean restart = bundles.remove(bundle);
-
         List<BundleRevision> revs = new ArrayList<BundleRevision>();
         for (Bundle bundle : bundles) {
             revs.add(bundle.adapt(BundleRevision.class));
@@ -1490,15 +1493,19 @@ public class FeaturesServiceImpl implements FeaturesService {
         for (BundleRevision rev : RequirementSort.sort(revs)) {
             sorted.add(rev.getBundle());
         }
-        if (restart) {
+        if (sorted.isEmpty() && restart) {
             sorted.add(bundle);
         }
         return sorted;
     }
 
     protected List<Bundle> getBundlesToStop(Collection<Bundle> bundles) {
-        // TODO: make this pluggable ?
-        // TODO: honor respectStartLvlDuringFeatureUninstall
+        SortedMap<Integer, Set<Bundle>> bundlesPerStartLevel = new TreeMap<Integer, Set<Bundle>>();
+        for (Bundle bundle : bundles) {
+            int sl = bundle.adapt(BundleStartLevel.class).getStartLevel();
+            addToMapSet(bundlesPerStartLevel, sl, bundle);
+        }
+        bundles = bundlesPerStartLevel.get(bundlesPerStartLevel.lastKey());
 
         List<Bundle> bundlesToDestroy = new ArrayList<Bundle>();
         for (Bundle bundle : bundles) {
