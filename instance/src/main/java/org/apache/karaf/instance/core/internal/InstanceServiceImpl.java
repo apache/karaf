@@ -305,7 +305,6 @@ public class InstanceServiceImpl implements InstanceService {
                 copyResourceToDir(karafBase, "etc/org.apache.karaf.log.cfg", printOutput);
                 copyResourceToDir(karafBase, "etc/org.ops4j.pax.logging.cfg", printOutput);
                 copyResourceToDir(karafBase, "etc/org.ops4j.pax.url.mvn.cfg", printOutput);
-                copyResourceToDir(karafBase, "etc/regions-config.xml", printOutput);
                 copyResourceToDir(karafBase, "etc/shell.init.script", printOutput);
                 copyResourceToDir(karafBase, "etc/users.properties", printOutput);
 
