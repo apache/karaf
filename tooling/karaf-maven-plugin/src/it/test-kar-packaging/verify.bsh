@@ -21,7 +21,7 @@ import java.io.*;
 import java.lang.*;
 
 // check if the kar archive has been pushed to the repository
-File generated = new File(localRepositoryPath, "test/test-kar-packaging/1.0-SNAPSHOT/test-kar-packaging-1.0-SNAPSHOT.kar");
+File generated = new File(basedir, "target/test-kar-packaging-1.0-SNAPSHOT.kar");
 if (generated.exists()) {
     return true;
 }

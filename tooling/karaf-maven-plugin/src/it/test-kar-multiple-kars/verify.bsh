@@ -21,11 +21,11 @@ import java.io.*;
 import java.lang.*;
 
 // check if the kar archives and features XMLs have been pushed to the repository
-File feature1 = new File(localRepositoryPath, "test/test-kar-multiple-kars/1.0-SNAPSHOT/test-kar-multiple-kars-1.0-SNAPSHOT-feature1.xml");
-File feature2 = new File(localRepositoryPath, "test/test-kar-multiple-kars/1.0-SNAPSHOT/test-kar-multiple-kars-1.0-SNAPSHOT-feature2.xml");
+File feature1 = new File(basedir, "target/feature/feature1.xml");
+File feature2 = new File(basedir, "target/feature/feature2.xml");
 
-File kar1 = new File(localRepositoryPath, "test/test-kar-multiple-kars/1.0-SNAPSHOT/test-kar-multiple-kars-1.0-SNAPSHOT-kar1.kar");
-File kar2 = new File(localRepositoryPath, "test/test-kar-multiple-kars/1.0-SNAPSHOT/test-kar-multiple-kars-1.0-SNAPSHOT-kar2.kar");
+File kar1 = new File(basedir, "target/test-kar-multiple-kars-1.0-SNAPSHOT-kar1.kar");
+File kar2 = new File(basedir, "target/test-kar-multiple-kars-1.0-SNAPSHOT-kar2.kar");
 
 if (feature1.exists() && feature2.exists()  &&  kar1.exists() && kar2.exists()) {
     return true;

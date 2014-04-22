@@ -24,7 +24,10 @@ import java.lang.*;
 Reader r = new FileReader(new File(basedir, "control.xml"));
 
 // load the features file pushed to the repository
-File generated = new File( localRepositoryPath, "test/test-type-classifier/1.0-SNAPSHOT/test-type-classifier-1.0-SNAPSHOT-fershizzle.zazzle" );
+// TODO: we can't actually test the classifier and type unless we install the artifact
+// TODO: but we don't want to pollute the user repo and we can't really use a different
+// TODO: repository and build offline (see KARAF-2927) 
+File generated = new File(basedir, "target/feature/feature.xml");
 if (generated.exists()) {
     try {
         XMLAssert.assertXMLEqual(r, new FileReader(generated));

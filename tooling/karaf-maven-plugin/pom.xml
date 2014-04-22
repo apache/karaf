@@ -191,13 +191,13 @@
                         <pomInclude>*/pom.xml</pomInclude>
                     </pomIncludes>
                     <postBuildHookScript>verify</postBuildHookScript>
-                    <localRepositoryPath>${project.build.directory}/system</localRepositoryPath>
+                    <!--<localRepositoryPath>${project.build.directory}/system</localRepositoryPath>-->
                     <!--<settingsFile>src/it/settings.xml</settingsFile>-->
                     <mavenOpts>-Djava.io.tmpdir=${project.build.directory}</mavenOpts>
                     <skipInstallation>${skipTests}</skipInstallation>
                     <skipInvocation>${skipTests}</skipInvocation>
                     <goals>
-                        <goal>install</goal>
+                        <goal>package</goal>
                     </goals>
                 </configuration>
                 <executions>

@@ -21,7 +21,7 @@ import java.io.*;
 import java.lang.*;
 
 // check that the kar archive has been pushed to the repository
-File generated = new File(localRepositoryPath, "test/test-kar-classifier/1.0-SNAPSHOT/test-kar-classifier-1.0-SNAPSHOT-classy.kar");
+File generated = new File(basedir, "target/test-kar-classifier-1.0-SNAPSHOT-classy.kar");
 if (generated.exists()) {
     return true;
 }
