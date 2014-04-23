@@ -18,11 +18,19 @@
  */
 package org.apache.karaf.features.internal.repository;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
+import java.util.zip.GZIPOutputStream;
 
 import org.junit.Test;
 import org.osgi.resource.Resource;
 
+import static org.apache.karaf.util.StreamUtils.close;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.osgi.framework.namespace.BundleNamespace.BUNDLE_NAMESPACE;
@@ -45,6 +53,22 @@ public class RepositoryTest {
         verify(repo);
     }
 
+    @Test
+    public void testXmlGzip() throws Exception {
+        URL url = getClass().getResource("repo.xml");
+        url = gzip(url);
+        XmlRepository repo = new XmlRepository(url.toExternalForm());
+        verify(repo);
+    }
+
+    @Test
+    public void testJsonGzip() throws Exception {
+        URL url = getClass().getResource("repo.json");
+        url = gzip(url);
+        JsonRepository repo = new JsonRepository(url.toExternalForm());
+        verify(repo);
+    }
+
     private void verify(BaseRepository repo) {
         assertNotNull(repo.getResources());
         assertEquals(1, repo.getResources().size());
@@ -54,5 +78,22 @@ public class RepositoryTest {
         assertEquals(1, resource.getCapabilities(BUNDLE_NAMESPACE).size());
         assertEquals(1, resource.getCapabilities(PACKAGE_NAMESPACE).size());
         assertEquals(1, resource.getRequirements(PACKAGE_NAMESPACE).size());
+    }
+
+    private URL gzip(URL url) throws IOException {
+        File temp = File.createTempFile("repo", ".tmp");
+        OutputStream os = new GZIPOutputStream(new FileOutputStream(temp));
+        InputStream is = url.openStream();
+        copy(is, os);
+        close(is, os);
+        return temp.toURI().toURL();
+    }
+
+    private void copy(InputStream inputStream, OutputStream outputStream) throws IOException {
+        byte[] buffer = new byte[4096];
+        int n = 0;
+        while (-1 != (n = inputStream.read(buffer))) {
+            outputStream.write(buffer, 0, n);
+        }
     }
 }

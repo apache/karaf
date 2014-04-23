@@ -142,7 +142,12 @@ public class Activator extends BaseActivator {
                 logger.warn("Unrecognized resource repository: " + url);
             }
         }
-        Repository globalRepository = repositories.isEmpty() ? null : new AggregateRepository(repositories);
+        Repository globalRepository;
+        switch (repositories.size()) {
+            case 0: globalRepository = null; break;
+            case 1: globalRepository = repositories.get(0); break;
+            default: globalRepository = new AggregateRepository(repositories); break;
+        }
 
         FeatureConfigInstaller configInstaller = new FeatureConfigInstaller(configurationAdmin);
         String overrides = getString("overrides", new File(System.getProperty("karaf.etc"), "overrides.properties").toURI().toString());
