@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.features.internal.region;
 
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -25,7 +26,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.felix.resolver.Util;
+import org.apache.karaf.features.internal.download.Downloader;
 import org.apache.karaf.features.internal.repository.BaseRepository;
+import org.apache.karaf.features.internal.resolver.CapabilityImpl;
+import org.apache.karaf.features.internal.resolver.RequirementImpl;
+import org.apache.karaf.features.internal.resolver.ResourceImpl;
 import org.eclipse.equinox.region.Region;
 import org.eclipse.equinox.region.RegionDigraph;
 import org.eclipse.equinox.region.RegionFilter;
@@ -38,6 +43,8 @@ import org.osgi.service.repository.Repository;
 import org.osgi.service.resolver.HostedCapability;
 import org.osgi.service.resolver.ResolveContext;
 
+import static org.apache.karaf.features.internal.resolver.ResourceUtils.addIdentityRequirement;
+import static org.apache.karaf.features.internal.resolver.ResourceUtils.getUri;
 import static org.eclipse.equinox.region.RegionFilter.VISIBLE_BUNDLE_NAMESPACE;
 import static org.osgi.framework.Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE;
 import static org.osgi.framework.Constants.BUNDLE_VERSION_ATTRIBUTE;
@@ -54,11 +61,14 @@ public class SubsystemResolveContext extends ResolveContext {
 
     private final Map<Resource, Subsystem> resToSub = new HashMap<Resource, Subsystem>();
     private final Repository repository;
+    private final Repository globalRepository;
+    private final Downloader downloader;
 
-
-    public SubsystemResolveContext(Subsystem root, RegionDigraph digraph) throws BundleException {
+    public SubsystemResolveContext(Subsystem root, RegionDigraph digraph, Repository globalRepository, Downloader downloader) throws BundleException {
         this.root = root;
         this.digraph = digraph;
+        this.globalRepository = globalRepository != null ? new SubsystemRepository(globalRepository) : null;
+        this.downloader = downloader;
 
         prepare(root);
         repository = new BaseRepository(resToSub.keySet());
@@ -87,9 +97,16 @@ public class SubsystemResolveContext extends ResolveContext {
             Map<Requirement, Collection<Capability>> resMap =
                     repository.findProviders(Collections.singleton(requirement));
             Collection<Capability> res = resMap != null ? resMap.get(requirement) : null;
-            if (res != null) {
+            if (res != null && !res.isEmpty()) {
                 caps.addAll(res);
+            } else if (globalRepository != null) {
+                resMap = globalRepository.findProviders(Collections.singleton(requirement));
+                res = resMap != null ? resMap.get(requirement) : null;
+                if (res != null && !res.isEmpty()) {
+                    caps.addAll(res);
+                }
             }
+
             // Use the digraph to prune non visible capabilities
             Visitor visitor = new Visitor(caps);
             requirerRegion.visitSubgraph(visitor);
@@ -189,6 +206,65 @@ public class SubsystemResolveContext extends ResolveContext {
             return false;
         }
 
+    }
+
+    class SubsystemRepository implements Repository {
+
+        private final Repository repository;
+        private final Map<Subsystem, Map<Capability, Capability>> mapping = new HashMap<Subsystem, Map<Capability, Capability>>();
+
+        public SubsystemRepository(Repository repository) {
+            this.repository = repository;
+        }
+
+        @Override
+        public Map<Requirement, Collection<Capability>> findProviders(Collection<? extends Requirement> requirements) {
+            Map<Requirement, Collection<Capability>> base = repository.findProviders(requirements);
+            Map<Requirement, Collection<Capability>> result = new HashMap<Requirement, Collection<Capability>>();
+            for (Map.Entry<Requirement, Collection<Capability>> entry : base.entrySet()) {
+                List<Capability> caps = new ArrayList<Capability>();
+                Subsystem ss = getSubsystem(entry.getKey().getResource());
+                while (!ss.isAcceptDependencies()) {
+                    ss = ss.getParent();
+                }
+                Map<Capability, Capability> map = mapping.get(ss);
+                if (map == null) {
+                    map = new HashMap<Capability, Capability>();
+                    mapping.put(ss, map);
+                }
+                for (Capability cap : entry.getValue()) {
+                    Capability wrapped = map.get(cap);
+                    if (wrapped == null) {
+                        wrap(map, ss, cap.getResource());
+                        wrapped = map.get(cap);
+                    }
+                    caps.add(wrapped);
+                }
+                result.put(entry.getKey(), caps);
+            }
+            return result;
+        }
+
+        private void wrap(Map<Capability, Capability> map, Subsystem subsystem, Resource resource) {
+            ResourceImpl wrapped = new ResourceImpl();
+            for (Capability cap : resource.getCapabilities(null)) {
+                CapabilityImpl wCap = new CapabilityImpl(wrapped, cap.getNamespace(), cap.getDirectives(), cap.getAttributes());
+                map.put(cap, wCap);
+                wrapped.addCapability(wCap);
+            }
+            for (Requirement req : resource.getRequirements(null)) {
+                RequirementImpl wReq = new RequirementImpl(wrapped, req.getNamespace(), req.getDirectives(), req.getAttributes());
+                wrapped.addRequirement(wReq);
+            }
+            addIdentityRequirement(wrapped, subsystem, false);
+            resToSub.put(wrapped, subsystem);
+            // TODO: use RepositoryContent ?
+            try {
+                downloader.download(getUri(wrapped), null);
+            } catch (MalformedURLException e) {
+                throw new IllegalStateException("Unable to download resource: " + getUri(wrapped));
+            }
+        }
     }
 
 }

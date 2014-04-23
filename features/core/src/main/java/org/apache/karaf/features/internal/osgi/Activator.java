@@ -23,13 +23,18 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.felix.resolver.ResolverImpl;
 import org.apache.karaf.features.FeaturesListener;
 import org.apache.karaf.features.FeaturesService;
+import org.apache.karaf.features.internal.repository.AggregateRepository;
+import org.apache.karaf.features.internal.repository.JsonRepository;
+import org.apache.karaf.features.internal.repository.XmlRepository;
 import org.apache.karaf.features.internal.resolver.Slf4jResolverLog;
 import org.apache.karaf.features.internal.service.EventAdminListener;
 import org.apache.karaf.features.internal.service.FeatureConfigInstaller;
@@ -39,7 +44,6 @@ import org.apache.karaf.features.internal.service.FeaturesServiceImpl;
 import org.apache.karaf.features.internal.service.StateStorage;
 import org.apache.karaf.features.internal.management.FeaturesServiceMBeanImpl;
 import org.apache.karaf.util.tracker.BaseActivator;
-import org.apache.karaf.util.tracker.SingleServiceTracker;
 import org.eclipse.equinox.internal.region.DigraphHelper;
 import org.eclipse.equinox.internal.region.StandardRegionDigraph;
 import org.eclipse.equinox.internal.region.management.StandardManageableRegionDigraph;
@@ -50,6 +54,7 @@ import org.osgi.framework.hooks.bundle.CollisionHook;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ManagedService;
+import org.osgi.service.repository.Repository;
 import org.osgi.service.resolver.Resolver;
 import org.osgi.service.url.URLStreamHandlerService;
 import org.osgi.util.tracker.ServiceTracker;
@@ -120,7 +125,21 @@ public class Activator extends BaseActivator {
         props.put(Constants.SERVICE_PID, FEATURES_REPOS_PID);
         register(ManagedService.class, featureFinder, props);
 
-       FeatureConfigInstaller configInstaller = new FeatureConfigInstaller(configurationAdmin);
+        List<Repository> repositories = new ArrayList<Repository>();
+        String[] resourceRepositories = getString("resourceRepositories", "").split(",");
+        for (String url : resourceRepositories) {
+            url = url.trim();
+            if (url.startsWith("json:")) {
+                repositories.add(new JsonRepository(url.substring("json:".length())));
+            } else if (url.startsWith("xml:")) {
+                repositories.add(new XmlRepository(url.substring("xml:".length())));
+            } else {
+                logger.warn("Unrecognized resource repository: " + url);
+            }
+        }
+        Repository globalRepository = repositories.isEmpty() ? null : new AggregateRepository(repositories);
+
+        FeatureConfigInstaller configInstaller = new FeatureConfigInstaller(configurationAdmin);
         String overrides = getString("overrides", new File(System.getProperty("karaf.etc"), "overrides.properties").toURI().toString());
         String featureResolutionRange = getString("featureResolutionRange", FeaturesServiceImpl.DEFAULT_FEATURE_RESOLUTION_RANGE);
         String bundleUpdateRange = getString("bundleUpdateRange", FeaturesServiceImpl.DEFAULT_BUNDLE_UPDATE_RANGE);
@@ -159,7 +178,8 @@ public class Activator extends BaseActivator {
                                 overrides,
                                 featureResolutionRange,
                                 bundleUpdateRange,
-                                updateSnapshots);
+                                updateSnapshots,
+                                globalRepository);
         register(FeaturesService.class, featuresService);
 
         featuresListenerTracker = new ServiceTracker<FeaturesListener, FeaturesListener>(

@@ -59,7 +59,9 @@ public class SimpleDownloader implements DownloadManager, Downloader {
             providers.putIfAbsent(location, createProvider(location));
         }
         try {
-            downloadCallback.downloaded(providers.get(location));
+            if (downloadCallback != null) {
+                downloadCallback.downloaded(providers.get(location));
+            }
         } catch (Exception e) {
             exception.addException(e);
         }

@@ -152,6 +152,11 @@ public class FeaturesServiceImpl implements FeaturesService {
      */
     private final String updateSnaphots;
 
+    /**
+     * Optional global repository
+     */
+    private final org.osgi.service.repository.Repository globalRepository;
+
     private final List<FeaturesListener> listeners = new CopyOnWriteArrayIdentityList<FeaturesListener>();
 
     // Synchronized on lock
@@ -171,7 +176,8 @@ public class FeaturesServiceImpl implements FeaturesService {
                                String overrides,
                                String featureResolutionRange,
                                String bundleUpdateRange,
-                               String updateSnaphots) {
+                               String updateSnaphots,
+                               org.osgi.service.repository.Repository globalRepository) {
         this.bundle = bundle;
         this.systemBundleContext = systemBundleContext;
         this.storage = storage;
@@ -183,6 +189,7 @@ public class FeaturesServiceImpl implements FeaturesService {
         this.featureResolutionRange = featureResolutionRange;
         this.bundleUpdateRange = bundleUpdateRange;
         this.updateSnaphots = updateSnaphots;
+        this.globalRepository = globalRepository;
         loadState();
     }
 
@@ -700,7 +707,7 @@ public class FeaturesServiceImpl implements FeaturesService {
         Set<String> fl = required.get(region);
         if (fl == null) {
             fl = new HashSet<String>();
-            required.put(region,fl);
+            required.put(region, fl);
         }
         List<String> featuresToRemove = new ArrayList<String>();
         for (String feature : new HashSet<String>(features)) {
@@ -749,7 +756,7 @@ public class FeaturesServiceImpl implements FeaturesService {
         print(sb.toString(), options.contains(Option.Verbose));
         fl.removeAll(featuresToRemove);
         if (fl.isEmpty()) {
-            required.remove(fl);
+            required.remove(region);
         }
         doInstallFeaturesInThread(required, state, options);
     }
@@ -872,7 +879,8 @@ public class FeaturesServiceImpl implements FeaturesService {
                 features,
                 unmanagedBundles,
                 Overrides.loadOverrides(this.overrides),
-                featureResolutionRange);
+                featureResolutionRange,
+                globalRepository);
         Collection<Resource> allResources = resolution.keySet();
         Map<String, StreamProvider> providers = resolver.getProviders();
 
@@ -957,7 +965,7 @@ public class FeaturesServiceImpl implements FeaturesService {
                     List<Wire> newWires = resolution.get(wiring.getRevision());
                     if (newWires != null) {
                         for (Wire wire : newWires) {
-                            Bundle b = null;
+                            Bundle b;
                             if (wire.getProvider() instanceof BundleRevision) {
                                 b = ((BundleRevision) wire.getProvider()).getBundle();
                             } else {

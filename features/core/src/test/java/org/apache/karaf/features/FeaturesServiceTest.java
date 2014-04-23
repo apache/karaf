@@ -346,7 +346,7 @@ public class FeaturesServiceTest extends TestBase {
                 + "  <feature name='f2' version='0.2'><bundle>bundle2</bundle></feature>"
                 + "</features>");
 
-        FeaturesServiceImpl svc = new FeaturesServiceImpl(null, null, new Storage(), null, null, null, null, null, null, null, null);
+        FeaturesServiceImpl svc = new FeaturesServiceImpl(null, null, new Storage(), null, null, null, null, null, null, null, null, null);
         svc.addRepository(uri);
 
         assertEquals(feature("f2", "0.2"), svc.getFeature("f2", "[0.1,0.3)"));
@@ -366,7 +366,7 @@ public class FeaturesServiceTest extends TestBase {
         expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
         replay(bundleContext);
 
-        FeaturesServiceImpl svc = new FeaturesServiceImpl(null, bundleContext, new Storage(), null, null, null, null, null, null, null, null);
+        FeaturesServiceImpl svc = new FeaturesServiceImpl(null, bundleContext, new Storage(), null, null, null, null, null, null, null, null, null);
         svc.addRepository(uri);
         try {
             List<String> features = new ArrayList<String>();
@@ -391,7 +391,7 @@ public class FeaturesServiceTest extends TestBase {
         URI uri = createTempRepo("<features name='test' xmlns='http://karaf.apache.org/xmlns/features/v1.0.0'>"
                 + "  <featur><bundle>somebundle</bundle></featur></features>");
 
-        FeaturesServiceImpl svc = new FeaturesServiceImpl(null, null, new Storage(), null, null, null, null, null, null, null, null);
+        FeaturesServiceImpl svc = new FeaturesServiceImpl(null, null, new Storage(), null, null, null, null, null, null, null, null, null);
         try {
             svc.addRepository(uri);
             fail("exception expected");
@@ -409,7 +409,7 @@ public class FeaturesServiceTest extends TestBase {
                 + "  <feature name='f1'><bundle>file:bundle1</bundle><bundle>file:bundle2</bundle></feature>"
                 + "</features>");
 
-        FeaturesServiceImpl svc = new FeaturesServiceImpl(null, null, new Storage(), null, null, null, null, null, null, null, null);
+        FeaturesServiceImpl svc = new FeaturesServiceImpl(null, null, new Storage(), null, null, null, null, null, null, null, null, null);
         svc.addRepository(uri);
         Feature feature = svc.getFeature("f1");
         Assert.assertNotNull("No feature named fi found", feature);        

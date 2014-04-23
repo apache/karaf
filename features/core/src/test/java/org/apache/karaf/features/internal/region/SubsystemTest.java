@@ -66,7 +66,8 @@ public class SubsystemTest {
                          features,
                          Collections.<String, Set<BundleRevision>>emptyMap(),
                          Collections.<String>emptySet(),
-                         FeaturesServiceImpl.DEFAULT_FEATURE_RESOLUTION_RANGE);
+                         FeaturesServiceImpl.DEFAULT_FEATURE_RESOLUTION_RANGE,
+                         null);
 
         verify(resolver, expected);
     }
@@ -96,7 +97,8 @@ public class SubsystemTest {
                          features,
                          Collections.<String, Set<BundleRevision>>emptyMap(),
                          Collections.<String>emptySet(),
-                         FeaturesServiceImpl.DEFAULT_FEATURE_RESOLUTION_RANGE);
+                         FeaturesServiceImpl.DEFAULT_FEATURE_RESOLUTION_RANGE,
+                         null);
 
         verify(resolver, expected);
     }
@@ -116,7 +118,8 @@ public class SubsystemTest {
                 features,
                 Collections.<String, Set<BundleRevision>>emptyMap(),
                 Collections.singleton("b"),
-                FeaturesServiceImpl.DEFAULT_FEATURE_RESOLUTION_RANGE);
+                FeaturesServiceImpl.DEFAULT_FEATURE_RESOLUTION_RANGE,
+                null);
 
         verify(resolver, expected);
     }

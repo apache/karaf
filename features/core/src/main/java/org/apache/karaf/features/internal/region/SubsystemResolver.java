@@ -30,6 +30,7 @@ import org.apache.felix.resolver.Util;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.Repository;
 import org.apache.karaf.features.internal.download.DownloadManager;
+import org.apache.karaf.features.internal.download.Downloader;
 import org.apache.karaf.features.internal.download.StreamProvider;
 import org.apache.karaf.features.internal.download.simple.SimpleDownloader;
 import org.apache.karaf.features.internal.resolver.CapabilitySet;
@@ -80,7 +81,8 @@ public class SubsystemResolver {
             Map<String, Set<String>> features,
             Map<String, Set<BundleRevision>> system,
             Set<String> overrides,
-            String featureResolutionRange
+            String featureResolutionRange,
+            org.osgi.service.repository.Repository globalRepository
     ) throws Exception {
         // Build subsystems on the fly
         for (Map.Entry<String, Set<String>> entry : features.entrySet()) {
@@ -141,7 +143,9 @@ public class SubsystemResolver {
         populateDigraph(digraph, root);
 
         Resolver resolver = new ResolverImpl(new Slf4jResolverLog(LOGGER));
-        wiring = resolver.resolve(new SubsystemResolveContext(root, digraph));
+        Downloader downloader = manager.createDownloader();
+        wiring = resolver.resolve(new SubsystemResolveContext(root, digraph, globalRepository, downloader));
+        downloader.await();
 
         // Fragments are always wired to their host only, so create fake wiring to
         // the subsystem the host is wired to
