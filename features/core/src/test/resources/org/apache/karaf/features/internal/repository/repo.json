@@ -1,0 +1,9 @@
+ {
+	"http://www.acme.com/repository/org/acme/pool/org.acme.pool-1.5.6.jar": {
+		"Bundle-ManifestVersion": "2",
+	 	"Bundle-SymbolicName": "org.acme.pool",
+	 	"Bundle-Version": "1.5.6",
+	 	"Export-Package": "org.acme.pool; version=1.1.2; uses=\"org.acme.pool,org.acme.util\"",
+	 	"Import-Package": "org.apache.commons.pool; version=1.5.6"
+	}
+ }

@@ -2250,6 +2250,8 @@
                                 <exclude>manual/**/*.conf</exclude>
                                 <!-- test manifests -->
                                 <exclude>**/*.mf</exclude>
+                                <!-- test json files -->
+                                <exclude>**/*.json</exclude>
                             </excludes>
                         </configuration>
                     </plugin>

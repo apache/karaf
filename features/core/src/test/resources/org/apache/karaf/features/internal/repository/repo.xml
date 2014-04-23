@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one or more
+    contributor license agreements.  See the NOTICE file distributed with
+    this work for additional information regarding copyright ownership.
+    The ASF licenses this file to You under the Apache License, Version 2.0
+    (the "License"); you may not use this file except in compliance with
+    the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<repository name='OSGi Repository' increment='13582741'
+            xmlns='http://www.osgi.org/xmlns/repository/v1.0.0'>
+    <resource>
+        <capability namespace='osgi.identity'>
+            <attribute name='osgi.identity' value='org.acme.pool'/>
+            <attribute name='version' type='Version' value='1.5.6'> </attribute>
+            <attribute name='type' value='osgi.bundle'/>
+        </capability>
+        <capability namespace='osgi.content'>
+            <attribute name='osgi.content' value='e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'/>
+            <attribute name='url' value='http://www.acme.com/repository/org/acme/pool/org.acme.pool-1.5.6.jar'/>
+            <attribute name='size' type='Long' value='4405'/>
+            <attribute name='mime' value='application/vnd.osgi.bundle'/>
+        </capability>
+        <capability namespace='osgi.wiring.bundle'>
+            <attribute name='osgi.wiring.bundle' value='org.acme.pool'/>
+            <attribute name='bundle-version' type='Version' value='1.5.6'/>
+        </capability>
+        <capability namespace='osgi.wiring.package'>
+            <attribute name='osgi.wiring.package' value='org.acme.pool'/>
+            <attribute name='version' type='Version' value='1.1.2'/>
+            <attribute name='bundle-version' type='Version' value='1.5.6'/>
+            <attribute name='bundle-symbolic-name' value='org.acme.pool'/>
+            <directive name='uses' value='org.acme.pool,org.acme.util'/>
+        </capability>
+        <requirement namespace='osgi.wiring.package'>
+            <directive name='filter' value='(&amp;(osgi.wiring.package=org.apache.commons.pool)(version&gt;=1.5.6))'/>
+        </requirement>
+        <requirement namespace='osgi.identity'>
+            <directive name='effective' value='meta'/>
+            <directive name='resolution' value='optional'/>
+            <directive name='filter' value='(&amp;(version=1.5.6)(osgi.identity=org.acme.pool-src))'/>
+            <directive name='classifier' value='sources'/>
+        </requirement>
+    </resource>
+</repository>

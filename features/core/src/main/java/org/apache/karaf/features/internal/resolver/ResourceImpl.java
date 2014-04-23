@@ -34,6 +34,15 @@ public class ResourceImpl implements Resource {
     private final List<Capability> m_caps;
     private final List<Requirement> m_reqs;
 
+    /**
+     * CAUTION: This constructor does not ensure that the resource
+     * has the required identity capability
+     */
+    public ResourceImpl() {
+        m_caps = new ArrayList<Capability>();
+        m_reqs = new ArrayList<Requirement>();
+    }
+
     public ResourceImpl(String name, Version version) {
         this(name, IdentityNamespace.TYPE_BUNDLE, version);
     }

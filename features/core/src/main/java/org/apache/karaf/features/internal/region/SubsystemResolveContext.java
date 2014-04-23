@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.felix.resolver.Util;
-import org.apache.karaf.features.internal.repository.StaticRepository;
+import org.apache.karaf.features.internal.repository.BaseRepository;
 import org.eclipse.equinox.region.Region;
 import org.eclipse.equinox.region.RegionDigraph;
 import org.eclipse.equinox.region.RegionFilter;
@@ -61,7 +61,7 @@ public class SubsystemResolveContext extends ResolveContext {
         this.digraph = digraph;
 
         prepare(root);
-        repository = new StaticRepository(resToSub.keySet());
+        repository = new BaseRepository(resToSub.keySet());
     }
 
     void prepare(Subsystem subsystem) {
