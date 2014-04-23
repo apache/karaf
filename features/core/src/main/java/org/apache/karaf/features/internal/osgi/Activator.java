@@ -27,9 +27,10 @@ import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Properties;
+import java.util.Map;
 
 import org.apache.felix.resolver.ResolverImpl;
+import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.features.FeaturesListener;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.internal.repository.AggregateRepository;
@@ -93,7 +94,11 @@ public class Activator extends BaseActivator {
                 logger.warn("Error reading configuration file " + configFile.toString(), e);
             }
         }
-        updated((Dictionary) configuration);
+        Dictionary<String, String> props = new Hashtable<String, String>();
+        for (Map.Entry<String, String> entry : configuration.entrySet()) {
+            props.put(entry.getKey(), entry.getValue());
+        }
+        updated(props);
     }
 
     protected void doStart() throws Exception {

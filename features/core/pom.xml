@@ -132,6 +132,7 @@
                             org.apache.karaf.features.internal.*,
                             org.apache.felix.resolver,
                             org.apache.felix.utils.version,
+                            org.apache.felix.utils.properties,
                             org.apache.felix.utils.manifest,
                             org.apache.karaf.util.collections,
                             org.apache.karaf.util.json,
