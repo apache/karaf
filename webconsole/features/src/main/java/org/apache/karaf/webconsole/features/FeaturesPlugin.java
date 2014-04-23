@@ -58,7 +58,7 @@ public class FeaturesPlugin extends AbstractWebConsolePlugin {
 
     @Override
     protected boolean isHtmlRequest(HttpServletRequest request) {
-        return false;
+        return true;
     }
 
     public void start() {
@@ -272,6 +272,9 @@ public class FeaturesPlugin extends AbstractWebConsolePlugin {
             jw.array();
             for (Repository r : repositories) {
                 jw.object();
+                jw.key("name");
+                String name = r.getName();
+                jw.value(name);
                 jw.key("url");
                 String uri = r.getURI().toString();
                 jw.value(uri);

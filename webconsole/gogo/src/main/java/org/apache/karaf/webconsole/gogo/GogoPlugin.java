@@ -65,7 +65,7 @@ public class GogoPlugin extends AbstractWebConsolePlugin {
 
     @Override
     protected boolean isHtmlRequest(HttpServletRequest request) {
-        return false;
+        return true;
     }
 
     public void setBundleContext(BundleContext bundleContext) {

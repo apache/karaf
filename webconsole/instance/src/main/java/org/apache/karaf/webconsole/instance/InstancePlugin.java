@@ -55,7 +55,7 @@ public class InstancePlugin extends AbstractWebConsolePlugin {
 
     @Override
     protected boolean isHtmlRequest(HttpServletRequest request) {
-        return false;
+        return true;
     }
 
     public void start() {
