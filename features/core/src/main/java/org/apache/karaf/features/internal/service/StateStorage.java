@@ -33,7 +33,7 @@ public abstract class StateStorage {
 
     public void load(State state) throws IOException {
         state.repositories.clear();
-        state.features.clear();
+        state.requestedFeatures.clear();
         state.installedFeatures.clear();
         state.managedBundles.clear();
         InputStream is = getInputStream();
@@ -42,7 +42,7 @@ public abstract class StateStorage {
                 Map json = (Map) JsonReader.read(is);
                 state.bootDone.set((Boolean) json.get("bootDone"));
                 state.repositories.addAll(toStringSet((Collection) json.get("repositories")));
-                state.features.putAll(toStringStringSetMap((Map) json.get("features")));
+                state.requestedFeatures.putAll(toStringStringSetMap((Map) json.get("features")));
                 state.installedFeatures.putAll(toStringStringSetMap((Map) json.get("installed")));
                 state.managedBundles.putAll(toStringLongSetMap((Map) json.get("managed")));
                 state.bundleChecksums.putAll(toLongLongMap((Map) json.get("checksums")));
@@ -59,7 +59,7 @@ public abstract class StateStorage {
                 Map<String, Object> json = new HashMap<String, Object>();
                 json.put("bootDone", state.bootDone.get());
                 json.put("repositories", state.repositories);
-                json.put("features", state.features);
+                json.put("features", state.requestedFeatures);
                 json.put("installed", state.installedFeatures);
                 json.put("managed", state.managedBundles);
                 json.put("checksums", toStringLongMap(state.bundleChecksums));

@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -62,7 +63,7 @@ public class SubsystemTest {
         addToMapSet(expected, "root/apps1", "b/1.0.0");
 
         SubsystemResolver resolver = new SubsystemResolver(new TestDownloadManager("data1"));
-        resolver.resolve(Collections.<Repository>singletonList(repo),
+        resolver.resolve(Arrays.asList(repo.getFeatures()),
                          features,
                          Collections.<String, Set<BundleRevision>>emptyMap(),
                          Collections.<String>emptySet(),
@@ -93,7 +94,7 @@ public class SubsystemTest {
         addToMapSet(expected, "root/apps2#f1", "a/1.0.0");
 
         SubsystemResolver resolver = new SubsystemResolver(new TestDownloadManager("data2"));
-        resolver.resolve(Collections.<Repository>singletonList(repo),
+        resolver.resolve(Arrays.asList(repo.getFeatures()),
                          features,
                          Collections.<String, Set<BundleRevision>>emptyMap(),
                          Collections.<String>emptySet(),
@@ -114,12 +115,12 @@ public class SubsystemTest {
         addToMapSet(expected, "root/apps1", "a/1.0.1");
 
         SubsystemResolver resolver = new SubsystemResolver(new TestDownloadManager("data3"));
-        resolver.resolve(Collections.<Repository>singletonList(repo),
-                features,
-                Collections.<String, Set<BundleRevision>>emptyMap(),
-                Collections.singleton("b"),
-                FeaturesServiceImpl.DEFAULT_FEATURE_RESOLUTION_RANGE,
-                null);
+        resolver.resolve(Arrays.asList(repo.getFeatures()),
+                         features,
+                         Collections.<String, Set<BundleRevision>>emptyMap(),
+                         Collections.singleton("b"),
+                         FeaturesServiceImpl.DEFAULT_FEATURE_RESOLUTION_RANGE,
+                         null);
 
         verify(resolver, expected);
     }

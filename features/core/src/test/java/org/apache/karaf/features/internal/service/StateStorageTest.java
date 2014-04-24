@@ -37,7 +37,7 @@ public class StateStorageTest {
         State oldState = new State();
         oldState.bootDone.set(true);
         oldState.bundleChecksums.put(4l, 32794l);
-        oldState.features.put("bar", Collections.singleton("f1"));
+        oldState.requestedFeatures.put("bar", Collections.singleton("f1"));
         oldState.managedBundles.put("reg", Collections.singleton(32l));
         oldState.managedBundles.put("reg2", new HashSet<Long>(Arrays.asList(24l, 43l)));
         oldState.repositories.add("repo");
@@ -53,7 +53,7 @@ public class StateStorageTest {
 
         assertEquals(oldState.bootDone.get(), newState.bootDone.get());
         assertEquals(oldState.bundleChecksums, newState.bundleChecksums);
-        assertEquals(oldState.features, newState.features);
+        assertEquals(oldState.requestedFeatures, newState.requestedFeatures);
         assertEquals(oldState.managedBundles, newState.managedBundles);
         assertEquals(oldState.repositories, newState.repositories);
     }

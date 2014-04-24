@@ -27,6 +27,7 @@ import java.util.Set;
 
 import org.apache.felix.resolver.ResolverImpl;
 import org.apache.felix.resolver.Util;
+import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.Repository;
 import org.apache.karaf.features.internal.download.DownloadManager;
@@ -77,7 +78,7 @@ public class SubsystemResolver {
     }
 
     public Map<Resource, List<Wire>> resolve(
-            List<Repository> repositories,
+            Collection<Feature> allFeatures,
             Map<String, Set<String>> features,
             Map<String, Set<BundleRevision>> system,
             Set<String> overrides,
@@ -113,10 +114,6 @@ public class SubsystemResolver {
             return Collections.emptyMap();
         }
         // Pre-resolve
-        List<Feature> allFeatures = new ArrayList<Feature>();
-        for (Repository repo : repositories) {
-            allFeatures.addAll(Arrays.asList(repo.getFeatures()));
-        }
         root.preResolve(allFeatures, manager, overrides, featureResolutionRange);
 
         // Add system resources
@@ -152,6 +149,26 @@ public class SubsystemResolver {
         associateFragments();
 
         return wiring;
+    }
+
+    public Map<String, Map<String, BundleInfo>> getBundleInfos() {
+        Map<String, Map<String, BundleInfo>> infos = new HashMap<String, Map<String, BundleInfo>>();
+        Map<String, String> flats = getFlatSubsystemsMap();
+        addBundleInfos(infos, root, flats);
+        return infos;
+    }
+
+    private void addBundleInfos(Map<String, Map<String, BundleInfo>> infos, Subsystem subsystem, Map<String, String> flats) {
+        String region = flats.get(subsystem.getName());
+        Map<String, BundleInfo> bis = infos.get(region);
+        if (bis == null) {
+            bis = new HashMap<String, BundleInfo>();
+            infos.put(region, bis);
+        }
+        bis.putAll(subsystem.getBundleInfos());
+        for (Subsystem child : subsystem.getChildren()) {
+            addBundleInfos(infos, child, flats);
+        }
     }
 
     public Map<String, StreamProvider> getProviders() {

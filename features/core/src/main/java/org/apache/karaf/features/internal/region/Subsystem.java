@@ -52,6 +52,7 @@ import org.osgi.resource.Resource;
 import static org.apache.karaf.features.internal.resolver.ResourceUtils.TYPE_FEATURE;
 import static org.apache.karaf.features.internal.resolver.ResourceUtils.TYPE_SUBSYSTEM;
 import static org.apache.karaf.features.internal.resolver.ResourceUtils.addIdentityRequirement;
+import static org.apache.karaf.features.internal.resolver.ResourceUtils.getUri;
 import static org.apache.karaf.features.internal.util.MapUtils.addToMapSet;
 import static org.eclipse.equinox.region.RegionFilter.VISIBLE_ALL_NAMESPACE;
 import static org.osgi.framework.namespace.IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE;
@@ -203,6 +204,14 @@ public class Subsystem extends ResourceImpl {
         ResourceUtils.addIdentityRequirement(this, name, TYPE_FEATURE, range);
     }
 
+    public Map<String, BundleInfo> getBundleInfos() {
+        Map<String, BundleInfo> infos = new HashMap<String, BundleInfo>();
+        for (DependencyInfo di : dependencies.values()) {
+            infos.put(di.getLocation(), di);
+        }
+        return infos;
+    }
+
     @SuppressWarnings("InfiniteLoopStatement")
     public void preResolve(Collection<Feature> features,
                            DownloadManager manager,
@@ -283,9 +292,9 @@ public class Subsystem extends ResourceImpl {
                 final boolean mandatory = entry.getValue();
                 ResourceImpl res = bundles.get(loc);
                 if (bi.isDependency()) {
-                    addDependency(res, false);
+                    addDependency(res, false, bi.isStart(), bi.getStartLevel());
                 } else {
-                    doAddDependency(res, mandatory);
+                    doAddDependency(res, mandatory, bi.isStart(), bi.getStartLevel());
                 }
             }
             for (Dependency dep : feature.getDependencies()) {
@@ -312,15 +321,15 @@ public class Subsystem extends ResourceImpl {
        }
     }
 
-    void addDependency(ResourceImpl resource, boolean mandatory) {
+    void addDependency(ResourceImpl resource, boolean mandatory, boolean start, int startLevel) {
         if (isAcceptDependencies()) {
-            doAddDependency(resource, mandatory);
+            doAddDependency(resource, mandatory, start, startLevel);
         } else {
-            parent.addDependency(resource, mandatory);
+            parent.addDependency(resource, mandatory, start, startLevel);
         }
     }
 
-    private void doAddDependency(ResourceImpl resource, boolean mandatory) {
+    private void doAddDependency(ResourceImpl resource, boolean mandatory, boolean start, int startLevel) {
         String id = Util.getSymbolicName(resource) + "|" + Util.getVersion(resource);
         DependencyInfo info = dependencies.get(id);
         if (info == null) {
@@ -329,11 +338,39 @@ public class Subsystem extends ResourceImpl {
         }
         info.resource = resource;
         info.mandatory |= mandatory;
+        info.start |= start;
+        if (info.startLevel > 0 && startLevel > 0) {
+            info.startLevel = Math.min(info.startLevel, startLevel);
+        } else {
+            info.startLevel = Math.max(info.startLevel, startLevel);
+        }
     }
 
-    class DependencyInfo {
+    class DependencyInfo implements BundleInfo {
         ResourceImpl resource;
         boolean mandatory;
+        boolean start;
+        int startLevel;
+
+        @Override
+        public boolean isStart() {
+            return start;
+        }
+
+        @Override
+        public int getStartLevel() {
+            return startLevel;
+        }
+
+        @Override
+        public String getLocation() {
+            return getUri(resource);
+        }
+
+        @Override
+        public boolean isDependency() {
+            return !mandatory;
+        }
     }
 
     Map<String, Set<String>> createPolicy(List<? extends ScopeFilter> filters) {
