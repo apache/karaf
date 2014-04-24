@@ -100,10 +100,13 @@ public class SubsystemResolveContext extends ResolveContext {
             if (res != null && !res.isEmpty()) {
                 caps.addAll(res);
             } else if (globalRepository != null) {
-                resMap = globalRepository.findProviders(Collections.singleton(requirement));
-                res = resMap != null ? resMap.get(requirement) : null;
-                if (res != null && !res.isEmpty()) {
-                    caps.addAll(res);
+                // Only bring in external resources for non optional requirements
+                if (!RESOLUTION_OPTIONAL.equals(requirement.getDirectives().get(RESOLUTION_DIRECTIVE))) {
+                    resMap = globalRepository.findProviders(Collections.singleton(requirement));
+                    res = resMap != null ? resMap.get(requirement) : null;
+                    if (res != null && !res.isEmpty()) {
+                        caps.addAll(res);
+                    }
                 }
             }
 
@@ -168,9 +171,7 @@ public class SubsystemResolveContext extends ResolveContext {
 
     @Override
     public boolean isEffective(Requirement requirement) {
-        String resolution = requirement.getDirectives().get(RESOLUTION_DIRECTIVE);
-        return requirement.getNamespace().equals(IDENTITY_NAMESPACE)
-                || !RESOLUTION_OPTIONAL.equals(resolution);
+        return true;
     }
 
     @Override
