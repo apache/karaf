@@ -951,7 +951,7 @@ public class FeaturesServiceImpl implements FeaturesService {
         }
 
         if (simulate) {
-            if (!toRefresh.isEmpty()) {
+            if (!noRefresh && !toRefresh.isEmpty()) {
                 print("  Bundles to refresh:", verbose);
                 for (Bundle bundle : toRefresh) {
                     print("    " + bundle.getSymbolicName() + " / " + bundle.getVersion(), verbose);
@@ -1250,7 +1250,7 @@ public class FeaturesServiceImpl implements FeaturesService {
             while (!toStart.isEmpty()) {
                 List<Bundle> bs = getBundlesToStart(toStart);
                 for (Bundle bundle : bs) {
-                    LOGGER.info("  " + bundle.getSymbolicName() + " / " + bundle.getVersion());
+                    print("  " + bundle.getSymbolicName() + " / " + bundle.getVersion(), verbose);
                     try {
                         bundle.start();
                     } catch (BundleException e) {
