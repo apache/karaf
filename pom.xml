@@ -1611,6 +1611,7 @@
                                 <exclude>**/.*</exclude>
                                 <exclude>**/eclipse-classes/**/*</exclude>
                                 <exclude>**/dependency-reduced-pom.xml</exclude>
+                                <exclude>**/.settings/**/*</exclude>
                                 <!-- Resources files -->
                                 <exclude>**/bundle.info</exclude>
                                 <exclude>**/*.txt</exclude>
