@@ -81,6 +81,11 @@ public class MapUtils {
         };
     }
 
+    public static <S, T> boolean contains(Map<S, Set<T>> mapset, S key, T val) {
+        Set<T> set = mapset.get(key);
+        return set != null && set.contains(val);
+    }
+
     public static <S, T> Set<T> flatten(Map<S, Set<T>> mapset) {
         Set<T> set = new HashSet<T>();
         for (Set<T> s : mapset.values()) {

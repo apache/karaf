@@ -44,6 +44,9 @@ public class InstallFeatureCommand extends FeaturesCommandSupport {
     @Option(name = "-s", aliases = "--no-auto-start", description = "Do not start the bundles", required = false, multiValued = false)
     boolean noStart;
 
+    @Option(name = "-m", aliases = "--no-auto-manage", description = "Do not automatically manage bundles", required = false, multiValued = false)
+    boolean noManage;
+
     @Option(name = "-v", aliases = "--verbose", description = "Explain what is being done", required = false, multiValued = false)
     boolean verbose;
 
@@ -63,6 +66,9 @@ public class InstallFeatureCommand extends FeaturesCommandSupport {
         }
         if (noRefresh) {
             options.add(FeaturesService.Option.NoAutoRefreshBundles);
+        }
+        if (noManage) {
+            options.add(FeaturesService.Option.NoAutoManageBundles);
         }
         if (verbose) {
             options.add(FeaturesService.Option.Verbose);

@@ -16,8 +16,6 @@
  */
 package org.apache.karaf.features.internal.region;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -29,7 +27,6 @@ import org.apache.felix.resolver.ResolverImpl;
 import org.apache.felix.resolver.Util;
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Feature;
-import org.apache.karaf.features.Repository;
 import org.apache.karaf.features.internal.download.DownloadManager;
 import org.apache.karaf.features.internal.download.Downloader;
 import org.apache.karaf.features.internal.download.StreamProvider;
@@ -68,6 +65,16 @@ public class SubsystemResolver {
     private RegionDigraph digraph;
     private Subsystem root;
     private Map<Resource, List<Wire>> wiring;
+
+    // Cached computed results
+    private Map<String, String> flatSubsystemsMap;
+    private Map<String, Set<Resource>> bundlesPerRegions;
+    private Map<Resource, String> bundles;
+    private Map<String, Set<Resource>> featuresPerRegions;
+    private Map<Resource, String> features;
+    private RegionDigraph flatDigraph;
+    private Map<String, Map<String, BundleInfo>> bundleInfos;
+
 
     public SubsystemResolver() {
         this(new SimpleDownloader());
@@ -152,22 +159,23 @@ public class SubsystemResolver {
     }
 
     public Map<String, Map<String, BundleInfo>> getBundleInfos() {
-        Map<String, Map<String, BundleInfo>> infos = new HashMap<String, Map<String, BundleInfo>>();
-        Map<String, String> flats = getFlatSubsystemsMap();
-        addBundleInfos(infos, root, flats);
-        return infos;
+        if (bundleInfos == null) {
+            bundleInfos = new HashMap<String, Map<String, BundleInfo>>();
+            addBundleInfos(root);
+        }
+        return bundleInfos;
     }
 
-    private void addBundleInfos(Map<String, Map<String, BundleInfo>> infos, Subsystem subsystem, Map<String, String> flats) {
-        String region = flats.get(subsystem.getName());
-        Map<String, BundleInfo> bis = infos.get(region);
+    private void addBundleInfos(Subsystem subsystem) {
+        String region = getFlatSubsystemsMap().get(subsystem.getName());
+        Map<String, BundleInfo> bis = bundleInfos.get(region);
         if (bis == null) {
             bis = new HashMap<String, BundleInfo>();
-            infos.put(region, bis);
+            bundleInfos.put(region, bis);
         }
         bis.putAll(subsystem.getBundleInfos());
         for (Subsystem child : subsystem.getChildren()) {
-            addBundleInfos(infos, child, flats);
+            addBundleInfos(child);
         }
     }
 
@@ -175,83 +183,87 @@ public class SubsystemResolver {
         return manager.getProviders();
     }
 
-    public RegionDigraph getDigraph() {
-        return digraph;
-    }
-
     public Map<Resource, List<Wire>> getWiring() {
         return wiring;
     }
 
     public RegionDigraph getFlatDigraph() throws BundleException, InvalidSyntaxException {
-        RegionDigraph clone = this.digraph.copy();
-        RegionDigraph computedDigraph = digraph;
-        for (Region r : clone.getRegions()) {
-            clone.removeRegion(r);
-        }
-        Map<String, String> flats = getFlatSubsystemsMap();
-        for (Region r : computedDigraph.getRegions()) {
-            if (r.getName().equals(flats.get(r.getName()))) {
-                clone.createRegion(r.getName());
+        if (flatDigraph == null) {
+            flatDigraph = new StandardRegionDigraph(null, null);
+            Map<String, String> flats = getFlatSubsystemsMap();
+            for (Region r : digraph.getRegions()) {
+                if (r.getName().equals(flats.get(r.getName()))) {
+                    flatDigraph.createRegion(r.getName());
+                }
             }
-        }
-        for (Region r : computedDigraph.getRegions()) {
-            for (RegionDigraph.FilteredRegion fr : computedDigraph.getEdges(r)) {
-                String rt = flats.get(r.getName());
-                String rh = flats.get(fr.getRegion().getName());
-                if (!rh.equals(rt)) {
-                    Region tail = clone.getRegion(rt);
-                    Region head = clone.getRegion(rh);
-                    RegionFilterBuilder rfb = clone.createRegionFilterBuilder();
-                    for (Map.Entry<String, Collection<String>> entry : fr.getFilter().getSharingPolicy().entrySet()) {
-                        // Discard osgi.identity namespace
-                        if (!IDENTITY_NAMESPACE.equals(entry.getKey())) {
-                            for (String f : entry.getValue()) {
-                                rfb.allow(entry.getKey(), f);
+            for (Region r : digraph.getRegions()) {
+                for (RegionDigraph.FilteredRegion fr : digraph.getEdges(r)) {
+                    String rt = flats.get(r.getName());
+                    String rh = flats.get(fr.getRegion().getName());
+                    if (!rh.equals(rt)) {
+                        Region tail = flatDigraph.getRegion(rt);
+                        Region head = flatDigraph.getRegion(rh);
+                        RegionFilterBuilder rfb = flatDigraph.createRegionFilterBuilder();
+                        for (Map.Entry<String, Collection<String>> entry : fr.getFilter().getSharingPolicy().entrySet()) {
+                            // Discard osgi.identity namespace
+                            if (!IDENTITY_NAMESPACE.equals(entry.getKey())) {
+                                for (String f : entry.getValue()) {
+                                    rfb.allow(entry.getKey(), f);
+                                }
                             }
                         }
+                        flatDigraph.connect(tail, rfb.build(), head);
                     }
-                    clone.connect(tail, rfb.build(), head);
                 }
             }
         }
-        return clone;
+        return flatDigraph;
     }
 
     public Map<String, String> getFlatSubsystemsMap() {
-        Map<String, String> toFlatten = new HashMap<String, String>();
-        findSubsystemsToFlatten(root, toFlatten);
-        return toFlatten;
+        if (flatSubsystemsMap == null) {
+            flatSubsystemsMap = new HashMap<String, String>();
+            findSubsystemsToFlatten(root, flatSubsystemsMap);
+        }
+        return flatSubsystemsMap;
     }
 
     public Map<String, Set<Resource>> getBundlesPerRegions() {
-        return invert(getBundles());
+        if (bundlesPerRegions == null) {
+            bundlesPerRegions = invert(getBundles());
+        }
+        return bundlesPerRegions;
     }
 
     public Map<Resource, String> getBundles() {
-        String filter = String.format("(&(%s=*)(|(%s=%s)(%s=%s)))",
-                            IDENTITY_NAMESPACE,
-                            CAPABILITY_TYPE_ATTRIBUTE, TYPE_BUNDLE,
-                            CAPABILITY_TYPE_ATTRIBUTE, TYPE_FRAGMENT);
-        SimpleFilter sf = SimpleFilter.parse(filter);
-        return getResourceMapping(sf);
+        if (bundles == null) {
+            String filter = String.format("(&(%s=*)(|(%s=%s)(%s=%s)))",
+                    IDENTITY_NAMESPACE,
+                    CAPABILITY_TYPE_ATTRIBUTE, TYPE_BUNDLE,
+                    CAPABILITY_TYPE_ATTRIBUTE, TYPE_FRAGMENT);
+            SimpleFilter sf = SimpleFilter.parse(filter);
+            bundles = getResourceMapping(sf);
+        }
+        return bundles;
     }
 
     public Map<String, Set<Resource>> getFeaturesPerRegions() {
-        return invert(getFeatures());
+        if (featuresPerRegions == null) {
+            featuresPerRegions = invert(getFeatures());
+        }
+        return featuresPerRegions;
     }
 
     public Map<Resource, String> getFeatures() {
-        SimpleFilter sf = createFilter(IDENTITY_NAMESPACE, "*",
-                                       CAPABILITY_TYPE_ATTRIBUTE, TYPE_FEATURE);
-        return getResourceMapping(sf);
+        if (features == null) {
+            SimpleFilter sf = createFilter(IDENTITY_NAMESPACE, "*",
+                                           CAPABILITY_TYPE_ATTRIBUTE, TYPE_FEATURE);
+            features = getResourceMapping(sf);
+        }
+        return features;
     }
 
-    public Map<String, Set<Resource>> getResourcesPerRegion(SimpleFilter resourceFilter) {
-        return invert(getResourceMapping(resourceFilter));
-    }
-
-    public Map<Resource, String> getResourceMapping(SimpleFilter resourceFilter) {
+    private Map<Resource, String> getResourceMapping(SimpleFilter resourceFilter) {
         Map<String, String> flats = getFlatSubsystemsMap();
         Map<Resource, List<Wire>> wiring = getWiring();
         Map<Resource, String> resources = new HashMap<Resource, String>();

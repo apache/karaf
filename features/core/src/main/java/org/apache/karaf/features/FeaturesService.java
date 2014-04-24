@@ -31,6 +31,7 @@ public interface FeaturesService {
         NoAutoRefreshUnmanagedBundles,
         NoAutoRefreshBundles,
         NoAutoStartBundles,
+        NoAutoManageBundles,
         Simulate,
         Verbose
     }
