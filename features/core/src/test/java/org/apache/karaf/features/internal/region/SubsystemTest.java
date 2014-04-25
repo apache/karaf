@@ -125,6 +125,48 @@ public class SubsystemTest {
         verify(resolver, expected);
     }
 
+    @Test
+    public void testConditionalUnsatisfiedWithOptional() throws Exception {
+        RepositoryImpl repo = new RepositoryImpl(getClass().getResource("data4/features.xml").toURI());
+
+        Map<String, Set<String>> features = new HashMap<String, Set<String>>();
+        addToMapSet(features, "root/apps1", "f1");
+        Map<String, Set<String>> expected = new HashMap<String, Set<String>>();
+        addToMapSet(expected, "root/apps1", "a/1.0.0");
+
+        SubsystemResolver resolver = new SubsystemResolver(new TestDownloadManager("data4"));
+        resolver.resolve(Arrays.asList(repo.getFeatures()),
+                features,
+                Collections.<String, Set<BundleRevision>>emptyMap(),
+                Collections.<String>emptySet(),
+                FeaturesServiceImpl.DEFAULT_FEATURE_RESOLUTION_RANGE,
+                null);
+
+        verify(resolver, expected);
+    }
+
+    @Test
+    public void testConditionalSatisfiedWithOptional() throws Exception {
+        RepositoryImpl repo = new RepositoryImpl(getClass().getResource("data4/features.xml").toURI());
+
+        Map<String, Set<String>> features = new HashMap<String, Set<String>>();
+        addToMapSet(features, "root/apps1", "f1");
+        addToMapSet(features, "root/apps1", "f2");
+        Map<String, Set<String>> expected = new HashMap<String, Set<String>>();
+        addToMapSet(expected, "root/apps1", "a/1.0.0");
+        addToMapSet(expected, "root/apps1", "b/1.0.0");
+
+        SubsystemResolver resolver = new SubsystemResolver(new TestDownloadManager("data4"));
+        resolver.resolve(Arrays.asList(repo.getFeatures()),
+                features,
+                Collections.<String, Set<BundleRevision>>emptyMap(),
+                Collections.<String>emptySet(),
+                FeaturesServiceImpl.DEFAULT_FEATURE_RESOLUTION_RANGE,
+                null);
+
+        verify(resolver, expected);
+    }
+
     private void verify(SubsystemResolver resolver, Map<String, Set<String>> expected) {
         Map<String, Set<String>> mapping = getBundleNamesPerRegions(resolver);
         if (!expected.equals(mapping)) {

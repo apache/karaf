@@ -254,16 +254,16 @@ public class Subsystem extends ResourceImpl {
         if (feature != null) {
             final Map<String, ResourceImpl> bundles = new ConcurrentHashMap<String, ResourceImpl>();
             final Downloader downloader = manager.createDownloader();
-            final Map<BundleInfo, Boolean> infos = new HashMap<BundleInfo, Boolean>();
+            final Map<BundleInfo, Conditional> infos = new HashMap<BundleInfo, Conditional>();
             for (Conditional cond : feature.getConditional()) {
                 for (final BundleInfo bi : cond.getBundles()) {
-                    infos.put(bi, false);
+                    infos.put(bi, cond);
                 }
             }
             for (BundleInfo bi : feature.getBundles()) {
-                infos.put(bi, true);
+                infos.put(bi, null);
             }
-            for (Map.Entry<BundleInfo, Boolean> entry : infos.entrySet()) {
+            for (Map.Entry<BundleInfo, Conditional> entry : infos.entrySet()) {
                 final BundleInfo bi = entry.getKey();
                 final String loc = bi.getLocation();
                 downloader.download(loc, new DownloadCallback() {
@@ -286,17 +286,6 @@ public class Subsystem extends ResourceImpl {
             }
             downloader.await();
             Overrides.override(bundles, overrides);
-            for (Map.Entry<BundleInfo, Boolean> entry : infos.entrySet()) {
-                final BundleInfo bi = entry.getKey();
-                final String loc = bi.getLocation();
-                final boolean mandatory = entry.getValue();
-                ResourceImpl res = bundles.get(loc);
-                if (bi.isDependency()) {
-                    addDependency(res, false, bi.isStart(), bi.getStartLevel());
-                } else {
-                    doAddDependency(res, mandatory, bi.isStart(), bi.getStartLevel());
-                }
-            }
             for (Dependency dep : feature.getDependencies()) {
                 Subsystem ss = this;
                 while (!ss.isAcceptDependencies()) {
@@ -304,15 +293,33 @@ public class Subsystem extends ResourceImpl {
                 }
                 ss.requireFeature(dep.getName(), dep.getVersion());
             }
+            // Add conditionals
+            Map<Conditional, Resource> resConds = new HashMap<Conditional, Resource>();
             for (Conditional cond : feature.getConditional()) {
                 FeatureResource resCond = FeatureResource.build(feature, cond, featureResolutionRange, bundles);
                 addIdentityRequirement(this, resCond, false);
                 installable.add(resCond);
+                resConds.put(cond, resCond);
             }
-
-            FeatureResource res = FeatureResource.build(feature, featureResolutionRange, bundles);
-            addIdentityRequirement(res, this);
-            installable.add(res);
+            // Add features
+            FeatureResource resFeature = FeatureResource.build(feature, featureResolutionRange, bundles);
+            addIdentityRequirement(resFeature, this);
+            installable.add(resFeature);
+            // Add dependencies
+            for (Map.Entry<BundleInfo, Conditional> entry : infos.entrySet()) {
+                final BundleInfo bi = entry.getKey();
+                final String loc = bi.getLocation();
+                final Conditional cond = entry.getValue();
+                ResourceImpl res = bundles.get(loc);
+                if (bi.isDependency()) {
+                    addDependency(res, false, bi.isStart(), bi.getStartLevel());
+                } else {
+                    doAddDependency(res, cond == null, bi.isStart(), bi.getStartLevel());
+                }
+                if (cond != null) {
+                    addIdentityRequirement(res, resConds.get(cond), true);
+                }
+            }
         }
         // Compute dependencies
         for (DependencyInfo info : dependencies.values()) {
