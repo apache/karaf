@@ -1708,14 +1708,22 @@ public class FeaturesServiceImpl implements FeaturesService {
     protected List<Bundle> getBundlesToStart(Collection<Bundle> bundles) {
         // Restart the features service last, regardless of any other consideration
         // so that we don't end up with the service trying to do stuff before we're done
-        boolean restart = bundles.remove(bundle);
+        boolean restart = false;
 
         SortedMap<Integer, Set<Bundle>> bundlesPerStartLevel = new TreeMap<>();
         for (Bundle bundle : bundles) {
-            int sl = bundle.adapt(BundleStartLevel.class).getStartLevel();
-            addToMapSet(bundlesPerStartLevel, sl, bundle);
+            if (bundle == this.bundle) {
+                restart = true;
+            } else {
+                int sl = bundle.adapt(BundleStartLevel.class).getStartLevel();
+                addToMapSet(bundlesPerStartLevel, sl, bundle);
+            }
         }
-        bundles = bundlesPerStartLevel.remove(bundlesPerStartLevel.firstKey());
+        if (bundlesPerStartLevel.isEmpty()) {
+            bundles = Collections.emptyList();
+        } else {
+            bundles = bundlesPerStartLevel.remove(bundlesPerStartLevel.firstKey());
+        }
 
         // We hit FELIX-2949 if we don't use the correct order as Felix resolver isn't greedy.
         // In order to minimize that, we make sure we resolve the bundles in the order they
