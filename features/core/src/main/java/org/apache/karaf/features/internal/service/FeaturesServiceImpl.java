@@ -16,6 +16,9 @@
  */
 package org.apache.karaf.features.internal.service;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -52,6 +55,8 @@ import org.apache.karaf.features.RepositoryEvent;
 import org.apache.karaf.features.internal.download.StreamProvider;
 import org.apache.karaf.features.internal.region.SubsystemResolver;
 import org.apache.karaf.features.internal.util.ChecksumUtils;
+import org.apache.karaf.features.internal.util.JsonReader;
+import org.apache.karaf.features.internal.util.JsonWriter;
 import org.apache.karaf.features.internal.util.Macro;
 import org.apache.karaf.features.internal.util.MapUtils;
 import org.apache.karaf.features.internal.util.MultiException;
@@ -82,6 +87,7 @@ import static org.apache.felix.resolver.Util.getSymbolicName;
 import static org.apache.felix.resolver.Util.getVersion;
 import static org.apache.karaf.features.internal.resolver.ResourceUtils.getFeatureId;
 import static org.apache.karaf.features.internal.resolver.ResourceUtils.getUri;
+import static org.apache.karaf.features.internal.service.StateStorage.toStringStringSetMap;
 import static org.apache.karaf.features.internal.util.MapUtils.addToMapSet;
 import static org.apache.karaf.features.internal.util.MapUtils.apply;
 import static org.apache.karaf.features.internal.util.MapUtils.contains;
@@ -197,6 +203,55 @@ public class FeaturesServiceImpl implements FeaturesService {
         this.updateSnaphots = updateSnaphots;
         this.globalRepository = globalRepository;
         loadState();
+        checkResolve();
+
+    }
+
+    private void checkResolve() {
+        if (bundle == null) {
+            return; // Most certainly in unit tests
+        }
+        File resolveFile = bundle.getBundleContext().getDataFile("resolve");
+        if (!resolveFile.exists()) {
+            return;
+        }
+        Map<String, Object> request;
+        try(
+            FileInputStream fis = new FileInputStream(resolveFile)
+        ) {
+            request = (Map<String, Object>) JsonReader.read(fis);
+        } catch (IOException e) {
+            LOGGER.warn("Error reading resolution request", e);
+            return;
+        }
+        Map<String, Set<String>> requestedFeatures = toStringStringSetMap((Map) request.get("features"));
+        Collection<String> opts = (Collection<String>) request.get("options");
+        EnumSet<Option> options = EnumSet.noneOf(Option.class);
+        for (String opt : opts) {
+            options.add(Option.valueOf(opt));
+        }
+        // Resolve
+        try {
+            doInstallFeaturesInThread(requestedFeatures, copyState(), options);
+        } catch (Exception e) {
+            LOGGER.warn("Error updating state", e);
+        }
+    }
+
+    private void writeResolve(Map<String, Set<String>> requestedFeatures, EnumSet<Option> options) throws IOException {
+        File resolveFile = bundle.getBundleContext().getDataFile("resolve");
+        Map<String, Object> request = new HashMap<>();
+        List<String> opts = new ArrayList<>();
+        for (Option opt : options) {
+            opts.add(opt.toString());
+        }
+        request.put("features", requestedFeatures);
+        request.put("options", opts);
+        try(
+                FileOutputStream fos = new FileOutputStream(resolveFile);
+        ) {
+            JsonWriter.write(fos, request);
+        }
     }
 
     //
@@ -1025,16 +1080,52 @@ public class FeaturesServiceImpl implements FeaturesService {
         // #10: send events
         //
 
-        // TODO: handle update on the features service itself
+        //
+        // Handle updates on the FeaturesService bundle
+        //
         RegionDeployment rootRegionDeployment = deployment.regions.get(ROOT_REGION);
-        if (rootRegionDeployment != null &&
-                (rootRegionDeployment.toUpdate.containsKey(bundle)
-                        || rootRegionDeployment.toDelete.contains(bundle))) {
-
-            LOGGER.warn("Updating or uninstalling of the FeaturesService is not supported");
-            rootRegionDeployment.toUpdate.remove(bundle);
-            rootRegionDeployment.toDelete.remove(bundle);
-
+        // We don't support uninstalling the bundle
+        if (rootRegionDeployment != null && rootRegionDeployment.toDelete.contains(bundle)) {
+            throw new UnsupportedOperationException("Uninstalling the FeaturesService bundle is not supported");
+        }
+        // If the bundle needs to be updated, do the following:
+        //  - create flag files to indicate the resolution must be continued after restart
+        //  - update the checksum and save the state
+        //  - compute bundles wired to the FeaturesService bundle that will be refreshed
+        //  - stop the bundle
+        //  - update the bundle
+        //  - refresh wired bundles
+        //  - start the bundle
+        //  - exit
+        // When restarting, the resolution will be attempted again
+        if (rootRegionDeployment != null && rootRegionDeployment.toUpdate.containsKey(bundle)) {
+            writeResolve(requestedFeatures, options);
+            // If the bundle is updated because of a different checksum,
+            // save the new checksum persistently
+            if (deployment.bundleChecksums.containsKey(bundle.getBundleId())) {
+                synchronized (lock) {
+                    this.state.bundleChecksums.put(bundle.getBundleId(), deployment.bundleChecksums.get(bundle.getBundleId()));
+                    saveState();
+                }
+            }
+            Resource resource = rootRegionDeployment.toUpdate.get(bundle);
+            String uri = getUri(resource);
+            print("The FeaturesService bundle needs is being updated with " + uri, verbose);
+            toRefresh.clear();
+            toRefresh.add(bundle);
+            computeBundlesToRefresh(toRefresh,
+                    dstate.bundles.values(),
+                    Collections.<Resource, Bundle>emptyMap(),
+                    Collections.<Resource, List<Wire>>emptyMap());
+            bundle.stop(Bundle.STOP_TRANSIENT);
+            try (
+                InputStream is = getBundleInputStream(resource, providers)
+            ) {
+                bundle.update(is);
+            }
+            refreshPackages(toRefresh);
+            bundle.start();
+            return;
         }
 
         //
