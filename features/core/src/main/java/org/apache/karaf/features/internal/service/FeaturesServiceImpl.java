@@ -1216,12 +1216,6 @@ public class FeaturesServiceImpl implements FeaturesService {
                         bundle.update(is);
                     }
                     toStart.add(bundle);
-                    BundleInfo bi = bundleInfos.get(rde.getKey()).get(uri);
-                    if (bi != null && bi.getStartLevel() > 0) {
-                        // TODO: this is wrong, as it will certainly start the bundle asynchronously
-                        // TODO:
-                        bundle.adapt(BundleStartLevel.class).setStartLevel(bi.getStartLevel());
-                    }
                 }
             }
         }
