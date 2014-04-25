@@ -55,7 +55,7 @@ public class DigraphHelper {
 
     public static StandardRegionDigraph loadDigraph(BundleContext bundleContext) throws BundleException, IOException, InvalidSyntaxException {
         StandardRegionDigraph digraph;
-        ThreadLocal<Region> threadLocal = new ThreadLocal<Region>();
+        ThreadLocal<Region> threadLocal = new ThreadLocal<>();
         File digraphFile = bundleContext.getDataFile(DIGRAPH_FILE);
         if (digraphFile == null || !digraphFile.exists()) {
             digraph = new StandardRegionDigraph(bundleContext, threadLocal);
@@ -64,11 +64,10 @@ public class DigraphHelper {
                 root.addBundle(bundle);
             }
         } else {
-            InputStream in = new FileInputStream(digraphFile);
-            try {
+            try (
+                InputStream in = new FileInputStream(digraphFile)
+            ) {
                 digraph = readDigraph(new DataInputStream(in), bundleContext, threadLocal);
-            } finally {
-                in.close();
             }
         }
         return digraph;
@@ -76,17 +75,12 @@ public class DigraphHelper {
 
     public static void saveDigraph(BundleContext bundleContext, RegionDigraph digraph) throws IOException {
         File digraphFile = bundleContext.getDataFile(DIGRAPH_FILE);
-        FileOutputStream out = new FileOutputStream(digraphFile);
-        try {
+        try (
+            FileOutputStream out = new FileOutputStream(digraphFile)
+        ) {
             saveDigraph(digraph, out);
         } catch (Exception e) {
             // Ignore
-        } finally {
-            try {
-                out.close();
-            } catch (IOException e) {
-                // ignore;
-            }
         }
     }
 
@@ -125,17 +119,17 @@ public class DigraphHelper {
     }
 
     static void saveDigraph(RegionDigraph digraph, OutputStream out) throws IOException {
-        Map<String, Object> json = new LinkedHashMap<String, Object>();
-        Map<String, Set<Long>> regions = new LinkedHashMap<String, Set<Long>>();
+        Map<String, Object> json = new LinkedHashMap<>();
+        Map<String, Set<Long>> regions = new LinkedHashMap<>();
         json.put(REGIONS, regions);
         for (Region region : digraph.getRegions()) {
             regions.put(region.getName(), region.getBundleIds());
         }
-        List<Map<String, Object>> edges = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> edges = new ArrayList<>();
         json.put(EDGES, edges);
         for (Region tail : digraph.getRegions()) {
             for (RegionDigraph.FilteredRegion fr : digraph.getEdges(tail)) {
-                Map<String, Object> edge = new HashMap<String, Object>();
+                Map<String, Object> edge = new HashMap<>();
                 edge.put(TAIL, tail.getName());
                 edge.put(HEAD, fr.getRegion().getName());
                 edge.put(POLICY, fr.getFilter().getSharingPolicy());

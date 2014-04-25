@@ -61,8 +61,9 @@ public abstract class UrlLoader {
             if (lm <= lastModified) {
                 return false;
             }
-            BufferedInputStream bis = new BufferedInputStream(connection.getInputStream());
-            try {
+            try (
+                BufferedInputStream bis = new BufferedInputStream(connection.getInputStream())
+            ) {
                 // Auto-detect gzipped streams
                 InputStream is = bis;
                 bis.mark(512);
@@ -75,8 +76,6 @@ public abstract class UrlLoader {
                 boolean r = doRead(is);
                 lastModified = lm;
                 return r;
-            } finally {
-                bis.close();
             }
         } catch (IOException e) {
             throw new RuntimeException(e);

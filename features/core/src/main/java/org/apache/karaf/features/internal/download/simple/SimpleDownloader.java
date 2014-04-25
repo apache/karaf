@@ -101,8 +101,9 @@ public class SimpleDownloader implements DownloadManager, Downloader {
         }
 
         protected Map<String, String> doGetMetadata() throws IOException {
-            InputStream is = open();
-            try {
+            try (
+                InputStream is = open()
+            ) {
                 ZipInputStream zis = new ZipInputStream(is);
                 ZipEntry entry;
                 while ((entry = zis.getNextEntry()) != null) {
@@ -115,8 +116,6 @@ public class SimpleDownloader implements DownloadManager, Downloader {
                         return headers;
                     }
                 }
-            } finally {
-                is.close();
             }
             throw new IllegalArgumentException("Resource " + url + " does not contain a manifest");
         }

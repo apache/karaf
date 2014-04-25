@@ -160,7 +160,7 @@ public class SubsystemResolver {
 
     public Map<String, Map<String, BundleInfo>> getBundleInfos() {
         if (bundleInfos == null) {
-            bundleInfos = new HashMap<String, Map<String, BundleInfo>>();
+            bundleInfos = new HashMap<>();
             addBundleInfos(root);
         }
         return bundleInfos;
@@ -170,7 +170,7 @@ public class SubsystemResolver {
         String region = getFlatSubsystemsMap().get(subsystem.getName());
         Map<String, BundleInfo> bis = bundleInfos.get(region);
         if (bis == null) {
-            bis = new HashMap<String, BundleInfo>();
+            bis = new HashMap<>();
             bundleInfos.put(region, bis);
         }
         bis.putAll(subsystem.getBundleInfos());
@@ -222,7 +222,7 @@ public class SubsystemResolver {
 
     public Map<String, String> getFlatSubsystemsMap() {
         if (flatSubsystemsMap == null) {
-            flatSubsystemsMap = new HashMap<String, String>();
+            flatSubsystemsMap = new HashMap<>();
             findSubsystemsToFlatten(root, flatSubsystemsMap);
         }
         return flatSubsystemsMap;
@@ -266,7 +266,7 @@ public class SubsystemResolver {
     private Map<Resource, String> getResourceMapping(SimpleFilter resourceFilter) {
         Map<String, String> flats = getFlatSubsystemsMap();
         Map<Resource, List<Wire>> wiring = getWiring();
-        Map<Resource, String> resources = new HashMap<Resource, String>();
+        Map<Resource, String> resources = new HashMap<>();
         SimpleFilter sf = createFilter(IDENTITY_NAMESPACE, "*",
                                        CAPABILITY_TYPE_ATTRIBUTE, TYPE_SUBSYSTEM);
         for (Resource resource : wiring.keySet()) {
@@ -349,7 +349,7 @@ public class SubsystemResolver {
     }
 
     private SimpleFilter createFilter(String... s) {
-        Map<String, Object> attrs = new HashMap<String, Object>();
+        Map<String, Object> attrs = new HashMap<>();
         for (int i = 0; i < s.length - 1; i += 2) {
             attrs.put(s[i], s[i+1]);
         }

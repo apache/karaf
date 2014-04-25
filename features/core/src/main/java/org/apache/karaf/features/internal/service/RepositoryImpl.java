@@ -70,27 +70,27 @@ public class RepositoryImpl implements Repository {
 
     public void load(boolean validate) throws IOException {
         if (features == null) {
-            try {
-                InputStream inputStream = uri.toURL().openStream();
-                inputStream = new FilterInputStream(inputStream) {
-    				@Override
-    				public int read(byte[] b, int off, int len) throws IOException {
-    					if (Thread.currentThread().isInterrupted()) {
-    						throw new InterruptedIOException();
-    					}
-    					return super.read(b, off, len);
-    				}
-    			};
-                try {
-                    features = JaxbUtil.unmarshal(uri.toASCIIString(), inputStream, validate);
-                } finally {
-                    inputStream.close();
-                }
-            } catch (IllegalArgumentException e) {
-                throw (IOException) new IOException(e.getMessage() + " : " + uri).initCause(e);
+            try (
+                InputStream inputStream = new InterruptibleInputStream(uri.toURL().openStream())
+            ) {
+                features = JaxbUtil.unmarshal(uri.toASCIIString(), inputStream, validate);
             } catch (Exception e) {
                 throw (IOException) new IOException(e.getMessage() + " : " + uri).initCause(e);
             }
+        }
+    }
+
+    static class InterruptibleInputStream extends FilterInputStream {
+        InterruptibleInputStream(InputStream in) {
+            super(in);
+        }
+
+        @Override
+        public int read(byte[] b, int off, int len) throws IOException {
+            if (Thread.currentThread().isInterrupted()) {
+                throw new InterruptedIOException();
+            }
+            return super.read(b, off, len);
         }
     }
 

@@ -128,40 +128,28 @@ public class FeatureConfigInstaller {
             LOGGER.info("Creating configuration file {}", finalname);
         }
 
-        InputStream is = null;
-        FileOutputStream fop = null;
-        try {
-            is = new BufferedInputStream(new URL(fileLocation).openStream());
-
+        try (
+            InputStream is = new BufferedInputStream(new URL(fileLocation).openStream())
+        ) {
             if (!file.exists()) {
                 File parentFile = file.getParentFile();
                 if (parentFile != null)
                     parentFile.mkdirs();
                 file.createNewFile();
             }
+            try (
+                FileOutputStream fop = new FileOutputStream(file)
+            ) {
+                int bytesRead;
+                byte[] buffer = new byte[1024];
 
-            fop = new FileOutputStream(file);
-        
-            int bytesRead;
-            byte[] buffer = new byte[1024];
-            
-            while ((bytesRead = is.read(buffer)) != -1) {
-                fop.write(buffer, 0, bytesRead);
+                while ((bytesRead = is.read(buffer)) != -1) {
+                    fop.write(buffer, 0, bytesRead);
+                }
             }
-        } catch (RuntimeException e) {
+        } catch (RuntimeException | MalformedURLException e) {
             LOGGER.error(e.getMessage());
             throw e;
-        } catch (MalformedURLException e) {
-        	LOGGER.error(e.getMessage());
-            throw e;
-		} finally {
-			if (is != null)
-				is.close();
-            if (fop != null) {
-			    fop.flush();
-			    fop.close();
-            }
-		}
-            
+        }
     }
 }

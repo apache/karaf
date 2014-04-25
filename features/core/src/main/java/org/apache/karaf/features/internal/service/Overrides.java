@@ -101,8 +101,9 @@ public class Overrides {
         Set<String> overrides = new HashSet<String>();
         try {
             if (overridesUrl != null) {
-                InputStream is = new URL(overridesUrl).openStream();
-                try {
+                try (
+                    InputStream is = new URL(overridesUrl).openStream()
+                ) {
                     BufferedReader reader = new BufferedReader(new InputStreamReader(is));
                     String line;
                     while ((line = reader.readLine()) != null) {
@@ -111,8 +112,6 @@ public class Overrides {
                             overrides.add(line);
                         }
                     }
-                } finally {
-                    is.close();
                 }
             }
         } catch (Exception e) {

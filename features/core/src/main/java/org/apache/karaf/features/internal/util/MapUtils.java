@@ -32,7 +32,7 @@ public class MapUtils {
     }
 
     public static <S, T> Map<S, Set<T>> invert(Map<T, S> map) {
-        Map<S, Set<T>> inverted = new HashMap<S, Set<T>>(map.size());
+        Map<S, Set<T>> inverted = new HashMap<>(map.size());
         for (Map.Entry<T, S> entry : map.entrySet()) {
             addToMapSet(inverted, entry.getValue(), entry.getKey());
         }
@@ -40,7 +40,7 @@ public class MapUtils {
     }
 
     public static <S, T, U> Map<S, Set<U>> apply(Map<S, Set<T>> mapset, Function<T, U> function) {
-        Map<S, Set<U>> result = new HashMap<S, Set<U>>(mapset.size());
+        Map<S, Set<U>> result = new HashMap<>(mapset.size());
         for (Map.Entry<S, Set<T>> entry : mapset.entrySet()) {
             result.put(entry.getKey(), apply(entry.getValue(), function));
         }
@@ -48,7 +48,7 @@ public class MapUtils {
     }
 
     public static <U, T> Set<U> apply(Set<T> set, Function<T, U> function) {
-        Set<U> result = new HashSet<U>(set.size());
+        Set<U> result = new HashSet<>(set.size());
         for (T t : set) {
             result.add(function.apply(t));
         }
@@ -56,7 +56,7 @@ public class MapUtils {
     }
 
     public static <S, T, U> Map<T, U> build(Collection<S> col, Function<S, T> key, Function<S, U> value) {
-        Map<T, U> result = new HashMap<T, U>(col.size());
+        Map<T, U> result = new HashMap<>(col.size());
         for (S s : col) {
             result.put(key.apply(s), value.apply(s));
         }
@@ -87,7 +87,7 @@ public class MapUtils {
     }
 
     public static <S, T> Set<T> flatten(Map<S, Set<T>> mapset) {
-        Set<T> set = new HashSet<T>();
+        Set<T> set = new HashSet<>();
         for (Set<T> s : mapset.values()) {
             set.addAll(s);
         }
@@ -104,7 +104,7 @@ public class MapUtils {
         for (Map.Entry<S, Set<T>> entry : toAdd.entrySet()) {
             Set<T> s = from.get(entry.getKey());
             if (s == null) {
-                s = new HashSet<T>();
+                s = new HashSet<>();
                 from.put(entry.getKey(), s);
             }
             s.addAll(entry.getValue());
@@ -174,21 +174,21 @@ public class MapUtils {
     }
 
     public static <S, T> Map<S, Set<T>> copyMapSet(Map<S, Set<T>> from) {
-        Map<S, Set<T>> to = new HashMap<S, Set<T>>();
+        Map<S, Set<T>> to = new HashMap<>();
         copyMapSet(from, to);
         return to;
     }
 
     public static <S, T> void copyMapSet(Map<S, Set<T>> from, Map<S, Set<T>> to) {
         for (Map.Entry<S, Set<T>> entry : from.entrySet()) {
-            to.put(entry.getKey(), new HashSet<T>(entry.getValue()));
+            to.put(entry.getKey(), new HashSet<>(entry.getValue()));
         }
     }
 
     public static <S, T> void addToMapSet(Map<S, Set<T>> map, S key, T value) {
         Set<T> values = map.get(key);
         if (values == null) {
-            values = new HashSet<T>();
+            values = new HashSet<>();
             map.put(key, values);
         }
         values.add(value);

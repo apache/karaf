@@ -16,7 +16,6 @@
  */
 package org.apache.karaf.features.internal.service;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -36,9 +35,10 @@ public abstract class StateStorage {
         state.requestedFeatures.clear();
         state.installedFeatures.clear();
         state.managedBundles.clear();
-        InputStream is = getInputStream();
-        if (is != null) {
-            try {
+        try (
+            InputStream is = getInputStream()
+        ) {
+            if (is != null) {
                 Map json = (Map) JsonReader.read(is);
                 state.bootDone.set((Boolean) json.get("bootDone"));
                 state.repositories.addAll(toStringSet((Collection) json.get("repositories")));
@@ -46,16 +46,15 @@ public abstract class StateStorage {
                 state.installedFeatures.putAll(toStringStringSetMap((Map) json.get("installed")));
                 state.managedBundles.putAll(toStringLongSetMap((Map) json.get("managed")));
                 state.bundleChecksums.putAll(toLongLongMap((Map) json.get("checksums")));
-            } finally {
-                close(is);
             }
         }
     }
 
     public void save(State state) throws IOException {
-        OutputStream os = getOutputStream();
-        if (os != null) {
-            try {
+        try (
+            OutputStream os = getOutputStream()
+        ) {
+            if (os != null) {
                 Map<String, Object> json = new HashMap<String, Object>();
                 json.put("bootDone", state.bootDone.get());
                 json.put("repositories", state.repositories);
@@ -64,8 +63,6 @@ public abstract class StateStorage {
                 json.put("managed", state.managedBundles);
                 json.put("checksums", toStringLongMap(state.bundleChecksums));
                 JsonWriter.write(os, json);
-            } finally {
-                close(os);
             }
         }
     }
@@ -126,16 +123,6 @@ public abstract class StateStorage {
             return ((Number) o).longValue();
         } else {
             return Long.parseLong(o.toString());
-        }
-    }
-
-    static void close(Closeable closeable) {
-        if (closeable != null) {
-            try {
-                closeable.close();
-            } catch (IOException e) {
-                // Ignore
-            }
         }
     }
 
