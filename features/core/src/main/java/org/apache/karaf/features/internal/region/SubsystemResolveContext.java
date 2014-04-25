@@ -35,6 +35,7 @@ import org.eclipse.equinox.region.Region;
 import org.eclipse.equinox.region.RegionDigraph;
 import org.eclipse.equinox.region.RegionFilter;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.resource.Capability;
 import org.osgi.resource.Requirement;
 import org.osgi.resource.Resource;
@@ -130,9 +131,8 @@ public class SubsystemResolveContext extends ResolveContext {
                         String r2 = getRegion(resource).getName();
                         int c = r1.compareTo(r2);
                         if (c == 0) {
-                            // This should never happen because resource have been
-                            // de-duplicated during the pre-resolution phase.
-                            throw new IllegalStateException();
+                            // One of the resource has to be a bundle, use that one
+                            c = (prev instanceof BundleRevision) ? -1 : +1;
                         }
                         resource = c < 0 ? prev : resource;
                     }
