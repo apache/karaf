@@ -94,7 +94,7 @@ public class Activator extends BaseActivator {
                 logger.warn("Error reading configuration file " + configFile.toString(), e);
             }
         }
-        Dictionary<String, String> props = new Hashtable<String, String>();
+        Dictionary<String, String> props = new Hashtable<>();
         for (Map.Entry<String, String> entry : configuration.entrySet()) {
             props.put(entry.getKey(), entry.getValue());
         }
@@ -126,11 +126,11 @@ public class Activator extends BaseActivator {
 
 
         FeatureFinder featureFinder = new FeatureFinder();
-        Hashtable<String, Object> props = new Hashtable<String, Object>();
+        Hashtable<String, Object> props = new Hashtable<>();
         props.put(Constants.SERVICE_PID, FEATURES_REPOS_PID);
         register(ManagedService.class, featureFinder, props);
 
-        List<Repository> repositories = new ArrayList<Repository>();
+        List<Repository> repositories = new ArrayList<>();
         String[] resourceRepositories = getString("resourceRepositories", "").split(",");
         for (String url : resourceRepositories) {
             url = url.trim();
@@ -192,7 +192,7 @@ public class Activator extends BaseActivator {
                                 globalRepository);
         register(FeaturesService.class, featuresService);
 
-        featuresListenerTracker = new ServiceTracker<FeaturesListener, FeaturesListener>(
+        featuresListenerTracker = new ServiceTracker<>(
                 bundleContext, FeaturesListener.class, new ServiceTrackerCustomizer<FeaturesListener, FeaturesListener>() {
             @Override
             public FeaturesListener addingService(ServiceReference<FeaturesListener> reference) {

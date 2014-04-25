@@ -1210,8 +1210,11 @@ public class FeaturesServiceImpl implements FeaturesService {
                     Resource resource = entry.getValue();
                     String uri = getUri(resource);
                     print("  " + uri, verbose);
-                    InputStream is = getBundleInputStream(resource, providers);
-                    bundle.update(is);
+                    try (
+                        InputStream is = getBundleInputStream(resource, providers)
+                    ) {
+                        bundle.update(is);
+                    }
                     toStart.add(bundle);
                     BundleInfo bi = bundleInfos.get(rde.getKey()).get(uri);
                     if (bi != null && bi.getStartLevel() > 0) {

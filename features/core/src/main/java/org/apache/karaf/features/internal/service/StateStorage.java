@@ -55,7 +55,7 @@ public abstract class StateStorage {
             OutputStream os = getOutputStream()
         ) {
             if (os != null) {
-                Map<String, Object> json = new HashMap<String, Object>();
+                Map<String, Object> json = new HashMap<>();
                 json.put("bootDone", state.bootDone.get());
                 json.put("repositories", state.repositories);
                 json.put("features", state.requestedFeatures);
@@ -71,7 +71,7 @@ public abstract class StateStorage {
     protected abstract OutputStream getOutputStream() throws IOException;
 
     protected Map<String, Set<String>> toStringStringSetMap(Map<?,?> map) {
-        Map<String, Set<String>> nm = new HashMap<String, Set<String>>();
+        Map<String, Set<String>> nm = new HashMap<>();
         for (Map.Entry entry : map.entrySet()) {
             nm.put(entry.getKey().toString(), toStringSet((Collection) entry.getValue()));
         }
@@ -79,7 +79,7 @@ public abstract class StateStorage {
     }
 
     protected Map<String, Set<Long>> toStringLongSetMap(Map<?,?> map) {
-        Map<String, Set<Long>> nm = new HashMap<String, Set<Long>>();
+        Map<String, Set<Long>> nm = new HashMap<>();
         for (Map.Entry entry : map.entrySet()) {
             nm.put(entry.getKey().toString(), toLongSet((Collection) entry.getValue()));
         }
@@ -87,7 +87,7 @@ public abstract class StateStorage {
     }
 
     protected Set<String> toStringSet(Collection<?> col) {
-        Set<String> ns = new TreeSet<String>();
+        Set<String> ns = new TreeSet<>();
         for (Object o : col) {
             ns.add(o.toString());
         }
@@ -95,7 +95,7 @@ public abstract class StateStorage {
     }
 
     protected Set<Long> toLongSet(Collection<?> set) {
-        Set<Long> ns = new TreeSet<Long>();
+        Set<Long> ns = new TreeSet<>();
         for (Object o : set) {
             ns.add(toLong(o));
         }
@@ -103,7 +103,7 @@ public abstract class StateStorage {
     }
 
     protected Map<Long, Long> toLongLongMap(Map<?,?> map) {
-        Map<Long, Long> nm = new HashMap<Long, Long>();
+        Map<Long, Long> nm = new HashMap<>();
         for (Map.Entry entry : map.entrySet()) {
             nm.put(toLong(entry.getKey()), toLong(entry.getValue()));
         }
@@ -111,7 +111,7 @@ public abstract class StateStorage {
     }
 
     protected Map<String, Long> toStringLongMap(Map<?,?> map) {
-        Map<String, Long> nm = new HashMap<String, Long>();
+        Map<String, Long> nm = new HashMap<>();
         for (Map.Entry entry : map.entrySet()) {
             nm.put(entry.getKey().toString(), toLong(entry.getValue()));
         }
