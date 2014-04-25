@@ -22,7 +22,6 @@
 
     <feature version="${project.version}" description="OSGi Security for Karaf" name="framework-security">
         <bundle start="false" start-level="1">mvn:org.apache.felix/org.apache.felix.framework.security/${felix.framework.security.version}</bundle>
-        <bundle start="true" start-level="10">mvn:org.apache.karaf.service/org.apache.karaf.service.guard/${project.version}</bundle>
     </feature>
 
     <feature version="${project.version}" description="Services Security for Karaf" name="service-security">
