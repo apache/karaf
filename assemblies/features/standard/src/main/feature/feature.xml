@@ -259,6 +259,7 @@
         <bundle dependency="true" start-level="30">mvn:commons-codec/commons-codec/${commons-codec.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:commons-lang/commons-lang/${commons-lang.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jasypt/${jasypt.bundle.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jasypt-spring31/${jasypt.spring.bundle.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.jaas/org.apache.karaf.jaas.jasypt/${project.version}</bundle>
         <conditional>
             <condition>aries-blueprint</condition>
