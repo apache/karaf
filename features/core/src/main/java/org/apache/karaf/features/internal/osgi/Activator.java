@@ -134,12 +134,14 @@ public class Activator extends BaseActivator {
         String[] resourceRepositories = getString("resourceRepositories", "").split(",");
         for (String url : resourceRepositories) {
             url = url.trim();
-            if (url.startsWith("json:")) {
-                repositories.add(new JsonRepository(url.substring("json:".length())));
-            } else if (url.startsWith("xml:")) {
-                repositories.add(new XmlRepository(url.substring("xml:".length())));
-            } else {
-                logger.warn("Unrecognized resource repository: " + url);
+            if (!url.isEmpty()) {
+                if (url.startsWith("json:")) {
+                    repositories.add(new JsonRepository(url.substring("json:".length())));
+                } else if (url.startsWith("xml:")) {
+                    repositories.add(new XmlRepository(url.substring("xml:".length())));
+                } else {
+                    logger.warn("Unrecognized resource repository: " + url);
+                }
             }
         }
         Repository globalRepository;
