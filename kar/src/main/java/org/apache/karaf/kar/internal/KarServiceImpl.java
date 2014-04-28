@@ -49,6 +49,7 @@ import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
 import org.apache.karaf.kar.KarService;
+import org.apache.karaf.util.StreamUtils;
 import org.apache.karaf.util.maven.Parser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -335,11 +336,13 @@ public class KarServiceImpl implements KarService {
         try {
             String noPrefixLocation = location.toString().substring(location.toString().lastIndexOf(":") + 1);
             Parser parser = new Parser(noPrefixLocation);
-            InputStream is = location.toURL().openStream();
             String path = "repository/" + parser.getArtifactPath();
             jos.putNextEntry(new JarEntry(path));
-            Kar.copyStream(is, jos);
-            is.close();
+            try (
+                InputStream is = location.toURL().openStream()
+            ) {
+                StreamUtils.copy(is, jos);
+            }
             locationMap.put(location, 1);
         } catch (Exception e) {
             LOGGER.error("Error adding " + location, e);

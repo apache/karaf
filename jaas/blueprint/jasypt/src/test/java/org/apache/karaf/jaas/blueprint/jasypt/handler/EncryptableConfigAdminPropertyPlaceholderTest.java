@@ -20,6 +20,7 @@ import de.kalpatec.pojosr.framework.launch.ClasspathScanner;
 import de.kalpatec.pojosr.framework.launch.PojoServiceRegistry;
 import de.kalpatec.pojosr.framework.launch.PojoServiceRegistryFactory;
 import junit.framework.TestCase;
+import org.apache.karaf.util.StreamUtils;
 import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.jasypt.encryption.pbe.config.EnvironmentStringPBEConfig;
 import org.junit.After;
@@ -86,7 +87,7 @@ public class EncryptableConfigAdminPropertyPlaceholderTest extends TestCase {
     private BundleDescriptor getBundleDescriptor(String path, TinyBundle bundle) throws Exception {
         File file = new File(path);
         FileOutputStream fos = new FileOutputStream(file);
-        copy(bundle.build(), fos);
+        StreamUtils.copy(bundle.build(), fos);
         fos.close();
         JarInputStream jis = new JarInputStream(new FileInputStream(file));
         Map<String, String> headers = new HashMap<String, String>();
@@ -233,21 +234,6 @@ public class EncryptableConfigAdminPropertyPlaceholderTest extends TestCase {
             }
         }
         return result;
-    }
-
-    public static long copy(final InputStream input, final OutputStream output) throws IOException {
-        return copy(input, output, 8024);
-    }
-
-    public static long copy(final InputStream input, final OutputStream output, int buffersize) throws IOException {
-        final byte[] buffer = new byte[buffersize];
-        int n;
-        long count = 0;
-        while (-1 != (n = input.read(buffer))) {
-            output.write(buffer, 0, n);
-            count += n;
-        }
-        return count;
     }
 
     /*

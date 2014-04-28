@@ -21,13 +21,14 @@ package org.apache.felix.webconsole.internal;
 import java.io.IOException;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
+
 import javax.security.auth.Subject;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
 import org.apache.felix.webconsole.internal.servlet.OsgiManager;
-import org.apache.karaf.jaas.modules.JaasHelper;
+import org.apache.karaf.util.jaas.JaasHelper;
 import org.osgi.framework.BundleContext;
 
 public class KarafOsgiManager extends OsgiManager {

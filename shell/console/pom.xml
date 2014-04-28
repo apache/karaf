@@ -71,6 +71,11 @@
         </dependency>
 
         <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.apache.karaf.util</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.apache.aries.blueprint</groupId>
             <artifactId>org.apache.aries.blueprint.api</artifactId>
             <scope>provided</scope>
@@ -176,6 +181,7 @@
                         	org.apache.karaf.shell.console.impl*,
                             org.apache.karaf.shell.security.impl*,
                             org.apache.karaf.shell.inject.impl*,
+                            org.apache.karaf.util.jaas
                         </Private-Package>
                         <Main-Class>
                             org.apache.karaf.shell.console.impl.Main

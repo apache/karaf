@@ -18,6 +18,8 @@ package org.apache.karaf.util;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 public class StreamUtils {
     
@@ -27,13 +29,34 @@ public class StreamUtils {
     public static void close(Closeable... closeables) {
         for (Closeable c : closeables) {
             try {
-            	if (c != null) {
-            		c.close();
-            	}
+                if (c != null) {
+                    c.close();
+                }
             } catch (IOException e) {
                 // Ignore
             }
         }
+    }
+
+    public static void close(Iterable<Closeable> closeables) {
+        for (Closeable c : closeables) {
+            try {
+                if (c != null) {
+                    c.close();
+                }
+            } catch (IOException e) {
+                // Ignore
+            }
+        }
+    }
+
+    public static void copy(final InputStream input, final OutputStream output) throws IOException {
+        byte[] buffer = new byte[1024 * 16];
+        int n;
+        while ((n = input.read(buffer)) > 0) {
+            output.write(buffer, 0, n);
+        }
+        output.flush();
     }
 
 }

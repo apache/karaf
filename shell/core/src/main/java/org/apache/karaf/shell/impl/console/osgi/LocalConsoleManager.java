@@ -25,12 +25,12 @@ import javax.security.auth.Subject;
 
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
-import org.apache.karaf.jaas.modules.JaasHelper;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.api.console.SessionFactory;
 import org.apache.karaf.shell.impl.console.JLineTerminal;
 import org.apache.karaf.shell.impl.console.TerminalFactory;
 import org.apache.karaf.shell.support.ShellUtil;
+import org.apache.karaf.util.jaas.JaasHelper;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 

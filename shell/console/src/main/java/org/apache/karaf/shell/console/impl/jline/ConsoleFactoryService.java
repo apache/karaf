@@ -26,15 +26,14 @@ import java.util.List;
 import java.util.Properties;
 
 import jline.Terminal;
-
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Function;
 import org.apache.felix.service.threadio.ThreadIO;
-import org.apache.karaf.jaas.modules.JaasHelper;
 import org.apache.karaf.shell.console.Console;
 import org.apache.karaf.shell.console.factory.ConsoleFactory;
 import org.apache.karaf.shell.util.ShellUtil;
+import org.apache.karaf.util.jaas.JaasHelper;
 import org.osgi.framework.BundleContext;
 
 public class ConsoleFactoryService implements ConsoleFactory {

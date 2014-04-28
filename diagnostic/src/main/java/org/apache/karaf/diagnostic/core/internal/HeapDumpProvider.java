@@ -19,6 +19,7 @@ package org.apache.karaf.diagnostic.core.internal;
 import com.sun.management.HotSpotDiagnosticMXBean;
 import org.apache.karaf.diagnostic.core.DumpDestination;
 import org.apache.karaf.diagnostic.core.DumpProvider;
+import org.apache.karaf.util.StreamUtils;
 
 import javax.management.MBeanServer;
 import java.io.File;
@@ -33,8 +34,6 @@ public class HeapDumpProvider implements DumpProvider {
 
     @Override
     public void createDump(DumpDestination destination) throws Exception {
-        FileInputStream in = null;
-        OutputStream out = null;
         try {
             MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
             HotSpotDiagnosticMXBean diagnosticMXBean = ManagementFactory.newPlatformMXBeanProxy(mBeanServer,
@@ -42,11 +41,11 @@ public class HeapDumpProvider implements DumpProvider {
             diagnosticMXBean.dumpHeap("heapdump.txt", false);
             // copy the dump in the destination
             File heapDumpFile = new File("heapdump.txt");
-            in = new FileInputStream(heapDumpFile);
-            out = destination.add("heapdump.txt");
-            byte[] buffer = new byte[2048];
-            while ((in.read(buffer) != -1)) {
-                out.write(buffer);
+            try (
+                FileInputStream in = new FileInputStream(heapDumpFile);
+                OutputStream out = destination.add("heapdump.txt")
+            ) {
+                StreamUtils.copy(in, out);
             }
             // remove the original dump
             if (heapDumpFile.exists()) {
@@ -54,14 +53,6 @@ public class HeapDumpProvider implements DumpProvider {
             }
         } catch (Exception e) {
             // nothing to do
-        } finally {
-            if (in != null) {
-                in.close();
-            }
-            if (out != null) {
-                out.flush();
-                out.close();
-            }
         }
     }
 

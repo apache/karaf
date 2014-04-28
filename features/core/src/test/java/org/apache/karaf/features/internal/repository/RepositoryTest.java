@@ -27,10 +27,10 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.util.zip.GZIPOutputStream;
 
+import org.apache.karaf.util.StreamUtils;
 import org.junit.Test;
 import org.osgi.resource.Resource;
 
-import static org.apache.karaf.util.StreamUtils.close;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.osgi.framework.namespace.BundleNamespace.BUNDLE_NAMESPACE;
@@ -82,18 +82,13 @@ public class RepositoryTest {
 
     private URL gzip(URL url) throws IOException {
         File temp = File.createTempFile("repo", ".tmp");
-        OutputStream os = new GZIPOutputStream(new FileOutputStream(temp));
-        InputStream is = url.openStream();
-        copy(is, os);
-        close(is, os);
+        try (
+            OutputStream os = new GZIPOutputStream(new FileOutputStream(temp));
+            InputStream is = url.openStream()
+        ) {
+            StreamUtils.copy(is, os);
+        }
         return temp.toURI().toURL();
     }
 
-    private void copy(InputStream inputStream, OutputStream outputStream) throws IOException {
-        byte[] buffer = new byte[4096];
-        int n = 0;
-        while (-1 != (n = inputStream.read(buffer))) {
-            outputStream.write(buffer, 0, n);
-        }
-    }
 }

@@ -18,18 +18,26 @@
  */
 package org.apache.karaf.shell.ssh;
 
-import java.io.*;
+import java.io.CharArrayWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.io.Reader;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.Map;
 
 import javax.security.auth.Subject;
 
-import org.apache.karaf.jaas.modules.JaasHelper;
-import org.apache.karaf.util.StreamUtils;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.api.console.SessionFactory;
 import org.apache.karaf.shell.support.ShellUtil;
+import org.apache.karaf.util.StreamUtils;
+import org.apache.karaf.util.jaas.JaasHelper;
 import org.apache.sshd.server.Command;
 import org.apache.sshd.server.Environment;
 import org.apache.sshd.server.ExitCallback;

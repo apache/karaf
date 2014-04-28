@@ -19,9 +19,6 @@ package org.apache.karaf.service.guard.impl;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.security.AccessControlContext;
-import java.security.AccessController;
-import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Dictionary;
@@ -38,14 +35,12 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.regex.Pattern;
 
-import javax.security.auth.Subject;
-
 import org.apache.aries.proxy.InvocationListener;
 import org.apache.aries.proxy.ProxyManager;
 import org.apache.aries.proxy.UnableToProxyException;
-import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.service.guard.tools.ACLConfigurationParser;
 import org.apache.karaf.service.guard.tools.ACLConfigurationParser.Specificity;
+import org.apache.karaf.util.jaas.JaasHelper;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -372,34 +367,7 @@ public class GuardProxyCatalog implements ServiceListener {
         if (ROLE_WILDCARD.equals(reqRole)) {
             return true;
         }
-
-        String clazz;
-        String role;
-        int idx = reqRole.indexOf(':');
-        if (idx > 0) {
-            clazz = reqRole.substring(0, idx);
-            role = reqRole.substring(idx + 1);
-        } else {
-            clazz = RolePrincipal.class.getName();
-            role = reqRole;
-        }
-
-        AccessControlContext acc = AccessController.getContext();
-        if (acc == null) {
-            return false;
-        }
-
-        Subject subject = Subject.getSubject(acc);
-        if (subject == null) {
-            return false;
-        }
-
-        for (Principal p : subject.getPrincipals()) {
-            if (clazz.equals(p.getClass().getName()) && role.equals(p.getName())) {
-                return true;
-            }
-        }
-        return false;
+        return JaasHelper.currentUserHasRole(reqRole);
     }
 
     static class ServiceRegistrationHolder {

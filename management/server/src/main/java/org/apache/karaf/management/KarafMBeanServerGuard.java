@@ -16,9 +16,9 @@
  */
 package org.apache.karaf.management;
 
-import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.management.boot.KarafMBeanServerBuilder;
 import org.apache.karaf.service.guard.tools.ACLConfigurationParser;
+import org.apache.karaf.util.jaas.JaasHelper;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -171,7 +171,7 @@ public class KarafMBeanServerGuard implements InvocationHandler {
 
     private boolean canInvoke(ObjectName objectName, String methodName, String[] signature) throws IOException {
         for (String role : getRequiredRoles(objectName, methodName, signature)) {
-            if (currentUserHasRole(role))
+            if (JaasHelper.currentUserHasRole(role))
                 return true;
         }
 
@@ -222,7 +222,7 @@ public class KarafMBeanServerGuard implements InvocationHandler {
 
     void handleInvoke(ObjectName objectName, String operationName, Object[] params, String[] signature) throws IOException {
         for (String role : getRequiredRoles(objectName, operationName, params, signature)) {
-            if (currentUserHasRole(role))
+            if (JaasHelper.currentUserHasRole(role))
                 return;
         }
         throw new SecurityException("Insufficient roles/credentials for operation");
@@ -299,37 +299,6 @@ public class KarafMBeanServerGuard implements InvocationHandler {
         }
         res.add(JMX_ACL_PID_PREFIX); // this is the top PID (aka jmx.acl)
         return res;
-    }
-
-    static boolean currentUserHasRole(String requestedRole) {
-        String clazz;
-        String role;
-        int index = requestedRole.indexOf(':');
-        if (index > 0) {
-            clazz = requestedRole.substring(0, index);
-            role = requestedRole.substring(index + 1);
-        } else {
-            clazz = RolePrincipal.class.getName();
-            role = requestedRole;
-        }
-
-        AccessControlContext acc = AccessController.getContext();
-        if (acc == null) {
-            return false;
-        }
-        Subject subject = Subject.getSubject(acc);
-
-        if (subject == null) {
-            return false;
-        }
-
-        for (Principal p : subject.getPrincipals()) {
-            if (clazz.equals(p.getClass().getName()) && role.equals(p.getName())) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
 }

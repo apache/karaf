@@ -16,8 +16,6 @@
  */
 package org.apache.karaf.bundle.core.internal;
 
-import static java.lang.String.format;
-
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,7 +30,7 @@ import org.apache.karaf.bundle.core.BundleInfo;
 import org.apache.karaf.bundle.core.BundleService;
 import org.apache.karaf.bundle.core.BundleState;
 import org.apache.karaf.bundle.core.BundleStateService;
-import org.apache.karaf.jaas.modules.JaasHelper;
+import org.apache.karaf.util.jaas.JaasHelper;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -46,6 +44,8 @@ import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.framework.wiring.FrameworkWiring;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static java.lang.String.format;
 
 public class BundleServiceImpl implements BundleService {
 

@@ -83,6 +83,10 @@
             <artifactId>wagon-http-lightweight</artifactId>
             <version>2.6</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.apache.karaf.util</artifactId>
+        </dependency>
 
 
         <dependency>

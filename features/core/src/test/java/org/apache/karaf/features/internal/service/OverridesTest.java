@@ -148,24 +148,6 @@ public class OverridesTest {
         assertNotNull("Missing range on admin.core override", karafAdminCore.getAttribute(Overrides.OVERRIDE_RANGE));
     }
 
-    /**
-     * Copies the content of {@link java.io.InputStream} to {@link java.io.OutputStream}.
-     *
-     * @param input
-     * @param output
-     * @throws java.io.IOException
-     */
-    private void copy(final InputStream input, final OutputStream output) throws IOException {
-        byte[] buffer = new byte[1024 * 16];
-        int n;
-        while (-1 != (n = input.read(buffer))) {
-            output.write(buffer, 0, n);
-            output.flush();
-        }
-        input.close();
-        output.close();
-    }
-
     static Builder resource(String uri) {
         return new Builder(uri);
     }

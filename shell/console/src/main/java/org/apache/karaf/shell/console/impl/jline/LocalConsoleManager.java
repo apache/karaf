@@ -24,14 +24,13 @@ import java.security.PrivilegedAction;
 import javax.security.auth.Subject;
 
 import jline.Terminal;
-
 import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
-import org.apache.karaf.jaas.modules.JaasHelper;
 import org.apache.karaf.shell.console.Console;
 import org.apache.karaf.shell.console.factory.ConsoleFactory;
 import org.apache.karaf.shell.util.ShellUtil;
+import org.apache.karaf.util.jaas.JaasHelper;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 

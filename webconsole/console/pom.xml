@@ -52,6 +52,11 @@
           <artifactId>org.osgi.compendium</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.apache.karaf.util</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.webconsole</artifactId>
             <scope>provided</scope>
@@ -129,7 +134,8 @@
                         </Export-Package>
                         <Private-Package>
                             !org.apache.felix.webconsole,
-                            org.apache.felix.webconsole.*;-split-package:=merge-first
+                            org.apache.felix.webconsole.*;-split-package:=merge-first,
+                            org.apache.karaf.util.jaas
                         </Private-Package>
                         <Import-Package>
                             org.osgi.service.metatype;resolution:=optional,

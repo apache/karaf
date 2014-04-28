@@ -27,6 +27,7 @@ import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 
 import org.apache.karaf.util.DeployerUtils;
+import org.apache.karaf.util.StreamUtils;
 import org.osgi.framework.Constants;
 
 /**
@@ -61,11 +62,10 @@ public class FeatureTransformer {
         out.closeEntry();
         e = new ZipEntry("META-INF/" + FeatureDeploymentListener.FEATURE_PATH + "/" + name);
         out.putNextEntry(e);
-        InputStream fis = url.openStream();
-        try {
-            copyInputStream(fis, out);
-        } finally {
-            fis.close();
+        try (
+            InputStream fis = url.openStream()
+        ) {
+            StreamUtils.copy(fis, out);
         }
         out.closeEntry();
         out.close();
@@ -92,15 +92,6 @@ public class FeatureTransformer {
                     + version + "/" + artifactId + "-" + version + qualifier + type;
         }
         return url.getPath();
-    }
-
-    private static void copyInputStream(InputStream in, OutputStream out) throws IOException {
-        byte[] buffer = new byte[8192];
-        int len = in.read(buffer);
-        while (len >= 0) {
-            out.write(buffer, 0, len);
-            len = in.read(buffer);
-        }
     }
 
 }

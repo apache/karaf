@@ -31,6 +31,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.karaf.util.StreamUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
@@ -356,36 +357,19 @@ public abstract class MojoSupport extends AbstractMojo {
         }
     }
 
-    protected void silentClose(Closeable closeable) {
-        if (closeable != null) {
-            try {
-                closeable.close();
-            } catch (IOException e) {
-                // Ignore
-            }
-        }
-    }
-    
     protected void copy(File sourceFile, File destFile) {
         File targetDir = destFile.getParentFile();
         ensureDirExists(targetDir);
 
-        FileInputStream is = null;
-        BufferedOutputStream bos = null;
         try {
-            is = new FileInputStream(sourceFile);
-            bos = new BufferedOutputStream(new FileOutputStream(destFile));
-            int count = 0;
-            byte[] buffer = new byte[8192];
-            while ((count = is.read(buffer)) > 0) {
-                bos.write(buffer, 0, count);
+            try (
+                FileInputStream is = new FileInputStream(sourceFile);
+                FileOutputStream bos = new FileOutputStream(destFile)
+            ) {
+                StreamUtils.copy(is, bos);
             }
-            bos.close();
         } catch (IOException e) {
             throw new RuntimeException(e.getMessage(), e);
-        } finally {
-            silentClose(is);
-            silentClose(bos);
         }
     }
     

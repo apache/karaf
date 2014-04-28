@@ -145,6 +145,7 @@
                         <Private-Package>
                             org.apache.karaf.service.guard.tools,
                             org.apache.karaf.shell.impl.*,
+                            org.apache.karaf.util.jaas,
                             org.apache.karaf.util.tracker,
                             org.apache.felix.utils.properties,
                             org.apache.felix.utils.extender,
@@ -164,9 +165,6 @@
                         <Main-Class>
                             org.apache.karaf.shell.impl.console.standalone.Main
                         </Main-Class>
-                        <Embed-Dependency>
-                            org.apache.karaf.jaas.modules;inline="org/apache/karaf/jaas/modules/JaasHelper*.class"
-                        </Embed-Dependency>
                     </instructions>
                     <unpackBundle>true</unpackBundle>
                 </configuration>

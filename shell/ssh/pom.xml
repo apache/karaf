@@ -112,6 +112,7 @@
                         </Import-Package>
                         <Private-Package>
                             org.apache.karaf.util,
+                            org.apache.karaf.util.jaas,
                             org.apache.karaf.util.tracker
                         </Private-Package>
                         <Bundle-Activator>org.apache.karaf.shell.ssh.Activator</Bundle-Activator>

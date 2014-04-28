@@ -182,12 +182,4 @@ public class BlueprintTransformer {
         return url.getPath();
     }
 
-    protected static void copyInputStream(InputStream in, OutputStream out) throws Exception {
-        byte[] buffer = new byte[4096];
-        int len = in.read(buffer);
-        while (len >= 0) {
-            out.write(buffer, 0, len);
-            len = in.read(buffer);
-        }
-    }
 }

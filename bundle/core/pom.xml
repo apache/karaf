@@ -126,6 +126,7 @@
                             org.apache.karaf.bundle.command*,
                             org.apache.karaf.bundle.core.internal,
                             org.apache.karaf.bundle.core.internal.osgi,
+                            org.apache.karaf.util.jaas,
                             org.apache.karaf.util.maven,
                             org.apache.karaf.util.tracker,
                             org.apache.felix.utils.version,

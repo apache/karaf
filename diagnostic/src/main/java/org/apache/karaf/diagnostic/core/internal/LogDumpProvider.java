@@ -25,6 +25,7 @@ import java.util.Enumeration;
 
 import org.apache.karaf.diagnostic.core.DumpDestination;
 import org.apache.karaf.diagnostic.core.DumpProvider;
+import org.apache.karaf.util.StreamUtils;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
@@ -68,7 +69,7 @@ public class LogDumpProvider implements DumpProvider {
                     if (file.exists()) {
                         FileInputStream inputStream = new FileInputStream(file);
                         OutputStream outputStream = destination.add("log/" + file.getName());
-                        copy(inputStream, outputStream);
+                        StreamUtils.copy(inputStream, outputStream);
                     }
                 }
             }
@@ -76,22 +77,6 @@ public class LogDumpProvider implements DumpProvider {
             throw e;
         } finally {
             bundleContext.ungetService(ref);
-        }
-    }
-
-    /**
-     * Rewrites data from input stream to output stream. This code is very common
-     * but we would avoid additional dependencies in diagnostic stuff.
-     *
-     * @param inputStream  Source stream.
-     * @param outputStream Destination stream.
-     * @throws IOException When IO operation fails.
-     */
-    private void copy(InputStream inputStream, OutputStream outputStream) throws IOException {
-        byte[] buffer = new byte[4096];
-        int n = 0;
-        while (-1 != (n = inputStream.read(buffer))) {
-            outputStream.write(buffer, 0, n);
         }
     }
 

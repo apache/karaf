@@ -12,7 +12,7 @@
  *  limitations under the License.
  *  under the License.
  */
-package org.apache.karaf.jaas.modules;
+package org.apache.karaf.util.jaas;
 
 import java.security.AccessControlContext;
 import java.security.AccessController;
@@ -22,6 +22,7 @@ import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.security.ProtectionDomain;
+
 import javax.security.auth.Subject;
 import javax.security.auth.SubjectDomainCombiner;
 

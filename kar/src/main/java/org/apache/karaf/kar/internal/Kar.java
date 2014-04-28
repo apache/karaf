@@ -30,6 +30,7 @@ import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 
+import org.apache.karaf.util.StreamUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -151,7 +152,7 @@ public class Kar {
         } else {
             dest.getParentFile().mkdirs();
             FileOutputStream out = new FileOutputStream(dest);
-            copyStream(is, out);
+            StreamUtils.copy(is, out);
             out.close();
         }
         return dest;
@@ -165,17 +166,6 @@ public class Kar {
                 LOGGER.warn("Error closing stream", e);
             }
         }
-    }
-
-    static long copyStream(InputStream input, OutputStream output) throws IOException {
-        byte[] buffer = new byte[10000];
-        long count = 0;
-        int n = 0;
-        while (-1 != (n = input.read(buffer))) {
-            output.write(buffer, 0, n);
-            count += n;
-        }
-        return count;
     }
 
     public String getKarName() {

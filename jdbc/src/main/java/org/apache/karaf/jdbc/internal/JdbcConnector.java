@@ -42,7 +42,7 @@ public class JdbcConnector implements Closeable {
     public JdbcConnector(BundleContext bundleContext, String datasourceName) {
         this.bundleContext = bundleContext;
         this.datasourceName = datasourceName;
-        this.resources = new LinkedList<Closeable>();
+        this.resources = new LinkedList<>();
     }
     
     public Connection connect() throws SQLException {
@@ -137,7 +137,7 @@ public class JdbcConnector implements Closeable {
 
     @Override
     public void close() {
-        StreamUtils.close(resources.toArray(new Closeable[]{}));
+        StreamUtils.close(resources);
         if (reference != null) {
             bundleContext.ungetService(reference);
         }

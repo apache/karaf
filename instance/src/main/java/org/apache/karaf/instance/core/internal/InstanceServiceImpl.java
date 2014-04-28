@@ -22,6 +22,7 @@ import org.apache.karaf.instance.core.InstanceSettings;
 import org.apache.karaf.jpm.Process;
 import org.apache.karaf.jpm.impl.ProcessBuilderFactoryImpl;
 import org.apache.karaf.jpm.impl.ScriptUtils;
+import org.apache.karaf.util.StreamUtils;
 import org.apache.karaf.util.locks.FileLockUtils;
 import org.fusesource.jansi.Ansi;
 import org.slf4j.Logger;
@@ -1057,15 +1058,12 @@ public class InstanceServiceImpl implements InstanceService {
                     copy(new File(source, child), new File(destination, child));
             }
         } else {
-            InputStream in = new FileInputStream(source);
-            OutputStream out = new FileOutputStream(destination);
-            byte[] buffer = new byte[1024];
-            int length;
-            while ((length = in.read(buffer)) > 0) {
-                out.write(buffer, 0, length);
+            try(
+                InputStream in = new FileInputStream(source);
+                OutputStream out = new FileOutputStream(destination)
+            ) {
+                StreamUtils.copy(in, out);
             }
-            in.close();
-            out.close();
         }
     }
 

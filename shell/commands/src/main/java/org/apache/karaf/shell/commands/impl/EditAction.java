@@ -99,7 +99,7 @@ public class EditAction implements Action {
                 }
 
                 fos = new FileOutputStream(f);
-                copy(is, fos);
+                StreamUtils.copy(is, fos);
             } catch (Exception ex) {
                 System.out.println("Failed to copy resource from url:" + sourceUrl + " to tmp file: " + path + "  for editing.");
             } finally {
@@ -128,7 +128,7 @@ public class EditAction implements Action {
         if (!isLocal) {
             FileInputStream fis = new FileInputStream(path);
             try {
-                copy(fis, os);
+                StreamUtils.copy(fis, os);
             } finally {
                 StreamUtils.close(fis);
             }
@@ -166,22 +166,6 @@ public class EditAction implements Action {
                     return terminal.getHeight();
                 }
             };
-        }
-    }
-
-    /**
-     * Copies the content of {@link InputStream} to {@link OutputStream}.
-     *
-     * @param input
-     * @param output
-     * @throws IOException
-     */
-    private void copy(final InputStream input, final OutputStream output) throws IOException {
-        byte[] buffer = new byte[1024 * 16];
-        int n = 0;
-        while (-1 != (n = input.read(buffer))) {
-            output.write(buffer, 0, n);
-            output.flush();
         }
     }
 

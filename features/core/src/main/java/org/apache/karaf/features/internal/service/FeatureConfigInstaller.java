@@ -28,6 +28,7 @@ import java.util.Hashtable;
 
 import org.apache.karaf.features.ConfigFileInfo;
 import org.apache.karaf.features.Feature;
+import org.apache.karaf.util.StreamUtils;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
@@ -140,12 +141,7 @@ public class FeatureConfigInstaller {
             try (
                 FileOutputStream fop = new FileOutputStream(file)
             ) {
-                int bytesRead;
-                byte[] buffer = new byte[1024];
-
-                while ((bytesRead = is.read(buffer)) != -1) {
-                    fop.write(buffer, 0, bytesRead);
-                }
+                StreamUtils.copy(is, fop);
             }
         } catch (RuntimeException | MalformedURLException e) {
             LOGGER.error(e.getMessage());
