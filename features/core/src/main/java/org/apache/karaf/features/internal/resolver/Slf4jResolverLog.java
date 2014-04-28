@@ -32,18 +32,18 @@ public class Slf4jResolverLog extends org.apache.felix.resolver.Logger {
     @Override
     protected void doLog(int level, String msg, Throwable throwable) {
         switch (level) {
-            case LOG_ERROR:
-                logger.error(msg, throwable);
-                break;
-            case LOG_WARNING:
-                logger.warn(msg, throwable);
-                break;
-            case LOG_INFO:
-                logger.info(msg, throwable);
-                break;
-            case LOG_DEBUG:
-                logger.debug(msg, throwable);
-                break;
+        case LOG_ERROR:
+            logger.error(msg, throwable);
+            break;
+        case LOG_WARNING:
+            logger.warn(msg, throwable);
+            break;
+        case LOG_INFO:
+            logger.info(msg, throwable);
+            break;
+        default:
+            logger.debug(msg, throwable);
+            break;
         }
     }
 }

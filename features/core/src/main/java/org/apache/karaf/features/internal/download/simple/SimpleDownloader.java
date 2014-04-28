@@ -35,7 +35,7 @@ import org.apache.karaf.features.internal.download.Downloader;
 import org.apache.karaf.features.internal.download.StreamProvider;
 import org.apache.karaf.features.internal.util.MultiException;
 
- import static java.util.jar.JarFile.MANIFEST_NAME;
+import static java.util.jar.JarFile.MANIFEST_NAME;
 
 public class SimpleDownloader implements DownloadManager, Downloader {
 
@@ -102,7 +102,7 @@ public class SimpleDownloader implements DownloadManager, Downloader {
 
         protected Map<String, String> doGetMetadata() throws IOException {
             try (
-                InputStream is = open()
+                    InputStream is = open()
             ) {
                 ZipInputStream zis = new ZipInputStream(is);
                 ZipEntry entry;

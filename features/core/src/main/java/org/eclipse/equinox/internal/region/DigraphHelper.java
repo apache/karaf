@@ -43,7 +43,7 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.hooks.bundle.CollisionHook;
 
-public class DigraphHelper {
+public final class DigraphHelper {
 
     private static final String DIGRAPH_FILE = "digraph.json";
 
@@ -52,6 +52,9 @@ public class DigraphHelper {
     private static final String TAIL = "tail";
     private static final String HEAD = "head";
     private static final String POLICY = "policy";
+
+    private DigraphHelper() {
+    }
 
     public static StandardRegionDigraph loadDigraph(BundleContext bundleContext) throws BundleException, IOException, InvalidSyntaxException {
         StandardRegionDigraph digraph;
@@ -65,7 +68,7 @@ public class DigraphHelper {
             }
         } else {
             try (
-                InputStream in = new FileInputStream(digraphFile)
+                    InputStream in = new FileInputStream(digraphFile)
             ) {
                 digraph = readDigraph(new DataInputStream(in), bundleContext, threadLocal);
             }
@@ -76,7 +79,7 @@ public class DigraphHelper {
     public static void saveDigraph(BundleContext bundleContext, RegionDigraph digraph) throws IOException {
         File digraphFile = bundleContext.getDataFile(DIGRAPH_FILE);
         try (
-            FileOutputStream out = new FileOutputStream(digraphFile)
+                FileOutputStream out = new FileOutputStream(digraphFile)
         ) {
             saveDigraph(digraph, out);
         } catch (Exception e) {
@@ -107,7 +110,7 @@ public class DigraphHelper {
             String head = (String) e.get(HEAD);
             Map<String, Collection<String>> policy = (Map<String, Collection<String>>) e.get(POLICY);
             RegionFilterBuilder builder = digraph.createRegionFilterBuilder();
-            for (Map.Entry<String,Collection<String>> rf : policy.entrySet()) {
+            for (Map.Entry<String, Collection<String>> rf : policy.entrySet()) {
                 String ns = rf.getKey();
                 for (String f : rf.getValue()) {
                     builder.allow(ns, f);

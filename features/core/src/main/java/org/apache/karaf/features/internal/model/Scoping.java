@@ -26,10 +26,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "scoping", propOrder = {
-        "imports",
-        "exports"
-})
+@XmlType(name = "scoping", propOrder = {"imports", "exports"})
 public class Scoping implements org.apache.karaf.features.Scoping {
 
     @XmlAttribute
@@ -41,14 +38,14 @@ public class Scoping implements org.apache.karaf.features.Scoping {
 
     public List<ScopeFilter> getImport() {
         if (imports == null) {
-            imports = new ArrayList<ScopeFilter>();
+            imports = new ArrayList<>();
         }
         return imports;
     }
 
     public List<ScopeFilter> getExport() {
         if (exports == null) {
-            exports = new ArrayList<ScopeFilter>();
+            exports = new ArrayList<>();
         }
         return exports;
     }

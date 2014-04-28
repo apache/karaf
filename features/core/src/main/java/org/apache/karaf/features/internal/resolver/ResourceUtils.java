@@ -32,11 +32,14 @@ import static org.osgi.framework.namespace.IdentityNamespace.IDENTITY_NAMESPACE;
 import static org.osgi.service.repository.ContentNamespace.CAPABILITY_URL_ATTRIBUTE;
 import static org.osgi.service.repository.ContentNamespace.CONTENT_NAMESPACE;
 
-public class ResourceUtils {
+public final class ResourceUtils {
 
     public static final String TYPE_SUBSYSTEM = "karaf.subsystem";
 
     public static final String TYPE_FEATURE = "karaf.feature";
+
+    private ResourceUtils() {
+    }
 
     public static String getUri(Resource resource) {
         List<Capability> caps = resource.getCapabilities(null);

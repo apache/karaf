@@ -25,7 +25,10 @@ import java.util.Map;
 
 /**
  */
-public class JsonWriter {
+public final class JsonWriter {
+
+    private JsonWriter() {
+    }
 
     public static void write(OutputStream stream, Object value) throws IOException {
         Writer writer = new OutputStreamWriter(stream);
@@ -72,29 +75,29 @@ public class JsonWriter {
         for (int i = 0; i < value.length(); i++) {
             char c = value.charAt(i);
             switch (c) {
-                case '\"':
-                case '\\':
-                case '\b':
-                case '\f':
-                case '\n':
-                case '\r':
-                case '\t':
+            case '\"':
+            case '\\':
+            case '\b':
+            case '\f':
+            case '\n':
+            case '\r':
+            case '\t':
+                writer.append('\\');
+                writer.append(c);
+                break;
+            default:
+                if (c < ' ' || (c >= '\u0080' && c < '\u00a0') || (c >= '\u2000' && c < '\u2100')) {
+                    String s = Integer.toHexString(c);
                     writer.append('\\');
-                    writer.append(c);
-                    break;
-                default:
-                    if (c < ' ' || (c >= '\u0080' && c < '\u00a0') || (c >= '\u2000' && c < '\u2100')) {
-                        String s = Integer.toHexString(c);
-                        writer.append('\\');
-                        writer.append('u');
-                        for (int j = s.length(); j < 4; j++) {
-                            writer.append('0');
-                        }
-                        writer.append(s);
-                    } else {
-                        writer.append(c);
+                    writer.append('u');
+                    for (int j = s.length(); j < 4; j++) {
+                        writer.append('0');
                     }
-                    break;
+                    writer.append(s);
+                } else {
+                    writer.append(c);
+                }
+                break;
             }
         }
         writer.append('"');

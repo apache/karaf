@@ -25,7 +25,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class MapUtils {
+public final class MapUtils {
+
+    private MapUtils() {
+    }
 
     public interface Function<T, U> {
         U apply(T t);
@@ -151,7 +154,7 @@ public class MapUtils {
             return (S) r;
         } else if (obj instanceof Map) {
             Map r = new HashMap();
-            for (Map.Entry<?,?> e : ((Map<?,?>) obj).entrySet()) {
+            for (Map.Entry<?, ?> e : ((Map<?, ?>) obj).entrySet()) {
                 r.put(copy(e.getKey()), copy(e.getValue()));
             }
             return (S) r;
@@ -165,7 +168,7 @@ public class MapUtils {
                 ((Collection) s2).add(copy(o));
             }
         } else if (s1 instanceof Map) {
-            for (Map.Entry<?,?> e : ((Map<?,?>) s1).entrySet()) {
+            for (Map.Entry<?, ?> e : ((Map<?, ?>) s1).entrySet()) {
                 ((Map) s2).put(copy(e.getKey()), copy(e.getValue()));
             }
         } else {

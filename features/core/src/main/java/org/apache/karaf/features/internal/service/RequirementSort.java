@@ -29,7 +29,10 @@ import org.osgi.resource.Capability;
 import org.osgi.resource.Requirement;
 import org.osgi.resource.Resource;
 
-public class RequirementSort<T extends Resource>  {
+public final class RequirementSort<T extends Resource> {
+
+    private RequirementSort() {
+    }
 
     /**
      * Sorts {@link Resource} based on their {@link Requirement}s and {@link Capability}s.

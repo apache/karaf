@@ -40,22 +40,25 @@ import static org.apache.felix.resolver.Util.getVersion;
 /**
  * Helper class to deal with overriden bundles at feature installation time.
  */
-public class Overrides {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(Overrides.class);
+public final class Overrides {
 
     protected static final String OVERRIDE_RANGE = "range";
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(Overrides.class);
+
+    private Overrides() {
+    }
+
     /**
      * Compute a list of bundles to install, taking into account overrides.
-     *
+     * <p/>
      * The file containing the overrides will be loaded from the given url.
      * Blank lines and lines starting with a '#' will be ignored, all other lines
      * are considered as urls to override bundles.
-     *
+     * <p/>
      * The list of resources to resolve will be scanned and for each bundle,
      * if a bundle override matches that resource, it will be used instead.
-     *
+     * <p/>
      * Matching is done on bundle symbolic name (they have to be the same)
      * and version (the bundle override version needs to be greater than the
      * resource to be resolved, and less than the next minor version.  A range
@@ -69,7 +72,7 @@ public class Overrides {
         // Do override replacement
         for (Clause override : Parser.parseClauses(overrides.toArray(new String[overrides.size()]))) {
             String url = override.getName();
-            String vr  = override.getAttribute(OVERRIDE_RANGE);
+            String vr = override.getAttribute(OVERRIDE_RANGE);
             T over = resources.get(url);
             if (over == null) {
                 // Ignore invalid overrides
@@ -102,7 +105,7 @@ public class Overrides {
         try {
             if (overridesUrl != null) {
                 try (
-                    InputStream is = new URL(overridesUrl).openStream()
+                        InputStream is = new URL(overridesUrl).openStream()
                 ) {
                     BufferedReader reader = new BufferedReader(new InputStreamReader(is));
                     String line;
@@ -121,7 +124,7 @@ public class Overrides {
     }
 
     public static String extractUrl(String override) {
-        Clause[] cs = Parser.parseClauses(new String[] { override });
+        Clause[] cs = Parser.parseClauses(new String[]{override});
         if (cs.length != 1) {
             throw new IllegalStateException("Override contains more than one clause: " + override);
         }

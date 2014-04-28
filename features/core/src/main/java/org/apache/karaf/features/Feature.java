@@ -24,7 +24,7 @@ import java.util.Map;
  */
 public interface Feature {
 
-    public static String DEFAULT_INSTALL_MODE = "auto";
+    String DEFAULT_INSTALL_MODE = "auto";
 
     String getId();
 
@@ -51,7 +51,7 @@ public interface Feature {
     List<ConfigFileInfo> getConfigurationFiles();
 
     List<? extends Conditional> getConditional();
-    
+
     int getStartLevel();
 
     List<? extends Capability> getCapabilities();

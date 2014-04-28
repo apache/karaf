@@ -21,10 +21,10 @@ package org.apache.karaf.features;
  */
 public interface BundleInfo {
 
-	String getLocation();
-	
+    String getLocation();
+
     int getStartLevel();
-    
+
     boolean isStart();
 
     boolean isDependency();

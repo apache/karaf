@@ -17,8 +17,8 @@
 package org.apache.karaf.features.management.codec;
 
 import javax.management.openmbean.CompositeData;
-import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.CompositeDataSupport;
+import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
@@ -38,9 +38,14 @@ public class JmxRepositoryEvent {
             Object[] itemValues = new Object[itemNames.length];
             itemValues[0] = event.getRepository().getURI().toString();
             switch (event.getType()) {
-                case RepositoryAdded:   itemValues[1] = FeaturesServiceMBean.REPOSITORY_EVENT_EVENT_TYPE_ADDED; break;
-                case RepositoryRemoved: itemValues[1] = FeaturesServiceMBean.REPOSITORY_EVENT_EVENT_TYPE_REMOVED; break;
-                default: throw new IllegalStateException("Unsupported event type: " + event.getType());
+            case RepositoryAdded:
+                itemValues[1] = FeaturesServiceMBean.REPOSITORY_EVENT_EVENT_TYPE_ADDED;
+                break;
+            case RepositoryRemoved:
+                itemValues[1] = FeaturesServiceMBean.REPOSITORY_EVENT_EVENT_TYPE_REMOVED;
+                break;
+            default:
+                throw new IllegalStateException("Unsupported event type: " + event.getType());
             }
             data = new CompositeDataSupport(REPOSITORY_EVENT, itemNames, itemValues);
         } catch (OpenDataException e) {

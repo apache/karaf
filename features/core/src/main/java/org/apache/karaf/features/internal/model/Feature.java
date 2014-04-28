@@ -1,22 +1,19 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-
 package org.apache.karaf.features.internal.model;
 
 import java.util.ArrayList;
@@ -33,14 +30,13 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * 
  * Definition of the Feature.
- *             
- * 
+ * <p/>
+ * <p/>
  * <p>Java class for feature complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="feature">
  *   &lt;complexContent>
@@ -63,24 +59,23 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "feature", propOrder = {
-    "details",
-    "config",
-    "configfile",
-    "feature",
-    "bundle",
-    "conditional",
-    "capability",
-    "requirement",
-    "scoping"
-})
+        "details",
+        "config",
+        "configfile",
+        "feature",
+        "bundle",
+        "conditional",
+        "capability",
+        "requirement",
+        "scoping"
+        })
 public class Feature extends Content implements org.apache.karaf.features.Feature {
-    public static String SPLIT_FOR_NAME_AND_VERSION = "/";
-    public static String DEFAULT_VERSION = "0.0.0";
+
+    public static final String SPLIT_FOR_NAME_AND_VERSION = "/";
+    public static final String DEFAULT_VERSION = "0.0.0";
 
 
     protected String details;
@@ -115,14 +110,14 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
 
 
     public static org.apache.karaf.features.Feature valueOf(String str) {
-    	if (str.contains(SPLIT_FOR_NAME_AND_VERSION)) {
-    		String strName = str.substring(0, str.indexOf(SPLIT_FOR_NAME_AND_VERSION));
-        	String strVersion = str.substring(str.indexOf(SPLIT_FOR_NAME_AND_VERSION)
-        			+ SPLIT_FOR_NAME_AND_VERSION.length(), str.length());
-        	return new Feature(strName, strVersion);
-    	} else {
-    		return new Feature(str);
-    	}
+        if (str.contains(SPLIT_FOR_NAME_AND_VERSION)) {
+            String strName = str.substring(0, str.indexOf(SPLIT_FOR_NAME_AND_VERSION));
+            String strVersion = str.substring(str.indexOf(SPLIT_FOR_NAME_AND_VERSION)
+                    + SPLIT_FOR_NAME_AND_VERSION.length(), str.length());
+            return new Feature(strName, strVersion);
+        } else {
+            return new Feature(str);
+        }
 
 
     }
@@ -134,11 +129,9 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
 
     /**
      * Gets the value of the name property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getName() {
         return name;
@@ -146,11 +139,9 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
 
     /**
      * Sets the value of the name property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setName(String value) {
         this.name = value;
@@ -158,11 +149,9 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
 
     /**
      * Gets the value of the version property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getVersion() {
         if (version == null) {
@@ -174,11 +163,9 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
 
     /**
      * Sets the value of the version property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setVersion(String value) {
         this.version = value;
@@ -194,11 +181,9 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
 
     /**
      * Gets the value of the description property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getDescription() {
         return description;
@@ -206,11 +191,9 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
 
     /**
      * Sets the value of the description property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setDescription(String value) {
         this.description = value;
@@ -226,11 +209,9 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
 
     /**
      * Gets the value of the resolver property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getResolver() {
         return resolver;
@@ -246,35 +227,29 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
 
     /**
      * Sets the value of the resolver property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setResolver(String value) {
         this.resolver = value;
     }
-    
+
     /**
      * Gets the value of the startLevel property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Integer }
-     *     
+     *
+     * @return possible object is
+     * {@link Integer }
      */
     public int getStartLevel() {
-        return startLevel == null? 0: startLevel;
+        return startLevel == null ? 0 : startLevel;
     }
 
     /**
      * Sets the value of the startLevel property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Integer }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link Integer }
      */
     public void setStartLevel(Integer value) {
         this.startLevel = value;
@@ -302,21 +277,21 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
      */
     public List<Conditional> getConditional() {
         if (conditional == null) {
-            conditional = new ArrayList<Conditional>();
+            conditional = new ArrayList<>();
         }
         return this.conditional;
     }
 
     public List<Capability> getCapabilities() {
         if (capability == null) {
-            capability = new ArrayList<Capability>();
+            capability = new ArrayList<>();
         }
         return this.capability;
     }
 
     public List<Requirement> getRequirements() {
         if (requirement == null) {
-            requirement = new ArrayList<Requirement>();
+            requirement = new ArrayList<>();
         }
         return this.requirement;
     }
@@ -330,19 +305,24 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
     }
 
     public String toString() {
-    	return getId();
+        return getId();
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         Feature feature = (Feature) o;
-
-        if (name != null ? !name.equals(feature.name) : feature.name != null) return false;
-        if (version != null ? !version.equals(feature.version) : feature.version != null) return false;
-
+        if (name != null ? !name.equals(feature.name) : feature.name != null) {
+            return false;
+        }
+        if (version != null ? !version.equals(feature.version) : feature.version != null) {
+            return false;
+        }
         return true;
     }
 
@@ -354,7 +334,7 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
     }
 
     @SuppressWarnings("rawtypes")
-	protected void interpolation(Properties properties) {
+    protected void interpolation(Properties properties) {
         for (Enumeration e = properties.propertyNames(); e.hasMoreElements();) {
             String key = (String) e.nextElement();
             String val = properties.getProperty(key);

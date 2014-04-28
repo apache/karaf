@@ -1,20 +1,18 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.apache.karaf.features.internal.model;
 
@@ -32,7 +30,6 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.namespace.QName;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
@@ -53,16 +50,21 @@ import org.xml.sax.XMLFilter;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLFilterImpl;
 
-public class JaxbUtil {
+public final class JaxbUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JaxbUtil.class);
     private static final JAXBContext FEATURES_CONTEXT;
+    private static final Map<String, Schema> SCHEMAS = new ConcurrentHashMap<>();
+
     static {
         try {
             FEATURES_CONTEXT = JAXBContext.newInstance(Features.class);
         } catch (JAXBException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private JaxbUtil() {
     }
 
     public static void marshal(Features features, OutputStream out) throws JAXBException {
@@ -139,20 +141,24 @@ public class JaxbUtil {
         }
     }
 
-    private static Map<String, Schema> schemas = new ConcurrentHashMap<String, Schema>();
     private static Schema getSchema(String namespace) throws SAXException {
-        Schema schema = schemas.get(namespace);
+        Schema schema = SCHEMAS.get(namespace);
         if (schema == null) {
             String schemaLocation;
-            if (FeaturesNamespaces.URI_1_0_0.equals(namespace)) {
+            switch (namespace) {
+            case FeaturesNamespaces.URI_1_0_0:
                 schemaLocation = "/org/apache/karaf/features/karaf-features-1.0.0.xsd";
-            } else if (FeaturesNamespaces.URI_1_1_0.equals(namespace)) {
+                break;
+            case FeaturesNamespaces.URI_1_1_0:
                 schemaLocation = "/org/apache/karaf/features/karaf-features-1.1.0.xsd";
-            } else if (FeaturesNamespaces.URI_1_2_0.equals(namespace)) {
+                break;
+            case FeaturesNamespaces.URI_1_2_0:
                 schemaLocation = "/org/apache/karaf/features/karaf-features-1.2.0.xsd";
-            } else if (FeaturesNamespaces.URI_1_3_0.equals(namespace)) {
+                break;
+            case FeaturesNamespaces.URI_1_3_0:
                 schemaLocation = "/org/apache/karaf/features/karaf-features-1.3.0.xsd";
-            } else {
+                break;
+            default:
                 throw new IllegalArgumentException("Unsupported namespace: " + namespace);
             }
 
@@ -163,7 +169,7 @@ public class JaxbUtil {
                 throw new IllegalStateException("Could not find resource: " + schemaLocation);
             }
             schema = factory.newSchema(new StreamSource(url.toExternalForm()));
-            schemas.put(namespace, schema);
+            SCHEMAS.put(namespace, schema);
         }
         return schema;
     }
@@ -206,7 +212,7 @@ public class JaxbUtil {
      * Converts all elements to the features namespace to make old feature files
      * compatible to the new format
      */
-    public static class NoSourceAndNamespaceFilter extends XMLFilterImpl {        
+    public static class NoSourceAndNamespaceFilter extends XMLFilterImpl {
         private static final InputSource EMPTY_INPUT_SOURCE = new InputSource(new ByteArrayInputStream(new byte[0]));
 
         public NoSourceAndNamespaceFilter(XMLReader xmlReader) {
@@ -228,6 +234,5 @@ public class JaxbUtil {
             super.endElement(FeaturesNamespaces.URI_CURRENT, localName, qName);
         }
     }
-
 
 }

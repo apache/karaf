@@ -16,21 +16,21 @@
  */
 package org.apache.karaf.features.management.codec;
 
-import java.util.Collection;
-import java.util.Arrays;
 import java.net.URI;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
-import javax.management.openmbean.TabularData;
-import javax.management.openmbean.CompositeType;
-import javax.management.openmbean.TabularType;
-import javax.management.openmbean.OpenType;
-import javax.management.openmbean.SimpleType;
-import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.ArrayType;
 import javax.management.openmbean.CompositeData;
-import javax.management.openmbean.TabularDataSupport;
 import javax.management.openmbean.CompositeDataSupport;
+import javax.management.openmbean.CompositeType;
+import javax.management.openmbean.OpenDataException;
+import javax.management.openmbean.OpenType;
+import javax.management.openmbean.SimpleType;
+import javax.management.openmbean.TabularData;
+import javax.management.openmbean.TabularDataSupport;
+import javax.management.openmbean.TabularType;
 
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.Repository;
@@ -38,9 +38,9 @@ import org.apache.karaf.features.management.FeaturesServiceMBean;
 
 public class JmxRepository {
 
-    public final static CompositeType REPOSITORY;
+    public static final CompositeType REPOSITORY;
 
-    public final static TabularType REPOSITORY_TABLE;
+    public static final TabularType REPOSITORY_TABLE;
 
     private final CompositeData data;
 
@@ -84,8 +84,8 @@ public class JmxRepository {
     static TabularData getFeatureIdentifierTable(List<Feature> features) throws OpenDataException {
         TabularDataSupport table = new TabularDataSupport(JmxFeature.FEATURE_IDENTIFIER_TABLE);
         for (Feature feature : features) {
-            String[] itemNames = new String[] { FeaturesServiceMBean.FEATURE_NAME, FeaturesServiceMBean.FEATURE_VERSION };
-            Object[] itemValues = new Object[] { feature.getName(), feature.getVersion() };
+            String[] itemNames = new String[]{FeaturesServiceMBean.FEATURE_NAME, FeaturesServiceMBean.FEATURE_VERSION};
+            Object[] itemValues = new Object[]{feature.getName(), feature.getVersion()};
             CompositeData ident = new CompositeDataSupport(JmxFeature.FEATURE_IDENTIFIER, itemNames, itemValues);
             table.put(ident);
         }
@@ -105,7 +105,7 @@ public class JmxRepository {
             String[] itemDescriptions = new String[itemNames.length];
             itemTypes[0] = SimpleType.STRING;
             itemTypes[1] = SimpleType.STRING;
-            itemTypes[2] = new ArrayType(1, SimpleType.STRING);
+            itemTypes[2] = new ArrayType<String>(1, SimpleType.STRING);
             itemTypes[3] = JmxFeature.FEATURE_IDENTIFIER_TABLE;
 
             itemDescriptions[0] = "The name of the repository";
@@ -123,7 +123,7 @@ public class JmxRepository {
     private static TabularType createRepositoryTableType() {
         try {
             return new TabularType("Features", "The table of repositories",
-                    REPOSITORY, new String[] { FeaturesServiceMBean.REPOSITORY_URI });
+                    REPOSITORY, new String[]{FeaturesServiceMBean.REPOSITORY_URI});
         } catch (OpenDataException e) {
             throw new IllegalStateException("Unable to build repository table type", e);
         }

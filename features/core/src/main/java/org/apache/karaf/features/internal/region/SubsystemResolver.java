@@ -105,7 +105,8 @@ public class SubsystemResolver {
                 ss = getOrCreateChild(ss, parts[i]);
             }
             for (String feature : entry.getValue()) {
-                String name, range;
+                String name;
+                String range;
                 int idx = feature.indexOf('/');
                 if (idx >= 0) {
                     name = feature.substring(0, idx);
@@ -257,7 +258,7 @@ public class SubsystemResolver {
     public Map<Resource, String> getFeatures() {
         if (features == null) {
             SimpleFilter sf = createFilter(IDENTITY_NAMESPACE, "*",
-                                           CAPABILITY_TYPE_ATTRIBUTE, TYPE_FEATURE);
+                    CAPABILITY_TYPE_ATTRIBUTE, TYPE_FEATURE);
             features = getResourceMapping(sf);
         }
         return features;
@@ -268,7 +269,7 @@ public class SubsystemResolver {
         Map<Resource, List<Wire>> wiring = getWiring();
         Map<Resource, String> resources = new HashMap<>();
         SimpleFilter sf = createFilter(IDENTITY_NAMESPACE, "*",
-                                       CAPABILITY_TYPE_ATTRIBUTE, TYPE_SUBSYSTEM);
+                CAPABILITY_TYPE_ATTRIBUTE, TYPE_SUBSYSTEM);
         for (Resource resource : wiring.keySet()) {
             if (findMatchingCapability(resourceFilter, resource.getCapabilities(null)) != null) {
                 // Find the subsystem where this feature is installed
@@ -351,7 +352,7 @@ public class SubsystemResolver {
     private SimpleFilter createFilter(String... s) {
         Map<String, Object> attrs = new HashMap<>();
         for (int i = 0; i < s.length - 1; i += 2) {
-            attrs.put(s[i], s[i+1]);
+            attrs.put(s[i], s[i + 1]);
         }
         return SimpleFilter.convert(attrs);
 
@@ -391,9 +392,11 @@ public class SubsystemResolver {
 
     private RegionFilterBuilder createRegionFilterBuilder(RegionDigraph digraph, Map<String, Set<String>> sharingPolicy) throws InvalidSyntaxException {
         RegionFilterBuilder result = digraph.createRegionFilterBuilder();
-        for (Map.Entry<String, Set<String>> entry : sharingPolicy.entrySet())
-            for (String filter : entry.getValue())
+        for (Map.Entry<String, Set<String>> entry : sharingPolicy.entrySet()) {
+            for (String filter : entry.getValue()) {
                 result.allow(entry.getKey(), filter);
+            }
+        }
         return result;
     }
 

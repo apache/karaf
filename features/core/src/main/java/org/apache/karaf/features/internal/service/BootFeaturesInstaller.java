@@ -24,7 +24,6 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -37,9 +36,9 @@ import org.slf4j.LoggerFactory;
 
 public class BootFeaturesInstaller {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(BootFeaturesInstaller.class);
+    public static final String VERSION_PREFIX = "version=";
 
-    public static String VERSION_PREFIX = "version=";
+    private static final Logger LOGGER = LoggerFactory.getLogger(BootFeaturesInstaller.class);
 
     private final FeaturesServiceImpl featuresService;
     private final BundleContext bundleContext;
@@ -48,7 +47,6 @@ public class BootFeaturesInstaller {
     private final boolean asynchronous;
 
     /**
-     *
      * @param features list of boot features separated by comma. Optionally contains ;version=x.x.x to specify a specific feature version
      */
     public BootFeaturesInstaller(BundleContext bundleContext,
@@ -118,7 +116,6 @@ public class BootFeaturesInstaller {
     }
 
     /**
-     *
      * @param featureSt either feature name or <featurename>;version=<version>
      * @return feature matching the feature string
      * @throws Exception
@@ -163,7 +160,8 @@ public class BootFeaturesInstaller {
 
     private void publishBootFinished() {
         if (bundleContext != null) {
-            BootFinished bootFinished = new BootFinished() {};
+            BootFinished bootFinished = new BootFinished() {
+            };
             bundleContext.registerService(BootFinished.class, bootFinished, new Hashtable<String, String>());
         }
     }

@@ -17,12 +17,13 @@
 package org.apache.karaf.features.internal.model;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
+
 import org.apache.karaf.features.Feature;
 
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -32,7 +33,7 @@ import org.apache.karaf.features.Feature;
         "configfile",
         "feature",
         "bundle"
-})
+        })
 public class Conditional extends Content implements org.apache.karaf.features.Conditional {
 
     @XmlElement(name = "condition")
@@ -40,7 +41,7 @@ public class Conditional extends Content implements org.apache.karaf.features.Co
 
     public List<String> getCondition() {
         if (condition == null) {
-            this.condition = new ArrayList<String>();
+            this.condition = new ArrayList<>();
         }
         return condition;
     }

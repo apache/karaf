@@ -27,7 +27,9 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import javax.xml.bind.annotation.XmlTransient;
+
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.ConfigFileInfo;
 
@@ -88,7 +90,7 @@ public class Content {
      */
     public List<ConfigFile> getConfigfile() {
         if (configfile == null) {
-            configfile = new ArrayList<ConfigFile>();
+            configfile = new ArrayList<>();
         }
         return this.configfile;
     }
@@ -115,7 +117,7 @@ public class Content {
      */
     public List<Dependency> getFeature() {
         if (feature == null) {
-            feature = new ArrayList<Dependency>();
+            feature = new ArrayList<>();
         }
         return this.feature;
     }
@@ -142,7 +144,7 @@ public class Content {
      */
     public List<Bundle> getBundle() {
         if (bundle == null) {
-            bundle = new ArrayList<Bundle>();
+            bundle = new ArrayList<>();
         }
         return this.bundle;
     }
@@ -181,8 +183,8 @@ public class Content {
     }
 
     @SuppressWarnings("rawtypes")
-	protected void interpolation(Properties properties) {
-        for (Enumeration e = properties.propertyNames(); e.hasMoreElements(); ) {
+    protected void interpolation(Properties properties) {
+        for (Enumeration e = properties.propertyNames(); e.hasMoreElements();) {
             String key = (String) e.nextElement();
             String val = properties.getProperty(key);
             Matcher matcher = Pattern.compile("\\$\\{([^}]+)\\}").matcher(val);

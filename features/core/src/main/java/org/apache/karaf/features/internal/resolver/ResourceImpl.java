@@ -31,38 +31,33 @@ import org.osgi.resource.Resource;
  */
 public class ResourceImpl implements Resource {
 
-    private final List<Capability> m_caps;
-    private final List<Requirement> m_reqs;
+    private final List<Capability> caps;
+    private final List<Requirement> reqs;
 
     /**
      * CAUTION: This constructor does not ensure that the resource
      * has the required identity capability
      */
     public ResourceImpl() {
-        m_caps = new ArrayList<Capability>();
-        m_reqs = new ArrayList<Requirement>();
+        caps = new ArrayList<>();
+        reqs = new ArrayList<>();
     }
 
-    public ResourceImpl(String name, Version version) {
-        this(name, IdentityNamespace.TYPE_BUNDLE, version);
-    }
-
-    public ResourceImpl(String name, String type, Version version)
-    {
-        m_caps = new ArrayList<Capability>();
-        Map<String, String> dirs = new HashMap<String, String>();
-        Map<String, Object> attrs = new HashMap<String, Object>();
+    public ResourceImpl(String name, String type, Version version) {
+        caps = new ArrayList<>();
+        Map<String, String> dirs = new HashMap<>();
+        Map<String, Object> attrs = new HashMap<>();
         attrs.put(IdentityNamespace.IDENTITY_NAMESPACE, name);
         attrs.put(IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE, type);
         attrs.put(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE, version);
         CapabilityImpl identity = new CapabilityImpl(this, IdentityNamespace.IDENTITY_NAMESPACE, dirs, attrs);
-        m_caps.add(identity);
-        m_reqs = new ArrayList<Requirement>();
+        caps.add(identity);
+        reqs = new ArrayList<>();
     }
 
     public void addCapability(Capability capability) {
         assert capability.getResource() == this;
-        m_caps.add(capability);
+        caps.add(capability);
     }
 
     public void addCapabilities(Iterable<? extends Capability> capabilities) {
@@ -73,7 +68,7 @@ public class ResourceImpl implements Resource {
 
     public void addRequirement(Requirement requirement) {
         assert requirement.getResource() == this;
-        m_reqs.add(requirement);
+        reqs.add(requirement);
     }
 
     public void addRequirements(Iterable<? extends Requirement> requirements) {
@@ -82,16 +77,12 @@ public class ResourceImpl implements Resource {
         }
     }
 
-    public List<Capability> getCapabilities(String namespace)
-    {
-        List<Capability> result = m_caps;
-        if (namespace != null)
-        {
-            result = new ArrayList<Capability>();
-            for (Capability cap : m_caps)
-            {
-                if (cap.getNamespace().equals(namespace))
-                {
+    public List<Capability> getCapabilities(String namespace) {
+        List<Capability> result = caps;
+        if (namespace != null) {
+            result = new ArrayList<>();
+            for (Capability cap : caps) {
+                if (cap.getNamespace().equals(namespace)) {
                     result.add(cap);
                 }
             }
@@ -99,16 +90,12 @@ public class ResourceImpl implements Resource {
         return result;
     }
 
-    public List<Requirement> getRequirements(String namespace)
-    {
-        List<Requirement> result = m_reqs;
-        if (namespace != null)
-        {
-            result = new ArrayList<Requirement>();
-            for (Requirement req : m_reqs)
-            {
-                if (req.getNamespace().equals(namespace))
-                {
+    public List<Requirement> getRequirements(String namespace) {
+        List<Requirement> result = reqs;
+        if (namespace != null) {
+            result = new ArrayList<>();
+            for (Requirement req : reqs) {
+                if (req.getNamespace().equals(namespace)) {
                     result.add(req);
                 }
             }
@@ -117,8 +104,7 @@ public class ResourceImpl implements Resource {
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         Capability cap = getCapabilities(IdentityNamespace.IDENTITY_NAMESPACE).get(0);
         return cap.getAttributes().get(IdentityNamespace.IDENTITY_NAMESPACE) + "/"
                 + cap.getAttributes().get(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE);

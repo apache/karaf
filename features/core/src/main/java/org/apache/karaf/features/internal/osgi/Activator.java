@@ -33,17 +33,17 @@ import org.apache.felix.resolver.ResolverImpl;
 import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.features.FeaturesListener;
 import org.apache.karaf.features.FeaturesService;
+import org.apache.karaf.features.internal.management.FeaturesServiceMBeanImpl;
 import org.apache.karaf.features.internal.repository.AggregateRepository;
 import org.apache.karaf.features.internal.repository.JsonRepository;
 import org.apache.karaf.features.internal.repository.XmlRepository;
 import org.apache.karaf.features.internal.resolver.Slf4jResolverLog;
+import org.apache.karaf.features.internal.service.BootFeaturesInstaller;
 import org.apache.karaf.features.internal.service.EventAdminListener;
 import org.apache.karaf.features.internal.service.FeatureConfigInstaller;
 import org.apache.karaf.features.internal.service.FeatureFinder;
-import org.apache.karaf.features.internal.service.BootFeaturesInstaller;
 import org.apache.karaf.features.internal.service.FeaturesServiceImpl;
 import org.apache.karaf.features.internal.service.StateStorage;
-import org.apache.karaf.features.internal.management.FeaturesServiceMBeanImpl;
 import org.apache.karaf.util.tracker.BaseActivator;
 import org.eclipse.equinox.internal.region.DigraphHelper;
 import org.eclipse.equinox.internal.region.StandardRegionDigraph;
@@ -146,9 +146,15 @@ public class Activator extends BaseActivator {
         }
         Repository globalRepository;
         switch (repositories.size()) {
-            case 0: globalRepository = null; break;
-            case 1: globalRepository = repositories.get(0); break;
-            default: globalRepository = new AggregateRepository(repositories); break;
+        case 0:
+            globalRepository = null;
+            break;
+        case 1:
+            globalRepository = repositories.get(0);
+            break;
+        default:
+            globalRepository = new AggregateRepository(repositories);
+            break;
         }
 
         FeatureConfigInstaller configInstaller = new FeatureConfigInstaller(configurationAdmin);
@@ -180,37 +186,41 @@ public class Activator extends BaseActivator {
             eventAdminListener = null;
         }
         featuresService = new FeaturesServiceImpl(
-                                bundleContext.getBundle(),
-                                bundleContext.getBundle(0).getBundleContext(),
-                                stateStorage,
-                                featureFinder,
-                                eventAdminListener,
-                                configInstaller,
-                                digraph,
-                                overrides,
-                                featureResolutionRange,
-                                bundleUpdateRange,
-                                updateSnapshots,
-                                globalRepository);
+                bundleContext.getBundle(),
+                bundleContext.getBundle(0).getBundleContext(),
+                stateStorage,
+                featureFinder,
+                eventAdminListener,
+                configInstaller,
+                digraph,
+                overrides,
+                featureResolutionRange,
+                bundleUpdateRange,
+                updateSnapshots,
+                globalRepository);
         register(FeaturesService.class, featuresService);
 
         featuresListenerTracker = new ServiceTracker<>(
-                bundleContext, FeaturesListener.class, new ServiceTrackerCustomizer<FeaturesListener, FeaturesListener>() {
-            @Override
-            public FeaturesListener addingService(ServiceReference<FeaturesListener> reference) {
-                FeaturesListener service = bundleContext.getService(reference);
-                featuresService.registerListener(service);
-                return service;
-            }
-            @Override
-            public void modifiedService(ServiceReference<FeaturesListener> reference, FeaturesListener service) {
-            }
-            @Override
-            public void removedService(ServiceReference<FeaturesListener> reference, FeaturesListener service) {
-                featuresService.unregisterListener(service);
-                bundleContext.ungetService(reference);
-            }
-        }
+                bundleContext,
+                FeaturesListener.class,
+                new ServiceTrackerCustomizer<FeaturesListener, FeaturesListener>() {
+                    @Override
+                    public FeaturesListener addingService(ServiceReference<FeaturesListener> reference) {
+                        FeaturesListener service = bundleContext.getService(reference);
+                        featuresService.registerListener(service);
+                        return service;
+                    }
+
+                    @Override
+                    public void modifiedService(ServiceReference<FeaturesListener> reference, FeaturesListener service) {
+                    }
+
+                    @Override
+                    public void removedService(ServiceReference<FeaturesListener> reference, FeaturesListener service) {
+                        featuresService.unregisterListener(service);
+                        bundleContext.ungetService(reference);
+                    }
+                }
         );
         featuresListenerTracker.open();
 

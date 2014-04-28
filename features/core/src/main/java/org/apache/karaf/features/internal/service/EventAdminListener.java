@@ -53,14 +53,14 @@ public class EventAdminListener implements FeaturesListener {
         props.put(EventConstants.FEATURE_VERSION, event.getFeature().getVersion());
         String topic;
         switch (event.getType()) {
-            case FeatureInstalled:
-                topic = EventConstants.TOPIC_FEATURES_INSTALLED;
-                break;
-            case FeatureUninstalled:
-                topic = EventConstants.TOPIC_FEATURES_UNINSTALLED;
-                break;
-            default:
-                throw new IllegalStateException("Unknown features event type: " + event.getType());
+        case FeatureInstalled:
+            topic = EventConstants.TOPIC_FEATURES_INSTALLED;
+            break;
+        case FeatureUninstalled:
+            topic = EventConstants.TOPIC_FEATURES_UNINSTALLED;
+            break;
+        default:
+            throw new IllegalStateException("Unknown features event type: " + event.getType());
         }
         eventAdmin.postEvent(new Event(topic, props));
     }
@@ -77,14 +77,14 @@ public class EventAdminListener implements FeaturesListener {
         props.put(EventConstants.REPOSITORY_URI, event.getRepository().getURI().toString());
         String topic;
         switch (event.getType()) {
-            case RepositoryAdded:
-                topic = EventConstants.TOPIC_REPOSITORY_ADDED;
-                break;
-            case RepositoryRemoved:
-                topic = EventConstants.TOPIC_REPOSITORY_REMOVED;
-                break;
-            default:
-                throw new IllegalStateException("Unknown repository event type: " + event.getType());
+        case RepositoryAdded:
+            topic = EventConstants.TOPIC_REPOSITORY_ADDED;
+            break;
+        case RepositoryRemoved:
+            topic = EventConstants.TOPIC_REPOSITORY_REMOVED;
+            break;
+        default:
+            throw new IllegalStateException("Unknown repository event type: " + event.getType());
         }
         eventAdmin.postEvent(new Event(topic, props));
     }

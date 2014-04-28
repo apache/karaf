@@ -102,11 +102,11 @@ public class JsonRepository extends BaseRepository {
 
     @SuppressWarnings("unchecked")
     private Map<String, Map<String, String>> verify(Object value) {
-        Map<?,?> obj = Map.class.cast(value);
-        for (Map.Entry<?,?> entry : obj.entrySet()) {
+        Map<?, ?> obj = Map.class.cast(value);
+        for (Map.Entry<?, ?> entry : obj.entrySet()) {
             String.class.cast(entry.getKey());
-            Map<?,?> child = Map.class.cast(entry.getValue());
-            for (Map.Entry<?,?> ce : child.entrySet()) {
+            Map<?, ?> child = Map.class.cast(entry.getValue());
+            for (Map.Entry<?, ?> ce : child.entrySet()) {
                 String.class.cast(ce.getKey());
                 String.class.cast(ce.getValue());
             }

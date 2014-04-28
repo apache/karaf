@@ -24,10 +24,11 @@ import java.util.List;
 @SuppressWarnings("serial")
 public class MultiException extends Exception {
 
-    private List<Exception> exceptions = new ArrayList<Exception>();
+    private final List<Exception> exceptions;
 
     public MultiException(String message) {
         super(message);
+        this.exceptions = new ArrayList<>();
     }
 
     public MultiException(String message, List<Exception> exceptions) {
@@ -44,14 +45,13 @@ public class MultiException extends Exception {
             throw this;
         }
     }
-    
+
     public Throwable[] getCauses() {
         return exceptions.toArray(new Throwable[exceptions.size()]);
     }
 
     @Override
-    public void printStackTrace()
-    {
+    public void printStackTrace() {
         super.printStackTrace();
         for (Exception e : exceptions) {
             e.printStackTrace();
@@ -60,12 +60,12 @@ public class MultiException extends Exception {
 
 
     /* ------------------------------------------------------------------------------- */
+
     /**
      * @see Throwable#printStackTrace(java.io.PrintStream)
      */
     @Override
-    public void printStackTrace(PrintStream out)
-    {
+    public void printStackTrace(PrintStream out) {
         super.printStackTrace(out);
         for (Exception e : exceptions) {
             e.printStackTrace(out);
@@ -73,8 +73,7 @@ public class MultiException extends Exception {
     }
 
     @Override
-    public void printStackTrace(PrintWriter out)
-    {
+    public void printStackTrace(PrintWriter out) {
         super.printStackTrace(out);
         for (Exception e : exceptions) {
             e.printStackTrace(out);

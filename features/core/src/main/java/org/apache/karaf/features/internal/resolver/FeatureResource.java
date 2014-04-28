@@ -33,10 +33,15 @@ import static org.apache.karaf.features.internal.resolver.ResourceUtils.TYPE_FEA
 import static org.apache.karaf.features.internal.resolver.ResourceUtils.addIdentityRequirement;
 
 /**
-*/
-public class FeatureResource extends ResourceImpl {
+ */
+public final class FeatureResource extends ResourceImpl {
 
     private final Feature feature;
+
+    private FeatureResource(Feature feature) {
+        super(feature.getName(), TYPE_FEATURE, VersionTable.getVersion(feature.getVersion()));
+        this.feature = feature;
+    }
 
     public static FeatureResource build(Feature feature, Conditional conditional, String featureRange, Map<String, ? extends Resource> locToRes) throws BundleException {
         Feature fcond = conditional.asFeature(feature.getName(), feature.getVersion());
@@ -95,11 +100,6 @@ public class FeatureResource extends ResourceImpl {
             version = Macro.transform(featureRange, version);
         }
         addIdentityRequirement(resource, name, TYPE_FEATURE, version);
-    }
-
-    public FeatureResource(Feature feature) {
-        super(feature.getName(), TYPE_FEATURE, VersionTable.getVersion(feature.getVersion()));
-        this.feature = feature;
     }
 
     public Feature getFeature() {

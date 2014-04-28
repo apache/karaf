@@ -31,5 +31,5 @@ public interface Repository {
     URI[] getRepositories() throws Exception;
 
     Feature[] getFeatures() throws Exception;
-    
+
 }

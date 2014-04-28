@@ -17,11 +17,11 @@
 package org.apache.karaf.features;
 
 public interface ConfigFileInfo {
-	
-	String getLocation();
-	
-	String getFinalname();
-	
-	boolean isOverride();
+
+    String getLocation();
+
+    String getFinalname();
+
+    boolean isOverride();
 
 }

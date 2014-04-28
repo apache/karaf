@@ -22,6 +22,6 @@ public interface DownloadManager {
 
     Downloader createDownloader();
 
-    Map<String,StreamProvider> getProviders();
+    Map<String, StreamProvider> getProviders();
 
 }

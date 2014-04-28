@@ -158,9 +158,9 @@ public class FeaturesServiceImpl implements FeaturesService {
     /**
      * Use CRC to check snapshot bundles and update them if changed.
      * Either:
-     *   - none : never update snapshots
-     *   - always : always update snapshots
-     *   - crc : use CRC to detect changes
+     * - none : never update snapshots
+     * - always : always update snapshots
+     * - crc : use CRC to detect changes
      */
     private final String updateSnaphots;
 
@@ -169,7 +169,7 @@ public class FeaturesServiceImpl implements FeaturesService {
      */
     private final org.osgi.service.repository.Repository globalRepository;
 
-    private final List<FeaturesListener> listeners = new CopyOnWriteArrayIdentityList<FeaturesListener>();
+    private final List<FeaturesListener> listeners = new CopyOnWriteArrayIdentityList<>();
 
     // Synchronized on lock
     private final Object lock = new Object();
@@ -216,8 +216,8 @@ public class FeaturesServiceImpl implements FeaturesService {
             return;
         }
         Map<String, Object> request;
-        try(
-            FileInputStream fis = new FileInputStream(resolveFile)
+        try (
+                FileInputStream fis = new FileInputStream(resolveFile)
         ) {
             request = (Map<String, Object>) JsonReader.read(fis);
         } catch (IOException e) {
@@ -247,7 +247,7 @@ public class FeaturesServiceImpl implements FeaturesService {
         }
         request.put("features", requestedFeatures);
         request.put("options", opts);
-        try(
+        try (
                 FileOutputStream fos = new FileOutputStream(resolveFile);
         ) {
             JsonWriter.write(fos, request);
@@ -511,9 +511,9 @@ public class FeaturesServiceImpl implements FeaturesService {
             Feature feature = version.isEmpty() ? null : versions.get(version);
             if (feature == null) {
                 // Compute version range. If an version has been given, assume exact range
-                VersionRange versionRange = version.isEmpty() ?
-                        new VersionRange(Version.emptyVersion) :
-                        new VersionRange(version, true, true);
+                VersionRange versionRange = version.isEmpty()
+                        ? new VersionRange(Version.emptyVersion)
+                        : new VersionRange(version, true, true);
                 Version latest = Version.emptyVersion;
                 for (String available : versions.keySet()) {
                     Version availableVersion = VersionTable.getVersion(available);
@@ -585,8 +585,8 @@ public class FeaturesServiceImpl implements FeaturesService {
             }
         }
         synchronized (lock) {
-            if (uris.size() == state.repositories.size() &&
-                    state.repositories.containsAll(uris)) {
+            if (uris.size() == state.repositories.size()
+                    && state.repositories.containsAll(uris)) {
                 featureCache = map;
             }
         }
@@ -753,7 +753,7 @@ public class FeaturesServiceImpl implements FeaturesService {
         Set<String> fl = required.get(region);
         if (fl == null) {
             fl = new HashSet<>();
-            required.put(region,fl);
+            required.put(region, fl);
         }
         fl.addAll(featuresToAdd);
         doInstallFeaturesInThread(required, state, options);
@@ -859,9 +859,9 @@ public class FeaturesServiceImpl implements FeaturesService {
         } catch (ExecutionException e) {
             Throwable t = e.getCause();
             if (t instanceof RuntimeException) {
-                throw ((RuntimeException) t);
+                throw (RuntimeException) t;
             } else if (t instanceof Error) {
-                throw ((Error) t);
+                throw (Error) t;
             } else if (t instanceof Exception) {
                 throw (Exception) t;
             } else {
@@ -878,7 +878,7 @@ public class FeaturesServiceImpl implements FeaturesService {
         Map<String, Set<Long>> bundlesPerRegion;
         Map<String, Map<String, Map<String, Set<String>>>> filtersPerRegion;
     }
-    
+
     protected DeploymentState getDeploymentState() throws Exception {
         DeploymentState state = new DeploymentState();
         // Bundles
@@ -921,9 +921,9 @@ public class FeaturesServiceImpl implements FeaturesService {
     }
 
     public void doInstallFeatures(Map<String, Set<String>> requestedFeatures,  // all request features
-                                  State                    state,              // current state
-                                  EnumSet<Option>          options             // installation options
-                    ) throws Exception {
+                                  State state,              // current state
+                                  EnumSet<Option> options             // installation options
+    ) throws Exception {
 
         boolean noRefreshUnmanaged = options.contains(Option.NoAutoRefreshUnmanagedBundles);
         boolean noRefreshManaged = options.contains(Option.NoAutoRefreshManagedBundles);
@@ -934,11 +934,11 @@ public class FeaturesServiceImpl implements FeaturesService {
         boolean noManageBundles = options.contains(Option.NoAutoManageBundles);
 
         DeploymentState dstate = getDeploymentState();
-        
+
         Map<String, Set<Long>> managedBundles = copy(state.managedBundles);
 
         Map<String, Set<Bundle>> unmanagedBundles = apply(diff(dstate.bundlesPerRegion, state.managedBundles),
-                                                          map(dstate.bundles));
+                map(dstate.bundles));
 
         // Resolve
         // TODO: requirements
@@ -1117,9 +1117,9 @@ public class FeaturesServiceImpl implements FeaturesService {
                     dstate.bundles.values(),
                     Collections.<Resource, Bundle>emptyMap(),
                     Collections.<Resource, List<Wire>>emptyMap());
-            bundle.stop(Bundle.STOP_TRANSIENT);
+            bundle.stop(STOP_TRANSIENT);
             try (
-                InputStream is = getBundleInputStream(resource, providers)
+                    InputStream is = getBundleInputStream(resource, providers)
             ) {
                 bundle.update(is);
             }
@@ -1193,7 +1193,7 @@ public class FeaturesServiceImpl implements FeaturesService {
         //
         boolean hasToDelete = false;
         for (RegionDeployment regionDeployment : deployment.regions.values()) {
-            if ((hasToDelete = !regionDeployment.toDelete.isEmpty())) {
+            if (hasToDelete = !regionDeployment.toDelete.isEmpty()) {
                 break;
             }
         }
@@ -1289,7 +1289,7 @@ public class FeaturesServiceImpl implements FeaturesService {
         //
         boolean hasToUpdate = false;
         for (RegionDeployment regionDeployment : deployment.regions.values()) {
-            if ((hasToUpdate = !regionDeployment.toUpdate.isEmpty())) {
+            if (hasToUpdate = !regionDeployment.toUpdate.isEmpty()) {
                 break;
             }
         }
@@ -1302,7 +1302,7 @@ public class FeaturesServiceImpl implements FeaturesService {
                     String uri = getUri(resource);
                     print("  " + uri, verbose);
                     try (
-                        InputStream is = getBundleInputStream(resource, providers)
+                            InputStream is = getBundleInputStream(resource, providers)
                     ) {
                         bundle.update(is);
                     }
@@ -1323,7 +1323,7 @@ public class FeaturesServiceImpl implements FeaturesService {
         //
         boolean hasToInstall = false;
         for (RegionDeployment regionDeployment : deployment.regions.values()) {
-            if ((hasToInstall = !regionDeployment.toInstall.isEmpty())) {
+            if (hasToInstall = !regionDeployment.toInstall.isEmpty()) {
                 break;
             }
         }
@@ -1339,7 +1339,7 @@ public class FeaturesServiceImpl implements FeaturesService {
                     Bundle bundle;
                     long crc;
                     try (
-                        ChecksumUtils.CRCInputStream is = new ChecksumUtils.CRCInputStream (getBundleInputStream(resource, providers))
+                            ChecksumUtils.CRCInputStream is = new ChecksumUtils.CRCInputStream(getBundleInputStream(resource, providers))
                     ) {
                         if (ROOT_REGION.equals(name)) {
                             bundle = region.installBundleAtLocation(uri, is);
@@ -1362,16 +1362,14 @@ public class FeaturesServiceImpl implements FeaturesService {
                     toResolve.add(bundle);
                     if (resourceLinkedToOldFeatures.contains(resource)) {
                         toStart.add(bundle);
-                    } else if (!noStart) {
-                        if (bi == null || bi.isStart()) {
-                            toStart.add(bundle);
-                        }
+                    } else if (!noStart && (bi == null || bi.isStart())) {
+                        toStart.add(bundle);
                     }
                 }
             }
         }
 
-       //
+        //
         // Update and save state
         //
         synchronized (lock) {
@@ -1568,9 +1566,9 @@ public class FeaturesServiceImpl implements FeaturesService {
     }
 
     protected Deployment computeDeployment(
-                                DeploymentState dstate,
-                                SubsystemResolver resolver,
-                                State state) throws IOException {
+            DeploymentState dstate,
+            SubsystemResolver resolver,
+            State state) throws IOException {
 
         Deployment result = new Deployment();
 
@@ -1594,7 +1592,7 @@ public class FeaturesServiceImpl implements FeaturesService {
             // Compute the list of resources to deploy in the region
             Set<Resource> bundlesInRegion = bundlesPerRegions.get(region);
             List<Resource> toDeploy = bundlesInRegion != null
-                            ? new ArrayList<>(bundlesInRegion) : new ArrayList<Resource>();
+                    ? new ArrayList<>(bundlesInRegion) : new ArrayList<Resource>();
 
             // First pass: go through all installed bundles and mark them
             // as either to ignore or delete
@@ -1606,11 +1604,10 @@ public class FeaturesServiceImpl implements FeaturesService {
                     // Look for a matching resource
                     Resource resource = null;
                     for (Resource res : toDeploy) {
-                        if (bundle.getSymbolicName().equals(getSymbolicName(res))) {
-                            if (bundle.getVersion().equals(getVersion(res))) {
-                                resource = res;
-                                break;
-                            }
+                        if (bundle.getSymbolicName().equals(getSymbolicName(res))
+                                && bundle.getVersion().equals(getVersion(res))) {
+                            resource = res;
+                            break;
                         }
                     }
                     // We found a matching bundle
@@ -1625,10 +1622,10 @@ public class FeaturesServiceImpl implements FeaturesService {
                             } else if (UPDATE_SNAPSHOTS_CRC.equalsIgnoreCase(updateSnaphots)) {
                                 // if the checksum are different
                                 try (
-                                    InputStream is = getBundleInputStream(resource, resolver.getProviders())
+                                        InputStream is = getBundleInputStream(resource, resolver.getProviders())
                                 ) {
                                     long newCrc = ChecksumUtils.checksum(is);
-                                    long oldCrc = state.bundleChecksums.containsKey(bundle.getBundleId()) ? state.bundleChecksums.get(bundle.getBundleId()) : 0l;
+                                    long oldCrc = state.bundleChecksums.containsKey(bundle.getBundleId()) ? state.bundleChecksums.get(bundle.getBundleId()) : 0L;
                                     if (newCrc != oldCrc) {
                                         LOGGER.debug("New snapshot available for " + bundle.getLocation());
                                         deployment.toUpdate.put(bundle, resource);
@@ -1700,8 +1697,8 @@ public class FeaturesServiceImpl implements FeaturesService {
 
     protected boolean isUpdateable(Resource resource) {
         String uri = getUri(resource);
-        return getVersion(resource).getQualifier().endsWith(SNAPSHOT) 
-                || uri.contains(SNAPSHOT) 
+        return getVersion(resource).getQualifier().endsWith(SNAPSHOT)
+                || uri.contains(SNAPSHOT)
                 || !uri.contains(MAVEN);
     }
 

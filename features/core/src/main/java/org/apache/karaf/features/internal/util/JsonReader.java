@@ -27,15 +27,7 @@ import java.util.Map;
 
 /**
  */
-public class JsonReader {
-
-    public static Object read(Reader reader) throws IOException {
-        return new JsonReader(reader).parse();
-    }
-
-    public static Object read(InputStream is) throws IOException {
-        return new JsonReader(new InputStreamReader(is)).parse();
-    }
+public final class JsonReader {
 
     //
     // Implementation
@@ -45,14 +37,22 @@ public class JsonReader {
     private final StringBuilder recorder;
     private int current;
     private int line = 1;
-    private int column = 0;
+    private int column;
 
-    JsonReader(Reader reader) {
+    private JsonReader(Reader reader) {
         this.reader = reader;
         recorder = new StringBuilder();
     }
 
-    public Object parse() throws IOException {
+    public static Object read(Reader reader) throws IOException {
+        return new JsonReader(reader).parse();
+    }
+
+    public static Object read(InputStream is) throws IOException {
+        return new JsonReader(new InputStreamReader(is)).parse();
+    }
+
+    private Object parse() throws IOException {
         read();
         skipWhiteSpace();
         Object result = readValue();
@@ -65,38 +65,38 @@ public class JsonReader {
 
     private Object readValue() throws IOException {
         switch (current) {
-            case 'n':
-                return readNull();
-            case 't':
-                return readTrue();
-            case 'f':
-                return readFalse();
-            case '"':
-                return readString();
-            case '[':
-                return readArray();
-            case '{':
-                return readObject();
-            case '-':
-            case '0':
-            case '1':
-            case '2':
-            case '3':
-            case '4':
-            case '5':
-            case '6':
-            case '7':
-            case '8':
-            case '9':
-                return readNumber();
-            default:
-                throw expected("value");
+        case 'n':
+            return readNull();
+        case 't':
+            return readTrue();
+        case 'f':
+            return readFalse();
+        case '"':
+            return readString();
+        case '[':
+            return readArray();
+        case '{':
+            return readObject();
+        case '-':
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+            return readNumber();
+        default:
+            throw expected("value");
         }
     }
 
     private Collection<?> readArray() throws IOException {
         read();
-        Collection<Object> array = new ArrayList<Object>();
+        Collection<Object> array = new ArrayList<>();
         skipWhiteSpace();
         if (readChar(']')) {
             return array;
@@ -114,7 +114,7 @@ public class JsonReader {
 
     private Map<String, Object> readObject() throws IOException {
         read();
-        Map<String, Object> object = new HashMap<String, Object>();
+        Map<String, Object> object = new HashMap<>();
         skipWhiteSpace();
         if (readChar('}')) {
             return object;
@@ -187,39 +187,39 @@ public class JsonReader {
     private void readEscape() throws IOException {
         read();
         switch (current) {
-            case '"':
-            case '/':
-            case '\\':
-                recorder.append((char) current);
-                break;
-            case 'b':
-                recorder.append('\b');
-                break;
-            case 'f':
-                recorder.append('\f');
-                break;
-            case 'n':
-                recorder.append('\n');
-                break;
-            case 'r':
-                recorder.append('\r');
-                break;
-            case 't':
-                recorder.append('\t');
-                break;
-            case 'u':
-                char[] hexChars = new char[4];
-                for (int i = 0; i < 4; i++) {
-                    read();
-                    if (!isHexDigit(current)) {
-                        throw expected("hexadecimal digit");
-                    }
-                    hexChars[i] = (char) current;
+        case '"':
+        case '/':
+        case '\\':
+            recorder.append((char) current);
+            break;
+        case 'b':
+            recorder.append('\b');
+            break;
+        case 'f':
+            recorder.append('\f');
+            break;
+        case 'n':
+            recorder.append('\n');
+            break;
+        case 'r':
+            recorder.append('\r');
+            break;
+        case 't':
+            recorder.append('\t');
+            break;
+        case 'u':
+            char[] hexChars = new char[4];
+            for (int i = 0; i < 4; i++) {
+                read();
+                if (!isHexDigit(current)) {
+                    throw expected("hexadecimal digit");
                 }
-                recorder.append((char) Integer.parseInt(String.valueOf(hexChars), 16));
-                break;
-            default:
-                throw expected("valid escape sequence");
+                hexChars[i] = (char) current;
+            }
+            recorder.append((char) Integer.parseInt(String.valueOf(hexChars), 16));
+            break;
+        default:
+            throw expected("valid escape sequence");
         }
         read();
     }
@@ -233,6 +233,7 @@ public class JsonReader {
         }
         if (firstDigit != '0') {
             while (readAndAppendDigit()) {
+                // Do nothing
             }
         }
         readFraction();
@@ -248,6 +249,7 @@ public class JsonReader {
             throw expected("digit");
         }
         while (readAndAppendDigit()) {
+            // Do nothing
         }
         return true;
     }
@@ -263,6 +265,7 @@ public class JsonReader {
             throw expected("digit");
         }
         while (readAndAppendDigit()) {
+            // Do nothing
         }
         return true;
     }

@@ -80,8 +80,9 @@ public abstract class AbstractRegionDigraphVisitor<C> implements RegionDigraphVi
                 i.remove();
             }
         }
-        if (candidates.isEmpty())
+        if (candidates.isEmpty()) {
             return false; // this filter does not apply; avoid traversing this edge
+        }
         // push the filtered candidates for the next region
         filteredDeque.push(candidates);
         // push the allowed
@@ -104,7 +105,7 @@ public abstract class AbstractRegionDigraphVisitor<C> implements RegionDigraphVi
     /**
      * Determines whether the given region contains the given candidate.
      *
-     * @param region the {@link Region}
+     * @param region    the {@link Region}
      * @param candidate the candidate
      * @return <code>true</code> if and only if the given region contains the given candidate
      */
@@ -114,7 +115,7 @@ public abstract class AbstractRegionDigraphVisitor<C> implements RegionDigraphVi
      * Determines whether the given candidate is allowed by the given {@link RegionFilter}.
      *
      * @param candidate the candidate
-     * @param filter the filter
+     * @param filter    the filter
      * @return <code>true</code> if and only if the given candidate is allowed by the given filter
      */
     protected abstract boolean isAllowed(C candidate, RegionFilter filter);

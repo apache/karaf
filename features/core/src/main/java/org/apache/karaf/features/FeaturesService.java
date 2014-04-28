@@ -38,7 +38,7 @@ public interface FeaturesService {
 
     /**
      * Validate repository contents.
-     * 
+     *
      * @param uri Repository uri.
      * @throws Exception When validation fails.
      */
@@ -51,19 +51,19 @@ public interface FeaturesService {
     void removeRepository(URI uri) throws Exception;
 
     void removeRepository(URI uri, boolean uninstall) throws Exception;
-    
+
     void restoreRepository(URI uri) throws Exception;
 
     Repository[] listRequiredRepositories() throws Exception;
 
     Repository[] listRepositories() throws Exception;
-    
+
     Repository getRepository(String repoName) throws Exception;
 
     void installFeature(String name) throws Exception;
 
     void installFeature(String name, EnumSet<Option> options) throws Exception;
-    
+
     void installFeature(String name, String version) throws Exception;
 
     void installFeature(String name, String version, EnumSet<Option> options) throws Exception;
@@ -79,7 +79,7 @@ public interface FeaturesService {
     void uninstallFeature(String name) throws Exception;
 
     void uninstallFeature(String name, String version, EnumSet<Option> options) throws Exception;
-    
+
     void uninstallFeature(String name, String version) throws Exception;
 
     void uninstallFeatures(Set<String> features, EnumSet<Option> options) throws Exception;
@@ -100,10 +100,10 @@ public interface FeaturesService {
 
     Feature getFeature(String name) throws Exception;
 
-	void refreshRepository(URI uri) throws Exception;
+    void refreshRepository(URI uri) throws Exception;
 
-    public URI getRepositoryUriFor(String name, String version);
+    URI getRepositoryUriFor(String name, String version);
 
-    public String[] getRepositoryNames();
+    String[] getRepositoryNames();
 
 }

@@ -27,7 +27,7 @@ public class Artifact {
     String version;
     String extension;
     String classifier;
-    
+
     public Artifact(String coords) {
         String[] coordsAr = coords.split(":");
         if (coordsAr.length != 5) {
@@ -39,12 +39,12 @@ public class Artifact {
         this.extension = coordsAr[2];
         this.classifier = coordsAr[3];
     }
-    
+
     public Artifact(String coords, String version) {
         this(coords);
         this.version = version;
     }
-    
+
     public URI getMavenUrl(String version) {
         String uriSt = "mvn:" + this.groupId + "/" + this.artifactId + "/" + version + "/" + this.extension + "/" + this.classifier;
         try {

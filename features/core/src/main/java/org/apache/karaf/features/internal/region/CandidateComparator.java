@@ -25,10 +25,8 @@ import org.osgi.framework.namespace.PackageNamespace;
 import org.osgi.framework.wiring.BundleCapability;
 import org.osgi.resource.Capability;
 
-public class CandidateComparator implements Comparator<Capability>
-{
-    public int compare(Capability cap1, Capability cap2)
-    {
+public class CandidateComparator implements Comparator<Capability> {
+    public int compare(Capability cap1, Capability cap2) {
         int c = 0;
         // Always prefer system bundle
         if (cap1 instanceof BundleCapability && !(cap2 instanceof BundleCapability)) {
@@ -37,12 +35,10 @@ public class CandidateComparator implements Comparator<Capability>
             c = 1;
         }
         // Compare revision capabilities.
-        if ((c == 0) && cap1.getNamespace().equals(BundleNamespace.BUNDLE_NAMESPACE))
-        {
-            c = ((Comparable) cap1.getAttributes().get(BundleNamespace.BUNDLE_NAMESPACE))
+        if ((c == 0) && cap1.getNamespace().equals(BundleNamespace.BUNDLE_NAMESPACE)) {
+            c = ((Comparable<Object>) cap1.getAttributes().get(BundleNamespace.BUNDLE_NAMESPACE))
                     .compareTo(cap2.getAttributes().get(BundleNamespace.BUNDLE_NAMESPACE));
-            if (c == 0)
-            {
+            if (c == 0) {
                 Version v1 = (!cap1.getAttributes().containsKey(BundleNamespace.CAPABILITY_BUNDLE_VERSION_ATTRIBUTE))
                         ? Version.emptyVersion
                         : (Version) cap1.getAttributes().get(BundleNamespace.CAPABILITY_BUNDLE_VERSION_ATTRIBUTE);
@@ -53,14 +49,11 @@ public class CandidateComparator implements Comparator<Capability>
                 // highest version to have priority.
                 c = compareVersions(v2, v1);
             }
-        }
         // Compare package capabilities.
-        else if ((c == 0) && cap1.getNamespace().equals(PackageNamespace.PACKAGE_NAMESPACE))
-        {
-            c = ((Comparable) cap1.getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE))
+        } else if ((c == 0) && cap1.getNamespace().equals(PackageNamespace.PACKAGE_NAMESPACE)) {
+            c = ((Comparable<Object>) cap1.getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE))
                     .compareTo(cap2.getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
-            if (c == 0)
-            {
+            if (c == 0) {
                 Version v1 = (!cap1.getAttributes().containsKey(PackageNamespace.CAPABILITY_VERSION_ATTRIBUTE))
                         ? Version.emptyVersion
                         : (Version) cap1.getAttributes().get(PackageNamespace.CAPABILITY_VERSION_ATTRIBUTE);
@@ -71,8 +64,7 @@ public class CandidateComparator implements Comparator<Capability>
                 // highest version to have priority.
                 c = compareVersions(v2, v1);
                 // if same version, rather compare on the bundle version
-                if (c == 0)
-                {
+                if (c == 0) {
                     v1 = (!cap1.getAttributes().containsKey(BundleNamespace.CAPABILITY_BUNDLE_VERSION_ATTRIBUTE))
                             ? Version.emptyVersion
                             : (Version) cap1.getAttributes().get(BundleNamespace.CAPABILITY_BUNDLE_VERSION_ATTRIBUTE);
@@ -84,14 +76,11 @@ public class CandidateComparator implements Comparator<Capability>
                     c = compareVersions(v2, v1);
                 }
             }
-        }
         // Compare feature capabilities
-        else if ((c == 0) && cap1.getNamespace().equals(IdentityNamespace.IDENTITY_NAMESPACE))
-        {
-            c = ((Comparable) cap1.getAttributes().get(IdentityNamespace.IDENTITY_NAMESPACE))
+        } else if ((c == 0) && cap1.getNamespace().equals(IdentityNamespace.IDENTITY_NAMESPACE)) {
+            c = ((Comparable<Object>) cap1.getAttributes().get(IdentityNamespace.IDENTITY_NAMESPACE))
                     .compareTo(cap2.getAttributes().get(IdentityNamespace.IDENTITY_NAMESPACE));
-            if (c == 0)
-            {
+            if (c == 0) {
                 Version v1 = (!cap1.getAttributes().containsKey(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE))
                         ? Version.emptyVersion
                         : (Version) cap1.getAttributes().get(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE);

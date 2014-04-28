@@ -188,7 +188,7 @@ public class Subsystem extends ResourceImpl {
         Capability identity = as.getCapabilities(IDENTITY_NAMESPACE).iterator().next();
         Object bsn = identity.getAttributes().get(IDENTITY_NAMESPACE);
         Requirement requirement = new RequirementImpl(this, IDENTITY_NAMESPACE,
-                Collections.<String,String>emptyMap(),
+                Collections.<String, String>emptyMap(),
                 Collections.singletonMap(IDENTITY_NAMESPACE, bsn));
         addRequirement(requirement);
         // Add it to repo
@@ -325,7 +325,7 @@ public class Subsystem extends ResourceImpl {
         for (DependencyInfo info : dependencies.values()) {
             installable.add(info.resource);
             addIdentityRequirement(info.resource, this, info.mandatory);
-       }
+        }
     }
 
     void addDependency(ResourceImpl resource, boolean mandatory, boolean start, int startLevel) {

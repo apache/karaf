@@ -1,20 +1,18 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.apache.karaf.features.internal.repository;
 
@@ -42,7 +40,7 @@ import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
 /**
  * Repository XML xml based on StaX
  */
-public class StaxParser {
+public final class StaxParser {
 
     public static final String REPOSITORY = "repository";
     public static final String REPO_NAME = "name";
@@ -60,6 +58,11 @@ public class StaxParser {
     public static final String VALUE = "value";
     public static final String TYPE = "type";
 
+    static XMLInputFactory factory;
+
+    private StaxParser() {
+    }
+
     public static class Referral {
         String url;
         int depth = Integer.MAX_VALUE;
@@ -68,8 +71,8 @@ public class StaxParser {
     public static class XmlRepository {
         String name;
         long increment;
-        List<Referral> referrals = new ArrayList<Referral>();
-        List<Resource> resources = new ArrayList<Resource>();
+        List<Referral> referrals = new ArrayList<>();
+        List<Resource> resources = new ArrayList<>();
     }
 
     public static XmlRepository parse(InputStream is) throws XMLStreamException {
@@ -86,11 +89,14 @@ public class StaxParser {
         for (int i = 0, nb = reader.getAttributeCount(); i < nb; i++) {
             String attrName = reader.getAttributeLocalName(i);
             String attrValue = reader.getAttributeValue(i);
-            if (REPO_NAME.equals(attrName)) {
+            switch (attrName) {
+            case REPO_NAME:
                 repo.name = attrName;
-            } else if (INCREMENT.equals(attrName)) {
+                break;
+            case INCREMENT:
                 repo.increment = Integer.parseInt(attrValue);
-            } else {
+                break;
+            default:
                 throw new IllegalStateException("Unexpected attribute '" + attrName + "'");
             }
         }
@@ -99,16 +105,20 @@ public class StaxParser {
         }
         while ((event = reader.nextTag()) == START_ELEMENT) {
             String element = reader.getLocalName();
-            if (REFERRAL.equals(element)) {
+            switch (element) {
+            case REFERRAL:
                 Referral referral = new Referral();
                 for (int i = 0, nb = reader.getAttributeCount(); i < nb; i++) {
                     String attrName = reader.getAttributeLocalName(i);
                     String attrValue = reader.getAttributeValue(i);
-                    if (DEPTH.equals(attrName)) {
+                    switch (attrName) {
+                    case DEPTH:
                         referral.depth = Integer.parseInt(attrValue);
-                    } else if (URL.equals(attrName)) {
+                        break;
+                    case URL:
                         referral.url = attrValue;
-                    } else {
+                        break;
+                    default:
                         throw new IllegalStateException("Unexpected attribute '" + attrName + "'");
                     }
                 }
@@ -117,9 +127,11 @@ public class StaxParser {
                 }
                 repo.referrals.add(referral);
                 sanityCheckEndElement(reader, reader.nextTag(), REFERRAL);
-            } else if (RESOURCE.equals(element)) {
+                break;
+            case RESOURCE:
                 repo.resources.add(parseResource(reader));
-            } else {
+                break;
+            default:
                 throw new IllegalStateException("Unsupported element '" + element + "'. Expected 'referral' or 'resource'");
             }
         }
@@ -143,19 +155,25 @@ public class StaxParser {
             int event;
             while ((event = reader.nextTag()) == START_ELEMENT) {
                 String element = reader.getLocalName();
-                if (CAPABILITY.equals(element)) {
+                switch (element) {
+                case CAPABILITY:
                     resource.addCapability(parseCapability(reader, resource));
-                } else if (REQUIREMENT.equals(element)) {
+                    break;
+                case REQUIREMENT:
                     resource.addRequirement(parseRequirement(reader, resource));
-                } else {
+                    break;
+                default:
                     while ((event = reader.next()) != END_ELEMENT) {
                         switch (event) {
-                            case START_ELEMENT:
-                                throw new IllegalStateException("Unexpected element '" + reader.getLocalName() + "' inside 'resource' element");
-                            case CHARACTERS:
-                                throw new IllegalStateException("Unexpected text inside 'resource' element");
+                        case START_ELEMENT:
+                            throw new IllegalStateException("Unexpected element '" + reader.getLocalName() + "' inside 'resource' element");
+                        case CHARACTERS:
+                            throw new IllegalStateException("Unexpected text inside 'resource' element");
+                        default:
+                            break;
                         }
                     }
+                    break;
                 }
             }
             // Sanity check
@@ -173,8 +191,8 @@ public class StaxParser {
 
     private static CapabilityImpl parseCapability(XMLStreamReader reader, ResourceImpl resource) throws XMLStreamException {
         String[] namespace = new String[1];
-        Map<String, String> directives = new HashMap<String, String>();
-        Map<String, Object> attributes = new HashMap<String, Object>();
+        Map<String, String> directives = new HashMap<>();
+        Map<String, Object> attributes = new HashMap<>();
         parseClause(reader, namespace, directives, attributes);
         sanityCheckEndElement(reader, reader.getEventType(), CAPABILITY);
         return new CapabilityImpl(resource, namespace[0], directives, attributes);
@@ -182,8 +200,8 @@ public class StaxParser {
 
     private static RequirementImpl parseRequirement(XMLStreamReader reader, ResourceImpl resource) throws XMLStreamException {
         String[] namespace = new String[1];
-        Map<String, String> directives = new HashMap<String, String>();
-        Map<String, Object> attributes = new HashMap<String, Object>();
+        Map<String, String> directives = new HashMap<>();
+        Map<String, Object> attributes = new HashMap<>();
         parseClause(reader, namespace, directives, attributes);
         sanityCheckEndElement(reader, reader.getEventType(), REQUIREMENT);
         return new RequirementImpl(resource, namespace[0], directives, attributes);
@@ -205,17 +223,21 @@ public class StaxParser {
         }
         while (reader.nextTag() == START_ELEMENT) {
             String element = reader.getLocalName();
-            if (DIRECTIVE.equals(element)) {
+            switch (element) {
+            case DIRECTIVE: {
                 String name = null;
                 String value = null;
                 for (int i = 0, nb = reader.getAttributeCount(); i < nb; i++) {
                     String attName = reader.getAttributeLocalName(i);
                     String attValue = reader.getAttributeValue(i);
-                    if (NAME.equals(attName)) {
+                    switch (attName) {
+                    case NAME:
                         name = attValue;
-                    } else if (VALUE.equals(attName)) {
+                        break;
+                    case VALUE:
                         value = attValue;
-                    } else {
+                        break;
+                    default:
                         throw new IllegalStateException("Unexpected attribute: '" + attName + "'. Expected 'name', or 'value'.");
                     }
                 }
@@ -224,20 +246,26 @@ public class StaxParser {
                 }
                 directives.put(name, value);
                 sanityCheckEndElement(reader, reader.nextTag(), DIRECTIVE);
-            } else if (ATTRIBUTE.equals(element)) {
+                break;
+            }
+            case ATTRIBUTE: {
                 String name = null;
                 String value = null;
                 String type = "String";
                 for (int i = 0, nb = reader.getAttributeCount(); i < nb; i++) {
                     String attName = reader.getAttributeLocalName(i);
                     String attValue = reader.getAttributeValue(i);
-                    if (NAME.equals(attName)) {
+                    switch (attName) {
+                    case NAME:
                         name = attValue;
-                    } else if (VALUE.equals(attName)) {
+                        break;
+                    case VALUE:
                         value = attValue;
-                    } else if (TYPE.equals(attName)) {
+                        break;
+                    case TYPE:
                         type = attValue;
-                    } else {
+                        break;
+                    default:
                         throw new IllegalStateException("Unexpected attribute: '" + attName + "'. Expected 'name', 'value' or 'type'.");
                     }
                 }
@@ -246,7 +274,9 @@ public class StaxParser {
                 }
                 attributes.put(name, parseAttribute(value, type));
                 sanityCheckEndElement(reader, reader.nextTag(), ATTRIBUTE);
-            } else {
+                break;
+            }
+            default:
                 throw new IllegalStateException("Unexpected element: '" + element + ". Expected 'directive' or 'attribute'");
             }
         }
@@ -263,7 +293,7 @@ public class StaxParser {
             return Double.parseDouble(value.trim());
         } else if (type.startsWith("List<") && type.endsWith(">")) {
             type = type.substring("List<".length(), type.length() - 1);
-            List<Object> list = new ArrayList<Object>();
+            List<Object> list = new ArrayList<>();
             for (String s : value.split(",")) {
                 list.add(parseAttribute(s.trim(), type));
             }
@@ -272,8 +302,6 @@ public class StaxParser {
             throw new IllegalStateException("Unexpected type: '" + type + "'");
         }
     }
-
-    static XMLInputFactory factory;
 
     private static synchronized XMLInputFactory getFactory() {
         if (StaxParser.factory == null) {
@@ -284,6 +312,4 @@ public class StaxParser {
         return StaxParser.factory;
     }
 
-    private StaxParser() {
-    }
 }

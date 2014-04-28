@@ -71,7 +71,7 @@ public class RepositoryImpl implements Repository {
     public void load(boolean validate) throws IOException {
         if (features == null) {
             try (
-                InputStream inputStream = new InterruptibleInputStream(uri.toURL().openStream())
+                    InputStream inputStream = new InterruptibleInputStream(uri.toURL().openStream())
             ) {
                 features = JaxbUtil.unmarshal(uri.toASCIIString(), inputStream, validate);
             } catch (Exception e) {

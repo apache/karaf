@@ -24,23 +24,24 @@ import org.osgi.resource.Requirement;
 import org.osgi.resource.Resource;
 
 public class RequirementImpl extends BaseClause implements Requirement {
-    private final Resource m_resource;
-    private final String m_namespace;
-    private final SimpleFilter m_filter;
-    private final boolean m_optional;
-    private final Map<String, String> m_dirs;
-    private final Map<String, Object> m_attrs;
+
+    private final Resource resource;
+    private final String namespace;
+    private final SimpleFilter filter;
+    private final boolean optional;
+    private final Map<String, String> dirs;
+    private final Map<String, Object> attrs;
 
     public RequirementImpl(
             Resource resource, String namespace,
             Map<String, String> dirs, Map<String, Object> attrs, SimpleFilter filter) {
-        m_resource = resource;
-        m_namespace = namespace;
-        m_dirs = dirs;
-        m_attrs = attrs;
-        m_filter = filter;
+        this.resource = resource;
+        this.namespace = namespace;
+        this.dirs = dirs;
+        this.attrs = attrs;
+        this.filter = filter;
         // Find resolution import directives.
-        m_optional = Constants.RESOLUTION_OPTIONAL.equals(m_dirs.get(Constants.RESOLUTION_DIRECTIVE));
+        optional = Constants.RESOLUTION_OPTIONAL.equals(this.dirs.get(Constants.RESOLUTION_DIRECTIVE));
     }
 
     public RequirementImpl(
@@ -50,19 +51,19 @@ public class RequirementImpl extends BaseClause implements Requirement {
     }
 
     public String getNamespace() {
-        return m_namespace;
+        return namespace;
     }
 
     public Map<String, String> getDirectives() {
-        return m_dirs;
+        return dirs;
     }
 
     public Map<String, Object> getAttributes() {
-        return m_attrs;
+        return attrs;
     }
 
     public Resource getResource() {
-        return m_resource;
+        return resource;
     }
 
     public boolean matches(Capability cap) {
@@ -70,11 +71,11 @@ public class RequirementImpl extends BaseClause implements Requirement {
     }
 
     public boolean isOptional() {
-        return m_optional;
+        return optional;
     }
 
     public SimpleFilter getFilter() {
-        return m_filter;
+        return filter;
     }
 
 }

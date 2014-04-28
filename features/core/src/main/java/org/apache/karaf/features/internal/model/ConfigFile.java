@@ -1,22 +1,19 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-
 package org.apache.karaf.features.internal.model;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -24,18 +21,18 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlValue;
+
 import org.apache.karaf.features.ConfigFileInfo;
 
 
 /**
- * 
  * Additional configuration files which should be created during feature installation.
- *             
- * 
+ * <p/>
+ * <p/>
  * <p>Java class for configFile complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="configFile">
  *   &lt;simpleContent>
@@ -46,13 +43,9 @@ import org.apache.karaf.features.ConfigFileInfo;
  *   &lt;/simpleContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "configFile", propOrder = {
-    "value"
-})
+@XmlType(name = "configFile", propOrder = {"value"})
 public class ConfigFile implements ConfigFileInfo {
 
     @XmlValue
@@ -64,11 +57,9 @@ public class ConfigFile implements ConfigFileInfo {
 
     /**
      * Gets the value of the value property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getLocation() {
         return value;
@@ -76,11 +67,9 @@ public class ConfigFile implements ConfigFileInfo {
 
     /**
      * Sets the value of the value property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setLocation(String value) {
         this.value = value;
@@ -88,11 +77,9 @@ public class ConfigFile implements ConfigFileInfo {
 
     /**
      * Gets the value of the finalname property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getFinalname() {
         return finalname;
@@ -100,37 +87,31 @@ public class ConfigFile implements ConfigFileInfo {
 
     /**
      * Sets the value of the finalname property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setFinalname(String value) {
-    	this.finalname = value;
+        this.finalname = value;
     }
 
     /**
      * Gets the value of the override property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Boolean }
-     *     
+     *
+     * @return possible object is
+     * {@link Boolean }
      */
     public boolean isOverride() {
-        return override == null? false: override;
+        return override == null ? false : override;
     }
 
     /**
      * Sets the value of the override property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Boolean }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link Boolean }
      */
     public void setOverride(Boolean value) {
-    	this.override = value;
+        this.override = value;
     }
 }

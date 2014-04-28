@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.zip.CRC32;
 
-public class ChecksumUtils {
+public final class ChecksumUtils {
 
     private ChecksumUtils() {
     }

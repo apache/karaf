@@ -62,7 +62,7 @@ public abstract class UrlLoader {
                 return false;
             }
             try (
-                BufferedInputStream bis = new BufferedInputStream(connection.getInputStream())
+                    BufferedInputStream bis = new BufferedInputStream(connection.getInputStream())
             ) {
                 // Auto-detect gzipped streams
                 InputStream is = bis;

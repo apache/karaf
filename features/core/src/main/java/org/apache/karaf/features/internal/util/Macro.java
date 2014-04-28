@@ -22,22 +22,29 @@ import java.util.regex.Pattern;
 import org.apache.felix.utils.version.VersionTable;
 import org.osgi.framework.Version;
 
-public class Macro {
+public final class Macro {
+
+    static final String MASK_STRING = "[\\-+=~0123456789]{0,3}[=~]?";
+    static final Pattern RANGE_MASK = Pattern.compile("(\\[|\\()(" + MASK_STRING + "),(" + MASK_STRING + ")(\\]|\\))");
+
+    private Macro() {
+    }
 
     public static String transform(String macro, String value) {
         if (macro.startsWith("${") && macro.endsWith("}")) {
             String[] args = macro.substring(2, macro.length() - 1).split(";");
-            if ("version".equals(args[0])) {
+            switch (args[0]) {
+            case "version":
                 if (args.length != 2) {
                     throw new IllegalArgumentException("Invalid syntax for macro: " + macro);
                 }
                 return version(args[1], VersionTable.getVersion(value));
-            } else if ("range".equals(args[0])) {
+            case "range":
                 if (args.length != 2) {
                     throw new IllegalArgumentException("Invalid syntax for macro: " + macro);
                 }
                 return range(args[1], VersionTable.getVersion(value));
-            } else {
+            default:
                 throw new IllegalArgumentException("Unknown macro: " + macro);
             }
         }
@@ -47,7 +54,7 @@ public class Macro {
     /**
      * Modify a version to set a version policy. Thed policy is a mask that is
      * mapped to a version.
-     *
+     * <p/>
      * <pre>
      * +           increment
      * -           decrement
@@ -56,14 +63,10 @@ public class Macro {
      *
      * ==+      = maintain major, minor, increment micro, discard qualifier
      * &tilde;&tilde;&tilde;=     = just get the qualifier
-     * version=&quot;[${version;==;${@}},${version;=+;${@}})&quot;
-	 * </pre>
-	 *
-	 * @param args
-     * @return
+     * version=&quot;[${version;==;${{@literal @}}},${version;=+;${{@literal @}}})&quot;
+     * </pre>
+     *
      */
-    final static String	MASK_STRING			= "[\\-+=~0123456789]{0,3}[=~]?";
-
     static String version(String mask, Version version) {
         StringBuilder sb = new StringBuilder();
         String del = "";
@@ -85,19 +88,29 @@ public class Macro {
                 } else {
                     int x = 0;
                     switch (i) {
-                        case 0: x = version.getMajor(); break;
-                        case 1: x = version.getMinor(); break;
-                        case 2: x = version.getMicro(); break;
+                    case 0:
+                        x = version.getMajor();
+                        break;
+                    case 1:
+                        x = version.getMinor();
+                        break;
+                    case 2:
+                        x = version.getMicro();
+                        break;
+                    default:
+                        throw new IllegalStateException();
                     }
                     switch (c) {
-                        case '+' :
-                            x++;
-                            break;
-                        case '-' :
-                            x--;
-                            break;
-                        case '=' :
-                            break;
+                    case '+':
+                        x++;
+                        break;
+                    case '-':
+                        x--;
+                        break;
+                    case '=':
+                        break;
+                    default:
+                        throw new IllegalStateException();
                     }
                     result = Integer.toString(x);
                 }
@@ -113,17 +126,13 @@ public class Macro {
 
     /**
      * Schortcut for version policy
-     *
+     * <p/>
      * <pre>
      * -provide-policy : ${policy;[==,=+)}
      * -consume-policy : ${policy;[==,+)}
      * </pre>
      *
-     * @param args
-     * @return
      */
-
-    static Pattern	RANGE_MASK		= Pattern.compile("(\\[|\\()(" + MASK_STRING + "),(" + MASK_STRING + ")(\\]|\\))");
 
     static String range(String spec, Version version) {
         Matcher m = RANGE_MASK.matcher(spec);

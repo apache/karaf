@@ -23,9 +23,7 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlValue;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "scopeFilter", propOrder = {
-        "value"
-})
+@XmlType(name = "scopeFilter", propOrder = {"value"})
 public class ScopeFilter implements org.apache.karaf.features.ScopeFilter {
 
     @XmlAttribute(required = true)

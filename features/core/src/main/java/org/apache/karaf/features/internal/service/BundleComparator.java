@@ -18,10 +18,8 @@ package org.apache.karaf.features.internal.service;
 
 import java.util.Comparator;
 
-import org.apache.felix.resolver.Util;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
-import org.osgi.resource.Resource;
 
 public class BundleComparator implements Comparator<Bundle> {
 

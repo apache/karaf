@@ -37,18 +37,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class FeatureConfigInstaller {
-	private static final Logger LOGGER = LoggerFactory.getLogger(FeaturesServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FeaturesServiceImpl.class);
     private static final String CONFIG_KEY = "org.apache.karaf.features.configKey";
 
     private final ConfigurationAdmin configAdmin;
-    
+
     public FeatureConfigInstaller(ConfigurationAdmin configAdmin) {
-		this.configAdmin = configAdmin;
-	}
+        this.configAdmin = configAdmin;
+    }
 
     public void installFeatureConfigs(Feature feature) throws IOException, InvalidSyntaxException {
         for (String config : feature.getConfigurations().keySet()) {
-            Dictionary<String,String> props = new Hashtable<String, String>(feature.getConfigurations().get(config));
+            Dictionary<String, String> props = new Hashtable<String, String>(feature.getConfigurations().get(config));
             String[] pid = parsePid(config);
             Configuration cfg = findExistingConfiguration(configAdmin, pid[0], pid[1]);
             if (cfg == null) {
@@ -78,7 +78,7 @@ public class FeatureConfigInstaller {
     }
 
     private Configuration createConfiguration(ConfigurationAdmin configurationAdmin,
-                                                String pid, String factoryPid) throws IOException, InvalidSyntaxException {
+                                              String pid, String factoryPid) throws IOException, InvalidSyntaxException {
         if (factoryPid != null) {
             return configurationAdmin.createFactoryConfiguration(factoryPid, null);
         } else {
@@ -87,7 +87,7 @@ public class FeatureConfigInstaller {
     }
 
     private Configuration findExistingConfiguration(ConfigurationAdmin configurationAdmin,
-                                                      String pid, String factoryPid) throws IOException, InvalidSyntaxException {
+                                                    String pid, String factoryPid) throws IOException, InvalidSyntaxException {
         String filter;
         if (factoryPid == null) {
             filter = "(" + Constants.SERVICE_PID + "=" + pid + ")";
@@ -107,39 +107,40 @@ public class FeatureConfigInstaller {
     }
 
     private void installConfigurationFile(String fileLocation, String finalname, boolean override) throws IOException {
-    	String basePath = System.getProperty("karaf.base");
-    	
-    	if (finalname.contains("${")) {
-    		//remove any placeholder or variable part, this is not valid.
-    		int marker = finalname.indexOf("}");
-    		finalname = finalname.substring(marker+1);
-    	}
-    	
-    	finalname = basePath + File.separator + finalname;
-    	
-    	File file = new File(finalname); 
-    	if (file.exists()) {
+        String basePath = System.getProperty("karaf.base");
+
+        if (finalname.contains("${")) {
+            //remove any placeholder or variable part, this is not valid.
+            int marker = finalname.indexOf("}");
+            finalname = finalname.substring(marker + 1);
+        }
+
+        finalname = basePath + File.separator + finalname;
+
+        File file = new File(finalname);
+        if (file.exists()) {
             if (!override) {
                 LOGGER.debug("Configuration file {} already exist, don't override it", finalname);
                 return;
             } else {
                 LOGGER.info("Configuration file {} already exist, overriding it", finalname);
             }
-    	} else {
+        } else {
             LOGGER.info("Creating configuration file {}", finalname);
         }
 
         try (
-            InputStream is = new BufferedInputStream(new URL(fileLocation).openStream())
+                InputStream is = new BufferedInputStream(new URL(fileLocation).openStream())
         ) {
             if (!file.exists()) {
                 File parentFile = file.getParentFile();
-                if (parentFile != null)
+                if (parentFile != null) {
                     parentFile.mkdirs();
+                }
                 file.createNewFile();
             }
             try (
-                FileOutputStream fop = new FileOutputStream(file)
+                    FileOutputStream fop = new FileOutputStream(file)
             ) {
                 StreamUtils.copy(is, fop);
             }

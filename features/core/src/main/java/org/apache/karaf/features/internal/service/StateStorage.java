@@ -36,7 +36,7 @@ public abstract class StateStorage {
         state.installedFeatures.clear();
         state.managedBundles.clear();
         try (
-            InputStream is = getInputStream()
+                InputStream is = getInputStream()
         ) {
             if (is != null) {
                 Map json = (Map) JsonReader.read(is);
@@ -52,7 +52,7 @@ public abstract class StateStorage {
 
     public void save(State state) throws IOException {
         try (
-            OutputStream os = getOutputStream()
+                OutputStream os = getOutputStream()
         ) {
             if (os != null) {
                 Map<String, Object> json = new HashMap<>();
@@ -68,9 +68,10 @@ public abstract class StateStorage {
     }
 
     protected abstract InputStream getInputStream() throws IOException;
+
     protected abstract OutputStream getOutputStream() throws IOException;
 
-    static Map<String, Set<String>> toStringStringSetMap(Map<?,?> map) {
+    static Map<String, Set<String>> toStringStringSetMap(Map<?, ?> map) {
         Map<String, Set<String>> nm = new HashMap<>();
         for (Map.Entry entry : map.entrySet()) {
             nm.put(entry.getKey().toString(), toStringSet((Collection) entry.getValue()));
@@ -78,7 +79,7 @@ public abstract class StateStorage {
         return nm;
     }
 
-    static  Map<String, Set<Long>> toStringLongSetMap(Map<?,?> map) {
+    static Map<String, Set<Long>> toStringLongSetMap(Map<?, ?> map) {
         Map<String, Set<Long>> nm = new HashMap<>();
         for (Map.Entry entry : map.entrySet()) {
             nm.put(entry.getKey().toString(), toLongSet((Collection) entry.getValue()));
@@ -86,7 +87,7 @@ public abstract class StateStorage {
         return nm;
     }
 
-    static  Set<String> toStringSet(Collection<?> col) {
+    static Set<String> toStringSet(Collection<?> col) {
         Set<String> ns = new TreeSet<>();
         for (Object o : col) {
             ns.add(o.toString());
@@ -94,7 +95,7 @@ public abstract class StateStorage {
         return ns;
     }
 
-    static  Set<Long> toLongSet(Collection<?> set) {
+    static Set<Long> toLongSet(Collection<?> set) {
         Set<Long> ns = new TreeSet<>();
         for (Object o : set) {
             ns.add(toLong(o));
@@ -102,7 +103,7 @@ public abstract class StateStorage {
         return ns;
     }
 
-    static  Map<Long, Long> toLongLongMap(Map<?,?> map) {
+    static Map<Long, Long> toLongLongMap(Map<?, ?> map) {
         Map<Long, Long> nm = new HashMap<>();
         for (Map.Entry entry : map.entrySet()) {
             nm.put(toLong(entry.getKey()), toLong(entry.getValue()));
@@ -110,7 +111,7 @@ public abstract class StateStorage {
         return nm;
     }
 
-    static Map<String, Long> toStringLongMap(Map<?,?> map) {
+    static Map<String, Long> toStringLongMap(Map<?, ?> map) {
         Map<String, Long> nm = new HashMap<>();
         for (Map.Entry entry : map.entrySet()) {
             nm.put(entry.getKey().toString(), toLong(entry.getValue()));
