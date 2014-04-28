@@ -2236,6 +2236,8 @@
                                 <exclude>**/.*</exclude>
                                 <exclude>**/eclipse-classes/**/*</exclude>
                                 <exclude>**/dependency-reduced-pom.xml</exclude>
+                                <exclude>**/.settings/**</exclude>
+                                <exclude>**/bin/**</exclude>
                                 <!-- resources file -->
                                 <exclude>**/bundle.info</exclude>
                                 <exclude>**/goal.txt</exclude>
