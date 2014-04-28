@@ -46,16 +46,9 @@ public class ListAction extends ScrActionSupport {
         Component[] components = scrService.getComponents();
         Arrays.sort(components, idComparator);
         for (Component component : ScrUtils.emptyIfNull(Component.class, components)) {
-            if (showHidden) {
-                // we display all because we are overridden
+            // Display only non hidden components, or all if showHidden is true
+            if (showHidden || !ScrActionSupport.isHiddenComponent(component)) {
                 table.addRow().addContent(component.getId(), ScrUtils.getState(component.getState()), component.getName());
-            } else {
-                if (ScrActionSupport.isHiddenComponent(component)) {
-                    // do nothing
-                } else {
-                    // we aren't hidden so print it
-                    table.addRow().addContent(component.getId(), ScrUtils.getState(component.getState()), component.getName());
-                }
             }
         }
         table.print(System.out);
