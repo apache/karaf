@@ -22,10 +22,11 @@ import org.osgi.framework.Bundle;
 
 @Command(scope = "bundle", name = "uninstall", description = "Uninstall bundles.")
 @Service
-public class Uninstall extends BundlesCommandWithConfirmation {
+public class Uninstall extends BundlesCommand {
     
     public Uninstall() {
-        this.errorMessage = "Unable to uninstall bundle";
+        defaultAllBundles = false;
+        errorMessage = "Error uninstalling bundle";
     }
 
     @Override

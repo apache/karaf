@@ -23,22 +23,19 @@ import org.osgi.framework.Bundle;
 
 @Command(scope = "bundle", name = "stop", description = "Stop bundles.")
 @Service
-public class Stop extends BundlesCommandWithConfirmation {
+public class Stop extends BundlesCommand {
     
 	@Option(name = "-t", aliases={"--transient"}, description="Keep the bundle as auto-start", required = false, multiValued = false)
 	boolean transientStop;
 	
     public Stop() {
-        this.errorMessage = "Unable to stop bundle";
+        defaultAllBundles = false;
+        errorMessage = "Error stopping bundle";
     }
 
     @Override
     protected void executeOnBundle(Bundle bundle) throws Exception {
-    	if (transientStop) {
-    		bundle.stop(Bundle.STOP_TRANSIENT);
-    	} else {
-    		bundle.stop();
-    	}
+        bundle.stop(transientStop ? Bundle.STOP_TRANSIENT : 0);
     }
 
 }

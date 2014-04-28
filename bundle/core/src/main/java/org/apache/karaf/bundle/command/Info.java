@@ -20,6 +20,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.nio.Buffer;
 import java.util.List;
 
 import org.apache.karaf.bundle.command.wikidoc.AnsiPrintingWikiVisitor;
@@ -34,16 +35,6 @@ import org.osgi.framework.Bundle;
 @Service
 public class Info extends BundlesCommand {
 
-    public Info() {
-        super(true);
-    }
-
-    protected void doExecute(List<Bundle> bundles) throws Exception {
-        for (Bundle bundle : bundles) {
-          printInfo(bundle);
-        }
-    }
-
     /**
      * <p>
      * Get the OSGI-INF/bundle.info entry from the bundle and display it.
@@ -51,27 +42,21 @@ public class Info extends BundlesCommand {
      *
      * @param bundle the bundle.
      */
-    protected void printInfo(Bundle bundle) {
+    @Override
+    protected void executeOnBundle(Bundle bundle) throws Exception {
         String title = ShellUtil.getBundleName(bundle);
         System.out.println("\n" + title);
         System.out.println(ShellUtil.getUnderlineString(title));
         URL bundleInfo = bundle.getEntry("OSGI-INF/bundle.info");
         if (bundleInfo != null) {
-        	BufferedReader reader = null;
-            try {
-                reader = new BufferedReader(new InputStreamReader(bundleInfo.openStream()));
+            try (
+                BufferedReader reader = new BufferedReader(new InputStreamReader(bundleInfo.openStream()));
+            ) {
                 WikiVisitor visitor = new AnsiPrintingWikiVisitor(System.out);
                 WikiParser parser = new WikiParser(visitor);
                 parser.parse(reader);
             } catch (Exception e) {
                 // ignore
-            } finally {
-            	if (reader != null) {
-            		try {
-						reader.close();
-					} catch (IOException e) {
-					}
-            	}
             }
         }
     }

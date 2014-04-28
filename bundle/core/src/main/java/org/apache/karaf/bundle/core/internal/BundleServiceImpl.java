@@ -32,9 +32,11 @@ import org.apache.karaf.bundle.core.BundleInfo;
 import org.apache.karaf.bundle.core.BundleService;
 import org.apache.karaf.bundle.core.BundleState;
 import org.apache.karaf.bundle.core.BundleStateService;
+import org.apache.karaf.jaas.modules.JaasHelper;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.startlevel.BundleStartLevel;
 import org.osgi.framework.wiring.BundleCapability;
 import org.osgi.framework.wiring.BundleRequirement;
 import org.osgi.framework.wiring.BundleRevision;
@@ -55,7 +57,7 @@ public class BundleServiceImpl implements BundleService {
     private static final String ORIGINAL_WIRES = "Original-Wires";
 
     private final BundleContext bundleContext;
-    private final List<BundleStateService> stateServices = new CopyOnWriteArrayList<BundleStateService>();
+    private final List<BundleStateService> stateServices = new CopyOnWriteArrayList<>();
 
     public BundleServiceImpl(BundleContext bundleContext) {
         this.bundleContext = bundleContext;
@@ -71,19 +73,22 @@ public class BundleServiceImpl implements BundleService {
 
     @Override
     public List<Bundle> selectBundles(List<String> ids, boolean defaultAllBundles) {
-        return new BundleSelectorImpl(bundleContext).selectBundles(ids, defaultAllBundles);
+        return selectBundles(null, ids, defaultAllBundles);
     }
 
     @Override
-    public Bundle getBundle(String id, boolean defaultAllBundles) {
-        List<String> ids = new ArrayList<String>(1);
-        ids.add(id);
-        List<Bundle> bundles = selectBundles(ids, defaultAllBundles);
-        if (bundles.isEmpty()) {            
-            return null;
-        } else {
-            return bundles.get(0);
-        }
+    public List<Bundle> selectBundles(String context, List<String> ids, boolean defaultAllBundles) {
+        return doSelectBundles(doGetBundleContext(context), ids, defaultAllBundles);
+    }
+
+    @Override
+    public Bundle getBundle(String id) {
+        return getBundle(null, id);
+    }
+
+    @Override
+    public Bundle getBundle(String context, String id) {
+        return doGetBundle(doGetBundleContext(context), id);
     }
 
     @Override
@@ -104,13 +109,14 @@ public class BundleServiceImpl implements BundleService {
         for (BundleStateService bundleStateService : stateServices) {
             String part = bundleStateService.getDiag(bundle);
             if (part != null) {
-                message.append(bundleStateService.getName() + "\n");
+                message.append(bundleStateService.getName());
+                message.append("\n");
                 message.append(part);
             }
         }
         if (bundle.getState() == Bundle.INSTALLED) {
             System.out.println("Unsatisfied Requirements:");
-            List<BundleRequirement> reqs = getUnsatisfiedRquirements(bundle, null);
+            List<BundleRequirement> reqs = getUnsatisfiedRequirements(bundle, null);
             for (BundleRequirement req : reqs) {
                 System.out.println(req);
             }
@@ -119,8 +125,8 @@ public class BundleServiceImpl implements BundleService {
     }
     
     @Override
-    public List<BundleRequirement> getUnsatisfiedRquirements(Bundle bundle, String namespace) {
-        List<BundleRequirement> result = new ArrayList<BundleRequirement>();
+    public List<BundleRequirement> getUnsatisfiedRequirements(Bundle bundle, String namespace) {
+        List<BundleRequirement> result = new ArrayList<>();
         BundleRevision rev = bundle.adapt(BundleRevision.class);
         if (rev != null) {
             List<BundleRequirement> reqs = rev.getDeclaredRequirements(namespace);
@@ -131,6 +137,72 @@ public class BundleServiceImpl implements BundleService {
             }
         }
         return result;
+    }
+
+    @Override
+    public int getSystemBundleThreshold() {
+        int sbsl = 50;
+        try {
+            final String sbslProp = bundleContext.getProperty("karaf.systemBundlesStartLevel");
+            if (sbslProp != null) {
+                sbsl = Integer.valueOf(sbslProp);
+            }
+        } catch (Exception ignore) {
+            // ignore
+        }
+        return sbsl;
+    }
+
+    private BundleContext doGetBundleContext(String context) {
+        if (context == null || context.trim().isEmpty()) {
+            return bundleContext;
+        } else {
+            List<Bundle> bundles = doSelectBundles(bundleContext, Collections.singletonList(context), false);
+            if (bundles.isEmpty()) {
+                throw new IllegalArgumentException("Context " + context + " does not evaluate to a bundle");
+            } else if (bundles.size() > 1) {
+                throw new IllegalArgumentException("Context " + context + " is ambiguous");
+            }
+            BundleContext bundleContext = bundles.get(0).getBundleContext();
+            if (bundleContext == null) {
+                throw new IllegalArgumentException("Context " + context + " is not resolved");
+            }
+            return bundleContext;
+        }
+    }
+
+    private Bundle doGetBundle(BundleContext bundleContext, String id) {
+        List<Bundle> bundles = doSelectBundles(bundleContext, Collections.singletonList(id), false);
+        if (bundles.isEmpty()) {
+            throw new IllegalArgumentException("Bundle " + id + " does not match any bundle");
+        } else {
+            List<Bundle> filtered = filter(bundles);
+            if (filtered.isEmpty()) {
+                throw new IllegalArgumentException("Access to bundle " + id + " is forbidden");
+            } else if (filtered.size() > 1) {
+                throw new IllegalArgumentException("Multiple bundles matching " + id);
+            }
+            return filtered.get(0);
+        }
+    }
+
+    private List<Bundle> doSelectBundles(BundleContext bundleContext, List<String> ids, boolean defaultAllBundles) {
+        return filter(new BundleSelectorImpl(bundleContext).selectBundles(ids, defaultAllBundles));
+    }
+
+    private List<Bundle> filter(List<Bundle> bundles) {
+        if (JaasHelper.currentUserHasRole(BundleService.SYSTEM_BUNDLES_ROLE)) {
+            return bundles;
+        }
+        int sbsl = getSystemBundleThreshold();
+        List<Bundle> filtered = new ArrayList<>();
+        for (Bundle bundle : bundles) {
+            int level = bundle.adapt(BundleStartLevel.class).getStartLevel();
+            if (level >= sbsl) {
+                filtered.add(bundle);
+            }
+        }
+        return filtered;
     }
     
     private boolean canBeSatisfied(BundleRequirement req) {
@@ -147,11 +219,6 @@ public class BundleServiceImpl implements BundleService {
             }
         }
         return false;
-    }
-
-    @Override
-    public List<Bundle> getBundlesByURL(String urlFilter) {
-        return new BundleSelectorImpl(bundleContext).getBundlesByURL(urlFilter);
     }
 
     /*
@@ -187,7 +254,7 @@ public class BundleServiceImpl implements BundleService {
      */
     public void disableDynamicImports(Bundle bundle) {
         Set<String> current = getWiredBundles(bundle).keySet();
-        for (String original : bundle.getHeaders().get(ORIGINAL_WIRES).toString().split(",")) {
+        for (String original : bundle.getHeaders().get(ORIGINAL_WIRES).split(",")) {
             current.remove(original);
         }
 
@@ -211,7 +278,7 @@ public class BundleServiceImpl implements BundleService {
      * Explode a set of string values in to a ,-delimited string
      */
     private String explode(Set<String> set) {
-        StringBuffer result = new StringBuffer();
+        StringBuilder result = new StringBuilder();
         Iterator<String> it = set.iterator();
         while (it.hasNext()) {
             result.append(it.next());
@@ -230,7 +297,7 @@ public class BundleServiceImpl implements BundleService {
      */
     public Map<String, Bundle> getWiredBundles(Bundle bundle) {
         // the set of bundles from which the bundle imports packages
-        Map<String, Bundle> exporters = new HashMap<String, Bundle>();
+        Map<String, Bundle> exporters = new HashMap<>();
 
         for (BundleRevision revision : bundle.adapt(BundleRevisions.class).getRevisions()) {
             BundleWiring wiring = revision.getWiring();

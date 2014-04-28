@@ -17,16 +17,25 @@
 package org.apache.karaf.bundle.command;
 
 import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.osgi.framework.Bundle;
 
 @Command(scope = "bundle", name = "start", description = "Starts bundles.")
 @Service
-public class Start extends BundlesCommandWithConfirmation {
+public class Start extends BundlesCommand {
+
+    @Option(name = "-t", aliases={"--transient"}, description="Keep the bundle as auto-start", required = false, multiValued = false)
+    boolean transientStart;
+
+    public Start() {
+        defaultAllBundles = false;
+        errorMessage = "Error starting bundle";
+    }
 
     @Override
     protected void executeOnBundle(Bundle bundle) throws Exception {
-        bundle.start();
+        bundle.start(transientStart ? Bundle.START_TRANSIENT : 0);
     }
 
 }

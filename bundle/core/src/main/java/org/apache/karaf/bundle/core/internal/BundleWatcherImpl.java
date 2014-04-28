@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -91,8 +92,12 @@ public class BundleWatcherImpl implements Runnable, BundleListener, BundleWatche
                 oldCounter = counter.get();
                 watchedBundles.clear();
                 for (String bundleURL : watchURLs) {
-                    for (Bundle bundle : bundleService.getBundlesByURL(bundleURL)) {
-                        watchedBundles.add(bundle);
+                    // Transform into regexp
+                    bundleURL = bundleURL.replaceAll("\\*", ".*");
+                    for (Bundle bundle : bundleService.selectBundles(Collections.singletonList(bundleURL), false)) {
+                        if (isMavenSnapshotUrl(bundle.getLocation())) {
+                            watchedBundles.add(bundle);
+                        }
                     }
                 }
             }
@@ -139,6 +144,10 @@ public class BundleWatcherImpl implements Runnable, BundleListener, BundleWatche
         if (logger.isDebugEnabled()) {
             logger.debug("Bundle watcher thread stopped");
         }
+    }
+
+    private boolean isMavenSnapshotUrl(String url) {
+        return url.startsWith("mvn:") && url.contains("SNAPSHOT");
     }
 
     private void updateBundleIfNecessary(File localRepository, List<Bundle> updated, Bundle bundle)
@@ -248,7 +257,8 @@ public class BundleWatcherImpl implements Runnable, BundleListener, BundleWatche
 
 	@Override
 	public List<Bundle> getBundlesByURL(String urlFilter) {
-		return bundleService.getBundlesByURL(urlFilter);
+        urlFilter = urlFilter.replaceAll("\\*", ".*");
+		return bundleService.selectBundles(Collections.singletonList(urlFilter), false);
 	}
 
 }

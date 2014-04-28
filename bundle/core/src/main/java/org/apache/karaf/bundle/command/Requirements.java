@@ -45,13 +45,13 @@ public class Requirements extends BundlesCommand {
 
     @Option(name = "--namespace")
     String namespace = "*";
-    
-    public Requirements() {
-        super(true);
+
+    @Override
+    protected void executeOnBundle(Bundle bundle) throws Exception {
     }
 
     @Override
-    protected void doExecute(List<Bundle> bundles) throws Exception {
+    protected Object doExecute(List<Bundle> bundles) throws Exception {
         boolean separatorNeeded = false;
         Pattern ns = Pattern.compile(namespace.replaceAll("\\.", "\\\\.").replaceAll("\\*", ".*"));
         for (Bundle b : bundles) {
@@ -84,6 +84,7 @@ public class Requirements extends BundlesCommand {
 
             separatorNeeded = true;
         }
+        return null;
     }
 
     private static boolean printMatchingRequirements(BundleWiring wiring, Pattern namespace) {

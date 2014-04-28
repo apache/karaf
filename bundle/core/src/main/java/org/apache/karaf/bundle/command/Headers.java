@@ -62,18 +62,9 @@ public class Headers extends BundlesCommand {
 
     @Reference
     Terminal terminal;
-    
-    public Headers() {
-        super(true);
-    }
 
-    protected void doExecute(List<Bundle> bundles) throws Exception {
-        for (Bundle bundle : bundles) {
-            printHeaders(bundle);
-        }
-    }
-
-    protected void printHeaders(Bundle bundle) throws Exception {
+    @Override
+    protected void executeOnBundle(Bundle bundle) throws Exception {
         String title = ShellUtil.getBundleName(bundle);
         System.out.println("\n" + title);
         System.out.println(ShellUtil.getUnderlineString(title));

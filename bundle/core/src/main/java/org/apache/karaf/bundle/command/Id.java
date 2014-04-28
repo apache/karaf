@@ -30,47 +30,11 @@ import org.osgi.framework.BundleContext;
 
 @Command(scope = "bundle", name = "id", description = "Gets the bundle ID.")
 @Service
-public class Id implements Action {
+public class Id extends BundleCommand {
 
-    @Argument(index = 0, name = "name", description = "The bundle name, name/version, or location", required = true, multiValued = false)
-    String name;
-
-    @Reference
-    BundleService bundleService;
-
-    @Reference
-    BundleContext bundleContext;
-
-    public Object execute() throws Exception {
-        return doExecute(true);
+    @Override
+    protected Object doExecute(Bundle bundle) throws Exception {
+        return bundle.getBundleId();
     }
 
-    protected Object doExecute(boolean force) throws Exception {
-        Bundle bundle = bundleService.getBundle(name, true);
-        
-        // if name or name/version were not successful, let's try searching by location
-        if (bundle == null) {
-            for (int i = 0; i < bundleContext.getBundles().length; i++) {
-                Bundle b = bundleContext.getBundles()[i];
-                if (name.equals(b.getLocation())) {
-                    bundle = b;
-                    break;
-                }
-            }
-        }
-        if (bundle != null) {            
-            if (force || !ShellUtil.isASystemBundle(bundleContext, bundle)) {                
-                return bundle.getBundleId();
-            } else {
-                System.err.println("Access to system bundle " + name + " is discouraged. You may override with -f");
-            }
-        } else {
-            System.err.println("Bundle " + name + " is not found");
-        }
-        return null;
-    }
-
-    public void setBundleService(BundleService bundleService) {
-        this.bundleService = bundleService;
-    }
 }

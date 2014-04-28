@@ -29,22 +29,17 @@ import org.osgi.framework.Bundle;
 @Service
 public class Diag extends BundlesCommand {
 
-    public Diag() {
-        super(true);
-    }
-
-    protected void doExecute(List<Bundle> bundles) throws Exception {
-        for (Bundle bundle : bundles) {
-            BundleInfo info = bundleService.getInfo(bundle);
-            if (info.getState() == BundleState.Failure || info.getState() == BundleState.Waiting
-                || info.getState() == BundleState.GracePeriod || info.getState() == BundleState.Installed) {
-                String title = ShellUtil.getBundleName(bundle);
-                System.out.println(title);
-                System.out.println(ShellUtil.getUnderlineString(title));
-                System.out.println("Status: " + info.getState().toString());
-                System.out.println(this.bundleService.getDiag(bundle));
-                System.out.println();
-            }
+    @Override
+    protected void executeOnBundle(Bundle bundle) throws Exception {
+        BundleInfo info = bundleService.getInfo(bundle);
+        if (info.getState() == BundleState.Failure || info.getState() == BundleState.Waiting
+            || info.getState() == BundleState.GracePeriod || info.getState() == BundleState.Installed) {
+            String title = ShellUtil.getBundleName(bundle);
+            System.out.println(title);
+            System.out.println(ShellUtil.getUnderlineString(title));
+            System.out.println("Status: " + info.getState().toString());
+            System.out.println(this.bundleService.getDiag(bundle));
+            System.out.println();
         }
     }
 

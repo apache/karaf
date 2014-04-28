@@ -28,6 +28,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.startlevel.BundleStartLevel;
 
 public class TestBundleFactory {
     ServiceReference<?> createServiceRef(Object ... keyProp) {
@@ -61,6 +62,8 @@ public class TestBundleFactory {
         Bundle bundle2 = createBundle(2, "Bundle B");
         Bundle bundle3 = createBundle(3, "Bundle C");
 
+        BundleStartLevel bsl = createMock(BundleStartLevel.class);
+
         ServiceReference<?> ref1 = createServiceRef(Constants.OBJECTCLASS, new String[]{"org.example.MyService"},
             "key1", "value1");
         ServiceReference<?> ref2 = createServiceRef(Constants.OBJECTCLASS, new String[]{"org.example.OtherService"}, "key2", 1);
@@ -76,7 +79,13 @@ public class TestBundleFactory {
         expect(ref1.getUsingBundles()).andReturn(new Bundle[]{bundle2, bundle3}).anyTimes();
         expect(ref2.getUsingBundles()).andReturn(new Bundle[]{bundle3}).anyTimes();
 
-        replay(bundle1, bundle2, bundle3, ref1, ref2);
+        expect(bundle1.adapt(BundleStartLevel.class)).andReturn(bsl).anyTimes();
+        expect(bundle2.adapt(BundleStartLevel.class)).andReturn(bsl).anyTimes();
+        expect(bundle3.adapt(BundleStartLevel.class)).andReturn(bsl).anyTimes();
+
+        expect(bsl.getStartLevel()).andReturn(80).anyTimes();
+
+        replay(bundle1, bundle2, bundle3, ref1, ref2, bsl);
         return new Bundle[] { bundle1, bundle2, bundle3 };
     }
     
@@ -94,6 +103,7 @@ public class TestBundleFactory {
     public BundleContext createBundleContext() {
         BundleContext bundleContext = createMock(BundleContext.class);
         Bundle[] bundles = createBundles();
+        expect(bundleContext.getProperty("karaf.systemBundlesStartLevel")).andReturn(Integer.toString(50)).anyTimes();
         expect(bundleContext.getBundles()).andReturn(bundles).anyTimes();
         expect(bundleContext.getBundle(0)).andReturn(null).anyTimes();
         expect(bundleContext.getBundle(1)).andReturn(bundles[0]).anyTimes();

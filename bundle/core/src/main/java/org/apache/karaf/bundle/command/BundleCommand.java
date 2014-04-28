@@ -16,9 +16,13 @@
  */
 package org.apache.karaf.bundle.command;
 
+import java.util.Collections;
+import java.util.List;
+
 import org.apache.karaf.bundle.core.BundleService;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.support.ShellUtil;
 import org.osgi.framework.Bundle;
@@ -29,10 +33,11 @@ import org.osgi.framework.BundleContext;
  */
 public abstract class BundleCommand implements Action {
 
+    @Option(name = "--context", description = "Use the given bundle context")
+    String context = "0";
+
     @Argument(index = 0, name = "id", description = "The bundle ID or name or name/version", required = true, multiValued = false)
     String id;
-
-    boolean defaultAllBundles = true;
 
     @Reference
     BundleService bundleService;
@@ -40,29 +45,12 @@ public abstract class BundleCommand implements Action {
     @Reference
     BundleContext bundleContext;
 
-    public BundleCommand(boolean defaultAllBundles) {
-        this.defaultAllBundles = defaultAllBundles;
-    }
-
     public Object execute() throws Exception {
-        return doExecute(true);
+        Bundle bundle = bundleService.getBundle(id);
+        return doExecute(bundle);
     }
 
-    protected Object doExecute(boolean force) throws Exception {
-        Bundle bundle = bundleService.getBundle(id, defaultAllBundles);
-        if (bundle != null) {
-            if (force || !ShellUtil.isASystemBundle(bundleContext, bundle)) {
-                doExecute(bundle);
-            } else {
-                System.err.println("Access to system bundle " + id + " is discouraged. You may override with -f");
-            }
-        } else {
-            System.err.println("Bundle " + id + " is not found");
-        }
-        return null;
-    }
-
-    protected abstract void doExecute(Bundle bundle) throws Exception;
+    protected abstract Object doExecute(Bundle bundle) throws Exception;
 
     public void setBundleService(BundleService bundleService) {
         this.bundleService = bundleService;

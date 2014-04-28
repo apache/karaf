@@ -25,15 +25,16 @@ import org.osgi.framework.wiring.FrameworkWiring;
 
 @Command(scope = "bundle", name = "refresh", description = "Refresh bundles.")
 @Service
-public class Refresh extends BundlesCommandWithConfirmation {
+public class Refresh extends BundlesCommand {
     
     public Refresh() {
-        this.defaultAllBundles = false;
+        defaultAllBundles = false;
     }
 
-    protected void doExecute(List<Bundle> bundles) throws Exception {
+    protected Object doExecute(List<Bundle> bundles) throws Exception {
         FrameworkWiring wiring = bundleContext.getBundle(0).adapt(FrameworkWiring.class);
         wiring.refreshBundles(bundles == null || bundles.isEmpty() ? null : bundles);
+        return null;
     }
 
     @Override

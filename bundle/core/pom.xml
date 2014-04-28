@@ -85,6 +85,12 @@
         </dependency>
 
         <dependency>
+            <groupId>org.apache.karaf.jaas</groupId>
+            <artifactId>org.apache.karaf.jaas.modules</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-jdk14</artifactId>
             <scope>test</scope>
@@ -125,6 +131,9 @@
                             org.apache.felix.utils.version,
                             org.apache.felix.utils.manifest
                         </Private-Package>
+                        <Embed-Dependency>
+                            org.apache.karaf.jaas.modules;inline="org/apache/karaf/jaas/modules/JaasHelper*.class"
+                        </Embed-Dependency>
                         <Bundle-Activator>
                             org.apache.karaf.bundle.core.internal.osgi.Activator
                         </Bundle-Activator>

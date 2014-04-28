@@ -23,18 +23,22 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.wiring.BundleRequirement;
 
 public interface BundleService {
+
+    String SYSTEM_BUNDLES_ROLE = "systembundles";
     
     BundleInfo getInfo(Bundle bundle);
 
     List<Bundle> selectBundles(List<String> ids, boolean defaultAllBundles);
-    
-    List<Bundle> getBundlesByURL(String urlFilter);
 
-    Bundle getBundle(String id, boolean defaultAllBundles);
-    
+    List<Bundle> selectBundles(String context, List<String> ids, boolean defaultAllBundles);
+
+    Bundle getBundle(String id);
+
+    Bundle getBundle(String context, String id);
+
     String getDiag(Bundle bundle);
     
-    List<BundleRequirement> getUnsatisfiedRquirements(Bundle bundle, String namespace);
+    List<BundleRequirement> getUnsatisfiedRequirements(Bundle bundle, String namespace);
     
     Map<String, Bundle> getWiredBundles(Bundle bundle);
     
@@ -43,5 +47,7 @@ public interface BundleService {
     void enableDynamicImports(Bundle bundle);
 
     void disableDynamicImports(Bundle bundle);
+
+    int getSystemBundleThreshold();
 
 }

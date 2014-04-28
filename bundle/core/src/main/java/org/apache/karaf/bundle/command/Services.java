@@ -31,9 +31,9 @@ import org.osgi.framework.ServiceReference;
 
 @Command(scope = "bundle", name = "services", description = "Lists OSGi services per Bundle")
 @Service
-public class ListBundleServices extends BundlesCommand {
+public class Services extends BundlesCommand {
 
-    @Option(name = "-a", aliases = {}, description = "Shows all services. (By default Karaf commands are hidden)", required = false, multiValued = false)
+    @Option(name = "-a", aliases = {}, description = "Shows all services. (Karaf commands and completers are hidden by default)", required = false, multiValued = false)
     boolean showAll;
 
     @Option(name = "-u", aliases = {}, description = "Shows the services each bundle uses. (By default the provided services are shown)", required = false, multiValued = false)
@@ -46,17 +46,11 @@ public class ListBundleServices extends BundlesCommand {
         "org.apache.felix.service.command.Function",
         "org.apache.karaf.shell.console.Completer"
     }));
-    
-    public ListBundleServices() {
-        super(true);
-    }
-    
+
     @Override
-    protected void doExecute(List<Bundle> bundles) throws Exception {
-        for (Bundle bundle : bundles) {
-            ServiceReference<?>[] refs = (inUse) ? bundle.getServicesInUse() : bundle.getRegisteredServices();
-            printServices(bundle, refs, showProperties);
-        }
+    protected void executeOnBundle(Bundle bundle) throws Exception {
+        ServiceReference<?>[] refs = (inUse) ? bundle.getServicesInUse() : bundle.getRegisteredServices();
+        printServices(bundle, refs, showProperties);
     }
     
     private void printServices(Bundle bundle, ServiceReference<?>[] refs, boolean showProperties) {

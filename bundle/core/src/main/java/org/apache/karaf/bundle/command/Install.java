@@ -19,6 +19,8 @@ package org.apache.karaf.bundle.command;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.karaf.bundle.core.BundleService;
+import org.apache.karaf.jaas.modules.JaasHelper;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
@@ -49,15 +51,26 @@ public class Install implements Action {
     
     @Reference
     Session session;
-    
+
+    @Reference
+    BundleService bundleService;
+
     @Reference
     BundleContext bundleContext;
 
     @Override
     public Object execute() throws Exception {
+        if (level != null) {
+            int sbsl = bundleService.getSystemBundleThreshold();
+            if (level < sbsl) {
+                if (!JaasHelper.currentUserHasRole(BundleService.SYSTEM_BUNDLES_ROLE)) {
+                    throw new IllegalArgumentException("Insufficient priviledges");
+                }
+            }
+        }
         // install the bundles
-        List<Exception> exceptions = new ArrayList<Exception>();
-        List<Bundle> bundles = new ArrayList<Bundle>();
+        List<Exception> exceptions = new ArrayList<>();
+        List<Bundle> bundles = new ArrayList<>();
         for (String url : urls) {
             try {
                 bundles.add(bundleContext.installBundle(url, null));
@@ -65,25 +78,16 @@ public class Install implements Action {
                 exceptions.add(new Exception("Unable to install bundle " + url, e));
             }
         }
-        
-        // optionally set the start level of the bundles
+        // optionally set start level
         if (level != null) {
-            if (level < 50 && !force){
-                for (;;) {
-                    String msg = "You are about to designate bundle as a system bundle.  Do you still wish to set the start level (yes/no): ";
-                    String str = session.readLine(msg, null);
-                    if ("yes".equalsIgnoreCase(str)) {
-                        setStartLevel(bundles);    
-                        break;
-                    } else if ("no".equalsIgnoreCase(str)) {
-                        break;
-                    }
-                }                
-            } else {
-                setStartLevel(bundles);    
+            for (Bundle bundle : bundles) {
+                try {
+                    bundle.adapt(BundleStartLevel.class).setStartLevel(level);
+                } catch (Exception e) {
+                    exceptions.add(new Exception("Unable to set bundle start level " + bundle.getLocation(), e));
+                }
             }
         }
-        
         // optionally start the bundles
         if (start) {
             for (Bundle bundle : bundles) {
@@ -110,17 +114,6 @@ public class Install implements Action {
         }
         MultiException.throwIf("Error installing bundles", exceptions);
         return null;
-    }
-
-    private void setStartLevel(List<Bundle> bundles) {
-        for (Bundle bundle : bundles) {
-            BundleStartLevel bsl = bundle.adapt(BundleStartLevel.class);
-            if (bsl == null) {
-                System.out.println("StartLevel service is unavailable for bundle id " + bundle);
-                return;
-            }
-            bsl.setStartLevel(level);
-        }
     }
 
 }

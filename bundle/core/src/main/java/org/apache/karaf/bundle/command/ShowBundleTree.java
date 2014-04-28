@@ -59,12 +59,8 @@ public class ShowBundleTree extends BundleCommand {
 
     private Tree<Bundle> tree;
 
-    public ShowBundleTree() {
-        super(false);
-    }
-
     @Override
-    protected void doExecute(Bundle bundle) throws Exception {
+    protected Object doExecute(Bundle bundle) throws Exception {
         long start = System.currentTimeMillis();
         // let's do the real work here
         printHeader(bundle);
@@ -74,6 +70,7 @@ public class ShowBundleTree extends BundleCommand {
         printDuplicatePackages(tree);
         LOGGER.debug(format("Dependency tree calculated in %d ms",
                             System.currentTimeMillis() - start));
+        return null;
     }
     
     /**

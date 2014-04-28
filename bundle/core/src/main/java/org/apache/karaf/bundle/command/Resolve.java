@@ -27,13 +27,14 @@ import org.osgi.framework.wiring.FrameworkWiring;
 @Service
 public class Resolve extends BundlesCommand {
 
-    public Resolve() {
-        super(true);
-    }
-
-    protected void doExecute(List<Bundle> bundles) throws Exception {
+    protected Object doExecute(List<Bundle> bundles) throws Exception {
         FrameworkWiring wiring = bundleContext.getBundle(0).adapt(FrameworkWiring.class);
         wiring.resolveBundles(bundles == null || bundles.isEmpty() ? null : bundles);
+        return null;
+    }
+
+    @Override
+    protected void executeOnBundle(Bundle bundle) throws Exception {
     }
 
 }

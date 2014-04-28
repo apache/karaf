@@ -25,7 +25,36 @@ import java.security.ProtectionDomain;
 import javax.security.auth.Subject;
 import javax.security.auth.SubjectDomainCombiner;
 
+import org.apache.karaf.jaas.boot.principal.RolePrincipal;
+
 public class JaasHelper {
+
+    public static boolean currentUserHasRole(String requestedRole) {
+        String clazz;
+        String role;
+        int index = requestedRole.indexOf(':');
+        if (index > 0) {
+            clazz = requestedRole.substring(0, index);
+            role = requestedRole.substring(index + 1);
+        } else {
+            clazz = RolePrincipal.class.getName();
+            role = requestedRole;
+        }
+        AccessControlContext acc = AccessController.getContext();
+        if (acc == null) {
+            return false;
+        }
+        Subject subject = Subject.getSubject(acc);
+        if (subject == null) {
+            return false;
+        }
+        for (Principal p : subject.getPrincipals()) {
+            if (clazz.equals(p.getClass().getName()) && role.equals(p.getName())) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     public static <T> T doAs(final Subject subject,
                              final PrivilegedAction<T> action) {

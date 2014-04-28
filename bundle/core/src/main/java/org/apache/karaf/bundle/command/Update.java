@@ -26,23 +26,22 @@ import org.osgi.framework.Bundle;
 
 @Command(scope = "bundle", name = "update", description = "Update bundle.")
 @Service
-public class Update extends BundleCommandWithConfirmation {
+public class Update extends BundleCommand {
 
     @Argument(index = 1, name = "location", description = "The bundles update location", required = false, multiValued = false)
     String location;
 
-    protected void doExecute(Bundle bundle) throws Exception {
-        InputStream is = null;
+    protected Object doExecute(Bundle bundle) throws Exception {
         if (location != null) {
-            try {
-                is = new URL(location).openStream();
+            try (
+                InputStream is = new URL(location).openStream()
+            ) {
                 bundle.update(is);
-            } finally {
-                is.close();
             }
         } else {
             bundle.update();
         }
+        return null;
     }
 
 }

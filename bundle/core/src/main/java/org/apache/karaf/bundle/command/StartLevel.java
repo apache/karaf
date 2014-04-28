@@ -16,8 +16,11 @@
  */
 package org.apache.karaf.bundle.command;
 
+import org.apache.karaf.bundle.core.BundleService;
+import org.apache.karaf.jaas.modules.JaasHelper;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
@@ -26,39 +29,34 @@ import org.osgi.framework.startlevel.BundleStartLevel;
 
 @Command(scope = "bundle", name = "start-level", description = "Gets or sets the start level of a bundle.")
 @Service
-public class StartLevel extends BundleCommandWithConfirmation {
+public class StartLevel extends BundleCommand {
 
     @Argument(index = 1, name = "startLevel", description = "The bundle's new start level", required = false, multiValued = false)
     Integer level;
 
     @Reference
+    BundleService bundleService;
+
+    @Reference
     Session session;
 
-    protected void doExecute(Bundle bundle) throws Exception {
+    protected Object doExecute(Bundle bundle) throws Exception {
         // Get package instance service.
         BundleStartLevel bsl = bundle.adapt(BundleStartLevel.class);
-        if (bsl == null) {
-            System.out.println("StartLevel service is unavailable.");
-            return;
-        }
         if (level == null) {
             System.out.println("Level " + bsl.getStartLevel());
         }
-        else if ((level < 50) && (bsl.getStartLevel() > 50) && !force){
-            for (;;) {
-                String msg = "You are about to designate bundle as a system bundle.  Do you wish to continue (yes/no): ";
-                String str = session.readLine(msg, null);
-                if ("yes".equalsIgnoreCase(str)) {
-                    bsl.setStartLevel(level);
-                    break;
-                } else if ("no".equalsIgnoreCase(str)) {
-                    break;
+        else {
+            int sbsl = bundleService.getSystemBundleThreshold();
+            if ((level < sbsl) && (bsl.getStartLevel() >= sbsl)) {
+                if (!JaasHelper.currentUserHasRole(BundleService.SYSTEM_BUNDLES_ROLE)) {
+                    throw new IllegalArgumentException("Insufficient priviledges");
                 }
-            }
 
-        } else {
+            }
             bsl.setStartLevel(level);
         }
+        return null;
     }
 
 }

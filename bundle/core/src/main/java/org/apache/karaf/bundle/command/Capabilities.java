@@ -36,6 +36,7 @@ import org.osgi.framework.wiring.BundleWiring;
 @Command(scope = "bundle", name = "capabilities", description = "Displays OSGi capabilities of a given bundles.")
 @Service
 public class Capabilities extends BundlesCommand {
+
     public static final String NONSTANDARD_SERVICE_NAMESPACE = "service";
 
     private static final String EMPTY_MESSAGE = "[EMPTY]";
@@ -44,12 +45,8 @@ public class Capabilities extends BundlesCommand {
     @Option(name = "--namespace")
     String namespace = "*";
 
-    public Capabilities() {
-        super(true);
-    }
-    
     @Override
-    protected void doExecute(List<Bundle> bundles) throws Exception {
+    protected Object doExecute(List<Bundle> bundles) throws Exception {
         boolean separatorNeeded = false;
         Pattern ns = Pattern.compile(namespace.replaceAll("\\.", "\\\\.").replaceAll("\\*", ".*"));
         for (Bundle b : bundles)
@@ -90,6 +87,11 @@ public class Capabilities extends BundlesCommand {
             }
             separatorNeeded = true;
         }
+        return null;
+    }
+
+    @Override
+    protected void executeOnBundle(Bundle bundle) throws Exception {
     }
 
     private static boolean printMatchingCapabilities(BundleWiring wiring, Pattern namespace)

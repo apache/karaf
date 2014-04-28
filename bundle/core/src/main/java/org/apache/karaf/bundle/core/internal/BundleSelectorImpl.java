@@ -35,7 +35,7 @@ public class BundleSelectorImpl {
     }
     
     public List<Bundle> selectBundles(List<String> ids, boolean defaultAllBundles) {
-        List<Bundle> bundles = new ArrayList<Bundle>();
+        List<Bundle> bundles = new ArrayList<>();
         if (ids != null && !ids.isEmpty()) {
             for (String id : ids) {
                 if (id == null) {
@@ -49,7 +49,7 @@ public class BundleSelectorImpl {
         return bundles;
     }
     
-    public void addMatchingBundles(String id, List<Bundle> bundles) {
+    private void addMatchingBundles(String id, List<Bundle> bundles) {
         // id is a number
         Pattern pattern = Pattern.compile("^\\d+$");
         Matcher matcher = pattern.matcher(id);
@@ -76,8 +76,9 @@ public class BundleSelectorImpl {
             return;
         }
 
+        // bundles by name
         int index = id.indexOf('/');
-        List<Bundle> bundlesByName = null;
+        List<Bundle> bundlesByName;
         if (index != -1) {
             // user has provided name and version
             bundlesByName = getBundleByNameAndVersion(id.substring(0, index), id.substring(index + 1));
@@ -87,6 +88,12 @@ public class BundleSelectorImpl {
         }
         for (Bundle bundleByName : bundlesByName) {
             addBundle(bundleByName, id, bundles);
+        }
+
+        // bundles by location
+        List<Bundle> bundlesByLocation = getBundlesByLocation(id);
+        for (Bundle bundleByLocation : bundlesByLocation) {
+            addBundle(bundleByLocation, id, bundles);
         }
     }
 
@@ -136,91 +143,62 @@ public class BundleSelectorImpl {
     private List<Bundle> getBundleByNameAndVersion(String name, String version) {
         Bundle[] bundles = bundleContext.getBundles();
 
-        ArrayList<Bundle> result = new ArrayList<Bundle>();
+        ArrayList<Bundle> result = new ArrayList<>();
 
         Pattern namePattern = Pattern.compile(name);
 
-        for (int i = 0; i < bundles.length; i++) {
+        for (Bundle bundle : bundles) {
 
-            String bundleSymbolicName = bundles[i].getSymbolicName();
+            String bundleSymbolicName = bundle.getSymbolicName();
             // skip bundles without Bundle-SymbolicName header
             if (bundleSymbolicName == null) {
                 continue;
             }
-            
+
             Matcher symbolicNameMatcher = namePattern.matcher(bundleSymbolicName);
-            
+
             Matcher nameMatcher = null;
-            String bundleName = (String) bundles[i].getHeaders().get(Constants.BUNDLE_NAME);
+            String bundleName = bundle.getHeaders().get(Constants.BUNDLE_NAME);
             if (bundleName != null) {
                 nameMatcher = namePattern.matcher(bundleName);
             }
 
             if (version != null) {
-                String bundleVersion = (String) bundles[i].getHeaders().get(Constants.BUNDLE_VERSION);
+                String bundleVersion = bundle.getHeaders().get(Constants.BUNDLE_VERSION);
                 if (bundleVersion != null) {
                     boolean nameMatch = (nameMatcher != null && nameMatcher.find()) || symbolicNameMatcher.find();
                     if (nameMatch) {
                         Pattern versionPattern = Pattern.compile(version);
-                        Matcher versionMatcher = versionPattern.matcher(bundleVersion);                    
+                        Matcher versionMatcher = versionPattern.matcher(bundleVersion);
                         if (versionMatcher.find()) {
-                            result.add(bundles[i]);
+                            result.add(bundle);
                         }
                     }
                 }
             } else {
                 boolean nameMatch = (nameMatcher != null && nameMatcher.find()) || symbolicNameMatcher.find();
                 if (nameMatch) {
-                    result.add(bundles[i]);
+                    result.add(bundle);
                 }
             }
         }
         return result;
     }
     
-    public List<Bundle> getBundlesByURL(String url) {
-        List<Bundle> bundleList = new ArrayList<Bundle>();
-        try {
-            Long id = Long.parseLong(url);
-            Bundle bundle = bundleContext.getBundle(id);
-            if (bundle != null) {
-                bundleList.add(bundle);
-            }
-        } catch (NumberFormatException e) {
-            for (int i = 0; i < bundleContext.getBundles().length; i++) {
-                Bundle bundle = bundleContext.getBundles()[i];
-                if (isMavenSnapshotUrl(bundle.getLocation()) && wildCardMatch(bundle.getLocation(), url)) {
-                    bundleList.add(bundle);
-                }
+    private List<Bundle> getBundlesByLocation(String url) {
+        Bundle[] bundles = bundleContext.getBundles();
+
+        ArrayList<Bundle> result = new ArrayList<>();
+
+        Pattern locationPattern = Pattern.compile(url);
+
+        for (Bundle bundle : bundles) {
+            Matcher locationMatcher = locationPattern.matcher(bundle.getLocation());
+            if (locationMatcher.find()) {
+                result.add(bundle);
             }
         }
-        return bundleList;
-    }
-
-    private boolean isMavenSnapshotUrl(String url) {
-        return url.startsWith("mvn:") && url.contains("SNAPSHOT");
-    }
-
-    /**
-     * Matches text using a pattern containing wildcards.
-     * 
-     * @param text
-     * @param pattern
-     * @return
-     */
-    private boolean wildCardMatch(String text, String pattern) {
-        String[] cards = pattern.split("\\*");
-        for (String card : cards) {
-            int idx = text.indexOf(card);
-            // Card not detected in the text.
-            if (idx == -1) {
-                return false;
-            }
-
-            // Move ahead, towards the right of the text.
-            text = text.substring(idx + card.length());
-        }
-        return true;
+        return result;
     }
 
 }

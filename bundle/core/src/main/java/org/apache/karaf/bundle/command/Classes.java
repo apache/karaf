@@ -32,17 +32,8 @@ public class Classes extends BundlesCommand {
     @Option(name = "-a", aliases={"--display-all-files"}, description="List all classes and files in the bundle", required = false, multiValued = false)
     boolean displayAllFiles;
 
-    public Classes() {
-        super(true);
-    }
-
-    protected void doExecute(List<Bundle> bundles) throws Exception {
-        for (Bundle bundle : bundles) {
-            printResources(bundle);
-        }
-    }
-
-    protected void printResources(Bundle bundle) {
+    @Override
+    protected void executeOnBundle(Bundle bundle) throws Exception {
         BundleWiring wiring = bundle.adapt(BundleWiring.class);
         if (wiring != null){
             Collection<String> resources;

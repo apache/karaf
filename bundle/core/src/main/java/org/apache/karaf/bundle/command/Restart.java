@@ -26,33 +26,35 @@ import org.osgi.framework.Bundle;
 
 @Command(scope = "bundle", name = "restart", description = "Restarts bundles.")
 @Service
-public class Restart extends BundlesCommandWithConfirmation {
+public class Restart extends BundlesCommand {
     
     public Restart() {
+        defaultAllBundles = false;
         errorMessage = "Error restarting bundle";
     }
 
-    protected void doExecute(List<Bundle> bundles) throws Exception {
+    protected Object doExecute(List<Bundle> bundles) throws Exception {
         if (bundles.isEmpty()) {
             System.err.println("No bundles specified.");
-            return;
+            return null;
         }
         List<Exception> exceptions = new ArrayList<Exception>();
         for (Bundle bundle : bundles) {
             try {
-                bundle.stop();
+                bundle.stop(Bundle.STOP_TRANSIENT);
             } catch (Exception e) {
                 exceptions.add(new Exception("Unable to stop bundle " + bundle.getBundleId() + ": " + e.getMessage(), e));
             }
         }
         for (Bundle bundle : bundles) {
             try {
-                bundle.start();
+                bundle.start(Bundle.START_TRANSIENT);
             } catch (Exception e) {
                 exceptions.add(new Exception("Unable to start bundle " + bundle.getBundleId() + ": " + e.getMessage(), e));
             }
         }
         MultiException.throwIf("Error restarting bundles", exceptions);
+        return null;
     }
 
     @Override

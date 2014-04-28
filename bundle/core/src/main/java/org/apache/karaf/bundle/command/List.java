@@ -31,10 +31,10 @@ import org.osgi.framework.startlevel.FrameworkStartLevel;
 
 @Command(scope = "bundle", name = "list", description = "Lists all installed bundles.")
 @Service
-public class ListBundles implements Action {
+public class List extends BundlesCommand {
 
     @Option(name = "-l", aliases = {}, description = "Show the locations", required = false, multiValued = false)
-    boolean showLoc;
+    boolean showLocation;
 
     @Option(name = "-s", description = "Shows the symbolic name", required = false, multiValued = false)
     boolean showSymbolic;
@@ -52,24 +52,18 @@ public class ListBundles implements Action {
     BundleContext bundleContext;
 
     @Reference
-    private BundleService bundleService;
+    BundleService bundleService;
 
-    public void setBundleService(BundleService bundleService) {
-        this.bundleService = bundleService;
+    @Override
+    protected void executeOnBundle(Bundle bundle) throws Exception {
     }
 
     @Override
-    public Object execute() throws Exception {
-        Bundle[] bundles = bundleContext.getBundles();
-        if (bundles == null) {
-            System.out.println("There are no installed bundles.");
-            return null;
-        }
-
+    protected Object doExecute(java.util.List<Bundle> bundles) throws Exception {
         determineBundleLevelThreshold();
         
         // Display active start level.
-        FrameworkStartLevel fsl = bundleContext.getBundle(0).adapt(FrameworkStartLevel.class);
+        FrameworkStartLevel fsl = this.bundleContext.getBundle(0).adapt(FrameworkStartLevel.class);
         if (fsl != null) {
             System.out.println("START LEVEL " + fsl.getStartLevel() + " , List Threshold: " + bundleLevelThreshold);
         }
@@ -81,8 +75,7 @@ public class ListBundles implements Action {
         table.column("Version");
         table.column(getNameHeader());
         
-        for (int i = 0; i < bundles.length; i++) {
-            Bundle bundle = bundles[i];
+        for (Bundle bundle : bundles) {
             BundleInfo info = this.bundleService.getInfo(bundle);
             if (info.getStartLevel() >= bundleLevelThreshold) {
                 String name = getNameToShow(info) + printFragments(info) + printHosts(info);
@@ -92,13 +85,12 @@ public class ListBundles implements Action {
             }
         }
         table.print(System.out, !noFormat);
-
         return null;
     }
 
     private String getNameHeader() {
         String msg = "Name";
-        if (showLoc) {
+        if (showLocation) {
             msg = "Location";
         } else if (showSymbolic) {
             msg = "Symbolic name";
@@ -109,15 +101,8 @@ public class ListBundles implements Action {
     }
 
     private void determineBundleLevelThreshold() {
-        final String sbslProp = bundleContext.getProperty("karaf.systemBundlesStartLevel");
-        if (sbslProp != null) {
-            try {
-                if (bundleLevelThreshold < 0) {
-                    bundleLevelThreshold = Integer.valueOf(sbslProp);
-                }
-            } catch (Exception ignore) {
-                // ignore
-            }
+        if (bundleLevelThreshold < 0) {
+            bundleLevelThreshold = bundleService.getSystemBundleThreshold();
         }
     }
 
@@ -161,7 +146,7 @@ public class ListBundles implements Action {
      * @return
      */
     private String getNameToShow(BundleInfo info) {
-        if (showLoc) {
+        if (showLocation) {
             return info.getUpdateLocation();
         } else if (showSymbolic) {
             return info.getSymbolicName() == null ? "<no symbolic name>" : info.getSymbolicName();

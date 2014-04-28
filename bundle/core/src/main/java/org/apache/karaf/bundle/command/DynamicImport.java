@@ -28,12 +28,8 @@ import org.osgi.framework.Bundle;
 @Service
 public class DynamicImport extends BundleCommand {
 
-    public DynamicImport() {
-        super(true);
-    }
-
     @Override
-    protected void doExecute(Bundle bundle) throws Exception {
+    protected Object doExecute(Bundle bundle) throws Exception {
         if (bundleService.isDynamicImport(bundle)) {
             System.out.printf("Disabling dynamic imports on bundle %s%n", bundle);
             bundleService.disableDynamicImports(bundle);
@@ -41,6 +37,7 @@ public class DynamicImport extends BundleCommand {
             System.out.printf("Enabling dynamic imports on bundle %s%n", bundle);
             bundleService.enableDynamicImports(bundle);
         }
+        return null;
     }
 
 }
