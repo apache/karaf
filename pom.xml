@@ -139,7 +139,7 @@
         <commons-lang.version>2.6</commons-lang.version>
         <commons-pool.version>1.6</commons-pool.version>
         <dom4j.bundle.version>1.6.1_5</dom4j.bundle.version>
-        <jasypt.bundle.version>1.9.1_1</jasypt.bundle.version>
+        <jasypt.bundle.version>1.9.2_1</jasypt.bundle.version>
         <serp.bundle.version>1.14.1_1</serp.bundle.version>
         <servlet.spec.groupId>org.apache.geronimo.specs</servlet.spec.groupId>
         <servlet.spec.artifactId>geronimo-servlet_3.0_spec</servlet.spec.artifactId>
