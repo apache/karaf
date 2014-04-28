@@ -44,6 +44,7 @@ import org.apache.karaf.features.Dependency;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
 import org.apache.karaf.features.internal.model.Bundle;
+import org.apache.karaf.features.internal.model.Conditional;
 import org.apache.karaf.features.internal.model.Feature;
 import org.apache.karaf.features.internal.model.Features;
 import org.apache.karaf.features.internal.model.JaxbUtil;
@@ -249,37 +250,40 @@ public class InstallKarsMojo extends MojoSupport {
 
         // install bundles listed in install features not in system
         for (Feature feature : localRepoFeatures) {
-            for (Bundle bundle : feature.getBundle()) {
-                if (!bundle.isDependency()) {
-                    String key = bundle.getLocation();
-                    // remove wrap: protocol to resolve from maven
-                    if (key.startsWith("wrap:")) {
-                        key = key.substring(5);
-                    }
-                    String path = this.dependencyHelper.pathFromMaven(key);
-                    File test = new File(system.resolve(path));
-                    if (!test.exists()) {
-                        File target = new File(system.resolve(path));
-                        if (!target.exists()) {
-                            install(key, target);
-                            Artifact artifact = this.dependencyHelper.mvnToArtifact(key);
-                            if (artifact.isSnapshot()) {
-                                // generate maven-metadata-local.xml for the artifact
-                                File metadataSource = new File(this.dependencyHelper.resolveById(key, getLog()).getParentFile(), "maven-metadata-local.xml");
-                                File metadataTarget = new File(target.getParentFile(), "maven-metadata-local.xml");
-                                metadataTarget.getParentFile().mkdirs();
-                                try {
-                                    if (!metadataSource.exists()) {
-                                        // the maven-metadata-local.xml doesn't exist in the local repo, generate one
-                                        MavenUtil.generateMavenMetadata(artifact, metadataTarget);
-                                    } else {
-                                        // copy the metadata to the target
-                                        copy(metadataSource, metadataTarget);
-                                    }
-                                } catch (IOException ioException) {
-                                    getLog().warn(ioException);
-                                    getLog().warn("Unable to copy the maven-metadata-local.xml, it means that this SNAPSHOT will be overwritten by a remote one (if exist)");
+            List<Bundle> bundles = new ArrayList<Bundle>();
+            bundles.addAll(feature.getBundle());
+            for (Conditional cond : feature.getConditional()) {
+                bundles.addAll(cond.getBundle());
+            }
+            for (Bundle bundle : bundles) {
+                String key = bundle.getLocation();
+                // remove wrap: protocol to resolve from maven
+                if (key.startsWith("wrap:")) {
+                    key = key.substring(5);
+                }
+                String path = this.dependencyHelper.pathFromMaven(key);
+                File test = new File(system.resolve(path));
+                if (!test.exists()) {
+                    File target = new File(system.resolve(path));
+                    if (!target.exists()) {
+                        install(key, target);
+                        Artifact artifact = this.dependencyHelper.mvnToArtifact(key);
+                        if (artifact.isSnapshot()) {
+                            // generate maven-metadata-local.xml for the artifact
+                            File metadataSource = new File(this.dependencyHelper.resolveById(key, getLog()).getParentFile(), "maven-metadata-local.xml");
+                            File metadataTarget = new File(target.getParentFile(), "maven-metadata-local.xml");
+                            metadataTarget.getParentFile().mkdirs();
+                            try {
+                                if (!metadataSource.exists()) {
+                                    // the maven-metadata-local.xml doesn't exist in the local repo, generate one
+                                    MavenUtil.generateMavenMetadata(artifact, metadataTarget);
+                                } else {
+                                    // copy the metadata to the target
+                                    copy(metadataSource, metadataTarget);
                                 }
+                            } catch (IOException ioException) {
+                                getLog().warn(ioException);
+                                getLog().warn("Unable to copy the maven-metadata-local.xml, it means that this SNAPSHOT will be overwritten by a remote one (if exist)");
                             }
                         }
                     }
@@ -332,29 +336,7 @@ public class InstallKarsMojo extends MojoSupport {
                         existingFeatureRepos = existingFeatureRepos + uri.toString();
                         properties.put(FEATURES_REPOSITORIES, existingFeatureRepos);
                     }
-                    Features repo = readFeatures(uri);
-                    for (String innerRepository : repo.getRepository()) {
-                        String innerRepositoryPath = dependencyHelper.pathFromMaven(innerRepository);
-                        File innerRepositoryTargetInSystemRepository = new File(system.resolve(innerRepositoryPath));
-                        if (!innerRepositoryTargetInSystemRepository.exists()) {
-                            File innerRepositorySourceFile = dependencyHelper.resolveById(innerRepository, getLog());
-                            innerRepositoryTargetInSystemRepository.getParentFile().mkdirs();
-                            copy(innerRepositorySourceFile, innerRepositoryTargetInSystemRepository);
-
-                            // add metadata for snapshot
-                            Artifact innerRepositoryArtifact = dependencyHelper.mvnToArtifact(innerRepository);
-                            if (innerRepositoryArtifact.isSnapshot()) {
-                                getLog().debug("Feature repository " + innerRepository + " is a SNAPSHOT, generate the maven-metadata-local.xml file");
-                                File metadataTarget = new File(innerRepositoryTargetInSystemRepository.getParentFile(), "maven-metadata-local.xml");
-                                try {
-                                    MavenUtil.generateMavenMetadata(innerRepositoryArtifact, metadataTarget);
-                                } catch (Exception e) {
-                                    getLog().warn("Could not create maven-metadata-local.xml", e);
-                                    getLog().warn("It means that this SNAPSHOT could be overwritten by an older one present on remote repositories");
-                                }
-                            }
-                        }
-                    }
+                    Features repo = loadAndCopyRepo(uri);
                     for (Feature feature : repo.getFeature()) {
                         featureSet.add(feature);
                         if (startupFeatures != null && startupFeatures.contains(feature.getName())) {
@@ -389,6 +371,35 @@ public class InstallKarsMojo extends MojoSupport {
                     installFeature(feature);
                 }
             }
+        }
+
+        private Features loadAndCopyRepo(URI uri) throws MojoExecutionException, MojoFailureException, JAXBException, XMLStreamException, IOException {
+            String repositoryPath = dependencyHelper.pathFromMaven(uri.toASCIIString());
+            getLog().info("Copying repo " + uri);
+            File repositoryTargetInSystemRepository = new File(system.resolve(repositoryPath));
+            if (!repositoryTargetInSystemRepository.exists()) {
+                File innerRepositorySourceFile = dependencyHelper.resolveById(uri.toASCIIString(), getLog());
+                repositoryTargetInSystemRepository.getParentFile().mkdirs();
+                copy(innerRepositorySourceFile, repositoryTargetInSystemRepository);
+
+                // add metadata for snapshot
+                Artifact innerRepositoryArtifact = dependencyHelper.mvnToArtifact(uri.toASCIIString());
+                if (innerRepositoryArtifact.isSnapshot()) {
+                    getLog().debug("Feature repository " + uri + " is a SNAPSHOT, generate the maven-metadata-local.xml file");
+                    File metadataTarget = new File(repositoryTargetInSystemRepository.getParentFile(), "maven-metadata-local.xml");
+                    try {
+                        MavenUtil.generateMavenMetadata(innerRepositoryArtifact, metadataTarget);
+                    } catch (Exception e) {
+                        getLog().warn("Could not create maven-metadata-local.xml", e);
+                        getLog().warn("It means that this SNAPSHOT could be overwritten by an older one present on remote repositories");
+                    }
+                }
+            }
+            Features features = readFeatures(repositoryTargetInSystemRepository.toURI());
+            for (String innerRepository : features.getRepository()) {
+                loadAndCopyRepo(URI.create(innerRepository));
+            }
+            return features;
         }
 
         private void addMissingDependenciesToRepo() {
