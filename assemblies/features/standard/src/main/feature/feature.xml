@@ -264,6 +264,10 @@
             <condition>aries-blueprint</condition>
             <bundle start-level="30" start="true">mvn:org.apache.karaf.jaas.blueprint/org.apache.karaf.jaas.blueprint.jasypt/${project.version}</bundle>
         </conditional>
+        <conditional>
+            <condition>spring</condition>
+            <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jasypt-spring31/${jasypt.bundle.version}</bundle>
+        </conditional>
     </feature>
 
     <feature name="scr" description="Declarative Service support" version="${project.version}">
