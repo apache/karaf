@@ -61,7 +61,7 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse</groupId>
-            <artifactId>org.eclipse.osgi</artifactId>
+            <artifactId>osgi</artifactId>
             <scope>runtime</scope>
         </dependency>
         <dependency>
@@ -310,8 +310,8 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse</groupId>
-                                    <artifactId>org.eclipse.osgi</artifactId>
-                                    <outputDirectory>target/classes/resources/system/org/eclipse/org.eclipse.osgi/${equinox.version}</outputDirectory>
+                                    <artifactId>osgi</artifactId>
+                                    <outputDirectory>target/classes/resources/system/org/eclipse/osgi/${equinox.version}</outputDirectory>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.apache.felix</groupId>

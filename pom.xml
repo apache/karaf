@@ -152,7 +152,7 @@
         <geronimo.atinject-spec.version>1.0</geronimo.atinject-spec.version>
         <geronimo.jaspic-spec.version>1.1</geronimo.jaspic-spec.version>
         <easymock.version>3.2</easymock.version>
-        <equinox.version>3.8.2.v20130124-134944</equinox.version>
+        <equinox.version>3.9.1-v20140110-1610</equinox.version>
         <bndlib.version>2.2.0</bndlib.version>
         <equinox.region.version>1.1.0.v20120522-1841</equinox.region.version>
         <equinox.coordinator.version>1.1.0.v20120522-1841</equinox.coordinator.version>
@@ -1457,7 +1457,7 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse</groupId>
-                <artifactId>org.eclipse.osgi</artifactId>
+                <artifactId>osgi</artifactId>
                 <version>${equinox.version}</version>
             </dependency>
             <dependency>

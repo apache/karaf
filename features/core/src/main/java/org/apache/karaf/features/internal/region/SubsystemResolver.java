@@ -19,6 +19,7 @@ package org.apache.karaf.features.internal.region;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -32,6 +33,8 @@ import org.apache.karaf.features.internal.download.Downloader;
 import org.apache.karaf.features.internal.download.StreamProvider;
 import org.apache.karaf.features.internal.download.simple.SimpleDownloader;
 import org.apache.karaf.features.internal.resolver.CapabilitySet;
+import org.apache.karaf.features.internal.resolver.ResourceBuilder;
+import org.apache.karaf.features.internal.resolver.ResourceImpl;
 import org.apache.karaf.features.internal.resolver.SimpleFilter;
 import org.apache.karaf.features.internal.resolver.Slf4jResolverLog;
 import org.eclipse.equinox.internal.region.StandardRegionDigraph;
@@ -40,6 +43,7 @@ import org.eclipse.equinox.region.RegionDigraph;
 import org.eclipse.equinox.region.RegionFilterBuilder;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.Version;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.resource.Capability;
 import org.osgi.resource.Requirement;
@@ -52,6 +56,8 @@ import org.slf4j.LoggerFactory;
 import static org.apache.karaf.features.internal.resolver.ResourceUtils.TYPE_FEATURE;
 import static org.apache.karaf.features.internal.resolver.ResourceUtils.TYPE_SUBSYSTEM;
 import static org.apache.karaf.features.internal.util.MapUtils.invert;
+import static org.osgi.framework.Constants.PROVIDE_CAPABILITY;
+import static org.osgi.framework.namespace.ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE;
 import static org.osgi.framework.namespace.IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE;
 import static org.osgi.framework.namespace.IdentityNamespace.IDENTITY_NAMESPACE;
 import static org.osgi.framework.namespace.IdentityNamespace.TYPE_BUNDLE;
@@ -125,6 +131,9 @@ public class SubsystemResolver {
         root.preResolve(allFeatures, manager, overrides, featureResolutionRange);
 
         // Add system resources
+        ResourceImpl environmentResource = null;
+        BundleRevision sysBundleRev = null;
+        boolean hasEeCap = false;
         for (Map.Entry<String, Set<BundleRevision>> entry : system.entrySet()) {
             Subsystem ss = null;
             String[] parts = entry.getKey().split("/");
@@ -137,10 +146,23 @@ public class SubsystemResolver {
                 ss = ss.getChild(path);
             }
             if (ss != null) {
-                for (Resource res : entry.getValue()) {
+                for (BundleRevision res : entry.getValue()) {
                     ss.addSystemResource(res);
+                    for (Capability cap : res.getCapabilities(null)) {
+                        hasEeCap |= cap.getNamespace().equals(EXECUTION_ENVIRONMENT_NAMESPACE);
+                    }
+                    if (res.getBundle().getBundleId() == 0) {
+                        sysBundleRev = res;
+                    }
                 }
             }
+        }
+        // Under Equinox, the osgi.ee capabilities are not provided by the system bundle
+        if (!hasEeCap && sysBundleRev != null) {
+            String provideCaps = sysBundleRev.getBundle().getHeaders().get(PROVIDE_CAPABILITY);
+            environmentResource = new ResourceImpl("environment", "karaf.environment", Version.emptyVersion);
+            environmentResource.addCapabilities(ResourceBuilder.parseCapability(environmentResource, provideCaps));
+            root.addSystemResource(environmentResource);
         }
 
         // Populate digraph and resolve
@@ -152,6 +174,17 @@ public class SubsystemResolver {
         wiring = resolver.resolve(new SubsystemResolveContext(root, digraph, globalRepository, downloader));
         downloader.await();
 
+        // Remove wiring to the fake environment resource
+        if (environmentResource != null) {
+            for (List<Wire> wires : wiring.values()) {
+                for (Iterator<Wire> iterator = wires.iterator(); iterator.hasNext();) {
+                    Wire wire = iterator.next();
+                    if (wire.getProvider() == environmentResource) {
+                        iterator.remove();
+                    }
+                }
+            }
+        }
         // Fragments are always wired to their host only, so create fake wiring to
         // the subsystem the host is wired to
         associateFragments();

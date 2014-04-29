@@ -240,24 +240,36 @@ public class Main {
 
         // Hack to set felix logger
         try {
-            Field field = framework.getClass().getDeclaredField("m_logger");
-            field.setAccessible(true);
-            Object logger = field.get(framework);
-            Method method = logger.getClass().getDeclaredMethod("setLogger", Object.class);
-            method.setAccessible(true);
-            method.invoke(logger, new Object() {
-                public void log(ServiceReference sr, int level, String message, Throwable exception) {
-                    Level lvl;
-                    switch (level) {
-                        case 1:  lvl = Level.SEVERE; break;
-                        case 2:  lvl = Level.WARNING; break;
-                        case 3:  lvl = Level.INFO; break;
-                        case 4:  lvl = Level.FINE; break;
-                        default: lvl = Level.FINEST; break;
+            if (framework.getClass().getName().startsWith("org.apache.felix.")) {
+                Field field = framework.getClass().getDeclaredField("m_logger");
+                field.setAccessible(true);
+                Object logger = field.get(framework);
+                Method method = logger.getClass().getDeclaredMethod("setLogger", Object.class);
+                method.setAccessible(true);
+                method.invoke(logger, new Object() {
+                    public void log(ServiceReference sr, int level, String message, Throwable exception) {
+                        Level lvl;
+                        switch (level) {
+                            case 1:
+                                lvl = Level.SEVERE;
+                                break;
+                            case 2:
+                                lvl = Level.WARNING;
+                                break;
+                            case 3:
+                                lvl = Level.INFO;
+                                break;
+                            case 4:
+                                lvl = Level.FINE;
+                                break;
+                            default:
+                                lvl = Level.FINEST;
+                                break;
+                        }
+                        Logger.getLogger("Felix").log(lvl, message, exception);
                     }
-                    Logger.getLogger("Felix").log(lvl, message, exception);
-                }
-            });
+                });
+            }
         } catch (Throwable t) {
             t.printStackTrace();
         }
