@@ -33,7 +33,7 @@ public interface PackageService {
     List<String> getImports(long bundleId);
 
 	/**
-	 * Gets a map of all exported packages with their version and the bundles that exprot them
+	 * Gets a map of all exported packages with their version and the bundles that export them
 	 * The key is in the form packagename:version.
 	 * 
 	 * @return 

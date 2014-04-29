@@ -16,11 +16,19 @@ package org.apache.karaf.itests;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.SortedMap;
+
+import javax.inject.Inject;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import javax.management.openmbean.TabularData;
 import javax.management.remote.JMXConnector;
 
+import org.apache.karaf.packages.core.PackageService;
+import org.apache.karaf.packages.core.PackageVersion;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -30,6 +38,8 @@ import org.ops4j.pax.exam.spi.reactors.PerClass;
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
 public class PackageTest extends KarafTestSupport {
+    @Inject
+    PackageService packageService;
 
     @Test
     public void exportsCommand() throws Exception {
@@ -45,7 +55,7 @@ public class PackageTest extends KarafTestSupport {
             connector = this.getJMXConnector();
             MBeanServerConnection connection = connector.getMBeanServerConnection();
             ObjectName name = new ObjectName("org.apache.karaf:type=package,name=root");
-            TabularData exports = (TabularData) connection.getAttribute(name, "Exports");
+            TabularData exports = (TabularData)connection.getAttribute(name, "Exports");
             assertTrue(exports.size() > 0);
         } finally {
             close(connector);
@@ -66,10 +76,27 @@ public class PackageTest extends KarafTestSupport {
             connector = this.getJMXConnector();
             MBeanServerConnection connection = connector.getMBeanServerConnection();
             ObjectName name = new ObjectName("org.apache.karaf:type=package,name=root");
-            TabularData imports = (TabularData) connection.getAttribute(name, "Imports");
+            TabularData imports = (TabularData)connection.getAttribute(name, "Imports");
             assertTrue(imports.size() > 0);
         } finally {
-        	close(connector);
+            close(connector);
+        }
+    }
+
+    @Test
+    public void duplicatePackageTest() throws Exception {
+        // Leaving out version to make test easier to manage
+        // We currently expect no duplicate package exports
+        Map<String, Integer> expectedDups = new HashMap<String, Integer>();
+        SortedMap<String, PackageVersion> packageVersionMap = packageService.getExports();
+       
+        for (String packageNameVersion : packageVersionMap.keySet()) {
+            PackageVersion pVer = packageVersionMap.get(packageNameVersion);
+            if (pVer.getBundles().size() > 1) {
+                String packageName = packageNameVersion.split(":")[0];
+                int expectedNum = expectedDups.containsKey(packageName) ? expectedDups.get(packageName) : 0;
+                Assert.assertEquals("Expecting number of duplicates for package " + packageNameVersion, expectedNum, pVer.getBundles().size());
+            }
         }
     }
 
