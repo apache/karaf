@@ -1,0 +1,53 @@
+h1. Synopsis
+
+${project.name}
+
+${project.description}
+
+Maven URL:
+    [mvn:${project.groupId}/${project.artifactId}/${project.version}]
+
+h1. Description
+
+Add Role-based access to any OSGi Service
+
+Role-based access is added to existing OSGi services by hiding the
+original service from a clients through service registry hooks and
+presenting a proxy to the service that checks the required roles before
+an invocation is made.
+
+To enable the Role-based access for services, the service needs to match
+the filter in the karaf.secured.services system property (typically set
+in etc/system.properties), e.g:
+
+  karaf.secured.services = (|(objectClass=org.acme*)(foo=bar))
+
+Only services that match this filter have Role-based access applied,
+other services are left alone.
+
+Required roles are registered through the OSGi Configuration Admin
+Service. The service PID must start with org.apache.karaf.service.acl.
+For enabled services configurations with matching PIDs defining a
+service.guard property that matches are looked up.
+Then roles associated with the current method, its signature and/or the
+passed arguments are looked up. For example, take the following
+configuration:
+
+  service.guard = (objectClass=org.acme.MyServiceAPI)
+  myMethod = admin, manager
+
+A special role declaration of '*' means that role checking is disabled
+for this method.
+If a matching ACL is found, but no matching definition for the method
+being invoked can be found, no user can invoke the method.
+If no matching ACL is found, role checking is not enabled for the
+service.
+As with the role-based JMX access, method signatures and arguments
+(either literal or regex-based) can be matched.
+
+When roles are checked, these are obtained from the Subject associated
+with the current AccessControlContext. By default the Karaf
+RolePrincipal is checked for, but other role implementations can be
+supported through the following syntax:
+
+  my.custom.RoleImpl:someRole

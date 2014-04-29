@@ -191,7 +191,8 @@ public class GogoPlugin extends AbstractWebConsolePlugin {
                         pipedOut,
                         new WebTerminal(TERM_WIDTH, TERM_HEIGHT),
                         null,
-                        null);
+                        null,
+                        bundleContext);
                 CommandSession session = console.getSession();
                 session.put("APPLICATION", System.getProperty("karaf.name", "root"));
                 session.put("USER", "karaf");

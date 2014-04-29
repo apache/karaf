@@ -42,6 +42,7 @@ import org.apache.sshd.server.Environment;
 import org.apache.sshd.server.ExitCallback;
 import org.apache.sshd.server.SessionAware;
 import org.apache.sshd.server.session.ServerSession;
+import org.osgi.framework.BundleContext;
 import org.osgi.service.blueprint.container.ReifiedType;
 
 /**
@@ -57,6 +58,7 @@ public class ShellFactoryImpl implements Factory<Command> {
 
     private CommandProcessor commandProcessor;
     private ThreadIO threadIO;
+    private BundleContext bundleContext;
 
     public void setCommandProcessor(CommandProcessor commandProcessor) {
         this.commandProcessor = commandProcessor;
@@ -64,6 +66,10 @@ public class ShellFactoryImpl implements Factory<Command> {
 
     public void setThreadIO(ThreadIO threadIO) {
         this.threadIO = threadIO;
+    }
+    
+    public void setBundleContext(BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
     }
 
     public Command create() {
@@ -122,7 +128,8 @@ public class ShellFactoryImpl implements Factory<Command> {
                                                   public void run() {
                                                       destroy();
                                                   }
-                                              });
+                                              },
+                                              bundleContext);
                 final CommandSession session = console.getSession();
                 session.put("APPLICATION", System.getProperty("karaf.name", "root"));
                 for (Map.Entry<String,String> e : env.getEnv().entrySet()) {

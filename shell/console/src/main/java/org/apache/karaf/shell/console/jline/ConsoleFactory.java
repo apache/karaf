@@ -38,6 +38,7 @@ import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Function;
 import org.apache.felix.service.threadio.ThreadIO;
+import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.apache.sshd.agent.SshAgent;
 import org.apache.sshd.agent.local.AgentImpl;
@@ -66,6 +67,8 @@ public class ConsoleFactory {
     private boolean start;
     private ServiceRegistration registration;
 
+
+    
     public void setBundleContext(BundleContext bundleContext) {
         this.bundleContext = bundleContext;
     }
@@ -97,6 +100,13 @@ public class ConsoleFactory {
             Subject subject = new Subject();
             final String user = "karaf";
             subject.getPrincipals().add(new UserPrincipal(user));
+            String roles = System.getProperty("karaf.local.roles");
+            if (roles != null) {
+                for (String role : roles.split("[,]")) {
+                    subject.getPrincipals().add(new RolePrincipal(role.trim()));
+                }
+            }
+            
             JaasHelper.doAs(subject, new PrivilegedExceptionAction<Object>() {
                 public Object run() throws Exception {
                     doStart(user);
@@ -156,7 +166,8 @@ public class ConsoleFactory {
                                    wrap(err),
                                    terminal,
                                    encoding,
-                                   callback);
+                                   callback,
+                                   bundleContext);
         CommandSession session = console.getSession();
         for (Object o : System.getProperties().keySet()) {
             String key = o.toString();

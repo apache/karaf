@@ -182,6 +182,17 @@
             <unpack>false</unpack>
             <useProjectArtifact>false</useProjectArtifact>
             <outputFileNameMapping>
+                org/apache/karaf/service/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}
+            </outputFileNameMapping>
+            <includes>
+                <include>org.apache.karaf.service:org.apache.karaf.service.guard</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <outputDirectory>/system</outputDirectory>
+            <unpack>false</unpack>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputFileNameMapping>
                 org/apache/karaf/diagnostic/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}
             </outputFileNameMapping>
             <includes>

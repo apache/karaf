@@ -126,6 +126,7 @@
                             *
                         </Import-Package>
                         <Export-Package>
+                            org.apache.felix.gogo.runtime.*;version=${felix.gogo.version};-split-package:=merge-first,
                             org.apache.felix.gogo.commands.*;version=${felix.gogo.version};-split-package:=merge-first,
                             org.apache.karaf.shell.console*;version=${project.version},
                             org.fusesource.jansi;version=${jansi.version};-split-package:=merge-first,
@@ -134,6 +135,7 @@
                             org.fusesource.hawtjni*;version=1.0;-split-package:=merge-first
                         </Export-Package>
                         <Private-Package>
+                            org.apache.karaf.shell.security.impl,
                             org.fusesource.jansi.internal;-split-package:=merge-first,
                             !org.apache.karaf.util.properties,
                             org.apache.karaf.util*;-split-package:=merge-first,
