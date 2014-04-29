@@ -36,14 +36,30 @@ public class State {
 
     public State copy() {
         State state = new State();
-        state.bootDone.set(bootDone.get());
-        MapUtils.copy(repositories, state.repositories);
-        MapUtils.copy(requestedFeatures, state.requestedFeatures);
-        MapUtils.copy(installedFeatures, state.installedFeatures);
-        MapUtils.copy(stateFeatures, state.stateFeatures);
-        MapUtils.copy(managedBundles, state.managedBundles);
-        MapUtils.copy(bundleChecksums, state.bundleChecksums);
+        copy(this, state, false);
         return state;
+    }
+
+    public void replace(State state) {
+        copy(state, this, true);
+    }
+
+    private static void copy(State from, State to, boolean clear) {
+        if (clear) {
+            to.repositories.clear();
+            to.requestedFeatures.clear();
+            to.installedFeatures.clear();
+            to.stateFeatures.clear();
+            to.managedBundles.clear();
+            to.bundleChecksums.clear();
+        }
+        to.bootDone.set(from.bootDone.get());
+        MapUtils.copy(from.repositories, to.repositories);
+        MapUtils.copy(from.requestedFeatures, to.requestedFeatures);
+        MapUtils.copy(from.installedFeatures, to.installedFeatures);
+        MapUtils.copy(from.stateFeatures, to.stateFeatures);
+        MapUtils.copy(from.managedBundles, to.managedBundles);
+        MapUtils.copy(from.bundleChecksums, to.bundleChecksums);
     }
 
 }

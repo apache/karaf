@@ -50,6 +50,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.startlevel.FrameworkStartLevel;
 
 public class FeaturesServiceTest extends TestBase {
     private static final String FEATURE_WITH_INVALID_BUNDLE = "<features name='test' xmlns='http://karaf.apache.org/xmlns/features/v1.0.0'>"
@@ -363,8 +364,14 @@ public class FeaturesServiceTest extends TestBase {
         URI uri = createTempRepo(FEATURE_WITH_INVALID_BUNDLE, bundle1Uri, bundle2Uri);
         
         BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
+        Bundle bundle = EasyMock.createMock(Bundle.class);
+        FrameworkStartLevel fsl = EasyMock.createMock(FrameworkStartLevel.class);
         expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
-        replay(bundleContext);
+        expect(bundleContext.getBundle()).andReturn(bundle);
+        expect(bundle.adapt(FrameworkStartLevel.class)).andReturn(fsl);
+        expect(fsl.getInitialBundleStartLevel()).andReturn(50);
+        expect(fsl.getStartLevel()).andReturn(100);
+        replay(bundleContext, bundle, fsl);
 
         FeaturesServiceImpl svc = new FeaturesServiceImpl(null, bundleContext, new Storage(), null, null, null, null, null, null, null, null, null);
         svc.addRepository(uri);

@@ -159,9 +159,9 @@ public class Activator extends BaseActivator {
 
         FeatureConfigInstaller configInstaller = new FeatureConfigInstaller(configurationAdmin);
         String overrides = getString("overrides", new File(System.getProperty("karaf.etc"), "overrides.properties").toURI().toString());
-        String featureResolutionRange = getString("featureResolutionRange", FeaturesServiceImpl.DEFAULT_FEATURE_RESOLUTION_RANGE);
-        String bundleUpdateRange = getString("bundleUpdateRange", FeaturesServiceImpl.DEFAULT_BUNDLE_UPDATE_RANGE);
-        String updateSnapshots = getString("updateSnapshots", FeaturesServiceImpl.DEFAULT_UPDATE_SNAPSHOTS);
+        String featureResolutionRange = getString("featureResolutionRange", FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE);
+        String bundleUpdateRange = getString("bundleUpdateRange", FeaturesService.DEFAULT_BUNDLE_UPDATE_RANGE);
+        String updateSnapshots = getString("updateSnapshots", FeaturesService.DEFAULT_UPDATE_SNAPSHOTS);
         StateStorage stateStorage = new StateStorage() {
             @Override
             protected InputStream getInputStream() throws IOException {

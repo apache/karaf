@@ -26,7 +26,17 @@ import java.util.Set;
  */
 public interface FeaturesService {
 
-    public static final String ROOT_REGION = "root";
+    String ROOT_REGION = "root";
+
+    String UPDATE_SNAPSHOTS_NONE = "none";
+    String UPDATE_SNAPSHOTS_CRC = "crc";
+    String DEFAULT_UPDATE_SNAPSHOTS = UPDATE_SNAPSHOTS_CRC;
+    String UPDATE_SNAPSHOTS_ALWAYS = "always";
+
+    String DEFAULT_FEATURE_RESOLUTION_RANGE = "${range;[====,====]}";
+    String DEFAULT_BUNDLE_UPDATE_RANGE = "${range;[==,=+)}";
+
+    String UPDATEABLE_URIS = "mvn:.*SNAPSHOT|(?!mvn:).*";
 
     enum Option {
         NoFailOnFeatureNotFound,

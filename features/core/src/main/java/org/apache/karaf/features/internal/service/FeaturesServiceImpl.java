@@ -25,17 +25,13 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
@@ -45,21 +41,14 @@ import java.util.concurrent.Executors;
 
 import org.apache.felix.utils.version.VersionRange;
 import org.apache.felix.utils.version.VersionTable;
-import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeatureEvent;
 import org.apache.karaf.features.FeaturesListener;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
 import org.apache.karaf.features.RepositoryEvent;
-import org.apache.karaf.features.internal.download.StreamProvider;
-import org.apache.karaf.features.internal.region.SubsystemResolver;
-import org.apache.karaf.features.internal.util.ChecksumUtils;
 import org.apache.karaf.features.internal.util.JsonReader;
 import org.apache.karaf.features.internal.util.JsonWriter;
-import org.apache.karaf.features.internal.util.Macro;
-import org.apache.karaf.features.internal.util.MapUtils;
-import org.apache.karaf.features.internal.util.MultiException;
 import org.apache.karaf.util.collections.CopyOnWriteArrayIdentityList;
 import org.eclipse.equinox.region.Region;
 import org.eclipse.equinox.region.RegionDigraph;
@@ -67,63 +56,26 @@ import org.eclipse.equinox.region.RegionFilterBuilder;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
-import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
-import org.osgi.framework.ServiceReference;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.Version;
 import org.osgi.framework.startlevel.BundleStartLevel;
 import org.osgi.framework.startlevel.FrameworkStartLevel;
-import org.osgi.framework.wiring.BundleRevision;
-import org.osgi.framework.wiring.BundleWire;
-import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.framework.wiring.FrameworkWiring;
-import org.osgi.resource.Capability;
-import org.osgi.resource.Resource;
-import org.osgi.resource.Wire;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.apache.felix.resolver.Util.getSymbolicName;
-import static org.apache.felix.resolver.Util.getVersion;
-import static org.apache.karaf.features.internal.resolver.ResourceUtils.TYPE_SUBSYSTEM;
-import static org.apache.karaf.features.internal.resolver.ResourceUtils.getFeatureId;
-import static org.apache.karaf.features.internal.resolver.ResourceUtils.getUri;
 import static org.apache.karaf.features.internal.service.StateStorage.toStringStringSetMap;
 import static org.apache.karaf.features.internal.util.MapUtils.addToMapSet;
-import static org.apache.karaf.features.internal.util.MapUtils.apply;
 import static org.apache.karaf.features.internal.util.MapUtils.copy;
-import static org.apache.karaf.features.internal.util.MapUtils.diff;
-import static org.apache.karaf.features.internal.util.MapUtils.flatten;
-import static org.apache.karaf.features.internal.util.MapUtils.map;
-import static org.apache.karaf.features.internal.util.MapUtils.removeFromMapSet;
-import static org.osgi.framework.Bundle.ACTIVE;
-import static org.osgi.framework.Bundle.RESOLVED;
-import static org.osgi.framework.Bundle.STARTING;
-import static org.osgi.framework.Bundle.STOPPING;
-import static org.osgi.framework.Bundle.STOP_TRANSIENT;
-import static org.osgi.framework.Bundle.UNINSTALLED;
-import static org.osgi.framework.namespace.IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE;
-import static org.osgi.framework.namespace.IdentityNamespace.IDENTITY_NAMESPACE;
-import static org.osgi.resource.Namespace.CAPABILITY_EFFECTIVE_DIRECTIVE;
-import static org.osgi.resource.Namespace.EFFECTIVE_ACTIVE;
 
 /**
  *
  */
-public class FeaturesServiceImpl implements FeaturesService {
-
-    public static final String UPDATE_SNAPSHOTS_NONE = "none";
-    public static final String UPDATE_SNAPSHOTS_CRC = "crc";
-    public static final String UPDATE_SNAPSHOTS_ALWAYS = "always";
-    public static final String DEFAULT_UPDATE_SNAPSHOTS = UPDATE_SNAPSHOTS_CRC;
-
-    public static final String DEFAULT_FEATURE_RESOLUTION_RANGE = "${range;[====,====]}";
-    public static final String DEFAULT_BUNDLE_UPDATE_RANGE = "${range;[==,=+)}";
+public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCallback {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FeaturesServiceImpl.class);
-    private static final String SNAPSHOT = "SNAPSHOT";
-    private static final String MAVEN = "mvn:";
 
     /**
      * Our bundle.
@@ -149,13 +101,13 @@ public class FeaturesServiceImpl implements FeaturesService {
     private final String overrides;
     /**
      * Range to use when a version is specified on a feature dependency.
-     * The default is {@link FeaturesServiceImpl#DEFAULT_FEATURE_RESOLUTION_RANGE}
+     * The default is {@link org.apache.karaf.features.FeaturesService#DEFAULT_FEATURE_RESOLUTION_RANGE}
      */
     private final String featureResolutionRange;
     /**
      * Range to use when verifying if a bundle should be updated or
      * new bundle installed.
-     * The default is {@link FeaturesServiceImpl#DEFAULT_BUNDLE_UPDATE_RANGE}
+     * The default is {@link org.apache.karaf.features.FeaturesService#DEFAULT_BUNDLE_UPDATE_RANGE}
      */
     private final String bundleUpdateRange;
     /**
@@ -331,7 +283,7 @@ public class FeaturesServiceImpl implements FeaturesService {
         listeners.remove(listener);
     }
 
-    protected void callListeners(FeatureEvent event) {
+    public void callListeners(FeatureEvent event) {
         if (eventAdminListener != null) {
             eventAdminListener.featureEvent(event);
         }
@@ -885,36 +837,37 @@ public class FeaturesServiceImpl implements FeaturesService {
         }
     }
 
-    static class DeploymentState {
-        Map<Long, Bundle> bundles;
-        Map<String, Feature> features;
-        Map<String, Set<Long>> bundlesPerRegion;
-        Map<String, Map<String, Map<String, Set<String>>>> filtersPerRegion;
-    }
-
-    protected DeploymentState getDeploymentState() throws Exception {
-        DeploymentState state = new DeploymentState();
+    protected Deployer.DeploymentState getDeploymentState(State state) throws Exception {
+        Deployer.DeploymentState dstate = new Deployer.DeploymentState();
+        // State
+        dstate.state = state;
+        // Service bundle
+        dstate.serviceBundle = bundle;
+        // Start level
+        FrameworkStartLevel fsl = systemBundleContext.getBundle().adapt(FrameworkStartLevel.class);
+        dstate.initialBundleStartLevel = fsl.getInitialBundleStartLevel();
+        dstate.currentStartLevel = fsl.getStartLevel();
         // Bundles
-        state.bundles = new HashMap<>();
+        dstate.bundles = new HashMap<>();
         for (Bundle bundle : systemBundleContext.getBundles()) {
-            state.bundles.put(bundle.getBundleId(), bundle);
+            dstate.bundles.put(bundle.getBundleId(), bundle);
         }
         // Features
-        state.features = new HashMap<>();
+        dstate.features = new HashMap<>();
         for (Map<String, Feature> m : getFeatures().values()) {
             for (Feature feature : m.values()) {
                 String id = feature.getName() + "/" + VersionTable.getVersion(feature.getVersion());
-                state.features.put(id, feature);
+                dstate.features.put(id, feature);
             }
         }
         // Region -> bundles mapping
         // Region -> policy mapping
-        state.bundlesPerRegion = new HashMap<>();
-        state.filtersPerRegion = new HashMap<>();
+        dstate.bundlesPerRegion = new HashMap<>();
+        dstate.filtersPerRegion = new HashMap<>();
         RegionDigraph clone = digraph.copy();
         for (Region region : clone.getRegions()) {
             // Get bundles
-            state.bundlesPerRegion.put(region.getName(), new HashSet<>(region.getBundleIds()));
+            dstate.bundlesPerRegion.put(region.getName(), new HashSet<>(region.getBundleIds()));
             // Get policies
             Map<String, Map<String, Set<String>>> edges = new HashMap<>();
             for (RegionDigraph.FilteredRegion fr : clone.getEdges(region)) {
@@ -927,11 +880,25 @@ public class FeaturesServiceImpl implements FeaturesService {
                 }
                 edges.put(fr.getRegion().getName(), policy);
             }
-            state.filtersPerRegion.put(region.getName(), edges);
+            dstate.filtersPerRegion.put(region.getName(), edges);
         }
         // Return
-        return state;
+        return dstate;
     }
+
+    private Deployer.DeploymentRequest getDeploymentRequest(Map<String, Set<String>> requestedFeatures, Map<String, Map<String, RequestedState>> stateChanges, EnumSet<Option> options) {
+        Deployer.DeploymentRequest request = new Deployer.DeploymentRequest();
+        request.bundleUpdateRange = bundleUpdateRange;
+        request.featureResolutionRange = featureResolutionRange;
+        request.globalRepository = globalRepository;
+        request.overrides = overrides;
+        request.requestedFeatures = requestedFeatures;
+        request.stateChanges = stateChanges;
+        request.options = options;
+        return request;
+    }
+
+
 
     public void doInstallFeatures(Map<String, Set<String>> requestedFeatures,            // all request features
                                   Map<String, Map<String, RequestedState>> stateChanges, // features state changes
@@ -939,993 +906,19 @@ public class FeaturesServiceImpl implements FeaturesService {
                                   EnumSet<Option> options                                // installation options
     ) throws Exception {
 
-        boolean noRefreshUnmanaged = options.contains(Option.NoAutoRefreshUnmanagedBundles);
-        boolean noRefreshManaged = options.contains(Option.NoAutoRefreshManagedBundles);
-        boolean noRefresh = options.contains(Option.NoAutoRefreshBundles);
-        boolean noStart = options.contains(Option.NoAutoStartBundles);
-        boolean verbose = options.contains(Option.Verbose);
-        boolean simulate = options.contains(Option.Simulate);
-        boolean noManageBundles = options.contains(Option.NoAutoManageBundles);
-
-        // TODO: add an option to unmanage bundles instead of uninstalling those
-
-        DeploymentState dstate = getDeploymentState();
-
-        Map<String, Set<Long>> managedBundles = copy(state.managedBundles);
-
-        Map<String, Set<Bundle>> unmanagedBundles = apply(diff(dstate.bundlesPerRegion, state.managedBundles),
-                map(dstate.bundles));
-
-        // Resolve
-        // TODO: requirements
-        // TODO: bundles
-
-        SubsystemResolver resolver = new SubsystemResolver();
-        resolver.resolve(
-                dstate.features.values(),
-                requestedFeatures,
-                apply(unmanagedBundles, adapt(BundleRevision.class)),
-                Overrides.loadOverrides(this.overrides),
-                featureResolutionRange,
-                globalRepository);
-
-        Map<String, StreamProvider> providers = resolver.getProviders();
-        Map<String, Set<Resource>> featuresPerRegion = resolver.getFeaturesPerRegions();
-        Map<String, Set<String>> installedFeatures = apply(featuresPerRegion, featureId());
-        Map<String, Set<String>> newFeatures = diff(installedFeatures, state.installedFeatures);
-        Map<String, Set<String>> delFeatures = diff(state.installedFeatures, installedFeatures);
-
-        //
-        // Compute requested features state
-        //
-        Map<String, Map<String, String>> stateFeatures = copy(state.stateFeatures);
-        for (Map.Entry<String, Set<String>> entry : delFeatures.entrySet()) {
-            Map<String, String> map = stateFeatures.get(entry.getKey());
-            if (map != null) {
-                map.entrySet().removeAll(entry.getValue());
-                if (map.isEmpty()) {
-                    stateFeatures.remove(entry.getKey());
-                }
-            }
-        }
-        for (Map.Entry<String, Map<String, RequestedState>> entry1 : stateChanges.entrySet()) {
-            String region = entry1.getKey();
-            Map<String, String> regionStates = stateFeatures.get(region);
-            if (regionStates != null) {
-                for (Map.Entry<String, RequestedState> entry2 : entry1.getValue().entrySet()) {
-                    String feature = entry2.getKey();
-                    if (regionStates.containsKey(feature)) {
-                        regionStates.put(feature, entry2.getValue().name());
-                    }
-                }
-            }
-        }
-        for (Map.Entry<String, Set<String>> entry : newFeatures.entrySet()) {
-            for (String feature : entry.getValue()) {
-                Map<String, String> map = stateFeatures.get(entry.getKey());
-                if (map == null) {
-                    map = new HashMap<>();
-                    stateFeatures.put(entry.getKey(), map);
-                }
-                map.put(feature, noStart ? RequestedState.Installed.name() : RequestedState.Started.name());
-            }
-        }
-
-        // Compute information for each bundle
-        Map<String, Map<String, BundleInfo>> bundleInfos = resolver.getBundleInfos();
-
-        //
-        // Compute deployment
-        //
-        Deployment deployment = computeDeployment(dstate, resolver, state);
-
-        //
-        // Compute the set of bundles to refresh
-        //
-        Set<Bundle> toRefresh = new TreeSet<>(new BundleComparator()); // sort is only used for display
-        for (RegionDeployment regionDeployment : deployment.regions.values()) {
-            toRefresh.addAll(regionDeployment.toDelete);
-            toRefresh.addAll(regionDeployment.toUpdate.keySet());
-        }
-        if (!noRefreshManaged) {
-            computeBundlesToRefresh(toRefresh, dstate.bundles.values(), deployment.resToBnd, resolver.getWiring());
-        }
-        if (noRefreshUnmanaged) {
-            toRefresh.removeAll(flatten(unmanagedBundles));
-        }
-
-        // Automatically turn unmanaged bundles into managed bundles
-        // if they are required by a feature and no other unmanaged
-        // bundles have a requirement on it
-        Set<Bundle> toManage = new TreeSet<>(new BundleComparator()); // sort is only used for display
-        if (!noManageBundles) {
-            Set<Resource> features = resolver.getFeatures().keySet();
-            Set<? extends Resource> unmanaged = apply(flatten(unmanagedBundles), adapt(BundleRevision.class));
-            Set<Resource> requested = new HashSet<>();
-            // Gather bundles required by a feature
-            for (List<Wire> wires : resolver.getWiring().values()) {
-                for (Wire wire : wires) {
-                    if (features.contains(wire.getRequirer()) && unmanaged.contains(wire.getProvider())) {
-                        requested.add(wire.getProvider());
-                    }
-                }
-            }
-            // Now, we know which bundles are completely unmanaged
-            unmanaged.removeAll(requested);
-            // Check if bundles have wires from really unmanaged bundles
-            for (List<Wire> wires : resolver.getWiring().values()) {
-                for (Wire wire : wires) {
-                    if (requested.contains(wire.getProvider()) && unmanaged.contains(wire.getRequirer())) {
-                        requested.remove(wire.getProvider());
-                    }
-                }
-            }
-            if (!requested.isEmpty()) {
-                Map<Long, String> bundleToRegion = new HashMap<>();
-                for (Map.Entry<String, Set<Long>> entry : dstate.bundlesPerRegion.entrySet()) {
-                    for (long id : entry.getValue()) {
-                        bundleToRegion.put(id, entry.getKey());
-                    }
-                }
-                for (Resource rev : requested) {
-                    Bundle bundle = ((BundleRevision) rev).getBundle();
-                    long id = bundle.getBundleId();
-                    addToMapSet(managedBundles, bundleToRegion.get(id), id);
-                    toManage.add(bundle);
-                }
-            }
-        }
-
-        //
-        // Log deployment
-        //
-        logDeployment(deployment, verbose);
-
-        if (simulate) {
-            if (!noRefresh && !toRefresh.isEmpty()) {
-                print("  Bundles to refresh:", verbose);
-                for (Bundle bundle : toRefresh) {
-                    print("    " + bundle.getSymbolicName() + " / " + bundle.getVersion(), verbose);
-                }
-            }
-            if (!toManage.isEmpty()) {
-                print("  Managing bundle:", verbose);
-                for (Bundle bundle : toManage) {
-                    print("    " + bundle.getSymbolicName() + " / " + bundle.getVersion(), verbose);
-                }
-            }
-            return;
-        }
-
-        Set<Bundle> toStart = new HashSet<>();
-        Set<Bundle> toResolve = new HashSet<>();
-        Set<Bundle> toStop = new HashSet<>();
-
-        //
-        // Execute deployment
-        //
-        // #1: stop bundles that needs to be updated or uninstalled in order
-        // #2: uninstall needed bundles
-        // #3: update regions
-        // #4: update bundles
-        // #5: install bundles
-        // #6: save state
-        // #7: install configuration
-        // #8: refresh bundles
-        // #9: start bundles in order
-        // #10: send events
-        //
-
-        //
-        // Compute bundle states
-        //
-        Map<Resource, RequestedState> states = new HashMap<>();
-        for (Map.Entry<String, Set<Resource>> entry : resolver.getFeaturesPerRegions().entrySet()) {
-            String region = entry.getKey();
-            Map<String, String> fss = stateFeatures.get(region);
-            for (Resource feature : entry.getValue()) {
-                String fs = fss.get(getFeatureId(feature));
-                propagateState(states, feature, RequestedState.valueOf(fs), resolver);
-            }
-        }
-        states.keySet().retainAll(resolver.getBundles().keySet());
-        //
-        // Compute bundles to start, stop and resolve
-        //
-        for (Map.Entry<Resource, RequestedState> entry : states.entrySet()) {
-            Bundle bundle = deployment.resToBnd.get(entry.getKey());
-            if (bundle != null) {
-                switch (entry.getValue()) {
-                case Started:
-                    toResolve.add(bundle);
-                    toStart.add(bundle);
-                    break;
-                case Resolved:
-                    toResolve.add(bundle);
-                    toStop.add(bundle);
-                    break;
-                }
-            }
-        }
-        //
-        // Compute bundle all start levels and start levels to update
-        //
-        FrameworkStartLevel fsl = systemBundleContext.getBundle().adapt(FrameworkStartLevel.class);
-        int initialBundleStartLevel = fsl.getInitialBundleStartLevel();
-        int currentStartLevel = fsl.getStartLevel();
-        Map<Resource, Integer> startLevels = new HashMap<>();
-        Map<Bundle, Integer> toUpdateStartLevel = new HashMap<>();
-        for (Map.Entry<String, Set<Resource>> entry : resolver.getBundlesPerRegions().entrySet()) {
-            String region = entry.getKey();
-            for (Resource resource : entry.getValue()) {
-                BundleInfo bi = bundleInfos.get(region).get(getUri(resource));
-                if (bi != null) {
-                    int sl = bi.getStartLevel() > 0 ? bi.getStartLevel() : initialBundleStartLevel;
-                    startLevels.put(resource, sl);
-                    Bundle bundle = deployment.resToBnd.get(resource);
-                    if (bundle != null) {
-                        int curSl = bundle.adapt(BundleStartLevel.class).getStartLevel();
-                        if (sl != curSl) {
-                            toUpdateStartLevel.put(bundle, sl);
-                            if (sl > currentStartLevel) {
-                                toStop.add(bundle);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-
-        //
-        // Handle updates on the FeaturesService bundle
-        //
-        RegionDeployment rootRegionDeployment = deployment.regions.get(ROOT_REGION);
-        // We don't support uninstalling the bundle
-        if (rootRegionDeployment != null && rootRegionDeployment.toDelete.contains(bundle)) {
-            throw new UnsupportedOperationException("Uninstalling the FeaturesService bundle is not supported");
-        }
-        // If the bundle needs to be updated, do the following:
-        //  - create flag files to indicate the resolution must be continued after restart
-        //  - update the checksum and save the state
-        //  - compute bundles wired to the FeaturesService bundle that will be refreshed
-        //  - stop the bundle
-        //  - update the bundle
-        //  - refresh wired bundles
-        //  - start the bundle
-        //  - exit
-        // When restarting, the resolution will be attempted again
-        if (rootRegionDeployment != null && rootRegionDeployment.toUpdate.containsKey(bundle)) {
-            writeResolve(requestedFeatures, options);
-            // If the bundle is updated because of a different checksum,
-            // save the new checksum persistently
-            if (deployment.bundleChecksums.containsKey(bundle.getBundleId())) {
-                synchronized (lock) {
-                    this.state.bundleChecksums.put(bundle.getBundleId(), deployment.bundleChecksums.get(bundle.getBundleId()));
-                    saveState();
-                }
-            }
-            Resource resource = rootRegionDeployment.toUpdate.get(bundle);
-            String uri = getUri(resource);
-            print("The FeaturesService bundle needs is being updated with " + uri, verbose);
-            toRefresh.clear();
-            toRefresh.add(bundle);
-            computeBundlesToRefresh(toRefresh,
-                    dstate.bundles.values(),
-                    Collections.<Resource, Bundle>emptyMap(),
-                    Collections.<Resource, List<Wire>>emptyMap());
-            bundle.stop(STOP_TRANSIENT);
-            try (
-                    InputStream is = getBundleInputStream(resource, providers)
-            ) {
-                bundle.update(is);
-            }
-            refreshPackages(toRefresh);
-            bundle.start();
-            return;
-        }
-
-        //
-        // Perform bundle operations
-        //
-
-        //
-        // Stop bundles by chunks
-        //
-        for (RegionDeployment regionDeployment : deployment.regions.values()) {
-            toStop.addAll(regionDeployment.toUpdate.keySet());
-            toStop.addAll(regionDeployment.toDelete);
-        }
-        removeFragmentsAndBundlesInState(toStop, UNINSTALLED | RESOLVED | STOPPING);
-        if (!toStop.isEmpty()) {
-            print("Stopping bundles:", verbose);
-            while (!toStop.isEmpty()) {
-                List<Bundle> bs = getBundlesToStop(toStop);
-                for (Bundle bundle : bs) {
-                    print("  " + bundle.getSymbolicName() + " / " + bundle.getVersion(), verbose);
-                    // If the bundle start level will be changed, stop it persistently to
-                    // avoid a restart when the start level is actually changed
-                    bundle.stop(toUpdateStartLevel.containsKey(bundle) ? 0 : STOP_TRANSIENT);
-                    toStop.remove(bundle);
-                }
-            }
-        }
-
-        //
-        // Delete bundles
-        //
-        boolean hasToDelete = false;
-        for (RegionDeployment regionDeployment : deployment.regions.values()) {
-            if (hasToDelete = !regionDeployment.toDelete.isEmpty()) {
-                break;
-            }
-        }
-        if (hasToDelete) {
-            print("Uninstalling bundles:", verbose);
-            for (Map.Entry<String, RegionDeployment> entry : deployment.regions.entrySet()) {
-                String name = entry.getKey();
-                RegionDeployment regionDeployment = entry.getValue();
-                for (Bundle bundle : regionDeployment.toDelete) {
-                    print("  " + bundle.getSymbolicName() + " / " + bundle.getVersion(), verbose);
-                    bundle.uninstall();
-                    removeFromMapSet(managedBundles, name, bundle.getBundleId());
-                }
-            }
-        }
-
-        //
-        // Update regions
-        //
-        {
-            RegionDigraph clone = digraph.copy();
-            RegionDigraph computedDigraph = resolver.getFlatDigraph();
-            Map<String, Map<String, Map<String, Set<String>>>> policies = copy(dstate.filtersPerRegion);
-            // Iterate through previously managed regions and
-            // delete those that do not contain any bundles anymore
-            for (String name : state.managedBundles.keySet()) {
-                if (!managedBundles.containsKey(name) && !unmanagedBundles.containsKey(name)) {
-                    dstate.filtersPerRegion.remove(name);
-                }
-            }
-            // Fix broken filters
-            for (String name : policies.keySet()) {
-                policies.get(name).keySet().retainAll(policies.keySet());
-            }
-            // Update managed regions
-            for (Region computedRegion : computedDigraph.getRegions()) {
-                String name = computedRegion.getName();
-                Map<String, Map<String, Set<String>>> policy = policies.get(name);
-                if (policy == null) {
-                    policy = new HashMap<>();
-                    policies.put(name, policy);
-                }
-                for (RegionDigraph.FilteredRegion fr : computedDigraph.getEdges(computedRegion)) {
-                    String r2 = fr.getRegion().getName();
-                    Map<String, Set<String>> filters = new HashMap<>();
-                    Map<String, Collection<String>> current = fr.getFilter().getSharingPolicy();
-                    for (String ns : current.keySet()) {
-                        for (String f : current.get(ns)) {
-                            addToMapSet(filters, ns, f);
-                        }
-                    }
-                    policy.put(r2, filters);
-                }
-            }
-            // Apply all changes
-            for (Region region : clone.getRegions()) {
-                clone.removeRegion(region);
-            }
-            for (String name : policies.keySet()) {
-                clone.createRegion(name);
-            }
-            for (String r1Name : policies.keySet()) {
-                Region r1 = clone.getRegion(r1Name);
-                Map<String, Map<String, Set<String>>> policy = policies.get(r1Name);
-                for (String r2Name : policy.keySet()) {
-                    Region r2 = clone.getRegion(r2Name);
-                    RegionFilterBuilder rfb = clone.createRegionFilterBuilder();
-                    for (String ns : policy.get(r2Name).keySet()) {
-                        for (String f : policy.get(r2Name).get(ns)) {
-                            rfb.allow(ns, f);
-                        }
-                    }
-                    clone.connect(r1, rfb.build(), r2);
-                }
-                // Dispatch bundles
-                if (unmanagedBundles.containsKey(r1Name)) {
-                    for (Bundle bundle : unmanagedBundles.get(r1Name)) {
-                        r1.addBundle(bundle);
-                    }
-                }
-                if (managedBundles.containsKey(r1Name)) {
-                    for (long id : managedBundles.get(r1Name)) {
-                        r1.addBundle(id);
-                    }
-                }
-            }
-            this.digraph.replace(clone);
-        }
-
-
-        //
-        // Update bundles
-        //
-        boolean hasToUpdate = false;
-        for (RegionDeployment regionDeployment : deployment.regions.values()) {
-            if (hasToUpdate = !regionDeployment.toUpdate.isEmpty()) {
-                break;
-            }
-        }
-        if (hasToUpdate) {
-            print("Updating bundles:", verbose);
-            for (Map.Entry<String, RegionDeployment> rde : deployment.regions.entrySet()) {
-                for (Map.Entry<Bundle, Resource> entry : rde.getValue().toUpdate.entrySet()) {
-                    Bundle bundle = entry.getKey();
-                    Resource resource = entry.getValue();
-                    String uri = getUri(resource);
-                    print("  " + uri, verbose);
-                    try (
-                            InputStream is = getBundleInputStream(resource, providers)
-                    ) {
-                        bundle.update(is);
-                    }
-                    toStart.add(bundle);
-                }
-            }
-        }
-        //
-        // Update start levels
-        //
-        for (Map.Entry<Bundle, Integer> entry : toUpdateStartLevel.entrySet()) {
-            Bundle bundle = entry.getKey();
-            int sl = entry.getValue();
-            bundle.adapt(BundleStartLevel.class).setStartLevel(sl);
-        }
-        //
-        // Install bundles
-        //
-        boolean hasToInstall = false;
-        for (RegionDeployment regionDeployment : deployment.regions.values()) {
-            if (hasToInstall = !regionDeployment.toInstall.isEmpty()) {
-                break;
-            }
-        }
-        if (hasToInstall) {
-            print("Installing bundles:", verbose);
-            for (Map.Entry<String, RegionDeployment> entry : deployment.regions.entrySet()) {
-                String name = entry.getKey();
-                Region region = digraph.getRegion(name);
-                RegionDeployment regionDeployment = entry.getValue();
-                for (Resource resource : regionDeployment.toInstall) {
-                    String uri = getUri(resource);
-                    print("  " + uri, verbose);
-                    Bundle bundle;
-                    long crc;
-                    try (
-                            ChecksumUtils.CRCInputStream is = new ChecksumUtils.CRCInputStream(getBundleInputStream(resource, providers))
-                    ) {
-                        if (ROOT_REGION.equals(name)) {
-                            bundle = region.installBundleAtLocation(uri, is);
-                        } else {
-                            bundle = region.installBundle(uri, is);
-                        }
-                        crc = is.getCRC();
-                    }
-                    addToMapSet(managedBundles, name, bundle.getBundleId());
-                    deployment.resToBnd.put(resource, bundle);
-                    // save a checksum of installed snapshot bundle
-                    if (UPDATE_SNAPSHOTS_CRC.equals(updateSnaphots)
-                            && isUpdateable(resource) && !deployment.bundleChecksums.containsKey(bundle.getBundleId())) {
-                        deployment.bundleChecksums.put(bundle.getBundleId(), crc);
-                    }
-                    int startLevel = startLevels.get(resource);
-                    bundle.adapt(BundleStartLevel.class).setStartLevel(startLevel);
-                    RequestedState reqState = states.get(resource);
-                    switch (reqState) {
-                    case Started:
-                        toResolve.add(bundle);
-                        toStart.add(bundle);
-                        break;
-                    case Resolved:
-                        toResolve.add(bundle);
-                        break;
-                    }
-                }
-            }
-        }
-
-        //
-        // Update and save state
-        //
-        synchronized (lock) {
-            this.state.bundleChecksums.clear();
-            this.state.bundleChecksums.putAll(deployment.bundleChecksums);
-            this.state.requestedFeatures.clear();
-            this.state.requestedFeatures.putAll(requestedFeatures);
-            this.state.installedFeatures.clear();
-            this.state.installedFeatures.putAll(installedFeatures);
-            this.state.stateFeatures.clear();
-            this.state.stateFeatures.putAll(stateFeatures);
-            this.state.managedBundles.clear();
-            this.state.managedBundles.putAll(managedBundles);
-            saveState();
-        }
-
-        //
-        // Install configurations
-        //
-        if (configInstaller != null && !newFeatures.isEmpty()) {
-            Set<Feature> set = apply(flatten(newFeatures), map(dstate.features));
-            for (Feature feature : set) {
-                configInstaller.installFeatureConfigs(feature);
-            }
-        }
-
-        // TODO: remove this hack, but it avoids loading the class after the bundle is refreshed
-        new CopyOnWriteArrayIdentityList().iterator();
-        RequirementSort.sort(Collections.<Resource>emptyList());
-
-        if (!noRefresh) {
-            toStop = new HashSet<>();
-            toStop.addAll(toRefresh);
-            removeFragmentsAndBundlesInState(toStop, UNINSTALLED | RESOLVED | STOPPING);
-            if (!toStop.isEmpty()) {
-                print("Stopping bundles:", verbose);
-                while (!toStop.isEmpty()) {
-                    List<Bundle> bs = getBundlesToStop(toStop);
-                    for (Bundle bundle : bs) {
-                        print("  " + bundle.getSymbolicName() + " / " + bundle.getVersion(), verbose);
-                        bundle.stop(STOP_TRANSIENT);
-                        toStop.remove(bundle);
-                        toStart.add(bundle);
-                    }
-                }
-            }
-
-            if (!toRefresh.isEmpty()) {
-                print("Refreshing bundles:", verbose);
-                for (Bundle bundle : toRefresh) {
-                    print("  " + bundle.getSymbolicName() + " / " + bundle.getVersion(), verbose);
-                }
-                if (!toRefresh.isEmpty()) {
-                    refreshPackages(toRefresh);
-                }
-            }
-        }
-
-        // Resolve bundles
-        toResolve.addAll(toStart);
-        toResolve.addAll(toRefresh);
-        removeFragmentsAndBundlesInState(toResolve, UNINSTALLED);
-        systemBundleContext.getBundle().adapt(FrameworkWiring.class).resolveBundles(toResolve);
-
-        // Compute bundles to start
-        removeFragmentsAndBundlesInState(toStart, UNINSTALLED | ACTIVE | STARTING);
-        if (!toStart.isEmpty()) {
-            // Compute correct start order
-            List<Exception> exceptions = new ArrayList<>();
-            print("Starting bundles:", verbose);
-            while (!toStart.isEmpty()) {
-                List<Bundle> bs = getBundlesToStart(toStart);
-                for (Bundle bundle : bs) {
-                    print("  " + bundle.getSymbolicName() + " / " + bundle.getVersion(), verbose);
-                    try {
-                        bundle.start();
-                    } catch (BundleException e) {
-                        exceptions.add(e);
-                    }
-                    toStart.remove(bundle);
-                }
-            }
-            if (!exceptions.isEmpty()) {
-                throw new MultiException("Error restarting bundles", exceptions);
-            }
-        }
-
-        // Call listeners
-        // TODO: add region information and avoid flattening
-        for (Feature feature : apply(flatten(delFeatures), map(dstate.features))) {
-            callListeners(new FeatureEvent(feature, FeatureEvent.EventType.FeatureUninstalled, false));
-        }
-        for (Feature feature : apply(flatten(newFeatures), map(dstate.features))) {
-            callListeners(new FeatureEvent(feature, FeatureEvent.EventType.FeatureInstalled, false));
-        }
-
-        print("Done.", verbose);
+        Deployer.DeploymentState dstate = getDeploymentState(state);
+        Deployer.DeploymentRequest request = getDeploymentRequest(requestedFeatures, stateChanges, options);
+        new Deployer(this).deploy(dstate, request);
     }
 
-    private void propagateState(Map<Resource, RequestedState> states, Resource resource, RequestedState state, SubsystemResolver resolver) {
-        if (!isSubsystem(resource)) {
-            RequestedState reqState = mergeStates(state, states.get(resource));
-            if (reqState != states.get(resource)) {
-                states.put(resource, reqState);
-                for (Wire wire : resolver.getWiring().get(resource)) {
-                    Resource provider = wire.getProvider();
-                    RequestedState stateToMerge;
-                    String region = resolver.getBundles().get(provider);
-                    BundleInfo bi = region != null ? resolver.getBundleInfos().get(region).get(getUri(provider)) : null;
-                    if (reqState == RequestedState.Started) {
-                        String effective = wire.getCapability().getDirectives().get(CAPABILITY_EFFECTIVE_DIRECTIVE);
-                        // If there is an active effective capability or a requirement from the feature
-                        // and if the bundle is flagged as to start, start it
-                        if ((EFFECTIVE_ACTIVE.equals(effective) || IDENTITY_NAMESPACE.equals(wire.getCapability().getNamespace()))
-                                && (bi == null || bi.isStart())) {
-                            stateToMerge = RequestedState.Started;
-                        } else {
-                            stateToMerge = RequestedState.Resolved;
-                        }
-                    } else {
-                        stateToMerge = reqState;
-                    }
-                    propagateState(states, provider, stateToMerge, resolver);
-                }
-            }
-        }
-    }
-
-    private boolean isSubsystem(Resource resource) {
-        for (Capability cap : resource.getCapabilities(null)) {
-            if (cap.getNamespace().equals(IDENTITY_NAMESPACE)) {
-                String type = (String) cap.getAttributes().get(CAPABILITY_TYPE_ATTRIBUTE);
-                return (type != null) && type.equals(TYPE_SUBSYSTEM);
-            }
-        }
-        return false;
-    }
-
-    private RequestedState mergeStates(RequestedState s1, RequestedState s2) {
-        if (s1 == RequestedState.Started || s2 == RequestedState.Started) {
-            return RequestedState.Started;
-        }
-        if (s1 == RequestedState.Resolved || s2 == RequestedState.Resolved) {
-            return RequestedState.Resolved;
-        }
-        return RequestedState.Installed;
-    }
-
-    private void computeBundlesToRefresh(Set<Bundle> toRefresh, Collection<Bundle> bundles, Map<Resource, Bundle> resources, Map<Resource, List<Wire>> resolution) {
-        int size;
-        do {
-            size = toRefresh.size();
-            for (Bundle bundle : bundles) {
-                // Continue if we already know about this bundle
-                if (toRefresh.contains(bundle)) {
-                    continue;
-                }
-                // Ignore non resolved bundle
-                BundleWiring wiring = bundle.adapt(BundleWiring.class);
-                if (wiring == null) {
-                    continue;
-                }
-                // Get through the old resolution and flag this bundle
-                // if it was wired to a bundle to be refreshed
-                for (BundleWire wire : wiring.getRequiredWires(null)) {
-                    if (toRefresh.contains(wire.getProvider().getBundle())) {
-                        toRefresh.add(bundle);
-                        break;
-                    }
-                }
-                // Get through the new resolution and flag this bundle
-                // if it's wired to any new bundle
-                List<Wire> newWires = resolution.get(wiring.getRevision());
-                if (newWires != null) {
-                    for (Wire wire : newWires) {
-                        Bundle b;
-                        if (wire.getProvider() instanceof BundleRevision) {
-                            b = ((BundleRevision) wire.getProvider()).getBundle();
-                        } else {
-                            b = resources.get(wire.getProvider());
-                        }
-                        if (b == null || toRefresh.contains(b)) {
-                            toRefresh.add(bundle);
-                            break;
-                        }
-                    }
-                }
-            }
-        } while (toRefresh.size() > size);
-    }
-
-    private void print(String message, boolean verbose) {
+    public void print(String message, boolean verbose) {
         LOGGER.info(message);
         if (verbose) {
             System.out.println(message);
         }
     }
 
-    private void removeFragmentsAndBundlesInState(Collection<Bundle> bundles, int state) {
-        for (Iterator<Bundle> iterator = bundles.iterator(); iterator.hasNext();) {
-            Bundle bundle = iterator.next();
-            if ((bundle.getState() & state) != 0
-                    || bundle.getHeaders().get(Constants.FRAGMENT_HOST) != null) {
-                iterator.remove();
-            }
-        }
-    }
-
-    protected void logDeployment(Deployment overallDeployment, boolean verbose) {
-        if (overallDeployment.regions.isEmpty()) {
-            print("No deployment change.", verbose);
-            return;
-        }
-        print("Changes to perform:", verbose);
-        for (Map.Entry<String, RegionDeployment> region : overallDeployment.regions.entrySet()) {
-            RegionDeployment deployment = region.getValue();
-            print("  Region: " + region.getKey(), verbose);
-            if (!deployment.toDelete.isEmpty()) {
-                print("    Bundles to uninstall:", verbose);
-                for (Bundle bundle : deployment.toDelete) {
-                    print("      " + bundle.getSymbolicName() + " / " + bundle.getVersion(), verbose);
-                }
-            }
-            if (!deployment.toUpdate.isEmpty()) {
-                print("    Bundles to update:", verbose);
-                for (Map.Entry<Bundle, Resource> entry : deployment.toUpdate.entrySet()) {
-                    print("      " + entry.getKey().getSymbolicName() + " / " + entry.getKey().getVersion() + " with " + getUri(entry.getValue()), verbose);
-                }
-            }
-            if (!deployment.toInstall.isEmpty()) {
-                print("    Bundles to install:", verbose);
-                for (Resource resource : deployment.toInstall) {
-                    print("      " + getUri(resource), verbose);
-                }
-            }
-        }
-    }
-
-    protected Deployment computeDeployment(
-            DeploymentState dstate,
-            SubsystemResolver resolver,
-            State state) throws IOException {
-
-        Deployment result = new Deployment();
-
-        Map<String, Set<Resource>> bundlesPerRegions = resolver.getBundlesPerRegions();
-
-        // Gather all regions, including old ones and new ones
-        Set<String> regions = new HashSet<>();
-        regions.addAll(state.managedBundles.keySet());
-        regions.addAll(bundlesPerRegions.keySet());
-
-        for (String region : regions) {
-
-            RegionDeployment deployment = new RegionDeployment();
-
-            // Get the list of bundles currently assigned in the region
-            Set<Long> managed = state.managedBundles.get(region);
-            if (managed == null) {
-                managed = Collections.emptySet();
-            }
-
-            // Compute the list of resources to deploy in the region
-            Set<Resource> bundlesInRegion = bundlesPerRegions.get(region);
-            List<Resource> toDeploy = bundlesInRegion != null
-                    ? new ArrayList<>(bundlesInRegion) : new ArrayList<Resource>();
-
-            // First pass: go through all installed bundles and mark them
-            // as either to ignore or delete
-            for (long bundleId : managed) {
-                // Look for the installed bundle
-                Bundle bundle = dstate.bundles.get(bundleId);
-                // Bundle has been manually uninstalled ?
-                if (bundle != null) {
-                    // Look for a matching resource
-                    Resource resource = null;
-                    for (Resource res : toDeploy) {
-                        if (bundle.getSymbolicName().equals(getSymbolicName(res))
-                                && bundle.getVersion().equals(getVersion(res))) {
-                            resource = res;
-                            break;
-                        }
-                    }
-                    // We found a matching bundle
-                    if (resource != null) {
-                        // In case of snapshots, check if the snapshot is out of date
-                        // and flag it as to update
-                        if (isUpdateable(resource)) {
-                            // Always update snapshots
-                            if (UPDATE_SNAPSHOTS_ALWAYS.equalsIgnoreCase(updateSnaphots)) {
-                                LOGGER.debug("Update snapshot for " + bundle.getLocation());
-                                deployment.toUpdate.put(bundle, resource);
-                            } else if (UPDATE_SNAPSHOTS_CRC.equalsIgnoreCase(updateSnaphots)) {
-                                // if the checksum are different
-                                try (
-                                        InputStream is = getBundleInputStream(resource, resolver.getProviders())
-                                ) {
-                                    long newCrc = ChecksumUtils.checksum(is);
-                                    long oldCrc = state.bundleChecksums.containsKey(bundle.getBundleId()) ? state.bundleChecksums.get(bundle.getBundleId()) : 0L;
-                                    if (newCrc != oldCrc) {
-                                        LOGGER.debug("New snapshot available for " + bundle.getLocation());
-                                        deployment.toUpdate.put(bundle, resource);
-                                    }
-                                    result.bundleChecksums.put(bundle.getBundleId(), newCrc);
-                                }
-                            }
-                        }
-                        // We're done for this resource
-                        toDeploy.remove(resource);
-                        result.resToBnd.put(resource, bundle);
-                        // There's no matching resource
-                        // If the bundle is managed, we need to delete it
-                    } else if (managed.contains(bundle.getBundleId())) {
-                        deployment.toDelete.add(bundle);
-                    }
-                }
-            }
-
-            // Second pass on remaining resources
-            for (Resource resource : toDeploy) {
-                TreeMap<Version, Bundle> matching = new TreeMap<>();
-                VersionRange range = new VersionRange(Macro.transform(bundleUpdateRange, getVersion(resource).toString()));
-                for (Bundle bundle : deployment.toDelete) {
-                    if (bundle.getSymbolicName().equals(getSymbolicName(resource)) && range.contains(bundle.getVersion())) {
-                        matching.put(bundle.getVersion(), bundle);
-                    }
-                }
-                if (!matching.isEmpty()) {
-                    Bundle bundle = matching.lastEntry().getValue();
-                    deployment.toUpdate.put(bundle, resource);
-                    deployment.toDelete.remove(bundle);
-                    result.resToBnd.put(resource, bundle);
-                } else {
-                    deployment.toInstall.add(resource);
-                }
-            }
-            Collections.sort(deployment.toInstall, new ResourceComparator());
-
-            // Add this region if there is something to do
-            if (!deployment.toDelete.isEmpty()
-                    || !deployment.toUpdate.isEmpty()
-                    || !deployment.toInstall.isEmpty()) {
-                result.regions.put(region, deployment);
-            }
-        }
-
-        return result;
-    }
-
-    protected <T> MapUtils.Function<Bundle, T> adapt(final Class<T> clazz) {
-        return new MapUtils.Function<Bundle, T>() {
-            @Override
-            public T apply(Bundle bundle) {
-                return bundle.adapt(clazz);
-            }
-        };
-    }
-
-    protected MapUtils.Function<Resource, String> featureId() {
-        return new MapUtils.Function<Resource, String>() {
-            @Override
-            public String apply(Resource resource) {
-                return getFeatureId(resource);
-            }
-        };
-    }
-
-
-    protected boolean isUpdateable(Resource resource) {
-        String uri = getUri(resource);
-        return getVersion(resource).getQualifier().endsWith(SNAPSHOT)
-                || uri.contains(SNAPSHOT)
-                || !uri.contains(MAVEN);
-    }
-
-    protected List<Bundle> getBundlesToStart(Collection<Bundle> bundles) {
-        // Restart the features service last, regardless of any other consideration
-        // so that we don't end up with the service trying to do stuff before we're done
-        boolean restart = false;
-
-        SortedMap<Integer, Set<Bundle>> bundlesPerStartLevel = new TreeMap<>();
-        for (Bundle bundle : bundles) {
-            if (bundle == this.bundle) {
-                restart = true;
-            } else {
-                int sl = bundle.adapt(BundleStartLevel.class).getStartLevel();
-                addToMapSet(bundlesPerStartLevel, sl, bundle);
-            }
-        }
-        if (bundlesPerStartLevel.isEmpty()) {
-            bundles = Collections.emptyList();
-        } else {
-            bundles = bundlesPerStartLevel.remove(bundlesPerStartLevel.firstKey());
-        }
-
-        // We hit FELIX-2949 if we don't use the correct order as Felix resolver isn't greedy.
-        // In order to minimize that, we make sure we resolve the bundles in the order they
-        // are given back by the resolution, meaning that all root bundles (i.e. those that were
-        // not flagged as dependencies in features) are started before the others.   This should
-        // make sure those important bundles are started first and minimize the problem.
-        List<BundleRevision> revs = new ArrayList<>();
-        for (Bundle bundle : bundles) {
-            revs.add(bundle.adapt(BundleRevision.class));
-        }
-        List<Bundle> sorted = new ArrayList<>();
-        for (BundleRevision rev : RequirementSort.sort(revs)) {
-            sorted.add(rev.getBundle());
-        }
-        if (sorted.isEmpty() && restart) {
-            sorted.add(bundle);
-        }
-        return sorted;
-    }
-
-    protected List<Bundle> getBundlesToStop(Collection<Bundle> bundles) {
-        SortedMap<Integer, Set<Bundle>> bundlesPerStartLevel = new TreeMap<>();
-        for (Bundle bundle : bundles) {
-            int sl = bundle.adapt(BundleStartLevel.class).getStartLevel();
-            addToMapSet(bundlesPerStartLevel, sl, bundle);
-        }
-        bundles = bundlesPerStartLevel.get(bundlesPerStartLevel.lastKey());
-
-        List<Bundle> bundlesToDestroy = new ArrayList<>();
-        for (Bundle bundle : bundles) {
-            ServiceReference[] references = bundle.getRegisteredServices();
-            int usage = 0;
-            if (references != null) {
-                for (ServiceReference reference : references) {
-                    usage += getServiceUsage(reference, bundles);
-                }
-            }
-            LOGGER.debug("Usage for bundle {} is {}", bundle, usage);
-            if (usage == 0) {
-                bundlesToDestroy.add(bundle);
-            }
-        }
-        if (!bundlesToDestroy.isEmpty()) {
-            Collections.sort(bundlesToDestroy, new Comparator<Bundle>() {
-                public int compare(Bundle b1, Bundle b2) {
-                    return (int) (b2.getLastModified() - b1.getLastModified());
-                }
-            });
-            LOGGER.debug("Selected bundles {} for destroy (no services in use)", bundlesToDestroy);
-        } else {
-            ServiceReference ref = null;
-            for (Bundle bundle : bundles) {
-                ServiceReference[] references = bundle.getRegisteredServices();
-                for (ServiceReference reference : references) {
-                    if (getServiceUsage(reference, bundles) == 0) {
-                        continue;
-                    }
-                    if (ref == null || reference.compareTo(ref) < 0) {
-                        LOGGER.debug("Currently selecting bundle {} for destroy (with reference {})", bundle, reference);
-                        ref = reference;
-                    }
-                }
-            }
-            if (ref != null) {
-                bundlesToDestroy.add(ref.getBundle());
-            }
-            LOGGER.debug("Selected bundle {} for destroy (lowest ranking service)", bundlesToDestroy);
-        }
-        return bundlesToDestroy;
-    }
-
-    private static int getServiceUsage(ServiceReference ref, Collection<Bundle> bundles) {
-        Bundle[] usingBundles = ref.getUsingBundles();
-        int nb = 0;
-        if (usingBundles != null) {
-            for (Bundle bundle : usingBundles) {
-                if (bundles.contains(bundle)) {
-                    nb++;
-                }
-            }
-        }
-        return nb;
-    }
-
-    protected InputStream getBundleInputStream(Resource resource, Map<String, StreamProvider> providers) throws IOException {
-        String uri = getUri(resource);
-        if (uri == null) {
-            throw new IllegalStateException("Resource has no uri");
-        }
-        StreamProvider provider = providers.get(uri);
-        if (provider == null) {
-            throw new IllegalStateException("Resource " + uri + " has no StreamProvider");
-        }
-        return provider.open();
-    }
-
-    protected void refreshPackages(Collection<Bundle> bundles) throws InterruptedException {
+    public void refreshPackages(Collection<Bundle> bundles) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         FrameworkWiring fw = systemBundleContext.getBundle().adapt(FrameworkWiring.class);
         fw.refreshBundles(bundles, new FrameworkListener() {
@@ -1940,17 +933,97 @@ public class FeaturesServiceImpl implements FeaturesService {
         latch.await();
     }
 
-
-    static class Deployment {
-        Map<Long, Long> bundleChecksums = new HashMap<>();
-        Map<Resource, Bundle> resToBnd = new HashMap<>();
-        Map<String, RegionDeployment> regions = new HashMap<>();
+    @Override
+    public void saveState(State state) {
+        synchronized (lock) {
+            this.state.replace(state);
+            saveState();
+        }
     }
 
-    static class RegionDeployment {
-        List<Resource> toInstall = new ArrayList<>();
-        List<Bundle> toDelete = new ArrayList<>();
-        Map<Bundle, Resource> toUpdate = new HashMap<>();
+    @Override
+    public void persistResolveRequest(Deployer.DeploymentRequest request) throws IOException {
+        writeResolve(request.requestedFeatures, request.options);
     }
 
+    @Override
+    public void installFeatureConfigs(Feature feature) throws IOException, InvalidSyntaxException {
+        if (configInstaller != null) {
+            configInstaller.installFeatureConfigs(feature);
+        }
+    }
+
+    @Override
+    public Bundle installBundle(String region, String uri, InputStream is) throws BundleException {
+        if (ROOT_REGION.equals(region)) {
+            return digraph.getRegion(region).installBundleAtLocation(uri, is);
+        } else {
+            return digraph.getRegion(region).installBundle(uri, is);
+        }
+    }
+
+    @Override
+    public void updateBundle(Bundle bundle, InputStream is) throws BundleException {
+        bundle.update(is);
+    }
+
+    @Override
+    public void uninstall(Bundle bundle) throws BundleException {
+        bundle.uninstall();
+    }
+
+    @Override
+    public void startBundle(Bundle bundle) throws BundleException {
+        bundle.start();
+    }
+
+    @Override
+    public void stopBundle(Bundle bundle, int options) throws BundleException {
+        bundle.stop(options);
+    }
+
+    @Override
+    public void setBundleStartLevel(Bundle bundle, int startLevel) {
+        bundle.adapt(BundleStartLevel.class).setStartLevel(startLevel);
+    }
+
+    @Override
+    public void resolveBundles(Set<Bundle> bundles) {
+        systemBundleContext.getBundle().adapt(FrameworkWiring.class).resolveBundles(bundles);
+    }
+
+    @Override
+    public void replaceDigraph(Map<String, Map<String, Map<String, Set<String>>>> policies, Map<String, Set<Long>> bundles) throws BundleException, InvalidSyntaxException {
+        RegionDigraph temp = digraph.copy();
+        // Remove everything
+        for (Region region : temp.getRegions()) {
+            temp.removeRegion(region);
+        }
+        // Re-create regions
+        for (String name : policies.keySet()) {
+            temp.createRegion(name);
+        }
+        // Dispatch bundles
+        for (Map.Entry<String, Set<Long>> entry : bundles.entrySet()) {
+            Region region = temp.getRegion(entry.getKey());
+            for (long bundleId : entry.getValue()) {
+                region.addBundle(bundleId);
+            }
+        }
+        // Add policies
+        for (Map.Entry<String, Map<String, Map<String, Set<String>>>> entry1 : policies.entrySet()) {
+            Region region1 = temp.getRegion(entry1.getKey());
+            for (Map.Entry<String, Map<String, Set<String>>> entry2 : entry1.getValue().entrySet()) {
+                Region region2 = temp.getRegion(entry2.getKey());
+                RegionFilterBuilder rfb = temp.createRegionFilterBuilder();
+                for (Map.Entry<String, Set<String>> entry3 : entry2.getValue().entrySet()) {
+                    for (String flt : entry3.getValue()) {
+                        rfb.allow(entry3.getKey(), flt);
+                    }
+                }
+                region1.connectRegion(region2, rfb.build());
+            }
+        }
+        digraph.replace(temp);
+    }
 }
