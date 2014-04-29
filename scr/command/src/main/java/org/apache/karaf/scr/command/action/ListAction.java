@@ -56,6 +56,8 @@ public class ListAction extends ScrActionSupport {
                 }
             }
         }
+        table.print(System.out);
+
         return null;
     }
 
