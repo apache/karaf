@@ -298,6 +298,7 @@ public class Subsystem extends ResourceImpl {
             for (Conditional cond : feature.getConditional()) {
                 FeatureResource resCond = FeatureResource.build(feature, cond, featureResolutionRange, bundles);
                 addIdentityRequirement(this, resCond, false);
+                addIdentityRequirement(resCond, this, true);
                 installable.add(resCond);
                 resConds.put(cond, resCond);
             }

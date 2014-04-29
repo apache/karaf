@@ -44,6 +44,7 @@ public abstract class StateStorage {
                 state.repositories.addAll(toStringSet((Collection) json.get("repositories")));
                 state.requestedFeatures.putAll(toStringStringSetMap((Map) json.get("features")));
                 state.installedFeatures.putAll(toStringStringSetMap((Map) json.get("installed")));
+                state.stateFeatures.putAll(toStringStringStringMapMap((Map) json.get("state")));
                 state.managedBundles.putAll(toStringLongSetMap((Map) json.get("managed")));
                 state.bundleChecksums.putAll(toLongLongMap((Map) json.get("checksums")));
             }
@@ -60,6 +61,7 @@ public abstract class StateStorage {
                 json.put("repositories", state.repositories);
                 json.put("features", state.requestedFeatures);
                 json.put("installed", state.installedFeatures);
+                json.put("state", state.stateFeatures);
                 json.put("managed", state.managedBundles);
                 json.put("checksums", toStringLongMap(state.bundleChecksums));
                 JsonWriter.write(os, json);
@@ -70,6 +72,22 @@ public abstract class StateStorage {
     protected abstract InputStream getInputStream() throws IOException;
 
     protected abstract OutputStream getOutputStream() throws IOException;
+
+    static Map<String, Map<String, String>> toStringStringStringMapMap(Map<?, ?> map) {
+        Map<String, Map<String, String>> nm = new HashMap<>();
+        for (Map.Entry entry : map.entrySet()) {
+            nm.put(entry.getKey().toString(), toStringStringMap((Map) entry.getValue()));
+        }
+        return nm;
+    }
+
+    static Map<String, String> toStringStringMap(Map<?, ?> map) {
+        Map<String, String> nm = new HashMap<>();
+        for (Map.Entry entry : map.entrySet()) {
+            nm.put(entry.getKey().toString(), entry.getValue().toString());
+        }
+        return nm;
+    }
 
     static Map<String, Set<String>> toStringStringSetMap(Map<?, ?> map) {
         Map<String, Set<String>> nm = new HashMap<>();

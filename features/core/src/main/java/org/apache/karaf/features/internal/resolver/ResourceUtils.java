@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.felix.utils.version.VersionRange;
-import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
 import org.osgi.resource.Capability;
 import org.osgi.resource.Resource;
@@ -29,6 +28,9 @@ import org.osgi.resource.Resource;
 import static org.osgi.framework.namespace.IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE;
 import static org.osgi.framework.namespace.IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE;
 import static org.osgi.framework.namespace.IdentityNamespace.IDENTITY_NAMESPACE;
+import static org.osgi.resource.Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE;
+import static org.osgi.resource.Namespace.RESOLUTION_MANDATORY;
+import static org.osgi.resource.Namespace.RESOLUTION_OPTIONAL;
 import static org.osgi.service.repository.ContentNamespace.CAPABILITY_URL_ATTRIBUTE;
 import static org.osgi.service.repository.ContentNamespace.CONTENT_NAMESPACE;
 
@@ -89,9 +91,9 @@ public final class ResourceUtils {
         for (Capability cap : required.getCapabilities(null)) {
             if (cap.getNamespace().equals(IDENTITY_NAMESPACE)) {
                 Map<String, Object> attributes = cap.getAttributes();
-                Map<String, String> dirs = new HashMap<String, String>();
-                dirs.put(Constants.RESOLUTION_DIRECTIVE, mandatory ? Constants.RESOLUTION_MANDATORY : Constants.RESOLUTION_OPTIONAL);
-                Map<String, Object> attrs = new HashMap<String, Object>();
+                Map<String, String> dirs = new HashMap<>();
+                dirs.put(REQUIREMENT_RESOLUTION_DIRECTIVE, mandatory ? RESOLUTION_MANDATORY : RESOLUTION_OPTIONAL);
+                Map<String, Object> attrs = new HashMap<>();
                 attrs.put(IDENTITY_NAMESPACE, attributes.get(IDENTITY_NAMESPACE));
                 attrs.put(CAPABILITY_TYPE_ATTRIBUTE, attributes.get(CAPABILITY_TYPE_ATTRIBUTE));
                 Version version = (Version) attributes.get(CAPABILITY_VERSION_ATTRIBUTE);

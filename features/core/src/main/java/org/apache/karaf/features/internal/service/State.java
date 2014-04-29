@@ -27,11 +27,12 @@ import org.apache.karaf.features.internal.util.MapUtils;
 public class State {
 
     public final AtomicBoolean bootDone = new AtomicBoolean();
-    public final Set<String> repositories = new TreeSet<String>();
-    public final Map<String, Set<String>> requestedFeatures = new HashMap<String, Set<String>>();
-    public final Map<String, Set<String>> installedFeatures = new HashMap<String, Set<String>>();
-    public final Map<String, Set<Long>> managedBundles = new HashMap<String, Set<Long>>();
-    public final Map<Long, Long> bundleChecksums = new HashMap<Long, Long>();
+    public final Set<String> repositories = new TreeSet<>();
+    public final Map<String, Set<String>> requestedFeatures = new HashMap<>();
+    public final Map<String, Set<String>> installedFeatures = new HashMap<>();
+    public final Map<String, Map<String, String>> stateFeatures = new HashMap<>();
+    public final Map<String, Set<Long>> managedBundles = new HashMap<>();
+    public final Map<Long, Long> bundleChecksums = new HashMap<>();
 
     public State copy() {
         State state = new State();
@@ -39,6 +40,7 @@ public class State {
         MapUtils.copy(repositories, state.repositories);
         MapUtils.copy(requestedFeatures, state.requestedFeatures);
         MapUtils.copy(installedFeatures, state.installedFeatures);
+        MapUtils.copy(stateFeatures, state.stateFeatures);
         MapUtils.copy(managedBundles, state.managedBundles);
         MapUtils.copy(bundleChecksums, state.bundleChecksums);
         return state;

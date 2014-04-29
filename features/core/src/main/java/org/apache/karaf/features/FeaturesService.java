@@ -18,12 +18,15 @@ package org.apache.karaf.features;
 
 import java.net.URI;
 import java.util.EnumSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
  * The service managing features repositories.
  */
 public interface FeaturesService {
+
+    public static final String ROOT_REGION = "root";
 
     enum Option {
         NoFailOnFeatureNotFound,
@@ -34,6 +37,12 @@ public interface FeaturesService {
         NoAutoManageBundles,
         Simulate,
         Verbose
+    }
+
+    enum RequestedState {
+        Installed,
+        Resolved,
+        Started
     }
 
     /**
@@ -85,6 +94,8 @@ public interface FeaturesService {
     void uninstallFeatures(Set<String> features, EnumSet<Option> options) throws Exception;
 
     void uninstallFeatures(Set<String> features, String region, EnumSet<Option> options) throws Exception;
+
+    void updateFeaturesState(Map<String, Map<String, RequestedState>> stateChanges, EnumSet<Option> options) throws Exception;
 
     Feature[] listFeatures() throws Exception;
 

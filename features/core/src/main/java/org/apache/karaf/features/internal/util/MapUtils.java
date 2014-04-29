@@ -53,7 +53,10 @@ public final class MapUtils {
     public static <U, T> Set<U> apply(Set<T> set, Function<T, U> function) {
         Set<U> result = new HashSet<>(set.size());
         for (T t : set) {
-            result.add(function.apply(t));
+            U u = function.apply(t);
+            if (u != null) {
+                result.add(u);
+            }
         }
         return result;
     }
@@ -61,7 +64,11 @@ public final class MapUtils {
     public static <S, T, U> Map<T, U> build(Collection<S> col, Function<S, T> key, Function<S, U> value) {
         Map<T, U> result = new HashMap<>(col.size());
         for (S s : col) {
-            result.put(key.apply(s), value.apply(s));
+            T t = key.apply(s);
+            U u = value.apply(s);
+            if (t != null && u != null) {
+                result.put(t, u);
+            }
         }
         return result;
     }

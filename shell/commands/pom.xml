@@ -106,6 +106,9 @@
                         <Bundle-Activator>
                             org.apache.karaf.shell.commands.impl.info.Activator
                         </Bundle-Activator>
+                        <Require-Capability>
+                            osgi.service;filter:="(objectClass=org.jledit.EditorFactory)";effective:=active
+                        </Require-Capability>
                         <Karaf-Commands>
                             org.apache.karaf.shell.commands.impl
                         </Karaf-Commands>
