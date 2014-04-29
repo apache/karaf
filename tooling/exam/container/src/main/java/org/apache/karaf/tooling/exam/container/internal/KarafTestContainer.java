@@ -101,7 +101,8 @@ public class KarafTestContainer implements TestContainer {
                             systemProperty(RMI_NAME_PROPERTY).value(name),
                             invokerConfiguration,
                             systemProperty(EXAM_INJECT_PROPERTY).value("true"),
-                            editConfigurationFileExtend("etc/system.properties", "jline.shutdownhook", "true")
+                            editConfigurationFileExtend("etc/system.properties", "jline.shutdownhook", "true"),
+                            new KarafDistributionConfigurationConsoleOption(false, true)
                     ));
             target = new RBCRemoteTarget(name, registry.getPort(), subsystem.getTimeout());
 

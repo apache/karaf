@@ -41,7 +41,6 @@ public class KarafTestContainerFactory implements TestContainerFactory {
     private RMIRegistry m_rmiRegistry;
 
     public KarafTestContainerFactory() {
-        m_rmiRegistry = new RMIRegistry(DEFAULTPORT, DEFAULTPORT + 1, DEFAULTPORT + 99).selectGracefully();
     }
 
     /**
@@ -49,6 +48,7 @@ public class KarafTestContainerFactory implements TestContainerFactory {
      */
     @Override
     public TestContainer[] create(ExamSystem system) {
+        m_rmiRegistry = new RMIRegistry(DEFAULTPORT, DEFAULTPORT + 1, DEFAULTPORT + 99).selectGracefully();
         List<TestContainer> containers = new ArrayList<TestContainer>();
         KarafDistributionKitConfigurationOption[] kitOptions =
                 system.getOptions(KarafDistributionKitConfigurationOption.class);
