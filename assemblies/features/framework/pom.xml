@@ -78,6 +78,13 @@
         <dependency>
             <groupId>org.jledit</groupId>
             <artifactId>core</artifactId>
+            <exclusions>
+                <exclusion>
+                    <!-- Excluding jansi as it is included in jline -->
+                    <groupId>org.fusesource.jansi</groupId>
+                    <artifactId>jansi</artifactId>
+                </exclusion>
+            </exclusions> 
         </dependency>
 
         <!-- listed in source feature.xml with explicit startlevel -->

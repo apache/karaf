@@ -67,7 +67,10 @@
             <artifactId>pax-exam-junit4</artifactId>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>org.apache.karaf.package</groupId>
+            <artifactId>org.apache.karaf.package.core</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

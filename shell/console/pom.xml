@@ -64,6 +64,7 @@
         <dependency>
             <groupId>org.apache.karaf.jaas</groupId>
             <artifactId>org.apache.karaf.jaas.boot</artifactId>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -151,13 +152,15 @@
                             org.apache.karaf.shell.console.completer;version=2.3.0,
                         	org.apache.karaf.shell.util;version=${project.version},
                             org.apache.karaf.shell.util;version=2.3.0,
-                            org.apache.felix.gogo*;version=${felix.gogo.version},
-                            org.apache.felix.service.command;version=${felix.gogo.version};status=provisional;mandatory:=status,
-                            org.apache.felix.service.threadio;version=${felix.gogo.version};status=provisional;mandatory:=status,
+                            org.apache.felix.gogo.commands*;version=${felix.gogo.version}
                         </Export-Package>
                         <Private-Package>
                         	org.apache.karaf.shell.console.impl*,
                             org.apache.karaf.shell.security.impl*,
+                            
+                            <!-- We need to embed gogo runtime to be able to create 
+                                 SecuredCommandProcessorImpl which needs CommandProcessorImpl -->
+                            org.apache.felix.gogo.runtime
                         </Private-Package>
                         <Main-Class>
                             org.apache.karaf.shell.console.impl.Main
