@@ -266,7 +266,7 @@
         </conditional>
         <conditional>
             <condition>spring</condition>
-            <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jasypt-spring31/${jasypt.bundle.version}</bundle>
+            <bundle start-level="30" start="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jasypt-spring31/${jasypt.bundle.version}</bundle>
         </conditional>
     </feature>
 
