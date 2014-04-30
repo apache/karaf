@@ -48,6 +48,7 @@ import org.apache.karaf.features.FeaturesListener;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
 import org.apache.karaf.features.RepositoryEvent;
+import org.apache.karaf.features.internal.download.simple.SimpleDownloader;
 import org.apache.karaf.features.internal.util.JsonReader;
 import org.apache.karaf.features.internal.util.JsonWriter;
 import org.apache.karaf.util.collections.CopyOnWriteArrayIdentityList;
@@ -892,7 +893,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         request.bundleUpdateRange = bundleUpdateRange;
         request.featureResolutionRange = featureResolutionRange;
         request.globalRepository = globalRepository;
-        request.overrides = overrides;
+        request.overrides = Overrides.loadOverrides(overrides);
         request.requestedFeatures = requestedFeatures;
         request.stateChanges = stateChanges;
         request.options = options;
@@ -909,7 +910,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
 
         Deployer.DeploymentState dstate = getDeploymentState(state);
         Deployer.DeploymentRequest request = getDeploymentRequest(requestedFeatures, stateChanges, options);
-        new Deployer(this).deploy(dstate, request);
+        new Deployer(new SimpleDownloader(), this).deploy(dstate, request);
     }
 
     public void print(String message, boolean verbose) {
@@ -937,6 +938,9 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
     @Override
     public void saveState(State state) {
         synchronized (lock) {
+            state.repositories.clear();
+            state.repositories.addAll(this.state.repositories);
+            state.bootDone.set(this.state.bootDone.get());
             this.state.replace(state);
             saveState();
         }

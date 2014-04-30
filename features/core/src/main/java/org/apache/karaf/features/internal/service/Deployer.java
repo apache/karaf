@@ -38,6 +38,7 @@ import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeatureEvent;
 import org.apache.karaf.features.FeaturesService;
+import org.apache.karaf.features.internal.download.DownloadManager;
 import org.apache.karaf.features.internal.download.StreamProvider;
 import org.apache.karaf.features.internal.region.SubsystemResolver;
 import org.apache.karaf.features.internal.util.ChecksumUtils;
@@ -128,7 +129,7 @@ public class Deployer {
     }
 
     static class DeploymentRequest {
-        String overrides;
+        Set<String> overrides;
         String featureResolutionRange;
         String bundleUpdateRange;
         String updateSnaphots;
@@ -153,9 +154,11 @@ public class Deployer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Deployer.class);
 
+    private final DownloadManager manager;
     private final DeployCallback callback;
 
-    public Deployer(DeployCallback callback) {
+    public Deployer(DownloadManager manager, DeployCallback callback) {
+        this.manager = manager;
         this.callback = callback;
     }
 
@@ -186,12 +189,12 @@ public class Deployer {
         // TODO: requirements
         // TODO: bundles
 
-        SubsystemResolver resolver = new SubsystemResolver();
+        SubsystemResolver resolver = new SubsystemResolver(manager);
         resolver.resolve(
                 dstate.features.values(),
                 request.requestedFeatures,
                 apply(unmanagedBundles, adapt(BundleRevision.class)),
-                Overrides.loadOverrides(request.overrides),
+                request.overrides,
                 request.featureResolutionRange,
                 request.globalRepository);
 
@@ -302,45 +305,9 @@ public class Deployer {
             }
         }
 
-        //
-        // Log deployment
-        //
-        logDeployment(deployment, verbose);
-
-        if (simulate) {
-            if (!noRefresh && !toRefresh.isEmpty()) {
-                print("  Bundles to refresh:", verbose);
-                for (Bundle bundle : toRefresh) {
-                    print("    " + bundle.getSymbolicName() + " / " + bundle.getVersion(), verbose);
-                }
-            }
-            if (!toManage.isEmpty()) {
-                print("  Managing bundle:", verbose);
-                for (Bundle bundle : toManage) {
-                    print("    " + bundle.getSymbolicName() + " / " + bundle.getVersion(), verbose);
-                }
-            }
-            return;
-        }
-
         Set<Bundle> toStart = new HashSet<>();
         Set<Bundle> toResolve = new HashSet<>();
         Set<Bundle> toStop = new HashSet<>();
-
-        //
-        // Execute deployment
-        //
-        // #1: stop bundles that needs to be updated or uninstalled in order
-        // #2: uninstall needed bundles
-        // #3: update regions
-        // #4: update bundles
-        // #5: install bundles
-        // #6: save state
-        // #7: install configuration
-        // #8: refresh bundles
-        // #9: start bundles in order
-        // #10: send events
-        //
 
         //
         // Compute bundle states
@@ -398,6 +365,42 @@ public class Deployer {
                 }
             }
         }
+
+        //
+        // Log deployment
+        //
+        logDeployment(deployment, verbose);
+
+        if (simulate) {
+            if (!noRefresh && !toRefresh.isEmpty()) {
+                print("  Bundles to refresh:", verbose);
+                for (Bundle bundle : toRefresh) {
+                    print("    " + bundle.getSymbolicName() + " / " + bundle.getVersion(), verbose);
+                }
+            }
+            if (!toManage.isEmpty()) {
+                print("  Managing bundle:", verbose);
+                for (Bundle bundle : toManage) {
+                    print("    " + bundle.getSymbolicName() + " / " + bundle.getVersion(), verbose);
+                }
+            }
+            return;
+        }
+
+        //
+        // Execute deployment
+        //
+        // #1: stop bundles that needs to be updated or uninstalled in order
+        // #2: uninstall needed bundles
+        // #3: update regions
+        // #4: update bundles
+        // #5: install bundles
+        // #6: save state
+        // #7: install configuration
+        // #8: refresh bundles
+        // #9: start bundles in order
+        // #10: send events
+        //
 
 
         //
@@ -605,7 +608,9 @@ public class Deployer {
                         deployment.bundleChecksums.put(bundle.getBundleId(), crc);
                     }
                     int startLevel = startLevels.get(resource);
-                    callback.setBundleStartLevel(bundle, startLevel);
+                    if (startLevel != dstate.initialBundleStartLevel) {
+                        callback.setBundleStartLevel(bundle, startLevel);
+                    }
                     FeaturesService.RequestedState reqState = states.get(resource);
                     switch (reqState) {
                     case Started:
