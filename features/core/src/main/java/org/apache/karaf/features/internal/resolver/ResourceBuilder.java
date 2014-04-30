@@ -60,7 +60,10 @@ public final class ResourceBuilder {
     }
 
     public static ResourceImpl build(String uri, Map<String, String> headerMap) throws BundleException {
+        return build(new ResourceImpl(), uri, headerMap);
+    }
 
+    public static ResourceImpl build(ResourceImpl resource, String uri, Map<String, String> headerMap) throws BundleException {
         // Verify that only manifest version 2 is specified.
         String manifestVersion = getManifestVersion(headerMap);
         if (manifestVersion == null || !manifestVersion.equals("2")) {
@@ -89,7 +92,15 @@ public final class ResourceBuilder {
 
         // Now that we have symbolic name and version, create the resource
         String type = headerMap.get(Constants.FRAGMENT_HOST) == null ? IdentityNamespace.TYPE_BUNDLE : IdentityNamespace.TYPE_FRAGMENT;
-        ResourceImpl resource = new ResourceImpl(bundleSymbolicName, type, bundleVersion);
+        {
+            Map<String, String> dirs = new HashMap<>();
+            Map<String, Object> attrs = new HashMap<>();
+            attrs.put(IdentityNamespace.IDENTITY_NAMESPACE, bundleSymbolicName);
+            attrs.put(IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE, type);
+            attrs.put(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE, bundleVersion);
+            CapabilityImpl identity = new CapabilityImpl(resource, IdentityNamespace.IDENTITY_NAMESPACE, dirs, attrs);
+            resource.addCapability(identity);
+        }
         if (uri != null) {
             Map<String, Object> attrs = new HashMap<>();
             attrs.put(ContentNamespace.CAPABILITY_URL_ATTRIBUTE, uri);

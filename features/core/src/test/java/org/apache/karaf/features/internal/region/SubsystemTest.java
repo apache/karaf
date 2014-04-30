@@ -16,11 +16,6 @@
  */
 package org.apache.karaf.features.internal.region;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -29,13 +24,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.jar.JarOutputStream;
-import java.util.jar.Manifest;
 
 import org.apache.karaf.features.FeaturesService;
-import org.apache.karaf.features.internal.download.StreamProvider;
 import org.apache.karaf.features.internal.service.RepositoryImpl;
-import org.apache.karaf.features.internal.download.simple.SimpleDownloader;
+import org.apache.karaf.features.internal.support.TestDownloadManager;
 import org.junit.Test;
 import org.osgi.framework.namespace.IdentityNamespace;
 import org.osgi.framework.wiring.BundleRevision;
@@ -61,7 +53,7 @@ public class SubsystemTest {
         addToMapSet(expected, "root", "c/1.0.0");
         addToMapSet(expected, "root/apps1", "b/1.0.0");
 
-        SubsystemResolver resolver = new SubsystemResolver(new TestDownloadManager("data1"));
+        SubsystemResolver resolver = new SubsystemResolver(new TestDownloadManager(getClass(), "data1"));
         resolver.resolve(Arrays.asList(repo.getFeatures()),
                          features,
                          Collections.<String, Set<BundleRevision>>emptyMap(),
@@ -92,7 +84,7 @@ public class SubsystemTest {
         addToMapSet(expected, "root/apps2", "c/1.0.0");
         addToMapSet(expected, "root/apps2#f1", "a/1.0.0");
 
-        SubsystemResolver resolver = new SubsystemResolver(new TestDownloadManager("data2"));
+        SubsystemResolver resolver = new SubsystemResolver(new TestDownloadManager(getClass(), "data2"));
         resolver.resolve(Arrays.asList(repo.getFeatures()),
                          features,
                          Collections.<String, Set<BundleRevision>>emptyMap(),
@@ -113,7 +105,7 @@ public class SubsystemTest {
         Map<String, Set<String>> expected = new HashMap<String, Set<String>>();
         addToMapSet(expected, "root/apps1", "a/1.0.1");
 
-        SubsystemResolver resolver = new SubsystemResolver(new TestDownloadManager("data3"));
+        SubsystemResolver resolver = new SubsystemResolver(new TestDownloadManager(getClass(), "data3"));
         resolver.resolve(Arrays.asList(repo.getFeatures()),
                          features,
                          Collections.<String, Set<BundleRevision>>emptyMap(),
@@ -133,7 +125,7 @@ public class SubsystemTest {
         Map<String, Set<String>> expected = new HashMap<String, Set<String>>();
         addToMapSet(expected, "root/apps1", "a/1.0.0");
 
-        SubsystemResolver resolver = new SubsystemResolver(new TestDownloadManager("data4"));
+        SubsystemResolver resolver = new SubsystemResolver(new TestDownloadManager(getClass(), "data4"));
         resolver.resolve(Arrays.asList(repo.getFeatures()),
                 features,
                 Collections.<String, Set<BundleRevision>>emptyMap(),
@@ -155,7 +147,7 @@ public class SubsystemTest {
         addToMapSet(expected, "root/apps1", "a/1.0.0");
         addToMapSet(expected, "root/apps1", "b/1.0.0");
 
-        SubsystemResolver resolver = new SubsystemResolver(new TestDownloadManager("data4"));
+        SubsystemResolver resolver = new SubsystemResolver(new TestDownloadManager(getClass(), "data4"));
         resolver.resolve(Arrays.asList(repo.getFeatures()),
                 features,
                 Collections.<String, Set<BundleRevision>>emptyMap(),
@@ -223,59 +215,4 @@ public class SubsystemTest {
                 + cap.getAttributes().get(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE);
     }
 
-    class TestDownloadManager extends SimpleDownloader {
-
-        private final String dir;
-
-        TestDownloadManager(String dir) {
-            this.dir = dir;
-        }
-
-        @Override
-        protected StreamProvider createProvider(String location) throws MalformedURLException {
-            return new TestProvider(location);
-        }
-
-        class TestProvider implements StreamProvider {
-            private final IOException exception;
-            private final Map<String, String> headers;
-            private final byte[] data;
-
-            TestProvider(String location) {
-                Map<String, String> headers = null;
-                byte[] data = null;
-                IOException exception = null;
-                try {
-                    Manifest man = new Manifest(getClass().getResourceAsStream(dir +"/" + location + ".mf"));
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    JarOutputStream jos = new JarOutputStream(baos, man);
-                    jos.close();
-                    data = baos.toByteArray();
-                    headers = new HashMap<String, String>();
-                    for (Map.Entry attr : man.getMainAttributes().entrySet()) {
-                        headers.put(attr.getKey().toString(), attr.getValue().toString());
-                    }
-                } catch (IOException e) {
-                    exception = e;
-                }
-                this.headers = headers;
-                this.data = data;
-                this.exception = exception;
-            }
-
-            @Override
-            public InputStream open() throws IOException {
-                if (exception != null)
-                    throw exception;
-                return new ByteArrayInputStream(data);
-            }
-
-            @Override
-            public Map<String, String> getMetadata() throws IOException {
-                if (exception != null)
-                    throw exception;
-                return headers;
-            }
-        }
-    }
 }

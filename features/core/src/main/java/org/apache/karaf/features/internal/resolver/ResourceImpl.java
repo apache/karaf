@@ -31,8 +31,8 @@ import org.osgi.resource.Resource;
  */
 public class ResourceImpl implements Resource {
 
-    private final List<Capability> caps;
-    private final List<Requirement> reqs;
+    protected final List<Capability> caps;
+    protected final List<Requirement> reqs;
 
     /**
      * CAUTION: This constructor does not ensure that the resource
