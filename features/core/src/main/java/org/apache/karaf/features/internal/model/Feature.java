@@ -26,7 +26,11 @@ import java.util.regex.Pattern;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
+
+import org.apache.felix.utils.version.VersionCleaner;
+import org.apache.felix.utils.version.VersionTable;
 
 
 /**
@@ -81,7 +85,7 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
     protected String details;
     @XmlAttribute(required = true)
     protected String name;
-    @XmlAttribute
+    @XmlTransient
     protected String version;
     @XmlAttribute
     protected String description;
@@ -105,7 +109,7 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
 
     public Feature(String name, String version) {
         this.name = name;
-        this.version = version;
+        this.version = VersionCleaner.clean(version);
     }
 
 
@@ -167,8 +171,9 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
      * @param value allowed object is
      *              {@link String }
      */
+    @XmlAttribute
     public void setVersion(String value) {
-        this.version = value;
+        this.version = VersionCleaner.clean(value);
     }
 
     /**

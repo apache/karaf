@@ -39,6 +39,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.apache.felix.utils.version.VersionCleaner;
 import org.apache.felix.utils.version.VersionRange;
 import org.apache.felix.utils.version.VersionTable;
 import org.apache.karaf.features.Feature;
@@ -799,7 +800,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         int idx = feature.indexOf("/");
         String name = feature.substring(0, idx);
         String version = feature.substring(idx + 1);
-        return name + "/" + VersionTable.getVersion(version).toString();
+        return name + "/" + VersionCleaner.clean(version);
     }
 
     /**
@@ -856,7 +857,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         dstate.features = new HashMap<>();
         for (Map<String, Feature> m : getFeatures().values()) {
             for (Feature feature : m.values()) {
-                String id = feature.getName() + "/" + VersionTable.getVersion(feature.getVersion());
+                String id = feature.getId();
                 dstate.features.put(id, feature);
             }
         }

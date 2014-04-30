@@ -24,6 +24,7 @@ import org.apache.karaf.features.internal.model.Features;
 import org.apache.karaf.features.internal.model.JaxbUtil;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
@@ -97,6 +98,7 @@ public class FeaturesValidationTest {
         URL url = getClass().getResource("f07.xml");
         Features features = JaxbUtil.unmarshal(url.toExternalForm(), true);
         assertNotNull(features);
+        assertEquals("2.5.6.SEC02", features.getFeature().get(0).getVersion());
     }
 
 }

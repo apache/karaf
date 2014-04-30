@@ -21,9 +21,9 @@ import junit.framework.TestCase;
 public class FeatureTest extends TestCase {
 	
 	public void testValueOf() {
-		Feature feature = org.apache.karaf.features.internal.model.Feature.valueOf("name" + org.apache.karaf.features.internal.model.Feature.SPLIT_FOR_NAME_AND_VERSION + "version");
+		Feature feature = org.apache.karaf.features.internal.model.Feature.valueOf("name/1.0.0");
 		assertEquals(feature.getName(), "name");
-		assertEquals(feature.getVersion(), "version");
+		assertEquals(feature.getVersion(), "1.0.0");
 		feature = org.apache.karaf.features.internal.model.Feature.valueOf("name");
 		assertEquals(feature.getName(), "name");
 		assertEquals(feature.getVersion(), org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION);
