@@ -19,11 +19,11 @@
   -->
 
 <features xmlns="http://karaf.apache.org/xmlns/features/v1.3.0" name="check-dependencies-features">
-    <feature description="dependency-module-c" version="1.0-SNAPSHOT" name="dependency-module-c">
+    <feature description="dependency-module-c" version="1.0.0.SNAPSHOT" name="dependency-module-c">
         <bundle>mvn:test/dependency-module-a/1.0-SNAPSHOT</bundle>
         <bundle>mvn:test/dependency-module-b/1.0-SNAPSHOT</bundle>
     </feature>
-    <feature description="dependency-module-d" version="1.0-SNAPSHOT" name="dependency-module-d">
+    <feature description="dependency-module-d" version="1.0.0.SNAPSHOT" name="dependency-module-d">
         <bundle>mvn:test/dependency-module-c/1.0-SNAPSHOT</bundle>
         <bundle>mvn:test/dependency-module-a/1.0-SNAPSHOT</bundle>
         <bundle>mvn:test/dependency-module-b/1.0-SNAPSHOT</bundle>
