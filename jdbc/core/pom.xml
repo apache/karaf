@@ -39,6 +39,12 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
             <scope>provided</scope>
@@ -74,6 +80,7 @@
                             javax.management,
                             javax.management.loading,
                             org.apache.karaf.management;version=${project.version},
+                            org.slf4j*;resolution:=optional,
                             *
                         </Import-Package>
                         <Private-Package>

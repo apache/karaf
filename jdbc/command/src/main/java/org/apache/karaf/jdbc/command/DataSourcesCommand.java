@@ -24,16 +24,20 @@ import java.util.Map;
 @Command(scope = "jdbc", name = "datasources", description = "List the JDBC datasources")
 public class DataSourcesCommand extends JdbcCommandSupport {
 
-    private final static String JDBC_DATASOURCES_STRING_FORMAT = "%10s %15s %10s %45s";
+    private final static String JDBC_DATASOURCES_STRING_FORMAT = "%10s %15s %10s %45s %5s";
 
     public Object doExecute() throws Exception {
 
-        System.out.println(String.format(JDBC_DATASOURCES_STRING_FORMAT, "Name", "Product", "Version", "URL"));
+        System.out.println(String.format(JDBC_DATASOURCES_STRING_FORMAT, "Name", "Product", "Version", "URL", "Status"));
 
         List<String> datasources = this.getJdbcService().datasources();
         for (String datasource : datasources) {
-            Map<String, String> info = this.getJdbcService().info(datasource);
-            System.out.println(String.format(JDBC_DATASOURCES_STRING_FORMAT, datasource, info.get("db.product"), info.get("db.version"), info.get("url")));
+            try {
+                Map<String, String> info = this.getJdbcService().info(datasource);
+                System.out.println(String.format(JDBC_DATASOURCES_STRING_FORMAT, datasource, info.get("db.product"), info.get("db.version"), info.get("url"), "OK"));
+            } catch (Exception e) {
+                System.out.println(String.format(JDBC_DATASOURCES_STRING_FORMAT, datasource, "", "", "", "Error"));
+            }
         }
 
         return null;
