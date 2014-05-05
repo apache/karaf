@@ -40,19 +40,26 @@ public class JdbcMBeanImpl extends StandardMBean implements JdbcMBean {
     public TabularData getDatasources() throws MBeanException {
         try {
             CompositeType type = new CompositeType("DataSource", "JDBC DataSource",
-                    new String[]{ "name", "product", "version", "url "},
-                    new String[]{ "Name", "Database product", "Database version", "JDBC URL" },
+                    new String[]{ "name", "product", "version", "url", "status"},
+                    new String[]{ "Name", "Database product", "Database version", "JDBC URL", "Status" },
                     new OpenType[]{ SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING });
             TabularType tableType = new TabularType("JDBC DataSources", "Table of the JDBC DataSources",
                     type, new String[]{ "name" });
             TabularData table = new TabularDataSupport(tableType);
 
             for (String datasource : jdbcService.datasources()) {
-                Map<String, String> info = jdbcService.info(datasource);
-                CompositeData data = new CompositeDataSupport(type,
-                        new String[]{ "name", "product", "version", "url" },
-                        new Object[]{ datasource, info.get("db.product"), info.get("db.version"), info.get("url") });
-                table.put(data);
+                try {
+                    Map<String, String> info = jdbcService.info(datasource);
+                    CompositeData data = new CompositeDataSupport(type,
+                            new String[]{"name", "product", "version", "url", "status"},
+                            new Object[]{datasource, info.get("db.product"), info.get("db.version"), info.get("url"), "OK"});
+                    table.put(data);
+                } catch (Exception e) {
+                    CompositeData data = new CompositeDataSupport(type,
+                            new String[]{"name", "product", "version", "url", "status"},
+                            new Object[]{datasource, "", "", "", "Error"});
+                    table.put(data);
+                }
             }
 
             return table;
