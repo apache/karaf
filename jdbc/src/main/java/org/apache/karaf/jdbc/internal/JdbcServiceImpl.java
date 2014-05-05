@@ -22,6 +22,8 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import javax.sql.XADataSource;
@@ -74,6 +76,8 @@ public class JdbcServiceImpl implements JdbcService {
         }
 
     }
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(JdbcServiceImpl.class);
 
     private BundleContext bundleContext;
 
@@ -219,6 +223,9 @@ public class JdbcServiceImpl implements JdbcService {
             map.put("driver.name", dbMetaData.getDriverName());
             map.put("driver.version", dbMetaData.getDriverVersion());
             return map;
+        } catch (Exception e) {
+            LOGGER.error("Can't get information about datasource {}", datasource, e);
+            throw e;
         } finally {
             jdbcConnector.close();
         }

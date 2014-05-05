@@ -35,11 +35,16 @@ public class DataSourcesCommand extends JdbcCommandSupport {
         table.column("Product");
         table.column("Version");
         table.column("URL");
+        table.column("Status");
 
         List<String> datasources = this.getJdbcService().datasources();
         for (String datasource : datasources) {
-            Map<String, String> info = this.getJdbcService().info(datasource);
-            table.addRow().addContent(datasource, info.get("db.product"), info.get("db.version"), info.get("url"));
+            try {
+                Map<String, String> info = this.getJdbcService().info(datasource);
+                table.addRow().addContent(datasource, info.get("db.product"), info.get("db.version"), info.get("url"), "OK");
+            } catch (Exception e) {
+                table.addRow().addContent(datasource, "", "", "", "Error");
+            }
         }
 
         table.print(System.out);
