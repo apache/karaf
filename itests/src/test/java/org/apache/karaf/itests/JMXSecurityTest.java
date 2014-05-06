@@ -50,6 +50,8 @@ import javax.management.remote.JMXConnector;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -92,7 +94,7 @@ public class JMXSecurityTest extends KarafTestSupport {
             ";jaas:roleadd " + viewerUser + " viewer" +
             ";jaas:update" +
             ";jaas:manage --realm karaf" +
-            ";jaas:users"));
+            ";jaas:users", new RolePrincipal("admin")));
 
         JMXConnector connector = getJMXConnector(viewerUser, viewerUser);
         MBeanServerConnection connection = connector.getMBeanServerConnection();
@@ -133,7 +135,7 @@ public class JMXSecurityTest extends KarafTestSupport {
             ";jaas:roleadd " + viewerUser + " viewer" +
             ";jaas:update" +
             ";jaas:manage --realm karaf" +
-            ";jaas:users"));
+            ";jaas:users", new RolePrincipal("admin")));
 
         JMXConnector connector = getJMXConnector(managerUser, managerUser);
         MBeanServerConnection connection = connector.getMBeanServerConnection();
@@ -207,7 +209,7 @@ public class JMXSecurityTest extends KarafTestSupport {
             ";jaas:roleadd " + viewerUser + " viewer" +
             ";jaas:update" +
             ";jaas:manage --realm karaf" +
-            ";jaas:users"));
+            ";jaas:users", new RolePrincipal("admin")));
 
         try {
             getJMXConnector("admingroup", "group");

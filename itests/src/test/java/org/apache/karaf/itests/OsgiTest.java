@@ -24,6 +24,8 @@ import javax.management.remote.JMXConnector;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerMethod;
@@ -87,7 +89,8 @@ public class OsgiTest extends KarafTestSupport {
 
     @Test
     public void installCommand() throws Exception {
-        String installOutput = executeCommand("osgi:install mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.commons-lang/2.4_6");
+        String installOutput = executeCommand("osgi:install mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.commons-lang/2.4_6",
+                                              new RolePrincipal("admin"));
         System.out.println(installOutput);
         String listOutput = executeCommand("osgi:list | grep -i commons-lang");
         assertFalse(listOutput.isEmpty());

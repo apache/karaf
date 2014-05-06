@@ -25,6 +25,8 @@ import javax.management.remote.JMXConnector;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerMethod;
@@ -35,7 +37,7 @@ public class ObrTest extends KarafTestSupport {
 
     @Before
     public void installObrFeature() throws Exception {
-        System.out.println(executeCommand("features:install obr"));
+        System.out.println(executeCommand("features:install obr", new RolePrincipal("admin") ));
         // give it time on faster machines to complete
         Thread.sleep(500);
     }
