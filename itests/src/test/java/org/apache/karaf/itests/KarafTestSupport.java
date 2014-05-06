@@ -13,11 +13,6 @@
  */
 package org.apache.karaf.itests;
 
-import static org.ops4j.pax.exam.CoreOptions.maven;
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.karafDistributionConfiguration;
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.logLevel;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.PrintStream;
@@ -28,7 +23,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -45,7 +42,6 @@ import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
-import org.junit.Assert;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.MavenUtils;
 import org.ops4j.pax.exam.Option;
@@ -59,6 +55,13 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
+
+import org.junit.Assert;
+
+import static org.ops4j.pax.exam.CoreOptions.maven;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.karafDistributionConfiguration;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.logLevel;
 
 public class KarafTestSupport {
 
@@ -303,6 +306,45 @@ public class KarafTestSupport {
             }
         }
         Assert.fail("Feature " + featureName + " should be installed but is not");
+    }
+    
+    protected void installAndAssertFeature(String feature) throws Exception {
+        featuresService.installFeature(feature);
+        assertFeatureInstalled(feature);
+    }
+
+    protected void installAssertAndUninstallFeature(String... feature) throws Exception {
+        Set<Feature> featuresBefore = new HashSet<Feature>(Arrays.asList(featuresService.listInstalledFeatures()));
+        try {
+                        for (String curFeature : feature) {
+                                featuresService.installFeature(curFeature);
+                            assertFeatureInstalled(curFeature);
+                        }
+                } finally {
+                        uninstallNewFeatures(featuresBefore);
+                }
+    }
+
+
+    /**
+     * The feature service does not uninstall feature dependencies when uninstalling a single feature.
+     * So we need to make sure we uninstall all features that were newly installed.
+     *
+     * @param featuresBefore
+     * @throws Exception
+     */
+    protected void uninstallNewFeatures(Set<Feature> featuresBefore) throws Exception {
+        Feature[] features = featuresService.listInstalledFeatures();
+        for (Feature curFeature : features) {
+            if (!featuresBefore.contains(curFeature)) {
+                try {
+                    System.out.println("Uninstalling " + curFeature.getName());
+                    featuresService.uninstallFeature(curFeature.getName(), curFeature.getVersion());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
 }

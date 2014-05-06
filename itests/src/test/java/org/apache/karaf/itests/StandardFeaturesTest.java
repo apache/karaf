@@ -31,7 +31,7 @@ public class StandardFeaturesTest extends KarafTestSupport {
         assertFeatureInstalled("kar");
     }
 
-    private void installAndAssertFeature(String feature) throws Exception {
+    protected void installAndAssertFeature(String feature) throws Exception {
         featuresService.installFeature(feature);
         assertFeatureInstalled(feature);
     }

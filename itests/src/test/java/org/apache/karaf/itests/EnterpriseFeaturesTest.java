@@ -23,7 +23,7 @@ import org.ops4j.pax.exam.spi.reactors.PerMethod;
 @ExamReactorStrategy(PerMethod.class)
 public class EnterpriseFeaturesTest extends KarafTestSupport {
 
-    private void installAndAssertFeature(String feature) throws Exception {
+    protected void installAndAssertFeature(String feature) throws Exception {
         featuresService.installFeature(feature);
         assertFeatureInstalled(feature);
     }
