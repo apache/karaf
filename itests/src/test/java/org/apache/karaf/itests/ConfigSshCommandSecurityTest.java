@@ -24,7 +24,7 @@ import org.ops4j.pax.exam.spi.reactors.PerClass;
 
 /**
  * This test exercises the Shell Command ACL for the config scope commands as defined in
- * /framework/src/main/resources/resources/etc/org.apache.karaf.command.acl.config.cfg
+ * apache-karaf/src/main/distribution/text/etc/org.apache.karaf.command.acl.config.cfg
  */
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
