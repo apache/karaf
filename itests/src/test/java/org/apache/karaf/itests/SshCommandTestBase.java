@@ -94,7 +94,8 @@ public class SshCommandTestBase extends KarafTestSupport {
         //wait for command done;
         closeSshChannel(pipe);
         String output = new String(out.toByteArray());
-            
+        System.out.println("the output is ======> " + output + "<========");
+
         switch(result) {
         case OK:
             Assert.assertFalse("Should not contain 'Insufficient credentials' or 'Command not found': " + output,
