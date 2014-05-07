@@ -13,6 +13,8 @@
  */
 package org.apache.karaf.itests;
 
+import junit.framework.Assert;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -29,7 +31,7 @@ public class OsgiSshCommandSecurityTest extends SshCommandTestBase {
     private static int counter = 0;
 
     @Test
-    public void testBundleCommandSecurityViaSsh() throws Exception {
+    public void testOsgiCommandSecurityViaSsh() throws Exception {
         String manageruser = "man" + System.nanoTime() + "_" + counter++;
         String vieweruser = "view" + System.nanoTime() + "_" + counter++;
 
@@ -74,5 +76,26 @@ public class OsgiSshCommandSecurityTest extends SshCommandTestBase {
         assertCommand(vieweruser, "osgi:install xyz", Result.NOT_FOUND);
         assertCommand(manageruser, "osgi:install xyz", Result.NOT_FOUND);
         assertCommand("karaf", "osgi:install xyz", Result.OK);
+        
+        assertCommand(vieweruser, "osgi:name", Result.OK);
+        assertCommand(vieweruser, "osgi:start-level", Result.OK);
+        assertCommand(vieweruser, "osgi:start-level 150", Result.NO_CREDENTIALS);
+        assertCommand(vieweruser, "osgi:shutdown", Result.NOT_FOUND);
+
+        assertCommand(manageruser, "osgi:name", Result.OK);
+        assertCommand(manageruser, "osgi:start-level", Result.OK);
+        assertCommand(manageruser, "osgi:start-level 0", Result.NO_CREDENTIALS);
+        assertCommand(manageruser, "osgi:start-level  1 ", Result.NO_CREDENTIALS);
+        assertCommand(manageruser, "osgi:start-level 99", Result.NO_CREDENTIALS);
+        assertCommand(manageruser, "osgi:start-level 105", Result.OK);
+        assertCommand(manageruser, "osgi:shutdown", Result.NOT_FOUND);
+
+        assertCommand("karaf", "osgi:name", Result.OK);
+        assertCommand("karaf", "osgi:start-level", Result.OK);
+        assertCommand("karaf", "osgi:start-level 99", Result.OK);
+        Assert.assertTrue(assertCommand("karaf", "osgi:start-level", Result.OK).contains("99"));
+        assertCommand("karaf", "osgi:start-level 100", Result.OK);
+        assertCommand("karaf", "osgi:shutdown --help", Result.OK);
+
     }
 }
