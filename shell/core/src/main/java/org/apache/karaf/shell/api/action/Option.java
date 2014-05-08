@@ -25,6 +25,18 @@ import java.lang.annotation.Target;
 
 /**
  * Used to mark an optional named command line option who's name typically starts with "--" or "-".
+ * This annotation can be applied to attributes of a class implementing an Action.
+ * <p>
+ * <h2>Example 1 (boolean option):</h2>
+ * <code>@Option(name="--force") boolean force;</code>
+ * <p>
+ * This will be represented as --force on the command line.
+ * <p>
+ * <h2>Example 2 (mandatory String option):</h2>
+ * <code>@Option(name="-name",required=true) String name;</code>
+ * <p>
+ * This will be represented as -name=<myname> on the command line and the command will be rejected if the 
+ * option is not given. 
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD})
