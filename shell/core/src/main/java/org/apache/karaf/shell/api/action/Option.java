@@ -26,6 +26,8 @@ import java.lang.annotation.Target;
 /**
  * Used to mark an optional named command line option who's name typically starts with "--" or "-".
  * This annotation can be applied to attributes of a class implementing an Action.
+ * The value of the command line option will be automatically converted to the attribute type. 
+ * @see org.apache.karaf.shell.support.converter.DefaultConverter
  * <p>
  * <h2>Example 1 (boolean option):</h2>
  * <code>@Option(name="--force") boolean force;</code>
