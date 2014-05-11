@@ -42,7 +42,7 @@ public class JdbcMBeanImpl extends StandardMBean implements JdbcMBean {
             CompositeType type = new CompositeType("DataSource", "JDBC DataSource",
                     new String[]{ "name", "product", "version", "url", "status"},
                     new String[]{ "Name", "Database product", "Database version", "JDBC URL", "Status" },
-                    new OpenType[]{ SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING });
+                    new OpenType[]{ SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING });
             TabularType tableType = new TabularType("JDBC DataSources", "Table of the JDBC DataSources",
                     type, new String[]{ "name" });
             TabularData table = new TabularDataSupport(tableType);
