@@ -32,7 +32,6 @@ public class PropertiesBackingEngine implements BackingEngine {
 
     private static final transient Logger LOGGER = LoggerFactory.getLogger(PropertiesBackingEngine.class);
 
-    static final String GROUP_PREFIX = "_g_:";
 
     private Properties users;
     private EncryptionSupport encryptionSupport;
