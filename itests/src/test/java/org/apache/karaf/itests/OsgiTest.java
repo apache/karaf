@@ -142,14 +142,14 @@ public class OsgiTest extends KarafTestSupport {
 
     @Test
     public void startLevelCommand() throws Exception {
-        String startLevelOutput = executeCommand("osgi:start-level");
+        String startLevelOutput = executeCommand("osgi:start-level", new RolePrincipal("viewer"));
         System.out.println(startLevelOutput);
         assertTrue(startLevelOutput.contains("100"));
     }
 
     @Test
     public void shutdownCommand() throws Exception {
-        System.out.println(executeCommand("osgi:shutdown -f"));
+        System.out.println(executeCommand("osgi:shutdown -f", new RolePrincipal("admin")));
     }
 
 }
