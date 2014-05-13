@@ -17,11 +17,12 @@
 package org.apache.karaf.scheduler.core;
 
 import java.io.Serializable;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Map;
-import java.util.TimeZone;
+
+import javax.xml.bind.DatatypeConverter;
 
 import org.apache.karaf.scheduler.ScheduleOptions;
 import org.quartz.CronExpression;
@@ -152,9 +153,8 @@ public class InternalScheduleOptions implements ScheduleOptions {
         if (date == null) {
             return "null";
         }
-        TimeZone tz = TimeZone.getTimeZone("UTC");
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
-        df.setTimeZone(tz);
-        return df.format(date);
+        Calendar c = GregorianCalendar.getInstance();
+        c.setTime(date);
+        return DatatypeConverter.printDateTime(c);
     }
 }

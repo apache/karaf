@@ -240,6 +240,7 @@ public class QuartzScheduler implements Scheduler {
             name = opts.name;
         } else {
             name = job.getClass().getName() + ':' + UUID.randomUUID();
+            opts.name = name;
         }
 
         final Trigger trigger = opts.trigger.withIdentity(name).build();

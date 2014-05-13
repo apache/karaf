@@ -71,7 +71,7 @@
                         </Import-Package>
                         <Private-Package>
                             org.apache.karaf.scheduler.core,
-                            org.apache.karaf.scheduler.command,
+                            org.apache.karaf.scheduler.command.*,
                             org.apache.karaf.util.tracker,
                             org.quartz,
                             org.quartz.core.*,
