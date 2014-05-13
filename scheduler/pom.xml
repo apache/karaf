@@ -22,19 +22,98 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <artifactId>karaf</artifactId>
         <groupId>org.apache.karaf</groupId>
+        <artifactId>karaf</artifactId>
         <version>4.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <groupId>org.apache.karaf</groupId>
-    <artifactId>scheduler</artifactId>
-    <packaging>pom</packaging>
-    <name>Apache Karaf :: Scheduler</name>
+    <groupId>org.apache.karaf.scheduler</groupId>
+    <artifactId>org.apache.karaf.scheduler.core</artifactId>
+    <packaging>bundle</packaging>
+    <name>Apache Karaf :: Scheduler :: Core</name>
+    <description>This bundle provides a Service Listener which listnes for Runnable Services and schedules their execution, based  on the service properties</description>
 
-    <modules>
-        <module>core</module>
-    </modules>
+    <build>
+        <resources>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/*.info</include>
+                </includes>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <configuration>
+                    <instructions>
+                        <Bundle-Activator>org.apache.karaf.scheduler.core.Activator</Bundle-Activator>
+                        <Karaf-Commands>org.apache.karaf.scheduler.command</Karaf-Commands>
+                        <Export-Package>
+                            org.apache.karaf.scheduler;version=${project.version};-noimport:=true
+                        </Export-Package>
+                        <Import-Package>
+                            !com.mchange.*,
+                            !oracle.*,
+                            !org.quartz.*,
+                            !weblogic.*,
+                            !javax.transaction,
+                            *
+                        </Import-Package>
+                        <Private-Package>
+                            org.apache.karaf.scheduler.core,
+                            org.apache.karaf.scheduler.command,
+                            org.apache.karaf.util.tracker,
+                            org.quartz,
+                            org.quartz.core.*,
+                            org.quartz.listeners.*,
+                            org.quartz.impl.*,
+                            org.quartz.spi.*,
+                            org.quartz.simpl.*,
+                            org.quartz.utils.*,
+                        </Private-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.quartz-scheduler</groupId>
+            <artifactId>quartz</artifactId>
+            <version>2.2.1</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.apache.karaf.util</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.shell</groupId>
+            <artifactId>org.apache.karaf.shell.core</artifactId>
+            <optional>true</optional>
+        </dependency>
+    </dependencies>
 
 </project>

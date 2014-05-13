@@ -1,0 +1,23 @@
+h1. Synopsis
+
+${project.name}
+
+${project.description}
+
+Maven URL:
+[mvn:${project.groupId}/${project.artifactId}/${project.version}]
+
+h1. Description
+
+This bundle registers a service listener, which listens from service events related to java.lang.Runnable and org.apache.karaf.scheduler.Job interface.
+Each service with such interface may be added the following properties:
+
+scheduler.name
+scheduler.period
+scheduler.expression
+scheduler.immediate
+scheduler.concurrent
+
+One of scheduler.period or scheduler.expression is mandatory.
+
+

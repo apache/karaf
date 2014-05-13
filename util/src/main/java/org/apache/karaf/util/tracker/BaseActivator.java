@@ -70,6 +70,7 @@ public class BaseActivator implements BundleActivator, SingleServiceTracker.Sing
             try {
                 doStart();
             } catch (Exception e) {
+                logger.warn("Error starting activator", e);
                 doStop();
             }
         } else {
