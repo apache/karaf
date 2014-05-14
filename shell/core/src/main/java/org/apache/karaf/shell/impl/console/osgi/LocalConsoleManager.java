@@ -106,8 +106,14 @@ public class LocalConsoleManager {
     }
 
     private Subject createLocalKarafSubject() {
+
+        String userName = System.getProperty("karaf.local.user");
+        if (userName == null) {
+            userName = "karaf";
+        }
+
         final Subject subject = new Subject();
-        subject.getPrincipals().add(new UserPrincipal("karaf"));
+        subject.getPrincipals().add(new UserPrincipal(userName));
 
         String roles = System.getProperty("karaf.local.roles");
         if (roles != null) {
