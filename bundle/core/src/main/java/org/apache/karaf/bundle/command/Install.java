@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.bundle.command;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,7 +39,7 @@ import org.osgi.framework.startlevel.BundleStartLevel;
 public class Install implements Action {
 
     @Argument(index = 0, name = "urls", description = "Bundle URLs separated by whitespaces", required = true, multiValued = true)
-    List<String> urls;
+    List<URI> urls;
 
     @Option(name = "-s", aliases={"--start"}, description="Starts the bundles after installation", required = false, multiValued = false)
     boolean start;
@@ -64,16 +65,16 @@ public class Install implements Action {
             int sbsl = bundleService.getSystemBundleThreshold();
             if (level < sbsl) {
                 if (!JaasHelper.currentUserHasRole(BundleService.SYSTEM_BUNDLES_ROLE)) {
-                    throw new IllegalArgumentException("Insufficient priviledges");
+                    throw new IllegalArgumentException("Insufficient privileges");
                 }
             }
         }
         // install the bundles
         List<Exception> exceptions = new ArrayList<>();
         List<Bundle> bundles = new ArrayList<>();
-        for (String url : urls) {
+        for (URI url : urls) {
             try {
-                bundles.add(bundleContext.installBundle(url, null));
+                bundles.add(bundleContext.installBundle(url.toString(), null));
             } catch (Exception e) {
                 exceptions.add(new Exception("Unable to install bundle " + url, e));
             }

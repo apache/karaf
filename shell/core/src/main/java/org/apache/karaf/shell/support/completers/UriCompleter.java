@@ -1,0 +1,172 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.karaf.shell.support.completers;
+
+import java.io.File;
+import java.nio.file.DirectoryStream;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+
+import org.apache.karaf.shell.api.console.CommandLine;
+import org.apache.karaf.shell.api.console.Completer;
+import org.apache.karaf.shell.api.console.Session;
+
+public class UriCompleter implements Completer {
+
+    @Override
+    public int complete(Session session, CommandLine commandLine, List<String> candidates) {
+        String arg = commandLine.getCursorArgument();
+        if (arg != null) {
+            if (arg.startsWith("mvn:")) {
+                return maven(session, commandLine, candidates);
+            } else if (arg.startsWith("file:")) {
+                return file(session, commandLine, candidates);
+            }
+        }
+        return 0;
+    }
+
+    private int file(Session session, CommandLine commandLine, List<String> candidates) {
+        String buffer = commandLine.getCursorArgument();
+        String path = buffer.substring("file:".length(), commandLine.getArgumentPosition());
+
+        String rem = "";
+        try {
+
+            Path dir;
+            if (path.length() == 0) {
+                for (Path root : FileSystems.getDefault().getRootDirectories()) {
+                    candidates.add(root.toString());
+                }
+                dir = Paths.get(".");
+            } else {
+                dir = Paths.get(decode(path));
+                if (!path.endsWith("/")) {
+                    rem = dir.getFileName().toString();
+                    dir = dir.getParent();
+                    if (dir == null) {
+                        dir = Paths.get(".");
+                    }
+                }
+            }
+            if (Files.isDirectory(dir)) {
+                try (DirectoryStream<Path> paths = Files.newDirectoryStream(dir, rem + "*")) {
+                    for (Path child : paths) {
+                        String name = encode(child.getFileName().toString());
+                        if (Files.isDirectory(child)) {
+                            name += "/";
+                        }
+                        candidates.add(name);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // Ignore
+        }
+
+        if (candidates.size() == 1) {
+            String cand = candidates.get(0);
+            if (!cand.endsWith("/")) {
+                candidates.set(0, cand + " ");
+            }
+        }
+        return candidates.isEmpty() ? -1 : commandLine.getBufferPosition() - rem.length();
+    }
+
+    private String encode(String s) {
+        return s.replaceAll(" ", "%20");
+    }
+
+    private String decode(String s) {
+        return s.replaceAll("%20", " ");
+    }
+
+    private int maven(Session session, CommandLine commandLine, List<String> candidates) {
+        String repo = System.getProperty("user.home") + "/.m2/repository";
+        String buffer = commandLine.getCursorArgument();
+        String mvn = buffer.substring("mvn:".length(), commandLine.getArgumentPosition());
+
+        String rem = "";
+
+        try {
+            String[] parts = mvn.split("/");
+            if (parts.length == 0 || parts.length == 1 && !mvn.endsWith("/")) {
+                String known = "";
+                String group = "";
+                String[] dirs = parts.length > 0 ? parts[0].split("\\.") : new String[] { "" };
+                if (parts.length > 0 && parts[0].endsWith(".")) {
+                    for (int i = 0; i < dirs.length; i++) {
+                        known += dirs[i] + File.separator;
+                        group += dirs[i] + ".";
+                    }
+                } else {
+                    for (int i = 0; i < dirs.length - 1; i++) {
+                        known += dirs[i] + File.separator;
+                        group += dirs[i] + ".";
+                    }
+                    rem = dirs[dirs.length - 1];
+                }
+                Path dir = Paths.get(repo + File.separator + known);
+                try (DirectoryStream<Path> paths = Files.newDirectoryStream(dir, rem + "*")) {
+                    for (Path path : paths) {
+                        if (Files.isDirectory(path)) {
+                            String name = path.getFileName().toString();
+                            candidates.add(group + name);
+                        }
+                    }
+                }
+                rem = group + rem;
+            } else if (parts.length == 1 || parts.length == 2 && !mvn.endsWith("/")) {
+                rem = parts.length > 1 ? parts[1] : "";
+                Path dir = Paths.get(repo + File.separator + parts[0].replace(".", "/"));
+                try (DirectoryStream<Path> paths = Files.newDirectoryStream(dir, rem + "*")) {
+                    for (Path path : paths) {
+                        if (Files.isDirectory(path)) {
+                            String name = path.getFileName().toString();
+                            candidates.add(name);
+                        }
+                    }
+                }
+            } else if (parts.length == 2 || parts.length == 3 && !mvn.endsWith("/")) {
+                rem = parts.length > 2 ? parts[2] : "";
+                Path dir = Paths.get(repo + File.separator + parts[0].replace(".", "/") + File.separator + parts[1]);
+                try (DirectoryStream<Path> paths = Files.newDirectoryStream(dir, rem + "*")) {
+                    for (Path path : paths) {
+                        if (Files.isDirectory(path)) {
+                            String name = path.getFileName().toString();
+                            candidates.add(name);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // Ignore
+        }
+
+        if (candidates.size() == 1) {
+            String cand = candidates.get(0);
+            if (cand.split("/").length == 3) {
+                candidates.set(0, candidates.get(0) + " ");
+            }
+        }
+        return candidates.isEmpty() ? -1 : commandLine.getBufferPosition() - rem.length();
+    }
+
+}

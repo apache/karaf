@@ -188,7 +188,7 @@ public class Parser
         {
             m_type = segments[ 3 ];
         }
-        // classifier is optional (if not pressent or empty we will have a null classsifier
+        // classifier is optional (if not present or empty we will have a null classifier
         m_fullClassifier = "";
         if( segments.length >= 5 && segments[ 4 ].trim().length() > 0 )
         {

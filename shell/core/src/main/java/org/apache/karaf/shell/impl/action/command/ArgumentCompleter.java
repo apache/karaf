@@ -20,7 +20,9 @@ package org.apache.karaf.shell.impl.action.command;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -39,6 +41,8 @@ import org.apache.karaf.shell.support.completers.ArgumentCommandLine;
 import org.apache.karaf.shell.support.completers.FileCompleter;
 import org.apache.karaf.shell.support.completers.NullCompleter;
 import org.apache.karaf.shell.support.completers.StringsCompleter;
+import org.apache.karaf.shell.support.completers.UriCompleter;
+import org.apache.karaf.shell.support.converter.GenericType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,10 +55,9 @@ public class ArgumentCompleter implements Completer {
     final Completer optionsCompleter;
     final List<Completer> argsCompleters;
     final Map<String, Completer> optionalCompleters;
-    final Map<Option, Field> fields = new HashMap<Option, Field>();
-    final Map<String, Option> options = new HashMap<String, Option>();
-    final Map<Integer, Field> arguments = new HashMap<Integer, Field>();
-    boolean strict = true;
+    final Map<Option, Field> fields = new HashMap<>();
+    final Map<String, Option> options = new HashMap<>();
+    final Map<Integer, Field> arguments = new HashMap<>();
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public ArgumentCompleter(ActionCommand command, boolean scoped) {
@@ -91,7 +94,7 @@ public class ArgumentCompleter implements Completer {
         }
         options.put(HelpOption.HELP.name(), HelpOption.HELP);
 
-        argsCompleters = new ArrayList<Completer>();
+        argsCompleters = new ArrayList<>();
         optionsCompleter = new StringsCompleter(options.keySet());
 
         boolean multi = false;
@@ -113,7 +116,7 @@ public class ArgumentCompleter implements Completer {
                         }
                     }
                 } else {
-                    completer = getDefaultCompleter(field);
+                    completer = getDefaultCompleter(field, multi);
                 }
             }
             if (completer == null) {
@@ -124,7 +127,7 @@ public class ArgumentCompleter implements Completer {
         if (argsCompleters.isEmpty() || !multi) {
             argsCompleters.add(NullCompleter.INSTANCE);
         }
-        optionalCompleters = new HashMap<String, Completer>();
+        optionalCompleters = new HashMap<>();
         for (Option option : fields.keySet()) {
             Completer completer = null;
             Field field = fields.get(option);
@@ -140,6 +143,8 @@ public class ArgumentCompleter implements Completer {
                             completer = command.getCompleter(clazz);
                         }
                     }
+                } else {
+                    completer = getDefaultCompleter(field, option.multiValued());
                 }
             }
             if (completer == null) {
@@ -154,43 +159,31 @@ public class ArgumentCompleter implements Completer {
         }
     }
 
-    private Completer getDefaultCompleter(Field field) {
+    @SuppressWarnings("unchecked")
+    private Completer getDefaultCompleter(Field field, boolean multi) {
         Completer completer = null;
         Class<?> type = field.getType();
-        if (type.isAssignableFrom(File.class)) {
+        GenericType genericType = new GenericType(field.getGenericType());
+        if (Collection.class.isAssignableFrom(genericType.getRawClass()) && multi) {
+            type = genericType.getActualTypeArgument(0).getRawClass();
+        }
+        if (type.isAssignableFrom(URI.class)) {
+            completer = new UriCompleter();
+        } else if (type.isAssignableFrom(File.class)) {
             completer = new FileCompleter();
         } else if (type.isAssignableFrom(Boolean.class) || type.isAssignableFrom(boolean.class)) {
             completer = new StringsCompleter(new String[] {"false", "true"}, false);
         } else if (type.isAssignableFrom(Enum.class)) {
-            Set<String> values = new HashSet<String>();
+            Set<String> values = new HashSet<>();
             for (Object o : EnumSet.allOf((Class<Enum>) type)) {
                 values.add(o.toString());
             }
             completer = new StringsCompleter(values, false);
-        } else {
-            // TODO any other completers we can add?
         }
         return completer;
     }
 
-    /**
-     *  If true, a completion at argument index N will only succeed
-     *  if all the completions from 0-(N-1) also succeed.
-     */
-    public void setStrict(final boolean strict) {
-        this.strict = strict;
-    }
-
-    /**
-     *  Returns whether a completion at argument index N will succees
-     *  if all the completions from arguments 0-(N-1) also succeed.
-     */
-    public boolean getStrict() {
-        return this.strict;
-    }
-
     public int complete(Session session, final CommandLine list, final List<String> candidates) {
-        int argpos = list.getArgumentPosition();
         int argIndex = list.getCursorArgumentIndex();
 
         Completer comp = null;
@@ -312,7 +305,7 @@ public class ArgumentCompleter implements Completer {
     }
 
     protected boolean verifyCompleter(Session session, Completer completer, String argument) {
-        List<String> candidates = new ArrayList<String>();
+        List<String> candidates = new ArrayList<>();
         return completer.complete(session, new ArgumentCommandLine(argument, argument.length()), candidates) != -1 && !candidates.isEmpty();
     }
 

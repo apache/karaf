@@ -64,10 +64,8 @@ public class FileCompleter implements Completer
             return 0;
         }
 
-        String buffer = commandLine.getBuffer();
-        if (buffer == null) {
-            buffer = "";
-        }
+        String buffer = commandLine.getCursorArgument();
+        buffer = buffer != null ? buffer.substring(0, commandLine.getArgumentPosition()) : "";
 
         if (OS_IS_WINDOWS) {
             buffer = buffer.replace('/', '\\');
@@ -101,7 +99,7 @@ public class FileCompleter implements Completer
 
         File[] entries = dir == null ? new File[0] : dir.listFiles();
 
-        return matchFiles(buffer, translated, entries, candidates);
+        return matchFiles(buffer, translated, entries, candidates) + commandLine.getBufferPosition() - commandLine.getArgumentPosition();
     }
 
     protected String separator() {
