@@ -18,16 +18,23 @@
  */
 package org.apache.karaf.shell.ssh;
 
+import org.apache.karaf.shell.api.console.Signal;
 import org.apache.karaf.shell.api.console.Terminal;
+import org.apache.karaf.shell.support.terminal.SignalSupport;
 import org.apache.sshd.server.Environment;
 
-public class SshTerminal implements Terminal {
+public class SshTerminal extends SignalSupport implements Terminal {
 
     private Environment environment;
 
-
     public SshTerminal(Environment environment) {
         this.environment = environment;
+        this.environment.addSignalListener(new org.apache.sshd.server.SignalListener() {
+            @Override
+            public void signal(org.apache.sshd.server.Signal signal) {
+                SshTerminal.this.signal(Signal.WINCH);
+            }
+        }, org.apache.sshd.server.Signal.WINCH);
     }
 
     @Override
@@ -66,4 +73,5 @@ public class SshTerminal implements Terminal {
     public void setEchoEnabled(boolean enabled) {
         // TODO: how to disable echo over ssh ?
     }
+
 }

@@ -19,6 +19,7 @@
 package org.apache.karaf.shell.impl.console;
 
 import java.io.CharArrayWriter;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -232,6 +233,13 @@ public class ConsoleSessionImpl implements Session {
         reader.shutdown();
         if (closeCallback != null) {
             closeCallback.run();
+        }
+        if (terminal instanceof Closeable) {
+            try {
+                ((Closeable) terminal).close();
+            } catch (IOException e) {
+                // Ignore
+            }
         }
     }
 

@@ -67,7 +67,7 @@ public class LocalConsoleManager {
 
         
         final Subject subject = createLocalKarafSubject();    
-        this.session = JaasHelper.<Session>doAs(subject, new PrivilegedAction<Session>() {
+        this.session = JaasHelper.doAs(subject, new PrivilegedAction<Session>() {
             public Session run() {
                 String encoding = getEncoding();
                 session = sessionFactory.create(
@@ -95,8 +95,7 @@ public class LocalConsoleManager {
     }
 
     private String getEncoding() {
-        String ctype = System.getenv("LC_CTYPE");
-        String encoding = ctype;
+        String encoding = System.getenv("LC_CTYPE");
         if (encoding != null && encoding.indexOf('.') > 0) {
             encoding = encoding.substring(encoding.indexOf('.') + 1);
         } else {

@@ -17,8 +17,9 @@
 package org.apache.karaf.webconsole.gogo;
 
  import org.apache.karaf.shell.api.console.Terminal;
+ import org.apache.karaf.shell.support.terminal.SignalSupport;
 
-public class WebTerminal implements Terminal {
+public class WebTerminal extends SignalSupport implements Terminal {
 
     private int width;
     private int height;
