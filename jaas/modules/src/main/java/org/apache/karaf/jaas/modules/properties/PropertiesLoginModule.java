@@ -148,19 +148,19 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
         principals = new HashSet<Principal>();
         principals.add(new UserPrincipal(user));
         for (int i = 1; i < infos.length; i++) {
-            if (infos[i].startsWith(PropertiesBackingEngine.GROUP_PREFIX)) {
+            if (infos[i].trim().startsWith(PropertiesBackingEngine.GROUP_PREFIX)) {
                 // it's a group reference
-                principals.add(new GroupPrincipal(infos[i].substring(PropertiesBackingEngine.GROUP_PREFIX.length())));
-                String groupInfo = (String) users.get(infos[i]);
+                principals.add(new GroupPrincipal(infos[i].trim().substring(PropertiesBackingEngine.GROUP_PREFIX.length())));
+                String groupInfo = (String) users.get(infos[i].trim());
                 if (groupInfo != null) {
                     String[] roles = groupInfo.split(",");
                     for (int j = 1; j < roles.length; j++) {
-                        principals.add(new RolePrincipal(roles[j]));
+                        principals.add(new RolePrincipal(roles[j].trim()));
                     }
                 }
             } else {
                 // it's an user reference
-                principals.add(new RolePrincipal(infos[i]));
+                principals.add(new RolePrincipal(infos[i].trim()));
             }
         }
 
