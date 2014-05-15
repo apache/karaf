@@ -43,7 +43,7 @@ public class HistoryAction extends AbstractAction {
             System.out.println(
                     Ansi.ansi()
                         .a("  ")
-                        .a(Ansi.Attribute.INTENSITY_BOLD).render("%3d", element.index()).a(Ansi.Attribute.INTENSITY_BOLD_OFF)
+                        .a(Ansi.Attribute.INTENSITY_BOLD).render("%3d", element.index() + 1).a(Ansi.Attribute.INTENSITY_BOLD_OFF)
                         .a("  ")
                         .a(element.value())
                         .toString());
