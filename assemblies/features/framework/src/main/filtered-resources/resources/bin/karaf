@@ -251,6 +251,10 @@ setupDebugOptions() {
     fi
     export JAVA_OPTS
 
+    if [ "x$EXTRA_JAVA_OPTS" != "x" ]; then
+        JAVA_OPTS="$EXTRA_JAVA_OPTS $JAVA_OPTS"
+    fi
+
     # Set Debug options if enabled
     if [ "x$KARAF_DEBUG" != "x" ]; then
         # Ignore DEBUG in case of stop or client mode
