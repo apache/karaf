@@ -55,6 +55,7 @@ import org.apache.karaf.shell.api.console.SessionFactory;
 import org.apache.karaf.shell.api.console.Terminal;
 import org.apache.karaf.shell.support.ShellUtil;
 import org.apache.karaf.shell.support.completers.FileCompleter;
+import org.apache.karaf.shell.support.completers.FileOrUriCompleter;
 import org.apache.karaf.shell.support.completers.UriCompleter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -154,6 +155,7 @@ public class ConsoleSessionImpl implements Session {
         registry.register(new CommandNamesCompleter());
         registry.register(new FileCompleter());
         registry.register(new UriCompleter());
+        registry.register(new FileOrUriCompleter());
 
         // Session
         session = processor.createSession(in != null ? console : null, out, err);

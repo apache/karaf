@@ -31,8 +31,10 @@ import java.util.List;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.support.completers.FileOrUriCompleter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,6 +54,7 @@ public class CatAction implements Action {
     private boolean stdin;
 
     @Argument(index = 0, name = "paths or urls", description = "A list of file paths or urls to display separated by whitespace (use - for STDIN)", required = false, multiValued = true)
+    @Completion(FileOrUriCompleter.class)
     private List<String> paths;
 
     @Override
