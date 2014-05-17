@@ -32,7 +32,7 @@ import org.apache.karaf.shell.commands.Command;
 @Command(scope = "obr", name = "info", description = "Prints information about OBR bundles.")
 public class InfoCommand extends ObrCommandSupport {
 
-    @Argument(index = 0, name = "bundles", description = "Specify bundles to query for information (separated by whitespaces)", required = true, multiValued = true)
+    @Argument(index = 0, name = "bundles", description = "Specify bundles to query for information (separated by whitespaces). The bundles are identified using the following syntax: symbolic_name,version where version is optional.", required = true, multiValued = true)
     List<String> bundles;
 
     protected void doExecute(RepositoryAdmin admin) throws Exception {

@@ -26,7 +26,7 @@ import java.util.List;
 @Command(scope = "obr", name = "start", description = "Deploys and starts a list of bundles using OBR.")
 public class StartCommand extends ObrCommandSupport {
 
-    @Argument(index = 0, name = "bundles", description = "List of bundles to deploy (separated by whitespaces)", required = true, multiValued = true)
+    @Argument(index = 0, name = "bundles", description = "List of bundles to deploy (separated by whitespaces). The bundles are identified using the following syntax: symbolic_name,version where version is optional.", required = true, multiValued = true)
     protected List<String> bundles;
 
     @Option(name = "-d", aliases = { "--deployOptional" }, description = "Deploy optional bundles", required = false, multiValued = false)
