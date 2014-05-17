@@ -37,7 +37,7 @@ public class SourceCommand extends ObrCommandSupport {
     @Argument(index = 0, name = "folder", description = "Local folder for storing sources", required = true, multiValued = false)
     String localDir;
 
-    @Argument(index = 1, name = "bundles", description = "List of bundles to download the sources for", required = true, multiValued = true)
+    @Argument(index = 1, name = "bundles", description = "List of bundles to download the sources for. The bundles are identified using the following syntax: symbolic_name,version where version is optional.", required = true, multiValued = true)
     List<String> bundles;
 
     protected void doExecute(RepositoryAdmin admin) throws Exception {

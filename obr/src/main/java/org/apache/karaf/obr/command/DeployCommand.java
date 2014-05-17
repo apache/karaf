@@ -28,7 +28,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 @Service
 public class DeployCommand extends ObrCommandSupport {
 
-    @Argument(index = 0, name = "bundles", description = "List of bundle names to deploy (separated by whitespaces)", required = true, multiValued = true)
+    @Argument(index = 0, name = "bundles", description = "List of bundle names to deploy (separated by whitespaces). The bundles are identified using the following syntax: symbolic_name,version where version is optional.", required = true, multiValued = true)
     protected List<String> bundles;
 
     @Option(name = "-s", aliases = { "--start" }, description = "Start the deployed bundles", required = false, multiValued = false)
