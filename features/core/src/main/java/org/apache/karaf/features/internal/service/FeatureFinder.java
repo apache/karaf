@@ -23,12 +23,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.felix.utils.properties.InterpolationHelper;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 
 public class FeatureFinder implements ManagedService {
 
-    final Map<String, String> nameToArtifactMap = new HashMap<String, String>();
+    final Map<String, String> nameToArtifactMap = new HashMap<>();
 
     public String[] getNames() {
         synchronized (nameToArtifactMap) {
@@ -38,15 +39,18 @@ public class FeatureFinder implements ManagedService {
     }
 
     public URI getUriFor(String name, String version) {
-        String coords;
+        String url;
         synchronized (nameToArtifactMap) {
-            coords = nameToArtifactMap.get(name);
+            url = nameToArtifactMap.get(name);
         }
-        if (coords == null) {
+        if (url == null) {
             return null;
         }
-        Artifact artifact = new Artifact(coords);
-        return artifact.getMavenUrl(version);
+        Map<String, String> map = new HashMap<>();
+        map.put("url", url);
+        map.put("version", version);
+        InterpolationHelper.performSubstitution(map);
+        return URI.create(map.get("url"));
     }
 
     @SuppressWarnings("rawtypes")
