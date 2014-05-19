@@ -273,7 +273,7 @@
     <feature name="scr" description="Declarative Service support" version="${project.version}">
         <feature>eventadmin</feature>
         <bundle dependency="true" start-level="30">mvn:org.apache.felix/org.apache.felix.metatype/${felix.metatype.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.apache.felix/org.apache.felix.scr/${felix.scr.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.scr/${felix.scr.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.scr/org.apache.karaf.scr.command/${project.version}</bundle>
         <conditional>
             <condition>management</condition>
@@ -283,6 +283,10 @@
             <condition>webconsole</condition>
             <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.webconsole.plugins.ds/${felix.scr.webconsole.plugin.version}</bundle>
         </conditional>
+        <capability>
+            osgi.service;effective:=active;objectClass=org.apache.felix.scr.ScrService,
+            osgi.extender;osgi.extender="osgi.component";uses:="org.osgi.service.component";version:Version="1.2.1"
+        </capability>
     </feature>
 
     <feature name="blueprint-web" description="Provides an OSGI-aware Servlet ContextListener for bootstrapping
