@@ -167,7 +167,7 @@
                     </dependency>
                     <dependency>
                         <groupId>org.apache.karaf.shell</groupId>
-                        <artifactId>org.apache.karaf.shell.console</artifactId>
+                        <artifactId>org.apache.karaf.shell.core</artifactId>
                         <version>${project.version}</version>
                     </dependency>
                     <dependency>
@@ -176,28 +176,13 @@
                         <version>${project.version}</version>
                     </dependency>
                     <dependency>
-                        <groupId>org.apache.karaf.log</groupId>
-                        <artifactId>org.apache.karaf.log.command</artifactId>
-                        <version>${project.version}</version>
-                    </dependency>
-                    <dependency>
                         <groupId>org.apache.karaf.obr</groupId>
                         <artifactId>org.apache.karaf.obr.core</artifactId>
                         <version>${project.version}</version>
                     </dependency>
                     <dependency>
-                        <groupId>org.apache.karaf.obr</groupId>
-                        <artifactId>org.apache.karaf.obr.command</artifactId>
-                        <version>${project.version}</version>
-                    </dependency>
-                    <dependency>
                         <groupId>org.apache.karaf.bundle</groupId>
                         <artifactId>org.apache.karaf.bundle.core</artifactId>
-                        <version>${project.version}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.apache.karaf.bundle</groupId>
-                        <artifactId>org.apache.karaf.bundle.command</artifactId>
                         <version>${project.version}</version>
                     </dependency>
                     <dependency>
@@ -208,16 +193,6 @@
                     <dependency>
                         <groupId>org.apache.karaf.service</groupId>
                         <artifactId>org.apache.karaf.service.core</artifactId>
-                        <version>${project.version}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.apache.karaf.service</groupId>
-                        <artifactId>org.apache.karaf.service.command</artifactId>
-                        <version>${project.version}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.apache.karaf.system</groupId>
-                        <artifactId>org.apache.karaf.system.command</artifactId>
                         <version>${project.version}</version>
                     </dependency>
                     <dependency>
@@ -232,17 +207,7 @@
                     </dependency>
                     <dependency>
                         <groupId>org.apache.karaf.web</groupId>
-                        <artifactId>org.apache.karaf.web.command</artifactId>
-                        <version>${project.version}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.apache.karaf.web</groupId>
                         <artifactId>org.apache.karaf.web.core</artifactId>
-                        <version>${project.version}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.apache.karaf.wrapper</groupId>
-                        <artifactId>org.apache.karaf.wrapper.command</artifactId>
                         <version>${project.version}</version>
                     </dependency>
                     <dependency>
@@ -252,12 +217,12 @@
                     </dependency>
                     <dependency>
                         <groupId>org.apache.karaf.instance</groupId>
-                        <artifactId>org.apache.karaf.instance.command</artifactId>
+                        <artifactId>org.apache.karaf.instance.core</artifactId>
                         <version>${project.version}</version>
                     </dependency>
                     <dependency>
                         <groupId>org.apache.karaf.diagnostic</groupId>
-                        <artifactId>org.apache.karaf.diagnostic.command</artifactId>
+                        <artifactId>org.apache.karaf.diagnostic.core</artifactId>
                         <version>${project.version}</version>
                     </dependency>
                     <dependency>

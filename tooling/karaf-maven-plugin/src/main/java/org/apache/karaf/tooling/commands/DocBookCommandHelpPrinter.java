@@ -21,38 +21,53 @@ package org.apache.karaf.tooling.commands;
 import java.io.PrintStream;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.karaf.shell.commands.Action;
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.HelpOption;
-import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.commands.meta.ActionMetaData;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.impl.action.command.HelpOption;
+
 
 /**
  * Prints documentation in docbook syntax
  */
-public class DocBookCommandHelpPrinter implements CommandHelpPrinter {
+public class DocBookCommandHelpPrinter extends AbstractCommandHelpPrinter {
 
     @Override
-    public void printHelp(Action action, ActionMetaData actionMeta, PrintStream out, boolean includeHelpOption) {
-
-        Map<Option, Field> optionsMap = actionMeta.getOptions();
-        Map<Argument, Field> argsMap = actionMeta.getArguments();
+    public void printHelp(Action action, PrintStream out, boolean includeHelpOption) {
         Command command = action.getClass().getAnnotation(Command.class);
-        List<Argument> arguments = new ArrayList<Argument>(argsMap.keySet());
-        Collections.sort(arguments, new Comparator<Argument>() {
-            public int compare(Argument o1, Argument o2) {
-                return Integer.valueOf(o1.index()).compareTo(Integer.valueOf(o2.index()));
+        Set<Option> options = new HashSet<>();
+        List<Argument> arguments = new ArrayList<Argument>();
+        Map<Argument, Field> argFields = new HashMap<>();
+        Map<Option, Field> optFields = new HashMap<>();
+        for (Class<?> type = action.getClass(); type != null; type = type.getSuperclass()) {
+            for (Field field : type.getDeclaredFields()) {
+                Option option = field.getAnnotation(Option.class);
+                if (option != null) {
+                    options.add(option);
+                }
+
+                Argument argument = field.getAnnotation(Argument.class);
+                if (argument != null) {
+                    argument = replaceDefaultArgument(field, argument);
+                    argFields.put(argument, field);
+                    int index = argument.index();
+                    while (arguments.size() <= index) {
+                        arguments.add(null);
+                    }
+                    if (arguments.get(index) != null) {
+                        throw new IllegalArgumentException("Duplicate argument index: " + index + " on Action " + action.getClass().getName());
+                    }
+                    arguments.set(index, argument);
+                }
             }
-        });
-        Set<Option> options = new HashSet<Option>(optionsMap.keySet());
+        }
         if (includeHelpOption)
             options.add(HelpOption.HELP);
 
@@ -92,10 +107,14 @@ public class DocBookCommandHelpPrinter implements CommandHelpPrinter {
                 out.println("      <td>" + argument.name() + "</td>");
                 String description = argument.description();
                 if (!argument.required()) {
-                    Object o = actionMeta.getDefaultValue(action, argument);
-                    String defaultValue = actionMeta.getDefaultValueString(o);
-                    if (defaultValue != null) {
-                        description += " (defaults to " + o.toString() + ")";
+                    if (argument.valueToShowInHelp() != null && argument.valueToShowInHelp().length() != 0) {
+                        if (Argument.DEFAULT_STRING.equals(argument.valueToShowInHelp())) {
+                            Object o = getDefaultValue(action, argFields.get(argument));
+                            String defaultValue = getDefaultValueString(o);
+                            if (defaultValue != null) {
+                                description += " (defaults to " + o.toString() + ")";
+                            }
+                        }
                     }
                 }
                 out.println("      <td>" + description + "</td>");
@@ -117,8 +136,8 @@ public class DocBookCommandHelpPrinter implements CommandHelpPrinter {
                 for (String alias : option.aliases()) {
                     opt += ", " + alias;
                 }
-                Object o = actionMeta.getDefaultValue(action, option);
-                String defaultValue = actionMeta.getDefaultValueString(o);
+                Object o = getDefaultValue(action, optFields.get(option));
+                String defaultValue = getDefaultValueString(o);
                 if (defaultValue != null) {
                     description += " (defaults to " + o.toString() + ")";
                 }
@@ -132,12 +151,11 @@ public class DocBookCommandHelpPrinter implements CommandHelpPrinter {
             out.println("  </section>");
         }
 
-        String desc = actionMeta.getDetailedDescription();
-        if (desc != null) {
+        if (command.detailedDescription().length() > 0) {
             out.println("  <section>");
             out.println("    <title>Details</title>");
             out.println("    <para>");
-            out.println(desc);
+            out.println(command.detailedDescription());
             out.println("    </para>");
             out.println("  </section>");
         }

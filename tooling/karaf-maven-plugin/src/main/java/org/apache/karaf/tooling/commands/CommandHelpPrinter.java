@@ -22,19 +22,17 @@ import java.io.PrintStream;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.karaf.shell.commands.Action;
-import org.apache.karaf.shell.commands.meta.ActionMetaData;
+import org.apache.karaf.shell.api.action.Action;
 
 public interface CommandHelpPrinter {
     /**
      * Print help for a single action to the out stream
      * 
      * @param action
-     * @param actionMeta
      * @param out stream to write to
      * @param includeHelpOption include the help option in the doc
      */
-    void printHelp(Action action, ActionMetaData actionMeta, PrintStream out, boolean includeHelpOption);
+    void printHelp(Action action, PrintStream out, boolean includeHelpOption);
     
     /**
      * Print the overview of all given commands to the out stream 

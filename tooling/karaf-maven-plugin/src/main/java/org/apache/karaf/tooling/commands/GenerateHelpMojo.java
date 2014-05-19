@@ -30,10 +30,8 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.apache.karaf.shell.commands.Action;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.meta.ActionMetaData;
-import org.apache.karaf.shell.commands.meta.ActionMetaDataFactory;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Command;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -118,8 +116,7 @@ public class GenerateHelpMojo extends AbstractMojo {
             for (Class<?> clazz : classes) {
                 try {
                     Action action = (Action) clazz.newInstance();
-                    ActionMetaData meta = new ActionMetaDataFactory().create(action.getClass());
-                    Command cmd = meta.getCommand();
+                    Command cmd = clazz.getAnnotation(Command.class);
 
                     // skip the *-help command
                     if (cmd.scope().equals("*")) continue;
@@ -127,7 +124,7 @@ public class GenerateHelpMojo extends AbstractMojo {
                     File output = new File(targetFolder, cmd.scope() + "-" + cmd.name() + "." + commandSuffix);
                     FileOutputStream outStream = new FileOutputStream(output);
                     PrintStream out = new PrintStream(outStream);
-                    helpPrinter.printHelp(action, meta, out, includeHelpOption);
+                    helpPrinter.printHelp(action, out, includeHelpOption);
                     out.close();
                     outStream.close();
 

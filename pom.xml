@@ -2250,9 +2250,9 @@
                                 <exclude>**/foo</exclude>
                                 <exclude>**/org.ops4j.pax.exam.TestContainerFactory</exclude>
                                 <!--manual resources -->
-                                <exclude>manual/**/*.css</exclude>
-                                <exclude>manual/**/*.ssp</exclude>
-                                <exclude>manual/**/*.conf</exclude>
+                                <exclude>**/*.css</exclude>
+                                <exclude>**/*.ssp</exclude>
+                                <exclude>**/*.conf</exclude>
                                 <!-- test manifests -->
                                 <exclude>**/*.mf</exclude>
                                 <!-- test json files -->
