@@ -1627,9 +1627,9 @@
                                 <exclude>**/*.rat</exclude>
                                 <exclude>**/build-main.xml</exclude>
                                 <!-- Manual files -->
-                                <exclude>manual/**/*.css</exclude>
-                                <exclude>manual/**/*.ssp</exclude>
-                                <exclude>manual/**/*.conf</exclude>
+                                <exclude>**/*.css</exclude>
+                                <exclude>**/*.ssp</exclude>
+                                <exclude>**/*.conf</exclude>
                             </excludes>
                         </configuration>
                     </plugin>
