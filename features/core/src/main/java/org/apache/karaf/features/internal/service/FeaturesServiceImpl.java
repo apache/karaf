@@ -908,9 +908,22 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
                                   EnumSet<Option> options                                // installation options
     ) throws Exception {
 
-        Deployer.DeploymentState dstate = getDeploymentState(state);
-        Deployer.DeploymentRequest request = getDeploymentRequest(requestedFeatures, stateChanges, options);
-        new Deployer(new SimpleDownloader(), this).deploy(dstate, request);
+        Set<String> prereqs = new HashSet<>();
+        while (true) {
+            try {
+                Deployer.DeploymentState dstate = getDeploymentState(state);
+                Deployer.DeploymentRequest request = getDeploymentRequest(requestedFeatures, stateChanges, options);
+                new Deployer(new SimpleDownloader(), this).deploy(dstate, request);
+                break;
+            } catch (Deployer.PartialDeploymentException e) {
+                if (!prereqs.containsAll(e.getMissing())) {
+                    prereqs.addAll(e.getMissing());
+                    state = copyState();
+                } else {
+                    throw new Exception("Deployment aborted due to loop in missing prerequisites: " + e.getMissing());
+                }
+            }
+        }
     }
 
     public void print(String message, boolean verbose) {

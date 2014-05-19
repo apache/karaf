@@ -23,4 +23,6 @@ public interface Dependency {
 
     String getVersion();
 
+    boolean isPrerequisite();
+
 }

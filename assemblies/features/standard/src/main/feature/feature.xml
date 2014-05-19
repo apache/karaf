@@ -84,8 +84,11 @@
     </feature>
 
     <feature name="deployer" description="Karaf Deployer" version="${project.version}">
-        <bundle start="true" start-level="24">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.wrap/${project.version}</bundle>
         <bundle start="true" start-level="26">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.features/${project.version}</bundle>
+        <conditional>
+            <condition>wrap</condition>
+            <bundle start="true" start-level="24">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.wrap/${project.version}</bundle>
+        </conditional>
         <conditional>
             <condition>req:osgi.extender;filter:="(&amp;(osgi.extender=osgi.blueprint)(version>=1.0))"</condition>
             <bundle start="true" start-level="24">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.blueprint/${project.version}</bundle>
@@ -293,6 +296,10 @@
         blueprint inside web-bundle containers" version="${project.version}">
         <feature>war</feature>
         <bundle>mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.webosgi/${aries.blueprint.web.version}</bundle>
+    </feature>
+
+    <feature name="wrap" description="Wrap URL handler">
+        <bundle start="true" start-level="5">mvn:org.ops4j.pax.url/pax-url-wrap/${pax.url.version}/jar/uber</bundle>
     </feature>
 
 </features>

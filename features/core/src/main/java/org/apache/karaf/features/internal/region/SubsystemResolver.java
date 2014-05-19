@@ -32,7 +32,6 @@ import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.internal.download.DownloadManager;
 import org.apache.karaf.features.internal.download.Downloader;
 import org.apache.karaf.features.internal.download.StreamProvider;
-import org.apache.karaf.features.internal.download.simple.SimpleDownloader;
 import org.apache.karaf.features.internal.resolver.CapabilityImpl;
 import org.apache.karaf.features.internal.resolver.CapabilitySet;
 import org.apache.karaf.features.internal.resolver.ResourceBuilder;
@@ -76,6 +75,7 @@ public class SubsystemResolver {
     private Map<Resource, List<Wire>> wiring;
 
     // Cached computed results
+    private ResourceImpl environmentResource;
     private Map<String, String> flatSubsystemsMap;
     private Map<String, Set<Resource>> bundlesPerRegions;
     private Map<Resource, String> bundles;
@@ -85,21 +85,14 @@ public class SubsystemResolver {
     private Map<String, Map<String, BundleInfo>> bundleInfos;
 
 
-    public SubsystemResolver() {
-        this(new SimpleDownloader());
-    }
-
     public SubsystemResolver(DownloadManager manager) {
         this.manager = manager;
     }
 
-    public Map<Resource, List<Wire>> resolve(
+    public void prepare(
             Collection<Feature> allFeatures,
             Map<String, Set<String>> features,
-            Map<String, Set<BundleRevision>> system,
-            Set<String> overrides,
-            String featureResolutionRange,
-            org.osgi.service.repository.Repository globalRepository
+            Map<String, Set<BundleRevision>> system
     ) throws Exception {
         // Build subsystems on the fly
         for (Map.Entry<String, Set<String>> entry : features.entrySet()) {
@@ -128,13 +121,13 @@ public class SubsystemResolver {
             }
         }
         if (root == null) {
-            return Collections.emptyMap();
+            return;
         }
+
         // Pre-resolve
-        root.preResolve(allFeatures, manager, overrides, featureResolutionRange);
+        root.build(allFeatures);
 
         // Add system resources
-        ResourceImpl environmentResource = null;
         BundleRevision sysBundleRev = null;
         boolean hasEeCap = false;
         for (Map.Entry<String, Set<BundleRevision>> entry : system.entrySet()) {
@@ -157,7 +150,7 @@ public class SubsystemResolver {
                     Map<String, String> headers = new DictionaryAsMap<>(res.getBundle().getHeaders());
                     Resource tmp = ResourceBuilder.build(res.getBundle().getLocation(), headers);
                     for (Capability cap : tmp.getCapabilities(ServiceNamespace.SERVICE_NAMESPACE)) {
-                        dummy.addCapability(new CapabilityImpl(dummy, cap.getNamespace(), cap.getDirectives() ,cap.getAttributes()));
+                        dummy.addCapability(new CapabilityImpl(dummy, cap.getNamespace(), cap.getDirectives(), cap.getAttributes()));
                     }
                     ss.addSystemResource(res);
                     for (Capability cap : res.getCapabilities(null)) {
@@ -177,6 +170,23 @@ public class SubsystemResolver {
             environmentResource.addCapabilities(ResourceBuilder.parseCapability(environmentResource, provideCaps));
             root.addSystemResource(environmentResource);
         }
+    }
+
+    public Set<String> collectPrerequisites() throws Exception {
+        return root.collectPrerequisites();
+    }
+
+    public Map<Resource, List<Wire>> resolve(
+            Set<String> overrides,
+            String featureResolutionRange,
+            final org.osgi.service.repository.Repository globalRepository
+    ) throws Exception {
+        if (root == null) {
+            return Collections.emptyMap();
+        }
+
+        // Download bundles
+        root.downloadBundles(manager, overrides, featureResolutionRange);
 
         // Populate digraph and resolve
         digraph = new StandardRegionDigraph(null, null);

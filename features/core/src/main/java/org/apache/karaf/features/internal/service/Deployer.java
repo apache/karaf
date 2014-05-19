@@ -34,6 +34,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.apache.felix.utils.version.VersionRange;
+import org.apache.felix.utils.version.VersionTable;
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeatureEvent;
@@ -58,7 +59,6 @@ import org.osgi.framework.startlevel.BundleStartLevel;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.BundleWire;
 import org.osgi.framework.wiring.BundleWiring;
-import org.osgi.resource.Capability;
 import org.osgi.resource.Resource;
 import org.osgi.resource.Wire;
 import org.osgi.service.repository.Repository;
@@ -116,6 +116,18 @@ public class Deployer {
         void resolveBundles(Set<Bundle> bundles);
 
         void replaceDigraph(Map<String, Map<String,Map<String,Set<String>>>> policies, Map<String, Set<Long>> bundles) throws BundleException, InvalidSyntaxException;
+    }
+
+    public static class PartialDeploymentException extends Exception {
+        private final Set<String> missing;
+
+        public PartialDeploymentException(Set<String> missing) {
+            this.missing = missing;
+        }
+
+        public Set<String> getMissing() {
+            return missing;
+        }
     }
 
     static class DeploymentState {
@@ -191,10 +203,56 @@ public class Deployer {
         // TODO: bundles
 
         SubsystemResolver resolver = new SubsystemResolver(manager);
-        resolver.resolve(
+        resolver.prepare(
                 dstate.features.values(),
                 request.requestedFeatures,
-                apply(unmanagedBundles, adapt(BundleRevision.class)),
+                apply(unmanagedBundles, adapt(BundleRevision.class))
+        );
+        Set<String> prereqs = resolver.collectPrerequisites();
+        if (!prereqs.isEmpty()) {
+            for (Iterator<String> iterator = prereqs.iterator(); iterator.hasNext(); ) {
+                String prereq = iterator.next();
+                String[] parts = prereq.split("/");
+                VersionRange range;
+                if (parts[1].equals("0.0.0")) {
+                    range = VersionRange.ANY_VERSION;
+                } else if (!parts[1].startsWith("[") && !parts[1].startsWith("(")) {
+                    range = new VersionRange(Macro.transform(request.featureResolutionRange, parts[1]));
+                } else {
+                    range = new VersionRange(parts[1]);
+                }
+                boolean found = false;
+                for (Set<String> featureSet : dstate.state.installedFeatures.values()) {
+                    for (String feature : featureSet) {
+                        String[] p = feature.split("/");
+                        found = parts[0].equals(p[0]) && range.contains(VersionTable.getVersion(p[1]));
+                        if (found) break;
+                    }
+                    if (found) break;
+                }
+                if (found) {
+                    iterator.remove();
+                }
+            }
+        }
+        if (!prereqs.isEmpty()) {
+            DeploymentRequest newRequest = new DeploymentRequest();
+            newRequest.bundleUpdateRange = request.bundleUpdateRange;
+            newRequest.featureResolutionRange = request.featureResolutionRange;
+            newRequest.globalRepository = request.globalRepository;
+            newRequest.options = request.options;
+            newRequest.overrides = request.overrides;
+            newRequest.requestedFeatures = copy(dstate.state.requestedFeatures);
+            for (String prereq : prereqs) {
+                addToMapSet(newRequest.requestedFeatures, ROOT_REGION, prereq);
+            }
+            newRequest.stateChanges = Collections.emptyMap();
+            newRequest.updateSnaphots = request.updateSnaphots;
+            deploy(dstate, newRequest);
+            throw new PartialDeploymentException(prereqs);
+        }
+
+        resolver.resolve(
                 request.overrides,
                 request.featureResolutionRange,
                 request.globalRepository);

@@ -111,6 +111,7 @@
 
     <feature name="hibernate" description="Hibernate 4.2.x JPA persistence engine support" version="${hibernate42.version}">
         <details>Enable Hibernate 4.2.x as persistence engine.</details>
+        <feature prerequisite="true">wrap</feature>
         <feature>transaction</feature>
         <feature>http</feature>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.antlr/${antlr.bundle.version}</bundle>
@@ -137,6 +138,7 @@
 
     <feature name="hibernate" description="Hibernate 4.3.x JPA persistence engine support" version="${hibernate43.version}">
         <details>Enable Hibernate 4.3.x as persistence engine.</details>
+        <feature prerequisite="true">wrap</feature>
         <feature>transaction</feature>
         <feature>http</feature>
         <bundle dependency="true" start-level="30">mvn:org.hibernate.javax.persistence/hibernate-jpa-2.1-api/1.0.0.Final</bundle>

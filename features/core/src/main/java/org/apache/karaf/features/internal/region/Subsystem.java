@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -85,11 +86,11 @@ public class Subsystem extends ResourceImpl {
     private final boolean acceptDependencies;
     private final Subsystem parent;
     private final Feature feature;
-    private final List<Subsystem> children = new ArrayList<Subsystem>();
+    private final List<Subsystem> children = new ArrayList<>();
     private final Map<String, Set<String>> importPolicy;
     private final Map<String, Set<String>> exportPolicy;
-    private final List<Resource> installable = new ArrayList<Resource>();
-    private final Map<String, DependencyInfo> dependencies = new HashMap<String, DependencyInfo>();
+    private final List<Resource> installable = new ArrayList<>();
+    private final Map<String, DependencyInfo> dependencies = new HashMap<>();
 
     public Subsystem(String name) {
         super(name, TYPE_SUBSYSTEM, Version.emptyVersion);
@@ -117,8 +118,8 @@ public class Subsystem extends ResourceImpl {
             this.exportPolicy = SHARE_ALL_POLICY;
         }
 
-        Map<String, String> dirs = new HashMap<String, String>();
-        Map<String, Object> attrs = new HashMap<String, Object>();
+        Map<String, String> dirs = new HashMap<>();
+        Map<String, Object> attrs = new HashMap<>();
         attrs.put(IDENTITY_NAMESPACE, feature.getName());
         attrs.put(CAPABILITY_TYPE_ATTRIBUTE, TYPE_FEATURE);
         attrs.put(CAPABILITY_VERSION_ATTRIBUTE, new VersionRange(VersionTable.getVersion(feature.getVersion()), true));
@@ -205,7 +206,7 @@ public class Subsystem extends ResourceImpl {
     }
 
     public Map<String, BundleInfo> getBundleInfos() {
-        Map<String, BundleInfo> infos = new HashMap<String, BundleInfo>();
+        Map<String, BundleInfo> infos = new HashMap<>();
         for (DependencyInfo di : dependencies.values()) {
             infos.put(di.getLocation(), di);
         }
@@ -213,14 +214,20 @@ public class Subsystem extends ResourceImpl {
     }
 
     @SuppressWarnings("InfiniteLoopStatement")
-    public void preResolve(Collection<Feature> features,
-                           DownloadManager manager,
-                           Set<String> overrides,
-                           String featureResolutionRange) throws Exception {
+    public void build(Collection<Feature> features) throws Exception {
         for (Subsystem child : children) {
-            child.preResolve(features, manager, overrides, featureResolutionRange);
+            child.build(features);
         }
-        List<Requirement> processed = new ArrayList<Requirement>();
+        if (feature != null) {
+            for (Dependency dep : feature.getDependencies()) {
+                Subsystem ss = this;
+                while (!ss.isAcceptDependencies()) {
+                    ss = ss.getParent();
+                }
+                ss.requireFeature(dep.getName(), dep.getVersion());
+            }
+        }
+        List<Requirement> processed = new ArrayList<>();
         while (true) {
             List<Requirement> requirements = getRequirements(IDENTITY_NAMESPACE);
             requirements.removeAll(processed);
@@ -240,7 +247,7 @@ public class Subsystem extends ResourceImpl {
                                 Subsystem fs = getChild(ssName);
                                 if (fs == null) {
                                     fs = new Subsystem(ssName, feature, this);
-                                    fs.preResolve(features, manager, overrides, featureResolutionRange);
+                                    fs.build(features);
                                     installable.add(fs);
                                     children.add(fs);
                                 }
@@ -251,10 +258,38 @@ public class Subsystem extends ResourceImpl {
                 processed.add(requirement);
             }
         }
+    }
+
+    public Set<String> collectPrerequisites() {
+        Set<String> prereqs = new HashSet<>();
+        doCollectPrerequisites(prereqs);
+        return prereqs;
+    }
+
+    private void doCollectPrerequisites(Set<String> prereqs) {
+        for (Subsystem child : children) {
+            child.doCollectPrerequisites(prereqs);
+        }
         if (feature != null) {
-            final Map<String, ResourceImpl> bundles = new ConcurrentHashMap<String, ResourceImpl>();
+            for (Dependency dep : feature.getDependencies()) {
+                if (dep.isPrerequisite()) {
+                    prereqs.add(dep.toString());
+                }
+            }
+        }
+    }
+
+    @SuppressWarnings("InfiniteLoopStatement")
+    public void downloadBundles(DownloadManager manager,
+                                Set<String> overrides,
+                                String featureResolutionRange) throws Exception {
+        for (Subsystem child : children) {
+            child.downloadBundles(manager, overrides, featureResolutionRange);
+        }
+        if (feature != null) {
+            final Map<String, ResourceImpl> bundles = new ConcurrentHashMap<>();
             final Downloader downloader = manager.createDownloader();
-            final Map<BundleInfo, Conditional> infos = new HashMap<BundleInfo, Conditional>();
+            final Map<BundleInfo, Conditional> infos = new HashMap<>();
             for (Conditional cond : feature.getConditional()) {
                 for (final BundleInfo bi : cond.getBundles()) {
                     infos.put(bi, cond);
@@ -286,15 +321,8 @@ public class Subsystem extends ResourceImpl {
             }
             downloader.await();
             Overrides.override(bundles, overrides);
-            for (Dependency dep : feature.getDependencies()) {
-                Subsystem ss = this;
-                while (!ss.isAcceptDependencies()) {
-                    ss = ss.getParent();
-                }
-                ss.requireFeature(dep.getName(), dep.getVersion());
-            }
             // Add conditionals
-            Map<Conditional, Resource> resConds = new HashMap<Conditional, Resource>();
+            Map<Conditional, Resource> resConds = new HashMap<>();
             for (Conditional cond : feature.getConditional()) {
                 FeatureResource resCond = FeatureResource.build(feature, cond, featureResolutionRange, bundles);
                 addIdentityRequirement(this, resCond, false);
@@ -382,7 +410,7 @@ public class Subsystem extends ResourceImpl {
     }
 
     Map<String, Set<String>> createPolicy(List<? extends ScopeFilter> filters) {
-        Map<String, Set<String>> policy = new HashMap<String, Set<String>>();
+        Map<String, Set<String>> policy = new HashMap<>();
         for (ScopeFilter filter : filters) {
             addToMapSet(policy, filter.getNamespace(), filter.getFilter());
         }

@@ -24,7 +24,6 @@
     <feature version="${project.version}" description="Karaf core feature" name="framework">
         <!-- mvn: and wrap: url handlers -->
         <bundle start="true" start-level="5">mvn:org.ops4j.pax.url/pax-url-aether/${pax.url.version}</bundle>
-        <bundle start="true" start-level="5">mvn:org.ops4j.pax.url/pax-url-wrap/${pax.url.version}/jar/uber</bundle>
         <!-- logging -->
         <bundle start="true" start-level="8">mvn:org.ops4j.pax.logging/pax-logging-api/${pax.logging.version}</bundle>
         <bundle start="true" start-level="8">mvn:org.ops4j.pax.logging/pax-logging-service/${pax.logging.version}</bundle>

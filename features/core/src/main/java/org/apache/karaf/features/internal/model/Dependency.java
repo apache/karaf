@@ -42,13 +42,15 @@ import javax.xml.bind.annotation.XmlValue;
  * </pre>
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "dependency", propOrder = {"value"})
+@XmlType(name = "dependency", propOrder = {"name"})
 public class Dependency implements org.apache.karaf.features.Dependency {
 
     @XmlValue
-    protected String value;
+    protected String name;
     @XmlAttribute
     protected String version;
+    @XmlAttribute
+    protected boolean prerequisite;
 
     /**
      * Feature name should be non empty string.
@@ -57,7 +59,7 @@ public class Dependency implements org.apache.karaf.features.Dependency {
      * {@link String }
      */
     public String getName() {
-        return value;
+        return name;
     }
 
     /**
@@ -67,7 +69,7 @@ public class Dependency implements org.apache.karaf.features.Dependency {
      *              {@link String }
      */
     public void setName(String value) {
-        this.value = value;
+        this.name = value;
     }
 
     /**
@@ -78,7 +80,7 @@ public class Dependency implements org.apache.karaf.features.Dependency {
      */
     public String getVersion() {
         if (version == null) {
-            return "0.0.0";
+            return Feature.DEFAULT_VERSION;
         } else {
             return version;
         }
@@ -94,8 +96,17 @@ public class Dependency implements org.apache.karaf.features.Dependency {
         this.version = value;
     }
 
+    @Override
+    public boolean isPrerequisite() {
+        return prerequisite;
+    }
+
+    public void setPrerequisite(boolean prerequisite) {
+        this.prerequisite = prerequisite;
+    }
+
     public String toString() {
-        return getName() + Feature.SPLIT_FOR_NAME_AND_VERSION + getVersion();
+        return getName() + Feature.VERSION_SEPARATOR + getVersion();
     }
 
 }

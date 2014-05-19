@@ -30,7 +30,6 @@ import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
 import org.apache.felix.utils.version.VersionCleaner;
-import org.apache.felix.utils.version.VersionTable;
 
 
 /**
@@ -78,7 +77,7 @@ import org.apache.felix.utils.version.VersionTable;
         })
 public class Feature extends Content implements org.apache.karaf.features.Feature {
 
-    public static final String SPLIT_FOR_NAME_AND_VERSION = "/";
+    public static final String VERSION_SEPARATOR = "/";
     public static final String DEFAULT_VERSION = "0.0.0";
 
 
@@ -114,10 +113,10 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
 
 
     public static org.apache.karaf.features.Feature valueOf(String str) {
-        if (str.contains(SPLIT_FOR_NAME_AND_VERSION)) {
-            String strName = str.substring(0, str.indexOf(SPLIT_FOR_NAME_AND_VERSION));
-            String strVersion = str.substring(str.indexOf(SPLIT_FOR_NAME_AND_VERSION)
-                    + SPLIT_FOR_NAME_AND_VERSION.length(), str.length());
+        if (str.contains(VERSION_SEPARATOR)) {
+            String strName = str.substring(0, str.indexOf(VERSION_SEPARATOR));
+            String strVersion = str.substring(str.indexOf(VERSION_SEPARATOR)
+                    + VERSION_SEPARATOR.length(), str.length());
             return new Feature(strName, strVersion);
         } else {
             return new Feature(str);
@@ -128,7 +127,7 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
 
 
     public String getId() {
-        return getName() + SPLIT_FOR_NAME_AND_VERSION + getVersion();
+        return getName() + VERSION_SEPARATOR + getVersion();
     }
 
     /**

@@ -54,10 +54,10 @@ public class SubsystemTest {
         addToMapSet(expected, "root/apps1", "b/1.0.0");
 
         SubsystemResolver resolver = new SubsystemResolver(new TestDownloadManager(getClass(), "data1"));
-        resolver.resolve(Arrays.asList(repo.getFeatures()),
+        resolver.prepare(Arrays.asList(repo.getFeatures()),
                          features,
-                         Collections.<String, Set<BundleRevision>>emptyMap(),
-                         Collections.<String>emptySet(),
+                         Collections.<String, Set<BundleRevision>>emptyMap());
+        resolver.resolve(Collections.<String>emptySet(),
                          FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
                          null);
 
@@ -85,10 +85,10 @@ public class SubsystemTest {
         addToMapSet(expected, "root/apps2#f1", "a/1.0.0");
 
         SubsystemResolver resolver = new SubsystemResolver(new TestDownloadManager(getClass(), "data2"));
-        resolver.resolve(Arrays.asList(repo.getFeatures()),
+        resolver.prepare(Arrays.asList(repo.getFeatures()),
                          features,
-                         Collections.<String, Set<BundleRevision>>emptyMap(),
-                         Collections.<String>emptySet(),
+                         Collections.<String, Set<BundleRevision>>emptyMap());
+        resolver.resolve(Collections.<String>emptySet(),
                          FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
                          null);
 
@@ -106,10 +106,10 @@ public class SubsystemTest {
         addToMapSet(expected, "root/apps1", "a/1.0.1");
 
         SubsystemResolver resolver = new SubsystemResolver(new TestDownloadManager(getClass(), "data3"));
-        resolver.resolve(Arrays.asList(repo.getFeatures()),
+        resolver.prepare(Arrays.asList(repo.getFeatures()),
                          features,
-                         Collections.<String, Set<BundleRevision>>emptyMap(),
-                         Collections.singleton("b"),
+                         Collections.<String, Set<BundleRevision>>emptyMap());
+        resolver.resolve(Collections.singleton("b"),
                          FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
                          null);
 
@@ -126,12 +126,12 @@ public class SubsystemTest {
         addToMapSet(expected, "root/apps1", "a/1.0.0");
 
         SubsystemResolver resolver = new SubsystemResolver(new TestDownloadManager(getClass(), "data4"));
-        resolver.resolve(Arrays.asList(repo.getFeatures()),
-                features,
-                Collections.<String, Set<BundleRevision>>emptyMap(),
-                Collections.<String>emptySet(),
-                FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
-                null);
+        resolver.prepare(Arrays.asList(repo.getFeatures()),
+                         features,
+                         Collections.<String, Set<BundleRevision>>emptyMap());
+        resolver.resolve(Collections.<String>emptySet(),
+                         FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
+                         null);
 
         verify(resolver, expected);
     }
@@ -148,12 +148,12 @@ public class SubsystemTest {
         addToMapSet(expected, "root/apps1", "b/1.0.0");
 
         SubsystemResolver resolver = new SubsystemResolver(new TestDownloadManager(getClass(), "data4"));
-        resolver.resolve(Arrays.asList(repo.getFeatures()),
-                features,
-                Collections.<String, Set<BundleRevision>>emptyMap(),
-                Collections.<String>emptySet(),
-                FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
-                null);
+        resolver.prepare(Arrays.asList(repo.getFeatures()),
+                         features,
+                         Collections.<String, Set<BundleRevision>>emptyMap());
+        resolver.resolve(Collections.<String>emptySet(),
+                         FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
+                         null);
 
         verify(resolver, expected);
     }

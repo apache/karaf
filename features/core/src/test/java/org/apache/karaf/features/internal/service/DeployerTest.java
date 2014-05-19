@@ -44,6 +44,7 @@ import static org.apache.karaf.features.FeaturesService.*;
 import static org.apache.karaf.features.internal.util.MapUtils.addToMapSet;
 import static org.easymock.EasyMock.anyInt;
 import static org.easymock.EasyMock.anyObject;
+import static org.junit.Assert.fail;
 
 public class DeployerTest {
 
@@ -253,6 +254,123 @@ public class DeployerTest {
         request.updateSnaphots = UPDATE_SNAPSHOTS_NONE;
         request.requestedFeatures = new HashMap<>();
         addToMapSet(request.requestedFeatures, ROOT_REGION, f1.getName());
+
+        deployer.deploy(dstate, request);
+
+        EasyMock.verify(callback);
+    }
+
+    @Test
+    public void testPrerequisite() throws Exception {
+
+        String dataDir = "data2";
+
+        TestDownloadManager manager = new TestDownloadManager(getClass(), dataDir);
+
+        RepositoryImpl repo = new RepositoryImpl(getClass().getResource(dataDir + "/features.xml").toURI());
+        repo.load(true);
+        Feature f1 = repo.getFeatures()[0];
+        Feature f2 = repo.getFeatures()[1];
+
+        Bundle serviceBundle1 = createTestBundle(1, Bundle.ACTIVE, dataDir, "a100");
+        Bundle serviceBundle2 = createTestBundle(2, Bundle.ACTIVE, dataDir, "b100");
+
+        Deployer.DeployCallback callback = EasyMock.createMock(Deployer.DeployCallback.class);
+        Deployer deployer = new Deployer(manager, callback);
+
+        callback.print(EasyMock.anyString(), EasyMock.anyBoolean());
+        EasyMock.expectLastCall().anyTimes();
+        callback.installBundle(EasyMock.eq(ROOT_REGION), EasyMock.eq("a100"), EasyMock.<InputStream>anyObject());
+        EasyMock.expectLastCall().andReturn(serviceBundle1);
+        callback.replaceDigraph(EasyMock.<Map<String, Map<String, Map<String, Set<String>>>>>anyObject(),
+                EasyMock.<Map<String, Set<Long>>>anyObject());
+        EasyMock.expectLastCall();
+        callback.saveState(EasyMock.<State>anyObject());
+        EasyMock.expectLastCall();
+        callback.installFeatureConfigs(f1);
+        EasyMock.expectLastCall();
+        callback.resolveBundles(EasyMock.<Set<Bundle>>anyObject());
+        EasyMock.expectLastCall();
+        callback.callListeners(EasyMock.<FeatureEvent>anyObject());
+        EasyMock.expectLastCall();
+
+        EasyMock.replay(callback);
+
+        Deployer.DeploymentState dstate = new Deployer.DeploymentState();
+        dstate.state = new State();
+        dstate.bundles = new HashMap<>();
+        dstate.bundlesPerRegion = new HashMap<>();
+        dstate.features = new HashMap<>();
+        dstate.features.put(f1.getId(), f1);
+        dstate.features.put(f2.getId(), f2);
+        dstate.filtersPerRegion = new HashMap<>();
+        dstate.filtersPerRegion.put(ROOT_REGION, new HashMap<String, Map<String, Set<String>>>());
+
+        Deployer.DeploymentRequest request = new Deployer.DeploymentRequest();
+        request.bundleUpdateRange = DEFAULT_BUNDLE_UPDATE_RANGE;
+        request.featureResolutionRange = DEFAULT_FEATURE_RESOLUTION_RANGE;
+        request.globalRepository = null;
+        request.options = EnumSet.noneOf(Option.class);
+        request.overrides = Collections.emptySet();
+        request.stateChanges = Collections.emptyMap();
+        request.updateSnaphots = UPDATE_SNAPSHOTS_NONE;
+        request.requestedFeatures = new HashMap<>();
+        addToMapSet(request.requestedFeatures, ROOT_REGION, f2.getName());
+
+        try {
+            deployer.deploy(dstate, request);
+            fail("Should have thrown an exception");
+        } catch (Deployer.PartialDeploymentException e) {
+            // ok
+        }
+
+        EasyMock.verify(callback);
+
+        EasyMock.reset(callback);
+
+        callback.print(EasyMock.anyString(), EasyMock.anyBoolean());
+        EasyMock.expectLastCall().anyTimes();
+        callback.installBundle(EasyMock.eq(ROOT_REGION), EasyMock.eq("b100"), EasyMock.<InputStream>anyObject());
+        EasyMock.expectLastCall().andReturn(serviceBundle2);
+        callback.replaceDigraph(EasyMock.<Map<String, Map<String, Map<String, Set<String>>>>>anyObject(),
+                EasyMock.<Map<String, Set<Long>>>anyObject());
+        EasyMock.expectLastCall();
+        callback.saveState(EasyMock.<State>anyObject());
+        EasyMock.expectLastCall();
+        callback.installFeatureConfigs(f2);
+        EasyMock.expectLastCall();
+        callback.resolveBundles(EasyMock.<Set<Bundle>>anyObject());
+        EasyMock.expectLastCall();
+        callback.callListeners(EasyMock.<FeatureEvent>anyObject());
+        EasyMock.expectLastCall();
+
+        EasyMock.replay(callback);
+
+        dstate = new Deployer.DeploymentState();
+        dstate.state = new State();
+        addToMapSet(dstate.state.installedFeatures, ROOT_REGION, f1.getId());
+        dstate.state.stateFeatures.put(ROOT_REGION, Collections.singletonMap(f1.getId(), "Started"));
+        addToMapSet(dstate.state.managedBundles, ROOT_REGION, serviceBundle1.getBundleId());
+        dstate.bundles = new HashMap<>();
+        dstate.bundles.put(serviceBundle1.getBundleId(), serviceBundle1);
+        dstate.bundlesPerRegion = new HashMap<>();
+        addToMapSet(dstate.bundlesPerRegion, ROOT_REGION, serviceBundle1.getBundleId());
+        dstate.features = new HashMap<>();
+        dstate.features.put(f1.getId(), f1);
+        dstate.features.put(f2.getId(), f2);
+        dstate.filtersPerRegion = new HashMap<>();
+        dstate.filtersPerRegion.put(ROOT_REGION, new HashMap<String, Map<String, Set<String>>>());
+
+        request = new Deployer.DeploymentRequest();
+        request.bundleUpdateRange = DEFAULT_BUNDLE_UPDATE_RANGE;
+        request.featureResolutionRange = DEFAULT_FEATURE_RESOLUTION_RANGE;
+        request.globalRepository = null;
+        request.options = EnumSet.noneOf(Option.class);
+        request.overrides = Collections.emptySet();
+        request.stateChanges = Collections.emptyMap();
+        request.updateSnaphots = UPDATE_SNAPSHOTS_NONE;
+        request.requestedFeatures = new HashMap<>();
+        addToMapSet(request.requestedFeatures, ROOT_REGION, f2.getName());
 
         deployer.deploy(dstate, request);
 
