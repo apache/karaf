@@ -26,6 +26,9 @@ import org.apache.karaf.shell.api.action.lifecycle.Manager;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.api.console.SessionFactory;
 import org.apache.karaf.util.tracker.BaseActivator;
+import org.apache.karaf.util.tracker.Managed;
+import org.apache.karaf.util.tracker.RequireService;
+import org.apache.karaf.util.tracker.Services;
 import org.apache.sshd.SshServer;
 import org.apache.sshd.common.NamedFactory;
 import org.apache.sshd.server.command.ScpCommandFactory;
@@ -40,6 +43,10 @@ import org.slf4j.LoggerFactory;
 /**
  * Activate this bundle
  */
+@Services(
+        requires = @RequireService(SessionFactory.class)
+)
+@Managed("org.apache.karaf.shell")
 public class Activator extends BaseActivator implements ManagedService {
 
     static final Logger LOGGER = LoggerFactory.getLogger(Activator.class);
@@ -54,8 +61,8 @@ public class Activator extends BaseActivator implements ManagedService {
     protected void doOpen() throws Exception {
         agentFactory = new KarafAgentFactory();
         sshClientFactory = new SshClientFactory(agentFactory, new File(bundleContext.getProperty("user.home"), ".sshkaraf/known_hosts"));
-        manage("org.apache.karaf.shell");
-        trackService(SessionFactory.class);
+
+        super.doOpen();
 
         sessionTracker = new ServiceTracker<Session, Session>(bundleContext, Session.class, null) {
             @Override

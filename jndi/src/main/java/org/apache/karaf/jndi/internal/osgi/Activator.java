@@ -26,12 +26,15 @@ import org.apache.karaf.jndi.KarafInitialContextFactory;
 import org.apache.karaf.jndi.internal.JndiMBeanImpl;
 import org.apache.karaf.jndi.internal.JndiServiceImpl;
 import org.apache.karaf.util.tracker.BaseActivator;
+import org.apache.karaf.util.tracker.ProvideService;
+import org.apache.karaf.util.tracker.RequireService;
+import org.apache.karaf.util.tracker.Services;
 
+@Services(
+        requires = @RequireService(ProxyManager.class),
+        provides = @ProvideService(JndiService.class)
+)
 public class Activator extends BaseActivator {
-    @Override
-    protected void doOpen() throws Exception {
-        trackService(ProxyManager.class);
-    }
 
     @Override
     protected void doStart() throws Exception {

@@ -24,20 +24,22 @@ import org.apache.karaf.bundle.core.internal.BundleWatcherImpl;
 import org.apache.karaf.bundle.core.internal.BundlesMBeanImpl;
 import org.apache.karaf.bundle.core.internal.MavenConfigService;
 import org.apache.karaf.util.tracker.BaseActivator;
+import org.apache.karaf.util.tracker.ProvideService;
+import org.apache.karaf.util.tracker.RequireService;
+import org.apache.karaf.util.tracker.Services;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
+@Services(
+        requires = @RequireService(ConfigurationAdmin.class),
+        provides = @ProvideService(BundleService.class)
+)
 public class Activator extends BaseActivator {
 
     private ServiceTracker<BundleStateService, BundleStateService> bundleStateServicesTracker;
     private BundleWatcherImpl bundleWatcher;
-
-    @Override
-    protected void doOpen() throws Exception {
-        trackService(ConfigurationAdmin.class);
-    }
 
     @Override
     protected void doStart() throws Exception {

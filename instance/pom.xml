@@ -47,6 +47,12 @@
         </dependency>
 
         <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <scope>provided</scope>
@@ -148,6 +154,10 @@
                 </executions>
             </plugin>
             <plugin>
+                <groupId>org.apache.karaf.tooling</groupId>
+                <artifactId>karaf-services-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
@@ -164,8 +174,11 @@
                             *
                         </Import-Package>
                         <Provide-Capability>
-                            osgi.service;effective:=active;objectClass=org.apache.karaf.instance.core.InstanceService
+                            ${capabilities}
                         </Provide-Capability>
+                        <Require-Capability>
+                            ${requirements}
+                        </Require-Capability>
                         <Private-Package>
                             org.apache.karaf.jpm,
                             org.apache.karaf.jpm.impl,

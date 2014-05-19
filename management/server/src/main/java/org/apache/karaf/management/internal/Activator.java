@@ -29,21 +29,26 @@ import org.apache.karaf.management.KarafMBeanServerGuard;
 import org.apache.karaf.management.MBeanServerFactory;
 import org.apache.karaf.management.RmiRegistryFactory;
 import org.apache.karaf.util.tracker.BaseActivator;
+import org.apache.karaf.util.tracker.Managed;
+import org.apache.karaf.util.tracker.ProvideService;
+import org.apache.karaf.util.tracker.RequireService;
+import org.apache.karaf.util.tracker.Services;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ManagedService;
 
+@Services(
+        requires = {
+                @RequireService(ConfigurationAdmin.class),
+                @RequireService(KeystoreManager.class)
+        },
+        provides = @ProvideService(MBeanServer.class)
+)
+@Managed("org.apache.karaf.management")
 public class Activator extends BaseActivator implements ManagedService {
 
     private ConnectorServerFactory connectorServerFactory;
     private RmiRegistryFactory rmiRegistryFactory;
     private MBeanServerFactory mbeanServerFactory;
-
-    @Override
-    protected void doOpen() throws Exception {
-        manage("org.apache.karaf.management");
-        trackService(ConfigurationAdmin.class);
-        trackService(KeystoreManager.class);
-    }
 
     protected void doStart() throws Exception {
         // Verify dependencies

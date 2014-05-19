@@ -22,21 +22,14 @@ import java.util.Hashtable;
 import org.apache.felix.fileinstall.ArtifactUrlTransformer;
 import org.apache.karaf.deployer.wrap.WrapDeploymentListener;
 import org.apache.karaf.util.tracker.BaseActivator;
-import org.apache.karaf.util.tracker.SingleServiceTracker;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
+import org.apache.karaf.util.tracker.RequireService;
+import org.apache.karaf.util.tracker.Services;
 import org.osgi.service.url.URLStreamHandlerService;
 
+@Services(requires = {
+    @RequireService(value = URLStreamHandlerService.class, filter = "(url.handler.protocol=wrap)")
+})
 public class Activator extends BaseActivator {
-
-    private BundleContext bundleContext;
-    private ServiceRegistration<ArtifactUrlTransformer> urlTransformerRegistration;
-    private SingleServiceTracker<URLStreamHandlerService> urlHandlerTracker;
-
-    @Override
-    protected void doOpen() throws Exception {
-        trackService(URLStreamHandlerService.class, "(url.handler.protocol=wrap)");
-    }
 
     @Override
     protected void doStart() throws Exception {

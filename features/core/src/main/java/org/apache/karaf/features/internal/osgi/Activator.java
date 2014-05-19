@@ -45,6 +45,9 @@ import org.apache.karaf.features.internal.service.FeatureFinder;
 import org.apache.karaf.features.internal.service.FeaturesServiceImpl;
 import org.apache.karaf.features.internal.service.StateStorage;
 import org.apache.karaf.util.tracker.BaseActivator;
+import org.apache.karaf.util.tracker.ProvideService;
+import org.apache.karaf.util.tracker.RequireService;
+import org.apache.karaf.util.tracker.Services;
 import org.eclipse.equinox.internal.region.DigraphHelper;
 import org.eclipse.equinox.internal.region.StandardRegionDigraph;
 import org.eclipse.equinox.internal.region.management.StandardManageableRegionDigraph;
@@ -62,6 +65,17 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.LoggerFactory;
 
+@Services(
+    requires = {
+            @RequireService(ConfigurationAdmin.class),
+            @RequireService(value = URLStreamHandlerService.class, filter = "(url.handler.protocol=mvn)")
+    },
+    provides = {
+            @ProvideService(FeaturesService.class),
+            @ProvideService(RegionDigraph.class),
+            @ProvideService(Resolver.class)
+    }
+)
 public class Activator extends BaseActivator {
 
     public static final String FEATURES_REPOS_PID = "org.apache.karaf.features.repos";
@@ -82,8 +96,7 @@ public class Activator extends BaseActivator {
 
     @Override
     protected void doOpen() throws Exception {
-        trackService(URLStreamHandlerService.class, "(url.handler.protocol=mvn)");
-        trackService(ConfigurationAdmin.class);
+        super.doOpen();
 
         Properties configuration = new Properties();
         File configFile = new File(System.getProperty("karaf.etc"), FEATURES_SERVICE_CONFIG_FILE);

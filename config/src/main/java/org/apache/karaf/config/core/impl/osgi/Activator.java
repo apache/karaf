@@ -20,14 +20,16 @@ import org.apache.karaf.config.core.ConfigRepository;
 import org.apache.karaf.config.core.impl.ConfigMBeanImpl;
 import org.apache.karaf.config.core.impl.ConfigRepositoryImpl;
 import org.apache.karaf.util.tracker.BaseActivator;
+import org.apache.karaf.util.tracker.ProvideService;
+import org.apache.karaf.util.tracker.RequireService;
+import org.apache.karaf.util.tracker.Services;
 import org.osgi.service.cm.ConfigurationAdmin;
 
+@Services(
+        requires = @RequireService(ConfigurationAdmin.class),
+        provides = @ProvideService(ConfigRepository.class)
+)
 public class Activator extends BaseActivator {
-
-    @Override
-    protected void doOpen() throws Exception {
-        trackService(ConfigurationAdmin.class);
-    }
 
     protected void doStart() throws Exception {
         ConfigurationAdmin configurationAdmin = getTrackedService(ConfigurationAdmin.class);

@@ -43,6 +43,16 @@ public final class ResourceUtils {
     private ResourceUtils() {
     }
 
+    public static String getType(Resource resource) {
+        List<Capability> caps = resource.getCapabilities(null);
+        for (Capability cap : caps) {
+            if (cap.getNamespace().equals(IDENTITY_NAMESPACE)) {
+                return cap.getAttributes().get(CAPABILITY_TYPE_ATTRIBUTE).toString();
+            }
+        }
+        return null;
+    }
+
     public static String getUri(Resource resource) {
         List<Capability> caps = resource.getCapabilities(null);
         for (Capability cap : caps) {

@@ -21,8 +21,11 @@ import org.apache.karaf.http.core.internal.HttpMBeanImpl;
 import org.apache.karaf.http.core.internal.ServletEventHandler;
 import org.apache.karaf.http.core.internal.ServletServiceImpl;
 import org.apache.karaf.util.tracker.BaseActivator;
+import org.apache.karaf.util.tracker.ProvideService;
+import org.apache.karaf.util.tracker.Services;
 import org.ops4j.pax.web.service.spi.ServletListener;
 
+@Services(provides = @ProvideService(ServletService.class))
 public class Activator extends BaseActivator {
 
     @Override

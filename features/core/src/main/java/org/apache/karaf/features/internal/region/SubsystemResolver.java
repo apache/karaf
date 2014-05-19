@@ -26,12 +26,14 @@ import java.util.Set;
 
 import org.apache.felix.resolver.ResolverImpl;
 import org.apache.felix.resolver.Util;
+import org.apache.felix.utils.collections.DictionaryAsMap;
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.internal.download.DownloadManager;
 import org.apache.karaf.features.internal.download.Downloader;
 import org.apache.karaf.features.internal.download.StreamProvider;
 import org.apache.karaf.features.internal.download.simple.SimpleDownloader;
+import org.apache.karaf.features.internal.resolver.CapabilityImpl;
 import org.apache.karaf.features.internal.resolver.CapabilitySet;
 import org.apache.karaf.features.internal.resolver.ResourceBuilder;
 import org.apache.karaf.features.internal.resolver.ResourceImpl;
@@ -45,6 +47,7 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.Version;
 import org.osgi.framework.wiring.BundleRevision;
+import org.osgi.namespace.service.ServiceNamespace;
 import org.osgi.resource.Capability;
 import org.osgi.resource.Requirement;
 import org.osgi.resource.Resource;
@@ -146,7 +149,16 @@ public class SubsystemResolver {
                 ss = ss.getChild(path);
             }
             if (ss != null) {
+                ResourceImpl dummy = new ResourceImpl("dummy", "dummy", Version.emptyVersion);
                 for (BundleRevision res : entry.getValue()) {
+                    // We need to explicitely provide service capabilities for bundles
+                    // We use both actual services and services declared from the headers
+                    // TODO: use actual services
+                    Map<String, String> headers = new DictionaryAsMap<>(res.getBundle().getHeaders());
+                    Resource tmp = ResourceBuilder.build(res.getBundle().getLocation(), headers);
+                    for (Capability cap : tmp.getCapabilities(ServiceNamespace.SERVICE_NAMESPACE)) {
+                        dummy.addCapability(new CapabilityImpl(dummy, cap.getNamespace(), cap.getDirectives() ,cap.getAttributes()));
+                    }
                     ss.addSystemResource(res);
                     for (Capability cap : res.getCapabilities(null)) {
                         hasEeCap |= cap.getNamespace().equals(EXECUTION_ENVIRONMENT_NAMESPACE);
@@ -155,6 +167,7 @@ public class SubsystemResolver {
                         sysBundleRev = res;
                     }
                 }
+                ss.addSystemResource(dummy);
             }
         }
         // Under Equinox, the osgi.ee capabilities are not provided by the system bundle

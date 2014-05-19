@@ -21,15 +21,18 @@ import org.apache.karaf.kar.KarService;
 import org.apache.karaf.kar.internal.KarServiceImpl;
 import org.apache.karaf.kar.internal.KarsMBeanImpl;
 import org.apache.karaf.util.tracker.BaseActivator;
+import org.apache.karaf.util.tracker.Managed;
+import org.apache.karaf.util.tracker.ProvideService;
+import org.apache.karaf.util.tracker.RequireService;
+import org.apache.karaf.util.tracker.Services;
 import org.osgi.service.cm.ManagedService;
 
+@Services(
+        requires = @RequireService(FeaturesService.class),
+        provides = @ProvideService(KarService.class)
+)
+@Managed("org.apache.karaf.kar")
 public class Activator extends BaseActivator implements ManagedService {
-
-    @Override
-    protected void doOpen() throws Exception {
-        manage("org.apache.karaf.kar");
-        trackService(FeaturesService.class);
-    }
 
     protected void doStart() throws Exception {
         FeaturesService featuresService = getTrackedService(FeaturesService.class);

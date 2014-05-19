@@ -95,6 +95,10 @@
                 </configuration>
             </plugin>
             <plugin>
+                <groupId>org.apache.karaf.tooling</groupId>
+                <artifactId>karaf-services-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
@@ -121,6 +125,12 @@
                         <Bundle-Activator>
                             org.apache.karaf.wrapper.internal.osgi.Activator
                         </Bundle-Activator>
+                        <Provide-Capability>
+                            ${capabilities}
+                        </Provide-Capability>
+                        <Require-Capability>
+                            ${requirements}
+                        </Require-Capability>
                         <Karaf-Commands>
                             org.apache.karaf.wrapper.commands
                         </Karaf-Commands>

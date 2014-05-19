@@ -104,6 +104,12 @@
                             org.apache.felix.utils.version,
                             org.apache.felix.utils.manifest,
                         </Private-Package>
+                        <Provide-Capability>
+                            ${capabilities}
+                        </Provide-Capability>
+                        <Require-Capability>
+                            ${requirements}
+                        </Require-Capability>
                         <Bundle-Activator>
                             org.apache.karaf.http.core.internal.osgi.Activator
                         </Bundle-Activator>

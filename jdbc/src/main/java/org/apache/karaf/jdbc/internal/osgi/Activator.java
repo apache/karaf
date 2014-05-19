@@ -20,7 +20,10 @@ import org.apache.karaf.jdbc.JdbcService;
 import org.apache.karaf.jdbc.internal.JdbcMBeanImpl;
 import org.apache.karaf.jdbc.internal.JdbcServiceImpl;
 import org.apache.karaf.util.tracker.BaseActivator;
+import org.apache.karaf.util.tracker.ProvideService;
+import org.apache.karaf.util.tracker.Services;
 
+@Services(provides = @ProvideService(JdbcService.class))
 public class Activator extends BaseActivator {
     @Override
     protected void doStart() throws Exception {

@@ -108,6 +108,9 @@
                         <Private-Package>
                             org.apache.karaf.util.collections
                         </Private-Package>
+                        <Provide-Capability>
+                            osgi.service;effective:=active;objectClass="org.apache.karaf.jaas.config.KeystoreManager
+                        </Provide-Capability>
                         <Bundle-Activator>
                             org.apache.karaf.jaas.config.impl.Activator
                         </Bundle-Activator>

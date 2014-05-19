@@ -70,6 +70,7 @@ import static org.apache.felix.resolver.Util.getVersion;
 import static org.apache.karaf.features.FeaturesService.ROOT_REGION;
 import static org.apache.karaf.features.internal.resolver.ResourceUtils.TYPE_SUBSYSTEM;
 import static org.apache.karaf.features.internal.resolver.ResourceUtils.getFeatureId;
+import static org.apache.karaf.features.internal.resolver.ResourceUtils.getType;
 import static org.apache.karaf.features.internal.resolver.ResourceUtils.getUri;
 import static org.apache.karaf.features.FeaturesService.UPDATEABLE_URIS;
 import static org.apache.karaf.features.FeaturesService.UPDATE_SNAPSHOTS_ALWAYS;
@@ -88,8 +89,8 @@ import static org.osgi.framework.Bundle.STARTING;
 import static org.osgi.framework.Bundle.STOPPING;
 import static org.osgi.framework.Bundle.STOP_TRANSIENT;
 import static org.osgi.framework.Bundle.UNINSTALLED;
-import static org.osgi.framework.namespace.IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE;
 import static org.osgi.framework.namespace.IdentityNamespace.IDENTITY_NAMESPACE;
+import static org.osgi.framework.namespace.IdentityNamespace.TYPE_BUNDLE;
 import static org.osgi.resource.Namespace.CAPABILITY_EFFECTIVE_DIRECTIVE;
 import static org.osgi.resource.Namespace.EFFECTIVE_ACTIVE;
 
@@ -749,13 +750,11 @@ public class Deployer {
     }
 
     private boolean isSubsystem(Resource resource) {
-        for (Capability cap : resource.getCapabilities(null)) {
-            if (cap.getNamespace().equals(IDENTITY_NAMESPACE)) {
-                String type = (String) cap.getAttributes().get(CAPABILITY_TYPE_ATTRIBUTE);
-                return (type != null) && type.equals(TYPE_SUBSYSTEM);
-            }
-        }
-        return false;
+        return TYPE_SUBSYSTEM.equals(getType(resource));
+    }
+
+    private boolean isBundle(Resource resource) {
+        return TYPE_BUNDLE.equals(getType(resource));
     }
 
     private FeaturesService.RequestedState mergeStates(FeaturesService.RequestedState s1, FeaturesService.RequestedState s2) {
@@ -795,6 +794,9 @@ public class Deployer {
                 List<Wire> newWires = resolution.get(wiring.getRevision());
                 if (newWires != null) {
                     for (Wire wire : newWires) {
+                        if (!isBundle(wire.getProvider())) {
+                            continue;
+                        }
                         Bundle b;
                         if (wire.getProvider() instanceof BundleRevision) {
                             b = ((BundleRevision) wire.getProvider()).getBundle();

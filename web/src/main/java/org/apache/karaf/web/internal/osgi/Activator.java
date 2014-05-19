@@ -17,6 +17,10 @@
 package org.apache.karaf.web.internal.osgi;
 
 import org.apache.karaf.util.tracker.BaseActivator;
+import org.apache.karaf.util.tracker.Managed;
+import org.apache.karaf.util.tracker.ProvideService;
+import org.apache.karaf.util.tracker.RequireService;
+import org.apache.karaf.util.tracker.Services;
 import org.apache.karaf.web.WebContainerService;
 import org.apache.karaf.web.internal.WebContainerServiceImpl;
 import org.apache.karaf.web.internal.WebEventHandler;
@@ -24,12 +28,12 @@ import org.apache.karaf.web.management.internal.WebMBeanImpl;
 import org.ops4j.pax.web.service.spi.WarManager;
 import org.ops4j.pax.web.service.spi.WebListener;
 
+@Services(
+        requires = @RequireService(WarManager.class),
+        provides = @ProvideService(WebContainerService.class)
+)
+@Managed("org.apache.karaf.shell")
 public class Activator extends BaseActivator {
-
-    @Override
-    protected void doOpen() throws Exception {
-        trackService(WarManager.class);
-    }
 
     @Override
     protected void doStart() throws Exception {

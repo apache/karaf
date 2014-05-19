@@ -48,8 +48,8 @@ public final class SingleServiceTracker<T> {
     private final AtomicReference<ServiceReference> ref = new AtomicReference<ServiceReference>();
     private final AtomicBoolean open = new AtomicBoolean(false);
     private final SingleServiceListener serviceListener;
-    private String filterString;
-    private Filter filter;
+    private final String filterString;
+    private final Filter filter;
 
     private final ServiceListener listener = new ServiceListener() {
         public void serviceChanged(ServiceEvent event) {
@@ -66,22 +66,16 @@ public final class SingleServiceTracker<T> {
         }
     };
 
-    public SingleServiceTracker(BundleContext context, String className, SingleServiceListener sl) {
-        ctx = context;
-        this.className = className;
-        serviceListener = sl;
-    }
-
-    public SingleServiceTracker(BundleContext context, Class<T> clazz, SingleServiceListener sl) {
-        ctx = context;
-        this.className = clazz.getName();
-        serviceListener = sl;
+    public SingleServiceTracker(BundleContext context, Class<T> clazz, SingleServiceListener sl) throws InvalidSyntaxException {
+        this(context, clazz, null, sl);
     }
 
     public SingleServiceTracker(BundleContext context, Class<T> clazz, String filterString, SingleServiceListener sl) throws InvalidSyntaxException {
-        this(context, clazz, sl);
+        this.ctx = context;
+        this.className = clazz.getName();
+        this.serviceListener = sl;
         this.filterString = filterString;
-        if (filterString != null) filter = context.createFilter(filterString);
+        this.filter = (filterString != null) ? context.createFilter(filterString) : null;
     }
 
     public T getService() {

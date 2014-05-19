@@ -33,7 +33,7 @@ public class Activator extends BaseActivator {
         Hashtable<String, Object> props = new Hashtable<String, Object>();
         props.put("url.handler.protocol", "blueprint");
         register(URLStreamHandlerService.class, new BlueprintURLHandler(), props);
-        register(new String[]{ArtifactUrlTransformer.class.getName(), ArtifactListener.class.getName()},
+        register(new Class[] { ArtifactUrlTransformer.class, ArtifactListener.class },
                 new BlueprintDeploymentListener());
     }
 

@@ -18,9 +18,12 @@ package org.apache.karaf.scheduler.core;
 
 import org.apache.karaf.scheduler.Scheduler;
 import org.apache.karaf.util.tracker.BaseActivator;
+import org.apache.karaf.util.tracker.ProvideService;
+import org.apache.karaf.util.tracker.Services;
 import org.quartz.simpl.SimpleThreadPool;
 import org.quartz.spi.ThreadPool;
 
+@Services(provides = @ProvideService(Scheduler.class))
 public class Activator extends BaseActivator {
 
     private ThreadPool threadPool;

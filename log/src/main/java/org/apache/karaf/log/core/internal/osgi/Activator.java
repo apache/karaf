@@ -25,17 +25,20 @@ import org.apache.karaf.log.core.internal.LogMBeanImpl;
 import org.apache.karaf.log.core.internal.LogServiceImpl;
 import org.apache.karaf.log.core.internal.LruList;
 import org.apache.karaf.util.tracker.BaseActivator;
+import org.apache.karaf.util.tracker.Managed;
+import org.apache.karaf.util.tracker.ProvideService;
+import org.apache.karaf.util.tracker.RequireService;
+import org.apache.karaf.util.tracker.Services;
 import org.ops4j.pax.logging.spi.PaxAppender;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ManagedService;
 
+@Services(
+        requires = @RequireService(ConfigurationAdmin.class),
+        provides = @ProvideService(LogService.class)
+)
+@Managed("org.apache.karaf.log")
 public class Activator extends BaseActivator implements ManagedService {
-
-    @Override
-    protected void doOpen() throws Exception {
-        manage("org.apache.karaf.log");
-        trackService(ConfigurationAdmin.class);
-    }
 
     protected void doStart() throws Exception {
         ConfigurationAdmin configurationAdmin = getTrackedService(ConfigurationAdmin.class);

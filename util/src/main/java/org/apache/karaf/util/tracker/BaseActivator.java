@@ -48,7 +48,7 @@ public class BaseActivator implements BundleActivator, SingleServiceTracker.Sing
     private long schedulerStopTimeout = TimeUnit.MILLISECONDS.convert(30, TimeUnit.SECONDS);
 
     private List<ServiceRegistration> registrations;
-    private Map<String, SingleServiceTracker> trackers = new HashMap<String, SingleServiceTracker>();
+    private Map<String, SingleServiceTracker> trackers = new HashMap<>();
     private ServiceRegistration managedServiceRegistration;
     private Dictionary<String, ?> configuration;
 
@@ -88,6 +88,16 @@ public class BaseActivator implements BundleActivator, SingleServiceTracker.Sing
     }
 
     protected void doOpen() throws Exception {
+        Services services = getClass().getAnnotation(Services.class);
+        if (services != null) {
+            for (RequireService require : services.requires()) {
+                trackService(require.value(), require.filter());
+            }
+        }
+        Managed managed = getClass().getAnnotation(Managed.class);
+        if (managed != null) {
+            manage(managed.value());
+        }
     }
 
     protected void doClose() {
@@ -115,7 +125,7 @@ public class BaseActivator implements BundleActivator, SingleServiceTracker.Sing
      * Called in {@link #doOpen()}
      */
     protected void manage(String pid) {
-        Hashtable<String, Object> props = new Hashtable<String, Object>();
+        Hashtable<String, Object> props = new Hashtable<>();
         props.put(Constants.SERVICE_PID, pid);
         managedServiceRegistration = bundleContext.registerService(
                 "org.osgi.service.cm.ManagedService", this, props);
@@ -220,9 +230,9 @@ public class BaseActivator implements BundleActivator, SingleServiceTracker.Sing
     /**
      * Called in {@link #doOpen()}
      */
-    protected void trackService(Class clazz) {
+    protected void trackService(Class<?> clazz) throws InvalidSyntaxException {
         if (!trackers.containsKey(clazz.getName())) {
-            SingleServiceTracker tracker = new SingleServiceTracker(bundleContext, clazz, this);
+            SingleServiceTracker tracker = new SingleServiceTracker<>(bundleContext, clazz, this);
             tracker.open();
             trackers.put(clazz.getName(), tracker);
         }
@@ -231,20 +241,12 @@ public class BaseActivator implements BundleActivator, SingleServiceTracker.Sing
     /**
      * Called in {@link #doOpen()}
      */
-    protected void trackService(String clazz) {
-        if (!trackers.containsKey(clazz)) {
-            SingleServiceTracker tracker = new SingleServiceTracker(bundleContext, clazz, this);
-            tracker.open();
-            trackers.put(clazz, tracker);
-        }
-    }
-
-    /**
-     * Called in {@link #doOpen()}
-     */
-    protected void trackService(Class clazz, String filter) throws InvalidSyntaxException {
+    protected void trackService(Class<?> clazz, String filter) throws InvalidSyntaxException {
         if (!trackers.containsKey(clazz.getName())) {
-            SingleServiceTracker tracker = new SingleServiceTracker(bundleContext, clazz, filter, this);
+            if (filter != null && filter.isEmpty()) {
+                filter = null;
+            }
+            SingleServiceTracker tracker = new SingleServiceTracker<>(bundleContext, clazz, filter, this);
             tracker.open();
             trackers.put(clazz.getName(), tracker);
         }
@@ -264,19 +266,8 @@ public class BaseActivator implements BundleActivator, SingleServiceTracker.Sing
     /**
      * Called in {@link #doStart()}
      */
-    protected Object getTrackedService(String clazz) {
-        SingleServiceTracker tracker = trackers.get(clazz);
-        if (tracker == null) {
-            throw new IllegalStateException("Service not tracked for class " + clazz);
-        }
-        return tracker.getService();
-    }
-
-    /**
-     * Called in {@link #doStart()}
-     */
     protected void registerMBean(Object mbean, String type) {
-        Hashtable<String, Object> props = new Hashtable<String, Object>();
+        Hashtable<String, Object> props = new Hashtable<>();
         props.put("jmx.objectname", "org.apache.karaf:" + type + ",name=" + System.getProperty("karaf.name"));
         trackRegistration(bundleContext.registerService(getInterfaceNames(mbean), mbean, props));
     }
@@ -284,54 +275,44 @@ public class BaseActivator implements BundleActivator, SingleServiceTracker.Sing
     /**
      * Called in {@link #doStart()}
      */
-    protected void register(Class clazz, Object service) {
+    protected <T> void register(Class<T> clazz, T service) {
         register(clazz, service, null);
     }
 
     /**
      * Called in {@link #doStart()}
      */
-    protected void register(Class clazz, Object service, Dictionary<String, ?> props) {
+    protected <T> void register(Class<T> clazz, T service, Dictionary<String, ?> props) {
         trackRegistration(bundleContext.registerService(clazz, service, props));
     }
 
     /**
      * Called in {@link #doStart()}
      */
-    protected void register(String clazz, Object service) {
+    protected void register(Class[] clazz, Object service) {
         register(clazz, service, null);
     }
 
     /**
      * Called in {@link #doStart()}
      */
-    protected void register(String clazz, Object service, Dictionary<String, ?> props) {
-        trackRegistration(bundleContext.registerService(clazz, service, props));
-    }
-
-    /**
-     * Called in {@link #doStart()}
-     */
-    protected void register(String[] clazz, Object service) {
-        register(clazz, service, null);
-    }
-
-    /**
-     * Called in {@link #doStart()}
-     */
-    protected void register(String[] clazz, Object service, Dictionary<String, ?> props) {
-        trackRegistration(bundleContext.registerService(clazz, service, props));
+    protected void register(Class[] clazz, Object service, Dictionary<String, ?> props) {
+        String[] names = new String[clazz.length];
+        for (int i = 0; i < clazz.length; i++) {
+            names[i] = clazz[i].getName();
+        }
+        trackRegistration(bundleContext.registerService(names, service, props));
     }
 
     private void trackRegistration(ServiceRegistration registration) {
         if (registrations == null) {
-            registrations = new ArrayList<ServiceRegistration>();
+            registrations = new ArrayList<>();
         }
         registrations.add(registration);
     }
 
     protected String[] getInterfaceNames(Object object) {
-        List<String> names = new ArrayList<String>();
+        List<String> names = new ArrayList<>();
         for (Class cl = object.getClass(); cl != Object.class; cl = cl.getSuperclass()) {
             addSuperInterfaces(names, cl);
         }

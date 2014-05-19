@@ -20,7 +20,10 @@ import org.apache.karaf.system.SystemService;
 import org.apache.karaf.system.internal.SystemServiceImpl;
 import org.apache.karaf.system.management.internal.SystemMBeanImpl;
 import org.apache.karaf.util.tracker.BaseActivator;
+import org.apache.karaf.util.tracker.ProvideService;
+import org.apache.karaf.util.tracker.Services;
 
+@Services(provides = @ProvideService(SystemService.class))
 public class Activator extends BaseActivator {
 
     @Override

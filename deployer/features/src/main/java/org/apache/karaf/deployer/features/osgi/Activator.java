@@ -25,16 +25,14 @@ import org.apache.karaf.deployer.features.FeatureDeploymentListener;
 import org.apache.karaf.deployer.features.FeatureURLHandler;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.util.tracker.BaseActivator;
+import org.apache.karaf.util.tracker.RequireService;
+import org.apache.karaf.util.tracker.Services;
 import org.osgi.service.url.URLStreamHandlerService;
 
+@Services(requires = @RequireService(FeaturesService.class))
 public class Activator extends BaseActivator {
 
     private FeatureDeploymentListener listener;
-
-    @Override
-    protected void doOpen() throws Exception {
-        trackService(FeaturesService.class);
-    }
 
     @Override
     protected void doStart() throws Exception {
@@ -52,9 +50,8 @@ public class Activator extends BaseActivator {
         listener.setFeaturesService(service);
         listener.setBundleContext(bundleContext);
         listener.init();
-        register(new String[]{
-                ArtifactUrlTransformer.class.getName(), ArtifactListener.class.getName()
-        }, listener);
+        register(new Class[] { ArtifactUrlTransformer.class, ArtifactListener.class },
+                 listener);
     }
 
     protected void doStop() {

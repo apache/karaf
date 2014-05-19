@@ -14,23 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.obr.core.internal.osgi;
+package org.apache.karaf.util.tracker;
 
-import org.apache.felix.bundlerepository.RepositoryAdmin;
-import org.apache.karaf.obr.core.internal.ObrMBeanImpl;
-import org.apache.karaf.util.tracker.BaseActivator;
-import org.apache.karaf.util.tracker.RequireService;
-import org.apache.karaf.util.tracker.Services;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-@Services(
-        requires = @RequireService(RepositoryAdmin.class)
-)
-public class Activator extends BaseActivator {
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.TYPE})
+public @interface Services {
 
-    @Override
-    protected void doStart() throws Exception {
-        RepositoryAdmin admin = getTrackedService(RepositoryAdmin.class);
-        ObrMBeanImpl mbean = new ObrMBeanImpl(bundleContext, admin);
-        registerMBean(mbean, "type=obr");
-    }
+    ProvideService[] provides() default {};
+
+    RequireService[] requires() default {};
+
 }

@@ -115,6 +115,10 @@
         </resources>
         <plugins>
             <plugin>
+                <groupId>org.apache.karaf.tooling</groupId>
+                <artifactId>karaf-services-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
@@ -132,6 +136,12 @@
                             org.apache.felix.utils.version,
                             org.apache.felix.utils.manifest
                         </Private-Package>
+                        <Provide-Capability>
+                            ${capabilities}
+                        </Provide-Capability>
+                        <Require-Capability>
+                            ${requirements}
+                        </Require-Capability>
                         <Embed-Dependency>
                             org.apache.karaf.jaas.modules;inline="org/apache/karaf/jaas/modules/JaasHelper*.class"
                         </Embed-Dependency>

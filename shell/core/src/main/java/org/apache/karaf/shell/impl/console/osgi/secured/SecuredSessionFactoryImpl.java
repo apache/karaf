@@ -40,6 +40,7 @@ import org.apache.karaf.shell.impl.console.SessionFactoryImpl;
 import org.apache.karaf.util.tracker.SingleServiceTracker;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -61,11 +62,11 @@ public class SecuredSessionFactoryImpl extends SessionFactoryImpl implements Con
     private SingleServiceTracker<ConfigurationAdmin> configAdminTracker;
     private ServiceRegistration registration;
 
-    public SecuredSessionFactoryImpl(BundleContext bundleContext, ThreadIO threadIO) {
+    public SecuredSessionFactoryImpl(BundleContext bundleContext, ThreadIO threadIO) throws InvalidSyntaxException {
         super(threadIO);
         this.bundleContext = bundleContext;
         this.registration = bundleContext.registerService(ConfigurationListener.class, this, null);
-        this.configAdminTracker = new SingleServiceTracker<ConfigurationAdmin>(bundleContext, ConfigurationAdmin.class, this);
+        this.configAdminTracker = new SingleServiceTracker<>(bundleContext, ConfigurationAdmin.class, this);
         this.configAdminTracker.open();
     }
 

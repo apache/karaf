@@ -53,6 +53,17 @@
             <artifactId>org.osgi.core</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>org.apache.karaf.features.core</artifactId>
+            <scope>provided</scope>
+        </dependency>
 
         <dependency>
             <groupId>org.apache.karaf.kar</groupId>
@@ -90,6 +101,10 @@
         </resources>
         <plugins>
             <plugin>
+                <groupId>org.apache.karaf.tooling</groupId>
+                <artifactId>karaf-services-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
@@ -100,6 +115,12 @@
                             org.apache.karaf.deployer.kar.osgi,
                             org.apache.karaf.util.tracker
                         </Private-Package>
+                        <Provide-Capability>
+                            ${capabilities}
+                        </Provide-Capability>
+                        <Require-Capability>
+                            ${requirements}
+                        </Require-Capability>
                         <Bundle-Activator>
                             org.apache.karaf.deployer.kar.osgi.Activator
                         </Bundle-Activator>

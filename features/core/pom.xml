@@ -108,6 +108,10 @@
         </resources>
         <plugins>
             <plugin>
+                <groupId>org.apache.karaf.tooling</groupId>
+                <artifactId>karaf-services-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
@@ -125,12 +129,10 @@
                             !org.eclipse.osgi.service.resolver,
                             *
                         </Import-Package>
-                        <Provide-Capability>
-                            osgi.service;effective:=active;objectClass=org.apache.karaf.features.FeaturesService
-                        </Provide-Capability>
                         <Private-Package>
                             org.apache.karaf.features.internal.*,
                             org.apache.felix.resolver,
+                            org.apache.felix.utils.collections,
                             org.apache.felix.utils.version,
                             org.apache.felix.utils.properties,
                             org.apache.felix.utils.manifest,

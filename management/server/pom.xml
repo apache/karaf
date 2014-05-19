@@ -107,6 +107,10 @@
         </resources>
         <plugins>
             <plugin>
+                <groupId>org.apache.karaf.tooling</groupId>
+                <artifactId>karaf-services-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
@@ -119,8 +123,11 @@
                             org.apache.karaf.util.tracker
                         </Private-Package>
                         <Provide-Capability>
-                            osgi.service;effective:=active;objectClass=javax.management.MBeanServer
+                            ${capabilities}
                         </Provide-Capability>
+                        <Require-Capability>
+                            ${requirements}
+                        </Require-Capability>
                         <Bundle-Activator>
                             org.apache.karaf.management.internal.Activator
                         </Bundle-Activator>
