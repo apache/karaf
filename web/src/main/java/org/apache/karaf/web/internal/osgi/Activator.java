@@ -32,7 +32,6 @@ import org.ops4j.pax.web.service.spi.WebListener;
         requires = @RequireService(WarManager.class),
         provides = @ProvideService(WebContainerService.class)
 )
-@Managed("org.apache.karaf.shell")
 public class Activator extends BaseActivator {
 
     @Override
