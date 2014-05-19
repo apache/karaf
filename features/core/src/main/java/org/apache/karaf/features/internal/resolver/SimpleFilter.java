@@ -57,8 +57,9 @@ public class SimpleFilter {
         return op;
     }
 
+    @SuppressWarnings("unchecked")
     public String toString() {
-        String s = null;
+        String s;
         switch (op) {
         case AND:
             s = "(&" + toString((List) value) + ")";
@@ -138,6 +139,7 @@ public class SimpleFilter {
         return o.toString();
     }
 
+    @SuppressWarnings("unchecked")
     public static SimpleFilter parse(String filter) {
         int idx = skipWhitespace(filter, 0);
 
@@ -446,11 +448,12 @@ public class SimpleFilter {
      * @param attrs Map of attributes to convert to a filter.
      * @return A filter corresponding to the attributes.
      */
+    @SuppressWarnings("unchecked")
     public static SimpleFilter convert(Map<String, Object> attrs) {
         // Rather than building a filter string to be parsed into a SimpleFilter,
         // we will just create the parsed SimpleFilter directly.
 
-        List<SimpleFilter> filters = new ArrayList<SimpleFilter>();
+        List<SimpleFilter> filters = new ArrayList<>();
 
         for (Entry<String, Object> entry : attrs.entrySet()) {
             if (entry.getValue() instanceof VersionRange) {

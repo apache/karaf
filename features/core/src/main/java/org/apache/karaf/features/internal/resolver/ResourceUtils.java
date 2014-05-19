@@ -79,8 +79,8 @@ public final class ResourceUtils {
     }
 
     public static void addIdentityRequirement(ResourceImpl resource, String name, String type, String range) {
-        Map<String, String> dirs = new HashMap<String, String>();
-        Map<String, Object> attrs = new HashMap<String, Object>();
+        Map<String, String> dirs = new HashMap<>();
+        Map<String, Object> attrs = new HashMap<>();
         if (name != null) {
             attrs.put(IDENTITY_NAMESPACE, name);
         }

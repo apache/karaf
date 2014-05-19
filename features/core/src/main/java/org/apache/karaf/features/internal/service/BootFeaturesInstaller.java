@@ -28,15 +28,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.karaf.features.BootFinished;
-import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class BootFeaturesInstaller {
-
-    public static final String VERSION_PREFIX = "version=";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BootFeaturesInstaller.class);
 
@@ -115,32 +112,10 @@ public class BootFeaturesInstaller {
         }
     }
 
-    /**
-     * @param featureSt either feature name or <featurename>;version=<version>
-     * @return feature matching the feature string
-     * @throws Exception
-     */
-    private Feature getFeature(String featureSt) throws Exception {
-        String[] parts = featureSt.trim().split(";");
-        String featureName = parts[0];
-        String featureVersion = null;
-        for (String part : parts) {
-            // if the part starts with "version=" it contains the version info
-            if (part.startsWith(VERSION_PREFIX)) {
-                featureVersion = part.substring(VERSION_PREFIX.length());
-            }
-        }
-        if (featureVersion == null) {
-            // no version specified - use default version
-            featureVersion = org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION;
-        }
-        return featuresService.getFeature(featureName, featureVersion);
-    }
-
     protected List<Set<String>> parseBootFeatures(String bootFeatures) {
         Pattern pattern = Pattern.compile("(\\((.+))\\),|.+");
         Matcher matcher = pattern.matcher(bootFeatures);
-        List<Set<String>> result = new ArrayList<Set<String>>();
+        List<Set<String>> result = new ArrayList<>();
         while (matcher.find()) {
             String group = matcher.group(2) != null ? matcher.group(2) : matcher.group();
             result.add(parseFeatureList(group));
@@ -149,7 +124,7 @@ public class BootFeaturesInstaller {
     }
 
     protected Set<String> parseFeatureList(String group) {
-        HashSet<String> features = new HashSet<String>();
+        HashSet<String> features = new HashSet<>();
         for (String feature : Arrays.asList(group.trim().split("\\s*,\\s*"))) {
             if (feature.length() > 0) {
                 features.add(feature);
