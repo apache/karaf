@@ -34,6 +34,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -60,6 +61,7 @@ import java.util.Properties;
 import java.util.Random;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
+import java.util.UUID;
 import java.util.jar.Manifest;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -1506,7 +1508,18 @@ public class Main {
             int port = Integer.parseInt(props.getProperty(KARAF_SHUTDOWN_PORT, "0"));
             String host = props.getProperty(KARAF_SHUTDOWN_HOST, "localhost");
             String portFile = props.getProperty(KARAF_SHUTDOWN_PORT_FILE);
-            final String shutdown = props.getProperty(KARAF_SHUTDOWN_COMMAND, DEFAULT_SHUTDOWN_COMMAND);
+            String shutdown = props.getProperty(KARAF_SHUTDOWN_COMMAND);
+            if (shutdown == null) {
+                shutdown = UUID.randomUUID().toString();
+                File file = new File(karafEtc, CONFIG_PROPERTIES_FILE_NAME);
+                Writer writer = new FileWriter(file, true);
+                try {
+                    writer.write("\n#\n# Generated command shutdown\n,#\n"
+                            + KARAF_SHUTDOWN_COMMAND + " = " + shutdown + "\n");
+                } finally {
+                    writer.close();
+                }
+            }
             if (port >= 0) {
                 shutdownSocket = new ServerSocket(port, 1, InetAddress.getByName(host));
                 if (port == 0) {
