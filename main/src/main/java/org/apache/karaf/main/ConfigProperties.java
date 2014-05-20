@@ -22,6 +22,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.UUID;
+
 import org.apache.felix.utils.properties.Properties;
 
 import org.apache.karaf.main.lock.SimpleFileLock;
@@ -231,10 +234,17 @@ public class ConfigProperties {
         this.shutdownPort = Integer.parseInt(props.getProperty(KARAF_SHUTDOWN_PORT, "0"));
         this.shutdownHost = props.getProperty(KARAF_SHUTDOWN_HOST, "localhost");
         this.portFile = props.getProperty(KARAF_SHUTDOWN_PORT_FILE);
-        this.shutdownCommand = props.getProperty(KARAF_SHUTDOWN_COMMAND, DEFAULT_SHUTDOWN_COMMAND);
+        this.shutdownCommand = props.getProperty(KARAF_SHUTDOWN_COMMAND);
         this.startupMessage = props.getProperty(KARAF_STARTUP_MESSAGE, "Apache Karaf starting up. Press Enter to open the shell now...");
         this.delayConsoleStart = Boolean.parseBoolean(props.getProperty(KARAF_DELAY_CONSOLE, "false"));
         System.setProperty(KARAF_DELAY_CONSOLE, new Boolean(this.delayConsoleStart).toString());
+
+        if (shutdownCommand == null || shutdownCommand.isEmpty()) {
+            shutdownCommand = UUID.randomUUID().toString();
+            Properties temp = new Properties(file);
+            temp.put(KARAF_SHUTDOWN_COMMAND, Arrays.asList("", "#", "# Generated command shutdown", "#"), shutdownCommand);
+            temp.save();
+        }
     }
     
     private String getPropertyOrFail(String propertyName) {
