@@ -23,11 +23,9 @@ import static org.apache.karaf.shell.commands.ansi.SimpleAnsi.COLOR_RED;
 import static org.apache.karaf.shell.commands.ansi.SimpleAnsi.INTENSITY_BOLD;
 import static org.apache.karaf.shell.commands.ansi.SimpleAnsi.INTENSITY_NORMAL;
 
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
 import java.security.AccessControlContext;
 import java.security.AccessController;
+import java.util.Arrays;
 
 import javax.security.auth.Subject;
 
@@ -68,6 +66,22 @@ public class ShellUtil {
     public static String getValueString(Object obj) {
         if (obj == null) {
             return "null";
+        } else if (obj instanceof boolean[]) {
+            return Arrays.toString((boolean[]) obj);
+        } else if (obj instanceof byte[]) {
+            return Arrays.toString((byte[]) obj);
+        } else if (obj instanceof char[]) {
+            return Arrays.toString((char[]) obj);
+        } else if (obj instanceof double[]) {
+            return Arrays.toString((double[]) obj);
+        } else if (obj instanceof float[]) {
+            return Arrays.toString((float[]) obj);
+        } else if (obj instanceof int[]) {
+            return Arrays.toString((int[]) obj);
+        } else if (obj instanceof long[]) {
+            return Arrays.toString((long[]) obj);
+        } else if (obj instanceof short[]) {
+            return Arrays.toString((short[]) obj);
         } else if (obj.getClass().isArray()) {
             Object[] array = (Object[]) obj;
             StringBuilder sb = new StringBuilder();
@@ -80,29 +94,6 @@ public class ShellUtil {
             }
             sb.append("]");
             return sb.toString();
-        } else if (obj instanceof String) {
-            return (String) obj;
-        } else if (obj instanceof Boolean) {
-            return ((Boolean) obj).toString();
-        } else if (obj instanceof Long) {
-            return ((Long) obj).toString();
-        } else if (obj instanceof Integer) {
-            return ((Integer) obj).toString();
-        } else if (obj instanceof Short) {
-            return ((Short) obj).toString();
-        } else if (obj instanceof Double) {
-            return ((Double) obj).toString();
-        } else if (obj instanceof Float) {
-            return ((Float) obj).toString();
-        } else if (obj instanceof URL) {
-            return ((URL) obj).toExternalForm();
-        } else if (obj instanceof URI) {
-            try {
-                return ((URI) obj).toURL().toExternalForm();
-            } catch (MalformedURLException e) {
-                LOGGER.error("URI could not be transformed to URL", e);
-                return obj.toString();
-            }
         } else {
             return obj.toString();
         }
