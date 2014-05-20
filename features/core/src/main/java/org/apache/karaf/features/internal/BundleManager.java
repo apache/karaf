@@ -37,6 +37,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
+import java.util.zip.ZipEntry;
 
 import org.apache.felix.utils.manifest.Clause;
 import org.apache.felix.utils.manifest.Parser;
@@ -60,6 +61,8 @@ import org.osgi.service.url.URLStreamHandlerService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static java.util.jar.JarFile.MANIFEST_NAME;
 
 public class BundleManager {
 
@@ -96,7 +99,16 @@ public class BundleManager {
             JarInputStream jar = new JarInputStream(is);
             Manifest m = jar.getManifest();
             if (m == null) {
-                throw new BundleException("Manifest not present in the first entry of the zip " + bundleLocation);
+                ZipEntry entry;
+                while ((entry = jar.getNextEntry()) != null) {
+                    if (MANIFEST_NAME.equals(entry.getName())) {
+                        m = new Manifest(jar);
+                        break;
+                    }
+                }
+                if (m == null) {
+                    throw new BundleException("Manifest not present in the zip " + bundleLocation);
+                }
             }
             String sn = m.getMainAttributes().getValue(Constants.BUNDLE_SYMBOLICNAME);
             if (sn == null) {
