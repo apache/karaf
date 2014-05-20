@@ -218,7 +218,7 @@ public class ConnectorServerFactory {
             throw new IllegalArgumentException("server must be set");
         }
         JMXServiceURL url = new JMXServiceURL(this.serviceUrl);
-
+        setupKarafRMIServerSocketFactory();
         if ( isClientAuth() ) {
             this.secured = true;
         }
@@ -292,7 +292,7 @@ public class ConnectorServerFactory {
     private void setupSsl() throws GeneralSecurityException {
 
         SSLServerSocketFactory sssf = keystoreManager.createSSLServerFactory(null, secureProtocol, algorithm, keyStore, keyAlias, trustStore,keyStoreAvailabilityTimeout);
-        RMIServerSocketFactory rssf = new KarafSslRMIServerSocketFactory(sssf, this.isClientAuth());
+        RMIServerSocketFactory rssf = new KarafSslRMIServerSocketFactory(sssf, this.isClientAuth(), getRmiServerHost());
         RMIClientSocketFactory rcsf = new SslRMIClientSocketFactory();
         environment.put(RMIConnectorServer.RMI_SERVER_SOCKET_FACTORY_ATTRIBUTE, rssf);
         environment.put(RMIConnectorServer.RMI_CLIENT_SOCKET_FACTORY_ATTRIBUTE, rcsf);
@@ -300,20 +300,41 @@ public class ConnectorServerFactory {
         //env.put("com.sun.jndi.rmi.factory.socket", rcsf);
     }
 
+    private void setupKarafRMIServerSocketFactory() {
+        RMIServerSocketFactory rmiServerSocketFactory = new KarafRMIServerSocketFactory(getRmiServerHost());
+        environment.put(RMIConnectorServer.RMI_SERVER_SOCKET_FACTORY_ATTRIBUTE, rmiServerSocketFactory);
+    }
+
     private static class KarafSslRMIServerSocketFactory implements RMIServerSocketFactory {
         private SSLServerSocketFactory sssf;
         private boolean clientAuth;
+        private String rmiServerHost;
 
-        public KarafSslRMIServerSocketFactory(SSLServerSocketFactory sssf, boolean clientAuth) {
+        public KarafSslRMIServerSocketFactory(SSLServerSocketFactory sssf, boolean clientAuth, String rmiServerHost) {
             this.sssf = sssf;
             this.clientAuth = clientAuth;
+            this.rmiServerHost = rmiServerHost;
         }
 
         public ServerSocket createServerSocket(int port) throws IOException {
-            SSLServerSocket ss = (SSLServerSocket) sssf.createServerSocket(port);
+            SSLServerSocket ss = (SSLServerSocket) sssf.createServerSocket(port, 50, InetAddress.getByName(rmiServerHost));
             ss.setNeedClientAuth(clientAuth);
             return ss;
         }
     }
+
+    private static class KarafRMIServerSocketFactory implements RMIServerSocketFactory {
+        private String rmiServerHost;
+
+        public KarafRMIServerSocketFactory(String rmiServerHost) {
+            this.rmiServerHost = rmiServerHost;
+        }
+
+        public ServerSocket createServerSocket(int port) throws IOException {
+            ServerSocket serverSocket = (ServerSocket) ServerSocketFactory.getDefault().createServerSocket(port, 50, InetAddress.getByName(rmiServerHost));
+            return serverSocket;
+        }
+    }
+
 
 }
