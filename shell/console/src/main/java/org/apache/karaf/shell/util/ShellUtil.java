@@ -27,6 +27,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Collection;
 
 import jline.console.ConsoleReader;
 import org.apache.felix.service.command.CommandSession;
@@ -81,6 +82,9 @@ public class ShellUtil {
             return Arrays.toString((long[]) obj);
         } else if (obj instanceof short[]) {
             return Arrays.toString((short[]) obj);
+        } else if (obj instanceof Collection<?>) {
+            Object[] array = ((Collection<?>) obj).toArray();
+            return getValueString(array);
         } else if (obj.getClass().isArray()) {
             Object[] array = (Object[]) obj;
             StringBuilder sb = new StringBuilder();
