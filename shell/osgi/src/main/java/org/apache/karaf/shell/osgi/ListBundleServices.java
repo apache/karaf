@@ -26,6 +26,7 @@ import org.osgi.framework.ServiceReference;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.List;
 
 @Command(scope = "osgi", name = "bundle-services", description = "List OSGi services per bundle")
@@ -79,7 +80,7 @@ public class ListBundleServices extends BundlesCommand {
                 if (showProperties) {
                     printProperties(serviceRef);
                 } else {
-                    System.out.println(ListBundleServices.getValueString(objectClass));
+                    System.out.println(Util.getValueString(objectClass));
                 }
 
                 needSeparator = true;
@@ -98,70 +99,8 @@ public class ListBundleServices extends BundlesCommand {
 
     private void printProperties(ServiceReference serviceRef) {
         for (String key : serviceRef.getPropertyKeys()) {
-            System.out.println(key + " = " + ListBundleServices.getValueString(serviceRef.getProperty(key)));
+            System.out.println(key + " = " + Util.getValueString(serviceRef.getProperty(key)));
         }
     }
-
-    private static String getBundleName(Bundle bundle) {
-        if (bundle != null) {
-            String name = (String) bundle.getHeaders().get(Constants.BUNDLE_NAME);
-            return (name == null)
-                    ? "Bundle " + Long.toString(bundle.getBundleId())
-                    : name + " (" + Long.toString(bundle.getBundleId()) + ")";
-        }
-        return "[STALE BUNDLE]";
-    }
-
-    private static String getUnderlineString(String s) {
-        StringBuilder sb = new StringBuilder(s.length());
-        for (int i = 0; i < s.length(); i++) {
-            sb.append('-');
-        }
-        return sb.toString();
-    }
-
-
-    private static String getValueString(Object obj) {
-        if (obj == null) {
-            return "null";
-        } else if (obj.getClass().isArray()) {
-            Object[] array = (Object[]) obj;
-            StringBuilder sb = new StringBuilder();
-            sb.append("[");
-            for (int i = 0; i < array.length; i++) {
-                if (i != 0) {
-                    sb.append(", ");
-                }
-                sb.append(getValueString(array[i]));
-            }
-            sb.append("]");
-            return sb.toString();
-        } else if (obj instanceof String) {
-            return (String) obj;
-        } else if (obj instanceof Boolean) {
-            return ((Boolean) obj).toString();
-        } else if (obj instanceof Long) {
-            return ((Long) obj).toString();
-        } else if (obj instanceof Integer) {
-            return ((Integer) obj).toString();
-        } else if (obj instanceof Short) {
-            return ((Short) obj).toString();
-        } else if (obj instanceof Double) {
-            return ((Double) obj).toString();
-        } else if (obj instanceof Float) {
-            return ((Float) obj).toString();
-        } else if (obj instanceof URL) {
-            return ((URL) obj).toExternalForm();
-        } else if (obj instanceof URI) {
-            try {
-                return ((URI) obj).toURL().toExternalForm();
-            } catch (MalformedURLException e) {
-                return obj.toString();
-            }
-        } else {
-            return obj.toString();
-        }
-    }
-
 
 }
