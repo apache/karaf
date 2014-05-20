@@ -50,6 +50,7 @@ import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
 
 import org.apache.felix.utils.manifest.Clause;
 import org.apache.felix.utils.manifest.Parser;
@@ -83,6 +84,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static java.lang.String.format;
+import static java.util.jar.JarFile.MANIFEST_NAME;
 
 /**
  * The Features service implementation.
@@ -834,7 +836,16 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
             JarInputStream jar = new JarInputStream(is);
             Manifest m = jar.getManifest();
             if (m == null) {
-                throw new BundleException("Manifest not present in the first entry of the zip " + bundleLocation);
+                ZipEntry entry;
+                while ((entry = jar.getNextEntry()) != null) {
+                    if (MANIFEST_NAME.equals(entry.getName())) {
+                        m = new Manifest(jar);
+                        break;
+                    }
+                }
+                if (m == null) {
+                    throw new BundleException("Manifest not present in the zip " + bundleLocation);
+                }
             }
             String sn = m.getMainAttributes().getValue(Constants.BUNDLE_SYMBOLICNAME);
             if (sn == null) {
