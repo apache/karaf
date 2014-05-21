@@ -16,8 +16,12 @@
  */
 package org.apache.karaf.instance.command;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.features.command.completers.AllFeatureCompleter;
 import org.apache.karaf.features.command.completers.InstalledRepoUriCompleter;
 import org.apache.karaf.instance.core.InstanceSettings;
@@ -34,6 +38,12 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 @Service
 public class CreateCommand extends InstanceCommandSupport
 {
+
+    public static final String FEATURES_SERVICE_CONFIG_FILE = "org.apache.karaf.features.cfg";
+
+    @Option(name = "-b", aliases = "--bare", description = "Do not use add default features")
+    boolean bare;
+
     @Option(name = "-s", aliases = {"--ssh-port"}, description = "Port number for remote secure shell connection", required = false, multiValued = false)
     int sshPort = 0;
 
@@ -66,6 +76,21 @@ public class CreateCommand extends InstanceCommandSupport
     String instance = null;
 
     protected Object doExecute() throws Exception {
+        if (!bare) {
+            Properties configuration = new Properties();
+            File configFile = new File(System.getProperty("karaf.etc"), FEATURES_SERVICE_CONFIG_FILE);
+            configuration.load(configFile);
+            String featuresRepositories = configuration.getProperty("featuresRepositories", "");
+            String featuresBoot = configuration.getProperty("featuresBoot", "");
+            if (featureURLs == null) {
+                featureURLs = new ArrayList<>();
+            }
+            featureURLs.addAll(Arrays.asList(featuresRepositories.split(",")));
+            if (features == null) {
+                features = new ArrayList<>();
+            }
+            features.addAll(Arrays.asList(featuresBoot.split(",")));
+        }
         InstanceSettings settings = new InstanceSettings(sshPort, rmiRegistryPort, rmiServerPort, location, javaOpts, featureURLs, features);
         getInstanceService().createInstance(instance, settings, verbose);
         return null;
