@@ -16,6 +16,10 @@
  */
 package org.apache.karaf.instance.command;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Pattern;
+
 import org.apache.karaf.instance.core.Instance;
 import org.apache.karaf.instance.core.InstanceService;
 import org.apache.karaf.shell.api.action.Action;
@@ -40,6 +44,29 @@ public abstract class InstanceCommandSupport implements Action {
             throw new IllegalArgumentException("Instances '" + name + "' does not exist");
         }
         return i;
+    }
+
+    protected List<Instance> getMatchingInstances(List<String> patterns) {
+        List<Instance> instances = new ArrayList<>();
+        Instance[] allInstances = instanceService.getInstances();
+        for (Instance instance : allInstances) {
+            if (match(instance.getName(), patterns)) {
+                instances.add(instance);
+            }
+        }
+        if (instances.isEmpty()) {
+            throw new IllegalArgumentException("No matching instances");
+        }
+        return instances;
+    }
+
+    private boolean match(String name, List<String> patterns) {
+        for (String pattern : patterns) {
+            if (name.matches(pattern)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
