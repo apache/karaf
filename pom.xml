@@ -231,7 +231,7 @@
         <org.json.version>20131018</org.json.version>
         <pax.cdi.version>0.7.0</pax.cdi.version>
         <pax.exam.version>3.4.0</pax.exam.version>
-        <pax.logging.version>1.7.2</pax.logging.version>
+        <pax.logging.version>1.7.3-SNAPSHOT</pax.logging.version>
         <pax.base.version>1.4.0</pax.base.version>
         <pax.url.version>2.0.0</pax.url.version>
         <pax.web.version>4.0.0-SNAPSHOT</pax.web.version>
@@ -239,7 +239,7 @@
         <pax.tinybundle.version>2.0.0</pax.tinybundle.version>
         <portlet-api.version>2.0</portlet-api.version>
         <servlet.api.version>3.0</servlet.api.version>
-        <slf4j.version>1.7.5</slf4j.version>
+        <slf4j.version>1.7.7</slf4j.version>
         <servicemix.specs.version>2.4.0</servicemix.specs.version>
 
         <spring.osgi.version>1.2.1</spring.osgi.version>
