@@ -80,11 +80,13 @@ public class Activator implements BundleActivator {
     @Override
     public void stop(BundleContext context) throws Exception {
         sessionFactoryRegistration.unregister();
-        localConsoleManager.stop();
+        if (localConsoleManager != null) {
+            localConsoleManager.stop();
+            terminalFactory.destroy();
+        }
         sessionFactory.stop();
         actionExtender.stop(context);
         threadIO.stop();
-        terminalFactory.destroy();
         if (eventAdminListener != null) {
             eventAdminListener.close();
         }

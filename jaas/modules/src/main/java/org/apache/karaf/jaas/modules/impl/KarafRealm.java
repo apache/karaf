@@ -67,9 +67,11 @@ public class KarafRealm implements JaasRealm, ManagedService {
     public void updated(Dictionary<String, ?> properties) throws ConfigurationException {
         Map<String, Object> props = new HashMap<String, Object>();
         populateDefault(props);
-        for (Enumeration<String> keyEnum = properties.keys(); keyEnum.hasMoreElements(); ) {
-            String key = keyEnum.nextElement();
-            props.put(key, properties.get(key));
+        if (properties != null) {
+            for (Enumeration<String> keyEnum = properties.keys(); keyEnum.hasMoreElements(); ) {
+                String key = keyEnum.nextElement();
+                props.put(key, properties.get(key));
+            }
         }
         this.properties = props;
     }
