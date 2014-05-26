@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.felix.utils.version.VersionRange;
+import org.apache.felix.utils.version.VersionTable;
+import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
 import org.osgi.resource.Capability;
 import org.osgi.resource.Resource;
@@ -115,4 +117,28 @@ public final class ResourceUtils {
         }
     }
 
+    public static String toFeatureRequirement(String feature) {
+        String[] parts = feature.split("/");
+        Map<String, Object> attrs = new HashMap<>();
+        attrs.put(IDENTITY_NAMESPACE, parts[0]);
+        attrs.put(CAPABILITY_TYPE_ATTRIBUTE, TYPE_FEATURE);
+        if (parts.length > 1) {
+            attrs.put(CAPABILITY_VERSION_ATTRIBUTE, new VersionRange(parts[1]));
+        }
+        Map<String, String> dirs = new HashMap<>();
+        dirs.put(Constants.FILTER_DIRECTIVE, SimpleFilter.convert(attrs).toString());
+        return new RequirementImpl(null, IDENTITY_NAMESPACE, dirs, attrs).toString();
+    }
+
+    public static String toFeatureCapability(String feature) {
+        String[] parts = feature.split("/");
+        Map<String, String> dirs = new HashMap<>();
+        Map<String, Object> attrs = new HashMap<>();
+        attrs.put(IDENTITY_NAMESPACE, parts[0]);
+        attrs.put(CAPABILITY_TYPE_ATTRIBUTE, TYPE_FEATURE);
+        if (parts.length > 1) {
+            attrs.put(CAPABILITY_VERSION_ATTRIBUTE, VersionTable.getVersion(parts[1]));
+        }
+        return new CapabilityImpl(null, IDENTITY_NAMESPACE, dirs, attrs).toString();
+    }
 }

@@ -28,7 +28,7 @@ public class State {
 
     public final AtomicBoolean bootDone = new AtomicBoolean();
     public final Set<String> repositories = new TreeSet<>();
-    public final Map<String, Set<String>> requestedFeatures = new HashMap<>();
+    public final Map<String, Set<String>> requirements = new HashMap<>();
     public final Map<String, Set<String>> installedFeatures = new HashMap<>();
     public final Map<String, Map<String, String>> stateFeatures = new HashMap<>();
     public final Map<String, Set<Long>> managedBundles = new HashMap<>();
@@ -47,7 +47,7 @@ public class State {
     private static void copy(State from, State to, boolean clear) {
         if (clear) {
             to.repositories.clear();
-            to.requestedFeatures.clear();
+            to.requirements.clear();
             to.installedFeatures.clear();
             to.stateFeatures.clear();
             to.managedBundles.clear();
@@ -55,7 +55,7 @@ public class State {
         }
         to.bootDone.set(from.bootDone.get());
         MapUtils.copy(from.repositories, to.repositories);
-        MapUtils.copy(from.requestedFeatures, to.requestedFeatures);
+        MapUtils.copy(from.requirements, to.requirements);
         MapUtils.copy(from.installedFeatures, to.installedFeatures);
         MapUtils.copy(from.stateFeatures, to.stateFeatures);
         MapUtils.copy(from.managedBundles, to.managedBundles);

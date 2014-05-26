@@ -35,6 +35,8 @@ import org.osgi.resource.Capability;
 import org.osgi.resource.Resource;
 import org.osgi.resource.Wire;
 
+import static org.apache.karaf.features.internal.resolver.ResourceUtils.toFeatureCapability;
+import static org.apache.karaf.features.internal.resolver.ResourceUtils.toFeatureRequirement;
 import static org.apache.karaf.features.internal.util.MapUtils.addToMapSet;
 import static org.junit.Assert.assertEquals;
 
@@ -154,6 +156,28 @@ public class SubsystemTest {
         resolver.resolve(Collections.<String>emptySet(),
                          FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
                          null);
+
+        verify(resolver, expected);
+    }
+
+    @Test
+    public void testBundle() throws Exception {
+        RepositoryImpl repo = new RepositoryImpl(getClass().getResource("data1/features.xml").toURI());
+
+        Map<String, Set<String>> features = new HashMap<String, Set<String>>();
+        addToMapSet(features, "root/apps1", "bundle:a");
+        addToMapSet(features, "root/apps1", "bundle:c;dependency=true");
+        Map<String, Set<String>> expected = new HashMap<String, Set<String>>();
+        addToMapSet(expected, "root/apps1", "a/1.0.0");
+        addToMapSet(expected, "root/apps1", "c/1.0.0");
+
+        SubsystemResolver resolver = new SubsystemResolver(new TestDownloadManager(getClass(), "data1"));
+        resolver.prepare(Arrays.asList(repo.getFeatures()),
+                features,
+                Collections.<String, Set<BundleRevision>>emptyMap());
+        resolver.resolve(Collections.<String>emptySet(),
+                FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
+                null);
 
         verify(resolver, expected);
     }

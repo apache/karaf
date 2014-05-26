@@ -22,7 +22,6 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
@@ -101,8 +100,8 @@ public class DeployerTest {
         request.overrides = Collections.emptySet();
         request.stateChanges = Collections.emptyMap();
         request.updateSnaphots = UPDATE_SNAPSHOTS_NONE;
-        request.requestedFeatures = new HashMap<>();
-        addToMapSet(request.requestedFeatures, ROOT_REGION, f100.getName() + "/" + new VersionRange(f100.getVersion(), true));
+        request.requirements = new HashMap<>();
+        addToMapSet(request.requirements, ROOT_REGION, f100.getName() + "/" + new VersionRange(f100.getVersion(), true));
 
         deployer.deploy(dstate, request);
 
@@ -194,8 +193,8 @@ public class DeployerTest {
         request.overrides = Collections.emptySet();
         request.stateChanges = Collections.emptyMap();
         request.updateSnaphots = UPDATE_SNAPSHOTS_NONE;
-        request.requestedFeatures = new HashMap<>();
-        addToMapSet(request.requestedFeatures, ROOT_REGION, f101.getName() + "/" + new VersionRange(f101.getVersion(), true));
+        request.requirements = new HashMap<>();
+        addToMapSet(request.requirements, ROOT_REGION, f101.getName() + "/" + new VersionRange(f101.getVersion(), true));
 
         deployer.deploy(dstate, request);
 
@@ -252,8 +251,8 @@ public class DeployerTest {
         request.overrides = Collections.emptySet();
         request.stateChanges = Collections.emptyMap();
         request.updateSnaphots = UPDATE_SNAPSHOTS_NONE;
-        request.requestedFeatures = new HashMap<>();
-        addToMapSet(request.requestedFeatures, ROOT_REGION, f1.getName());
+        request.requirements = new HashMap<>();
+        addToMapSet(request.requirements, ROOT_REGION, f1.getName());
 
         deployer.deploy(dstate, request);
 
@@ -314,8 +313,8 @@ public class DeployerTest {
         request.overrides = Collections.emptySet();
         request.stateChanges = Collections.emptyMap();
         request.updateSnaphots = UPDATE_SNAPSHOTS_NONE;
-        request.requestedFeatures = new HashMap<>();
-        addToMapSet(request.requestedFeatures, ROOT_REGION, f2.getName());
+        request.requirements = new HashMap<>();
+        addToMapSet(request.requirements, ROOT_REGION, f2.getName());
 
         try {
             deployer.deploy(dstate, request);
@@ -369,8 +368,8 @@ public class DeployerTest {
         request.overrides = Collections.emptySet();
         request.stateChanges = Collections.emptyMap();
         request.updateSnaphots = UPDATE_SNAPSHOTS_NONE;
-        request.requestedFeatures = new HashMap<>();
-        addToMapSet(request.requestedFeatures, ROOT_REGION, f2.getName());
+        request.requirements = new HashMap<>();
+        addToMapSet(request.requirements, ROOT_REGION, f2.getName());
 
         deployer.deploy(dstate, request);
 

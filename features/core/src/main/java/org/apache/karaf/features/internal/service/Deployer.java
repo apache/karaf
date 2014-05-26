@@ -148,7 +148,7 @@ public class Deployer {
         String updateSnaphots;
         Repository globalRepository;
 
-        Map<String, Set<String>> requestedFeatures;
+        Map<String, Set<String>> requirements;
         Map<String, Map<String, FeaturesService.RequestedState>> stateChanges;
         EnumSet<FeaturesService.Option> options;
     }
@@ -199,13 +199,10 @@ public class Deployer {
                 map(dstate.bundles));
 
         // Resolve
-        // TODO: requirements
-        // TODO: bundles
-
         SubsystemResolver resolver = new SubsystemResolver(manager);
         resolver.prepare(
                 dstate.features.values(),
-                request.requestedFeatures,
+                request.requirements,
                 apply(unmanagedBundles, adapt(BundleRevision.class))
         );
         Set<String> prereqs = resolver.collectPrerequisites();
@@ -242,9 +239,9 @@ public class Deployer {
             newRequest.globalRepository = request.globalRepository;
             newRequest.options = request.options;
             newRequest.overrides = request.overrides;
-            newRequest.requestedFeatures = copy(dstate.state.requestedFeatures);
+            newRequest.requirements = copy(dstate.state.requirements);
             for (String prereq : prereqs) {
-                addToMapSet(newRequest.requestedFeatures, ROOT_REGION, prereq);
+                addToMapSet(newRequest.requirements, ROOT_REGION, prereq);
             }
             newRequest.stateChanges = Collections.emptyMap();
             newRequest.updateSnaphots = request.updateSnaphots;
@@ -671,6 +668,9 @@ public class Deployer {
                         callback.setBundleStartLevel(bundle, startLevel);
                     }
                     FeaturesService.RequestedState reqState = states.get(resource);
+                    if (reqState == null) {
+                        reqState = FeaturesService.RequestedState.Started;
+                    }
                     switch (reqState) {
                     case Started:
                         toResolve.add(bundle);
@@ -689,7 +689,7 @@ public class Deployer {
         //
         State newState = new State();
         newState.bundleChecksums.putAll(deployment.bundleChecksums);
-        newState.requestedFeatures.putAll(request.requestedFeatures);
+        newState.requirements.putAll(request.requirements);
         newState.installedFeatures.putAll(installedFeatures);
         newState.stateFeatures.putAll(stateFeatures);
         newState.managedBundles.putAll(managedBundles);

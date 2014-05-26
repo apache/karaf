@@ -27,6 +27,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.felix.resolver.Util;
+import org.apache.felix.utils.manifest.Clause;
+import org.apache.felix.utils.manifest.Parser;
 import org.apache.felix.utils.version.VersionRange;
 import org.apache.felix.utils.version.VersionTable;
 import org.apache.karaf.features.BundleInfo;
@@ -46,7 +48,6 @@ import org.apache.karaf.features.internal.resolver.ResourceUtils;
 import org.apache.karaf.features.internal.service.Overrides;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
-import org.osgi.resource.Capability;
 import org.osgi.resource.Requirement;
 import org.osgi.resource.Resource;
 
@@ -54,6 +55,7 @@ import static org.apache.karaf.features.internal.resolver.ResourceUtils.TYPE_FEA
 import static org.apache.karaf.features.internal.resolver.ResourceUtils.TYPE_SUBSYSTEM;
 import static org.apache.karaf.features.internal.resolver.ResourceUtils.addIdentityRequirement;
 import static org.apache.karaf.features.internal.resolver.ResourceUtils.getUri;
+import static org.apache.karaf.features.internal.resolver.ResourceUtils.toFeatureRequirement;
 import static org.apache.karaf.features.internal.util.MapUtils.addToMapSet;
 import static org.eclipse.equinox.region.RegionFilter.VISIBLE_ALL_NAMESPACE;
 import static org.osgi.framework.namespace.IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE;
@@ -91,6 +93,8 @@ public class Subsystem extends ResourceImpl {
     private final Map<String, Set<String>> exportPolicy;
     private final List<Resource> installable = new ArrayList<>();
     private final Map<String, DependencyInfo> dependencies = new HashMap<>();
+
+    private final List<String> bundles = new ArrayList<>();
 
     public Subsystem(String name) {
         super(name, TYPE_SUBSYSTEM, Version.emptyVersion);
@@ -183,14 +187,16 @@ public class Subsystem extends ResourceImpl {
             throw new UnsupportedOperationException("Can not create application subsystems inside a feature subsystem");
         }
         // Create subsystem
-        Subsystem as = new Subsystem(getName() + "/" + name, this, acceptDependencies);
+        String childName = getName() + "/" + name;
+        Subsystem as = new Subsystem(childName, this, acceptDependencies);
         children.add(as);
         // Add a requirement to force its resolution
-        Capability identity = as.getCapabilities(IDENTITY_NAMESPACE).iterator().next();
-        Object bsn = identity.getAttributes().get(IDENTITY_NAMESPACE);
+        Map<String, Object> attrs = new HashMap<>();
+        attrs.put(IDENTITY_NAMESPACE, childName);
+        attrs.put(CAPABILITY_TYPE_ATTRIBUTE, TYPE_SUBSYSTEM);
         Requirement requirement = new RequirementImpl(this, IDENTITY_NAMESPACE,
                 Collections.<String, String>emptyMap(),
-                Collections.singletonMap(IDENTITY_NAMESPACE, bsn));
+                attrs);
         addRequirement(requirement);
         // Add it to repo
         installable.add(as);
@@ -203,6 +209,39 @@ public class Subsystem extends ResourceImpl {
 
     public void requireFeature(String name, String range) {
         ResourceUtils.addIdentityRequirement(this, name, TYPE_FEATURE, range);
+    }
+
+    public void require(String requirement) throws BundleException {
+        int idx = requirement.indexOf(":");
+        String type, req;
+        if (idx >= 0) {
+            type = requirement.substring(0, idx);
+            req = requirement.substring(idx + 1);
+        } else {
+            type = "feature";
+            req = requirement;
+        }
+        switch (type) {
+        case "feature":
+            addRequirement(toFeatureRequirement(req));
+            break;
+        case "requirement":
+            addRequirement(req);
+            break;
+        case "bundle":
+            bundles.add(req);
+            break;
+        }
+    }
+
+    protected void addRequirement(String requirement) throws BundleException {
+        for (Requirement req : ResourceBuilder.parseRequirement(this, requirement)) {
+            Object range = req.getAttributes().get(CAPABILITY_VERSION_ATTRIBUTE);
+            if (range instanceof String) {
+                req.getAttributes().put(CAPABILITY_VERSION_ATTRIBUTE, new VersionRange((String) range));
+            }
+            addRequirement(req);
+        }
     }
 
     public Map<String, BundleInfo> getBundleInfos() {
@@ -286,10 +325,10 @@ public class Subsystem extends ResourceImpl {
         for (Subsystem child : children) {
             child.downloadBundles(manager, overrides, featureResolutionRange);
         }
+        final Map<String, ResourceImpl> bundles = new ConcurrentHashMap<>();
+        final Downloader downloader = manager.createDownloader();
+        final Map<BundleInfo, Conditional> infos = new HashMap<>();
         if (feature != null) {
-            final Map<String, ResourceImpl> bundles = new ConcurrentHashMap<>();
-            final Downloader downloader = manager.createDownloader();
-            final Map<BundleInfo, Conditional> infos = new HashMap<>();
             for (Conditional cond : feature.getConditional()) {
                 for (final BundleInfo bi : cond.getBundles()) {
                     infos.put(bi, cond);
@@ -298,29 +337,41 @@ public class Subsystem extends ResourceImpl {
             for (BundleInfo bi : feature.getBundles()) {
                 infos.put(bi, null);
             }
-            for (Map.Entry<BundleInfo, Conditional> entry : infos.entrySet()) {
-                final BundleInfo bi = entry.getKey();
-                final String loc = bi.getLocation();
-                downloader.download(loc, new DownloadCallback() {
-                    @Override
-                    public void downloaded(StreamProvider provider) throws Exception {
-                        ResourceImpl res = createResource(loc, provider.getMetadata());
-                        bundles.put(loc, res);
-                    }
-                });
-            }
-            for (String override : overrides) {
-                final String loc = Overrides.extractUrl(override);
-                downloader.download(loc, new DownloadCallback() {
-                    @Override
-                    public void downloaded(StreamProvider provider) throws Exception {
-                        ResourceImpl res = createResource(loc, provider.getMetadata());
-                        bundles.put(loc, res);
-                    }
-                });
-            }
-            downloader.await();
-            Overrides.override(bundles, overrides);
+        }
+        for (Map.Entry<BundleInfo, Conditional> entry : infos.entrySet()) {
+            final BundleInfo bi = entry.getKey();
+            final String loc = bi.getLocation();
+            downloader.download(loc, new DownloadCallback() {
+                @Override
+                public void downloaded(StreamProvider provider) throws Exception {
+                    ResourceImpl res = createResource(loc, provider.getMetadata());
+                    bundles.put(loc, res);
+                }
+            });
+        }
+        for (Clause bundle : Parser.parseClauses(this.bundles.toArray(new String[this.bundles.size()]))) {
+            final String loc = bundle.getName();
+            downloader.download(loc, new DownloadCallback() {
+                @Override
+                public void downloaded(StreamProvider provider) throws Exception {
+                    ResourceImpl res = createResource(loc, provider.getMetadata());
+                    bundles.put(loc, res);
+                }
+            });
+        }
+        for (String override : overrides) {
+            final String loc = Overrides.extractUrl(override);
+            downloader.download(loc, new DownloadCallback() {
+                @Override
+                public void downloaded(StreamProvider provider) throws Exception {
+                    ResourceImpl res = createResource(loc, provider.getMetadata());
+                    bundles.put(loc, res);
+                }
+            });
+        }
+        downloader.await();
+        Overrides.override(bundles, overrides);
+        if (feature != null) {
             // Add conditionals
             Map<Conditional, Resource> resConds = new HashMap<>();
             for (Conditional cond : feature.getConditional()) {
@@ -348,6 +399,23 @@ public class Subsystem extends ResourceImpl {
                 if (cond != null) {
                     addIdentityRequirement(res, resConds.get(cond), true);
                 }
+            }
+        }
+        for (Clause bundle : Parser.parseClauses(this.bundles.toArray(new String[this.bundles.size()]))) {
+            final String loc = bundle.getName();
+            boolean dependency = Boolean.parseBoolean(bundle.getAttribute("dependency"));
+            boolean start = bundle.getAttribute("start") == null || Boolean.parseBoolean(bundle.getAttribute("start"));
+            int startLevel = 0;
+            try {
+                startLevel = Integer.parseInt(bundle.getAttribute("start-level"));
+            } catch (NumberFormatException e) {
+                // Ignore
+            }
+            if (dependency) {
+                addDependency(bundles.get(loc), false, start, startLevel);
+            } else {
+                doAddDependency(bundles.get(loc), true, start, startLevel);
+                addIdentityRequirement(this, bundles.get(loc));
             }
         }
         // Compute dependencies

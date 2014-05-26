@@ -93,6 +93,8 @@ public interface FeaturesService {
 
     void installFeatures(Set<String> features, String region, EnumSet<Option> options) throws Exception;
 
+    void addRequirements(Map<String, Set<String>> requirements, EnumSet<Option> options) throws Exception;
+
     void uninstallFeature(String name, EnumSet<Option> options) throws Exception;
 
     void uninstallFeature(String name) throws Exception;
@@ -105,6 +107,8 @@ public interface FeaturesService {
 
     void uninstallFeatures(Set<String> features, String region, EnumSet<Option> options) throws Exception;
 
+    void removeRequirements(Map<String, Set<String>> requirements, EnumSet<Option> options) throws Exception;
+
     void updateFeaturesState(Map<String, Map<String, RequestedState>> stateChanges, EnumSet<Option> options) throws Exception;
 
     Feature[] listFeatures() throws Exception;
@@ -112,6 +116,8 @@ public interface FeaturesService {
     Feature[] listRequiredFeatures() throws Exception;
 
     Feature[] listInstalledFeatures() throws Exception;
+
+    Map<String, Set<String>> listRequirements();
 
     boolean isRequired(Feature f);
 

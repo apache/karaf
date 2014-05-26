@@ -84,18 +84,17 @@ public class SubsystemResolver {
     private RegionDigraph flatDigraph;
     private Map<String, Map<String, BundleInfo>> bundleInfos;
 
-
     public SubsystemResolver(DownloadManager manager) {
         this.manager = manager;
     }
 
     public void prepare(
             Collection<Feature> allFeatures,
-            Map<String, Set<String>> features,
+            Map<String, Set<String>> requirements,
             Map<String, Set<BundleRevision>> system
     ) throws Exception {
         // Build subsystems on the fly
-        for (Map.Entry<String, Set<String>> entry : features.entrySet()) {
+        for (Map.Entry<String, Set<String>> entry : requirements.entrySet()) {
             String[] parts = entry.getKey().split("/");
             if (root == null) {
                 root = new Subsystem(parts[0]);
@@ -106,18 +105,8 @@ public class SubsystemResolver {
             for (int i = 1; i < parts.length; i++) {
                 ss = getOrCreateChild(ss, parts[i]);
             }
-            for (String feature : entry.getValue()) {
-                String name;
-                String range;
-                int idx = feature.indexOf('/');
-                if (idx >= 0) {
-                    name = feature.substring(0, idx);
-                    range = feature.substring(idx + 1);
-                } else {
-                    name = feature;
-                    range = null;
-                }
-                ss.requireFeature(name, range);
+            for (String requirement : entry.getValue()) {
+                ss.require(requirement);
             }
         }
         if (root == null) {
