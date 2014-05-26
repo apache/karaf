@@ -30,7 +30,13 @@ import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 
 public class JaasHelper {
 
+    private static final String ROLE_WILDCARD = "*";
+
     public static boolean currentUserHasRole(String requestedRole) {
+        if (ROLE_WILDCARD.equals(requestedRole)) {
+            return true;
+        }
+        
         String clazz;
         String role;
         int index = requestedRole.indexOf(':');
