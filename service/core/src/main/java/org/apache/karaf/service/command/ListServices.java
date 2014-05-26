@@ -122,9 +122,10 @@ public class ListServices implements Action {
         String bundleName = ShellUtil.getBundleName(serviceRef.getBundle());
         System.out.println("Provided by : ");
         System.out.println(" " + bundleName);
-        if (serviceRef.getUsingBundles() != null) {
-        System.out.println("Used by: ");
-            for (Bundle bundle : serviceRef.getUsingBundles()) {
+        Bundle[] usingBundles = serviceRef.getUsingBundles();
+        if (usingBundles != null) {
+            System.out.println("Used by: ");
+            for (Bundle bundle : usingBundles) {
                 System.out.println(" " + ShellUtil.getBundleName(bundle));
             }
         }
