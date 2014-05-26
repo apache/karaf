@@ -85,11 +85,21 @@ public class CreateCommand extends InstanceCommandSupport
             if (featureURLs == null) {
                 featureURLs = new ArrayList<>();
             }
-            featureURLs.addAll(Arrays.asList(featuresRepositories.split(",")));
+            for (String repo : featuresRepositories.split(",")) {
+                repo = repo.trim();
+                if (!repo.isEmpty()) {
+                    featureURLs.add(repo);
+                }
+            }
             if (features == null) {
                 features = new ArrayList<>();
             }
-            features.addAll(Arrays.asList(featuresBoot.split(",")));
+            for (String feature : featuresBoot.split(",")) {
+                feature = feature.trim();
+                if (!feature.isEmpty()) {
+                    features.add(feature);
+                }
+            }
         }
         InstanceSettings settings = new InstanceSettings(sshPort, rmiRegistryPort, rmiServerPort, location, javaOpts, featureURLs, features);
         getInstanceService().createInstance(instance, settings, verbose);

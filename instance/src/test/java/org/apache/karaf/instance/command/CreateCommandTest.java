@@ -16,6 +16,8 @@
  */
 package org.apache.karaf.instance.command;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -38,10 +40,17 @@ public class CreateCommandTest extends TestCase {
         cc.rmiServerPort = 44444;
         cc.location = "top";
         cc.javaOpts = "foo";
-        cc.features = Arrays.asList("abc", "def");
-        cc.featureURLs = Collections.singletonList("http://something");
+        cc.features = new ArrayList<>(Arrays.asList("abc", "def"));
+        cc.featureURLs = new ArrayList<>(Arrays.asList("http://something"));
         cc.instance = "myInstance";
         cc.verbose = true;
+
+        // Create the features config file used
+        System.setProperty("karaf.etc", "target/etc");
+        File cfgFile = new File("target/etc/" + CreateCommand.FEATURES_SERVICE_CONFIG_FILE);
+        cfgFile.getParentFile().mkdirs();
+        cfgFile.createNewFile();
+
         
         EasyMock.verify(instanceService); // check precondition
         EasyMock.reset(instanceService);

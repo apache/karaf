@@ -229,11 +229,14 @@ public class KarafMBeanServerGuard implements InvocationHandler {
     private boolean canBypassRBAC(ObjectName objectName) {
         List<String> allBypassObjectName = new ArrayList<String>();
         try {
-            for (Configuration config : configAdmin.listConfigurations("(service.pid=" + JMX_ACL_WHITELIST + ")")) {
-                Enumeration<String> keys = config.getProperties().keys();
-                while (keys.hasMoreElements()) {
-                    String element = keys.nextElement();
-                    allBypassObjectName.add(element);
+            Configuration[] configs = configAdmin.listConfigurations("(service.pid=" + JMX_ACL_WHITELIST + ")");
+            if (configs != null) {
+                for (Configuration config : configs) {
+                    Enumeration<String> keys = config.getProperties().keys();
+                    while (keys.hasMoreElements()) {
+                        String element = keys.nextElement();
+                        allBypassObjectName.add(element);
+                    }
                 }
             }
         } catch (InvalidSyntaxException ise) {
