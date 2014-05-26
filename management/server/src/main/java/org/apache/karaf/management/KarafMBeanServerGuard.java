@@ -23,7 +23,9 @@ import java.security.AccessControlContext;
 import java.security.AccessController;
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.List;
 
 import javax.management.Attribute;
@@ -47,6 +49,8 @@ import org.osgi.service.cm.ConfigurationAdmin;
 public class KarafMBeanServerGuard implements InvocationHandler {
 
     private static final String JMX_ACL_PID_PREFIX = "jmx.acl";
+    
+    private static final String JMX_ACL_WHITELIST = "jmx.acl.whitelist";
     
     private static final String ROLE_WILDCARD = "*";
 
@@ -183,6 +187,9 @@ public class KarafMBeanServerGuard implements InvocationHandler {
     }
 
     private boolean canInvoke(ObjectName objectName, String methodName, String[] signature) throws IOException {
+        if (canBypassRBAC(objectName)) {
+            return true;
+        }
         for (String role : getRequiredRoles(objectName, methodName, signature)) {
             if (currentUserHasRole(role))
                 return true;
@@ -232,8 +239,36 @@ public class KarafMBeanServerGuard implements InvocationHandler {
             handleSetAttribute(proxy, objectName, attr);
         }
     }
+    
+    private boolean canBypassRBAC(ObjectName objectName) {
+        List<String> allBypassObjectName = new ArrayList<String>();
+        try {
+            for (Configuration config : configAdmin.listConfigurations("(service.pid=" + JMX_ACL_WHITELIST + ")")) {
+                Enumeration<String> keys = config.getProperties().keys();
+                while (keys.hasMoreElements()) {
+                    String element = keys.nextElement();
+                    allBypassObjectName.add(element);
+                }
+            }
+        } catch (InvalidSyntaxException ise) {
+            throw new RuntimeException(ise);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } 
+
+        for (String pid : iterateDownPids(getNameSegments(objectName))) {
+            if (!pid.equals("jmx.acl") 
+                && allBypassObjectName.contains(pid.substring("jmx.acl.".length()))) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     void handleInvoke(ObjectName objectName, String operationName, Object[] params, String[] signature) throws IOException {
+        if (canBypassRBAC(objectName)) {
+            return;
+        }
         for (String role : getRequiredRoles(objectName, operationName, params, signature)) {
             if (currentUserHasRole(role))
                 return;

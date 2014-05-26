@@ -391,6 +391,8 @@ public class KarafMBeanServerGuardTest extends TestCase {
         }
         EasyMock.expect(ca.listConfigurations(EasyMock.eq("(service.pid=jmx.acl*)"))).andReturn(
                 allConfigs.toArray(new Configuration[]{})).anyTimes();
+        EasyMock.expect(ca.listConfigurations(EasyMock.eq("(service.pid=jmx.acl.whitelist)"))).andReturn(
+                allConfigs.toArray(new Configuration[]{})).anyTimes();
         EasyMock.replay(ca);
         return ca;
     }
