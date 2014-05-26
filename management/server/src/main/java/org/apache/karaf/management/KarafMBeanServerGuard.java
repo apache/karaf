@@ -36,6 +36,8 @@ import java.util.*;
 public class KarafMBeanServerGuard implements InvocationHandler {
 
     private static final String JMX_ACL_PID_PREFIX = "jmx.acl";
+    
+    private static final String ROLE_WILDCARD = "*";
 
     private ConfigurationAdmin configAdmin;
 
@@ -302,6 +304,10 @@ public class KarafMBeanServerGuard implements InvocationHandler {
     }
 
     static boolean currentUserHasRole(String requestedRole) {
+        if (ROLE_WILDCARD.equals(requestedRole)) {
+            return true;
+        }
+        
         String clazz;
         String role;
         int index = requestedRole.indexOf(':');
