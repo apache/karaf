@@ -163,9 +163,11 @@ public class SecuredCommandConfigTransformerTest {
 
         @SuppressWarnings("unchecked")
         ServiceReference<ConfigurationAdmin> cmRef = EasyMock.createMock(ServiceReference.class);
+        EasyMock.expect(cmRef.getBundle()).andReturn(null).anyTimes();
         EasyMock.replay(cmRef);
 
         ConfigurationEvent event = new ConfigurationEvent(cmRef, ConfigurationEvent.CM_UPDATED, null, testPid);
+        
 
         assertEquals("Precondition", 0, generateCalled.size());
         scct.configurationEvent(event);
