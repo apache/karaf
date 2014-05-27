@@ -115,22 +115,24 @@ public class BundleWatcherImpl implements Runnable, BundleListener, BundleWatche
                         logger.error("Error updating bundle.", ex);
                     }
                 }
-                try {
-                    final CountDownLatch latch = new CountDownLatch(1);
-                    wiring.refreshBundles(updated, new FrameworkListener() {
-                        public void frameworkEvent(FrameworkEvent event) {
-                            latch.countDown();
-                        }
-                    });
-                    latch.await();
-                } catch (InterruptedException e) {
-                    running.set(false);
-                }
-                for (Bundle bundle : updated) {
+                if (!updated.isEmpty()) {
                     try {
-                        bundle.start(Bundle.START_TRANSIENT);
-                    } catch (BundleException ex) {
-                        logger.warn("Error starting bundle", ex);
+                        final CountDownLatch latch = new CountDownLatch(1);
+                        wiring.refreshBundles(updated, new FrameworkListener() {
+                            public void frameworkEvent(FrameworkEvent event) {
+                                latch.countDown();
+                            }
+                        });
+                        latch.await();
+                    } catch (InterruptedException e) {
+                        running.set(false);
+                    }
+                    for (Bundle bundle : updated) {
+                        try {
+                            bundle.start(Bundle.START_TRANSIENT);
+                        } catch (BundleException ex) {
+                            logger.warn("Error starting bundle", ex);
+                        }
                     }
                 }
             }
@@ -151,7 +153,7 @@ public class BundleWatcherImpl implements Runnable, BundleListener, BundleWatche
     }
 
     private void updateBundleIfNecessary(File localRepository, List<Bundle> updated, Bundle bundle)
-        throws FileNotFoundException, BundleException, IOException {
+        throws BundleException, IOException {
         File location = getBundleExternalLocation(localRepository, bundle);
         if (location != null && location.exists() && location.lastModified() > bundle.getLastModified()) {
             InputStream is = new FileInputStream(location);
