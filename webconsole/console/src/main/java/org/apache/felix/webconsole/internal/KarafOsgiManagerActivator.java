@@ -19,8 +19,15 @@
 package org.apache.felix.webconsole.internal;
 
 
+import java.util.Hashtable;
+
+import org.apache.felix.webconsole.WebConsoleSecurityProvider;
+import org.apache.felix.webconsole.WebConsoleSecurityProvider2;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.cm.ManagedService;
 
 
 /**
@@ -30,6 +37,7 @@ import org.osgi.framework.BundleContext;
 public class KarafOsgiManagerActivator implements BundleActivator
 {
 
+    private ServiceRegistration registration;
     private KarafOsgiManager osgiManager;
 
 
@@ -38,6 +46,13 @@ public class KarafOsgiManagerActivator implements BundleActivator
      */
     public void start( BundleContext bundleContext )
     {
+        Hashtable<String, String> props = new Hashtable<>();
+        props.put(Constants.SERVICE_PID, "org.apache.karaf.webconsole");
+        registration = bundleContext.registerService(
+                new String[] {WebConsoleSecurityProvider.class.getName(), WebConsoleSecurityProvider2.class.getName(), ManagedService.class.getName() },
+                new JaasSecurityProvider(),
+                props
+        );
         osgiManager = new KarafOsgiManager( bundleContext );
     }
 
@@ -50,6 +65,10 @@ public class KarafOsgiManagerActivator implements BundleActivator
         if ( osgiManager != null )
         {
             osgiManager.dispose();
+        }
+        if ( registration != null )
+        {
+            registration.unregister();
         }
     }
 

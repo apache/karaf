@@ -14,12 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.webconsole;
+package org.apache.felix.webconsole.internal;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
 import java.security.Principal;
+import java.util.Dictionary;
+import java.util.Hashtable;
+
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
@@ -33,13 +36,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.felix.webconsole.WebConsoleSecurityProvider2;
-import org.apache.felix.webconsole.internal.KarafOsgiManager;
 import org.apache.felix.webconsole.internal.servlet.Base64;
+import org.osgi.service.cm.ConfigurationException;
+import org.osgi.service.cm.ManagedService;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class JaasSecurityProvider implements WebConsoleSecurityProvider2 {
+public class JaasSecurityProvider implements WebConsoleSecurityProvider2, ManagedService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(JaasSecurityProvider.class);
 
@@ -51,6 +55,10 @@ public class JaasSecurityProvider implements WebConsoleSecurityProvider2 {
 
     private String realm;
     private String role;
+
+    public JaasSecurityProvider() {
+        updated(null);
+    }
 
     public String getRealm() {
         return realm;
@@ -70,6 +78,25 @@ public class JaasSecurityProvider implements WebConsoleSecurityProvider2 {
 
     public Object authenticate(final String username, final String password) {
         return doAuthenticate( username, password );
+    }
+
+    @Override
+    public void updated(Dictionary<String, ?> properties) {
+        if (properties == null) {
+            properties = new Hashtable<>();
+        }
+        realm = getString(properties, "realm", "karaf");
+        role = getString(properties, "role", System.getProperty("karaf.admin.role", "admin"));
+    }
+
+    private String getString(Dictionary<String, ?> properties, String key, String def) {
+        if (properties != null) {
+            Object val = properties.get(key);
+            if (val != null) {
+                return val.toString();
+            }
+        }
+        return def;
     }
 
     public Subject doAuthenticate(final String username, final String password) {
