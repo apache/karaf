@@ -42,6 +42,8 @@ public interface Feature {
 
     String getInstall();
 
+    boolean isHidden();
+
     List<Dependency> getDependencies();
 
     List<BundleInfo> getBundles();

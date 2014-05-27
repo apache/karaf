@@ -125,6 +125,11 @@ public class ExtendedFeature implements Feature {
         return feature.getInstall();
     }
 
+    @Override
+    public boolean isHidden() {
+        return feature.isHidden();
+    }
+
     public State getState() {
         return this.state;
     }

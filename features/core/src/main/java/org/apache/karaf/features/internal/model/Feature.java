@@ -94,6 +94,8 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
     protected String install;
     @XmlAttribute(name = "start-level")
     protected Integer startLevel;
+    @XmlAttribute
+    protected boolean hidden;
     protected List<Conditional> conditional;
     protected List<Capability> capability;
     protected List<Requirement> requirement;
@@ -257,6 +259,20 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
      */
     public void setStartLevel(Integer value) {
         this.startLevel = value;
+    }
+
+    /**
+     * Gets the value of the hidden property.
+     */
+    public boolean isHidden() {
+        return hidden;
+    }
+
+    /**
+     * Sets the value of the hidden property.
+     */
+    public void setHidden(boolean value) {
+        this.hidden = value;
     }
 
     /**

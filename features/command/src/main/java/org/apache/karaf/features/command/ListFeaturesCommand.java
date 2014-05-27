@@ -39,6 +39,9 @@ public class ListFeaturesCommand extends FeaturesCommandSupport {
     @Option(name = "-r", aliases = {"--required"}, description = "Display a list of all required features only", required = false, multiValued = false)
     boolean onlyRequired;
 
+    @Option(name = "-s", aliases = {"--show-hidden"}, description = "Display hidden features", required = false, multiValued = false)
+    boolean showHidden;
+
     @Option(name = "-o", aliases = {"--ordered"}, description = "Display a list using alphabetical order ", required = false, multiValued = false)
     boolean ordered;
 
@@ -70,6 +73,10 @@ public class ListFeaturesCommand extends FeaturesCommandSupport {
                 }
                 if (onlyRequired && !featuresService.isRequired(f)) {
                     // Filter out not installed features if we only want to see the installed ones
+                    continue;
+                }
+                if (!showHidden && f.isHidden()) {
+                    // Filter out hidden feature if not asked to display those
                     continue;
                 }
                 table.addRow().addContent(

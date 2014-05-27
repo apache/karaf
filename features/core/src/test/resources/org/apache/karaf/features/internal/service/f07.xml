@@ -42,5 +42,6 @@
             </import>
         </scoping>
     </feature>
+    <feature name="hidden" hidden="true"/>
 </features>
 
