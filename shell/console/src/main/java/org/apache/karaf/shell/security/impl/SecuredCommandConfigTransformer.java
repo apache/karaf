@@ -17,17 +17,22 @@
 package org.apache.karaf.shell.security.impl;
 
 import org.apache.felix.service.command.CommandProcessor;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ConfigurationEvent;
 import org.osgi.service.cm.ConfigurationListener;
+import org.osgi.service.packageadmin.PackageAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.Map.Entry;
 
 public class SecuredCommandConfigTransformer implements ConfigurationListener {
 
@@ -37,8 +42,10 @@ public class SecuredCommandConfigTransformer implements ConfigurationListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(SecuredCommandConfigTransformer.class);
     private static final String CONFIGURATION_FILTER =
             "(" + Constants.SERVICE_PID + "=" + PROXY_COMMAND_ACL_PID_PREFIX + "*)";
+    private static final String ACL_SCOPE_BUNDLE_MAP = "org.apache.karaf.command.acl.scope_bundle";
 
     private ConfigurationAdmin configAdmin;
+    
 
     public void setConfigAdmin(ConfigurationAdmin configAdmin) {
         this.configAdmin = configAdmin;
@@ -154,6 +161,7 @@ public class SecuredCommandConfigTransformer implements ConfigurationListener {
                     break;
                 case ConfigurationEvent.CM_UPDATED:
                     generateServiceGuardConfig(configAdmin.getConfiguration(event.getPid()));
+                    refreshTheAffectedShellCommandBundle(event, configAdmin.getConfiguration(event.getPid()));
                     break;
             }
         } catch (Exception e) {
@@ -161,4 +169,76 @@ public class SecuredCommandConfigTransformer implements ConfigurationListener {
         }
     }
 
+    private void refreshTheAffectedShellCommandBundle(ConfigurationEvent event, Configuration config) {
+        if (!config.getPid().startsWith(PROXY_COMMAND_ACL_PID_PREFIX)) {
+            // not a command scope configuration file
+            return;
+        }
+        String filter = "";
+        String scopeName = config.getPid().substring(PROXY_COMMAND_ACL_PID_PREFIX.length());
+        if (scopeName.indexOf('.') >= 0) {
+            // scopes don't contains dots, not a command scope
+            return;
+        }
+        scopeName = scopeName.trim();
+        for (Entry<String, String> entry : loadScopeBundleMaps().entrySet()) {
+            if (entry.getKey().equals(scopeName)) {
+                filter = "(" +
+                    "osgi.blueprint.container.symbolicname" + "=" + entry.getValue() + ")";
+                break;
+            }
+        }
+        
+
+        
+        BundleContext bundleContext = event.getReference().getBundle().getBundleContext();
+        
+        try {
+            ServiceReference<?>[] sr = bundleContext.getServiceReferences("org.osgi.service.blueprint.container.BlueprintContainer", filter);
+            if (sr == null) {
+                LOGGER.error("can't find the command bundle for scope " + scopeName);
+                return;
+            }
+            LOGGER.debug("the refreshed bundle is " + sr[0].getBundle().getSymbolicName());
+            
+            ServiceReference ref = bundleContext.getServiceReference(PackageAdmin.class.getName());
+            if (ref == null) {
+                LOGGER.error("PackageAdmin service is unavailable.");
+                return;
+            }
+            try {
+                PackageAdmin pa = (PackageAdmin) bundleContext.getService(ref);
+                if (pa == null) {
+                    LOGGER.error("PackageAdmin service is unavailable.");
+                    return;
+                }
+                pa.refreshPackages(new Bundle[]{sr[0].getBundle()});
+            }
+            finally {
+                bundleContext.ungetService(ref);
+            }
+        } catch (InvalidSyntaxException ex) {
+            LOGGER.error("Problem refresh the affected shell command bundle", ex);
+        }
+        
+        
+    }
+    
+    private Map<String, String> loadScopeBundleMaps() {
+        Map<String, String> scopeBundleMaps = new HashMap<String, String>();
+        try {
+            for (Configuration config : configAdmin.listConfigurations("(service.pid=" + ACL_SCOPE_BUNDLE_MAP + ")")) {
+                Enumeration<String> keys = config.getProperties().keys();
+                while (keys.hasMoreElements()) {
+                    String key = keys.nextElement();
+                    scopeBundleMaps.put(key, (String)config.getProperties().get(key));
+                }
+            }
+        } catch (Exception ex) {
+            LOGGER.error("Problem load the scope bundle map", ex);
+        } 
+        return scopeBundleMaps;
+    }
+    
 }
+
