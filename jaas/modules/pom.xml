@@ -127,6 +127,7 @@
                         <Import-Package>
                             javax.net,
                             org.apache.karaf.jaas.config,
+                            org.osgi.service.event;resolution:=optional,
                             *
                         </Import-Package>
                         <Private-Package>

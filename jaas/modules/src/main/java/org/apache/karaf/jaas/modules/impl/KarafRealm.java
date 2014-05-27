@@ -33,6 +33,7 @@ public class KarafRealm implements JaasRealm, ManagedService {
 
     private static final String KARAF_ETC = System.getProperty("karaf.etc");
     private static final String REALM = "karaf";
+    private static final String EVENTADMIN_MODULE = "org.apache.karaf.jaas.modules.eventadmin.EventAdminLoginModule";
     private static final String PROPERTIES_MODULE = "org.apache.karaf.jaas.modules.properties.PropertiesLoginModule";
     private static final String PUBLIC_KEY_MODULE = "org.apache.karaf.jaas.modules.publickey.PublickeyLoginModule";
 
@@ -42,6 +43,9 @@ public class KarafRealm implements JaasRealm, ManagedService {
     private static final String ENCRYPTION_SUFFIX = "encryption.suffix";
     private static final String ENCRYPTION_ALGORITHM = "encryption.algorithm";
     private static final String ENCRYPTION_ENCODING = "encryption.encoding";
+
+    private static final String EVENTADMIN_ENABLED = "eventadmin.enabled";
+
     private static final String MODULE = "org.apache.karaf.jaas.module";
 
     private final BundleContext bundleContext;
@@ -61,6 +65,7 @@ public class KarafRealm implements JaasRealm, ManagedService {
         props.put(ENCRYPTION_SUFFIX, "{CRYPT}");
         props.put(ENCRYPTION_ALGORITHM, "MD5");
         props.put(ENCRYPTION_ENCODING, "hexadecimal");
+        props.put(EVENTADMIN_ENABLED, "true");
     }
 
     @Override
@@ -102,7 +107,14 @@ public class KarafRealm implements JaasRealm, ManagedService {
         publicKeyOptions.put(ProxyLoginModule.PROPERTY_BUNDLE, Long.toString(bundleContext.getBundle().getBundleId()));
         publicKeyOptions.put("users", KARAF_ETC + File.separatorChar + "keys.properties");
 
+        Map<String, Object> eventadminOptions = new HashMap<>();
+        eventadminOptions.putAll(properties);
+        eventadminOptions.put(BundleContext.class.getName(), bundleContext);
+        eventadminOptions.put(ProxyLoginModule.PROPERTY_MODULE, EVENTADMIN_MODULE);
+        eventadminOptions.put(ProxyLoginModule.PROPERTY_BUNDLE, Long.toString(bundleContext.getBundle().getBundleId()));
+
         return new AppConfigurationEntry[] {
+                new AppConfigurationEntry(ProxyLoginModule.class.getName(), AppConfigurationEntry.LoginModuleControlFlag.OPTIONAL, eventadminOptions),
                 new AppConfigurationEntry(ProxyLoginModule.class.getName(), AppConfigurationEntry.LoginModuleControlFlag.SUFFICIENT, propertiesOptions),
                 new AppConfigurationEntry(ProxyLoginModule.class.getName(), AppConfigurationEntry.LoginModuleControlFlag.SUFFICIENT, publicKeyOptions)
         };
