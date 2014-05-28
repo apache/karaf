@@ -91,23 +91,24 @@ public class ManageRealmCommand extends JaasCommandSupport {
                     for (JaasRealm r : realms) {
                         if (r.getName().equals(realmName)) {
                             realm = r;
-                            break;
-                        }
-                    }
-
-                }
-                AppConfigurationEntry[] entries = realm.getEntries();
-                if (entries != null) {
-                    for (AppConfigurationEntry e : entries) {
-                        String moduleClass = (String) e.getOptions().get(ProxyLoginModule.PROPERTY_MODULE);
-                        if (moduleName == null) {
-                            entry = e;
-                            break;
-                        } else {
-                            if (moduleName.equals(e.getLoginModuleName()) || moduleName.equals(moduleClass)) {
-                                entry = e;
-                                break;
+                            AppConfigurationEntry[] entries = realm.getEntries();
+                            if (entries != null) {
+                                for (AppConfigurationEntry e : entries) {
+                                    String moduleClass = (String) e.getOptions().get(ProxyLoginModule.PROPERTY_MODULE);
+                                    if (moduleName == null) {
+                                        if (getBackingEngine(e) != null) {
+                                            entry = e;
+                                            break;
+                                        }
+                                    } else {
+                                        if (moduleName.equals(e.getLoginModuleName()) || moduleName.equals(moduleClass)) {
+                                            entry = e;
+                                            break;
+                                        }
+                                    }
+                                }
                             }
+                            break;
                         }
                     }
                 }
