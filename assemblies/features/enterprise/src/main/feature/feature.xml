@@ -70,6 +70,7 @@
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.asm/3.3_2</bundle>
         <bundle start-level="29">mvn:org.apache.openjpa/openjpa/2.2.2</bundle>
         <feature>jpa</feature>
+        <requirement>osgi.ee;filter:="(&amp;(osgi.ee=JavaSE)(!(version>=1.8)))"</requirement>
     </feature>
 
     <feature name="openjpa" description="Apache OpenJPA 2.3.x persistence engine support" version="2.3.0">
@@ -89,6 +90,7 @@
         <bundle dependency="true">mvn:org.apache.xbean/xbean-asm4-shaded/${xbean.version}</bundle>
         <bundle start-level="29">mvn:org.apache.openjpa/openjpa/2.3.0</bundle>
         <feature>jpa</feature>
+        <requirement>osgi.ee;filter:="(&amp;(osgi.ee=JavaSE)(!(version>=1.8)))"</requirement>
     </feature>
 
     <feature name="hibernate" description="Hibernate 3.x JPA persistence engine support" version="${hibernate3.version}">
