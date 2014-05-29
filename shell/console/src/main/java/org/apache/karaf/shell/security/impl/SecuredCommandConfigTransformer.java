@@ -189,6 +189,9 @@ public class SecuredCommandConfigTransformer implements ConfigurationListener {
             }
         }
         
+        if (filter.length() == 0) {
+            return;
+        }
 
         
         BundleContext bundleContext = event.getReference().getBundle().getBundleContext();
