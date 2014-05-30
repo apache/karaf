@@ -16,10 +16,19 @@
 
 package org.apache.karaf.jaas.modules.jdbc;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
 import javax.naming.InitialContext;
+import javax.sql.DataSource;
 
 public final class JDBCUtils {
 
@@ -33,32 +42,37 @@ public final class JDBCUtils {
 
     /**
      * Looks up a datasource from the url. The datasource can be passed either as jndi name or bundles ldap filter.
-     *
-     * @param url
-     * @return
-     * @throws Exception
      */
-    public static Object createDatasource(BundleContext bc, String url) throws Exception {
-        if (url == null) {
-            throw new Exception("Illegal datasource url format. Datasource URL cannot be null.");
-        } else if (url.trim().length() == 0) {
-            throw new Exception("Illegal datasource url format. Datasource URL cannot be empty.");
+    public static DataSource createDatasource(BundleContext bc, String url) throws Exception {
+        Object ds = doCreateDatasource(bc, url);
+        if (ds == null) {
+            throw new Exception("Unable to create datasource for " + url);
+        }
+        return DataSource.class.cast(ds);
+    }
+
+    protected static Object doCreateDatasource(BundleContext bc, String url) throws Exception {
+        url = (url != null) ? url.trim() : null;
+        if (url == null || url.isEmpty()) {
+            throw new Exception("Illegal datasource url format. Datasource URL cannot be null or empty.");
         } else if (url.startsWith(JNDI)) {
             String jndiName = url.substring(JNDI.length());
             InitialContext ic = new InitialContext();
-            return ic.lookup(jndiName);
+            try {
+                return ic.lookup(jndiName);
+            } finally {
+                ic.close();
+            }
         } else if (url.startsWith(OSGI)) {
             String osgiFilter = url.substring(OSGI.length());
             String clazz = null;
             String filter = null;
             String[] tokens = osgiFilter.split("/", 2);
-            if (tokens != null) {
-                if (tokens.length > 0) {
-                    clazz = tokens[0];
-                }
-                if (tokens.length > 1) {
-                    filter = tokens[1];
-                }
+            if (tokens.length > 0) {
+                clazz = tokens[0];
+            }
+            if (tokens.length > 1) {
+                filter = tokens[1];
             }
             ServiceReference[] references = bc.getServiceReferences(clazz, filter);
             if (references != null) {
@@ -70,8 +84,53 @@ public final class JDBCUtils {
                 throw new Exception("Unable to find service reference for datasource: " + clazz + "/" + filter);
             }
         } else {
-            throw new Exception("Illegal datasource url format");
+            throw new Exception("Illegal datasource url format " + url);
         }
+    }
+
+    protected static int rawUpdate(DataSource dataSource, String query, String... params) throws SQLException {
+        try (Connection connection = dataSource.getConnection()) {
+            try (PreparedStatement statement = connection.prepareStatement(query)) {
+                for (int i = 0; i < params.length; i++) {
+                    statement.setString(i + 1, params[i]);
+                }
+                int res = statement.executeUpdate();
+                if (!connection.getAutoCommit()) {
+                    connection.commit();
+                }
+                return res;
+            }
+        }
+    }
+
+    protected static int rawUpdate(Connection connection, String query, String... params) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            for (int i = 0; i < params.length; i++) {
+                statement.setString(i + 1, params[i]);
+            }
+            return statement.executeUpdate();
+        }
+    }
+
+    protected static List<String> rawSelect(DataSource dataSource, String query, String... params) throws SQLException {
+        try (Connection connection = dataSource.getConnection()) {
+            return rawSelect(connection, query, params);
+        }
+    }
+
+    protected static List<String> rawSelect(Connection connection, String query, String... params) throws SQLException {
+        List<String> results = new ArrayList<>();
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            for (int i = 0; i < params.length; i++) {
+                statement.setString(i + 1, params[i]);
+            }
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    results.add(resultSet.getString(1));
+                }
+            }
+        }
+        return results;
     }
 
 }

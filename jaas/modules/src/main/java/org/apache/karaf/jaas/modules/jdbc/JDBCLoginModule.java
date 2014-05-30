@@ -15,9 +15,11 @@
  */
 package org.apache.karaf.jaas.modules.jdbc;
 
+import org.apache.karaf.jaas.boot.principal.GroupPrincipal;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.apache.karaf.jaas.modules.AbstractKarafLoginModule;
+import org.apache.karaf.jaas.modules.BackingEngine;
 import org.apache.karaf.jaas.modules.properties.PropertiesLoginModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +36,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 
 public class JDBCLoginModule extends AbstractKarafLoginModule {
@@ -56,24 +59,20 @@ public class JDBCLoginModule extends AbstractKarafLoginModule {
     public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String, ?> sharedState, Map<String, ?> options) {
         super.initialize(subject, callbackHandler, options);
         datasourceURL = (String) options.get(JDBCUtils.DATASOURCE);
-        passwordQuery = (String) options.get(PASSWORD_QUERY);
-        roleQuery = (String) options.get(ROLE_QUERY);
         if (datasourceURL == null || datasourceURL.trim().length() == 0) {
             LOGGER.error("No datasource was specified ");
         } else if (!datasourceURL.startsWith(JDBCUtils.JNDI) && !datasourceURL.startsWith(JDBCUtils.OSGI)) {
             LOGGER.error("Invalid datasource lookup protocol");
         }
+        if (options.containsKey(PASSWORD_QUERY)) {
+            passwordQuery = (String) options.get(PASSWORD_QUERY);
+        }
+        if (options.containsKey(ROLE_QUERY)) {
+            roleQuery = (String) options.get(ROLE_QUERY);
+        }
     }
 
     public boolean login() throws LoginException {
-        Connection connection = null;
-
-        PreparedStatement passwordStatement = null;
-        PreparedStatement roleStatement = null;
-
-        ResultSet passwordResultSet = null;
-        ResultSet roleResultSet = null;
-
         Callback[] callbacks = new Callback[2];
         callbacks[0] = new NameCallback("Username: ");
         callbacks[1] = new PasswordCallback("Password: ", false);
@@ -94,75 +93,42 @@ public class JDBCLoginModule extends AbstractKarafLoginModule {
         }
 
         String password = new String(tmpPassword);
-        principals = new HashSet<Principal>();
+        principals = new HashSet<>();
 
         try {
-            Object credentialsDatasource = JDBCUtils.createDatasource(bundleContext, datasourceURL);
-
-            if (credentialsDatasource == null) {
-                throw new LoginException("Cannot obtain data source:" + datasourceURL);
-            } else if (credentialsDatasource instanceof DataSource) {
-                connection = ((DataSource) credentialsDatasource).getConnection();
-            } else if (credentialsDatasource instanceof XADataSource) {
-                connection = ((XADataSource) credentialsDatasource).getXAConnection().getConnection();
-            } else {
-                throw new LoginException("Unknow dataSource type " + credentialsDatasource.getClass());
-            }
-
-            //Retrieve user credentials from database.
-            passwordStatement = connection.prepareStatement(passwordQuery);
-            passwordStatement.setString(1, user);
-            passwordResultSet = passwordStatement.executeQuery();
-
-            if (!passwordResultSet.next()) {
-            	if (!this.detailedLoginExcepion) {
-            		throw new LoginException("login failed");
-            	} else {
-            		throw new LoginException("User " + user + " does not exist");
-            	}
-            } else {
-                String storedPassword = passwordResultSet.getString(1);
-
-                if (!checkPassword(password, storedPassword)) {
-                	if (!this.detailedLoginExcepion) {
-                		throw new LoginException("login failed");
-                	} else {
-                		throw new LoginException("Password for " + user + " does not match");
-                	}
+            DataSource datasource = JDBCUtils.createDatasource(bundleContext, datasourceURL);
+            try (Connection connection = datasource.getConnection()) {
+                List<String> passwords = JDBCUtils.rawSelect(connection, passwordQuery, user);
+                if (passwords.isEmpty()) {
+                    if (!this.detailedLoginExcepion) {
+                        throw new LoginException("login failed");
+                    } else {
+                        throw new LoginException("User " + user + " does not exist");
+                    }
+                }
+                if (!checkPassword(password, passwords.get(0))) {
+                    if (!this.detailedLoginExcepion) {
+                        throw new LoginException("login failed");
+                    } else {
+                        throw new LoginException("Password for " + user + " does not match");
+                    }
                 }
                 principals.add(new UserPrincipal(user));
-            }
 
-            //Retrieve user roles from database
-            roleStatement = connection.prepareStatement(roleQuery);
-            roleStatement.setString(1, user);
-            roleResultSet = roleStatement.executeQuery();
-            while (roleResultSet.next()) {
-                String role = roleResultSet.getString(1);
-                principals.add(new RolePrincipal(role));
+                List<String> roles = JDBCUtils.rawSelect(connection, roleQuery, user);
+                for (String role : roles) {
+                    if (role.startsWith(BackingEngine.GROUP_PREFIX)) {
+                        principals.add(new GroupPrincipal(role.substring(BackingEngine.GROUP_PREFIX.length())));
+                        for (String r : JDBCUtils.rawSelect(connection, roleQuery, role)) {
+                            principals.add(new RolePrincipal(r));
+                        }
+                    } else {
+                        principals.add(new RolePrincipal(role));
+                    }
+                }
             }
         } catch (Exception ex) {
-            throw new LoginException("Error has occured while retrieving credentials from database:" + ex.getMessage());
-        } finally {
-            try {
-                if (passwordResultSet != null) {
-                    passwordResultSet.close();
-                }
-                if (passwordStatement != null) {
-                    passwordStatement.close();
-                }
-                if (roleResultSet != null) {
-                    roleResultSet.close();
-                }
-                if (roleStatement != null) {
-                    roleStatement.close();
-                }
-                if (connection != null) {
-                    connection.close();
-                }
-            } catch (SQLException ex) {
-                LOGGER.warn("Failed to clearly close connection to the database:", ex);
-            }
+            throw new LoginException("Error has occurred while retrieving credentials from database:" + ex.getMessage());
         }
         return true;
     }

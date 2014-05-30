@@ -32,11 +32,8 @@ public class JDBCBackingEngineFactory implements BackingEngineFactory {
 
     /**
      * Build a Backing engine for the JDBCLoginModule.
-     *
-     * @param options
-     * @return
      */
-    public BackingEngine build(Map options) {
+    public BackingEngine build(Map<String, ?> options) {
         JDBCBackingEngine instance = null;
         String datasourceURL = (String) options.get(JDBCUtils.DATASOURCE);
         BundleContext bundleContext = (BundleContext) options.get(BundleContext.class.getName());
@@ -50,7 +47,7 @@ public class JDBCBackingEngineFactory implements BackingEngineFactory {
         String selectRolesQuery = (String) options.get(JDBCLoginModule.ROLE_QUERY);
 
         try {
-            DataSource dataSource = (DataSource) JDBCUtils.createDatasource(bundleContext, datasourceURL);
+            DataSource dataSource = JDBCUtils.createDatasource(bundleContext, datasourceURL);
             EncryptionSupport encryptionSupport = new EncryptionSupport(options);
             instance = new JDBCBackingEngine(dataSource, encryptionSupport);
             if(addUserStatement != null) {
@@ -82,8 +79,6 @@ public class JDBCBackingEngineFactory implements BackingEngineFactory {
 
     /**
      * Returns the login module class, that this factory can build.
-     *
-     * @return
      */
     public String getModuleClass() {
         return JDBCLoginModule.class.getName();

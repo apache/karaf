@@ -35,11 +35,8 @@ public class PropertiesBackingEngineFactory implements BackingEngineFactory {
 
     /**
      * Builds the Backing Engine
-     *
-     * @param options
-     * @return
      */
-    public BackingEngine build(Map options) {
+    public BackingEngine build(Map<String,?> options) {
         PropertiesBackingEngine engine = null;
         String usersFile = (String) options.get(USER_FILE);
 
@@ -51,15 +48,12 @@ public class PropertiesBackingEngineFactory implements BackingEngineFactory {
             engine = new PropertiesBackingEngine(users, encryptionSupport);
         } catch (IOException ioe) {
             LOGGER.warn("Cannot open users file: {}", usersFile);
-        } finally {
-            return engine;
         }
+        return engine;
     }
 
     /**
      * Returns the login module class, that this factory can build.
-     *
-     * @return
      */
     public String getModuleClass() {
         return PropertiesLoginModule.class.getName();

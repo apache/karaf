@@ -24,12 +24,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
+
 import java.security.Principal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -39,8 +41,6 @@ public class JDBCBackingEngine implements BackingEngine {
 
     private DataSource dataSource;
     private EncryptionSupport encryptionSupport;
-
-    private static final String MSG_CONNECTION_CLOSE_FAILED = "Failed to clearly close connection to the database:";
 
     private String addUserStatement = "INSERT INTO USERS VALUES(?,?)";
     private String addRoleStatement = "INSERT INTO ROLES VALUES(?,?)";
@@ -52,8 +52,6 @@ public class JDBCBackingEngine implements BackingEngine {
 
     /**
      * Constructor
-     *
-     * @param dataSource
      */
     public JDBCBackingEngine(DataSource dataSource) {
         this.dataSource = dataSource;
@@ -66,203 +64,90 @@ public class JDBCBackingEngine implements BackingEngine {
 
     /**
      * Adds a new user.
-     *
-     * @param username
-     * @param password
      */
     public void addUser(String username, String password) {
-        Connection connection = null;
-        PreparedStatement statement = null;
-
-        String newPassword = password;
-
+        if (username.startsWith(GROUP_PREFIX)) {
+            throw new IllegalArgumentException("Prefix not permitted: " + GROUP_PREFIX);
+        }
         //If encryption support is enabled, encrypt password
         if (encryptionSupport != null && encryptionSupport.getEncryption() != null) {
-            newPassword = encryptionSupport.getEncryption().encryptPassword(password);
+            password = encryptionSupport.getEncryption().encryptPassword(password);
             if (encryptionSupport.getEncryptionPrefix() != null) {
-                newPassword = encryptionSupport.getEncryptionPrefix() + newPassword;
+                password = encryptionSupport.getEncryptionPrefix() + password;
             }
             if (encryptionSupport.getEncryptionSuffix() != null) {
-                newPassword = newPassword + encryptionSupport.getEncryptionSuffix();
+                password = password + encryptionSupport.getEncryptionSuffix();
             }
         }
-
-        if (dataSource != null) {
-
-            try {
-                connection = dataSource.getConnection();
-                statement = connection.prepareStatement(addUserStatement);
-                statement.setString(1, username);
-                statement.setString(2, newPassword);
-                int rows = statement.executeUpdate();
-
-                if (!connection.getAutoCommit()) {
-                    connection.commit();
-                }
-                if (logger.isDebugEnabled()) {
-                    logger.debug(String.format("Executiong [%s], USERNAME=%s, PASSWORD=%s. %i rows affected.", addUserStatement, username, newPassword, rows));
-                }
-            } catch (SQLException e) {
-                logger.error("Error executiong statement", e);
-            } finally {
-                try {
-                    if (statement != null) {
-                        statement.close();
-                    }
-                    if (connection != null) {
-                        connection.close();
-                    }
-                } catch (SQLException e) {
-                    logger.warn(MSG_CONNECTION_CLOSE_FAILED, e);
-                }
+        try {
+            try (Connection connection = dataSource.getConnection()) {
+                rawUpdate(connection, addUserStatement, username, password);
             }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error adding user", e);
         }
     }
 
     /**
      * Delete user by username.
-     *
-     * @param username
      */
     public void deleteUser(String username) {
-        Connection connection = null;
-        PreparedStatement userStatement = null;
-        PreparedStatement roleStatement = null;
-
-        if (dataSource != null) {
-
-            try {
-                connection = dataSource.getConnection();
-
-                //Remove from roles
-                roleStatement = connection.prepareStatement(deleteAllUserRolesStatement);
-                roleStatement.setString(1, username);
-                roleStatement.executeUpdate();
-
-                //Remove from users
-                userStatement = connection.prepareStatement(deleteUserStatement);
-                userStatement.setString(1, username);
-                int userRows = userStatement.executeUpdate();
-
+        try {
+            try (Connection connection = dataSource.getConnection()) {
+                rawUpdate(connection, deleteAllUserRolesStatement, username);
+                rawUpdate(connection, deleteUserStatement, username);
                 if (!connection.getAutoCommit()) {
                     connection.commit();
                 }
-
-                if (logger.isDebugEnabled()) {
-                    logger.debug(String.format("Executiong [%s], USERNAME=%s. %i userRows affected.", deleteUserStatement, username, userRows));
-                }
-            } catch (SQLException e) {
-                logger.error("Error executiong statement", e);
-            } finally {
-                try {
-                    if (userStatement != null) {
-                        userStatement.close();
-                    }
-                    if (roleStatement != null) {
-                        roleStatement.close();
-                    }
-                    if (connection != null) {
-                        connection.close();
-                    }
-                } catch (SQLException e) {
-                    logger.warn(MSG_CONNECTION_CLOSE_FAILED, e);
-                }
             }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error deleting user", e);
         }
     }
 
     /**
      * List all Users
-     *
-     * @return
      */
     public List<UserPrincipal> listUsers() {
-        List<UserPrincipal> users = new ArrayList<UserPrincipal>();
-
-        Connection connection = null;
-        PreparedStatement listUserStatement = null;
-        ResultSet usersResultSet = null;
-
-
-        if (dataSource != null) {
-
-            try {
-                connection = dataSource.getConnection();
-
-                //Remove from users
-                listUserStatement = connection.prepareStatement(selectUsersQuery);
-                usersResultSet = listUserStatement.executeQuery();
-                while (usersResultSet.next()) {
-                    String username = usersResultSet.getString("USERNAME");
-                    users.add(new UserPrincipal(username));
+        try {
+            try (Connection connection = dataSource.getConnection()) {
+                List<UserPrincipal> users = new ArrayList<>();
+                for (String name : rawSelect(connection, selectUsersQuery)) {
+                    if (!name.startsWith(GROUP_PREFIX)) {
+                        users.add(new UserPrincipal(name));
+                    }
                 }
-            } catch (SQLException e) {
-                logger.error("Error executiong statement", e);
-            } finally {
-                try {
-                    if (usersResultSet != null) {
-                        usersResultSet.close();
-                    }
-                    if (listUserStatement != null) {
-                        listUserStatement.close();
-                    }
-                    if (connection != null) {
-                        connection.close();
-                    }
-                } catch (SQLException e) {
-                    logger.warn(MSG_CONNECTION_CLOSE_FAILED, e);
-                }
+                return users;
             }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error listing users", e);
         }
-        return users;
     }
 
     /**
      * List the roles of the {@param principal}.
-     *
-     * @param principal
-     * @return
      */
     public List<RolePrincipal> listRoles(Principal principal) {
-        List<RolePrincipal> roles = new ArrayList<RolePrincipal>();
-
-        Connection connection = null;
-        PreparedStatement listRolesStatement = null;
-        ResultSet rolesResultSet = null;
-
-
-        if (dataSource != null) {
-
-            try {
-                connection = dataSource.getConnection();
-
-                //Remove from roles
-                listRolesStatement = connection.prepareStatement(selectRolesQuery);
-                listRolesStatement.setString(1, principal.getName());
-
-                rolesResultSet = listRolesStatement.executeQuery();
-
-                while (rolesResultSet.next()) {
-                    String role = rolesResultSet.getString(1);
-                    roles.add(new RolePrincipal(role));
+        try {
+            try (Connection connection = dataSource.getConnection()) {
+                if (principal instanceof GroupPrincipal) {
+                    return listRoles(connection, GROUP_PREFIX + principal.getName());
+                } else {
+                    return listRoles(connection, principal.getName());
                 }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error listing roles", e);
+        }
+    }
 
-            } catch (SQLException e) {
-                logger.error("Error executiong statement", e);
-            } finally {
-                try {
-                    if (rolesResultSet != null) {
-                        rolesResultSet.close();
-                    }
-                    if (listRolesStatement != null) {
-                        listRolesStatement.close();
-                    }
-                    if (connection != null) {
-                        connection.close();
-                    }
-                } catch (SQLException e) {
-                    logger.warn(MSG_CONNECTION_CLOSE_FAILED, e);
-                }
+    private List<RolePrincipal> listRoles(Connection connection, String name) throws SQLException {
+        List<RolePrincipal> roles = new ArrayList<>();
+        for (String role : rawSelect(connection, selectRolesQuery, name)) {
+            if (role.startsWith(GROUP_PREFIX)) {
+                roles.addAll(listRoles(connection, role));
+            } else {
+                roles.add(new RolePrincipal(role));
             }
         }
         return roles;
@@ -270,86 +155,116 @@ public class JDBCBackingEngine implements BackingEngine {
 
     /**
      * Add a role to a user.
-     *
-     * @param username
-     * @param role
      */
     public void addRole(String username, String role) {
-        Connection connection = null;
-        PreparedStatement statement = null;
-
-        if (dataSource != null) {
-
-            try {
-                connection = dataSource.getConnection();
-                statement = connection.prepareStatement(addRoleStatement);
-                statement.setString(1, username);
-                statement.setString(2, role);
-                int rows = statement.executeUpdate();
-
+        try {
+            try (Connection connection = dataSource.getConnection()) {
+                rawUpdate(connection, addRoleStatement, username, role);
                 if (!connection.getAutoCommit()) {
                     connection.commit();
                 }
-                if (logger.isDebugEnabled()) {
-                    logger.debug(String.format("Executiong [%s], USERNAME=%s, ROLE=%s. %i rows affected.", addRoleStatement, username, role, rows));
-                }
-            } catch (SQLException e) {
-                logger.error("Error executiong statement", e);
-            } finally {
-                try {
-                    if (statement != null) {
-                        statement.close();
-                    }
-                    if (connection != null) {
-                        connection.close();
-                    }
-                } catch (SQLException e) {
-                    logger.warn(MSG_CONNECTION_CLOSE_FAILED, e);
-                }
             }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error adding role", e);
         }
     }
 
     /**
      * Remove role from user.
-     *
-     * @param username
-     * @param role
      */
     public void deleteRole(String username, String role) {
-        Connection connection = null;
-        PreparedStatement statement = null;
-
-        if (dataSource != null) {
-
-            try {
-                connection = dataSource.getConnection();
-                statement = connection.prepareStatement(deleteRoleStatement);
-                statement.setString(1, username);
-                statement.setString(2, role);
-                int rows = statement.executeUpdate();
-
+        try {
+            try (Connection connection = dataSource.getConnection()) {
+                rawUpdate(connection, deleteRoleStatement, username, role);
                 if (!connection.getAutoCommit()) {
                     connection.commit();
                 }
-                if (logger.isDebugEnabled()) {
-                    logger.debug(String.format("Executiong [%s], USERNAME=%s, ROLE=%s. %i rows affected.", deleteRoleStatement, username, role, rows));
-                }
-            } catch (SQLException e) {
-                logger.error("Error executing statement", e);
-            } finally {
-                try {
-                    if (statement != null) {
-                        statement.close();
-                    }
-                    if (connection != null) {
-                        connection.close();
-                    }
-                } catch (SQLException e) {
-                    logger.warn(MSG_CONNECTION_CLOSE_FAILED, e);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error deleting role", e);
+        }
+    }
+
+    @Override
+    public List<GroupPrincipal> listGroups(UserPrincipal principal) {
+        try {
+            try (Connection connection = dataSource.getConnection()) {
+            List<GroupPrincipal> roles = new ArrayList<>();
+            for (String role : rawSelect(connection, selectRolesQuery, principal.getName())) {
+                if (role.startsWith(GROUP_PREFIX)) {
+                    roles.add(new GroupPrincipal(role.substring(GROUP_PREFIX.length())));
                 }
             }
+            return roles;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error deleting role", e);
         }
+    }
+
+    @Override
+    public void addGroup(String username, String group) {
+        try {
+            try (Connection connection = dataSource.getConnection()) {
+                String groupName = GROUP_PREFIX + group;
+                rawUpdate(connection, addRoleStatement, username, groupName);
+                if (!connection.getAutoCommit()) {
+                    connection.commit();
+                }
+            }
+        } catch (SQLException e) {
+            logger.error("Error executing statement", e);
+        }
+    }
+
+    @Override
+    public void deleteGroup(String username, String group) {
+        try {
+            try (Connection connection = dataSource.getConnection()) {
+                rawUpdate(connection, deleteRoleStatement, username, GROUP_PREFIX + group);
+                // garbage collection, clean up the groups if needed
+                boolean inUse = false;
+                for (String user : rawSelect(connection, selectUsersQuery)) {
+                    for (String g : rawSelect(connection, selectRolesQuery, user)) {
+                        if (group.equals(g)) {
+                            // there is another user of this group, nothing to clean up
+                            inUse = true;
+                            break;
+                        }
+                    }
+                }
+                // nobody is using this group any more, remove it
+                if (!inUse) {
+                    rawUpdate(connection, deleteAllUserRolesStatement, GROUP_PREFIX + group);
+                }
+                if (!connection.getAutoCommit()) {
+                    connection.commit();
+                }
+            }
+        } catch (SQLException e) {
+            logger.error("Error executing statement", e);
+        }
+    }
+
+    @Override
+    public void addGroupRole(String group, String role) {
+        addRole(GROUP_PREFIX + group, role);
+    }
+
+    @Override
+    public void deleteGroupRole(String group, String role) {
+        deleteRole(GROUP_PREFIX + group, role);
+    }
+
+    protected void rawUpdate(Connection connection, String query, String... params) throws SQLException {
+        int rows = JDBCUtils.rawUpdate(connection, query, params);
+        if (logger.isDebugEnabled()) {
+            logger.debug(String.format("Executing [%s], params=%s. %d rows affected.", query, Arrays.toString(params), rows));
+        }
+    }
+
+    protected List<String> rawSelect(Connection connection, String query, String... params) throws SQLException {
+        return JDBCUtils.rawSelect(connection, query, params);
     }
 
     public String getAddUserStatement() {
@@ -406,36 +321,6 @@ public class JDBCBackingEngine implements BackingEngine {
 
     public void setSelectRolesQuery(String selectRolesQuery) {
         this.selectRolesQuery = selectRolesQuery;
-    }
-
-    @Override
-    public List<GroupPrincipal> listGroups(UserPrincipal user) {
-        // TODO support of groups has to be added
-        return Collections.emptyList();
-    }
-
-    @Override
-    public void addGroup(String username, String group) {
-        // TODO support of groups has to be added
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void deleteGroup(String username, String group) {
-        // TODO support of groups has to be added
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void addGroupRole(String group, String role) {
-        // TODO support of groups has to be added
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void deleteGroupRole(String group, String role) {
-        // TODO support of groups has to be added
-        throw new UnsupportedOperationException();
     }
 
 }

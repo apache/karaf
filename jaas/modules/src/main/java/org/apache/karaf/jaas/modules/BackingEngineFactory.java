@@ -21,18 +21,13 @@ public interface BackingEngineFactory {
 
     /**
      * Returns the corresponding module class.
-     *
-     * @return
      */
     String getModuleClass();
 
 
     /**
      * Backing engine factory method.
-     *
-     * @param options
-     * @return
      */
-    BackingEngine build(Map options);
+    BackingEngine build(Map<String,?> options);
 
 }
