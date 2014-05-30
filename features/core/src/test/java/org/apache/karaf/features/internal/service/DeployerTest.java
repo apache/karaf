@@ -30,6 +30,7 @@ import java.util.jar.Manifest;
 import org.apache.felix.utils.version.VersionRange;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeatureEvent;
+import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.internal.support.TestBundle;
 import org.apache.karaf.features.internal.support.TestDownloadManager;
 import org.easymock.EasyMock;
@@ -164,9 +165,9 @@ public class DeployerTest {
         EasyMock.expectLastCall();
         callback.refreshPackages(EasyMock.eq(Collections.<Bundle>singleton(bundleA)));
         EasyMock.expectLastCall();
-        callback.callListeners(FeatureEventMatcher.eq(new FeatureEvent(f100, FeatureEvent.EventType.FeatureUninstalled, false)));
+        callback.callListeners(FeatureEventMatcher.eq(new FeatureEvent(FeatureEvent.EventType.FeatureUninstalled, f100, FeaturesService.ROOT_REGION, false)));
         EasyMock.expectLastCall();
-        callback.callListeners(FeatureEventMatcher.eq(new FeatureEvent(f101, FeatureEvent.EventType.FeatureInstalled, false)));
+        callback.callListeners(FeatureEventMatcher.eq(new FeatureEvent(FeatureEvent.EventType.FeatureInstalled, f101, FeaturesService.ROOT_REGION, false)));
         EasyMock.expectLastCall();
 
         EasyMock.replay(callback);

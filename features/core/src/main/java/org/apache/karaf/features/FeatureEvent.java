@@ -27,12 +27,14 @@ public class FeatureEvent extends EventObject {
 
     private final EventType type;
     private final Feature feature;
+    private final String region;
     private final boolean replay;
 
-    public FeatureEvent(Feature feature, EventType type, boolean replay) {
+    public FeatureEvent(EventType type, Feature feature, String region, boolean replay) {
         super(feature);
         this.type = type;
         this.feature = feature;
+        this.region = region;
         this.replay = replay;
     }
 
@@ -42,6 +44,10 @@ public class FeatureEvent extends EventObject {
 
     public Feature getFeature() {
         return feature;
+    }
+
+    public String getRegion() {
+        return region;
     }
 
     public boolean isReplay() {

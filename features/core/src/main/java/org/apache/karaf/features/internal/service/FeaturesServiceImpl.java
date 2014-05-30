@@ -32,6 +32,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
@@ -266,18 +267,20 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         listeners.add(listener);
         try {
             Set<String> repositories = new TreeSet<>();
-            Set<String> installedFeatures = new TreeSet<>();
+            Map<String, Set<String>> installedFeatures = new TreeMap<>();
             synchronized (lock) {
                 repositories.addAll(state.repositories);
-                installedFeatures.addAll(state.installedFeatures.keySet());
+                installedFeatures.putAll(copy(state.installedFeatures));
             }
             for (String uri : repositories) {
                 Repository repository = new RepositoryImpl(URI.create(uri));
                 listener.repositoryEvent(new RepositoryEvent(repository, RepositoryEvent.EventType.RepositoryAdded, true));
             }
-            for (String id : installedFeatures) {
-                Feature feature = org.apache.karaf.features.internal.model.Feature.valueOf(id);
-                listener.featureEvent(new FeatureEvent(feature, FeatureEvent.EventType.FeatureInstalled, true));
+            for (Map.Entry<String, Set<String>> entry : installedFeatures.entrySet()) {
+                for (String id : entry.getValue()) {
+                    Feature feature = org.apache.karaf.features.internal.model.Feature.valueOf(id);
+                    listener.featureEvent(new FeatureEvent(FeatureEvent.EventType.FeatureInstalled, feature, entry.getKey(), true));
+                }
             }
         } catch (Exception e) {
             LOGGER.error("Error notifying listener about the current state", e);

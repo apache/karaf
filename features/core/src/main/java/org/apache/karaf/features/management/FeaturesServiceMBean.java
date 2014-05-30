@@ -52,6 +52,8 @@ public interface FeaturesServiceMBean {
 
     String FEATURE_EVENT_EVENT_TYPE_UNINSTALLED = "Uninstalled";
 
+    String FEATURE_EVENT_REGION = "Region";
+
     /**
      * The item names in the CompositeData representing a feature
      */
@@ -70,7 +72,7 @@ public interface FeaturesServiceMBean {
      * The item names in the CompositeData representing the event raised for
      * feature events within the OSGi container by this bean
      */
-    String[] FEATURE_EVENT = {FEATURE_NAME, FEATURE_VERSION, FEATURE_EVENT_EVENT_TYPE};
+    String[] FEATURE_EVENT = {FEATURE_NAME, FEATURE_VERSION, FEATURE_EVENT_REGION, FEATURE_EVENT_EVENT_TYPE};
 
 
     String REPOSITORY_NAME = "Name";

@@ -767,12 +767,21 @@ public class Deployer {
         }
 
         // Call listeners
-        // TODO: add region information and avoid flattening
-        for (Feature feature : apply(flatten(delFeatures), map(dstate.features))) {
-            callback.callListeners(new FeatureEvent(feature, FeatureEvent.EventType.FeatureUninstalled, false));
+        for (Map.Entry<String, Set<String>> entry : delFeatures.entrySet()) {
+            for (String name : entry.getValue()) {
+                Feature feature = dstate.features.get(name);
+                if (feature != null) {
+                    callback.callListeners(new FeatureEvent(FeatureEvent.EventType.FeatureUninstalled, feature, entry.getKey(), false));
+                }
+            }
         }
-        for (Feature feature : apply(flatten(newFeatures), map(dstate.features))) {
-            callback.callListeners(new FeatureEvent(feature, FeatureEvent.EventType.FeatureInstalled, false));
+        for (Map.Entry<String, Set<String>> entry : newFeatures.entrySet()) {
+            for (String name : entry.getValue()) {
+                Feature feature = dstate.features.get(name);
+                if (feature != null) {
+                    callback.callListeners(new FeatureEvent(FeatureEvent.EventType.FeatureInstalled, feature, entry.getKey(), false));
+                }
+            }
         }
 
         print("Done.", verbose);
