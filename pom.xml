@@ -127,7 +127,7 @@
         <dom4j.bundle.version>1.6.1_5</dom4j.bundle.version>
         <injection.bundle.version>1.0</injection.bundle.version>
         <jasypt.bundle.version>1.9.2_1</jasypt.bundle.version>
-        <javassist.version>3.18.1-GA</javassist.version>
+        <javassist.version>3.9.0.GA</javassist.version>
         <jetty.version>7.6.9.v20130131</jetty.version>
         <junit.version>4.10</junit.version>
         <junit.bundle.version>4.10_1</junit.bundle.version>
