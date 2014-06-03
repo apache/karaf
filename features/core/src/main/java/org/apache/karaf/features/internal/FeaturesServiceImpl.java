@@ -63,6 +63,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -89,7 +90,7 @@ public class FeaturesServiceImpl implements FeaturesService {
     private boolean respectStartLvlDuringFeatureUninstall;
     private long resolverTimeout = 5000;
     private Set<URI> uris;
-    private Map<URI, Repository> repositories = new HashMap<URI, Repository>();
+    private Map<URI, Repository> repositories = new ConcurrentHashMap<URI, Repository>();
     private Map<String, Map<String, Feature>> features;
     private Map<Feature, Set<Long>> installed = new HashMap<Feature, Set<Long>>();
     private List<FeaturesListener> listeners = new CopyOnWriteArrayIdentityList<FeaturesListener>();
@@ -299,7 +300,8 @@ public class FeaturesServiceImpl implements FeaturesService {
      * @return the list of features repository.
      */
     public Repository[] listRepositories() {
-        Collection<Repository> repos = repositories.values();
+        // the constructor will iterate over ConcurrentHashMap without the risk of ConcurrentModificationException
+        Collection<Repository> repos = new ArrayList<Repository>(repositories.values());
         return repos.toArray(new Repository[repos.size()]);
     }
     
