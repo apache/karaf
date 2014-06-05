@@ -277,9 +277,12 @@ public class ACLConfigurationParser {
         for (Enumeration<String> e = properties.keys(); e.hasMoreElements(); ) {
             String key = e.nextElement();
             if (key.endsWith("*")) {
-                String prefix = key.substring(0, key.length() - 1);
-                if (methodName.startsWith(prefix)) {
-                    wildcardRules.put(prefix, properties.get(key).toString());
+                String str = key.substring(0, key.length() - 1);
+                if (str.startsWith("*")) {
+                    str = str.substring(1);
+                }
+                if (methodName.contains(str)) {
+                    wildcardRules.put(str, properties.get(key).toString());
                 }
             }
         }
