@@ -48,18 +48,16 @@ public class ListFeaturesCommand extends FeaturesCommandSupport {
     protected void doExecute(FeaturesService admin) throws Exception {
 
         // Get the feature data to print.
-        List<Feature> features = new ArrayList<Feature>();
-        List<Repository> repositories = new ArrayList<Repository>();
+        List<FeatureAndRepository> featuresAndRepositories = new ArrayList<FeatureAndRepository>();
         for (Repository r : Arrays.asList(admin.listRepositories())) {
             for (Feature f : r.getFeatures()) {
                 if (installed && !admin.isInstalled(f)) {
                     continue;
                 }
-                features.add(f);
-                repositories.add(r);
+                featuresAndRepositories.add(new FeatureAndRepository(f, r));
             }
         }
-        if (features.size() == 0) {
+        if (featuresAndRepositories.size() == 0) {
             if (installed) {
                 System.out.println("No features installed.");
             } else {
@@ -70,16 +68,16 @@ public class ListFeaturesCommand extends FeaturesCommandSupport {
 
         // Print column headers.
         int maxVersionSize = VERSION.length();
-        for (Feature f : features) {
-            maxVersionSize = Math.max(maxVersionSize, f.getVersion().length());
+        for (FeatureAndRepository far : featuresAndRepositories) {
+            maxVersionSize = Math.max(maxVersionSize, far.feature.getVersion().length());
         }
         int maxNameSize = NAME.length();
-        for (Feature f : features) {
-            maxNameSize = Math.max(maxNameSize, f.getName().length());
+        for (FeatureAndRepository far : featuresAndRepositories) {
+            maxNameSize = Math.max(maxNameSize, far.feature.getName().length());
         }
         int maxRepositorySize = REPOSITORY.length();
-        for (Repository repository:repositories) {
-                maxRepositorySize = Math.max(maxRepositorySize,  repository.getName().length());
+        for (FeatureAndRepository far : featuresAndRepositories) {
+            maxRepositorySize = Math.max(maxRepositorySize, far.repository.getName().length());
         }
 
         StringBuilder sb = new StringBuilder();
@@ -102,37 +100,36 @@ public class ListFeaturesCommand extends FeaturesCommandSupport {
         // Print the feature data.
         boolean needsLegend = false;
         if (ordered) {
-            Collections.sort(features, new FeatureComparator());
+            Collections.sort(featuresAndRepositories, new FeatureAndRepositoryComparator());
         }
-        for (Feature f : features) {
+        for (FeatureAndRepository far : featuresAndRepositories) {
 
             sb.setLength(0);
             sb.append("[");
-            if (admin.isInstalled(f)) {
+            if (admin.isInstalled(far.feature)) {
                 sb.append(INSTALLED);
             } else {
                 sb.append(UNINSTALLED);
             }
 
             sb.append("] [");
-            String str = f.getVersion();
+            String str = far.feature.getVersion();
             sb.append(str);
             for (int i = str.length(); i < maxVersionSize; i++) {
                 sb.append(" ");
             }
             sb.append("] ");
 
-            str = f.getName();
+            str = far.feature.getName();
             sb.append(str);
             for (int i = str.length(); i < maxNameSize; i++) {
                 sb.append(" ");
             }
 
             sb.append(" ");
-            String name = repositories.get(0).getName();
+            String name = far.repository.getName();
             sb.append(name);
-            repositories.remove(0);
-            
+
             if (name.charAt(name.length() - 1) == '*') {
                 needsLegend = true;
             }
@@ -143,12 +140,12 @@ public class ListFeaturesCommand extends FeaturesCommandSupport {
 
             sb.append(" ");
             String description = "";
-            if(f.getDescription() != null) {
-            description = f.getDescription();
+            if (far.feature.getDescription() != null) {
+                description = far.feature.getDescription();
             }
             sb.append(description);
 
-            System.out.println(sb.toString());            
+            System.out.println(sb.toString());
         }
 
         if (needsLegend) {
@@ -156,12 +153,23 @@ public class ListFeaturesCommand extends FeaturesCommandSupport {
         }
 
     }
-    
-    class FeatureComparator implements Comparator<Feature>
+
+    class FeatureAndRepository
     {
-        public int compare(Feature o1, Feature o2)
+        public Feature feature;
+        public Repository repository;
+
+        FeatureAndRepository(Feature feature, Repository repository) {
+            this.feature = feature;
+            this.repository = repository;
+        }
+    }
+
+    class FeatureAndRepositoryComparator implements Comparator<FeatureAndRepository>
+    {
+        public int compare(FeatureAndRepository o1, FeatureAndRepository o2)
         {
-            return o1.getName().toLowerCase().compareTo( o2.getName().toLowerCase() );
+            return o1.feature.getName().toLowerCase().compareTo( o2.feature.getName().toLowerCase() );
         }
     }
 
