@@ -216,7 +216,7 @@ public class SystemServiceImpl implements SystemService {
             // TODO populate the equinox-debug.properties file with the one provided in shell/dev module
             properties.save();
         } catch (IOException e) {
-            throw new RuntimeException("Error settting framework debugging: " + e.getMessage(), e);
+            throw new RuntimeException("Error setting framework debugging: " + e.getMessage(), e);
         }
     }
 
