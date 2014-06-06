@@ -27,6 +27,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.StringTokenizer;
+import java.util.regex.Pattern;
 
 import javax.management.Attribute;
 import javax.management.AttributeList;
@@ -53,6 +55,8 @@ public class KarafMBeanServerGuard implements InvocationHandler {
     private static final String JMX_ACL_WHITELIST = "jmx.acl.whitelist";
     
     private static final String ROLE_WILDCARD = "*";
+    
+    private static final String JMX_OBJECTNAME_PROPERTY_WILDCARD = "_";
 
     private ConfigurationAdmin configAdmin;
 
@@ -292,8 +296,9 @@ public class KarafMBeanServerGuard implements InvocationHandler {
         }
 
         for (String pid : iterateDownPids(getNameSegments(objectName))) {
-            if (allPids.contains(pid)) {
-                Configuration config = configAdmin.getConfiguration(pid);
+            String generalPid = getGeneralPid(allPids, pid);
+            if (generalPid.length() > 0) {
+                Configuration config = configAdmin.getConfiguration(generalPid);
                 List<String> roles = new ArrayList<String>();
                 ACLConfigurationParser.Specificity s = ACLConfigurationParser.getRolesForInvocation(methodName, params, signature, config.getProperties(), roles);
                 if (s != ACLConfigurationParser.Specificity.NO_MATCH) {
@@ -303,7 +308,33 @@ public class KarafMBeanServerGuard implements InvocationHandler {
         }
         return Collections.emptyList();
     }
-
+    
+    private String getGeneralPid(List<String> allPids, String pid) {
+        String ret = "";
+        String[] pidStrArray = pid.split(Pattern.quote("."));
+        for (String id : allPids) {
+            String[] idStrArray = id.split(Pattern.quote("."));
+            if (idStrArray.length == pidStrArray.length) {
+                boolean match = true;
+                for (int i = 0; i < idStrArray.length; i++) {
+                    if (idStrArray[i].equals(JMX_OBJECTNAME_PROPERTY_WILDCARD) 
+                        || idStrArray[i].equals(pidStrArray[i])) {
+                        continue;
+                    } else {
+                        match = false;
+                        break;
+                    }
+                }
+                if (match) {
+                    ret = id;
+                    return ret;
+                }
+            }
+        }
+        
+        return ret;
+    }
+    
     private List<String> getNameSegments(ObjectName objectName) {
         List<String> segments = new ArrayList<String>();
         segments.add(objectName.getDomain());
