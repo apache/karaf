@@ -17,6 +17,7 @@
 package org.apache.karaf.features.internal.region;
 
 import java.util.Comparator;
+import java.util.Set;
 
 import org.osgi.framework.Version;
 import org.osgi.framework.namespace.BundleNamespace;
@@ -24,8 +25,16 @@ import org.osgi.framework.namespace.IdentityNamespace;
 import org.osgi.framework.namespace.PackageNamespace;
 import org.osgi.framework.wiring.BundleCapability;
 import org.osgi.resource.Capability;
+import org.osgi.resource.Resource;
 
 public class CandidateComparator implements Comparator<Capability> {
+
+    private final Set<Resource> mandatory;
+
+    public CandidateComparator(Set<Resource> mandatory) {
+        this.mandatory = mandatory;
+    }
+
     public int compare(Capability cap1, Capability cap2) {
         int c = 0;
         // Always prefer system bundle
@@ -33,6 +42,14 @@ public class CandidateComparator implements Comparator<Capability> {
             c = -1;
         } else if (!(cap1 instanceof BundleCapability) && cap2 instanceof BundleCapability) {
             c = 1;
+        }
+        // Always prefer mandatory resources
+        if (c == 0) {
+            if (mandatory.contains(cap1.getResource()) && !mandatory.contains(cap2.getResource())) {
+                c = -1;
+            } else if (!mandatory.contains(cap1.getResource()) && mandatory.contains(cap2.getResource())) {
+                c = 1;
+            }
         }
         // Compare revision capabilities.
         if ((c == 0) && cap1.getNamespace().equals(BundleNamespace.BUNDLE_NAMESPACE)) {

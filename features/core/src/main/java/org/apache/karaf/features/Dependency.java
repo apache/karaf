@@ -25,4 +25,6 @@ public interface Dependency {
 
     boolean isPrerequisite();
 
+    boolean isDependency();
+
 }

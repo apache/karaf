@@ -93,6 +93,7 @@ public class Subsystem extends ResourceImpl {
     private final Map<String, Set<String>> exportPolicy;
     private final List<Resource> installable = new ArrayList<>();
     private final Map<String, DependencyInfo> dependencies = new HashMap<>();
+    private final List<Requirement> dependentFeatures = new ArrayList<>();
 
     private final List<String> bundles = new ArrayList<>();
 
@@ -122,13 +123,10 @@ public class Subsystem extends ResourceImpl {
             this.exportPolicy = SHARE_ALL_POLICY;
         }
 
-        Map<String, String> dirs = new HashMap<>();
-        Map<String, Object> attrs = new HashMap<>();
-        attrs.put(IDENTITY_NAMESPACE, feature.getName());
-        attrs.put(CAPABILITY_TYPE_ATTRIBUTE, TYPE_FEATURE);
-        attrs.put(CAPABILITY_VERSION_ATTRIBUTE, new VersionRange(VersionTable.getVersion(feature.getVersion()), true));
-        Requirement requirement = new RequirementImpl(this, IDENTITY_NAMESPACE, dirs, attrs);
-        addRequirement(requirement);
+        addIdentityRequirement(this,
+                feature.getName(),
+                TYPE_FEATURE,
+                new VersionRange(VersionTable.getVersion(feature.getVersion()), true));
     }
 
     public Subsystem(String name, Subsystem parent, boolean acceptDependencies) {
@@ -191,13 +189,7 @@ public class Subsystem extends ResourceImpl {
         Subsystem as = new Subsystem(childName, this, acceptDependencies);
         children.add(as);
         // Add a requirement to force its resolution
-        Map<String, Object> attrs = new HashMap<>();
-        attrs.put(IDENTITY_NAMESPACE, childName);
-        attrs.put(CAPABILITY_TYPE_ATTRIBUTE, TYPE_SUBSYSTEM);
-        Requirement requirement = new RequirementImpl(this, IDENTITY_NAMESPACE,
-                Collections.<String, String>emptyMap(),
-                attrs);
-        addRequirement(requirement);
+        ResourceUtils.addIdentityRequirement(this, childName, TYPE_SUBSYSTEM, (VersionRange) null);
         // Add it to repo
         installable.add(as);
         return as;
@@ -207,8 +199,14 @@ public class Subsystem extends ResourceImpl {
         installable.add(resource);
     }
 
-    public void requireFeature(String name, String range) {
-        ResourceUtils.addIdentityRequirement(this, name, TYPE_FEATURE, range);
+    public void requireFeature(String name, String range, boolean mandatory) {
+        if (mandatory) {
+            ResourceUtils.addIdentityRequirement(this, name, TYPE_FEATURE, range);
+        } else {
+            ResourceImpl res = new ResourceImpl();
+            ResourceUtils.addIdentityRequirement(res, name, TYPE_FEATURE, range);
+            dependentFeatures.addAll(res.getRequirements(null));
+        }
     }
 
     public void require(String requirement) throws BundleException {
@@ -263,12 +261,13 @@ public class Subsystem extends ResourceImpl {
                 while (!ss.isAcceptDependencies()) {
                     ss = ss.getParent();
                 }
-                ss.requireFeature(dep.getName(), dep.getVersion());
+                ss.requireFeature(dep.getName(), dep.getVersion(), !dep.isDependency());
             }
         }
         List<Requirement> processed = new ArrayList<>();
         while (true) {
             List<Requirement> requirements = getRequirements(IDENTITY_NAMESPACE);
+            requirements.addAll(dependentFeatures);
             requirements.removeAll(processed);
             if (requirements.isEmpty()) {
                 break;

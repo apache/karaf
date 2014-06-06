@@ -167,6 +167,7 @@ Dependency of feature.
             <xs:extension base="tns:featureName">
                 <xs:attribute name="version" type="xs:string" default="0.0.0" />
                 <xs:attribute name="prerequisite" type="xs:boolean" default="false"/>
+                <xs:attribute name="dependency" type="xs:boolean" default="false"/>
             </xs:extension>
         </xs:simpleContent>
     </xs:complexType>

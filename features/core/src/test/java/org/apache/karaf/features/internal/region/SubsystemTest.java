@@ -182,6 +182,49 @@ public class SubsystemTest {
         verify(resolver, expected);
     }
 
+    @Test
+    public void testFeatureOptional() throws Exception {
+        RepositoryImpl repo = new RepositoryImpl(getClass().getResource("data5/features.xml").toURI());
+
+        Map<String, Set<String>> features = new HashMap<String, Set<String>>();
+        addToMapSet(features, "root", "f1");
+        Map<String, Set<String>> expected = new HashMap<String, Set<String>>();
+        addToMapSet(expected, "root", "a/1.0.0");
+        addToMapSet(expected, "root", "b/1.0.0");
+
+        SubsystemResolver resolver = new SubsystemResolver(new TestDownloadManager(getClass(), "data5"));
+        resolver.prepare(Arrays.asList(repo.getFeatures()),
+                features,
+                Collections.<String, Set<BundleRevision>>emptyMap());
+        resolver.resolve(Collections.<String>emptySet(),
+                FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
+                null);
+
+        verify(resolver, expected);
+    }
+
+    @Test
+    public void testFeatureOptionalAlreadyProvided() throws Exception {
+        RepositoryImpl repo = new RepositoryImpl(getClass().getResource("data5/features.xml").toURI());
+
+        Map<String, Set<String>> features = new HashMap<String, Set<String>>();
+        addToMapSet(features, "root", "f1");
+        addToMapSet(features, "root", "f3");
+        Map<String, Set<String>> expected = new HashMap<String, Set<String>>();
+        addToMapSet(expected, "root", "a/1.0.0");
+        addToMapSet(expected, "root", "c/1.0.0");
+
+        SubsystemResolver resolver = new SubsystemResolver(new TestDownloadManager(getClass(), "data5"));
+        resolver.prepare(Arrays.asList(repo.getFeatures()),
+                features,
+                Collections.<String, Set<BundleRevision>>emptyMap());
+        resolver.resolve(Collections.<String>emptySet(),
+                FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
+                null);
+
+        verify(resolver, expected);
+    }
+
     private void verify(SubsystemResolver resolver, Map<String, Set<String>> expected) {
         Map<String, Set<String>> mapping = getBundleNamesPerRegions(resolver);
         if (!expected.equals(mapping)) {

@@ -51,6 +51,8 @@ public class Dependency implements org.apache.karaf.features.Dependency {
     protected String version;
     @XmlAttribute
     protected boolean prerequisite;
+    @XmlAttribute
+    protected boolean dependency;
 
     /**
      * Feature name should be non empty string.
@@ -103,6 +105,15 @@ public class Dependency implements org.apache.karaf.features.Dependency {
 
     public void setPrerequisite(boolean prerequisite) {
         this.prerequisite = prerequisite;
+    }
+
+    @Override
+    public boolean isDependency() {
+        return dependency;
+    }
+
+    public void setDependency(boolean dependency) {
+        this.dependency = dependency;
     }
 
     public String toString() {

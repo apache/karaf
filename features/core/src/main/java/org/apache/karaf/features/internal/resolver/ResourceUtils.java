@@ -81,8 +81,23 @@ public final class ResourceUtils {
     }
 
     public static void addIdentityRequirement(ResourceImpl resource, String name, String type, String range) {
+        addIdentityRequirement(resource, name, type, range, true);
+    }
+
+    public static void addIdentityRequirement(ResourceImpl resource, String name, String type, String range, boolean mandatory) {
+        addIdentityRequirement(resource, name, type, range != null ? new VersionRange(range) : null, mandatory);
+    }
+
+    public static void addIdentityRequirement(ResourceImpl resource, String name, String type, VersionRange range) {
+        addIdentityRequirement(resource, name, type, range, true);
+    }
+
+    public static void addIdentityRequirement(ResourceImpl resource, String name, String type, VersionRange range, boolean mandatory) {
         Map<String, String> dirs = new HashMap<>();
         Map<String, Object> attrs = new HashMap<>();
+        if (!mandatory) {
+            dirs.put(REQUIREMENT_RESOLUTION_DIRECTIVE, RESOLUTION_OPTIONAL);
+        }
         if (name != null) {
             attrs.put(IDENTITY_NAMESPACE, name);
         }
@@ -90,7 +105,7 @@ public final class ResourceUtils {
             attrs.put(CAPABILITY_TYPE_ATTRIBUTE, type);
         }
         if (range != null) {
-            attrs.put(CAPABILITY_VERSION_ATTRIBUTE, new VersionRange(range));
+            attrs.put(CAPABILITY_VERSION_ATTRIBUTE, range);
         }
         resource.addRequirement(new RequirementImpl(resource, IDENTITY_NAMESPACE, dirs, attrs));
     }

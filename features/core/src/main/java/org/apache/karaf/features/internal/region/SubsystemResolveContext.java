@@ -21,9 +21,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.felix.resolver.Util;
 import org.apache.karaf.features.internal.download.Downloader;
@@ -53,12 +55,14 @@ import static org.osgi.framework.Constants.RESOLUTION_DIRECTIVE;
 import static org.osgi.framework.Constants.RESOLUTION_OPTIONAL;
 import static org.osgi.framework.namespace.IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE;
 import static org.osgi.framework.namespace.IdentityNamespace.IDENTITY_NAMESPACE;
+import static org.osgi.resource.Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE;
 
 public class SubsystemResolveContext extends ResolveContext {
 
     private final Subsystem root;
     private final RegionDigraph digraph;
-    private final CandidateComparator candidateComparator = new CandidateComparator();
+    private final Set<Resource> mandatory = new HashSet<>();
+    private final CandidateComparator candidateComparator = new CandidateComparator(mandatory);
 
     private final Map<Resource, Subsystem> resToSub = new HashMap<Resource, Subsystem>();
     private final Repository repository;
@@ -73,6 +77,25 @@ public class SubsystemResolveContext extends ResolveContext {
 
         prepare(root);
         repository = new BaseRepository(resToSub.keySet());
+
+        // Add a heuristic to sort capabilities :
+        //  if a capability comes from a resource which needs to be installed,
+        //  prefer that one over any capabilities from other resources
+        findMandatory(root);
+    }
+
+    void findMandatory(Resource res) {
+        if (mandatory.add(res)) {
+            for (Requirement req : res.getRequirements(null)) {
+                String resolution = req.getDirectives().get(REQUIREMENT_RESOLUTION_DIRECTIVE);
+                if (!RESOLUTION_OPTIONAL.equals(resolution)) {
+                    List<Capability> caps = findProviders(req);
+                    if (caps.size() == 1) {
+                        findMandatory(caps.get(0).getResource());
+                    }
+                }
+            }
+        }
     }
 
     void prepare(Subsystem subsystem) {

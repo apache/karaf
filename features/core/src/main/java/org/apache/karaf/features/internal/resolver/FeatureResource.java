@@ -80,7 +80,9 @@ public final class FeatureResource extends ResourceImpl {
             }
         }
         for (Dependency dep : feature.getDependencies()) {
-            addDependency(resource, dep, featureRange);
+            if (!dep.isDependency()) {
+                addDependency(resource, dep, featureRange);
+            }
         }
         for (org.apache.karaf.features.Capability cap : feature.getCapabilities()) {
             resource.addCapabilities(ResourceBuilder.parseCapability(resource, cap.getValue()));
