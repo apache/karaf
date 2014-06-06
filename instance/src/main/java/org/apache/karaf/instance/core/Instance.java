@@ -53,6 +53,8 @@ public interface Instance {
 
     void changeJavaOpts(String javaOpts) throws Exception;
 
+    void restart(String javaOpts) throws Exception;
+
     void start(String javaOpts) throws Exception;
 
     void stop() throws Exception;

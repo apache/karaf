@@ -33,6 +33,7 @@ import org.apache.karaf.instance.command.DestroyCommand;
 import org.apache.karaf.instance.command.InstanceCommandSupport;
 import org.apache.karaf.instance.command.ListCommand;
 import org.apache.karaf.instance.command.RenameCommand;
+import org.apache.karaf.instance.command.RestartCommand;
 import org.apache.karaf.instance.command.StartCommand;
 import org.apache.karaf.instance.command.StatusCommand;
 import org.apache.karaf.instance.command.StopCommand;
@@ -54,6 +55,7 @@ public class Execute {
             DestroyCommand.class,
             ListCommand.class,
             RenameCommand.class,
+            RestartCommand.class,
             StartCommand.class,
             StatusCommand.class,
             StopCommand.class};

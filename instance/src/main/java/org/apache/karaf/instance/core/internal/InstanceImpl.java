@@ -88,6 +88,10 @@ public class InstanceImpl implements Instance {
         service.changeInstanceJavaOpts(name, javaOpts);
     }
 
+    public void restart(String javaOpts) throws Exception {
+        service.restartInstance(name, javaOpts);
+    }
+
     public void start(String javaOpts) throws Exception {
         service.startInstance(name, javaOpts);
     }

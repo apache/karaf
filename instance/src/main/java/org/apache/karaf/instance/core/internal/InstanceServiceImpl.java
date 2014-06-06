@@ -19,6 +19,7 @@ package org.apache.karaf.instance.core.internal;
 import org.apache.karaf.instance.core.Instance;
 import org.apache.karaf.instance.core.InstanceService;
 import org.apache.karaf.instance.core.InstanceSettings;
+import org.apache.karaf.instance.main.Execute;
 import org.apache.karaf.jpm.Process;
 import org.apache.karaf.jpm.impl.ProcessBuilderFactoryImpl;
 import org.apache.karaf.jpm.impl.ScriptUtils;
@@ -49,6 +50,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Scanner;
+import java.util.TreeMap;
 
 public class InstanceServiceImpl implements InstanceService {
 
@@ -410,71 +412,144 @@ public class InstanceServiceImpl implements InstanceService {
                 if (instance.pid != 0) {
                     throw new IllegalStateException("Instance already started");
                 }
-                String opts = javaOpts;
-                if (opts == null || opts.length() == 0) {
-                    opts = instance.opts;
-                }
-                if (opts == null || opts.length() == 0) {
-                    opts = DEFAULT_JAVA_OPTS;
-                }
-
-                // fallback and read karafOpts from KARAF_OPTS environment if no System property present
-                String karafOptsEnv = System.getenv("KARAF_OPTS");
-                String karafOpts = System.getProperty("karaf.opts", karafOptsEnv != null ? karafOptsEnv : "");
-                
-                String location = instance.loc;
-
-                File libDir = new File(System.getProperty("karaf.home"), "lib");
-                File childLibDir = new File(location, "lib");
-                
-                StringBuilder classpath = classpathFromLibDir(libDir);
-                StringBuilder childClasspath = classpathFromLibDir(childLibDir);
-                if (childClasspath.length() > 0 && !libDir.equals(childLibDir)) {
-                    classpath.append(System.getProperty("path.separator"));
-                    classpath.append(childClasspath);
-                }    
-
-                String command = "\""
-                        + new File(System.getProperty("java.home"), ScriptUtils.isWindows() ? "bin\\java.exe" : "bin/java").getCanonicalPath()
-                        + "\" " + opts
-                        + " " + karafOpts
-                        + " -Djava.util.logging.config.file=\"" + new File(location, "etc/java.util.logging.properties").getCanonicalPath() + "\""
-                        + " -Djava.endorsed.dirs=\"" + new File(new File(new File(System.getProperty("java.home"), "jre"), "lib"), "endorsed") + System.getProperty("path.separator") + new File(new File(System.getProperty("java.home"), "lib"), "endorsed") + System.getProperty("path.separator") + new File(libDir, "endorsed").getCanonicalPath() + "\""
-                        + " -Djava.ext.dirs=\"" + new File(new File(new File(System.getProperty("java.home"), "jre"), "lib"), "ext") + System.getProperty("path.separator") + new File(new File(System.getProperty("java.home"), "lib"), "ext") + System.getProperty("path.separator") + new File(libDir, "ext").getCanonicalPath() + "\""
-                        + " -Dkaraf.home=\"" + System.getProperty("karaf.home") + "\""
-                        + " -Dkaraf.base=\"" + new File(location).getCanonicalPath() + "\""
-                        + " -Dkaraf.data=\"" + new File(new File(location).getCanonicalPath(), "data") + "\""
-                        + " -Dkaraf.etc=\"" + new File(new File(location).getCanonicalPath(), "etc") + "\""
-                        + " -Djavax.management.builder.initial=org.apache.karaf.management.boot.KarafMBeanServerBuilder"
-                        + " -Dkaraf.startLocalConsole=false"
-                        + " -Dkaraf.startRemoteShell=true"
-                        + " -classpath \"" + classpath.toString() + "\""
-                        + " org.apache.karaf.main.Main";
-                LOGGER.debug("Starting instance " + name + " with command: " + command);
-                org.apache.karaf.jpm.Process process = new ProcessBuilderFactoryImpl().newBuilder()
-                        .directory(new File(location))
-                        .command(command)
-                        .start();
-                instance.pid = process.getPid();
+                doStart(instance, name, javaOpts);
                 return null;
             }
 
-            private StringBuilder classpathFromLibDir(File libDir) throws IOException {
-                File[] jars = libDir.listFiles(new FilenameFilter() {
-                    public boolean accept(File dir, String name) {
-                        return name.endsWith(".jar");
-                    }
-                });
-                StringBuilder classpath = new StringBuilder();
-                if (jars != null) {
-                    for (File jar : jars) {
-                        if (classpath.length() > 0) {
-                            classpath.append(System.getProperty("path.separator"));
-                        }
-                        classpath.append(jar.getCanonicalPath());
-                    }
+        });
+    }
+
+    private void doStart(InstanceState instance, String name, String javaOpts) throws IOException {
+        String opts = javaOpts;
+        if (opts == null || opts.length() == 0) {
+            opts = instance.opts;
+        }
+        if (opts == null || opts.length() == 0) {
+            opts = DEFAULT_JAVA_OPTS;
+        }
+
+        // fallback and read karafOpts from KARAF_OPTS environment if no System property present
+        String karafOptsEnv = System.getenv("KARAF_OPTS");
+        String karafOpts = System.getProperty("karaf.opts", karafOptsEnv != null ? karafOptsEnv : "");
+
+        String location = instance.loc;
+
+        File libDir = new File(System.getProperty("karaf.home"), "lib");
+        File childLibDir = new File(location, "lib");
+
+        StringBuilder classpath = classpathFromLibDir(libDir);
+        StringBuilder childClasspath = classpathFromLibDir(childLibDir);
+        if (childClasspath.length() > 0 && !libDir.equals(childLibDir)) {
+            classpath.append(System.getProperty("path.separator"));
+            classpath.append(childClasspath);
+        }
+
+        String command = "\""
+                + new File(System.getProperty("java.home"), ScriptUtils.isWindows() ? "bin\\java.exe" : "bin/java").getCanonicalPath()
+                + "\" " + opts
+                + " " + karafOpts
+                + " -Djava.util.logging.config.file=\"" + new File(location, "etc/java.util.logging.properties").getCanonicalPath() + "\""
+                + " -Djava.endorsed.dirs=\"" + new File(new File(new File(System.getProperty("java.home"), "jre"), "lib"), "endorsed") + System.getProperty("path.separator") + new File(new File(System.getProperty("java.home"), "lib"), "endorsed") + System.getProperty("path.separator") + new File(libDir, "endorsed").getCanonicalPath() + "\""
+                + " -Djava.ext.dirs=\"" + new File(new File(new File(System.getProperty("java.home"), "jre"), "lib"), "ext") + System.getProperty("path.separator") + new File(new File(System.getProperty("java.home"), "lib"), "ext") + System.getProperty("path.separator") + new File(libDir, "ext").getCanonicalPath() + "\""
+                + " -Dkaraf.home=\"" + System.getProperty("karaf.home") + "\""
+                + " -Dkaraf.base=\"" + new File(location).getCanonicalPath() + "\""
+                + " -Dkaraf.data=\"" + new File(new File(location).getCanonicalPath(), "data") + "\""
+                + " -Dkaraf.etc=\"" + new File(new File(location).getCanonicalPath(), "etc") + "\""
+                + " -Djavax.management.builder.initial=org.apache.karaf.management.boot.KarafMBeanServerBuilder"
+                + " -Dkaraf.startLocalConsole=false"
+                + " -Dkaraf.startRemoteShell=true"
+                + " -classpath \"" + classpath.toString() + "\""
+                + " org.apache.karaf.main.Main";
+        LOGGER.debug("Starting instance " + name + " with command: " + command);
+        Process process = new ProcessBuilderFactoryImpl().newBuilder()
+                .directory(new File(location))
+                .command(command)
+                .start();
+        instance.pid = process.getPid();
+    }
+
+    private StringBuilder classpathFromLibDir(File libDir) throws IOException {
+        File[] jars = libDir.listFiles(new FilenameFilter() {
+            public boolean accept(File dir, String name) {
+                return name.endsWith(".jar");
+            }
+        });
+        StringBuilder classpath = new StringBuilder();
+        if (jars != null) {
+            for (File jar : jars) {
+                if (classpath.length() > 0) {
+                    classpath.append(System.getProperty("path.separator"));
                 }
-                return classpath;
+                classpath.append(jar.getCanonicalPath());
+            }
+        }
+        return classpath;
+    }
+
+    private void addJar(StringBuilder sb, String groupId, String artifactId) {
+        File artifactDir = new File(System.getProperty("karaf.home") + File.separator +
+                                    "system" + File.separator +
+                                    groupId.replaceAll("\\.", File.separator) + File.separator +
+                                    artifactId + File.separator);
+        TreeMap<String, File> jars = new TreeMap<>();
+        String[] versions = artifactDir.list();
+        if (versions != null) {
+            for (String version : versions) {
+                File jar = new File(artifactDir, version + File.separator + artifactId + "-" + version + ".jar");
+                if (jar.exists()) {
+                    jars.put(version, jar);
+                }
+            }
+        }
+        if (jars.isEmpty()) {
+            throw new IllegalStateException("Cound not find jar for " + groupId + "/" + artifactId);
+        }
+        if (sb.length() > 0) {
+            sb.append(File.pathSeparator);
+        }
+        sb.append(jars.lastEntry().getValue().getAbsolutePath());
+    }
+
+    public void restartInstance(final String name, final String javaOpts) {
+        execute(new Task<Object>() {
+            public Object call(State state) throws IOException {
+                InstanceState instance = state.instances.get(name);
+                if (instance == null) {
+                    throw new IllegalArgumentException("Instance " + name + " not found");
+                }
+                String current = System.getProperty("karaf.name");
+                if (name.equals(current)) {
+                    String location = System.getProperty("karaf.home");
+                    StringBuilder classpath = new StringBuilder();
+                    addJar(classpath, "org.apache.karaf.instance", "org.apache.karaf.instance.core");
+                    addJar(classpath, "org.apache.karaf.shell", "org.apache.karaf.shell.core");
+                    addJar(classpath, "org.ops4j.pax.logging", "pax-logging-api");
+                    addJar(classpath, "jline", "jline");
+                    String command = "\""
+                            + new File(System.getProperty("java.home"), ScriptUtils.isWindows() ? "bin\\java.exe" : "bin/java").getCanonicalPath()
+                            + "\" "
+                            + " -Djava.util.logging.config.file=\"" + new File(location, "etc/java.util.logging.properties").getCanonicalPath() + "\""
+                            + " -Dkaraf.home=\"" + System.getProperty("karaf.home") + "\""
+                            + " -Dkaraf.base=\"" + new File(location).getCanonicalPath() + "\""
+                            + " -Dkaraf.data=\"" + new File(new File(location).getCanonicalPath(), "data") + "\""
+                            + " -Dkaraf.etc=\"" + new File(new File(location).getCanonicalPath(), "etc") + "\""
+                            + " -Dkaraf.instances=\"" + System.getProperty("karaf.instances") + "\""
+                            + " -Djavax.management.builder.initial=org.apache.karaf.management.boot.KarafMBeanServerBuilder"
+                            + " -classpath \"" + classpath.toString() + "\""
+                            + " " + Execute.class.getName()
+                            + " restart --java-opts \"" + javaOpts + "\" " + name;
+                    org.apache.karaf.jpm.Process process = new ProcessBuilderFactoryImpl().newBuilder()
+                            .directory(new File(System.getProperty("karaf.home")))
+                            .command(command)
+                            .start();
+                } else {
+                    checkPid(instance);
+                    if (instance.pid != 0) {
+                        cleanShutdown(instance);
+                    }
+                    doStart(instance, name, javaOpts);
+                }
+                return null;
             }
         });
     }
