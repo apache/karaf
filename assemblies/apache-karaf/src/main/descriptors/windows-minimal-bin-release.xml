@@ -152,10 +152,52 @@
                 org/ops4j/pax/url/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}
             </outputFileNameMapping>
             <includes>
-                <include>org.ops4j.pax.url:pax-url-mvn</include>
+                <include>org.ops4j.pax.url:pax-url-aether</include>
                 <include>org.ops4j.pax.url:pax-url-wrap</include>
+                <include>org.ops4j.pax.url:pax-url-commons</include>
+                <include>org.ops4j.pax.url:pax-url-maven-commons</include>
             </includes>
         </dependencySet>
+        <dependencySet>
+            <outputDirectory>/system</outputDirectory>
+            <unpack>false</unpack>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputFileNameMapping>
+                org/ops4j/pax/swissbox/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}
+            </outputFileNameMapping>
+            <includes>
+                <include>org.ops4j.pax.swissbox:pax-swissbox-bnd</include>
+                <include>org.ops4j.pax.swissbox:pax-swissbox-property</include>                
+            </includes>
+        </dependencySet>   
+        <dependencySet>
+            <outputDirectory>/system</outputDirectory>
+            <unpack>false</unpack>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputFileNameMapping>
+                org/ops4j/base/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}
+            </outputFileNameMapping>
+            <includes>
+                <include>org.ops4j.base:ops4j-base-lang</include>
+                <include>org.ops4j.base:ops4j-base-util-property</include>
+                <include>org.ops4j.base:ops4j-base-util-xml</include>
+                <include>org.ops4j.base:ops4j-base-util-collections</include>
+                <include>org.ops4j.base:ops4j-base-lang</include>
+                <include>org.ops4j.base:ops4j-base-net</include>
+                <include>org.ops4j.base:ops4j-base-monitors</include>                                
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <outputDirectory>/system</outputDirectory>
+            <unpack>false</unpack>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputFileNameMapping>
+                biz/aQute/bnd/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}
+            </outputFileNameMapping>
+            <includes>
+                <include>biz.aQute.bnd:bndlib</include>                             
+            </includes>
+        </dependencySet>         
         <dependencySet>
             <outputDirectory>/system</outputDirectory>
             <unpack>false</unpack>
