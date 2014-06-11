@@ -233,7 +233,7 @@
         <pax.exam.version>3.4.0</pax.exam.version>
         <pax.logging.version>1.7.3-SNAPSHOT</pax.logging.version>
         <pax.base.version>1.4.0</pax.base.version>
-        <pax.url.version>2.0.0</pax.url.version>
+        <pax.url.version>2.1.0</pax.url.version>
         <pax.web.version>4.0.0-SNAPSHOT</pax.web.version>
         <pax.swissbox.version>1.7.0</pax.swissbox.version>
         <pax.tinybundle.version>2.0.0</pax.tinybundle.version>
