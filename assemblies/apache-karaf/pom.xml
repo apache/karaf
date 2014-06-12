@@ -572,6 +572,7 @@
                         <configuration>
                             <descriptors>
                               <descriptor>mvn:org.apache.karaf.assemblies.features/standard/${project.version}/xml/features</descriptor>
+                              <descriptor>mvn:org.apache.karaf.assemblies.features/spring/${project.version}/xml/features</descriptor>
                               <descriptor>mvn:org.apache.karaf.assemblies.features/enterprise/${project.version}/xml/features</descriptor>
                             </descriptors>
                             <features>

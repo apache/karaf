@@ -36,6 +36,7 @@
     <modules>
         <module>standard</module>
         <module>enterprise</module>
+        <module>spring</module>
     </modules>
 
 </project>
