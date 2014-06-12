@@ -287,7 +287,6 @@ public class AdminServiceImpl implements AdminService {
                 copyResourceToDir(karafBase, "etc/org.ops4j.pax.url.mvn.cfg", true);
                 copyResourceToDir(karafBase, "etc/shell.init.script", true);
                 copyResourceToDir(karafBase, "etc/startup.properties", true);
-                copyResourceToDir(karafBase, "etc/system.properties", true);
                 copyResourceToDir(karafBase, "etc/users.properties", true);
 
                 HashMap<String, String> props = new HashMap<String, String>();
