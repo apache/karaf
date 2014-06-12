@@ -64,17 +64,20 @@ public abstract class OsgiCommandSupport extends AbstractAction implements Actio
         return services;
     }
 
-    protected <T> T getService(Class<T> clazz) {
-        ServiceReference<T> sr = getBundleContext().getServiceReference(clazz);
-        if (sr != null) {
-            return getService(clazz, sr);
-        } else {
-            return null;
-        }
+    protected <T> T getService(Class<T> clazz, ServiceReference reference) {
+        return (T) getService(reference);
     }
 
-    protected <T> T getService(Class<T> clazz, ServiceReference<T> reference) {
-        T t = getBundleContext().getService(reference);
+    protected <T> T getService(Class<T> clazz) {
+        ServiceReference<T> ref = getBundleContext().getServiceReference(clazz);
+        if (ref != null) {
+            return getService(ref);
+        }
+        return null;
+    }
+
+    protected <T> T getService(ServiceReference<T> reference) {
+        T t = (T) getBundleContext().getService(reference);
         if (t != null) {
             if (usedReferences == null) {
                 usedReferences = new ArrayList<ServiceReference<?>>();
