@@ -361,6 +361,9 @@ getpid() {
                 if [ "$DIST_OS" = "solaris" ]
                 then
                     pidtest=`$PSEXE -p $pid -o comm | grep $WRAPPER_CMD | tail -1`
+                elif [ "$DIST_OS" = "aix" ]
+                then
+                    pidtest=`$PSEXE -p $pid -o args | grep "$WRAPPER_CMD" | tail -1`
                 else
                     pidtest=`$PSEXE -p $pid -o command | grep $WRAPPER_CMD | tail -1`
                 fi
