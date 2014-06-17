@@ -21,11 +21,12 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.security.KeyPair;
 import java.util.Locale;
+import java.util.Properties;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 import jline.Terminal;
-import org.apache.felix.utils.properties.Properties;
+
 import org.apache.karaf.shell.console.jline.TerminalFactory;
 import org.apache.sshd.ClientChannel;
 import org.apache.sshd.ClientSession;
@@ -47,7 +48,7 @@ public class Main {
     private static final String ROLE_DELIMITER = ",";
 
     public static void main(String[] args) throws Exception {
-        Properties shellCfg = new Properties(new File(System.getProperty("karaf.etc"), "org.apache.karaf.shell.cfg"));
+        Properties shellCfg = loadProps(new File(System.getProperty("karaf.etc"), "org.apache.karaf.shell.cfg"));
 
         String host = shellCfg.getProperty("sshHost", "localhost");
         int port = Integer.parseInt(shellCfg.getProperty("sshPort", "8101"));
@@ -60,7 +61,7 @@ public class Main {
         String password = null;
         StringBuilder command = new StringBuilder();
 
-        Properties usersCfg = new Properties(new File(System.getProperty("karaf.etc"), "users.properties"));
+        Properties usersCfg = loadProps(new File(System.getProperty("karaf.etc"), "users.properties"));
         if (!usersCfg.isEmpty()) {
             user = (String) usersCfg.keySet().iterator().next();
             password = (String) usersCfg.getProperty(user);
@@ -223,6 +224,28 @@ public class Main {
             } catch (Throwable t) { }
         }
         System.exit(exitStatus);
+    }
+
+    private static Properties loadProps(File file) {
+        Properties props = new Properties();
+        FileInputStream is = null;
+        try {
+            is = new FileInputStream(file);
+            if (is != null) {
+                props.load(is);
+            }
+        } catch (Exception e) {
+            System.err.println("Could not load properties from: " + file + ", Reason: " + e.getMessage());
+        } finally {
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (IOException e) {
+                    // Ignore
+                }
+            }
+        }
+        return props;
     }
 
     protected static SshAgent startAgent(String user) {
