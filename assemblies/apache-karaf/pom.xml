@@ -282,7 +282,6 @@
         <dependency>
             <groupId>org.ops4j.pax.url</groupId>
             <artifactId>pax-url-wrap</artifactId>
-            <classifier>uber</classifier>
         </dependency>
         <dependency>
             <groupId>org.apache.sshd</groupId>
