@@ -1157,9 +1157,9 @@
   <supplement>
     <project>
       <groupId>org.ops4j.pax.url</groupId>
-      <artifactId>pax-url-mvn</artifactId>
+      <artifactId>pax-url-aether</artifactId>
       <name>OPS4J Pax Url - mvn:</name>
-      <url>http://www.ops4j.org/projects/pax/url/pax-url-mvn</url>
+      <url>http://www.ops4j.org/projects/pax/url/pax-url-aether</url>
 	  <organization>
 	    <name>OPS4J - Open Participation Software for Java</name>
 	    <url>http://www.ops4j.org/</url>

@@ -42,7 +42,7 @@ public class MainStartTest {
         File data = new File(home, "data" + System.currentTimeMillis());
 
 		String[] args = new String[0];
-		String fileMVNbundle = new File(home, "bundles/pax-url-mvn.jar").toURI().toURL().toExternalForm();
+		String fileMVNbundle = new File(home, "bundles/pax-url-aether.jar").toURI().toURL().toExternalForm();
 		String mvnUrl = "mvn:org.osgi/org.osgi.compendium/4.2.0";
 		System.setProperty("karaf.home", home.toString());
 		System.setProperty("karaf.data", data.toString());
