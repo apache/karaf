@@ -54,14 +54,6 @@ public class ListCommand extends ObrCommandSupport {
             query = "(|(presentationname=*" + substr + "*)(symbolicname=*" + substr + "*))";
         }
         Resource[] resources = admin.discoverResources(query);
-        int maxPName = 4;
-        int maxSName = 13;
-        int maxVersion = 7;
-        for (Resource resource : resources) {
-            maxPName = Math.max(maxPName, emptyIfNull(resource.getPresentationName()).length());
-            maxSName = Math.max(maxSName, emptyIfNull(resource.getSymbolicName()).length());
-            maxVersion = Math.max(maxVersion, emptyIfNull(resource.getVersion()).length());
-        }
 
         ShellTable table = new ShellTable();
         table.column("Name");

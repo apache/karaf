@@ -34,7 +34,7 @@ public class InstallFeatureCommand extends FeaturesCommandSupport {
 
     private static String DEFAULT_VERSION = "0.0.0";
 
-    @Argument(index = 0, name = "feature", description = "The name and version of the features to install. A feature id looks like name/version. The version is optional.", required = true, multiValued = true)
+    @Argument(index = 0, name = "features", description = "The name and version of the features to install. A feature id looks like name/version. The version is optional.", required = true, multiValued = true)
     @Completion(AvailableFeatureCompleter.class)
     List<String> features;
 
