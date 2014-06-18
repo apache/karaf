@@ -60,14 +60,6 @@ public class ListCommand implements Action {
             query = "(|(presentationname=*" + substr + "*)(symbolicname=*" + substr + "*))";
         }
         Resource[] resources = repoAdmin.discoverResources(query);
-        int maxPName = 4;
-        int maxSName = 13;
-        int maxVersion = 7;
-        for (Resource resource : resources) {
-            maxPName = Math.max(maxPName, emptyIfNull(resource.getPresentationName()).length());
-            maxSName = Math.max(maxSName, emptyIfNull(resource.getSymbolicName()).length());
-            maxVersion = Math.max(maxVersion, emptyIfNull(resource.getVersion()).length());
-        }
 
         ShellTable table = new ShellTable();
         table.column("Name");
