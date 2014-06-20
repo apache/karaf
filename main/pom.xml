@@ -40,7 +40,7 @@
     <dependencies>
         <dependency>
             <groupId>org.eclipse</groupId>
-            <artifactId>osgi</artifactId>
+            <artifactId>org.eclipse.osgi</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>

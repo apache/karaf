@@ -254,7 +254,7 @@
                 org/eclipse/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}
             </outputFileNameMapping>
             <includes>
-                <include>org.eclipse:osgi</include>
+                <include>org.eclipse:org.eclipse.osgi</include>
             </includes>
         </dependencySet>
         <dependencySet>
