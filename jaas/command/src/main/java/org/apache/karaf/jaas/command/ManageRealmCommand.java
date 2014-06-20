@@ -16,6 +16,7 @@
 package org.apache.karaf.jaas.command;
 
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 
 import javax.security.auth.login.AppConfigurationEntry;
@@ -48,6 +49,9 @@ public class ManageRealmCommand extends JaasCommandSupport {
     @Option(name = "-f", aliases = { "--force" }, description = "Force the management of this realm, even if another one was under management", required = false, multiValued = false)
     boolean force;
 
+    @Option(name = "-h", aliases = {"--hidden"}, description = "Manage hidden realms", required = false, multiValued = false)
+    boolean hidden;
+
     @SuppressWarnings("unchecked")
     @Override
     public Object execute() throws Exception {
@@ -69,6 +73,7 @@ public class ManageRealmCommand extends JaasCommandSupport {
 
             if (index > 0) {
                 // user provided the index, get the realm AND entry from the index
+                List<JaasRealm> realms = getRealms(hidden);
                 if (realms != null && realms.size() > 0) {
                     int i = 1;
                     realms_loop: for (JaasRealm r : realms) {
@@ -87,6 +92,7 @@ public class ManageRealmCommand extends JaasCommandSupport {
                     }
                 }
             } else {
+                List<JaasRealm> realms = getRealms(hidden);
                 if (realms != null && realms.size() > 0) {
                     for (JaasRealm r : realms) {
                         if (r.getName().equals(realmName)) {
@@ -102,13 +108,17 @@ public class ManageRealmCommand extends JaasCommandSupport {
                                         }
                                     } else {
                                         if (moduleName.equals(e.getLoginModuleName()) || moduleName.equals(moduleClass)) {
-                                            entry = e;
-                                            break;
+	                                        if (getBackingEngine(e) != null) {
+												entry = e;
+												break;
+											}
                                         }
                                     }
                                 }
+                                if (entry != null) {
+                                    break;
+                                }
                             }
-                            break;
                         }
                     }
                 }
