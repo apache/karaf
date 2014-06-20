@@ -38,7 +38,6 @@
     </properties>
 
     <dependencies>
-
         <dependency>
             <groupId>org.apache.karaf</groupId>
             <artifactId>apache-karaf</artifactId>
@@ -47,25 +46,11 @@
             <type>tar.gz</type>
             <exclusions>
                 <exclusion>
-                    <groupId>org.apache.karaf</groupId>
-                    <artifactId>org.apache.karaf.client</artifactId>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
-        <dependency>
-            <groupId>org.apache.karaf</groupId>
-            <artifactId>apache-karaf</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-            <type>zip</type>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.apache.karaf</groupId>
-                    <artifactId>org.apache.karaf.client</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.gogo.runtime</artifactId>
@@ -93,7 +78,10 @@
             <artifactId>geronimo-atinject_1.0_spec</artifactId>
             <version>1.0</version>
         </dependency>
-
+            <dependency>
+                <groupId>org.ops4j.pax.url</groupId>
+                <artifactId>pax-url-aether</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -122,6 +110,16 @@
                     </execution>
                 </executions>
             </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <systemPropertyVariables>
+                                 <org.ops4j.pax.logging.DefaultServiceLog.level>INFO</org.ops4j.pax.logging.DefaultServiceLog.level>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
+
         </plugins>
     </build>
 
