@@ -41,6 +41,9 @@ public class ManageRealmCommand extends JaasCommandSupport {
     @Option(name = "-f", aliases = {"--force"}, description = "Force the management of this realm, even if another one was under management", required = false, multiValued = false)
     boolean force;
 
+    @Option(name = "-h", aliases = {"--hidden"}, description = "Manage hidden realms", required = false, multiValued = false)
+    boolean hidden;
+
     @Override
     protected Object doExecute() throws Exception {
         if (realmName == null && index <= 0) {
@@ -61,7 +64,7 @@ public class ManageRealmCommand extends JaasCommandSupport {
 
             if (index > 0) {
                 // user provided the index, get the realm AND entry from the index
-                List<JaasRealm> realms = getRealms();
+                List<JaasRealm> realms = getRealms(hidden);
                 if (realms != null && realms.size() > 0) {
                     int i = 1;
                     realms_loop: for (JaasRealm r : realms) {
@@ -85,22 +88,23 @@ public class ManageRealmCommand extends JaasCommandSupport {
                     for (JaasRealm r : realms) {
                         if (r.getName().equals(realmName)) {
                             realm = r;
-                            break;
-                        }
-                    }
-
-                }
-                AppConfigurationEntry[] entries = realm.getEntries();
-                if (entries != null) {
-                    for (AppConfigurationEntry e : entries) {
-                        String moduleClass = (String) e.getOptions().get(ProxyLoginModule.PROPERTY_MODULE);
-                        if (moduleName == null) {
-                            entry = e;
-                            break;
-                        } else {
-                            if (moduleName.equals(e.getLoginModuleName()) || moduleName.equals(moduleClass)) {
-                                entry = e;
-                                break;
+                            AppConfigurationEntry[] entries = realm.getEntries();
+                            if (entries != null) {
+                                for (AppConfigurationEntry e : entries) {
+                                    String moduleClass = (String) e.getOptions().get(ProxyLoginModule.PROPERTY_MODULE);
+                                    if (moduleName == null) {
+                                        entry = e;
+                                        break;
+                                    } else {
+                                        if (moduleName.equals(e.getLoginModuleName()) || moduleName.equals(moduleClass)) {
+                                            entry = e;
+                                            break;
+                                        }
+                                    }
+                                }
+                                if (entry != null) {
+                                    break;
+                                }
                             }
                         }
                     }

@@ -19,6 +19,7 @@ import java.util.List;
 import javax.security.auth.login.AppConfigurationEntry;
 
 import org.apache.felix.gogo.commands.Command;
+import org.apache.felix.gogo.commands.Option;
 import org.apache.karaf.jaas.boot.ProxyLoginModule;
 import org.apache.karaf.jaas.config.JaasRealm;
 import org.apache.karaf.jaas.modules.BackingEngine;
@@ -28,13 +29,16 @@ public class ListRealmsCommand extends JaasCommandSupport {
 
     private static final String REALM_LIST_FORMAT = "%5s %-20s %-80s";
 
+    @Option(name = "-h", aliases = {"--hidden"}, description = "Show hidden realms", required = false, multiValued = false)
+    boolean hidden;
+
     @Override
     protected Object doExecute(BackingEngine engine) throws Exception {
         return null;
     }
 
     protected Object doExecute() throws Exception {
-        List<JaasRealm> realms = getRealms();
+        List<JaasRealm> realms = getRealms(hidden);
         if (realms != null && realms.size() > 0) {
             System.out.println(String.format(REALM_LIST_FORMAT, "Index","Realm", "Module Class"));
             int index = 1;

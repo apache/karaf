@@ -21,8 +21,13 @@ import org.apache.karaf.jaas.modules.BackingEngineService;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 
 import javax.security.auth.login.AppConfigurationEntry;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
+import java.util.TreeMap;
 
 public abstract class JaasCommandSupport extends OsgiCommandSupport {
 
@@ -58,7 +63,22 @@ public abstract class JaasCommandSupport extends OsgiCommandSupport {
     }
 
     public List<JaasRealm> getRealms() {
-        return realms;
+        return getRealms(false);
+    }
+
+    public List<JaasRealm> getRealms(boolean hidden) {
+        if (hidden) {
+            return realms;
+        } else {
+            Map<String, JaasRealm> map = new TreeMap<String, JaasRealm>();
+            for (JaasRealm realm : realms) {
+                if (!map.containsKey(realm.getName())
+                        || realm.getRank() > map.get(realm.getName()).getRank()) {
+                    map.put(realm.getName(), realm);
+                }
+            }
+            return new ArrayList<JaasRealm>(map.values());
+        }
     }
 
     public void setRealms(List<JaasRealm> realms) {
