@@ -766,7 +766,9 @@ public class Main {
                     location = nextLocation(st);
                     if (location != null) {
                         try {
-                            String[] parts = convertToMavenUrlsIfNeeded(location, convertToMavenUrls);
+                            // TODO: Workaround for PAXURL-278
+                            String[] parts = location.contains("pax-url-aether") ? convertToMavenUrlsIfNeeded(location, false) 
+                                :  convertToMavenUrlsIfNeeded(location, convertToMavenUrls);
                             Bundle b = context.installBundle(parts[0], new URL(parts[1]).openStream());
                             sl.setBundleStartLevel(b, startLevel);
                             bundles.add(b);
