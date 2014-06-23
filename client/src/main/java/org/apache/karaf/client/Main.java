@@ -38,6 +38,7 @@ import org.apache.sshd.client.UserInteraction;
 import org.apache.sshd.client.channel.ChannelShell;
 import org.apache.sshd.client.future.ConnectFuture;
 import org.apache.sshd.common.RuntimeSshException;
+import org.apache.sshd.common.keyprovider.FileKeyPairProvider;
 import org.fusesource.jansi.AnsiConsole;
 import org.slf4j.impl.SimpleLogger;
 
@@ -78,7 +79,7 @@ public class Main {
         try {
             final Console console = System.console();
             client = SshClient.setUpDefaultClient();
-            setupAgent(config.getUser(), client);
+            setupAgent(config.getUser(), config.getKeyFile(), client);
             client.setUserInteraction(new UserInteraction() {
                 public void welcome(String banner) {
                     System.out.println(banner);
@@ -161,10 +162,10 @@ public class Main {
         System.exit(exitStatus);
     }
 
-    private static void setupAgent(String user, SshClient client) {
+    private static void setupAgent(String user, String keyFile, SshClient client) {
         SshAgent agent;
         URL builtInPrivateKey = Main.class.getClassLoader().getResource("karaf.key");
-        agent = startAgent(user, builtInPrivateKey);
+        agent = startAgent(user, builtInPrivateKey, keyFile);
         client.setAgentFactory(new LocalAgentFactory(agent));
         client.getProperties().put(SshAgent.SSH_AUTHSOCKET_ENV_NAME, "local");
     }
@@ -189,7 +190,7 @@ public class Main {
         return session;
     }
 
-    private static SshAgent startAgent(String user, URL privateKeyUrl) {
+    private static SshAgent startAgent(String user, URL privateKeyUrl, String keyFile) {
         InputStream is = null;
         try {
             SshAgent agent = new AgentImpl();
@@ -198,6 +199,13 @@ public class Main {
             KeyPair keyPair = (KeyPair) r.readObject();
             is.close();
             agent.addIdentity(keyPair, user);
+            if (keyFile != null) {
+                String[] keyFiles = new String[]{keyFile};
+                FileKeyPairProvider fileKeyPairProvider = new FileKeyPairProvider(keyFiles);
+                for (KeyPair key : fileKeyPairProvider.loadKeys()) {
+                    agent.addIdentity(key, user);                
+                }
+            }
             return agent;
         } catch (Throwable e) {
             close(is);
