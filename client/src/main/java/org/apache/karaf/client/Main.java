@@ -38,6 +38,7 @@ import org.apache.sshd.client.UserInteraction;
 import org.apache.sshd.client.channel.ChannelShell;
 import org.apache.sshd.client.future.ConnectFuture;
 import org.apache.sshd.common.RuntimeSshException;
+import org.apache.sshd.common.keyprovider.FileKeyPairProvider;
 import org.fusesource.jansi.AnsiConsole;
 import org.slf4j.impl.SimpleLogger;
 
@@ -61,6 +62,7 @@ public class Main {
         String user = "karaf";
         String password = null;
         StringBuilder command = new StringBuilder();
+        String keyFile = null;
 
         Properties usersCfg = loadProps(new File(System.getProperty("karaf.etc"), "users.properties"));
         if (!usersCfg.isEmpty()) {
@@ -91,6 +93,8 @@ public class Main {
                     batch = true;
                 } else if (args[i].equals("-f")) {
                     file = args[++i];
+                } else if (args[i].equals("-k")) {
+                    keyFile = args[++i];
                 } else if (args[i].equals("--help")) {
                     System.out.println("Apache Karaf client");
                     System.out.println("  -a [port]     specify the port to connect to");
@@ -104,6 +108,7 @@ public class Main {
                     System.out.println("  -d [delay]    intra-retry delay (defaults to 2 seconds)");
                     System.out.println("  -b            batch mode, specify multiple commands via standard input");
                     System.out.println("  -f [file]    read commands from the specified file");
+                    System.out.println("  -k [keyFile]    specify the private keyFile location when using key login, need have BouncyCastle registered as security provider using this flag");
                     System.out.println("  [commands]    commands to run");
                     System.out.println("If no commands are specified, the client will be put in an interactive mode");
                     System.exit(0);
@@ -146,7 +151,7 @@ public class Main {
 
             final Console console = System.console();
             client = SshClient.setUpDefaultClient();
-            setupAgent(user, client);
+            setupAgent(user, client, keyFile);
             client.setUserInteraction(new UserInteraction() {
                 public void welcome(String banner) {
                     System.out.println(banner);
@@ -267,15 +272,15 @@ public class Main {
         return props;
     }
 
-    private static void setupAgent(String user, SshClient client) {
+    private static void setupAgent(String user, SshClient client, String keyFile) {
         SshAgent agent;
         URL builtInPrivateKey = Main.class.getClassLoader().getResource("karaf.key");
-        agent = startAgent(user, builtInPrivateKey);
+        agent = startAgent(user, builtInPrivateKey, keyFile);
         client.setAgentFactory(new LocalAgentFactory(agent));
         client.getProperties().put(SshAgent.SSH_AUTHSOCKET_ENV_NAME, "local");
     }
 
-    private static SshAgent startAgent(String user, URL privateKeyUrl) {
+    private static SshAgent startAgent(String user, URL privateKeyUrl, String keyFile) {
         InputStream is = null;
         try {
             SshAgent agent = new AgentImpl();
@@ -284,6 +289,15 @@ public class Main {
             KeyPair keyPair = (KeyPair) r.readObject();
             is.close();
             agent.addIdentity(keyPair, user);
+            
+            if (keyFile != null) {
+                String[] keyFiles = new String[]{keyFile};
+                FileKeyPairProvider fileKeyPairProvider = new FileKeyPairProvider(keyFiles);
+                for (KeyPair key : fileKeyPairProvider.loadKeys()) {
+                    agent.addIdentity(key, user);                
+                }
+            }
+            
             return agent;
         } catch (Throwable e) {
             close(is);
