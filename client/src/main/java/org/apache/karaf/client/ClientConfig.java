@@ -36,6 +36,7 @@ public class ClientConfig {
     private int retryDelay;
     private boolean batch;
     private String file = null;
+    private String keyFile = null;
     private String command;
 
     public ClientConfig(String[] args) throws IOException {
@@ -70,6 +71,8 @@ public class ClientConfig {
                     batch = true;
                 } else if (args[i].equals("-f")) {
                     file = args[++i];
+                } else if (args[i].equals("-k")) {
+                    keyFile = args[++i];
                 } else if (args[i].equals("--help")) {
                     showHelp();
                 } else {
@@ -108,6 +111,7 @@ public class ClientConfig {
         System.out.println("  -d [delay]    intra-retry delay (defaults to 2 seconds)");
         System.out.println("  -b            batch mode, specify multiple commands via standard input");
         System.out.println("  -f [file]     read commands from the specified file");
+        System.out.println("  -k [keyFile]    specify the private keyFile location when using key login, need have BouncyCastle registered as security provider using this flag");
         System.out.println("  [commands]    commands to run");
         System.out.println("If no commands are specified, the client will be put in an interactive mode");
         System.exit(0);
@@ -155,5 +159,9 @@ public class ClientConfig {
 
     public String getFile() {
         return file;
+    }
+
+    public String getKeyFile() {
+        return keyFile;
     }
 }
