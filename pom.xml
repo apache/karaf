@@ -238,7 +238,6 @@
         <pax.swissbox.version>1.7.0</pax.swissbox.version>
         <pax.tinybundle.version>2.0.0</pax.tinybundle.version>
         <portlet-api.version>2.0</portlet-api.version>
-        <servlet.api.version>3.0</servlet.api.version>
         <slf4j.version>1.7.7</slf4j.version>
         <servicemix.specs.version>2.4.0</servicemix.specs.version>
 
@@ -1470,11 +1469,6 @@
                 <groupId>org.eclipse</groupId>
                 <artifactId>osgi</artifactId>
                 <version>${equinox.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>javax.servlet</groupId>
-                <artifactId>servlet-api</artifactId>
-                <version>${servlet.api.version}</version>
             </dependency>
 
             <dependency>
