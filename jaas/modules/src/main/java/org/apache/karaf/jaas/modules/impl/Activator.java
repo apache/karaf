@@ -21,6 +21,7 @@ import org.apache.karaf.jaas.modules.BackingEngineFactory;
 import org.apache.karaf.jaas.modules.EncryptionService;
 import org.apache.karaf.jaas.modules.encryption.BasicEncryptionService;
 import org.apache.karaf.jaas.modules.properties.PropertiesBackingEngineFactory;
+import org.apache.karaf.jaas.modules.publickey.PublickeyBackingEngineFactory;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -30,6 +31,7 @@ import org.osgi.service.cm.ManagedService;
 public class Activator implements BundleActivator {
 
     private ServiceRegistration<BackingEngineFactory> propertiesBackingEngineFactoryServiceRegistration;
+    private ServiceRegistration<BackingEngineFactory> publickeyBackingEngineFactoryServiceRegistration;
     private ServiceRegistration<EncryptionService> basicEncryptionServiceServiceRegistration;
     private ServiceRegistration karafRealmServiceRegistration;
 
@@ -37,6 +39,8 @@ public class Activator implements BundleActivator {
     public void start(BundleContext context) throws Exception {
         propertiesBackingEngineFactoryServiceRegistration =
             context.registerService(BackingEngineFactory.class, new PropertiesBackingEngineFactory(), null);
+        publickeyBackingEngineFactoryServiceRegistration =
+            context.registerService(BackingEngineFactory.class, new PublickeyBackingEngineFactory(), null);
 
         Hashtable<String, Object> props = new Hashtable<String, Object>();
         props.put(Constants.SERVICE_RANKING, -1);
