@@ -65,6 +65,11 @@
         <bean class="org.apache.karaf.jaas.modules.properties.PropertiesBackingEngineFactory"/>
     </service>
 
+    <!-- The Backing Engine Factory Service for the PublickeyLoginModule -->
+    <service interface="org.apache.karaf.jaas.modules.BackingEngineFactory">
+        <bean class="org.apache.karaf.jaas.modules.publickey.PublickeyBackingEngineFactory"/>
+    </service>
+    
     <service interface="org.apache.karaf.jaas.modules.EncryptionService" ranking="-1">
         <service-properties>
             <entry key="name" value="basic"/>
