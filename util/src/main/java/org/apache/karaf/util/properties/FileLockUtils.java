@@ -64,6 +64,7 @@ public final class FileLockUtils {
         RandomAccessFile raf = new RandomAccessFile(file, "rw");
         try {
             FileLock lock = raf.getChannel().lock();
+            
             try {
                 return callback.call(raf);
             } finally {
@@ -74,7 +75,7 @@ public final class FileLockUtils {
         }
     }
 
-    public static void execute(File file, final RunnableWithProperties callback) throws IOException {
+    public static void execute(File file, final RunnableWithProperties callback, final boolean writeToFile) throws IOException {
         execute(file, new Runnable() {
             public void run(RandomAccessFile file) throws IOException {
                 byte[] buffer = new byte[(int) file.length()];
@@ -82,15 +83,17 @@ public final class FileLockUtils {
                 Properties props = new Properties();
                 props.load(new ByteArrayInputStream(buffer));
                 callback.run(props);
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                props.store(baos, null);
-                file.setLength(0);
-                file.write(baos.toByteArray());
+                if (writeToFile) {
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    props.store(baos, null);
+                    file.setLength(0);
+                    file.write(baos.toByteArray());
+                }
             }
         });
     }
 
-    public static <T> T execute(File file, final CallableWithProperties<T> callback) throws IOException {
+    public static <T> T execute(File file, final CallableWithProperties<T> callback, final boolean writeToFile) throws IOException {
         return execute(file, new Callable<T>() {
             public T call(RandomAccessFile file) throws IOException {
                 byte[] buffer = new byte[(int) file.length()];
@@ -98,10 +101,12 @@ public final class FileLockUtils {
                 Properties props = new Properties();
                 props.load(new ByteArrayInputStream(buffer));
                 T result = callback.call(props);
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                props.store(baos, null);
-                file.setLength(0);
-                file.write(baos.toByteArray());
+                if (writeToFile) {
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    props.store(baos, null);
+                    file.setLength(0);
+                    file.write(baos.toByteArray());
+                }
                 return result;
             }
         });

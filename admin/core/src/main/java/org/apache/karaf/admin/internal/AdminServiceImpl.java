@@ -199,7 +199,7 @@ public class AdminServiceImpl implements AdminService {
         T call(State state) throws IOException;
     }
 
-    synchronized <T> T execute(final Task<T> callback) {
+    synchronized <T> T execute(final Task<T> callback, final boolean writeToFile) {
         final File storageFile = new File(storageLocation, STORAGE_FILE);
         if (!storageFile.exists()) {
             storageFile.getParentFile().mkdirs();
@@ -218,10 +218,12 @@ public class AdminServiceImpl implements AdminService {
                     public T call(org.apache.felix.utils.properties.Properties properties) throws IOException {
                         State state = loadData(properties);
                         T t = callback.call(state);
-                        saveData(state, properties);
+                        if (writeToFile) {
+                            saveData(state, properties);
+                        }
                         return t;
                     }
-                });
+                }, writeToFile);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -332,7 +334,7 @@ public class AdminServiceImpl implements AdminService {
                 AdminServiceImpl.this.proxies.put(name, instance);
                 return instance;
             }
-        });
+        }, true);
     }
 
     void handleFeatures(File file, final InstanceSettings settings) throws IOException {
@@ -341,7 +343,7 @@ public class AdminServiceImpl implements AdminService {
                 appendToPropList(properties, "featuresBoot", settings.getFeatures());
                 appendToPropList(properties, "featuresRepositories", settings.getFeatureURLs());
             }
-        });
+        }, true);
     }
 
     private void appendToPropList(org.apache.felix.utils.properties.Properties p, String key, List<String> elements) {
@@ -363,7 +365,7 @@ public class AdminServiceImpl implements AdminService {
             public Instance[] call(State state) throws IOException {
                 return proxies.values().toArray(new Instance[proxies.size()]);
             }
-        });
+        }, false);
     }
 
     public Instance getInstance(final String name) {
@@ -371,7 +373,7 @@ public class AdminServiceImpl implements AdminService {
             public Instance call(State state) throws IOException {
                 return proxies.get(name);
             }
-        });
+        }, false);
     }
 
     public void startInstance(final String name, final String javaOpts) {
@@ -449,7 +451,7 @@ public class AdminServiceImpl implements AdminService {
                 }
                 return classpath;
             }
-        });
+        }, true);
     }
 
     public void stopInstance(final String name) {
@@ -470,7 +472,7 @@ public class AdminServiceImpl implements AdminService {
                 }
                 return null;
             }
-        });
+        }, true);
     }
 
     public void destroyInstance(final String name) {
@@ -489,7 +491,7 @@ public class AdminServiceImpl implements AdminService {
                 AdminServiceImpl.this.proxies.remove(name);
                 return null;
             }
-        });
+        }, true);
     }
 
     public void renameInstance(final String oldName, final String newName) throws Exception {
@@ -549,7 +551,7 @@ public class AdminServiceImpl implements AdminService {
                 AdminServiceImpl.this.proxies.put(newName, proxy);
                 return null;
             }
-        });
+        }, true);
     }
 
     public synchronized Instance cloneInstance(final String name, final String cloneName, final InstanceSettings settings) throws Exception {
@@ -614,7 +616,7 @@ public class AdminServiceImpl implements AdminService {
                 AdminServiceImpl.this.proxies.put(cloneName, cloneInstance);
                 return cloneInstance;
             }
-        });
+        }, true);
     }
 
     private void checkPid(InstanceState instance) throws IOException {
@@ -695,7 +697,7 @@ public class AdminServiceImpl implements AdminService {
             public Integer call(State state) throws IOException {
                 return AdminServiceImpl.this.getKarafPort(state, name, path, key);
             }
-        });
+        }, false);
     }
 
     private Integer getKarafPort(State state, String name, String path, final String key) {
@@ -709,7 +711,7 @@ public class AdminServiceImpl implements AdminService {
                 public Integer call(org.apache.felix.utils.properties.Properties properties) throws IOException {
                     return Integer.parseInt(properties.get(key).toString());
                 }
-            });
+            }, false);
         } catch (IOException e) {
             return 0;
         }
@@ -731,10 +733,10 @@ public class AdminServiceImpl implements AdminService {
                     public void run(org.apache.felix.utils.properties.Properties properties) throws IOException {
                         properties.put(key, Integer.toString(port));
                     }
-                });
+                }, true);
                 return null;
             }
-        });
+        }, true);
     }
 
     boolean isInstanceRoot(final String name) {
@@ -746,7 +748,7 @@ public class AdminServiceImpl implements AdminService {
                 }
                 return instance.root;
             }
-        });
+        }, false);
     }
 
     String getInstanceLocation(final String name) {
@@ -758,7 +760,7 @@ public class AdminServiceImpl implements AdminService {
                 }
                 return instance.loc;
             }
-        });
+        }, true);
     }
 
     int getInstancePid(final String name) {
@@ -771,7 +773,7 @@ public class AdminServiceImpl implements AdminService {
                 checkPid(instance);
                 return instance.pid;
             }
-        });
+        }, false);
     }
 
     String getInstanceJavaOpts(final String name) {
@@ -783,7 +785,7 @@ public class AdminServiceImpl implements AdminService {
                 }
                 return instance.opts;
             }
-        });
+        }, false);
     }
 
     void changeInstanceJavaOpts(final String name, final String opts) {
@@ -796,7 +798,7 @@ public class AdminServiceImpl implements AdminService {
                 instance.opts = opts;
                 return null;
             }
-        });
+        }, true);
     }
 
     String getInstanceState(final String name) {
@@ -824,7 +826,7 @@ public class AdminServiceImpl implements AdminService {
                     return Instance.STARTING;
                 }
             }
-        });
+        }, true);
     }
 
     private boolean deleteFile(File fileToDelete) {
