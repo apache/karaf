@@ -418,7 +418,7 @@ public class InstanceServiceImpl implements InstanceService {
                 return null;
             }
 
-        });
+        }, true);
     }
 
     private void doStart(InstanceState instance, String name, String javaOpts) throws IOException {
