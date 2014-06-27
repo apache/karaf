@@ -203,7 +203,7 @@ public class InstanceServiceImpl implements InstanceService {
         T call(State state) throws IOException;
     }
 
-    synchronized <T> T execute(final Task<T> callback) {
+    synchronized <T> T execute(final Task<T> callback, final boolean writeToFile) {
         final File storageFile = new File(storageLocation, STORAGE_FILE);
         if (!storageFile.exists()) {
             storageFile.getParentFile().mkdirs();
@@ -222,10 +222,12 @@ public class InstanceServiceImpl implements InstanceService {
                     public T call(org.apache.felix.utils.properties.Properties properties) throws IOException {
                         State state = loadData(properties);
                         T t = callback.call(state);
-                        saveData(state, properties);
+                        if (writeToFile) {
+                            saveData(state, properties);
+                        }
                         return t;
                     }
-                });
+                }, writeToFile);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -359,7 +361,7 @@ public class InstanceServiceImpl implements InstanceService {
                 InstanceServiceImpl.this.proxies.put(name, instance);
                 return instance;
             }
-        });
+        }, true);
     }
 
     void addFeaturesFromSettings(File featuresCfg, final InstanceSettings settings) throws IOException {
@@ -368,7 +370,7 @@ public class InstanceServiceImpl implements InstanceService {
                 appendToPropList(properties, "featuresBoot", settings.getFeatures());
                 appendToPropList(properties, "featuresRepositories", settings.getFeatureURLs());
             }
-        });
+        }, true);
     }
 
     private void appendToPropList(org.apache.felix.utils.properties.Properties p, String key, List<String> elements) {
@@ -390,7 +392,7 @@ public class InstanceServiceImpl implements InstanceService {
             public Instance[] call(State state) throws IOException {
                 return proxies.values().toArray(new Instance[proxies.size()]);
             }
-        });
+        }, false);
     }
 
     public Instance getInstance(final String name) {
@@ -398,7 +400,7 @@ public class InstanceServiceImpl implements InstanceService {
             public Instance call(State state) throws IOException {
                 return proxies.get(name);
             }
-        });
+        }, false);
     }
 
     public void startInstance(final String name, final String javaOpts) {
@@ -551,7 +553,7 @@ public class InstanceServiceImpl implements InstanceService {
                 }
                 return null;
             }
-        });
+        }, true);
     }
 
     public void stopInstance(final String name) {
@@ -572,7 +574,7 @@ public class InstanceServiceImpl implements InstanceService {
                 }
                 return null;
             }
-        });
+        }, true);
     }
 
     public void destroyInstance(final String name) {
@@ -591,7 +593,7 @@ public class InstanceServiceImpl implements InstanceService {
                 InstanceServiceImpl.this.proxies.remove(name);
                 return null;
             }
-        });
+        }, true);
     }
 
     public void renameInstance(final String oldName, final String newName, final boolean printOutput) throws Exception {
@@ -651,7 +653,7 @@ public class InstanceServiceImpl implements InstanceService {
                 InstanceServiceImpl.this.proxies.put(newName, proxy);
                 return null;
             }
-        });
+        }, true);
     }
 
     public synchronized Instance cloneInstance(final String name, final String cloneName, final InstanceSettings settings, final boolean printOutput) throws Exception {
@@ -717,7 +719,7 @@ public class InstanceServiceImpl implements InstanceService {
                 InstanceServiceImpl.this.proxies.put(cloneName, cloneInstance);
                 return cloneInstance;
             }
-        });
+        }, true);
     }
 
     private void checkPid(InstanceState instance) throws IOException {
@@ -798,7 +800,7 @@ public class InstanceServiceImpl implements InstanceService {
             public Integer call(State state) throws IOException {
                 return InstanceServiceImpl.this.getKarafPort(state, name, path, key);
             }
-        });
+        }, false);
     }
 
     private Integer getKarafPort(State state, String name, String path, final String key) {
@@ -812,7 +814,7 @@ public class InstanceServiceImpl implements InstanceService {
                 public Integer call(org.apache.felix.utils.properties.Properties properties) throws IOException {
                     return Integer.parseInt(properties.get(key).toString());
                 }
-            });
+            }, false);
         } catch (IOException e) {
             return 0;
         }
@@ -834,10 +836,10 @@ public class InstanceServiceImpl implements InstanceService {
                     public void run(org.apache.felix.utils.properties.Properties properties) throws IOException {
                         properties.put(key, Integer.toString(port));
                     }
-                });
+                }, true);
                 return null;
             }
-        });
+        }, true);
     }
 
     boolean isInstanceRoot(final String name) {
@@ -849,7 +851,7 @@ public class InstanceServiceImpl implements InstanceService {
                 }
                 return instance.root;
             }
-        });
+        }, false);
     }
 
     String getInstanceLocation(final String name) {
@@ -861,7 +863,7 @@ public class InstanceServiceImpl implements InstanceService {
                 }
                 return instance.loc;
             }
-        });
+        }, true);
     }
 
     int getInstancePid(final String name) {
@@ -874,7 +876,7 @@ public class InstanceServiceImpl implements InstanceService {
                 checkPid(instance);
                 return instance.pid;
             }
-        });
+        }, false);
     }
 
     String getInstanceJavaOpts(final String name) {
@@ -886,7 +888,7 @@ public class InstanceServiceImpl implements InstanceService {
                 }
                 return instance.opts;
             }
-        });
+        }, false);
     }
 
     void changeInstanceJavaOpts(final String name, final String opts) {
@@ -899,7 +901,7 @@ public class InstanceServiceImpl implements InstanceService {
                 instance.opts = opts;
                 return null;
             }
-        });
+        }, true);
     }
 
     String getInstanceState(final String name) {
@@ -927,7 +929,7 @@ public class InstanceServiceImpl implements InstanceService {
                     return Instance.STARTING;
                 }
             }
-        });
+        }, true);
     }
 
     private boolean deleteFile(File fileToDelete) {
