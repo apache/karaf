@@ -634,7 +634,7 @@ public class Main {
                             }
                         }
                     }
-                });
+                }, true);
             }
         } catch (Exception e) {
             System.err.println("Unable to update instance pid: " + e.getMessage());
