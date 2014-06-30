@@ -64,6 +64,7 @@
         <module>jndi</module>
         <module>jdbc</module>
         <module>jms</module>
+        <module>jpa</module>
         <module>tooling</module>
         <module>assemblies</module>
         <module>demos</module>
