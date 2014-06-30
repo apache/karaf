@@ -46,6 +46,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 import java.util.regex.Matcher;
@@ -108,7 +109,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
     private boolean respectStartLvlDuringFeatureStartup;
     private long resolverTimeout = 5000;
     private Set<URI> uris;
-    private Map<URI, RepositoryImpl> repositories = new HashMap<URI, RepositoryImpl>();
+    private Map<URI, Repository> repositories = new ConcurrentHashMap<URI, Repository>();
     private Map<String, Map<String, Feature>> features;
     private Map<Feature, Set<Long>> installed = new HashMap<Feature, Set<Long>>();
     private String boot;
@@ -318,8 +319,8 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
     public void removeRepository(URI uri, boolean uninstall) throws Exception {
         if (repositories.containsKey(uri)) {
             if (uninstall) {
-                RepositoryImpl repositoryImpl = repositories.get(uri);
-                for (Feature feature : repositoryImpl.getFeatures()) {
+                Repository repository = repositories.get(uri);
+                for (Feature feature : repository.getFeatures()) {
                     this.uninstallFeature(feature.getName(), feature.getVersion());
                 }
             }
@@ -358,7 +359,8 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
      * @return the list of features repositories.
      */
     public Repository[] listRepositories() {
-        Collection<RepositoryImpl> repos = repositories.values();
+        // the constructor will iterate over ConcurrentHashMap without the risk of ConcurrentModificationException
+        Collection<Repository> repos = new ArrayList<Repository>(repositories.values());
         return repos.toArray(new Repository[repos.size()]);
     }
 
