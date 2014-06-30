@@ -85,7 +85,7 @@ public class Bundle implements BundleInfo {
      *     
      */
     public String getLocation() {
-        return value;
+        return value.trim();
     }
 
     /**

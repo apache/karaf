@@ -73,7 +73,7 @@ public class BundleInfoImpl implements BundleInfo {
 	}
 
 	public String getLocation() {
-		return this.location;
+		return this.location.trim();
 	}
 
 	public void setStart(boolean start) {
