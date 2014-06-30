@@ -78,7 +78,7 @@ public class Bundle implements BundleInfo {
      * {@link String }
      */
     public String getLocation() {
-        return value;
+        return value.trim();
     }
 
     /**
