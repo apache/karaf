@@ -20,6 +20,7 @@ import java.io.*;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.security.KeyPair;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -48,6 +49,7 @@ import org.slf4j.impl.SimpleLogger;
 public class Main {
 
     private static final String ROLE_DELIMITER = ",";
+    private static final String GROUP_PREFIX = "_g_";
 
     public static void main(String[] args) throws Exception {
         Properties shellCfg = loadProps(new File(System.getProperty("karaf.etc"), "org.apache.karaf.shell.cfg"));
@@ -66,7 +68,13 @@ public class Main {
 
         Properties usersCfg = loadProps(new File(System.getProperty("karaf.etc"), "users.properties"));
         if (!usersCfg.isEmpty()) {
-            user = (String) usersCfg.keySet().iterator().next();
+            Iterator iter = usersCfg.keySet().iterator();
+            while (iter.hasNext()) {
+              user = (String) iter.next();
+              if (!user.startsWith(GROUP_PREFIX)) {
+                  break;
+              }
+            }
             password = (String) usersCfg.getProperty(user);
             if (password.contains(ROLE_DELIMITER)) {
                 password = password.substring(0, password.indexOf(ROLE_DELIMITER));
