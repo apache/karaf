@@ -335,7 +335,7 @@
                                 <excludedArtifactId>jline</excludedArtifactId>
                                 <excludedArtifactId>core</excludedArtifactId>
                                 <excludedArtifactId>org.apache.karaf.region.core</excludedArtifactId>
-                                <excludedArtifactId>region</excludedArtifactId>
+                                <excludedArtifactId>org.eclipse.equinox.region</excludedArtifactId>
                             </excludedArtifactIds>
                         </configuration>
                     </execution>
