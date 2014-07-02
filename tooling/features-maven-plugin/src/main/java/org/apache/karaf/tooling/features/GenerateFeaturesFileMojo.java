@@ -250,12 +250,14 @@ public class GenerateFeaturesFileMojo extends MojoSupport {
         Set<Artifact> dependencies = (Set<Artifact>)project.getDependencyArtifacts();
         dependencies.removeAll(provided);
         for (Artifact artifact : dependencies) {
-            getLog().info(" Generating feature " + artifact.getArtifactId() + " from " + artifact);
-            out.println("  <feature name='" + artifact.getArtifactId() + "'>");
-            currentFeature.clear();
-            writeBundle(out, artifact);
-            features.add(artifact);
-            out.println("  </feature>");
+            if (!artifact.getScope().equalsIgnoreCase("test")) {
+                getLog().info(" Generating feature " + artifact.getArtifactId() + " from " + artifact);
+                out.println("  <feature name='" + artifact.getArtifactId() + "'>");
+                currentFeature.clear();
+                writeBundle(out, artifact);
+                features.add(artifact);
+                out.println("  </feature>");
+            }
         }
         if (missingBundles.size() > 0) {
         	getLog().info("-- Some bundles were missing  --");
