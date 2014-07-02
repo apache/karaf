@@ -143,7 +143,8 @@
                             ${requirements}
                         </Require-Capability>
                         <Embed-Dependency>
-                            org.apache.karaf.jaas.modules;inline="org/apache/karaf/jaas/modules/JaasHelper*.class"
+                            org.apache.karaf.jaas.modules;inline="org/apache/karaf/jaas/modules/JaasHelper*.class",
+                            org.apache.karaf.util;inline="org/apache/karaf/util/StringEscape*.class"
                         </Embed-Dependency>
                         <Bundle-Activator>
                             org.apache.karaf.bundle.core.internal.osgi.Activator
