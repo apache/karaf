@@ -301,6 +301,7 @@ public class InstanceServiceImpl implements InstanceService {
                 copyResourceToDir(karafBase, "etc/org.apache.karaf.command.acl.feature.cfg", printOutput);
                 copyResourceToDir(karafBase, "etc/org.apache.karaf.command.acl.jaas.cfg", printOutput);
                 copyResourceToDir(karafBase, "etc/org.apache.karaf.command.acl.kar.cfg", printOutput);
+                copyResourceToDir(karafBase, "etc/org.apache.karaf.command.acl.scope_bundle.cfg", printOutput);
                 copyResourceToDir(karafBase, "etc/org.apache.karaf.command.acl.shell.cfg", printOutput);
                 copyResourceToDir(karafBase, "etc/org.apache.karaf.command.acl.system.cfg", printOutput);
                 copyResourceToDir(karafBase, "etc/org.apache.karaf.features.obr.cfg", printOutput);
