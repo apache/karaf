@@ -218,7 +218,7 @@
         <spring30.version>3.0.7.RELEASE</spring30.version>
         <spring31.version>3.1.4.RELEASE</spring31.version>
         <spring32.version>3.2.9.RELEASE_1</spring32.version>
-        <spring40.version>4.0.2.RELEASE_1</spring40.version>
+        <spring40.version>4.0.5.RELEASE_1</spring40.version>
         <spring.security31.version>3.1.4.RELEASE</spring.security31.version>
 
         <directory-version>2.0.0-M16</directory-version>
