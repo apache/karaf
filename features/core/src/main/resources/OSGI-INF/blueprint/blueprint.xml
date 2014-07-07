@@ -36,6 +36,8 @@
             <ext:property name="respectStartLvlDuringFeatureUninstall" value="true"/>
             <ext:property name="featuresBootAsynchronous" value="false"/>
             <ext:property name="overrides" value="file:$(karaf.etc)/overrides.properties"/>
+            <ext:property name="featuresRedirectConfigsToFile" value="false"/>
+            <ext:property name="featuresRedirectConfigDir" value="$(karaf.etc)"/>
         </ext:default-properties>
         <ext:location>file:$(karaf.etc)/org.apache.karaf.features.cfg</ext:location>
     </ext:property-placeholder>
@@ -62,6 +64,8 @@
     </bean>
     <bean id="configInstaller" class="org.apache.karaf.features.internal.FeatureConfigInstaller">
         <argument ref="configAdmin"/>
+        <property name="redirectFeatureConfigsToFile" value="$[featuresRedirectConfigsToFile]" />
+        <property name="featureConfigsOutputDir" value="$[featuresRedirectConfigDir]" />
     </bean>
     <bean id="featuresService" class="org.apache.karaf.features.internal.FeaturesServiceImpl" init-method="start"
           destroy-method="stop">

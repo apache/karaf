@@ -16,16 +16,6 @@
  */
 package org.apache.karaf.features.internal;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Dictionary;
-import java.util.Hashtable;
-
 import org.apache.karaf.features.ConfigFileInfo;
 import org.apache.karaf.features.Feature;
 import org.osgi.framework.Constants;
@@ -35,11 +25,23 @@ import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.Map;
+import java.util.Properties;
+
 public class FeatureConfigInstaller {
 	private static final Logger LOGGER = LoggerFactory.getLogger(FeaturesServiceImpl.class);
     private static final String CONFIG_KEY = "org.apache.karaf.features.configKey";
+    private static final String CONFIG_FILE_EXTENSION = ".cfg";
 
     private final ConfigurationAdmin configAdmin;
+
+    private boolean redirectFeatureConfigsToFile;
+    private String featureConfigsOutputDir;
     
     public FeatureConfigInstaller(ConfigurationAdmin configAdmin) {
 		this.configAdmin = configAdmin;
@@ -83,22 +85,66 @@ public class FeatureConfigInstaller {
 
     void installFeatureConfigs(Feature feature, boolean verbose) throws IOException, InvalidSyntaxException {
         for (String config : feature.getConfigurations().keySet()) {
-            Dictionary<String,String> props = new Hashtable<String, String>(feature.getConfigurations().get(config));
-            String[] pid = parsePid(config);
-            Configuration cfg = findExistingConfiguration(configAdmin, pid[0], pid[1]);
-            if (cfg == null) {
-                cfg = createConfiguration(configAdmin, pid[0], pid[1]);
-                String key = createConfigurationKey(pid[0], pid[1]);
-                props.put(CONFIG_KEY, key);
-                if (cfg.getBundleLocation() != null) {
-                    cfg.setBundleLocation(null);
+            if (!redirectFeatureConfigsToFile) {
+                Dictionary<String, String> props = new Hashtable<String, String>(feature.getConfigurations().get(config));
+                String[] pid = parsePid(config);
+                Configuration cfg = findExistingConfiguration(configAdmin, pid[0], pid[1]);
+                if (cfg == null) {
+                    cfg = createConfiguration(configAdmin, pid[0], pid[1]);
+                    String key = createConfigurationKey(pid[0], pid[1]);
+                    props.put(CONFIG_KEY, key);
+                    if (cfg.getBundleLocation() != null) {
+                        cfg.setBundleLocation(null);
+                    }
+                    cfg.update(props);
                 }
-                cfg.update(props);
+            } else {
+                feature.getConfigurations().get(config);
+                String finalname = new StringBuilder(featureConfigsOutputDir)
+                        .append(File.separator)
+                        .append(config)
+                        .append(CONFIG_FILE_EXTENSION)
+                        .toString();
+                File file = new File(finalname);
+                if (file.exists()) {
+                    LOGGER.debug("configFile already exist, don't override it");
+                    continue;
+                }
+                if (!file.exists()) {
+                    File parentFile = file.getParentFile();
+                    if (parentFile != null) {
+                        parentFile.mkdirs();
+                    }
+                }
+                Map<String, String> configItems = feature.getConfigurations().get(config);
+                Properties outputProperties = new Properties();
+                for (Map.Entry<String, String> configItemEntry : configItems.entrySet()) {
+                    outputProperties.put(configItemEntry.getKey(), configItemEntry.getValue());
+                }
+                Writer writer = new OutputStreamWriter(new FileOutputStream(finalname));
+                outputProperties.store(writer, null);
+                writer.close();
             }
         }
         for (ConfigFileInfo configFile : feature.getConfigurationFiles()) {
             installConfigurationFile(configFile.getLocation(), configFile.getFinalname(), configFile.isOverride(), verbose);
         }
+    }
+
+    public boolean isRedirectFeatureConfigsToFile() {
+        return redirectFeatureConfigsToFile;
+    }
+
+    public void setRedirectFeatureConfigsToFile(boolean redirectFeatureConfigsToFile) {
+        this.redirectFeatureConfigsToFile = redirectFeatureConfigsToFile;
+    }
+
+    public String getFeatureConfigsOutputDir() {
+        return featureConfigsOutputDir;
+    }
+
+    public void setFeatureConfigsOutputDir(String featureConfigsOutputDir) {
+        this.featureConfigsOutputDir = featureConfigsOutputDir;
     }
 
     private String createConfigurationKey(String pid, String factoryPid) {
