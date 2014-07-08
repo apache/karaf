@@ -191,6 +191,7 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
         }
         logger.debug("Get the user DN.");
         String userDN;
+        String userDNNamespace;
         DirContext context = null;
         try {
             logger.debug("Initialize the JNDI LDAP Dir Context.");
@@ -224,6 +225,7 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
             //
             // the second escapes the slashes correctly.
             userDN = result.getNameInNamespace().replace("," + userBaseDN, "");
+            userDNNamespace = (String) result.getNameInNamespace();
             
             namingEnumeration.close();
         } catch (Exception e) {
@@ -288,6 +290,7 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
             roleFilter = roleFilter.replaceAll(Pattern.quote("%u"), Matcher.quoteReplacement(user));
             roleFilter = roleFilter.replaceAll(Pattern.quote("%dn"), Matcher.quoteReplacement(userDN));
             roleFilter = roleFilter.replaceAll(Pattern.quote("%fqdn"), Matcher.quoteReplacement(userDN + "," + userBaseDN));
+            roleFilter = roleFilter.replaceAll(Pattern.quote("%nsdn"), Matcher.quoteReplacement(userDNNamespace));
             roleFilter = roleFilter.replace("\\", "\\\\");
             logger.debug("  filter: " + roleFilter);
             NamingEnumeration namingEnumeration = context.search(roleBaseDN, roleFilter, controls);
