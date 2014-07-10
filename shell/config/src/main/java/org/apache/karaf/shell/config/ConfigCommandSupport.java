@@ -69,8 +69,8 @@ public abstract class ConfigCommandSupport extends OsgiCommandSupport {
         return null;
     }
 
-    protected Dictionary getEditedProps() throws Exception {
-        return (Dictionary) this.session.get(PROPERTY_CONFIG_PROPS);
+    protected Dictionary<String, Object> getEditedProps() throws Exception {
+        return (Dictionary<String, Object>) this.session.get(PROPERTY_CONFIG_PROPS);
     }
 
     protected ConfigurationAdmin getConfigurationAdmin() {
@@ -134,7 +134,7 @@ public abstract class ConfigCommandSupport extends OsgiCommandSupport {
      * @param bypassStorage
      * @throws IOException
      */
-    protected void update(ConfigurationAdmin admin, String pid, Dictionary props, boolean bypassStorage) throws IOException {
+    protected void update(ConfigurationAdmin admin, String pid, Dictionary<String, Object> props, boolean bypassStorage) throws IOException {
         if (!bypassStorage && storage != null) {
             persistConfiguration(admin, pid, props);
         } else {
@@ -150,7 +150,7 @@ public abstract class ConfigCommandSupport extends OsgiCommandSupport {
      * @param props
      * @throws IOException
      */
-    protected void persistConfiguration(ConfigurationAdmin admin, String pid, Dictionary props) throws IOException {
+    protected void persistConfiguration(ConfigurationAdmin admin, String pid, Dictionary<String, Object> props) throws IOException {
         File storageFile = new File(storage, pid + ".cfg");
         Configuration cfg = admin.getConfiguration(pid, null);
         if (cfg != null && cfg.getProperties() != null) {
@@ -170,22 +170,24 @@ public abstract class ConfigCommandSupport extends OsgiCommandSupport {
             }
         }
         Properties p = new Properties(storageFile);
-        for (Enumeration keys = props.keys(); keys.hasMoreElements(); ) {
-            Object key = keys.nextElement();
+        for (Enumeration<String> keys = props.keys(); keys.hasMoreElements(); ) {
+            String key = keys.nextElement();
             if (!Constants.SERVICE_PID.equals(key)
                     && !ConfigurationAdmin.SERVICE_FACTORYPID.equals(key)
                     && !FILEINSTALL_FILE_NAME.equals(key)) {
-                p.put((String) key, (String) props.get(key));
+                if (props.get(key) != null) {
+                    p.put(key, props.get(key).toString());
+                }
             }
         }
         // remove "removed" properties from the file
         ArrayList<String> propertiesToRemove = new ArrayList<String>();
-        for (Object key : p.keySet()) {
+        for (String key : p.keySet()) {
             if (props.get(key) == null
                     && !Constants.SERVICE_PID.equals(key)
                     && !ConfigurationAdmin.SERVICE_FACTORYPID.equals(key)
                     && !FILEINSTALL_FILE_NAME.equals(key)) {
-                propertiesToRemove.add(key.toString());
+                propertiesToRemove.add(key);
             }
         }
         for (String key : propertiesToRemove) {
@@ -225,7 +227,7 @@ public abstract class ConfigCommandSupport extends OsgiCommandSupport {
      * @param props
      * @throws IOException
      */
-    public void updateConfiguration(ConfigurationAdmin admin, String pid, Dictionary props) throws IOException {
+    public void updateConfiguration(ConfigurationAdmin admin, String pid, Dictionary<String, Object> props) throws IOException {
         Configuration cfg = admin.getConfiguration(pid, null);
         if (cfg.getProperties() == null) {
             String[] pids = parsePid(pid);

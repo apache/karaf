@@ -31,7 +31,7 @@ public class UpdateCommand extends ConfigCommandSupport {
     protected boolean bypassStorage;
     
     protected void doExecute(ConfigurationAdmin admin) throws Exception {
-        Dictionary props = getEditedProps();
+        Dictionary<String, Object> props = getEditedProps();
         if (props == null) {
             System.err.println("No configuration is being edited--run the edit command first");
             return;

@@ -24,9 +24,9 @@ import org.apache.felix.gogo.commands.Command;
 public class PropListCommand extends ConfigPropertyCommandSupport {
 
     @Override
-    public void propertyAction(Dictionary props) {
-        for (Enumeration e = props.keys(); e.hasMoreElements(); ) {
-            Object key = e.nextElement();
+    public void propertyAction(Dictionary<String, Object> props) {
+        for (Enumeration<String> e = props.keys(); e.hasMoreElements(); ) {
+            String key = e.nextElement();
             System.out.println("   " + key + " = " + props.get(key));
         }
     }

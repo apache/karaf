@@ -21,6 +21,8 @@ package org.apache.karaf.shell.config;
 import java.util.Dictionary;
 
 import org.apache.felix.gogo.commands.Option;
+
+import java.util.Hashtable;
 import java.util.Properties;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -38,7 +40,7 @@ public abstract class ConfigPropertyCommandSupport extends ConfigCommandSupport 
 
 
     protected void doExecute(ConfigurationAdmin admin) throws Exception {
-        Dictionary props = getEditedProps();
+        Dictionary<String, Object> props = getEditedProps();
         if (bypassStorage && pid == null) {
         	System.err.println("Warning: option -b does not have any effect unless -p is also specified.");
         }
@@ -46,7 +48,7 @@ public abstract class ConfigPropertyCommandSupport extends ConfigCommandSupport 
             System.err.println("No configuration is being edited--run the edit command first");
         } else {
             if (props == null) {
-                props = new Properties();
+                props = new Hashtable<String, Object>();
             }
             propertyAction(props);
             if(requiresUpdate(pid)) {
@@ -59,7 +61,7 @@ public abstract class ConfigPropertyCommandSupport extends ConfigCommandSupport 
      * Perform an action on the properties.
      * @param props
      */
-    protected abstract void propertyAction(Dictionary props);
+    protected abstract void propertyAction(Dictionary<String, Object> props);
 
     /**
      * Checks if the configuration requires to be updated.
@@ -82,7 +84,7 @@ public abstract class ConfigPropertyCommandSupport extends ConfigCommandSupport 
      * @throws Exception
      */
     @Override
-    protected Dictionary getEditedProps() throws Exception {
+    protected Dictionary<String, Object> getEditedProps() throws Exception {
         if(pid != null) {
             ConfigurationAdmin configurationAdmin = getConfigurationAdmin();
             if (configurationAdmin != null) {
