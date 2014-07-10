@@ -18,8 +18,10 @@ package org.apache.karaf.instance.command;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.net.URL;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.features.command.completers.AllFeatureCompleter;
@@ -75,6 +77,14 @@ public class CreateCommand extends InstanceCommandSupport
     @Option(name = "-a", aliases = {"--address"}, description = "IP address of the new container instance running on (when virtual IP is used)", required = false, multiValued = false)
     String address = "0.0.0.0";
 
+    @Option(name = "-tr", aliases = {"--text-resource"},
+            description = "Add a text resource to the instance", required = false, multiValued = true)
+    List<String> textResourceLocation;
+
+    @Option(name = "-br", aliases = {"--binary-resource"},
+            description = "Add a text resource to the instance", required = false, multiValued = true)
+    List<String> binaryResourceLocations;
+
     @Argument(index = 0, name = "name", description="The name of the new container instance", required = true, multiValued = false)
     String instance = null;
 
@@ -104,9 +114,10 @@ public class CreateCommand extends InstanceCommandSupport
                 }
             }
         }
-        InstanceSettings settings = new InstanceSettings(sshPort, rmiRegistryPort, rmiServerPort, location, javaOpts, featureURLs, features, address);
+        Map<String, URL> textResources = getResources(textResourceLocation);
+        Map<String, URL> binaryResources = getResources(binaryResourceLocations);
+        InstanceSettings settings = new InstanceSettings(sshPort, rmiRegistryPort, rmiServerPort, location, javaOpts, featureURLs, features, address, textResources, binaryResources);
         getInstanceService().createInstance(instance, settings, verbose);
         return null;
     }
-
 }

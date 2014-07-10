@@ -22,7 +22,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URL;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.karaf.instance.core.Instance;
@@ -101,6 +104,18 @@ public class InstanceServiceImplTest {
         assertFileExists(instance.getLocation(), "etc/org.apache.karaf.management.cfg");
         assertFileExists(instance.getLocation(), "etc/org.ops4j.pax.logging.cfg");
         assertFileExists(instance.getLocation(), "etc/org.ops4j.pax.url.mvn.cfg");
+    }
+
+    public void testTextResources() throws Exception {
+        AdminServiceImpl service = new AdminServiceImpl();
+        service.setStorageLocation(new File("target/instances/" + System.currentTimeMillis()));
+        Map<String, URL> textResources = new HashMap<String, URL>();
+        textResources.put("etc/myresource", getClass().getClassLoader().getResource("myresource"));
+
+        InstanceSettings settings = new InstanceSettings(8122, 1122, 44444, getName(), null, null, null, textResources, new HashMap<String, URL>());
+        Instance instance = service.createInstance(getName(), settings);
+
+        assertFileExists(instance.getLocation(), "etc/myresource");
     }
 
     /**

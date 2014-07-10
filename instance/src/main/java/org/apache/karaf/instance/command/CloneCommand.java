@@ -24,6 +24,10 @@ import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
+import java.net.URL;
+import java.util.List;
+import java.util.Map;
+
 /**
  * Clone an existing instance.
  */
@@ -49,6 +53,14 @@ public class CloneCommand extends InstanceCommandSupport {
     @Option(name = "-v", aliases = {"--verbose"}, description = "Display actions performed by the command (disabled by default)", required = false, multiValued = false)
     boolean verbose = false;
 
+    @Option(name = "-tr", aliases = {"--text-resource"},
+            description = "Add a text resource to the instance", required = false, multiValued = true)
+    List<String> textResourceLocation;
+
+    @Option(name = "-br", aliases = {"--binary-resource"},
+            description = "Add a text resource to the instance", required = false, multiValued = true)
+    List<String> binaryResourceLocations;
+
     @Argument(index = 0, name = "name", description = "The name of the source container instance", required = true, multiValued = false)
     @Completion(InstanceCompleter.class)
     String name;
@@ -56,9 +68,10 @@ public class CloneCommand extends InstanceCommandSupport {
     @Argument(index = 1, name = "cloneName", description = "The name of the cloned container instance", required = true, multiValued = false)
     String cloneName;
 
-
     protected Object doExecute() throws Exception {
-        InstanceSettings settings = new InstanceSettings(sshPort, rmiRegistryPort, rmiServerPort, location, javaOpts, null, null);
+        Map<String, URL> textResources = getResources(textResourceLocation);
+        Map<String, URL> binaryResources = getResources(binaryResourceLocations);
+        InstanceSettings settings = new InstanceSettings(sshPort, rmiRegistryPort, rmiServerPort, location, javaOpts, null, null, null, textResources, binaryResources);
         getInstanceService().cloneInstance(name, cloneName, settings, verbose);
         return null;
     }

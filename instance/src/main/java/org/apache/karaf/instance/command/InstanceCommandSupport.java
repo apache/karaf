@@ -16,9 +16,12 @@
  */
 package org.apache.karaf.instance.command;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.regex.Pattern;
+import java.util.Map;
 
 import org.apache.karaf.instance.core.Instance;
 import org.apache.karaf.instance.core.InstanceService;
@@ -58,6 +61,19 @@ public abstract class InstanceCommandSupport implements Action {
             throw new IllegalArgumentException("No matching instances");
         }
         return instances;
+    }
+
+    protected static Map<String, URL> getResources(List<String> resources) throws MalformedURLException {
+        Map<String, URL> result = new HashMap<>();
+        if (resources != null) {
+            for (String resource : resources) {
+                String path = resource.substring(0, resource.indexOf("="));
+                String location = resource.substring(path.length() + 1);
+                URL url = new URL(location);
+                result.put(path, url);
+            }
+        }
+        return result;
     }
 
     private boolean match(String name, List<String> patterns) {
