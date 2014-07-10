@@ -20,6 +20,12 @@ import org.apache.karaf.admin.AdminService;
 import org.apache.karaf.admin.Instance;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public abstract class AdminCommandSupport extends OsgiCommandSupport {
 
     private AdminService adminService;
@@ -38,5 +44,18 @@ public abstract class AdminCommandSupport extends OsgiCommandSupport {
             throw new IllegalArgumentException("Instance '" + name + "' does not exist");
         }
         return i;
+    }
+
+    protected static Map<String, URL> getResources(List<String> resources) throws MalformedURLException {
+        Map<String, URL> result = new HashMap<String, URL>();
+        if (resources != null) {
+            for(String resource : resources) {
+                String path = resource.substring(0, resource.indexOf("="));
+                String location = resource.substring(path.length() + 1);
+                URL url = new URL(location);
+                result.put(path, url);
+            }
+        }
+        return result;
     }
 }

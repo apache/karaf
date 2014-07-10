@@ -21,6 +21,10 @@ import org.apache.felix.gogo.commands.Command;
 import org.apache.felix.gogo.commands.Option;
 import org.apache.karaf.admin.InstanceSettings;
 
+import java.net.URL;
+import java.util.List;
+import java.util.Map;
+
 /**
  * Clone an existing instance.
  */
@@ -45,15 +49,24 @@ public class CloneCommand extends AdminCommandSupport {
     @Option(name = "-v", aliases = {"--verbose"}, description = "Display actions performed by the command (disabled by default)", required = false, multiValued = false)
     boolean verbose = false;
 
+    @Option(name = "-tr", aliases = {"--text-resource"},
+            description = "Add a text resource to the instance", required = false, multiValued = true)
+    List<String> textResourceLocation;
+
+    @Option(name = "-br", aliases = {"--binary-resource"},
+            description = "Add a text resource to the instance", required = false, multiValued = true)
+    List<String> binaryResourceLocations;
+
     @Argument(index = 0, name = "name", description = "The name of the source container instance", required = true, multiValued = false)
     String name;
 
     @Argument(index = 1, name = "cloneName", description = "The name of the cloned container instance", required = true, multiValued = false)
     String cloneName;
 
-
     protected Object doExecute() throws Exception {
-        InstanceSettings settings = new InstanceSettings(sshPort, rmiRegistryPort, rmiServerPort, location, javaOpts, null, null);
+        Map<String, URL> textResources = getResources(textResourceLocation);
+        Map<String, URL> binaryResources = getResources(binaryResourceLocations);
+        InstanceSettings settings = new InstanceSettings(sshPort, rmiRegistryPort, rmiServerPort, location, javaOpts, null, null, textResources, binaryResources);
         getAdminService().cloneInstance(name, cloneName, settings);
         return null;
     }
