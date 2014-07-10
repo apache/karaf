@@ -16,6 +16,8 @@
  */
 package org.apache.karaf.bundle.command.wikidoc;
 
+import org.apache.karaf.util.StringEscapeUtils;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
@@ -33,10 +35,13 @@ public class WikiParser {
 	}
 
 	public void parse(String line) {
-		StringTokenizer tokenizer = new StringTokenizer(line , "[h*", true);
+        String unescaped = StringEscapeUtils.unescapeJava(line);
+		StringTokenizer tokenizer = new StringTokenizer(unescaped, "\u001B[h*", true);
 		while (tokenizer.hasMoreTokens()) {
 			String token = tokenizer.nextToken();
-			if ("[".equals(token)) {
+            if ("\u001B".equals(token)) {
+                parseEsc(tokenizer, token);
+            } else if ("[".equals(token)) {
 				parseLink(tokenizer);
 			} else if ("h".equals(token)) {
 				parseHeading(tokenizer);
@@ -47,6 +52,10 @@ public class WikiParser {
 			}
 		}
 	}
+
+    private void parseEsc(StringTokenizer tokenizer, String token) {
+        visitor.text(token + tokenizer.nextToken() + tokenizer.nextToken("\u001B[]"));
+    }
 	
 	private void parseEnumeration(StringTokenizer tokenizer) {
 		String text = tokenizer.nextToken("-\n");
