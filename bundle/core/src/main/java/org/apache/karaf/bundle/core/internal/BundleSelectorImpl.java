@@ -54,7 +54,7 @@ public class BundleSelectorImpl {
         Pattern pattern = Pattern.compile("^\\d+$");
         Matcher matcher = pattern.matcher(id);
         
-        if (matcher.find()) {
+        if (matcher.matches()) {
             Bundle bundle = this.getBundleById(id);
             addBundle(bundle, id, bundles);
             return;
@@ -63,7 +63,7 @@ public class BundleSelectorImpl {
         // id as a number range
         pattern = Pattern.compile("^(\\d+)-(\\d+)$");
         matcher = pattern.matcher(id);
-        if (matcher.find()) {
+        if (matcher.matches()) {
             int index = id.indexOf('-');
             long startId = Long.parseLong(id.substring(0, index));
             long endId = Long.parseLong(id.substring(index + 1));
@@ -166,17 +166,17 @@ public class BundleSelectorImpl {
             if (version != null) {
                 String bundleVersion = bundle.getHeaders().get(Constants.BUNDLE_VERSION);
                 if (bundleVersion != null) {
-                    boolean nameMatch = (nameMatcher != null && nameMatcher.find()) || symbolicNameMatcher.find();
+                    boolean nameMatch = (nameMatcher != null && nameMatcher.matches()) || symbolicNameMatcher.matches();
                     if (nameMatch) {
                         Pattern versionPattern = Pattern.compile(version);
                         Matcher versionMatcher = versionPattern.matcher(bundleVersion);
-                        if (versionMatcher.find()) {
+                        if (versionMatcher.matches()) {
                             result.add(bundle);
                         }
                     }
                 }
             } else {
-                boolean nameMatch = (nameMatcher != null && nameMatcher.find()) || symbolicNameMatcher.find();
+                boolean nameMatch = (nameMatcher != null && nameMatcher.matches()) || symbolicNameMatcher.matches();
                 if (nameMatch) {
                     result.add(bundle);
                 }
@@ -194,7 +194,7 @@ public class BundleSelectorImpl {
 
         for (Bundle bundle : bundles) {
             Matcher locationMatcher = locationPattern.matcher(bundle.getLocation());
-            if (locationMatcher.find()) {
+            if (locationMatcher.matches()) {
                 result.add(bundle);
             }
         }
