@@ -17,6 +17,7 @@
 package org.apache.karaf.shell.config;
 
 import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.Properties;
 
 import org.apache.felix.gogo.commands.Argument;
@@ -43,7 +44,7 @@ public class EditCommand extends ConfigCommandSupport {
             System.err.println("Another config is being edited.  Cancel / update first, or use the --force option");
             return;
         }
-	    Dictionary props;
+	    Dictionary<String, Object> props;
 
 	    //User selected to use file instead.
         if (useFile) {
@@ -58,7 +59,7 @@ public class EditCommand extends ConfigCommandSupport {
             Configuration configuration = admin.getConfiguration(pid, null);
             props = configuration.getProperties();
             if (props == null) {
-                props = new Properties();
+                props = new Hashtable<String, Object>();
             }
         }
         this.session.put(PROPERTY_CONFIG_PID, pid);

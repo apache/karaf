@@ -33,7 +33,7 @@ public class PropAppendCommand extends ConfigPropertyCommandSupport {
     String value;
 
     @Override
-    public void propertyAction(Dictionary props) {
+    public void propertyAction(Dictionary<String, Object> props) {
         final Object currentValue = props.get(prop);
         if (currentValue == null) {
             props.put(prop, value);
