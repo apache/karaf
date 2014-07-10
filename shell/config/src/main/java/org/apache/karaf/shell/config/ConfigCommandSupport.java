@@ -182,7 +182,8 @@ public abstract class ConfigCommandSupport extends OsgiCommandSupport {
         }
         // remove "removed" properties from the file
         ArrayList<String> propertiesToRemove = new ArrayList<String>();
-        for (String key : p.keySet()) {
+        for (Object current : p.keySet()) {
+            String key = (String) current;
             if (props.get(key) == null
                     && !Constants.SERVICE_PID.equals(key)
                     && !ConfigurationAdmin.SERVICE_FACTORYPID.equals(key)
