@@ -157,7 +157,7 @@ public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHan
         MutableServiceMetadata commandService = context.createMetadata(MutableServiceMetadata.class);
         commandService.setActivation(MutableServiceMetadata.ACTIVATION_LAZY);
         commandService.setId(getName());
-        commandService.setAutoExport(ServiceMetadata.AUTO_EXPORT_ALL_CLASSES);
+        commandService.setAutoExport(ServiceMetadata.AUTO_EXPORT_INTERFACES);
         commandService.setServiceComponent(command);
 
         String scope = null;
@@ -225,7 +225,7 @@ public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHan
         MutableServiceMetadata subShellCommandService = context.createMetadata(MutableServiceMetadata.class);
         subShellCommandService.setActivation(MutableServiceMetadata.ACTIVATION_LAZY);
         subShellCommandService.setId(subShellName == null ? getName() : subShellName);
-        subShellCommandService.setAutoExport(ServiceMetadata.AUTO_EXPORT_ALL_CLASSES);
+        subShellCommandService.setAutoExport(ServiceMetadata.AUTO_EXPORT_INTERFACES);
         subShellCommandService.setServiceComponent(subShellCommand);
         subShellCommandService.addServiceProperty(createStringValue(context, "osgi.command.scope"), createStringValue(context, "*"));
         if (scope != null && !scope.isEmpty()) {
