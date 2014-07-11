@@ -117,11 +117,11 @@ public class CommandListHelpProvider implements HelpProvider {
         int termWidth = term != null ? term.getWidth() : 80;
         out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("COMMANDS").a(Ansi.Attribute.RESET));
         ShellTable table = new ShellTable().noHeaders().separator(" ").size(termWidth);
-        table.column(new Col("Command").maxSize(35));
+        table.column(new Col("Command").maxSize(64));
         table.column(new Col("Description"));
         for (Map.Entry<String,String> entry : commands.entrySet()) {
             String key = NameScoping.getCommandNameWithoutGlobalPrefix(session, entry.getKey());
-            table.addRow().addContent(key, entry.getValue());
+            table.addRow().addContent(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a(key).a(Ansi.Attribute.RESET), entry.getValue());
         }
         table.print(out, true);
     }
