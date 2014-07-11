@@ -68,6 +68,8 @@ public class InstanceServiceImpl implements InstanceService {
     private static final String KARAF_SHUTDOWN_COMMAND = "karaf.shutdown.command";
 
     private static final String KARAF_SHUTDOWN_PID_FILE = "karaf.shutdown.pid.file";
+    
+    private static final String KARAF_SHUTDOWN_TIMEOUT = "karaf.shutdown.timeout";
 
     private static final String DEFAULT_SHUTDOWN_COMMAND = "SHUTDOWN";
 
@@ -678,7 +680,9 @@ public class InstanceServiceImpl implements InstanceService {
                 Socket s = new Socket(host, port);
                 s.getOutputStream().write(shutdown.getBytes());
                 s.close();
-                long t = System.currentTimeMillis() + getStopTimeout();
+                long stopTimeout = Long.parseLong(props.getProperty(KARAF_SHUTDOWN_TIMEOUT, 
+                                                                    Long.toString(getStopTimeout())));
+                long t = System.currentTimeMillis() + stopTimeout;
                 do {
                     Thread.sleep(100);
                     checkPid(instance);
