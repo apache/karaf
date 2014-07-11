@@ -218,7 +218,6 @@ public class Main {
         }
         String log4jConfigPath = System.getProperty("karaf.etc") + "/org.ops4j.pax.logging.cfg";
         BootstrapLogManager.setProperties(config.props, log4jConfigPath);
-        lock = createLock();
         lockCallback = new KarafLockCallback();
         InstanceHelper.updateInstancePid(config.karafHome, config.karafBase);
         LOG.addHandler(BootstrapLogManager.getDefaultHandler());
@@ -268,41 +267,40 @@ public class Main {
     private void monitor() {
         new Thread() {
             public void run() {
-                doMonitor();
+                try {
+                    doMonitor();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }.start();
     }
 
-    private void doMonitor() {
+    private void doMonitor() throws Exception {
+        lock = createLock();
         File dataDir = new File(System.getProperty(ConfigProperties.PROP_KARAF_DATA));
         while (!exiting) {
-            try {
-                if (lock.lock()) {
-                    lockCallback.lockAquired();
-                    for (;;) {
-                        if (!dataDir.isDirectory()) {
-                            LOG.info("Data directory does not exist anymore, halting");
-                            framework.stop();
-                            System.exit(-1);
-                            return;
-                        }
-                        if (!lock.isAlive() || exiting) {
-                            break;
-                        }
-                        Thread.sleep(config.lockDelay);
+            if (lock.lock()) {
+                lockCallback.lockAquired();
+                for (;;) {
+                    if (!dataDir.isDirectory()) {
+                        LOG.info("Data directory does not exist anymore, halting");
+                        framework.stop();
+                        System.exit(-1);
+                        return;
                     }
-                    if (!exiting) {
-                        lockCallback.lockLost();
+                    if (!lock.isAlive() || exiting) {
+                        break;
                     }
-                } else {
-                    lockCallback.waitingForLock();
+                    Thread.sleep(config.lockDelay);
                 }
-                Thread.sleep(config.lockDelay);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (Exception e) {
-                e.printStackTrace();
+                if (!exiting) {
+                    lockCallback.lockLost();
+                }
+            } else {
+                lockCallback.waitingForLock();
             }
+            Thread.sleep(config.lockDelay);
         }
     }
 
@@ -469,7 +467,15 @@ public class Main {
         }
         while (true) {
             FrameworkEvent event = framework.waitForStop(0);
-            if (event.getType() != FrameworkEvent.STOPPED_UPDATE) {
+            if (event.getType() == FrameworkEvent.STOPPED_UPDATE) {
+                if (lock != null) {
+                    lock.release();
+                }
+                while (framework.getState() != Bundle.STARTING && framework.getState() != Bundle.ACTIVE) {
+                    Thread.sleep(10);
+                }
+                monitor();
+            } else {
                 return;
             }
         }
