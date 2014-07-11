@@ -1275,7 +1275,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
     protected Configuration createConfiguration(ConfigurationAdmin configurationAdmin,
                                                 String pid, String factoryPid) throws IOException, InvalidSyntaxException {
         if (factoryPid != null) {
-            return configurationAdmin.createFactoryConfiguration(factoryPid, null);
+            return configurationAdmin.createFactoryConfiguration(pid, null);
         } else {
             return configurationAdmin.getConfiguration(pid, null);
         }
