@@ -32,7 +32,7 @@ public class PropSetCommand extends ConfigPropertyCommandSupport {
     String value;
 
     @Override
-    public void propertyAction(Dictionary props) {
+    public void propertyAction(Dictionary<String, Object> props) {
         props.put(prop, value);
     }
 }

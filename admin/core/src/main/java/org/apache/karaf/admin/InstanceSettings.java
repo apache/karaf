@@ -16,7 +16,12 @@
  */
 package org.apache.karaf.admin;
 
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class InstanceSettings {
     private final int sshPort;
@@ -26,15 +31,23 @@ public class InstanceSettings {
     private final String javaOpts;
     private final List<String> featureURLs;
     private final List<String> features;
+    private final Map<String, URL> textResources;
+    private final Map<String, URL> binaryResources;
 
     public InstanceSettings(int sshPort, int rmiRegistryPort, int rmiServerPort, String location, String javaOpts, List<String> featureURLs, List<String> features) {
+       this(sshPort, rmiRegistryPort, rmiServerPort, location, javaOpts, featureURLs, features, new HashMap<String, URL>(), new HashMap<String, URL>());
+    }
+
+    public InstanceSettings(int sshPort, int rmiRegistryPort, int rmiServerPort, String location, String javaOpts, List<String> featureURLs, List<String> features, Map<String, URL> textResources, Map<String, URL> binaryResources) {
         this.sshPort = sshPort;
         this.rmiRegistryPort = rmiRegistryPort;
         this.rmiServerPort = rmiServerPort;
         this.location = location;
         this.javaOpts = javaOpts;
-        this.featureURLs = featureURLs;
-        this.features = features;
+        this.featureURLs = featureURLs != null ? featureURLs : new ArrayList<String>();
+        this.features = features != null ? features : new ArrayList<String>();
+        this.textResources = textResources != null ? textResources : new HashMap<String, URL>();
+        this.binaryResources = binaryResources != null ? binaryResources : new HashMap<String, URL>();
     }
 
     public int getSshPort() {
@@ -58,11 +71,19 @@ public class InstanceSettings {
     }
 
     public List<String> getFeatureURLs() {
-        return featureURLs;
+        return Collections.unmodifiableList(featureURLs);
     }
 
     public List<String> getFeatures() {
-        return features;
+        return Collections.unmodifiableList(features);
+    }
+
+    public Map<String, URL> getTextResources() {
+        return Collections.unmodifiableMap(textResources);
+    }
+
+    public Map<String, URL> getBinaryResources() {
+        return Collections.unmodifiableMap(binaryResources);
     }
 
     @Override

@@ -66,6 +66,24 @@
 	white-space: nowrap;
 }
 
+/* New Category Based Navigation Tree (FELIX-3769) */
+#navmenu {
+     width: auto;
+}
+
+#navmenu li.ui-menu-item {
+     width: auto;
+}
+
+#navmenu li.navMenuItem-0 {
+    display: inline-block;
+}
+
+/* Don't display caret on top-level menu (FELIX-3841) */
+#navmenu li.navMenuItem-0 > a > span {
+    display: none;
+}
+
 /* CENTRAL CONTENT AREA STYLING */
 #content, .ui-widget, .ui-widget input, .ui-widget select, .ui-widget textarea, .ui-widget button { font-size: 8pt }
 
@@ -119,16 +137,16 @@ table.nicetable th, table.nicetable td {
 
 /* tablesorter styling */
 tr .header {
-	background-image: url(../lib/bg.gif);
-	background-repeat: no-repeat;
-	background-position: center right;
-	cursor: pointer;
+	background-image: url(../lib/bg.gif) !important;
+	background-repeat: no-repeat !important;
+	background-position: center right !important;
+	cursor: pointer !important;
 }
 tr .headerSortUp {
-	background-image: url(../lib/asc.gif);
+	background-image: url(../lib/asc.gif) !important;
 }
 tr .headerSortDown {
-	background-image: url(../lib/desc.gif);
+	background-image: url(../lib/desc.gif) !important;
 }
 
 /* status line */

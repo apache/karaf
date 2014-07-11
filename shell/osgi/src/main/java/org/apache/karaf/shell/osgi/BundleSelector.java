@@ -46,7 +46,7 @@ public class BundleSelector {
                 // id is a number
                 Pattern pattern = Pattern.compile("^\\d+$");
                 Matcher matcher = pattern.matcher(id);
-                if (matcher.find()) {
+                if (matcher.matches()) {
                     Bundle bundle = this.getBundleById(id);
                     addBundle(bundle, id, force, bundles);
                     continue;
@@ -55,7 +55,7 @@ public class BundleSelector {
                 // id as a number range
                 pattern = Pattern.compile("^(\\d+)-(\\d+)$");
                 matcher = pattern.matcher(id);
-                if (matcher.find()) {
+                if (matcher.matches()) {
                     int index = id.indexOf('-');
                     long startId = Long.parseLong(id.substring(0, index));
                     long endId = Long.parseLong(id.substring(index + 1));
@@ -176,17 +176,17 @@ public class BundleSelector {
             if (version != null) {
                 String bundleVersion = (String) bundles[i].getHeaders().get(Constants.BUNDLE_VERSION);
                 if (bundleVersion != null) {
-                    boolean nameMatch = (nameMatcher != null && nameMatcher.find()) || symbolicNameMatcher.find();
+                    boolean nameMatch = (nameMatcher != null && nameMatcher.matches()) || symbolicNameMatcher.matches();
                     if (nameMatch) {
                         Pattern versionPattern = Pattern.compile(version);
                         Matcher versionMatcher = versionPattern.matcher(bundleVersion);                    
-                        if (versionMatcher.find()) {
+                        if (versionMatcher.matches()) {
                             result.add(bundles[i]);
                         }
                     }
                 }
             } else {
-                boolean nameMatch = (nameMatcher != null && nameMatcher.find()) || symbolicNameMatcher.find();
+                boolean nameMatch = (nameMatcher != null && nameMatcher.matches()) || symbolicNameMatcher.matches();
                 if (nameMatch) {
                     result.add(bundles[i]);
                 }

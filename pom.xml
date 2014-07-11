@@ -144,7 +144,7 @@
         <felix.framework.security.version>2.4.0</felix.framework.security.version>
         <felix.gogo.version>0.12.1</felix.gogo.version>
         <felix.plugin.version>2.5.0</felix.plugin.version>
-        <felix.utils.version>1.4.2</felix.utils.version>
+        <felix.utils.version>1.6.0</felix.utils.version>
         <felix.webconsole.version>4.2.0</felix.webconsole.version>
         <felix.webconsole.api.version>3.1.2</felix.webconsole.api.version>
         <felix.metatype.version>1.0.10</felix.metatype.version>
@@ -200,7 +200,7 @@
         <org.json.version>20131018</org.json.version>
         <pax.base.version>1.4.0</pax.base.version>
         <pax.cdi.version>0.7.0</pax.cdi.version>
-        <pax.exam.version>3.5.0</pax.exam.version>
+        <pax.exam.version>4.0.0</pax.exam.version>
         <pax.logging.version>1.7.2</pax.logging.version>
         <pax.url.version>2.1.0</pax.url.version>
         <pax.swissbox.version>1.7.1</pax.swissbox.version>

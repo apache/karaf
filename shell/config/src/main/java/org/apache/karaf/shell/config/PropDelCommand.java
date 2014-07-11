@@ -27,7 +27,7 @@ public class PropDelCommand extends ConfigPropertyCommandSupport {
     String prop;
 
     @Override
-    public void propertyAction(Dictionary props) {
+    public void propertyAction(Dictionary<String, Object> props) {
         props.remove(prop);
     }
 }

@@ -16,7 +16,12 @@
  */
 package org.apache.karaf.admin.command;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
@@ -31,6 +36,9 @@ import org.apache.karaf.features.command.completers.FeatureRepositoryCompleter;
 @Command(scope = "admin", name = "create", description = "Creates a new container instance.")
 public class CreateCommand extends AdminCommandSupport
 {
+
+    private static final Pattern RESOURCE_PATTERN= Pattern.compile("([a-zA-Z0-9_.-]+[/\\\\]*)");
+
     @Option(name = "-s", aliases = {"--ssh-port"}, description = "Port number for remote secure shell connection", required = false, multiValued = false)
     int sshPort = 0;
 
@@ -54,13 +62,21 @@ public class CreateCommand extends AdminCommandSupport
             description = "Additional feature descriptor URLs. This option can be specified multiple times to add multiple URLs", required = false, multiValued = true)
     List<String> featureURLs;
 
+    @Option(name = "-tr", aliases = {"--text-resource"},
+            description = "Add a text resource to the instance", required = false, multiValued = true)
+    List<String> textResourceLocation;
+
+    @Option(name = "-br", aliases = {"--binary-resource"},
+            description = "Add a text resource to the instance", required = false, multiValued = true)
+    List<String> binaryResourceLocations;
+
     @Argument(index = 0, name = "name", description="The name of the new container instance", required = true, multiValued = false)
     String instance = null;
-
     protected Object doExecute() throws Exception {
-        InstanceSettings settings = new InstanceSettings(sshPort, rmiRegistryPort, rmiServerPort, location, javaOpts, featureURLs, features);
+        Map<String, URL> textResources = getResources(textResourceLocation);
+        Map<String, URL> binaryResources = getResources(binaryResourceLocations);
+        InstanceSettings settings = new InstanceSettings(sshPort, rmiRegistryPort, rmiServerPort, location, javaOpts, featureURLs, features, textResources, binaryResources);
         getAdminService().createInstance(instance, settings);
         return null;
     }
-
 }
