@@ -22,8 +22,8 @@
 
     <repository>mvn:org.ops4j.pax.cdi/pax-cdi-features/${pax.cdi.version}/xml/features</repository>
 
-    <feature name="transaction" description="OSGi Transaction Manager" version="${aries.transaction.version}" resolver="(obr)">
-        <details>JTA implementation provided by Apache Aries Transaction ${aries.transaction.version}</details>
+    <feature name="transaction" description="OSGi Transaction Manager" version="1.1.0" resolver="(obr)">
+        <details>JTA implementation provided by Apache Aries Transaction 1.1.0</details>
         <config name="org.apache.aries.transaction">
             aries.transaction.recoverable = true
             aries.transaction.timeout = 600
@@ -34,11 +34,11 @@
         </config>
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.transaction/org.apache.aries.transaction.blueprint/${aries.transaction.blueprint.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.aries.transaction/org.apache.aries.transaction.manager/${aries.transaction.manager.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.transaction/org.apache.aries.transaction.manager/1.1.0</bundle>
     </feature>
 
     <feature name="transaction" description="OSGi Transaction Manager" version="1.0.1" resolver="(obr)">
-        <details>JTA implementation provided by Apache Aries Transaction ${aries.transaction.version}</details>
+        <details>JTA implementation provided by Apache Aries Transaction 1.0.1</details>
         <config name="org.apache.aries.transaction">
             aries.transaction.recoverable = true
             aries.transaction.timeout = 600
@@ -64,7 +64,7 @@
 
     <feature name="connector" description="OSGi support for JCA Connector 1.6" version="3.1.1" resolver="(obr)">
         <details>OSGi support for JCA Connector 1.6</details>
-        <feature version="[1.0,1.1)">transaction</feature>
+        <feature version="[1.1,2)">transaction</feature>
         <feature version="[3.2,4)">spring-tx</feature>
         <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-j2ee-connector_1.6_spec/1.0</bundle>
         <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-jms_1.1_spec/${geronimo.jms-spec.version}</bundle>
