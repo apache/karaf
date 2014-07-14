@@ -33,12 +33,17 @@ public class InstanceSettings {
     private final List<String> features;
     private final Map<String, URL> textResources;
     private final Map<String, URL> binaryResources;
+    private final String address;
 
     public InstanceSettings(int sshPort, int rmiRegistryPort, int rmiServerPort, String location, String javaOpts, List<String> featureURLs, List<String> features) {
        this(sshPort, rmiRegistryPort, rmiServerPort, location, javaOpts, featureURLs, features, new HashMap<String, URL>(), new HashMap<String, URL>());
     }
 
     public InstanceSettings(int sshPort, int rmiRegistryPort, int rmiServerPort, String location, String javaOpts, List<String> featureURLs, List<String> features, Map<String, URL> textResources, Map<String, URL> binaryResources) {
+        this(sshPort, rmiRegistryPort, rmiServerPort, location, javaOpts, featureURLs, features, textResources, binaryResources, "0.0.0.0");
+    }
+    
+    public InstanceSettings(int sshPort, int rmiRegistryPort, int rmiServerPort, String location, String javaOpts, List<String> featureURLs, List<String> features, Map<String, URL> textResources, Map<String, URL> binaryResources, String address) {
         this.sshPort = sshPort;
         this.rmiRegistryPort = rmiRegistryPort;
         this.rmiServerPort = rmiServerPort;
@@ -48,6 +53,7 @@ public class InstanceSettings {
         this.features = features != null ? features : new ArrayList<String>();
         this.textResources = textResources != null ? textResources : new HashMap<String, URL>();
         this.binaryResources = binaryResources != null ? binaryResources : new HashMap<String, URL>();
+        this.address = address;
     }
 
     public int getSshPort() {
@@ -85,6 +91,10 @@ public class InstanceSettings {
     public Map<String, URL> getBinaryResources() {
         return Collections.unmodifiableMap(binaryResources);
     }
+    
+    public String getAddress() {
+        return this.address;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -101,7 +111,8 @@ public class InstanceSettings {
                (location == null ? is.location == null : location.equals(is.location)) &&
                (javaOpts == null ? is.javaOpts == null : javaOpts.equals(is.javaOpts)) &&
                (featureURLs == null ? is.featureURLs == null : featureURLs.equals(is.featureURLs)) &&
-               (features == null ? is.features == null : features.equals(is.features));
+               (features == null ? is.features == null : features.equals(is.features)) &&
+               (address == null ? is.address == null : address.equals(is.address));
     }
 
     @Override
@@ -111,6 +122,7 @@ public class InstanceSettings {
         result = 31 * result + (javaOpts != null ? javaOpts.hashCode() : 0);
         result = 31 * result + (featureURLs != null ? featureURLs.hashCode() : 0);
         result = 31 * result + (features != null ? features.hashCode() : 0);
+        result = 31 * result + (address != null ? address.hashCode() : 0);
         return result;
     }
 }

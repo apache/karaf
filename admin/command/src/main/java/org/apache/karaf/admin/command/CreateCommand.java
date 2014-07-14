@@ -69,13 +69,16 @@ public class CreateCommand extends AdminCommandSupport
     @Option(name = "-br", aliases = {"--binary-resource"},
             description = "Add a text resource to the instance", required = false, multiValued = true)
     List<String> binaryResourceLocations;
+    
+    @Option(name = "-a", aliases = {"--adderss"}, description = "IP address of the new container instance running on(When Virtual IP is used)", required = false, multiValued = false)
+    String address = "0.0.0.0";
 
     @Argument(index = 0, name = "name", description="The name of the new container instance", required = true, multiValued = false)
     String instance = null;
     protected Object doExecute() throws Exception {
         Map<String, URL> textResources = getResources(textResourceLocation);
         Map<String, URL> binaryResources = getResources(binaryResourceLocations);
-        InstanceSettings settings = new InstanceSettings(sshPort, rmiRegistryPort, rmiServerPort, location, javaOpts, featureURLs, features, textResources, binaryResources);
+        InstanceSettings settings = new InstanceSettings(sshPort, rmiRegistryPort, rmiServerPort, location, javaOpts, featureURLs, features, textResources, binaryResources, address);
         getAdminService().createInstance(instance, settings);
         return null;
     }
