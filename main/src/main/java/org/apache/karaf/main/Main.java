@@ -421,7 +421,18 @@ public class Main {
         }
         while (true) {
             FrameworkEvent event = framework.waitForStop(0);
-            if (event.getType() != FrameworkEvent.STOPPED_UPDATE) {
+            if (event.getType() == FrameworkEvent.STOPPED_UPDATE) {
+                unlock();
+                while (framework.getState() != Bundle.STARTING && framework.getState() != Bundle.ACTIVE) {
+                    Thread.sleep(10);
+                }
+                new Thread() {
+                    @Override
+                    public void run() {
+                        lock(configProps);
+                    }
+                }.start();
+            } else {
                 return;
             }
         }
@@ -1447,7 +1458,6 @@ public class Main {
         String clz = props.getProperty(PROPERTY_LOCK_CLASS, PROPERTY_LOCK_CLASS_DEFAULT);
         lock = (Lock) Class.forName(clz).getConstructor(Properties.class).newInstance(props);
         boolean lockLogged = false;
-        setStartLevel(lockStartLevel);
         while (!exiting) {
             if (lock.lock()) {
                 if (lockLogged) {
@@ -1479,9 +1489,12 @@ public class Main {
                         startLevelLock.wait(shutdownTimeout);
                     }
                 }
-            } else if (!lockLogged) {
-                LOG.info("Waiting for the lock ...");
-                lockLogged = true;
+            } else {
+                setStartLevel(lockStartLevel);
+                if (!lockLogged) {
+                    LOG.info("Waiting for the lock ...");
+                    lockLogged = true;
+                }
             }
             Thread.sleep(lockDelay);
         }
