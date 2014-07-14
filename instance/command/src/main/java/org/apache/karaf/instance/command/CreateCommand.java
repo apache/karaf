@@ -55,11 +55,14 @@ public class CreateCommand extends InstanceCommandSupport
     @Option(name = "-v", aliases = {"--verbose"}, description = "Display actions performed by the command (disabled by default)", required = false, multiValued = false)
     boolean verbose = false;
 
+    @Option(name = "-a", aliases = {"--adderss"}, description = "IP address of the new container instance running on(When Virtual IP is used)", required = false, multiValued = false)
+    String address = "0.0.0.0";
+
     @Argument(index = 0, name = "name", description="The name of the new container instance", required = true, multiValued = false)
     String instance = null;
 
     protected Object doExecute() throws Exception {
-        InstanceSettings settings = new InstanceSettings(sshPort, rmiRegistryPort, rmiServerPort, location, javaOpts, featureURLs, features);
+        InstanceSettings settings = new InstanceSettings(sshPort, rmiRegistryPort, rmiServerPort, location, javaOpts, featureURLs, features, address);
         getInstanceService().createInstance(instance, settings, verbose);
         return null;
     }
