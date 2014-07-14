@@ -266,6 +266,7 @@ public class InstanceServiceImpl implements InstanceService {
                 if (sshPort <= 0) {
                     sshPort = ++state.defaultSshPortStart;
                 }
+                String sshHost = settings.getAddress();
                 int rmiRegistryPort = settings.getRmiRegistryPort();
                 if (rmiRegistryPort <= 0) {
                     rmiRegistryPort = ++state.defaultRmiRegistryPortStart;
@@ -329,6 +330,7 @@ public class InstanceServiceImpl implements InstanceService {
                 props.put("${SUBST-KARAF-HOME}", System.getProperty("karaf.home"));
                 props.put("${SUBST-KARAF-BASE}", karafBase.getPath());
                 props.put("${SUBST-SSH-PORT}", Integer.toString(sshPort));
+                props.put("${SUBST-SSH-HOST}", sshHost);
                 props.put("${SUBST-RMI-REGISTRY-PORT}", Integer.toString(rmiRegistryPort));
                 props.put("${SUBST-RMI-SERVER-PORT}", Integer.toString(rmiServerPort));
                 copyFilteredResourceToDir(karafBase, "etc/system.properties", props, printOutput);
@@ -824,6 +826,23 @@ public class InstanceServiceImpl implements InstanceService {
             return 0;
         }
     }
+    
+    private String getKarafHost(State state, String name, String path, final String key) {
+        InstanceState instance = state.instances.get(name);
+        if (instance == null) {
+            throw new IllegalArgumentException("Instance " + name + " not found");
+        }
+        File f = new File(instance.loc, path);
+        try {
+            return FileLockUtils.execute(f, new FileLockUtils.CallableWithProperties<String>() {
+                public String call(org.apache.felix.utils.properties.Properties properties) throws IOException {
+                    return properties.get(key).toString();
+                }
+            }, false);
+        } catch (IOException e) {
+            return "0.0.0.0";
+        }
+    }
 
     private void setKarafPort(final String name, final String path, final String key, final int port) throws IOException {
         execute(new Task<Object>() {
@@ -917,6 +936,10 @@ public class InstanceServiceImpl implements InstanceService {
                     throw new IllegalArgumentException("Instance " + name + " not found");
                 }
                 int port = getKarafPort(state, name, "etc/org.apache.karaf.shell.cfg", "sshPort");
+                String host = getKarafHost(state, name, "etc/org.apache.karaf.shell.cfg", "sshHost");
+                if (host.equals("0.0.0.0")) {
+                    host = "localhost";
+                }
                 if (!new File(instance.loc).isDirectory() || port <= 0) {
                     return Instance.ERROR;
                 }
@@ -925,7 +948,7 @@ public class InstanceServiceImpl implements InstanceService {
                     return Instance.STOPPED;
                 } else {
                     try {
-                        Socket s = new Socket("localhost", port);
+                        Socket s = new Socket(host, port);
                         s.close();
                         return Instance.STARTED;
                     } catch (Exception e) {
