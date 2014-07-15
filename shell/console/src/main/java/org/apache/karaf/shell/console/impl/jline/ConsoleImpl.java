@@ -486,6 +486,12 @@ public class ConsoleImpl implements Console {
             try {
                 while (running) {
                     try {
+                        while (in.available() == 0) {
+                            if (!running) {
+                                return;
+                            }
+                            Thread.sleep(50);
+                        }
                         int c = in.read();
                         if (c == -1) {
                             return;
