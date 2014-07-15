@@ -59,6 +59,22 @@
         </jaas:module>
     </jaas:config>
 
+    <!-- Properties installer -->
+    <bean class="org.apache.karaf.jaas.modules.properties.AutoEncryptionSupport"
+            init-method="init" destroy-method="destroy">
+        <argument>
+            <map>
+                <entry key="org.osgi.framework.BundleContext" value-ref="blueprintBundleContext"/>
+                <entry key="users" value="$[karaf.etc]/users.properties"/>
+                <entry key="encryption.name" value="${encryption.name}"/>
+                <entry key="encryption.enabled" value="${encryption.enabled}"/>
+                <entry key="encryption.prefix" value="${encryption.prefix}"/>
+                <entry key="encryption.suffix" value="${encryption.suffix}"/>
+                <entry key="encryption.algorithm" value="${encryption.algorithm}"/>
+                <entry key="encryption.encoding" value="${encryption.encoding}"/>
+            </map>
+        </argument>
+    </bean>
 
     <!-- The Backing Engine Factory Service for the PropertiesLoginModule -->
     <service interface="org.apache.karaf.jaas.modules.BackingEngineFactory">
