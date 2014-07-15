@@ -14,53 +14,100 @@
  */
 package org.apache.karaf.jaas.modules.impl;
 
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Map;
 
 import org.apache.karaf.jaas.config.JaasRealm;
 import org.apache.karaf.jaas.modules.BackingEngineFactory;
 import org.apache.karaf.jaas.modules.EncryptionService;
 import org.apache.karaf.jaas.modules.encryption.BasicEncryptionService;
+import org.apache.karaf.jaas.modules.properties.AutoEncryptionSupport;
 import org.apache.karaf.jaas.modules.properties.PropertiesBackingEngineFactory;
 import org.apache.karaf.jaas.modules.publickey.PublickeyBackingEngineFactory;
-import org.osgi.framework.BundleActivator;
+import org.apache.karaf.util.tracker.BaseActivator;
+import org.apache.karaf.util.tracker.Managed;
+import org.apache.karaf.util.tracker.ProvideService;
+import org.apache.karaf.util.tracker.Services;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ManagedService;
 
-public class Activator implements BundleActivator {
+@Managed("org.apache.karaf.jaas")
+@Services(provides = {
+        @ProvideService(JaasRealm.class),
+        @ProvideService(BackingEngineFactory.class),
+        @ProvideService(EncryptionService.class)
+})
+public class Activator extends BaseActivator implements ManagedService {
 
-    private ServiceRegistration<BackingEngineFactory> propertiesBackingEngineFactoryServiceRegistration;
-    private ServiceRegistration<BackingEngineFactory> publickeyBackingEngineFactoryServiceRegistration;
-    private ServiceRegistration<EncryptionService> basicEncryptionServiceServiceRegistration;
-    private ServiceRegistration karafRealmServiceRegistration;
+    private static final String ENCRYPTION_NAME = "encryption.name";
+    private static final String ENCRYPTION_ENABLED = "encryption.enabled";
+    private static final String ENCRYPTION_PREFIX = "encryption.prefix";
+    private static final String ENCRYPTION_SUFFIX = "encryption.suffix";
+    private static final String ENCRYPTION_ALGORITHM = "encryption.algorithm";
+    private static final String ENCRYPTION_ENCODING = "encryption.encoding";
+
+    private static final String EVENTADMIN_ENABLED = "eventadmin.enabled";
+
+    private KarafRealm karafRealm;
+    private AutoEncryptionSupport autoEncryptionSupport;
 
     @Override
-    public void start(BundleContext context) throws Exception {
-        propertiesBackingEngineFactoryServiceRegistration =
-            context.registerService(BackingEngineFactory.class, new PropertiesBackingEngineFactory(), null);
-        publickeyBackingEngineFactoryServiceRegistration =
-            context.registerService(BackingEngineFactory.class, new PublickeyBackingEngineFactory(), null);
+    protected void doOpen() throws Exception {
+        super.doOpen();
+        register(BackingEngineFactory.class, new PropertiesBackingEngineFactory());
+        register(BackingEngineFactory.class, new PublickeyBackingEngineFactory());
 
-        Hashtable<String, Object> props = new Hashtable<String, Object>();
+        Hashtable<String, Object> props = new Hashtable<>();
         props.put(Constants.SERVICE_RANKING, -1);
         props.put("name", "basic");
-        basicEncryptionServiceServiceRegistration =
-                context.registerService(EncryptionService.class, new BasicEncryptionService(), props);
+        register(EncryptionService.class, new BasicEncryptionService(), props);
 
-        props = new Hashtable<String, Object>();
-        props.put(Constants.SERVICE_PID, "org.apache.karaf.jaas");
-        karafRealmServiceRegistration =
-                context.registerService(new String[] {
-                        JaasRealm.class.getName(),
-                        ManagedService.class.getName()
-                }, new KarafRealm(context), props);
+
+        Map<String, Object> config = getConfig();
+
+        karafRealm = new KarafRealm(bundleContext, config);
+        register(JaasRealm.class, karafRealm);
+
+        autoEncryptionSupport = new AutoEncryptionSupport(config);
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
-        karafRealmServiceRegistration.unregister();
-        basicEncryptionServiceServiceRegistration.unregister();
-        propertiesBackingEngineFactoryServiceRegistration.unregister();
+    protected void doStop() {
+        if (autoEncryptionSupport != null) {
+            autoEncryptionSupport.destroy();
+        }
+        super.doStop();
     }
+
+    @Override
+    protected void reconfigure() {
+        Map<String, Object> config = getConfig();
+        if (karafRealm != null) {
+            karafRealm.updated(config);
+        }
+        if (autoEncryptionSupport != null) {
+            autoEncryptionSupport.updated(config);
+        }
+    }
+
+    private Map<String, Object> getConfig() {
+        Map<String, Object> config = new HashMap<>();
+        populate(config, "detailed.login.exception", "false");
+        populate(config, ENCRYPTION_NAME, "");
+        populate(config, ENCRYPTION_ENABLED, "false");
+        populate(config, ENCRYPTION_PREFIX, "{CRYPT}");
+        populate(config, ENCRYPTION_SUFFIX, "{CRYPT}");
+        populate(config, ENCRYPTION_ALGORITHM, "MD5");
+        populate(config, ENCRYPTION_ENCODING, "hexadecimal");
+        populate(config, EVENTADMIN_ENABLED, "true");
+        config.put(BundleContext.class.getName(), bundleContext);
+        return config;
+    }
+
+    private void populate(Map<String, Object> map, String key, String def) {
+        map.put(key, getString(key, def));
+    }
+
 }
