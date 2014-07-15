@@ -156,6 +156,7 @@ public class Console implements Runnable
         if (!running) {
             return;
         }
+        out.println();
         if (reader.getHistory() instanceof PersistentHistory) {
             try {
                 ((PersistentHistory) reader.getHistory()).flush();
