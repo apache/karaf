@@ -53,15 +53,7 @@ public class InstancesMBeanImpl extends StandardMBean implements InstancesMBean 
         return this.createInstance(name, sshPort, rmiRegistryPort, rmiServerPort, location, javaOpts, features, featuresURLs, "localhost");
     }
 
-    public int createInstance(String name,
-                              int sshPort,
-                              int rmiRegistryPort,
-                              int rmiServerPort,
-                              String location,
-                              String javaOpts,
-                              String features,
-                              String featureURLs,
-                              String address)
+    public int createInstance(String name, int sshPort, int rmiRegistryPort, int rmiServerPort, String location, String javaOpts, String features, String featureURLs, String address)
             throws MBeanException {
         try {
             if ("".equals(location)) {
