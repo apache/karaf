@@ -43,6 +43,11 @@ public class InstancesMBeanImpl extends StandardMBean implements InstancesMBean 
 
     public int createInstance(String name, int sshPort, int rmiRegistryPort, int rmiServerPort, String location, String javaOpts, String features, String featureURLs)
             throws MBeanException {
+        return this.createInstance(name, sshPort, rmiRegistryPort, rmiServerPort, location, javaOpts, features, featureURLs, "localhost");
+    }
+
+    public int createInstance(String name, int sshPort, int rmiRegistryPort, int rmiServerPort, String location, String javaOpts, String features, String featureURLs, String address)
+            throws MBeanException {
         try {
             if ("".equals(location)) {
                 location = null;
@@ -52,7 +57,7 @@ public class InstancesMBeanImpl extends StandardMBean implements InstancesMBean 
             }
 
             InstanceSettings settings = new InstanceSettings(sshPort, rmiRegistryPort, rmiServerPort, location, javaOpts,
-                    parseStringList(featureURLs), parseStringList(features));
+                    parseStringList(featureURLs), parseStringList(features), address);
 
             Instance inst = instanceService.createInstance(name, settings, false);
             if (inst != null) {

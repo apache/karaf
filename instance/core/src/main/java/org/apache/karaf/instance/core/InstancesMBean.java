@@ -36,6 +36,7 @@ public interface InstancesMBean {
 
     // Operations
     int createInstance(String name, int sshPort, int rmiRegistryPort, int rmiServerPort, String location, String javaOpts, String features, String featureURLs) throws MBeanException;
+    int createInstance(String name, int sshPort, int rmiRegistryPort, int rmiServerPort, String location, String javaOpts, String features, String featureURLs, String address) throws MBeanException;
     void changeSshPort(String name, int port) throws MBeanException;
     void changeRmiRegistryPort(String name, int port) throws MBeanException;
     void changeRmiServerPort(String name, int port) throws MBeanException;
