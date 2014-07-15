@@ -212,10 +212,18 @@ public class Console implements Runnable
                     logException(t);
                 }
             }
-            secCP.close();
+            try {
+                secCP.close();
+            } catch (Throwable t) {
+                // Ignore
+            }
             close(true);
         } finally {
-            threadIO.close();
+            try {
+                threadIO.close();
+            } catch (Throwable t) {
+                // Ignore
+            }
         }
     }
     
