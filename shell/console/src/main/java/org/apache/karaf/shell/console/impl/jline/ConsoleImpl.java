@@ -171,6 +171,7 @@ public class ConsoleImpl implements Console {
         if (!running) {
             return;
         }
+        out.println();
         if (reader.getHistory() instanceof PersistentHistory) {
             try {
                 ((PersistentHistory) reader.getHistory()).flush();
