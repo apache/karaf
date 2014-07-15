@@ -41,28 +41,16 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
 
     private final Logger LOG = LoggerFactory.getLogger(PropertiesLoginModule.class);
 
-    private static final String USER_FILE = "users";
+    static final String USER_FILE = "users";
 
     private String usersFile;
     
-    private static PropertiesInstaller propertiesInstaller;
-    
-    
+
     public void initialize(Subject sub, CallbackHandler handler, Map sharedState, Map options) {
         super.initialize(sub,handler,options);
         usersFile = (String) options.get(USER_FILE);
         if (debug) {
             LOG.debug("Initialized debug=" + debug + " usersFile=" + usersFile);
-        }
-       
-        if (propertiesInstaller == null || !usersFile.equals(propertiesInstaller.getUsersFileName()) ) {
-       
-            LOG.debug("Register PropertiesInstaller service");
-            
-            propertiesInstaller = new PropertiesInstaller(this, usersFile);
-            if (this.bundleContext != null) {
-                this.bundleContext.registerService("org.apache.felix.fileinstall.ArtifactInstaller", propertiesInstaller, null);
-            }
         }
     }
 
@@ -80,8 +68,6 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
         } catch (IOException ioe) {
             throw new LoginException("Unable to load user properties file " + f);
         }
-        //encrypt all password if necessary
-        encryptedPassword(users);
 
         Callback[] callbacks = new Callback[2];
 
@@ -165,51 +151,4 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
         return true;
     }
     
-    void encryptedPassword(Properties users) {
-        for (Object userName : users.keySet()) {
-            String user = (String)userName;
-            String userInfos = null;
-
-            userInfos = (String) users.get(user);
-                        
-            // the password is in the first position
-            String[] infos = userInfos.split(",");
-            String storedPassword = infos[0];
-            
-            // check if the stored password is flagged as encrypted
-            String encryptedPassword = getEncryptedPassword(storedPassword);
-            if (!storedPassword.equals(encryptedPassword)) {
-                if (debug) {
-                    LOG.debug("The password isn't flagged as encrypted, encrypt it.");
-                }
-                if (debug) {
-                    LOG.debug("Rebuild the user informations string.");
-                }
-                userInfos = encryptedPassword + ",";
-                for (int i = 1; i < infos.length; i++) {
-                    if (i == (infos.length - 1)) {
-                        userInfos = userInfos + infos[i];
-                    } else {
-                        userInfos = userInfos + infos[i] + ",";
-                    }
-                }
-                if (debug) {
-                    LOG.debug("Push back the user informations in the users properties.");
-                }
-                if (user.contains("\\")) {
-                    users.remove(user);
-                    user = user.replace("\\", "\\\\");
-                }
-                users.put(user, userInfos);
-                try {
-                    if (debug) {
-                        LOG.debug("Store the users properties file.");
-                    }
-                    users.save();
-                } catch (IOException ioe) {
-                    LOG.warn("Unable to write user properties file ", ioe);
-                }
-            }
-        }
-    }
 }
