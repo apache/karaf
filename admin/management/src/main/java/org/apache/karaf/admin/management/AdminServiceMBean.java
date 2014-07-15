@@ -35,6 +35,7 @@ public interface AdminServiceMBean {
 
     // Operations
     int createInstance(String name, int sshPort, int rmiRegistryPort, int rmiServerPort, String location, String javaOpts, String features, String featureURLs) throws Exception;
+    int createInstance(String name, int sshPort, int rmiRegistryPort, int rmiServerPort, String location, String javaOpts, String features, String featureURLs, String address) throws Exception;
     void changeSshPort(String name, int port) throws Exception;
     void changeRmiRegistryPort(String name, int port) throws Exception;
     void changeRmiServerPort(String name, int port) throws Exception;

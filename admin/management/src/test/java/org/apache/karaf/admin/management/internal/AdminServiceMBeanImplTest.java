@@ -16,8 +16,10 @@
  */
 package org.apache.karaf.admin.management.internal;
 
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.TabularData;
