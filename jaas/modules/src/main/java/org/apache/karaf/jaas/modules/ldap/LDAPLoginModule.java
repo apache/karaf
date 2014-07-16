@@ -59,6 +59,7 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
     public final static String ROLE_SEARCH_SUBTREE = "role.search.subtree";
     public final static String AUTHENTICATION = "authentication";
     public final static String INITIAL_CONTEXT_FACTORY = "initial.context.factory";
+    public static final String CONTEXT_PREFIX = "context.";
     public final static String SSL = "ssl";
     public final static String SSL_PROVIDER = "ssl.provider";
     public final static String SSL_PROTOCOL = "ssl.protocol";
@@ -176,8 +177,13 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
         principals = new HashSet<Principal>();
 
         // step 1: get the user DN
-        Hashtable env = new Hashtable();
+        Hashtable<String, Object> env = new Hashtable<String, Object>();
         logger.debug("Create the LDAP initial context.");
+        for (String key : options.keySet()) {
+            if (key.startsWith(CONTEXT_PREFIX)) {
+                env.put(key.substring(CONTEXT_PREFIX.length()), options.get(key));
+            }
+        }
         env.put(Context.INITIAL_CONTEXT_FACTORY, initialContextFactory);
         env.put(Context.PROVIDER_URL, connectionURL);
         if (connectionUsername != null && connectionUsername.trim().length() > 0) {
