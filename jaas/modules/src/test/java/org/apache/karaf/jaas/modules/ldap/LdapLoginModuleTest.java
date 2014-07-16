@@ -31,6 +31,7 @@ import org.junit.runner.RunWith;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.*;
+import javax.security.auth.login.LoginException;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,6 +39,7 @@ import java.security.Principal;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 
 @RunWith ( FrameworkRunner.class )
@@ -180,6 +182,33 @@ public class LdapLoginModuleTest extends AbstractLdapTestUnit {
 
         assertEquals("Precondition", 0, subject.getPrincipals().size());
         assertFalse(module.login());
+    }
+
+    @Test
+    public void testEmptyPassword() throws Exception {
+        Properties options = ldapLoginModuleOptions();
+        LDAPLoginModule module = new LDAPLoginModule();
+        CallbackHandler cb = new CallbackHandler() {
+            public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
+                for (Callback cb : callbacks) {
+                    if (cb instanceof NameCallback) {
+                        ((NameCallback) cb).setName("imnothere");
+                    } else if (cb instanceof PasswordCallback) {
+                        ((PasswordCallback) cb).setPassword("".toCharArray());
+                    }
+                }
+            }
+        };
+        Subject subject = new Subject();
+        module.initialize(subject, cb, null, options);
+
+        assertEquals("Precondition", 0, subject.getPrincipals().size());
+        try {
+            module.login();
+            fail("Should have failed");
+        } catch (LoginException e) {
+            assertTrue(e.getMessage().equals("Empty passwords not allowed"));
+        }
     }
 }
             
