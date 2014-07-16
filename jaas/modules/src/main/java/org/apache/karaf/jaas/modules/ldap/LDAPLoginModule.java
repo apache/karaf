@@ -32,9 +32,12 @@ import javax.security.auth.callback.*;
 import javax.security.auth.login.LoginException;
 import java.io.IOException;
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -184,7 +187,7 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
         principals = new HashSet<Principal>();
 
         // step 1: get the user DN
-        Hashtable<String, Object> env = new Hashtable<>();
+        final Hashtable<String, Object> env = new Hashtable<>();
         logger.debug("Create the LDAP initial context.");
         for (String key : options.keySet()) {
             if (key.startsWith(CONTEXT_PREFIX)) {
@@ -203,56 +206,76 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
             setupSsl(env);
         }
         logger.debug("Get the user DN.");
-        String userDN;
-        String userDNNamespace;
-        DirContext context = null;
+        final String userDN;
+        final String userDNNamespace;
         try {
-            logger.debug("Initialize the JNDI LDAP Dir Context.");
-            context = new InitialDirContext(env);
-            logger.debug("Define the subtree scope search control.");
-            SearchControls controls = new SearchControls();
-            if (userSearchSubtree) {
-                controls.setSearchScope(SearchControls.SUBTREE_SCOPE);
-            } else {
-                controls.setSearchScope(SearchControls.ONELEVEL_SCOPE);
-            }
-            logger.debug("Looking for the user in LDAP with ");
-            logger.debug("  base DN: " + userBaseDN);
-            userFilter = userFilter.replaceAll(Pattern.quote("%u"), Matcher.quoteReplacement(user));
-            userFilter = userFilter.replace("\\", "\\\\");
-            logger.debug("  filter: " + userFilter);
-            NamingEnumeration namingEnumeration = context.search(userBaseDN, userFilter, controls);
-            if (!namingEnumeration.hasMore()) {
-                logger.warn("User " + user + " not found in LDAP.");
+            String[] userDnAndNamespace = LDAPCache.getCache(env).getUserDnAndNamespace(user, new Callable<String[]>() {
+                @Override
+                public String[] call() throws Exception {
+                    DirContext context = null;
+                    NamingEnumeration namingEnumeration = null;
+                    try {
+                        logger.debug("Initialize the JNDI LDAP Dir Context.");
+                        context = new InitialDirContext(env);
+                        logger.debug("Define the subtree scope search control.");
+                        SearchControls controls = new SearchControls();
+                        if (userSearchSubtree) {
+                            controls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+                        } else {
+                            controls.setSearchScope(SearchControls.ONELEVEL_SCOPE);
+                        }
+                        logger.debug("Looking for the user in LDAP with ");
+                        logger.debug("  base DN: " + userBaseDN);
+                        userFilter = userFilter.replaceAll(Pattern.quote("%u"), Matcher.quoteReplacement(user));
+                        userFilter = userFilter.replace("\\", "\\\\");
+                        logger.debug("  filter: " + userFilter);
+                        namingEnumeration = context.search(userBaseDN, userFilter, controls);
+                        if (!namingEnumeration.hasMore()) {
+                            logger.warn("User " + user + " not found in LDAP.");
+                            return null;
+                        }
+                        logger.debug("Get the user DN.");
+                        SearchResult result = (SearchResult) namingEnumeration.next();
+
+                        // We need to do the following because slashes are handled badly. For example, when searching
+                        // for a user with lots of special characters like cn=admin,=+<>#;\
+                        // SearchResult contains 2 different results:
+                        //
+                        // SearchResult.getName = cn=admin\,\=\+\<\>\#\;\\\\
+                        // SearchResult.getNameInNamespace = cn=admin\,\=\+\<\>#\;\\,ou=people,dc=example,dc=com
+                        //
+                        // the second escapes the slashes correctly.
+                        String userDN = result.getNameInNamespace().replace("," + userBaseDN, "");
+                        String userDNNamespace = (String) result.getNameInNamespace();
+                        return new String[] { userDN, userDNNamespace };
+                    } finally {
+                        if (namingEnumeration != null) {
+                            try {
+                                namingEnumeration.close();
+                            } catch (Exception e) {
+                                // ignore
+                            }
+                        }
+                        if (context != null) {
+                            try {
+                                context.close();
+                            } catch (Exception e) {
+                                // ignore
+                            }
+                        }
+                    }
+                }
+            });
+            if (userDnAndNamespace == null) {
                 return false;
             }
-            logger.debug("Get the user DN.");
-            SearchResult result = (SearchResult) namingEnumeration.next();
-            
-            // We need to do the following because slashes are handled badly. For example, when searching 
-            // for a user with lots of special characters like cn=admin,=+<>#;\
-            // SearchResult contains 2 different results:
-            // 
-            // SearchResult.getName = cn=admin\,\=\+\<\>\#\;\\\\
-            // SearchResult.getNameInNamespace = cn=admin\,\=\+\<\>#\;\\,ou=people,dc=example,dc=com
-            //
-            // the second escapes the slashes correctly.
-            userDN = result.getNameInNamespace().replace("," + userBaseDN, "");
-            userDNNamespace = (String) result.getNameInNamespace();
-            namingEnumeration.close();
+            userDN = userDnAndNamespace[0];
+            userDNNamespace = userDnAndNamespace[1];
         } catch (Exception e) {
             throw new LoginException("Can't connect to the LDAP server: " + e.getMessage());
-        } finally {
-            if (context != null) {
-                try {
-                    context.close();
-                } catch (Exception e) {
-                    // ignore
-                }
-            }
         }
         // step 2: bind the user using the DN
-        context = null;
+        DirContext context = null;
         try {
             // switch the credentials to the Karaf login user so that we can verify his password is correct
             logger.debug("Bind user (authentication).");
@@ -278,58 +301,70 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
         }
         principals.add(new UserPrincipal(user));
         // step 3: retrieving user roles
-        context = null;
         try {
-            logger.debug("Get user roles.");
-            // switch back to the connection credentials for the role search like we did for the user search in step 1 
-            if (connectionUsername != null && connectionUsername.trim().length() > 0) {
-                env.put(Context.SECURITY_AUTHENTICATION, authentication);
-                env.put(Context.SECURITY_PRINCIPAL, connectionUsername);
-                env.put(Context.SECURITY_CREDENTIALS, connectionPassword);
-            }
-            context = new InitialDirContext(env);
-            SearchControls controls = new SearchControls();
-            if (roleSearchSubtree) {
-                controls.setSearchScope(SearchControls.SUBTREE_SCOPE);
-            } else {
-                controls.setSearchScope(SearchControls.ONELEVEL_SCOPE);
-            }
-            if (roleNameAttribute != null) {
-                controls.setReturningAttributes(new String[]{ roleNameAttribute });
-            }
-            logger.debug("Looking for the user roles in LDAP with ");
-            logger.debug("  base DN: " + roleBaseDN);
-            roleFilter = roleFilter.replaceAll(Pattern.quote("%u"), Matcher.quoteReplacement(user));
-            roleFilter = roleFilter.replaceAll(Pattern.quote("%dn"), Matcher.quoteReplacement(userDN));
-            roleFilter = roleFilter.replaceAll(Pattern.quote("%fqdn"), Matcher.quoteReplacement(userDN + "," + userBaseDN));
-            roleFilter = roleFilter.replaceAll(Pattern.quote("%nsdn"), Matcher.quoteReplacement(userDNNamespace));
-            roleFilter = roleFilter.replace("\\", "\\\\");
-            logger.debug("  filter: " + roleFilter);
-            NamingEnumeration namingEnumeration = context.search(roleBaseDN, roleFilter, controls);
-            while (namingEnumeration.hasMore()) {
-                SearchResult result = (SearchResult)namingEnumeration.next();
-                Attributes attributes = result.getAttributes();
-                Attribute roles = attributes.get(roleNameAttribute);
-                if (roles != null) {
-                    for (int i = 0; i < roles.size(); i++) {
-                        String role = (String)roles.get(i);
-                        if (role != null) {
-                            principals.add(new RolePrincipal(role));
+            String[] roles = LDAPCache.getCache(env).getUserRoles(userDN, new Callable<String[]>() {
+                @Override
+                public String[] call() throws Exception {
+                    DirContext context = null;
+                    try {
+                        logger.debug("Get user roles.");
+                        // switch back to the connection credentials for the role search like we did for the user search in step 1
+                        if (connectionUsername != null && connectionUsername.trim().length() > 0) {
+                            env.put(Context.SECURITY_AUTHENTICATION, authentication);
+                            env.put(Context.SECURITY_PRINCIPAL, connectionUsername);
+                            env.put(Context.SECURITY_CREDENTIALS, connectionPassword);
+                        }
+                        context = new InitialDirContext(env);
+                        SearchControls controls = new SearchControls();
+                        if (roleSearchSubtree) {
+                            controls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+                        } else {
+                            controls.setSearchScope(SearchControls.ONELEVEL_SCOPE);
+                        }
+                        if (roleNameAttribute != null) {
+                            controls.setReturningAttributes(new String[]{roleNameAttribute});
+                        }
+                        logger.debug("Looking for the user roles in LDAP with ");
+                        logger.debug("  base DN: " + roleBaseDN);
+                        roleFilter = roleFilter.replaceAll(Pattern.quote("%u"), Matcher.quoteReplacement(user));
+                        roleFilter = roleFilter.replaceAll(Pattern.quote("%dn"), Matcher.quoteReplacement(userDN));
+                        roleFilter = roleFilter.replaceAll(Pattern.quote("%fqdn"), Matcher.quoteReplacement(userDN + "," + userBaseDN));
+                        roleFilter = roleFilter.replaceAll(Pattern.quote("%nsdn"), Matcher.quoteReplacement(userDNNamespace));
+                        roleFilter = roleFilter.replace("\\", "\\\\");
+                        logger.debug("  filter: " + roleFilter);
+                        List<String> rolesList = new ArrayList<>();
+                        NamingEnumeration namingEnumeration = context.search(roleBaseDN, roleFilter, controls);
+                        while (namingEnumeration.hasMore()) {
+                            SearchResult result = (SearchResult) namingEnumeration.next();
+                            Attributes attributes = result.getAttributes();
+                            Attribute roles = attributes.get(roleNameAttribute);
+                            if (roles != null) {
+                                for (int i = 0; i < roles.size(); i++) {
+                                    String role = (String) roles.get(i);
+                                    if (role != null) {
+                                        rolesList.add(role);
+                                    }
+                                }
+                            }
+
+                        }
+                        return rolesList.toArray(new String[rolesList.size()]);
+                    } finally {
+                        if (context != null) {
+                            try {
+                                context.close();
+                            } catch (Exception e) {
+                                // ignore
+                            }
                         }
                     }
                 }
-
+            });
+            for (String role : roles) {
+                principals.add(new RolePrincipal(role));
             }
         } catch (Exception e) {
             throw new LoginException("Can't get user " + user + " roles: " + e.getMessage());
-        } finally {
-            if (context != null) {
-                try {
-                    context.close();
-                } catch (Exception e) {
-                    // ignore
-                }
-            }
         }
         return true;
     }

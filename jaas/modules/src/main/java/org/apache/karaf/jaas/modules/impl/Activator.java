@@ -22,6 +22,7 @@ import org.apache.karaf.jaas.config.JaasRealm;
 import org.apache.karaf.jaas.modules.BackingEngineFactory;
 import org.apache.karaf.jaas.modules.EncryptionService;
 import org.apache.karaf.jaas.modules.encryption.BasicEncryptionService;
+import org.apache.karaf.jaas.modules.ldap.LDAPCache;
 import org.apache.karaf.jaas.modules.properties.AutoEncryptionSupport;
 import org.apache.karaf.jaas.modules.properties.PropertiesBackingEngineFactory;
 import org.apache.karaf.jaas.modules.publickey.PublickeyBackingEngineFactory;
@@ -79,6 +80,7 @@ public class Activator extends BaseActivator implements ManagedService {
             autoEncryptionSupport.destroy();
         }
         super.doStop();
+        LDAPCache.clear();
     }
 
     @Override
