@@ -94,7 +94,7 @@
     <feature name="jpa" description="OSGi Persistence Container" version="1.0.1">
         <details>JPA 2.0 implementation provided by Apache Aries JPA 1.0.1. NB: this feature doesn"t provide the JPA engine, you have to install one by yourself (OpenJPA for instance)</details>
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jpa_2.0_spec/1.1</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jpa_2.0_spec/${geronimo.jpa-spec.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.jpa/org.apache.aries.jpa.api/1.0.0</bundle>
         <bundle start-level="30">mvn:org.apache.aries.jpa/org.apache.aries.jpa.container/1.0.0</bundle>
         <bundle start-level="30">mvn:org.apache.aries.jpa/org.apache.aries.jpa.container.context/1.0.1</bundle>
