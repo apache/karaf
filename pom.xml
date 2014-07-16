@@ -174,8 +174,8 @@
         <aries.application.version>1.0.0</aries.application.version>
         <aries.application.api.version>1.0.0</aries.application.api.version>
         <aries.application.management.version>1.0.0</aries.application.management.version>
-        <aries.blueprint.annotation.version>1.0.0</aries.blueprint.annotation.version>
-        <aries.blueprint.annotation.api.version>1.0.0</aries.blueprint.annotation.api.version>
+        <aries.blueprint.annotation.version>1.0.1</aries.blueprint.annotation.version>
+        <aries.blueprint.annotation.api.version>1.0.1</aries.blueprint.annotation.api.version>
         <aries.blueprint.version>1.0.1</aries.blueprint.version>
         <aries.blueprint.api.version>1.0.1</aries.blueprint.api.version>
         <aries.blueprint.core.version>1.4.1</aries.blueprint.core.version>
