@@ -26,6 +26,7 @@ import org.apache.directory.server.core.annotations.CreatePartition;
 import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -50,6 +51,11 @@ import static org.junit.Assert.fail;
    "org/apache/karaf/jaas/modules/ldap/example.com.ldif"
 )
 public class LdapLoginModuleTest extends AbstractLdapTestUnit {
+
+    @After
+    public void tearDown() {
+        LDAPCache.clear();
+    }
 
     @Test
     public void testAdminLogin() throws Exception {
