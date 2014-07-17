@@ -39,8 +39,14 @@ public class InstanceCompleter implements Completer {
     public int complete(String buffer, int cursor, List candidates) {
         StringsCompleter delegate = new StringsCompleter();
         for (Instance instance : adminService.getInstances()) {
-            delegate.getStrings().add(instance.getName());
+            if (acceptsInstance(instance)) {
+                delegate.getStrings().add(instance.getName());
+            }
         }
         return delegate.complete(buffer, cursor, candidates);
+    }
+
+    protected boolean acceptsInstance(Instance instance) {
+        return true;
     }
 }

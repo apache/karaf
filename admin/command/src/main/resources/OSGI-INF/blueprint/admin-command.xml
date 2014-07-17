@@ -49,7 +49,7 @@
                 <property name="adminService" ref="adminService" />
             </action>
             <completers>
-                <ref component-id="instanceCompleter" />
+                <ref component-id="stoppedInstanceCompleter" />
                 <null/>
             </completers>
         </command>
@@ -58,7 +58,7 @@
                 <property name="adminService" ref="adminService" />
             </action>
             <completers>
-                <ref component-id="instanceCompleter" />
+                <ref component-id="startedInstanceCompleter" />
                 <null/>
             </completers>
         </command>
@@ -140,6 +140,14 @@
     <reference id="featuresService" interface="org.apache.karaf.features.FeaturesService" />
 
     <bean id="instanceCompleter" class="org.apache.karaf.admin.command.completers.InstanceCompleter">
+        <property name="adminService" ref="adminService" />
+    </bean>
+
+    <bean id="stoppedInstanceCompleter" class="org.apache.karaf.admin.command.completers.StoppedInstanceCompleter">
+        <property name="adminService" ref="adminService" />
+    </bean>
+
+    <bean id="startedInstanceCompleter" class="org.apache.karaf.admin.command.completers.StartedInstanceCompleter">
         <property name="adminService" ref="adminService" />
     </bean>
 
