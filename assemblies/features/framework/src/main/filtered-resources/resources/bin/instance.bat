@@ -143,7 +143,7 @@ set CLASSPATH=%KARAF_HOME%\system\org\apache\karaf\instance\org.apache.karaf.ins
 set CLASSPATH=%CLASSPATH%;%KARAF_HOME%\system\org\apache\karaf\shell\org.apache.karaf.shell.core\${project.version}\org.apache.karaf.shell.core-${project.version}.jar
 set CLASSPATH=%CLASSPATH%;%KARAF_HOME%\system\org\ops4j\pax\logging\pax-logging-api\${pax.logging.version}\pax-logging-api-${pax.logging.version}.jar
 set CLASSPATH=%CLASSPATH%;%KARAF_HOME%\system\jline\jline\${jline.version}\jline-${jline.version}.jar
-
+set CLASSPATH=%CLASSPATH%;%KARAF_HOME%\lib\karaf-jmx-boot.jar
 
 :EXECUTE
     if "%SHIFT%" == "true" SET ARGS=%2 %3 %4 %5 %6 %7 %8
