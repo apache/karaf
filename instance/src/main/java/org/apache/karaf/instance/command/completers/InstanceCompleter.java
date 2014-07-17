@@ -44,9 +44,14 @@ public class InstanceCompleter implements Completer {
     public int complete(Session session, CommandLine commandLine, List<String> candidates) {
         StringsCompleter delegate = new StringsCompleter();
         for (Instance instance : instanceService.getInstances()) {
-            delegate.getStrings().add(instance.getName());
+            if (acceptsInstance(instance)) {
+                delegate.getStrings().add(instance.getName());
+            }
         }
         return delegate.complete(session, commandLine, candidates);
     }
 
+    protected boolean acceptsInstance(Instance instance) {
+        return true;
+    }
 }

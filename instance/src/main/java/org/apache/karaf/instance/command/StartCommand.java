@@ -19,7 +19,7 @@ package org.apache.karaf.instance.command;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.karaf.instance.command.completers.InstanceCompleter;
+import org.apache.karaf.instance.command.completers.StoppedInstanceCompleter;
 import org.apache.karaf.instance.core.Instance;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
@@ -42,7 +42,7 @@ public class StartCommand extends InstanceCommandSupport {
     private boolean wait;
 
     @Argument(index = 0, name = "name", description = "The name of the container instance", required = true, multiValued = true)
-    @Completion(InstanceCompleter.class)
+    @Completion(StoppedInstanceCompleter.class)
     private List<String> instances = null;
 
     static final String DEBUG_OPTS = " -Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005";

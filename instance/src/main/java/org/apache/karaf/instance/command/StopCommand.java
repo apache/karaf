@@ -19,7 +19,7 @@ package org.apache.karaf.instance.command;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
-import org.apache.karaf.instance.command.completers.InstanceCompleter;
+import org.apache.karaf.instance.command.completers.StartedInstanceCompleter;
 import org.apache.karaf.instance.core.Instance;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
@@ -32,7 +32,7 @@ import org.apache.karaf.shell.support.MultiException;
 public class StopCommand extends InstanceCommandSupport {
 
     @Argument(index = 0, name = "name", description = "The name of the container instance", required = true, multiValued = true)
-    @Completion(InstanceCompleter.class)
+    @Completion(StartedInstanceCompleter.class)
     private List<String> instances = null;
 
     protected Object doExecute() throws Exception {
