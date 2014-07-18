@@ -107,4 +107,8 @@ public class InstanceImpl implements Instance {
     public boolean isAttached() {
         return getPid() != 0;
     }
+
+    public void changeSshHost(String host) throws Exception {
+        service.changeInstanceSshHost(name, host);
+    }
 }

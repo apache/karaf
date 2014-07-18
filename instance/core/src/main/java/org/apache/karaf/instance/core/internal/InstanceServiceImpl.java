@@ -1185,4 +1185,30 @@ public class InstanceServiceImpl implements InstanceService {
         return val;
     }
 
+    public void changeInstanceSshHost(String name, String host) throws Exception {
+        setKarafHost(name, "etc/org.apache.karaf.shell.cfg", "sshHost", host);      
+    }
+
+    private void setKarafHost(final String name, final String path, final String key, final String host) throws IOException {
+        execute(new Task<Object>() {
+            public Object call(State state) throws IOException {
+                InstanceState instance = state.instances.get(name);
+                if (instance == null) {
+                    throw new IllegalArgumentException("Instance " + name + " not found");
+                }
+                checkPid(instance);
+                if (instance.pid != 0) {
+                    throw new IllegalStateException("Instance is not stopped");
+                }
+                File f = new File(instance.loc, path);
+                FileLockUtils.execute(f, new FileLockUtils.RunnableWithProperties() {
+                    public void run(org.apache.felix.utils.properties.Properties properties) throws IOException {
+                        properties.put(key, host);
+                    }
+                }, true);
+                return null;
+            }
+        }, true);
+    }
+
 }

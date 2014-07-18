@@ -99,6 +99,15 @@
             </completers>
         </command>
         <command>
+            <action class="org.apache.karaf.instance.command.ChangeSshHostCommand">
+                <property name="instanceService" ref="instanceService" />
+            </action>
+            <completers>
+                <ref component-id="stoppedInstanceCompleter" />
+                <null/>
+            </completers>
+        </command>
+        <command>
             <action class="org.apache.karaf.instance.command.ChangeRmiRegistryPortCommand">
                 <property name="instanceService" ref="instanceService" />
             </action>

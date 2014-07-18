@@ -78,6 +78,14 @@ public class InstancesMBeanImpl extends StandardMBean implements InstancesMBean 
         }
     }
 
+    public void changeSshHost(String name, String host) throws MBeanException {
+        try {
+            getExistingInstance(name).changeSshHost(host);
+        } catch (Exception e) {
+            throw new MBeanException(null, e.getMessage());
+        }
+    }
+
     public void changeRmiRegistryPort(String name, int port) throws MBeanException {
         try {
             getExistingInstance(name).changeRmiRegistryPort(port);
