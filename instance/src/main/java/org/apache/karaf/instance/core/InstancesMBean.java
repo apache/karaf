@@ -49,6 +49,7 @@ public interface InstancesMBean {
     void renameInstance(String originalName, String newName) throws MBeanException;
     void renameInstance(String originalName, String newName, boolean verbose) throws MBeanException;
     void cloneInstance(String name, String cloneName, int sshPort, int rmiRegistryPort, int rmiServerPort, String location, String javaOpts) throws MBeanException;
+    void changeSshHost(String name, String host) throws MBeanException;
 
     // Attributes
     TabularData getInstances() throws MBeanException;
