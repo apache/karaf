@@ -64,4 +64,6 @@ public interface Instance {
     @Deprecated
     boolean isAttached();
 
+    void changeSshHost(String host) throws Exception;
+
 }

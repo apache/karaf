@@ -77,6 +77,10 @@ public class AdminServiceMBeanImpl extends StandardMBean implements AdminService
         getExistingInstance(name).changeSshPort(port);
     }
 
+    public void changeSshHost(String name, String host) throws Exception {
+        getExistingInstance(name).changeSshHost(host);
+    }
+    
     public void changeRmiRegistryPort(String name, int port) throws Exception {
         getExistingInstance(name).changeRmiRegistryPort(port);
     }
