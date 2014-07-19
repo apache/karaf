@@ -2260,6 +2260,8 @@
                                 <exclude>**/*.mf</exclude>
                                 <!-- test json files -->
                                 <exclude>**/*.json</exclude>
+                                <!-- SSH keys -->
+				<exclude>**/*.key</exclude>
                             </excludes>
                         </configuration>
                     </plugin>
