@@ -2258,10 +2258,12 @@
                                 <exclude>**/wc.txt</exclude>
                                 <exclude>**/foo</exclude>
                                 <exclude>**/org.ops4j.pax.exam.TestContainerFactory</exclude>
-                                <!--manual resources -->
+                                <!-- manual resources -->
                                 <exclude>manual/**/*.css</exclude>
                                 <exclude>manual/**/*.ssp</exclude>
                                 <exclude>manual/**/*.conf</exclude>
+                                <!-- SSH keys -->
+                                <exclude>**/*.key</exclude>
                             </excludes>
                         </configuration>
                     </plugin>
