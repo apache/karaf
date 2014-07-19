@@ -1701,6 +1701,8 @@
                                 <exclude>**/*.css</exclude>
                                 <exclude>**/*.ssp</exclude>
                                 <exclude>**/*.conf</exclude>
+                                <!-- SSH keys -->
+                                <exclude>**/*.key</exclude>
                             </excludes>
                         </configuration>
                     </plugin>
