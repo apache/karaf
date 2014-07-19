@@ -38,6 +38,9 @@
         <command name="shell/echo">
             <action class="org.apache.karaf.shell.commands.EchoAction"/>
         </command>
+        <command name="shell/env">
+            <action class="org.apache.karaf.shell.commands.EnvAction"/>
+        </command>
         <command name="shell/exec">
             <action class="org.apache.karaf.shell.commands.ExecuteAction"/>
         </command>
