@@ -23,6 +23,7 @@ org.apache.karaf.shell.commands.impl.DateAction
 org.apache.karaf.shell.commands.impl.EachAction
 org.apache.karaf.shell.commands.impl.EchoAction
 org.apache.karaf.shell.commands.impl.EditAction
+org.apache.karaf.shell.commands.impl.EnvAction
 org.apache.karaf.shell.commands.impl.ExecuteAction
 org.apache.karaf.shell.commands.impl.GrepAction
 org.apache.karaf.shell.commands.impl.HeadAction
