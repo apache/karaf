@@ -24,7 +24,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
 
 /**
- * Command to get the value of a session variable.
+ * Command to get/set the value of a session variable.
  */
 @Command(scope = "shell", name = "env", description = "Get/set the value of a console session variable.")
 @Service
