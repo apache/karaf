@@ -42,6 +42,9 @@
             <action class="org.apache.karaf.shell.commands.impl.EchoAction"/>
         </command>
         <command>
+            <action class="org.apache.karaf.shell.commands.impl.EnvAction"/>
+        </command>
+        <command>
             <action class="org.apache.karaf.shell.commands.impl.ExecuteAction"/>
         </command>
         <command>
