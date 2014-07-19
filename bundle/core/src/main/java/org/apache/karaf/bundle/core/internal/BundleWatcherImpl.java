@@ -32,16 +32,11 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.karaf.bundle.core.BundleInfo;
 import org.apache.karaf.bundle.core.BundleService;
 import org.apache.karaf.bundle.core.BundleWatcher;
 import org.apache.karaf.util.maven.Parser;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleEvent;
-import org.osgi.framework.BundleException;
-import org.osgi.framework.BundleListener;
-import org.osgi.framework.FrameworkEvent;
-import org.osgi.framework.FrameworkListener;
+import org.osgi.framework.*;
 import org.osgi.framework.wiring.FrameworkWiring;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -129,9 +124,13 @@ public class BundleWatcherImpl implements Runnable, BundleListener, BundleWatche
                     }
                     for (Bundle bundle : updated) {
                         try {
-                            bundle.start(Bundle.START_TRANSIENT);
+                            if (bundle.getHeaders().get(Constants.FRAGMENT_HOST) != null) {
+                                logger.info("[Watch] Bundle {} is a fragment, so it's not started", bundle.getSymbolicName());
+                            } else {
+                                bundle.start(Bundle.START_TRANSIENT);
+                            }
                         } catch (BundleException ex) {
-                            logger.warn("Error starting bundle", ex);
+                            logger.warn("[Watch] Error starting bundle", ex);
                         }
                     }
                 }
@@ -158,9 +157,12 @@ public class BundleWatcherImpl implements Runnable, BundleListener, BundleWatche
         if (location != null && location.exists() && location.lastModified() > bundle.getLastModified()) {
             InputStream is = new FileInputStream(location);
             try {
-                logger.info("[Watch] Updating watched bundle: " + bundle.getSymbolicName() + " ("
-                            + bundle.getVersion() + ")");
-                bundle.stop(Bundle.STOP_TRANSIENT);
+                logger.info("[Watch] Updating watched bundle: {} ({})", bundle.getSymbolicName(), bundle.getVersion());
+                if (bundle.getHeaders().get(Constants.FRAGMENT_HOST) != null) {
+                    logger.info("[Watch] Bundle {} is a fragment, so it's not stopped", bundle.getSymbolicName());
+                } else {
+                    bundle.stop(Bundle.STOP_TRANSIENT);
+                }
                 bundle.update(is);
                 updated.add(bundle);
             } finally {
