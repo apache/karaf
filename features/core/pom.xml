@@ -117,10 +117,20 @@
                         </Import-Package>
                         <Private-Package>
                             org.apache.karaf.features.internal,
+                            org.apache.karaf.features.osgi,
                             org.apache.felix.utils.version;-split-package:=merge-first,
                             org.apache.felix.utils.manifest;-split-package:=merge-first,
                             org.apache.karaf.util.collections;-split-package:=merge-first
                         </Private-Package>
+                        <Bundle-Activator>
+                            org.apache.karaf.features.osgi.Activator
+                        </Bundle-Activator>
+                        <Provide-Capability>
+                            osgi.service;effective:=active;objectClass="org.apache.karaf.features.FeaturesService"
+                        </Provide-Capability>
+                        <Require-Capability>
+                            osgi.service;effective:=active;filter:="(objectClass=org.osgi.service.cm.ConfigurationAdmin)"
+                        </Require-Capability>
                     </instructions>
                 </configuration>
             </plugin>

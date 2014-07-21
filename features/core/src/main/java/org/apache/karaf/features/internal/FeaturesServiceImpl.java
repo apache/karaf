@@ -47,6 +47,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 import java.util.regex.Matcher;
@@ -58,6 +59,7 @@ import org.apache.felix.utils.manifest.Parser;
 import org.apache.felix.utils.version.VersionRange;
 import org.apache.felix.utils.version.VersionTable;
 import org.apache.karaf.features.BundleInfo;
+import org.apache.karaf.features.Conditional;
 import org.apache.karaf.features.ConfigFileInfo;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeatureEvent;
@@ -76,9 +78,10 @@ import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.Version;
+import org.osgi.framework.startlevel.BundleStartLevel;
+import org.osgi.framework.wiring.FrameworkWiring;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
-import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
@@ -104,11 +107,9 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
 
     private BundleContext bundleContext;
     private ConfigurationAdmin configAdmin;
-    private PackageAdmin packageAdmin;
-    private StartLevel startLevel;
     private boolean respectStartLvlDuringFeatureStartup;
     private long resolverTimeout = 5000;
-    private Set<URI> uris;
+    private Set<URI> uris = new HashSet<URI>();
     private Map<URI, Repository> repositories = new ConcurrentHashMap<URI, Repository>();
     private Map<String, Map<String, Feature>> features;
     private Map<Feature, Set<Long>> installed = new HashMap<Feature, Set<Long>>();
@@ -140,24 +141,8 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         this.configAdmin = configAdmin;
     }
 
-    public PackageAdmin getPackageAdmin() {
-        return packageAdmin;
-    }
-
-    public void setPackageAdmin(PackageAdmin packageAdmin) {
-        this.packageAdmin = packageAdmin;
-    }
-
-    public StartLevel getStartLevel() {
-        return startLevel;
-    }
-
     public void setRespectStartLvlDuringFeatureStartup(boolean respectStartLvlDuringFeatureStartup) {
         this.respectStartLvlDuringFeatureStartup = respectStartLvlDuringFeatureStartup;
-    }
-
-    public void setStartLevel(StartLevel startLevel) {
-        this.startLevel = startLevel;
     }
 
     public long getResolverTimeout() {
@@ -192,7 +177,6 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
 
     public void setUrls(String uris) throws URISyntaxException {
         String[] s = uris.split(",");
-        this.uris = new HashSet<URI>();
         for (String value : s) {
             value = value.trim();
             if (!value.isEmpty()) {
@@ -261,6 +245,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         RepositoryImpl repo = null;
         repo = new RepositoryImpl(uri);
         repositories.put(uri, repo);
+        uris.add(uri);
         repo.load();
         if (repo.getName() == null) {
             LOGGER.warn("Feature repository doesn't have a name. The name will be mandatory in the next Karaf version.");
@@ -419,6 +404,15 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
                 InstallationState s = new InstallationState();
                 try {
                     doInstallFeature(s, f, verbose);
+                    doInstallFeatureConditionals(s, f, verbose);
+                    //Check if current feature satisfies the conditionals of existing features
+                    for (Feature installedFeature : listInstalledFeatures()) {
+                        doInstallFeatureConditionals(s, installedFeature, verbose);
+                    }
+                    for (Feature installedFeature : state.features.keySet()) {
+                        doInstallFeatureConditionals(s, installedFeature, verbose);
+                    }
+
                     state.bundleInfos.putAll(s.bundleInfos);
                     state.bundles.addAll(s.bundles);
                     state.features.putAll(s.features);
@@ -457,7 +451,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
                     }
                     if (refresh) {
                         LOGGER.debug("Refreshing bundles: {}", sb.toString());
-                        refreshPackages(bundlesToRefresh.toArray(new Bundle[bundlesToRefresh.size()]));
+                        refreshPackages(bundlesToRefresh);
                     }
                 }
             }
@@ -483,7 +477,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
                     // do not start bundles that are persistently stopped
                     if (state.installed.contains(b)
                             || (b.getState() != Bundle.STARTING && b.getState() != Bundle.ACTIVE
-                            && getStartLevel().isBundlePersistentlyStarted(b))) {
+                            && isBundlePersistentlyStarted(b))) {
                         // do no start bundles when user request it
                         Long bundleId = b.getBundleId();
                         BundleInfo bundleInfo = state.bundleInfos.get(bundleId);
@@ -553,7 +547,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
 
     protected static class InstallationState {
         final Set<Bundle> installed = new HashSet<Bundle>();
-        final List<Bundle> bundles = new ArrayList<Bundle>();
+        final Set<Bundle> bundles = new TreeSet<Bundle>();
         final Map<Long, BundleInfo> bundleInfos = new HashMap<Long, BundleInfo>();
         final Map<Feature, Set<Long>> features = new HashMap<Feature, Set<Long>>();
     }
@@ -635,6 +629,15 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
             }
         }
         state.features.put(feature, bundles);
+    }
+
+    private void doInstallFeatureConditionals(InstallationState state, Feature feature, boolean verbose) throws Exception {
+        for (Conditional conditional : feature.getConditional()) {
+            if (dependenciesSatisfied(conditional.getCondition(), state)) {
+                doInstallFeature(state, conditional.asFeature(feature.getName(), feature.getVersion()), verbose);
+            }
+        }
+
     }
 
     private String createConfigurationKey(String pid, String factoryPid) {
@@ -896,8 +899,12 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
 
     private void startBundleIfNeeded(Bundle bundle, int startLevel) {
         if (startLevel > 0) {
-            getStartLevel().setBundleStartLevel(bundle, startLevel);
+            bundle.adapt(BundleStartLevel.class).setStartLevel(startLevel);
         }
+    }
+
+    private boolean isBundlePersistentlyStarted(Bundle bundle) {
+        return bundle.adapt(BundleStartLevel.class).isPersistentlyStarted();
     }
 
     public void installConfigurationFile(String fileLocation, String finalname, boolean override, boolean verbose) throws IOException {
@@ -1007,6 +1014,12 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         // and remove all those who will still be in use.
         // This gives this list of bundles to uninstall.
         Set<Long> bundles = installed.remove(feature);
+
+        //Also remove bundles installed as conditionals
+        for (Conditional conditional : feature.getConditional()) {
+            bundles.addAll(installed.remove(conditional.asFeature(feature.getName(),feature.getVersion())));
+        }
+
         for (Set<Long> b : installed.values()) {
             bundles.removeAll(b);
         }
@@ -1249,7 +1262,6 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
 
     public void stop() throws Exception {
         bundleContext.removeFrameworkListener(this);
-        uris = new HashSet<URI>(repositories.keySet());
         while (!repositories.isEmpty()) {
             internalRemoveRepository(repositories.keySet().iterator().next());
         }
@@ -1263,13 +1275,19 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         }
     }
 
-    protected void refreshPackages(Bundle[] bundles) throws InterruptedException {
-        if (getPackageAdmin() != null) {
-            synchronized (refreshLock) {
-                getPackageAdmin().refreshPackages(bundles);
-                refreshLock.wait(refreshTimeout);
+    protected void refreshPackages(Collection<Bundle> bundles) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        FrameworkWiring fw = bundleContext.getBundle(0).adapt(FrameworkWiring.class);
+        fw.refreshBundles(bundles, new FrameworkListener() {
+            @Override
+            public void frameworkEvent(FrameworkEvent event) {
+                if (event.getType() == FrameworkEvent.ERROR) {
+                    LOGGER.error("Framework error", event.getThrowable());
+                }
+                latch.countDown();
             }
-        }
+        });
+        latch.await();
     }
 
     protected String[] parsePid(String pid) {
@@ -1529,4 +1547,23 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         }
         return buffer.toString();
     }
+
+    /**
+     * Estimates if the {@link List} of dependencies is satisfied.
+     * The method will look into {@link Feature}s that are already installed or now being installed (if {@link InstallationState} is provided (not null)).
+     * @param dependencies
+     * @param state
+     * @return
+     */
+    private boolean dependenciesSatisfied(List<Feature> dependencies, InstallationState state) throws Exception {
+       boolean satisfied = true;
+       for (Feature dep : dependencies) {
+           Feature f = getFeature(dep.getName(), dep.getVersion());
+           if (f != null && !isInstalled(f) && (state != null && !state.features.keySet().contains(f))) {
+               satisfied = false;
+           }
+       }
+       return satisfied;
+    }
+
 }

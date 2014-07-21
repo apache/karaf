@@ -157,72 +157,28 @@ public class RepositoryImpl implements Repository {
                     if (details != null && details.length() > 0)
                         f.setDetails(details);
 
-                    NodeList featureNodes = e.getElementsByTagName("feature");
-                    for (int j = 0; j < featureNodes.getLength(); j++) {
-                        Element b = (Element) featureNodes.item(j);
-                        String dependencyFeatureVersion = b.getAttribute("version");
-                        if (dependencyFeatureVersion != null && dependencyFeatureVersion.length() > 0) {
-                            f.addDependency(new FeatureImpl(b.getTextContent(), dependencyFeatureVersion));
-                        } else {
-                            f.addDependency(new FeatureImpl(b.getTextContent()));
-                        }
-                    }
-                    NodeList configNodes = e.getElementsByTagName("config");
-                    for (int j = 0; j < configNodes.getLength(); j++) {
-                        Element c = (Element) configNodes.item(j);
-                        String cfgName = c.getAttribute("name");
-                        String data = c.getTextContent();
-                        Properties properties = new Properties();
-                        properties.load(new ByteArrayInputStream(data.getBytes()));
-                        interpolation(properties);
-                        Map<String, String> hashtable = new Hashtable<String, String>();
-                        for (Object key : properties.keySet()) {
-                            String n = key.toString();
-                            hashtable.put(n, properties.getProperty(n));
-                        }
-                        f.addConfig(cfgName, hashtable);
-                    }
-                    NodeList configurationFiles = e.getElementsByTagName("configfile");
-                    for (int j = 0; j < configurationFiles.getLength(); j++) {
-                    	Element cf = (Element) configurationFiles.item(j);
-                    	String finalname = cf.getAttribute("finalname");
-                    	String location = cf.getTextContent().trim();
-                    	String override = cf.getAttribute("override");
-                    	boolean finalnameOverride = false;
-                    	// Check the value of the "override" attribute
-                        if (override != null && override.length() > 0) {
-                        	finalnameOverride = Boolean.parseBoolean(override);
-                        }
-                    	f.addConfigurationFile(new ConfigFileInfoImpl(location, finalname, finalnameOverride));
-                    }
-                    NodeList bundleNodes = e.getElementsByTagName("bundle");
-                    for (int j = 0; j < bundleNodes.getLength(); j++) {
-                        Element b = (Element) bundleNodes.item(j);
-                        String bStartLevel = b.getAttribute("start-level");
-                        String bStart = b.getAttribute("start");
-                        String bDependency = b.getAttribute("dependency");
-                        boolean bs = true;
-                        boolean bd = false;
-                        int bsl = absl;
+                    parseContent(e, f, absl);
 
-                        // Check the value of the "start" attribute
-                        if (bStart != null && bStart.length() > 0) {
-                            bs = Boolean.parseBoolean(bStart);
-                        }
-                        // Check the value of the "dependency" attribute
-                        if (bDependency != null && bDependency.length() > 0) {
-                            bd = Boolean.parseBoolean(bDependency);
-                        }
-                        // Check start level
-                        if (bStartLevel != null && bStartLevel.length() > 0) {
-                            try {
-                                bsl = Integer.parseInt(bStartLevel);
-                            } catch (Exception ex) {
-                                LOGGER.error("The start-level is not an int value for the bundle : " + b.getTextContent());
+                    NodeList conditionalNodes = e.getElementsByTagName("conditional");
+                    for (int j = 0; j < conditionalNodes.getLength(); j++) {
+                        Element c = (Element) conditionalNodes.item(j);
+
+                        ConditionalImpl conditional = new ConditionalImpl();
+                        parseContent(c, conditional, absl);
+
+                        NodeList conditionNodes = c.getElementsByTagName("condition");
+                        for (int k = 0; k < conditionNodes.getLength(); k++) {
+                            Element b = (Element) conditionNodes.item(k);
+                            String dependencyFeatureVersion = b.getAttribute("version");
+                            if (dependencyFeatureVersion != null && dependencyFeatureVersion.length() > 0) {
+                                conditional.addCondition(new FeatureImpl(b.getTextContent(), dependencyFeatureVersion));
+                            } else {
+                                conditional.addCondition(new FeatureImpl(b.getTextContent()));
                             }
                         }
-                        f.addBundle(new BundleInfoImpl(b.getTextContent().trim(), bsl, bs, bd));
+                        f.addConditional(conditional);
                     }
+
                     features.add(f);
                 }
             }
@@ -238,6 +194,79 @@ public class RepositoryImpl implements Repository {
         } catch (Exception e) {
             valid = false;
             throw (IOException) new IOException(e.getMessage() + " : " + uri).initCause(e);
+        }
+    }
+
+    private void parseContent(Element e, ContentImpl content, int absl) throws IOException {
+        NodeList featureNodes = e.getElementsByTagName("feature");
+        for (int j = 0; j < featureNodes.getLength(); j++) {
+            Element b = (Element) featureNodes.item(j);
+            if (b.getParentNode() != e) continue;
+            String dependencyFeatureVersion = b.getAttribute("version");
+            if (dependencyFeatureVersion != null && dependencyFeatureVersion.length() > 0) {
+                content.addDependency(new FeatureImpl(b.getTextContent(), dependencyFeatureVersion));
+            } else {
+                content.addDependency(new FeatureImpl(b.getTextContent()));
+            }
+        }
+        NodeList configNodes = e.getElementsByTagName("config");
+        for (int j = 0; j < configNodes.getLength(); j++) {
+            Element c = (Element) configNodes.item(j);
+            if (c.getParentNode() != e) continue;
+            String cfgName = c.getAttribute("name");
+            String data = c.getTextContent();
+            Properties properties = new Properties();
+            properties.load(new ByteArrayInputStream(data.getBytes()));
+            interpolation(properties);
+            Map<String, String> hashtable = new Hashtable<String, String>();
+            for (Object key : properties.keySet()) {
+                String n = key.toString();
+                hashtable.put(n, properties.getProperty(n));
+            }
+            content.addConfig(cfgName, hashtable);
+        }
+        NodeList configurationFiles = e.getElementsByTagName("configfile");
+        for (int j = 0; j < configurationFiles.getLength(); j++) {
+            Element cf = (Element) configurationFiles.item(j);
+            if (cf.getParentNode() != e) continue;
+            String finalname = cf.getAttribute("finalname");
+            String location = cf.getTextContent().trim();
+            String override = cf.getAttribute("override");
+            boolean finalnameOverride = false;
+            // Check the value of the "override" attribute
+            if (override != null && override.length() > 0) {
+                finalnameOverride = Boolean.parseBoolean(override);
+            }
+            content.addConfigurationFile(new ConfigFileInfoImpl(location, finalname, finalnameOverride));
+        }
+        NodeList bundleNodes = e.getElementsByTagName("bundle");
+        for (int j = 0; j < bundleNodes.getLength(); j++) {
+            Element b = (Element) bundleNodes.item(j);
+            if (b.getParentNode() != e) continue;
+            String bStartLevel = b.getAttribute("start-level");
+            String bStart = b.getAttribute("start");
+            String bDependency = b.getAttribute("dependency");
+            boolean bs = true;
+            boolean bd = false;
+            int bsl = absl;
+
+            // Check the value of the "start" attribute
+            if (bStart != null && bStart.length() > 0) {
+                bs = Boolean.parseBoolean(bStart);
+            }
+            // Check the value of the "dependency" attribute
+            if (bDependency != null && bDependency.length() > 0) {
+                bd = Boolean.parseBoolean(bDependency);
+            }
+            // Check start level
+            if (bStartLevel != null && bStartLevel.length() > 0) {
+                try {
+                    bsl = Integer.parseInt(bStartLevel);
+                } catch (Exception ex) {
+                    LOGGER.error("The start-level is not an int value for the bundle : " + b.getTextContent());
+                }
+            }
+            content.addBundle(new BundleInfoImpl(b.getTextContent().trim(), bsl, bs, bd));
         }
     }
 
@@ -262,3 +291,4 @@ public class RepositoryImpl implements Repository {
     }
 
 }
+

@@ -15,12 +15,12 @@
  */
 package org.apache.karaf.features.internal;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URLConnection;
 
 import javax.xml.XMLConstants;
+import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamSource;
@@ -28,7 +28,9 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 
+import org.apache.karaf.features.FeaturesNamespaces;
 import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
 /**
  * Utility class which fires XML Schema validation.
@@ -57,16 +59,29 @@ public class FeatureValidationUtil {
         dFactory.setNamespaceAware(true);
         Document doc = dFactory.newDocumentBuilder().parse(stream);
 
-        if (doc.getDocumentElement().getNamespaceURI() == null) {
+        QName name = new QName(doc.getDocumentElement().getNamespaceURI(), doc.getDocumentElement().getLocalName());
+        if (FeaturesNamespaces.FEATURES_0_0_0.equals(name)) {
             return;
+        } else if (FeaturesNamespaces.FEATURES_1_0_0.equals(name)) {
+            validate(doc, "/org/apache/karaf/features/karaf-features-1.0.0.xsd");
+        } else if (FeaturesNamespaces.FEATURES_1_1_0.equals(name)) {
+            validate(doc, "/org/apache/karaf/features/karaf-features-1.1.0.xsd");
+        } else if (FeaturesNamespaces.FEATURES_1_2_0.equals(name)) {
+            validate(doc, "/org/apache/karaf/features/karaf-features-1.2.0.xsd");
         }
+        else {
+            throw new IllegalArgumentException("Unrecognized root element: " + name);
+        }
+    }
 
+
+    private static void validate(Document doc, String schemaLocation) throws SAXException {
         SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
         
         /** FIXME should move to 1.1.0 ? */
         // root element has namespace - we can use schema validation
         Schema schema = factory.newSchema(new StreamSource(FeatureValidationUtil.class
-            .getResourceAsStream("/org/apache/karaf/features/karaf-features-1.0.0.xsd")));
+            .getResourceAsStream(schemaLocation)));
 
         // create schema by reading it from an XSD file:
         Validator validator = schema.newValidator();
@@ -74,7 +89,7 @@ public class FeatureValidationUtil {
         try {
             validator.validate(new DOMSource(doc));
         } catch (Exception e) {
-            throw new IllegalArgumentException("Unable to validate " + uri, e);
+            throw new IllegalArgumentException("Unable to validate " + doc.getDocumentURI(), e);
         }        
     }
 

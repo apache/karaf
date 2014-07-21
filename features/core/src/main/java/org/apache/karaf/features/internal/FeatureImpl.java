@@ -17,18 +17,19 @@
 package org.apache.karaf.features.internal;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import org.apache.karaf.features.BundleInfo;
-import org.apache.karaf.features.ConfigFileInfo;
+import org.apache.karaf.features.Conditional;
 import org.apache.karaf.features.Feature;
 
 /**
  * A feature
  */
-public class FeatureImpl implements Feature {
+public class FeatureImpl extends ContentImpl implements Feature {
+
+    public static String SPLIT_FOR_NAME_AND_VERSION = "_split_for_name_and_version_";
+    public static String DEFAULT_VERSION = "0.0.0";
+    public static String VERSION_PREFIX = "version=";
 
     private String id;
     private String name;
@@ -37,13 +38,7 @@ public class FeatureImpl implements Feature {
     private String version;
     private String resolver;
     private String install = DEFAULT_INSTALL_MODE;
-    private List<Feature> dependencies = new ArrayList<Feature>();
-    private List<BundleInfo> bundles = new ArrayList<BundleInfo>();
-    private Map<String, Map<String,String>> configs = new HashMap<String, Map<String,String>>();
-    private List<ConfigFileInfo> configurationFiles = new ArrayList<ConfigFileInfo>();
-    public static String SPLIT_FOR_NAME_AND_VERSION = "_split_for_name_and_version_";
-    public static String DEFAULT_VERSION = "0.0.0";
-    public static String VERSION_PREFIX = "version=";
+    private List<Conditional> conditionals = new ArrayList<Conditional>();
 
     public FeatureImpl() {
     }
@@ -106,35 +101,12 @@ public class FeatureImpl implements Feature {
         this.install = install;
     }
 
-    public List<Feature> getDependencies() {
-        return dependencies;
+    public List<Conditional> getConditional() {
+        return conditionals;
     }
 
-    public List<BundleInfo> getBundles() {
-        return bundles;
-    }
-
-    public Map<String, Map<String, String>> getConfigurations() {
-        return configs;
-    }
-    
-	public List<ConfigFileInfo> getConfigurationFiles() {
-		return configurationFiles;
-	}
-    public void addDependency(Feature dependency) {
-        dependencies.add(dependency);
-    }
-
-    public void addBundle(BundleInfo bundle) {
-        bundles.add(bundle);
-    }
-
-    public void addConfig(String name, Map<String,String> properties) {
-        configs.put(name, properties);
-    }
-    
-    public void addConfigurationFile(ConfigFileInfo configurationFileInfo) {
-    	configurationFiles.add(configurationFileInfo);
+    public void addConditional(Conditional conditional) {
+        conditionals.add(conditional);
     }
 
     public String toString() {

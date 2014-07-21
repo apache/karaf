@@ -33,6 +33,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.EnumSet;
@@ -46,10 +47,15 @@ import junit.framework.TestCase;
 
 import org.apache.karaf.features.internal.FeatureImpl;
 import org.apache.karaf.features.internal.FeaturesServiceImpl;
+import org.easymock.Capture;
 import org.easymock.EasyMock;
+import org.easymock.IAnswer;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
+import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.FrameworkListener;
+import org.osgi.framework.wiring.FrameworkWiring;
 import org.osgi.service.log.LogService;
 import org.osgi.service.packageadmin.PackageAdmin;
 
@@ -81,6 +87,9 @@ public class FeaturesServiceTest extends TestCase {
         BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
         Bundle installedBundle = EasyMock.createMock(Bundle.class);
 
+        // required since the sorted set uses it
+        expect(installedBundle.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
+
         expect(bundleContext.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
 
         replay(bundleContext, installedBundle);
@@ -108,6 +117,9 @@ public class FeaturesServiceTest extends TestCase {
         verify(bundleContext, installedBundle);
 
         reset(bundleContext, installedBundle);
+
+        // required since the sorted set uses it
+        expect(installedBundle.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
 
         expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
         expect(bundleContext.installBundle(isA(String.class),
@@ -149,6 +161,8 @@ public class FeaturesServiceTest extends TestCase {
         URI uri = tmp.toURI();
         
         BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
+        final Bundle sysBundle = EasyMock.createMock(Bundle.class);
+        FrameworkWiring frameworkWiring = EasyMock.createMock(FrameworkWiring.class);
         Bundle installedBundle = EasyMock.createMock(Bundle.class);
 
         expect(bundleContext.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
@@ -162,6 +176,9 @@ public class FeaturesServiceTest extends TestCase {
         verify(bundleContext, installedBundle);
 
         reset(bundleContext, installedBundle);
+
+        // required since the sorted set uses it
+        expect(installedBundle.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
 
         // Installs f1 and 0.1
         expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
@@ -195,7 +212,21 @@ public class FeaturesServiceTest extends TestCase {
 
         expect(bundleContext.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
 
-        replay(bundleContext, installedBundle);
+        // refresh
+        expect(bundleContext.getBundle(0)).andStubReturn(sysBundle);
+        expect(sysBundle.adapt(FrameworkWiring.class)).andStubReturn(frameworkWiring);
+        final Capture<FrameworkListener> listeners =  new Capture<FrameworkListener>();
+        frameworkWiring.refreshBundles(EasyMock.<Collection<Bundle>>eq(null), capture(listeners));
+        expectLastCall().andStubAnswer(new IAnswer<Object>() {
+            public Object answer() throws Throwable {
+                for (FrameworkListener listener : listeners.getValues()) {
+                    listener.frameworkEvent(new FrameworkEvent(FrameworkEvent.PACKAGES_REFRESHED, sysBundle, null));
+                }
+                return null;
+            }
+        });
+
+        replay(bundleContext, installedBundle, sysBundle, frameworkWiring);
 
         try {
             svc.uninstallFeature("f1");
@@ -281,7 +312,12 @@ public class FeaturesServiceTest extends TestCase {
         URI uri = tmp.toURI();
 
         BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
+        final Bundle sysBundle = EasyMock.createMock(Bundle.class);
+        FrameworkWiring frameworkWiring = EasyMock.createMock(FrameworkWiring.class);
         Bundle installedBundle = EasyMock.createMock(Bundle.class);
+
+        // required since the sorted set uses it
+        expect(installedBundle.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
 
         // Installs feature f1 with dependency on f2
         // so will install f2 first
@@ -316,7 +352,21 @@ public class FeaturesServiceTest extends TestCase {
 
         expect(bundleContext.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
 
-        replay(bundleContext, installedBundle);
+        // refresh
+        expect(bundleContext.getBundle(0)).andStubReturn(sysBundle);
+        expect(sysBundle.adapt(FrameworkWiring.class)).andStubReturn(frameworkWiring);
+        final Capture<FrameworkListener> listeners =  new Capture<FrameworkListener>();
+        frameworkWiring.refreshBundles(EasyMock.<Collection<Bundle>>eq(null), capture(listeners));
+        expectLastCall().andStubAnswer(new IAnswer<Object>() {
+            public Object answer() throws Throwable {
+                for (FrameworkListener listener : listeners.getValues()) {
+                    listener.frameworkEvent(new FrameworkEvent(FrameworkEvent.PACKAGES_REFRESHED, sysBundle, null));
+                }
+                return null;
+            }
+        });
+
+        replay(bundleContext, installedBundle, sysBundle, frameworkWiring);
 
         FeaturesServiceImpl svc = new FeaturesServiceImpl();
         svc.setBundleContext(bundleContext);
@@ -456,7 +506,12 @@ public class FeaturesServiceTest extends TestCase {
         URI uri = tmp.toURI();
 
         BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
+        final Bundle sysBundle = EasyMock.createMock(Bundle.class);
+        FrameworkWiring frameworkWiring = EasyMock.createMock(FrameworkWiring.class);
         Bundle installedBundle = EasyMock.createMock(Bundle.class);
+
+        // required since the sorted set uses it
+        expect(installedBundle.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
 
         // Installs feature f1 with dependency on f2
         expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
@@ -473,12 +528,29 @@ public class FeaturesServiceTest extends TestCase {
                                            isA(InputStream.class))).andReturn(installedBundle);
         installedBundle.start();
 
+        expect(bundleContext.getBundle(0)).andReturn(sysBundle);
+        expect(sysBundle.adapt(FrameworkWiring.class)).andReturn(frameworkWiring);
+
         // uninstalls first feature name = f2, version = 0.1
         installedBundle.uninstall();
 
         expect(bundleContext.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
 
-        replay(bundleContext, installedBundle);
+        // refresh
+        expect(bundleContext.getBundle(0)).andStubReturn(sysBundle);
+        expect(sysBundle.adapt(FrameworkWiring.class)).andStubReturn(frameworkWiring);
+        final Capture<FrameworkListener> listeners =  new Capture<FrameworkListener>();
+        frameworkWiring.refreshBundles(EasyMock.<Collection<Bundle>>eq(null), capture(listeners));
+        expectLastCall().andStubAnswer(new IAnswer<Object>() {
+            public Object answer() throws Throwable {
+                for (FrameworkListener listener : listeners.getValues()) {
+                    listener.frameworkEvent(new FrameworkEvent(FrameworkEvent.PACKAGES_REFRESHED, sysBundle, null));
+                }
+                return null;
+            }
+        });
+
+        replay(bundleContext, installedBundle, sysBundle, frameworkWiring);
 
         FeaturesServiceImpl svc = new FeaturesServiceImpl();
         svc.setBundleContext(bundleContext);
@@ -535,6 +607,11 @@ public class FeaturesServiceTest extends TestCase {
     private BundleContext prepareBundleContextForInstallUninstall() throws Exception {
         BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
         Bundle installedBundle = EasyMock.createMock(Bundle.class);
+        final Bundle sysBundle = EasyMock.createMock(Bundle.class);
+        FrameworkWiring frameworkWiring = EasyMock.createMock(FrameworkWiring.class);
+
+        // required since the sorted set uses it
+        expect(installedBundle.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
 
         // Installs feature f1 with dependency on f2
         expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
@@ -553,7 +630,22 @@ public class FeaturesServiceTest extends TestCase {
 
         expect(bundleContext.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
 
-        replay(bundleContext, installedBundle);
+        // refresh
+        expect(bundleContext.getBundle(0)).andStubReturn(sysBundle);
+        expect(sysBundle.adapt(FrameworkWiring.class)).andStubReturn(frameworkWiring);
+
+        final Capture<FrameworkListener> listeners =  new Capture<FrameworkListener>();
+        frameworkWiring.refreshBundles(EasyMock.<Collection<Bundle>>eq(null), capture(listeners));
+        expectLastCall().andStubAnswer(new IAnswer<Object>() {
+            public Object answer() throws Throwable {
+                for (FrameworkListener listener : listeners.getValues()) {
+                    listener.frameworkEvent(new FrameworkEvent(FrameworkEvent.PACKAGES_REFRESHED, sysBundle, null));
+                }
+                return null;
+            }
+        });
+
+        replay(bundleContext, installedBundle, sysBundle, frameworkWiring);
         return bundleContext;
     }
 
@@ -579,6 +671,10 @@ public class FeaturesServiceTest extends TestCase {
         BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
         Bundle installedBundle1 = EasyMock.createMock(Bundle.class);
         Bundle installedBundle2 = EasyMock.createMock(Bundle.class);
+
+        // required since the sorted set uses it
+        expect(installedBundle1.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
+        expect(installedBundle2.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
 
         // Installs feature f1 and f2
         expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
@@ -632,6 +728,10 @@ public class FeaturesServiceTest extends TestCase {
         Bundle installedBundle1 = EasyMock.createMock(Bundle.class);
         Bundle installedBundle2 = EasyMock.createMock(Bundle.class);
 
+        // required since the sorted set uses it
+        expect(installedBundle1.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
+        expect(installedBundle2.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
+
         // Installs feature f1 and f2
         expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
         expect(bundleContext.installBundle(eq(bundle1), isA(InputStream.class))).andReturn(installedBundle1);
@@ -684,6 +784,10 @@ public class FeaturesServiceTest extends TestCase {
         BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
         Bundle installedBundle1 = EasyMock.createMock(Bundle.class);
         Bundle installedBundle2 = EasyMock.createMock(Bundle.class);
+
+        // required since the sorted set uses it
+        expect(installedBundle1.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
+        expect(installedBundle2.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
 
         // Installs feature f1 and f2
         expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
@@ -741,6 +845,10 @@ public class FeaturesServiceTest extends TestCase {
         BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
         Bundle installedBundle1 = EasyMock.createMock(Bundle.class);
         Bundle installedBundle2 = EasyMock.createMock(Bundle.class);
+
+        // required since the sorted set uses it
+        expect(installedBundle1.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
+        expect(installedBundle2.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
 
         // Installs feature f1 and f2
         expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
@@ -800,10 +908,15 @@ public class FeaturesServiceTest extends TestCase {
         }
 
         // loads the state
-        PackageAdmin packageAdmin = EasyMock.createMock(PackageAdmin.class);
         BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
+        final Bundle sysBundle = EasyMock.createMock(Bundle.class);
+        FrameworkWiring frameworkWiring = EasyMock.createMock(FrameworkWiring.class);
         Bundle installedBundle1 = EasyMock.createMock(Bundle.class);
         Bundle installedBundle2 = EasyMock.createMock(Bundle.class);
+
+        // required since the sorted set uses it
+        expect(installedBundle1.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
+        expect(installedBundle2.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
 
         // Installs feature f1
         expect(installedBundle1.getBundleId()).andReturn(12345L);
@@ -831,14 +944,24 @@ public class FeaturesServiceTest extends TestCase {
         //
         // This is the real test to make sure the host is actually refreshed
         //
-        packageAdmin.refreshPackages(aryEq(new Bundle[] { installedBundle1 }));
+        expect(bundleContext.getBundle(0)).andReturn(sysBundle);
+        expect(sysBundle.adapt(FrameworkWiring.class)).andReturn(frameworkWiring);
+        final Capture<FrameworkListener> capture =  new Capture<FrameworkListener>();
+        frameworkWiring.refreshBundles(eq(Collections.singleton(installedBundle1)), capture(capture));
+        expectLastCall().andAnswer(new IAnswer<Object>() {
+            public Object answer() throws Throwable {
+                for (FrameworkListener listener : capture.getValues()) {
+                    listener.frameworkEvent(new FrameworkEvent(FrameworkEvent.PACKAGES_REFRESHED, sysBundle, null));
+                }
+                return null;
+            }
+        });
 
         expect(bundleContext.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
 
-        replay(packageAdmin, bundleContext, installedBundle1, installedBundle2);
+        replay(frameworkWiring, sysBundle, bundleContext, installedBundle1, installedBundle2);
 
         FeaturesServiceImpl svc = new FeaturesServiceImpl();
-        svc.setPackageAdmin(packageAdmin);
         svc.setBundleContext(bundleContext);
         svc.addRepository(uri);
 

@@ -18,7 +18,7 @@
 -->
 <features name="spring-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.0.0 http://karaf.apache.org/xmlns/features/v1.0.0">
 
-    <!-- NB: this file is not the one really used. This file is used by the karaf-maven-plugin to define the start-level of bundles in the generated feature.xml -->
+    <repository>mvn:org.apache.karaf.assemblies.features/standard/${project.version}/xml/features</repository>
 
     <!-- Spring DM support -->
     <feature name="spring-dm" description="Spring DM support" version="${spring.osgi.version}">
@@ -28,7 +28,6 @@
         <bundle start-level="30">mvn:org.springframework.osgi/spring-osgi-core/${spring.osgi.version}</bundle>
         <bundle start-level="30">mvn:org.springframework.osgi/spring-osgi-extender/${spring.osgi.version}</bundle>
         <bundle start-level="30">mvn:org.springframework.osgi/spring-osgi-annotation/${spring.osgi.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.spring/${project.version}</bundle>
     </feature>
 
     <feature name="spring-dm-web" description="Spring DM Web support" version="${spring.osgi.version}">
@@ -49,7 +48,6 @@
         <bundle start-level="30">mvn:org.springframework/spring-aop/${spring31.version}</bundle>
         <bundle start-level="30">mvn:org.springframework/spring-context/${spring31.version}</bundle>
         <bundle start-level="30">mvn:org.springframework/spring-context-support/${spring31.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.spring/${project.version}</bundle>
     </feature>
 
     <feature name="spring-aspects" description="Spring 3.1.x AOP support" version="${spring31.version}">
@@ -126,7 +124,6 @@
         <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-aop/${spring32.version}</bundle>
         <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-context/${spring32.version}</bundle>
         <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-context-support/${spring32.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.spring/${project.version}</bundle>
     </feature>
 
     <feature name="spring-aspects" description="Spring 3.2.x AOP support" version="${spring32.version}">
@@ -203,7 +200,6 @@
         <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-aop/${spring40.version}</bundle>
         <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-context/${spring40.version}</bundle>
         <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-context-support/${spring40.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.spring/${project.version}</bundle>
     </feature>
 
     <feature name="spring-aspects" description="Spring 4.0.x AOP support" version="${spring40.version}">
@@ -270,22 +266,13 @@
 
     <feature name="spring-security" description="Spring Security 3.1.x support" version="${spring.security31.version}">
         <feature>war</feature>
-	<feature version="[3,4)">spring-web</feature>
+	    <feature version="[3,4)">spring-web</feature>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.aspectj/${aspectj.bundle.version}</bundle>
         <bundle start-level="30">mvn:org.springframework.security/spring-security-core/${spring.security31.version}</bundle>
         <bundle start-level="30">mvn:org.springframework.security/spring-security-config/${spring.security31.version}</bundle>
         <bundle start-level="30">mvn:org.springframework.security/spring-security-web/${spring.security31.version}</bundle>
         <bundle start-level="30">mvn:org.springframework.security/spring-security-acl/${spring.security31.version}</bundle>
         <bundle start-level="30">mvn:org.springframework.security/spring-security-taglibs/${spring.security31.version}</bundle>
-    </feature>
-
-    <!-- Gemini Blueprint support -->
-
-    <feature name="gemini-blueprint" description="Gemini Blueprint Extender" version="${gemini.blueprint.version}">
-        <feature version="[3,4)">spring</feature>
-        <bundle start-level="30">mvn:org.eclipse.gemini/org.eclipse.gemini.blueprint.io/${gemini.blueprint.version}</bundle>
-        <bundle start-level="30">mvn:org.eclipse.gemini/org.eclipse.gemini.blueprint.core/${gemini.blueprint.version}</bundle>
-        <bundle start-level="30">mvn:org.eclipse.gemini/org.eclipse.gemini.blueprint.extender/${gemini.blueprint.version}</bundle>
     </feature>
 
 </features>

@@ -18,8 +18,9 @@
     limitations under the License.
 -->
 
-<features name="karaf-enterprise-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.0.0">
+<features name="karaf-enterprise-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0">
 
+    <repository>mvn:org.apache.karaf.assemblies.features/standard/${project.version}/xml/features</repository>
     <repository>mvn:org.ops4j.pax.cdi/pax-cdi-features/${pax.cdi.version}/xml/features</repository>
 
     <feature name="transaction" description="OSGi Transaction Manager" version="1.0.0" resolver="(obr)">
@@ -33,8 +34,12 @@
             aries.transaction.howl.bufferSizeKBytes = 4
         </config>
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.aries.transaction/org.apache.aries.transaction.blueprint/${aries.transaction.blueprint.version}</bundle>
+        <bundle dependency="true" start-level="20">mvn:org.apache.aries/org.apache.aries.util/${aries.util.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.transaction/org.apache.aries.transaction.manager/1.0.0</bundle>
+        <conditional>
+            <condition>aries-blueprint</condition>
+            <bundle start-level="30">mvn:org.apache.aries.transaction/org.apache.aries.transaction.blueprint/${aries.transaction.blueprint.version}</bundle>
+        </conditional>
     </feature>
 
     <feature name="transaction" description="OSGi Transaction Manager" version="1.1.0" resolver="(obr)">
@@ -48,8 +53,12 @@
             aries.transaction.howl.bufferSizeKBytes = 4
         </config>
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.aries.transaction/org.apache.aries.transaction.blueprint/${aries.transaction.blueprint.version}</bundle>
+        <bundle dependency="true" start-level="20">mvn:org.apache.aries/org.apache.aries.util/${aries.util.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.transaction/org.apache.aries.transaction.manager/1.1.0</bundle>
+        <conditional>
+            <condition>aries-blueprint</condition>
+            <bundle start-level="30">mvn:org.apache.aries.transaction/org.apache.aries.transaction.blueprint/${aries.transaction.blueprint.version}</bundle>
+        </conditional>
     </feature>
 
     <feature name="transaction" description="OSGi Transaction Manager" version="1.0.1" resolver="(obr)">
@@ -63,8 +72,12 @@
             aries.transaction.howl.bufferSizeKBytes = 4
         </config>
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.aries.transaction/org.apache.aries.transaction.blueprint/${aries.transaction.blueprint.version}</bundle>
+        <bundle dependency="true" start-level="20">mvn:org.apache.aries/org.apache.aries.util/${aries.util.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.transaction/org.apache.aries.transaction.manager/1.0.1</bundle>
+        <conditional>
+            <condition>aries-blueprint</condition>
+            <bundle start-level="30">mvn:org.apache.aries.transaction/org.apache.aries.transaction.blueprint/${aries.transaction.blueprint.version}</bundle>
+        </conditional>
     </feature>
 
     <feature name="connector" description="OSGi support for JCA Connector 1.5" version="2.2.2" resolver="(obr)">
@@ -86,20 +99,28 @@
         <details>JPA 2.0 implementation provided by Apache Aries JPA 1.0.1. NB: this feature doesn't provide the JPA engine, you have to install one by yourself (OpenJPA for instance)</details>
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jpa_2.0_spec/${geronimo.jpa-spec.version}</bundle>
+        <bundle dependency="true" start-level="20">mvn:org.apache.aries/org.apache.aries.util/${aries.util.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.jpa/org.apache.aries.jpa.api/1.0.0</bundle>
-        <bundle start-level="30">mvn:org.apache.aries.jpa/org.apache.aries.jpa.blueprint.aries/1.0.1</bundle>
         <bundle start-level="30">mvn:org.apache.aries.jpa/org.apache.aries.jpa.container/1.0.0</bundle>
         <bundle start-level="30">mvn:org.apache.aries.jpa/org.apache.aries.jpa.container.context/1.0.1</bundle>
+        <conditional>
+            <condition>aries-blueprint</condition>
+            <bundle start-level="30">mvn:org.apache.aries.jpa/org.apache.aries.jpa.blueprint.aries/1.0.1</bundle>
+        </conditional>
     </feature>
 
     <feature name="jpa" description="OSGi Persistence Container" version="${aries.jpa.version}" resolver="(obr)">
         <details>JPA 2.1 implementation provided by Apache Aries JPA ${aries.jpa.version}. NB: this feature doesn't provide the JPA engine, you have to install one by yourself (OpenJPA for instance)</details>
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.hibernate.javax.persistence/hibernate-jpa-2.1-api/1.0.0.Final</bundle>
+        <bundle dependency="true" start-level="20">mvn:org.apache.aries/org.apache.aries.util/${aries.util.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.jpa/org.apache.aries.jpa.api/${aries.jpa.api.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.aries.jpa/org.apache.aries.jpa.blueprint.aries/${aries.jpa.blueprint.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.jpa/org.apache.aries.jpa.container/${aries.jpa.container.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.jpa/org.apache.aries.jpa.container.context/${aries.jpa.container.context.version}</bundle>
+        <conditional>
+            <condition>aries-blueprint</condition>
+            <bundle start-level="30">mvn:org.apache.aries.jpa/org.apache.aries.jpa.blueprint.aries/${aries.jpa.blueprint.version}</bundle>
+        </conditional>
     </feature>
 
     <feature name="openjpa" description="Apache OpenJPA 2.2.x persistent engine support" version="2.2.2" resolver="(obr)">
@@ -222,6 +243,7 @@
 
     <feature name="jndi" description="OSGi Service Registry JNDI access" version="${aries.jndi.version}" resolver="(obr)">
         <details>JNDI support provided by Apache Aries JNDI ${aries.jndi.version}</details>
+        <feature>management</feature>
         <bundle start-level="30">mvn:org.apache.xbean/xbean-naming/${xbean.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.jndi/org.apache.karaf.jndi.core/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.jndi/org.apache.aries.jndi.api/${aries.jndi.api.version}</bundle>
@@ -229,24 +251,35 @@
         <bundle start-level="30">mvn:org.apache.aries.jndi/org.apache.aries.jndi.rmi/${aries.jndi.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.jndi/org.apache.aries.jndi.url/${aries.jndi.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.jndi/org.apache.aries.jndi.legacy.support/${aries.jndi.version}</bundle>
-        <bundle>mvn:org.apache.karaf.jndi/org.apache.karaf.jndi.command/${project.version}</bundle>
+        <conditional>
+            <condition>shell</condition>
+            <bundle>mvn:org.apache.karaf.jndi/org.apache.karaf.jndi.command/${project.version}</bundle>
+        </conditional>
     </feature>
 
     <feature name="jdbc" description="JDBC service and commands" version="${project.version}" resolver="(obr)">
         <details>JDBC support providing service, commands, and MBean</details>
         <feature>transaction</feature>
+        <feature>management</feature>
         <bundle>mvn:commons-pool/commons-pool/${commons-pool.version}</bundle>
         <bundle>mvn:commons-dbcp/commons-dbcp/${commons-dbcp.version}</bundle>
         <bundle>mvn:org.apache.karaf.jdbc/org.apache.karaf.jdbc.core/${project.version}</bundle>
-        <bundle>mvn:org.apache.karaf.jdbc/org.apache.karaf.jdbc.command/${project.version}</bundle>
+        <conditional>
+            <condition>shell</condition>
+            <bundle>mvn:org.apache.karaf.jdbc/org.apache.karaf.jdbc.command/${project.version}</bundle>
+        </conditional>
     </feature>
 
     <feature name="jms" description="JMS service and commands" version="${project.version}" resolver="(obr)">
         <details>JMS support provinding service, commands, and MBean.</details>
         <feature>transaction</feature>
+        <feature>management</feature>
         <bundle>mvn:org.apache.geronimo.specs/geronimo-jms_1.1_spec/${geronimo.jms-spec.version}</bundle>
         <bundle>mvn:org.apache.karaf.jms/org.apache.karaf.jms.core/${project.version}</bundle>
-        <bundle>mvn:org.apache.karaf.jms/org.apache.karaf.jms.command/${project.version}</bundle>
+        <conditional>
+            <condition>shell</condition>
+            <bundle>mvn:org.apache.karaf.jms/org.apache.karaf.jms.command/${project.version}</bundle>
+        </conditional>
     </feature>
 
     <feature name="openwebbeans" description="Apache OpenWebBeans CDI container support" version="${openwebbeans.version}" resolver="(obr)">
@@ -265,6 +298,7 @@
 
     <feature name="application-without-isolation" description="Provide EBA archive support" version="${aries.application.version}">
         <details>Support of the Aries EBA archives</details>
+        <feature>aries-blueprint</feature>
         <feature version="${project.version}">obr</feature>
         <!-- commom -->
         <bundle start-level="30">mvn:org.apache.aries.application/org.apache.aries.application.resolver.obr/${aries.application.version}</bundle>
