@@ -28,18 +28,18 @@ public class LoggingCommandSessionListener implements CommandSessionListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(LoggingCommandSessionListener.class);
 
     public void beforeExecute(CommandSession session, CharSequence command) {
-        LOGGER.info("Executing command: '" + command + "'");
+        LOGGER.debug("Executing command: '" + command + "'");
     }
 
     public void afterExecute(CommandSession session, CharSequence command, Exception exception) {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.info("Command: '" + command + "' failed", exception);
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.debug("Command: '" + command + "' failed", exception);
         } else {
-            LOGGER.info("Command: '" + command + "' failed: " + exception);
+            LOGGER.debug("Command: '" + command + "' failed: " + exception);
         }
     }
 
     public void afterExecute(CommandSession session, CharSequence command, Object result) {
-        LOGGER.info("Command: '" + command + "' returned '" + result + "'");
+        LOGGER.debug("Command: '" + command + "' returned '" + result + "'");
     }
 }
