@@ -31,7 +31,8 @@ public interface FeaturesService {
         NoAutoRefreshBundles,
         NoAutoStartBundles,
         ContinueBatchOnFailure,
-        Verbose
+        Verbose,
+        Boot
     }
 
     /**

@@ -398,6 +398,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         final InstallationState state = new InstallationState();
         final InstallationState failure = new InstallationState();
         boolean verbose = options.contains(FeaturesService.Option.Verbose);
+        Set<Bundle> bundlesToRefresh = null;
         try {
             // Install everything
             for (Feature f : features) {
@@ -432,7 +433,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
             boolean print = options.contains(Option.PrintBundlesToRefresh);
             boolean refresh = !options.contains(Option.NoAutoRefreshBundles);
             if (print || refresh) {
-                Set<Bundle> bundlesToRefresh = findBundlesToRefresh(state);
+                bundlesToRefresh = findBundlesToRefresh(state);
                 StringBuilder sb = new StringBuilder();
                 for (Bundle b : bundlesToRefresh) {
                     if (sb.length() > 0) {
@@ -451,7 +452,9 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
                     }
                     if (refresh) {
                         LOGGER.debug("Refreshing bundles: {}", sb.toString());
-                        refreshPackages(bundlesToRefresh);
+                        if (!options.contains(Option.Boot)) {
+                            refreshPackages(bundlesToRefresh);
+                        }
                     }
                 }
             }
@@ -504,6 +507,10 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
                         // Ignore
                     }
                 }
+            }
+            // Refresh bundles async for boot
+            if (options.contains(Option.Boot) && bundlesToRefresh != null && !bundlesToRefresh.isEmpty()) {
+                refreshPackagesAsync(bundlesToRefresh);
             }
         } catch (Exception e) {
             // cleanup on error
@@ -1203,7 +1210,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
                             }
                         }
                         try {
-                            installFeatures(features, EnumSet.of(Option.NoCleanIfFailure, Option.ContinueBatchOnFailure));
+                            installFeatures(features, EnumSet.of(Option.NoCleanIfFailure, Option.ContinueBatchOnFailure, Option.Boot));
                         } catch (Exception e) {
                             LOGGER.error("Error installing boot features", e);
                         }
@@ -1250,7 +1257,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
                     }
                 }
                 try {
-                    installFeatures(features, EnumSet.of(Option.NoCleanIfFailure, Option.ContinueBatchOnFailure));
+                    installFeatures(features, EnumSet.of(Option.NoCleanIfFailure, Option.ContinueBatchOnFailure, Option.Boot));
                 } catch (Exception e) {
                     LOGGER.error("Error installing boot features", e);
                 }
@@ -1288,6 +1295,11 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
             }
         });
         latch.await();
+    }
+
+    protected void refreshPackagesAsync(Collection<Bundle> bundles) throws InterruptedException {
+        FrameworkWiring fw = bundleContext.getBundle(0).adapt(FrameworkWiring.class);
+        fw.refreshBundles(bundles);
     }
 
     protected String[] parsePid(String pid) {
