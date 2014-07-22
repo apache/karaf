@@ -63,7 +63,7 @@ public class JaasTest extends KarafTestSupport {
         for (int i=0; i<10; i++) {
             doLogin();
         }
-        assertEquals(3, bundleContext.getServiceReferences(ArtifactInstaller.class.getName(), null).length);
+        assertEquals(2, bundleContext.getServiceReferences(ArtifactInstaller.class.getName(), null).length);
     }
 
     private void doLogin() throws Exception {

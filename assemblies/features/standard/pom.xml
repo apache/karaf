@@ -444,9 +444,11 @@
                         <phase>compile</phase>
                         <goals>
                             <goal>features-generate-descriptor</goal>
+                            <goal>features-validate-descriptor</goal>
                         </goals>
                         <configuration>
                             <addBundlesToPrimaryFeature>false</addBundlesToPrimaryFeature>
+                            <file>${project.build.directory}/feature/feature.xml</file>
                         </configuration>
                     </execution>
                 </executions>

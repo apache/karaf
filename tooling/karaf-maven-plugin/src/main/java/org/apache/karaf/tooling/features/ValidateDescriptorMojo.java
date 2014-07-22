@@ -19,6 +19,7 @@ package org.apache.karaf.tooling.features;
 
 import aQute.bnd.header.OSGiHeader;
 import org.apache.felix.utils.manifest.Clause;
+import org.apache.felix.utils.version.VersionTable;
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Dependency;
 import org.apache.karaf.features.Feature;
@@ -40,6 +41,7 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.shared.dependency.tree.DependencyNode;
 import org.apache.maven.shared.dependency.tree.DependencyTreeBuilder;
 import org.apache.maven.shared.dependency.tree.traversal.DependencyNodeVisitor;
+import org.osgi.framework.Version;
 
 import java.io.*;
 import java.net.URI;
@@ -657,10 +659,22 @@ public class ValidateDescriptorMojo extends MojoSupport {
         }
 
         public Feature get(String name, String version) throws Exception {
+            Feature best = null;
             for (Feature feature : features) {
-                if (name.equals(feature.getName()) && version.equals(feature.getVersion())) {
-                    return feature;
+                if (name.equals(feature.getName())) {
+                    if (best == null) {
+                        best = feature;
+                    } else {
+                        Version v1 = VersionTable.getVersion(feature.getVersion());
+                        Version v2 = VersionTable.getVersion(best.getVersion());
+                        if (v1.compareTo(v2) > 0) {
+                            best = feature;
+                        }
+                    }
                 }
+            }
+            if (best != null) {
+                return best;
             }
             throw new Exception(String.format("Unable to find definition for feature %s (version %s)",
                     name, version));
