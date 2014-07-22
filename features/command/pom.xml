@@ -118,6 +118,9 @@
                             org.apache.karaf.shell.console,
                             *
                         </Import-Package>
+                        <Private-Package>
+                            org.apache.karaf.util
+                        </Private-Package>
                     </instructions>
                 </configuration>
             </plugin>

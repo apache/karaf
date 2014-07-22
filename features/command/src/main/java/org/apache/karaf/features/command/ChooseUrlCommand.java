@@ -47,12 +47,15 @@ public class ChooseUrlCommand extends AbstractAction {
     }
 
     protected Object doExecute() throws Exception {
-        String effectiveVersion = (version == null) ? "LATEST" : version;
-        URI uri = featureFinder.getUriFor(name, effectiveVersion);
+        URI uri = featureFinder.getUriFor(name, version);
         if (uri == null) {
-            throw new RuntimeException("No feature found for name " + name + " and version " + version);
+            if (version != null) {
+                throw new RuntimeException("No feature found for name " + name + " and version " + version);
+            } else {
+                throw new RuntimeException("No feature found for name " + name);
+            }
         }
-        System.out.println("adding feature url " + uri);
+        System.out.println("Adding feature url " + uri);
         featuresService.addRepository(uri);
         return null;
     }
