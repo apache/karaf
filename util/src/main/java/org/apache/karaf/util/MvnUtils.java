@@ -22,7 +22,6 @@ public class MvnUtils {
 
     private MvnUtils() { }
 
-
     /**
      * Compute the path of url, expanding it if the url uses the mvn protocol.
      *
@@ -50,4 +49,20 @@ public class MvnUtils {
         }
         return url.getPath();
     }
+
+    public static String replaceVersion(String url, String version) {
+        if (url.startsWith("mvn:")) {
+            // mvn:groupId/artifactId/version...
+            int index = url.indexOf('/');
+            index = url.indexOf('/', index + 1);
+
+            String first = url.substring(0, index);
+            index = url.indexOf('/', index + 1);
+            String second = url.substring(index + 1);
+
+            return first + "/" + version + "/" + second;
+        }
+        return url;
+    }
+
 }

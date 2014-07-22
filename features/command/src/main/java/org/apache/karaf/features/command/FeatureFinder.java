@@ -22,6 +22,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.karaf.util.MvnUtils;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 
@@ -31,13 +32,13 @@ public class FeatureFinder implements ManagedService {
         return nameToArtifactMap.keySet().toArray(new String[] {});
     }
 
-    public URI getUriFor(String name, String version) {
-        String coords = nameToArtifactMap.get(name);
-        if (coords == null) {
-            return null;
+    public URI getUriFor(String name, String version) throws Exception {
+        String uri = nameToArtifactMap.get(name);
+        if (version != null) {
+            // replace the version in the URL with the provided one
+            uri = MvnUtils.replaceVersion(uri, version);
         }
-        Artifact artifact = new Artifact(coords);
-        return artifact.getPaxUrlForArtifact(version);
+        return new URI(uri);
     }
 
     @SuppressWarnings("rawtypes")
