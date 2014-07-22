@@ -24,6 +24,11 @@ import javax.management.ObjectName;
 import javax.management.openmbean.TabularData;
 import javax.management.remote.JMXConnector;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.net.URI;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -118,6 +123,27 @@ public class FeaturesTest extends KarafTestSupport {
         String repoListOutput = executeCommand("features:listurl", 60000L, false);
         System.out.println(repoListOutput);
         assertTrue(repoListOutput.contains("apache-karaf-cellar"));
+    }
+
+    @Test
+    public void repoAddContainingInnerRepositoryWithVersionRange() throws Exception {
+        File tmp = File.createTempFile("test", ".feature");
+        PrintWriter pw = new PrintWriter(new FileWriter(tmp));
+        pw.write("<features xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
+        pw.write("  <repository>mvn:org.apache.karaf.cellar/apache-karaf-cellar/[2.3,3)/xml/features</repository>");
+        pw.write("  <feature name=\"test\" version=\"1.0\">");
+        pw.write("     <feature>cellar</feature>");
+        pw.write("  </feature>");
+        pw.write("</features>");
+        pw.close();
+
+        URI uri = tmp.toURI();
+        System.out.println(executeCommand("features:addurl " + uri));
+        System.out.println(executeCommand("features:install test", 60000L, false));
+        String featuresListOutput = executeCommand("features:list");
+        System.out.println(featuresListOutput);
+        assertTrue(featuresListOutput.contains("test"));
+        assertTrue(featuresListOutput.contains("cellar"));
     }
 
 }
