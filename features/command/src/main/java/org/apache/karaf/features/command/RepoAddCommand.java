@@ -48,8 +48,7 @@ public class RepoAddCommand extends AbstractAction {
     }
 
     protected Object doExecute() throws Exception {
-        String effectiveVersion = (version == null) ? "LATEST" : version;
-        URI uri = featureFinder.getUriFor(nameOrUrl, effectiveVersion);
+        URI uri = featureFinder.getUriFor(nameOrUrl, version);
         if (uri == null) {
             uri = new URI(nameOrUrl);
         }

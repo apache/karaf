@@ -30,16 +30,16 @@ public class FeatureFinder implements ManagedService {
     Map<String, String> nameToArtifactMap = new HashMap<String, String>();
 
     public String[] getNames() {
-        return nameToArtifactMap.keySet().toArray(new String[] {});
+        return nameToArtifactMap.keySet().toArray(new String[]{});
     }
 
-    public URI getUriFor(String name, String version) {
-        String coords = nameToArtifactMap.get(name);
-        if (coords == null) {
-            return null;
+    public URI getUriFor(String name, String version) throws Exception {
+        String uri = nameToArtifactMap.get(name);
+        if (version != null) {
+            // replace the version in the URL with the provided one
+            uri = FeatureFinder.replaceVersion(uri, version);
         }
-        Artifact artifact = new Artifact(coords);
-        return artifact.getPaxUrlForArtifact(version);
+        return new URI(uri);
     }
 
     @SuppressWarnings("rawtypes")
@@ -48,12 +48,27 @@ public class FeatureFinder implements ManagedService {
             nameToArtifactMap.clear();
             Enumeration keys = properties.keys();
             while (keys.hasMoreElements()) {
-                String key = (String)keys.nextElement();
+                String key = (String) keys.nextElement();
                 if (!"felix.fileinstall.filename".equals(key) && !"service.pid".equals(key)) {
-                    nameToArtifactMap.put(key, (String)properties.get(key));
+                    nameToArtifactMap.put(key, (String) properties.get(key));
                 }
             }
         }
+    }
+
+    private static String replaceVersion(String url, String version) {
+        if (url.startsWith("mvn:")) {
+            // mvn:groupId/artifactId/version...
+            int index = url.indexOf('/');
+            index = url.indexOf('/', index + 1);
+
+            String first = url.substring(0, index);
+            index = url.indexOf('/', index + 1);
+            String second = url.substring(index + 1);
+
+            return first + "/" + version + "/" + second;
+        }
+        return url;
     }
 
 }
