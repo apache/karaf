@@ -42,8 +42,7 @@ public class RepoAddCommand extends FeaturesCommandSupport {
 
     @Override
     protected void doExecute(FeaturesService featuresService) throws Exception {
-        String effectiveVersion = (version == null) ? "LATEST" : version;
-        URI uri = featuresService.getRepositoryUriFor(nameOrUrl, effectiveVersion);
+        URI uri = featuresService.getRepositoryUriFor(nameOrUrl, version);
         if (uri == null) {
             uri = new URI(nameOrUrl);
         }

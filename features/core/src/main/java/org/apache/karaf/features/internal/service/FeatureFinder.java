@@ -46,11 +46,11 @@ public class FeatureFinder implements ManagedService {
         if (url == null) {
             return null;
         }
-        Map<String, String> map = new HashMap<>();
-        map.put("url", url);
-        map.put("version", version);
-        InterpolationHelper.performSubstitution(map);
-        return URI.create(map.get("url"));
+        if (version != null) {
+            // replace the version in the URL with the provided one
+            url = FeatureFinder.replaceVersion(url, version);
+        }
+        return URI.create(url);
     }
 
     @SuppressWarnings("rawtypes")
@@ -67,6 +67,21 @@ public class FeatureFinder implements ManagedService {
                 }
             }
         }
+    }
+
+    private static String replaceVersion(String url, String version) {
+        if (url.startsWith("mvn:")) {
+            // mvn:groupId/artifactId/version...
+            int index = url.indexOf('/');
+            index = url.indexOf('/', index + 1);
+
+            String first = url.substring(0, index);
+            index = url.indexOf('/', index + 1);
+            String second = url.substring(index + 1);
+
+            return first + "/" + version + "/" + second;
+        }
+        return url;
     }
 
 }
