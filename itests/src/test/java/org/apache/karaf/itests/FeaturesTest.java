@@ -87,11 +87,11 @@ public class FeaturesTest extends KarafTestSupport {
 
     @Test
     public void repoAddRemoveCommand() throws Exception {
-        System.out.println(executeCommand("features:addurl mvn:org.apache.karaf.cellar/apache-karaf-cellar/2.2.4/xml/features"));
+        System.out.println(executeCommand("features:addurl mvn:org.apache.karaf.cellar/apache-karaf-cellar/2.3.1/xml/features"));
         String repoListOutput = executeCommand("features:listurl");
         System.out.println(repoListOutput);
         assertTrue(repoListOutput.contains("apache-karaf-cellar"));
-        System.out.println(executeCommand("features:removeurl mvn:org.apache.karaf.cellar/apache-karaf-cellar/2.2.4/xml/features"));
+        System.out.println(executeCommand("features:removeurl mvn:org.apache.karaf.cellar/apache-karaf-cellar/2.3.1/xml/features"));
         repoListOutput = executeCommand("features:listurl");
         System.out.println(repoListOutput);
         assertFalse(repoListOutput.contains("apache-karaf-cellar"));
@@ -104,8 +104,8 @@ public class FeaturesTest extends KarafTestSupport {
             connector = this.getJMXConnector();
             MBeanServerConnection connection = connector.getMBeanServerConnection();
             ObjectName name = new ObjectName("org.apache.karaf:type=features,name=root");
-            connection.invoke(name, "addRepository", new Object[] { "mvn:org.apache.karaf.cellar/apache-karaf-cellar/2.2.4/xml/features" }, new String[]{ "java.lang.String" });
-            connection.invoke(name, "removeRepository", new Object[] { "mvn:org.apache.karaf.cellar/apache-karaf-cellar/2.2.4/xml/features" }, new String[]{ "java.lang.String" });
+            connection.invoke(name, "addRepository", new Object[] { "mvn:org.apache.karaf.cellar/apache-karaf-cellar/2.3.1/xml/features" }, new String[]{ "java.lang.String" });
+            connection.invoke(name, "removeRepository", new Object[] { "mvn:org.apache.karaf.cellar/apache-karaf-cellar/2.3.1/xml/features" }, new String[]{ "java.lang.String" });
         } finally {
             if (connector != null)
                 connector.close();
