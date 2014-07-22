@@ -26,7 +26,7 @@ import org.apache.karaf.shell.console.AbstractAction;
 /**
  * Concatenate and print files and/or URLs.
  */
-@Command(scope = "feature", name = "chooseurl", description = "Add a repository url for well known features")
+@Command(scope = "features", name = "chooseurl", description = "Add a repository url for well known features")
 public class ChooseUrlCommand extends AbstractAction {
 
     @Argument(index = 0, name = "", description = "", required = true, multiValued = false)

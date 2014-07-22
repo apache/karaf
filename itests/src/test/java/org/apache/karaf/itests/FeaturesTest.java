@@ -112,4 +112,12 @@ public class FeaturesTest extends KarafTestSupport {
         }
     }
 
+    @Test
+    public void repoChooseUrlCommand() throws Exception {
+        System.out.println(executeCommand("features:chooseurl cellar", 60000L, false));
+        String repoListOutput = executeCommand("features:listurl", 60000L, false);
+        System.out.println(repoListOutput);
+        assertTrue(repoListOutput.contains("apache-karaf-cellar"));
+    }
+
 }
