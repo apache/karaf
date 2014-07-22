@@ -34,12 +34,18 @@ public class FeatureFinder implements ManagedService {
     }
 
     public URI getUriFor(String name, String version) throws Exception {
-        String uri = nameToArtifactMap.get(name);
+        String url;
+        synchronized (nameToArtifactMap) {
+            url = nameToArtifactMap.get(name);
+        }
+        if (url == null) {
+            return null;
+        }
         if (version != null) {
             // replace the version in the URL with the provided one
-            uri = FeatureFinder.replaceVersion(uri, version);
+            url = FeatureFinder.replaceVersion(url, version);
         }
-        return new URI(uri);
+        return URI.create(url);
     }
 
     @SuppressWarnings("rawtypes")
