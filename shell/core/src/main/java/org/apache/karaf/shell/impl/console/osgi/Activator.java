@@ -55,6 +55,7 @@ public class Activator implements BundleActivator {
         sessionFactory = new SecuredSessionFactoryImpl(context, threadIO);
         sessionFactory.getCommandProcessor().addConverter(new Converters(context));
         sessionFactory.getCommandProcessor().addConstant(".context", context.getBundle(0).getBundleContext());
+        sessionFactory.getCommandProcessor().addListener(new LoggingCommandSessionListener());
         try {
             EventAdminListener listener = new EventAdminListener(context);
             sessionFactory.getCommandProcessor().addListener(listener);
