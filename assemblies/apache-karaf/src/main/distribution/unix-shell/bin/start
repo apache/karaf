@@ -98,6 +98,14 @@ locateData() {
     fi
 }
 
+enableRedirect() {
+    if [ "x$KARAF_REDIRECT" != "x" ]; then
+	warn "Redirecting Karaf output to $KARAF_REDIRECT"
+    else
+	KARAF_REDIRECT="/dev/null"
+    fi
+}
+
 init() {
     # Determine if there is special OS handling we must perform
     detectOS
@@ -110,6 +118,9 @@ init() {
 
     # Locate the Karaf data directory
     locateData
+
+    # Define the Karaf output redirection
+    enableRedirect
 }
 
 run() {
@@ -123,7 +134,7 @@ run() {
     if [ ! -d "$KARAF_DATA/log" ]; then
         mkdir -p "$KARAF_DATA/log"
     fi
-    exec "$KARAF_HOME"/bin/karaf server "$@" >> "$KARAF_DATA/karaf.out" 2>&1 &
+    exec "$KARAF_HOME"/bin/karaf server "$@" >> "$KARAF_REDIRECT" 2>&1 &
 }
 
 main() {

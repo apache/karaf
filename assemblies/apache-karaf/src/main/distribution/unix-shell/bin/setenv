@@ -43,4 +43,4 @@
 # export KARAF_DATA # Karaf data folder
 # export KARAF_BASE # Karaf base folder
 # export KARAF_OPTS # Additional available Karaf options
-
+# export KARAF_REDIRECT # Enable/set the std/err redirection when using bin/start
