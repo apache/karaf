@@ -33,38 +33,7 @@ import org.osgi.framework.launch.Framework;
 
 public class MainStartTest {
 
-	@Test
-    @Ignore("Unit test for KARAF-334 disabled for now")
-    public void testAutoStart() throws Exception {
-        File basedir = new File(getClass().getClassLoader().getResource("foo").getPath()).getParentFile();
-        File home = new File(basedir, "test-karaf-home");
-        // create an unique data folder to avoid conflict with other unit tests (KARAF-2558)
-        File data = new File(home, "data" + System.currentTimeMillis());
-
-		String[] args = new String[0];
-		String fileMVNbundle = new File(home, "bundles/pax-url-mvn.jar").toURI().toURL().toExternalForm();
-		String mvnUrl = "mvn:org.osgi/org.osgi.compendium/4.2.0";
-		System.setProperty("karaf.home", home.toString());
-		System.setProperty("karaf.data", data.toString());
-		System.setProperty("karaf.auto.start.1", "\""+fileMVNbundle+"|unused\"");
-		System.setProperty("karaf.auto.start.2", "\""+mvnUrl+"|unused\"");
-		System.setProperty("karaf.maven.convert", "false");
-
-		Main main = new Main(args);
-		main.launch();
-		Thread.sleep(1000);
-		Framework framework = main.getFramework();
-		Bundle[] bundles = framework.getBundleContext().getBundles();
-		Assert.assertEquals(3, bundles.length);
-		Assert.assertEquals(fileMVNbundle, bundles[1].getLocation());
-		Assert.assertEquals(mvnUrl, bundles[2].getLocation());
-		Assert.assertEquals(Bundle.ACTIVE, bundles[1].getState());
-		Assert.assertEquals(Bundle.ACTIVE, bundles[2].getState());
-		main.destroy();
-	}
-
     @Test
-    @Ignore("Unit test for testStopWithTimeout disabled for now")
     public void testStopWithTimeout() throws Exception {
         File basedir = new File(getClass().getClassLoader().getResource("foo").getPath()).getParentFile();
         File home = new File(basedir, "test-karaf-home");
