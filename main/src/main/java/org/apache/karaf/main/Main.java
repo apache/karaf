@@ -18,20 +18,8 @@
  */
 package org.apache.karaf.main;
 
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleException;
-import org.osgi.framework.Constants;
-import org.osgi.framework.FrameworkEvent;
-import org.osgi.framework.ServiceReference;
-import org.osgi.framework.launch.Framework;
-import org.osgi.framework.launch.FrameworkFactory;
-import org.osgi.service.startlevel.StartLevel;
-
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
@@ -48,7 +36,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.nio.channels.FileLock;
 import java.security.AccessControlException;
 import java.security.Provider;
 import java.security.Security;
@@ -62,6 +49,8 @@ import java.util.Random;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.jar.Manifest;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -76,10 +65,10 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
-import org.osgi.framework.ServiceReference;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
-import org.osgi.service.startlevel.StartLevel;
+import org.osgi.framework.startlevel.BundleStartLevel;
+import org.osgi.framework.startlevel.FrameworkStartLevel;
 
 /**
  * <p>
@@ -250,8 +239,6 @@ public class Main {
     private boolean exiting = false;
     private ShutdownCallback shutdownCallback;
     private List<BundleActivator> karafActivators = new ArrayList<BundleActivator>();
-    private Object startLevelLock = new Object();
-    private StartLevelListener startLevelListener;
 
     public Main(String[] args) {
         this.args = args;
@@ -355,9 +342,6 @@ public class Main {
         // Process properties
         loadStartupProperties(configProps);
         processAutoProperties(framework.getBundleContext());
-
-        startLevelListener = new StartLevelListener(startLevelLock);
-        framework.getBundleContext().addFrameworkListener(startLevelListener);
 
         framework.start();
         // Start custom activators
@@ -713,8 +697,7 @@ public class Main {
 
         // Retrieve the Start Level service, since it will be needed
         // to set the start level of the installed bundles.
-        StartLevel sl = (StartLevel) context.getService(
-                context.getServiceReference(org.osgi.service.startlevel.StartLevel.class.getName()));
+        FrameworkStartLevel sl = framework.adapt(FrameworkStartLevel.class);
 
         // Set the default bundle start level
         int ibsl = 60;
@@ -725,7 +708,7 @@ public class Main {
             }
         } catch (Throwable t) {
         }
-        sl.setInitialBundleStartLevel(ibsl);
+        framework.adapt(FrameworkStartLevel.class).setInitialBundleStartLevel(ibsl);
 
         // If we have a clean state, install everything
         if (framework.getBundleContext().getBundles().length == 1) {
@@ -747,7 +730,7 @@ public class Main {
         }
     }
 
-    private List<Bundle> autoInstall(String propertyPrefix, BundleContext context, StartLevel sl, boolean convertToMavenUrls, boolean start) {
+    private List<Bundle> autoInstall(String propertyPrefix, BundleContext context, FrameworkStartLevel sl, boolean convertToMavenUrls, boolean start) {
         Map<Integer, String> autoStart = new TreeMap<Integer, String>();
         List<Bundle> bundles = new ArrayList<Bundle>();
         for (Object o : configProps.keySet()) {
@@ -781,7 +764,7 @@ public class Main {
                             String[] parts = location.contains("pax-url-aether") ? convertToMavenUrlsIfNeeded(location, false) 
                                 :  convertToMavenUrlsIfNeeded(location, convertToMavenUrls);
                             Bundle b = context.installBundle(parts[0], new URL(parts[1]).openStream());
-                            sl.setBundleStartLevel(b, startLevel);
+                            b.adapt(BundleStartLevel.class).setStartLevel(startLevel);
                             bundles.add(b);
                         }
                         catch (Exception ex) {
@@ -1446,7 +1429,7 @@ public class Main {
             if (Boolean.parseBoolean(props.getProperty(PROPERTY_USE_LOCK, "true"))) {
                 doLock(props);
             } else {
-                setStartLevel(defaultStartLevel);
+                setStartLevel(defaultStartLevel, 0);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -1464,7 +1447,7 @@ public class Main {
                     LOG.info("Lock acquired.");
                 }
                 setupShutdown(props);
-                setStartLevel(defaultStartLevel);
+                setStartLevel(defaultStartLevel, 0);
                 for (;;) {
                     if (!dataDir.isDirectory()) {
                         LOG.info("Data directory does not exist anymore, halting");
@@ -1479,18 +1462,13 @@ public class Main {
                 }
                 if (framework.getState() == Bundle.ACTIVE && !exiting) {
                     LOG.info("Lost the lock, reducing start level to " + lockStartLevel);
-                    synchronized (startLevelLock) {
-                        setStartLevel(lockStartLevel);
-                        
-                        // we have to wait for the start level to be reduced here because
-                        // if the lock is regained before the start level is fully changed
-                        // things may not come up as expected
-                        LOG.fine("Waiting for start level change to complete...");
-                        startLevelLock.wait(shutdownTimeout);
-                    }
+                    // we have to wait for the start level to be reduced here because
+                    // if the lock is regained before the start level is fully changed
+                    // things may not come up as expected
+                    setStartLevel(lockStartLevel, shutdownTimeout);
                 }
             } else {
-                setStartLevel(lockStartLevel);
+                setStartLevel(lockStartLevel, 0);
                 if (!lockLogged) {
                     LOG.info("Waiting for the lock ...");
                     lockLogged = true;
@@ -1506,11 +1484,31 @@ public class Main {
         }
     }
 
-    protected void setStartLevel(int level) throws Exception {
-        BundleContext ctx = framework.getBundleContext();
-        ServiceReference[] refs = ctx.getServiceReferences(StartLevel.class.getName(), null);
-        StartLevel sl = (StartLevel) ctx.getService(refs[0]);
-        sl.setStartLevel(level);
+    protected void setStartLevel(int level, long timeout) throws Exception {
+        FrameworkStartLevel fsl = framework.adapt(FrameworkStartLevel.class);
+        int current = fsl.getStartLevel();
+        if (current < level) {
+            for (int l = current + 1; l <= level; l++) {
+                doSetStartLevel(fsl, l, 0);
+            }
+        } else if (current > level) {
+            for (int l = current - 1; l >= level; l--) {
+                doSetStartLevel(fsl, l, 0);
+            }
+        }
+        doSetStartLevel(fsl, level, timeout);
+    }
+
+    protected void doSetStartLevel(FrameworkStartLevel fsl, int level, long timeout) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        fsl.setStartLevel(level, new FrameworkListener() {
+            public void frameworkEvent(FrameworkEvent event) {
+                latch.countDown();
+            }
+        });
+        if (timeout > 0) {
+            latch.await(timeout, TimeUnit.MILLISECONDS);
+        }
     }
 
 

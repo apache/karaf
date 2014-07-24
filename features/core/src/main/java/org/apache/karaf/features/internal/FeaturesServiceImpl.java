@@ -82,7 +82,6 @@ import org.osgi.framework.startlevel.BundleStartLevel;
 import org.osgi.framework.wiring.FrameworkWiring;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
-import org.osgi.service.startlevel.StartLevel;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -464,11 +463,8 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
                 Collections.sort(bundlesSortedByStartLvl, new Comparator<Bundle>() {
                     @Override
                     public int compare(Bundle bundle, Bundle bundle1) {
-                        int startLevel = state.bundleInfos.get(bundle.getBundleId()).getStartLevel();
-                        startLevel = startLevel == 0 ? KARAF_BUNDLE_START_LEVEL : startLevel;
-                        int startLevel1 = state.bundleInfos.get(bundle1.getBundleId()).getStartLevel();
-                        startLevel1 = startLevel1 == 0 ? KARAF_BUNDLE_START_LEVEL : startLevel1;
-                        return startLevel - startLevel1;
+                        return bundle.adapt(BundleStartLevel.class).getStartLevel()
+                                - bundle1.adapt(BundleStartLevel.class).getStartLevel();
                     }
                 });
             }
