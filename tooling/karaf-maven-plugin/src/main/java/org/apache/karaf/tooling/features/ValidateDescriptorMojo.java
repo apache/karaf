@@ -600,6 +600,8 @@ public class ValidateDescriptorMojo extends MojoSupport {
         switch (elements.length) {
             case 5:
                 return factory.createArtifactWithClassifier(elements[0], elements[1], elements[2], elements[3], elements[4]);
+            case 4:
+                return factory.createArtifact(elements[0], elements[1], elements[2], Artifact.SCOPE_PROVIDED, elements[3]);
             case 3:
                 return factory.createArtifact(elements[0], elements[1], elements[2], Artifact.SCOPE_PROVIDED, "jar");
             default:
