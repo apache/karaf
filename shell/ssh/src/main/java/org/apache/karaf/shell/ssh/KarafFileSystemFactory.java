@@ -19,8 +19,13 @@
 package org.apache.karaf.shell.ssh;
 
 import org.apache.sshd.common.Session;
-import org.apache.sshd.server.FileSystemFactory;
-import org.apache.sshd.server.FileSystemView;
+import org.apache.sshd.common.file.FileSystemFactory;
+import org.apache.sshd.common.file.FileSystemView;
+import org.apache.sshd.common.file.nativefs.NativeFileSystemView;
+
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * SSHd file system factory to reduce the visibility to the KARAF_BASE.
@@ -28,7 +33,10 @@ import org.apache.sshd.server.FileSystemView;
 public class KarafFileSystemFactory implements FileSystemFactory {
 
     public FileSystemView createFileSystemView(Session session) {
-        return new KarafFileSystemView();
+        Map<String, String> roots = new HashMap<String, String>();
+        String dir = new File(System.getProperty("karaf.base")).getAbsolutePath();
+        roots.put("/", dir);
+        return new NativeFileSystemView(session.getUsername(), roots, "/");
     }
 
 }
