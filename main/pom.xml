@@ -41,6 +41,7 @@
         <dependency>
             <groupId>org.eclipse</groupId>
             <artifactId>org.eclipse.osgi</artifactId>
+            <version>${equinox.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
