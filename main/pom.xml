@@ -182,7 +182,7 @@
                                     <artifactItems>
                                         <artifactItem>
                                             <groupId>org.eclipse</groupId>
-                                            <artifactId>osgi</artifactId>
+                                            <artifactId>org.eclipse.osgi</artifactId>
                                             <classifier>sources</classifier>
                                         </artifactItem>
                                         <artifactItem>
