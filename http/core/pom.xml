@@ -77,6 +77,10 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
+                    	<Import-Package>
+                    		org.ops4j.pax.web.service.spi;version="[3.1,5)",
+                    		*
+                    	</Import-Package>
                         <Export-Package>
                             org.apache.karaf.http.core
                         </Export-Package>
