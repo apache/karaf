@@ -16,6 +16,8 @@
  */
 package org.apache.karaf.admin.management;
 
+import org.apache.karaf.admin.InstanceSettings;
+
 import javax.management.openmbean.TabularData;
 
 public interface AdminServiceMBean {
@@ -34,6 +36,7 @@ public interface AdminServiceMBean {
             INSTANCE_RMI_SERVER_PORT, INSTANCE_STATE, INSTANCE_LOCATION, INSTANCE_JAVAOPTS };
 
     // Operations
+    int createInstance(String name, InstanceSettings settings) throws Exception;
     int createInstance(String name, int sshPort, int rmiRegistryPort, int rmiServerPort, String location, String javaOpts, String features, String featureURLs) throws Exception;
     int createInstance(String name, int sshPort, int rmiRegistryPort, int rmiServerPort, String location, String javaOpts, String features, String featureURLs, String address) throws Exception;
     void changeSshPort(String name, int port) throws Exception;
@@ -47,6 +50,7 @@ public interface AdminServiceMBean {
     void startInstance(String name, String opts, boolean wait) throws Exception;
     void stopInstance(String name) throws Exception;
     void renameInstance(String originalName, String newName) throws Exception;
+    void cloneInstance(String name, String cloneName, InstanceSettings settings) throws Exception;
     void cloneInstance(String name, String cloneName, int sshPort, int rmiRegistryPort, int rmiServerPort, String location, String javaOpts) throws Exception;
 
     // Attributes

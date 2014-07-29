@@ -48,6 +48,15 @@ public class AdminServiceMBeanImpl extends StandardMBean implements AdminService
         this.adminService = adminService;
     }
 
+    public int createInstance(String name, InstanceSettings settings) throws Exception {
+        Instance inst = adminService.createInstance(name, settings);
+        if (inst != null) {
+            return inst.getPid();
+        } else {
+            return -1;
+        }
+    }
+
     public int createInstance(String name, int sshPort, int rmiRegistryPort, int rmiServerPort, String location, String javaOpts, String features, String featureURLs)
             throws Exception {
         return this.createInstance(name, sshPort, rmiRegistryPort, rmiServerPort, location, javaOpts, features, featureURLs, "0.0.0.0");
@@ -129,6 +138,10 @@ public class AdminServiceMBeanImpl extends StandardMBean implements AdminService
 
     public void renameInstance(String originalName, String newName) throws Exception {
         adminService.renameInstance(originalName, newName);
+    }
+
+    public void cloneInstance(String name, String cloneName, InstanceSettings settings) throws Exception {
+        adminService.cloneInstance(name, cloneName, settings);
     }
 
     public void cloneInstance(String name, String cloneName, int sshPort, int rmiRegistryPort, int rmiServerPort, String location, String javaOpts) throws Exception {

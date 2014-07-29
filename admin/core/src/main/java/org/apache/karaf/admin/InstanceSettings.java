@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.admin;
 
+import java.io.Serializable;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,7 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class InstanceSettings {
+public class InstanceSettings implements Serializable {
     private final int sshPort;
     private final int rmiRegistryPort;
     private final int rmiServerPort;
