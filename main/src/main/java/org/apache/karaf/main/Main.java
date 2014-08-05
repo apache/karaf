@@ -44,12 +44,8 @@ import org.apache.karaf.main.util.BootstrapLogManager;
 import org.apache.karaf.main.util.SimpleMavenResolver;
 import org.apache.karaf.main.util.StringMap;
 import org.apache.karaf.main.util.Utils;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleException;
-import org.osgi.framework.Constants;
-import org.osgi.framework.FrameworkEvent;
-import org.osgi.framework.FrameworkListener;
+
+import org.osgi.framework.*;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
 import org.osgi.framework.startlevel.BundleStartLevel;
