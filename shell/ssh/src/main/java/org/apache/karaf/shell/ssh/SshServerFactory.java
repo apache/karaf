@@ -65,7 +65,7 @@ public class SshServerFactory {
     public void stop() {
         if (start && server != null) {
             try {
-                server.stop();
+                server.stop(true);
             } catch (Exception e) {
                 LOGGER.info("Error stopping SSH server", e);
             } finally {
