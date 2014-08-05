@@ -115,7 +115,7 @@ public class Activator extends BaseActivator implements ManagedService {
         }
         if (server != null) {
             try {
-                server.stop();
+                server.stop(true);
             } catch (InterruptedException e) {
                 LOGGER.warn("Exception caught while stopping SSH server", e);
             }
