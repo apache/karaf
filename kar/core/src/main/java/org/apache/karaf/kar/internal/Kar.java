@@ -180,9 +180,18 @@ public class Kar {
 
     public String getKarName() {
         try {
-            String karName = new File(karUri.toURL().getFile()).getName();
-            karName = karName.substring(0, karName.lastIndexOf("."));
-            return karName;
+            String url = karUri.toURL().toString();
+            if (url.startsWith("mvn")) {
+                int index = url.indexOf("/");
+                url = url.substring(index + 1);
+                index = url.indexOf("/");
+                url = url.substring(0, index);
+                return url;
+            } else {
+                String karName = new File(karUri.toURL().getFile()).getName();
+                karName = karName.substring(0, karName.lastIndexOf("."));
+                return karName;
+            }
         } catch (MalformedURLException e) {
             throw new RuntimeException("Invalid kar URI " + karUri, e);
         }
