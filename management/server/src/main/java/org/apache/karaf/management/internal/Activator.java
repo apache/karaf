@@ -65,7 +65,7 @@ public class Activator extends BaseActivator implements ManagedService {
 
         String jmxRealm = getString("jmxRealm", "karaf");
         String serviceUrl = getString("serviceUrl",
-                "service:jmx:rmi://0.0.0.0:" + rmiServerPort + "/jndi/rmi://0.0.0.0:" + rmiRegistryPort + "/karaf-" + System.getProperty("karaf.name"));
+                "service:jmx:rmi://" + rmiServerHost + ":" + rmiServerPort + "/jndi/rmi://" + rmiRegistryHost + ":" + rmiRegistryPort + "/karaf-" + System.getProperty("karaf.name"));
 
         boolean daemon = getBoolean("daemon", true);
         boolean threaded = getBoolean("threaded", true);
