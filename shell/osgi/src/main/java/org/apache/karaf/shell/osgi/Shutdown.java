@@ -36,8 +36,8 @@ public class Shutdown extends OsgiCommandSupport {
 
     @Argument(name = "time", index = 0, description = "Shutdown after a specified delay. The time argument can have different" +
             " formats. First, it can be an abolute time in the format hh:mm, in which hh is the hour (1 or 2 digits) and mm" +
-            " is the minute of the hour (in two digits). Second, it can be in the format +m, in which m is the number of minutes" +
-            " to wait. The word now is an alias for +0.", required = false, multiValued = false)
+            " is the minute of the hour (in two digits). Second, it can be in the format m (or +m), in which m is the number of minutes" +
+            " to wait. The word now is an alias for 0.", required = false, multiValued = false)
     String time;
 
     protected Object doExecute() throws Exception {
@@ -45,28 +45,39 @@ public class Shutdown extends OsgiCommandSupport {
         long sleep = 0;
         if (time != null) {
             if (!time.equals("now")) {
-                if (time.startsWith("+")) {
-                    // delay in number of minutes provided
-                    time = time.substring(1);
-                    try {
-                        sleep = Long.parseLong(time) * 60 * 1000;
-                    } catch (Exception e) {
-                        System.err.println("Invalid time argument.");
-                        return null;
-                    }
-                } else {
+                if (time.contains(":")) {
                     // try to parse the date in hh:mm
                     String[] strings = time.split(":");
                     if (strings.length != 2) {
-                        System.err.println("Invalid time argument.");
+                        System.err.println("Time " + time + " is not valid (not in hh:mm format)");
+                        return null;
+                    }
+                    int hour = Integer.parseInt(strings[0]);
+                    int minute = Integer.parseInt(strings[1]);
+                    if (hour < 0 || hour > 23) {
+                        System.err.println("Time " + time + " is not valid (hour " + hour + " is not between 0 and 23)");
+                        return null;
+                    }
+                    if (minute < 0 || minute > 59) {
+                        System.err.println("Time " + time + " is not valid (minute " + minute + " is not between 0 and 59)");
                         return null;
                     }
                     GregorianCalendar currentDate = new GregorianCalendar();
-                    GregorianCalendar shutdownDate = new GregorianCalendar(currentDate.get(Calendar.YEAR), currentDate.get(Calendar.MONTH), currentDate.get(Calendar.DATE), Integer.parseInt(strings[0]), Integer.parseInt(strings[1]));
+                    GregorianCalendar shutdownDate = new GregorianCalendar(currentDate.get(Calendar.YEAR), currentDate.get(Calendar.MONTH), currentDate.get(Calendar.DAY_OF_MONTH), hour, minute);
                     if (shutdownDate.before(currentDate)) {
                         shutdownDate.set(Calendar.DATE, shutdownDate.get(Calendar.DATE) + 1);
                     }
                     sleep = shutdownDate.getTimeInMillis() - currentDate.getTimeInMillis();
+                } else {
+                    if (time.startsWith("+")) {
+                        time = time.substring(1);
+                    }
+                    try {
+                        sleep = Long.parseLong(time) * 60 * 1000;
+                    } catch (Exception e) {
+                        System.err.println("Time " + time + " is not valid");
+                        return null;
+                    }
                 }
             }
         }

@@ -191,26 +191,35 @@ public class SystemMBeanImpl extends StandardMBean implements SystemMBean {
         long sleep = 0;
         if (time != null) {
             if (!time.equals("now")) {
-                if (time.startsWith("+")) {
-                    // delay in number of minutes provided
-                    time = time.substring(1);
+                if (time.contains(":")) {
+                    // try to parse the date in hh:mm
+                    String[] strings = time.split(":");
+                    if (strings.length != 2) {
+                        throw new IllegalArgumentException("Time " + time + " is not valid (not in hh:mm format)");
+                    }
+                    int hour = Integer.parseInt(strings[0]);
+                    int minute = Integer.parseInt(strings[1]);
+                    if (hour < 0 || hour > 23) {
+                        throw new IllegalArgumentException("Time " + time + " is not valid (hour " + hour + " is not between 0 and 23)");
+                    }
+                    if (minute < 0 || minute > 59) {
+                        throw new IllegalArgumentException("Time " + time + " is not valid (minute " + minute + " is not between 0 and 59)");
+                    }
+                    GregorianCalendar currentDate = new GregorianCalendar();
+                    GregorianCalendar shutdownDate = new GregorianCalendar(currentDate.get(Calendar.YEAR), currentDate.get(Calendar.MONTH), currentDate.get(Calendar.DAY_OF_MONTH), hour, minute);
+                    if (shutdownDate.before(currentDate)) {
+                        shutdownDate.set(Calendar.DATE, shutdownDate.get(Calendar.DATE) + 1);
+                    }
+                    sleep = shutdownDate.getTimeInMillis() - currentDate.getTimeInMillis();
+                } else {
+                    if (time.startsWith("+")) {
+                        time = time.substring(1);
+                    }
                     try {
                         sleep = Long.parseLong(time) * 60 * 1000;
                     } catch (Exception e) {
                         throw new IllegalArgumentException("Time " + time + " is not valid");
                     }
-                } else {
-                    // try to parse the date in hh:mm
-                    String[] strings = time.split(":");
-                    if (strings.length != 2) {
-                        throw new IllegalArgumentException("Time " + time + " is not valid");
-                    }
-                    GregorianCalendar currentDate = new GregorianCalendar();
-                    GregorianCalendar shutdownDate = new GregorianCalendar(currentDate.get(Calendar.YEAR), currentDate.get(Calendar.MONTH), currentDate.get(Calendar.DATE), Integer.parseInt(strings[0]), Integer.parseInt(strings[1]));
-                    if (shutdownDate.before(currentDate)) {
-                        shutdownDate.set(Calendar.DATE, shutdownDate.get(Calendar.DATE) + 1);
-                    }
-                    sleep = shutdownDate.getTimeInMillis() - currentDate.getTimeInMillis();
                 }
             }
         }
