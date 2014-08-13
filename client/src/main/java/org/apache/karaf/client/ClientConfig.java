@@ -17,9 +17,9 @@
 package org.apache.karaf.client;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-
-import org.apache.felix.utils.properties.Properties;
+import java.util.Properties;
 
 import org.slf4j.impl.SimpleLogger;
 
@@ -40,7 +40,7 @@ public class ClientConfig {
     private String command;
 
     public ClientConfig(String[] args) throws IOException {
-        Properties shellCfg = new Properties(new File(System.getProperty("karaf.etc"), "org.apache.karaf.shell.cfg"));
+        Properties shellCfg = loadProps(new File(System.getProperty("karaf.etc"), "org.apache.karaf.shell.cfg"));
 
         host = shellCfg.getProperty("sshHost", "localhost");
         port = Integer.parseInt(shellCfg.getProperty("sshPort", "8101"));
@@ -87,7 +87,7 @@ public class ClientConfig {
         }
         command = commandBuilder.toString();
 
-        Properties usersCfg = new Properties(new File(System.getProperty("karaf.etc") + "/users.properties"));
+        Properties usersCfg = loadProps(new File(System.getProperty("karaf.etc") + "/users.properties"));
         if (!usersCfg.isEmpty()) {
             if (user == null) {
                 user = (String) usersCfg.keySet().iterator().next();
@@ -115,6 +115,29 @@ public class ClientConfig {
         System.out.println("  [commands]    commands to run");
         System.out.println("If no commands are specified, the client will be put in an interactive mode");
         System.exit(0);
+    }
+
+    private static Properties loadProps(File file) {
+        Properties props = new Properties();
+        FileInputStream is = null;
+        try {
+            is = new FileInputStream(file);
+            if (is != null) {
+                props.load(is);
+            }
+
+        } catch (Exception e) {
+                System.err.println("Could not load properties from: " + file + ", Reason: " + e.getMessage());
+        } finally {
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (IOException e) {
+                    // ignore
+                }
+            }
+        }
+        return props;
     }
 
     public String getHost() {
