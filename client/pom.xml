@@ -50,10 +50,6 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.utils</artifactId>
-        </dependency>
     </dependencies>
 
 	<build>
@@ -76,7 +72,6 @@
                         <Private-Package>
                             org.apache.karaf.client;
                             org.slf4j.impl;
-                            org.apache.felix.utils.properties;-split-package:=merge-first,
                             META-INF;-split-package:=merge-first
                         </Private-Package>
                         <Include-Resource>
