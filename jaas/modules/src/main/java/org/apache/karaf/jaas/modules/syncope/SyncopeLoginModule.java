@@ -16,14 +16,14 @@ package org.apache.karaf.jaas.modules.syncope;
 
 import org.apache.http.HttpStatus;
 import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
+import org.apache.karaf.jaas.boot.principal.RolePrincipal;
+import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.apache.karaf.jaas.modules.AbstractKarafLoginModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +43,8 @@ public class SyncopeLoginModule extends AbstractKarafLoginModule {
     private final static Logger LOGGER = LoggerFactory.getLogger(SyncopeLoginModule.class);
 
     public final static String ADDRESS = "address";
+    public final static String ADMIN_USER = "admin.user"; // for the backing engine
+    public final static String ADMIN_PASSWORD = "admin.password"; // for the backing engine
 
     private String address;
 
@@ -75,27 +77,66 @@ public class SyncopeLoginModule extends AbstractKarafLoginModule {
 
         // authenticate the user on Syncope
         LOGGER.debug("Authenticate user {} on Syncope located {}", user, address);
-        CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-        credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(user, password));
-        CloseableHttpClient client = HttpClients.createDefault();
-        HttpClientContext context = HttpClientContext.create();
-        context.setCredentialsProvider(credentialsProvider);
+        DefaultHttpClient client = new DefaultHttpClient();
+        Credentials creds = new UsernamePasswordCredentials(user, password);
+        client.getCredentialsProvider().setCredentials(AuthScope.ANY, creds);
         HttpGet get = new HttpGet(address + "/users/self");
+        List<String> roles = new ArrayList<String>();
         try {
-            CloseableHttpResponse response = client.execute(get, context);
-            LOGGER.info("Response: " + response.getStatusLine().getStatusCode());
+            CloseableHttpResponse response = client.execute(get);
+            LOGGER.debug("Syncope HTTP response status code: {}", response.getStatusLine().getStatusCode());
             if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
                 LOGGER.warn("User {} not authenticated", user);
                 return false;
             }
+            LOGGER.debug("User {} authenticated", user);
+            LOGGER.debug("Populating principals with user");
+            principals.add(new UserPrincipal(user));
+            LOGGER.debug("Retrieving user {} roles", user);
+            roles = extractingRoles(EntityUtils.toString(response.getEntity()));
         } catch (Exception e) {
             LOGGER.error("User {} authentication failed", user, e);
             throw new LoginException("User " + user + " authentication failed: " + e.getMessage());
         }
 
-        LOGGER.warn("User {} authenticated", user);
+        LOGGER.debug("Populating principals with roles");
+        for (String role : roles) {
+            principals.add(new RolePrincipal(role));
+        }
 
         return true;
+    }
+
+    /**
+     * Extract the user roles from the Syncope entity response.
+     *
+     * @param response the HTTP response from Syncope.
+     * @return the list of user roles.
+     * @throws Exception in case of extraction failure.
+     */
+    protected List<String> extractingRoles(String response) throws Exception {
+        List<String> roles = new ArrayList<String>();
+        // extract the <memberships> element
+        int index = response.indexOf("<memberships>");
+        response = response.substring(index + "<memberships>".length());
+        index = response.indexOf("</memberships>");
+        response = response.substring(0, index);
+
+        // looking for the roleName elements
+        index = response.indexOf("<roleName>");
+        while (index != -1) {
+            response = response.substring(index + "<roleName>".length());
+            int end = response.indexOf("</roleName>");
+            if (end == -1) {
+                index = -1;
+            }
+            String role = response.substring(0, end);
+            roles.add(role);
+            response = response.substring(end + "</roleName>".length());
+            index = response.indexOf("<roleName>");
+        }
+
+        return roles;
     }
 
     public boolean abort() {

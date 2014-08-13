@@ -96,7 +96,8 @@
 
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient-osgi</artifactId>
+            <artifactId>httpclient</artifactId>
+            <scope>provided</scope>
             <version>4.3.5</version>
         </dependency>
 
@@ -150,16 +151,16 @@
                             javax.net,
                             org.apache.karaf.jaas.config,
                             org.osgi.service.event;resolution:=optional,
-                            net.sf.ehcache*;resolution:=optional,
-                            net.spy.memcached*;resolution:=optional,
-                            org.apache.commons.codec*;resolution:=optional,
+                            !net.sf.ehcache*,
+                            !net.spy.memcached*,
                             *
                         </Import-Package>
                         <Private-Package>
                             org.apache.karaf.jaas.modules.impl,
                             org.apache.felix.utils.properties,
                             org.apache.karaf.util.tracker,
-                            org.apache.http*
+                            org.apache.http*,
+                            org.apache.commons.codec*
                         </Private-Package>
                         <Bundle-Activator>
                             org.apache.karaf.jaas.modules.impl.Activator
