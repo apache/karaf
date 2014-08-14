@@ -116,26 +116,28 @@ public class SyncopeLoginModule extends AbstractKarafLoginModule {
      */
     protected List<String> extractingRoles(String response) throws Exception {
         List<String> roles = new ArrayList<String>();
-        // extract the <memberships> element
-        int index = response.indexOf("<memberships>");
-        response = response.substring(index + "<memberships>".length());
-        index = response.indexOf("</memberships>");
-        response = response.substring(0, index);
+        if (response != null && !response.isEmpty()) {
+            // extract the <memberships> element
+            int index = response.indexOf("<memberships>");
+            response = response.substring(index + "<memberships>".length());
+            index = response.indexOf("</memberships>");
+            response = response.substring(0, index);
 
-        // looking for the roleName elements
-        index = response.indexOf("<roleName>");
-        while (index != -1) {
-            response = response.substring(index + "<roleName>".length());
-            int end = response.indexOf("</roleName>");
-            if (end == -1) {
-                index = -1;
-            }
-            String role = response.substring(0, end);
-            roles.add(role);
-            response = response.substring(end + "</roleName>".length());
+            // looking for the roleName elements
             index = response.indexOf("<roleName>");
-        }
+            while (index != -1) {
+                response = response.substring(index + "<roleName>".length());
+                int end = response.indexOf("</roleName>");
+                if (end == -1) {
+                    index = -1;
+                }
+                String role = response.substring(0, end);
+                roles.add(role);
+                response = response.substring(end + "</roleName>".length());
+                index = response.indexOf("<roleName>");
+            }
 
+        }
         return roles;
     }
 

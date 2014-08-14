@@ -22,6 +22,7 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.apache.karaf.jaas.boot.principal.GroupPrincipal;
@@ -31,6 +32,7 @@ import org.apache.karaf.jaas.modules.BackingEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.naming.OperationNotSupportedException;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
@@ -56,6 +58,24 @@ public class SyncopeBackingEngine implements BackingEngine {
             throw new IllegalArgumentException("Group prefix " + GROUP_PREFIX + " not permitted with Syncope backend");
         }
         HttpPost request = new HttpPost(address + "/users");
+        String userTO = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" +
+                "<user>" +
+                "<attributes>" +
+                "<attribute><readonly>false</readonly><schema>fullname</schema><value>" + username + "</value></attribute>" +
+                "<attribute><readonly>false</readonly><schema>surname</schema><value>" + username + "</value></attribute>" +
+                "<attribute><readonly>false</readonly><schema>userId</schema><value>" + username + "@karaf.apache.org</value></attribute>" +
+                "</attributes>" +
+                "<password>" + password + "</password>" +
+                "<username>" + username + "</username>" +
+                "</user>";
+        try {
+            StringEntity entity = new StringEntity(userTO);
+            request.setEntity(entity);
+            HttpResponse response = client.execute(request);
+        } catch (Exception e) {
+            logger.error("Can't add user {}", username, e);
+            throw new RuntimeException("Can't add user " + username, e);
+        }
     }
 
     public void deleteUser(String username) {
@@ -64,36 +84,65 @@ public class SyncopeBackingEngine implements BackingEngine {
         }
         HttpDelete request = new HttpDelete(address + "/users/" + username);
         try {
-            HttpResponse response = client.execute(request);
-            logger.warn("Status code: " + response.getStatusLine().getStatusCode());
-            logger.warn(EntityUtils.toString(response.getEntity()));
+            client.execute(request);
         } catch (Exception e) {
-            throw new RuntimeException("Error deleting user", e);
+            logger.error("Can't delete user {}", username, e);
+            throw new RuntimeException("Can't delete user " + username, e);
         }
     }
 
     public List<UserPrincipal> listUsers() {
+        List<UserPrincipal> users = new ArrayList<>();
         HttpGet request = new HttpGet(address + "/users");
         try {
             HttpResponse response = client.execute(request);
-            logger.warn("Status code: " + response.getStatusLine().getStatusCode());
-            logger.warn(EntityUtils.toString(response.getEntity()));
+            String responseTO = EntityUtils.toString(response.getEntity());
+            if (responseTO != null && !responseTO.isEmpty()) {
+                // extracting the user
+                int index = responseTO.indexOf("<username>");
+                while (index != -1) {
+                    responseTO = responseTO.substring(index + "<username>".length());
+                    int end = responseTO.indexOf("</username>");
+                    if (end == -1) {
+                        index = -1;
+                    }
+                    String username = responseTO.substring(0, end);
+                    users.add(new UserPrincipal(username));
+                    responseTO = responseTO.substring(end + "</username>".length());
+                    index = responseTO.indexOf("<username>");
+                }
+            }
         } catch (Exception e) {
-            throw new RuntimeException("Error listing user", e);
+            throw new RuntimeException("Error listing users", e);
         }
-        return new ArrayList<UserPrincipal>();
+        return users;
     }
 
     public List<RolePrincipal> listRoles(Principal principal) {
-        HttpGet request = new HttpGet(address + "/users/" + principal.getName());
+        List<RolePrincipal> roles = new ArrayList<>();
+        HttpGet request = new HttpGet(address + "/users?username=" + principal.getName());
         try {
             HttpResponse response  = client.execute(request);
-            logger.warn("Status code: " + response.getStatusLine().getStatusCode());
-            logger.warn(EntityUtils.toString(response.getEntity()));
+            String responseTO = EntityUtils.toString(response.getEntity());
+            if (responseTO != null && !responseTO.isEmpty()) {
+                int index = responseTO.indexOf("<roleName>");
+                while (index != 1) {
+                    responseTO = responseTO.substring(index + "<roleName>".length());
+                    int end = responseTO.indexOf("</roleName>");
+                    if (end == -1) {
+                        index = -1;
+                        break;
+                    }
+                    String role = responseTO.substring(0, end);
+                    roles.add(new RolePrincipal(role));
+                    responseTO = responseTO.substring(end + "</roleName>".length());
+                    index = responseTO.indexOf("<roleName>");
+                }
+            }
         } catch (Exception e) {
             throw new RuntimeException("Error listing roles", e);
         }
-        return new ArrayList<RolePrincipal>();
+        return roles;
     }
 
     public void addRole(String username, String role) {
@@ -109,19 +158,19 @@ public class SyncopeBackingEngine implements BackingEngine {
     }
 
     public void addGroup(String username, String group) {
-
+        throw new RuntimeException("Group management is not supported by Syncope backend");
     }
 
     public void deleteGroup(String username, String group) {
-
+        throw new RuntimeException("Group management is not supported by Syncope backend");
     }
 
     public void addGroupRole(String group, String role) {
-
+        throw new RuntimeException("Group management is not supported by Syncope backend");
     }
 
     public void deleteGroupRole(String group, String role) {
-
+        throw new RuntimeException("Group management is not supported by Syncope backend");
     }
 
 }
