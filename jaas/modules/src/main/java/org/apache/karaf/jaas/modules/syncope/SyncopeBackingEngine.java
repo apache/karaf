@@ -146,11 +146,11 @@ public class SyncopeBackingEngine implements BackingEngine {
     }
 
     public void addRole(String username, String role) {
-
+        throw new RuntimeException("Roles management should be done on the Syncope side");
     }
 
     public void deleteRole(String username, String role) {
-
+        throw new RuntimeException("Roles management should be done on the Syncope side");
     }
 
     public List<GroupPrincipal> listGroups(UserPrincipal principal) {
