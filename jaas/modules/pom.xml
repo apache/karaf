@@ -55,6 +55,13 @@
         </dependency>
 
         <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.3.5</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.fileinstall</artifactId>
         </dependency>
@@ -130,10 +137,14 @@
                             org.osgi.service.blueprint.container,
                             org.osgi.service.blueprint.reflect,
                             org.apache.karaf.jaas.config,
+                            !net.sf.ehcache*,
+                            !net.spy.memcached*,
                             *
                         </Import-Package>
                         <Private-Package>
-                            org.apache.felix.utils.properties
+                            org.apache.felix.utils.properties,
+                            org.apache.http*,
+                            org.apache.commons.codec*
                         </Private-Package>
                     </instructions>
                 </configuration>
