@@ -53,9 +53,6 @@ public class SyncopeBackingEngine implements BackingEngine {
     }
 
     public void addUser(String username, String password) {
-        if (username.startsWith(GROUP_PREFIX)) {
-            throw new IllegalArgumentException("Group prefix " + GROUP_PREFIX + " not permitted with Syncope backend");
-        }
         HttpPost request = new HttpPost(address + "/users");
         String userTO = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" +
                 "<user>" +
@@ -78,9 +75,6 @@ public class SyncopeBackingEngine implements BackingEngine {
     }
 
     public void deleteUser(String username) {
-        if (username.startsWith(GROUP_PREFIX)) {
-            throw new IllegalArgumentException("Group prefix " + GROUP_PREFIX + " not permitted with Syncope backend");
-        }
         HttpDelete request = new HttpDelete(address + "/users/" + username);
         try {
             client.execute(request);
@@ -117,7 +111,7 @@ public class SyncopeBackingEngine implements BackingEngine {
         return users;
     }
 
-    public List<RolePrincipal> listRoles(Principal principal) {
+    public List<RolePrincipal> listRoles(UserPrincipal principal) {
         List<RolePrincipal> roles = new ArrayList<RolePrincipal>();
         HttpGet request = new HttpGet(address + "/users?username=" + principal.getName());
         try {
