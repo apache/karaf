@@ -53,6 +53,13 @@
         </dependency>
 
         <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.3.5</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.fileinstall</artifactId>
         </dependency>
@@ -86,6 +93,7 @@
             <artifactId>org.apache.aries.blueprint.core</artifactId>
             <scope>provided</scope>
         </dependency>
+
         <dependency>
             <groupId>org.apache.directory.server</groupId>
             <artifactId>apacheds-core-integ</artifactId>
@@ -126,10 +134,14 @@
                             javax.net,
                             org.apache.karaf.jaas.config,
                             org.apache.aries.blueprint.ext,
+                            !net.sf.ehcache*,
+                            !net.spy.memcached*,
                             *
                         </Import-Package>
                         <Private-Package>
-                            org.apache.felix.utils*
+                            org.apache.felix.utils*,
+                            org.apache.http*,
+                            org.apache.commons.codec*
                         </Private-Package>
                     </instructions>
                 </configuration>
