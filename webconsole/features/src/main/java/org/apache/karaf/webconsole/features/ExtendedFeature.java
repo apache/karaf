@@ -22,6 +22,7 @@ import java.util.Map;
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Conditional;
 import org.apache.karaf.features.ConfigFileInfo;
+import org.apache.karaf.features.ConfigInfo;
 import org.apache.karaf.features.Dependency;
 import org.apache.karaf.features.Feature;
 
@@ -54,7 +55,8 @@ public class ExtendedFeature implements Feature {
     }
 
     @Override
-    public Map<String, Map<String, String>> getConfigurations() {
+    public List<ConfigInfo> getConfigurations() {
+//    public Map<String, Map<String, String>> getConfigurations() {
         return this.feature.getConfigurations();
     }
 

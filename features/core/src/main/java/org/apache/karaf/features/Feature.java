@@ -19,6 +19,8 @@ package org.apache.karaf.features;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.karaf.features.internal.model.Config;
+
 /**
  * A feature is a list of bundles associated identified by its name.
  */
@@ -46,7 +48,8 @@ public interface Feature {
 
     List<BundleInfo> getBundles();
 
-    Map<String, Map<String, String>> getConfigurations();
+//    Map<String, Map<String, String>> getConfigurations();
+    List<ConfigInfo> getConfigurations();
 
     List<ConfigFileInfo> getConfigurationFiles();
 

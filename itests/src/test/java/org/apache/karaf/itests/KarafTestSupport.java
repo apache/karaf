@@ -19,6 +19,7 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.configure
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.karafDistributionConfiguration;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.logLevel;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.replaceConfigurationFile;
 
 import java.io.ByteArrayOutputStream;
@@ -62,6 +63,7 @@ import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.ProbeBuilder;
 import org.ops4j.pax.exam.TestProbeBuilder;
+import org.ops4j.pax.exam.karaf.options.LogLevelOption.LogLevel;
 import org.ops4j.pax.exam.options.MavenArtifactUrlReference;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -125,6 +127,7 @@ public class KarafTestSupport {
             // enable JMX RBAC security, thanks to the KarafMBeanServerBuilder
             configureSecurity().enableKarafMBeanServerBuilder(),
             keepRuntimeFolder(),
+				logLevel(LogLevel.DEBUG),
             replaceConfigurationFile("etc/org.ops4j.pax.logging.cfg", getConfigFile("/etc/org.ops4j.pax.logging.cfg")),
             editConfigurationFilePut("etc/org.apache.karaf.features.cfg", "featuresBoot", "config,standard,region,package,kar,management"),
             editConfigurationFilePut("etc/org.ops4j.pax.web.cfg", "org.osgi.service.http.port", HTTP_PORT),

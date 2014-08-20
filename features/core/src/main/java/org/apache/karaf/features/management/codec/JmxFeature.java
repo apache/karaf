@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import javax.management.openmbean.TabularData;
@@ -35,6 +36,7 @@ import javax.management.openmbean.TabularDataSupport;
 
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.ConfigFileInfo;
+import org.apache.karaf.features.ConfigInfo;
 import org.apache.karaf.features.Dependency;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.management.FeaturesServiceMBean;
@@ -77,7 +79,7 @@ public class JmxFeature {
             itemValues[1] = feature.getVersion();
             itemValues[2] = getDependencyIdentifierTable(feature.getDependencies());
             itemValues[3] = getBundleUris(feature.getBundles());
-            itemValues[4] = getConfigTable(feature.getConfigurations());
+            itemValues[4] = getConfigList(feature.getConfigurations());
             itemValues[5] = getConfigFileList(feature.getConfigurationFiles());
             itemValues[6] = installed;
             data = new CompositeDataSupport(FEATURE, itemNames, itemValues);
@@ -123,16 +125,18 @@ public class JmxFeature {
         return array;
     }
 
-    static TabularData getConfigTable(Map<String, Map<String, String>> configs) throws OpenDataException {
+	static TabularData getConfigList(List<ConfigInfo> config) throws OpenDataException {
         TabularDataSupport table = new TabularDataSupport(FEATURE_CONFIG_TABLE);
-        for (Map.Entry<String, Map<String, String>> entry : configs.entrySet()) {
-            String[] itemNames = FeaturesServiceMBean.FEATURE_CONFIG;
-            Object[] itemValues = new Object[2];
-            itemValues[0] = entry.getKey();
-            itemValues[1] = getConfigElementTable(entry.getValue());
-            CompositeData config = new CompositeDataSupport(FEATURE_CONFIG, itemNames, itemValues);
-            table.put(config);
-        }
+        for (ConfigInfo configInfo : config) {
+        	String[] itemNames = FeaturesServiceMBean.FEATURE_CONFIG;
+        	Object[] itemValues = new Object[3];
+        	itemValues[0] = configInfo.getName();
+			itemValues[1] = getConfigElementTable(configInfo.getProperties());
+			itemValues[2] = configInfo.isAppend();
+			CompositeData configComposite = new CompositeDataSupport(
+					FEATURE_CONFIG, itemNames, itemValues);
+			table.put(configComposite);
+		}
         return table;
     }
     
@@ -157,6 +161,21 @@ public class JmxFeature {
         }
         return table;
     }
+
+	static TabularData getConfigElementTable(Properties props)
+			throws OpenDataException {
+		TabularDataSupport table = new TabularDataSupport(
+				FEATURE_CONFIG_ELEMENT_TABLE);
+		for (Object key : props.keySet()) {
+			String[] itemNames = FeaturesServiceMBean.FEATURE_CONFIG_ELEMENT;
+			Object[] itemValues = { (String) key,
+					props.getProperty((String) key) };
+			CompositeData element = new CompositeDataSupport(
+					FEATURE_CONFIG_ELEMENT, itemNames, itemValues);
+			table.put(element);
+		}
+		return table;
+	}
 
 
     static {

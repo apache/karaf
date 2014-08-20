@@ -27,9 +27,12 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import javax.xml.bind.annotation.XmlTransient;
+
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.ConfigFileInfo;
+import org.apache.karaf.features.ConfigInfo;
 
 @XmlTransient
 public class Content {
@@ -155,45 +158,12 @@ public class Content {
         return Collections.<BundleInfo>unmodifiableList(getBundle());
     }
 
-    public Map<String, Map<String, String>> getConfigurations() {
-        Map<String, Map<String, String>> result = new HashMap<String, Map<String, String>>();
-        for (Config config : getConfig()) {
-            String name = config.getName();
-            StringReader propStream = new StringReader(config.getValue());
-            Properties props = new Properties();
-            try {
-                props.load(propStream);
-            } catch (IOException e) {
-                //ignore??
-            }
-            interpolation(props);
-            Map<String, String> propMap = new HashMap<String, String>();
-            for (Map.Entry<Object, Object> entry : props.entrySet()) {
-                propMap.put((String) entry.getKey(), (String) entry.getValue());
-            }
-            result.put(name, propMap);
-        }
-        return result;
+    public List<ConfigInfo> getConfigurations() {
+    	return Collections.<ConfigInfo>unmodifiableList(getConfig());
     }
 
     public List<ConfigFileInfo> getConfigurationFiles() {
         return Collections.<ConfigFileInfo>unmodifiableList(getConfigfile());
     }
 
-    @SuppressWarnings("rawtypes")
-	protected void interpolation(Properties properties) {
-        for (Enumeration e = properties.propertyNames(); e.hasMoreElements(); ) {
-            String key = (String) e.nextElement();
-            String val = properties.getProperty(key);
-            Matcher matcher = Pattern.compile("\\$\\{([^}]+)\\}").matcher(val);
-            while (matcher.find()) {
-                String rep = System.getProperty(matcher.group(1));
-                if (rep != null) {
-                    val = val.replace(matcher.group(0), rep);
-                    matcher.reset(val);
-                }
-            }
-            properties.put(key, val);
-        }
-    }
 }

@@ -21,12 +21,19 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.List;
+import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.karaf.features.ConfigFileInfo;
+import org.apache.karaf.features.ConfigInfo;
 import org.apache.karaf.features.Feature;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
@@ -82,24 +89,72 @@ public class FeatureConfigInstaller {
     }
 
     void installFeatureConfigs(Feature feature, boolean verbose) throws IOException, InvalidSyntaxException {
-        for (String config : feature.getConfigurations().keySet()) {
-            Dictionary<String,String> props = new Hashtable<String, String>(feature.getConfigurations().get(config));
-            String[] pid = parsePid(config);
-            Configuration cfg = findExistingConfiguration(configAdmin, pid[0], pid[1]);
-            if (cfg == null) {
-                cfg = createConfiguration(configAdmin, pid[0], pid[1]);
-                String key = createConfigurationKey(pid[0], pid[1]);
-                props.put(CONFIG_KEY, key);
-                if (cfg.getBundleLocation() != null) {
-                    cfg.setBundleLocation(null);
-                }
-                cfg.update(props);
-            }
-        }
+//        for (String config : feature.getConfigurations().keySet()) {
+//            Dictionary<String,String> props = new Hashtable<String, String>(feature.getConfigurations().get(config));
+//            String[] pid = parsePid(config);
+//            Configuration cfg = findExistingConfiguration(configAdmin, pid[0], pid[1]);
+//            if (cfg == null) {
+//                cfg = createConfiguration(configAdmin, pid[0], pid[1]);
+//                String key = createConfigurationKey(pid[0], pid[1]);
+//                props.put(CONFIG_KEY, key);
+//                if (cfg.getBundleLocation() != null) {
+//                    cfg.setBundleLocation(null);
+//                }
+//                cfg.update(props);
+//            }
+//        }
+    	for (ConfigInfo config : feature.getConfigurations()) {
+    		String name = config.getName();
+			Properties props = config.getProperties();
+
+			// interpolation(props);
+            
+
+			String[] pid = parsePid(config.getName());
+			Configuration cfg = findExistingConfiguration(configAdmin, pid[0],
+					pid[1]);
+			if (cfg == null) {
+				Dictionary<String, String> cfgProps = convertToDict(props);
+
+				cfg = createConfiguration(configAdmin, pid[0], pid[1]);
+				String key = createConfigurationKey(pid[0], pid[1]);
+				cfgProps.put(CONFIG_KEY, key);
+				if (cfg.getBundleLocation() != null) {
+					cfg.setBundleLocation(null);
+				}
+				cfg.update(cfgProps);
+			} else if (config.isAppend()) {
+				Dictionary<String,Object> properties = cfg.getProperties();
+				for (Enumeration<String> propKeys = properties.keys(); propKeys
+						.hasMoreElements();) {
+					String key = propKeys.nextElement();
+					// remove existing entry, since it's about appending.
+					if (props.containsKey(key)) {
+						props.remove(key);
+					} 
+				}
+				if (props.size() > 0) {
+					// convert props to dictionary
+					Dictionary<String, String> cfgProps = convertToDict(props);
+					cfg.update(cfgProps);
+				}
+			}
+		}
         for (ConfigFileInfo configFile : feature.getConfigurationFiles()) {
             installConfigurationFile(configFile.getLocation(), configFile.getFinalname(), configFile.isOverride(), verbose);
         }
     }
+
+	private Dictionary<String, String> convertToDict(Properties props) {
+		Dictionary<String, String> cfgProps = new Hashtable<String, String>();
+		for (@SuppressWarnings("rawtypes")
+		Enumeration e = props.propertyNames(); e.hasMoreElements();) {
+			String key = (String) e.nextElement();
+			String val = props.getProperty(key);
+			cfgProps.put(key, val);
+		}
+		return cfgProps;
+	}
 
     private String createConfigurationKey(String pid, String factoryPid) {
         return factoryPid == null ? pid : pid + "-" + factoryPid;
@@ -163,4 +218,5 @@ public class FeatureConfigInstaller {
 		}
             
     }
+    
 }

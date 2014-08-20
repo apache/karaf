@@ -16,7 +16,7 @@
       See the License for the specific language governing permissions and
       limitations under the License.
 -->
-<features name="standard-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
+<features name="standard-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.1 http://karaf.apache.org/xmlns/features/v1.2.1">
 
 	<repository>mvn:org.ops4j.pax.web/pax-web-features/${pax.web.version}/xml/features</repository>
 
@@ -107,7 +107,7 @@
     </feature>
 
     <feature name="http-whiteboard" description="Provide HTTP Whiteboard pattern support" version="${project.version}" resolver="(obr)">
-    	<feature version="${project.version}">http</feature>
+    	<feature>http</feature>
         <feature version="[${pax.web.version},5)">pax-http-whiteboard</feature>
     </feature>
 

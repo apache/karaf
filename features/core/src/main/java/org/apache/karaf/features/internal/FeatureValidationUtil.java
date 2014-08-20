@@ -44,6 +44,7 @@ public class FeatureValidationUtil {
     public static final QName FEATURES_1_0 = new QName("http://karaf.apache.org/xmlns/features/v1.0.0", "features");
     public static final QName FEATURES_1_1 = new QName("http://karaf.apache.org/xmlns/features/v1.1.0", "features");
     public static final QName FEATURES_1_2 = new QName("http://karaf.apache.org/xmlns/features/v1.2.0", "features");
+    public static final QName FEATURES_1_2_1 = new QName("http://karaf.apache.org/xmlns/features/v1.2.1", "features");
     private static final Logger LOGGER = LoggerFactory.getLogger(FeatureValidationUtil.class);
 
     /**
@@ -53,6 +54,7 @@ public class FeatureValidationUtil {
      * @throws Exception When validation fails.
      */
     public static void validate(URI uri) throws Exception {
+		LOGGER.debug("validating URI {}", uri);
         Document doc = load(uri);
 
         QName name = new QName(doc.getDocumentElement().getNamespaceURI(), doc.getDocumentElement().getLocalName());
@@ -61,11 +63,17 @@ public class FeatureValidationUtil {
             LOGGER.warn("Old style feature file without namespace found (URI: {}). This format is deprecated and support for it will soon be removed", uri);
             return;
         } else if (FeaturesNamespaces.FEATURES_1_0_0.equals(name)) {
+			LOGGER.debug("validating with schema version 1.0.0");
             validate(doc, "/org/apache/karaf/features/karaf-features-1.0.0.xsd");
         } else if (FeaturesNamespaces.FEATURES_1_1_0.equals(name)) {
-            validate(doc, "/org/apache/karaf/features/karaf-features-1.1.0.xsd");
+			LOGGER.debug("validating with schema version 1.1.0");
+			validate(doc, "/org/apache/karaf/features/karaf-features-1.1.0.xsd");
         } else if (FeaturesNamespaces.FEATURES_1_2_0.equals(name)) {
-            validate(doc, "/org/apache/karaf/features/karaf-features-1.2.0.xsd");
+			LOGGER.debug("validating with schema version 1.2.0");
+			validate(doc, "/org/apache/karaf/features/karaf-features-1.2.0.xsd");
+		} else if (FeaturesNamespaces.FEATURES_1_2_1.equals(name)) {
+			LOGGER.debug("validating with schema version 1.2.1");
+			validate(doc, "/org/apache/karaf/features/karaf-features-1.2.1.xsd");
         }
         else {
             throw new IllegalArgumentException("Unrecognized root element: " + name);
