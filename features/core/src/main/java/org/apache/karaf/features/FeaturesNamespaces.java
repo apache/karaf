@@ -27,6 +27,7 @@ public interface FeaturesNamespaces {
     String URI_1_0_0 = "http://karaf.apache.org/xmlns/features/v1.0.0";
     String URI_1_1_0 = "http://karaf.apache.org/xmlns/features/v1.1.0";
     String URI_1_2_0 = "http://karaf.apache.org/xmlns/features/v1.2.0";
+	String URI_1_2_1 = "http://karaf.apache.org/xmlns/features/v1.2.1";
     String URI_1_3_0 = "http://karaf.apache.org/xmlns/features/v1.3.0";
 
     String URI_CURRENT = URI_1_3_0;
@@ -35,6 +36,7 @@ public interface FeaturesNamespaces {
     QName FEATURES_1_0_0 = new QName(URI_1_0_0, "features");
     QName FEATURES_1_1_0 = new QName(URI_1_1_0, "features");
     QName FEATURES_1_2_0 = new QName(URI_1_2_0, "features");
+	QName FEATURES_1_2_1 = new QName(URI_1_2_1, "features");
     QName FEATURES_1_3_0 = new QName(URI_1_3_0, "features");
 
     QName FEATURES_CURRENT = FEATURES_1_3_0;

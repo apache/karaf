@@ -111,6 +111,7 @@ public class Repository {
                     Element c = (Element) configNodes.item(j);
                     String cfgName = c.getAttribute("name");
                     String data = c.getTextContent();
+					String append = c.getAttribute("append");
                     Properties properties = new Properties();
                     properties.load(new ByteArrayInputStream(data.getBytes()));
                     Map<String, String> hashtable = new Hashtable<String, String>();
@@ -118,7 +119,7 @@ public class Repository {
                         String n = key.toString();
                         hashtable.put(n, properties.getProperty(n));
                     }
-                    f.addConfig(cfgName, hashtable);
+					f.addConfig(new ConfigRef(cfgName, hashtable, append));
                 }
                 NodeList configFileNodes = e.getElementsByTagName("configfile");
                 for (int j = 0; j < configFileNodes.getLength(); j++) {

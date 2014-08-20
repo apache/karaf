@@ -16,11 +16,20 @@
  */
 package org.apache.karaf.features.internal.model;
 
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.Enumeration;
+import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlValue;
+
+import org.apache.karaf.features.ConfigInfo;
 
 
 /**
@@ -44,12 +53,14 @@ import javax.xml.bind.annotation.XmlValue;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "config", propOrder = {"value"})
-public class Config {
+public class Config implements ConfigInfo{
 
     @XmlValue
     protected String value;
     @XmlAttribute(required = true)
     protected String name;
+    @XmlAttribute(required = false)
+	private Boolean append = false;
 
     /**
      * Gets the value of the value property.
@@ -91,4 +102,45 @@ public class Config {
         this.name = value;
     }
 
+	/**
+	 * @return the append
+	 */
+	public boolean isAppend() {
+		return append;
+	}
+
+	/**
+	 * @param append the append to set
+	 */
+	public void setAppend(boolean append) {
+		this.append = append;
+	}
+
+	public Properties getProperties() {
+		StringReader propStream = new StringReader(getValue());
+		Properties props = new Properties();
+		try {
+			props.load(propStream);
+		} catch (IOException e) {
+			// ignore??
+		}
+		return props;
+	}
+
+	@SuppressWarnings("rawtypes")
+	private void interpolation(Properties properties) {
+		for (Enumeration e = properties.propertyNames(); e.hasMoreElements();) {
+			String key = (String) e.nextElement();
+			String val = properties.getProperty(key);
+			Matcher matcher = Pattern.compile("\\$\\{([^}]+)\\}").matcher(val);
+			while (matcher.find()) {
+				String rep = System.getProperty(matcher.group(1));
+				if (rep != null) {
+					val = val.replace(matcher.group(0), rep);
+					matcher.reset(val);
+				}
+			}
+			properties.put(key, val);
+		}
+	}
 }

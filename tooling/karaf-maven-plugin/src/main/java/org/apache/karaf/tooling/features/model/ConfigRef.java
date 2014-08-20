@@ -14,23 +14,43 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.features;
+package org.apache.karaf.tooling.features.model;
 
-import java.util.List;
 import java.util.Map;
 
-public interface Conditional {
+public class ConfigRef {
 
-    List<String> getCondition();
+	private String name;
+	private Map<String, String> properties;
+	private boolean append;
 
-    List<Dependency> getDependencies();
+	public ConfigRef(String name, Map<String, String> hashtable, String append) {
+		this.name = name;
+		this.properties = hashtable;
+		this.append = Boolean.parseBoolean(append);
+	}
 
-    List<BundleInfo> getBundles();
+	public String getName() {
+		return name;
+	}
 
-//    Map<String, Map<String, String>> getConfigurations();
-    List<ConfigInfo> getConfigurations();
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    List<ConfigFileInfo> getConfigurationFiles();
+	public Map<String, String> getProperties() {
+		return properties;
+	}
 
-    Feature asFeature(String name, String version);
+	public void setProperties(Map<String, String> properties) {
+		this.properties = properties;
+	}
+
+	public boolean isAppend() {
+		return append;
+	}
+
+	public void setAppend(boolean append) {
+		this.append = append;
+	}
 }
