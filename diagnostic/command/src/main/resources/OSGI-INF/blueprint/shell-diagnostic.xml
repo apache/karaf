@@ -27,7 +27,6 @@
         </command>
     </command-bundle>
 
-
     <reference-list id="providers" interface="org.apache.karaf.diagnostic.core.DumpProvider"
         availability="optional">
     </reference-list>

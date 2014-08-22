@@ -19,6 +19,8 @@ package org.apache.karaf.diagnostic.common;
 import com.sun.management.HotSpotDiagnosticMXBean;
 import org.apache.karaf.diagnostic.core.DumpDestination;
 import org.apache.karaf.diagnostic.core.DumpProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.management.MBeanServer;
 import java.io.File;
@@ -30,6 +32,8 @@ import java.lang.management.ManagementFactory;
  * Create a heap dump.
  */
 public class HeapDumpProvider implements DumpProvider {
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(HeapDumpProvider.class);
 
     public void createDump(DumpDestination destination) throws Exception {
         FileInputStream in = null;
@@ -52,7 +56,7 @@ public class HeapDumpProvider implements DumpProvider {
                 heapDumpFile.delete();
             }
         } catch (Exception e) {
-            // nothing to do
+            LOGGER.warn("Can't create heapdump", e);
         } finally {
             if (in != null) {
                 in.close();
