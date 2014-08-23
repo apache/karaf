@@ -43,6 +43,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
@@ -54,6 +55,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 
+import org.apache.felix.utils.collections.MapToDictionary;
 import org.apache.felix.utils.manifest.Clause;
 import org.apache.felix.utils.manifest.Parser;
 import org.apache.felix.utils.version.VersionRange;
@@ -61,6 +63,7 @@ import org.apache.felix.utils.version.VersionTable;
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Conditional;
 import org.apache.karaf.features.ConfigFileInfo;
+import org.apache.karaf.features.ConfigInfo;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeatureEvent;
 import org.apache.karaf.features.FeaturesListener;
@@ -600,19 +603,41 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
                 }
             }
         }
-        for (String config : feature.getConfigurations().keySet()) {
-            Dictionary<String, String> props = new Hashtable<String, String>(feature.getConfigurations().get(config));
-            String[] pid = parsePid(config);
-            Configuration cfg = findExistingConfiguration(configAdmin, pid[0], pid[1]);
-            if (cfg == null) {
-                cfg = createConfiguration(configAdmin, pid[0], pid[1]);
-                String key = createConfigurationKey(pid[0], pid[1]);
-                props.put(CONFIG_KEY, key);
-                if (cfg.getBundleLocation() != null) {
-                    cfg.setBundleLocation(null);
-                }
-                cfg.update(props);
-            }
+		for (ConfigInfo config : feature.getConfigurations()) {
+			String name = config.getName();
+			Map<String, String> props = config.getProperties();
+
+			String[] pid = parsePid(config.getName());
+			Configuration cfg = findExistingConfiguration(configAdmin, pid[0],
+					pid[1]);
+			if (cfg == null) {
+				
+				Dictionary<String, String> cfgProps = convertToDict(config
+						.getProperties());
+
+				cfg = createConfiguration(configAdmin, pid[0], pid[1]);
+				String key = createConfigurationKey(pid[0], pid[1]);
+				cfgProps.put(CONFIG_KEY, key);
+				if (cfg.getBundleLocation() != null) {
+					cfg.setBundleLocation(null);
+				}
+				cfg.update(cfgProps);
+			} else if (config.isAppend()) {
+				Dictionary<String, Object> properties = cfg.getProperties();
+				for (Enumeration<String> propKeys = properties.keys(); propKeys
+						.hasMoreElements();) {
+					String key = propKeys.nextElement();
+					// remove existing entry, since it's about appending.
+					if (props.containsKey(key)) {
+						props.remove(key);
+					}
+				}
+				if (props.size() > 0) {
+					// convert props to dictionary
+					Dictionary<String, String> cfgProps = convertToDict(props);
+					cfg.update(cfgProps);
+				}
+			}
         }
         for (ConfigFileInfo configFile : feature.getConfigurationFiles()) {
             installConfigurationFile(configFile.getLocation(),
@@ -642,6 +667,14 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         }
 
     }
+
+	private Dictionary<String, String> convertToDict(Map<String, String> props) {
+		Dictionary<String, String> cfgProps = new Hashtable<String, String>();
+		for (Entry<String, String> property : props.entrySet()) {
+			cfgProps.put(property.getKey(), property.getValue());
+		}
+		return cfgProps;
+	}
 
     private String createConfigurationKey(String pid, String factoryPid) {
         return factoryPid == null ? pid : pid + "-" + factoryPid;

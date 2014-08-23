@@ -17,11 +17,11 @@
 package org.apache.karaf.webconsole.features;
 
 import java.util.List;
-import java.util.Map;
 
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Conditional;
 import org.apache.karaf.features.ConfigFileInfo;
+import org.apache.karaf.features.ConfigInfo;
 import org.apache.karaf.features.Feature;
 
 public class ExtendedFeature implements Feature {
@@ -51,7 +51,7 @@ public class ExtendedFeature implements Feature {
         return this.feature.getBundles();
     }
 
-    public Map<String, Map<String, String>> getConfigurations() {
+	public List<ConfigInfo> getConfigurations() {
         return this.feature.getConfigurations();
     }
 

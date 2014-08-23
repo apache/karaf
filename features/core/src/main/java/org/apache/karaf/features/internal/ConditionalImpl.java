@@ -39,7 +39,7 @@ public class ConditionalImpl extends ContentImpl implements Conditional {
         String conditionName = name + "-condition-" + getConditionId().replaceAll("[^A-Za-z0-9 ]", "_");
         FeatureImpl f = new FeatureImpl(conditionName, version);
         f.getBundles().addAll(getBundles());
-        f.getConfigurations().putAll(getConfigurations());
+		f.getConfigurations().addAll(getConfigurations());
         f.getConfigurationFiles().addAll(getConfigurationFiles());
         f.getDependencies().addAll(getDependencies());
         return f;

@@ -27,6 +27,7 @@ import org.apache.felix.gogo.commands.Option;
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Conditional;
 import org.apache.karaf.features.ConfigFileInfo;
+import org.apache.karaf.features.ConfigInfo;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
 
@@ -153,13 +154,13 @@ public class InfoFeatureCommand extends FeaturesCommandSupport {
     }
 
     private void displayConfigInformation(Feature feature, String contentType) {
-        Map<String, Map<String, String>> configurations = feature.getConfigurations();
+		List<ConfigInfo> configurations = feature.getConfigurations();
         if (configurations.isEmpty()) {
             System.out.println(contentType + " has no configuration");
         } else {
             System.out.println(contentType + " configuration:");
-            for (String name : configurations.keySet()) {
-                System.out.println("  " + name);
+			for (ConfigInfo configInf : configurations) {
+				System.out.println("  " + configInf.getName());
             }
         }
     }

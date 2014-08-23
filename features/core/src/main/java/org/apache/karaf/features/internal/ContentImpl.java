@@ -23,13 +23,14 @@ import java.util.Map;
 
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.ConfigFileInfo;
+import org.apache.karaf.features.ConfigInfo;
 import org.apache.karaf.features.Feature;
 
 public class ContentImpl {
 
     private List<Feature> dependencies = new ArrayList<Feature>();
     private List<BundleInfo> bundles = new ArrayList<BundleInfo>();
-    private Map<String, Map<String,String>> configs = new HashMap<String, Map<String,String>>();
+	private List<ConfigInfo> configs = new ArrayList<ConfigInfo>();
     private List<ConfigFileInfo> configurationFiles = new ArrayList<ConfigFileInfo>();
 
     public List<Feature> getDependencies() {
@@ -40,7 +41,7 @@ public class ContentImpl {
         return bundles;
     }
 
-    public Map<String, Map<String, String>> getConfigurations() {
+	public List<ConfigInfo> getConfigurations() {
         return configs;
     }
 
@@ -56,8 +57,8 @@ public class ContentImpl {
         bundles.add(bundle);
     }
 
-    public void addConfig(String name, Map<String,String> properties) {
-        configs.put(name, properties);
+	public void addConfig(ConfigInfo configInfo) {
+		configs.add(configInfo);
     }
 
     public void addConfigurationFile(ConfigFileInfo configurationFileInfo) {

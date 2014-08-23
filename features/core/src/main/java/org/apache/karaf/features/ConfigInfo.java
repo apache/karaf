@@ -16,37 +16,15 @@
  */
 package org.apache.karaf.features;
 
-import java.util.List;
+import java.util.Hashtable;
+import java.util.Map;
 
-/**
- * A feature is a list of bundles associated identified by its name.
- */
-public interface Feature {
+public interface ConfigInfo {
 
-    public static String DEFAULT_INSTALL_MODE = "auto";
+	String getName();
 
-    String getId();
+	Map<String, String> getProperties();
 
-    String getName();
-
-    String getDescription();
-
-    String getDetails();
-
-    String getVersion();
-
-    String getResolver();
-
-    String getInstall();
-
-    List<Feature> getDependencies();
-
-    List<BundleInfo> getBundles();
-
-    List<ConfigInfo> getConfigurations();
-
-    List<ConfigFileInfo> getConfigurationFiles();
-
-    List<Conditional> getConditional();
+	boolean isAppend();
 
 }

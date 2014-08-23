@@ -35,6 +35,7 @@ import javax.management.openmbean.TabularDataSupport;
 
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.ConfigFileInfo;
+import org.apache.karaf.features.ConfigInfo;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.management.FeaturesServiceMBean;
 
@@ -76,7 +77,7 @@ public class JmxFeature {
             itemValues[1] = feature.getVersion();
             itemValues[2] = getFeatureIdentifierTable(feature.getDependencies());
             itemValues[3] = getBundleUris(feature.getBundles());
-            itemValues[4] = getConfigTable(feature.getConfigurations());
+            itemValues[4] = getConfigList(feature.getConfigurations());
             itemValues[5] = getConfigFileList(feature.getConfigurationFiles());
             itemValues[6] = installed;
             data = new CompositeDataSupport(FEATURE, itemNames, itemValues);
@@ -122,13 +123,14 @@ public class JmxFeature {
         return array;
     }
 
-    static TabularData getConfigTable(Map<String, Map<String, String>> configs) throws OpenDataException {
+    static TabularData getConfigList(List<ConfigInfo> configs) throws OpenDataException {
         TabularDataSupport table = new TabularDataSupport(FEATURE_CONFIG_TABLE);
-        for (Map.Entry<String, Map<String, String>> entry : configs.entrySet()) {
+		for (ConfigInfo configInfo : configs) {
             String[] itemNames = FeaturesServiceMBean.FEATURE_CONFIG;
-            Object[] itemValues = new Object[2];
-            itemValues[0] = entry.getKey();
-            itemValues[1] = getConfigElementTable(entry.getValue());
+			Object[] itemValues = new Object[3];
+			itemValues[0] = configInfo.getName();
+			itemValues[1] = getConfigElementTable(configInfo.getProperties());
+			itemValues[2] = configInfo.isAppend();
             CompositeData config = new CompositeDataSupport(FEATURE_CONFIG, itemNames, itemValues);
             table.put(config);
         }

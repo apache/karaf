@@ -68,6 +68,8 @@ public class FeatureValidationUtil {
             validate(doc, "/org/apache/karaf/features/karaf-features-1.1.0.xsd");
         } else if (FeaturesNamespaces.FEATURES_1_2_0.equals(name)) {
             validate(doc, "/org/apache/karaf/features/karaf-features-1.2.0.xsd");
+        } else if (FeaturesNamespaces.FEATURES_1_2_1.equals(name)) {
+            validate(doc, "/org/apache/karaf/features/karaf-features-1.2.1.xsd");
         }
         else {
             throw new IllegalArgumentException("Unrecognized root element: " + name);

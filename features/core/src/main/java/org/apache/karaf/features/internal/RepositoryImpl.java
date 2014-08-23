@@ -214,7 +214,9 @@ public class RepositoryImpl implements Repository {
             Element c = (Element) configNodes.item(j);
             if (c.getParentNode() != e) continue;
             String cfgName = c.getAttribute("name");
+            String append = c.getAttribute("append");
             String data = c.getTextContent();
+            
             Properties properties = new Properties();
             properties.load(new ByteArrayInputStream(data.getBytes()));
             interpolation(properties);
@@ -223,7 +225,7 @@ public class RepositoryImpl implements Repository {
                 String n = key.toString();
                 hashtable.put(n, properties.getProperty(n));
             }
-            content.addConfig(cfgName, hashtable);
+			content.addConfig(new ConfigInfoImpl(cfgName, hashtable, append));
         }
         NodeList configurationFiles = e.getElementsByTagName("configfile");
         for (int j = 0; j < configurationFiles.getLength(); j++) {

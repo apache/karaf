@@ -19,8 +19,9 @@ package org.apache.karaf.features;
 import java.net.URI;
 
 import junit.framework.TestCase;
-import org.apache.karaf.features.internal.RepositoryImpl;
+
 import org.apache.karaf.features.internal.FeatureImpl;
+import org.apache.karaf.features.internal.RepositoryImpl;
 
 
 public class RepositoryTest extends TestCase {
@@ -40,9 +41,54 @@ public class RepositoryTest extends TestCase {
         assertEquals("f1", features[0].getName());
         assertNotNull(features[0].getConfigurations());
         assertEquals(1, features[0].getConfigurations().size());
-        assertNotNull(features[0].getConfigurations().get("c1"));
-        assertEquals(1, features[0].getConfigurations().get("c1").size());
-        assertEquals("v", features[0].getConfigurations().get("c1").get("k"));
+        assertNotNull(features[0].getConfigurations().get(0).getName());
+		assertEquals("c1", features[0].getConfigurations().get(0).getName());
+        assertEquals(1, features[0].getConfigurations().get(0).getProperties().size());
+        assertEquals("v", features[0].getConfigurations().get(0).getProperties().get("k"));
+        assertNotNull(features[0].getDependencies());
+        assertEquals(0, features[0].getDependencies().size());
+        assertNotNull(features[0].getBundles());
+        assertEquals(2, features[0].getBundles().size());
+        assertEquals("b1", features[0].getBundles().get(0).getLocation());
+        assertEquals("b2", features[0].getBundles().get(1).getLocation());
+        assertNotNull(features[1]);
+        assertEquals("f2", features[1].getName());
+        assertNotNull(features[1].getConfigurations());
+        assertEquals(0, features[1].getConfigurations().size());
+        assertNotNull(features[1].getDependencies());
+        assertEquals(1, features[1].getDependencies().size());
+        assertEquals("f1" + FeatureImpl.SPLIT_FOR_NAME_AND_VERSION + FeatureImpl.DEFAULT_VERSION, features[1].getDependencies().get(0).toString());
+        assertNotNull(features[1].getBundles());
+        assertEquals(1, features[1].getBundles().size());
+        assertEquals("b3", features[1].getBundles().get(0).getLocation());
+        assertEquals("f3", features[2].getName());
+        assertNotNull(features[2].getConfigurationFiles());
+        assertEquals(1, features[2].getConfigurationFiles().size());
+        assertEquals("cf1", features[2].getConfigurationFiles().get(0).getFinalname());
+        assertEquals("cfloc", features[2].getConfigurationFiles().get(0).getLocation());
+    }
+
+    
+    public void testLoadConfigAppend() throws Exception {
+        RepositoryImpl r = new RepositoryImpl(getClass().getResource("repo3.xml").toURI());
+        // Check repo
+        URI[] repos = r.getRepositories();
+        assertNotNull(repos);
+        assertEquals(1, repos.length);
+        assertEquals(URI.create("urn:r1"), repos[0]);
+        // Check features
+        Feature[] features = r.getFeatures();
+        assertNotNull(features);
+        assertEquals(3, features.length);
+        assertNotNull(features[0]);
+        assertEquals("f1", features[0].getName());
+        assertNotNull(features[0].getConfigurations());
+        assertEquals(1, features[0].getConfigurations().size());
+        assertNotNull(features[0].getConfigurations().get(0).getName());
+		assertEquals("c1", features[0].getConfigurations().get(0).getName());
+        assertEquals(1, features[0].getConfigurations().get(0).getProperties().size());
+        assertEquals("v", features[0].getConfigurations().get(0).getProperties().get("k"));
+        assertTrue(features[0].getConfigurations().get(0).isAppend());
         assertNotNull(features[0].getDependencies());
         assertEquals(0, features[0].getDependencies().size());
         assertNotNull(features[0].getBundles());

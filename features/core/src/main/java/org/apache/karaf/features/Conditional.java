@@ -27,7 +27,7 @@ public interface Conditional {
 
     List<BundleInfo> getBundles();
 
-    Map<String, Map<String, String>> getConfigurations();
+    List<ConfigInfo> getConfigurations();
 
     List<ConfigFileInfo> getConfigurationFiles();
 
