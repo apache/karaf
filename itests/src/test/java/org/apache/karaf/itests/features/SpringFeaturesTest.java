@@ -60,6 +60,10 @@ public class SpringFeaturesTest extends KarafTestSupport {
         installAssertAndUninstallFeature("spring-jms");
     }
 
+    /**
+     * Ignore this itest waiting for KARAF-3178
+     */
+    @Ignore
     @Test
     public void installSpringStrutsFeature() throws Exception {
         installAssertAndUninstallFeature("spring-struts");
