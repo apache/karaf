@@ -63,16 +63,10 @@ public class FeatureTest extends KarafTestSupport {
 
     @Test
     public void installUninstallCommand() throws Exception {
-        String featureInstallOutput = executeCommand("feature:install -v eventadmin", new RolePrincipal("admin"));
-        System.out.println(featureInstallOutput);
-        assertFalse(featureInstallOutput.isEmpty());
-        String featureListOutput = executeCommand("feature:list -i | grep eventadmin");
-        System.out.println(featureListOutput);
-        assertFalse(featureListOutput.isEmpty());
+        System.out.println(executeCommand("feature:install eventadmin", new RolePrincipal("admin")));
+        assertFeatureInstalled("eventadmin");
         System.out.println(executeCommand("feature:uninstall eventadmin", new RolePrincipal("admin")));
-        featureListOutput = executeCommand("feature:list -i | grep eventadmin");
-        System.out.println(featureListOutput);
-        assertTrue(featureListOutput.isEmpty());
+        assertFeatureNotInstalled("eventadmin");
     }
 
     @Test
