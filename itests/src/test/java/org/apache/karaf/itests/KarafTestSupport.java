@@ -355,6 +355,16 @@ public class KarafTestSupport {
         Assert.fail("Feature " + featureName + " should be installed but is not");
     }
 
+    public void assertFeatureNotInstalled(String featureName) {
+        Feature[] features = featureService.listInstalledFeatures();
+        for (Feature feature : features) {
+            if (featureName.equals(feature.getName())) {
+                Assert.fail("Feature " + featureName + " is installed whereas it should not be");
+                return;
+            }
+        }
+    }
+
     public void assertFeaturesInstalled(String ... expectedFeatures) {
         Set<String> expectedFeaturesSet = new HashSet<String>(Arrays.asList(expectedFeatures));
         Feature[] features = featureService.listInstalledFeatures();
