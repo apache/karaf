@@ -64,16 +64,10 @@ public class FeatureTest extends KarafTestSupport {
 
     @Test
     public void installUninstallCommand() throws Exception {
-        String featureInstallOutput = executeCommand("feature:install -v wrapper", new RolePrincipal("admin"));
-        System.out.println(featureInstallOutput);
-        assertFalse(featureInstallOutput.isEmpty());
-        String featureListOutput = executeCommand("feature:list -i | grep wrapper");
-        System.out.println(featureListOutput);
-        assertFalse(featureListOutput.isEmpty());
+        System.out.println(executeCommand("feature:install -v wrapper", new RolePrincipal("admin")));
+        assertFeatureInstalled("wrapper");
         System.out.println(executeCommand("feature:uninstall wrapper", new RolePrincipal("admin")));
-        featureListOutput = executeCommand("feature:list -i | grep wrapper");
-        System.out.println(featureListOutput);
-        assertTrue(featureListOutput.isEmpty());
+        assertFeatureNotInstalled("wrapper");
     }
 
     @Test
@@ -84,7 +78,9 @@ public class FeatureTest extends KarafTestSupport {
             MBeanServerConnection connection = connector.getMBeanServerConnection();
             ObjectName name = new ObjectName("org.apache.karaf:type=feature,name=root");
             connection.invoke(name, "installFeature", new Object[] { "wrapper" }, new String[]{ "java.lang.String" });
+            assertFeatureInstalled("wrapper");
             connection.invoke(name, "uninstallFeature", new Object[] { "wrapper" }, new String[]{ "java.lang.String" });
+            assertFeatureNotInstalled("wrapper");
         } finally {
         	close(connector);
         }
@@ -92,9 +88,9 @@ public class FeatureTest extends KarafTestSupport {
 
     @Test
     public void repoAddRemoveCommand() throws Exception {
-        System.out.println(executeCommand("feature:repo-add mvn:org.apache.karaf.cellar/apache-karaf-cellar/2.2.4/xml/features"));
+        System.out.println(executeCommand("feature:repo-add mvn:org.apache.karaf.cellar/apache-karaf-cellar/3.0.0/xml/features"));
         assertContains("apache-karaf-cellar", executeCommand("feature:repo-list"));
-        System.out.println(executeCommand("feature:repo-remove mvn:org.apache.karaf.cellar/apache-karaf-cellar/2.2.4/xml/features"));
+        System.out.println(executeCommand("feature:repo-remove mvn:org.apache.karaf.cellar/apache-karaf-cellar/3.0.0/xml/features"));
         assertContainsNot("apache-karaf-cellar", executeCommand("feature:repo-list"));
     }
 
@@ -105,8 +101,8 @@ public class FeatureTest extends KarafTestSupport {
             connector = this.getJMXConnector();
             MBeanServerConnection connection = connector.getMBeanServerConnection();
             ObjectName name = new ObjectName("org.apache.karaf:type=feature,name=root");
-            connection.invoke(name, "addRepository", new Object[] { "mvn:org.apache.karaf.cellar/apache-karaf-cellar/2.2.4/xml/features" }, new String[]{ "java.lang.String" });
-            connection.invoke(name, "removeRepository", new Object[] { "mvn:org.apache.karaf.cellar/apache-karaf-cellar/2.2.4/xml/features" }, new String[]{ "java.lang.String" });
+            connection.invoke(name, "addRepository", new Object[] { "mvn:org.apache.karaf.cellar/apache-karaf-cellar/3.0.0/xml/features" }, new String[]{ "java.lang.String" });
+            connection.invoke(name, "removeRepository", new Object[] { "mvn:org.apache.karaf.cellar/apache-karaf-cellar/3.0.0/xml/features" }, new String[]{ "java.lang.String" });
         } finally {
         	close(connector);
         }

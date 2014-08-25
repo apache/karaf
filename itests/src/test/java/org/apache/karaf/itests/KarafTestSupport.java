@@ -389,6 +389,29 @@ public class KarafTestSupport {
         Assert.assertTrue(msg, installedFeatures.containsAll(expectedFeaturesSet));
     }
 
+    public void assertFeatureNotInstalled(String featureName) throws Exception {
+        String name;
+        String version;
+        if (featureName.contains("/")) {
+            name = featureName.substring(0, featureName.indexOf("/"));
+            version = featureName.substring(featureName.indexOf("/") + 1);
+        } else {
+            name = featureName;
+            version = null;
+        }
+        assertFeatureNotInstalled(name, version);
+    }
+
+    public void assertFeatureNotInstalled(String featureName, String featureVersion) throws Exception {
+        Feature featureToAssert = featureService.getFeature(featureName, featureVersion);
+        Feature[] features = featureService.listInstalledFeatures();
+        for (Feature feature : features) {
+            if (featureToAssert.equals(feature)) {
+                Assert.fail("Feature " + featureName + (featureVersion != null ? "/" + featureVersion : "") + " is installed whereas it should not be");
+            }
+        }
+    }
+
     public void assertContains(String expectedPart, String actual) {
         assertTrue("Should contain '" + expectedPart + "' but was : " + actual, actual.contains(expectedPart));
     }

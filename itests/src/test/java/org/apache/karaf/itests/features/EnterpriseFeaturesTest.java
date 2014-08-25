@@ -14,7 +14,6 @@
 package org.apache.karaf.itests.features;
 
 import org.apache.karaf.itests.KarafTestSupport;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -26,28 +25,73 @@ import org.ops4j.pax.exam.spi.reactors.PerClass;
 public class EnterpriseFeaturesTest extends KarafTestSupport {
 
     @Test
-    public void installTransactionFeature() throws Exception {
-        installAssertAndUninstallFeatures("transaction");
+    public void installTransaction100Feature() throws Exception {
+        installAssertAndUninstallFeature("transaction", "1.0.0");
     }
 
     @Test
-    public void installJpaFeature() throws Exception {
-    	installAssertAndUninstallFeatures("jpa");
+    public void installTransaction101Feature() throws Exception {
+        installAssertAndUninstallFeature("transaction", "1.0.1");
     }
 
     @Test
-    public void installOpenJpaFeature() throws Exception {
-        installAssertAndUninstallFeatures("openjpa");
+    public void installTransaction110Feature() throws Exception {
+        installAssertAndUninstallFeature("transaction", "1.1.0");
     }
 
     @Test
-    public void installHibernateFeature() throws Exception {
-        installAssertAndUninstallFeatures("hibernate");
+    public void installConnector222Feature() throws Exception {
+        installAssertAndUninstallFeature("connector", "2.2.2");
     }
 
     @Test
-    public void installHibernateEnversFeature() throws Exception {
-        installAssertAndUninstallFeatures("hibernate-envers");
+    public void installConnector311Feature() throws Exception {
+        installAssertAndUninstallFeature("connector", "3.1.1");
+    }
+
+    @Test
+    public void installJpa101Feature() throws Exception {
+    	installAssertAndUninstallFeature("jpa", "1.0.1");
+    }
+
+    @Test
+    public void installJpa102Feature() throws Exception {
+        installAssertAndUninstallFeature("jpa", "1.0.2");
+    }
+
+    @Test
+    public void installOpenJpa222Feature() throws Exception {
+        installAssertAndUninstallFeature("openjpa", "2.2.2");
+    }
+
+    @Test
+    public void installOpenJpa230Feature() throws Exception {
+        installAssertAndUninstallFeature("openjpa", "2.3.0");
+    }
+
+    @Test
+    public void installHibernate332GAFeature() throws Exception {
+        installAssertAndUninstallFeature("hibernate", "3.3.2.GA");
+    }
+
+    @Test
+    public void installHibernate4215FinalFeature() throws Exception {
+        installAssertAndUninstallFeature("hibernate", "4.2.15.Final");
+    }
+
+    @Test
+    public void installHibernateEnvers4215FinalFeature() throws Exception {
+        installAssertAndUninstallFeature("hibernate-envers", "4.2.15.Final");
+    }
+
+    @Test
+    public void installHibernate436FinalFeature() throws Exception {
+        installAssertAndUninstallFeature("hibernate", "4.3.6.Final");
+    }
+
+    @Test
+    public void installHibernateEnvers436FinalFeature() throws Exception {
+        installAssertAndUninstallFeature("hibernate-envers", "4.3.6.Final");
     }
 
     @Test
@@ -71,13 +115,11 @@ public class EnterpriseFeaturesTest extends KarafTestSupport {
     }
 
     @Test
-    @Ignore("Pax-cdi depends on scr feature [2.3,3.5) so it does not work with 4.0")
     public void installOpenWebBeansFeature() throws Exception {
         installAssertAndUninstallFeatures("openwebbeans");
     }
 
     @Test
-    @Ignore("Pax-cdi depends on scr feature [2.3,3.5) so it does not work with 4.0")
     public void installWeldFeature() throws Exception {
         installAssertAndUninstallFeatures("weld");
     }
