@@ -14,6 +14,7 @@
 package org.apache.karaf.itests.features;
 
 import org.apache.karaf.itests.KarafTestSupport;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -23,6 +24,27 @@ import org.ops4j.pax.exam.spi.reactors.PerClass;
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
 public class StandardFeaturesTest extends KarafTestSupport {
+
+    @Test
+    public void checkInstalledFeaturesBoot() throws Exception {
+        assertFeatureInstalled("wrap");
+        assertFeatureInstalled("aries-blueprint");
+        assertFeatureInstalled("shell");
+        assertFeatureInstalled("shell-compat");
+        assertFeatureInstalled("jaas");
+        assertFeatureInstalled("ssh");
+        assertFeatureInstalled("management");
+        assertFeatureInstalled("bundle");
+        assertFeatureInstalled("config");
+        assertFeatureInstalled("deployer");
+        assertFeatureInstalled("diagnostic");
+        assertFeatureInstalled("instance");
+        assertFeatureInstalled("kar");
+        assertFeatureInstalled("log");
+        assertFeatureInstalled("package");
+        assertFeatureInstalled("service");
+        assertFeatureInstalled("system");
+    }
 	
 	@Test
 	/**
@@ -32,6 +54,16 @@ public class StandardFeaturesTest extends KarafTestSupport {
 	public void checkInteractionOfHttpAndAriesAnnotationFeature() throws Exception {
 		installAssertAndUninstallFeatures("aries-annotation", "pax-http");
 		installAssertAndUninstallFeatures("pax-http", "aries-annotation");
+    }
+
+    @Test
+    @Ignore("Waiting for KARAF-3181")
+    public void installFrameworkSecurityFeature() throws Exception {
+        installAssertAndUninstallFeatures("framework-security");
+    }
+
+    public void installServiceSecurityFeature() throws Exception {
+        installAssertAndUninstallFeatures("service-security");
     }
 
     @Test
@@ -55,16 +87,6 @@ public class StandardFeaturesTest extends KarafTestSupport {
     }
 
     @Test
-    public void installConfigFeature() throws Exception {
-        installAssertAndUninstallFeatures("config");
-    }
-    
-    @Test
-    public void installPackageFeature() throws Exception {
-        installAssertAndUninstallFeatures("package");
-    }
-
-    @Test
     public void installHttpFeature() throws Exception {
         installAssertAndUninstallFeatures("http");
     }
@@ -78,25 +100,15 @@ public class StandardFeaturesTest extends KarafTestSupport {
     public void installWarFeature() throws Exception {
         installAssertAndUninstallFeatures("war");
     }
-    
+
     @Test
-    public void installKarFeature() throws Exception {
-        installAssertAndUninstallFeatures("kar");
+    public void installJettyFeature() throws Exception {
+        installAssertAndUninstallFeatures("jetty");
     }
 
     @Test
     public void installWebConsoleFeature() throws Exception {
         installAssertAndUninstallFeatures("webconsole");
-    }
-
-    @Test
-    public void installSSHFeature() throws Exception {
-        installAssertAndUninstallFeatures("ssh");
-    }
-    
-    @Test
-    public void installManagementFeature() throws Exception {
-        installAssertAndUninstallFeatures("management");
     }
     
     @Test
