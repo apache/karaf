@@ -200,6 +200,10 @@
             <artifactId>org.apache.karaf.webconsole.gogo</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.apache.karaf.services</groupId>
+            <artifactId>org.apache.karaf.services.eventadmin</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.osgi</groupId>
             <artifactId>spring-osgi-extender</artifactId>
         </dependency>

@@ -252,7 +252,11 @@
     </feature>
 
     <feature name="eventadmin" description="OSGi Event Admin service specification for event-based communication" version="${project.version}">
-		<bundle start-level='30'>mvn:org.apache.felix/org.apache.felix.eventadmin/${felix.eventadmin.version}</bundle>
+        <config name="org.apache.felix.eventadmin.impl.EventAdmin">
+            org.apache.felix.eventadmin.AddTimestamp=true
+            org.apache.felix.eventadmin.AddSubject=true
+        </config>
+		<bundle start-level='30'>mvn:org.apache.karaf.services/org.apache.karaf.services.eventadmin/${project.version}</bundle>
     </feature>
 
     <feature name="jasypt-encryption" description="Advanced encryption support for Karaf security" version="${project.version}" resolver="(obr)">
