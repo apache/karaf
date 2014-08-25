@@ -25,15 +25,7 @@ import org.ops4j.pax.exam.spi.reactors.PerMethod;
 @ExamReactorStrategy(PerMethod.class)
 public class Spring3FeaturesTest extends KarafTestSupport {
 
-    @Test
-    public void installSpringFeature() throws Exception {
-        installAssertAndUninstallFeature("spring", System.getProperty("spring32.version"));
-    }
-
-    @Test
-    public void installSpringAspectsFeature() throws Exception {
-        installAssertAndUninstallFeature("spring-aspects", System.getProperty("spring32.version"));
-    }
+    // Spring DM
 
     @Test
     public void installSpringDmFeature() throws Exception {
@@ -43,6 +35,80 @@ public class Spring3FeaturesTest extends KarafTestSupport {
     @Test
     public void installSpringDmWebFeature() throws Exception {
         installAssertAndUninstallFeatures("spring-dm-web");
+    }
+
+    // Spring 3.1.x
+
+    @Test
+    public void installSpring31Feature() throws Exception {
+        installAssertAndUninstallFeature("spring", System.getProperty("spring31.version"));
+    }
+
+    @Test
+    public void installSpringAspects31Feature() throws Exception {
+        installAssertAndUninstallFeature("spring-aspects", System.getProperty("spring31.version"));
+    }
+
+    @Test
+    public void installSpringInstrument31Feature() throws Exception {
+        installAssertAndUninstallFeature("spring-instrument", System.getProperty("spring31.version"));
+    }
+
+    @Test
+    public void installSpringJdbc31Feature() throws Exception {
+        installAssertAndUninstallFeature("spring-jdbc", System.getProperty("spring31.version"));
+    }
+
+    @Test
+    public void installSpringJms31Feature() throws Exception {
+        installAssertAndUninstallFeature("spring-jms", System.getProperty("spring31.version"));
+    }
+
+    @Test
+    public void installSpringStruts31Feature() throws Exception {
+        installAssertAndUninstallFeature("spring-struts", System.getProperty("spring31.version"));
+    }
+
+    @Test
+    public void installSpringTest31Feature() throws Exception {
+        installAssertAndUninstallFeature("spring-test", System.getProperty("spring31.version"));
+    }
+
+    @Test
+    public void installSpringOrm31Feature() throws Exception {
+        installAssertAndUninstallFeature("spring-orm", System.getProperty("spring31.version"));
+    }
+
+    @Test
+    public void installSpringOxm31Feature() throws Exception {
+        installAssertAndUninstallFeature("spring-oxm", System.getProperty("spring31.version"));
+    }
+
+    @Test
+    public void installSpringTx31Feature() throws Exception {
+        installAssertAndUninstallFeature("spring-tx", System.getProperty("spring31.version"));
+    }
+
+    @Test
+    public void installSpringWeb31Feature() throws Exception {
+        installAssertAndUninstallFeature("spring-web", System.getProperty("spring31.version"));
+    }
+
+    @Test
+    public void installSpringWebPortlet31Feature() throws Exception {
+        installAssertAndUninstallFeature("spring-web-portlet", System.getProperty("spring31.version"));
+    }
+
+    // Spring 3.2.x
+
+    @Test
+    public void installSpringFeature() throws Exception {
+        installAssertAndUninstallFeature("spring", System.getProperty("spring32.version"));
+    }
+
+    @Test
+    public void installSpringAspectsFeature() throws Exception {
+        installAssertAndUninstallFeature("spring-aspects", System.getProperty("spring32.version"));
     }
 
     @Test
@@ -71,7 +137,6 @@ public class Spring3FeaturesTest extends KarafTestSupport {
     }
 
     @Test
-    @Ignore
     public void installSpringOrmFeature() throws Exception {
         installAssertAndUninstallFeature("spring-orm", System.getProperty("spring32.version"));
     }
@@ -87,27 +152,27 @@ public class Spring3FeaturesTest extends KarafTestSupport {
     }
 
     @Test
-    @Ignore
     public void installSpringWebFeature() throws Exception {
         installAssertAndUninstallFeature("spring-web", System.getProperty("spring32.version"));
     }
 
     @Test
-    @Ignore
     public void installSpringWebPortletFeature() throws Exception {
         installAssertAndUninstallFeature("spring-web-portlet", System.getProperty("spring32.version"));
     }
+
+    // Spring Security
 
     @Test
     public void installSpringSecurityFeature() throws Exception {
         installAssertAndUninstallFeatures("spring-security");
     }
 
+    // Gemini
+
     @Test
     public void installGeminiBlueprintFeature() throws Exception {
         installAssertAndUninstallFeatures("gemini-blueprint");
     }
-
-    // TODO add combined/all Spring features installation tests
 
 }
