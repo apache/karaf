@@ -19,14 +19,22 @@
 package org.apache.felix.eventadmin.impl;
 
 
-import java.util.*;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.StringTokenizer;
 
-import org.apache.felix.eventadmin.impl.adapter.*;
+import org.apache.felix.eventadmin.impl.adapter.AbstractAdapter;
+import org.apache.felix.eventadmin.impl.adapter.BundleEventAdapter;
+import org.apache.felix.eventadmin.impl.adapter.FrameworkEventAdapter;
+import org.apache.felix.eventadmin.impl.adapter.LogEventAdapter;
+import org.apache.felix.eventadmin.impl.adapter.ServiceEventAdapter;
 import org.apache.felix.eventadmin.impl.handler.EventAdminImpl;
 import org.apache.felix.eventadmin.impl.security.SecureEventAdminFactory;
 import org.apache.felix.eventadmin.impl.tasks.DefaultThreadPool;
 import org.apache.felix.eventadmin.impl.util.LogWrapper;
-import org.osgi.framework.*;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.event.EventAdmin;
@@ -165,7 +173,7 @@ public class Configuration
                     interfaceNames = new String[] {ManagedService.class.getName(), MetaTypeProvider.class.getName()};
                     service = enhancedService;
                 }
-                Dictionary props = new Hashtable();
+                Dictionary<String, Object> props = new Hashtable<String, Object>();
                 props.put( Constants.SERVICE_PID, PID );
                 m_managedServiceReg = m_bundleContext.registerService( interfaceNames, service, props );
             }
@@ -176,13 +184,14 @@ public class Configuration
         }
     }
 
-    void updateFromConfigAdmin(final Dictionary config)
+    void updateFromConfigAdmin(final Dictionary<String, ?> config)
     {
         // do this in the background as we don't want to stop
         // the config admin
         new Thread()
         {
 
+            @Override
             public void run()
             {
                 synchronized ( Configuration.this )
@@ -199,7 +208,7 @@ public class Configuration
     /**
      * Configures this instance.
      */
-    void configure( Dictionary config )
+    void configure( Dictionary<String, ?> config )
     {
         if ( config == null )
         {
@@ -428,7 +437,7 @@ public class Configuration
         {
             return new ManagedService()
             {
-                public void updated( Dictionary properties ) throws ConfigurationException
+                public void updated( Dictionary<String, ?> properties ) throws ConfigurationException
                 {
                     updateFromConfigAdmin(properties);
                 }
