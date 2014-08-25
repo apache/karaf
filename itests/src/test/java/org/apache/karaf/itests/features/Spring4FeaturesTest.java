@@ -74,6 +74,14 @@ public class Spring4FeaturesTest extends KarafTestSupport {
         installAssertAndUninstallFeature("spring-web", System.getProperty("spring40.version"));
     }
 
-    // TODO add combined/all Spring features installation tests
+    @Test
+    public void installSpringWebPortletFeature() throws Exception {
+        installAssertAndUninstallFeature("spring-web-portlet", System.getProperty("spring40.version"));
+    }
+
+    @Test
+    public void installSpringWebSocketFeature() throws Exception {
+        installAssertAndUninstallFeature("spring-websocket", System.getProperty("spring40.version"));
+    }
 
 }
