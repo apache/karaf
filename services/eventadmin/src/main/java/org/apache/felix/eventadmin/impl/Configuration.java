@@ -107,6 +107,7 @@ public class Configuration
     static final String PROP_TIMEOUT = "org.apache.felix.eventadmin.Timeout";
     static final String PROP_REQUIRE_TOPIC = "org.apache.felix.eventadmin.RequireTopic";
     static final String PROP_IGNORE_TIMEOUT = "org.apache.felix.eventadmin.IgnoreTimeout";
+    static final String PROP_IGNORE_TOPIC = "org.apache.felix.eventadmin.IgnoreTopic";
     static final String PROP_LOG_LEVEL = "org.apache.felix.eventadmin.LogLevel";
     static final String PROP_ADD_TIMESTAMP = "org.apache.felix.eventadmin.AddTimestamp";
     static final String PROP_ADD_SUBJECT = "org.apache.felix.eventadmin.AddSubject";
@@ -121,6 +122,8 @@ public class Configuration
     private boolean m_requireTopic;
 
     private String[] m_ignoreTimeout;
+
+    private String[] m_ignoreTopics;
 
     private int m_logLevel;
 
@@ -250,6 +253,21 @@ public class Configuration
                     m_ignoreTimeout[i] = st.nextToken();
                 }
             }
+
+            final String valueIgnoreTopic = m_bundleContext.getProperty(PROP_IGNORE_TOPIC);
+            if ( valueIgnoreTopic == null )
+            {
+                m_ignoreTopics = null;
+            }
+            else
+            {
+                final StringTokenizer st = new StringTokenizer(valueIgnoreTopic, ",");
+                m_ignoreTopics = new String[st.countTokens()];
+                for(int i=0; i<m_ignoreTopics.length; i++)
+                {
+                    m_ignoreTopics[i] = st.nextToken();
+                }
+            }
             m_logLevel = getIntProperty(PROP_LOG_LEVEL,
                     m_bundleContext.getProperty(PROP_LOG_LEVEL),
                     LogWrapper.LOG_WARNING, // default log level is WARNING
@@ -278,6 +296,21 @@ public class Configuration
             {
                 LogWrapper.getLogger().log(LogWrapper.LOG_WARNING,
                         "Value for property: " + PROP_IGNORE_TIMEOUT + " is neither a string nor a string array - Using default");
+            }
+            m_ignoreTopics = null;
+            final Object valueIT = config.get(PROP_IGNORE_TOPIC);
+            if ( valueIT instanceof String )
+            {
+                m_ignoreTopics = new String[] {(String)valueIT};
+            }
+            else if ( valueIT instanceof String[] )
+            {
+                m_ignoreTopics = (String[])valueIT;
+            }
+            else
+            {
+                LogWrapper.getLogger().log(LogWrapper.LOG_WARNING,
+                        "Value for property: " + PROP_IGNORE_TOPIC + " is neither a string nor a string array - Using default");
             }
             m_logLevel = getIntProperty(PROP_LOG_LEVEL,
                     config.get(PROP_LOG_LEVEL),
@@ -337,6 +370,7 @@ public class Configuration
                     m_timeout,
                     m_ignoreTimeout,
                     m_requireTopic,
+                    m_ignoreTopics,
                     m_addTimestamp,
                     m_addSubject);
 
@@ -351,7 +385,7 @@ public class Configuration
         }
         else
         {
-            m_admin.update(m_timeout, m_ignoreTimeout, m_requireTopic, m_addTimestamp, m_addSubject);
+            m_admin.update(m_timeout, m_ignoreTimeout, m_requireTopic, m_ignoreTopics, m_addTimestamp, m_addSubject);
         }
 
     }
@@ -422,7 +456,7 @@ public class Configuration
         {
             return new MetaTypeProviderImpl((ManagedService)managedService,
                     m_threadPoolSize, m_timeout, m_requireTopic,
-                    m_ignoreTimeout);
+                    m_ignoreTimeout, m_ignoreTopics);
         }
         catch (final Throwable t)
         {

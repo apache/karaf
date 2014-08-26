@@ -23,6 +23,7 @@ import java.util.HashMap;
 
 import javax.security.auth.Subject;
 
+import org.apache.felix.eventadmin.impl.handler.EventHandlerTracker.Matcher;
 import org.apache.felix.eventadmin.impl.tasks.AsyncDeliverTasks;
 import org.apache.felix.eventadmin.impl.tasks.DefaultThreadPool;
 import org.apache.felix.eventadmin.impl.tasks.SyncDeliverTasks;
@@ -55,6 +56,9 @@ public class EventAdminImpl implements EventAdmin
     // The synchronous event dispatcher
     private final SyncDeliverTasks m_sendManager;
 
+    // matchers for ignore topics
+    private Matcher[] m_ignoreTopics;
+
     private boolean addTimestamp;
     private boolean addSubject;
 
@@ -71,6 +75,7 @@ public class EventAdminImpl implements EventAdmin
             final int timeout,
             final String[] ignoreTimeout,
             final boolean requireTopic,
+            final String[] ignoreTopics,
             final boolean addTimestamp,
             final boolean addSubject)
     {
@@ -84,6 +89,7 @@ public class EventAdminImpl implements EventAdmin
         this.tracker.open();
         m_sendManager = new SyncDeliverTasks(syncPool, timeout);
         m_postManager = new AsyncDeliverTasks(asyncPool, m_sendManager);
+        m_ignoreTopics = EventHandlerTracker.createMatchers(ignoreTopics);
     }
 
     /**
@@ -100,17 +106,23 @@ public class EventAdminImpl implements EventAdmin
     }
 
     /**
-     * Post an asynchronous event.
-     *
-     * @param event The event to be posted by this service
-     *
-     * @throws IllegalStateException - In case we are stopped
-     *
-     * @see org.osgi.service.event.EventAdmin#postEvent(org.osgi.service.event.Event)
+     * Check whether the topic should be delivered at all
      */
-    public void postEvent(final Event event)
+    private boolean checkTopic( final Event event )
     {
-        m_postManager.execute(this.getTracker().getHandlers(event), prepareEvent(event));
+        boolean result = true;
+        if ( this.m_ignoreTopics != null )
+        {
+            for(final Matcher m : this.m_ignoreTopics)
+            {
+                if ( m.match(event.getTopic()) )
+                {
+                    result = false;
+                    break;
+                }
+            }
+        }
+        return result;
     }
 
     static final String SUBJECT = "subject";
@@ -143,6 +155,23 @@ public class EventAdminImpl implements EventAdmin
     }
 
     /**
+     * Post an asynchronous event.
+     *
+     * @param event The event to be posted by this service
+     *
+     * @throws IllegalStateException - In case we are stopped
+     *
+     * @see org.osgi.service.event.EventAdmin#postEvent(org.osgi.service.event.Event)
+     */
+    public void postEvent(final Event event)
+    {
+        if ( checkTopic( event ) )
+        {
+            m_postManager.execute(this.getTracker().getHandlers(event), prepareEvent(event));
+        }
+    }
+
+    /**
      * Send a synchronous event.
      *
      * @param event The event to be send by this service
@@ -153,7 +182,10 @@ public class EventAdminImpl implements EventAdmin
      */
     public void sendEvent(final Event event)
     {
-        m_sendManager.execute(this.getTracker().getHandlers(event), prepareEvent(event), false);
+        if ( checkTopic( event ) )
+        {
+            m_sendManager.execute(this.getTracker().getHandlers(event), prepareEvent(event), false);
+        }
     }
 
     /**
@@ -171,6 +203,7 @@ public class EventAdminImpl implements EventAdmin
     public void update(final int timeout,
                        final String[] ignoreTimeout,
                        final boolean requireTopic,
+                       final String[] ignoreTopics,
                        final boolean addTimestamp,
                        final boolean addSubject)
     {
@@ -180,6 +213,7 @@ public class EventAdminImpl implements EventAdmin
         this.tracker.update(ignoreTimeout, requireTopic);
         this.m_sendManager.update(timeout);
         this.tracker.open();
+        this.m_ignoreTopics = EventHandlerTracker.createMatchers(ignoreTopics);
     }
 
     /**
