@@ -234,6 +234,11 @@
     </properties>
 
     <repositories>
+		<!-- temporary until eventadmin 1.4.0 is available on central -->
+		<repository>
+			<id>apache-public</id>
+			<url>https://repository.apache.org/content/groups/public/</url>
+		</repository>
         <!-- ServiceMix repo -->
         <repository>
             <id>servicemix</id>
