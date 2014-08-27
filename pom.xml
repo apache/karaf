@@ -116,7 +116,7 @@
         <bndlib.version>2.3.0</bndlib.version>
         <cglib.bundle.version>3.0_1</cglib.bundle.version>
         <cglib2.version>2.2.0</cglib2.version>
-        <commons-beanutils.version>1.9.1</commons-beanutils.version>
+        <commons-beanutils.version>1.9.2</commons-beanutils.version>
         <commons-codec.version>1.9</commons-codec.version>
         <commons-collections.version>3.2.1</commons-collections.version>
         <commons-compress.version>1.6</commons-compress.version>
@@ -233,11 +233,6 @@
     </properties>
 
     <repositories>
-		<!-- temporary until eventadmin 1.4.0 is available on central -->
-		<repository>
-			<id>apache-public</id>
-			<url>https://repository.apache.org/content/groups/public/</url>
-		</repository>
         <!-- ServiceMix repo -->
         <repository>
             <id>servicemix</id>
