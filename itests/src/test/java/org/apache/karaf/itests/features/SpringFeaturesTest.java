@@ -60,10 +60,6 @@ public class SpringFeaturesTest extends KarafTestSupport {
         installAssertAndUninstallFeature("spring-jms");
     }
 
-    /**
-     * Ignore this itest waiting for KARAF-3178
-     */
-    @Ignore
     @Test
     public void installSpringStrutsFeature() throws Exception {
         installAssertAndUninstallFeature("spring-struts");
@@ -95,7 +91,6 @@ public class SpringFeaturesTest extends KarafTestSupport {
     }
 
     @Test
-    @Ignore
     public void installSpringWebPortletFeature() throws Exception {
         installAssertAndUninstallFeature("spring-web-portlet");
     }
@@ -106,7 +101,6 @@ public class SpringFeaturesTest extends KarafTestSupport {
     }
 
     @Test
-    @Ignore
     public void installGeminiBlueprintFeature() throws Exception {
         installAssertAndUninstallFeature("gemini-blueprint");
     }
