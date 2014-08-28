@@ -34,7 +34,11 @@ import java.security.Principal;
 import java.util.*;
 import java.util.regex.Pattern;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 public class KarafMBeanServerGuard implements InvocationHandler {
+
+    private static final Logger LOG = LoggerFactory.getLogger(KarafMBeanServerGuard.class);    
 
     private static final String JMX_ACL_PID_PREFIX = "jmx.acl";
     
@@ -195,8 +199,9 @@ public class KarafMBeanServerGuard implements InvocationHandler {
                 prefix = attr.isIs() ? "is" : "get";
             }
         }
-        if (prefix == null)
-            throw new IllegalStateException("Attribute " + attributeName + " can not be found");
+        if (prefix == null) {
+            LOG.debug("Attribute " + attributeName + " can not be found for MBean " + objectName.toString());
+        }
 
         handleInvoke(objectName, prefix + attributeName, new Object[]{}, new String[]{});
     }
