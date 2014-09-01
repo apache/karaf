@@ -19,20 +19,12 @@
 -->
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
            xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.0.0"
-           xmlns:ext="http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.0.0"
            default-activation="lazy">
-
-    <ext:property-placeholder placeholder-prefix="$[" placeholder-suffix="]">
-        <ext:default-properties>
-            <ext:property name="karaf.admin.role" value="admin" />
-        </ext:default-properties>
-    </ext:property-placeholder>
-
 
     <cm:property-placeholder persistent-id="org.apache.karaf.webconsole">
         <cm:default-properties>
             <cm:property name="realm" value="karaf"/>
-            <cm:property name="role" value="$[karaf.admin.role]"/>
+            <cm:property name="role" value="admin"/>
         </cm:default-properties>
     </cm:property-placeholder>
 
