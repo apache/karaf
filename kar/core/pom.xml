@@ -43,6 +43,10 @@
             <artifactId>org.apache.felix.utils</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.apache.karaf.util</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
             <scope>provided</scope>
@@ -99,7 +103,8 @@
                         </Export-Package>
                         <Private-Package>
                             org.apache.karaf.kar.internal,
-                            org.apache.felix.utils.properties
+                            org.apache.felix.utils.properties,
+                            org.apache.karaf.util.maven
                         </Private-Package>
                     </instructions>
                 </configuration>

@@ -226,7 +226,7 @@
         <pax.exam.version>4.1.0</pax.exam.version>
         <pax.logging.version>1.7.3</pax.logging.version>
         <pax.base.version>1.4.0</pax.base.version>
-        <pax.url.version>1.6.0</pax.url.version>
+        <pax.url.version>2.1.0</pax.url.version>
         <pax.web.version>3.1.2-SNAPSHOT</pax.web.version>
         <pax.swissbox.version>1.7.0</pax.swissbox.version>
         <pax.tinybundle.version>2.0.0</pax.tinybundle.version>
@@ -1330,11 +1330,13 @@
                 <groupId>org.ops4j.pax.url</groupId>
                 <artifactId>pax-url-obr</artifactId>
                 <version>${pax.url.version}</version>
+                <classifier>uber</classifier>
             </dependency>
             <dependency>
                 <groupId>org.ops4j.pax.url</groupId>
                 <artifactId>pax-url-war</artifactId>
                 <version>${pax.url.version}</version>
+                <classifier>uber</classifier>
             </dependency>
 
             <dependency>
@@ -1342,11 +1344,7 @@
                 <artifactId>ops4j-base-lang</artifactId>
                 <version>${pax.base.version}</version>
             </dependency>
-            <dependency>
-                <groupId>org.ops4j.pax.url</groupId>
-                <artifactId>pax-url-maven-commons</artifactId>
-                <version>${pax.url.version}</version>
-            </dependency>
+
             <dependency>
                 <groupId>org.ops4j.pax.url</groupId>
                 <artifactId>pax-url-aether</artifactId>
@@ -1406,6 +1404,7 @@
                 <groupId>org.ops4j.pax.url</groupId>
                 <artifactId>pax-url-wrap</artifactId>
                 <version>${pax.url.version}</version>
+                <classifier>uber</classifier>
             </dependency>
             <dependency>
                 <groupId>${servlet.spec.groupId}</groupId>
