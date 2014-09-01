@@ -465,12 +465,6 @@ public class Console implements Runnable
                 {
                     try
                     {
-                        while (in.available() == 0) {
-                            if (!running) {
-                                return;
-                            }
-                            Thread.sleep(50);
-                        }
                         int c = in.read();
                         if (c == -1)
                         {
