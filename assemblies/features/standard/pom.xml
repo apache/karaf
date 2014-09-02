@@ -147,16 +147,6 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.ops4j.pax.swissbox</groupId>
-            <artifactId>pax-swissbox-lifecycle</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.ops4j.pax.swissbox</groupId>
-            <artifactId>pax-swissbox-tracker</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>org.ops4j.pax.url</groupId>
             <artifactId>pax-url-obr</artifactId>
             <classifier>uber</classifier>
@@ -268,16 +258,6 @@
         <dependency>
             <groupId>org.ops4j.pax.url</groupId>
             <artifactId>pax-url-commons</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.ops4j.pax.swissbox</groupId>
-            <artifactId>pax-swissbox-bnd</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.ops4j.pax.swissbox</groupId>
-            <artifactId>pax-swissbox-property</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>

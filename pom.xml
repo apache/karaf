@@ -234,7 +234,6 @@
         <pax.base.version>1.4.0</pax.base.version>
         <pax.url.version>2.1.0</pax.url.version>
         <pax.web.version>4.0.0-SNAPSHOT</pax.web.version>
-        <pax.swissbox.version>1.7.0</pax.swissbox.version>
         <pax.tinybundle.version>2.0.0</pax.tinybundle.version>
         <portlet-api.version>2.0</portlet-api.version>
         <slf4j.version>1.7.7</slf4j.version>
@@ -1281,27 +1280,6 @@
                         <artifactId>log4j</artifactId>
                     </exclusion>
                 </exclusions>
-            </dependency>
-
-            <dependency>
-                <groupId>org.ops4j.pax.swissbox</groupId>
-                <artifactId>pax-swissbox-bnd</artifactId>
-                <version>${pax.swissbox.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.ops4j.pax.swissbox</groupId>
-                <artifactId>pax-swissbox-lifecycle</artifactId>
-                <version>${pax.swissbox.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.ops4j.pax.swissbox</groupId>
-                <artifactId>pax-swissbox-property</artifactId>
-                <version>${pax.swissbox.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.ops4j.pax.swissbox</groupId>
-                <artifactId>pax-swissbox-tracker</artifactId>
-                <version>${pax.swissbox.version}</version>
             </dependency>
 
             <dependency>

@@ -60,10 +60,6 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.ops4j.pax.swissbox</groupId>
-            <artifactId>pax-swissbox-property</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.apache.karaf.features</groupId>
             <artifactId>org.apache.karaf.features.command</artifactId>
             <scope>provided</scope>
