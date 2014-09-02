@@ -14,6 +14,41 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+                    Apache Karaf 2.3.7
+                    ==================
+
+  Overview
+  --------
+
+  This is an update patch for Apache Karaf 2.3.6, containing many bug fixes, dependency updates, and improvements. New features include SyncopeLoginModule, and improved documentation for exposing JAAS BackendEngineFactory services for the login module and configfile override behavoir. This patch contains a high priority bug fix for Windows users experiencing console input issues. For more information on changes present in this patch, please read the below changelog.
+
+  Changelog
+  ---------
+
+** Bug
+ * [KARAF-2981|https://issues.apache.org/jira/browse/KARAF-2981] - Karaf shutdown hangs in SshServer.stop()
+ * [KARAF-3093|https://issues.apache.org/jira/browse/KARAF-3093] - ops4j repositories (release/snapshot) break pax-url resolution
+ * [KARAF-3149|https://issues.apache.org/jira/browse/KARAF-3149] - Karaf chooseurl for jclouds is wrong
+ * [KARAF-3154|https://issues.apache.org/jira/browse/KARAF-3154] - Feature repo org.ops4j.pax.cdi-0.7.0 contains broken feature
+ * [KARAF-3158|https://issues.apache.org/jira/browse/KARAF-3158] - Incorrect javax.annotation version for java7
+ * [KARAF-3180|https://issues.apache.org/jira/browse/KARAF-3180] - openwebbeans feature doesn't install
+ * [KARAF-3196|https://issues.apache.org/jira/browse/KARAF-3196] - Export sun.misc package from the system bundle
+ * [KARAF-3197|https://issues.apache.org/jira/browse/KARAF-3197] - Can't type anything in the console on Windows platform
+
+** Dependency upgrade
+ * [KARAF-2932|https://issues.apache.org/jira/browse/KARAF-2932] - Upgrade to Felix WebConsole 4.2.2
+ * [KARAF-3156|https://issues.apache.org/jira/browse/KARAF-3156] - Upgrade to Pax CDI 0.8.0
+ * [KARAF-3182|https://issues.apache.org/jira/browse/KARAF-3182] - Upgrade to Felix EventAdmin 1.4.0
+ * [KARAF-3183|https://issues.apache.org/jira/browse/KARAF-3183] - Upgrade to bndlib 2.3.0
+
+** Documentation
+ * [KARAF-3167|https://issues.apache.org/jira/browse/KARAF-3167] - Document the configfile override behaviour
+
+** Improvement
+ * [KARAF-3164|https://issues.apache.org/jira/browse/KARAF-3164] - Document exposing JAAS BackendEngineFactory services for the login module
+ * [KARAF-3166|https://issues.apache.org/jira/browse/KARAF-3166] - Add SyncopeLoginModule (including backend)
+
  
                     Apache Karaf 2.3.6
                     ==================
