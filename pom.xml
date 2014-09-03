@@ -1111,27 +1111,6 @@
 
             <dependency>
                 <groupId>org.ops4j.pax.swissbox</groupId>
-                <artifactId>pax-swissbox-bnd</artifactId>
-                <version>${pax.swissbox.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.ops4j.pax.swissbox</groupId>
-                <artifactId>pax-swissbox-lifecycle</artifactId>
-                <version>${pax.swissbox.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.ops4j.pax.swissbox</groupId>
-                <artifactId>pax-swissbox-property</artifactId>
-                <version>${pax.swissbox.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.ops4j.pax.swissbox</groupId>
-                <artifactId>pax-swissbox-tracker</artifactId>
-                <version>${pax.swissbox.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.ops4j.pax.swissbox</groupId>
                 <artifactId>pax-swissbox-tinybundles</artifactId>
                 <version>${pax.tinybundles.version}</version>
             </dependency>
