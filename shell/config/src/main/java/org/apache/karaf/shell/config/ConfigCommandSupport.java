@@ -235,9 +235,6 @@ public abstract class ConfigCommandSupport extends OsgiCommandSupport {
                 cfg = admin.createFactoryConfiguration(pids[0], null);
             }
         }
-        if (cfg.getBundleLocation() != null) {
-            cfg.setBundleLocation(null);
-        }
         cfg.update(props);
     }
 

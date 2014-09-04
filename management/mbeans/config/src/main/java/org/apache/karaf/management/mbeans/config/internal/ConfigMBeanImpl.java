@@ -260,9 +260,6 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
                     cfg = configurationAdmin.createFactoryConfiguration(pids[0], null);
                 }
             }
-            if (cfg.getBundleLocation() != null) {
-                cfg.setBundleLocation(null);
-            }
             cfg.update(properties);
         }
     }
