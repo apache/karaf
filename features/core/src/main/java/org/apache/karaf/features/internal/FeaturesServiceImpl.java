@@ -618,9 +618,6 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
 				cfg = createConfiguration(configAdmin, pid[0], pid[1]);
 				String key = createConfigurationKey(pid[0], pid[1]);
 				cfgProps.put(CONFIG_KEY, key);
-				if (cfg.getBundleLocation() != null) {
-					cfg.setBundleLocation(null);
-				}
 				cfg.update(cfgProps);
 			} else if (config.isAppend()) {
 				Dictionary<String, Object> properties = cfg.getProperties();
