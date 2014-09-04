@@ -460,11 +460,18 @@ public class Console implements Runnable
     {
         public void run()
         {
+            boolean useAvailable = !System.getProperty("os.name").toLowerCase().contains("windows");
             try {
                 while (running)
                 {
                     try
                     {
+                        while (useAvailable && in.available() == 0) {
+                            if (!running) {
+                                return;
+                            }
+                            Thread.sleep(50);
+                        }
                         int c = in.read();
                         if (c == -1)
                         {
