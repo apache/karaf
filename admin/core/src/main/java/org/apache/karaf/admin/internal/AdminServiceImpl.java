@@ -891,7 +891,7 @@ public class AdminServiceImpl implements AdminService {
     private void copyResourceToDir(File target, String resource, boolean text, Map<String, URL> resources) throws IOException {
         File outFile = new File(target, resource);
         if( !outFile.exists() ) {
-            println(Ansi.ansi().a("Creating file: ").a(Ansi.Attribute.INTENSITY_BOLD).a(outFile.getPath()).a(Ansi.Attribute.RESET).toString());
+            LOGGER.debug("Creating file: {}", outFile.getPath());
             InputStream is = resources.containsKey(resource) ? resources.remove(resource).openStream() : getClass().getClassLoader().getResourceAsStream("org/apache/karaf/admin/" + resource);
             try {
                 if( text ) {
@@ -969,7 +969,7 @@ public class AdminServiceImpl implements AdminService {
     private void copyFilteredResourceToDir(String resource, File target, Map<String, URL> resources, HashMap<String, String> props) throws IOException {
         File outFile = new File(target, resource);
         if( !outFile.exists() ) {
-            println(Ansi.ansi().a("Creating file: ").a(Ansi.Attribute.INTENSITY_BOLD).a(outFile.getPath()).a(Ansi.Attribute.RESET).toString());
+            LOGGER.debug("Creating file: {}", outFile.getPath());
             InputStream is = resources.containsKey(resource) ? resources.remove(resource).openStream() : getClass().getClassLoader().getResourceAsStream("org/apache/karaf/admin/" + resource);
             copyAndFilterResource(is, new FileOutputStream(outFile), props);
         }
@@ -1029,7 +1029,7 @@ public class AdminServiceImpl implements AdminService {
     private void mkdir(File karafBase, String path) {
         File file = new File(karafBase, path);
         if( !file.exists() ) {
-            println(Ansi.ansi().a("Creating dir:  ").a(Ansi.Attribute.INTENSITY_BOLD).a(file.getPath()).a(Ansi.Attribute.RESET).toString());
+            LOGGER.debug("Creating dir: {}", file.getPath());
             file.mkdirs();
         }
     }
