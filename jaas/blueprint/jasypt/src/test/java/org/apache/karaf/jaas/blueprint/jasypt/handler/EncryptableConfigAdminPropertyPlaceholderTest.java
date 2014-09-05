@@ -115,14 +115,13 @@ public class EncryptableConfigAdminPropertyPlaceholderTest extends TestCase {
         configAdmin = getOsgiService(ConfigurationAdmin.class);
         assertNotNull(configAdmin);
 
-        Configuration config = configAdmin.createFactoryConfiguration("encrypt.config");
+        Configuration config = configAdmin.createFactoryConfiguration("encrypt.config", null);
         Dictionary props = new Properties();
 
         // Encrypt a key/value
         // bar is encrypted and link to foo key
         encryptedValue = enc.encrypt("bar");
         props.put("foo", encryptedValue);
-        config.setBundleLocation(null);
         config.update(props);
 
         Configuration[] configs = configAdmin.listConfigurations(null);

@@ -42,9 +42,6 @@ public class ConfigRepositoryImpl implements ConfigRepository {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public void update(String pid, Dictionary props) throws IOException {
         Configuration cfg = this.configAdmin.getConfiguration(pid, null);
-        if (cfg.getBundleLocation() != null) {
-            cfg.setBundleLocation(null);
-        }
         cfg.update(props);
     }
 
