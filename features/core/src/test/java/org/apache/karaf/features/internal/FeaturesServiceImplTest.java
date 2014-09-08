@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.LinkedList;
@@ -160,6 +161,10 @@ public class FeaturesServiceImplTest extends TestCase {
                 // this method will be invoked twice while features service is starting
                 latch.countDown();
             }
+            @Override
+            protected Set<Bundle> findBundlesToRefresh() {
+                return Collections.emptySet();
+            }
         };
         impl.setBundleContext(bundleContext);
 
@@ -213,6 +218,11 @@ public class FeaturesServiceImplTest extends TestCase {
                 replay(bundle);
                 return new InstallResult(false, bundle, 0);
             }
+
+            @Override
+            protected Set<Bundle> findBundlesToRefresh() {
+                return Collections.emptySet();
+            }
         };
         impl.addRepository(getClass().getResource("repo2.xml").toURI());
 
@@ -229,15 +239,4 @@ public class FeaturesServiceImplTest extends TestCase {
         }
     }
 
-    public void testGetOptionalImportsOnly() {
-        FeaturesServiceImpl service = new FeaturesServiceImpl();
-
-        List<Clause> result = service.getOptionalImports("org.apache.karaf,org.apache.karaf.optional;resolution:=optional");
-        assertEquals("One optional import expected", 1, result.size());
-        assertEquals("org.apache.karaf.optional", result.get(0).getName());
-
-        result = service.getOptionalImports(null);
-        assertNotNull(result);
-        assertEquals("No optional imports expected", 0, result.size());
-    }
 }

@@ -47,17 +47,18 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 
-import org.apache.felix.utils.collections.MapToDictionary;
-import org.apache.felix.utils.manifest.Clause;
-import org.apache.felix.utils.manifest.Parser;
 import org.apache.felix.utils.version.VersionRange;
 import org.apache.felix.utils.version.VersionTable;
 import org.apache.karaf.features.BundleInfo;
@@ -81,7 +82,13 @@ import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.Version;
+import org.osgi.framework.namespace.PackageNamespace;
 import org.osgi.framework.startlevel.BundleStartLevel;
+import org.osgi.framework.wiring.BundleCapability;
+import org.osgi.framework.wiring.BundleRequirement;
+import org.osgi.framework.wiring.BundleRevision;
+import org.osgi.framework.wiring.BundleWire;
+import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.framework.wiring.FrameworkWiring;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -98,7 +105,7 @@ import static java.util.jar.JarFile.MANIFEST_NAME;
  * create dummy sub shells.  When invoked, these commands will prompt the user for
  * installing the needed bundles.
  */
-public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
+public class FeaturesServiceImpl implements FeaturesService {
 
     public static final String CONFIG_KEY = "org.apache.karaf.features.configKey";
 
@@ -121,8 +128,6 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
     private List<FeaturesListener> listeners = new CopyOnWriteArrayIdentityList<FeaturesListener>();
     private ThreadLocal<Repository> repo = new ThreadLocal<Repository>();
     private EventAdminListener eventAdminListener;
-    private final Object refreshLock = new Object();
-    private long refreshTimeout = 5000;
 
     public FeaturesServiceImpl() {
     }
@@ -153,14 +158,6 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
 
     public void setResolverTimeout(long resolverTimeout) {
         this.resolverTimeout = resolverTimeout;
-    }
-
-    public long getRefreshTimeout() {
-        return refreshTimeout;
-    }
-
-    public void setRefreshTimeout(long refreshTimeout) {
-        this.refreshTimeout = refreshTimeout;
     }
 
     public void registerListener(FeaturesListener listener) {
@@ -396,7 +393,33 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         installFeatures(Collections.singleton(f), options);
     }
 
-    public void installFeatures(Set<Feature> features, EnumSet<Option> options) throws Exception {
+    public void installFeatures(final Set<Feature> features, final EnumSet<Option> options) throws Exception {
+        ExecutorService executor = Executors.newCachedThreadPool();
+        try {
+            executor.submit(new Callable<Object>() {
+                @Override
+                public Object call() throws Exception {
+                    doInstallFeatures(features, options);
+                    return null;
+                }
+            }).get();
+        } catch (ExecutionException e) {
+            Throwable t = e.getCause();
+            if (t instanceof RuntimeException) {
+                throw (RuntimeException) t;
+            } else if (t instanceof Error) {
+                throw (Error) t;
+            } else if (t instanceof Exception) {
+                throw (Exception) t;
+            } else {
+                throw e;
+            }
+        } finally {
+            executor.shutdown();
+        }
+    }
+
+    protected void doInstallFeatures(Set<Feature> features, EnumSet<Option> options) throws Exception {
         final InstallationState state = new InstallationState();
         final InstallationState failure = new InstallationState();
         boolean verbose = options.contains(FeaturesService.Option.Verbose);
@@ -435,7 +458,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
             boolean print = options.contains(Option.PrintBundlesToRefresh);
             boolean refresh = !options.contains(Option.NoAutoRefreshBundles);
             if (print || refresh) {
-                bundlesToRefresh = findBundlesToRefresh(state);
+                bundlesToRefresh = findBundlesToRefresh();
                 StringBuilder sb = new StringBuilder();
                 for (Bundle b : bundlesToRefresh) {
                     if (sb.length() > 0) {
@@ -713,34 +736,37 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         }
     }
 
-    protected Set<Bundle> findBundlesToRefresh(InstallationState state) {
-        Set<Bundle> bundles = new HashSet<Bundle>();
-        bundles.addAll(findBundlesWithOptionalPackagesToRefresh(state));
-        bundles.addAll(findBundlesWithFragmentsToRefresh(state));
-        return bundles;
+    protected Set<Bundle> findBundlesToRefresh() {
+        Set<Bundle> toRefresh = new HashSet<Bundle>();
+        Set<Bundle> bundles = new HashSet<Bundle>(Arrays.asList(bundleContext.getBundles()));
+        findBundlesWithOptionalPackagesToRefresh(bundles, toRefresh);
+        findBundlesWithFragmentsToRefresh(bundles, toRefresh);
+        return toRefresh;
     }
 
-    protected Set<Bundle> findBundlesWithFragmentsToRefresh(InstallationState state) {
-        Set<Bundle> bundles = new HashSet<Bundle>();
-        Set<Bundle> oldBundles = new HashSet<Bundle>(state.bundles);
-        oldBundles.removeAll(state.installed);
-        if (!oldBundles.isEmpty()) {
-            for (Bundle b : state.installed) {
-                String hostHeader = (String) b.getHeaders().get(Constants.FRAGMENT_HOST);
-                if (hostHeader != null) {
-                    Clause[] clauses = Parser.parseHeader(hostHeader);
-                    if (clauses != null && clauses.length > 0) {
-                        Clause path = clauses[0];
-                        for (Bundle hostBundle : oldBundles) {
-                            if (hostBundle.getSymbolicName().equals(path.getName())) {
-                                String ver = path.getAttribute(Constants.BUNDLE_VERSION_ATTRIBUTE);
-                                if (ver != null) {
-                                    VersionRange v = VersionRange.parseVersionRange(ver);
-                                    if (v.contains(hostBundle.getVersion())) {
-                                        bundles.add(hostBundle);
+    protected void findBundlesWithFragmentsToRefresh(Collection<Bundle> allBundles, Set<Bundle> toRefresh) {
+        if (toRefresh.isEmpty()) {
+            return;
+        }
+        Set<Bundle> bundles = new HashSet<Bundle>(allBundles);
+        bundles.removeAll(toRefresh);
+        if (bundles.isEmpty()) {
+            return;
+        }
+        for (Bundle bundle : new ArrayList<Bundle>(toRefresh)) {
+            BundleRevision rev = bundle.adapt(BundleRevision.class);
+            if (rev != null) {
+                for (BundleRequirement req : rev.getDeclaredRequirements(null)) {
+                    if (BundleRevision.HOST_NAMESPACE.equals(req.getNamespace())) {
+                        for (Bundle hostBundle : bundles) {
+                            if (!toRefresh.contains(hostBundle)) {
+                                BundleRevision hostRev = hostBundle.adapt(BundleRevision.class);
+                                if (hostRev != null) {
+                                    for (BundleCapability cap : hostRev.getDeclaredCapabilities(null)) {
+                                        if (req.matches(cap)) {
+                                            toRefresh.add(hostBundle);
+                                        }
                                     }
-                                } else {
-                                    bundles.add(hostBundle);
                                 }
                             }
                         }
@@ -748,90 +774,66 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
                 }
             }
         }
-        return bundles;
     }
 
-    protected Set<Bundle> findBundlesWithOptionalPackagesToRefresh(InstallationState state) {
+    protected void findBundlesWithOptionalPackagesToRefresh(Collection<Bundle> allBundles, Set<Bundle> toRefresh) {
         // First pass: include all bundles contained in these features
-        Set<Bundle> bundles = new HashSet<Bundle>(state.bundles);
-        bundles.removeAll(state.installed);
+        if (toRefresh.isEmpty()) {
+            return;
+        }
+        Set<Bundle> bundles = new HashSet<Bundle>(allBundles);
+        bundles.removeAll(toRefresh);
         if (bundles.isEmpty()) {
-            return bundles;
+            return;
         }
         // Second pass: for each bundle, check if there is any unresolved optional package that could be resolved
-        Map<Bundle, List<Clause>> imports = new HashMap<Bundle, List<Clause>>();
-        for (Iterator<Bundle> it = bundles.iterator(); it.hasNext(); ) {
-            Bundle b = it.next();
-            String importsStr = (String) b.getHeaders().get(Constants.IMPORT_PACKAGE);
-            List<Clause> importsList = getOptionalImports(importsStr);
-            if (importsList.isEmpty()) {
-                it.remove();
-            } else {
-                imports.put(b, importsList);
-            }
+        for (Bundle bundle : bundles) {
+            matchBundleWithOptionalImport(bundle, toRefresh);
         }
-        if (bundles.isEmpty()) {
-            return bundles;
-        }
-        // Third pass: compute a list of packages that are exported by our bundles and see if
-        //             some exported packages can be wired to the optional imports
-        List<Clause> exports = new ArrayList<Clause>();
-        for (Bundle b : state.installed) {
-            String exportsStr = (String) b.getHeaders().get(Constants.EXPORT_PACKAGE);
-            if (exportsStr != null) {
-                Clause[] exportsList = Parser.parseHeader(exportsStr);
-                exports.addAll(Arrays.asList(exportsList));
-            }
-        }
-        for (Iterator<Bundle> it = bundles.iterator(); it.hasNext(); ) {
-            Bundle b = it.next();
-            List<Clause> importsList = imports.get(b);
-            for (Iterator<Clause> itpi = importsList.iterator(); itpi.hasNext(); ) {
-                Clause pi = itpi.next();
-                boolean matching = false;
-                for (Clause pe : exports) {
-                    if (pi.getName().equals(pe.getName())) {
-                        String evStr = pe.getAttribute(Constants.VERSION_ATTRIBUTE);
-                        String ivStr = pi.getAttribute(Constants.VERSION_ATTRIBUTE);
-                        Version exported = evStr != null ? Version.parseVersion(evStr) : Version.emptyVersion;
-                        VersionRange imported = ivStr != null ? VersionRange.parseVersionRange(ivStr) : VersionRange.ANY_VERSION;
-                        if (imported.contains(exported)) {
-                            matching = true;
+    }
+
+    private void matchBundleWithOptionalImport(Bundle bundle, Set<Bundle> toRefresh) {
+        BundleRevision revision = bundle.adapt(BundleRevision.class);
+        for (BundleRequirement req : revision.getDeclaredRequirements(PackageNamespace.PACKAGE_NAMESPACE)) {
+            if (PackageNamespace.RESOLUTION_OPTIONAL.equals(req.getDirectives().get(PackageNamespace.REQUIREMENT_RESOLUTION_DIRECTIVE))) {
+
+                // Find the wire for this optional package import
+                BundleWiring wiring = bundle.adapt(BundleWiring.class);
+                BundleWire reqwire = null;
+                if (wiring != null) {
+                    for (BundleWire wire : wiring.getRequiredWires(PackageNamespace.PACKAGE_NAMESPACE)) {
+                        if (req.equals(wire.getRequirement())) {
+                            BundleCapability cap = wire.getCapability();
+                            BundleRevision provider = wire.getProvider();
+                            LOGGER.debug("Optional requirement {} from {} wires to capability {} provided by {}", req, bundle, cap, provider);
+                            reqwire = wire;
                             break;
                         }
                     }
                 }
-                if (!matching) {
-                    itpi.remove();
+
+                // If the requirement is already wired we don't need to do anything
+                // the refresh algorithm will compute the transitive graph of refresh candidates
+                if (reqwire == null) {
+
+                    // Compute the set of possible providers
+                    for (Bundle provider : toRefresh) {
+                        BundleRevision providerRev = provider.adapt(BundleRevision.class);
+                        if (providerRev != null) {
+                            for (BundleCapability cap : providerRev.getDeclaredCapabilities(PackageNamespace.PACKAGE_NAMESPACE)) {
+                                if (req.matches(cap)) {
+                                    LOGGER.info("Found possible provider for unwired optional requirement {} from {}: {}", req, bundle, provider);
+                                    toRefresh.add(bundle);
+                                    return;
+                                }
+                            }
+                        }
+                    }
                 }
             }
-            if (importsList.isEmpty()) {
-                it.remove();
-            } else {
-                LOGGER.debug("Refeshing bundle {} ({}) to solve the following optional imports", b.getSymbolicName(), b.getBundleId());
-                for (Clause p : importsList) {
-                    LOGGER.debug("    {}", p);
-                }
-
-            }
         }
-        return bundles;
     }
 
-    /*
-     * Get the list of optional imports from an OSGi Import-Package string
-     */
-    protected List<Clause> getOptionalImports(String importsStr) {
-        Clause[] imports = Parser.parseHeader(importsStr);
-        List<Clause> result = new LinkedList<Clause>();
-        for (int i = 0; i < imports.length; i++) {
-            String resolution = imports[i].getDirective(Constants.RESOLUTION_DIRECTIVE);
-            if (Constants.RESOLUTION_OPTIONAL.equals(resolution)) {
-                result.add(imports[i]);
-            }
-        }
-        return result;
-    }
 
     protected static class InstallResult {
 
@@ -1050,7 +1052,10 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
 
         //Also remove bundles installed as conditionals
         for (Conditional conditional : feature.getConditional()) {
-            bundles.addAll(installed.remove(conditional.asFeature(feature.getName(),feature.getVersion())));
+            Set<Long> ids = installed.remove(conditional.asFeature(feature.getName(), feature.getVersion()));
+            if (ids != null) {
+                bundles.addAll(ids);
+            }
         }
 
         for (Set<Long> b : installed.values()) {
@@ -1168,8 +1173,6 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
     }
 
     public void start() throws Exception {
-        // Register FrameworkEventListener
-        bundleContext.addFrameworkListener(this);
         // Register EventAdmin listener
         EventAdminListener listener = null;
         try {
@@ -1294,17 +1297,8 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
     }
 
     public void stop() throws Exception {
-        bundleContext.removeFrameworkListener(this);
         while (!repositories.isEmpty()) {
             internalRemoveRepository(repositories.keySet().iterator().next());
-        }
-    }
-
-    public void frameworkEvent(FrameworkEvent event) {
-        if (event.getType() == FrameworkEvent.PACKAGES_REFRESHED) {
-            synchronized (refreshLock) {
-                refreshLock.notifyAll();
-            }
         }
     }
 
