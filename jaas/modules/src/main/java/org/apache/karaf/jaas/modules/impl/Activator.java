@@ -104,6 +104,10 @@ public class Activator extends BaseActivator implements ManagedService {
         populate(config, ENCRYPTION_ALGORITHM, "MD5");
         populate(config, ENCRYPTION_ENCODING, "hexadecimal");
         populate(config, EVENTADMIN_ENABLED, "true");
+        populate(config, "audit.file.enabled", "true");
+        populate(config, "audit.file.file", System.getProperty("karaf.data") + "/security/audit.log");
+        populate(config, "audit.eventadmin.enabled", "true");
+        populate(config, "audit.eventadmin.topic", "org/apache/karaf/login");
         config.put(BundleContext.class.getName(), bundleContext);
         return config;
     }

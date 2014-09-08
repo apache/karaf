@@ -28,9 +28,10 @@ public class KarafRealm implements JaasRealm {
 
     private static final String KARAF_ETC = System.getProperty("karaf.etc");
     private static final String REALM = "karaf";
-    private static final String EVENTADMIN_MODULE = "org.apache.karaf.jaas.modules.eventadmin.EventAdminLoginModule";
     private static final String PROPERTIES_MODULE = "org.apache.karaf.jaas.modules.properties.PropertiesLoginModule";
     private static final String PUBLIC_KEY_MODULE = "org.apache.karaf.jaas.modules.publickey.PublickeyLoginModule";
+    private static final String FILE_AUDIT_MODULE = "org.apache.karaf.jaas.modules.audit.FileAuditLoginModule";
+    private static final String EVENTADMIN_AUDIT_MODULE = "org.apache.karaf.jaas.modules.audit.EventAdminAuditLoginModule";
 
     private static final String MODULE = "org.apache.karaf.jaas.module";
 
@@ -72,16 +73,23 @@ public class KarafRealm implements JaasRealm {
         publicKeyOptions.put(ProxyLoginModule.PROPERTY_BUNDLE, Long.toString(bundleContext.getBundle().getBundleId()));
         publicKeyOptions.put("users", KARAF_ETC + File.separatorChar + "keys.properties");
 
+        Map<String, Object> fileOptions = new HashMap<>();
+        fileOptions.putAll(properties);
+        fileOptions.put(BundleContext.class.getName(), bundleContext);
+        fileOptions.put(ProxyLoginModule.PROPERTY_MODULE, FILE_AUDIT_MODULE);
+        fileOptions.put(ProxyLoginModule.PROPERTY_BUNDLE, Long.toString(bundleContext.getBundle().getBundleId()));
+
         Map<String, Object> eventadminOptions = new HashMap<>();
         eventadminOptions.putAll(properties);
         eventadminOptions.put(BundleContext.class.getName(), bundleContext);
-        eventadminOptions.put(ProxyLoginModule.PROPERTY_MODULE, EVENTADMIN_MODULE);
+        eventadminOptions.put(ProxyLoginModule.PROPERTY_MODULE, EVENTADMIN_AUDIT_MODULE);
         eventadminOptions.put(ProxyLoginModule.PROPERTY_BUNDLE, Long.toString(bundleContext.getBundle().getBundleId()));
 
         return new AppConfigurationEntry[] {
-                new AppConfigurationEntry(ProxyLoginModule.class.getName(), AppConfigurationEntry.LoginModuleControlFlag.OPTIONAL, eventadminOptions),
-                new AppConfigurationEntry(ProxyLoginModule.class.getName(), AppConfigurationEntry.LoginModuleControlFlag.SUFFICIENT, propertiesOptions),
-                new AppConfigurationEntry(ProxyLoginModule.class.getName(), AppConfigurationEntry.LoginModuleControlFlag.SUFFICIENT, publicKeyOptions)
+                new AppConfigurationEntry(ProxyLoginModule.class.getName(), AppConfigurationEntry.LoginModuleControlFlag.OPTIONAL, propertiesOptions),
+                new AppConfigurationEntry(ProxyLoginModule.class.getName(), AppConfigurationEntry.LoginModuleControlFlag.OPTIONAL, publicKeyOptions),
+                new AppConfigurationEntry(ProxyLoginModule.class.getName(), AppConfigurationEntry.LoginModuleControlFlag.OPTIONAL, fileOptions),
+                new AppConfigurationEntry(ProxyLoginModule.class.getName(), AppConfigurationEntry.LoginModuleControlFlag.OPTIONAL, eventadminOptions)
         };
     }
 
