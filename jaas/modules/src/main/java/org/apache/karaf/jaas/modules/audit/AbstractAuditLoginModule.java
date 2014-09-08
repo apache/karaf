@@ -32,12 +32,14 @@ public abstract class AbstractAuditLoginModule implements LoginModule {
         LOGOUT
     }
 
+    protected Subject subject;
     private CallbackHandler handler;
     private String username;
     private boolean enabled;
 
     public void initialize(Subject subject, CallbackHandler callbackHandler,
                            Map sharedState, Map options) {
+        this.subject = subject;
         enabled = Boolean.parseBoolean((String) options.get("enabled"));
         handler = callbackHandler;
     }

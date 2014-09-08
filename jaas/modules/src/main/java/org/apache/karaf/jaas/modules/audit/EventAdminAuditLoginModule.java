@@ -52,7 +52,7 @@ public class EventAdminAuditLoginModule extends AbstractAuditLoginModule {
     @Override
     protected void audit(Action action, String user) {
         try {
-            EventAdminAuditor.audit(bundleContext, topic + action.toString().toUpperCase(), user);
+            EventAdminAuditor.audit(bundleContext, topic + action.toString().toUpperCase(), user, subject);
         } catch (Throwable t) {
             if (!errorLogged) {
                 errorLogged = true;
@@ -62,14 +62,17 @@ public class EventAdminAuditLoginModule extends AbstractAuditLoginModule {
     }
 
     static class EventAdminAuditor {
-        public static void audit(BundleContext bundleContext, String topic, String user) {
+        public static void audit(BundleContext bundleContext, String topic, String username, Subject subject) {
             ServiceReference<EventAdmin> ref = bundleContext.getServiceReference(EventAdmin.class);
             if (ref != null) {
                 EventAdmin eventAdmin = bundleContext.getService(ref);
                 try {
                     Map<String, Object> props = new HashMap<String, Object>();
                     Event event = new Event(topic, props);
-                    props.put("username", user);
+                    props.put("type", topic.substring(topic.lastIndexOf("/") + 1).toLowerCase());
+                    props.put("timestamp", System.currentTimeMillis());
+                    props.put("username", username);
+                    props.put("subject", subject);
                     eventAdmin.postEvent(event);
                 } finally {
                     bundleContext.ungetService(ref);
