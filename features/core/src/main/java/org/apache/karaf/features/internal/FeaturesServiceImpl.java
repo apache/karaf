@@ -430,15 +430,19 @@ public class FeaturesServiceImpl implements FeaturesService {
                 InstallationState s = new InstallationState();
                 try {
                     doInstallFeature(s, f, verbose);
-                    doInstallFeatureConditionals(s, f, verbose);
-                    //Check if current feature satisfies the conditionals of existing features
-                    for (Feature installedFeature : listInstalledFeatures()) {
-                        doInstallFeatureConditionals(s, installedFeature, verbose);
-                    }
-                    for (Feature installedFeature : state.features.keySet()) {
-                        doInstallFeatureConditionals(s, installedFeature, verbose);
-                    }
 
+                    Set<Feature> installed = new HashSet<Feature>();
+                    installed.addAll(this.installed.keySet());
+                    installed.addAll(s.features.keySet());
+                    installed.addAll(state.features.keySet());
+                    installed.add(f);
+                    for (Feature feature : installed) {
+                        for (Conditional conditional : feature.getConditional()) {
+                            if (dependenciesSatisfied(conditional.getCondition(), installed)) {
+                                doInstallFeature(state, conditional.asFeature(feature.getName(), feature.getVersion()), verbose);
+                            }
+                        }
+                    }
                     state.bundleInfos.putAll(s.bundleInfos);
                     state.bundles.addAll(s.bundles);
                     state.features.putAll(s.features);
@@ -677,15 +681,6 @@ public class FeaturesServiceImpl implements FeaturesService {
             }
         }
         state.features.put(feature, bundles);
-    }
-
-    private void doInstallFeatureConditionals(InstallationState state, Feature feature, boolean verbose) throws Exception {
-        for (Conditional conditional : feature.getConditional()) {
-            if (dependenciesSatisfied(conditional.getCondition(), state)) {
-                doInstallFeature(state, conditional.asFeature(feature.getName(), feature.getVersion()), verbose);
-            }
-        }
-
     }
 
 	private Dictionary<String, String> convertToDict(Map<String, String> props) {
@@ -1050,11 +1045,25 @@ public class FeaturesServiceImpl implements FeaturesService {
         // This gives this list of bundles to uninstall.
         Set<Long> bundles = installed.remove(feature);
 
-        //Also remove bundles installed as conditionals
+        // Also remove bundles installed as conditionals
         for (Conditional conditional : feature.getConditional()) {
             Set<Long> ids = installed.remove(conditional.asFeature(feature.getName(), feature.getVersion()));
             if (ids != null) {
                 bundles.addAll(ids);
+            }
+        }
+        // Verify all other conditionals
+        for (Feature dep : new ArrayList<Feature>(installed.keySet())) {
+            Feature f = getFeature(dep.getName(), dep.getVersion());
+            if (f != null) {
+                for (Conditional conditional : f.getConditional()) {
+                    if (!dependenciesSatisfied(conditional.getCondition(), installed.keySet())) {
+                        Set<Long> ids = installed.remove(conditional.asFeature(f.getName(), f.getVersion()));
+                        if (ids != null) {
+                            bundles.addAll(ids);
+                        }
+                    }
+                }
             }
         }
 
@@ -1582,16 +1591,16 @@ public class FeaturesServiceImpl implements FeaturesService {
 
     /**
      * Estimates if the {@link List} of dependencies is satisfied.
-     * The method will look into {@link Feature}s that are already installed or now being installed (if {@link InstallationState} is provided (not null)).
+     * The method will look into {@link Feature}s that are already installed or now being installed.
      * @param dependencies
-     * @param state
+     * @param installed
      * @return
      */
-    private boolean dependenciesSatisfied(List<Feature> dependencies, InstallationState state) throws Exception {
+    private boolean dependenciesSatisfied(List<Feature> dependencies, Set<Feature> installed) throws Exception {
        boolean satisfied = true;
        for (Feature dep : dependencies) {
            Feature f = getFeature(dep.getName(), dep.getVersion());
-           if (f != null && !isInstalled(f) && (state != null && !state.features.keySet().contains(f))) {
+           if (f != null && !installed.contains(f)) {
                satisfied = false;
            }
        }
