@@ -134,6 +134,7 @@
                             javax.net,
                             org.apache.karaf.jaas.config,
                             org.apache.aries.blueprint.ext,
+                            org.osgi.service.event;resolution:=optional,
                             !net.sf.ehcache*,
                             !net.spy.memcached*,
                             *

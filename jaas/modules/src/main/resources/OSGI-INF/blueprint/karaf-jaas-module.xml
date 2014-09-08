@@ -39,11 +39,15 @@
             <cm:property name="encryption.suffix" value="{CRYPT}"/>
             <cm:property name="encryption.algorithm" value="MD5"/>
             <cm:property name="encryption.encoding" value="hexadecimal"/>
+            <cm:property name="audit.file.enabled" value="true"/>
+            <cm:property name="audit.file.file" value="$[karaf.data]/security/audit.log"/>
+            <cm:property name="audit.eventadmin.enabled" value="true"/>
+            <cm:property name="audit.eventadmin.topic" value="org/apache/karaf/login"/>
         </cm:default-properties>
     </cm:property-placeholder>
 
     <jaas:config name="karaf">
-        <jaas:module className="org.apache.karaf.jaas.modules.properties.PropertiesLoginModule" flags="sufficient">
+        <jaas:module className="org.apache.karaf.jaas.modules.properties.PropertiesLoginModule" flags="optional">
             users = $[karaf.etc]/users.properties
             detailed.login.exception = ${detailed.login.exception}
             encryption.name = ${encryption.name}
@@ -53,9 +57,17 @@
             encryption.algorithm = ${encryption.algorithm}
             encryption.encoding = ${encryption.encoding}
         </jaas:module>
-        <jaas:module className="org.apache.karaf.jaas.modules.publickey.PublickeyLoginModule" flags="sufficient">
+        <jaas:module className="org.apache.karaf.jaas.modules.publickey.PublickeyLoginModule" flags="optional">
             users = $[karaf.etc]/keys.properties
             detailed.login.exception = ${detailed.login.exception}
+        </jaas:module>
+        <jaas:module className="org.apache.karaf.jaas.modules.audit.FileAuditLoginModule" flags="optional">
+            enabled = ${audit.file.enabled}
+            file = ${audit.file.file}
+        </jaas:module>
+        <jaas:module className="org.apache.karaf.jaas.modules.audit.EventAdminAuditLoginModule" flags="optional">
+            enabled = ${audit.eventadmin.enabled}
+            topic = ${audit.eventadmin.topic}
         </jaas:module>
     </jaas:config>
 
