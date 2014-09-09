@@ -19,17 +19,14 @@ package org.apache.karaf.diagnostic.command;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
 
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 import org.apache.felix.gogo.commands.Option;
+import org.apache.karaf.diagnostic.core.Dump;
 import org.apache.karaf.diagnostic.core.DumpDestination;
-import org.apache.karaf.diagnostic.core.DumpProvider;
-import org.apache.karaf.diagnostic.core.common.DirectoryDumpDestination;
-import org.apache.karaf.diagnostic.core.common.ZipDumpDestination;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
+import org.osgi.framework.BundleContext;
 
 /**
  * Command to create dump from shell.
@@ -38,9 +35,9 @@ import org.apache.karaf.shell.console.OsgiCommandSupport;
 public class DumpCommand extends OsgiCommandSupport {
 
     /**
-     * Registered dump providers.
+     * Bundle Context
      */
-    private List<DumpProvider> providers = new LinkedList<DumpProvider>();
+    private BundleContext bundleContext;
 
     /**
      * Output format of the filename if not defined otherwise
@@ -63,11 +60,6 @@ public class DumpCommand extends OsgiCommandSupport {
     protected Object doExecute() throws Exception {
         DumpDestination destination;
 
-        if (providers.isEmpty()) {
-            session.getConsole().println("Unable to create dump. No providers were found");
-            return null;
-        }
-
         // create default file name if none provided
         if (fileName == null || fileName.trim().length() == 0) {
             fileName = dumpFormat.format(new Date());
@@ -79,26 +71,18 @@ public class DumpCommand extends OsgiCommandSupport {
 
         // if directory switch is on, create dump in directory
         if (directory) {
-            destination = new DirectoryDumpDestination(target);
+            destination = Dump.directory(target);
         } else {
-            destination = new ZipDumpDestination(target);
+            destination = Dump.zip(target);
         }
 
-        for (DumpProvider provider : providers) {
-            provider.createDump(destination);
-        }
-        destination.save();
+        Dump.dump(bundleContext, destination);
         session.getConsole().println("Diagnostic dump created.");
 
         return null;
     }
 
-    /**
-     * Sets dump providers to use.
-     * 
-     * @param providers Providers.
-     */
-    public void setProviders(List<DumpProvider> providers) {
-        this.providers = providers;
+    public void setBundleContext(BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
     }
 }

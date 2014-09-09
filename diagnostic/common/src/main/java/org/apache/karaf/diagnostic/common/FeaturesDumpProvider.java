@@ -17,11 +17,12 @@ package org.apache.karaf.diagnostic.common;
 
 import java.io.OutputStreamWriter;
 
-import org.apache.karaf.diagnostic.core.common.TextDumpProvider;
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 
 /**
  * Dump provider which add file named features.txt with informations
@@ -32,48 +33,56 @@ public class FeaturesDumpProvider extends TextDumpProvider {
     /**
      * Feature service.
      */
-    private final FeaturesService features;
+    private final BundleContext bundleContext;
 
     /**
      * Creates new dump entry witch contains information about
      * karaf features.
-     * 
-     * @param features Feature service.
      */
-    public FeaturesDumpProvider(FeaturesService features) {
+    public FeaturesDumpProvider(BundleContext bundleContext) {
         super("features.txt");
-        this.features = features;
+        this.bundleContext = bundleContext;
     }
 
     /**
      * {@inheritDoc}
      */
     protected void writeDump(OutputStreamWriter outputStreamWriter) throws Exception {
-        // creates header
-        outputStreamWriter.write("Repositories:\n");
-
-        // list repositories
-        for (Repository repo : features.listRepositories()) {
-            outputStreamWriter.write(repo.getURI() + " (" + repo.getName() + ")\n");
+        ServiceReference ref = bundleContext.getServiceReference(FeaturesService.class.getName());
+        if (ref == null) {
+            return;
         }
 
-        // list features
-        outputStreamWriter.write("\nfeatures:\n");
-        for (Feature feature : features.listFeatures()) {
-            outputStreamWriter.write(feature.getName() + " " + feature.getVersion());
-            outputStreamWriter.write(" installed: " + features.isInstalled(feature));
-            outputStreamWriter.write("\nBundles:\n");
-            for (BundleInfo bundle : feature.getBundles()) {
-                outputStreamWriter.write("\t" + bundle.getLocation());
-                if (bundle.getStartLevel() != 0) {
-                    outputStreamWriter.write(" start level " + bundle.getStartLevel());
-                }
-                outputStreamWriter.write("\n\n");
+        FeaturesService features = (FeaturesService) bundleContext.getService(ref);
+        try {
+            // creates header
+            outputStreamWriter.write("Repositories:\n");
+
+            // list repositories
+            for (Repository repo : features.listRepositories()) {
+                outputStreamWriter.write(repo.getURI() + " (" + repo.getName() + ")\n");
             }
-        }
 
-        // flush & close stream
-        outputStreamWriter.close();
+            // list features
+            outputStreamWriter.write("\nfeatures:\n");
+            for (Feature feature : features.listFeatures()) {
+                outputStreamWriter.write(feature.getName() + " " + feature.getVersion());
+                outputStreamWriter.write(" installed: " + features.isInstalled(feature));
+                outputStreamWriter.write("\nBundles:\n");
+                for (BundleInfo bundle : feature.getBundles()) {
+                    outputStreamWriter.write("\t" + bundle.getLocation());
+                    if (bundle.getStartLevel() != 0) {
+                        outputStreamWriter.write(" start level " + bundle.getStartLevel());
+                    }
+                    outputStreamWriter.write("\n\n");
+                }
+            }
+
+            // flush & close stream
+            outputStreamWriter.close();
+        } finally {
+            bundleContext.ungetService(ref);
+        }
     }
 
 }

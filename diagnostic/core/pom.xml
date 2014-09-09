@@ -37,6 +37,13 @@
         <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
     </properties>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+        </dependency>
+    </dependencies>
+
     <build>
         <resources>
             <resource>
@@ -60,12 +67,19 @@
                 <configuration>
                     <instructions>
                         <Export-Package>
-                        	${project.artifactId};version=${project.version},
-                        	${project.artifactId}.common;version=${project.version};-noimport:=true,
+                        	${project.artifactId};version=${project.version}
                        	</Export-Package>
                         <Import-Package>
                             *
                         </Import-Package>
+                        <Private-Package>
+                            org.apache.karaf.diagnostic.core.common,
+                            org.apache.karaf.diagnostic.core.internal,
+                            org.apache.karaf.diagnostic.core.providers
+                        </Private-Package>
+                        <Karaf-Activator>
+                            org.apache.karaf.diagnostic.core.internal.Activator
+                        </Karaf-Activator>
                     </instructions>
                 </configuration>
             </plugin>

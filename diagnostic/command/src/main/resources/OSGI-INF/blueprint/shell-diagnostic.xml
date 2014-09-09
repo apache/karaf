@@ -22,13 +22,9 @@
     <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.0.0">
         <command name="dev/create-dump">
             <action class="org.apache.karaf.diagnostic.command.DumpCommand">
-                <property name="providers" ref="providers"/>
+                <property name="bundleContext" ref="blueprintBundleContext"/>
             </action>
         </command>
     </command-bundle>
-
-    <reference-list id="providers" interface="org.apache.karaf.diagnostic.core.DumpProvider"
-        availability="optional">
-    </reference-list>
 
 </blueprint>

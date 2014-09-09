@@ -20,35 +20,13 @@
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" default-activation="lazy">
 
     <bean id="features" class="org.apache.karaf.diagnostic.common.FeaturesDumpProvider">
-        <argument>
-            <reference interface="org.apache.karaf.features.FeaturesService"
-                availability="optional" />
-        </argument>
+        <argument ref="blueprintBundleContext"/>
     </bean>
     <service ref="features" auto-export="interfaces" />
 
     <bean id="logs" class="org.apache.karaf.diagnostic.common.LogDumpProvider">
-        <property name="bundleContext" ref="blueprintBundleContext"/>
+        <argument ref="blueprintBundleContext"/>
     </bean>
     <service ref="logs" auto-export="interfaces" />
-
-    <bean id="bundles" class="org.apache.karaf.diagnostic.common.BundleDumpProvider">
-        <argument ref="blueprintBundleContext" />
-    </bean>
-    <service ref="bundles" auto-export="interfaces" />
-
-    <bean id="threads" class="org.apache.karaf.diagnostic.common.ThreadDumpProvider" />
-    <service ref="threads" auto-export="interfaces" />
-
-    <bean id="heapdump" class="org.apache.karaf.diagnostic.common.HeapDumpProvider" />
-    <service ref="heapdump" auto-export="interfaces" />
-
-    <bean id="memory" class="org.apache.karaf.diagnostic.common.MemoryDumpProvider" />
-    <service ref="memory" auto-export="interfaces" />
-
-    <bean id="environment" class="org.apache.karaf.diagnostic.common.EnvironmentDumpProvider" >
-        <argument ref="blueprintBundleContext" />
-    </bean>
-    <service ref="environment" auto-export="interfaces" />
 
 </blueprint>

@@ -108,6 +108,17 @@
 
     <dependencySets>
         <dependencySet>
+            <outputDirectory>/lib</outputDirectory>
+            <unpack>false</unpack>
+            <useProjectArtifact>false</useProjectArtifact>
+            <includes>
+                <include>org.apache.servicemix.specs:org.apache.servicemix.specs.activator</include>
+                <include>org.apache.servicemix.specs:org.apache.servicemix.specs.locator</include>
+                <include>org.apache.karaf.diagnostic:org.apache.karaf.diagnostic.core</include>
+            </includes>
+        </dependencySet>
+
+        <dependencySet>
             <outputDirectory>/lib/endorsed</outputDirectory>
             <unpack>false</unpack>
             <useProjectArtifact>false</useProjectArtifact>
@@ -218,7 +229,6 @@
                 org/apache/karaf/diagnostic/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}
             </outputFileNameMapping>
             <includes>
-                <include>org.apache.karaf.diagnostic:org.apache.karaf.diagnostic.core</include>
                 <include>org.apache.karaf.diagnostic:org.apache.karaf.diagnostic.common</include>
                 <include>org.apache.karaf.diagnostic:org.apache.karaf.diagnostic.command</include>
                 <include>org.apache.karaf.diagnostic:org.apache.karaf.diagnostic.management</include>

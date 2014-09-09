@@ -51,5 +51,9 @@ public class DirectoryDumpDestination implements DumpDestination {
 	public void save() throws Exception {
 		// do nothing, all should be written to output streams
 	}
-	
+
+    @Override
+    public String toString() {
+        return "directory: " + directory;
+    }
 }

@@ -14,13 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.diagnostic.common;
+package org.apache.karaf.diagnostic.core.providers;
 
 import com.sun.management.HotSpotDiagnosticMXBean;
 import org.apache.karaf.diagnostic.core.DumpDestination;
 import org.apache.karaf.diagnostic.core.DumpProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.management.MBeanServer;
 import java.io.File;
@@ -33,30 +31,25 @@ import java.lang.management.ManagementFactory;
  */
 public class HeapDumpProvider implements DumpProvider {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(HeapDumpProvider.class);
-
     public void createDump(DumpDestination destination) throws Exception {
+        File heapDumpFile = null;
         FileInputStream in = null;
         OutputStream out = null;
         try {
             MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
             HotSpotDiagnosticMXBean diagnosticMXBean = ManagementFactory.newPlatformMXBeanProxy(mBeanServer,
                     "com.sun.management:type=HotSpotDiagnostic", HotSpotDiagnosticMXBean.class);
-            diagnosticMXBean.dumpHeap("heapdump.txt", false);
+            heapDumpFile = File.createTempFile("heapdump", ".txt");
+            heapDumpFile.delete();
+            diagnosticMXBean.dumpHeap(heapDumpFile.getAbsolutePath(), false);
             // copy the dump in the destination
-            File heapDumpFile = new File("heapdump.txt");
             in = new FileInputStream(heapDumpFile);
             out = destination.add("heapdump.txt");
             byte[] buffer = new byte[2048];
-            while ((in.read(buffer) != -1)) {
-                out.write(buffer);
+            int l;
+            while (((l = in.read(buffer)) != -1)) {
+                out.write(buffer, 0, l);
             }
-            // remove the original dump
-            if (heapDumpFile.exists()) {
-                heapDumpFile.delete();
-            }
-        } catch (Exception e) {
-            LOGGER.warn("Can't create heapdump", e);
         } finally {
             if (in != null) {
                 in.close();
@@ -64,6 +57,10 @@ public class HeapDumpProvider implements DumpProvider {
             if (out != null) {
                 out.flush();
                 out.close();
+            }
+            // remove the original dump
+            if (heapDumpFile != null && heapDumpFile.exists()) {
+                heapDumpFile.delete();
             }
         }
     }

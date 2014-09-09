@@ -33,6 +33,7 @@ public class ZipDumpDestination implements DumpDestination {
      * Destination streem.
      */
     private ZipOutputStream outputStream;
+    private File file;
 
     /**
      * Creates new dump in given directory.
@@ -51,8 +52,8 @@ public class ZipDumpDestination implements DumpDestination {
      */
     public ZipDumpDestination(File file) {
         try {
-            outputStream = new ZipOutputStream(new FileOutputStream(
-                file));
+            this.file = file;
+            outputStream = new ZipOutputStream(new FileOutputStream( file));
         } catch (FileNotFoundException e) {
             // sometimes this can occur, but we simply re throw and let 
             // caller handle exception
@@ -76,4 +77,8 @@ public class ZipDumpDestination implements DumpDestination {
         outputStream.close();
     }
 
+    @Override
+    public String toString() {
+        return "zip: " + file;
+    }
 }

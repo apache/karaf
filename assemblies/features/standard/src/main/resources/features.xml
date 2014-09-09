@@ -85,7 +85,6 @@
 
     <feature name="diagnostic" description="Diagnostic support" version="${project.version}">
         <feature>aries-blueprint</feature>
-        <bundle start-level="30">mvn:org.apache.karaf.diagnostic/org.apache.karaf.diagnostic.core/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.diagnostic/org.apache.karaf.diagnostic.common/${project.version}</bundle>
         <conditional>
             <condition>shell</condition>

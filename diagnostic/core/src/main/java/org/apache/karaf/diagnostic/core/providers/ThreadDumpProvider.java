@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.apache.karaf.diagnostic.common;
+package org.apache.karaf.diagnostic.core.providers;
 
 import java.io.OutputStreamWriter;
 import java.lang.management.LockInfo;

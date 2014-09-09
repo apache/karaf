@@ -14,16 +14,14 @@
 package org.apache.karaf.diagnostic.management.internal;
 
 import java.io.File;
-import java.util.List;
 
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 
+import org.apache.karaf.diagnostic.core.Dump;
 import org.apache.karaf.diagnostic.core.DumpDestination;
-import org.apache.karaf.diagnostic.core.DumpProvider;
-import org.apache.karaf.diagnostic.core.common.DirectoryDumpDestination;
-import org.apache.karaf.diagnostic.core.common.ZipDumpDestination;
 import org.apache.karaf.diagnostic.management.DiagnosticDumpMBean;
+import org.osgi.framework.BundleContext;
 
 /**
  * Implementation of diagnostic mbean.
@@ -34,7 +32,7 @@ public class DiagnosticDumpMBeanImpl extends StandardMBean implements
     /**
      * Dump providers.
      */
-    private List<DumpProvider> providers;
+    private BundleContext bundleContext;
 
     /**
      * Creates new diagnostic mbean.
@@ -62,25 +60,18 @@ public class DiagnosticDumpMBeanImpl extends StandardMBean implements
 
         DumpDestination destination;
         if (directory) {
-            destination = new DirectoryDumpDestination(target);
+            destination = Dump.directory(target);
         } else {
-            destination = new ZipDumpDestination(target);
+            destination = Dump.zip(target);
         }
 
-        for (DumpProvider provider : providers) {
-            provider.createDump(destination);
-        }
-
-        destination.save();
+        Dump.dump(bundleContext, destination);
     }
 
     /**
-     * Sets dump providers.
-     * 
-     * @param providers Dump providers. 
+     * Sets the bundle context
      */
-    public void setProviders(List<DumpProvider> providers) {
-        this.providers = providers;
+    public void setBundleContext(BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
     }
-
 }
