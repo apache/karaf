@@ -59,7 +59,6 @@ public class ExtendedFeature implements Feature {
 
     @Override
     public List<ConfigInfo> getConfigurations() {
-//    public Map<String, Map<String, String>> getConfigurations() {
         return this.feature.getConfigurations();
     }
 
