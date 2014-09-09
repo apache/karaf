@@ -140,6 +140,7 @@ public class Config implements ConfigInfo{
 		} catch (IOException e) {
 			// ignore??
 		}
+		interpolation(props);
 		return props;
 	}
 
