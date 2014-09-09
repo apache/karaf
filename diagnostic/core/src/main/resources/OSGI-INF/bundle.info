@@ -1,0 +1,16 @@
+h1. Synopsis
+
+${project.name}
+
+${project.description}
+
+Maven URL:
+[mvn:${project.groupId}/${project.artifactId}/${project.version}]
+
+h1. Description
+
+The diagnostic core bundle contains the command and mbean for creating diagnostic dumps.
+
+h1. See also
+
+Diagnostic - section of the Karaf User Guide.

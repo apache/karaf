@@ -60,6 +60,11 @@
             <scope>runtime</scope>
         </dependency>
         <dependency>
+            <groupId>org.apache.karaf.diagnostic</groupId>
+            <artifactId>org.apache.karaf.diagnostic.boot</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse</groupId>
             <artifactId>osgi</artifactId>
             <scope>runtime</scope>
@@ -234,6 +239,11 @@
                                     <artifactId>org.apache.karaf.management.boot</artifactId>
                                     <outputDirectory>target/classes/resources/lib</outputDirectory>
                                     <destFileName>karaf-jmx-boot.jar</destFileName>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.apache.karaf.diagnostic</groupId>
+                                    <artifactId>org.apache.karaf.diagnostic.boot</artifactId>
+                                    <outputDirectory>target/classes/resources/lib</outputDirectory>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.apache.karaf</groupId>

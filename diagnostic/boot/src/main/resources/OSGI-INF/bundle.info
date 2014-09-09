@@ -1,0 +1,16 @@
+h1. Synopsis
+
+${project.name}
+
+${project.description}
+
+Maven URL:
+[mvn:${project.groupId}/${project.artifactId}/${project.version}]
+
+h1. Description
+
+The diagnostic boot bundle contains the core diagnostic implementation along with the signal handler.
+
+h1. See also
+
+Diagnostic - section of the Karaf User Guide.
