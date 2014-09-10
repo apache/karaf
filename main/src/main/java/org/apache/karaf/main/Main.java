@@ -1527,7 +1527,7 @@ public class Main {
                 File file = new File(karafEtc, CONFIG_PROPERTIES_FILE_NAME);
                 Writer writer = new FileWriter(file, true);
                 try {
-                    writer.write("\n#\n# Generated command shutdown\n,#\n"
+                    writer.write("\n\n#\n# Generated shutdown command\n#\n"
                             + KARAF_SHUTDOWN_COMMAND + " = " + shutdown + "\n");
                 } finally {
                     writer.close();
