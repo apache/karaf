@@ -98,7 +98,11 @@ public class ConsoleFactory {
     protected void start() throws Exception {
         if (start) {
             Subject subject = new Subject();
-            final String user = "karaf";
+            String userName = System.getProperty("karaf.local.user");
+            if (userName == null) {
+                userName = "karaf";
+            }
+            final String user = userName;
             subject.getPrincipals().add(new UserPrincipal(user));
             String roles = System.getProperty("karaf.local.roles");
             if (roles != null) {
