@@ -120,6 +120,7 @@
                             <resources>
                                 <resource>
                                     <directory>../../assemblies/apache-karaf/src/main/distribution/text/etc/</directory>
+                                    <filtering>false</filtering>
                                     <includes>
                                         <include>*.policy</include>
                                         <include>*.properties</include>
@@ -129,6 +130,7 @@
                                     <excludes>
                                         <exclude>org.apache.karaf.shell.cfg</exclude>
                                         <exclude>org.apache.karaf.management.cfg</exclude>
+                                        <exclude>org.ops4j.pax.url.mvn.cfg</exclude>
                                         <exclude>system.properties</exclude>
                                     </excludes>
                                 </resource>
@@ -168,7 +170,7 @@
                             <resources>
                                 <resource>
                                     <directory>../../assemblies/apache-karaf/src/main/distribution/release/etc/</directory>
-                                    <filtering>true</filtering>
+                                    <filtering>false</filtering>
                                     <includes>
                                         <include>*.cfg</include>
                                     </includes>
