@@ -28,7 +28,7 @@ import org.apache.karaf.system.SystemService;
 /**
  * Command to shut down Karaf container.
  */
-@Command(scope = "system", name = "shutdown", description = "Shutdown Karaf.")
+@Command(scope = "system", name = "shutdown", description = "Shutdown the Karaf container.")
 @Service
 public class Shutdown implements Action {
 
