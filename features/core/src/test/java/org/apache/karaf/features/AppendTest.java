@@ -26,7 +26,7 @@ public class AppendTest extends TestCase {
 	public void testLoad() throws Exception {
 		System.setProperty("karaf.data", "data");
 
-		RepositoryImpl r = new RepositoryImpl(getClass().getResource("internal/f08.xml").toURI());
+		RepositoryImpl r = new RepositoryImpl(getClass().getResource("internal/service/f08.xml").toURI());
 		// Check repo
 		Feature[] features = r.getFeatures();
 		assertNotNull(features);
