@@ -25,6 +25,7 @@ import org.apache.felix.service.command.Converter;
 import org.apache.felix.service.threadio.ThreadIO;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -114,8 +115,21 @@ public class SecuredCommandProcessorImpl extends CommandProcessorImpl {
             {
                 Object scope = reference.getProperty(CommandProcessor.COMMAND_SCOPE);
                 Object function = reference.getProperty(CommandProcessor.COMMAND_FUNCTION);
+                Object ranking = reference.getProperty(Constants.SERVICE_RANKING);
                 List<Object> commands = new ArrayList<Object>();
 
+                int rank = 0;
+                if (ranking != null)
+                {
+                    try
+                    {
+                        rank = Integer.parseInt(ranking.toString());
+                    }
+                    catch (NumberFormatException e)
+                    {
+                        // Ignore
+                    }
+                }
                 if (scope != null && function != null)
                 {
                     Map<String, CommandProxy> proxyMap = new HashMap<String, CommandProxy>();
@@ -125,7 +139,7 @@ public class SecuredCommandProcessorImpl extends CommandProcessorImpl {
                         {
                             CommandProxy target = new CommandProxy(context, reference, f.toString());
                             proxyMap.put(f.toString(), target);
-                            addCommand(scope.toString(), target, f.toString());
+                            addCommand(scope.toString(), target, f.toString(), rank);
                             commands.add(target);
                         }
                     }
@@ -133,7 +147,7 @@ public class SecuredCommandProcessorImpl extends CommandProcessorImpl {
                     {
                         CommandProxy target = new CommandProxy(context, reference, function.toString());
                         proxyMap.put(function.toString(), target);
-                        addCommand(scope.toString(), target, function.toString());
+                        addCommand(scope.toString(), target, function.toString(), rank);
                         commands.add(target);
                     }
                     proxies.put(reference, proxyMap);
@@ -153,7 +167,7 @@ public class SecuredCommandProcessorImpl extends CommandProcessorImpl {
                     Map<String, CommandProxy> proxyMap = proxies.remove(reference);
                     for (Map.Entry<String, CommandProxy> entry : proxyMap.entrySet())
                     {
-                        removeCommand(scope.toString(), entry.getKey());
+                        removeCommand(scope.toString(), entry.getKey(), entry.getValue());
                     }
                 }
 

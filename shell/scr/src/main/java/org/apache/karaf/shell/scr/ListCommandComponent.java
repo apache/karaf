@@ -28,6 +28,7 @@ import org.apache.felix.scr.ScrService;
 import org.apache.karaf.shell.console.CompletableFunction;
 import org.apache.karaf.shell.console.Completer;
 import org.apache.karaf.shell.scr.action.ListAction;
+import org.osgi.framework.Constants;
 
 /**
  * Shell Command that lists the available Declarative Service Components.
@@ -40,7 +41,8 @@ import org.apache.karaf.shell.scr.action.ListAction;
         properties={ 
             ScrCommandConstants.OSGI_COMMAND_SCOPE_KEY+"="+ScrCommandConstants.SCR_COMMAND, 
             ScrCommandConstants.OSGI_COMMAND_FUNCTION_KEY+"="+ScrCommandConstants.LIST_FUNCTION,
-            ScrCommandConstants.HIDDEN_COMPONENT_KEY + "=true"})
+            ScrCommandConstants.HIDDEN_COMPONENT_KEY + "=true",
+            Constants.SERVICE_RANKING + "=1"})
 public class ListCommandComponent extends ScrCommandSupport {
 
     public static final String COMPONENT_NAME = "ListCommand";

@@ -30,6 +30,7 @@ import org.apache.karaf.shell.console.CompletableFunction;
 import org.apache.karaf.shell.console.Completer;
 import org.apache.karaf.shell.scr.action.DetailsAction;
 import org.apache.karaf.shell.scr.completer.DetailsCompleter;
+import org.osgi.framework.Constants;
 
 /**
  * Shell Command that prints the current state details of a given
@@ -43,7 +44,8 @@ import org.apache.karaf.shell.scr.completer.DetailsCompleter;
         properties={ 
             ScrCommandConstants.OSGI_COMMAND_SCOPE_KEY+"="+ScrCommandConstants.SCR_COMMAND, 
             ScrCommandConstants.OSGI_COMMAND_FUNCTION_KEY+"="+ScrCommandConstants.DETAILS_FUNCTION,
-            ScrCommandConstants.HIDDEN_COMPONENT_KEY + "=true"})
+            ScrCommandConstants.HIDDEN_COMPONENT_KEY + "=true",
+            Constants.SERVICE_RANKING + "=1"})
 public class DetailsCommandComponent extends ScrCommandSupport {
 
     public static final String COMPONENT_NAME = "DetailsCommand";

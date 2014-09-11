@@ -30,6 +30,7 @@ import org.apache.karaf.shell.console.CompletableFunction;
 import org.apache.karaf.shell.console.Completer;
 import org.apache.karaf.shell.scr.action.DeactivateAction;
 import org.apache.karaf.shell.scr.completer.DeactivateCompleter;
+import org.osgi.framework.Constants;
 
 /**
  * Shell Command used to deactivate a Declarative Service Component.
@@ -42,7 +43,8 @@ import org.apache.karaf.shell.scr.completer.DeactivateCompleter;
         properties={ 
             ScrCommandConstants.OSGI_COMMAND_SCOPE_KEY+"="+ScrCommandConstants.SCR_COMMAND, 
             ScrCommandConstants.OSGI_COMMAND_FUNCTION_KEY+"="+ScrCommandConstants.DEACTIVATE_FUNCTION,
-            ScrCommandConstants.HIDDEN_COMPONENT_KEY + "=true"})
+            ScrCommandConstants.HIDDEN_COMPONENT_KEY + "=true",
+            Constants.SERVICE_RANKING + "=1"})
 public class DeactivateCommandComponent extends ScrCommandSupport {
 
     public static final String COMPONENT_NAME = "DeactivateCommand";
