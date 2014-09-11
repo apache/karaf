@@ -44,6 +44,8 @@ import org.apache.sshd.server.SessionAware;
 import org.apache.sshd.server.session.ServerSession;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.blueprint.container.ReifiedType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * SSHD {@link org.apache.sshd.server.Command} factory which provides access to Shell.
@@ -55,6 +57,8 @@ public class ShellFactoryImpl implements Factory<Command> {
             JaasHelper.OsgiSubjectDomainCombiner.class,
             JaasHelper.DelegatingProtectionDomain.class,
     };
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ShellFactoryImpl.class);
 
     private CommandProcessor commandProcessor;
     private ThreadIO threadIO;
@@ -111,63 +115,63 @@ public class ShellFactoryImpl implements Factory<Command> {
         }
 
         public void start(final Environment env) throws IOException {
-            try {
-                final Terminal terminal = new SshTerminal(env);
-                String encoding = env.getEnv().get("LC_CTYPE");
-                if (encoding != null && encoding.indexOf('.') > 0) {
-                    encoding = encoding.substring(encoding.indexOf('.') + 1);
-                }
-                Console console = new Console(commandProcessor,
-                                              threadIO,
-                                              in,
-                                              new PrintStream(new LfToCrLfFilterOutputStream(out), true),
-                                              new PrintStream(new LfToCrLfFilterOutputStream(err), true),
-                                              terminal,
-                                              encoding,
-                                              new Runnable() {
-                                                  public void run() {
-                                                      destroy();
-                                                  }
-                                              },
-                                              bundleContext);
-                final CommandSession session = console.getSession();
-                session.put("APPLICATION", System.getProperty("karaf.name", "root"));
-                for (Map.Entry<String,String> e : env.getEnv().entrySet()) {
-                    session.put(e.getKey(), e.getValue());
-                }
-                session.put("#LINES", new Function() {
-                    public Object execute(CommandSession session, List<Object> arguments) throws Exception {
-                        return Integer.toString(terminal.getHeight());
+            new Thread() {
+                @Override
+                public void run() {
+                    Subject subject = ShellImpl.this.session != null ? ShellImpl.this.session.getAttribute(KarafJaasAuthenticator.SUBJECT_ATTRIBUTE_KEY) : null;
+                    if (subject != null) {
+                        JaasHelper.doAs(subject, new PrivilegedAction<Object>() {
+                            public Object run() {
+                                runConsole();
+                                return null;
+                            }
+                        });
+                    } else {
+                        runConsole();
                     }
-                });
-                session.put("#COLUMNS", new Function() {
-                    public Object execute(CommandSession session, List<Object> arguments) throws Exception {
-                        return Integer.toString(terminal.getWidth());
-                    }
-                });
-                session.put(".jline.terminal", terminal);
-                new Thread(console) {
-                    @Override
-                    public void run() {
-                        Subject subject = ShellImpl.this.session != null ? ShellImpl.this.session.getAttribute(KarafJaasAuthenticator.SUBJECT_ATTRIBUTE_KEY) : null;
-                        if (subject != null) {
-                            JaasHelper.doAs(subject, new PrivilegedAction<Object>() {
-                                public Object run() {
-                                    doRun();
-                                    return null;
-                                }
-                            });
-                        } else {
-                            doRun();
+                }
+                protected void runConsole() {
+                    try {
+                        final Terminal terminal = new SshTerminal(env);
+                        String encoding = env.getEnv().get("LC_CTYPE");
+                        if (encoding != null && encoding.indexOf('.') > 0) {
+                            encoding = encoding.substring(encoding.indexOf('.') + 1);
                         }
+                        final Console console = new Console(commandProcessor,
+                                threadIO,
+                                in,
+                                new PrintStream(new LfToCrLfFilterOutputStream(out), true),
+                                new PrintStream(new LfToCrLfFilterOutputStream(err), true),
+                                terminal,
+                                encoding,
+                                new Runnable() {
+                                    public void run() {
+                                        ShellImpl.this.destroy();
+                                    }
+                                },
+                                bundleContext);
+                        final CommandSession session = console.getSession();
+                        session.put("APPLICATION", System.getProperty("karaf.name", "root"));
+                        for (Map.Entry<String,String> e : env.getEnv().entrySet()) {
+                            session.put(e.getKey(), e.getValue());
+                        }
+                        session.put("#LINES", new Function() {
+                            public Object execute(CommandSession session, List<Object> arguments) throws Exception {
+                                return Integer.toString(terminal.getHeight());
+                            }
+                        });
+                        session.put("#COLUMNS", new Function() {
+                            public Object execute(CommandSession session, List<Object> arguments) throws Exception {
+                                return Integer.toString(terminal.getWidth());
+                            }
+                        });
+                        session.put(".jline.terminal", terminal);
+                        console.run();
+                    } catch (Exception e) {
+                        LOGGER.warn("Unable to start shell", e);
                     }
-                    protected void doRun() {
-                        super.run();
-                    }
-                }.start();
-            } catch (Exception e) {
-                throw (IOException) new IOException("Unable to start shell").initCause(e);
-            }
+                }
+            }.start();
         }
 
         public void destroy() {

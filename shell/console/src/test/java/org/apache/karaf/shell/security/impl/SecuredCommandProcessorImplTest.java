@@ -132,7 +132,7 @@ public class SecuredCommandProcessorImplTest {
     // Subclass to provide access to some protected members
     static class MySecuredCommandProcessorImpl extends SecuredCommandProcessorImpl {
         public MySecuredCommandProcessorImpl(BundleContext bc) {
-            super(bc);
+            super(bc, null);
         }
 
         Map<String, Object> getConstants() {

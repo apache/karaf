@@ -99,7 +99,6 @@
     <feature name="shell" description="Karaf Shell" version="${project.version}">
         <feature>aries-blueprint</feature>
         <feature>jaas</feature>
-        <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.gogo.runtime/${felix.gogo.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.shell/org.apache.karaf.shell.console/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.shell/org.apache.karaf.shell.commands/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.shell/org.apache.karaf.shell.osgi/${project.version}</bundle>

@@ -73,6 +73,10 @@ public class ConsoleFactory {
         this.bundleContext = bundleContext;
     }
 
+    public void setCommandProcessor(CommandProcessor commandProcessor) {
+        this.commandProcessor = commandProcessor;
+    }
+
     public void setThreadIO(ThreadIO threadIO) {
         this.threadIO = threadIO;
     }
@@ -95,7 +99,7 @@ public class ConsoleFactory {
         this.start = start;
     }
 
-    protected void start() throws Exception {
+    public void start() throws Exception {
         if (start) {
             Subject subject = new Subject();
             String userName = System.getProperty("karaf.local.user");
@@ -211,7 +215,7 @@ public class ConsoleFactory {
         return parts[0];
     }
 
-    protected void stop() throws Exception {
+    public void stop() throws Exception {
         if (registration != null) {
             registration.unregister();
         }

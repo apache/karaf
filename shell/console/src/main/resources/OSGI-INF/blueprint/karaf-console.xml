@@ -26,18 +26,23 @@
         </ext:default-properties>
     </ext:property-placeholder>
 
-    <reference id="commandProcessor" interface="org.apache.felix.service.command.CommandProcessor">
-        <reference-listener ref="consoleFactory"
-                            bind-method="registerCommandProcessor"
-                            unbind-method="unregisterCommandProcessor"/>
-    </reference>
-    <reference id="threadIO" interface="org.apache.felix.service.threadio.ThreadIO" />
+    <bean id="threadIO" class="org.apache.felix.gogo.runtime.threadio.ThreadIOImpl"
+          init-method="start" destroy-method="stop"/>
+    <service ref="threadIO" auto-export="interfaces"/>
 
-    <bean id="consoleFactory" class="org.apache.karaf.shell.console.jline.ConsoleFactory">
+    <bean id="commandProcessor" class="org.apache.karaf.shell.security.impl.SecCommandProcessorImpl">
+        <argument ref="blueprintBundleContext"/>
+        <argument ref="threadIO"/>
+    </bean>
+    <service ref="commandProcessor" auto-export="interfaces"/>
+
+    <bean id="consoleFactory" class="org.apache.karaf.shell.console.jline.ConsoleFactory"
+            init-method="start" destroy-method="stop">
         <property name="start" value="$[karaf.startLocalConsole]"/>
         <property name="bundleContext" ref="blueprintBundleContext"/>
         <property name="terminalFactory" ref="terminalFactory"/>
         <property name="threadIO" ref="threadIO"/>
+        <property name="commandProcessor" ref="commandProcessor"/>
     </bean>
 
     <bean id="converters" class="org.apache.karaf.shell.console.Converters">
@@ -83,9 +88,7 @@
     </service>
     <service auto-export="interfaces" ranking="-10">
         <bean class="org.apache.karaf.shell.console.help.SingleCommandHelpProvider">
-            <property name="io">
-                <reference interface="org.apache.felix.service.threadio.ThreadIO"/>
-            </property>
+            <property name="io" ref="threadIO"/>
         </bean>
     </service>
     <service auto-export="interfaces" ref="subShellHelpProvider" ranking="-10"/>

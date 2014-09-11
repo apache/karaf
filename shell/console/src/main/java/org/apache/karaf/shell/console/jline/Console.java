@@ -102,7 +102,8 @@ public class Console implements Runnable
         this.queue = new ArrayBlockingQueue<Integer>(1024);
         this.terminal = term == null ? new UnsupportedTerminal() : term;
         this.consoleInput = new ConsoleInputStream();
-        this.session = new DelegateSession();
+
+        this.session = processor.createSession(consoleInput, out, err);
         this.session.put("SCOPE", "shell:osgi:*");
         this.closeCallback = closeCallback;
         this.bundleContext = bc;
@@ -178,7 +179,6 @@ public class Console implements Runnable
     {
         try {
             threadIO.setStreams(consoleInput, out, err);
-            SecuredCommandProcessorImpl secCP = createSecuredCommandProcessor();
             thread = Thread.currentThread();
             CommandSessionHolder.setSession(session);
             running = true;
@@ -212,11 +212,6 @@ public class Console implements Runnable
                     logException(t);
                 }
             }
-            try {
-                secCP.close();
-            } catch (Throwable t) {
-                // Ignore
-            }
             close(true);
         } finally {
             try {
@@ -227,22 +222,6 @@ public class Console implements Runnable
         }
     }
     
-    SecuredCommandProcessorImpl createSecuredCommandProcessor() {
-        if (!(session instanceof DelegateSession)) {
-            throw new IllegalStateException("Should be an Delegate Session here, about to set the delegate");
-        }
-        DelegateSession is = (DelegateSession)session;
-
-        // make it active
-        SecuredCommandProcessorImpl secCP = new SecuredCommandProcessorImpl(bundleContext);
-        CommandSession s = secCP.createSession(consoleInput, out, err);
-
-        // before the session is activated attributes may have been set on it. Pass these on to the real
-        // session now
-        is.setDelegate(s);
-        return secCP;
-    }
-
     private void logException(Throwable t) {
         try {
             boolean isCommandNotFound = "org.apache.felix.gogo.runtime.CommandNotFoundException".equals(t.getClass().getName());
@@ -441,88 +420,6 @@ public class Console implements Runnable
     private void interrupt() {
         interrupt = true;
         thread.interrupt();
-    }
-
-    static class DelegateSession implements CommandSession {
-        final Map<String, Object> attrs = new HashMap<String, Object>();
-        volatile CommandSession delegate;
-
-        @Override
-        public Object execute(CharSequence commandline) throws Exception {
-            if (delegate != null)
-                return delegate.execute(commandline);
-
-            throw new UnsupportedOperationException();
-        }
-
-        void setDelegate(CommandSession s) {
-            synchronized (this) {
-                for (Map.Entry<String, Object> entry : attrs.entrySet()) {
-                    s.put(entry.getKey(), entry.getValue());
-                }
-            }
-            delegate = s;
-        }
-
-        @Override
-        public void close() {
-            if (delegate != null)
-                delegate.close();
-        }
-
-        @Override
-        public InputStream getKeyboard() {
-            if (delegate != null)
-                return delegate.getKeyboard();
-
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public PrintStream getConsole() {
-            if (delegate != null)
-                return delegate.getConsole();
-
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public Object get(String name) {
-            if (delegate != null)
-                return delegate.get(name);
-
-            return attrs.get(name);
-        }
-
-        // you can put attributes on this session before it's delegate is set...
-        @Override
-        public void put(String name, Object value) {
-            if (delegate != null) {
-                delegate.put(name, value);
-                return;
-            }
-
-            // there is no delegate yet, so we'll keep the attributes locally
-            synchronized (this) {
-                attrs.put(name, value);
-            }
-        }
-
-        @Override
-        public CharSequence format(Object target, int level) {
-            if (delegate != null)
-                return delegate.format(target, level);
-
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public Object convert(Class<?> type, Object instance) {
-            if (delegate != null)
-                return delegate.convert(type, instance);
-
-            throw new UnsupportedOperationException();
-        }
     }
 
     private class ConsoleInputStream extends InputStream

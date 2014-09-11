@@ -51,7 +51,7 @@ public class Context extends CommandProcessorImpl
 
     public void addCommand(String name, Object target)
     {
-        put("test:" + name, target);
+        addCommand("test", target, name);
     }
 
     public void set(String name, Object value)
