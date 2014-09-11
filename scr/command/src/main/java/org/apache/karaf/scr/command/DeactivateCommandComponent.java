@@ -30,6 +30,7 @@ import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Deactivate;
 import aQute.bnd.annotation.component.Reference;
+import org.osgi.framework.Constants;
 
 /**
  * Shell Command used to deactivate a Declarative Service Component.
@@ -42,7 +43,8 @@ import aQute.bnd.annotation.component.Reference;
         properties={
                 ScrCommandConstants.OSGI_COMMAND_SCOPE_KEY + "=" + ScrCommandConstants.SCR_COMMAND,
                 ScrCommandConstants.OSGI_COMMAND_FUNCTION_KEY + "=" + ScrCommandConstants.DEACTIVATE_FUNCTION,
-                ScrCommandConstants.HIDDEN_COMPONENT_KEY + "=true"
+                ScrCommandConstants.HIDDEN_COMPONENT_KEY + "=true",
+                Constants.SERVICE_RANKING + "=1"
         })
 public class DeactivateCommandComponent extends ScrCommandSupport {
 
