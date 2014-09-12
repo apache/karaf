@@ -2244,7 +2244,11 @@
                                 <!-- test json files -->
                                 <exclude>**/*.json</exclude>
                                 <!-- SSH keys -->
-				<exclude>**/*.key</exclude>
+				                <exclude>**/*.key</exclude>
+                                <!-- For Jenkins, ignore the .repository -->
+                                <exclude>.repository/**</exclude>
+                                <!-- jar files -->
+                                <exclude>**/*.jar</exclude>
                             </excludes>
                         </configuration>
                     </plugin>
