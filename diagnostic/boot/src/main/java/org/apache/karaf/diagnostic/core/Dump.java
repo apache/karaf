@@ -77,7 +77,6 @@ public final class Dump {
         } catch (Throwable t) {
             // Ignore
         }
-        System.out.println("Created dump " + destination.toString());
     }
 
     // Private constructor

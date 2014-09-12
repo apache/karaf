@@ -63,6 +63,7 @@ public class Activator implements BundleActivator {
         });
 
         final DiagnosticDumpMBeanImpl diagnostic = new DiagnosticDumpMBeanImpl();
+        diagnostic.setBundleContext(context);
 
         Hashtable<String, Object> props = new Hashtable<String, Object>();
         props.put("jmx.objectname", "org.apache.karaf:type=diagnostic,name=" + System.getProperty("karaf.name"));

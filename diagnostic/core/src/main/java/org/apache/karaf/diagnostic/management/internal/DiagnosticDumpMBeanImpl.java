@@ -14,6 +14,8 @@
 package org.apache.karaf.diagnostic.management.internal;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
@@ -22,6 +24,8 @@ import org.apache.karaf.diagnostic.core.Dump;
 import org.apache.karaf.diagnostic.core.DumpDestination;
 import org.apache.karaf.diagnostic.management.DiagnosticDumpMBean;
 import org.osgi.framework.BundleContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implementation of diagnostic mbean.
@@ -32,6 +36,10 @@ public class DiagnosticDumpMBeanImpl extends StandardMBean implements Diagnostic
      * Dump providers.
      */
     private BundleContext bundleContext;
+
+    private SimpleDateFormat dumpFormat = new SimpleDateFormat("yyyy-MM-dd_HHmmss");
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(DiagnosticDumpMBeanImpl.class);
 
     /**
      * Creates new diagnostic mbean.
@@ -55,6 +63,12 @@ public class DiagnosticDumpMBeanImpl extends StandardMBean implements Diagnostic
      * {@inheritDoc}
      */
     public void createDump(boolean directory, String name) {
+        if (name == null || name.trim().length() == 0) {
+            name = dumpFormat.format(new Date());
+            if (!directory) {
+                name += ".zip";
+            }
+        }
         File target = new File(name);
 
         DumpDestination destination;
@@ -65,6 +79,7 @@ public class DiagnosticDumpMBeanImpl extends StandardMBean implements Diagnostic
         }
 
         Dump.dump(bundleContext, destination);
+        LOGGER.info("Created dump " + destination.toString());
     }
 
     /**

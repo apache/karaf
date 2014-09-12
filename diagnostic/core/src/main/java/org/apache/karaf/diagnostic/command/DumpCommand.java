@@ -79,6 +79,7 @@ public class DumpCommand implements Action {
         }
 
         Dump.dump(bundleContext, destination);
+        System.out.println("Created dump " + destination.toString());
 
         return null;
     }
