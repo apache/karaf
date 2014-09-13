@@ -25,7 +25,17 @@ import java.security.ProtectionDomain;
 import javax.security.auth.Subject;
 import javax.security.auth.SubjectDomainCombiner;
 
+import org.apache.karaf.jaas.boot.principal.UserPrincipal;
+
 public class JaasHelper {
+
+    public static String getUserName(final Subject subject) {
+        if (subject != null && subject.getPrincipals().iterator().hasNext()) {
+            return subject.getPrincipals(UserPrincipal.class).iterator().next().getName();
+        } else {
+            return null;
+        }
+    }
 
     public static <T> T doAs(final Subject subject,
                              final PrivilegedAction<T> action) {

@@ -19,6 +19,7 @@
 package org.apache.karaf.shell.console.impl.jline;
 
 import java.nio.charset.Charset;
+import java.security.PrivilegedAction;
 
 import javax.security.auth.Subject;
 
@@ -28,6 +29,7 @@ import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.threadio.ThreadIO;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
+import org.apache.karaf.jaas.modules.JaasHelper;
 import org.apache.karaf.shell.console.Console;
 import org.apache.karaf.shell.console.ConsoleFactory;
 import org.osgi.framework.BundleContext;
@@ -81,7 +83,7 @@ public class LocalConsoleManager {
         }
 
         final Terminal terminal = terminalFactory.getTerminal();
-        Runnable callback = new Runnable() {
+        final Runnable callback = new Runnable() {
             public void run() {
                 try {
                     bundleContext.getBundle(0).stop();
@@ -91,19 +93,31 @@ public class LocalConsoleManager {
             }
         };
         String ctype = System.getenv("LC_CTYPE");
-        String encoding = ctype;
-        if (encoding != null && encoding.indexOf('.') > 0) {
-            encoding = encoding.substring(encoding.indexOf('.') + 1);
+        final String encoding;
+        if (ctype != null && ctype.indexOf('.') > 0) {
+            encoding = ctype.substring(ctype.indexOf('.') + 1);
         } else {
             encoding = System.getProperty("input.encoding", Charset.defaultCharset().name());
         }
-        this.console = consoleFactory.createLocal(this.commandProcessor, this.threadIO, terminal, encoding, callback);
-
-        registration = bundleContext.registerService(CommandSession.class, console.getSession(), null);
 
         Runnable consoleStarter = new Runnable() {
             public void run() {
-                consoleFactory.startConsoleAs(console, subject, "Local");
+                new Thread("Karaf Console Local for user " + JaasHelper.getUserName(subject)) {
+                    @Override
+                    public void run() {
+                        JaasHelper.doAs(subject, new PrivilegedAction<Object>() {
+                            @Override
+                            public Object run() {
+                                console = consoleFactory.createLocal(commandProcessor, threadIO, terminal, encoding, callback);
+                                registration = bundleContext.registerService(CommandSession.class, console.getSession(), null);
+                                CommandSession session = console.getSession();
+                                session.put("USER", JaasHelper.getUserName(subject));
+                                console.run();
+                                return null;
+                            }
+                        });
+                    }
+                }.start();
             }
         };
         

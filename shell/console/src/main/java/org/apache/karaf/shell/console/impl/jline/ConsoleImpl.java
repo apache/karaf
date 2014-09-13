@@ -91,21 +91,15 @@ public class ConsoleImpl implements Console {
                        Terminal term,
                        String encoding,
                        Runnable closeCallback,
-                       BundleContext bc,
-                       boolean secured) {
+                       BundleContext bc) {
         this.threadIO = threadIO;
         this.in = in;
         this.out = out;
         this.err = err;
-        this.secured = secured;
         this.queue = new ArrayBlockingQueue<Integer>(1024);
         this.terminal = term == null ? new UnsupportedTerminal() : term;
         this.consoleInput = new ConsoleInputStream();
-        if (secured) {
-            this.session = new DelegateSession();
-        } else {
-            this.session = processor.createSession(consoleInput, out, err);
-        }
+        this.session = processor.createSession(consoleInput, out, err);
         this.session.put("SCOPE", "shell:bundle:*");
         this.session.put("SUBSHELL", "");
         this.setCompletionMode();
@@ -190,10 +184,6 @@ public class ConsoleImpl implements Console {
     public void run() {
         try {
             threadIO.setStreams(consoleInput, out, err);
-            SecuredCommandProcessorImpl secCP = null;
-            if (secured) {
-                secCP = createSecuredCommandProcessor();
-            }
             thread = Thread.currentThread();
             CommandSessionHolder.setSession(session);
             running = true;
@@ -225,13 +215,6 @@ public class ConsoleImpl implements Console {
                     ShellUtil.logException(session, t);
                 }
             }
-            if (secured) {
-                try {
-                    secCP.close();
-                } catch (Throwable t) {
-                    // Ignore
-                }
-            }
             close(true);
         } finally {
             try {
@@ -241,22 +224,6 @@ public class ConsoleImpl implements Console {
             }
         }
     }
-
-    SecuredCommandProcessorImpl createSecuredCommandProcessor() {
-        if (!(session instanceof DelegateSession)) {
-            throw new IllegalStateException("Should be an Delegate Session here, about to set the delegate");
-        }
-        DelegateSession is = (DelegateSession) session;
-
-        // make it active
-        SecuredCommandProcessorImpl secCP = new SecuredCommandProcessorImpl(bundleContext);
-        CommandSession s = secCP.createSession(consoleInput, out, err);
-
-        // before the session is activated attributes may have been set on it. Pass these on to the real session now
-        is.setDelegate(s);
-        return secCP;
-    }
-
     private void setCompletionMode() {
         try {
             File shellCfg = new File(System.getProperty("karaf.etc"), "/org.apache.karaf.shell.cfg");

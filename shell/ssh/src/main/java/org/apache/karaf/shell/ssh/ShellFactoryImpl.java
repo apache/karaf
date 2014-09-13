@@ -24,14 +24,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.security.PrivilegedAction;
 import java.util.Map;
 
 import javax.security.auth.Subject;
 
 import jline.Terminal;
-
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
+import org.apache.karaf.jaas.modules.JaasHelper;
 import org.apache.karaf.shell.console.Console;
 import org.apache.karaf.shell.console.ConsoleFactory;
 import org.apache.felix.service.command.Function;
@@ -43,12 +44,17 @@ import org.apache.sshd.server.ExitCallback;
 import org.apache.sshd.server.SessionAware;
 import org.apache.sshd.server.session.ServerSession;
 import org.osgi.service.blueprint.container.ReifiedType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * SSHD {@link org.apache.sshd.server.Command} factory which provides access to
  * Shell.
  */
 public class ShellFactoryImpl implements Factory<Command> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ShellFactoryImpl.class);
+
     private CommandProcessor commandProcessor;
     private ConsoleFactory consoleFactory;
     private ThreadIO threadIO;
@@ -97,29 +103,49 @@ public class ShellFactoryImpl implements Factory<Command> {
         }
 
         public void start(final Environment env) throws IOException {
-            try {
-                final Subject subject = ShellImpl.this.session != null ? ShellImpl.this.session
-                        .getAttribute(KarafJaasAuthenticator.SUBJECT_ATTRIBUTE_KEY) : null;
-                final Terminal terminal = new SshTerminal(env);
-                Runnable destroyCallback = new Runnable() {
-                    public void run() {
-                        destroy();
+            new Thread() {
+                @Override
+                public void run() {
+                    final Subject subject = ShellImpl.this.session != null ? ShellImpl.this.session.getAttribute(KarafJaasAuthenticator.SUBJECT_ATTRIBUTE_KEY) : null;
+                    if (subject != null) {
+                        JaasHelper.doAs(subject, new PrivilegedAction<Object>() {
+                            public Object run() {
+                                String userName = JaasHelper.getUserName(subject);
+                                Thread.currentThread().setName("Karaf Console ssh for user " + userName);
+                                runConsole(userName);
+                                return null;
+                            }
+                        });
+                    } else {
+                        Thread.currentThread().setName("Karaf Console ssh for anonymous user");
+                        runConsole(null);
                     }
-                };
-                String encoding = env.getEnv().get("LC_CTYPE");
-                if (encoding != null && encoding.indexOf('.') > 0) {
-                    encoding = encoding.substring(encoding.indexOf('.') + 1);
                 }
-                Console console = consoleFactory.create(commandProcessor, threadIO, in,
-                        lfToCrLfPrintStream(out), lfToCrLfPrintStream(err), terminal, encoding, destroyCallback);
-                final CommandSession session = console.getSession();
-                for (Map.Entry<String, String> e : env.getEnv().entrySet()) {
-                    session.put(e.getKey(), e.getValue());
+                protected void runConsole(String userName) {
+                    try {
+                        final Terminal terminal = new SshTerminal(env);
+                        Runnable destroyCallback = new Runnable() {
+                            public void run() {
+                                ShellImpl.this.destroy();
+                            }
+                        };
+                        String encoding = env.getEnv().get("LC_CTYPE");
+                        if (encoding != null && encoding.indexOf('.') > 0) {
+                            encoding = encoding.substring(encoding.indexOf('.') + 1);
+                        }
+                        final Console console = consoleFactory.create(commandProcessor, threadIO, in,
+                                lfToCrLfPrintStream(out), lfToCrLfPrintStream(err), terminal, encoding, destroyCallback);
+                        final CommandSession session = console.getSession();
+                        for (Map.Entry<String,String> e : env.getEnv().entrySet()) {
+                            session.put(e.getKey(), e.getValue());
+                        }
+                        session.put("USER", userName);
+                        console.run();
+                    } catch (Exception e) {
+                        LOGGER.warn("Unable to start shell", e);
+                    }
                 }
-                consoleFactory.startConsoleAs(console, subject, "ssh");
-            } catch (Exception e) {
-                throw (IOException) new IOException("Unable to start shell").initCause(e);
-            }
+            }.start();
         }
 
         private PrintStream lfToCrLfPrintStream(OutputStream stream) {

@@ -33,6 +33,8 @@ import java.io.PrintWriter;
 import java.net.URL;
 import java.security.AccessControlContext;
 import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.security.PrivilegedExceptionAction;
 import java.util.zip.GZIPOutputStream;
 
 import javax.security.auth.Subject;
@@ -42,6 +44,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.threadio.ThreadIO;
+import org.apache.karaf.jaas.modules.JaasHelper;
 import org.apache.karaf.shell.console.Console;
 import org.apache.karaf.shell.console.ConsoleFactory;
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
@@ -194,11 +197,12 @@ public class GogoPlugin extends AbstractWebConsolePlugin {
 
                 in = new PipedOutputStream();
                 out = new PipedInputStream();
-                PrintStream pipedOut = new PrintStream(new PipedOutputStream(out), true);
+                final PrintStream pipedOut = new PrintStream(new PipedOutputStream(out), true);
 
                 AccessControlContext acc = AccessController.getContext();
-                final Subject subject = Subject.getSubject(acc);
-                
+                Subject subject = Subject.getSubject(acc);
+                String userName = JaasHelper.getUserName(subject);
+
                 Console console = consoleFactory.create(commandProcessor,
                         threadIO,
                         new PipedInputStream(in),
@@ -207,7 +211,7 @@ public class GogoPlugin extends AbstractWebConsolePlugin {
                         new WebTerminal(TERM_WIDTH, TERM_HEIGHT),
                         null,
                         null);
-                consoleFactory.startConsoleAs(console, subject, "Web");
+                new Thread(console, "Karaf Console Web for user " + userName).start();
             } catch (IOException e) {
                 e.printStackTrace();
                 throw e;

@@ -22,7 +22,6 @@ import org.apache.felix.gogo.runtime.CommandProxy;
 import org.apache.felix.gogo.runtime.activator.Activator;
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.Converter;
-import org.apache.felix.service.command.Function;
 import org.apache.felix.service.threadio.ThreadIO;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.osgi.framework.BundleContext;
@@ -35,48 +34,47 @@ import javax.security.auth.Subject;
 import java.security.AccessControlContext;
 import java.security.AccessController;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 public class SecuredCommandProcessorImpl extends CommandProcessorImpl {
 
     private final BundleContext bundleContext;
-    private final ServiceReference<ThreadIO> threadIOServiceReference;
     private final ServiceTracker<Object, Object> commandTracker;
     private final ServiceTracker<Converter, Converter> converterTracker;
     private final ServiceTracker<CommandSessionListener, CommandSessionListener> listenerTracker;
 
-    public SecuredCommandProcessorImpl(BundleContext bc) {
-        this(bc, bc.getServiceReference(ThreadIO.class));
-    }
-
-    private SecuredCommandProcessorImpl(BundleContext bc, ServiceReference<ThreadIO> sr) {
-        super(bc.getService(sr));
+    public SecuredCommandProcessorImpl(BundleContext bc, ThreadIO io) {
+        super(io);
         bundleContext = bc;
-        threadIOServiceReference = sr;
+
+        String roleClause = "";
 
         AccessControlContext acc = AccessController.getContext();
         Subject sub = Subject.getSubject(acc);
-        if (sub == null)
-            throw new SecurityException("No current Subject in the Access Control Context");
+        if (sub != null) {
+            Set<RolePrincipal> rolePrincipals = sub.getPrincipals(RolePrincipal.class);
+            if (rolePrincipals.size() == 0)
+                throw new SecurityException("Current user has no associated roles.");
 
-        Set<RolePrincipal> rolePrincipals = sub.getPrincipals(RolePrincipal.class);
-        if (rolePrincipals.size() == 0)
-            throw new SecurityException("Current user has no associated roles.");
-
-        // TODO cater for custom roles
-        StringBuilder sb = new StringBuilder();
-        sb.append("(|");
-        for (RolePrincipal rp : rolePrincipals) {
-            sb.append('(');
-            sb.append("org.apache.karaf.service.guard.roles");
-            sb.append('=');
-            sb.append(rp.getName());
+            // TODO cater for custom roles
+            StringBuilder sb = new StringBuilder();
+            sb.append("(|");
+            for (RolePrincipal rp : rolePrincipals) {
+                sb.append('(');
+                sb.append("org.apache.karaf.service.guard.roles");
+                sb.append('=');
+                sb.append(rp.getName());
+                sb.append(')');
+            }
+            sb.append("(!(org.apache.karaf.service.guard.roles=*))"); // Or no roles specified at all
             sb.append(')');
+            roleClause = sb.toString();
         }
-        sb.append("(!(org.apache.karaf.service.guard.roles=*))"); // Or no roles specified at all
-        sb.append(')');
-        String roleClause = sb.toString();
 
         addConstant(Activator.CONTEXT, bc);
         addCommand("osgi", this, "addCommand");
@@ -101,7 +99,6 @@ public class SecuredCommandProcessorImpl extends CommandProcessorImpl {
         commandTracker.close();
         converterTracker.close();
         listenerTracker.close();
-        bundleContext.ungetService(threadIOServiceReference);
     }
 
     private ServiceTracker<Object, Object> trackCommands(final BundleContext context, String roleClause) throws InvalidSyntaxException {
@@ -109,45 +106,57 @@ public class SecuredCommandProcessorImpl extends CommandProcessorImpl {
                 CommandProcessor.COMMAND_SCOPE, CommandProcessor.COMMAND_FUNCTION, roleClause));
 
         return new ServiceTracker<Object, Object>(context, filter, null) {
+            private final ConcurrentMap<ServiceReference, Map<String, CommandProxy>> proxies
+                    = new ConcurrentHashMap<ServiceReference, Map<String, CommandProxy>>();
+
             @Override
-            public Object addingService(ServiceReference<Object> reference) {
+            public Object addingService(ServiceReference reference)
+            {
                 Object scope = reference.getProperty(CommandProcessor.COMMAND_SCOPE);
                 Object function = reference.getProperty(CommandProcessor.COMMAND_FUNCTION);
                 List<Object> commands = new ArrayList<Object>();
 
-                if (scope != null && function != null) {
-                    if (function.getClass().isArray()) {
-                        for (Object f : ((Object[]) function)) {
-                            Function target = new CommandProxy(context, reference,
-                                    f.toString());
+                if (scope != null && function != null)
+                {
+                    Map<String, CommandProxy> proxyMap = new HashMap<String, CommandProxy>();
+                    if (function.getClass().isArray())
+                    {
+                        for (Object f : ((Object[]) function))
+                        {
+                            CommandProxy target = new CommandProxy(context, reference, f.toString());
+                            proxyMap.put(f.toString(), target);
                             addCommand(scope.toString(), target, f.toString());
                             commands.add(target);
                         }
-                    } else {
-                        Function target = new CommandProxy(context, reference,
-                                function.toString());
+                    }
+                    else
+                    {
+                        CommandProxy target = new CommandProxy(context, reference, function.toString());
+                        proxyMap.put(function.toString(), target);
                         addCommand(scope.toString(), target, function.toString());
                         commands.add(target);
                     }
+                    proxies.put(reference, proxyMap);
                     return commands;
                 }
                 return null;
             }
 
             @Override
-            public void removedService(ServiceReference<Object> reference, Object service) {
+            public void removedService(ServiceReference reference, Object service)
+            {
                 Object scope = reference.getProperty(CommandProcessor.COMMAND_SCOPE);
                 Object function = reference.getProperty(CommandProcessor.COMMAND_FUNCTION);
 
-                if (scope != null && function != null) {
-                    if (!function.getClass().isArray()) {
-                        removeCommand(scope.toString(), function.toString());
-                    } else {
-                        for (Object func : (Object[]) function) {
-                            removeCommand(scope.toString(), func.toString());
-                        }
+                if (scope != null && function != null)
+                {
+                    Map<String, CommandProxy> proxyMap = proxies.remove(reference);
+                    for (Map.Entry<String, CommandProxy> entry : proxyMap.entrySet())
+                    {
+                        removeCommand(scope.toString(), entry.getKey());
                     }
                 }
+
                 super.removedService(reference, service);
             }
         };

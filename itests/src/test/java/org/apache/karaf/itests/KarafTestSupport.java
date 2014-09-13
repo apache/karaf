@@ -164,8 +164,6 @@ public class KarafTestSupport {
         String response;
         final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         final PrintStream printStream = new PrintStream(byteArrayOutputStream);
-        final CommandProcessor commandProcessor = getOsgiService(CommandProcessor.class);
-        final CommandSession commandSession = commandProcessor.createSession(System.in, printStream, System.err);
 
         final Callable<String> commandCallable = new Callable<String>() {
             @Override
@@ -174,6 +172,8 @@ public class KarafTestSupport {
                     if (!silent) {
                         System.err.println(command);
                     }
+                    final CommandProcessor commandProcessor = getOsgiService(CommandProcessor.class);
+                    final CommandSession commandSession = commandProcessor.createSession(System.in, printStream, System.err);
                     commandSession.execute(command);
                 } catch (Exception e) {
                     throw new RuntimeException(e.getMessage(), e);
