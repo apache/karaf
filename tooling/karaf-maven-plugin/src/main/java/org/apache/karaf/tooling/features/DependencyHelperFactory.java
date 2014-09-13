@@ -51,12 +51,12 @@ public class DependencyHelperFactory {
      */
     public static DependencyHelper createDependencyHelper(PlexusContainer container, MavenProject mavenProject, MavenSession mavenSession, Log log) throws MojoExecutionException {
         try {
-            if (container.hasComponent(org.sonatype.aether.RepositorySystem.class)) {
+            if (container.hasComponent("org.sonatype.aether.RepositorySystem")) {
                 org.sonatype.aether.RepositorySystem system = container.lookup(org.sonatype.aether.RepositorySystem.class);
                 org.sonatype.aether.RepositorySystemSession session = mavenSession.getRepositorySession();
                 List<RemoteRepository> repositories = mavenProject.getRemoteProjectRepositories();
                 return new Dependency30Helper(repositories, session, system);
-            } else if (container.hasComponent(org.eclipse.aether.RepositorySystem.class)) {
+            } else if (container.hasComponent("org.eclipse.aether.RepositorySystem")) {
                 org.eclipse.aether.RepositorySystem system = container.lookup(org.eclipse.aether.RepositorySystem.class);
                 Object session;
                 try {
