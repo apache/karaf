@@ -62,6 +62,7 @@ public class SecuredCommandProcessorImplTest {
         }).anyTimes();
         EasyMock.expect(bc.getServiceReferences((String) EasyMock.anyObject(), (String) EasyMock.anyObject())).andReturn(null).anyTimes();
 
+
         // Capture the listeners
         final Map<String, ServiceListener> listeners = new HashMap<String, ServiceListener>();
 
@@ -94,6 +95,7 @@ public class SecuredCommandProcessorImplTest {
                 ServiceReference<?> cdRef = EasyMock.createMock(ServiceReference.class);
                 EasyMock.expect(cdRef.getProperty(CommandProcessor.COMMAND_SCOPE)).andReturn("foo");
                 EasyMock.expect(cdRef.getProperty(CommandProcessor.COMMAND_FUNCTION)).andReturn("bar");
+                EasyMock.expect(cdRef.getProperty("service.ranking")).andReturn("1");
                 EasyMock.replay(cdRef);
 
                 ServiceEvent event = new ServiceEvent(ServiceEvent.REGISTERED, cdRef);
@@ -105,6 +107,7 @@ public class SecuredCommandProcessorImplTest {
                 EasyMock.expect(cd2Ref.getProperty(CommandProcessor.COMMAND_SCOPE)).andReturn("xxx");
                 EasyMock.expect(cd2Ref.getProperty(CommandProcessor.COMMAND_FUNCTION)).andReturn(
                         new String[] {"aaa", "bbb"});
+                EasyMock.expect(cd2Ref.getProperty("service.ranking")).andReturn("2");
                 EasyMock.replay(cd2Ref);
 
                 ServiceEvent event2 = new ServiceEvent(ServiceEvent.REGISTERED, cd2Ref);
