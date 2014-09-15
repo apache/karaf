@@ -16,10 +16,7 @@
  */
 package org.apache.karaf.features.command;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
@@ -42,7 +39,7 @@ public class ListFeaturesCommand extends FeaturesCommandSupport {
 
     protected void doExecute(FeaturesService featuresService) throws Exception {
         boolean needsLegend = false;
-        
+
         ShellTable table = new ShellTable();
         table.column("Name");
         table.column("Version");
@@ -51,26 +48,29 @@ public class ListFeaturesCommand extends FeaturesCommandSupport {
         table.column("Description").maxSize(50);
         table.emptyTableText(onlyInstalled ? "No features installed" : "No features available");
 
-        List<Repository> repos = Arrays.asList(featuresService.listRepositories());
-        for (Repository r : repos) {
-            List<Feature> features = Arrays.asList(r.getFeatures());
-            if (ordered) {
-                Collections.sort(features, new FeatureComparator());
-            }
-            for (Feature f : features) {
-                if (onlyInstalled && !featuresService.isInstalled(f)) {
-                    // Filter out not installed features if we only want to see the installed ones
+        List<FeatureAndRepository> featuresAndRepositories = new ArrayList<FeatureAndRepository>();
+        for (Repository repository : Arrays.asList(featuresService.listRepositories())) {
+            for (Feature feature : Arrays.asList(repository.getFeatures())) {
+                if (onlyInstalled && !featuresService.isInstalled(feature)) {
                     continue;
                 }
-                table.addRow().addContent(
-                        f.getName(),
-                        f.getVersion(),
-                        featuresService.isInstalled(f) ? "x" : "",
-                        r.getName(),
-                        f.getDescription());
-                if (isInstalledViaDeployDir(r.getName())) {
-                    needsLegend = true;
-                }
+                featuresAndRepositories.add(new FeatureAndRepository(feature, repository));
+            }
+        }
+
+        if (ordered) {
+            Collections.sort(featuresAndRepositories, new FeatureAndRepositoryComparator());
+        }
+
+        for (FeatureAndRepository far : featuresAndRepositories) {
+            table.addRow().addContent(
+                    far.feature.getName(),
+                    far.feature.getVersion(),
+                    featuresService.isInstalled(far.feature) ? "x" : "",
+                    far.repository.getName(),
+                    far.feature.getDescription());
+            if (isInstalledViaDeployDir(far.repository.getName())) {
+                needsLegend = true;
             }
         }
 
@@ -86,9 +86,19 @@ public class ListFeaturesCommand extends FeaturesCommandSupport {
         return (st == null || st.length() <= 1) ? false : (st.charAt(st.length() - 1) == '*');
     }
 
-    class FeatureComparator implements Comparator<Feature> {
-        public int compare(Feature o1, Feature o2) {
-            return o1.getName().toLowerCase().compareTo( o2.getName().toLowerCase() );
+    class FeatureAndRepository {
+        public Feature feature;
+        public Repository repository;
+
+        FeatureAndRepository(Feature feature, Repository repository) {
+            this.feature = feature;
+            this.repository = repository;
+        }
+    }
+
+    class FeatureAndRepositoryComparator implements Comparator<FeatureAndRepository> {
+        public int compare(FeatureAndRepository o1, FeatureAndRepository o2) {
+            return o1.feature.getName().toLowerCase().compareTo( o2.feature.getName().toLowerCase() );
         }
     }
 
