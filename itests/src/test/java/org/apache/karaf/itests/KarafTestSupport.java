@@ -15,12 +15,7 @@ package org.apache.karaf.itests;
 
 import static org.junit.Assert.assertTrue;
 import static org.ops4j.pax.exam.CoreOptions.maven;
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.configureSecurity;
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.karafDistributionConfiguration;
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.logLevel;
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.replaceConfigurationFile;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
@@ -133,7 +128,8 @@ public class KarafTestSupport {
             editConfigurationFilePut("etc/org.ops4j.pax.web.cfg", "org.osgi.service.http.port", HTTP_PORT),
             editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiRegistryPort", RMI_REG_PORT),
             editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiServerPort", RMI_SERVER_PORT),
-            editConfigurationFilePut("etc/system.properties", "spring31.version", System.getProperty("spring31.version"))
+            editConfigurationFilePut("etc/system.properties", "spring31.version", System.getProperty("spring31.version")),
+            editConfigurationFilePut("etc/system.properties", "spring32.version", System.getProperty("spring32.version"))
         };
     }
 
