@@ -15,6 +15,34 @@
  * limitations under the License.
  */
 
+                    Apache Karaf 2.3.8
+                    ==================
+
+  Overview
+  --------
+
+  This is an update patch for Apache Karaf 2.3.7, containing several bug fixes, and dependency updates. We have introduced support of !$ to recall the last command argument, and improved the command description for osgi:shutdown. For more information on changes present in this patch, please read the below changelog.
+
+  Changelog
+  ---------
+
+** Bug
+ * [KARAF-2878|https://issues.apache.org/jira/browse/KARAF-2878] - The thread reading the system input stream should exit automatically when the console bundle stops
+ * [KARAF-2890|https://issues.apache.org/jira/browse/KARAF-2890] - The env variables can't be read while running karaf as a Linux service
+ * [KARAF-3023|https://issues.apache.org/jira/browse/KARAF-3023] - Wrong repositories for features after "features:list -o" command in 2.3.x
+ * [KARAF-3204|https://issues.apache.org/jira/browse/KARAF-3204] - Avoid calls to Configuration#setBundleLocation(null) which are not needed
+ * [KARAF-3213|https://issues.apache.org/jira/browse/KARAF-3213] - ConcurrentModification exception in FileInstall/Upgrade to Felix FileInstall 3.4.1
+
+** Dependency upgrade
+ * [KARAF-3201|https://issues.apache.org/jira/browse/KARAF-3201] - Upgrade to pax-logging 1.7.4
+ * [KARAF-3206|https://issues.apache.org/jira/browse/KARAF-3206] - Upgrade to ConfigAdmin 1.8.0
+
+** Improvement
+ * [KARAF-3222|https://issues.apache.org/jira/browse/KARAF-3222] - Command description for osgi:shutdown could be improved
+
+** New Feature
+ * [KARAF-2070|https://issues.apache.org/jira/browse/KARAF-2070] - Add support of !$ to recall the last command argument
+
                     Apache Karaf 2.3.7
                     ==================
 
