@@ -14,7 +14,6 @@
 package org.apache.karaf.itests.features;
 
 import org.apache.karaf.itests.KarafTestSupport;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -24,6 +23,70 @@ import org.ops4j.pax.exam.spi.reactors.PerClass;
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
 public class SpringFeaturesTest extends KarafTestSupport {
+
+    // Spring 3.1.x features test
+
+    @Test
+    public void installSpring31Feature() throws Exception {
+        installAssertAndUninstallFeature("spring", System.getProperty("spring31.version"));
+    }
+
+    @Test
+    public void installSpringAspects31Feature() throws Exception {
+        installAssertAndUninstallFeature("spring-aspects", System.getProperty("spring31.version"));
+    }
+
+    @Test
+    public void installSpringInstrument31Feature() throws Exception {
+        installAssertAndUninstallFeature("spring-instrument", System.getProperty("spring31.version"));
+    }
+
+    @Test
+    public void installSpringJdbc31Feature() throws Exception {
+        installAssertAndUninstallFeature("spring-jdbc", System.getProperty("spring31.version"));
+    }
+
+    @Test
+    public void installSpringJms31Feature() throws Exception {
+        installAssertAndUninstallFeature("spring-jms", System.getProperty("spring31.version"));
+    }
+
+    @Test
+    public void installSpringStruts31Feature() throws Exception {
+        installAssertAndUninstallFeature("spring-struts", System.getProperty("spring31.version"));
+    }
+
+    @Test
+    public void installSpringTest31Feature() throws Exception {
+        installAssertAndUninstallFeature("spring-test", System.getProperty("spring31.version"));
+    }
+
+    @Test
+    public void installSpringOrm31Feature() throws Exception {
+        installAssertAndUninstallFeature("spring-orm", System.getProperty("spring31.version"));
+    }
+
+    @Test
+    public void installSpringOxm31Feature() throws Exception {
+        installAssertAndUninstallFeature("spring-oxm", System.getProperty("spring31.version"));
+    }
+
+    @Test
+    public void installSpringTx31Feature() throws Exception {
+        installAssertAndUninstallFeature("spring-tx", System.getProperty("spring31.version"));
+    }
+
+    @Test
+    public void installSpringWeb31Feature() throws Exception {
+        installAssertAndUninstallFeature("spring-web", System.getProperty("spring31.version"));
+    }
+
+    @Test
+    public void installSpringWebPortlet31Feature() throws Exception {
+        installAssertAndUninstallFeature("spring-web-portlet", System.getProperty("spring31.version"));
+    }
+
+    // Spring 4.0.x features test
 
     @Test
     public void installSpringFeature() throws Exception {

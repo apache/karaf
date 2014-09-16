@@ -132,7 +132,8 @@ public class KarafTestSupport {
             editConfigurationFilePut("etc/org.apache.karaf.features.cfg", "featuresBoot", "config,standard,region,package,kar,management"),
             editConfigurationFilePut("etc/org.ops4j.pax.web.cfg", "org.osgi.service.http.port", HTTP_PORT),
             editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiRegistryPort", RMI_REG_PORT),
-            editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiServerPort", RMI_SERVER_PORT)
+            editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiServerPort", RMI_SERVER_PORT),
+            editConfigurationFilePut("etc/system.properties", "spring31.version", System.getProperty("spring31.version"))
         };
     }
 
@@ -355,6 +356,16 @@ public class KarafTestSupport {
         Assert.fail("Feature " + featureName + " should be installed but is not");
     }
 
+    public void assertFeatureInstalled(String featureName, String featureVersion) {
+        Feature[] features = featureService.listInstalledFeatures();
+        for (Feature feature : features) {
+            if (featureName.equals(feature.getName()) && featureVersion.equals(feature.getVersion())) {
+                return;
+            }
+        }
+        Assert.fail("Feature " + featureName + "/" + featureVersion + " should be installed but is not");
+    }
+
     public void assertFeatureNotInstalled(String featureName) {
         Feature[] features = featureService.listInstalledFeatures();
         for (Feature feature : features) {
@@ -406,6 +417,11 @@ public class KarafTestSupport {
         assertFeatureInstalled(feature);
     }
 
+    protected void installAndAssertFeature(String feature, String version) throws Exception {
+        featureService.installFeature(feature, version);
+        assertFeatureInstalled(feature, version);
+    }
+
     protected void installAssertAndUninstallFeature(String... feature) throws Exception {
     	Set<Feature> featuresBefore = new HashSet<Feature>(Arrays.asList(featureService.listInstalledFeatures()));
     	try {
@@ -416,6 +432,16 @@ public class KarafTestSupport {
 		} finally {
 			uninstallNewFeatures(featuresBefore);
 		}
+    }
+
+    protected void installAssertAndUninstallFeature(String feature, String version) throws Exception {
+        Set<Feature> featuresBefore = new HashSet<Feature>(Arrays.asList(featureService.listInstalledFeatures()));
+        try {
+            featureService.installFeature(feature, version);
+            assertFeatureInstalled(feature, version);
+        } finally {
+            uninstallNewFeatures(featuresBefore);
+        }
     }
 
     /**
