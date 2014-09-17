@@ -30,8 +30,8 @@ public class StandardFeaturesTest extends KarafTestSupport {
 	 * @throws Exception
 	 */
 	public void checkInteractionOfHttpAndAriesAnnotationFeature() throws Exception {
-		installAssertAndUninstallFeature("aries-annotation", "pax-http");
-		installAssertAndUninstallFeature("pax-http", "aries-annotation");
+		installAssertAndUninstallFeatures("aries-annotation", "pax-http");
+		installAssertAndUninstallFeatures("pax-http", "aries-annotation");
     }
 
     @Test
