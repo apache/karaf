@@ -456,7 +456,7 @@ public class Configuration
         {
             return new MetaTypeProviderImpl((ManagedService)managedService,
                     m_threadPoolSize, m_timeout, m_requireTopic,
-                    m_ignoreTimeout, m_ignoreTopics, 0.0);
+                    m_ignoreTimeout, m_ignoreTopics);
         }
         catch (final Throwable t)
         {
