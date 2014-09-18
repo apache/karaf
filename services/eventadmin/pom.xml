@@ -42,7 +42,7 @@
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>
-                            ${pom.artifactId}
+                            ${project.artifactId}
                         </Bundle-SymbolicName>
                         <Bundle-Activator>
                             org.apache.felix.eventadmin.impl.Activator

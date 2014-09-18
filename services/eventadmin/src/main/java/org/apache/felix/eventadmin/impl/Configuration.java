@@ -104,6 +104,7 @@ public class Configuration
     static final String PID = "org.apache.felix.eventadmin.impl.EventAdmin";
 
     static final String PROP_THREAD_POOL_SIZE = "org.apache.felix.eventadmin.ThreadPoolSize";
+    static final String PROP_ASYNC_TO_SYNC_THREAD_RATIO = "org.apache.felix.eventadmin.AsyncToSyncThreadRatio";
     static final String PROP_TIMEOUT = "org.apache.felix.eventadmin.Timeout";
     static final String PROP_REQUIRE_TOPIC = "org.apache.felix.eventadmin.RequireTopic";
     static final String PROP_IGNORE_TIMEOUT = "org.apache.felix.eventadmin.IgnoreTimeout";
@@ -116,6 +117,10 @@ public class Configuration
     private final BundleContext m_bundleContext;
 
     private int m_threadPoolSize;
+
+    private double m_asyncToSyncThreadRatio;
+
+    private int m_asyncThreadPoolSize;
 
     private int m_timeout;
 
@@ -226,6 +231,13 @@ public class Configuration
             m_threadPoolSize = getIntProperty(
                     PROP_THREAD_POOL_SIZE, m_bundleContext.getProperty(PROP_THREAD_POOL_SIZE), 20, 2);
 
+            // The ratio of asynchronous to synchronous threads in the internal thread
+            // pool.  Ratio must be positive and may be adjusted to represent the
+            // distribution of post to send operations.  Applications with higher number
+            // of post operations should have a higher ratio.
+            m_asyncToSyncThreadRatio = getDoubleProperty(
+                    PROP_ASYNC_TO_SYNC_THREAD_RATIO, m_bundleContext.getProperty(PROP_ASYNC_TO_SYNC_THREAD_RATIO), 0.5, 0.0);
+
             // The timeout in milliseconds - A value of less then 100 turns timeouts off.
             // Any other value is the time in milliseconds granted to each EventHandler
             // before it gets blacklisted.
@@ -280,6 +292,8 @@ public class Configuration
         else
         {
             m_threadPoolSize = getIntProperty(PROP_THREAD_POOL_SIZE, config.get(PROP_THREAD_POOL_SIZE), 20, 2);
+            m_asyncToSyncThreadRatio = getDoubleProperty(
+                    PROP_ASYNC_TO_SYNC_THREAD_RATIO, m_bundleContext.getProperty(PROP_ASYNC_TO_SYNC_THREAD_RATIO), 0.5, 0.0);
             m_timeout = getIntProperty(PROP_TIMEOUT, config.get(PROP_TIMEOUT), 5000, Integer.MIN_VALUE);
             m_requireTopic = getBooleanProperty(config.get(PROP_REQUIRE_TOPIC), true);
             m_ignoreTimeout = null;
@@ -326,6 +340,7 @@ public class Configuration
         {
             m_timeout = 0;
         }
+        m_asyncThreadPoolSize = m_threadPoolSize > 5 ? (int)Math.floor(m_threadPoolSize * m_asyncToSyncThreadRatio)  : 2;
     }
 
     private void startOrUpdate()
@@ -335,6 +350,10 @@ public class Configuration
                 PROP_LOG_LEVEL + "=" + m_logLevel);
         LogWrapper.getLogger().log(LogWrapper.LOG_DEBUG,
                 PROP_THREAD_POOL_SIZE + "=" + m_threadPoolSize);
+        LogWrapper.getLogger().log(LogWrapper.LOG_DEBUG,
+                PROP_ASYNC_TO_SYNC_THREAD_RATIO + "=" + m_asyncToSyncThreadRatio);
+        LogWrapper.getLogger().log(LogWrapper.LOG_DEBUG,
+                "Async Pool Size=" + m_asyncThreadPoolSize);
         LogWrapper.getLogger().log(LogWrapper.LOG_DEBUG,
                 PROP_TIMEOUT + "=" + m_timeout);
         LogWrapper.getLogger().log(LogWrapper.LOG_DEBUG,
@@ -352,7 +371,7 @@ public class Configuration
         {
             m_sync_pool.configure(m_threadPoolSize);
         }
-        final int asyncThreadPoolSize = m_threadPoolSize > 5 ? m_threadPoolSize / 2 : 2;
+        final int asyncThreadPoolSize = m_asyncThreadPoolSize;
         if ( m_async_pool == null )
         {
             m_async_pool = new DefaultThreadPool(asyncThreadPoolSize, false);
@@ -456,7 +475,7 @@ public class Configuration
         {
             return new MetaTypeProviderImpl((ManagedService)managedService,
                     m_threadPoolSize, m_timeout, m_requireTopic,
-                    m_ignoreTimeout, m_ignoreTopics);
+                    m_ignoreTimeout, m_ignoreTopics, m_asyncToSyncThreadRatio);
         }
         catch (final Throwable t)
         {
@@ -505,6 +524,47 @@ public class Configuration
                 try
                 {
                     result = Integer.parseInt(value.toString());
+                }
+                catch (NumberFormatException e)
+                {
+                    LogWrapper.getLogger().log(LogWrapper.LOG_WARNING,
+                            "Unable to parse property: " + key + " - Using default", e);
+                    return defaultValue;
+                }
+            }
+            if(result >= min)
+            {
+                return result;
+            }
+
+            LogWrapper.getLogger().log(LogWrapper.LOG_WARNING,
+                    "Value for property: " + key + " is to low - Using default");
+        }
+
+        return defaultValue;
+    }
+
+    /**
+     * Returns either the parsed double from the value of the property if it is set and
+     * not less then the min value or the default. Additionally, a warning is
+     * generated in case the value is erroneous (i.e., can not be parsed as an double or
+     * is less then the min value).
+     */
+    private double getDoubleProperty(final String key, final Object value,
+                                     final double defaultValue, final double min)
+    {
+        if(null != value)
+        {
+            final double result;
+            if ( value instanceof Double )
+            {
+                result = ((Double)value).doubleValue();
+            }
+            else
+            {
+                try
+                {
+                    result = Double.parseDouble(value.toString());
                 }
                 catch (NumberFormatException e)
                 {
