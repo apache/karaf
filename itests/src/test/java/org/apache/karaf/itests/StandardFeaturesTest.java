@@ -25,130 +25,96 @@ public class StandardFeaturesTest extends KarafTestSupport {
 
     @Test
     public void testBootFeatures() throws Exception {
+        System.out.println("");
+        System.out.println("===== TESTING BOOT FEATURES =====");
+        assertFeatureInstalled("karaf-framework");
+        assertFeatureInstalled("shell");
+        assertFeatureInstalled("features");
+        assertFeatureInstalled("service-security");
+        assertFeatureInstalled("admin");
         assertFeatureInstalled("config");
         assertFeatureInstalled("ssh");
         assertFeatureInstalled("management");
         assertFeatureInstalled("kar");
-    }
-
-    protected void installAndAssertFeature(String feature) throws Exception {
-        featuresService.installFeature(feature);
-        assertFeatureInstalled(feature);
-    }
-
-    @Test
-    public void testSpringFeature() throws Exception {
-        installAndAssertFeature("spring");
-    }
-
-    @Test
-    public void testSpringAspectsFeature() throws Exception {
-        installAndAssertFeature("spring-aspects");
-    }
-
-    @Test
-    public void testSpringDmFeature() throws Exception {
-        installAndAssertFeature("spring-dm");
-    }
-
-    @Test
-    public void testSpringDmWebFeature() throws Exception {
-        installAndAssertFeature("spring-dm-web");
-    }
-
-    @Test
-    public void testSpringInstrumentFeature() throws Exception {
-        installAndAssertFeature("spring-instrument");
-    }
-
-    @Test
-    public void testSpringJdbcFeature() throws Exception {
-        installAndAssertFeature("spring-jdbc");
-    }
-
-    @Test
-    public void testSpringJmsFeature() throws Exception {
-        installAndAssertFeature("spring-jms");
-    }
-
-    @Test
-    public void testSpringStrutsFeature() throws Exception {
-        installAndAssertFeature("spring-struts");
-    }
-
-    @Test
-    public void testSpringTestFeature() throws Exception {
-        installAndAssertFeature("spring-test");
-    }
-
-    @Test
-    public void testSpringOrmFeature() throws Exception {
-        installAndAssertFeature("spring-orm");
-    }
-
-    @Test
-    public void testSpringOxmFeature() throws Exception {
-        installAndAssertFeature("spring-oxm");
-    }
-
-    @Test
-    public void testSpringTxFeature() throws Exception {
-        installAndAssertFeature("spring-tx");
-    }
-
-    @Test
-    public void testSpringWebFeature() throws Exception {
-        installAndAssertFeature("spring-web");
-    }
-
-    @Test
-    public void testSpringWebPortletFeature() throws Exception {
-        installAndAssertFeature("spring-web-portlet");
+        assertFeatureInstalled("deployer");
+        assertFeatureInstalled("diagnostic");
     }
 
     @Test
     public void testWrapperFeature() throws Exception {
+        System.out.println("");
+        System.out.println("===== TESTING WRAPPER FEATURE =====");
         installAndAssertFeature("wrapper");
     }
 
     @Test
     public void testObrFeature() throws Exception {
+        System.out.println("");
+        System.out.println("===== TESTING OBR FEATURE =====");
         installAndAssertFeature("obr");
     }
 
     @Test
     public void testJettyFeature() throws Exception {
+        System.out.println("");
+        System.out.println("===== TESTING JETTY FEATURE =====");
         installAndAssertFeature("jetty");
     }
 
     @Test
     public void testHttpFeature() throws Exception {
+        System.out.println("");
+        System.out.println("===== TESTING HTTP FEATURE =====");
         installAndAssertFeature("http");
     }
 
     @Test
     public void testHttpWhiteboardFeature() throws Exception {
+        System.out.println("");
+        System.out.println("===== TESTING HTTP-WHITEBOARD FEATURE =====");
         installAndAssertFeature("http-whiteboard");
     }
 
     @Test
     public void testWarFeature() throws Exception {
+        System.out.println("");
+        System.out.println("===== TESTING WAR FEATURE =====");
         installAndAssertFeature("war");
     }
 
     @Test
     public void testWebconsoleFeature() throws Exception {
+        System.out.println("");
+        System.out.println("===== TESTING WEBCONSOLE FEATURE =====");
         installAndAssertFeature("webconsole");
     }
 
     @Test
     public void testEventadminFeature() throws Exception {
+        System.out.println("");
+        System.out.println("===== TESTING EVENTADMIN FEATURE =====");
         installAndAssertFeature("eventadmin");
     }
 
     @Test
     public void testJasyptEncryptionFeature() throws Exception {
+        System.out.println("");
+        System.out.println("===== TESTING JASYPT-ENCRYPTION FEATURE =====");
         installAndAssertFeature("jasypt-encryption");
+    }
+
+    @Test
+    public void testBlueprintWebFeature() throws Exception {
+        System.out.println("");
+        System.out.println("===== TESTING BLUEPRINT-WEB FEATURE =====");
+        installAndAssertFeature("blueprint-web");
+    }
+
+    @Test
+    public void testScrFeature() throws Exception {
+        System.out.println("");
+        System.out.println("===== TESTING SCR FEATURE =====");
+        installAndAssertFeature("scr");
     }
 
 }

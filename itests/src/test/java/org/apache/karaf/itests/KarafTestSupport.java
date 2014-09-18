@@ -59,9 +59,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.junit.Assert;
 
 import static org.ops4j.pax.exam.CoreOptions.maven;
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.karafDistributionConfiguration;
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.logLevel;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.*;
 
 public class KarafTestSupport {
 
@@ -89,7 +87,14 @@ public class KarafTestSupport {
                 karafDistributionConfiguration().frameworkUrl(maven().groupId("org.apache.karaf").artifactId("apache-karaf").versionAsInProject().type("tar.gz"))
                         .karafVersion(MavenUtils.getArtifactVersion("org.apache.karaf", "apache-karaf")).name("Apache Karaf").unpackDirectory(new File("target/exam")),
                 keepRuntimeFolder(),
-                logLevel(LogLevelOption.LogLevel.ERROR)};
+                logLevel(LogLevelOption.LogLevel.ERROR),
+                editConfigurationFilePut("etc/system.properties", "hibernate3.version", System.getProperty("hibernate3.version")),
+                editConfigurationFilePut("etc/system.properties", "hibernate42.version", System.getProperty("hibernate42.version")),
+                editConfigurationFilePut("etc/system.properties", "hibernate43.version", System.getProperty("hibernate43.version")),
+                editConfigurationFilePut("etc/system.properties", "spring31.version", System.getProperty("spring31.version")),
+                editConfigurationFilePut("etc/system.properties", "spring32.version", System.getProperty("spring32.version")),
+                editConfigurationFilePut("etc/system.properties", "spring40.version", System.getProperty("spring40.version"))
+        };
     }
 
     /**
@@ -307,33 +312,66 @@ public class KarafTestSupport {
         }
         Assert.fail("Feature " + featureName + " should be installed but is not");
     }
+
+    public void assertFeatureInstalled(String featureName, String featureVersion) {
+        Feature[] features = featuresService.listInstalledFeatures();
+        for (Feature feature : features) {
+            if (featureName.equals(feature.getName()) && featureVersion.equals(feature.getVersion())) {
+                return;
+            }
+        }
+        Assert.fail("Feature " + featureName + "/" + featureVersion + " should be installed but is not");
+    }
     
     protected void installAndAssertFeature(String feature) throws Exception {
         featuresService.installFeature(feature);
         assertFeatureInstalled(feature);
     }
 
-    protected void installAssertAndUninstallFeature(String... feature) throws Exception {
-        Set<Feature> featuresBefore = new HashSet<Feature>(Arrays.asList(featuresService.listInstalledFeatures()));
-        try {
-                        for (String curFeature : feature) {
-                                featuresService.installFeature(curFeature);
-                            assertFeatureInstalled(curFeature);
-                        }
-                } finally {
-                        uninstallNewFeatures(featuresBefore);
-                }
+    protected void installAndAssertFeature(String feature, String version) throws Exception {
+        featuresService.installFeature(feature, version);
+        assertFeatureInstalled(feature, version);
     }
 
+    protected void installAssertAndUninstallFeature(String feature) throws Exception {
+        Set<Feature> featuresBefore = new HashSet<Feature>(Arrays.asList(featuresService.listInstalledFeatures()));
+        try {
+            featuresService.installFeature(feature);
+            assertFeatureInstalled(feature);
+        } finally {
+            uninstallNewFeatures(featuresBefore);
+        }
+    }
+
+    protected void installAssertAndUninstallFeature(String feature, String version) throws Exception {
+        Set<Feature> featuresBefore = new HashSet<Feature>(Arrays.asList(featuresService.listInstalledFeatures()));
+        try {
+            featuresService.installFeature(feature, version);
+            assertFeatureInstalled(feature, version);
+        } finally {
+            uninstallNewFeatures(featuresBefore);
+        }
+    }
+
+    protected void installAssertAndUninstallFeatures(String... feature) throws Exception {
+        Set<Feature> featuresBefore = new HashSet<Feature>(Arrays.asList(featuresService.listInstalledFeatures()));
+        try {
+            for (String curFeature : feature) {
+                featuresService.installFeature(curFeature);
+                assertFeatureInstalled(curFeature);
+            }
+        } finally {
+            uninstallNewFeatures(featuresBefore);
+        }
+    }
 
     /**
      * The feature service does not uninstall feature dependencies when uninstalling a single feature.
      * So we need to make sure we uninstall all features that were newly installed.
      *
      * @param featuresBefore
-     * @throws Exception
      */
-    protected void uninstallNewFeatures(Set<Feature> featuresBefore) throws Exception {
+    protected void uninstallNewFeatures(Set<Feature> featuresBefore) {
         Feature[] features = featuresService.listInstalledFeatures();
         for (Feature curFeature : features) {
             if (!featuresBefore.contains(curFeature)) {
@@ -341,7 +379,7 @@ public class KarafTestSupport {
                     System.out.println("Uninstalling " + curFeature.getName());
                     featuresService.uninstallFeature(curFeature.getName(), curFeature.getVersion());
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    // e.printStackTrace();
                 }
             }
         }
