@@ -25,6 +25,7 @@
 
     <bean id="configRepo" class="org.apache.karaf.config.core.impl.ConfigRepositoryImpl">
         <argument ref="configAdmin"/>
+        <argument value="$[karaf.etc]"/>
     </bean>
     
     <reference id="configAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"  />
