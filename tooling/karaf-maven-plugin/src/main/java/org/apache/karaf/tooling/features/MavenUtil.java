@@ -41,7 +41,7 @@ public class MavenUtil {
 
     static final DefaultRepositoryLayout layout = new DefaultRepositoryLayout();
     private static final Pattern aetherPattern = Pattern.compile("([^: ]+):([^: ]+)(:([^: ]*)(:([^: ]+))?)?:([^: ]+)");
-    private static final Pattern mvnPattern = Pattern.compile("(?:wrap:)?mvn:([^/ ]+)/([^/ ]+)/([^/\\$ ]*)(/([^/\\$ ]+)(/([^/\\$ ]+))?)?(\\$.+)?");
+    private static final Pattern mvnPattern = Pattern.compile("(?:(?:wrap:)|(?:blueprint:))?mvn:([^/ ]+)/([^/ ]+)/([^/\\$ ]*)(/([^/\\$ ]+)(/([^/\\$ ]+))?)?(/\\$.+)?");
 
     /**
      * Convert PAX URL mvn format to aether coordinate format.
