@@ -109,7 +109,8 @@
                         <Private-Package>
                             org.apache.karaf.config.core.impl,
                             org.apache.karaf.config.core.impl.osgi,
-                            org.apache.karaf.util.tracker
+                            org.apache.karaf.util.tracker,
+                            org.apache.felix.utils.properties
                         </Private-Package>
                         <Provide-Capability>
                             ${capabilities}

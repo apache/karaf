@@ -18,21 +18,38 @@ package org.apache.karaf.config.core.impl;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.Hashtable;
 
+import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.config.core.ConfigRepository;
+import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ConfigRepositoryImpl implements ConfigRepository {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConfigRepositoryImpl.class);
+
+    private static final String FILEINSTALL_FILE_NAME = "felix.fileinstall.filename";
+
     private ConfigurationAdmin configAdmin;
-    
     private File storage;
 
     public ConfigRepositoryImpl(ConfigurationAdmin configAdmin) {
         this.configAdmin = configAdmin;
+    }
+
+    public ConfigRepositoryImpl(ConfigurationAdmin configAdmin, File storage) {
+        this.configAdmin = configAdmin;
+        this.storage = storage;
     }
 
     /* (non-Javadoc)
@@ -41,8 +58,14 @@ public class ConfigRepositoryImpl implements ConfigRepository {
     @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public void update(String pid, Dictionary props) throws IOException {
+        LOGGER.trace("Update configuration {}", pid);
         Configuration cfg = this.configAdmin.getConfiguration(pid, null);
         cfg.update(props);
+        try {
+            updateStorage(pid, props);
+        } catch (Exception e) {
+            LOGGER.warn("Can't update cfg file", e);
+        }
     }
 
     /* (non-Javadoc)
@@ -50,15 +73,75 @@ public class ConfigRepositoryImpl implements ConfigRepository {
      */
     @Override
     public void delete(String pid) throws Exception {
+        LOGGER.trace("Delete configuration {}", pid);
         Configuration configuration = this.configAdmin.getConfiguration(pid);
         configuration.delete();
-        deleteStorage(pid);
+        try {
+            deleteStorage(pid);
+        } catch (Exception e) {
+            LOGGER.warn("Can't delete cfg file", e);
+        }
     }
     
     protected void deleteStorage(String pid) throws Exception {
         if (storage != null) {
             File cfgFile = new File(storage, pid + ".cfg");
+            LOGGER.trace("Delete {}", cfgFile.getName());
             cfgFile.delete();
+        }
+    }
+
+    protected void updateStorage(String pid, Dictionary props) throws IOException {
+        if (storage != null) {
+            // get the cfg file
+            File cfgFile = new File(storage, pid + ".cfg");
+            Configuration cfg = configAdmin.getConfiguration(pid, null);
+            // update the cfg file depending of the configuration
+            if (cfg != null && cfg.getProperties() != null) {
+                Object val = cfg.getProperties().get(FILEINSTALL_FILE_NAME);
+                try {
+                    if (val instanceof URL) {
+                        cfgFile = new File(((URL) val).toURI());
+                    }
+                    if (val instanceof URI) {
+                        cfgFile = new File((URI) val);
+                    }
+                    if (val instanceof String) {
+                        cfgFile = new File(new URL((String) val).toURI());
+                    }
+                } catch (Exception e) {
+                    throw (IOException) new IOException(e.getMessage()).initCause(e);
+                }
+            }
+            LOGGER.trace("Update {}", cfgFile.getName());
+            // update the cfg file
+            Properties properties = new Properties(cfgFile);
+            for (Enumeration<String> keys = props.keys(); keys.hasMoreElements(); ) {
+                String key = keys.nextElement();
+                if (!Constants.SERVICE_PID.equals(key)
+                        && !ConfigurationAdmin.SERVICE_FACTORYPID.equals(key)
+                        && !FILEINSTALL_FILE_NAME.equals(key)) {
+                    if (props.get(key) != null) {
+                        properties.put(key, props.get(key).toString());
+                    }
+                }
+            }
+            // remove "removed" properties from the cfg file
+            ArrayList<String> propertiesToRemove = new ArrayList<>();
+            for (String key : properties.keySet()) {
+                if (props.get(key) == null
+                        && !Constants.SERVICE_PID.equals(key)
+                        && !ConfigurationAdmin.SERVICE_FACTORYPID.equals(key)
+                        && !FILEINSTALL_FILE_NAME.equals(key)) {
+                    propertiesToRemove.add(key);
+                }
+            }
+            for (String key : propertiesToRemove) {
+                properties.remove(key);
+            }
+            // save the cfg file
+            storage.mkdirs();
+            properties.save();
         }
     }
 
@@ -68,7 +151,7 @@ public class ConfigRepositoryImpl implements ConfigRepository {
     @Override
     @SuppressWarnings("rawtypes")
     public Dictionary getConfigProperties(String pid) throws IOException, InvalidSyntaxException {
-        if(pid != null && configAdmin != null) {
+        if (pid != null && configAdmin != null) {
             Configuration configuration = this.configAdmin.getConfiguration(pid);
             if(configuration != null) {
                 Dictionary props = configuration.getProperties();
