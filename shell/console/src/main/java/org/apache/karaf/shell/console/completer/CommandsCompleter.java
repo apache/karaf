@@ -96,7 +96,7 @@ public class CommandsCompleter implements Completer {
             }
             List<Completer> completers = new ArrayList<Completer>();
             for (String name : allCompleters[1].keySet()) {
-                if (name.startsWith(subShell)) {
+                if (name.startsWith(subShell + ":")) {
                     completers.add(allCompleters[1].get(name));
                 }
             }
@@ -112,7 +112,7 @@ public class CommandsCompleter implements Completer {
             if (!subShell.isEmpty()) {
                 List<Completer> completers = new ArrayList<Completer>();
                 for (String name : allCompleters[1].keySet()) {
-                    if (name.startsWith(subShell)) {
+                    if (name.startsWith(subShell + ":")) {
                         completers.add(allCompleters[1].get(name));
                     }
                 }
