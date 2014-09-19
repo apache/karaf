@@ -75,7 +75,7 @@ public class CommandsCompleter extends org.apache.karaf.shell.support.completers
             }
             List<Completer> completers = new ArrayList<Completer>();
             for (String name : allCompleters[1].keySet()) {
-                if (name.startsWith(subShell)) {
+                if (name.startsWith(subShell + ":")) {
                     completers.add(allCompleters[1].get(name));
                 }
             }
@@ -87,11 +87,12 @@ public class CommandsCompleter extends org.apache.karaf.shell.support.completers
             return res;
         }
 
+        // FIRST mode
         if (Session.COMPLETION_MODE_FIRST.equalsIgnoreCase(completion)) {
             if (!subShell.isEmpty()) {
                 List<Completer> completers = new ArrayList<Completer>();
                 for (String name : allCompleters[1].keySet()) {
-                    if (name.startsWith(subShell)) {
+                    if (name.startsWith(subShell + ":")) {
                         completers.add(allCompleters[1].get(name));
                     }
                 }
