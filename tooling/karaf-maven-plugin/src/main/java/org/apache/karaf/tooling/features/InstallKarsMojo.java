@@ -25,13 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.features.BundleInfo;
@@ -160,11 +154,13 @@ public class InstallKarsMojo extends MojoSupport {
         }
 
         Set<String> repositories = new HashSet<String>();
-        Set<Feature> features = new HashSet<Feature>();
+        Map<Feature, Boolean> features = new HashMap<Feature, Boolean>();
 
         getLog().info("Loading kar and features dependency in compile and runtime scopes");
         Collection<Artifact> dependencies = project.getDependencyArtifacts();
         for (Artifact artifact : dependencies) {
+            getLog().info("The startup.properties file is updated using kar and features dependency with a scope different from runtime, or defined in the <startupFeatures/> element");
+            boolean addToStartup = !artifact.getScope().equals("runtime");
             if (artifact.getScope().equals("compile") || artifact.getScope().equals("runtime")) {
                 if (artifact.getType().equals("kar")) {
                     File karFile = artifact.getFile();
@@ -173,7 +169,7 @@ public class InstallKarsMojo extends MojoSupport {
                         Kar kar = new Kar(karFile.toURI());
                         kar.extract(new File(system.getPath()), new File(workDirectory));
                         for (URI repositoryUri : kar.getFeatureRepos()) {
-                            resolveRepository(repositoryUri.getPath(), repositories, features, true);
+                            resolveRepository(repositoryUri.getPath(), repositories, features, true, addToStartup);
                         }
                     } catch (Exception e) {
                         throw new RuntimeException("Can not install " + artifact.toString() + " kar", e);
@@ -183,7 +179,7 @@ public class InstallKarsMojo extends MojoSupport {
                         getLog().info("Resolving " + artifact.toString() + " features repository");
                         String repositoryUri = dependencyHelper.artifactToMvn(artifact);
                         try {
-                            resolveRepository(repositoryUri, repositories, features, true);
+                            resolveRepository(repositoryUri, repositories, features, true, addToStartup);
                         } catch (Exception e) {
                             throw new MojoFailureException("Can not install " + artifact.toString() + " features repository", e);
                         }
@@ -193,10 +189,10 @@ public class InstallKarsMojo extends MojoSupport {
         }
 
         // install features/bundles
-        for (Feature feature : features) {
+        for (Feature feature : features.keySet()) {
             getLog().info("Install " + feature.getName() + " feature");
             try {
-                if (startupFeatures != null && startupFeatures.contains(feature.getName())) {
+                if (features.get(feature) || (startupFeatures != null && startupFeatures.contains(feature.getName()))) {
                     // the feature is a startup feature, updating startup.properties file
                     getLog().info("= Feature " + feature.getName() + " is defined as a startup feature");
                     getLog().info("= Updating startup.properties file");
@@ -281,7 +277,7 @@ public class InstallKarsMojo extends MojoSupport {
         }
     }
 
-    private void resolveRepository(String repository, Set<String> repositories, Set<Feature> features, boolean updateFeaturesCfgFile) throws Exception {
+    private void resolveRepository(String repository, Set<String> repositories, Map<Feature, Boolean> features, boolean updateFeaturesCfgFile, boolean updateStartupProperties) throws Exception {
         // check if the repository has not been processed
         if (repositories.contains(repository)) {
             return;
@@ -335,17 +331,17 @@ public class InstallKarsMojo extends MojoSupport {
         Features featuresModel = JaxbUtil.unmarshal(new FileInputStream(repositoryFile), false);
         // recursively process the inner repositories
         for (String innerRepository : featuresModel.getRepository()) {
-            resolveRepository(innerRepository, repositories, features, false);
+            resolveRepository(innerRepository, repositories, features, false, updateStartupProperties);
         }
         // update features
         for (Feature feature : featuresModel.getFeature()) {
-            features.add(feature);
+            features.put(feature, updateStartupProperties);
         }
     }
 
-    private void resolveFeature(Feature feature, Set<Feature> features) throws Exception {
+    private void resolveFeature(Feature feature, Map<Feature, Boolean> features) throws Exception {
         for (Dependency dependency : feature.getFeature()) {
-            for (Feature f : features) {
+            for (Feature f : features.keySet()) {
                 if (f.getName().equals(dependency.getName())) {
                     resolveFeature(f, features);
                 }
