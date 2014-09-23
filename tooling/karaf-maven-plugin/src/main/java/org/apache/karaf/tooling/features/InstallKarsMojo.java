@@ -29,28 +29,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Set;
-
-import javax.xml.bind.JAXBException;
-import javax.xml.stream.XMLStreamException;
 
 import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Dependency;
-import org.apache.karaf.features.FeaturesService;
-import org.apache.karaf.features.Repository;
-import org.apache.karaf.features.internal.model.Bundle;
-import org.apache.karaf.features.internal.model.Feature;
-import org.apache.karaf.features.internal.model.Features;
-import org.apache.karaf.features.internal.model.JaxbUtil;
+import org.apache.karaf.features.internal.model.*;
 import org.apache.karaf.kar.internal.Kar;
 import org.apache.karaf.tooling.utils.MojoSupport;
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 
@@ -97,12 +86,6 @@ public class InstallKarsMojo extends MojoSupport {
     protected int defaultStartLevel = 30;
 
     /**
-     * if false, unpack to system and add bundles to startup.properties
-     * if true, unpack to system and add feature to features config
-     */
-    protected boolean dontAddToStartup;
-
-    /**
      * Directory used during build to construction the Karaf system repository.
      *
      * @parameter default-value="${project.build.directory}/assembly/system"
@@ -132,33 +115,32 @@ public class InstallKarsMojo extends MojoSupport {
     private List<String> installedFeatures;
 
     /**
-     * When a feature depends on another feature, try to find it in another referenced feature-file and install that one
-     * too.
+     * Ignore the dependency attribute (dependency="[true|false]") on bundle
      *
      * @parameter
      */
-    private boolean addTransitiveFeatures = true;
+    protected boolean ignoreDependencyFlag = true;
 
     private URI system;
     private Properties startupProperties = new Properties();
-    private Set<Feature> featureSet = new HashSet<Feature>();
-    private List<Dependency> missingDependencies = new ArrayList<Dependency>();
 
     // an access layer for available Aether implementation
     protected DependencyHelper dependencyHelper;
 
-    /**
-     * list of features to  install into local repo.
-     */
-    private List<Feature> localRepoFeatures = new ArrayList<Feature>();
+    private static final String FEATURES_REPOSITORIES = "featuresRepositories";
+    private static final String FEATURES_BOOT = "featuresBoot";
 
     @SuppressWarnings("deprecation")
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         this.dependencyHelper = DependencyHelperFactory.createDependencyHelper(this.container, this.project, this.mavenSession, getLog());
+
+        getLog().info("Creating system directory");
         systemDirectory.mkdirs();
         system = systemDirectory.toURI();
+
         if (startupPropertiesFile.exists()) {
+            getLog().info("Loading startup.properties");
             try {
                 InputStream in = new FileInputStream(startupPropertiesFile);
                 try {
@@ -170,124 +152,123 @@ public class InstallKarsMojo extends MojoSupport {
                 throw new MojoFailureException("Could not open existing startup.properties file at " + startupPropertiesFile, e);
             }
         } else {
+            getLog().info("Creating startup.properties");
             startupProperties.setHeader(Collections.singletonList("#Bundles to be started on startup, with startlevel"));
             if (!startupPropertiesFile.getParentFile().exists()) {
                 startupPropertiesFile.getParentFile().mkdirs();
             }
         }
 
-        FeaturesService featuresService = new OfflineFeaturesService();
+        Set<String> repositories = new HashSet<String>();
+        Set<Feature> features = new HashSet<Feature>();
 
+        getLog().info("Loading kar and features dependency in compile and runtime scopes");
         Collection<Artifact> dependencies = project.getDependencyArtifacts();
-        StringBuilder buf = new StringBuilder();
         for (Artifact artifact : dependencies) {
-            dontAddToStartup = "runtime".equals(artifact.getScope());
-            if ("kar".equals(artifact.getType()) && acceptScope(artifact)) {
-                File file = artifact.getFile();
-                try {
-                    Kar kar = new Kar(file.toURI());
-                    kar.extract(new File(system.getPath()), new File(workDirectory));
-                    for (URI repoUri : kar.getFeatureRepos()) {
-                        featuresService.removeRepository(repoUri);
-                        featuresService.addRepository(repoUri);
-                    }
-                } catch (Exception e) {
-                    throw new RuntimeException("Could not install kar: " + artifact.toString() + "\n", e);
-                    //buf.append("Could not install kar: ").append(artifact.toString()).append("\n");
-                    //buf.append(e.getMessage()).append("\n\n");
-                }
-            }
-            if ("features".equals(artifact.getClassifier()) && acceptScope(artifact)) {
-                String uri = this.dependencyHelper.artifactToMvn(artifact);
-
-                File source = artifact.getFile();
-                DefaultRepositoryLayout layout = new DefaultRepositoryLayout();
-
-                //remove timestamp version
-                artifact = factory.createArtifactWithClassifier(artifact.getGroupId(), artifact.getArtifactId(), artifact.getBaseVersion(), artifact.getType(), artifact.getClassifier());
-                File target = new File(system.resolve(layout.pathOf(artifact)));
-
-                if (!target.exists()) {
-                    target.getParentFile().mkdirs();
+            if (artifact.getScope().equals("compile") || artifact.getScope().equals("runtime")) {
+                if (artifact.getType().equals("kar")) {
+                    File karFile = artifact.getFile();
+                    getLog().info("Extracting " + artifact.toString() + " kar");
                     try {
-                        copy(source, target);
-                    } catch (RuntimeException e) {
-                        getLog().error("Could not copy features " + uri + " from source file " + source, e);
+                        Kar kar = new Kar(karFile.toURI());
+                        kar.extract(new File(system.getPath()), new File(workDirectory));
+                        for (URI repositoryUri : kar.getFeatureRepos()) {
+                            resolveRepository(repositoryUri.getPath(), repositories, features, true);
+                        }
+                    } catch (Exception e) {
+                        throw new RuntimeException("Can not install " + artifact.toString() + " kar", e);
                     }
-
-                    // for snapshot, generate the repository metadata in order to avoid override of snapshot from remote repositories
-                    if (artifact.isSnapshot()) {
-                        getLog().debug("Feature " + uri + " is a SNAPSHOT, generate the maven-metadata-local.xml file");
-                        File metadataTarget = new File(target.getParentFile(), "maven-metadata-local.xml");
+                } else {
+                    if (artifact.getClassifier().equals("features")) {
+                        getLog().info("Resolving " + artifact.toString() + " features repository");
+                        String repositoryUri = dependencyHelper.artifactToMvn(artifact);
                         try {
-                            MavenUtil.generateMavenMetadata(artifact, metadataTarget);
+                            resolveRepository(repositoryUri, repositories, features, true);
                         } catch (Exception e) {
-                            getLog().warn("Could not create maven-metadata-local.xml", e);
-                            getLog().warn("It means that this SNAPSHOT could be overwritten by an older one present on remote repositories");
+                            throw new MojoFailureException("Can not install " + artifact.toString() + " features repository", e);
                         }
                     }
-
-                }
-                try {
-                    featuresService.addRepository(URI.create(uri));
-                } catch (Exception e) {
-                    buf.append("Could not install feature: ").append(artifact.toString()).append("\n");
-                    buf.append(e.getMessage()).append("\n\n");
                 }
             }
         }
 
-        // install bundles listed in startup properties that weren't in kars into the system dir
-        Set<?> keySet = startupProperties.keySet();
-        for (Object keyObject : keySet) {
-            String key = (String) keyObject;
-            String path = this.dependencyHelper.pathFromMaven(key);
-            File target = new File(system.resolve(path));
-            if (!target.exists()) {
-                install(key, target);
-            }
-        }
-
-        // install bundles listed in install features not in system
-        for (Feature feature : localRepoFeatures) {
-            for (Bundle bundle : feature.getBundle()) {
-                if (!bundle.isDependency()) {
-                    String key = bundle.getLocation();
-                    // remove wrap: protocol to resolve from maven
-                    if (key.startsWith("wrap:")) {
-                        key = key.substring(5);
-                    }
-                    String path = this.dependencyHelper.pathFromMaven(key);
-                    File test = new File(system.resolve(path));
-                    if (!test.exists()) {
-                        File target = new File(system.resolve(path));
-                        if (!target.exists()) {
-                            install(key, target);
-                            Artifact artifact = this.dependencyHelper.mvnToArtifact(key);
-                            if (artifact.isSnapshot()) {
-                                // generate maven-metadata-local.xml for the artifact
-                                File metadataSource = new File(this.dependencyHelper.resolveById(key, getLog()).getParentFile(), "maven-metadata-local.xml");
-                                File metadataTarget = new File(target.getParentFile(), "maven-metadata-local.xml");
-                                metadataTarget.getParentFile().mkdirs();
-                                try {
-                                    if (!metadataSource.exists()) {
-                                        // the maven-metadata-local.xml doesn't exist in the local repo, generate one
-                                        MavenUtil.generateMavenMetadata(artifact, metadataTarget);
-                                    } else {
-                                        // copy the metadata to the target
-                                        copy(metadataSource, metadataTarget);
-                                    }
-                                } catch (IOException ioException) {
-                                    getLog().warn(ioException);
-                                    getLog().warn("Unable to copy the maven-metadata-local.xml, it means that this SNAPSHOT will be overwritten by a remote one (if exist)");
-                                }
+        // install features/bundles
+        for (Feature feature : features) {
+            getLog().info("Install " + feature.getName() + " feature");
+            try {
+                if (startupFeatures != null && startupFeatures.contains(feature.getName())) {
+                    // the feature is a startup feature, updating startup.properties file
+                    getLog().info("= Feature " + feature.getName() + " is defined as a startup feature");
+                    getLog().info("= Updating startup.properties file");
+                    List<String> comment = Arrays.asList(new String[]{"", "# feature: " + feature.getName() + " version: " + feature.getVersion()});
+                    for (BundleInfo bundleInfo : feature.getBundles()) {
+                        String bundleLocation = bundleInfo.getLocation();
+                        String bundleStartLevel = Integer.toString(bundleInfo.getStartLevel() == 0 ? defaultStartLevel : bundleInfo.getStartLevel());
+                        if (startupProperties.containsKey(bundleLocation)) {
+                            int oldStartLevel = Integer.decode((String) startupProperties.get(bundleLocation));
+                            if (oldStartLevel > bundleInfo.getStartLevel()) {
+                                startupProperties.put(bundleLocation, bundleStartLevel);
+                            }
+                        } else {
+                            if (comment == null) {
+                                startupProperties.put(bundleLocation, bundleStartLevel);
+                            } else {
+                                startupProperties.put(bundleLocation, comment, bundleStartLevel);
+                                comment = null;
                             }
                         }
                     }
+                    // add the feature in the system folder
+                    resolveFeature(feature, features);
+                } else if (bootFeatures != null && bootFeatures.contains(feature.getName())) {
+                    // the feature is a boot feature, updating the etc/org.apache.karaf.features.cfg file
+                    getLog().info("= Feature " + feature.getName() + " is defined as a boot feature");
+                    if (featuresCfgFile.exists()) {
+                        getLog().info("= Updating " + featuresCfgFile.getPath());
+                        Properties featuresProperties = new Properties();
+                        InputStream in = new FileInputStream(featuresCfgFile);
+                        try {
+                            featuresProperties.load(in);
+                        } finally {
+                            in.close();
+                        }
+                        String featuresBoot = featuresProperties.getProperty(FEATURES_BOOT);
+                        featuresBoot = featuresBoot != null && featuresBoot.length() > 0 ? featuresBoot + "," : "";
+                        if (!featuresBoot.contains(feature.getName())) {
+                            featuresBoot = featuresBoot + feature.getName();
+                            featuresProperties.put(FEATURES_BOOT, featuresBoot);
+                            featuresProperties.save(featuresCfgFile);
+                        }
+                    }
+                    // add the feature in the system folder
+                    resolveFeature(feature, features);
+                } else if (installedFeatures != null && installedFeatures.contains(feature.getName())) {
+                    getLog().info("= Feature " + feature.getName() + " is defined as a installed feature");
+                    // add the feature in the system folder
+                    resolveFeature(feature, features);
+                } else {
+                    getLog().debug("= Feature " + feature.getName() + " is not installed");
                 }
+            } catch (Exception e) {
+                throw new MojoFailureException("Can not install " + feature.getName() + " feature", e);
             }
         }
 
+        // install bundles defined in startup.properties
+        getLog().info("Installing bundles defined in startup.properties in the system");
+        Set<?> startupBundles = startupProperties.keySet();
+        for (Object startupBundle : startupBundles) {
+            String bundlePath = this.dependencyHelper.pathFromMaven((String) startupBundle);
+            File bundleFile = new File(system.resolve(bundlePath));
+            if (!bundleFile.exists()) {
+                File bundleSource = this.dependencyHelper.resolveById((String) startupBundle, getLog());
+                bundleFile.getParentFile().mkdirs();
+                copy(bundleSource, bundleFile);
+            }
+        }
+
+        // generate the startup.properties file
+        getLog().info("Generating the startup.properties file");
         try {
             OutputStream out = new FileOutputStream(startupPropertiesFile);
             try {
@@ -296,282 +277,156 @@ public class InstallKarsMojo extends MojoSupport {
                 out.close();
             }
         } catch (IOException e) {
-            throw new MojoFailureException("Could not write startup.properties file at " + startupPropertiesFile, e);
-        }
-        if (buf.length() > 0) {
-            throw new MojoExecutionException("Could not unpack all dependencies:\n" + buf.toString());
+            throw new MojoFailureException("Can not write " + startupPropertiesFile, e);
         }
     }
 
-    private void install(String key, File target) throws MojoFailureException {
-        File source = this.dependencyHelper.resolveById(key, getLog());
-        target.getParentFile().mkdirs();
-        copy(source, target);
-    }
-
-    private boolean acceptScope(Artifact artifact) {
-        return "compile".equals(artifact.getScope()) || "runtime".equals(artifact.getScope());
-    }
-
-    private class OfflineFeaturesService implements FeaturesService {
-        private static final String FEATURES_REPOSITORIES = "featuresRepositories";
-        private static final String FEATURES_BOOT = "featuresBoot";
-
-        @Override
-        public void validateRepository(URI uri) throws Exception {
+    private void resolveRepository(String repository, Set<String> repositories, Set<Feature> features, boolean updateFeaturesCfgFile) throws Exception {
+        // check if the repository has not been processed
+        if (repositories.contains(repository)) {
+            return;
         }
-
-        @Override
-        public void addRepository(URI uri) throws Exception {
-            if (dontAddToStartup) {
-                getLog().info("Adding feature repository to system: " + uri);
-                if (featuresCfgFile.exists()) {
-                    Properties properties = new Properties();
-                    InputStream in = new FileInputStream(featuresCfgFile);
-                    try {
-                        properties.load(in);
-                    } finally {
-                        in.close();
-                    }
-                    String existingFeatureRepos = retrieveProperty(properties, FEATURES_REPOSITORIES);
-                    if (!existingFeatureRepos.contains(uri.toString())) {
-                        existingFeatureRepos = existingFeatureRepos + uri.toString();
-                        properties.put(FEATURES_REPOSITORIES, existingFeatureRepos);
-                    }
-                    Features repo = readFeatures(uri);
-                    for (String innerRepository : repo.getRepository()) {
-                        String innerRepositoryPath = dependencyHelper.pathFromMaven(innerRepository);
-                        File innerRepositoryTargetInSystemRepository = new File(system.resolve(innerRepositoryPath));
-                        if (!innerRepositoryTargetInSystemRepository.exists()) {
-                            File innerRepositorySourceFile = dependencyHelper.resolveById(innerRepository, getLog());
-                            innerRepositoryTargetInSystemRepository.getParentFile().mkdirs();
-                            copy(innerRepositorySourceFile, innerRepositoryTargetInSystemRepository);
-
-                            // add metadata for snapshot
-                            Artifact innerRepositoryArtifact = dependencyHelper.mvnToArtifact(innerRepository);
-                            if (innerRepositoryArtifact.isSnapshot()) {
-                                getLog().debug("Feature repository " + innerRepository + " is a SNAPSHOT, generate the maven-metadata-local.xml file");
-                                File metadataTarget = new File(innerRepositoryTargetInSystemRepository.getParentFile(), "maven-metadata-local.xml");
-                                try {
-                                    MavenUtil.generateMavenMetadata(innerRepositoryArtifact, metadataTarget);
-                                } catch (Exception e) {
-                                    getLog().warn("Could not create maven-metadata-local.xml", e);
-                                    getLog().warn("It means that this SNAPSHOT could be overwritten by an older one present on remote repositories");
-                                }
-                            }
-                        }
-                    }
-                    for (Feature feature : repo.getFeature()) {
-                        featureSet.add(feature);
-                        if (startupFeatures != null && startupFeatures.contains(feature.getName())) {
-                            installFeature(feature, null);
-                        } else if (bootFeatures != null && bootFeatures.contains(feature.getName())) {
-                            localRepoFeatures.add(feature);
-                            missingDependencies.addAll(feature.getDependencies());
-                            String existingBootFeatures = retrieveProperty(properties, FEATURES_BOOT);
-                            if (!existingBootFeatures.contains(feature.getName())) {
-                                existingBootFeatures = existingBootFeatures + feature.getName();
-                                properties.put(FEATURES_BOOT, existingBootFeatures);
-                            }
-                        } else if (installedFeatures != null && installedFeatures.contains(feature.getName())) {
-                            localRepoFeatures.add(feature);
-                            missingDependencies.addAll(feature.getDependencies());
-                        }
-                    }
-                    if (addTransitiveFeatures) {
-                        addMissingDependenciesToRepo();
-                    }
-                    FileOutputStream out = new FileOutputStream(featuresCfgFile);
-                    try {
-                        properties.save(out);
-                    } finally {
-                        out.close();
-                    }
-                }
-            } else {
-                getLog().info("Installing feature " + uri + " to system and startup.properties");
-                Features features = readFeatures(uri);
-                for (Feature feature : features.getFeature()) {
-                    installFeature(feature, null);
-                }
-            }
-        }
-
-        private void addMissingDependenciesToRepo() {
-            for (ListIterator<Dependency> iterator = missingDependencies.listIterator(); iterator.hasNext(); ) {
-                Dependency dependency = iterator.next();
-                Feature depFeature = lookupFeature(dependency);
-                if (depFeature == null) {
-                    continue;
-                }
-                localRepoFeatures.add(depFeature);
-                iterator.remove();
-                addAllMissingDependencies(iterator, depFeature);
-            }
-        }
-
-        private void addAllMissingDependencies(ListIterator<Dependency> iterator, Feature depFeature) {
-            for (Dependency dependency : depFeature.getDependencies()) {
-                if (!missingDependencies.contains(dependency)) {
-                    iterator.add(dependency);
-                }
-            }
-        }
-
-        @Override
-        public void addRepository(URI uri, boolean install) throws Exception {
-        }
-
-        private String retrieveProperty(Properties properties, String key) {
-            String val = properties.getProperty(key);
-            return val != null && val.length() > 0 ? val + "," : "";
-        }
-
-        private Features readFeatures(URI uri) throws MojoExecutionException, XMLStreamException, JAXBException, IOException {
-            File repoFile;
-            if (uri.toString().startsWith("mvn:")) {
-                URI featuresPath = system.resolve(dependencyHelper.pathFromMaven(uri.toString()));
-                repoFile = new File(featuresPath);
-            } else {
-                repoFile = new File(uri);
-            }
-            InputStream in = new FileInputStream(repoFile);
-            Features features;
+        repositories.add(repository);
+        // update etc/org.apache.karaf.features.cfg file
+        if (updateFeaturesCfgFile && featuresCfgFile.exists()) {
+            Properties featuresProperties = new Properties();
+            InputStream in = new FileInputStream(featuresCfgFile);
             try {
-                features = JaxbUtil.unmarshal(in, false);
+                featuresProperties.load(in);
             } finally {
                 in.close();
             }
-            return features;
+            String featureRepos = featuresProperties.getProperty(FEATURES_REPOSITORIES);
+            featureRepos = featureRepos != null && featureRepos.length() > 0 ? featureRepos + "," : "";
+            if (!featureRepos.contains(repository)) {
+                featureRepos = featureRepos + repository;
+                featuresProperties.put(FEATURES_REPOSITORIES, featureRepos);
+                featuresProperties.save(featuresCfgFile);
+            }
         }
-
-        @Override
-        public void removeRepository(URI uri) {
+        // resolving repository location
+        File repositoryFile;
+        if (repository.startsWith("mvn")) {
+            repositoryFile = dependencyHelper.resolveById(repository, getLog());
+            repository = dependencyHelper.pathFromMaven(repository);
+        } else {
+            repositoryFile = new File(repository);
         }
-
-        @Override
-        public void removeRepository(URI uri, boolean install) {
-        }
-
-        @Override
-        public void restoreRepository(URI uri) throws Exception {
-        }
-
-        @Override
-        public Repository[] listRepositories() {
-            return new Repository[0];
-        }
-
-        @Override
-        public void installFeature(String name) throws Exception {
-        }
-
-        @Override
-        public void installFeature(String name, EnumSet<Option> options) throws Exception {
-        }
-
-        @Override
-        public void installFeature(String name, String version) throws Exception {
-        }
-
-        @Override
-        public void installFeature(String name, String version, EnumSet<Option> options) throws Exception {
-        }
-
-        @Override
-        public void installFeature(org.apache.karaf.features.Feature feature, EnumSet<Option> options) throws Exception {
-            List<String> comment = Arrays.asList(new String[]{"", "# feature: " + feature.getName() + " version: " + feature.getVersion()});
-            for (BundleInfo bundle : feature.getBundles()) {
-                String location = bundle.getLocation();
-                String startLevel = Integer.toString(bundle.getStartLevel() == 0 ? defaultStartLevel : bundle.getStartLevel());
-                if (startupProperties.containsKey(location)) {
-                    int oldStartLevel = Integer.decode((String) startupProperties.get(location));
-                    if (oldStartLevel > bundle.getStartLevel()) {
-                        startupProperties.put(location, startLevel);
+        // copy the repository file in system folder
+        File repositoryFileInSystemFolder = new File(system.resolve(repository));
+        if (!repositoryFileInSystemFolder.exists()) {
+            repositoryFileInSystemFolder.getParentFile().mkdirs();
+            copy(repositoryFile, repositoryFileInSystemFolder);
+            // add metadata for snapshot
+            if (repository.startsWith("mvn")) {
+                Artifact repositoryArtifact = dependencyHelper.mvnToArtifact(repository);
+                if (repositoryArtifact.isSnapshot()) {
+                    File metadataTarget = new File(repositoryFileInSystemFolder.getParentFile(), "maven-metadata-local.xml");
+                    try {
+                        MavenUtil.generateMavenMetadata(repositoryArtifact, metadataTarget);
+                    } catch (Exception e) {
+                        getLog().warn("Could not create maven-metadata-local.xml", e);
+                        getLog().warn("It means that this SNAPSHOT could be overwritten by an older one present on remote repositories");
                     }
+                }
+            }
+        }
+        // loading the model
+        Features featuresModel = JaxbUtil.unmarshal(new FileInputStream(repositoryFile), false);
+        // recursively process the inner repositories
+        for (String innerRepository : featuresModel.getRepository()) {
+            resolveRepository(innerRepository, repositories, features, false);
+        }
+        // update features
+        for (Feature feature : featuresModel.getFeature()) {
+            features.add(feature);
+        }
+    }
+
+    private void resolveFeature(Feature feature, Set<Feature> features) throws Exception {
+        for (Dependency dependency : feature.getFeature()) {
+            for (Feature f : features) {
+                if (f.getName().equals(dependency.getName())) {
+                    resolveFeature(f, features);
+                }
+            }
+        }
+
+        getLog().info("Resolving feature " + feature.getName());
+
+        // installing feature bundles
+        getLog().info("= Installing bundles from " + feature.getName() + " feature");
+        for (Bundle bundle : feature.getBundle()) {
+            if (!ignoreDependencyFlag && bundle.isDependency()) {
+                getLog().warn("== Bundle " + bundle.getLocation() + " is defined as dependency, so it's not installed");
+            } else {
+                getLog().info("== Installing bundle " + bundle.getLocation());
+                String bundleLocation = bundle.getLocation();
+                // cleanup prefixes
+                if (bundleLocation.startsWith("wrap:")) {
+                    bundleLocation = bundleLocation.substring("wrap:".length());
+                }
+                if (bundleLocation.startsWith("blueprint:")) {
+                    bundleLocation = bundleLocation.substring("blueprint:".length());
+                }
+                if (bundleLocation.startsWith("webbundle:")) {
+                    bundleLocation = bundleLocation.substring("webbundle:".length());
+                }
+                if (bundleLocation.startsWith("war:")) {
+                    bundleLocation = bundleLocation.substring("war:".length());
+                }
+                File bundleFile;
+                if (bundleLocation.startsWith("mvn:")) {
+                    bundleFile = dependencyHelper.resolveById(bundleLocation, getLog());
+                    bundleLocation = dependencyHelper.pathFromMaven(bundleLocation);
                 } else {
-                    if (comment == null) {
-                        startupProperties.put(location, startLevel);
-                    } else {
-                        startupProperties.put(location, comment, startLevel);
-                        comment = null;
+                    bundleFile = new File(new URI(bundleLocation));
+                }
+                File bundleSystemFile = new File(system.resolve(bundleLocation));
+                copy(bundleFile, bundleSystemFile);
+                // add metadata for snapshot
+                if (bundleLocation.startsWith("mvn")) {
+                    Artifact bundleArtifact = dependencyHelper.mvnToArtifact(bundleLocation);
+                    if (bundleArtifact.isSnapshot()) {
+                        File metadataTarget = new File(bundleSystemFile.getParentFile(), "maven-metadata-local.xml");
+                        try {
+                            MavenUtil.generateMavenMetadata(bundleArtifact, metadataTarget);
+                        } catch (Exception e) {
+                            getLog().warn("Could not create maven-metadata-local.xml", e);
+                            getLog().warn("It means that this SNAPSHOT could be overwritten by an older one present on remote repositories");
+                        }
                     }
                 }
             }
         }
 
-        private Feature lookupFeature(Dependency dependency) {
-            for (Feature feature : featureSet) {
-                if (featureSatisfiesDependency(feature, dependency)) {
-                    return feature;
+        // installing feature config files
+        getLog().info("= Installing configuration files from " + feature.getName() + " feature");
+        for (ConfigFile configFile : feature.getConfigfile()) {
+            getLog().warn("== Installing configuration file " + configFile.getLocation());
+            String configFileLocation = configFile.getLocation();
+            File configFileFile;
+            if (configFileLocation.startsWith("mvn:")) {
+                configFileFile = dependencyHelper.resolveById(configFileLocation, getLog());
+                configFileLocation = dependencyHelper.pathFromMaven(configFileLocation);
+            } else {
+                configFileFile = new File(new URI(configFileLocation));
+            }
+            File configFileSystemFile = new File(system.resolve(configFileLocation));
+            copy(configFileFile, configFileSystemFile);
+            // add metadata for snapshot
+            if (configFileLocation.startsWith("mvn")) {
+                Artifact configFileArtifact = dependencyHelper.mvnToArtifact(configFileLocation);
+                if (configFileArtifact.isSnapshot()) {
+                    File metadataTarget = new File(configFileSystemFile.getParentFile(), "maven-metadata-local.xml");
+                    try {
+                        MavenUtil.generateMavenMetadata(configFileArtifact, metadataTarget);
+                    } catch (Exception e) {
+                        getLog().warn("Could not create maven-metadata-local.xml", e);
+                        getLog().warn("It means that this SNAPSHOT could be overwritten by an older one present on remote repositories");
+                    }
                 }
             }
-            return null;
-        }
-
-        private boolean featureSatisfiesDependency(Feature feature, Dependency dependency) {
-            if (!feature.getName().equals(dependency.getName())) {
-                return false;
-            }
-            return true;
-        }
-
-        @Override
-        public void installFeatures(Set<org.apache.karaf.features.Feature> features, EnumSet<Option> options)
-                throws Exception {
-        }
-
-        @Override
-        public void uninstallFeature(String name) throws Exception {
-        }
-
-        @Override
-        public void uninstallFeature(String name, EnumSet<Option> options) {
-        }
-
-        @Override
-        public void uninstallFeature(String name, String version) throws Exception {
-        }
-
-        @Override
-        public void uninstallFeature(String name, String version, EnumSet<Option> options) {
-        }
-
-        @Override
-        public Feature[] listFeatures() throws Exception {
-            return new Feature[0];
-        }
-
-        @Override
-        public Feature[] listInstalledFeatures() {
-            return new Feature[0];
-        }
-
-        @Override
-        public boolean isInstalled(org.apache.karaf.features.Feature f) {
-            return false;
-        }
-
-        @Override
-        public org.apache.karaf.features.Feature getFeature(String name, String version) throws Exception {
-            return null;
-        }
-
-        @Override
-        public org.apache.karaf.features.Feature getFeature(String name) throws Exception {
-            return null;
-        }
-
-        @Override
-        public Repository getRepository(String repoName) {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public void refreshRepository(URI uri) throws Exception {
-            // TODO Auto-generated method stub
-
         }
     }
 
