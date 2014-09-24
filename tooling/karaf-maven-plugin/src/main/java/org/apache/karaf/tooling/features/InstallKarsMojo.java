@@ -392,6 +392,10 @@ public class InstallKarsMojo extends MojoSupport {
                 // cleanup prefixes
                 if (bundleLocation.startsWith("wrap:")) {
                     bundleLocation = bundleLocation.substring("wrap:".length());
+                    int index = bundleLocation.indexOf("$");
+                    if (index != -1) {
+                        bundleLocation = bundleLocation.substring(0, index);
+                    }
                 }
                 if (bundleLocation.startsWith("blueprint:")) {
                     bundleLocation = bundleLocation.substring("blueprint:".length());
