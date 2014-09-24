@@ -404,6 +404,10 @@ public class InstallKarsMojo extends MojoSupport {
                 }
                 File bundleFile;
                 if (bundleLocation.startsWith("mvn:")) {
+                    if (bundleLocation.endsWith("/")) {
+                        // for bad formed URL (like in Camel for mustache-compiler), we remove the trailing /
+                        bundleLocation = bundleLocation.substring(0, bundleLocation.length() - 1);
+                    }
                     bundleFile = dependencyHelper.resolveById(bundleLocation, getLog());
                     bundleLocation = dependencyHelper.pathFromMaven(bundleLocation);
                 } else {
