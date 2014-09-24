@@ -157,9 +157,9 @@ public class InstallKarsMojo extends MojoSupport {
         Map<Feature, Boolean> features = new HashMap<Feature, Boolean>();
 
         getLog().info("Loading kar and features dependency in compile and runtime scopes");
+        getLog().info("The startup.properties file is updated using kar and features dependency with a scope different from runtime, or defined in the <startupFeatures/> element");
         Collection<Artifact> dependencies = project.getDependencyArtifacts();
         for (Artifact artifact : dependencies) {
-            getLog().info("The startup.properties file is updated using kar and features dependency with a scope different from runtime, or defined in the <startupFeatures/> element");
             boolean addToStartup = !artifact.getScope().equals("runtime");
             if (artifact.getScope().equals("compile") || artifact.getScope().equals("runtime")) {
                 if (artifact.getType().equals("kar")) {
@@ -169,7 +169,7 @@ public class InstallKarsMojo extends MojoSupport {
                         Kar kar = new Kar(karFile.toURI());
                         kar.extract(new File(system.getPath()), new File(workDirectory));
                         for (URI repositoryUri : kar.getFeatureRepos()) {
-                            resolveRepository(repositoryUri.getPath(), repositories, features, true, addToStartup);
+                            resolveRepository(repositoryUri.getPath(), repositories, features, false, addToStartup);
                         }
                     } catch (Exception e) {
                         throw new RuntimeException("Can not install " + artifact.toString() + " kar", e);
@@ -190,7 +190,6 @@ public class InstallKarsMojo extends MojoSupport {
 
         // install features/bundles
         for (Feature feature : features.keySet()) {
-            getLog().info("Install " + feature.getName() + " feature");
             try {
                 if (features.get(feature) || (startupFeatures != null && startupFeatures.contains(feature.getName()))) {
                     // the feature is a startup feature, updating startup.properties file
@@ -282,6 +281,7 @@ public class InstallKarsMojo extends MojoSupport {
         if (repositories.contains(repository)) {
             return;
         }
+        getLog().info("Resolving " + repository + " features repository");
         repositories.add(repository);
         // update etc/org.apache.karaf.features.cfg file
         if (updateFeaturesCfgFile && featuresCfgFile.exists()) {
