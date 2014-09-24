@@ -408,6 +408,14 @@ public class InstallKarsMojo extends MojoSupport {
                         // for bad formed URL (like in Camel for mustache-compiler), we remove the trailing /
                         bundleLocation = bundleLocation.substring(0, bundleLocation.length() - 1);
                     }
+                    if (bundleLocation.startsWith("mvn:http")) {
+                        // cleanup the URL containing the repository location directly in the URL
+                        int index = bundleLocation.indexOf("!");
+                        if (index != -1) {
+                            bundleLocation = bundleLocation.substring(index + 1);
+                            bundleLocation = "mvn:" + bundleLocation;
+                        }
+                    }
                     bundleFile = dependencyHelper.resolveById(bundleLocation, getLog());
                     bundleLocation = dependencyHelper.pathFromMaven(bundleLocation);
                 } else {
