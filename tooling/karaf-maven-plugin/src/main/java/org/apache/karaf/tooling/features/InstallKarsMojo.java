@@ -175,7 +175,7 @@ public class InstallKarsMojo extends MojoSupport {
                         throw new RuntimeException("Can not install " + artifact.toString() + " kar", e);
                     }
                 } else {
-                    if (artifact.getClassifier().equals("features")) {
+                    if (artifact.getClassifier() != null && artifact.getClassifier().equals("features")) {
                         getLog().info("Resolving " + artifact.toString() + " features repository");
                         String repositoryUri = dependencyHelper.artifactToMvn(artifact);
                         try {
