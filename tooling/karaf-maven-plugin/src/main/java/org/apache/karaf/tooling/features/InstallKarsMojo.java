@@ -396,12 +396,10 @@ public class InstallKarsMojo extends MojoSupport {
         // installing condition features
         for (Conditional conditional : feature.getConditional()) {
             boolean found = true;
-            for (String condition : conditional.getCondition()) {
-                if (!condition.startsWith("req:")) {
-                    if (!installedFeatures.contains(condition) && !bootFeatures.contains(condition)) {
-                        found = false;
-                        break;
-                    }
+            for (Dependency condition : conditional.getCondition()) {
+                if (!installedFeatures.contains(condition.getName()) && !bootFeatures.contains(condition.getName())) {
+                    found = false;
+                    break;
                 }
             }
             if (found) {
