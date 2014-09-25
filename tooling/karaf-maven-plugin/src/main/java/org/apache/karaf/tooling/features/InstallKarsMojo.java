@@ -384,90 +384,130 @@ public class InstallKarsMojo extends MojoSupport {
         // installing feature bundles
         getLog().info("= Installing bundles from " + feature.getName() + " feature");
         for (Bundle bundle : feature.getBundle()) {
-            if (!ignoreDependencyFlag && bundle.isDependency()) {
-                getLog().warn("== Bundle " + bundle.getLocation() + " is defined as dependency, so it's not installed");
-            } else {
-                getLog().info("== Installing bundle " + bundle.getLocation());
-                String bundleLocation = bundle.getLocation();
-                // cleanup prefixes
-                if (bundleLocation.startsWith("wrap:")) {
-                    bundleLocation = bundleLocation.substring("wrap:".length());
-                    int index = bundleLocation.indexOf("$");
-                    if (index != -1) {
-                        bundleLocation = bundleLocation.substring(0, index);
-                    }
-                }
-                if (bundleLocation.startsWith("blueprint:")) {
-                    bundleLocation = bundleLocation.substring("blueprint:".length());
-                }
-                if (bundleLocation.startsWith("webbundle:")) {
-                    bundleLocation = bundleLocation.substring("webbundle:".length());
-                }
-                if (bundleLocation.startsWith("war:")) {
-                    bundleLocation = bundleLocation.substring("war:".length());
-                }
-                File bundleFile;
-                if (bundleLocation.startsWith("mvn:")) {
-                    if (bundleLocation.endsWith("/")) {
-                        // for bad formed URL (like in Camel for mustache-compiler), we remove the trailing /
-                        bundleLocation = bundleLocation.substring(0, bundleLocation.length() - 1);
-                    }
-                    if (bundleLocation.startsWith("mvn:http")) {
-                        // cleanup the URL containing the repository location directly in the URL
-                        int index = bundleLocation.indexOf("!");
-                        if (index != -1) {
-                            bundleLocation = bundleLocation.substring(index + 1);
-                            bundleLocation = "mvn:" + bundleLocation;
-                        }
-                    }
-                    bundleFile = dependencyHelper.resolveById(bundleLocation, getLog());
-                    bundleLocation = dependencyHelper.pathFromMaven(bundleLocation);
-                } else {
-                    bundleFile = new File(new URI(bundleLocation));
-                }
-                File bundleSystemFile = new File(system.resolve(bundleLocation));
-                copy(bundleFile, bundleSystemFile);
-                // add metadata for snapshot
-                if (bundleLocation.startsWith("mvn")) {
-                    Artifact bundleArtifact = dependencyHelper.mvnToArtifact(bundleLocation);
-                    if (bundleArtifact.isSnapshot()) {
-                        File metadataTarget = new File(bundleSystemFile.getParentFile(), "maven-metadata-local.xml");
-                        try {
-                            MavenUtil.generateMavenMetadata(bundleArtifact, metadataTarget);
-                        } catch (Exception e) {
-                            getLog().warn("Could not create maven-metadata-local.xml", e);
-                            getLog().warn("It means that this SNAPSHOT could be overwritten by an older one present on remote repositories");
-                        }
-                    }
-                }
-            }
+            installBundle(bundle);
         }
 
         // installing feature config files
         getLog().info("= Installing configuration files from " + feature.getName() + " feature");
         for (ConfigFile configFile : feature.getConfigfile()) {
-            getLog().warn("== Installing configuration file " + configFile.getLocation());
-            String configFileLocation = configFile.getLocation();
-            File configFileFile;
-            if (configFileLocation.startsWith("mvn:")) {
-                configFileFile = dependencyHelper.resolveById(configFileLocation, getLog());
-                configFileLocation = dependencyHelper.pathFromMaven(configFileLocation);
-            } else {
-                configFileFile = new File(new URI(configFileLocation));
+            installConfigFile(configFile);
+        }
+
+        // installing condition features
+        for (Conditional conditional : feature.getConditional()) {
+            boolean found = true;
+            for (String condition : conditional.getCondition()) {
+                if (!condition.startsWith("req:")) {
+                    if (!installedFeatures.contains(condition) && !bootFeatures.contains(condition)) {
+                        found = false;
+                        break;
+                    }
+                }
             }
-            File configFileSystemFile = new File(system.resolve(configFileLocation));
-            copy(configFileFile, configFileSystemFile);
+            if (found) {
+                getLog().info("= Installing conditional " + conditional.getCondition().toString());
+                getLog().debug("== Conditional features ...");
+                for (Dependency dependency : conditional.getFeature()) {
+                    for (Feature f : features.keySet()) {
+                        if (f.getName().equals(dependency.getName())) {
+                            resolveFeature(f, features);
+                        }
+                    }
+                }
+                getLog().debug("== Conditional bundles");
+                for (Bundle bundle : conditional.getBundle()) {
+                    installBundle(bundle);
+                }
+                getLog().debug("== Conditional configuration files");
+                for (ConfigFile configFile : conditional.getConfigfile()) {
+                    installConfigFile(configFile);
+                }
+            }
+        }
+    }
+
+    private void installBundle(Bundle bundle) throws Exception {
+        if (!ignoreDependencyFlag && bundle.isDependency()) {
+            getLog().warn("== Bundle " + bundle.getLocation() + " is defined as dependency, so it's not installed");
+        } else {
+            getLog().info("== Installing bundle " + bundle.getLocation());
+            String bundleLocation = bundle.getLocation();
+            // cleanup prefixes
+            if (bundleLocation.startsWith("wrap:")) {
+                bundleLocation = bundleLocation.substring("wrap:".length());
+                int index = bundleLocation.indexOf("$");
+                if (index != -1) {
+                    bundleLocation = bundleLocation.substring(0, index);
+                }
+            }
+            if (bundleLocation.startsWith("blueprint:")) {
+                bundleLocation = bundleLocation.substring("blueprint:".length());
+            }
+            if (bundleLocation.startsWith("webbundle:")) {
+                bundleLocation = bundleLocation.substring("webbundle:".length());
+            }
+            if (bundleLocation.startsWith("war:")) {
+                bundleLocation = bundleLocation.substring("war:".length());
+            }
+            File bundleFile;
+            if (bundleLocation.startsWith("mvn:")) {
+                if (bundleLocation.endsWith("/")) {
+                    // for bad formed URL (like in Camel for mustache-compiler), we remove the trailing /
+                    bundleLocation = bundleLocation.substring(0, bundleLocation.length() - 1);
+                }
+                if (bundleLocation.startsWith("mvn:http")) {
+                    // cleanup the URL containing the repository location directly in the URL
+                    int index = bundleLocation.indexOf("!");
+                    if (index != -1) {
+                        bundleLocation = bundleLocation.substring(index + 1);
+                        bundleLocation = "mvn:" + bundleLocation;
+                    }
+                }
+                bundleFile = dependencyHelper.resolveById(bundleLocation, getLog());
+                bundleLocation = dependencyHelper.pathFromMaven(bundleLocation);
+            } else {
+                bundleFile = new File(new URI(bundleLocation));
+            }
+            File bundleSystemFile = new File(system.resolve(bundleLocation));
+            copy(bundleFile, bundleSystemFile);
             // add metadata for snapshot
-            if (configFileLocation.startsWith("mvn")) {
-                Artifact configFileArtifact = dependencyHelper.mvnToArtifact(configFileLocation);
-                if (configFileArtifact.isSnapshot()) {
-                    File metadataTarget = new File(configFileSystemFile.getParentFile(), "maven-metadata-local.xml");
+            if (bundleLocation.startsWith("mvn")) {
+                Artifact bundleArtifact = dependencyHelper.mvnToArtifact(bundleLocation);
+                if (bundleArtifact.isSnapshot()) {
+                    File metadataTarget = new File(bundleSystemFile.getParentFile(), "maven-metadata-local.xml");
                     try {
-                        MavenUtil.generateMavenMetadata(configFileArtifact, metadataTarget);
+                        MavenUtil.generateMavenMetadata(bundleArtifact, metadataTarget);
                     } catch (Exception e) {
                         getLog().warn("Could not create maven-metadata-local.xml", e);
                         getLog().warn("It means that this SNAPSHOT could be overwritten by an older one present on remote repositories");
                     }
+                }
+            }
+        }
+    }
+
+    private void installConfigFile(ConfigFile configFile) throws Exception {
+        getLog().warn("== Installing configuration file " + configFile.getLocation());
+        String configFileLocation = configFile.getLocation();
+        File configFileFile;
+        if (configFileLocation.startsWith("mvn:")) {
+            configFileFile = dependencyHelper.resolveById(configFileLocation, getLog());
+            configFileLocation = dependencyHelper.pathFromMaven(configFileLocation);
+        } else {
+            configFileFile = new File(new URI(configFileLocation));
+        }
+        File configFileSystemFile = new File(system.resolve(configFileLocation));
+        copy(configFileFile, configFileSystemFile);
+        // add metadata for snapshot
+        if (configFileLocation.startsWith("mvn")) {
+            Artifact configFileArtifact = dependencyHelper.mvnToArtifact(configFileLocation);
+            if (configFileArtifact.isSnapshot()) {
+                File metadataTarget = new File(configFileSystemFile.getParentFile(), "maven-metadata-local.xml");
+                try {
+                    MavenUtil.generateMavenMetadata(configFileArtifact, metadataTarget);
+                } catch (Exception e) {
+                    getLog().warn("Could not create maven-metadata-local.xml", e);
+                    getLog().warn("It means that this SNAPSHOT could be overwritten by an older one present on remote repositories");
                 }
             }
         }
