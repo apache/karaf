@@ -146,9 +146,9 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
 
     /**
      * Installation mode. If present, generate "feature.install" attribute:
-     *
+     * <p/>
      * <a href="http://karaf.apache.org/xmlns/features/v1.1.0">Installation mode</a>
-     *
+     * <p/>
      * Can be either manual or auto. Specifies whether the feature should be automatically installed when
      * dropped inside the deploy folder. Note: this attribute doesn't affect feature descriptors that are installed
      * from the feature:install command or as part of the etc/org.apache.karaf.features.cfg file.
@@ -174,6 +174,15 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
      * @parameter default-value="true"
      */
     private boolean addBundlesToPrimaryFeature;
+
+    /**
+     * The standard behavior is to add any dependencies other than those in the <code>runtime</code> scope to the feature bundle.
+     * Setting this flag to "true" disables adding any dependencies (transient or otherwise) that are in
+     * <code>&lt;scope&gt;provided&lt;/scope&gt;</code>.
+     *
+     * @parameter default-value="false"
+     */
+    private boolean ignoreScopeProvided;
 
     // *************************************************
     // READ-ONLY MAVEN PLUGIN PARAMETERS
@@ -347,7 +356,9 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
                 if (bundle == null) {
                     bundle = objectFactory.createBundle();
                     bundle.setLocation(bundleName);
-                    feature.getBundle().add(bundle);
+                    if (!"provided".equals(entry.getValue()) || !ignoreScopeProvided) {
+                        feature.getBundle().add(bundle);
+                    }
                 }
                 if ("runtime".equals(entry.getValue())) {
                     bundle.setDependency(true);
@@ -661,7 +672,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
             }
             targetFile.getParentFile().mkdirs();
             @SuppressWarnings("rawtypes")
-			List filters = mavenFileFilter.getDefaultFilterWrappers(project, null, true, session, null);
+            List filters = mavenFileFilter.getDefaultFilterWrappers(project, null, true, session, null);
             mavenFileFilter.copyFile(sourceFile, targetFile, true, filters, encoding, true);
         } catch (MavenFilteringException e) {
             throw new MojoExecutionException(e.getMessage(), e);
