@@ -291,7 +291,7 @@ public class KarafMBeanServerGuard implements InvocationHandler {
         for (String pid : iterateDownPids(getNameSegments(objectName))) {
             String generalPid = getGeneralPid(allPids, pid);
             if (generalPid.length() > 0) {
-                Configuration config = configAdmin.getConfiguration(generalPid);        
+                Configuration config = configAdmin.getConfiguration(generalPid, null);
                 List<String> roles = new ArrayList<String>();
                 ACLConfigurationParser.Specificity s = ACLConfigurationParser.getRolesForInvocation(methodName, params, signature, config.getProperties(), roles);
                 if (s != ACLConfigurationParser.Specificity.NO_MATCH) {

@@ -49,7 +49,7 @@ public class OsgiConfigLoginModule extends AbstractKarafLoginModule {
     public boolean login() throws LoginException {
         try {
             String pid = (String) options.get(PID);
-            Configuration config = ConfigAdminHolder.getService().getConfiguration(pid);
+            Configuration config = ConfigAdminHolder.getService().getConfiguration(pid, null);
             Dictionary properties = config.getProperties();
 
             Callback[] callbacks = new Callback[2];

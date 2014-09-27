@@ -55,7 +55,7 @@ public class EditCommandTest extends TestCase {
     
     public void testExecuteOnExistingPid() throws Exception {        
         Configuration config = createMock(Configuration.class);
-        expect(admin.getConfiguration(PID)).andReturn(config);
+        expect(admin.getConfiguration(PID, null)).andReturn(config);
         replay(admin);
         
         // the ConfigAdmin service returns a Dictionary for an existing PID
@@ -76,7 +76,7 @@ public class EditCommandTest extends TestCase {
     @SuppressWarnings("rawtypes")
     public void testExecuteOnNewPid() throws Exception {        
         Configuration config = createMock(Configuration.class);
-        expect(admin.getConfiguration(PID)).andReturn(config);
+        expect(admin.getConfiguration(PID, null)).andReturn(config);
         replay(admin);
         
         // the ConfigAdmin service does not return a Dictionary for a new PID

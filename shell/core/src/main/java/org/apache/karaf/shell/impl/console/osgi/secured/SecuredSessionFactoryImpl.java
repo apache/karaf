@@ -173,7 +173,7 @@ public class SecuredSessionFactoryImpl extends SessionFactoryImpl implements Con
                 case ConfigurationEvent.CM_UPDATED:
                     ConfigurationAdmin configAdmin = bundleContext.getService(event.getReference());
                     try {
-                        addScopeConfig(configAdmin.getConfiguration(event.getPid()));
+                        addScopeConfig(configAdmin.getConfiguration(event.getPid(), null));
                     } finally {
                         bundleContext.ungetService(event.getReference());
                     }

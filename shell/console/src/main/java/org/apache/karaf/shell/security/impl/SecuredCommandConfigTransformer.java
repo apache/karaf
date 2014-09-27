@@ -116,7 +116,7 @@ public class SecuredCommandConfigTransformer implements ConfigurationListener {
 
         // update config admin with the generated configuration
         for (Map.Entry<String, Dictionary<String, Object>> entry : configMaps.entrySet()) {
-            Configuration genConfig = configAdmin.getConfiguration(entry.getKey());
+            Configuration genConfig = configAdmin.getConfiguration(entry.getKey(), null);
             genConfig.update(entry.getValue());
         }
     }
@@ -161,8 +161,8 @@ public class SecuredCommandConfigTransformer implements ConfigurationListener {
                     deleteServiceGuardConfig(event.getPid(), event.getPid().substring(PROXY_COMMAND_ACL_PID_PREFIX.length()));
                     break;
                 case ConfigurationEvent.CM_UPDATED:
-                    generateServiceGuardConfig(configAdmin.getConfiguration(event.getPid()));
-                    refreshTheAffectedShellCommandBundle(event, configAdmin.getConfiguration(event.getPid()));
+                    generateServiceGuardConfig(configAdmin.getConfiguration(event.getPid(), null));
+                    refreshTheAffectedShellCommandBundle(event, configAdmin.getConfiguration(event.getPid(), null));
                     break;
             }
         } catch (Exception e) {

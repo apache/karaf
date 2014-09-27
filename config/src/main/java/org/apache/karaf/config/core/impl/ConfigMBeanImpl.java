@@ -42,7 +42,7 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
     }
 
     private Configuration getConfiguration(String pid) throws IOException {
-        Configuration configuration = configRepo.getConfigAdmin().getConfiguration(pid);
+        Configuration configuration = configRepo.getConfigAdmin().getConfiguration(pid, null);
         if (configuration == null) {
             throw new IllegalArgumentException("Configuration PID " + pid + " doesn't exist");
         }
