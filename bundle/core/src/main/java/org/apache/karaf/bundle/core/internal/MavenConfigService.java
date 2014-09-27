@@ -43,7 +43,7 @@ public class MavenConfigService {
     public File getLocalRepository() {
         String path = null;
         try {
-            Configuration configuration = configurationAdmin.getConfiguration("org.ops4j.pax.url.mvn");
+            Configuration configuration = configurationAdmin.getConfiguration("org.ops4j.pax.url.mvn", null);
             if (configuration != null) {
                 Dictionary<String, Object> dict = configuration.getProperties();
                 path = getLocalRepoFromConfig(dict);

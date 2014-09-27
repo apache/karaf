@@ -64,7 +64,7 @@ public class SecuredCommandConfigTransformerTest {
         EasyMock.expect(ca.listConfigurations(
                 "(service.pid=" + SecuredCommandConfigTransformer.PROXY_COMMAND_ACL_PID_PREFIX + "*)")).
                 andReturn(new Configuration [] {commandConfig, commandConfig2, otherConfig}).anyTimes();
-        EasyMock.expect(ca.getConfiguration(EasyMock.isA(String.class))).andAnswer(new IAnswer<Configuration>() {
+        EasyMock.expect(ca.getConfiguration(EasyMock.isA(String.class), EasyMock.anyString())).andAnswer(new IAnswer<Configuration>() {
             @Override
             public Configuration answer() throws Throwable {
                 String pid = (String) EasyMock.getCurrentArguments()[0];
@@ -148,7 +148,7 @@ public class SecuredCommandConfigTransformerTest {
 
         ConfigurationAdmin cm = EasyMock.createMock(ConfigurationAdmin.class);
         EasyMock.expect(cm.listConfigurations(EasyMock.isA(String.class))).andReturn(null).anyTimes();
-        EasyMock.expect(cm.getConfiguration(testPid)).andReturn(conf).anyTimes();
+        EasyMock.expect(cm.getConfiguration(testPid, null)).andReturn(conf).anyTimes();
         EasyMock.replay(cm);
 
         final List<String> generateCalled = new ArrayList<String>();

@@ -74,7 +74,7 @@ public class ConfigRepositoryImpl implements ConfigRepository {
     @Override
     public void delete(String pid) throws Exception {
         LOGGER.trace("Delete configuration {}", pid);
-        Configuration configuration = this.configAdmin.getConfiguration(pid);
+        Configuration configuration = this.configAdmin.getConfiguration(pid, null);
         configuration.delete();
         try {
             deleteStorage(pid);
@@ -152,7 +152,7 @@ public class ConfigRepositoryImpl implements ConfigRepository {
     @SuppressWarnings("rawtypes")
     public Dictionary getConfigProperties(String pid) throws IOException, InvalidSyntaxException {
         if (pid != null && configAdmin != null) {
-            Configuration configuration = this.configAdmin.getConfiguration(pid);
+            Configuration configuration = this.configAdmin.getConfiguration(pid, null);
             if (configuration != null) {
                 Dictionary props = configuration.getProperties();
                 return (props != null) ? props : new Hashtable<String, String>();
@@ -168,7 +168,7 @@ public class ConfigRepositoryImpl implements ConfigRepository {
     @Override
     public String createFactoryConfiguration(String factoryPid, Dictionary<String, ?> properties) {
         try {
-            Configuration config = configAdmin.createFactoryConfiguration(factoryPid);
+            Configuration config = configAdmin.createFactoryConfiguration(factoryPid, null);
             config.update(properties);
             return config.getPid();
         } catch (IOException e) {
