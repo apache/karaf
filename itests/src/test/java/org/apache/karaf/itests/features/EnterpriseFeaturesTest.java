@@ -30,13 +30,8 @@ public class EnterpriseFeaturesTest extends KarafTestSupport {
     }
 
     @Test
-    public void installJpa20Feature() throws Exception {
-    	installAssertAndUninstallFeature("jpa20");
-    }
-
-    @Test
-    public void installJpa21Feature() throws Exception {
-        installAssertAndUninstallFeature("jpa21");
+    public void installJpaFeature() throws Exception {
+    	installAssertAndUninstallFeature("jpa");
     }
 
     @Test
