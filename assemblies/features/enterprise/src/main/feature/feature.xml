@@ -91,7 +91,7 @@
         <bundle>mvn:org.apache.geronimo.components/geronimo-connector/3.1.1</bundle>
     </feature>
 
-    <feature name="jpa20" description="OSGi Persistence Container 2.0" version="1.0.1">
+    <feature name="jpa" description="OSGi Persistence Container 2.0" version="1.0.1">
         <details>JPA 2.0 implementation provided by Apache Aries JPA 1.0.1. NB: this feature doesn"t provide the JPA engine, you have to install one by yourself (OpenJPA for instance)</details>
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jpa_2.0_spec/${geronimo.jpa-spec.version}</bundle>
@@ -101,22 +101,6 @@
         <conditional>
             <condition>aries-blueprint</condition>
             <bundle start-level="30">mvn:org.apache.aries.jpa/org.apache.aries.jpa.blueprint.aries/1.0.1</bundle>
-        </conditional>
-    </feature>
-    <feature name="jpa" description="OSGi Persistence Container 2.0" version="1.0.1">
-        <feature>jpa20</feature>
-    </feature>
-
-    <feature name="jpa21" description="OSGi Persistence Container 2.1" version="${aries.jpa.version}">
-        <details>JPA 2.1 implementation provided by Apache Aries JPA ${aries.jpa.version}. NB: this feature doesn"t provide the JPA engine, you have to install one by yourself (OpenJPA for instance)</details>
-        <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.hibernate.javax.persistence/hibernate-jpa-2.1-api/1.0.0.Final</bundle>
-        <bundle start-level="30">mvn:org.apache.aries.jpa/org.apache.aries.jpa.api/${aries.jpa.api.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.aries.jpa/org.apache.aries.jpa.container/${aries.jpa.container.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.aries.jpa/org.apache.aries.jpa.container.context/${aries.jpa.container.context.version}</bundle>
-        <conditional>
-            <condition>aries-blueprint</condition>
-            <bundle start-level="30">mvn:org.apache.aries.jpa/org.apache.aries.jpa.blueprint.aries/${aries.jpa.blueprint.aries.version}</bundle>
         </conditional>
     </feature>
 
