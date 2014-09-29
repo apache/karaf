@@ -49,11 +49,8 @@ public class EnterpriseFeaturesTest extends KarafTestSupport {
     @Test
     public void testJpaFeatures() throws Exception {
         System.out.println("");
-        System.out.println("===== TESTING JPA 2.0 FEATURE =====");
-        installAndAssertFeature("jpa20");
-        System.out.println("");
-        System.out.println("===== TESTING JPA 2.1 FEATURE =====");
-        installAndAssertFeature("jpa21");
+        System.out.println("===== TESTING JPA FEATURE =====");
+        installAndAssertFeature("jpa");
     }
 
     @Test
