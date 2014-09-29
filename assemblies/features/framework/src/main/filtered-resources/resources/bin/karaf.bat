@@ -97,14 +97,6 @@ if "%KARAF_ETC%" == "" (
 set LOCAL_CLASSPATH=%CLASSPATH%
 set JAVA_MODE=-server
 
-rem Check some easily accessible MIN/MAX params for JVM mem usage
-if not "%JAVA_PERM_MEM%" == "" (
-    set DEFAULT_JAVA_OPTS=%DEFAULT_JAVA_OPTS% -XX:PermSize=%JAVA_PERM_MEM%
-)
-if not "%JAVA_MAX_PERM_MEM%" == "" (
-    set DEFAULT_JAVA_OPTS=%DEFAULT_JAVA_OPTS% -XX:MaxPermSize=%JAVA_MAX_PERM_MEM%
-)
-
 set CLASSPATH=%LOCAL_CLASSPATH%;%KARAF_BASE%\conf
 set DEFAULT_JAVA_DEBUG_OPTS=-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005
 
@@ -229,10 +221,18 @@ if not exist "%JAVA_HOME%\bin\server\jvm.dll" (
 )
 set DEFAULT_JAVA_OPTS=%JAVA_MODE% -Xms%JAVA_MIN_MEM% -Xmx%JAVA_MAX_MEM% -Dderby.system.home="%KARAF_DATA%\derby" -Dderby.storage.fileSyncTransactionLog=true -Dcom.sun.management.jmxremote  -XX:+UnlockDiagnosticVMOptions -XX:+UnsyncloadClass
 
+rem Check some easily accessible MIN/MAX params for JVM mem usage
+if not "%JAVA_PERM_MEM%" == "" (
+    set DEFAULT_JAVA_OPTS=%DEFAULT_JAVA_OPTS% -XX:PermSize=%JAVA_PERM_MEM%
+)
+if not "%JAVA_MAX_PERM_MEM%" == "" (
+    set DEFAULT_JAVA_OPTS=%DEFAULT_JAVA_OPTS% -XX:MaxPermSize=%JAVA_MAX_PERM_MEM%
+)
+
 if "%JAVA_OPTS%" == "" set JAVA_OPTS=%DEFAULT_JAVA_OPTS%
 
 if "%EXTRA_JAVA_OPTS%" == "" goto :KARAF_EXTRA_JAVA_OPTS_END
-    set JAVA_OPTS="%JAVA_OPTS% %EXTRA_JAVA_OPTS%"
+    set JAVA_OPTS=%JAVA_OPTS% %EXTRA_JAVA_OPTS%
 :KARAF_EXTRA_JAVA_OPTS_END
 
 if "%KARAF_DEBUG%" == "" goto :KARAF_DEBUG_END
@@ -241,7 +241,7 @@ if "%KARAF_DEBUG%" == "" goto :KARAF_DEBUG_END
     rem Use the defaults if JAVA_DEBUG_OPTS was not set
     if "%JAVA_DEBUG_OPTS%" == "" set JAVA_DEBUG_OPTS=%DEFAULT_JAVA_DEBUG_OPTS%
 
-    set JAVA_OPTS="%JAVA_DEBUG_OPTS% %JAVA_OPTS%"
+    set JAVA_OPTS=%JAVA_DEBUG_OPTS% %JAVA_OPTS%
     call :warn Enabling Java debug options: %JAVA_DEBUG_OPTS%
 :KARAF_DEBUG_END
 
@@ -319,7 +319,7 @@ if "%KARAF_PROFILER%" == "" goto :RUN
 
 :EXECUTE_DEBUG
     if "%JAVA_DEBUG_OPTS%" == "" set JAVA_DEBUG_OPTS=%DEFAULT_JAVA_DEBUG_OPTS%
-    set "JAVA_OPTS=%JAVA_DEBUG_OPTS% %JAVA_OPTS%"
+    set JAVA_OPTS=%JAVA_DEBUG_OPTS% %JAVA_OPTS%
     shift
     goto :RUN_LOOP
 
