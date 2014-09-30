@@ -130,7 +130,11 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
     public void refresh(String bundleId) throws MBeanException {
         try {
             List<Bundle> bundles = selectBundles(bundleId);
-            getFrameworkWiring().refreshBundles(bundles);
+            if (bundles.isEmpty()) {
+                getFrameworkWiring().refreshBundles(bundles);
+            } else {
+                getFrameworkWiring().refreshBundles(bundles);
+            }
         } catch (Exception e) {
             throw new MBeanException(null, e.getMessage());
         }

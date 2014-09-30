@@ -30,8 +30,11 @@ public class Refresh extends BundlesCommandWithConfirmation {
     }
 
     protected void doExecute(List<Bundle> bundles) throws Exception {
+        if (bundles != null && bundles.isEmpty()) {
+            bundles = null;
+        }
         FrameworkWiring wiring = getBundleContext().getBundle(0).adapt(FrameworkWiring.class);
-        wiring.refreshBundles(bundles == null || bundles.isEmpty() ? null : bundles);
+        wiring.refreshBundles(bundles);
     }
 
     @Override
