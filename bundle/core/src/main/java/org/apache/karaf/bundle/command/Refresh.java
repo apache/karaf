@@ -33,7 +33,10 @@ public class Refresh extends BundlesCommand {
 
     protected Object doExecute(List<Bundle> bundles) throws Exception {
         FrameworkWiring wiring = bundleContext.getBundle(0).adapt(FrameworkWiring.class);
-        wiring.refreshBundles(bundles == null || bundles.isEmpty() ? null : bundles);
+        if (bundles == null || bundles.isEmpty()) {
+            bundles = null;
+        }
+        wiring.refreshBundles(bundles);
         return null;
     }
 
