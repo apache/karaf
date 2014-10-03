@@ -184,6 +184,15 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
      */
     private boolean ignoreScopeProvided;
 
+    /**
+     * Flag indicating whether the main project artifact should be included (<code>true</code>) or not (<code>false</code>).
+     * <p/>
+     * Assumes the main project artifact is a bundle and the feature will be attached alongside using <code>attachmentArtifactClassifier</code>.
+     *
+     * @parameter default-value="false"
+     */
+    private boolean includeProjectArtifact;
+
     // *************************************************
     // READ-ONLY MAVEN PLUGIN PARAMETERS
     // *************************************************
@@ -319,6 +328,14 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
         }
         if (project.getDescription() != null && feature.getDetails() == null) {
             feature.setDetails(project.getDescription());
+        }
+        if (includeProjectArtifact) {
+            Bundle bundle = objectFactory.createBundle();
+            bundle.setLocation(this.dependencyHelper.artifactToMvn(project.getArtifact()));
+            if (startLevel != null) {
+                bundle.setStartLevel(startLevel);
+            }
+            feature.getBundle().add(bundle);
         }
         for (Map.Entry<?, String> entry : localDependencies.entrySet()) {
             Object artifact = entry.getKey();
