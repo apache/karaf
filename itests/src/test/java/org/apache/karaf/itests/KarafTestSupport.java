@@ -296,7 +296,7 @@ public class KarafTestSupport {
     }
 
     private void waitForService(String filter, long timeout) throws InvalidSyntaxException, InterruptedException {
-        ServiceTracker<Object, Object> st = new ServiceTracker<Object, Object>(bundleContext, bundleContext.createFilter(filter), null);
+        ServiceTracker st = new ServiceTracker(bundleContext, bundleContext.createFilter(filter), null);
         try {
             st.open();
             st.waitForService(timeout);
