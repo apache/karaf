@@ -205,7 +205,7 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
      * @param properties the configuration properties.
      * @throws Exception
      */
-    private void store(String pid, Dictionary properties, boolean bypassStorage) throws Exception {
+    private void store(String pid, Dictionary<String, Object> properties, boolean bypassStorage) throws Exception {
         if (!bypassStorage && storage != null) {
             File storageFile = new File(storage, pid + ".cfg");
             Configuration configuration = configurationAdmin.getConfiguration(pid, null);
@@ -227,22 +227,24 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
             }
             Properties p = new Properties(storageFile);
             p.clear();
-            for (Enumeration keys = properties.keys(); keys.hasMoreElements(); ) {
-                Object key = keys.nextElement();
+            for (Enumeration<String> keys = properties.keys(); keys.hasMoreElements(); ) {
+                String key = keys.nextElement();
                 if (!Constants.SERVICE_PID.equals(key)
                         && !ConfigurationAdmin.SERVICE_FACTORYPID.equals(key)
                         && !FELIX_FILEINSTALL_FILENAME.equals(key)) {
-                    p.put((String) key, (String) properties.get(key));
+                    if (properties.get(key) != null) {
+                        p.put(key, properties.get(key).toString());
+                    }
                 }
             }
             // remove "removed" properties from the file
             ArrayList<String> propertiesToRemove = new ArrayList<String>();
-            for (Object key : p.keySet()) {
+            for (String key : p.keySet()) {
                 if (properties.get(key) == null
                         && !Constants.SERVICE_PID.equals(key)
                         && !ConfigurationAdmin.SERVICE_FACTORYPID.equals(key)
                         && !FELIX_FILEINSTALL_FILENAME.equals(key)) {
-                    propertiesToRemove.add(key.toString());
+                    propertiesToRemove.add(key);
                 }
             }
             for (String key : propertiesToRemove) {
