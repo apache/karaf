@@ -178,7 +178,7 @@
     <feature name="webconsole" description="Karaf WebConsole for administration and monitoring" version="${project.version}">
         <config name="org.apache.karaf.webconsole">
             realm=karaf
-            role=${karaf.admin.role}
+            role=admin
         </config>
         <feature>http</feature>
         <feature>aries-blueprint</feature>
