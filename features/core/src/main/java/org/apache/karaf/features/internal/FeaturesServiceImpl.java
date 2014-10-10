@@ -425,8 +425,7 @@ public class FeaturesServiceImpl implements FeaturesService {
                 Collections.sort(bundlesSortedByStartLvl, new Comparator<Bundle>() {
                     @Override
                     public int compare(Bundle bundle, Bundle bundle1) {
-                        return bundle.adapt(BundleStartLevel.class).getStartLevel()
-                                - bundle1.adapt(BundleStartLevel.class).getStartLevel();
+                        return state.bundleStartLevels.get(bundle) - state.bundleStartLevels.get(bundle1);
                     }
                 });
             }
