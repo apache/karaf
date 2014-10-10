@@ -15,6 +15,15 @@
  * limitations under the License.
  */
 
+                    Apache Karaf 4.0.0.M1
+                    =====================
+
+  !! This is a technology preview release of Apache Karaf, and should NOT be considered production ready !!
+
+  Apache Karaf 4.0.0.M1 represents a major refactoring of the project, and includes numerous new features. We ask that users provide the community with their feed back so that the full Apache Karaf 4.0.0 release can be as feature complete and stable as possible.
+
+  The 4.0.x line will ship with OSGi Rev5 support via Felix 4.4.1 and Equinox 3.9.1-v20140110-1610, and a completely refactored internal framework based on Declarative Services instead of Blueprint. From a users point of view these changes will yield a smaller, more efficient Karaf core. There will be a Blueprint feature present in Karaf so that you can easily install Blueprint based applications. You will always be capable of using Blueprint in Karaf. So the main difference from a user perspective is that you’d need to depend on the Blueprint service if you need it. 
+
 
                     Apache Karaf 3.0.0
                     ==================
