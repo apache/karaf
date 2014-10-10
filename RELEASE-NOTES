@@ -145,6 +145,7 @@
  * [KARAF-3249|https://issues.apache.org/jira/browse/KARAF-3249] - Error: "usage: dirname path" when Karaf is located under path with spaces
  * [KARAF-3250|https://issues.apache.org/jira/browse/KARAF-3250] - JVM options ignored on Windows
  * [KARAF-3258|https://issues.apache.org/jira/browse/KARAF-3258] - KarService returns immediately after Kar install
+ * [KARAF-3273|https://issues.apache.org/jira/browse/KARAF-3273] - zodiac.springsource.com repo is missing from the default repository set (required for gemini-blueprint feature)
 
 ** Dependency upgrade
  * [KARAF-2279|https://issues.apache.org/jira/browse/KARAF-2279] - Upgrade to OSGi Core 5.0.0
