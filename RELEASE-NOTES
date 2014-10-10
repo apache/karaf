@@ -15,6 +15,242 @@
  * limitations under the License.
  */
 
+                    Apache Karaf 3.0.2
+                    ==================
+
+  This is an update patch for Apache Karaf 3.0.x, containing many bug fixes, dependency updates, and improvements. New features highlights include: Support of !$ to recall the last command argument, a command to display bundle id, and automatically create data sources from configuration files. It is recommended that users update their deployment after reviewing the changelog below.
+
+  Changelog
+  ---------
+
+** Bug
+ * [KARAF-609|https://issues.apache.org/jira/browse/KARAF-609] - Karaf features core bundle gets stack to creating state if there is no access to the default maven repositories
+ * [KARAF-677|https://issues.apache.org/jira/browse/KARAF-677] - Karaf is missing osgi/minimum from the ee defined in config.properties
+ * [KARAF-1137|https://issues.apache.org/jira/browse/KARAF-1137] - Corrupted output for bundle:info command in 3.0.0-SNAPSHOT
+ * [KARAF-1246|https://issues.apache.org/jira/browse/KARAF-1246] - add a version checker for karaf start script
+ * [KARAF-1350|https://issues.apache.org/jira/browse/KARAF-1350] - features-maven-plugin cannot resolve a feature without an explicit descriptor
+ * [KARAF-1545|https://issues.apache.org/jira/browse/KARAF-1545] - Jar files in lib directory require "karaf-" prefix in order to be loaded
+ * [KARAF-1553|https://issues.apache.org/jira/browse/KARAF-1553] - Command service references should be AUTO_EXPORT_INTERFACES
+ * [KARAF-1560|https://issues.apache.org/jira/browse/KARAF-1560] - config:update throws ClassCastException when used on a Configuration with boolean fields created in the web console
+ * [KARAF-1561|https://issues.apache.org/jira/browse/KARAF-1561] - Restart Framework from Web Console's System Information tab results in Karaf dying
+ * [KARAF-1584|https://issues.apache.org/jira/browse/KARAF-1584] - karaf-maven-plugin ignores provided scope on dependency
+ * [KARAF-1894|https://issues.apache.org/jira/browse/KARAF-1894] - Framework's active start level is set to org.osgi.framework.startlevel.beginning too early when launching Karaf with empty bundle cache
+ * [KARAF-2095|https://issues.apache.org/jira/browse/KARAF-2095] - Camel Route (JMS Polling) not working when installing feature "jndi"
+ * [KARAF-2269|https://issues.apache.org/jira/browse/KARAF-2269] - Servicemix Specs Activator/OsgiLocator Broken due to KARAF-2136
+ * [KARAF-2295|https://issues.apache.org/jira/browse/KARAF-2295] - features deployer is useless for dynamic updates
+ * [KARAF-2315|https://issues.apache.org/jira/browse/KARAF-2315] - The check for jvm.dll happens to early in the bat file
+ * [KARAF-2390|https://issues.apache.org/jira/browse/KARAF-2390] - Fix namespace handlers provided service header
+ * [KARAF-2420|https://issues.apache.org/jira/browse/KARAF-2420] - blueprint deployer: redeploy untouched blueprint xml in deploy folder after restart
+ * [KARAF-2481|https://issues.apache.org/jira/browse/KARAF-2481] - LogService WebConsole view doesn't work with Equinox
+ * [KARAF-2519|https://issues.apache.org/jira/browse/KARAF-2519] - karaf-maven-plugin ignores dependent feature repositories when building an assembly
+ * [KARAF-2563|https://issues.apache.org/jira/browse/KARAF-2563] - Compilation fails with JDK 8 ea
+ * [KARAF-2594|https://issues.apache.org/jira/browse/KARAF-2594] - The use of inheritable thread locals in ThreadIO can cause problems
+ * [KARAF-2596|https://issues.apache.org/jira/browse/KARAF-2596] - install-kars goal of the karaf-maven-plugin ignores bundles listed in the features that have the "dependency" property set to "true"
+ * [KARAF-2602|https://issues.apache.org/jira/browse/KARAF-2602] - Support Java 8
+ * [KARAF-2656|https://issues.apache.org/jira/browse/KARAF-2656] - Config service doesn't create a file in etc if it doesn't exist
+ * [KARAF-2725|https://issues.apache.org/jira/browse/KARAF-2725] - jpa feature should install org.osgi.enterprise 5.0.0 bundle
+ * [KARAF-2726|https://issues.apache.org/jira/browse/KARAF-2726] - Openjpa feature installs wrong jpa spec bundle
+ * [KARAF-2728|https://issues.apache.org/jira/browse/KARAF-2728] - feature:install fails with ArrayIndexOutOfBoundsException
+ * [KARAF-2732|https://issues.apache.org/jira/browse/KARAF-2732] - Karaf doesn't start without internet connection
+ * [KARAF-2742|https://issues.apache.org/jira/browse/KARAF-2742] - karaf-maven-plugin can not include filtered resources in a custom distribution
+ * [KARAF-2743|https://issues.apache.org/jira/browse/KARAF-2743] - karaf-maven-plugin can not create custom Karaf with Apache Camel
+ * [KARAF-2750|https://issues.apache.org/jira/browse/KARAF-2750] - karaf-maven-plugin install-kar doesn't include config file in the system folder
+ * [KARAF-2755|https://issues.apache.org/jira/browse/KARAF-2755] - Encrypt password mechanism pollutes the group
+ * [KARAF-2786|https://issues.apache.org/jira/browse/KARAF-2786] - Comment the default key and document how to change/enable it
+ * [KARAF-2787|https://issues.apache.org/jira/browse/KARAF-2787] - Add a way to specify the client key
+ * [KARAF-2800|https://issues.apache.org/jira/browse/KARAF-2800] - karaf-maven-plugin only supports mvn URL
+ * [KARAF-2804|https://issues.apache.org/jira/browse/KARAF-2804] - Karaf Maven Plugin throws errors when trying to install pax-web-features with compile scope
+ * [KARAF-2828|https://issues.apache.org/jira/browse/KARAF-2828] - Reintroduce system as a default repository
+ * [KARAF-2830|https://issues.apache.org/jira/browse/KARAF-2830] - Karaf scripts java version check should be more "flexible"
+ * [KARAF-2878|https://issues.apache.org/jira/browse/KARAF-2878] - The thread reading the system input stream should exit automatically when the console bundle stops
+ * [KARAF-2890|https://issues.apache.org/jira/browse/KARAF-2890] - The env variables can't be read while running karaf as a Linux service
+ * [KARAF-2895|https://issues.apache.org/jira/browse/KARAF-2895] - installation website link produces 404 not found page
+ * [KARAF-2898|https://issues.apache.org/jira/browse/KARAF-2898] - Maven feature validation did not accept WAR bundle (WAB) artifacts.
+ * [KARAF-2910|https://issues.apache.org/jira/browse/KARAF-2910] - Properties login module seems to leak a PropertiesInstaller reference results in OOM
+ * [KARAF-2913|https://issues.apache.org/jira/browse/KARAF-2913] - JAAS JDBCBackingEngine has the wrong condition to iterate results, no users are returned
+ * [KARAF-2914|https://issues.apache.org/jira/browse/KARAF-2914] - JAAS JDBCBackingEngineFactory: Wrong query from the configuration
+ * [KARAF-2920|https://issues.apache.org/jira/browse/KARAF-2920] - Karaf freezes during startup
+ * [KARAF-2946|https://issues.apache.org/jira/browse/KARAF-2946] - Duplicate package exports because of accidently deployed bundles
+ * [KARAF-2950|https://issues.apache.org/jira/browse/KARAF-2950] - scr:list displays no output
+ * [KARAF-2957|https://issues.apache.org/jira/browse/KARAF-2957] - LDAP login module cannot handle slashes in CN
+ * [KARAF-2962|https://issues.apache.org/jira/browse/KARAF-2962] - Manual doesn't compile
+ * [KARAF-2980|https://issues.apache.org/jira/browse/KARAF-2980] - strip off tabs/spaces around role|group names
+ * [KARAF-2981|https://issues.apache.org/jira/browse/KARAF-2981] - Karaf shutdown hangs in SshServer.stop()
+ * [KARAF-2982|https://issues.apache.org/jira/browse/KARAF-2982] - Command history is off by one
+ * [KARAF-2989|https://issues.apache.org/jira/browse/KARAF-2989] - rmiServerHost configruation doesn't work on Karaf 3.x
+ * [KARAF-2990|https://issues.apache.org/jira/browse/KARAF-2990] - url list order for org.ops4j.pax.url.mvn.repositories property in org.ops4j.pax.url.mvn.cfg matters
+ * [KARAF-2991|https://issues.apache.org/jira/browse/KARAF-2991] - Shell Console throws exception when a service contains int[] as value for a property
+ * [KARAF-2992|https://issues.apache.org/jira/browse/KARAF-2992] - Generate the shutdown command at first boot
+ * [KARAF-2996|https://issues.apache.org/jira/browse/KARAF-2996] - shutdown +n command not work and shutdown hh:mm not been validated
+ * [KARAF-3000|https://issues.apache.org/jira/browse/KARAF-3000] -  Whitespace in feature file bundle element value causes NumberFormatException
+ * [KARAF-3012|https://issues.apache.org/jira/browse/KARAF-3012] - Console only NPEs in response to all commands
+ * [KARAF-3017|https://issues.apache.org/jira/browse/KARAF-3017] - Concurrency issues in FeaturesService related to add/remove/list operations
+ * [KARAF-3021|https://issues.apache.org/jira/browse/KARAF-3021] - Keyboard still read after log:tail cancelled
+ * [KARAF-3023|https://issues.apache.org/jira/browse/KARAF-3023] - Wrong repositories for features after "features:list -o" command in 2.3.x
+ * [KARAF-3033|https://issues.apache.org/jira/browse/KARAF-3033] - The system bundle should export and boot delegate javax.xml.crypto packages
+ * [KARAF-3044|https://issues.apache.org/jira/browse/KARAF-3044] - Can't shutdown karaf via wrapper on AIX
+ * [KARAF-3052|https://issues.apache.org/jira/browse/KARAF-3052] - Allow passing through custom ldap properties
+ * [KARAF-3054|https://issues.apache.org/jira/browse/KARAF-3054] - client doesn't load using IBM JDK
+ * [KARAF-3055|https://issues.apache.org/jira/browse/KARAF-3055] - tabbing in subshell displays more than commands of the current subshell
+ * [KARAF-3056|https://issues.apache.org/jira/browse/KARAF-3056] - Upgrade to JLine 2.12
+ * [KARAF-3061|https://issues.apache.org/jira/browse/KARAF-3061] - Problems with jaas:realms / jaas:manage commands when using multiple realms of the same name
+ * [KARAF-3064|https://issues.apache.org/jira/browse/KARAF-3064] - SSH Console regenerates the SSH key on each restart
+ * [KARAF-3065|https://issues.apache.org/jira/browse/KARAF-3065] - help doesn't work in subshell
+ * [KARAF-3069|https://issues.apache.org/jira/browse/KARAF-3069] - Karaf is missing the osgi.ee capabilities when using equinox as framework
+ * [KARAF-3071|https://issues.apache.org/jira/browse/KARAF-3071] - etc/org.ops4j.pax.url.mvn.cfg file contains replaced string in instances that should not be
+ * [KARAF-3072|https://issues.apache.org/jira/browse/KARAF-3072] - Instance etc files are not sync with the root etc files
+ * [KARAF-3087|https://issues.apache.org/jira/browse/KARAF-3087] - can't ssh to the karaf container in latest karaf 3.0.2 snapshot kit
+ * [KARAF-3091|https://issues.apache.org/jira/browse/KARAF-3091] - Maven Coordinates of org.eclipse.equinox.region
+ * [KARAF-3092|https://issues.apache.org/jira/browse/KARAF-3092] - Remove ${services-${karaf.framework}} variables from org.osgi.framework.system.capabilities
+ * [KARAF-3095|https://issues.apache.org/jira/browse/KARAF-3095] - itests randomly fail to get the JMXConnector
+ * [KARAF-3096|https://issues.apache.org/jira/browse/KARAF-3096] - Karaf doesn't start with Equinox 3.9.1
+ * [KARAF-3098|https://issues.apache.org/jira/browse/KARAF-3098] - Check the usage of config.properties in main module
+ * [KARAF-3099|https://issues.apache.org/jira/browse/KARAF-3099] - Karaf doesn't start on some Windows 7 system
+ * [KARAF-3103|https://issues.apache.org/jira/browse/KARAF-3103] - config:edit does not correctly handle configuration visibility for --factory calls.
+ * [KARAF-3105|https://issues.apache.org/jira/browse/KARAF-3105] - Cannot use LDAPLoginModule with ActiveDirectory
+ * [KARAF-3108|https://issues.apache.org/jira/browse/KARAF-3108] - Fix webconsole CSS
+ * [KARAF-3114|https://issues.apache.org/jira/browse/KARAF-3114] - Call to ManagementFactory.getPlatformMBeanServer() fail due to RBAC
+ * [KARAF-3115|https://issues.apache.org/jira/browse/KARAF-3115] - add address flag when create a child instance
+ * [KARAF-3117|https://issues.apache.org/jira/browse/KARAF-3117] - The console welcome message is garbled when the console is restarted
+ * [KARAF-3123|https://issues.apache.org/jira/browse/KARAF-3123] - BundleWatcherImpl tries to stop bundle fragments
+ * [KARAF-3127|https://issues.apache.org/jira/browse/KARAF-3127] - bin/instance  script doesn't work
+ * [KARAF-3128|https://issues.apache.org/jira/browse/KARAF-3128] - Update ops4j/oss sonatype repositories URL
+ * [KARAF-3129|https://issues.apache.org/jira/browse/KARAF-3129] - RAT plugin error on ssh key files
+ * [KARAF-3137|https://issues.apache.org/jira/browse/KARAF-3137] - Karaf doesn't start due to jline constraint
+ * [KARAF-3149|https://issues.apache.org/jira/browse/KARAF-3149] - Karaf chooseurl for jclouds is wrong
+ * [KARAF-3150|https://issues.apache.org/jira/browse/KARAF-3150] - kar:install doesn't support classifier in a MVN URL
+ * [KARAF-3151|https://issues.apache.org/jira/browse/KARAF-3151] - Blueprint managed-properties doesn't call the update-method
+ * [KARAF-3154|https://issues.apache.org/jira/browse/KARAF-3154] - Feature repo org.ops4j.pax.cdi-0.7.0 contains broken feature
+ * [KARAF-3158|https://issues.apache.org/jira/browse/KARAF-3158] - Incorrect javax.annotation version for java7
+ * [KARAF-3159|https://issues.apache.org/jira/browse/KARAF-3159] - Fix feature deployer documentation about auto installation of the features
+ * [KARAF-3162|https://issues.apache.org/jira/browse/KARAF-3162] - Update the security documentation as the PropertiesConverter doesn't exist anymore
+ * [KARAF-3170|https://issues.apache.org/jira/browse/KARAF-3170] - Java8 packages related to JavaFX are missing
+ * [KARAF-3176|https://issues.apache.org/jira/browse/KARAF-3176] - sshRole and jmxRole are not functionnal
+ * [KARAF-3178|https://issues.apache.org/jira/browse/KARAF-3178] - spring-struts 3.2.9.RELEASE_1 feature doesn't install correctly
+ * [KARAF-3179|https://issues.apache.org/jira/browse/KARAF-3179] - aries-annotation feature doesn't install
+ * [KARAF-3180|https://issues.apache.org/jira/browse/KARAF-3180] - openwebbeans feature doesn't install
+ * [KARAF-3192|https://issues.apache.org/jira/browse/KARAF-3192] - Don't throw IllegalStateException when can't find attribute for a certain bean
+ * [KARAF-3196|https://issues.apache.org/jira/browse/KARAF-3196] - Export sun.misc package from the system bundle
+ * [KARAF-3197|https://issues.apache.org/jira/browse/KARAF-3197] - Can't type anything in the console on Windows platform
+ * [KARAF-3204|https://issues.apache.org/jira/browse/KARAF-3204] - Avoid calls to Configuration#setBundleLocation(null) which are not needed
+ * [KARAF-3210|https://issues.apache.org/jira/browse/KARAF-3210] - karaf:features-generate-descriptor fails with Maven 3.1.x and 3.2.x : required class was missing ... org/sonatype/aether/RepositorySystem
+ * [KARAF-3211|https://issues.apache.org/jira/browse/KARAF-3211] - Error while installing transaction feature
+ * [KARAF-3212|https://issues.apache.org/jira/browse/KARAF-3212] - karaf.data variable not correctly resolved while installing the pax-http feature
+ * [KARAF-3213|https://issues.apache.org/jira/browse/KARAF-3213] - ConcurrentModification exception in FileInstall/Upgrade to Felix FileInstall 3.4.1
+ * [KARAF-3221|https://issues.apache.org/jira/browse/KARAF-3221] - Wrong scr:list command used causing NPE
+ * [KARAF-3224|https://issues.apache.org/jira/browse/KARAF-3224] - Support wrap URL with option
+ * [KARAF-3232|https://issues.apache.org/jira/browse/KARAF-3232] - Feature installation looks for MANIFEST as first position in the jar
+ * [KARAF-3244|https://issues.apache.org/jira/browse/KARAF-3244] - EntityManager Factory not available
+ * [KARAF-3248|https://issues.apache.org/jira/browse/KARAF-3248] - bundle:refresh doesn't work without argument
+ * [KARAF-3249|https://issues.apache.org/jira/browse/KARAF-3249] - Error: "usage: dirname path" when Karaf is located under path with spaces
+ * [KARAF-3250|https://issues.apache.org/jira/browse/KARAF-3250] - JVM options ignored on Windows
+ * [KARAF-3258|https://issues.apache.org/jira/browse/KARAF-3258] - KarService returns immediately after Kar install
+ * [KARAF-3273|https://issues.apache.org/jira/browse/KARAF-3273] - zodiac.springsource.com repo is missing from the default repository set (required for gemini-blueprint feature)
+
+** Dependency upgrade
+ * [KARAF-2279|https://issues.apache.org/jira/browse/KARAF-2279] - Upgrade to OSGi Core 5.0.0
+ * [KARAF-2565|https://issues.apache.org/jira/browse/KARAF-2565] - Upgrade to OSGi Compendium 5.0.0
+ * [KARAF-2861|https://issues.apache.org/jira/browse/KARAF-2861] - Upgrade to ASM 5.0.3
+ * [KARAF-2868|https://issues.apache.org/jira/browse/KARAF-2868] - Upgrade to aries jmx core 1.1.2
+ * [KARAF-2874|https://issues.apache.org/jira/browse/KARAF-2874] - Upgrade to XBean 3.18
+ * [KARAF-2906|https://issues.apache.org/jira/browse/KARAF-2906] - Upgrade to fileinstall 3.4.0
+ * [KARAF-2928|https://issues.apache.org/jira/browse/KARAF-2928] - Upgrade to Aries JMX Core 1.1.2
+ * [KARAF-2932|https://issues.apache.org/jira/browse/KARAF-2932] - Upgrade to Felix WebConsole 4.2.2
+ * [KARAF-2933|https://issues.apache.org/jira/browse/KARAF-2933] - Upgrade to Jasypt 1.9.2
+ * [KARAF-2936|https://issues.apache.org/jira/browse/KARAF-2936] - Upgrade to slf4j 1.7.7 / Pax Logging 1.7.3
+ * [KARAF-2937|https://issues.apache.org/jira/browse/KARAF-2937] - Upgrade to json 20140107
+ * [KARAF-2945|https://issues.apache.org/jira/browse/KARAF-2945] - Upgrade to Aries Proxy 1.0.3 and Aries spifly 1.0.1 in order to support ASM5 and Java8
+ * [KARAF-2954|https://issues.apache.org/jira/browse/KARAF-2954] - Upgrade to Pax Exam 3.5.0
+ * [KARAF-3028|https://issues.apache.org/jira/browse/KARAF-3028] - Update Pax Web dependency to 3.1.1
+ * [KARAF-3031|https://issues.apache.org/jira/browse/KARAF-3031] - Upgrade to Pax URL 2.1.0
+ * [KARAF-3046|https://issues.apache.org/jira/browse/KARAF-3046] - Upgrade to gogo runtime 0.12.1
+ * [KARAF-3049|https://issues.apache.org/jira/browse/KARAF-3049] - Upgrade to sshd 0.11
+ * [KARAF-3101|https://issues.apache.org/jira/browse/KARAF-3101] - Upgrade to Spring 4.0.5.RELEASE
+ * [KARAF-3106|https://issues.apache.org/jira/browse/KARAF-3106] - Upgrade to blueprint core 1.4.1
+ * [KARAF-3109|https://issues.apache.org/jira/browse/KARAF-3109] - Upgrade to Pax Exam 4.0.0
+ * [KARAF-3120|https://issues.apache.org/jira/browse/KARAF-3120] - Upgrade to Aries JPA 1.0.2
+ * [KARAF-3121|https://issues.apache.org/jira/browse/KARAF-3121] - Upgrade to Aries Blueprint Annotation 1.0.1
+ * [KARAF-3131|https://issues.apache.org/jira/browse/KARAF-3131] - Upgrade to Hibernate 4.2.15.Final/4.3.6.Final
+ * [KARAF-3140|https://issues.apache.org/jira/browse/KARAF-3140] - Upgrade to sshd 0.12.0
+ * [KARAF-3156|https://issues.apache.org/jira/browse/KARAF-3156] - Upgrade to Pax CDI 0.8.0
+ * [KARAF-3157|https://issues.apache.org/jira/browse/KARAF-3157] - Upgrade to Pax Exam 4.1.0
+ * [KARAF-3171|https://issues.apache.org/jira/browse/KARAF-3171] - Upgrade to Aries Blueprint CM 1.0.4
+ * [KARAF-3182|https://issues.apache.org/jira/browse/KARAF-3182] - Upgrade to Felix EventAdmin 1.4.0
+ * [KARAF-3183|https://issues.apache.org/jira/browse/KARAF-3183] - Upgrade to bndlib 2.3.0
+ * [KARAF-3184|https://issues.apache.org/jira/browse/KARAF-3184] - Upgrade to commons-beanutils 1.9.2
+ * [KARAF-3185|https://issues.apache.org/jira/browse/KARAF-3185] - Upgrade to Felix BundleRepository 2.0.2
+ * [KARAF-3191|https://issues.apache.org/jira/browse/KARAF-3191] - Upgrade to Pax Web 3.1.2
+ * [KARAF-3198|https://issues.apache.org/jira/browse/KARAF-3198] - Cleanup Pax Swissbox dependencies
+ * [KARAF-3201|https://issues.apache.org/jira/browse/KARAF-3201] - Upgrade to pax-logging 1.7.4
+ * [KARAF-3206|https://issues.apache.org/jira/browse/KARAF-3206] - Upgrade to ConfigAdmin 1.8.0
+ * [KARAF-3226|https://issues.apache.org/jira/browse/KARAF-3226] - Upgrade to Spring 4.0.7.RELEASE
+ * [KARAF-3227|https://issues.apache.org/jira/browse/KARAF-3227] - Upgrade to Spring 3.2.11.RELEASE
+ * [KARAF-3233|https://issues.apache.org/jira/browse/KARAF-3233] - Upgrade to Pax Exam 4.2.0
+ * [KARAF-3243|https://issues.apache.org/jira/browse/KARAF-3243] - Upgrade to Pax URL 2.2.0
+ * [KARAF-3265|https://issues.apache.org/jira/browse/KARAF-3265] - Upgrade to Aries Blueprint CM 1.0.5
+
+** Documentation
+ * [KARAF-2958|https://issues.apache.org/jira/browse/KARAF-2958] - Use of type-converters in Karaf Security Documentation is incorrect
+ * [KARAF-3066|https://issues.apache.org/jira/browse/KARAF-3066] - Improve OpenEJB documentation in manual
+ * [KARAF-3167|https://issues.apache.org/jira/browse/KARAF-3167] - Document the configfile override behaviour
+
+** Improvement
+ * [KARAF-448|https://issues.apache.org/jira/browse/KARAF-448] - Make scanning for MANIFEST.MF in jar consistent between osgi:install and feature:install
+ * [KARAF-1250|https://issues.apache.org/jira/browse/KARAF-1250] - Cleanup karaf-maven-plugin
+ * [KARAF-1514|https://issues.apache.org/jira/browse/KARAF-1514] - Improve feature file generation to be able to create features out of special feature poms
+ * [KARAF-1698|https://issues.apache.org/jira/browse/KARAF-1698] - Add support for role-based JMX authorization
+ * [KARAF-2299|https://issues.apache.org/jira/browse/KARAF-2299] - WARN message should be logged when a boot feature installation fails
+ * [KARAF-2453|https://issues.apache.org/jira/browse/KARAF-2453] - Using features to extend existing configuration
+ * [KARAF-2749|https://issues.apache.org/jira/browse/KARAF-2749] - BundleSelector should be more "selective"
+ * [KARAF-2803|https://issues.apache.org/jira/browse/KARAF-2803] - Set org.apache.aries.blueprint.preemptiveShutdown to false by default
+ * [KARAF-2831|https://issues.apache.org/jira/browse/KARAF-2831] - Switch to pax url uber bundles
+ * [KARAF-2871|https://issues.apache.org/jira/browse/KARAF-2871] - Command description for http:* commands
+ * [KARAF-2916|https://issues.apache.org/jira/browse/KARAF-2916] - Add fully qualified DN replacement for role search
+ * [KARAF-2918|https://issues.apache.org/jira/browse/KARAF-2918] - Provide ability to set a banner prior to user login via ssh
+ * [KARAF-2921|https://issues.apache.org/jira/browse/KARAF-2921] - bin/karaf selecting the wrong Java VM on a computer with Java 8 installed
+ * [KARAF-2941|https://issues.apache.org/jira/browse/KARAF-2941] - Let jdbc be more robust against broken data sources
+ * [KARAF-2944|https://issues.apache.org/jira/browse/KARAF-2944] - Add jasypt-spring31 bundle to jasypt-encryption feature
+ * [KARAF-2974|https://issues.apache.org/jira/browse/KARAF-2974] - Mentioning of version number delimiter missing in obr:deploy command help
+ * [KARAF-2978|https://issues.apache.org/jira/browse/KARAF-2978] - RBAC-- recognize group configuration when use Publickey to Login
+ * [KARAF-2984|https://issues.apache.org/jira/browse/KARAF-2984] - Improve setenv script to include placeholder for extra java options
+ * [KARAF-2995|https://issues.apache.org/jira/browse/KARAF-2995] - RBAC - the shell command acl configuration modification can't take effect unless we restart the Karaf server
+ * [KARAF-3001|https://issues.apache.org/jira/browse/KARAF-3001] - RBAC - MBean Server RBAC guard should support wildcard role
+ * [KARAF-3002|https://issues.apache.org/jira/browse/KARAF-3002] - RBAC-add a jmx.acl.whitelist so that all ObjectName in this list will bypass the RBAC
+ * [KARAF-3020|https://issues.apache.org/jira/browse/KARAF-3020] - RBAC-put "type" right after the domain when generate the PID from JMX ObjectName
+ * [KARAF-3022|https://issues.apache.org/jira/browse/KARAF-3022] - RBAC - support the JMX operation match starts with a wildcard
+ * [KARAF-3024|https://issues.apache.org/jira/browse/KARAF-3024] - RBAC - Support wildcard in jmx.acl.....cfg filename
+ * [KARAF-3041|https://issues.apache.org/jira/browse/KARAF-3041] - Provide additional helper methods in OsgiCommandSupport
+ * [KARAF-3042|https://issues.apache.org/jira/browse/KARAF-3042] - Add a variable (false by default) to enable redirect to karaf.out
+ * [KARAF-3045|https://issues.apache.org/jira/browse/KARAF-3045] - Simplify console branding
+ * [KARAF-3073|https://issues.apache.org/jira/browse/KARAF-3073] - Add jvisualvm config in monitoring documentation
+ * [KARAF-3075|https://issues.apache.org/jira/browse/KARAF-3075] - AdminService should avoid writing file in case just read instance status
+ * [KARAF-3112|https://issues.apache.org/jira/browse/KARAF-3112] - make stopTimeout of AdminService configurable
+ * [KARAF-3124|https://issues.apache.org/jira/browse/KARAF-3124] - Provide shell:env command
+ * [KARAF-3126|https://issues.apache.org/jira/browse/KARAF-3126] - add more specific completer for admin:start|stop command
+ * [KARAF-3130|https://issues.apache.org/jira/browse/KARAF-3130] - add admin:change-ssh-host command
+ * [KARAF-3134|https://issues.apache.org/jira/browse/KARAF-3134] - Log executed shell commands at debug level
+ * [KARAF-3143|https://issues.apache.org/jira/browse/KARAF-3143] - Refereing Pax-Web features with version range
+ * [KARAF-3164|https://issues.apache.org/jira/browse/KARAF-3164] - Document exposing JAAS BackendEngineFactory services for the login module
+ * [KARAF-3166|https://issues.apache.org/jira/browse/KARAF-3166] - Add SyncopeLoginModule (including backend)
+ * [KARAF-3222|https://issues.apache.org/jira/browse/KARAF-3222] - Command description for osgi:shutdown could be improved
+ * [KARAF-3246|https://issues.apache.org/jira/browse/KARAF-3246] - Rename jpa features as jpa/jpa20 and jpa21
+ * [KARAF-3255|https://issues.apache.org/jira/browse/KARAF-3255] - Document jasypt property placeholder
+ * [KARAF-3256|https://issues.apache.org/jira/browse/KARAF-3256] - Duplicated classes from org.osgi.core
+ * [KARAF-3268|https://issues.apache.org/jira/browse/KARAF-3268] - remove karaf.admin.role
+
+** New Feature
+ * [KARAF-2070|https://issues.apache.org/jira/browse/KARAF-2070] - Add support of !$ to recall the last command argument
+ * [KARAF-2917|https://issues.apache.org/jira/browse/KARAF-2917] - Command to display bundle id
+ * [KARAF-2961|https://issues.apache.org/jira/browse/KARAF-2961] - When a feature is generated from a bundle project, include that bundle in the feature
+ * [KARAF-3034|https://issues.apache.org/jira/browse/KARAF-3034] - Automatically create data sources from configuration files
+ * [KARAF-3058|https://issues.apache.org/jira/browse/KARAF-3058] - add backing engine serivce for org.apache.karaf.jaas.modules.publickey.PublickeyLoginModule
+ * [KARAF-3059|https://issues.apache.org/jira/browse/KARAF-3059] - add a flag to bin/client so that it can read private key from a specified location
+ * [KARAF-3104|https://issues.apache.org/jira/browse/KARAF-3104] - Add the connector feature from ServiceMix
+
+** Task
+ * [KARAF-3068|https://issues.apache.org/jira/browse/KARAF-3068] - Update to Spring 3.2.9.RELEASE_1
+
+
                     Apache Karaf 3.0.1
                     ==================
 
