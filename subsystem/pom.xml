@@ -69,7 +69,14 @@
 
         <dependency>
             <groupId>org.apache.aries.subsystem</groupId>
-            <artifactId>org.apache.aries.subsystem</artifactId>
+            <artifactId>org.apache.aries.subsystem.api</artifactId>
+            <version>${aries.subsystem.api.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.aries.subsystem</groupId>
+            <artifactId>org.apache.aries.subsystem.core</artifactId>
+            <version>${aries.subsystem.core.version}</version>
         </dependency>
 
         <dependency>

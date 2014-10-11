@@ -300,7 +300,8 @@
         <details>Support for Aries OSGi subsystems</details>
         <bundle dependency="true" start-level="30">mvn:org.apache.aries/org.apache.aries.util/${aries.util.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.karaf.services/org.apache.karaf.services.coordinator/${project.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.aries.subsystem/org.apache.aries.subsystem/${aries.subsystem.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.subsystem/org.apache.aries.subsystem.api/${aries.subsystem.api.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.subsystem/org.apache.aries.subsystem.core/${aries.subsystem.core.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.subsystem/org.apache.karaf.subsystem.core/${project.version}</bundle>
     </feature>
 
