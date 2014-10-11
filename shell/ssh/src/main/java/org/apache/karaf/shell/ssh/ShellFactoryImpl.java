@@ -143,6 +143,15 @@ public class ShellFactoryImpl implements Factory<Command> {
                         console.run();
                     } catch (Exception e) {
                         LOGGER.warn("Unable to start shell", e);
+                        //close the session to notify the ssh client if something wrong
+                        //during starting shell
+                        try {
+                            out.write(("unable to start shell because " + e.getMessage() + "\n").getBytes());
+                            out.flush();
+                        } catch (IOException e1) {
+                            LOGGER.warn("Unable to send back error message", e1);
+                        }
+                        ShellImpl.this.session.close(true);
                     }
                 }
             }.start();
