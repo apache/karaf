@@ -204,7 +204,7 @@ public class BundleWatcher implements Runnable, BundleListener {
     protected MavenConfiguration retrieveMavenConfiguration() {
         MavenConfiguration mavenConfiguration = null;
         try {
-            Configuration configuration = configurationAdmin.getConfiguration(ServiceConstants.PID);
+            Configuration configuration = configurationAdmin.getConfiguration(ServiceConstants.PID, null);
             if (configuration != null) {
                 Dictionary dictonary = configuration.getProperties();
                 if (dictonary != null) {

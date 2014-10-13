@@ -55,7 +55,7 @@ public class LogDumpProvider implements DumpProvider {
         // get the PAX Logging configuration
         ConfigurationAdmin configurationAdmin = (ConfigurationAdmin) bundleContext.getService(ref);
         try {
-            Configuration configuration = configurationAdmin.getConfiguration("org.ops4j.pax.logging");
+            Configuration configuration = configurationAdmin.getConfiguration("org.ops4j.pax.logging", null);
 
             // get the ".file" Pax Logging Properties
             Dictionary dictionary = configuration.getProperties();
