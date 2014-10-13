@@ -39,13 +39,10 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.security.AccessControlContext;
 import java.security.AccessController;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.Map;
 
 /**
  * Note: this CommandProcessor can only be used to create a single session, as closing the
@@ -54,7 +51,7 @@ import java.util.concurrent.ConcurrentMap;
 public class SecuredCommandProcessorImpl extends CommandProcessorImpl {
 
     private final BundleContext bundleContext;
-    private final ServiceTracker<Object, Object> commandTracker;
+    private final ServiceTracker<Object, Map<String, CommandProxy>> commandTracker;
     private final ServiceTracker<Converter, Converter> converterTracker;
     private final ServiceTracker<CommandSessionListener, CommandSessionListener> listenerTracker;
 
@@ -128,21 +125,18 @@ public class SecuredCommandProcessorImpl extends CommandProcessorImpl {
         }
     }
 
-    private ServiceTracker<Object, Object> trackCommands(final BundleContext context, String roleClause) throws InvalidSyntaxException {
+    private ServiceTracker<Object, Map<String, CommandProxy>> trackCommands(final BundleContext context, String roleClause) throws InvalidSyntaxException {
         Filter filter = context.createFilter(String.format("(&(%s=*)(%s=*)%s)",
                 CommandProcessor.COMMAND_SCOPE, CommandProcessor.COMMAND_FUNCTION, roleClause));
 
-        return new ServiceTracker<Object, Object>(context, filter, null) {
-            private final ConcurrentMap<ServiceReference, Map<String, CommandProxy>> proxies
-                    = new ConcurrentHashMap<ServiceReference, Map<String, CommandProxy>>();
+        return new ServiceTracker<Object, Map<String, CommandProxy>>(context, filter, null) {
 
             @Override
-            public Object addingService(ServiceReference reference)
+            public Map<String, CommandProxy> addingService(ServiceReference<Object> reference)
             {
                 Object scope = reference.getProperty(CommandProcessor.COMMAND_SCOPE);
                 Object function = reference.getProperty(CommandProcessor.COMMAND_FUNCTION);
                 Object ranking = reference.getProperty(Constants.SERVICE_RANKING);
-                List<Object> commands = new ArrayList<Object>();
 
                 int rank = 0;
                 if (ranking != null)
@@ -163,41 +157,37 @@ public class SecuredCommandProcessorImpl extends CommandProcessorImpl {
                     {
                         for (Object f : ((Object[]) function))
                         {
-                            CommandProxy target = new CommandProxy(context, reference, f.toString());
-                            proxyMap.put(f.toString(), target);
-                            addCommand(scope.toString(), target, f.toString(), rank);
-                            commands.add(target);
+                            String func = f.toString();
+                            CommandProxy target = new CommandProxy(context, reference, func);
+                            if (!proxyMap.containsKey(func)) {
+                                proxyMap.put(func, target);
+                                addCommand(scope.toString(), target, func, rank);
+                            }
                         }
                     }
                     else
                     {
-                        CommandProxy target = new CommandProxy(context, reference, function.toString());
-                        proxyMap.put(function.toString(), target);
-                        addCommand(scope.toString(), target, function.toString(), rank);
-                        commands.add(target);
+                        String func = function.toString();
+                        CommandProxy target = new CommandProxy(context, reference, func);
+                        proxyMap.put(func, target);
+                        addCommand(scope.toString(), target, func, rank);
                     }
-                    proxies.put(reference, proxyMap);
-                    return commands;
+                    return proxyMap;
                 }
                 return null;
             }
 
             @Override
-            public void removedService(ServiceReference reference, Object service)
+            public void removedService(ServiceReference<Object> reference, Map<String, CommandProxy> proxyMap)
             {
                 Object scope = reference.getProperty(CommandProcessor.COMMAND_SCOPE);
-                Object function = reference.getProperty(CommandProcessor.COMMAND_FUNCTION);
 
-                if (scope != null && function != null)
+                for (Map.Entry<String, CommandProxy> entry : proxyMap.entrySet())
                 {
-                    Map<String, CommandProxy> proxyMap = proxies.remove(reference);
-                    for (Map.Entry<String, CommandProxy> entry : proxyMap.entrySet())
-                    {
-                        removeCommand(scope.toString(), entry.getKey(), entry.getValue());
-                    }
+                    removeCommand(scope.toString(), entry.getKey(), entry.getValue());
                 }
 
-                super.removedService(reference, service);
+                context.ungetService(reference);
             }
         };
     }
