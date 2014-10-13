@@ -19,8 +19,10 @@ package org.apache.karaf.shell.security.impl;
 import org.apache.felix.gogo.api.CommandSessionListener;
 import org.apache.felix.gogo.runtime.CommandProcessorImpl;
 import org.apache.felix.gogo.runtime.CommandProxy;
+import org.apache.felix.gogo.runtime.CommandSessionImpl;
 import org.apache.felix.gogo.runtime.activator.Activator;
 import org.apache.felix.service.command.CommandProcessor;
+import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Converter;
 import org.apache.felix.service.threadio.ThreadIO;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
@@ -32,6 +34,9 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
 import javax.security.auth.Subject;
+
+import java.io.InputStream;
+import java.io.PrintStream;
 import java.security.AccessControlContext;
 import java.security.AccessController;
 import java.util.ArrayList;
@@ -42,6 +47,10 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+/**
+ * Note: this CommandProcessor can only be used to create a single session, as closing the
+ * session will also close the command processor.
+ */
 public class SecuredCommandProcessorImpl extends CommandProcessorImpl {
 
     private final BundleContext bundleContext;
@@ -100,6 +109,23 @@ public class SecuredCommandProcessorImpl extends CommandProcessorImpl {
         commandTracker.close();
         converterTracker.close();
         listenerTracker.close();
+    }
+
+    public CommandSession createSession(InputStream in, PrintStream out, PrintStream err) {
+        synchronized (sessions) {
+            if (stopped) {
+                throw new IllegalStateException("CommandProcessor has been stopped");
+            }
+            CommandSessionImpl session = new CommandSessionImpl(this, in, out, err) {
+                @Override
+                public void close() {
+                    super.close();
+                    SecuredCommandProcessorImpl.this.close();
+                }
+            };
+            sessions.put(session, null);
+            return session;
+        }
     }
 
     private ServiceTracker<Object, Object> trackCommands(final BundleContext context, String roleClause) throws InvalidSyntaxException {
