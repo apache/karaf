@@ -86,13 +86,15 @@ public class WatchAction extends AbstractAction {
 
         public void run() {
             try {
-                byteArrayOutputStream = new ByteArrayOutputStream();
-                printStream = new PrintStream(byteArrayOutputStream);
-                session = commandProcessor.createSession(null, printStream, printStream);
-                session.put("SCOPE", "shell:osgi:*");
-                String output = "";
+                if (session == null) {
+                    byteArrayOutputStream = new ByteArrayOutputStream();
+                    printStream = new PrintStream(byteArrayOutputStream);
+                    session = commandProcessor.createSession(null, printStream, printStream);
+                    session.put("SCOPE", "shell:osgi:*");
+                }
+                byteArrayOutputStream.reset();
                 session.execute(command);
-                output = byteArrayOutputStream.toString();
+                String output = byteArrayOutputStream.toString();
                 // make sure before displaying that this is not a forgotten long running task
                 if (doDisplay) {
                     if (!append) {
@@ -102,10 +104,8 @@ public class WatchAction extends AbstractAction {
                     System.out.print(output);
                     System.out.flush();
                 }
-                byteArrayOutputStream.close();
-                session.close();
             } catch (Exception e) {
-                //Ingore
+                //Ignore
             }
         }
 
