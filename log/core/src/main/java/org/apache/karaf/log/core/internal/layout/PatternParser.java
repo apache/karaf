@@ -16,13 +16,13 @@
  */
 package org.apache.karaf.log.core.internal.layout;
 
+import java.lang.management.ManagementFactory;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
 
-import org.apache.log4j.spi.LoggingEvent;
 import org.ops4j.pax.logging.spi.PaxLocationInfo;
 import org.ops4j.pax.logging.spi.PaxLoggingEvent;
 
@@ -381,7 +381,7 @@ public class PatternParser {
     String convert(PaxLoggingEvent event) {
       switch(type) {
       case RELATIVE_TIME_CONVERTER:
-	return (Long.toString(event.getTimeStamp() - LoggingEvent.getStartTime()));
+	return (Long.toString(event.getTimeStamp() - getStartTime()));
       case THREAD_CONVERTER:
 	return event.getThreadName();
       case LEVEL_CONVERTER:
@@ -405,7 +405,7 @@ public class PatternParser {
 
     public
     final
-    void format(StringBuffer sbuf, LoggingEvent event) {
+    void format(StringBuffer sbuf, PaxLoggingEvent event) {
       sbuf.append(literal);
     }
 
@@ -555,6 +555,20 @@ public class PatternParser {
         }
     }
 
+  }
+
+  private static long startTime = 0;
+  private static long getStartTime() {
+      if (startTime == 0) {
+          synchronized (PatternParser.class) {
+              try {
+                  startTime = ManagementFactory.getRuntimeMXBean().getStartTime();
+              } catch (Throwable t) {
+                  startTime = System.currentTimeMillis();
+              }
+          }
+      }
+      return startTime;
   }
 }
 
