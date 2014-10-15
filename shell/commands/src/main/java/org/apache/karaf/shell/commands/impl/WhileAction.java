@@ -16,6 +16,9 @@
  */
 package org.apache.karaf.shell.commands.impl;
 
+import java.util.Collection;
+import java.util.Collections;
+
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
@@ -27,30 +30,25 @@ import org.apache.karaf.shell.api.console.Session;
 /**
  * Execute a closure on a list of arguments.
  */
-@Command(scope = "shell", name = "if", description = "If/Then/Else block.")
+@Command(scope = "shell", name = "while", description = "Loop while the condition is true.")
 @Service
-public class IfAction implements Action {
+public class WhileAction implements Action {
 
-    @Argument(name = "condition", index = 0, multiValued = false, required = true, description = "The condition")
+    @Argument(name = "condition", index = 0, multiValued = false, required = true, description = "The condition of the loop")
     Function condition;
 
-    @Argument(name = "ifTrue", index = 1, multiValued = false, required = true, description = "The function to execute if the condition is true")
-    Function ifTrue;
-
-    @Argument(name = "ifFalse", index = 2, multiValued = false, required = false, description = "The function to execute if the condition is false")
-    Function ifFalse;
+    @Argument(name = "function", index = 1, multiValued = false, required = true, description = "The function to execute")
+    Function function;
 
     @Reference
     Session session;
 
     @Override
     public Object execute() throws Exception {
-        Object result = condition.execute(session, null);
-        if (isTrue(result)) {
-            return ifTrue.execute(session, null);
-        } else {
-            if (ifFalse != null) {
-                return ifFalse.execute(session, null);
+        while (isTrue(condition.execute(session, null))) {
+            function.execute(session, null);
+            if (Thread.currentThread().isInterrupted()) {
+                throw new InterruptedException();
             }
         }
         return null;
