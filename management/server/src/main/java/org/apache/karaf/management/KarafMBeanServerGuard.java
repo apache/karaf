@@ -23,11 +23,9 @@ import java.security.AccessControlContext;
 import java.security.AccessController;
 import java.security.Principal;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 
 import javax.management.Attribute;
@@ -198,7 +196,7 @@ public class KarafMBeanServerGuard implements InvocationHandler {
     }
 
     private boolean canInvoke(ObjectName objectName, String methodName, String[] signature) throws IOException {
-        if (canBypassRBAC(objectName)) {
+        if (canBypassRBAC(objectName, methodName)) {
             return true;
         }
         for (String role : getRequiredRoles(objectName, methodName, signature)) {
@@ -219,9 +217,9 @@ public class KarafMBeanServerGuard implements InvocationHandler {
         }
         if (prefix == null) {
             LOG.debug("Attribute " + attributeName + " can not be found for MBean " + objectName.toString());
+        } else {
+            handleInvoke(objectName, prefix + attributeName, new Object[]{}, new String[]{});
         }
-
-        handleInvoke(objectName, prefix + attributeName, new Object[]{}, new String[]{});
     }
 
     private void handleGetAttributes(MBeanServer proxy, ObjectName objectName, String[] attributeNames) throws JMException, IOException {
@@ -252,7 +250,7 @@ public class KarafMBeanServerGuard implements InvocationHandler {
         }
     }
     
-    private boolean canBypassRBAC(ObjectName objectName) {
+    private boolean canBypassRBAC(ObjectName objectName, String operationName) {
         List<String> allBypassObjectName = new ArrayList<String>();
         try {
             Configuration[] configs = configAdmin.listConfigurations("(service.pid=" + JMX_ACL_WHITELIST + ")");
@@ -272,16 +270,28 @@ public class KarafMBeanServerGuard implements InvocationHandler {
         } 
 
         for (String pid : iterateDownPids(getNameSegments(objectName))) {
-            if (!pid.equals("jmx.acl") 
-                && allBypassObjectName.contains(pid.substring("jmx.acl.".length()))) {
-                return true;
+            if (!pid.equals("jmx.acl"))  {
+                for (String bypassObjectName : allBypassObjectName) {
+                    String objectNameAndMethod[] = bypassObjectName.split(";");
+                    if (objectNameAndMethod.length > 1) {
+                        //check both the ObjectName and MethodName
+                        if (bypassObjectName.equals(pid.substring("jmx.acl.".length()) 
+                            + ";" + operationName)) {
+                            return true;
+                        }
+                    } else {
+                        if (bypassObjectName.equals(pid.substring("jmx.acl.".length()))) {
+                            return true;
+                        }
+                    }
+                }
             }
         }
         return false;
     }
 
     void handleInvoke(ObjectName objectName, String operationName, Object[] params, String[] signature) throws IOException {
-        if (canBypassRBAC(objectName)) {
+        if (canBypassRBAC(objectName, operationName)) {
             return;
         }
         for (String role : getRequiredRoles(objectName, operationName, params, signature)) {
