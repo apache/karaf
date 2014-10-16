@@ -202,7 +202,7 @@ locateJava() {
         else
             warn "JAVA_HOME not set; results may vary"
             JAVA=`type java`
-            JAVA=`expr "$JAVA" : '.*is \(.*\)$'`
+            JAVA=`expr "$JAVA" : '.* \(/.*\)$'`
             if [ "x$JAVA" = "x" ]; then
                 die "java command not found"
             fi
