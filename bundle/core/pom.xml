@@ -118,7 +118,7 @@
                             org.apache.karaf.bundle.core.internal,
                             org.apache.felix.utils.version,
                             org.apache.felix.utils.manifest,
-                            org;apache.karaf.util.maven
+                            org.apache.karaf.util.maven
                         </Private-Package>
                     </instructions>
                 </configuration>
