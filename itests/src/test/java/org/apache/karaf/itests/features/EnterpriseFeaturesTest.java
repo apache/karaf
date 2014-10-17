@@ -110,16 +110,6 @@ public class EnterpriseFeaturesTest extends KarafTestSupport {
     }
 
     @Test
-    public void installOpenWebBeansFeature() throws Exception {
-        installAssertAndUninstallFeatures("openwebbeans");
-    }
-
-    @Test
-    public void installWeldFeature() throws Exception {
-        installAssertAndUninstallFeatures("weld");
-    }
-
-    @Test
     public void installApplicationWithoutIsolationFeature() throws Exception {
     	installAssertAndUninstallFeatures("application-without-isolation");
     }
