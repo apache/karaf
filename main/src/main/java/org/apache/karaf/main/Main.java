@@ -25,6 +25,7 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.channels.FileLock;
@@ -1540,10 +1541,20 @@ public class Main {
                     // Wait for the next connection
                     Socket socket = null;
                     InputStream stream = null;
+                    long acceptStartTime = System.currentTimeMillis();
                     try {
                         socket = shutdownSocket.accept();
                         socket.setSoTimeout(10 * 1000);  // Ten seconds
                         stream = socket.getInputStream();
+                    } catch (SocketTimeoutException ste) {
+                        // This should never happen but bug 3325 suggests that
+                        // it does.
+                        LOG.log(Level.WARNING, "Karaf shutdown socket: "
+                                           + "The socket listening for the shutdown command experienced "
+                                           + "an unexpected timeout "
+                                           + "[" + (System.currentTimeMillis() - acceptStartTime) + "] milliseconds "
+                                           + "after the call to accept(). Is this an instance of bug 3325?", ste);
+                        continue;
                     } catch (AccessControlException ace) {
                         LOG.log(Level.WARNING, "Karaf shutdown socket: security exception: "
                                            + ace.getMessage(), ace);
