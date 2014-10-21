@@ -183,7 +183,7 @@
         <aries.jpa.blueprint.version>1.0.2</aries.jpa.blueprint.version>
         <aries.jndi.version>1.0.0</aries.jndi.version>
         <aries.jndi.api.version>1.1.0</aries.jndi.api.version>
-        <aries.proxy.version>1.0.3</aries.proxy.version>
+        <aries.proxy.version>1.0.4</aries.proxy.version>
         <aries.proxy.api.version>1.0.1</aries.proxy.api.version>
         <aries.transaction.blueprint.version>1.0.1</aries.transaction.blueprint.version>
         <aries.transaction.jdbc.version>2.0.0</aries.transaction.jdbc.version>
