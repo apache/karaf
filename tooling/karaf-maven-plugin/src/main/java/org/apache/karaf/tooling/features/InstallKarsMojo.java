@@ -395,16 +395,16 @@ public class InstallKarsMojo extends MojoSupport {
 
         // installing condition features
         for (Conditional conditional : feature.getConditional()) {
-            boolean found = true;
-            for (String condition : conditional.getCondition()) {
-                if (!condition.startsWith("req:")) {
-                    if ((installedFeatures != null && !installedFeatures.contains(condition)) && (bootFeatures != null && !bootFeatures.contains(condition))) {
-                        found = false;
-                        break;
-                    }
-                }
-            }
-            if (found) {
+//            boolean found = true;
+//            for (String condition : conditional.getCondition()) {
+//                if (!condition.startsWith("req:")) {
+//                    if ((installedFeatures != null && !installedFeatures.contains(condition)) && (bootFeatures != null && !bootFeatures.contains(condition))) {
+//                        found = false;
+//                        break;
+//                    }
+//                }
+//            }
+//            if (found) {
                 getLog().info("= Installing conditional " + conditional.getCondition().toString());
                 getLog().debug("== Conditional features ...");
                 for (Dependency dependency : conditional.getFeature()) {
@@ -422,7 +422,7 @@ public class InstallKarsMojo extends MojoSupport {
                 for (ConfigFile configFile : conditional.getConfigfile()) {
                     installConfigFile(configFile);
                 }
-            }
+//            }
         }
     }
 
