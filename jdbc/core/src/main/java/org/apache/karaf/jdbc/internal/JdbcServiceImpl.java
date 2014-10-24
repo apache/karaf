@@ -21,6 +21,7 @@ import org.apache.karaf.util.TemplateUtils;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -121,22 +122,54 @@ public class JdbcServiceImpl implements JdbcService {
     public List<String> datasources() throws Exception {
         List<String> datasources = new ArrayList<String>();
 
-        ServiceReference<?>[] references = bundleContext.getServiceReferences((String) null, "(|(" + Constants.OBJECTCLASS + "=" + DataSource.class.getName() + ")("
-        + Constants.OBJECTCLASS + "=" + XADataSource.class.getName() + "))");
+        ServiceReference<?>[] references = bundleContext.getServiceReferences((String) null,
+                "(|(" + Constants.OBJECTCLASS + "=" + DataSource.class.getName() + ")("
+                        + Constants.OBJECTCLASS + "=" + XADataSource.class.getName() + "))");
         if (references != null) {
             for (ServiceReference reference : references) {
                 if (reference.getProperty("osgi.jndi.service.name") != null) {
-                    datasources.add((String) reference.getProperty("osgi.jndi.service.name"));
-                } else if (reference.getProperty("datasource") != null) {
-                    datasources.add((String) reference.getProperty("datasource"));
-                } else if (reference.getProperty("name") != null) {
-                    datasources.add((String) reference.getProperty("name"));
-                } else {
-                    datasources.add(reference.getProperty(Constants.SERVICE_ID).toString());
+                    datasources.add(reference.getProperty("osgi.jndi.service.name").toString());
                 }
+                if (reference.getProperty("datasource") != null) {
+                    datasources.add(reference.getProperty("datasource").toString());
+                }
+                if (reference.getProperty("name") != null) {
+                    datasources.add(reference.getProperty("name").toString());
+                }
+                datasources.add(reference.getProperty(Constants.SERVICE_ID).toString());
             }
         }
         return datasources;
+    }
+
+    @Override
+    public Map<String, Set<String>> aliases() throws Exception {
+        Map<String, Set<String>> aliases = new LinkedHashMap<String, Set<String>>();
+
+        ServiceReference<?>[] references = bundleContext.getServiceReferences((String) null,
+                "(|(" + Constants.OBJECTCLASS + "=" + DataSource.class.getName() + ")("
+                        + Constants.OBJECTCLASS + "=" + XADataSource.class.getName() + "))");
+        if (references != null) {
+            List<ServiceReference<?>> refs = Arrays.asList(references);
+            Collections.sort(refs);
+            Collections.reverse(refs);
+            for (ServiceReference<?> reference : refs) {
+                Set<String> names = new LinkedHashSet<String>();
+                if (reference.getProperty("osgi.jndi.service.name") != null) {
+                    names.add(reference.getProperty("osgi.jndi.service.name").toString());
+                }
+                if (reference.getProperty("datasource") != null) {
+                    names.add(reference.getProperty("datasource").toString());
+                }
+                if (reference.getProperty("name") != null) {
+                    names.add(reference.getProperty("name").toString());
+                }
+                String id = reference.getProperty(Constants.SERVICE_ID).toString();
+                names.add(id);
+                aliases.put(id, names);
+            }
+        }
+        return aliases;
     }
 
     @Override
@@ -157,7 +190,7 @@ public class JdbcServiceImpl implements JdbcService {
 
     @Override
     public Map<String, List<String>> query(String datasource, String query) throws Exception {
-        JdbcConnector jdbcConnector = new JdbcConnector(bundleContext, datasource);
+        JdbcConnector jdbcConnector = new JdbcConnector(bundleContext, lookupDataSource(datasource));
         try {
             Map<String, List<String>> map = new HashMap<String, List<String>>();
             Statement statement = jdbcConnector.createStatement();
@@ -179,7 +212,7 @@ public class JdbcServiceImpl implements JdbcService {
 
     @Override
     public void execute(String datasource, String command) throws Exception {
-        JdbcConnector jdbcConnector = new JdbcConnector(bundleContext, datasource);
+        JdbcConnector jdbcConnector = new JdbcConnector(bundleContext, lookupDataSource(datasource));
         try {
             jdbcConnector.createStatement().execute(command);
         } finally {
@@ -189,7 +222,7 @@ public class JdbcServiceImpl implements JdbcService {
 
     @Override
     public Map<String, List<String>> tables(String datasource) throws Exception {
-        JdbcConnector jdbcConnector = new JdbcConnector(bundleContext, datasource);
+        JdbcConnector jdbcConnector = new JdbcConnector(bundleContext, lookupDataSource(datasource));
         try {
 
             DatabaseMetaData dbMetaData = jdbcConnector.connect().getMetaData();
@@ -212,7 +245,7 @@ public class JdbcServiceImpl implements JdbcService {
 
     @Override
     public Map<String, String> info(String datasource) throws Exception {
-        JdbcConnector jdbcConnector = new JdbcConnector(bundleContext, datasource);
+        JdbcConnector jdbcConnector = new JdbcConnector(bundleContext, lookupDataSource(datasource));
         try {
             DatabaseMetaData dbMetaData = jdbcConnector.connect().getMetaData();
             Map<String, String> map = new HashMap<String, String>();
@@ -233,6 +266,36 @@ public class JdbcServiceImpl implements JdbcService {
 
     public void setBundleContext(BundleContext bundleContext) {
         this.bundleContext = bundleContext;
+    }
+
+    private ServiceReference<?> lookupDataSource(String name) {
+        ServiceReference<?>[] references;
+        try {
+            references = bundleContext.getServiceReferences((String) null,
+                    "(&(|(" + Constants.OBJECTCLASS + "=" + DataSource.class.getName() + ")"
+                            + "(" + Constants.OBJECTCLASS + "=" + XADataSource.class.getName() + "))"
+                            + "(|(osgi.jndi.service.name=" + name + ")(datasource=" + name + ")(name=" + name + ")(service.id=" + name + ")))");
+        } catch (InvalidSyntaxException e) {
+            throw new IllegalArgumentException("Error finding datasource with name " + name, e);
+        }
+        if (references == null || references.length == 0) {
+            throw new IllegalArgumentException("No JDBC datasource found for " + name);
+        }
+        if (references.length > 1) {
+            Arrays.sort(references);
+            if (getRank(references[references.length - 1]) == getRank(references[references.length - 2])) {
+                LOGGER.warn("Multiple JDBC datasources found with the same service ranking for " + name);
+            }
+        }
+        return references[references.length - 1];
+    }
+
+    private int getRank(ServiceReference<?> reference) {
+        Object rankObj = reference.getProperty(Constants.SERVICE_RANKING);
+        // If no rank, then spec says it defaults to zero.
+        rankObj = (rankObj == null) ? new Integer(0) : rankObj;
+        // If rank is not Integer, then spec says it defaults to zero.
+        return (rankObj instanceof Integer) ? (Integer) rankObj : 0;
     }
 
 }

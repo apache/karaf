@@ -18,6 +18,7 @@ package org.apache.karaf.jdbc;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * JDBC Service.
@@ -51,6 +52,14 @@ public interface JdbcService {
      * @return a list of datasources name.
      */
     List<String> datasources() throws Exception;
+
+    /**
+     * List the datasources available and
+     * group aliases for the same datasource.
+     *
+     * @return a list of aliases.
+     */
+    Map<String, Set<String>> aliases() throws Exception;
 
     /**
      * List the JDBC datasources configuration file names present in the deploy folder.
