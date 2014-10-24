@@ -113,7 +113,7 @@ public class BootFeaturesInstaller {
     }
 
     protected List<Set<String>> parseBootFeatures(String bootFeatures) {
-        Pattern pattern = Pattern.compile("(\\((.+))\\),|.+");
+        Pattern pattern = Pattern.compile("(\\s*\\(([^)]+))\\s*\\)\\s*,\\s*|.+");
         Matcher matcher = pattern.matcher(bootFeatures);
         List<Set<String>> result = new ArrayList<>();
         while (matcher.find()) {

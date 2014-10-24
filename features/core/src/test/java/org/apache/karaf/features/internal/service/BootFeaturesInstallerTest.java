@@ -37,8 +37,9 @@ public class BootFeaturesInstallerTest extends TestBase {
     @SuppressWarnings("unchecked")
     public void testParser() {
         BootFeaturesInstaller installer = new BootFeaturesInstaller(null, null, "", "", false);
-        Assert.assertEquals(asList(setOf("test1", "test2"),setOf("test3")), installer.parseBootFeatures("(test1, test2), test3"));
-        Assert.assertEquals(asList(setOf("test1", "test2", "test3")), installer.parseBootFeatures("test1, test2, test3"));
+        Assert.assertEquals(asList(setOf("test1", "test2"), setOf("test3")), installer.parseBootFeatures(" ( test1 , test2 ) , test3 "));
+        Assert.assertEquals(asList(setOf("test1", "test2", "test3")), installer.parseBootFeatures(" test1 , test2, test3"));
+        Assert.assertEquals(asList(setOf("test1"), setOf("test2"), setOf("test3")), installer.parseBootFeatures("(test1), (test2), test3"));
     }
     
     @Test
