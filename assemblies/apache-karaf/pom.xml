@@ -158,7 +158,6 @@
                 <configuration>
                     <installedFeatures>
                         <feature>wrapper</feature>
-                        <feature>spring</feature>
                     </installedFeatures>
                     <bootFeatures>
                         <feature>wrap</feature>
