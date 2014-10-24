@@ -18,6 +18,7 @@ package org.apache.karaf.jdbc.command;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
@@ -37,13 +38,21 @@ public class DataSourcesCommand extends JdbcCommandSupport {
         table.column("URL");
         table.column("Status");
 
-        List<String> datasources = this.getJdbcService().datasources();
-        for (String datasource : datasources) {
+        Map<String, Set<String>> datasources = this.getJdbcService().aliases();
+        for (Map.Entry<String, Set<String>> entry : datasources.entrySet()) {
+            StringBuilder ids = new StringBuilder();
+            for (String id : entry.getValue()) {
+                if (ids.length() > 0) {
+                    ids.append(", ");
+                }
+                ids.append(id);
+            }
+            String id = ids.toString();
             try {
-                Map<String, String> info = this.getJdbcService().info(datasource);
-                table.addRow().addContent(datasource, info.get("db.product"), info.get("db.version"), info.get("url"), "OK");
+                Map<String, String> info = this.getJdbcService().info(entry.getKey());
+                table.addRow().addContent(id, info.get("db.product"), info.get("db.version"), info.get("url"), "OK");
             } catch (Exception e) {
-                table.addRow().addContent(datasource, "", "", "", "Error");
+                table.addRow().addContent(id, "", "", "", "Error");
             }
         }
 

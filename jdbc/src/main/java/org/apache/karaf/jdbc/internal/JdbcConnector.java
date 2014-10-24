@@ -17,8 +17,9 @@
 package org.apache.karaf.jdbc.internal;
 
 import java.io.Closeable;
-import java.io.IOException;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Deque;
 import java.util.LinkedList;
 
@@ -26,120 +27,67 @@ import javax.sql.DataSource;
 import javax.sql.XAConnection;
 import javax.sql.XADataSource;
 
-import org.apache.karaf.util.StreamUtils;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
 public class JdbcConnector implements Closeable {
-    private BundleContext bundleContext;
-    private String datasourceName;
-    private Connection connection;
-    private Deque<Closeable> resources;
-    private ServiceReference<?> reference;
 
-    public JdbcConnector(BundleContext bundleContext, String datasourceName) {
-        this.bundleContext = bundleContext;
-        this.datasourceName = datasourceName;
+    private Object datasource;
+    private Connection connection;
+    private Deque<AutoCloseable> resources;
+
+    public JdbcConnector(final BundleContext bundleContext, final ServiceReference<?> reference) {
+        this.datasource = bundleContext.getService(reference);
         this.resources = new LinkedList<>();
+        this.resources.addFirst(new AutoCloseable() {
+            @Override
+            public void close() throws Exception {
+                bundleContext.ungetService(reference);
+            }
+        });
     }
     
     public Connection connect() throws SQLException {
-        reference = lookupDataSource(datasourceName);
-        Object datasource = bundleContext.getService(reference);
-        if (datasource instanceof DataSource) {
-            connection = ((DataSource) datasource).getConnection();
-        }
-        if (datasource instanceof XADataSource) {
-            connection = ((XADataSource) datasource).getXAConnection().getConnection();
+        if (connection == null) {
+            if (datasource instanceof DataSource) {
+                connection = ((DataSource) datasource).getConnection();
+            } else if (datasource instanceof XADataSource) {
+                connection = register(((XADataSource) datasource).getXAConnection()).getConnection();
+            } else {
+                throw new IllegalStateException("Datasource is not an instance of DataSource nor XADataSource");
+            }
+            register(connection);
         }
         return connection;
     }
     
     public Statement createStatement() throws SQLException {
-        if (connection == null) {
-            connect();
-        }
-        if (connection instanceof Connection) {
-            return register(((Connection) connection).createStatement());
-        }
-        if (connection instanceof XAConnection) {
-            return register(((XAConnection) connection).getConnection().createStatement());
-        }
-        return null;
+        return register(connect().createStatement());
     }
 
-    public Connection register(final Connection connection) {
-        resources.addFirst(new Closeable() {
-            
+    public <T extends AutoCloseable> T register(final T closeable) {
+        resources.addFirst(closeable);
+        return closeable;
+    }
+
+    public XAConnection register(final XAConnection closeable) {
+        register(new AutoCloseable() {
             @Override
-            public void close() throws IOException {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    // Ignore
-                }
+            public void close() throws Exception {
+                closeable.close();
             }
         });
-        return connection;
-    }
-
-    public Statement register(final Statement statement) {
-        resources.addFirst(new Closeable() {
-            
-            @Override
-            public void close() throws IOException {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-                    // Ignore
-                }
-            }
-        });
-        return statement;
-    }
-
-    public ResultSet register(final ResultSet resultSet) {
-        resources.addFirst(new Closeable() {
-            
-            @Override
-            public void close() throws IOException {
-                try {
-                    resultSet.close();
-                } catch (SQLException e) {
-                    // Ignore
-                }
-            }
-        });
-        return resultSet;
-    }
-    
-
-    private ServiceReference<?> lookupDataSource(String name) {
-        ServiceReference<?>[] references;
-        try {
-            references = bundleContext.getServiceReferences((String) null,
-                    "(&(|(" + Constants.OBJECTCLASS + "=" + DataSource.class.getName() + ")"
-                    + "(" + Constants.OBJECTCLASS + "=" + XADataSource.class.getName() + "))"
-                    + "(|(osgi.jndi.service.name=" + name + ")(datasource=" + name + ")(name=" + name + ")(service.id=" + name + ")))");
-        } catch (InvalidSyntaxException e) {
-            throw new IllegalArgumentException("Error finding datasource with name " + name, e);
-        }
-        if (references == null || references.length == 0) {
-            throw new IllegalArgumentException("No JDBC datasource found for " + name);
-        }
-        if (references.length > 1) {
-            throw new IllegalArgumentException("Multiple JDBC datasource found for " + name);
-        }
-        return references[0];
+        return closeable;
     }
 
     @Override
     public void close() {
-        StreamUtils.close(resources);
-        if (reference != null) {
-            bundleContext.ungetService(reference);
+        for (AutoCloseable closeable : resources) {
+            try {
+                closeable.close();
+            } catch (Throwable t) {
+                // Ignore
+            }
         }
     }
 
