@@ -153,11 +153,14 @@ public class CommandProcessorImpl implements CommandProcessor
         Object cmd = null;
         if (cmdMap != null && !cmdMap.isEmpty())
         {
-            for (Entry<Object, Integer> e : cmdMap.entrySet())
+            synchronized (cmdMap)
             {
-                if (cmd == null || e.getValue() > cmdMap.get(cmd))
+                for (Entry<Object, Integer> e : cmdMap.entrySet())
                 {
-                    cmd = e.getKey();
+                    if (cmd == null || e.getValue() > cmdMap.get(cmd))
+                    {
+                        cmd = e.getKey();
+                    }
                 }
             }
         }
@@ -219,7 +222,10 @@ public class CommandProcessorImpl implements CommandProcessor
             commands.putIfAbsent(key, new LinkedHashMap<Object, Integer>());
             cmdMap = commands.get(key);
         }
-        cmdMap.put(target, ranking);
+        synchronized (cmdMap)
+        {
+            cmdMap.put(target, ranking);
+        }
     }
 
     public void removeCommand(String scope, String function)
@@ -236,7 +242,10 @@ public class CommandProcessorImpl implements CommandProcessor
         Map<Object, Integer> cmdMap = commands.get(key);
         if (cmdMap != null)
         {
-            cmdMap.remove(target);
+            synchronized (cmdMap)
+            {
+                cmdMap.remove(target);
+            }
         }
     }
 
