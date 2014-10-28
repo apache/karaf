@@ -23,12 +23,15 @@ import org.osgi.framework.hooks.service.ListenerHook;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 public class GuardingEventHook implements EventListenerHook {
 
     private final BundleContext bundleContext;
     private final GuardProxyCatalog guardProxyCatalog;
     private final Filter servicesFilter;
+    private final Set<ServiceReference<?>> references = new ConcurrentSkipListSet<ServiceReference<?>>();
 
     GuardingEventHook(BundleContext bundleContext, GuardProxyCatalog guardProxyCatalog, Filter securedServicesFilter) throws InvalidSyntaxException {
         this.bundleContext = bundleContext;
@@ -45,6 +48,18 @@ public class GuardingEventHook implements EventListenerHook {
         ServiceReference<?> sr = event.getServiceReference();
         if (!servicesFilter.match(sr)) {
             return;
+        }
+
+        if (event.getType() == ServiceEvent.REGISTERED) {
+            references.add(sr);
+        } else if (event.getType() == ServiceEvent.UNREGISTERING) {
+            if (!references.remove(sr)) {
+                return;
+            }
+        } else {
+            if (!references.contains(sr)) {
+                return;
+            }
         }
 
         for (Iterator<BundleContext> i = listeners.keySet().iterator(); i.hasNext(); ) {
