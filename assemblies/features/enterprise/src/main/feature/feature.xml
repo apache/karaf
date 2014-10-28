@@ -253,6 +253,7 @@
     <feature name="weld" description="JBoss Weld CDI container support" version="${weld.version}" resolver="(obr)">
         <details>Add support of JBoss Weld CDI container.</details>
         <feature>pax-cdi-weld</feature>
+        <bundle>mvn:javax.annotation/javax.annotation-api/1.2</bundle>
         <bundle>mvn:org.jboss.weld/weld-osgi-bundle/${weld.version}</bundle>
     </feature>
 
