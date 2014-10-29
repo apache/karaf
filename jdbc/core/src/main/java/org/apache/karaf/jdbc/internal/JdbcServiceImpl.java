@@ -163,18 +163,48 @@ public class JdbcServiceImpl implements JdbcService {
         if (references != null) {
             for (ServiceReference reference : references) {
                 if (reference.getProperty("osgi.jndi.service.name") != null) {
-                    datasources.add((String) reference.getProperty("osgi.jndi.service.name"));
-                } else if (reference.getProperty("datasource") != null) {
-                    datasources.add((String) reference.getProperty("datasource"));
-                } else if (reference.getProperty("name") != null) {
-                    datasources.add((String) reference.getProperty("name"));
-                } else {
-                    datasources.add(reference.getProperty(Constants.SERVICE_ID).toString());
+                    datasources.add(reference.getProperty("osgi.jndi.service.name").toString());
                 }
+                if (reference.getProperty("datasource") != null) {
+                    datasources.add(reference.getProperty("datasource").toString());
+                }
+                if (reference.getProperty("name") != null) {
+                    datasources.add(reference.getProperty("name").toString());
+                }
+                datasources.add(reference.getProperty(Constants.SERVICE_ID).toString());
             }
         }
         return datasources;
     }
+
+    public Map<String, Set<String>> aliases() throws Exception {
+        Map<String, Set<String>> aliases = new LinkedHashMap<String, Set<String>>();
+
+        ServiceReference<?>[] references = bundleContext.getServiceReferences((String) null,
+                "(|(" + Constants.OBJECTCLASS + "=" + DataSource.class.getName() + ")("
+                        + Constants.OBJECTCLASS + "=" + XADataSource.class.getName() + "))");
+        if (references != null) {
+            List<ServiceReference<?>> refs = Arrays.asList(references);
+            Collections.sort(refs);
+            Collections.reverse(refs);
+            for (ServiceReference<?> reference : refs) {
+                Set<String> names = new LinkedHashSet<String>();
+                if (reference.getProperty("osgi.jndi.service.name") != null) {
+                    names.add(reference.getProperty("osgi.jndi.service.name").toString());
+                }
+                if (reference.getProperty("datasource") != null) {
+                    names.add(reference.getProperty("datasource").toString());
+                }
+                if (reference.getProperty("name") != null) {
+                    names.add(reference.getProperty("name").toString());
+                }
+                String id = reference.getProperty(Constants.SERVICE_ID).toString();
+                names.add(id);
+                aliases.put(id, names);
+            }
+        }
+        return aliases;
+   }
 
     public List<String> datasourceFileNames() throws Exception {
         File karafBase = new File(System.getProperty("karaf.base"));
