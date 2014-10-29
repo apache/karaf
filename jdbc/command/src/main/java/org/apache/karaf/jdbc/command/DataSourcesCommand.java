@@ -18,25 +18,33 @@ package org.apache.karaf.jdbc.command;
 
 import org.apache.felix.gogo.commands.Command;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Command(scope = "jdbc", name = "datasources", description = "List the JDBC datasources")
 public class DataSourcesCommand extends JdbcCommandSupport {
 
-    private final static String JDBC_DATASOURCES_STRING_FORMAT = "%10s %15s %10s %45s %5s";
+    private final static String JDBC_DATASOURCES_STRING_FORMAT = "%20s %15s %10s %45s %5s";
 
     public Object doExecute() throws Exception {
 
         System.out.println(String.format(JDBC_DATASOURCES_STRING_FORMAT, "Name", "Product", "Version", "URL", "Status"));
 
-        List<String> datasources = this.getJdbcService().datasources();
-        for (String datasource : datasources) {
+        Map<String, Set<String>> datasources = this.getJdbcService().aliases();
+        for (Map.Entry<String, Set<String>> entry : datasources.entrySet()) {
+            StringBuilder ids = new StringBuilder();
+            for (String id : entry.getValue()) {
+                if (ids.length() > 0) {
+                    ids.append(", ");
+                }
+                ids.append(id);
+            }
+            String id = ids.toString();
             try {
-                Map<String, String> info = this.getJdbcService().info(datasource);
-                System.out.println(String.format(JDBC_DATASOURCES_STRING_FORMAT, datasource, info.get("db.product"), info.get("db.version"), info.get("url"), "OK"));
+                Map<String, String> info = this.getJdbcService().info(entry.getKey());
+                System.out.println(String.format(JDBC_DATASOURCES_STRING_FORMAT, id, info.get("db.product"), info.get("db.version"), info.get("url"), "OK"));
             } catch (Exception e) {
-                System.out.println(String.format(JDBC_DATASOURCES_STRING_FORMAT, datasource, "", "", "", "Error"));
+                System.out.println(String.format(JDBC_DATASOURCES_STRING_FORMAT, id, "", "", "", "Error"));
             }
         }
 
