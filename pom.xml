@@ -1973,7 +1973,7 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>build-helper-maven-plugin</artifactId>
-                    <version>1.8</version>
+                    <version>1.9.1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -2236,9 +2236,9 @@
                                 <exclude>**/foo</exclude>
                                 <exclude>**/org.ops4j.pax.exam.TestContainerFactory</exclude>
                                 <!-- manual resources -->
-                                <exclude>manual/**/*.css</exclude>
-                                <exclude>manual/**/*.ssp</exclude>
-                                <exclude>manual/**/*.conf</exclude>
+                                <exclude>**/*.css</exclude>
+                                <exclude>**/*.ssp</exclude>
+                                <exclude>**/*.conf</exclude>
                                 <!-- SSH keys -->
                                 <exclude>**/*.key</exclude>
                             </excludes>
