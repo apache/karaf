@@ -58,8 +58,8 @@
         </conditional>
     </feature>
 
-    <feature name="transaction" description="OSGi Transaction Manager" version="1.1.0">
-        <details>JTA implementation provided by Apache Aries Transaction 1.1.0</details>
+    <feature name="transaction" description="OSGi Transaction Manager" version="1.1.1">
+        <details>JTA implementation provided by Apache Aries Transaction 1.1.1</details>
         <config name="org.apache.aries.transaction">
             aries.transaction.recoverable = true
             aries.transaction.timeout = 600
@@ -69,7 +69,7 @@
             aries.transaction.howl.bufferSizeKBytes = 4
         </config>
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.aries.transaction/org.apache.aries.transaction.manager/1.1.0</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.transaction/org.apache.aries.transaction.manager/1.1.1</bundle>
         <conditional>
             <condition>aries-blueprint</condition>
             <bundle start-level="30">mvn:org.apache.aries.transaction/org.apache.aries.transaction.blueprint/${aries.transaction.blueprint.version}</bundle>
