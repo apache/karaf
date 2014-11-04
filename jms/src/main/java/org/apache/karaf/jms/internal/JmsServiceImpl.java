@@ -275,7 +275,7 @@ public class JmsServiceImpl implements JmsService {
         JmsConnector connector = new JmsConnector(bundleContext, connectionFactory, username, password);
         try {
             int count = 0;
-            Session session = connector.createSession();
+            Session session = connector.createSession(Session.SESSION_TRANSACTED);
             MessageConsumer consumer = session.createConsumer(session.createQueue(sourceQueue), selector);
             Message message;
             do {
@@ -286,6 +286,7 @@ public class JmsServiceImpl implements JmsService {
                     count++;
                 }
             } while (message != null);
+            session.commit();
             consumer.close();
             return count;
         } finally {

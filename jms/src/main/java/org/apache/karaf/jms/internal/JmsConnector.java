@@ -91,9 +91,19 @@ public class JmsConnector implements Closeable {
     }
 
     public Session createSession() throws JMSException {
+        return createSession(Session.AUTO_ACKNOWLEDGE);
+    }
+
+    public Session createSession(int acknowledgeMode) throws JMSException {
         if (connection == null) {
             connect();
         }
-        return session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+        if (acknowledgeMode == Session.SESSION_TRANSACTED) {
+            session = connection.createSession(true, acknowledgeMode);
+        } else {
+            session = connection.createSession(false, acknowledgeMode);
+        }
+        return session;
     }
+
 }
