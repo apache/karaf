@@ -162,6 +162,10 @@ public class ValidateDescriptorMojo extends MojoSupport {
      * The Mojo's main method
      */
     public void execute() throws MojoExecutionException, MojoFailureException {
+
+        this.dependencyHelper = DependencyHelperFactory.createDependencyHelper(this.container, this.project, this.mavenSession, getLog());
+        this.dependencyHelper.getDependencies(project, true);
+
         try {
             prepare();
             URI uri = file.toURI();
@@ -532,7 +536,17 @@ public class ValidateDescriptorMojo extends MojoSupport {
                 // the disk
                 file = new ZipFile(localFile);
             } else {
-                resolver.resolve(mvnArtifact, remoteRepos, localRepo);
+                //TODO: Extend DependencyHelper to handle org.apache.maven.artifact.Artifact ?
+                String paxUrl = null;
+                try {
+                    paxUrl = dependencyHelper.artifactToMvn(artifact);
+                    File mvnArtifactFile = dependencyHelper.resolveById(paxUrl, getLog());
+                    mvnArtifact.setFile(mvnArtifactFile);
+                } catch (MojoExecutionException e) {
+                    e.printStackTrace();
+                } catch (MojoFailureException e) {
+                    e.printStackTrace();
+                }
                 file = new ZipFile(mvnArtifact.getFile());
             }
             ZipEntry entry = file.getEntry("META-INF/MANIFEST.MF");
@@ -572,8 +586,10 @@ public class ValidateDescriptorMojo extends MojoSupport {
                     new DefaultRepositoryLayout());
             List<ArtifactRepository> repos = new LinkedList<ArtifactRepository>();
             repos.add(repository);
+            // TODO: Should be resolved via DependencyHelper but currently not sure how to implement.
             resolver.resolve(artifact, repos, localRepo);
         } else {
+            // TODO: Should be resolved via DependencyHelper but currently not sure how to implement.0
             resolver.resolve(artifact, remoteRepos, localRepo);
         }
         if (artifact == null) {

@@ -31,6 +31,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.karaf.tooling.features.DependencyHelper;
 import org.apache.karaf.util.StreamUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.factory.ArtifactFactory;
@@ -137,6 +138,9 @@ public abstract class MojoSupport extends AbstractMojo {
      * @readonly
      */
     protected PlexusContainer container;
+
+    // an access layer for available Aether implementation
+    protected DependencyHelper dependencyHelper;
 
     protected MavenProject getProject() {
         return project;
