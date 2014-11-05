@@ -15,6 +15,31 @@
  * limitations under the License.
  */
 
+                    Apache Karaf 2.3.9
+                    ==================
+
+  Overview
+  --------
+
+  This is an update patch for Apache Karaf 2.3.x, containing several bug fixes, and a dependency update. Amoung them are a fix for when Karaf throws a SocketTimeoutException and exits after 49 days, and env variables can now be read while running Karaf as a Linux service. An important dependency update has been made to Aries JPA API 1.0.2/JPA Container 1.0.2/JPA Blueprint Aries 1.0.4/JPA Container Context 1.0.4. For more information, please read the below changelog.
+
+  Changelog
+  ---------
+
+** Bug
+ * [KARAF-1701|https://issues.apache.org/jira/browse/KARAF-1701] - Parsing of config for a field with cardinality > 1 is incorrectlyprocessed and displayed on Admin Console
+ * [KARAF-2377|https://issues.apache.org/jira/browse/KARAF-2377] - Set GenerateFeaturesXmlMojoTest to ignore
+ * [KARAF-2890|https://issues.apache.org/jira/browse/KARAF-2890] - The env variables can't be read while running karaf as a Linux service
+ * [KARAF-3261|https://issues.apache.org/jira/browse/KARAF-3261] - jdbc command (using JdbcConnector.java) does not honour service ranking and throws IllegalArgumentException instead
+ * [KARAF-3325|https://issues.apache.org/jira/browse/KARAF-3325] - Karaf throws SocketTimeoutException and exits after 49 days
+
+** Dependency upgrade
+ * [KARAF-3307|https://issues.apache.org/jira/browse/KARAF-3307] - Upgrade to Aries JPA API 1.0.2/JPA Container 1.0.2/JPA Blueprint Aries 1.0.4/JPA Container Context 1.0.4
+
+** Improvement
+ * [KARAF-3255|https://issues.apache.org/jira/browse/KARAF-3255] - Document jasypt property placeholder
+
+
                     Apache Karaf 2.3.8
                     ==================
 
