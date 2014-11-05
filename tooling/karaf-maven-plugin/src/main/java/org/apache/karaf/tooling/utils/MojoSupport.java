@@ -92,19 +92,9 @@ public abstract class MojoSupport extends AbstractMojo {
     protected ArtifactRepository localRepo;
 
     /**
-     * @parameter default-value="${project.remoteArtifactRepositories}"
-     */
-    protected List<ArtifactRepository> remoteRepos;
-
-    /**
      * @component
      */
     protected ArtifactMetadataSource artifactMetadataSource;
-
-    /**
-     * @component
-     */
-    protected ArtifactResolver resolver;
 
     /**
      * @component

@@ -19,12 +19,7 @@ package org.apache.karaf.tooling.features;
 
 import java.io.File;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.apache.felix.utils.version.VersionRange;
 import org.apache.felix.utils.version.VersionTable;
@@ -33,9 +28,11 @@ import org.apache.karaf.tooling.features.model.Feature;
 import org.apache.karaf.tooling.features.model.Repository;
 import org.apache.karaf.tooling.utils.MojoSupport;
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.MojoExecutionException;
 
 import org.osgi.framework.Version;
+import shaded.org.eclipse.aether.repository.RemoteRepository;
 
 /**
  * Common functionality for mojos that need to reolve features
@@ -141,7 +138,10 @@ public abstract class AbstractFeatureMojo extends MojoSupport {
      */
     protected void resolveArtifact(Artifact artifact) {
         try {
-            //TODO: Extend DependencyHelper to handle org.apache.maven.artifact.Artifact ?
+            if(null != artifact.getRepository()) {
+                List<ArtifactRepository> usedRemoteRepos = Collections.singletonList(artifact.getRepository());
+                dependencyHelper.overwriteRemoteRepositories(usedRemoteRepos);
+            }
             String paxUrl = dependencyHelper.artifactToMvn(artifact);
             File file = dependencyHelper.resolveById(paxUrl, getLog());
             artifact.setFile(file);
@@ -252,7 +252,7 @@ public abstract class AbstractFeatureMojo extends MojoSupport {
                 artifactRef.setArtifact(artifact);
                 resolveArtifact(artifact);
             }
-            // TODO: Is this still necessary when DependencyHelper is used ?
+            // TODO: Is this still necessary when Aether is used (from comment on the method i guess no)?
             checkDoGarbageCollect();
         }
     }

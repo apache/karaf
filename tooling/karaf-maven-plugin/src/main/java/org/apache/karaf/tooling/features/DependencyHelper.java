@@ -19,9 +19,11 @@
 package org.apache.karaf.tooling.features;
 
 import java.io.File;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
@@ -84,5 +86,12 @@ public interface DependencyHelper {
      * @return the filesystem path.
      */
     public String pathFromAether(String name) throws MojoExecutionException;
+
+    /**
+     * Overwrites the default repositories to use for the resolution of project dependencies.
+     *
+     * @param artifactRepositories the Maven <code>ArtifactRepositories</code>.
+     */
+    public void overwriteRemoteRepositories(List<ArtifactRepository> artifactRepositories);
 
 }

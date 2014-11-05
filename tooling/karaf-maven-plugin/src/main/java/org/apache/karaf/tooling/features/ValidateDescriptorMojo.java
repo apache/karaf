@@ -586,12 +586,9 @@ public class ValidateDescriptorMojo extends MojoSupport {
                     new DefaultRepositoryLayout());
             List<ArtifactRepository> repos = new LinkedList<ArtifactRepository>();
             repos.add(repository);
-            // TODO: Should be resolved via DependencyHelper but currently not sure how to implement.
-            resolver.resolve(artifact, repos, localRepo);
-        } else {
-            // TODO: Should be resolved via DependencyHelper but currently not sure how to implement.0
-            resolver.resolve(artifact, remoteRepos, localRepo);
+            dependencyHelper.overwriteRemoteRepositories(repos);
         }
+        artifact = dependencyHelper.mvnToArtifact(bundle);
         if (artifact == null) {
             throw new Exception("Unable to resolve artifact for uri " + bundle);
         } else {

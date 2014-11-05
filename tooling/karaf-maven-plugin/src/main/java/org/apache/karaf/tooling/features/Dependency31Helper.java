@@ -19,6 +19,7 @@
 package org.apache.karaf.tooling.features;
 
 import org.apache.maven.RepositoryUtils;
+import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
@@ -390,6 +391,19 @@ public class Dependency31Helper implements DependencyHelper {
         DefaultArtifact artifact = new DefaultArtifact(name);
         org.apache.maven.artifact.Artifact mavenArtifact = toArtifact(artifact);
         return MavenUtil.layout.pathOf(mavenArtifact);
+    }
+
+    @Override
+    public void overwriteRemoteRepositories(List<ArtifactRepository> artifactRepositories) {
+        projectRepositories.clear();
+        for(ArtifactRepository artifactRepository : artifactRepositories) {
+            String id = artifactRepository.getId();
+            String type = "default";
+            String url = artifactRepository.getUrl();
+            RemoteRepository.Builder repositoryBuilder = new RemoteRepository.Builder(id, type, url);
+            RemoteRepository remoteRepository = repositoryBuilder.build();
+            projectRepositories.add(remoteRepository);
+        }
     }
 
 }
