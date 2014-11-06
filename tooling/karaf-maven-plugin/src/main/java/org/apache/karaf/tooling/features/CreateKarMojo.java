@@ -188,7 +188,6 @@ public class CreateKarMojo extends MojoSupport {
             try {
                 Artifact artifactTemp = resourceToArtifact(file, false);
                 if (!fileResolved.exists()) {
-                    //TODO: Extend DependencyHelper to handle org.apache.maven.artifact.Artifact ?
                     String paxUrl = dependencyHelper.artifactToMvn(artifactTemp);
                     try {
                         fileResolved = dependencyHelper.resolveById(paxUrl, getLog());
@@ -312,7 +311,6 @@ public class CreateKarMojo extends MojoSupport {
             }
 
             for (Artifact artifact : bundles) {
-                //TODO: Extend DependencyHelper to handle org.apache.maven.artifact.Artifact ?
                 String paxUrl = dependencyHelper.artifactToMvn(artifact);
                 File file = dependencyHelper.resolveById(paxUrl, getLog());
                 artifact.setFile(file);

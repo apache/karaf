@@ -141,12 +141,7 @@ public abstract class AbstractFeatureMojo extends MojoSupport {
         try {
             File file;
             String paxUrl = dependencyHelper.artifactToMvn(artifact);
-            if(null != artifact.getRepository()) {
-                List<ArtifactRepository> usedRemoteRepos = Collections.singletonList(artifact.getRepository());
-                file = dependencyHelper.resolveById(paxUrl, usedRemoteRepos, getLog());
-            }else {
-                file = dependencyHelper.resolveById(paxUrl, getLog());
-            }
+            file = dependencyHelper.resolveById(paxUrl, getLog());
             artifact.setFile(file);
         } catch (Exception e) {
             if (failOnArtifactResolutionError) {

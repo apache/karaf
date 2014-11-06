@@ -19,7 +19,6 @@
 package org.apache.karaf.tooling.features;
 
 import org.apache.maven.RepositoryUtils;
-import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
@@ -324,16 +323,6 @@ public class Dependency30Helper implements DependencyHelper {
     }
 
     @Override
-    public File resolveById(String id, List<ArtifactRepository> artifactRepositories, Log log) throws MojoFailureException {
-        List<RemoteRepository> backupRepositories = new ArrayList<>(projectRepositories.size());
-        Collections.copy(backupRepositories, projectRepositories);
-        overwriteProjectRepositoriesWithGivenAritfactRepositories(artifactRepositories);
-        File file = resolveById(id, log);
-        overwriteProjectRepositoriesWithGivenRemoteRepositories(backupRepositories);
-        return file;
-    }
-
-    @Override
     public String artifactToMvn(org.apache.maven.artifact.Artifact artifact) {
         return this.artifactToMvn(RepositoryUtils.toArtifact(artifact));
     }
@@ -363,16 +352,6 @@ public class Dependency30Helper implements DependencyHelper {
     }
 
     @Override
-    public org.apache.maven.artifact.Artifact mvnToArtifact(String name, List<ArtifactRepository> artifactRepositories) throws MojoExecutionException {
-        List<RemoteRepository> backupRepositories = new ArrayList<>(projectRepositories.size());
-        Collections.copy(backupRepositories, projectRepositories);
-        overwriteProjectRepositoriesWithGivenAritfactRepositories(artifactRepositories);
-        org.apache.maven.artifact.Artifact artifact = mvnToArtifact(name);
-        overwriteProjectRepositoriesWithGivenRemoteRepositories(backupRepositories);
-        return artifact;
-    }
-
-    @Override
     public String pathFromMaven(String name) {
         if (name.indexOf(':') == -1) {
             return name;
@@ -386,22 +365,6 @@ public class Dependency30Helper implements DependencyHelper {
         DefaultArtifact artifact = new DefaultArtifact(name);
         org.apache.maven.artifact.Artifact mavenArtifact = RepositoryUtils.toArtifact(artifact);
         return MavenUtil.layout.pathOf(mavenArtifact);
-    }
-
-    private void overwriteProjectRepositoriesWithGivenAritfactRepositories(List<ArtifactRepository> artifactRepositories) {
-        projectRepositories.clear();
-        for(ArtifactRepository artifactRepository : artifactRepositories) {
-            String id = artifactRepository.getId();
-            String type = "default";
-            String url = artifactRepository.getUrl();
-            RemoteRepository remoteRepository = new RemoteRepository(id, type, url);
-            projectRepositories.add(remoteRepository);
-        }
-    }
-
-    private void overwriteProjectRepositoriesWithGivenRemoteRepositories(List<RemoteRepository> remoteRepositories) {
-        projectRepositories.clear();
-        projectRepositories.addAll(remoteRepositories);
     }
 
 }

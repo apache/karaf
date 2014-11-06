@@ -19,11 +19,9 @@
 package org.apache.karaf.tooling.features;
 
 import java.io.File;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
@@ -53,8 +51,6 @@ public interface DependencyHelper {
 
     public abstract File resolveById(String id, Log log) throws MojoFailureException;
 
-    public abstract File resolveById(String id, List<ArtifactRepository> artifactRepositories, Log log) throws MojoFailureException;
-
     /**
      * Convert a Maven <code>Artifact</code> into a PAX URL mvn format.
      *
@@ -72,8 +68,6 @@ public interface DependencyHelper {
     public String artifactToMvn(Object object) throws MojoExecutionException;
 
     public Artifact mvnToArtifact(String name) throws MojoExecutionException;
-
-    public Artifact mvnToArtifact(String name, List<ArtifactRepository> artifactRepositories) throws MojoExecutionException;
 
     /**
      * Convert a PAX URL mvn format into a filesystem path.
