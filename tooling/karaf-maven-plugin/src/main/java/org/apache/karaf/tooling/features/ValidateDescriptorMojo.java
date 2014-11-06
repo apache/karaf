@@ -570,7 +570,6 @@ public class ValidateDescriptorMojo extends MojoSupport {
             return bundle;
         }
         Artifact artifact = dependencyHelper.mvnToArtifact(bundle);
-
         if (artifact == null) {
             throw new Exception("Unable to resolve artifact for uri " + bundle);
         } else {

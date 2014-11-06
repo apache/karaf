@@ -28,14 +28,12 @@ import org.apache.karaf.tooling.features.model.Feature;
 import org.apache.karaf.tooling.features.model.Repository;
 import org.apache.karaf.tooling.utils.MojoSupport;
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.MojoExecutionException;
 
 import org.osgi.framework.Version;
-import shaded.org.eclipse.aether.repository.RemoteRepository;
 
 /**
- * Common functionality for mojos that need to reolve features
+ * Common functionality for mojos that need to resolve features
  */
 public abstract class AbstractFeatureMojo extends MojoSupport {
     
