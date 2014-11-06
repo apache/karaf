@@ -90,6 +90,7 @@ public abstract class AbstractFeatureMojo extends MojoSupport {
     }
 
     protected void addFeatureRepo(String featureUrl) throws MojoExecutionException {
+        //TODO: If 'skipNonMavenProtocols' is always true it should be impossible to use other repositories than the default project repositories
         Artifact featureDescArtifact = resourceToArtifact(featureUrl, true);
         if (featureDescArtifact == null) {
             return;
@@ -138,12 +139,14 @@ public abstract class AbstractFeatureMojo extends MojoSupport {
      */
     protected void resolveArtifact(Artifact artifact) {
         try {
+            File file;
+            String paxUrl = dependencyHelper.artifactToMvn(artifact);
             if(null != artifact.getRepository()) {
                 List<ArtifactRepository> usedRemoteRepos = Collections.singletonList(artifact.getRepository());
-                dependencyHelper.overwriteRemoteRepositories(usedRemoteRepos);
+                file = dependencyHelper.resolveById(paxUrl, usedRemoteRepos, getLog());
+            }else {
+                file = dependencyHelper.resolveById(paxUrl, getLog());
             }
-            String paxUrl = dependencyHelper.artifactToMvn(artifact);
-            File file = dependencyHelper.resolveById(paxUrl, getLog());
             artifact.setFile(file);
         } catch (Exception e) {
             if (failOnArtifactResolutionError) {

@@ -53,6 +53,8 @@ public interface DependencyHelper {
 
     public abstract File resolveById(String id, Log log) throws MojoFailureException;
 
+    public abstract File resolveById(String id, List<ArtifactRepository> artifactRepositories, Log log) throws MojoFailureException;
+
     /**
      * Convert a Maven <code>Artifact</code> into a PAX URL mvn format.
      *
@@ -71,6 +73,8 @@ public interface DependencyHelper {
 
     public Artifact mvnToArtifact(String name) throws MojoExecutionException;
 
+    public Artifact mvnToArtifact(String name, List<ArtifactRepository> artifactRepositories) throws MojoExecutionException;
+
     /**
      * Convert a PAX URL mvn format into a filesystem path.
      *
@@ -86,12 +90,5 @@ public interface DependencyHelper {
      * @return the filesystem path.
      */
     public String pathFromAether(String name) throws MojoExecutionException;
-
-    /**
-     * Overwrites the default repositories to use for the resolution of project dependencies.
-     *
-     * @param artifactRepositories the Maven <code>ArtifactRepositories</code>.
-     */
-    public void overwriteRemoteRepositories(List<ArtifactRepository> artifactRepositories);
 
 }

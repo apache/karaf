@@ -331,6 +331,16 @@ public class Dependency31Helper implements DependencyHelper {
     }
 
     @Override
+    public File resolveById(String id, List<ArtifactRepository> artifactRepositories, Log log) throws MojoFailureException {
+        List<RemoteRepository> backupRepositories = new ArrayList<>(projectRepositories.size());
+        Collections.copy(backupRepositories, projectRepositories);
+        overwriteProjectRepositoriesWithGivenAritfactRepositories(artifactRepositories);
+        File file = resolveById(id, log);
+        overwriteProjectRepositoriesWithGivenRemoteRepositories(backupRepositories);
+        return file;
+    }
+
+    @Override
     public String artifactToMvn(org.apache.maven.artifact.Artifact artifact) throws MojoExecutionException {
         return this.artifactToMvn(toArtifact(artifact));
     }
@@ -378,6 +388,16 @@ public class Dependency31Helper implements DependencyHelper {
     }
 
     @Override
+    public org.apache.maven.artifact.Artifact mvnToArtifact(String name, List<ArtifactRepository> artifactRepositories) throws MojoExecutionException {
+        List<RemoteRepository> backupRepositories = new ArrayList<>(projectRepositories.size());
+        Collections.copy(backupRepositories, projectRepositories);
+        overwriteProjectRepositoriesWithGivenAritfactRepositories(artifactRepositories);
+        org.apache.maven.artifact.Artifact artifact = mvnToArtifact(name);
+        overwriteProjectRepositoriesWithGivenRemoteRepositories(backupRepositories);
+        return artifact;
+    }
+
+    @Override
     public String pathFromMaven(String name) throws MojoExecutionException {
         if (name.indexOf(':') == -1) {
             return name;
@@ -393,8 +413,7 @@ public class Dependency31Helper implements DependencyHelper {
         return MavenUtil.layout.pathOf(mavenArtifact);
     }
 
-    @Override
-    public void overwriteRemoteRepositories(List<ArtifactRepository> artifactRepositories) {
+    private void overwriteProjectRepositoriesWithGivenAritfactRepositories(List<ArtifactRepository> artifactRepositories) {
         projectRepositories.clear();
         for(ArtifactRepository artifactRepository : artifactRepositories) {
             String id = artifactRepository.getId();
@@ -406,4 +425,8 @@ public class Dependency31Helper implements DependencyHelper {
         }
     }
 
+    private void overwriteProjectRepositoriesWithGivenRemoteRepositories(List<RemoteRepository> remoteRepositories) {
+        projectRepositories.clear();
+        projectRepositories.addAll(remoteRepositories);
+    }
 }

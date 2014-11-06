@@ -536,7 +536,6 @@ public class ValidateDescriptorMojo extends MojoSupport {
                 // the disk
                 file = new ZipFile(localFile);
             } else {
-                //TODO: Extend DependencyHelper to handle org.apache.maven.artifact.Artifact ?
                 String paxUrl = null;
                 try {
                     paxUrl = dependencyHelper.artifactToMvn(artifact);
@@ -586,9 +585,10 @@ public class ValidateDescriptorMojo extends MojoSupport {
                     new DefaultRepositoryLayout());
             List<ArtifactRepository> repos = new LinkedList<ArtifactRepository>();
             repos.add(repository);
-            dependencyHelper.overwriteRemoteRepositories(repos);
+            artifact = dependencyHelper.mvnToArtifact(bundle, repos);
+        }else {
+            artifact = dependencyHelper.mvnToArtifact(bundle);
         }
-        artifact = dependencyHelper.mvnToArtifact(bundle);
         if (artifact == null) {
             throw new Exception("Unable to resolve artifact for uri " + bundle);
         } else {
