@@ -142,7 +142,6 @@ public class CreateKarMojo extends MojoSupport {
     public void execute() throws MojoExecutionException, MojoFailureException {
 
         this.dependencyHelper = DependencyHelperFactory.createDependencyHelper(this.container, this.project, this.mavenSession, getLog());
-        this.dependencyHelper.getDependencies(project, true);
 
         File featuresFileResolved = resolveFile(featuresFile);
         String groupId = project.getGroupId();

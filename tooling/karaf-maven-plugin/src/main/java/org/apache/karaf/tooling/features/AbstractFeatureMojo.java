@@ -139,9 +139,8 @@ public abstract class AbstractFeatureMojo extends MojoSupport {
      */
     protected void resolveArtifact(Artifact artifact) {
         try {
-            File file;
             String paxUrl = dependencyHelper.artifactToMvn(artifact);
-            file = dependencyHelper.resolveById(paxUrl, getLog());
+            File file = dependencyHelper.resolveById(paxUrl, getLog());
             artifact.setFile(file);
         } catch (Exception e) {
             if (failOnArtifactResolutionError) {

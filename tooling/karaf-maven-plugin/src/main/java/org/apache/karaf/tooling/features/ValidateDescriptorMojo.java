@@ -28,9 +28,6 @@ import org.apache.karaf.features.internal.service.RepositoryImpl;
 import org.apache.karaf.tooling.url.CustomBundleURLStreamHandlerFactory;
 import org.apache.karaf.tooling.utils.MojoSupport;
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.artifact.repository.DefaultArtifactRepository;
-import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.artifact.resolver.ArtifactCollector;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
@@ -162,7 +159,6 @@ public class ValidateDescriptorMojo extends MojoSupport {
     public void execute() throws MojoExecutionException, MojoFailureException {
 
         this.dependencyHelper = DependencyHelperFactory.createDependencyHelper(this.container, this.project, this.mavenSession, getLog());
-        this.dependencyHelper.getDependencies(project, true);
 
         try {
             prepare();
@@ -536,13 +532,13 @@ public class ValidateDescriptorMojo extends MojoSupport {
             } else {
                 String paxUrl = null;
                 try {
-                    paxUrl = dependencyHelper.artifactToMvn(artifact);
+                    paxUrl = dependencyHelper.artifactToMvn(mvnArtifact);
                     File mvnArtifactFile = dependencyHelper.resolveById(paxUrl, getLog());
                     mvnArtifact.setFile(mvnArtifactFile);
                 } catch (MojoExecutionException e) {
-                    e.printStackTrace();
+                    throw new IOException("Unable to resolve artifact for uri " + bundle);
                 } catch (MojoFailureException e) {
-                    e.printStackTrace();
+                    throw new IOException("Unable to resolve artifact for uri " + bundle);
                 }
                 file = new ZipFile(mvnArtifact.getFile());
             }
