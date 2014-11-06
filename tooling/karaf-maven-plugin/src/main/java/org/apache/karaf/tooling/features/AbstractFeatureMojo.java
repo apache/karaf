@@ -90,7 +90,6 @@ public abstract class AbstractFeatureMojo extends MojoSupport {
     }
 
     protected void addFeatureRepo(String featureUrl) throws MojoExecutionException {
-        //TODO: If 'skipNonMavenProtocols' is always true it should be impossible to use other repositories than the default project repositories
         Artifact featureDescArtifact = resourceToArtifact(featureUrl, true);
         if (featureDescArtifact == null) {
             return;
