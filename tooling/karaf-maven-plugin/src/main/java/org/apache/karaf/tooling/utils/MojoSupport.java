@@ -220,7 +220,7 @@ public abstract class MojoSupport extends AbstractMojo {
     /**
      * Required because Maven 3 returns null in {@link ArtifactRepository#getProtocol()} (see KARAF-244)
      */
-    private String extractProtocolFromLocalMavenRepo() {
+    protected String extractProtocolFromLocalMavenRepo() {
         try {
             return new URL(localRepo.getUrl()).getProtocol();
         } catch (MalformedURLException e) {

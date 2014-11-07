@@ -267,11 +267,8 @@ public abstract class AbstractFeatureMojo extends MojoSupport {
 
     private String translateFromDescriptor(Artifact descriptor) {
         String path = descriptor.getFile().getPath();
-        if (System.getProperty("os.name").startsWith("Windows")) {
-            path = path.replaceAll("\\\\", "/").replaceAll(" ", "%20");
-            path = "file:///" + path;
-        }
-        return path;
+        path = path.replaceAll("\\\\", "/").replaceAll(" ", "%20");
+        return extractProtocolFromLocalMavenRepo() + ":///" + path;
     }
 
 }
