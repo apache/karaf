@@ -158,7 +158,7 @@
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.serp/${serp.bundle.version}</bundle>
         <bundle dependency="true">mvn:com.fasterxml/classmate/0.9.0</bundle>
         <bundle dependency="true">mvn:org.javassist/javassist/3.18.1-GA</bundle>
-        <bundle dependency="true">wrap:mvn:org.jboss/jandex/1.1.0.Final</bundle>
+        <bundle dependency="true">mvn:org.jboss/jandex/1.2.2.Final</bundle>
         <bundle dependency="true">mvn:org.jboss.logging/jboss-logging/3.1.4.GA</bundle>
         <bundle dependency="true">mvn:org.hibernate.common/hibernate-commons-annotations/4.0.4.Final</bundle>
         <bundle start-level="100">mvn:org.hibernate/hibernate-core/${hibernate42.version}</bundle>
@@ -184,7 +184,7 @@
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.serp/${serp.bundle.version}</bundle>
         <bundle dependency="true">mvn:com.fasterxml/classmate/0.9.0</bundle>
         <bundle dependency="true">mvn:org.javassist/javassist/3.18.1-GA</bundle>
-        <bundle dependency="true">wrap:mvn:org.jboss/jandex/1.1.0.Final</bundle>
+        <bundle dependency="true">mvn:org.jboss/jandex/1.2.2.Final</bundle>
         <bundle dependency="true">mvn:org.jboss.logging/jboss-logging/3.1.4.GA</bundle>
         <bundle dependency="true">mvn:org.hibernate.common/hibernate-commons-annotations/4.0.4.Final</bundle>
         <bundle start-level="100">mvn:org.hibernate/hibernate-core/${hibernate43.version}</bundle>
