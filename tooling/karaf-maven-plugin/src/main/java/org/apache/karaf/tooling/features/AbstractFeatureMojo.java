@@ -109,14 +109,17 @@ public abstract class AbstractFeatureMojo extends MojoSupport {
         } catch (MojoExecutionException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
+        URI repoURI;
         if (descriptor != null) {
             resolveArtifact(descriptor);
             descriptorArtifacts.add(descriptor);
+            repoURI = URI.create(translateFromDescriptor(descriptor));
+        }else {
+            repoURI = URI.create(translateFromMaven(uri.replaceAll(" ", "%20")));
         }
         if (includeMvnBasedDescriptors) {
             bundles.add(uri);
         }
-        URI repoURI = URI.create(translateFromMaven(uri.replaceAll(" ", "%20")));
         Repository repo = new Repository(repoURI, defaultStartLevel);
         for (Feature f : repo.getFeatures()) {
             featuresMap.put(f.getName() + "/" + f.getVersion(), f);
@@ -262,5 +265,13 @@ public abstract class AbstractFeatureMojo extends MojoSupport {
         }
     }
 
+    private String translateFromDescriptor(Artifact descriptor) {
+        String path = descriptor.getFile().getPath();
+        if (System.getProperty("os.name").startsWith("Windows")) {
+            path = path.replaceAll("\\\\", "/").replaceAll(" ", "%20");
+            path = "file:///" + path;
+        }
+        return path;
+    }
 
 }
