@@ -431,9 +431,9 @@ public class InstallKarsMojo extends MojoSupport {
             getLog().info("== Installing bundle " + bundle.getLocation());
             String bundleLocation = bundle.getLocation();
 
-            // cleanup prefixes and headers after '$'
+            // cleanup prefixes and headers after '?'
             bundleLocation = bundleLocation.replaceFirst("^(wrap|blueprint|webbundle|war):", "");
-            bundleLocation = bundleLocation.replaceFirst("\\$.*", "");
+            bundleLocation = bundleLocation.replaceFirst("\\?.*", "");
 
             File bundleFile;
             if (bundleLocation.startsWith("mvn:")) {
