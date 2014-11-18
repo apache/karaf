@@ -42,6 +42,12 @@ public class Install extends AbstractAction {
 
 	@Option(name = "-s", aliases = { "--start-type" }, description = "Mode in which the service is installed. AUTO_START or DEMAND_START (Default: AUTO_START)", required = false, multiValued = false)
 	private String startType = "AUTO_START";
+	
+	@Option(name = "-e", aliases = {"--env"}, description = "Specify environment variable and values. To specify multiple environment variable and values, specify this flag multiple times.", required = false, multiValued = true)
+	private String[] envs;
+	    
+	@Option(name = "-i", aliases = {"--include"}, description = "Specify include statement for JSW wrapper conf. To specify multiple include statement, specify this flag multiple times.", required = false, multiValued = true)
+	private String[] includes;
 
 	private WrapperService wrapperService = new WrapperServiceImpl();
 
@@ -50,7 +56,7 @@ public class Install extends AbstractAction {
 	}
 
 	protected Object doExecute() throws Exception {
-        File[] wrapperPaths = wrapperService.install(name, displayName, description, startType);
+        File[] wrapperPaths = wrapperService.install(name, displayName, description, startType, envs, includes);
 
         String os = System.getProperty("os.name", "Unknown");
         File wrapperConf = wrapperPaths[0];

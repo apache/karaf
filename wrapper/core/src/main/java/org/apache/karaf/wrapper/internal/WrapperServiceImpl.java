@@ -39,7 +39,12 @@ public class WrapperServiceImpl implements WrapperService {
         install("karaf", "karaf", "", "AUTO_START");
     }
 
-    public File[] install(String name, String displayName, String description, String startType) throws Exception {
+    public File[] install(String name, 
+                          String displayName, 
+                          String description, 
+                          String startType,
+                          String[] envs,
+                          String[] includes) throws Exception {
 
         File base = new File(System.getProperty("karaf.base"));
         File etc = new File(System.getProperty("karaf.etc"));
@@ -74,8 +79,8 @@ public class WrapperServiceImpl implements WrapperService {
                 serviceFile = new File(bin, name + "-service.bat");
                 wrapperConf = new File(etc, name + "-wrapper.conf");
 
-                copyFilteredResourceTo(wrapperConf, "windows64/karaf-wrapper.conf", props);
-                copyFilteredResourceTo(serviceFile, "windows64/karaf-service.bat", props);
+                copyFilteredResourceTo(wrapperConf, "windows64/karaf-wrapper.conf", props, envs, includes);
+                copyFilteredResourceTo(serviceFile, "windows64/karaf-service.bat", props, envs, includes);
 
                 mkdir(lib);
                 copyResourceTo(new File(lib, "wrapper.dll"), "windows64/wrapper.dll", false);
@@ -87,8 +92,8 @@ public class WrapperServiceImpl implements WrapperService {
                 serviceFile = new File(bin, name + "-service.bat");
                 wrapperConf = new File(etc, name + "-wrapper.conf");
 
-                copyFilteredResourceTo(wrapperConf, "windows/karaf-wrapper.conf", props);
-                copyFilteredResourceTo(serviceFile, "windows/karaf-service.bat", props);
+                copyFilteredResourceTo(wrapperConf, "windows/karaf-wrapper.conf", props, envs, includes);
+                copyFilteredResourceTo(serviceFile, "windows/karaf-service.bat", props, envs, includes);
 
                 mkdir(lib);
                 copyResourceTo(new File(lib, "wrapper.dll"), "windows/wrapper.dll", false);
@@ -101,14 +106,14 @@ public class WrapperServiceImpl implements WrapperService {
             chmod(file, "a+x");
 
             serviceFile = new File(bin, name + "-service");
-            copyFilteredResourceTo(serviceFile, "unix/karaf-service", props);
+            copyFilteredResourceTo(serviceFile, "unix/karaf-service", props, envs, includes);
             chmod(serviceFile, "a+x");
 
             wrapperConf = new File(etc, name + "-wrapper.conf");
-            copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props);
+            copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props, envs, includes);
 
             File plistConf = new File(bin, "org.apache.karaf."+ name + ".plist");
-            copyFilteredResourceTo(plistConf, "macosx/org.apache.karaf.KARAF.plist", props);
+            copyFilteredResourceTo(plistConf, "macosx/org.apache.karaf.KARAF.plist", props, envs, includes);
             
             mkdir(lib);
 
@@ -123,11 +128,11 @@ public class WrapperServiceImpl implements WrapperService {
                 chmod(file, "a+x");
 
                 serviceFile = new File(bin, name + "-service");
-                copyFilteredResourceTo(serviceFile, "unix/karaf-service", props);
+                copyFilteredResourceTo(serviceFile, "unix/karaf-service", props, envs, includes);
                 chmod(serviceFile, "a+x");
 
                 wrapperConf = new File(etc, name + "-wrapper.conf");
-                copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props);
+                copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props, envs, includes);
 
                 mkdir(lib);
                 copyResourceTo(new File(lib, "libwrapper.so"), "linux64/libwrapper.so", false);
@@ -139,11 +144,11 @@ public class WrapperServiceImpl implements WrapperService {
                 chmod(file, "a+x");
 
                 serviceFile = new File(bin, name + "-service");
-                copyFilteredResourceTo(serviceFile, "unix/karaf-service", props);
+                copyFilteredResourceTo(serviceFile, "unix/karaf-service", props, envs, includes);
                 chmod(serviceFile, "a+x");
 
                 wrapperConf = new File(etc, name + "-wrapper.conf");
-                copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props);
+                copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props, envs, includes);
 
                 mkdir(lib);
                 copyResourceTo(new File(lib, "libwrapper.so"), "linux/libwrapper.so", false);
@@ -158,11 +163,11 @@ public class WrapperServiceImpl implements WrapperService {
                 chmod(file, "a+x");
 
                 serviceFile = new File(bin, name + "-service");
-                copyFilteredResourceTo(serviceFile, "unix/karaf-service", props);
+                copyFilteredResourceTo(serviceFile, "unix/karaf-service", props, envs, includes);
                 chmod(serviceFile, "a+x");
 
                 wrapperConf = new File(etc, name + "-wrapper.conf");
-                copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props);
+                copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props, envs, includes);
 
                 mkdir(lib);
                 copyResourceTo(new File(lib, "libwrapper.a"), "aix/ppc64/libwrapper.a", false);
@@ -174,11 +179,11 @@ public class WrapperServiceImpl implements WrapperService {
                 chmod(file, "a+x");
 
                 serviceFile = new File(bin, name + "-service");
-                copyFilteredResourceTo(serviceFile, "unix/karaf-service", props);
+                copyFilteredResourceTo(serviceFile, "unix/karaf-service", props, envs, includes);
                 chmod(serviceFile, "a+x");
 
                 wrapperConf = new File(etc, name + "-wrapper.conf");
-                copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props);
+                copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props, envs, includes);
 
                 mkdir(lib);
                 copyResourceTo(new File(lib, "libwrapper.a"), "aix/ppc32/libwrapper.a", false);
@@ -193,11 +198,11 @@ public class WrapperServiceImpl implements WrapperService {
                 chmod(file, "a+x");
 
                 serviceFile = new File(bin, name + "-service");
-                copyFilteredResourceTo(serviceFile, "unix/karaf-service", props);
+                copyFilteredResourceTo(serviceFile, "unix/karaf-service", props, envs, includes);
                 chmod(serviceFile, "a+x");
 
                 wrapperConf = new File(etc, name + "-wrapper.conf");
-                copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props);
+                copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props, envs, includes);
 
                 mkdir(lib);
                 copyResourceTo(new File(lib, "libwrapper.so"), "solaris/sparc64/libwrapper.so", false);
@@ -209,11 +214,11 @@ public class WrapperServiceImpl implements WrapperService {
                 chmod(file, "a+x");
 
                 serviceFile = new File(bin, name + "-service");
-                copyFilteredResourceTo(serviceFile, "unix/karaf-service", props);
+                copyFilteredResourceTo(serviceFile, "unix/karaf-service", props, envs, includes);
                 chmod(serviceFile, "a+x");
 
                 wrapperConf = new File(etc, name + "-wrapper.conf");
-                copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props);
+                copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props, envs, includes);
 
                 mkdir(lib);
                 copyResourceTo(new File(lib, "libwrapper.so"), "solaris/x86/libwrapper.so", false);
@@ -225,11 +230,11 @@ public class WrapperServiceImpl implements WrapperService {
                 chmod(file, "a+x");
 
                 serviceFile = new File(bin, name + "-service");
-                copyFilteredResourceTo(serviceFile, "unix/karaf-service", props);
+                copyFilteredResourceTo(serviceFile, "unix/karaf-service", props, envs, includes);
                 chmod(serviceFile, "a+x");
 
                 wrapperConf = new File(etc, name + "-wrapper.conf");
-                copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props);
+                copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props, envs, includes);
 
                 mkdir(lib);
                 copyResourceTo(new File(lib, "libwrapper.so"), "solaris/x86_64/libwrapper.so", false);
@@ -241,11 +246,11 @@ public class WrapperServiceImpl implements WrapperService {
                 chmod(file, "a+x");
 
                 serviceFile = new File(bin, name + "-service");
-                copyFilteredResourceTo(serviceFile, "unix/karaf-service", props);
+                copyFilteredResourceTo(serviceFile, "unix/karaf-service", props, envs, includes);
                 chmod(serviceFile, "a+x");
 
                 wrapperConf = new File(etc, name + "-wrapper.conf");
-                copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props);
+                copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props, envs, includes);
 
                 mkdir(lib);
                 copyResourceTo(new File(lib, "libwrapper.so"), "solaris/sparc32/libwrapper.so", false);
@@ -258,11 +263,11 @@ public class WrapperServiceImpl implements WrapperService {
             chmod(file, "a+x");
 
             serviceFile = new File(bin, name + "-service");
-            copyFilteredResourceTo(serviceFile, "unix/karaf-service", props);
+            copyFilteredResourceTo(serviceFile, "unix/karaf-service", props, envs, includes);
             chmod(serviceFile, "a+x");
 
             wrapperConf = new File(etc, name + "-wrapper.conf");
-            copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props);
+            copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props, envs, includes);
 
             mkdir(lib);
             copyResourceTo(new File(lib, "libwrapper.sl"), "hpux/parisc64/libwrapper.sl", false);
@@ -339,7 +344,7 @@ public class WrapperServiceImpl implements WrapperService {
         }
     }
 
-    private void copyFilteredResourceTo(File outFile, String resource, HashMap<String, String> props) throws Exception {
+    private void copyFilteredResourceTo(File outFile, String resource, HashMap<String, String> props, String[] envs, String[] includes) throws Exception {
         if (!outFile.exists()) {
             LOGGER.info("Creating file: {}", outFile.getPath());
             System.out.println(Ansi.ansi().a("Creating file: ")
@@ -357,6 +362,18 @@ public class WrapperServiceImpl implements WrapperService {
                         String line = scanner.nextLine();
                         line = filter(line, props);
                         out.println(line);
+                    }
+                    if (outFile.getName().endsWith(".conf")) {
+                        if (envs != null && envs.length > 0) {
+                            for (String env : envs) {
+                                out.println(env);
+                            }
+                        }
+                        if (includes != null && includes.length > 0) {
+                            for (String include : includes) {
+                                out.println("#include " + include);
+                            }
+                        }
                     }
                 } finally {
                     safeClose(out);
@@ -445,6 +462,11 @@ public class WrapperServiceImpl implements WrapperService {
                 safeClose(is);
             }
         }
+    }
+
+    @Override
+    public File[] install(String name, String displayName, String description, String startType) throws Exception {
+        return install(name, displayName, description, startType, null, null);
     }
 
 }
