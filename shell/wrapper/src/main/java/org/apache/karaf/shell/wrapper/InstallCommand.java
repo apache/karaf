@@ -29,6 +29,7 @@ import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
 
 import org.apache.karaf.shell.console.AbstractAction;
+import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Option;
 import org.apache.felix.gogo.commands.Command;
 import org.fusesource.jansi.Ansi;
@@ -50,6 +51,12 @@ public class InstallCommand extends AbstractAction {
 
     @Option(name = "-s", aliases = {"--start-type"}, description = "Mode in which the service is installed. AUTO_START or DEMAND_START (Default: AUTO_START)", required = false, multiValued = false)
     private String startType = "AUTO_START";
+    
+    @Option(name = "-e", aliases = {"--env"}, description = "Specify environment variable and values. To specify multiple environment variable and values, specify this flag multiple times.", required = false, multiValued = true)
+    private String[] envs;
+    
+    @Option(name = "-i", aliases = {"--include"}, description = "Specify include statement for JSW wrapper conf. To specify multiple include statement, specify this flag multiple times.", required = false, multiValued = true)
+    private String[] includes;
 
     protected Object doExecute() throws Exception {
 
@@ -478,6 +485,18 @@ public class InstallCommand extends AbstractAction {
                         String line = scanner.nextLine();
                         line = filter(line, props);
                         out.println(line);
+                    }
+                    if (outFile.getName().endsWith(".conf")) {
+                        if (envs != null && envs.length > 0) {
+                            for (String env : envs) {
+                                out.println(env);
+                            }
+                        }
+                        if (includes != null && includes.length > 0) {
+                            for (String include : includes) {
+                                out.println("#include " + include);
+                            }
+                        }
                     }
                 } finally {
                     safeClose(out);
