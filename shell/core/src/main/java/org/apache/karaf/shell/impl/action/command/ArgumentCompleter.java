@@ -134,14 +134,18 @@ public class ArgumentCompleter implements Completer {
             if (field != null) {
                 Completion ann = field.getAnnotation(Completion.class);
                 if (ann != null) {
-                    Class clazz = ann.value();
-                    String[] value = ann.values();
-                    if (clazz != null) {
-                        if (clazz == StringsCompleter.class) {
-                            completer = new StringsCompleter(value, ann.caseSensitive());
-                        } else {
-                            completer = command.getCompleter(clazz);
+                    try {
+                        Class clazz = ann.value();
+                        String[] value = ann.values();
+                        if (clazz != null) {
+                            if (clazz == StringsCompleter.class) {
+                                completer = new StringsCompleter(value, ann.caseSensitive());
+                            } else {
+                                completer = command.getCompleter(clazz);
+                            }
                         }
+                    } catch (Throwable t) {
+                        // Ignore in case the completer class is not even available
                     }
                 } else {
                     completer = getDefaultCompleter(field, option.multiValued());
