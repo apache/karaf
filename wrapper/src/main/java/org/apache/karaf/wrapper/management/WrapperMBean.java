@@ -42,5 +42,19 @@ public interface WrapperMBean {
      * @throws MBeanException in case of installation failure.
      */
     File[] install(String name, String displayName, String description, String startType) throws MBeanException;
+    
+    /**
+     * Install the service wrapper.
+     *
+     * @param name the service name.
+     * @param displayName the service display name.
+     * @param description the service description.
+     * @param startType the start type.
+     * @param envs The environment variable and values
+     * @param includes The include statement for JSW wrapper conf
+     * @return the wrapper configuration (index 0) and service files (index 1).
+     * @throws MBeanException in case of installation failure.
+     */
+    File[] install(String name, String displayName, String description, String startType, String[] envs, String[] includes) throws MBeanException;
 
 }

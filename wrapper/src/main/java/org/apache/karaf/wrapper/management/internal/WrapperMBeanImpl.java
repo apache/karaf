@@ -58,5 +58,13 @@ public class WrapperMBeanImpl extends StandardMBean implements WrapperMBean {
             throw new MBeanException(null, e.getMessage());
         }
     }
+    
+    public File[] install(String name, String displayName, String description, String startType, String[] envs, String[] includes) throws MBeanException {
+        try {
+            return wrapperService.install(name, displayName, description, startType, envs, includes);
+        } catch (Exception e) {
+            throw new MBeanException(null, e.getMessage());
+        }
+    }
 
 }
