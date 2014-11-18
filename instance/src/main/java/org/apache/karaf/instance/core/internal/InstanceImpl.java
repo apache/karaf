@@ -32,10 +32,6 @@ public class InstanceImpl implements Instance {
         return name;
     }
 
-    public void setName(String name) {
-        throw new UnsupportedOperationException();
-    }
-
     void doSetName(String name) {
         this.name = name;
     }
@@ -46,10 +42,6 @@ public class InstanceImpl implements Instance {
 
     public String getLocation() {
         return service.getInstanceLocation(name);
-    }
-
-    public void setLocation(String location) {
-        throw new UnsupportedOperationException();
     }
 
     public int getPid() {
@@ -106,10 +98,6 @@ public class InstanceImpl implements Instance {
 
     public String getState() throws Exception {
         return service.getInstanceState(name);
-    }
-
-    public boolean isAttached() {
-        return getPid() != 0;
     }
 
     public void changeSshHost(String host) throws Exception {

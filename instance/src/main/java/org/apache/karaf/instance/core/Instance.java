@@ -25,15 +25,9 @@ public interface Instance {
 
     String getName();
 
-    @Deprecated
-    void setName(String name);
-    
     boolean isRoot();
 
     String getLocation();
-
-    @Deprecated
-    void setLocation(String location);
 
     int getPid();
 
@@ -62,9 +56,6 @@ public interface Instance {
     void destroy() throws Exception;
 
     String getState() throws Exception;
-
-    @Deprecated
-    boolean isAttached();
 
     void changeSshHost(String host) throws Exception;
 

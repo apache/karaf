@@ -22,9 +22,6 @@ public interface InstanceService {
 
     void renameInstance(String name, String newName, boolean printOutput) throws Exception;
 
-    @Deprecated
-    void refreshInstance() throws Exception;
-
     Instance cloneInstance(String name, String cloneName, InstanceSettings settings, boolean printOutput) throws Exception;
 
     Instance[] getInstances();

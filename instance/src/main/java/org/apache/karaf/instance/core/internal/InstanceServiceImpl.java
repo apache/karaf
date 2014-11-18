@@ -239,9 +239,6 @@ public class InstanceServiceImpl implements InstanceService {
         }
     }
 
-    public synchronized void refreshInstance() throws Exception {
-    }
-
     private void logInfo(String message, boolean printOutput, Object... args) {
         if (LOGGER.isInfoEnabled() || printOutput) {
             String formatted = String.format(message, args);
