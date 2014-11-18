@@ -30,13 +30,7 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
-import java.net.InetAddress;
-import java.net.MalformedURLException;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.SocketTimeoutException;
-import java.net.URL;
-import java.net.URLClassLoader;
+import java.net.*;
 import java.security.AccessControlException;
 import java.security.Provider;
 import java.security.Security;
@@ -761,10 +755,15 @@ public class Main {
                     location = nextLocation(st);
                     if (location != null) {
                         try {
-                            // TODO: Workaround for PAXURL-278
-                            String[] parts = location.contains("pax-url-aether") ? convertToMavenUrlsIfNeeded(location, false) 
-                                :  convertToMavenUrlsIfNeeded(location, convertToMavenUrls);
-                            Bundle b = context.installBundle(parts[0], new URL(parts[1]).openStream());
+                            Bundle b;
+                            if (location.startsWith("reference:")) {
+                                b = context.installBundle(location);
+                            } else {
+                                // TODO: Workaround for PAXURL-278
+                                String[] parts = location.contains("pax-url-aether") ? convertToMavenUrlsIfNeeded(location, false)
+                                        : convertToMavenUrlsIfNeeded(location, convertToMavenUrls);
+                                b = context.installBundle(parts[0], new URL(parts[1]).openStream());
+                            }
                             b.adapt(BundleStartLevel.class).setStartLevel(startLevel);
                             bundles.add(b);
                         }
@@ -1216,12 +1215,19 @@ public class Main {
             HashMap<Integer, StringBuffer> levels = new HashMap<Integer, StringBuffer>();
             for (Object o : startupProps.keySet()) {
                 String name = (String) o;
+                boolean isRef;
+                if (name.startsWith("reference:file:")) {
+                    isRef = true;
+                    name = name.substring("reference:file:".length());
+                } else {
+                    isRef = false;
+                }
                 File file = findFile(bundleDirs, name);
 
                 if (file != null) {
                     Integer level;
                     try {
-                        level = new Integer(startupProps.getProperty(name).trim());
+                        level = new Integer(startupProps.getProperty((String) o).trim());
                     } catch (NumberFormatException e1) {
                         System.err.print("Ignoring " + file.toString() + " (run level must be an integer)");
                         continue;
@@ -1232,7 +1238,12 @@ public class Main {
                         levels.put(level, sb);
                     }
                     try {
-                        sb.append("\"").append(file.toURI().toURL().toString()).append("|").append(name).append("\" ");
+                        if (isRef) {
+                            URI rel = new File(".").getAbsoluteFile().toURI().relativize(file.toURI());
+                            sb.append("\"reference:file:").append(rel.toString()).append("\" ");
+                        } else {
+                            sb.append("\"").append(file.toURI().toURL().toString()).append("|").append(name).append("\" ");
+                        }
                     } catch (MalformedURLException e) {
                         System.err.print("Ignoring " + file.toString() + " (" + e + ")");
                     }
