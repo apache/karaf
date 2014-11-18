@@ -418,8 +418,16 @@ public class Main {
     private void installAndStartBundles(ArtifactResolver resolver, BundleContext context, List<BundleInfo> bundles) {
         for (BundleInfo bundleInfo : bundles) {
             try {
-                URI resolvedURI = resolver.resolve(bundleInfo.uri);
-                Bundle b = context.installBundle(bundleInfo.uri.toString(), resolvedURI.toURL().openStream());
+                Bundle b;
+                if (bundleInfo.uri.toString().startsWith("reference:file:")) {
+                    URI temp = URI.create(bundleInfo.uri.toString().substring("reference:file:".length()));
+                    URI resolvedURI = resolver.resolve(temp);
+                    URI finalUri = URI.create("reference:file:" + config.karafBase.toURI().relativize(resolvedURI));
+                    b = context.installBundle(finalUri.toString());
+                } else {
+                    URI resolvedURI = resolver.resolve(bundleInfo.uri);
+                    b = context.installBundle(bundleInfo.uri.toString(), resolvedURI.toURL().openStream());
+                }
                 b.adapt(BundleStartLevel.class).setStartLevel(bundleInfo.startLevel);
                 if (isNotFragment(b)) {
                     b.start();
