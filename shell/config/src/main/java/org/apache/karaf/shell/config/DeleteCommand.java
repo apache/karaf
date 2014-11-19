@@ -53,7 +53,7 @@ public class DeleteCommand extends ConfigCommandSupport {
             }
             configuration.delete();
         } else {
-            Configuration configuration = admin.getConfiguration(pid);
+            Configuration configuration = admin.getConfiguration(pid, null);
             configuration.delete();
         }
         if (!noDeleteCfgFile) {

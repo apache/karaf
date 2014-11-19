@@ -87,7 +87,7 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
     }
 
     public void delete(String pid) throws Exception {
-        Configuration configuration = configurationAdmin.getConfiguration(pid);
+        Configuration configuration = configurationAdmin.getConfiguration(pid, null);
         if (configuration == null) {
             throw new IllegalArgumentException("Configuration PID " + pid + " doesn't exist");
         }
@@ -99,7 +99,7 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
     }
 
     public Map<String, String> listProperties(String pid) throws Exception {
-        Configuration configuration = configurationAdmin.getConfiguration(pid);
+        Configuration configuration = configurationAdmin.getConfiguration(pid, null);
         if (configuration == null) {
             throw new IllegalArgumentException("Configuration PID " + pid + " doesn't exist");
         }
@@ -126,7 +126,7 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
     }
 
     public void deleteProperty(String pid, String key) throws Exception {
-        Configuration configuration = configurationAdmin.getConfiguration(pid);
+        Configuration configuration = configurationAdmin.getConfiguration(pid, null);
         if (configuration == null) {
             throw new IllegalArgumentException("Configuration PID " + pid + " doesn't exist");
         }
@@ -148,7 +148,7 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
     }
 
     public void appendProperty(String pid, String key, String value) throws Exception {
-        Configuration configuration = configurationAdmin.getConfiguration(pid);
+        Configuration configuration = configurationAdmin.getConfiguration(pid, null);
         if (configuration == null) {
             throw new IllegalArgumentException("Configuration PID " + pid + " doesn't exist");
         }
@@ -177,7 +177,7 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
     }
 
     public void setProperty(String pid, String key, String value) throws Exception {
-        Configuration configuration = configurationAdmin.getConfiguration(pid);
+        Configuration configuration = configurationAdmin.getConfiguration(pid, null);
         if (configuration == null) {
             throw new IllegalArgumentException("Configuration PID " + pid + " doesn't exist");
         }
