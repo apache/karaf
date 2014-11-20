@@ -134,6 +134,10 @@
             </exclusions>
         </dependency>
         <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.resolver</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.ops4j.pax.url</groupId>
             <artifactId>pax-url-wrap</artifactId>
             <classifier>uber</classifier>
@@ -141,6 +145,11 @@
         <dependency>
             <groupId>org.ops4j.pax.url</groupId>
             <artifactId>pax-url-aether</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.url</groupId>
+            <artifactId>pax-url-war</artifactId>
+            <classifier>uber</classifier>
         </dependency>
         <dependency>
             <groupId>org.apache.karaf.deployer</groupId>
@@ -169,6 +178,10 @@
         <dependency>
             <groupId>org.apache.karaf.shell</groupId>
             <artifactId>org.apache.karaf.shell.console</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>org.apache.karaf.features.core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>

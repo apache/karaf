@@ -130,27 +130,27 @@ public class Deployer {
         }
     }
 
-    static class DeploymentState {
-        State state;
-        Bundle serviceBundle;
-        int initialBundleStartLevel;
-        int currentStartLevel;
-        Map<Long, Bundle> bundles;
-        Map<String, Feature> features;
-        Map<String, Set<Long>> bundlesPerRegion;
-        Map<String, Map<String, Map<String, Set<String>>>> filtersPerRegion;
+    public static class DeploymentState {
+        public State state;
+        public Bundle serviceBundle;
+        public int initialBundleStartLevel;
+        public int currentStartLevel;
+        public Map<Long, Bundle> bundles;
+        public Map<String, Feature> features;
+        public Map<String, Set<Long>> bundlesPerRegion;
+        public Map<String, Map<String, Map<String, Set<String>>>> filtersPerRegion;
     }
 
-    static class DeploymentRequest {
-        Set<String> overrides;
-        String featureResolutionRange;
-        String bundleUpdateRange;
-        String updateSnaphots;
-        Repository globalRepository;
+    public static class DeploymentRequest {
+        public Set<String> overrides;
+        public String featureResolutionRange;
+        public String bundleUpdateRange;
+        public String updateSnaphots;
+        public Repository globalRepository;
 
-        Map<String, Set<String>> requirements;
-        Map<String, Map<String, FeaturesService.RequestedState>> stateChanges;
-        EnumSet<FeaturesService.Option> options;
+        public Map<String, Set<String>> requirements;
+        public Map<String, Map<String, FeaturesService.RequestedState>> stateChanges;
+        public EnumSet<FeaturesService.Option> options;
     }
 
     static class Deployment {
@@ -952,6 +952,13 @@ public class Deployer {
             Set<Resource> bundlesInRegion = bundlesPerRegions.get(region);
             List<Resource> toDeploy = bundlesInRegion != null
                     ? new ArrayList<>(bundlesInRegion) : new ArrayList<Resource>();
+
+            // Remove the system bundle
+            Bundle systemBundle = dstate.bundles.get(0l);
+            if (systemBundle != null) {
+                // It may be null when unit testing, so ignore that
+                toDeploy.remove(systemBundle.adapt(BundleRevision.class));
+            }
 
             // First pass: go through all installed bundles and mark them
             // as either to ignore or delete
