@@ -101,6 +101,18 @@ public class InstallKarsMojo extends MojoSupport {
     @Parameter(defaultValue = "true")
     protected boolean ignoreDependencyFlag;
 
+    /**
+     * Additional feature repositories
+     */
+    @Parameter
+    protected List<String> featureRepositories;
+
+    /**
+     * Use reference: style urls in startup.properties
+     */
+    @Parameter(defaultValue = "false")
+    protected boolean useReferenceUrls;
+
     private URI system;
     private Properties startupProperties = new Properties();
 
@@ -140,10 +152,10 @@ public class InstallKarsMojo extends MojoSupport {
             }
         }
 
-        Set<String> repositories = new HashSet<String>();
-        Map<Feature, Boolean> features = new HashMap<Feature, Boolean>();
+        Set<String> repositories = new HashSet<>();
+        Map<Feature, Boolean> features = new HashMap<>();
 
-        // loading kar and featres repositories
+        // loading kar and features repositories
         getLog().info("Loading kar and features repositories dependencies with compile or runtime scopes");
         getLog().info("The startup.properties file is updated using kar and features dependency with a scope different from runtime, or defined in the <startupFeatures/> plugin configuration");
         Collection<Artifact> dependencies = project.getDependencyArtifacts();
@@ -175,10 +187,19 @@ public class InstallKarsMojo extends MojoSupport {
                 }
             }
         }
+        if (featureRepositories != null) {
+            for (String repositoryUri : featureRepositories) {
+                try {
+                    resolveRepository(repositoryUri, repositories, features, true, false);
+                } catch (Exception e) {
+                    throw new MojoFailureException("Can not install " + repositoryUri + " features repository", e);
+                }
+            }
+        }
 
         // checking if all startup, installed, and boot features have been resolved
         getLog().info("Checking features resolution");
-        List<String> resolvedFeaturesNames = new ArrayList<String>();
+        List<String> resolvedFeaturesNames = new ArrayList<>();
         for (Feature feature : features.keySet()) {
             resolvedFeaturesNames.add(feature.getName());
         }
@@ -212,12 +233,15 @@ public class InstallKarsMojo extends MojoSupport {
                     // the feature is a startup feature, updating startup.properties file
                     getLog().info("Feature " + feature.getName() + " is defined as a startup feature");
                     getLog().info("= Updating startup.properties file");
-                    List<String> comment = Arrays.asList(new String[]{"", "# feature: " + feature.getName() + " version: " + feature.getVersion()});
+                    List<String> comment = Arrays.asList("", "# feature: " + feature.getName() + " version: " + feature.getVersion());
                     for (BundleInfo bundleInfo : feature.getBundles()) {
                         String bundleLocation = bundleInfo.getLocation();
                         String bundleStartLevel = Integer.toString(bundleInfo.getStartLevel() == 0 ? defaultStartLevel : bundleInfo.getStartLevel());
+                        if (useReferenceUrls) {
+                            bundleLocation = "reference:file:" + dependencyHelper.pathFromMaven(bundleLocation);
+                        }
                         if (startupProperties.containsKey(bundleLocation)) {
-                            int oldStartLevel = Integer.decode((String) startupProperties.get(bundleLocation));
+                            int oldStartLevel = Integer.decode(startupProperties.get(bundleLocation));
                             if (oldStartLevel > bundleInfo.getStartLevel()) {
                                 startupProperties.put(bundleLocation, bundleStartLevel);
                             }
@@ -237,19 +261,13 @@ public class InstallKarsMojo extends MojoSupport {
                     getLog().info("Feature " + feature.getName() + " is defined as a boot feature");
                     if (featuresCfgFile.exists()) {
                         getLog().info("= Updating " + featuresCfgFile.getPath());
-                        Properties featuresProperties = new Properties();
-                        InputStream in = new FileInputStream(featuresCfgFile);
-                        try {
-                            featuresProperties.load(in);
-                        } finally {
-                            in.close();
-                        }
+                        Properties featuresProperties = new Properties(featuresCfgFile);
                         String featuresBoot = featuresProperties.getProperty(FEATURES_BOOT);
                         featuresBoot = featuresBoot != null && featuresBoot.length() > 0 ? featuresBoot + "," : "";
                         if (!featuresBoot.contains(feature.getName())) {
                             featuresBoot = featuresBoot + feature.getName();
                             featuresProperties.put(FEATURES_BOOT, featuresBoot);
-                            featuresProperties.save(featuresCfgFile);
+                            featuresProperties.save();
                         }
                     }
                     // add the feature in the system folder
@@ -268,14 +286,24 @@ public class InstallKarsMojo extends MojoSupport {
 
         // install bundles defined in startup.properties
         getLog().info("Installing bundles defined in startup.properties in the system");
-        Set<?> startupBundles = startupProperties.keySet();
-        for (Object startupBundle : startupBundles) {
-            String bundlePath = this.dependencyHelper.pathFromMaven((String) startupBundle);
-            File bundleFile = new File(system.resolve(bundlePath));
-            if (!bundleFile.exists()) {
-                File bundleSource = this.dependencyHelper.resolveById((String) startupBundle, getLog());
-                bundleFile.getParentFile().mkdirs();
-                copy(bundleSource, bundleFile);
+        Set<String> startupBundles = startupProperties.keySet();
+        for (String startupBundle : startupBundles) {
+            if (startupBundle.startsWith("mvn:")) {
+                String bundlePath = this.dependencyHelper.pathFromMaven(startupBundle);
+                File bundleFile = new File(system.resolve(bundlePath));
+                if (!bundleFile.exists()) {
+                    File bundleSource = this.dependencyHelper.resolveById(startupBundle, getLog());
+                    bundleFile.getParentFile().mkdirs();
+                    copy(bundleSource, bundleFile);
+                }
+            } else if (startupBundle.startsWith("reference:file:")) {
+                String bundlePath = startupBundle.substring("reference:file:".length());
+                File bundleFile = new File(system.resolve(bundlePath));
+                if (!bundleFile.exists()) {
+                    File bundleSource = this.dependencyHelper.resolveById(MavenUtil.pathToMvn(bundlePath), getLog());
+                    bundleFile.getParentFile().mkdirs();
+                    copy(bundleSource, bundleFile);
+                }
             }
         }
 
