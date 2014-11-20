@@ -16,15 +16,10 @@
  */
 package org.apache.karaf.shell.support;
 
-import java.io.PrintStream;
-import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("serial")
 public class MultiException extends Exception {
-
-    private List<Exception> exceptions = new ArrayList<Exception>();
 
     public MultiException(String message) {
         super(message);
@@ -32,53 +27,27 @@ public class MultiException extends Exception {
 
     public MultiException(String message, List<Exception> exceptions) {
         super(message);
-        this.exceptions = exceptions;
+        if (exceptions != null) {
+            for (Exception exception : exceptions) {
+                addSuppressed(exception);
+            }
+        }
     }
 
+    @Deprecated
     public void addException(Exception e) {
-        exceptions.add(e);
+        addSuppressed(e);
     }
 
     public void throwIfExceptions() throws MultiException {
-        if (!exceptions.isEmpty()) {
+        if (getSuppressed().length > 0) {
             throw this;
         }
     }
-    
+
+    @Deprecated
     public Throwable[] getCauses() {
-        return exceptions.toArray(new Throwable[exceptions.size()]);
-    }
-
-    @Override
-    public void printStackTrace()
-    {
-        super.printStackTrace();
-        for (Exception e : exceptions) {
-            e.printStackTrace();
-        }
-    }
-
-
-    /* ------------------------------------------------------------------------------- */
-    /**
-     * @see Throwable#printStackTrace(java.io.PrintStream)
-     */
-    @Override
-    public void printStackTrace(PrintStream out)
-    {
-        super.printStackTrace(out);
-        for (Exception e : exceptions) {
-            e.printStackTrace(out);
-        }
-    }
-
-    @Override
-    public void printStackTrace(PrintWriter out)
-    {
-        super.printStackTrace(out);
-        for (Exception e : exceptions) {
-            e.printStackTrace(out);
-        }
+        return getSuppressed();
     }
 
     public static void throwIf(String message, List<Exception> exceptions) throws MultiException {

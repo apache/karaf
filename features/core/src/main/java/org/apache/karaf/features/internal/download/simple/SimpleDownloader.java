@@ -63,7 +63,7 @@ public class SimpleDownloader implements DownloadManager, Downloader {
                 downloadCallback.downloaded(providers.get(location));
             }
         } catch (Exception e) {
-            exception.addException(e);
+            exception.addSuppressed(e);
         }
     }
 
