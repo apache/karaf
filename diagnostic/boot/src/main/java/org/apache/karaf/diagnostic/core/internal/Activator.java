@@ -37,11 +37,15 @@ public class Activator implements BundleActivator, SignalHandler {
 
     public void start(BundleContext context) throws Exception {
         bundleContext = context;
-        previous = Signal.handle(new Signal(SIGNAL), this);
+        if (!isWindows()) {
+            previous = sun.misc.Signal.handle(new Signal(SIGNAL), this);
+        }
     }
 
     public void stop(BundleContext context) throws Exception {
-        Signal.handle(new Signal(SIGNAL), previous);
+        if (!isWindows()) {
+            sun.misc.Signal.handle(new Signal(SIGNAL), previous);
+        }
     }
 
     public void handle(Signal signal) {
@@ -49,6 +53,15 @@ public class Activator implements BundleActivator, SignalHandler {
         String fileName = "dump-" + dumpFormat.format(new Date()) + ".zip";
         DumpDestination destination = new ZipDumpDestination(new File(fileName));
         Dump.dump(bundleContext, destination);
+    }
+
+    private boolean isWindows() {
+        String os = System.getProperty("os.name", "Unknown");
+        if (os.startsWith("Win")) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
 }
