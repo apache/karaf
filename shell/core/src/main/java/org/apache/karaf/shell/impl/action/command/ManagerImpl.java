@@ -135,6 +135,9 @@ public class ManagerImpl implements Manager {
                 throw new IllegalArgumentException("Command " + clazz.getName() + " is not annotated with @Command");
             }
             Object command = new ActionCommand(this, (Class<? extends Action>) clazz);
+            synchronized (instances) {
+                instances.put(clazz, command);
+            }
             registrations.register(command);
         }
         if (allowCustomServices || Completer.class.isAssignableFrom(clazz)) {
