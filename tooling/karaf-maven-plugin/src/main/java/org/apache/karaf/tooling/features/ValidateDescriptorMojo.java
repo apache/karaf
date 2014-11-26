@@ -28,9 +28,6 @@ import org.apache.karaf.features.internal.service.RepositoryImpl;
 import org.apache.karaf.tooling.url.CustomBundleURLStreamHandlerFactory;
 import org.apache.karaf.tooling.utils.MojoSupport;
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.artifact.repository.DefaultArtifactRepository;
-import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.artifact.resolver.ArtifactCollector;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
@@ -62,11 +59,9 @@ import static org.apache.karaf.tooling.features.ManifestUtils.*;
  * @inheritByDefault true
  * @description Validates the features XML file
  */
-@SuppressWarnings("deprecation")
 public class ValidateDescriptorMojo extends MojoSupport {
 
     private static final String MVN_URI_PREFIX = "mvn:";
-    private static final String MVN_REPO_SEPARATOR = "!";
 
     private static final String KARAF_CORE_STANDARD_FEATURE_URL = "mvn:org.apache.karaf.features/standard/%s/xml/features";
     private static final String KARAF_CORE_ENTERPRISE_FEATURE_URL = "mvn:org.apache.karaf.features/enterprise/%s/xml/features";
@@ -162,6 +157,9 @@ public class ValidateDescriptorMojo extends MojoSupport {
      * The Mojo's main method
      */
     public void execute() throws MojoExecutionException, MojoFailureException {
+
+        this.dependencyHelper = DependencyHelperFactory.createDependencyHelper(this.container, this.project, this.mavenSession, getLog());
+
         try {
             prepare();
             URI uri = file.toURI();
@@ -532,7 +530,16 @@ public class ValidateDescriptorMojo extends MojoSupport {
                 // the disk
                 file = new ZipFile(localFile);
             } else {
-                resolver.resolve(mvnArtifact, remoteRepos, localRepo);
+                String paxUrl = null;
+                try {
+                    paxUrl = dependencyHelper.artifactToMvn(mvnArtifact);
+                    File mvnArtifactFile = dependencyHelper.resolveById(paxUrl, getLog());
+                    mvnArtifact.setFile(mvnArtifactFile);
+                } catch (MojoExecutionException e) {
+                    throw new IOException("Unable to resolve artifact for uri " + bundle);
+                } catch (MojoFailureException e) {
+                    throw new IOException("Unable to resolve artifact for uri " + bundle);
+                }
                 file = new ZipFile(mvnArtifact.getFile());
             }
             ZipEntry entry = file.getEntry("META-INF/MANIFEST.MF");
@@ -562,52 +569,12 @@ public class ValidateDescriptorMojo extends MojoSupport {
         if (!isMavenProtocol(bundle)) {
             return bundle;
         }
-        Artifact artifact = getArtifact(bundle);
-        if (bundle.indexOf(MVN_REPO_SEPARATOR) >= 0) {
-            if (bundle.startsWith(MVN_URI_PREFIX)) {
-                bundle = bundle.substring(MVN_URI_PREFIX.length());
-            }
-            String repo = bundle.substring(0, bundle.indexOf(MVN_REPO_SEPARATOR));
-            ArtifactRepository repository = new DefaultArtifactRepository(artifact.getArtifactId() + "-repo", repo,
-                    new DefaultRepositoryLayout());
-            List<ArtifactRepository> repos = new LinkedList<ArtifactRepository>();
-            repos.add(repository);
-            resolver.resolve(artifact, repos, localRepo);
-        } else {
-            resolver.resolve(artifact, remoteRepos, localRepo);
-        }
+        Artifact artifact = dependencyHelper.mvnToArtifact(bundle);
         if (artifact == null) {
             throw new Exception("Unable to resolve artifact for uri " + bundle);
         } else {
             return artifact;
         }
-    }
-
-    /*
-     * Create an artifact for a given mvn: uri
-     */
-    private Artifact getArtifact(String uri) {
-        // remove the mvn: prefix when necessary
-        if (uri.startsWith(MVN_URI_PREFIX)) {
-            uri = uri.substring(MVN_URI_PREFIX.length());
-        }
-        // remove the repository url when specified
-        if (uri.contains(MVN_REPO_SEPARATOR)) {
-            uri = uri.split(MVN_REPO_SEPARATOR)[1];
-        }
-        String[] elements = uri.split("/");
-
-        switch (elements.length) {
-            case 5:
-                return factory.createArtifactWithClassifier(elements[0], elements[1], elements[2], elements[3], elements[4]);
-            case 4:
-                return factory.createArtifact(elements[0], elements[1], elements[2], Artifact.SCOPE_PROVIDED, elements[3]);
-            case 3:
-                return factory.createArtifact(elements[0], elements[1], elements[2], Artifact.SCOPE_PROVIDED, "jar");
-            default:
-                return null;
-        }
-
     }
 
     /*

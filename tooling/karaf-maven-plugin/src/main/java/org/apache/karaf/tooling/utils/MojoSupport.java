@@ -31,6 +31,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.karaf.tooling.features.DependencyHelper;
 import org.apache.karaf.util.StreamUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.factory.ArtifactFactory;
@@ -91,19 +92,9 @@ public abstract class MojoSupport extends AbstractMojo {
     protected ArtifactRepository localRepo;
 
     /**
-     * @parameter default-value="${project.remoteArtifactRepositories}"
-     */
-    protected List<ArtifactRepository> remoteRepos;
-
-    /**
      * @component
      */
     protected ArtifactMetadataSource artifactMetadataSource;
-
-    /**
-     * @component
-     */
-    protected ArtifactResolver resolver;
 
     /**
      * @component
@@ -137,6 +128,9 @@ public abstract class MojoSupport extends AbstractMojo {
      * @readonly
      */
     protected PlexusContainer container;
+
+    // an access layer for available Aether implementation
+    protected DependencyHelper dependencyHelper;
 
     protected MavenProject getProject() {
         return project;
@@ -226,7 +220,7 @@ public abstract class MojoSupport extends AbstractMojo {
     /**
      * Required because Maven 3 returns null in {@link ArtifactRepository#getProtocol()} (see KARAF-244)
      */
-    private String extractProtocolFromLocalMavenRepo() {
+    protected String extractProtocolFromLocalMavenRepo() {
         try {
             return new URL(localRepo.getUrl()).getProtocol();
         } catch (MalformedURLException e) {

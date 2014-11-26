@@ -140,6 +140,9 @@ public class CreateKarMojo extends MojoSupport {
     //
 
     public void execute() throws MojoExecutionException, MojoFailureException {
+
+        this.dependencyHelper = DependencyHelperFactory.createDependencyHelper(this.container, this.project, this.mavenSession, getLog());
+
         File featuresFileResolved = resolveFile(featuresFile);
         String groupId = project.getGroupId();
         String artifactId = project.getArtifactId();
@@ -184,13 +187,11 @@ public class CreateKarMojo extends MojoSupport {
             try {
                 Artifact artifactTemp = resourceToArtifact(file, false);
                 if (!fileResolved.exists()) {
+                    String paxUrl = dependencyHelper.artifactToMvn(artifactTemp);
                     try {
-                        resolver.resolve(artifactTemp, remoteRepos, localRepo);
-                        fileResolved = artifactTemp.getFile();
-                    } catch (ArtifactResolutionException e) {
-                        getLog().error("Artifact was not resolved", e);
-                    } catch (ArtifactNotFoundException e) {
-                        getLog().error("Artifact was not found", e);
+                        fileResolved = dependencyHelper.resolveById(paxUrl, getLog());
+                    } catch (MojoFailureException e) {
+                        getLog().error("Artifact was not found or resolved", e);
                     }
                 }
             } catch (MojoExecutionException e) {
@@ -309,7 +310,9 @@ public class CreateKarMojo extends MojoSupport {
             }
 
             for (Artifact artifact : bundles) {
-                resolver.resolve(artifact, remoteRepos, localRepo);
+                String paxUrl = dependencyHelper.artifactToMvn(artifact);
+                File file = dependencyHelper.resolveById(paxUrl, getLog());
+                artifact.setFile(file);
                 File localFile = artifact.getFile();
 
                 if (artifact.isSnapshot()) {

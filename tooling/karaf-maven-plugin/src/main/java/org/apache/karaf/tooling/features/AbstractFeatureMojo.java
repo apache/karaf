@@ -17,14 +17,9 @@
  */
 package org.apache.karaf.tooling.features;
 
+import java.io.File;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.apache.felix.utils.version.VersionRange;
 import org.apache.felix.utils.version.VersionTable;
@@ -33,13 +28,12 @@ import org.apache.karaf.tooling.features.model.Feature;
 import org.apache.karaf.tooling.features.model.Repository;
 import org.apache.karaf.tooling.utils.MojoSupport;
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.MojoExecutionException;
 
 import org.osgi.framework.Version;
 
 /**
- * Common functionality for mojos that need to reolve features
+ * Common functionality for mojos that need to resolve features
  */
 public abstract class AbstractFeatureMojo extends MojoSupport {
     
@@ -99,7 +93,7 @@ public abstract class AbstractFeatureMojo extends MojoSupport {
             return;
         }
         try {
-            resolveArtifact(featureDescArtifact, remoteRepos);
+            resolveArtifact(featureDescArtifact);
             descriptors.add(0, featureUrl);
         } catch (Exception e) {
             getLog().warn("Can't add " + featureUrl + " in the descriptors set");
@@ -115,14 +109,17 @@ public abstract class AbstractFeatureMojo extends MojoSupport {
         } catch (MojoExecutionException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
+        URI repoURI;
         if (descriptor != null) {
-            resolveArtifact(descriptor, remoteRepos);
+            resolveArtifact(descriptor);
             descriptorArtifacts.add(descriptor);
+            repoURI = URI.create(translateFromDescriptor(descriptor));
+        }else {
+            repoURI = URI.create(translateFromMaven(uri.replaceAll(" ", "%20")));
         }
         if (includeMvnBasedDescriptors) {
             bundles.add(uri);
         }
-        URI repoURI = URI.create(translateFromMaven(uri.replaceAll(" ", "%20")));
         Repository repo = new Repository(repoURI, defaultStartLevel);
         for (Feature f : repo.getFeatures()) {
             featuresMap.put(f.getName() + "/" + f.getVersion(), f);
@@ -139,15 +136,12 @@ public abstract class AbstractFeatureMojo extends MojoSupport {
      * Prefers to resolve using the repository of the artifact if present.
      * 
      * @param artifact
-     * @param remoteRepos
      */
-    @SuppressWarnings("deprecation")
-    protected void resolveArtifact(Artifact artifact, List<ArtifactRepository> remoteRepos) {
+    protected void resolveArtifact(Artifact artifact) {
         try {
-            List<ArtifactRepository> usedRemoteRepos = artifact.getRepository() != null ? 
-                    Collections.singletonList(artifact.getRepository())
-                    : remoteRepos;
-            resolver.resolve(artifact, usedRemoteRepos, localRepo);
+            String paxUrl = dependencyHelper.artifactToMvn(artifact);
+            File file = dependencyHelper.resolveById(paxUrl, getLog());
+            artifact.setFile(file);
         } catch (Exception e) {
             if (failOnArtifactResolutionError) {
                 throw new RuntimeException("Can't resolve artifact " + artifact, e);
@@ -239,12 +233,8 @@ public abstract class AbstractFeatureMojo extends MojoSupport {
     
             getLog().info("Base repo: " + localRepo.getUrl());
             for (Feature feature : featuresSet) {
-                try {
-                    resolveArtifacts(feature.getBundles());
-                    resolveArtifacts(feature.getConfigFiles());
-                } catch (RuntimeException e) {
-                    throw new RuntimeException("Error resolving feature " + feature.getName() + "/" + feature.getVersion(), e);
-                }
+                resolveArtifacts(feature.getBundles());
+                resolveArtifacts(feature.getConfigFiles());
             }            
         } catch (Exception e) {
             throw new MojoExecutionException("Error populating repository", e);
@@ -257,12 +247,9 @@ public abstract class AbstractFeatureMojo extends MojoSupport {
             Artifact artifact = resourceToArtifact(artifactRef.getUrl(), skipNonMavenProtocols);
             if (artifact != null) {
                 artifactRef.setArtifact(artifact);
-                try {
-                    resolveArtifact(artifact, remoteRepos);
-                } catch (RuntimeException e) {
-                    throw new RuntimeException("Error resolving artifact " + artifactRef.getUrl(), e);
-                }
+                resolveArtifact(artifact);
             }
+            // TODO: Is this still necessary when Aether is used (from comment on the method i guess no)?
             checkDoGarbageCollect();
         }
     }
@@ -278,5 +265,10 @@ public abstract class AbstractFeatureMojo extends MojoSupport {
         }
     }
 
+    private String translateFromDescriptor(Artifact descriptor) {
+        String path = descriptor.getFile().getPath();
+        path = path.replaceAll("\\\\", "/").replaceAll(" ", "%20");
+        return extractProtocolFromLocalMavenRepo() + ":///" + path;
+    }
 
 }

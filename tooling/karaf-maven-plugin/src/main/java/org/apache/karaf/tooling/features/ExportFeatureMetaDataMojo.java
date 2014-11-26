@@ -64,6 +64,9 @@ public class ExportFeatureMetaDataMojo extends AbstractFeatureMojo {
     private File metaDataFile;
     
     public void execute() throws MojoExecutionException, MojoFailureException {
+
+        this.dependencyHelper = DependencyHelperFactory.createDependencyHelper(this.container, this.project, this.mavenSession, getLog());
+
         Set<Feature> featuresSet = resolveFeatures();
         if (mergedFeature) {
             Feature feature = oneVersion ? mergeFeatureOneVersion(featuresSet) : mergeFeature(featuresSet);

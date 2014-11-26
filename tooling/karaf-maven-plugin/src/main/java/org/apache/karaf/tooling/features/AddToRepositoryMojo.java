@@ -57,6 +57,9 @@ public class AddToRepositoryMojo extends AbstractFeatureMojo {
     protected List<CopyFileBasedDescriptor> copyFileBasedDescriptors;
 
     public void execute() throws MojoExecutionException, MojoFailureException {
+
+        this.dependencyHelper = DependencyHelperFactory.createDependencyHelper(this.container, this.project, this.mavenSession, getLog());
+
         Set<Feature> featuresSet = resolveFeatures();
         
         for (Artifact descriptor : descriptorArtifacts) {
