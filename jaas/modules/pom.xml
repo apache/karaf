@@ -159,6 +159,7 @@
                             org.apache.karaf.jaas.modules.impl,
                             org.apache.felix.utils.properties,
                             org.apache.karaf.util.tracker,
+                            org.apache.karaf.util.base64,
                             org.apache.http*,
                             org.apache.commons.codec*
                         </Private-Package>
