@@ -46,90 +46,78 @@ import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Component;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
+import org.codehaus.plexus.archiver.Archiver;
 import org.codehaus.plexus.archiver.jar.JarArchiver;
 
 /**
- * assembles a kar archive
- *
- * @goal features-create-kar
- * @phase package
- * @requiresDependencyResolution runtime
- * @inheritByDefault true
- * @description Assemble a kar archive from a features.xml file
+ * Assemble a kar archive from a features.xml file
  */
+@Mojo(name = "features-create-kar", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME)
 public class CreateKarMojo extends MojoSupport {
 
     /**
      * The maven archive configuration to use.
      * <p/>
      * See <a href="http://maven.apache.org/ref/current/maven-archiver/apidocs/org/apache/maven/archiver/MavenArchiveConfiguration.html">the Javadocs for MavenArchiveConfiguration</a>.
-     *
-     * @parameter
      */
+    @Parameter
     private MavenArchiveConfiguration archive = new MavenArchiveConfiguration();
 
     /**
      * The Jar archiver.
-     *
-     * @component role="org.codehaus.plexus.archiver.Archiver" roleHint="jar"
-     * @required
-     * @readonly
      */
+    @Component(role = Archiver.class, hint="jar")
     private JarArchiver jarArchiver = null;
 
     /**
      * Directory containing the generated archive.
-     *
-     * @parameter default-value="${project.build.directory}"
-     * @required
      */
+    @Parameter(defaultValue = "${project.build.directory}")
     private File outputDirectory = null;
 
     /**
      * Name of the generated archive.
-     *
-     * @parameter default-value="${project.build.finalName}"
-     * @required
      */
+    @Parameter(defaultValue = "${project.build.finalName}")
     private String finalName = null;
 
     /**
      * Ignore the dependency flag on the bundles in the features XML
-     *
-     * @parameter default-value="false"
      */
+    @Parameter(defaultValue = "false")
     private boolean ignoreDependencyFlag;
 
     /**
      * Classifier to add to the artifact generated. If given, the artifact will be attached.
      * If it's not given, it will merely be written to the output directory according to the finalName.
-     *
-     * @parameter
      */
+    @Parameter
     protected String classifier;
 
     /**
      * Location of resources directory for additional content to include in the kar.
      * Note that it includes everything under classes so as to include maven-remote-resources
-     *
-     * @parameter default-value="${project.build.directory}/classes"
      */
+    @Parameter(defaultValue = "${project.build.directory}/classes")
     private File resourcesDir;
 
 
     /**
      * The features file to use as instructions
-     *
-     * @parameter default-value="${project.build.directory}/feature/feature.xml"
      */
+    @Parameter(defaultValue = "${project.build.directory}/feature/feature.xml")
     private String featuresFile;
 
 
     /**
      * The wrapper repository in the kar.
-     *
-     * @parameter default-value="${repositoryPath}"
      */
+    @Parameter(defaultValue = "${repositoryPath}")
     private String repositoryPath = "repository/";
 
     private static final Pattern mvnPattern = Pattern.compile("mvn:([^/ ]+)/([^/ ]+)/([^/ ]*)(/([^/ ]+)(/([^/ ]+))?)?");
@@ -185,7 +173,7 @@ public class CreateKarMojo extends MojoSupport {
                 Artifact artifactTemp = resourceToArtifact(file, false);
                 if (!fileResolved.exists()) {
                     try {
-                        resolver.resolve(artifactTemp, remoteRepos, localRepo);
+                        artifactResolver.resolve(artifactTemp, remoteRepos, localRepo);
                         fileResolved = artifactTemp.getFile();
                     } catch (ArtifactResolutionException e) {
                         getLog().error("Artifact was not resolved", e);
@@ -309,7 +297,7 @@ public class CreateKarMojo extends MojoSupport {
             }
 
             for (Artifact artifact : bundles) {
-                resolver.resolve(artifact, remoteRepos, localRepo);
+                artifactResolver.resolve(artifact, remoteRepos, localRepo);
                 File localFile = artifact.getFile();
 
                 if (artifact.isSnapshot()) {

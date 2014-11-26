@@ -28,39 +28,35 @@ import org.apache.karaf.tooling.features.model.BundleRef;
 import org.apache.karaf.tooling.features.model.Feature;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.osgi.framework.Version;
 
 /**
  * Export meta data about features
- *
- * @goal features-export-meta-data
- * @phase compile
- * @execute phase="compile"
- * @requiresDependencyResolution runtime
- * @inheritByDefault true
- * @description Export meta data about features
  */
+@Mojo(name = "features-export-meta-data", defaultPhase = LifecyclePhase.COMPILE, requiresDependencyResolution = ResolutionScope.RUNTIME)
 public class ExportFeatureMetaDataMojo extends AbstractFeatureMojo {
     
     /**
      * If set to true then all bundles will be merged into one combined feature.
      * In this case duplicates will be eliminated
-     * 
-     * @parameter
      */
+    @Parameter
     private boolean mergedFeature;
     
     /**
      * If set to true then for each bundle symbolic name only the highest version will be used
-     * @parameter
      */
+    @Parameter
     protected boolean oneVersion;
 
     /**
      * Name of the file for exported feature meta data
-     * 
-     * @parameter default-value="${project.build.directory}/features.xml"
      */
+    @Parameter(defaultValue = "${project.build.directory}/features.xml")
     private File metaDataFile;
     
     public void execute() throws MojoExecutionException, MojoFailureException {

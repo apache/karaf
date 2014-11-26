@@ -37,6 +37,11 @@ import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Component;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.shared.dependency.tree.DependencyNode;
 import org.apache.maven.shared.dependency.tree.DependencyTreeBuilder;
 import org.apache.maven.shared.dependency.tree.traversal.DependencyNodeVisitor;
@@ -48,20 +53,14 @@ import java.util.*;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
 import static org.apache.karaf.tooling.features.ManifestUtils.*;
 
 /**
  * Validates a features XML file
- *
- * @goal features-validate-descriptor
- * @execute phase="process-resources"
- * @requiresDependencyResolution runtime
- * @inheritByDefault true
- * @description Validates the features XML file
  */
+@Mojo(name = "features-validate-descriptor", defaultPhase = LifecyclePhase.PROCESS_RESOURCES, requiresDependencyResolution = ResolutionScope.RUNTIME)
 @SuppressWarnings("deprecation")
 public class ValidateDescriptorMojo extends MojoSupport {
 
@@ -74,62 +73,50 @@ public class ValidateDescriptorMojo extends MojoSupport {
     private static boolean isCustomStreamURLHandlerSet;
     /**
      * The dependency tree builder to use.
-     *
-     * @component
-     * @required
-     * @readonly
      */
+    @Component
     private DependencyTreeBuilder dependencyTreeBuilder;
 
     /**
      * The ArtifactCollector provided by Maven at runtime
-     *
-     * @component
-     * @required
-     * @readonly
      */
+    @Component
     private ArtifactCollector collector;
 
     /**
      * The file to generate
-     *
-     * @parameter default-value="${project.build.directory}/classes/features.xml"
      */
+    @Parameter(defaultValue="${project.build.directory}/classes/features.xml")
     private File file;
 
     /**
      * Karaf config.properties
-     *
-     * @parameter default-value="config.properties"
      */
+    @Parameter(defaultValue="config.properties")
     private String karafConfig;
 
     /**
      * which JRE version to parse from config.properties to get the JRE exported packages
-     *
-     * @parameter default-value="jre-1.5"
      */
+    @Parameter(defaultValue = "jre-1.5")
     private String jreVersion;
 
     /**
      * which Karaf version used for Karaf core features resolution
-     *
-     * @parameter
      */
+    @Parameter
     private String karafVersion;
 
     /**
      * The repositories which are included from the plugin config
-     *
-     * @parameter
      */
+    @Parameter
     private List<String> repositories;
 
     /**
      * skip non maven protocols or not skip
-     *
-     * @parameter default-value="false"
      */
+    @Parameter
     private boolean skipNonMavenProtocols = false;
 
     /*
@@ -532,7 +519,7 @@ public class ValidateDescriptorMojo extends MojoSupport {
                 // the disk
                 file = new ZipFile(localFile);
             } else {
-                resolver.resolve(mvnArtifact, remoteRepos, localRepo);
+                artifactResolver.resolve(mvnArtifact, remoteRepos, localRepo);
                 file = new ZipFile(mvnArtifact.getFile());
             }
             ZipEntry entry = file.getEntry("META-INF/MANIFEST.MF");
@@ -572,9 +559,9 @@ public class ValidateDescriptorMojo extends MojoSupport {
                     new DefaultRepositoryLayout());
             List<ArtifactRepository> repos = new LinkedList<ArtifactRepository>();
             repos.add(repository);
-            resolver.resolve(artifact, repos, localRepo);
+            artifactResolver.resolve(artifact, repos, localRepo);
         } else {
-            resolver.resolve(artifact, remoteRepos, localRepo);
+            artifactResolver.resolve(artifact, remoteRepos, localRepo);
         }
         if (artifact == null) {
             throw new Exception("Unable to resolve artifact for uri " + bundle);

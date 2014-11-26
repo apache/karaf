@@ -31,47 +31,36 @@ import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.apache.xbean.finder.ClassFinder;
 
 /**
  * Generates service requirement and capabilities for activators
- *
- * @goal service-metadata-generate
- * @phase process-classes
- * @execute phase="generate-resources"
- * @requiresDependencyResolution compile+runtime
- * @inheritByDefault false
- * @description Generates service requirement and capabilities for activators
  */
+@Mojo(name = "service-metadata-generate", defaultPhase = LifecyclePhase.PROCESS_CLASSES, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME, inheritByDefault = false)
 public class GenerateServiceMetadata extends AbstractMojo {
 
     /**
      * The maven project.
-     *
-     * @parameter default-value="${project}"
-     * @required
      */
+    @Parameter(defaultValue = "${project}")
     protected MavenProject project;
 
-    /**
-     * @parameter default-value="requirements"
-     * @required
-     */
+    @Parameter(defaultValue="requirements")
     protected String requirementsProperty;
 
-    /**
-     * @parameter default-value="capabilities"
-     * @required
-     */
+    @Parameter(defaultValue="capabilities")
     protected String capabilitiesProperty;
 
     /**
      * The classloader to use for loading the commands.
      * Can be "project" or "plugin"
-     *
-     * @parameter default-value="project"
      */
+    @Parameter(defaultValue = "project")
     protected String classLoader;
 
     public void execute() throws MojoExecutionException, MojoFailureException {

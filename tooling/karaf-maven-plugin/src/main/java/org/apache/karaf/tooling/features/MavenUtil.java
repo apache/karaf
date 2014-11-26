@@ -43,6 +43,44 @@ public class MavenUtil {
     private static final Pattern aetherPattern = Pattern.compile("([^: ]+):([^: ]+)(:([^: ]*)(:([^: ]+))?)?:([^: ]+)");
     private static final Pattern mvnPattern = Pattern.compile("(?:(?:wrap:)|(?:blueprint:))?mvn:([^/ ]+)/([^/ ]+)/([^/\\$ ]*)(/([^/\\$ ]+)(/([^/\\$ ]+))?)?(/\\$.+)?");
 
+
+    static String pathToMvn(String location) {
+        String[] p = location.split("/");
+        if (p.length >= 4 && p[p.length-1].startsWith(p[p.length-3] + "-" + p[p.length-2])) {
+            String artifactId = p[p.length-3];
+            String version = p[p.length-2];
+            String classifier;
+            String type;
+            String artifactIdVersion = artifactId + "-" + version;
+            StringBuilder sb = new StringBuilder();
+            if (p[p.length-1].charAt(artifactIdVersion.length()) == '-') {
+                classifier = p[p.length-1].substring(artifactIdVersion.length() + 1, p[p.length-1].lastIndexOf('.'));
+            } else {
+                classifier = null;
+            }
+            type = p[p.length-1].substring(p[p.length-1].lastIndexOf('.') + 1);
+            sb.append("mvn:");
+            for (int j = 0; j < p.length - 3; j++) {
+                if (j > 0) {
+                    sb.append('.');
+                }
+                sb.append(p[j]);
+            }
+            sb.append('/').append(artifactId).append('/').append(version);
+            if (!"jar".equals(type) || classifier != null) {
+                sb.append('/');
+                if (!"jar".equals(type)) {
+                    sb.append(type);
+                }
+                if (classifier != null) {
+                    sb.append('/').append(classifier);
+                }
+            }
+            return sb.toString();
+        }
+        return location;
+    }
+
     /**
      * Convert PAX URL mvn format to aether coordinate format.
      * N.B. we do not handle repository-url in mvn urls.

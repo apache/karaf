@@ -26,6 +26,7 @@ import org.apache.karaf.tooling.features.model.Feature;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Parameter;
 
 /**
  * Add features to a repository directory
@@ -39,21 +40,17 @@ import org.apache.maven.plugin.MojoFailureException;
  */
 public class AddToRepositoryMojo extends AbstractFeatureMojo {
 
-    /**
-     * @parameter default-value="${project.build.directory}/features-repo"
-     */
+    @Parameter(defaultValue = "${project.build.directory}/features-repo")
     protected File repository;
 
     /**
      * If set to true the exported bundles will be directly copied into the repository dir.
      * If set to false the default maven repository layout will be used
-     * @parameter
      */
+    @Parameter
     private boolean flatRepoLayout;
 
-    /**
-     * @parameter
-     */
+    @Parameter
     protected List<CopyFileBasedDescriptor> copyFileBasedDescriptors;
 
     public void execute() throws MojoExecutionException, MojoFailureException {

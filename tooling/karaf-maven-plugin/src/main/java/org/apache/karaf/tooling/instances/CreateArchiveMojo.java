@@ -23,6 +23,10 @@ import java.io.IOException;
 
 import org.apache.karaf.tooling.utils.MojoSupport;
 import org.apache.maven.model.Resource;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.MatchingTask;
 import org.apache.tools.ant.taskdefs.Tar;
@@ -35,52 +39,38 @@ import org.apache.maven.plugin.MojoFailureException;
 
 /**
  * Package a server archive from an assembled server
- *
- * @goal instance-create-archive
- * @phase package
- * @requiresDependencyResolution runtime
- * @inheritByDefault true
- * @description Package a server archive from an assembled server
  */
+@Mojo(name = "instance-create-archive", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME)
 public class CreateArchiveMojo extends MojoSupport {
 
     /**
      * The target directory of the project.
-     *
-     * @parameter default-value="${project.build.directory}"
-     * @required
-     * @readonly
      */
+    @Parameter(defaultValue="${project.build.directory}")
     private File destDir;
 
     /**
      * The location of the server repository.
-     *
-     * @parameter default-value="${project.build.directory}/assembly"
-     * @required
      */
+    @Parameter(defaultValue="${project.build.directory}/assembly")
     private File targetServerDirectory;
 
     /**
      * The target file to set as the project's artifact.
-     *
-     * @parameter default-value="${project.file}"
-     * @required
      */
+    @Parameter(defaultValue="${project.file}")
     private File targetFile;
 
     /**
      * pack a assembly as a tar.gz archive
-     *
-     * @parameter
      */
+    @Parameter
     private boolean archiveTarGz = true;
 
     /**
      * pack a assembly as a zip archive
-     *
-     * @parameter
      */
+    @Parameter
     private boolean archiveZip = true;
 
     public void execute() throws MojoExecutionException, MojoFailureException {

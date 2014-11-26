@@ -17,8 +17,23 @@
  */
 package org.apache.karaf.tooling.features;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintStream;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 
@@ -32,21 +47,23 @@ import org.apache.karaf.features.internal.model.Feature;
 import org.apache.karaf.features.internal.model.Features;
 import org.apache.karaf.features.internal.model.JaxbUtil;
 import org.apache.karaf.features.internal.model.ObjectFactory;
+import org.apache.karaf.tooling.utils.MojoSupport;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.execution.MavenSession;
-import org.apache.maven.plugin.Mojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugin.logging.SystemStreamLog;
-import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.MavenProjectHelper;
+import org.apache.maven.plugins.annotations.Component;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.shared.filtering.MavenFileFilter;
 import org.apache.maven.shared.filtering.MavenFilteringException;
 import org.apache.maven.shared.filtering.MavenResourcesFiltering;
 import org.codehaus.plexus.PlexusContainer;
-import org.codehaus.plexus.logging.AbstractLogEnabled;
 import org.codehaus.plexus.util.ReaderFactory;
 import org.codehaus.plexus.util.StringUtils;
 import org.xml.sax.SAXException;
@@ -54,17 +71,13 @@ import org.xml.sax.SAXException;
 import static org.apache.karaf.deployer.kar.KarArtifactInstaller.FEATURE_CLASSIFIER;
 
 /**
- * Generates the features XML file
+ * Generates the features XML file starting with an optional source feature.xml and adding
+ * project dependencies as bundles and feature/car dependencies.
+ * 
  * NB this requires a recent maven-install-plugin such as 2.3.1
- *
- * @goal features-generate-descriptor
- * @phase compile
- * @requiresDependencyResolution runtime
- * @inheritByDefault true
- * @description Generates the features XML file starting with an optional source feature.xml and adding
- * project dependencies as bundles and feature/car dependencies
  */
-public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
+@Mojo(name = "features-generate-descriptor", defaultPhase = LifecyclePhase.COMPILE, requiresDependencyResolution = ResolutionScope.RUNTIME)
+public class GenerateDescriptorMojo extends MojoSupport {
 
     /**
      * An (optional) input feature file to extend.  This is highly recommended as it is the only way to add <code>&lt;feature/&gt;</code>
@@ -74,52 +87,45 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
      * <p/>
      * When dependencies are processed, if they are duplicated in this file, the dependency here provides the baseline
      * information and is supplemented by additional information from the dependency.
-     *
-     * @parameter default-value="${project.basedir}/src/main/feature/feature.xml"
      */
+    @Parameter(defaultValue = "${project.basedir}/src/main/feature/feature.xml")
     private File inputFile;
 
     /**
      * (wrapper) The filtered input file. This file holds the result of Maven resource interpolation and is generally
      * not necessary to change, although it may be helpful for debugging.
-     *
-     * @parameter default-value="${project.build.directory}/feature/filteredInputFeature.xml"
      */
+    @Parameter(defaultValue = "${project.build.directory}/feature/filteredInputFeature.xml")
     private File filteredInputFile;
 
     /**
      * (wrapper) The file to generate.  This file is attached as a project output artifact.
-     *
-     * @parameter default-value="${project.build.directory}/feature/feature.xml"
      */
+    @Parameter(defaultValue = "${project.build.directory}/feature/feature.xml")
     private File outputFile;
 
     /**
      * (wrapper) Exclude some artifacts from the generated feature.
-     *
-     * @parameter
      */
+    @Parameter
     private List<String> excludedArtifactIds = new ArrayList<String>();
 
     /**
      * The resolver to use for the feature.  Normally null or "OBR" or "(OBR)"
-     *
-     * @parameter default-value="${resolver}"
      */
+    @Parameter(defaultValue = "${resolver}")
     private String resolver;
 
     /**
      * (wrapper) The artifact type for attaching the generated file to the project
-     *
-     * @parameter default-value="xml"
      */
+    @Parameter(defaultValue = "xml")
     private String attachmentArtifactType = "xml";
 
     /**
      * (wrapper) The artifact classifier for attaching the generated file to the project
-     *
-     * @parameter default-value="features"
      */
+    @Parameter(defaultValue = "features")
     private String attachmentArtifactClassifier = "features";
 
     /**
@@ -130,18 +136,16 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
      * Setting this value to <code>true</code> is especially helpful in multiproject builds where subprojects build their own features
      * using <code>aggregateFeatures = false</code>, then combined with <code>aggregateFeatures = true</code> in an
      * aggregation project with explicit dependencies to the child projects.
-     *
-     * @parameter default-value="false"
      */
+    @Parameter(defaultValue = "false")
     private boolean aggregateFeatures = false;
 
     /**
      * If present, the bundles added to the feature constructed from the dependencies will be marked with this default
      * startlevel.  If this parameter is not present, no startlevel attribute will be created. Finer resolution for specific
      * dependencies can be obtained by specifying the dependency in the file referenced by the <code>inputFile</code> parameter.
-     *
-     * @parameter
      */
+    @Parameter
     private Integer startLevel;
 
     /**
@@ -152,9 +156,8 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
      * Can be either manual or auto. Specifies whether the feature should be automatically installed when
      * dropped inside the deploy folder. Note: this attribute doesn't affect feature descriptors that are installed
      * from the feature:install command or as part of the etc/org.apache.karaf.features.cfg file.
-     *
-     * @parameter
      */
+    @Parameter
     private String installMode;
 
     /**
@@ -162,35 +165,31 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
      * <p/>
      * N.B. Note the default value of this is true, but is suboptimal in cases where specific <code>&lt;feature/&gt;</code> dependencies are
      * provided by the <code>inputFile</code> parameter.
-     *
-     * @parameter default-value="true"
      */
+    @Parameter(defaultValue = "true")
     private boolean includeTransitiveDependency;
 
     /**
      * The standard behavior is to add dependencies as <code>&lt;bundle&gt;</code> elements to a <code>&lt;feature&gt;</code>
      * with the same name as the artifactId of the project.  This flag disables that behavior.
-     *
-     * @parameter default-value="true"
      */
+    @Parameter(defaultValue = "true")
     private boolean addBundlesToPrimaryFeature;
 
     /**
      * The standard behavior is to add any dependencies other than those in the <code>runtime</code> scope to the feature bundle.
      * Setting this flag to "true" disables adding any dependencies (transient or otherwise) that are in
      * <code>&lt;scope&gt;provided&lt;/scope&gt;</code>.
-     *
-     * @parameter default-value="false"
      */
+    @Parameter(defaultValue = "false")
     private boolean ignoreScopeProvided;
 
     /**
      * Flag indicating whether the main project artifact should be included (<code>true</code>) or not (<code>false</code>).
      * <p/>
      * Assumes the main project artifact is a bundle and the feature will be attached alongside using <code>attachmentArtifactClassifier</code>.
-     *
-     * @parameter default-value="false"
      */
+    @Parameter(defaultValue = "false")
     private boolean includeProjectArtifact;
 
     // *************************************************
@@ -198,53 +197,16 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
     // *************************************************
 
     /**
-     * (wrapper) The maven project.
-     *
-     * @parameter default-value="${project}"
-     * @required
-     * @readonly
-     */
-    protected MavenProject project;
-
-    /**
-     * The maven project's helper.
-     *
-     * @component
-     * @required
-     * @readonly
-     */
-    protected MavenProjectHelper projectHelper;
-
-    /**
      * We can't autowire strongly typed RepositorySystem from Aether because it may be Sonatype (Maven 3.0.x)
      * or Eclipse (Maven 3.1.x/3.2.x) implementation, so we switch to service locator.
-     *
-     * @component
-     * @required
-     * @readonly
      */
+    @Component
     private PlexusContainer container;
 
-    /**
-     * @component role="org.apache.maven.shared.filtering.MavenResourcesFiltering" role-hint="default"
-     * @required
-     * @readonly
-     */
+    @Component
     protected MavenResourcesFiltering mavenResourcesFiltering;
 
-    /**
-     * @parameter default-value="${session}"
-     * @required
-     * @readonly
-     */
-    protected MavenSession session;
-
-    /**
-     * @plexus.requirement role-hint="default"
-     * @component
-     * @required
-     * @readonly
-     */
+    @Component
     protected MavenFileFilter mavenFileFilter;
 
     // dependencies we are interested in
@@ -261,7 +223,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
 
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
-            this.dependencyHelper = DependencyHelperFactory.createDependencyHelper(this.container, this.project, this.session, getLog());
+            this.dependencyHelper = DependencyHelperFactory.createDependencyHelper(this.container, this.project, this.mavenSession, getLog());
             this.dependencyHelper.getDependencies(project, includeTransitiveDependency);
             this.localDependencies = dependencyHelper.getLocalDependencies();
             this.treeListing = dependencyHelper.getTreeListing();
@@ -280,7 +242,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
                 throw new MojoExecutionException("Could not create directory for features file: " + dir);
             }
         } catch (Exception e) {
-            getLogger().error(e.getMessage());
+            getLog().error(e.getMessage());
             throw new MojoExecutionException("Unable to create features.xml file: " + e, e);
         }
     }
@@ -290,7 +252,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
      */
     private void writeFeatures(PrintStream out) throws ArtifactResolutionException, ArtifactNotFoundException,
             IOException, JAXBException, SAXException, ParserConfigurationException, XMLStreamException, MojoExecutionException {
-        getLogger().info("Generating feature descriptor file " + outputFile.getAbsolutePath());
+        getLog().info("Generating feature descriptor file " + outputFile.getAbsolutePath());
         //read in an existing feature.xml
         ObjectFactory objectFactory = new ObjectFactory();
         Features features;
@@ -396,7 +358,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
         } catch (Exception e) {
             throw new MojoExecutionException("Features contents have changed", e);
         }
-        getLogger().info("...done!");
+        getLog().info("...done!");
     }
 
     /**
@@ -408,7 +370,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
         try {
             is = new BufferedInputStream(new FileInputStream(file));
         } catch (Exception e) {
-            getLogger().warn("Error while opening artifact", e);
+            getLog().warn("Error while opening artifact", e);
             return null;
         }
 
@@ -417,7 +379,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
             JarInputStream jar = new JarInputStream(is);
             Manifest m = jar.getManifest();
             if (m == null) {
-                getLogger().warn("Manifest not present in the first entry of the zip - " + file.getName());
+                getLog().warn("Manifest not present in the first entry of the zip - " + file.getName());
             }
             jar.close();
             return m;
@@ -451,76 +413,66 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
      * <code>dependencyCache</code> does not exist, it will be unconditionally generated.  If the file does exist, it is
      * used to detect changes from previous builds and generate logs of those changes.  In that case,
      * <code>failOnDependencyChange = true</code> will cause the build to fail.
-     *
-     * @parameter default-value="false"
      */
+    @Parameter(defaultValue = "false")
     private boolean checkDependencyChange;
 
     /**
      * (wrapper) Location of dependency cache.  This file is generated to contain known dependencies and is generally
      * located in SCM so that it may be used across separate developer builds. This is parameter is ignored unless
      * <code>checkDependencyChange</code> is set to <code>true</code>.
-     *
-     * @parameter default-value="${basedir}/src/main/history/dependencies.xml"
      */
+    @Parameter(defaultValue = "${basedir}/src/main/history/dependencies.xml")
     private File dependencyCache;
 
     /**
      * Location of filtered dependency file.
-     *
-     * @parameter default-value="${basedir}/target/history/dependencies.xml"
-     * @readonly
      */
+    @Parameter(defaultValue = "${basedir}/target/history/dependencies.xml", readonly = true)
     private File filteredDependencyCache;
 
     /**
      * Whether to fail on changed dependencies (default, <code>true</code>) or warn (<code>false</code>). This is parameter is ignored unless
      * <code>checkDependencyChange</code> is set to <code>true</code> and <code>dependencyCache</code> exists to compare
      * against.
-     *
-     * @parameter default-value="true"
      */
+    @Parameter(defaultValue = "true")
     private boolean failOnDependencyChange;
 
     /**
      * Copies the contents of dependency change logs that are generated to stdout. This is parameter is ignored unless
      * <code>checkDependencyChange</code> is set to <code>true</code> and <code>dependencyCache</code> exists to compare
      * against.
-     *
-     * @parameter default-value="false"
      */
+    @Parameter(defaultValue = "false")
     private boolean logDependencyChanges;
 
     /**
      * Whether to overwrite the file referenced by <code>dependencyCache</code> if it has changed.  This is parameter is
      * ignored unless <code>checkDependencyChange</code> is set to <code>true</code>, <code>failOnDependencyChange</code>
      * is set to <code>false</code> and <code>dependencyCache</code> exists to compare against.
-     *
-     * @parameter default-value="false"
      */
+    @Parameter(defaultValue = "false")
     private boolean overwriteChangedDependencies;
 
     //filtering support
     /**
      * The character encoding scheme to be applied when filtering resources.
-     *
-     * @parameter default-value="${project.build.sourceEncoding}"
      */
+    @Parameter(defaultValue = "${project.build.sourceEncoding}")
     protected String encoding;
 
     /**
      * Expression preceded with the String won't be interpolated
      * \${foo} will be replaced with ${foo}
-     *
-     * @parameter default-value="${maven.resources.escapeString}"
      */
+    @Parameter(defaultValue = "${maven.resources.escapeString}")
     protected String escapeString = "\\";
 
     /**
      * System properties.
-     *
-     * @parameter
      */
+    @Parameter
     protected Map<String, String> systemProperties;
 
     private void checkChanges(Features newFeatures, ObjectFactory objectFactory) throws Exception, IOException, JAXBException, XMLStreamException {
@@ -570,10 +522,10 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
                     boolean t2 = addedBundles.remove(test);
                     int s2 = addedBundles.size();
                     if (t1 != t2) {
-                        getLogger().warn("dependencies.contains: " + t1 + ", dependencies.remove(test): " + t2);
+                        getLog().warn("dependencies.contains: " + t1 + ", dependencies.remove(test): " + t2);
                     }
                     if (t1 == (s1 == s2)) {
-                        getLogger().warn("dependencies.contains: " + t1 + ", size before: " + s1 + ", size after: " + s2);
+                        getLog().warn("dependencies.contains: " + t1 + ", size before: " + s1 + ", size after: " + s2);
                     }
                     if (!t2) {
                         removedBundles.add(test);
@@ -588,10 +540,10 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
                     boolean t2 = addedDependencys.remove(test);
                     int s2 = addedDependencys.size();
                     if (t1 != t2) {
-                        getLogger().warn("dependencies.contains: " + t1 + ", dependencies.remove(test): " + t2);
+                        getLog().warn("dependencies.contains: " + t1 + ", dependencies.remove(test): " + t2);
                     }
                     if (t1 == (s1 == s2)) {
-                        getLogger().warn("dependencies.contains: " + t1 + ", size before: " + s1 + ", size after: " + s2);
+                        getLog().warn("dependencies.contains: " + t1 + ", size before: " + s1 + ", size after: " + s2);
                     }
                     if (!t2) {
                         removedDependencys.add(test);
@@ -682,7 +634,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
             }
             targetFile.getParentFile().mkdirs();
             @SuppressWarnings("rawtypes")
-            List filters = mavenFileFilter.getDefaultFilterWrappers(project, null, true, session, null);
+            List filters = mavenFileFilter.getDefaultFilterWrappers(project, null, true, mavenSession, null);
             mavenFileFilter.copyFile(sourceFile, targetFile, true, filters, encoding, true);
         } catch (MavenFilteringException e) {
             throw new MojoExecutionException(e.getMessage(), e);

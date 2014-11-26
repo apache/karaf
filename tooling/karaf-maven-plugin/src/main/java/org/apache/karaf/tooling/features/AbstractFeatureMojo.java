@@ -36,6 +36,7 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.MojoExecutionException;
 
+import org.apache.maven.plugins.annotations.Parameter;
 import org.osgi.framework.Version;
 
 /**
@@ -43,44 +44,33 @@ import org.osgi.framework.Version;
  */
 public abstract class AbstractFeatureMojo extends MojoSupport {
     
-    /**
-     * @parameter
-     */
+    @Parameter
     protected List<String> descriptors;
     
     protected Set<Artifact> descriptorArtifacts;
-    
-    /**
-     * @parameter
-     */
+
+    @Parameter
     protected List<String> features;
 
-    /**
-     * @parameter
-     */
+    @Parameter
     protected boolean addTransitiveFeatures = true;
-    /**
-     * @parameter
-     */
+
+    @Parameter
     private boolean includeMvnBasedDescriptors = false;
-    /**
-     * @parameter
-     */
+
+    @Parameter
     private boolean failOnArtifactResolutionError = true;
-    /**
-     * @parameter
-     */
+
+    @Parameter
     private boolean resolveDefinedRepositoriesRecursively = true;
-    
-    /**
-     * @parameter
-     */
+
+    @Parameter
     protected boolean skipNonMavenProtocols = true;
 
     /**
      * The start level exported when no explicit start level is set for a bundle
-     * @parameter 
      */
+    @Parameter
     private int defaultStartLevel = 80;
 
     /**
@@ -147,7 +137,7 @@ public abstract class AbstractFeatureMojo extends MojoSupport {
             List<ArtifactRepository> usedRemoteRepos = artifact.getRepository() != null ? 
                     Collections.singletonList(artifact.getRepository())
                     : remoteRepos;
-            resolver.resolve(artifact, usedRemoteRepos, localRepo);
+            artifactResolver.resolve(artifact, usedRemoteRepos, localRepo);
         } catch (Exception e) {
             if (failOnArtifactResolutionError) {
                 throw new RuntimeException("Can't resolve artifact " + artifact, e);

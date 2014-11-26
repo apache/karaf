@@ -36,57 +36,51 @@ import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.apache.xbean.finder.ClassFinder;
 
 /**
  * Generates help documentation for Karaf commands
- *
- * @goal commands-generate-help
- * @phase generate-resources
- * @execute phase="generate-resources"
- * @requiresDependencyResolution runtime
- * @inheritByDefault false
- * @description Generates help for Karaf commands
  */
+@Mojo(name = "commands-generate-help", defaultPhase = LifecyclePhase.GENERATE_RESOURCES,
+        requiresDependencyResolution = ResolutionScope.RUNTIME, inheritByDefault = false)
 public class GenerateHelpMojo extends AbstractMojo {
 
     /**
-     * The maven project.
-     *
-     * @parameter default-value="${project}"
-     * @required
-     */
-    protected MavenProject project;
-
-    /**
      * The output folder
-     *
-     * @parameter default-value="${project.build.directory}/docbkx/sources"
      */
+    @Parameter(defaultValue = "${project.build.directory}/docbkx/sources")
     protected File targetFolder;
 
     /**
      * The output format
-     *
-     * @parameter default-value="docbx"
      */
+    @Parameter(defaultValue = "docbx")
     protected String format;
 
     /**
      * The classloader to use for loading the commands.
      * Can be "project" or "plugin"
-     *
-     * @parameter default-value="project"
      */
+    @Parameter(defaultValue = "project")
     protected String classLoader;
 
     /**
      * Includes the --help command output in the generated documentation
-     *
-     * @parameter default-value="true"
      */
+    @Parameter(defaultValue = "true")
     protected boolean includeHelpOption;
+
+    /**
+     * The maven project.
+     */
+    @Parameter(defaultValue = "${project}")
+    protected MavenProject project;
+
 
     private static final String FORMAT_CONF = "conf";
     private static final String FORMAT_DOCBX = "docbx";

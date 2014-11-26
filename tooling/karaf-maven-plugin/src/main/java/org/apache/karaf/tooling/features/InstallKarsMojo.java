@@ -36,83 +36,69 @@ import org.apache.karaf.tooling.utils.MojoSupport;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 
 /**
  * Installs kar dependencies into a server-under-construction in target/assembly
- *
- * @goal install-kars
- * @phase process-resources
- * @requiresDependencyResolution runtime
- * @inheritByDefault true
- * @description Install kar dependencies
  */
+@Mojo(name = "install-kars", defaultPhase = LifecyclePhase.PROCESS_RESOURCES, requiresDependencyResolution = ResolutionScope.RUNTIME)
 public class InstallKarsMojo extends MojoSupport {
 
     /**
      * Base directory used to copy the resources during the build (working directory).
-     *
-     * @parameter default-value="${project.build.directory}/assembly"
-     * @required
      */
+    @Parameter(defaultValue = "${project.build.directory}/assembly")
     protected String workDirectory;
 
     /**
      * Features configuration file (etc/org.apache.karaf.features.cfg).
-     *
-     * @parameter default-value="${project.build.directory}/assembly/etc/org.apache.karaf.features.cfg"
-     * @required
      */
+    @Parameter(defaultValue = "${project.build.directory}/assembly/etc/org.apache.karaf.features.cfg")
     protected File featuresCfgFile;
 
     /**
      * startup.properties file.
-     *
-     * @parameter default-value="${project.build.directory}/assembly/etc/startup.properties"
-     * @required
      */
+    @Parameter(defaultValue = "${project.build.directory}/assembly/etc/startup.properties")
     protected File startupPropertiesFile;
 
     /**
      * default start level for bundles in features that don't specify it.
-     *
-     * @parameter
      */
+    @Parameter
     protected int defaultStartLevel = 30;
 
     /**
      * Directory used during build to construction the Karaf system repository.
-     *
-     * @parameter default-value="${project.build.directory}/assembly/system"
-     * @required
      */
+    @Parameter(defaultValue="${project.build.directory}/assembly/system")
     protected File systemDirectory;
 
     /**
      * List of features from runtime-scope features xml and kars to be installed into system and listed in startup.properties.
-     *
-     * @parameter
      */
+    @Parameter
     private List<String> startupFeatures;
 
     /**
      * List of features from runtime-scope features xml and kars to be installed into system repo and listed in features service boot features.
-     *
-     * @parameter
      */
+    @Parameter
     private List<String> bootFeatures;
 
     /**
      * List of features from runtime-scope features xml and kars to be installed into system repo and not mentioned elsewhere.
-     *
-     * @parameter
      */
+    @Parameter
     private List<String> installedFeatures;
 
     /**
      * Ignore the dependency attribute (dependency="[true|false]") on bundle
-     *
-     * @parameter default-value="true"
      */
+    @Parameter(defaultValue = "true")
     protected boolean ignoreDependencyFlag;
 
     private URI system;

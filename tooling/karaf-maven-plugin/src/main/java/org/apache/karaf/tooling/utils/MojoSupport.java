@@ -17,8 +17,6 @@
  */
 package org.apache.karaf.tooling.utils;
 
-import java.io.BufferedOutputStream;
-import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -46,6 +44,8 @@ import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.Component;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.project.MavenProjectHelper;
@@ -58,72 +58,50 @@ public abstract class MojoSupport extends AbstractMojo {
 
     /**
      * Maven ProjectHelper
-     *
-     * @component
      */
+    @Component
     protected MavenProjectHelper projectHelper;
 
     /**
      * The Maven project.
-     *
-     * @parameter default-value="${project}"
-     * @required
-     * @readonly
      */
+    @Parameter(defaultValue = "${project}", readonly = true)
     protected MavenProject project;
 
     /**
      * Directory that resources are copied to during the build.
-     *
-     * @parameter default-value="${project.build.directory}/${project.artifactId}-${project.version}-installer"
-     * @required
      */
+    @Parameter(defaultValue = "${project.build.directory}/${project.artifactId}-${project.version}-installer")
     protected File workDirectory;
 
-    /**
-     * @component
-     */
+    @Component
     protected MavenProjectBuilder projectBuilder;
 
-    /**
-     * @parameter default-value="${localRepository}"
-     */
+    @Parameter(defaultValue = "${localRepository}")
     protected ArtifactRepository localRepo;
 
-    /**
-     * @parameter default-value="${project.remoteArtifactRepositories}"
-     */
+    @Parameter(defaultValue = "${project.remoteArtifactRepositories}")
     protected List<ArtifactRepository> remoteRepos;
 
-    /**
-     * @component
-     */
+    @Component
     protected ArtifactMetadataSource artifactMetadataSource;
 
-    /**
-     * @component
-     */
-    protected ArtifactResolver resolver;
+    @Component
+    protected ArtifactResolver artifactResolver;
 
-    /**
-     * @component
-     */
+    @Component
     protected ArtifactFactory factory;
     
     /**
      * The artifact type of a feature
-     * 
-     * @parameter default-value="xml"
      */
+    @Parameter(defaultValue = "xml")
     private String featureArtifactType = "xml";
     
     /**
      * The Maven session.
-     * 
-     * @parameter default-value="${session}"
-     * @readonly
-     * @required
      */
+    @Parameter(defaultValue = "${session}", readonly = true)
     protected MavenSession mavenSession;
 
     /**
@@ -131,11 +109,8 @@ public abstract class MojoSupport extends AbstractMojo {
      * or Eclipse (Maven 3.1.x/3.2.x) version, so we switch to service locator by autowiring entire {@link PlexusContainer}</p>
      *
      * <p>It's a bit of a hack but we have not choice when we want to be usable both in Maven 3.0.x and 3.1.x/3.2.x</p>
-     *
-     * @component
-     * @required
-     * @readonly
      */
+    @Component
     protected PlexusContainer container;
 
     protected MavenProject getProject() {

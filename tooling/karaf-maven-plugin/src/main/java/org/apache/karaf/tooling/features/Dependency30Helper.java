@@ -66,9 +66,6 @@ public class Dependency30Helper implements DependencyHelper {
 
     /**
      * The project's defined repositories to use for the resolution of project dependencies.
-     *
-     * @parameter default-value="${project.remoteProjectRepositories}"
-     * @readonly
      */
     private final List<RemoteRepository> projectRepositories;
 
