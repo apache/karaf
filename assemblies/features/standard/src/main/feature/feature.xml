@@ -68,12 +68,19 @@
         <bundle start-level="20">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.jexl.evaluator/${aries.blueprint.jexl.evaluator.version}</bundle>
     </feature>
 
+    <feature name="feature" description="Features Support" version="${project.version}">
+        <bundle start-level="30">mvn:org.apache.karaf.features/org.apache.karaf.features.core/${project.version}</bundle>
+        <conditional>
+            <condition>shell</condition>
+            <bundle start-level="30">mvn:org.apache.karaf.features/org.apache.karaf.features.command/${project.version}</bundle>
+        </conditional>
+    </feature>
+
     <feature name="shell" description="Karaf Shell" version="${project.version}">
         <bundle dependency="true" start-level="30">mvn:jline/jline/${jline.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.jledit/core/${jledit.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.shell/org.apache.karaf.shell.core/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.shell/org.apache.karaf.shell.commands/${project.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.karaf.features/org.apache.karaf.features.command/${project.version}</bundle>
     </feature>
 
     <feature name="shell-compat" description="Karaf Shell Compatibility" version="${project.version}">
@@ -138,10 +145,13 @@
     <feature name="jaas" description="Provide JAAS support" version="${project.version}">
         <bundle start-level="30" start="true">mvn:org.apache.karaf.jaas/org.apache.karaf.jaas.config/${project.version}</bundle>
         <bundle start-level="30" start="true">mvn:org.apache.karaf.jaas/org.apache.karaf.jaas.modules/${project.version}</bundle>
-        <bundle start-level="30" start="true">mvn:org.apache.karaf.jaas/org.apache.karaf.jaas.command/${project.version}</bundle>
         <conditional>
             <condition>aries-blueprint</condition>
             <bundle start-level="30" start="true">mvn:org.apache.karaf.jaas.blueprint/org.apache.karaf.jaas.blueprint.config/${project.version}</bundle>
+        </conditional>
+        <conditional>
+            <condition>shell</condition>
+            <bundle start-level="30" start="true">mvn:org.apache.karaf.jaas/org.apache.karaf.jaas.command/${project.version}</bundle>
         </conditional>
     </feature>
 
@@ -193,8 +203,6 @@
         <feature>aries-blueprint</feature>
         <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.metatype/${felix.metatype.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.console/${project.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.features/${project.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.gogo/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.http/${project.version}</bundle>
         <conditional>
             <condition>eventadmin</condition>
@@ -207,6 +215,14 @@
         <conditional>
             <condition>instance</condition>
             <bundle start-level="30">mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.instance/${project.version}</bundle>
+        </conditional>
+        <conditional>
+            <condition>shell</condition>
+            <bundle start-level="30">mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.gogo/${project.version}</bundle>
+        </conditional>
+        <conditional>
+            <condition>feature</condition>
+            <bundle start-level="30">mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.features/${project.version}</bundle>
         </conditional>
     </feature>
 
@@ -258,6 +274,7 @@
     </feature>
 
     <feature name="jasypt-encryption" description="Advanced encryption support for Karaf security" version="${project.version}">
+        <feature>jaas</feature>
         <bundle dependency="true" start-level="30">mvn:commons-codec/commons-codec/${commons-codec.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:commons-lang/commons-lang/${commons-lang.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jasypt/${jasypt.bundle.version}</bundle>
@@ -275,7 +292,6 @@
     <feature name="scr" description="Declarative Service support" version="${project.version}">
         <bundle dependency="true" start-level="30">mvn:org.apache.felix/org.apache.felix.metatype/${felix.metatype.version}</bundle>
         <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.scr/${felix.scr.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.karaf.scr/org.apache.karaf.scr.command/${project.version}</bundle>
         <conditional>
             <condition>management</condition>
             <bundle start-level="30">mvn:org.apache.karaf.scr/org.apache.karaf.scr.management/${project.version}</bundle>
@@ -283,6 +299,10 @@
         <conditional>
             <condition>webconsole</condition>
             <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.webconsole.plugins.ds/${felix.scr.webconsole.plugin.version}</bundle>
+        </conditional>
+        <conditional>
+            <condition>shell</condition>
+            <bundle start-level="30">mvn:org.apache.karaf.scr/org.apache.karaf.scr.command/${project.version}</bundle>
         </conditional>
         <capability>
             osgi.service;effective:=active;objectClass=org.apache.felix.scr.ScrService,
@@ -293,6 +313,7 @@
     <feature name="blueprint-web" description="Provides an OSGI-aware Servlet ContextListener for bootstrapping
         blueprint inside web-bundle containers" version="${project.version}">
         <feature>war</feature>
+        <feature>aries-blueprint</feature>
         <bundle>mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.webosgi/${aries.blueprint.web.version}</bundle>
     </feature>
 

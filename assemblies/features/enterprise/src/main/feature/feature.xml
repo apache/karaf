@@ -21,6 +21,7 @@
     <!-- NB: this file is not the one really used. This file is used by the karaf-maven-plugin to define the start-level of bundles in the generated feature.xml -->
 
     <repository>mvn:org.ops4j.pax.cdi/pax-cdi-features/${pax.cdi.version}/xml/features</repository>
+    <repository>mvn:org.apache.karaf.features/standard/${project.version}/xml/features</repository>
 
     <feature name="transaction" description="OSGi Transaction Manager" version="1.0.0">
         <details>JTA implementation provided by Apache Aries Transaction 1.0.0</details>
@@ -33,6 +34,7 @@
             aries.transaction.howl.bufferSizeKBytes = 4
         </config>
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.aries/org.apache.aries.util/${aries.util.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.transaction/org.apache.aries.transaction.manager/1.0.0</bundle>
         <conditional>
             <condition>aries-blueprint</condition>
@@ -51,6 +53,7 @@
             aries.transaction.howl.bufferSizeKBytes = 4
         </config>
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.aries/org.apache.aries.util/${aries.util.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.transaction/org.apache.aries.transaction.manager/1.0.1</bundle>
         <conditional>
             <condition>aries-blueprint</condition>
@@ -69,6 +72,7 @@
             aries.transaction.howl.bufferSizeKBytes = 4
         </config>
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.aries/org.apache.aries.util/${aries.util.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.transaction/org.apache.aries.transaction.manager/1.1.1</bundle>
         <conditional>
             <condition>aries-blueprint</condition>
@@ -95,6 +99,7 @@
         <details>JPA 2.0 implementation provided by Apache Aries JPA ${aries.jpa.version}. NB: this feature doesn"t provide the JPA engine, you have to install one by yourself (OpenJPA for instance)</details>
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jpa_2.0_spec/${geronimo.jpa-spec.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.aries/org.apache.aries.util/${aries.util.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.jpa/org.apache.aries.jpa.api/${aries.jpa.api.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.jpa/org.apache.aries.jpa.container/${aries.jpa.container.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.jpa/org.apache.aries.jpa.container.context/${aries.jpa.container.context.version}</bundle>
@@ -272,6 +277,7 @@
     <feature name="weld" description="JBoss Weld CDI container support" version="${weld.version}">
         <details>Add support of JBoss Weld CDI container.</details>
         <feature>pax-cdi-weld</feature>
+        <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-annotation_1.1_spec/1.0.1</bundle>
         <bundle>mvn:org.jboss.weld/weld-osgi-bundle/${weld.version}</bundle>
     </feature>
 
@@ -300,7 +306,10 @@
         <bundle dependency="true" start-level="30">mvn:org.apache.karaf.services/org.apache.karaf.services.coordinator/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.subsystem/org.apache.aries.subsystem.api/${aries.subsystem.api.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.subsystem/org.apache.aries.subsystem.core/${aries.subsystem.core.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.karaf.subsystem/org.apache.karaf.subsystem.core/${project.version}</bundle>
+        <conditional>
+            <condition>shell</condition>
+            <bundle start-level="30">mvn:org.apache.karaf.subsystem/org.apache.karaf.subsystem.core/${project.version}</bundle>
+        </conditional>
     </feature>
 
 </features>

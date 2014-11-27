@@ -39,6 +39,14 @@
     </properties>
 
     <dependencies>
+        <!-- Framework distribution -->
+        <dependency>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>framework</artifactId>
+            <type>kar</type>
+            <scope>provided</scope>
+        </dependency>
+
         <!-- standard deps -->
         <dependency>
             <groupId>org.apache.karaf.shell</groupId>
@@ -48,6 +56,11 @@
         <dependency>
             <groupId>org.apache.karaf.features</groupId>
             <artifactId>org.apache.karaf.features.core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>org.apache.karaf.features.command</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -421,12 +434,31 @@
                 <executions>
                     <execution>
                         <id>compile</id>
-                        <phase>compile</phase>
+                        <phase>generate-resources</phase>
                         <goals>
                             <goal>features-generate-descriptor</goal>
                         </goals>
                         <configuration>
                             <addBundlesToPrimaryFeature>false</addBundlesToPrimaryFeature>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>verify</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>verify-features</goal>
+                        </goals>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>mvn:org.apache.karaf.features/framework/${project.version}/xml/features</descriptor>
+                                <descriptor>file:${project.build.directory}/feature/feature.xml</descriptor>
+                            </descriptors>
+                            <distribution>org.apache.karaf.features:framework</distribution>
+                            <javase>1.7</javase>
+                            <framework>
+                                <feature>framework</feature>
+                            </framework>
+                            <ignoreMissingConditions>true</ignoreMissingConditions>
                         </configuration>
                     </execution>
                 </executions>

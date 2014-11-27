@@ -117,6 +117,7 @@
                     <bootFeatures>
                         <feature>jaas</feature>
                         <feature>shell</feature>
+                        <feature>feature</feature>
                         <feature>ssh</feature>
                         <feature>management</feature>
                         <feature>bundle</feature>

@@ -63,6 +63,7 @@
             <groupId>org.apache.karaf.features</groupId>
             <artifactId>org.apache.karaf.features.command</artifactId>
             <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>

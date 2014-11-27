@@ -20,6 +20,9 @@
 
     <!-- NB: this file is not the one really used. This file is used by the karaf-maven-plugin to define the start-level of bundles in the generated feature.xml -->
 
+    <repository>mvn:org.ops4j.pax.web/pax-web-features/${pax.web.version}/xml/features</repository>
+    <repository>mvn:org.apache.karaf.features/standard/${project.version}/xml/features</repository>
+
     <!-- Spring DM support -->
     <feature name="spring-dm" description="Spring DM support" version="${spring.osgi.version}">
         <feature version="[2.5.6,4)">spring</feature>
@@ -28,8 +31,14 @@
         <bundle start-level="30">mvn:org.springframework.osgi/spring-osgi-core/${spring.osgi.version}</bundle>
         <bundle start-level="30">mvn:org.springframework.osgi/spring-osgi-extender/${spring.osgi.version}</bundle>
         <bundle start-level="30">mvn:org.springframework.osgi/spring-osgi-annotation/${spring.osgi.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.spring/${project.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.karaf.bundle/org.apache.karaf.bundle.springstate/${project.version}</bundle>
+        <conditional>
+            <condition>deployer</condition>
+            <bundle start-level="30">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.spring/${project.version}</bundle>
+        </conditional>
+        <conditional>
+            <condition>bundle</condition>
+            <bundle start-level="30">mvn:org.apache.karaf.bundle/org.apache.karaf.bundle.springstate/${project.version}</bundle>
+        </conditional>
     </feature>
 
     <feature name="spring-dm-web" description="Spring DM Web support" version="${spring.osgi.version}">

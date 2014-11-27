@@ -110,7 +110,10 @@
                     <instructions>
                         <Bundle-Activator>org.apache.karaf.service.guard.impl.Activator</Bundle-Activator>
                         <Export-Package>org.apache.karaf.service.guard.tools</Export-Package>
-                        <Private-Package>org.apache.karaf.service.guard.impl</Private-Package>
+                        <Private-Package>
+                            org.apache.karaf.service.guard.impl,
+                            org.apache.karaf.util.jaas
+                        </Private-Package>
                     </instructions>
                 </configuration>
             </plugin>

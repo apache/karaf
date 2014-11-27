@@ -164,6 +164,7 @@
                         <feature>aries-blueprint</feature>
                         <feature>shell</feature>
                         <feature>shell-compat</feature>
+                        <feature>feature</feature>
                         <feature>jaas</feature>
                         <feature>ssh</feature>
                         <feature>management</feature>
