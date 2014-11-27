@@ -25,10 +25,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.features.BundleInfo;
+import org.apache.karaf.features.ConfigFileInfo;
+import org.apache.karaf.features.ConfigInfo;
 import org.apache.karaf.features.Dependency;
 import org.apache.karaf.features.internal.model.*;
 import org.apache.karaf.kar.internal.Kar;
@@ -255,7 +260,7 @@ public class InstallKarsMojo extends MojoSupport {
                         }
                     }
                     // add the feature in the system folder
-                    resolveFeature(feature, features);
+                    resolveFeature(feature, features, true);
                 } else if (bootFeatures != null && bootFeatures.contains(feature.getName())) {
                     // the feature is a boot feature, updating the etc/org.apache.karaf.features.cfg file
                     getLog().info("Feature " + feature.getName() + " is defined as a boot feature");
@@ -271,11 +276,11 @@ public class InstallKarsMojo extends MojoSupport {
                         }
                     }
                     // add the feature in the system folder
-                    resolveFeature(feature, features);
+                    resolveFeature(feature, features, false);
                 } else if (installedFeatures != null && installedFeatures.contains(feature.getName())) {
                     getLog().info("Feature " + feature.getName() + " is defined as a installed feature");
                     // add the feature in the system folder
-                    resolveFeature(feature, features);
+                    resolveFeature(feature, features, false);
                 } else {
                     getLog().debug("Feature " + feature.getName() + " is not installed");
                 }
@@ -384,11 +389,11 @@ public class InstallKarsMojo extends MojoSupport {
         }
     }
 
-    private void resolveFeature(Feature feature, Map<Feature, Boolean> features) throws Exception {
+    private void resolveFeature(Feature feature, Map<Feature, Boolean> features, boolean installConfig) throws Exception {
         for (Dependency dependency : feature.getFeature()) {
             for (Feature f : features.keySet()) {
                 if (f.getName().equals(dependency.getName())) {
-                    resolveFeature(f, features);
+                    resolveFeature(f, features, installConfig);
                 }
             }
         }
@@ -403,8 +408,13 @@ public class InstallKarsMojo extends MojoSupport {
 
         // installing feature config files
         getLog().info("= Installing configuration files from " + feature.getName() + " feature");
+        if (installConfig) {
+            for (Config config : feature.getConfig()) {
+                installConfig(config);
+            }
+        }
         for (ConfigFile configFile : feature.getConfigfile()) {
-            installConfigFile(configFile);
+            installConfigFile(configFile, installConfig);
         }
 
         // installing condition features
@@ -424,7 +434,7 @@ public class InstallKarsMojo extends MojoSupport {
                 for (Dependency dependency : conditional.getFeature()) {
                     for (Feature f : features.keySet()) {
                         if (f.getName().equals(dependency.getName())) {
-                            resolveFeature(f, features);
+                            resolveFeature(f, features, installConfig);
                         }
                     }
                 }
@@ -433,8 +443,13 @@ public class InstallKarsMojo extends MojoSupport {
                     installBundle(bundle);
                 }
                 getLog().debug("== Conditional configuration files");
+                if (installConfig) {
+                    for (Config config : conditional.getConfig()) {
+                        installConfig(config);
+                    }
+                }
                 for (ConfigFile configFile : conditional.getConfigfile()) {
-                    installConfigFile(configFile);
+                    installConfigFile(configFile, installConfig);
                 }
 //            }
         }
@@ -500,8 +515,15 @@ public class InstallKarsMojo extends MojoSupport {
         }
     }
 
-    private void installConfigFile(ConfigFile configFile) throws Exception {
-        getLog().warn("== Installing configuration file " + configFile.getLocation());
+    private void installConfig(Config config) throws Exception {
+        getLog().info("== Installing configuration " + config.getName());
+
+        Path configFile = Paths.get(workDirectory, "etc", config.getName());
+        Files.write(configFile, config.getValue().getBytes());
+    }
+
+    private void installConfigFile(ConfigFile configFile, boolean installConfig) throws Exception {
+        getLog().info("== Installing configuration file " + configFile.getLocation());
         String configFileLocation = configFile.getLocation();
         File configFileFile;
         if (configFileLocation.startsWith("mvn:")) {
@@ -510,18 +532,22 @@ public class InstallKarsMojo extends MojoSupport {
         } else {
             configFileFile = new File(new URI(configFileLocation));
         }
-        File configFileSystemFile = new File(system.resolve(configFileLocation));
-        copy(configFileFile, configFileSystemFile);
-        // add metadata for snapshot
-        if (configFileLocation.startsWith("mvn")) {
-            Artifact configFileArtifact = dependencyHelper.mvnToArtifact(configFileLocation);
-            if (configFileArtifact.isSnapshot()) {
-                File metadataTarget = new File(configFileSystemFile.getParentFile(), "maven-metadata-local.xml");
-                try {
-                    MavenUtil.generateMavenMetadata(configFileArtifact, metadataTarget);
-                } catch (Exception e) {
-                    getLog().warn("Could not create maven-metadata-local.xml", e);
-                    getLog().warn("It means that this SNAPSHOT could be overwritten by an older one present on remote repositories");
+        if (installConfig) {
+            copy(configFileFile, new File(workDirectory + "/" + configFile.getFinalname()));
+        } else {
+            File configFileSystemFile = new File(system.resolve(configFileLocation));
+            copy(configFileFile, configFileSystemFile);
+            // add metadata for snapshot
+            if (configFileLocation.startsWith("mvn")) {
+                Artifact configFileArtifact = dependencyHelper.mvnToArtifact(configFileLocation);
+                if (configFileArtifact.isSnapshot()) {
+                    File metadataTarget = new File(configFileSystemFile.getParentFile(), "maven-metadata-local.xml");
+                    try {
+                        MavenUtil.generateMavenMetadata(configFileArtifact, metadataTarget);
+                    } catch (Exception e) {
+                        getLog().warn("Could not create maven-metadata-local.xml", e);
+                        getLog().warn("It means that this SNAPSHOT could be overwritten by an older one present on remote repositories");
+                    }
                 }
             }
         }

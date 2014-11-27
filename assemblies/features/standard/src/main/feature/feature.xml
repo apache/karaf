@@ -72,11 +72,27 @@
         <bundle start-level="30">mvn:org.apache.karaf.features/org.apache.karaf.features.core/${project.version}</bundle>
         <conditional>
             <condition>shell</condition>
+            <config name="org.apache.karaf.command.acl.feature">
+                #
+                # This configuration file defines the ACLs for commands in the feature subshell
+                #
+                install = admin
+                uninstall = admin
+            </config>
             <bundle start-level="30">mvn:org.apache.karaf.features/org.apache.karaf.features.command/${project.version}</bundle>
         </conditional>
     </feature>
 
     <feature name="shell" description="Karaf Shell" version="${project.version}">
+        <config name="org.apache.karaf.command.acl.shell">
+            #
+            # This configuration file defines the ACLs for commands in the shell subshell
+            #
+            edit = admin
+            exec = admin
+            new = admin
+            java = admin
+        </config>
         <bundle dependency="true" start-level="30">mvn:jline/jline/${jline.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.jledit/core/${jledit.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.shell/org.apache.karaf.shell.core/${project.version}</bundle>
@@ -128,10 +144,132 @@
 
     <feature name="bundle" description="Provide Bundle support" version="${project.version}">
         <bundle start-level="30" start="true">mvn:org.apache.karaf.bundle/org.apache.karaf.bundle.core/${project.version}</bundle>
+        <conditional>
+            <condition>management</condition>
+            <config name="jmx.acl.org.apache.karaf.bundle">
+                #
+                # JMX ACL specific to the org.apache.karaf:type=bundle,name=* MBean which maps to the Karaf MBean
+                # to control OSGi bundles.
+                #
+                install = manager
+                refresh = manager
+                resolve = manager
+                restart = manager
+                setStartLevel(java.lang.String, int)[/([1-4])?[0-9]/,/.*/] = admin
+                setStartLevel = manager
+                start(java.lang.String)[/([1-4])?[0-9]/] = admin
+                start = manager
+                stop(java.lang.String)[/([1-4])?[0-9]/] = admin
+                stop = manager
+                uninstall(java.lang.String)["0"] = #this is a comment, no roles can perform this operation
+                uninstall = admin
+                update(java.lang.String)[/([1-4])?[0-9]/] = admin
+                update(java.lang.String,java.lang.String)[/([1-4])?[0-9]/,/.*/] = admin
+                update = manager
+            </config>
+        </conditional>
+        <conditional>
+            <condition>shell</condition>
+            <config name="org.apache.karaf.command.acl.bundle">
+                #
+                # This configuration file defines the ACLs for commands in the bundle subshell
+                #
+                # For an explanation of the syntax of this file, see the file:
+                #   org.apache.karaf.command.acl.system.cfg
+                #
+                # This configuration relies on the fact that 'system' bundles need to be managed
+                # with the
+                #   -f (--force)
+                # flag. Operations with -f need admin permission. Most of these operations without
+                # the 'force' option can be done by a manager.
+                install = admin
+                refresh[/.*[-][f].*/] = admin
+                refresh = manager
+                restart[/.*[-][f].*/] = admin
+                restart = manager
+                start[/.*[-][f].*/] = admin
+                start = manager
+                stop[/.*[-][f].*/] = admin
+                stop = manager
+                uninstall[/.*[-][f].*/] = admin
+                uninstall = manager
+                update[/.*[-][f].*/] = admin
+                update = manager
+                watch = admin
+            </config>
+        </conditional>
     </feature>
 
     <feature name="config" description="Provide OSGi ConfigAdmin support" version="${project.version}">
         <bundle start-level="30" start="true">mvn:org.apache.karaf.config/org.apache.karaf.config.core/${project.version}</bundle>
+        <conditional>
+            <condition>management</condition>
+            <config name="jmx.acl.org.apache.karaf.config">
+                #
+                # JMX ACL specific to the org.apache.karaf:type=config,name=* MBean which maps to the Karaf MBean to interact with the
+                # OSGi Config Admin service.
+                #
+                # For a description of the format of this file, see jmx.acl.cfg
+                #
+                # By default, only an admin can make changes to the JMX ACL and shell command rules, but managers can make
+                # changes to other PIDs.
+                #
+                appendProperty(java.lang.String,java.lang.String,java.lang.String)[/jmx[.]acl.*/,/.*/,/.*/] = admin
+                appendProperty(java.lang.String,java.lang.String,java.lang.String)[/org[.]apache[.]karaf[.]command[.]acl.+/,/.*/,/.*/] = admin
+                appendProperty(java.lang.String,java.lang.String,java.lang.String)[/org[.]apache[.]karaf[.]service[.]acl.+/,/.*/,/.*/] = admin
+                appendProperty(java.lang.String,java.lang.String,java.lang.String) = manager
+                create(java.lang.String)[/jmx[.]acl.*/] = admin
+                create(java.lang.String)[/org[.]apache[.]karaf[.]command[.]acl.+/] = admin
+                create(java.lang.String)[/org[.]apache[.]karaf[.]service[.]acl.+/] = admin
+                create(java.lang.String) = manager
+                delete(java.lang.String)[/jmx[.]acl.*/] = admin
+                delete(java.lang.String)[/org[.]apache[.]karaf[.]command[.]acl.+/] = admin
+                delete(java.lang.String)[/org[.]apache[.]karaf[.]service[.]acl.+/] = admin
+                delete(java.lang.String) = manager
+                deleteProperty(java.lang.String,java.lang.String)[/jmx[.]acl.*/,/.*/] = admin
+                deleteProperty(java.lang.String,java.lang.String)[/org[.]apache[.]karaf[.]command[.]acl.+/,/.*/] = admin
+                deleteProperty(java.lang.String,java.lang.String)[/org[.]apache[.]karaf[.]service[.]acl.+/,/.*/] = admin
+                deleteProperty(java.lang.String,java.lang.String) = manager
+                setProperty(java.lang.String,java.lang.String,java.lang.String)[/jmx[.]acl.*/,/.*/,/.*/] = admin
+                setProperty(java.lang.String,java.lang.String,java.lang.String)[/org[.]apache[.]karaf[.]command[.]acl.+/,/.*/,/.*/] = admin
+                setProperty(java.lang.String,java.lang.String,java.lang.String)[/org[.]apache[.]karaf[.]service[.]acl.+/,/.*/,/.*/] = admin
+                setProperty(java.lang.String,java.lang.String,java.lang.String) = manager
+                update(java.lang.String,java.util.Map)[/jmx[.]acl.*/,/.*/] = admin
+                update(java.lang.String,java.util.Map)[/org[.]apache[.]karaf[.]command[.]acl.+/,/.*/] = admin
+                update(java.lang.String,java.util.Map)[/org[.]apache[.]karaf[.]service[.]acl.+/,/.*/] = admin
+                update(java.lang.String,java.util.Map) = manager
+            </config>
+        </conditional>
+        <conditional>
+            <condition>shell</condition>
+            <config name="org.apache.karaf.command.acl.config">
+                #
+                # This configuration file defines the ACLs for various commands in the config subshell
+                #
+                # For an explanation of the syntax of this file, see the file:
+                #   org.apache.karaf.command.acl.system.cfg
+                #
+                cancel = manager
+                delete = admin
+                edit = manager
+                edit[/.*jmx[.]acl.*/] = admin
+                edit[/.*org[.]apache[.]karaf[.]command[.]acl[.].+/] = admin
+                edit[/.*org[.]apache[.]karaf[.]service[.]acl[.].+/] = admin
+                property-append = manager
+                property-append[/.*jmx[.]acl.*/] = admin
+                property-append[/.*org[.]apache[.]karaf[.]command[.]acl[.].+/] = admin
+                property-append[/.*org[.]apache[.]karaf[.]service[.]acl[.].+/] = admin
+                property-delete = manager
+                property-delete[/.*jmx[.]acl.*/] = admin
+                property-delete[/.*org[.]apache[.]karaf[.]command[.]acl[.].+/] = admin
+                property-delete[/.*org[.]apache[.]karaf[.]service[.]acl[.].+/] = admin
+                property-set = manager
+                property-set[/.*jmx[.]acl.*/] = admin
+                property-set[/.*org[.]apache[.]karaf[.]command[.]acl[.].+/] = admin
+                property-set[/.*org[.]apache[.]karaf[.]service[.]acl[.].+/] = admin
+                update = manager
+            </config>
+        </conditional>
     </feature>
 
     <feature name="diagnostic" description="Provide Diagnostic support" version="${project.version}">
@@ -151,6 +289,12 @@
         </conditional>
         <conditional>
             <condition>shell</condition>
+            <config name="org.apache.karaf.command.acl.jaas">
+                #
+                # This configuration file defines the ACLs for commands in the jaas subshell
+                # Jaas commands commands have no effect until update is called.
+                update = admin
+            </config>
             <bundle start-level="30" start="true">mvn:org.apache.karaf.jaas/org.apache.karaf.jaas.command/${project.version}</bundle>
         </conditional>
     </feature>
@@ -169,6 +313,20 @@
 
     <feature name="system" description="Provide System support" version="${project.version}">
         <bundle start-level="30" start="true">mvn:org.apache.karaf.system/org.apache.karaf.system.core/${project.version}</bundle>
+        <conditional>
+            <condition>shell</condition>
+            <config name="org.apache.karaf.command.acl.system">
+                #
+                # This configuration file defines the ACLs for commands in the system subshell
+                #
+                update = admin
+                property = admin
+                shutdown = admin
+                start-level[/.*[0-9][0-9][0-9]+.*/] = manager # manager can set startlevels above 100
+                start-level[/[^0-9]*/] = viewer               # viewer can obtain the current start level
+                start-level = admin                           # admin can set any start level, including &lt; 100
+            </config>
+        </conditional>
     </feature>
 
     <feature name="http" version="${project.version}" description="Implementation of the OSGI HTTP Service">
@@ -193,6 +351,19 @@
 
     <feature name="kar" description="Provide KAR (KARaf archive) support" version="${project.version}">
         <bundle start-level="30">mvn:org.apache.karaf.kar/org.apache.karaf.kar.core/${project.version}</bundle>
+        <conditional>
+            <condition>shell</condition>
+            <config name="org.apache.karaf.command.acl.kar">
+                #
+                # This configuration file defines the ACLs for commands in the kar subshell
+                #
+                # For an explanation of the syntax of this file, see the file:
+                #   org.apache.karaf.command.acl.system.cfg
+                #
+                install = admin
+                uninstall = admin
+            </config>
+        </conditional>
     </feature>
 
     <feature name="webconsole" description="Base support of the Karaf WebConsole" version="${project.version}">
@@ -244,6 +415,60 @@
     </feature>
 
     <feature name="management" description="Provide a JMX MBeanServer and a set of MBeans in Karaf" version="${project.version}">
+        <config name="jmx.acl.org.apache.karaf.security.jmx">
+            #
+            # JMX ACL specific to the org.apache.karaf:type=security,area=jmx MBean which
+            # can be used to find out whether the currently logged in JMX user can invoke
+            # the requested JMX operations.
+            #
+            # For a description of the format of this file, see jmx.acl.cfg
+            #
+            canInvoke = viewer
+        </config>
+        <config name="jmx.acl.java.lang.Memory">
+            #
+            # JMX ACL specific to the java.lang.Memory MBean
+            #
+            # For a description of the format of this file, see jmx.acl.cfg
+            #
+            gc = manager
+        </config>
+        <config name="jmx.acl.osgi.compendium.cm">
+            #
+            # JMX ACL specific to osgi.compendium.cm MBean
+            #
+            # For a description of the format of this file, see jmx.acl.cfg
+            #
+            # This configuration file configures the management of ConfigAdmin via the standard ConfigAdmin MBean
+            # Such that only an admin can make changes to the JMX ACL rules, but managers can make
+            # changes to other PIDs.
+            #
+            createFactoryConfiguration(java.lang.String)[/jmx[.]acl.*/] = admin
+            createFactoryConfiguration(java.lang.String)[/org[.]apache[.]karaf[.]command[.]acl[.].+/] = admin
+            createFactoryConfiguration(java.lang.String)[/org[.]apache[.]karaf[.]service[.]acl[.].+/] = admin
+            createFactoryConfiguration(java.lang.String) = manager
+            createFactoryConfigurationForLocation(java.lang.String,java.lang.String)[/jmx[.]acl.*/,/.*/] = admin
+            createFactoryConfigurationForLocation(java.lang.String,java.lang.String)[/org[.]apache[.]karaf[.]command[.]acl[.].+/,/.*/] = admin
+            createFactoryConfigurationForLocation(java.lang.String,java.lang.String)[/org[.]apache[.]karaf[.]service[.]acl[.].+/,/.*/] = admin
+            createFactoryConfigurationForLocation(java.lang.String,java.lang.String) = manager
+            delete(java.lang.String)[/jmx[.]acl.*/] = admin
+            delete(java.lang.String)[/org[.]apache[.]karaf[.]command[.]acl[.].+/] = admin
+            delete(java.lang.String)[/org[.]apache[.]karaf[.]service[.]acl[.].+/] = admin
+            delete(java.lang.String) = manager
+            deleteConfigurations = admin
+            deleteForLocation(java.lang.String,java.lang.String)[/jmx[.]acl.*/,/.*/] = admin
+            deleteForLocation(java.lang.String,java.lang.String)[/org[.]apache[.]karaf[.]command[.]acl[.].+/,/.*/] = admin
+            deleteForLocation(java.lang.String,java.lang.String)[/org[.]apache[.]karaf[.]service[.]acl[.].+/,/.*/] = admin
+            deleteForLocation(java.lang.String,java.lang.String) = manager
+            update(java.lang.String,javax.management.openmbean.TabularData)[/jmx[.]acl.*/,/.*/] = admin
+            update(java.lang.String,javax.management.openmbean.TabularData)[/org[.]apache[.]karaf[.]command[.]acl[.].+/,/.*/] = admin
+            update(java.lang.String,javax.management.openmbean.TabularData)[/org[.]apache[.]karaf[.]service[.]acl[.].+/,/.*/] = admin
+            update(java.lang.String,javax.management.openmbean.TabularData) = manager
+            updateForLocation(java.lang.String,java.lang.String,javax.management.openmbean.TabularData)[/jmx[.]acl.*/,/.*/,/.*/] = admin
+            updateForLocation(java.lang.String,java.lang.String,javax.management.openmbean.TabularData)[/org[.]apache[.]karaf[.]command[.]acl[.].+/,/.*/,/.*/] = admin
+            updateForLocation(java.lang.String,java.lang.String,javax.management.openmbean.TabularData)[/org[.]apache[.]karaf[.]service[.]acl[.].+/,/.*/,/.*/] = admin
+            updateForLocation(java.lang.String,java.lang.String,javax.management.openmbean.TabularData) = manager
+        </config>
         <feature>jaas</feature>
         <bundle dependency="true" start-level="20">mvn:org.apache.aries/org.apache.aries.util/${aries.util.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.management/org.apache.karaf.management.server/${project.version}</bundle>

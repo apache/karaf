@@ -36,6 +36,7 @@ import java.util.TreeSet;
 import org.apache.felix.utils.version.VersionRange;
 import org.apache.felix.utils.version.VersionTable;
 import org.apache.karaf.features.BundleInfo;
+import org.apache.karaf.features.Conditional;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeatureEvent;
 import org.apache.karaf.features.FeaturesService;
@@ -699,9 +700,17 @@ public class Deployer {
         // Install configurations
         //
         if (!newFeatures.isEmpty()) {
-            Set<Feature> set = apply(flatten(newFeatures), map(dstate.features));
-            for (Feature feature : set) {
-                callback.installFeatureConfigs(feature);
+            Set<String> featureIds = flatten(newFeatures);
+            for (Feature feature : dstate.features.values()) {
+                if (featureIds.contains(feature.getId())) {
+                    callback.installFeatureConfigs(feature);
+                }
+                for (Conditional cond : feature.getConditional()) {
+                    Feature condFeature = cond.asFeature(feature.getName(), feature.getVersion());
+                    if (featureIds.contains(condFeature.getId())) {
+                        callback.installFeatureConfigs(condFeature);
+                    }
+                }
             }
         }
 

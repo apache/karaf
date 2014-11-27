@@ -172,6 +172,7 @@
                         <feature>config</feature>
                         <feature>deployer</feature>
                         <feature>diagnostic</feature>
+                        <feature>feature</feature>
                         <feature>instance</feature>
                         <feature>kar</feature>
                         <feature>log</feature>
