@@ -69,7 +69,6 @@
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
-            <version>4.2.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -80,9 +79,9 @@
         </dependency>
 
         <dependency>
-            <groupId>com.googlecode.pojosr</groupId>
-            <artifactId>de.kalpatec.pojosr.framework</artifactId>
-            <version>0.1.6</version>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.connect</artifactId>
+            <version>0.1.0-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
 
@@ -95,6 +94,13 @@
         <dependency>
             <groupId>org.apache.aries.proxy</groupId>
             <artifactId>org.apache.aries.proxy.impl</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm-debug-all</artifactId>
+            <version>5.0.3</version>
             <scope>test</scope>
         </dependency>
 
@@ -144,6 +150,14 @@
                         <Export-Package />
                         <Import-Package>*</Import-Package>
                     </instructions>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <systemProperties>
+                        <karaf.etc>${project.build.testOutputDirectory}/karaf/etc</karaf.etc>
+                    </systemProperties>
                 </configuration>
             </plugin>
         </plugins>

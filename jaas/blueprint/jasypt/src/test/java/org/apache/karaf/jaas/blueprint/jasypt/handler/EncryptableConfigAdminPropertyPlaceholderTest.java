@@ -14,12 +14,12 @@
  */
 package org.apache.karaf.jaas.blueprint.jasypt.handler;
 
-import de.kalpatec.pojosr.framework.PojoServiceRegistryFactoryImpl;
-import de.kalpatec.pojosr.framework.launch.BundleDescriptor;
-import de.kalpatec.pojosr.framework.launch.ClasspathScanner;
-import de.kalpatec.pojosr.framework.launch.PojoServiceRegistry;
-import de.kalpatec.pojosr.framework.launch.PojoServiceRegistryFactory;
 import junit.framework.TestCase;
+import org.apache.felix.connect.PojoServiceRegistryFactoryImpl;
+import org.apache.felix.connect.launch.BundleDescriptor;
+import org.apache.felix.connect.launch.ClasspathScanner;
+import org.apache.felix.connect.launch.PojoServiceRegistry;
+import org.apache.felix.connect.launch.PojoServiceRegistryFactory;
 import org.apache.karaf.util.StreamUtils;
 import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.jasypt.encryption.pbe.config.EnvironmentStringPBEConfig;
@@ -72,7 +72,7 @@ public class EncryptableConfigAdminPropertyPlaceholderTest extends TestCase {
                         .set("Bundle-Version", "0.0.0")));
         bundles.add(getBundleDescriptor(
                 "target/test2.jar",
-                bundle().add("OSGI-INF/blueprint/config-adminTest.xml", getClass().getResource("config-adminTest.xml"))
+                bundle().add("OSGI-INF/blueprint/configadmin-test.xml", getClass().getResource("configadmin-test.xml"))
                         .set("Manifest-Version", "2")
                         .set("Bundle-ManifestVersion", "2")
                         .set("Bundle-SymbolicName", "configtest")
@@ -96,7 +96,7 @@ public class EncryptableConfigAdminPropertyPlaceholderTest extends TestCase {
         }
         return new BundleDescriptor(
                 getClass().getClassLoader(),
-                new URL("jar:" + file.toURI().toString() + "!/"),
+                "jar:" + file.toURI().toString() + "!/",
                 headers);
     }
 

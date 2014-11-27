@@ -17,10 +17,6 @@ package org.apache.karaf.jaas.blueprint.jasypt.handler;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URL;
 import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Enumeration;
@@ -30,12 +26,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.jar.JarInputStream;
 
-import de.kalpatec.pojosr.framework.PojoServiceRegistryFactoryImpl;
-import de.kalpatec.pojosr.framework.launch.BundleDescriptor;
-import de.kalpatec.pojosr.framework.launch.ClasspathScanner;
-import de.kalpatec.pojosr.framework.launch.PojoServiceRegistry;
-import de.kalpatec.pojosr.framework.launch.PojoServiceRegistryFactory;
 import junit.framework.TestCase;
+import org.apache.felix.connect.PojoServiceRegistryFactoryImpl;
+import org.apache.felix.connect.launch.BundleDescriptor;
+import org.apache.felix.connect.launch.ClasspathScanner;
+import org.apache.felix.connect.launch.PojoServiceRegistry;
+import org.apache.felix.connect.launch.PojoServiceRegistryFactory;
+import org.apache.karaf.jaas.blueprint.jasypt.handler.beans.Bean;
 import org.apache.karaf.util.StreamUtils;
 import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.jasypt.encryption.pbe.config.EnvironmentStringPBEConfig;
@@ -108,7 +105,7 @@ public class EncryptablePropertyPlaceholderTest extends TestCase {
         }
         return new BundleDescriptor(
                 getClass().getClassLoader(),
-                new URL("jar:" + file.toURI().toString() + "!/"),
+                "jar:" + file.toURI().toString() + "!/",
                 headers);
     }
 
@@ -124,8 +121,8 @@ public class EncryptablePropertyPlaceholderTest extends TestCase {
             System.out.println(bundle.getSymbolicName() + " / " + bundle.getVersion());
         }
 
-        String encoded = getOsgiService(String.class, "(encoded=*)");
-        assertEquals("bar", encoded);
+        Bean encoded = getOsgiService(Bean.class, "(encoded=*)");
+        assertEquals("bar", encoded.getString());
     }
 
 

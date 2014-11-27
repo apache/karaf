@@ -37,7 +37,7 @@
         <service-properties>
             <entry key="encoded" value="ENC(${foo})" />
         </service-properties>
-        <bean class="java.lang.String">
+        <bean class="org.apache.karaf.jaas.blueprint.jasypt.handler.beans.Bean">
             <argument value="ENC(${foo})" />
         </bean>
     </service>
