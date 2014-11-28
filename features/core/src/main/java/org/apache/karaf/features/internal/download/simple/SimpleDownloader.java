@@ -54,7 +54,7 @@ public class SimpleDownloader implements DownloadManager, Downloader {
     }
 
     @Override
-    public void download(final String location, final DownloadCallback downloadCallback) throws MalformedURLException {
+    public void download(final String location, final DownloadCallback downloadCallback) {
         if (!providers.containsKey(location)) {
             providers.putIfAbsent(location, createProvider(location));
         }
@@ -67,8 +67,12 @@ public class SimpleDownloader implements DownloadManager, Downloader {
         }
     }
 
-    protected StreamProvider createProvider(String location) throws MalformedURLException {
-        return new UrlProvider(new URL(location));
+    protected StreamProvider createProvider(String location) {
+        try {
+            return new UrlProvider(new URL(location));
+        } catch (MalformedURLException e) {
+            throw new IllegalStateException("Error opening URL " + location, e);
+        }
     }
 
     public Map<String, StreamProvider> getProviders() {
