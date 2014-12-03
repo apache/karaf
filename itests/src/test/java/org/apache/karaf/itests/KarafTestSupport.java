@@ -132,7 +132,7 @@ public class KarafTestSupport {
             // enable JMX RBAC security, thanks to the KarafMBeanServerBuilder
             configureSecurity().enableKarafMBeanServerBuilder(),
             keepRuntimeFolder(),
-				logLevel(LogLevel.DEBUG),
+				logLevel(LogLevel.INFO),
             replaceConfigurationFile("etc/org.ops4j.pax.logging.cfg", getConfigFile("/etc/org.ops4j.pax.logging.cfg")),
             editConfigurationFilePut("etc/org.ops4j.pax.web.cfg", "org.osgi.service.http.port", HTTP_PORT),
             editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiRegistryPort", RMI_REG_PORT),
