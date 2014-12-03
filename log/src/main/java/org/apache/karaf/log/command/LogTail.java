@@ -46,7 +46,7 @@ public class LogTail extends DisplayLog {
     @Override
     public Object execute() throws Exception {
         PrintEventThread printThread = new PrintEventThread();
-        ReadKeyBoardThread readKeyboardThread = new ReadKeyBoardThread(this, Thread.currentThread());
+        ReadKeyBoardThread readKeyboardThread = new ReadKeyBoardThread(Thread.currentThread());
         executorService.execute(printThread);
         executorService.execute(readKeyboardThread);
         while (!Thread.currentThread().isInterrupted()) {
@@ -63,11 +63,9 @@ public class LogTail extends DisplayLog {
     }
    
     class ReadKeyBoardThread implements Runnable {
-        private LogTail logTail;
         private Thread sessionThread;
         boolean readKeyboard = true;
-        public ReadKeyBoardThread(LogTail logtail, Thread thread) {
-            this.logTail = logtail;
+        public ReadKeyBoardThread(Thread thread) {
             this.sessionThread = thread;
         }
 
@@ -78,9 +76,9 @@ public class LogTail extends DisplayLog {
         public void run() {
             while (readKeyboard) {
                 try {
-                    int c = this.logTail.session.getKeyboard().read();
+                    int c = session.getKeyboard().read();
                     if (c < 0) {
-                        this.sessionThread.interrupt();
+                        sessionThread.interrupt();
                         break;
                     }
                 } catch (IOException e) {
