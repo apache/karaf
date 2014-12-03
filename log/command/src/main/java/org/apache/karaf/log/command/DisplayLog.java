@@ -65,13 +65,18 @@ public class DisplayLog extends LogCommandSupport {
     }
 
     protected void printEvent(final PrintStream out, PaxLoggingEvent event) {
-        if ((logger != null) && 
-            (event != null)&&
-            (checkIfFromRequestedLog(event))) {
+        try {
+            if ((logger != null) &&
+                    (event != null) &&
+                    (checkIfFromRequestedLog(event))) {
+                out.append(formatter.format(event, overridenPattern, noColor));
+            } else if ((event != null) && (logger == null)) {
                 out.append(formatter.format(event, overridenPattern, noColor));
             }
-            else if ((event != null)&&(logger == null)){
-                out.append(formatter.format(event, overridenPattern, noColor));
+        } catch (NoClassDefFoundError e) {
+            // KARAF-3350: Ignore NoClassDefFoundError exceptions
+            // Those exceptions may happen if the underlying pax-logging service
+            // bundle has been refreshed somehow.
         }
     }
 }
