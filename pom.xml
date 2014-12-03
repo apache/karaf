@@ -201,7 +201,7 @@
         <pax.base.version>1.5.0</pax.base.version>
         <pax.cdi.version>0.8.0</pax.cdi.version>
         <pax.exam.version>4.3.0</pax.exam.version>
-        <pax.logging.version>1.8.0</pax.logging.version>
+        <pax.logging.version>1.8.1</pax.logging.version>
         <pax.url.version>2.2.0</pax.url.version>
         <pax.swissbox.version>1.7.1</pax.swissbox.version>
         <pax.web.version>3.1.2</pax.web.version>
