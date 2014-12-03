@@ -16,6 +16,7 @@ package org.apache.karaf.itests;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.PrintStream;
+import java.net.URL;
 import java.security.Principal;
 import java.security.PrivilegedExceptionAction;
 import java.util.Arrays;
@@ -63,7 +64,7 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.*;
 
 public class KarafTestSupport {
 
-    static final Long COMMAND_TIMEOUT = 10000L;
+    static final Long COMMAND_TIMEOUT = 30000L;
     static final Long SERVICE_TIMEOUT = 30000L;
 
     ExecutorService executor = Executors.newCachedThreadPool();
@@ -80,6 +81,14 @@ public class KarafTestSupport {
         return probe;
     }
 
+    public File getConfigFile(String path) {
+        URL res = this.getClass().getResource(path);
+        if (res == null) {
+            throw new RuntimeException("Config resource " + path + " not found");
+        }
+        return new File(res.getFile());
+    }
+
     @Configuration
     public Option[] config() {
         return new Option[]{
@@ -87,7 +96,8 @@ public class KarafTestSupport {
                 karafDistributionConfiguration().frameworkUrl(maven().groupId("org.apache.karaf").artifactId("apache-karaf").versionAsInProject().type("tar.gz"))
                         .karafVersion(MavenUtils.getArtifactVersion("org.apache.karaf", "apache-karaf")).name("Apache Karaf").unpackDirectory(new File("target/exam")),
                 keepRuntimeFolder(),
-                logLevel(LogLevelOption.LogLevel.ERROR),
+                logLevel(LogLevelOption.LogLevel.DEBUG),
+                replaceConfigurationFile("etc/org.ops4j.pax.logging.cfg", getConfigFile("/etc/org.ops4j.pax.logging.cfg")),
                 editConfigurationFilePut("etc/system.properties", "hibernate3.version", System.getProperty("hibernate3.version")),
                 editConfigurationFilePut("etc/system.properties", "hibernate42.version", System.getProperty("hibernate42.version")),
                 editConfigurationFilePut("etc/system.properties", "hibernate43.version", System.getProperty("hibernate43.version")),
@@ -194,9 +204,9 @@ public class KarafTestSupport {
             if (colonIndx > 0) {
                 String scope = command.substring(0, colonIndx);
                 String function = command.substring(colonIndx + 1);
-                waitForService("(&(osgi.command.scope=" + scope + ")(osgi.command.function=" + function + ")(org.apache.karaf.service.guard.roles=*))", SERVICE_TIMEOUT);
+                waitForService("(&(osgi.command.scope=" + scope + ")(osgi.command.function=" + function + "))", SERVICE_TIMEOUT);
             } else {
-                waitForService("(&(osgi.command.function=" + command + ")(org.apache.karaf.service.guard.roles=*))", SERVICE_TIMEOUT);
+                waitForService("(osgi.command.function=" + command + ")", SERVICE_TIMEOUT);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
