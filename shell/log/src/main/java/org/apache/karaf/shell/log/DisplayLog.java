@@ -140,30 +140,36 @@ public class DisplayLog extends OsgiCommandSupport {
     }
 
     protected void display(PatternConverter cnv, PaxLoggingEvent event, PrintStream stream) {
-        String color = getColor(event);
-        StringBuffer sb = new StringBuffer();
-        sb.setLength(0);
-        if (color != null) {
-            sb.append(FIRST_ESC_CHAR);
-            sb.append(SECOND_ESC_CHAR);
-            sb.append(color);
-            sb.append(COMMAND_CHAR);
-        }
-        for (PatternConverter pc = cnv; pc != null; pc = pc.next) {
-            pc.format(sb, event);
-        }
-        if (event.getThrowableStrRep() != null) {
-            for (String r : event.getThrowableStrRep()) {
-                sb.append(r).append('\n');
+        try {
+            String color = getColor(event);
+            StringBuffer sb = new StringBuffer();
+            sb.setLength(0);
+            if (color != null) {
+                sb.append(FIRST_ESC_CHAR);
+                sb.append(SECOND_ESC_CHAR);
+                sb.append(color);
+                sb.append(COMMAND_CHAR);
             }
+            for (PatternConverter pc = cnv; pc != null; pc = pc.next) {
+                pc.format(sb, event);
+            }
+            if (event.getThrowableStrRep() != null) {
+                for (String r : event.getThrowableStrRep()) {
+                    sb.append(r).append('\n');
+                }
+            }
+            if (color != null) {
+                sb.append(FIRST_ESC_CHAR);
+                sb.append(SECOND_ESC_CHAR);
+                sb.append("0");
+                sb.append(COMMAND_CHAR);
+            }
+            stream.print(sb.toString());
+        } catch (NoClassDefFoundError e) {
+            // KARAF-3350: Ignore NoClassDefFoundError exceptions
+            // Those exceptions may happen if the underlying pax-logging service
+            // bundle has been refreshed somehow.
         }
-        if (color != null) {
-            sb.append(FIRST_ESC_CHAR);
-            sb.append(SECOND_ESC_CHAR);
-            sb.append("0");
-            sb.append(COMMAND_CHAR);
-        }
-        stream.print(sb.toString());
     }
 
     private String getColor(PaxLoggingEvent event) {
