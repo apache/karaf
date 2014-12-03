@@ -55,30 +55,31 @@ public class Exports implements Action {
 
     @Override
     public Object execute() throws Exception {
-    	if (onlyDuplicates) {
-    		checkDuplicateExports();
-    	} else {
-    		showExports();
-    	}
+        if (onlyDuplicates) {
+            checkDuplicateExports();
+        } else {
+            showExports();
+        }
         return null;
     }
 
-	private void showExports() {
-		SortedMap<String, PackageVersion> exports = packageService.getExports();
+    private void showExports() {
+        SortedMap<String, PackageVersion> exports = packageService.getExports();
         ShellTable table = new ShellTable();
         table.column(new Col("Package Name"));
         table.column(new Col("Version"));
         table.column(new Col("ID"));
         table.column(new Col("Bundle Name"));
-        
+
         for (String key : exports.keySet()) {
             PackageVersion pVer = exports.get(key);
             for (Bundle bundle : pVer.getBundles()) {
-                table.addRow().addContent(pVer.getPackageName(),pVer.getVersion().toString(), bundle.getBundleId(), bundle.getSymbolicName());
+                table.addRow().addContent(pVer.getPackageName(), pVer.getVersion().toString(),
+                                          bundle.getBundleId(), bundle.getSymbolicName());
             }
         }
         table.print(System.out, !noFormat);
-	}
+    }
     
     private void checkDuplicateExports() {
         Bundle[] bundles = bundleContext.getBundles();
@@ -98,20 +99,19 @@ public class Exports implements Action {
         table.print(System.out, !noFormat);
     }
 
-	private String getBundlesSt(Set<Bundle> bundles) {
-		StringBuilder st = new StringBuilder();
-		for (Bundle bundle : bundles) {
+    private String getBundlesSt(Set<Bundle> bundles) {
+        StringBuilder st = new StringBuilder();
+        for (Bundle bundle : bundles) {
             st.append(bundle.getBundleId() + " ");
         }
-		return st.toString();
-	}
+        return st.toString();
+    }
 
-	private SortedMap<String, PackageVersion> getDuplicatePackages(
-			Bundle[] bundles) {
-		SortedMap<String, PackageVersion> packageVersionMap = new TreeMap<String, PackageVersion>();
+    private SortedMap<String, PackageVersion> getDuplicatePackages(Bundle[] bundles) {
+        SortedMap<String, PackageVersion> packageVersionMap = new TreeMap<String, PackageVersion>();
         for (Bundle bundle : bundles) {
             BundleRevision rev = bundle.adapt(BundleRevision.class);
-            if (rev!=null) {
+            if (rev != null) {
                 List<BundleCapability> caps = rev.getDeclaredCapabilities(BundleRevision.PACKAGE_NAMESPACE);
                 for (BundleCapability cap : caps) {
                     Map<String, Object> attr = cap.getAttributes();
@@ -127,6 +127,6 @@ public class Exports implements Action {
                 }
             }
         }
-		return packageVersionMap;
-	}
+        return packageVersionMap;
+    }
 }
