@@ -87,6 +87,31 @@ public class FeaturesTest extends KarafTestSupport {
     }
 
     @Test
+    public void refreshUrlCommand() throws Exception {
+        // regular command, without argument
+        String refreshOutput = executeCommand("features:refreshurl");
+        System.out.println(refreshOutput);
+        assertTrue(refreshOutput.contains("pax-web-features"));
+        assertTrue(refreshOutput.contains("standard"));
+        assertTrue(refreshOutput.contains("spring"));
+        assertTrue(refreshOutput.contains("pax-cdi-features"));
+        assertTrue(refreshOutput.contains("enterprise"));
+        // command with .* regex
+        refreshOutput = executeCommand("features:refreshurl .*");
+        System.out.println(refreshOutput);
+        assertTrue(refreshOutput.contains("pax-web-features"));
+        assertTrue(refreshOutput.contains("standard"));
+        assertTrue(refreshOutput.contains("spring"));
+        assertTrue(refreshOutput.contains("pax-cdi-features"));
+        assertTrue(refreshOutput.contains("enterprise"));
+        // command with .*pax-.* regex
+        refreshOutput = executeCommand("features:refreshurl .*pax-.*");
+        System.out.println("refreshOutput");
+        assertTrue(refreshOutput.contains("pax-web-features"));
+        assertTrue(refreshOutput.contains("pax-cdi-features"));
+    }
+
+    @Test
     public void repoAddRemoveCommand() throws Exception {
         System.out.println(executeCommand("features:addurl mvn:org.apache.karaf.cellar/apache-karaf-cellar/2.2.4/xml/features"));
         String repoListOutput = executeCommand("features:listurl");

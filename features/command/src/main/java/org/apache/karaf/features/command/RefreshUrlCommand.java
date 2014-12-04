@@ -18,7 +18,10 @@ package org.apache.karaf.features.command;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
@@ -40,15 +43,30 @@ public class RefreshUrlCommand extends FeaturesCommandSupport {
             }
         }
         List<Exception> exceptions = new ArrayList<Exception>();
-        for (String strUri : urls) {
+        LinkedList<URI> uriToReload = new LinkedList<URI>();
+        for (String url : urls) {
             try {
-                URI uri = new URI(strUri);
+                Pattern pattern = Pattern.compile(url);
+                for (Repository repository : admin.listRepositories()) {
+                    URI uri = repository.getURI();
+                    Matcher matcher = pattern.matcher(uri.toString());
+                    if (matcher.matches()) {
+                        uriToReload.add(uri);
+                    }
+                }
+            } catch (Exception e) {
+                exceptions.add(e);
+            }
+        }
+        for (URI uri : uriToReload) {
+            try {
+                System.out.println("Refreshing " + uri.toString());
                 admin.removeRepository(uri);
                 admin.addRepository(uri);
             } catch (Exception e) {
                 exceptions.add(e);
                 //get chance to restore previous, fix for KARAF-4
-                admin.restoreRepository(new URI(strUri));
+                admin.restoreRepository(uri);
             }
         }
         MultiException.throwIf("Unable to add repositories", exceptions);
