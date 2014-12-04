@@ -90,6 +90,7 @@ import static org.osgi.framework.Bundle.STARTING;
 import static org.osgi.framework.Bundle.STOPPING;
 import static org.osgi.framework.Bundle.STOP_TRANSIENT;
 import static org.osgi.framework.Bundle.UNINSTALLED;
+import static org.osgi.framework.namespace.HostNamespace.HOST_NAMESPACE;
 import static org.osgi.framework.namespace.IdentityNamespace.IDENTITY_NAMESPACE;
 import static org.osgi.framework.namespace.IdentityNamespace.TYPE_BUNDLE;
 import static org.osgi.resource.Namespace.CAPABILITY_EFFECTIVE_DIRECTIVE;
@@ -844,6 +845,22 @@ public class Deployer {
     }
 
     private void computeBundlesToRefresh(Set<Bundle> toRefresh, Collection<Bundle> bundles, Map<Resource, Bundle> resources, Map<Resource, List<Wire>> resolution) {
+        // Compute the new list of fragments
+        Map<Bundle, Set<Resource>> newFragments = new HashMap<>();
+        for (Bundle bundle : bundles) {
+            newFragments.put(bundle, new HashSet<Resource>());
+        }
+        for (Resource res : resolution.keySet()) {
+            for (Wire wire : resolution.get(res)) {
+                if (HOST_NAMESPACE.equals(wire.getCapability().getNamespace())) {
+                    Bundle bundle = resources.get(wire.getProvider());
+                    if (bundle != null) {
+                        newFragments.get(bundle).add(wire.getRequirer());
+                    }
+                }
+            }
+        }
+        // Main loop
         int size;
         do {
             size = toRefresh.size();
@@ -856,6 +873,17 @@ public class Deployer {
                 BundleWiring wiring = bundle.adapt(BundleWiring.class);
                 if (wiring == null) {
                     continue;
+                }
+                // Check if this bundle is a host and its fragments changed
+                Set<Resource> oldFragments = new HashSet<>();
+                for (BundleWire wire : wiring.getProvidedWires(null)) {
+                    if (HOST_NAMESPACE.equals(wire.getCapability().getNamespace())) {
+                        oldFragments.add(wire.getRequirer());
+                    }
+                }
+                if (!oldFragments.equals(newFragments.get(bundle))) {
+                    toRefresh.add(bundle);
+                    break;
                 }
                 // Get through the old resolution and flag this bundle
                 // if it was wired to a bundle to be refreshed
