@@ -72,6 +72,7 @@ public interface FeaturesServiceMBean {
 
     String FEATURE_CONFIG_PID = "Pid";
     String FEATURE_CONFIG_ELEMENTS = "Elements";
+    String FEATURE_CONFIG_APPEND = "Append";
     String FEATURE_CONFIG_ELEMENT_KEY = "Key";
     String FEATURE_CONFIG_ELEMENT_VALUE = "Value";
     
@@ -96,7 +97,7 @@ public interface FeaturesServiceMBean {
 
     String[] FEATURE_IDENTIFIER = { FEATURE_NAME, FEATURE_VERSION };
 
-    String[] FEATURE_CONFIG = { FEATURE_CONFIG_PID, FEATURE_CONFIG_ELEMENTS };
+    String[] FEATURE_CONFIG = { FEATURE_CONFIG_PID, FEATURE_CONFIG_ELEMENTS, FEATURE_CONFIG_APPEND };
     
     String[] FEATURE_CONFIG_FILES = { FEATURE_CONFIG_FILES_ELEMENTS };
 
