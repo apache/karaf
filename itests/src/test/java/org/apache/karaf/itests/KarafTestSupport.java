@@ -96,7 +96,7 @@ public class KarafTestSupport {
                 karafDistributionConfiguration().frameworkUrl(maven().groupId("org.apache.karaf").artifactId("apache-karaf").versionAsInProject().type("tar.gz"))
                         .karafVersion(MavenUtils.getArtifactVersion("org.apache.karaf", "apache-karaf")).name("Apache Karaf").unpackDirectory(new File("target/exam")),
                 keepRuntimeFolder(),
-                logLevel(LogLevelOption.LogLevel.DEBUG),
+                logLevel(LogLevelOption.LogLevel.INFO),
                 replaceConfigurationFile("etc/org.ops4j.pax.logging.cfg", getConfigFile("/etc/org.ops4j.pax.logging.cfg")),
                 editConfigurationFilePut("etc/system.properties", "hibernate3.version", System.getProperty("hibernate3.version")),
                 editConfigurationFilePut("etc/system.properties", "hibernate42.version", System.getProperty("hibernate42.version")),
