@@ -113,6 +113,7 @@
                         </Export-Package>
                         <Private-Package>
                             org.apache.karaf.packages.command,
+                            org.apache.karaf.packages.core.internal.filter,
                             org.apache.karaf.packages.core.internal,
                             org.apache.karaf.packages.core.internal.osgi,
                             org.apache.karaf.util.tracker,

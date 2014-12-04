@@ -20,12 +20,14 @@ import java.util.SortedMap;
 
 import org.apache.karaf.packages.core.PackageRequirement;
 import org.apache.karaf.packages.core.PackageService;
+import org.apache.karaf.packages.core.internal.filter.Expression;
+import org.apache.karaf.packages.core.internal.filter.FilterParser;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.apache.karaf.shell.support.table.Col;
+import org.apache.karaf.shell.support.table.Row;
 import org.apache.karaf.shell.support.table.ShellTable;
 import org.osgi.framework.Bundle;
 
@@ -33,11 +35,14 @@ import org.osgi.framework.Bundle;
 @Service
 public class Imports implements Action {
     
-    @Option(name = "-p", description = "Only show package instead of full filter", required = false, multiValued = false)
-    boolean onlyPackage;
+    @Option(name = "--filter", description = "Only show package instead of full filter", required = false, multiValued = false)
+    boolean showFilter;
 
     @Option(name = "--no-format", description = "Disable table rendered output", required = false, multiValued = false)
     boolean noFormat;
+    
+    @Option(name = "--package", description = "Only show the named package", required = false, multiValued = false)
+    String packageName;
 
     @Reference
     private PackageService packageService;
@@ -46,20 +51,37 @@ public class Imports implements Action {
     public Object execute() throws Exception {
         SortedMap<String, PackageRequirement> imports = packageService.getImports();
         ShellTable table = new ShellTable();
-        table.column(new Col(onlyPackage ? "Package name" : "Filter"));
-        table.column(new Col("Optional"));
-        table.column(new Col("ID"));
-        table.column(new Col("Bundle Name"));
-        table.column(new Col("Resolveable"));
-        
+        if (showFilter) {
+            table.column("Filter");
+        } else {
+            table.column("Package");
+            table.column("Version");
+        }
+        table.column("Optional");
+        table.column("ID");
+        table.column("Bundle Name");
+        table.column("Resolveable");
+
         for (String filter : imports.keySet()) {
             PackageRequirement req = imports.get(filter);
-            Bundle bundle = req.getBundle();
-            String firstCol = onlyPackage ? req.getPackageName() : req.getFilter();
-            table.addRow().addContent(firstCol, req.isOptional() ? "optional" : "", bundle.getBundleId(), bundle.getSymbolicName(), req.isResolveable());
+            if (packageName == null || packageName.equals(req.getPackageName())) {
+                Bundle bundle = req.getBundle();
+                Row row = table.addRow();
+                if (showFilter) {
+                    row.addContent(filter);
+                } else {
+                    row.addContent(req.getPackageName(), req.getVersionRange());
+                }
+                row.addContent(getOptional(req), bundle.getBundleId(),
+                               bundle.getSymbolicName(), req.isResolveable());
+            }
         }
         table.print(System.out, !noFormat);
         return null;
+    }
+
+    private String getOptional(PackageRequirement req) {
+        return req.isOptional() ? "optional" : "";
     }
 
 }

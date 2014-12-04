@@ -73,13 +73,8 @@ public class PackageServiceImpl implements PackageService {
             if (rev != null) {
                 List<BundleRequirement> reqs = rev.getDeclaredRequirements(BundleRevision.PACKAGE_NAMESPACE);
                 for (BundleRequirement req : reqs) {
-                    Map<String, String> attr = req.getDirectives();
-                    String filter = attr.get("filter");
-                    String resolution = attr.get("resolution");
-                    boolean optional = "optional".equals(resolution);
-                    boolean resolveable = checkResolveAble(req);
-                    PackageRequirement preq = new PackageRequirement(filter, optional, bundle, resolveable);
-                    filterMap.put(filter, preq);
+                    PackageRequirement preq = create(req, bundle);
+                    filterMap.put(preq.getFilter(), preq);
                 }
             }
         }
@@ -102,9 +97,9 @@ public class PackageServiceImpl implements PackageService {
         return false;
     }
 
-	@Override
-	public List<String> getExports(long bundleId) {
-		Bundle bundle = bundleContext.getBundle(bundleId);
+    @Override
+    public List<String> getExports(long bundleId) {
+        Bundle bundle = bundleContext.getBundle(bundleId);
         BundleRevision rev = bundle.adapt(BundleRevision.class);
         List<BundleCapability> caps = rev.getDeclaredCapabilities(BundleRevision.PACKAGE_NAMESPACE);
         List<String> exports = new ArrayList<String>();
@@ -113,22 +108,32 @@ public class PackageServiceImpl implements PackageService {
             String packageName = (String)attr.get(BundleRevision.PACKAGE_NAMESPACE);
             exports.add(packageName);
         }
-		return exports ;
-	}
+        return exports;
+    }
 
-	@Override
-	public List<String> getImports(long bundleId) {
-		Bundle bundle = bundleContext.getBundle(bundleId);
+    @Override
+    public List<String> getImports(long bundleId) {
+        Bundle bundle = bundleContext.getBundle(bundleId);
         BundleRevision rev = bundle.adapt(BundleRevision.class);
         List<BundleRequirement> reqs = rev.getDeclaredRequirements(BundleRevision.PACKAGE_NAMESPACE);
         List<String> imports = new ArrayList<String>();
         for (BundleRequirement req : reqs) {
-            Map<String, String> attr = req.getDirectives();
-            String filter = attr.get("filter");
-            String name = PackageRequirement.getPackageName(filter);
-            imports.add(name);
+            PackageRequirement packageReq = create(req, bundle);
+            imports.add(packageReq.getPackageName());
         }
-		return imports;
-	}
+        return imports;
+    }
+    
+    PackageRequirement create(BundleRequirement req, Bundle bundle) {
+        Map<String, String> attr = req.getDirectives();
+        String filter = attr.get("filter");
+        String resolution = attr.get("resolution");
+        boolean optional = "optional".equals(resolution);
+        boolean resolveable = checkResolveAble(req);
+        ImportDetails details = new ImportDetails(filter);
+        return new PackageRequirement(filter, optional, bundle, resolveable, 
+                                      details.name, details.minVersion, details.maxVersion);
+    }
+    
 
 }

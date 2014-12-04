@@ -16,9 +16,6 @@
  */
 package org.apache.karaf.packages.core;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.osgi.framework.Bundle;
 
 public class PackageRequirement {
@@ -26,14 +23,19 @@ public class PackageRequirement {
     private boolean optional;
     private Bundle bundle;
     private boolean resolveable;
-    private static Pattern packagePattern  = Pattern.compile(".*" + Pattern.quote("(osgi.wiring.package=") + "(.*?)\\).*");
-    
-    public PackageRequirement(String filter, boolean optional, Bundle bundle, boolean resolveable) {
+    private String packageName;
+    private String minVersion;
+    private String maxVersion;
+
+    public PackageRequirement(String filter, boolean optional, Bundle bundle, boolean resolveable, String packageName, String minVersion, String maxVersion) {
         super();
         this.filter = filter;
         this.optional = optional;
         this.bundle = bundle;
         this.resolveable = resolveable;
+        this.packageName = packageName;
+        this.minVersion = minVersion;
+        this.maxVersion = maxVersion;
     }
     
     public Bundle getBundle() {
@@ -52,13 +54,30 @@ public class PackageRequirement {
     }
 
     public String getPackageName() {
-        return getPackageName(filter);
-    }
-    
-    public static String getPackageName(String filter) {
-        Matcher matcher = packagePattern.matcher(filter);
-        matcher.matches();
-        return matcher.group(1);
+        return packageName;
     }
 
+    public String getMinVersion() {
+        return minVersion;
+    }
+    
+    public String getMaxVersion() {
+        return maxVersion;
+    }
+    
+    public String getVersionRange() {
+        if (minVersion == null && maxVersion == null) {
+            return "";
+        }
+        return String.format("[%s,%s)", getString(minVersion), getString(maxVersion));
+    }
+
+    private String getString(String version) {
+        return version == null ? "" : version;
+    }
+    
+
+    public String toString() {
+        return String.format("%s;version=\"[%s,%s)\"", packageName, minVersion, maxVersion); 
+    }
 }
