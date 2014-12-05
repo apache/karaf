@@ -129,10 +129,7 @@ public class JmxFeature {
         TabularDataSupport table = new TabularDataSupport(FEATURE_CONFIG_TABLE);
         for (ConfigInfo configInfo : config) {
         	String[] itemNames = FeaturesServiceMBean.FEATURE_CONFIG;
-        	Object[] itemValues = new Object[3];
-        	itemValues[0] = configInfo.getName();
-			itemValues[1] = getConfigElementTable(configInfo.getProperties());
-			itemValues[2] = configInfo.isAppend();
+        	Object[] itemValues = { configInfo.getName(), getConfigElementTable(configInfo.getProperties()), new Boolean(configInfo.isAppend()) };
 			CompositeData configComposite = new CompositeDataSupport(
 					FEATURE_CONFIG, itemNames, itemValues);
 			table.put(configComposite);
@@ -255,9 +252,11 @@ public class JmxFeature {
             String[] itemDescriptions = new String[itemNames.length];
             itemTypes[0] = SimpleType.STRING;
             itemTypes[1] = FEATURE_CONFIG_ELEMENT_TABLE;
+            itemTypes[2] = SimpleType.BOOLEAN;
 
             itemDescriptions[0] = "The PID of the config";
             itemDescriptions[1] = "The configuration elements";
+            itemDescriptions[2] = "The Append flag";
 
             return new CompositeType("Config", description, itemNames,
                     itemDescriptions, itemTypes);
