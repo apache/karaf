@@ -309,16 +309,20 @@ public class Deployer {
         //
         // Compute the set of bundles to refresh
         //
-        Set<Bundle> toRefresh = new TreeSet<>(new BundleComparator()); // sort is only used for display
+        Map<Bundle, String> toRefresh = new TreeMap<>(new BundleComparator()); // sort is only used for display
         for (Deployer.RegionDeployment regionDeployment : deployment.regions.values()) {
-            toRefresh.addAll(regionDeployment.toDelete);
-            toRefresh.addAll(regionDeployment.toUpdate.keySet());
+            for (Bundle b : regionDeployment.toDelete) {
+                toRefresh.put(b, "Bundle will be uninstalled");
+            }
+            for (Bundle b : regionDeployment.toUpdate.keySet()) {
+                toRefresh.put(b, "Bundle will be updated");
+            }
         }
         if (!noRefreshManaged) {
             computeBundlesToRefresh(toRefresh, dstate.bundles.values(), deployment.resToBnd, resolver.getWiring());
         }
         if (noRefreshUnmanaged) {
-            toRefresh.removeAll(flatten(unmanagedBundles));
+            toRefresh.keySet().removeAll(flatten(unmanagedBundles));
         }
 
         // Automatically turn unmanaged bundles into managed bundles
@@ -432,8 +436,9 @@ public class Deployer {
         if (simulate) {
             if (!noRefresh && !toRefresh.isEmpty()) {
                 print("  Bundles to refresh:", verbose);
-                for (Bundle bundle : toRefresh) {
-                    print("    " + bundle.getSymbolicName() + " / " + bundle.getVersion(), verbose);
+                for (Map.Entry<Bundle, String> entry : toRefresh.entrySet()) {
+                    Bundle bundle = entry.getKey();
+                    print("    " + bundle.getSymbolicName() + " / " + bundle.getVersion() + " (" + entry.getValue() + ")", verbose);
                 }
             }
             if (!toManage.isEmpty()) {
@@ -493,7 +498,7 @@ public class Deployer {
             String uri = getUri(resource);
             print("The FeaturesService bundle needs is being updated with " + uri, verbose);
             toRefresh.clear();
-            toRefresh.add(dstate.serviceBundle);
+            toRefresh.put(dstate.serviceBundle, "FeaturesService bundle is being updated");
             computeBundlesToRefresh(toRefresh,
                     dstate.bundles.values(),
                     Collections.<Resource, Bundle>emptyMap(),
@@ -504,7 +509,7 @@ public class Deployer {
             ) {
                 callback.updateBundle(dstate.serviceBundle, is);
             }
-            callback.refreshPackages(toRefresh);
+            callback.refreshPackages(toRefresh.keySet());
             callback.startBundle(dstate.serviceBundle);
             return;
         }
@@ -721,7 +726,7 @@ public class Deployer {
 
         if (!noRefresh) {
             toStop = new HashSet<>();
-            toStop.addAll(toRefresh);
+            toStop.addAll(toRefresh.keySet());
             removeFragmentsAndBundlesInState(toStop, UNINSTALLED | RESOLVED | STOPPING);
             if (!toStop.isEmpty()) {
                 print("Stopping bundles:", verbose);
@@ -738,18 +743,19 @@ public class Deployer {
 
             if (!toRefresh.isEmpty()) {
                 print("Refreshing bundles:", verbose);
-                for (Bundle bundle : toRefresh) {
-                    print("  " + bundle.getSymbolicName() + " / " + bundle.getVersion(), verbose);
+                for (Map.Entry<Bundle, String> entry : toRefresh.entrySet()) {
+                    Bundle bundle = entry.getKey();
+                    print("    " + bundle.getSymbolicName() + " / " + bundle.getVersion() + " (" + entry.getValue() + ")", verbose);
                 }
                 if (!toRefresh.isEmpty()) {
-                    callback.refreshPackages(toRefresh);
+                    callback.refreshPackages(toRefresh.keySet());
                 }
             }
         }
 
         // Resolve bundles
         toResolve.addAll(toStart);
-        toResolve.addAll(toRefresh);
+        toResolve.addAll(toRefresh.keySet());
         removeFragmentsAndBundlesInState(toResolve, UNINSTALLED);
         callback.resolveBundles(toResolve);
 
@@ -844,7 +850,7 @@ public class Deployer {
         return FeaturesService.RequestedState.Installed;
     }
 
-    private void computeBundlesToRefresh(Set<Bundle> toRefresh, Collection<Bundle> bundles, Map<Resource, Bundle> resources, Map<Resource, List<Wire>> resolution) {
+    private void computeBundlesToRefresh(Map<Bundle, String> toRefresh, Collection<Bundle> bundles, Map<Resource, Bundle> resources, Map<Resource, List<Wire>> resolution) {
         // Compute the new list of fragments
         Map<Bundle, Set<Resource>> newFragments = new HashMap<>();
         for (Bundle bundle : bundles) {
@@ -866,7 +872,7 @@ public class Deployer {
             size = toRefresh.size();
             for (Bundle bundle : bundles) {
                 // Continue if we already know about this bundle
-                if (toRefresh.contains(bundle)) {
+                if (toRefresh.containsKey(bundle)) {
                     continue;
                 }
                 // Ignore non resolved bundle
@@ -882,14 +888,15 @@ public class Deployer {
                     }
                 }
                 if (!oldFragments.equals(newFragments.get(bundle))) {
-                    toRefresh.add(bundle);
+                    toRefresh.put(bundle, "Attached fragments changed: " + new ArrayList<>(newFragments.get(bundle)));
                     break;
                 }
                 // Get through the old resolution and flag this bundle
                 // if it was wired to a bundle to be refreshed
                 for (BundleWire wire : wiring.getRequiredWires(null)) {
-                    if (toRefresh.contains(wire.getProvider().getBundle())) {
-                        toRefresh.add(bundle);
+                    Bundle provider = wire.getProvider().getBundle();
+                    if (toRefresh.containsKey(provider)) {
+                        toRefresh.put(bundle, "Wired to " + provider.getSymbolicName() + "/" + provider.getVersion() + " which is being refreshed");
                         break;
                     }
                 }
@@ -907,8 +914,11 @@ public class Deployer {
                         } else {
                             b = resources.get(wire.getProvider());
                         }
-                        if (b == null || toRefresh.contains(b)) {
-                            toRefresh.add(bundle);
+                        if (b == null) {
+                            toRefresh.put(bundle, "Wired to a new bundle " + wire.getProvider());
+                            break;
+                        } else if (toRefresh.containsKey(b)) {
+                            toRefresh.put(bundle, "Wired to " + b.getSymbolicName() + "/" + b.getVersion() + " which is being refreshed");
                             break;
                         }
                     }
