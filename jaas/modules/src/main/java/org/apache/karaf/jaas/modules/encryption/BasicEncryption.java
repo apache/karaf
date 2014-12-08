@@ -14,18 +14,14 @@
  */
 package org.apache.karaf.jaas.modules.encryption;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 
+import javax.xml.bind.DatatypeConverter;
+
 import org.apache.karaf.jaas.modules.Encryption;
 import org.apache.karaf.jaas.modules.EncryptionService;
-import org.apache.karaf.util.base64.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -99,21 +95,8 @@ public class BasicEncryption implements Encryption {
         return false;
     }
 
-    private static final byte[] hexTable = {
-        (byte) '0', (byte) '1', (byte) '2', (byte) '3', (byte) '4', (byte) '5', (byte) '6', (byte) '7',
-        (byte) '8', (byte) '9', (byte) 'a', (byte) 'b', (byte) 'c', (byte) 'd', (byte) 'e', (byte) 'f'
-    };
-
     public static String hexEncode(byte[] in) {
-        int inOff = 0;
-        int length = in.length;
-        byte[] out = new byte[length * 2];
-        for (int i = 0, j = 0; i < length; i++, j += 2) {
-            out[j] = hexTable[(in[inOff] >> 4) & 0x0f];
-            out[j + 1] = hexTable[in[inOff] & 0x0f];
-            inOff++;
-        }
-        return new String(out);
+        return DatatypeConverter.printHexBinary(in);
     }
 
     /**
@@ -122,8 +105,7 @@ public class BasicEncryption implements Encryption {
      * @return a byte array containing the base 64 encoded data.
      */
     public static String base64Encode(byte[] input) {
-        byte[] transformed = Base64.encodeBase64(input);
-        return new String(transformed, StandardCharsets.ISO_8859_1);
+        return DatatypeConverter.printBase64Binary(input);
     }
 
 }
