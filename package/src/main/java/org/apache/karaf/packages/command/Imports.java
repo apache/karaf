@@ -20,8 +20,6 @@ import java.util.SortedMap;
 
 import org.apache.karaf.packages.core.PackageRequirement;
 import org.apache.karaf.packages.core.PackageService;
-import org.apache.karaf.packages.core.internal.filter.Expression;
-import org.apache.karaf.packages.core.internal.filter.FilterParser;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Option;
@@ -41,8 +39,11 @@ public class Imports implements Action {
     @Option(name = "--no-format", description = "Disable table rendered output", required = false, multiValued = false)
     boolean noFormat;
     
-    @Option(name = "--package", description = "Only show the named package", required = false, multiValued = false)
+    @Option(name = "-p", description = "Only show package starting with given name", required = false, multiValued = false)
     String packageName;
+    
+    @Option(name = "-b", description = "Only show imports of the given bundle id", required = false, multiValued = false)
+    Integer bundleId;
 
     @Reference
     private PackageService packageService;
@@ -60,11 +61,10 @@ public class Imports implements Action {
         table.column("Optional");
         table.column("ID");
         table.column("Bundle Name");
-        table.column("Resolveable");
 
         for (String filter : imports.keySet()) {
             PackageRequirement req = imports.get(filter);
-            if (packageName == null || packageName.equals(req.getPackageName())) {
+            if (matchesFilter(req)) {
                 Bundle bundle = req.getBundle();
                 Row row = table.addRow();
                 if (showFilter) {
@@ -72,16 +72,25 @@ public class Imports implements Action {
                 } else {
                     row.addContent(req.getPackageName(), req.getVersionRange());
                 }
-                row.addContent(getOptional(req), bundle.getBundleId(),
-                               bundle.getSymbolicName(), req.isResolveable());
+                row.addContent(getOptional(req),
+                               bundle.getBundleId(),
+                               bundle.getSymbolicName());
             }
         }
         table.print(System.out, !noFormat);
         return null;
     }
 
+    private boolean matchesFilter(PackageRequirement req) {
+        return (packageName == null || req.getPackageName().startsWith(packageName))
+            && (bundleId == null || req.getBundle().getBundleId() == bundleId);
+    }
+
     private String getOptional(PackageRequirement req) {
-        return req.isOptional() ? "optional" : "";
+        if (!req.isOptional()) {
+            return "";
+        }
+        return (req.isResolveable() ? "resolved" : "unresolved");
     }
 
 }

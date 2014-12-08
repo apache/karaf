@@ -46,6 +46,12 @@ public class Exports implements Action {
 
     @Option(name = "--no-format", description = "Disable table rendered output", required = false, multiValued = false)
     boolean noFormat;
+    
+    @Option(name = "-b", description = "Only show packages exported by given bundle id", required = false, multiValued = false)
+    private Integer bundleId;
+    
+    @Option(name = "-p", description = "Only show package starting with given name", required = false, multiValued = false)
+    private String packageFilter;
 
     @Reference
     private PackageService packageService;
@@ -66,21 +72,29 @@ public class Exports implements Action {
     private void showExports() {
         SortedMap<String, PackageVersion> exports = packageService.getExports();
         ShellTable table = new ShellTable();
-        table.column(new Col("Package Name"));
-        table.column(new Col("Version"));
-        table.column(new Col("ID"));
-        table.column(new Col("Bundle Name"));
-
+        table.column("Package Name");
+        table.column("Version");
+        table.column("ID");
+        table.column("Bundle Name");
         for (String key : exports.keySet()) {
             PackageVersion pVer = exports.get(key);
             for (Bundle bundle : pVer.getBundles()) {
-                table.addRow().addContent(pVer.getPackageName(), pVer.getVersion().toString(),
-                                          bundle.getBundleId(), bundle.getSymbolicName());
+                if (matchesFilter(pVer, bundle)) {
+                    table.addRow().addContent(pVer.getPackageName(),
+                                              pVer.getVersion().toString(),
+                                              bundle.getBundleId(),
+                                              bundle.getSymbolicName());
+                }
             }
         }
         table.print(System.out, !noFormat);
     }
     
+    private boolean matchesFilter(PackageVersion pVer, Bundle bundle) {
+        return (bundleId == null || bundle.getBundleId() == bundleId)
+            && (packageFilter == null || pVer.getPackageName().startsWith(packageFilter));
+    }
+
     private void checkDuplicateExports() {
         Bundle[] bundles = bundleContext.getBundles();
         SortedMap<String, PackageVersion> packageVersionMap = getDuplicatePackages(bundles);
