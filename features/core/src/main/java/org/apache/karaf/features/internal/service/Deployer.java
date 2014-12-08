@@ -861,7 +861,9 @@ public class Deployer {
                 if (HOST_NAMESPACE.equals(wire.getCapability().getNamespace())) {
                     Bundle bundle = resources.get(wire.getProvider());
                     if (bundle != null) {
-                        newFragments.get(bundle).add(wire.getRequirer());
+                        Bundle b = resources.get(wire.getRequirer());
+                        Resource r = b != null ? b.adapt(BundleRevision.class) : wire.getRequirer();
+                        newFragments.get(bundle).add(r);
                     }
                 }
             }
