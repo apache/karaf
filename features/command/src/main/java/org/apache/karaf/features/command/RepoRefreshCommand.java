@@ -26,9 +26,12 @@ import org.apache.karaf.features.command.completers.InstalledRepoUriCompleter;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Completion;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 
 @Command(scope = "feature", name = "repo-refresh", description = "Refresh a features repository")
+@Service
 public class RepoRefreshCommand extends FeaturesCommandSupport {
+    
     @Argument(index = 0, name = "Feature name or uri", description = "Shortcut name of the feature repository or the full URI", required = false, multiValued = false)
     @Completion(InstalledRepoUriCompleter.class)
     private String nameOrUrl;
