@@ -406,7 +406,8 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
 
     @Override
     public void refreshRepository(URI uri) throws Exception {
-        throw new UnsupportedOperationException();
+        removeRepository(uri, false);
+        addRepository(uri, false);
     }
 
     @Override
