@@ -17,6 +17,8 @@
 package org.apache.karaf.features.command;
 
 import java.net.URI;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
@@ -26,6 +28,7 @@ import org.apache.karaf.shell.console.AbstractAction;
 
 @Command(scope = "feature", name = "repo-refresh", description = "Refresh a features repository")
 public class RepoRefreshCommand extends AbstractAction {
+
     @Argument(index = 0, name = "Feature name or uri", description = "Shortcut name of the feature repository or the full URI", required = false, multiValued = false)
     private String nameOrUrl;
     
@@ -48,7 +51,16 @@ public class RepoRefreshCommand extends AbstractAction {
     		String effectiveVersion = (version == null) ? "LATEST" : version;
         	URI uri = featureFinder.getUriFor(nameOrUrl, effectiveVersion);
         	if (uri == null) {
-        		uri = new URI(nameOrUrl);
+				// regex on the URL
+				Pattern pattern = Pattern.compile(nameOrUrl);
+				for (Repository r : featuresService.listRepositories()) {
+					URI u = r.getURI();
+					Matcher matcher = pattern.matcher(u.toString());
+					if (matcher.matches()) {
+						uri = u;
+						break;
+					}
+				}
         	}
         	System.out.println("Refreshing feature url " + uri);
         	featuresService.refreshRepository(uri);
