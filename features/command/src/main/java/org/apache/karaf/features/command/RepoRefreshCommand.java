@@ -19,6 +19,8 @@ package org.apache.karaf.features.command;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
@@ -46,9 +48,18 @@ public class RepoRefreshCommand extends FeaturesCommandSupport {
     		String effectiveVersion = (version == null) ? "LATEST" : version;
         	URI uri = featuresService.getRepositoryUriFor(nameOrUrl, effectiveVersion);
         	if (uri == null) {
-        		uri = new URI(nameOrUrl);
-        	}
-            uris.add(uri);
+                // add regex support on installed repositories
+                Pattern pattern = Pattern.compile(nameOrUrl);
+                for (Repository repository : featuresService.listRepositories()) {
+                    URI u = repository.getURI();
+                    Matcher matcher = pattern.matcher(u.toString());
+                    if (matcher.matches()) {
+                        uris.add(u);
+                    }
+                }
+        	} else {
+                uris.add(uri);
+            }
     	} else {
             Repository[] repos = featuresService.listRepositories();
             for (Repository repo : repos) {
