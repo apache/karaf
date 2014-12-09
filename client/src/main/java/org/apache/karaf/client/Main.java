@@ -84,25 +84,65 @@ public class Main {
         for (int i = 0; i < args.length; i++) {
             if (args[i].charAt(0) == '-') {
                 if (args[i].equals("-a")) {
-                    port = Integer.parseInt(args[++i]);
+                    if (args.length <= ++i) {
+                        System.err.println("miss the port");
+                        System.exit(1);
+                    } else {
+                        port = Integer.parseInt(args[i]);
+                    }
                 } else if (args[i].equals("-h")) {
-                    host = args[++i];
+                    if (args.length <= ++i) {
+                        System.err.println("miss the host");
+                        System.exit(1);
+                    } else {
+                        host = args[i];
+                    }
                 } else if (args[i].equals("-u")) {
-                    user = args[++i];
+                    if (args.length <= ++i) {
+                        System.err.println("miss the user");
+                        System.exit(1);
+                    } else {
+                        user = args[i];
+                    }
                 } else if (args[i].equals("-v")) {
                     level++;
                 } else if (args[i].equals("-r")) {
-                    retryAttempts = Integer.parseInt(args[++i]);
+                    if (args.length <= ++i) {
+                        System.err.println("miss the attempts");
+                        System.exit(1);
+                    } else {
+                        retryAttempts = Integer.parseInt(args[i]);
+                    }
                 } else if (args[i].equals("-p")) {
-                    password = args[++i];
+                    if (args.length <= ++i) {
+                        System.err.println("miss the password");
+                        System.exit(1);
+                    } else {
+                        password = args[i];
+                    }
                 } else if (args[i].equals("-d")) {
-                    retryDelay = Integer.parseInt(args[++i]);
+                    if (args.length <= ++i) {
+                        System.err.println("miss the delay in seconds");
+                        System.exit(1);
+                    } else {
+                        retryDelay = Integer.parseInt(args[i]);
+                    }
                 } else if (args[i].equals("-b")) {
                     batch = true;
                 } else if (args[i].equals("-f")) {
-                    file = args[++i];
+                    if (args.length <= ++i) {
+                        System.err.println("miss the commands file");
+                        System.exit(1);
+                    } else {
+                        file = args[i];
+                    }
                 } else if (args[i].equals("-k")) {
-                    keyFile = args[++i];
+                    if (args.length <= ++i) {
+                        System.err.println("miss the key file");
+                        System.exit(1);
+                    } else {
+                        keyFile = args[i];
+                    }
                 } else if (args[i].equals("--help")) {
                     System.out.println("Apache Karaf client");
                     System.out.println("  -a [port]     specify the port to connect to");
