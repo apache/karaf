@@ -108,4 +108,11 @@ public class FeatureTest extends KarafTestSupport {
         }
     }
 
+    @Test
+    public void repoRefreshCommand() throws Exception {
+        String refreshedRepo = executeCommand("feature:repo-refresh .*pax.*");
+        assertContains("pax-cdi", refreshedRepo);
+        assertContains("pax-web", refreshedRepo);
+    }
+
 }
