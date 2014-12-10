@@ -36,6 +36,7 @@
     <modules>
         <module>registry</module>
         <module>dynamic</module>
+        <module>static</module>
     </modules>
 
 </project>

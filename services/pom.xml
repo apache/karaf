@@ -36,6 +36,7 @@
     <modules>
         <module>coordinator</module>
         <module>eventadmin</module>
+        <module>staticcm</module>
     </modules>
 
 </project>
