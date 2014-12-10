@@ -28,18 +28,14 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <groupId>org.apache.karaf.demos</groupId>
-    <artifactId>demos</artifactId>
+    <groupId>org.apache.karaf.demos.profiles</groupId>
+    <artifactId>profiles</artifactId>
     <packaging>pom</packaging>
-    <name>Apache Karaf :: Demos</name>
+    <name>Apache Karaf :: Demos :: Profiles</name>
 
     <modules>
-        <module>web</module>
-        <module>branding</module>
-        <module>command</module>
-        <module>dump</module>
-        <module>deployer</module>
-        <module>profiles</module>
+        <module>registry</module>
+        <module>dynamic</module>
     </modules>
 
 </project>
