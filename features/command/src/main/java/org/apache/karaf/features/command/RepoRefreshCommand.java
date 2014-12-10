@@ -17,6 +17,8 @@
 package org.apache.karaf.features.command;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -52,18 +54,23 @@ public class RepoRefreshCommand extends AbstractAction {
         	URI uri = featureFinder.getUriFor(nameOrUrl, effectiveVersion);
         	if (uri == null) {
 				// regex on the URL
+				List<URI> uris = new ArrayList<URI>();
 				Pattern pattern = Pattern.compile(nameOrUrl);
 				for (Repository r : featuresService.listRepositories()) {
 					URI u = r.getURI();
 					Matcher matcher = pattern.matcher(u.toString());
 					if (matcher.matches()) {
-						uri = u;
-						break;
+						uris.add(u);
 					}
 				}
-        	}
-        	System.out.println("Refreshing feature url " + uri);
-        	featuresService.refreshRepository(uri);
+				for (URI u : uris) {
+					System.out.println("Refreshing feature url " + u);
+					featuresService.refreshRepository(u);
+				}
+        	} else {
+				System.out.println("Refreshing feature url " + uri);
+				featuresService.refreshRepository(uri);
+			}
     	} else {
     		refreshAll();
     	}
