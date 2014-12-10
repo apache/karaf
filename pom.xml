@@ -65,6 +65,7 @@
         <module>jdbc</module>
         <module>jms</module>
         <module>jpa</module>
+        <module>profile</module>
         <module>tooling</module>
         <module>assemblies</module>
         <module>demos</module>
@@ -164,7 +165,7 @@
         <felix.framework.security.version>2.4.0</felix.framework.security.version>
         <felix.gogo.version>0.14.0</felix.gogo.version>
         <felix.plugin.version>2.5.3</felix.plugin.version>
-        <felix.utils.version>1.6.0</felix.utils.version>
+        <felix.utils.version>1.6.1-SNAPSHOT</felix.utils.version>
         <felix.webconsole.version>4.2.2</felix.webconsole.version>
         <felix.webconsole.api.version>3.1.2</felix.webconsole.api.version>
         <felix.metatype.version>1.0.10</felix.metatype.version>
@@ -232,7 +233,7 @@
         <pax.exam.version>4.3.0</pax.exam.version>
         <pax.logging.version>1.8.1</pax.logging.version>
         <pax.base.version>1.5.0</pax.base.version>
-        <pax.url.version>2.2.0</pax.url.version>
+        <pax.url.version>2.2.1-SNAPSHOT</pax.url.version>
         <pax.web.version>4.0.0</pax.web.version>
         <pax.tinybundle.version>2.1.0</pax.tinybundle.version>
         <portlet-api.version>2.0</portlet-api.version>
@@ -537,6 +538,12 @@
             <dependency>
                 <groupId>org.apache.karaf.features</groupId>
                 <artifactId>org.apache.karaf.features.command</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.karaf.profile</groupId>
+                <artifactId>org.apache.karaf.profile.core</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -1267,6 +1274,11 @@
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-simple</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>jcl-over-slf4j</artifactId>
                 <version>${slf4j.version}</version>
             </dependency>
 

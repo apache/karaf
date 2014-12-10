@@ -18,19 +18,26 @@ package org.apache.karaf.features.internal.support;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 
+import org.apache.karaf.features.internal.download.DownloadCallback;
+import org.apache.karaf.features.internal.download.DownloadManager;
+import org.apache.karaf.features.internal.download.Downloader;
 import org.apache.karaf.features.internal.download.StreamProvider;
-import org.apache.karaf.features.internal.download.simple.SimpleDownloader;
+import org.apache.karaf.features.internal.util.MultiException;
 
-public class TestDownloadManager extends SimpleDownloader {
+public class TestDownloadManager implements DownloadManager, Downloader {
 
+    private final MultiException exception = new MultiException("Error");
+    private final ConcurrentMap<String, StreamProvider> providers = new ConcurrentHashMap<>();
     private final Class loader;
     private final String dir;
 
@@ -40,17 +47,44 @@ public class TestDownloadManager extends SimpleDownloader {
     }
 
     @Override
+    public Downloader createDownloader() {
+        return this;
+    }
+
+    @Override
+    public Map<String, StreamProvider> getProviders() {
+        return providers;
+    }
+
+    @Override
+    public void await() throws InterruptedException, MultiException {
+        exception.throwIfExceptions();
+    }
+
+    @Override
+    public void download(final String location, final DownloadCallback downloadCallback) throws MalformedURLException {
+        if (!providers.containsKey(location)) {
+            providers.putIfAbsent(location, createProvider(location));
+        }
+        try {
+            if (downloadCallback != null) {
+                downloadCallback.downloaded(providers.get(location));
+            }
+        } catch (Exception e) {
+            exception.addSuppressed(e);
+        }
+    }
+
     protected StreamProvider createProvider(String location) throws MalformedURLException {
         return new TestProvider(location);
     }
 
     class TestProvider implements StreamProvider {
+        private final String location;
         private final IOException exception;
-        private final Map<String, String> headers;
         private final byte[] data;
 
         TestProvider(String location) {
-            Map<String, String> headers = null;
             byte[] data = null;
             IOException exception = null;
             try {
@@ -59,16 +93,16 @@ public class TestDownloadManager extends SimpleDownloader {
                 JarOutputStream jos = new JarOutputStream(baos, man);
                 jos.close();
                 data = baos.toByteArray();
-                headers = new HashMap<>();
-                for (Map.Entry attr : man.getMainAttributes().entrySet()) {
-                    headers.put(attr.getKey().toString(), attr.getValue().toString());
-                }
             } catch (IOException e) {
                 exception = e;
             }
-            this.headers = headers;
+            this.location = location;
             this.data = data;
             this.exception = exception;
+        }
+
+        public String getUrl() {
+            return location;
         }
 
         @Override
@@ -79,10 +113,9 @@ public class TestDownloadManager extends SimpleDownloader {
         }
 
         @Override
-        public Map<String, String> getMetadata() throws IOException {
-            if (exception != null)
-                throw exception;
-            return headers;
+        public File getFile() throws IOException {
+            throw new UnsupportedOperationException();
         }
+
     }
 }

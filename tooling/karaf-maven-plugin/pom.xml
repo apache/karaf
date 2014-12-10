@@ -134,6 +134,10 @@
             </exclusions>
         </dependency>
         <dependency>
+            <groupId>org.apache.karaf.profile</groupId>
+            <artifactId>org.apache.karaf.profile.core</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.resolver</artifactId>
         </dependency>

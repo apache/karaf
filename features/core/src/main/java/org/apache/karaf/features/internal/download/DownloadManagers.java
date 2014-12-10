@@ -16,17 +16,20 @@
  */
 package org.apache.karaf.features.internal.download;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Map;
+import java.util.concurrent.ScheduledExecutorService;
 
-public interface StreamProvider {
+import org.apache.karaf.features.internal.download.impl.MavenDownloadManager;
+import org.ops4j.pax.url.mvn.MavenResolver;
 
-    String getUrl();
+public final class DownloadManagers {
 
-    File getFile() throws IOException;
+    private DownloadManagers() { }
 
-    InputStream open() throws IOException;
+    /**
+     * Creates a DownloadManager
+     */
+    public static DownloadManager createDownloadManager(MavenResolver resolver, ScheduledExecutorService executorService) {
+        return new MavenDownloadManager(resolver, executorService);
+    }
 
 }

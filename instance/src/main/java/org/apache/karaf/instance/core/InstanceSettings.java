@@ -35,16 +35,21 @@ public class InstanceSettings {
     private final String address;
     private final Map<String, URL> textResources;
     private final Map<String, URL> binaryResources;
+    private final List<String> profiles;
 
     public InstanceSettings(int sshPort, int rmiRegistryPort, int rmiServerPort, String location, String javaOpts, List<String> featureURLs, List<String> features) {
         this(sshPort, rmiRegistryPort, rmiServerPort, location, javaOpts, featureURLs, features, "0.0.0.0");
     }
 
     public InstanceSettings(int sshPort, int rmiRegistryPort, int rmiServerPort, String location, String javaOpts, List<String> featureURLs, List<String> features, String address) {
-       this(sshPort, rmiRegistryPort, rmiServerPort, location, javaOpts, featureURLs, features, address, new HashMap<String, URL>(), new HashMap<String, URL>());
+        this(sshPort, rmiRegistryPort, rmiServerPort, location, javaOpts, featureURLs, features, address, new HashMap<String, URL>(), new HashMap<String, URL>());
     }
 
     public InstanceSettings(int sshPort, int rmiRegistryPort, int rmiServerPort, String location, String javaOpts, List<String> featureURLs, List<String> features, String address, Map<String, URL> textResources, Map<String, URL> binaryResources) {
+        this(sshPort, rmiRegistryPort, rmiServerPort, location, javaOpts, featureURLs, features, address, textResources, binaryResources, null);
+    }
+
+    public InstanceSettings(int sshPort, int rmiRegistryPort, int rmiServerPort, String location, String javaOpts, List<String> featureURLs, List<String> features, String address, Map<String, URL> textResources, Map<String, URL> binaryResources, List<String> profiles) {
         this.sshPort = sshPort;
         this.rmiRegistryPort = rmiRegistryPort;
         this.rmiServerPort = rmiServerPort;
@@ -55,6 +60,7 @@ public class InstanceSettings {
         this.address = address;
         this.textResources = textResources != null ? textResources : new HashMap<String, URL>();
         this.binaryResources = binaryResources != null ? binaryResources : new HashMap<String, URL>();
+        this.profiles = profiles != null ? profiles : new ArrayList<String>();
     }
 
 
@@ -98,6 +104,10 @@ public class InstanceSettings {
         return this.address;
     }
 
+    public List<String> getProfiles() {
+        return profiles;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == this) {
@@ -114,7 +124,8 @@ public class InstanceSettings {
                (javaOpts == null ? is.javaOpts == null : javaOpts.equals(is.javaOpts)) &&
                (featureURLs == null ? is.featureURLs == null : featureURLs.equals(is.featureURLs)) &&
                (features == null ? is.features == null : features.equals(is.features)) &&
-               (address == null ? is.address == null : address.equals(is.address));
+               (address == null ? is.address == null : address.equals(is.address)) &&
+               (profiles == null ? is.profiles == null : profiles.equals(is.profiles));
     }
 
     @Override
@@ -125,6 +136,7 @@ public class InstanceSettings {
         result = 31 * result + (featureURLs != null ? featureURLs.hashCode() : 0);
         result = 31 * result + (features != null ? features.hashCode() : 0);
         result = 31 * result + (address != null ? address.hashCode() : 0);
+        result = 31 * result + (profiles != null ? profiles.hashCode() : 0);
         return result;
     }
 

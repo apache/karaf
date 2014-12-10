@@ -16,6 +16,8 @@
  */
 package org.apache.karaf.features.internal.region;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -25,6 +27,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import org.apache.felix.resolver.Util;
 import org.apache.felix.utils.manifest.Clause;
@@ -50,6 +56,7 @@ import org.osgi.framework.Version;
 import org.osgi.resource.Requirement;
 import org.osgi.resource.Resource;
 
+import static java.util.jar.JarFile.MANIFEST_NAME;
 import static org.apache.karaf.features.internal.resolver.ResourceUtils.TYPE_FEATURE;
 import static org.apache.karaf.features.internal.resolver.ResourceUtils.TYPE_SUBSYSTEM;
 import static org.apache.karaf.features.internal.resolver.ResourceUtils.addIdentityRequirement;
@@ -342,7 +349,7 @@ public class Subsystem extends ResourceImpl {
             downloader.download(loc, new DownloadCallback() {
                 @Override
                 public void downloaded(StreamProvider provider) throws Exception {
-                    ResourceImpl res = createResource(loc, provider.getMetadata());
+                    ResourceImpl res = createResource(loc, getMetadata(provider));
                     bundles.put(loc, res);
                 }
             });
@@ -352,7 +359,7 @@ public class Subsystem extends ResourceImpl {
             downloader.download(loc, new DownloadCallback() {
                 @Override
                 public void downloaded(StreamProvider provider) throws Exception {
-                    ResourceImpl res = createResource(loc, provider.getMetadata());
+                    ResourceImpl res = createResource(loc, getMetadata(provider));
                     bundles.put(loc, res);
                 }
             });
@@ -362,7 +369,7 @@ public class Subsystem extends ResourceImpl {
             downloader.download(loc, new DownloadCallback() {
                 @Override
                 public void downloaded(StreamProvider provider) throws Exception {
-                    ResourceImpl res = createResource(loc, provider.getMetadata());
+                    ResourceImpl res = createResource(loc, getMetadata(provider));
                     bundles.put(loc, res);
                 }
             });
@@ -421,6 +428,26 @@ public class Subsystem extends ResourceImpl {
             installable.add(info.resource);
             addIdentityRequirement(info.resource, this, info.mandatory);
         }
+    }
+
+    Map<String, String> getMetadata(StreamProvider provider) throws IOException {
+        try (
+                InputStream is = provider.open();
+        ) {
+            ZipInputStream zis = new ZipInputStream(is);
+            ZipEntry entry;
+            while ((entry = zis.getNextEntry()) != null) {
+                if (MANIFEST_NAME.equals(entry.getName())) {
+                    Attributes attributes = new Manifest(zis).getMainAttributes();
+                    Map<java.lang.String, java.lang.String> headers = new HashMap<java.lang.String, java.lang.String>();
+                    for (Map.Entry attr : attributes.entrySet()) {
+                        headers.put(attr.getKey().toString(), attr.getValue().toString());
+                    }
+                    return headers;
+                }
+            }
+        }
+        throw new IllegalArgumentException("Resource " + provider.getUrl() + " does not contain a manifest");
     }
 
     void addDependency(ResourceImpl resource, boolean mandatory, boolean start, int startLevel) {

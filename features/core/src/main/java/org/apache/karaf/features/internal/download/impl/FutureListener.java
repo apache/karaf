@@ -14,19 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.features.internal.download;
+package org.apache.karaf.features.internal.download.impl;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Map;
+/**
+ * Something interested in being notified when the completion
+ * of an asynchronous download operation : {@link DefaultFuture}.
+ *
+ */
+public interface FutureListener<T extends DefaultFuture> {
 
-public interface StreamProvider {
-
-    String getUrl();
-
-    File getFile() throws IOException;
-
-    InputStream open() throws IOException;
+    /**
+     * Invoked when the operation associated with the {@link DefaultFuture}
+     * has been completed even if you add the listener after the completion.
+     *
+     * @param future The source {@link DefaultFuture} which called this
+     *               callback.
+     */
+    void operationComplete(T future);
 
 }

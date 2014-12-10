@@ -204,7 +204,7 @@ public class Activator extends BaseActivator {
                 stateStorage,
                 featureFinder,
                 eventAdminListener,
-                configInstaller,
+                configurationAdmin,
                 digraph,
                 overrides,
                 featureResolutionRange,

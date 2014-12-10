@@ -16,19 +16,6 @@
  */
 package org.apache.karaf.instance.core.internal;
 
-import org.apache.karaf.instance.core.Instance;
-import org.apache.karaf.instance.core.InstanceService;
-import org.apache.karaf.instance.core.InstanceSettings;
-import org.apache.karaf.instance.main.Execute;
-import org.apache.karaf.jpm.Process;
-import org.apache.karaf.jpm.impl.ProcessBuilderFactoryImpl;
-import org.apache.karaf.jpm.impl.ScriptUtils;
-import org.apache.karaf.util.StreamUtils;
-import org.apache.karaf.util.locks.FileLockUtils;
-import org.fusesource.jansi.Ansi;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.File;
@@ -43,6 +30,9 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.Socket;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -52,6 +42,25 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Scanner;
 import java.util.TreeMap;
+
+import org.apache.karaf.instance.core.Instance;
+import org.apache.karaf.instance.core.InstanceService;
+import org.apache.karaf.instance.core.InstanceSettings;
+import org.apache.karaf.instance.main.Execute;
+import org.apache.karaf.jpm.Process;
+import org.apache.karaf.jpm.impl.ProcessBuilderFactoryImpl;
+import org.apache.karaf.jpm.impl.ScriptUtils;
+import org.apache.karaf.profile.Profile;
+import org.apache.karaf.profile.ProfileBuilder;
+import org.apache.karaf.profile.ProfileService;
+import org.apache.karaf.util.StreamUtils;
+import org.apache.karaf.util.locks.FileLockUtils;
+import org.fusesource.jansi.Ansi;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.ServiceReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class InstanceServiceImpl implements InstanceService {
 
@@ -239,7 +248,7 @@ public class InstanceServiceImpl implements InstanceService {
         }
     }
 
-    private void logInfo(String message, boolean printOutput, Object... args) {
+    private static void logInfo(String message, boolean printOutput, Object... args) {
         if (LOGGER.isInfoEnabled() || printOutput) {
             String formatted = String.format(message, args);
             LOGGER.info(formatted);
@@ -255,6 +264,14 @@ public class InstanceServiceImpl implements InstanceService {
                 if (state.instances.get(name) != null) {
                     throw new IllegalArgumentException("Instance '" + name + "' already exists");
                 }
+                if (!settings.getProfiles().isEmpty()) {
+                    try {
+                        ProfileApplier.verify();
+                    } catch (NoClassDefFoundError error) {
+                        throw new IllegalArgumentException("Profile service package is not available");
+                    }
+                }
+
                 String loc = settings.getLocation() != null ? settings.getLocation() : name;
                 File karafBase = new File(loc);
                 if (!karafBase.isAbsolute()) {
@@ -349,6 +366,10 @@ public class InstanceServiceImpl implements InstanceService {
                     copyBinaryResourceToDir(resource, karafBase, binaryResources, printOutput);
                 }
 
+                if (!settings.getProfiles().isEmpty()) {
+                    ProfileApplier.applyProfiles(karafBase, settings.getProfiles(), printOutput);
+                }
+
                 String javaOpts = settings.getJavaOpts();
                 if (javaOpts == null || javaOpts.length() == 0) {
                     javaOpts = DEFAULT_JAVA_OPTS;
@@ -374,7 +395,7 @@ public class InstanceServiceImpl implements InstanceService {
         }, true);
     }
 
-    private void appendToPropList(org.apache.felix.utils.properties.Properties p, String key, List<String> elements) {
+    private static void appendToPropList(org.apache.felix.utils.properties.Properties p, String key, List<String> elements) {
         if (elements == null) {
             return;
         }
@@ -761,7 +782,7 @@ public class InstanceServiceImpl implements InstanceService {
                 Socket s = new Socket(host, port);
                 s.getOutputStream().write(shutdown.getBytes());
                 s.close();
-                long stopTimeout = Long.parseLong(props.getProperty(KARAF_SHUTDOWN_TIMEOUT, 
+                long stopTimeout = Long.parseLong(props.getProperty(KARAF_SHUTDOWN_TIMEOUT,
                                                                     Long.toString(getStopTimeout())));
                 long t = System.currentTimeMillis() + stopTimeout;
                 do {
@@ -1000,7 +1021,7 @@ public class InstanceServiceImpl implements InstanceService {
         }
     }
 
-    private void println(String st) {
+    private static void println(String st) {
         System.out.println(st);
     }
 
@@ -1273,6 +1294,46 @@ public class InstanceServiceImpl implements InstanceService {
                 return null;
             }
         }, true);
+    }
+
+    private static class ProfileApplier {
+
+        // Verify that profile package is wired correctly
+        static void verify() {
+            Profile.class.getName();
+        }
+
+        static void applyProfiles(File karafBase, List<String> profiles, boolean printOutput) throws IOException {
+            BundleContext bundleContext = FrameworkUtil.getBundle(ProfileApplier.class).getBundleContext();
+            ServiceReference<ProfileService> reference = bundleContext.getServiceReference(ProfileService.class);
+            ProfileService service = bundleContext.getService(reference);
+
+            Profile profile = ProfileBuilder.Factory.create("temp")
+                    .addParents(profiles)
+                    .getProfile();
+            Profile overlay = service.getOverlayProfile(profile);
+            final Profile effective = service.getEffectiveProfile(overlay, false);
+
+            Map<String, byte[]> configs = effective.getFileConfigurations();
+            for (Map.Entry<String, byte[]> config : configs.entrySet()) {
+                String pid = config.getKey();
+                if (!pid.equals(Profile.INTERNAL_PID + Profile.PROPERTIES_SUFFIX)) {
+                    Path configFile = Paths.get(karafBase.toString(), "etc", pid);
+                    logInfo("Creating file: %s", printOutput, configFile.toString());
+                    Files.write(configFile, config.getValue());
+                }
+            }
+            FileLockUtils.execute(new File(karafBase, FEATURES_CFG), new FileLockUtils.RunnableWithProperties() {
+                public void run(org.apache.felix.utils.properties.Properties properties) throws IOException {
+                    appendToPropList(properties, "featuresBoot", effective.getFeatures());
+                    appendToPropList(properties, "featuresRepositories", effective.getRepositories());
+                }
+            }, true);
+
+            bundleContext.ungetService(reference);
+        }
+
+
     }
 
 }

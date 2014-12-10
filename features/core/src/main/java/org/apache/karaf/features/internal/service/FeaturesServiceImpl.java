@@ -25,9 +25,12 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Dictionary;
 import java.util.EnumSet;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +42,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.apache.felix.utils.version.VersionCleaner;
 import org.apache.felix.utils.version.VersionRange;
@@ -49,13 +53,16 @@ import org.apache.karaf.features.FeaturesListener;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
 import org.apache.karaf.features.RepositoryEvent;
-import org.apache.karaf.features.internal.download.simple.SimpleDownloader;
+import org.apache.karaf.features.internal.download.DownloadManager;
+import org.apache.karaf.features.internal.download.DownloadManagers;
 import org.apache.karaf.features.internal.util.JsonReader;
 import org.apache.karaf.features.internal.util.JsonWriter;
 import org.apache.karaf.util.collections.CopyOnWriteArrayIdentityList;
 import org.eclipse.equinox.region.Region;
 import org.eclipse.equinox.region.RegionDigraph;
 import org.eclipse.equinox.region.RegionFilterBuilder;
+import org.ops4j.pax.url.mvn.MavenResolver;
+import org.ops4j.pax.url.mvn.MavenResolvers;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -66,6 +73,8 @@ import org.osgi.framework.Version;
 import org.osgi.framework.startlevel.BundleStartLevel;
 import org.osgi.framework.startlevel.FrameworkStartLevel;
 import org.osgi.framework.wiring.FrameworkWiring;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -101,6 +110,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
     private final StateStorage storage;
     private final FeatureFinder featureFinder;
     private final EventAdminListener eventAdminListener;
+    private final ConfigurationAdmin configurationAdmin;
     private final FeatureConfigInstaller configInstaller;
     private final RegionDigraph digraph;
     private final String overrides;
@@ -143,7 +153,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
                                StateStorage storage,
                                FeatureFinder featureFinder,
                                EventAdminListener eventAdminListener,
-                               FeatureConfigInstaller configInstaller,
+                               ConfigurationAdmin configurationAdmin,
                                RegionDigraph digraph,
                                String overrides,
                                String featureResolutionRange,
@@ -155,7 +165,8 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         this.storage = storage;
         this.featureFinder = featureFinder;
         this.eventAdminListener = eventAdminListener;
-        this.configInstaller = configInstaller;
+        this.configurationAdmin = configurationAdmin;
+        this.configInstaller = configurationAdmin != null ? new FeatureConfigInstaller(configurationAdmin) : null;
         this.digraph = digraph;
         this.overrides = overrides;
         this.featureResolutionRange = featureResolutionRange;
@@ -944,22 +955,50 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
                             EnumSet<Option> options                                // installation options
     ) throws Exception {
 
-        Set<String> prereqs = new HashSet<>();
-        while (true) {
-            try {
-                Deployer.DeploymentState dstate = getDeploymentState(state);
-                Deployer.DeploymentRequest request = getDeploymentRequest(requirements, stateChanges, options);
-                new Deployer(new SimpleDownloader(), this).deploy(dstate, request);
-                break;
-            } catch (Deployer.PartialDeploymentException e) {
-                if (!prereqs.containsAll(e.getMissing())) {
-                    prereqs.addAll(e.getMissing());
-                    state = copyState();
-                } else {
-                    throw new Exception("Deployment aborted due to loop in missing prerequisites: " + e.getMissing());
+        Dictionary<String, String> props = getMavenConfig();
+        MavenResolver resolver = MavenResolvers.createMavenResolver(props, "org.ops4j.pax.url.mvn");
+        ScheduledExecutorService executor = Executors.newScheduledThreadPool(8);
+        DownloadManager manager = DownloadManagers.createDownloadManager(resolver, executor);
+        try {
+            Set<String> prereqs = new HashSet<>();
+            while (true) {
+                try {
+                    Deployer.DeploymentState dstate = getDeploymentState(state);
+                    Deployer.DeploymentRequest request = getDeploymentRequest(requirements, stateChanges, options);
+                    new Deployer(manager, this).deploy(dstate, request);
+                    break;
+                } catch (Deployer.PartialDeploymentException e) {
+                    if (!prereqs.containsAll(e.getMissing())) {
+                        prereqs.addAll(e.getMissing());
+                        state = copyState();
+                    } else {
+                        throw new Exception("Deployment aborted due to loop in missing prerequisites: " + e.getMissing());
+                    }
+                }
+            }
+        } finally {
+            executor.shutdown();
+        }
+    }
+
+    private Dictionary<String, String> getMavenConfig() throws IOException {
+        Hashtable<String, String> props = new Hashtable<>();
+        if (configurationAdmin != null) {
+            Configuration config = configurationAdmin.getConfiguration("org.ops4j.pax.url.mvn", null);
+            if (config != null) {
+                Dictionary<String, Object> cfg = config.getProperties();
+                if (cfg != null) {
+                    for (Enumeration<String> e = cfg.keys(); e.hasMoreElements(); ) {
+                        String key = e.nextElement();
+                        Object val = cfg.get(key);
+                        if (key != null) {
+                            props.put(key, val.toString());
+                        }
+                    }
                 }
             }
         }
+        return props;
     }
 
     public void print(String message, boolean verbose) {

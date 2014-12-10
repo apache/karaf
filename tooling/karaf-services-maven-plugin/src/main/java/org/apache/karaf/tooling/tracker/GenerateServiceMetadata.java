@@ -17,7 +17,6 @@
 package org.apache.karaf.tooling.tracker;
 
 import java.io.File;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -27,7 +26,6 @@ import org.apache.karaf.util.tracker.ProvideService;
 import org.apache.karaf.util.tracker.RequireService;
 import org.apache.karaf.util.tracker.Services;
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;

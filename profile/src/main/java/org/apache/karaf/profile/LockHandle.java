@@ -14,19 +14,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.features.internal.download;
+package org.apache.karaf.profile;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Map;
+/**
+ * A handle on an acquired read or write lock.
+ */
+public interface LockHandle extends AutoCloseable {
 
-public interface StreamProvider {
-
-    String getUrl();
-
-    File getFile() throws IOException;
-
-    InputStream open() throws IOException;
+    /**
+     * Release the lock
+     */
+    void close();
 
 }

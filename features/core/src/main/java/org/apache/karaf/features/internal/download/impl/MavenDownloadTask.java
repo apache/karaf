@@ -14,19 +14,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.features.internal.download;
+package org.apache.karaf.features.internal.download.impl;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Map;
+import java.util.concurrent.ScheduledExecutorService;
 
-public interface StreamProvider {
+import org.ops4j.pax.url.mvn.MavenResolver;
 
-    String getUrl();
+public class MavenDownloadTask extends AbstractRetryableDownloadTask {
 
-    File getFile() throws IOException;
+    private final MavenResolver resolver;
 
-    InputStream open() throws IOException;
+    public MavenDownloadTask(ScheduledExecutorService executor, MavenResolver resolver, String url) {
+        super(executor, url);
+        this.resolver = resolver;
+    }
+
+    protected File download() throws Exception {
+        return resolver.resolve(url);
+    }
 
 }

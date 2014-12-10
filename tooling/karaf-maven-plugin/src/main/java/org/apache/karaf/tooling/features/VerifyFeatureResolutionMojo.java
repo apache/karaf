@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Dictionary;
 import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -48,6 +49,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
@@ -66,7 +69,7 @@ import org.apache.karaf.features.FeatureEvent;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
 import org.apache.karaf.features.internal.download.DownloadManager;
-import org.apache.karaf.features.internal.download.simple.SimpleDownloader;
+import org.apache.karaf.features.internal.download.DownloadManagers;
 import org.apache.karaf.features.internal.resolver.ResourceBuilder;
 import org.apache.karaf.features.internal.resolver.ResourceImpl;
 import org.apache.karaf.features.internal.resolver.ResourceUtils;
@@ -75,6 +78,9 @@ import org.apache.karaf.features.internal.service.RepositoryImpl;
 import org.apache.karaf.features.internal.service.State;
 import org.apache.karaf.features.internal.util.MapUtils;
 import org.apache.karaf.features.internal.util.MultiException;
+import org.apache.karaf.tooling.url.CustomBundleURLStreamHandlerFactory;
+import org.apache.karaf.tooling.utils.InternalMavenResolver;
+import org.apache.karaf.tooling.utils.MojoSupport;
 import org.apache.karaf.tooling.utils.PropertiesLoader;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
@@ -84,7 +90,10 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
+import org.ops4j.pax.url.mvn.MavenResolver;
+import org.ops4j.pax.url.mvn.MavenResolvers;
 import org.ops4j.pax.url.mvn.ServiceConstants;
+import org.ops4j.pax.url.mvn.internal.AetherBasedResolver;
 import org.ops4j.pax.url.mvn.internal.Connection;
 import org.ops4j.pax.url.mvn.internal.config.MavenConfigurationImpl;
 import org.osgi.framework.Bundle;
@@ -105,7 +114,7 @@ import shaded.org.ops4j.util.property.PropertiesPropertyResolver;
 import static java.util.jar.JarFile.MANIFEST_NAME;
 
 @Mojo(name = "verify-features", requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
-public class VerifyFeatureResolutionMojo extends AbstractMojo {
+public class VerifyFeatureResolutionMojo extends MojoSupport {
 
     @Parameter(property = "descriptors")
     protected Set<String> descriptors;
@@ -143,20 +152,23 @@ public class VerifyFeatureResolutionMojo extends AbstractMojo {
     @Parameter(defaultValue = "${project}", readonly = true)
     protected MavenProject project;
 
+    protected MavenResolver resolver;
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
+        DependencyHelper helper = DependencyHelperFactory.createDependencyHelper(this.container, this.project, this.mavenSession, getLog());
+        resolver = new InternalMavenResolver(helper, getLog());
+        CustomBundleURLStreamHandlerFactory.install(resolver);
         try {
-            Field field = URL.class.getDeclaredField("factory");
-            field.setAccessible(true);
-            field.set(null, null);
-        } catch (Exception e) {
-            e.printStackTrace();
+            doExecute();
+        } finally {
+            CustomBundleURLStreamHandlerFactory.uninstall();
         }
-        URL.setURLStreamHandlerFactory(new CustomBundleURLStreamHandlerFactory());
+    }
 
+    protected void doExecute() throws MojoExecutionException, MojoFailureException {
         System.setProperty("karaf.home", "target/karaf");
         System.setProperty("karaf.data", "target/karaf/data");
-
 
         Hashtable<String, String> properties = new Hashtable<>();
 
@@ -174,7 +186,9 @@ public class VerifyFeatureResolutionMojo extends AbstractMojo {
             }
         }
 
-        DownloadManager manager = new SimpleDownloader();
+        // TODO: allow using external configuration ?
+        ScheduledExecutorService executor = Executors.newScheduledThreadPool(8);
+        DownloadManager manager = DownloadManagers.createDownloadManager(resolver, executor);
         final Map<String, Repository> repositories;
         Map<String, Feature[]> allFeatures = new HashMap<>();
         try {
@@ -487,32 +501,6 @@ public class VerifyFeatureResolutionMojo extends AbstractMojo {
             }
         }
         return result;
-    }
-
-    public static class CustomBundleURLStreamHandlerFactory implements URLStreamHandlerFactory {
-
-        public URLStreamHandler createURLStreamHandler(String protocol) {
-            switch (protocol) {
-            case "mvn":
-                return new URLStreamHandler() {
-                    @Override
-                    protected URLConnection openConnection(URL url) throws IOException {
-                        PropertiesPropertyResolver propertyResolver = new PropertiesPropertyResolver(System.getProperties());
-                        final MavenConfigurationImpl config = new MavenConfigurationImpl(propertyResolver, ServiceConstants.PID);
-                        return new Connection(url, config);
-                    }
-                };
-            case "wrap":
-                return new org.ops4j.pax.url.wrap.Handler();
-            case "blueprint":
-                return new org.apache.karaf.deployer.blueprint.BlueprintURLHandler();
-            case "war":
-                return new org.ops4j.pax.url.war.Handler();
-            default:
-                return null;
-            }
-        }
-
     }
 
     public static Map<String, Map<VersionRange, Map<String, String>>> getMetadata(Map<String, String> properties, String prefix) {

@@ -136,6 +136,9 @@ public class BaseActivator implements BundleActivator, SingleServiceTracker.Sing
         reconfigure();
     }
 
+    protected Dictionary<String, ?> getConfiguration() {
+        return configuration;
+    }
     /**
      * Called in {@link #doStart()}
      */

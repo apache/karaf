@@ -14,19 +14,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.features.internal.download;
+package org.apache.karaf.profile;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Map;
 
-public interface StreamProvider {
+public interface PlaceholderResolver {
 
-    String getUrl();
+    String CATCH_ALL_SCHEME = "*";
 
-    File getFile() throws IOException;
+    /**
+     * The placeholder scheme.
+     */
+    public String getScheme();
 
-    InputStream open() throws IOException;
+    /**
+     * Resolves the placeholder found inside the value, for the specific key of the pid.
+     * @param profile   The current profile
+     * @param pid       The pid that contains the placeholder.
+     * @param key       The key of the configuration value that contains the placeholder.
+     * @param value     The value with the placeholder.
+     * @return          The resolved value or EMPTY_STRING.
+     */
+    public String resolve(Map<String, Map<String, String>> profile, String pid, String key, String value);
 
 }
