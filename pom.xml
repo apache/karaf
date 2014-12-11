@@ -65,14 +65,14 @@
         <module>jdbc</module>
         <module>jms</module>
         <module>jpa</module>
+        <module>services</module>
+        <module>subsystem</module>
         <module>profile</module>
         <module>tooling</module>
         <module>assemblies</module>
         <module>demos</module>
         <module>archetypes</module>
         <module>itests</module>
-        <module>services</module>
-        <module>subsystem</module>
     </modules>
 
     <scm>
