@@ -95,6 +95,14 @@ public class FeatureTest extends KarafTestSupport {
     }
 
     @Test
+    public void repoAddRemoveCommandWithRegex() throws Exception {
+        System.out.println(executeCommand("feature:repo-add mvn:org.apache.karaf.cellar/apache-karaf-cellar/3.0.0/xml/features"));
+        assertContains("apache-karaf-cellar", executeCommand("feature:repo-list"));
+        System.out.println(executeCommand("feature:repo-remove .*apache-karaf-cellar.*"));
+        assertContainsNot("apache-karaf-cellar", executeCommand("feature:repo-list"));
+    }
+
+    @Test
     public void repoAddRemoveViaMBean() throws Exception {
         JMXConnector connector = null;
         try {

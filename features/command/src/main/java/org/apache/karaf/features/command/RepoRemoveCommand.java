@@ -17,6 +17,10 @@
 package org.apache.karaf.features.command;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
@@ -39,18 +43,33 @@ public class RepoRemoveCommand extends FeaturesCommandSupport {
     private boolean uninstall;
 
     protected void doExecute(FeaturesService featuresService) throws Exception {
-    	URI uri = null;
-    	for (Repository r : featuresService.listRepositories()) {
-    		if (r.getName() != null && r.getName().equals(repository)) {
-    			uri = r.getURI();
-    			break;
-    		}
-    	}
+		List<URI> uris = new ArrayList<>();
+		Pattern pattern = Pattern.compile(repository);
+		for (Repository r : featuresService.listRepositories()) {
+			if (r.getName() != null && !r.getName().isEmpty()) {
+				// repository has a name, try regex on the name
+				Matcher nameMatcher = pattern.matcher(r.getName());
+				if (nameMatcher.matches()) {
+					uris.add(r.getURI());
+				} else {
+					// the name regex doesn't match, fallback to repository URI regex
+					Matcher uriMatcher = pattern.matcher(r.getURI().toString());
+					if (uriMatcher.matches()) {
+						uris.add(r.getURI());
+					}
+				}
+			} else {
+				// the repository name is not defined, use repository URI regex
+				Matcher uriMatcher = pattern.matcher(r.getURI().toString());
+				if (uriMatcher.matches()) {
+					uris.add(r.getURI());
+				}
+			}
+		}
 
-    	if (uri == null) {
-    	    uri = new URI(repository);
-    	}
-
-    	featuresService.removeRepository(uri, uninstall);
+		for (URI uri : uris) {
+			System.out.println("Removing features repository " + uri);
+			featuresService.removeRepository(uri, uninstall);
+		}
     }
 }
