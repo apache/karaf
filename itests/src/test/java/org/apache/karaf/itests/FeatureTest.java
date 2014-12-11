@@ -117,6 +117,20 @@ public class FeatureTest extends KarafTestSupport {
     }
 
     @Test
+    public void repoAddRemoveWithRegexViaMBean() throws Exception {
+        JMXConnector connector = null;
+        try {
+            connector = this.getJMXConnector();
+            MBeanServerConnection connection = connector.getMBeanServerConnection();
+            ObjectName name = new ObjectName("org.apache.karaf:type=feature,name=root");
+            connection.invoke(name, "addRepository", new Object[] { "mvn:org.apache.karaf.cellar/apache-karaf-cellar/3.0.0/xml/features" }, new String[]{ "java.lang.String" });
+            connection.invoke(name, "removeRepository", new Object[] { ".*apache-karaf-cellar.*" }, new String[]{ "java.lang.String" });
+        } finally {
+            close(connector);
+        }
+    }
+
+    @Test
     public void repoRefreshCommand() throws Exception {
         String refreshedRepo = executeCommand("feature:repo-refresh .*pax.*");
         assertContains("pax-cdi", refreshedRepo);
