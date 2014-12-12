@@ -19,6 +19,8 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.management.MBeanNotificationInfo;
 import javax.management.MBeanRegistration;
@@ -133,6 +135,26 @@ public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
 
     public void removeRepository(String uri, boolean uninstall) throws Exception {
         featuresService.removeRepository(new URI(uri), uninstall);
+    }
+
+    public void refreshRepository(String url) throws Exception {
+        List<URI> uris = new ArrayList<URI>();
+        if (url != null && !url.isEmpty()) {
+            Pattern pattern = Pattern.compile(url);
+            for (Repository r : featuresService.listRepositories()) {
+                Matcher matcher = pattern.matcher(r.getURI().toString());
+                if (matcher.matches()) {
+                    uris.add(r.getURI());
+                }
+            }
+        } else {
+            for (Repository r : featuresService.listRepositories()) {
+                uris.add(r.getURI());
+            }
+        }
+        for (URI u : uris) {
+            featuresService.refreshRepository(u);
+        }
     }
 
     public void installFeature(String name) throws Exception {
