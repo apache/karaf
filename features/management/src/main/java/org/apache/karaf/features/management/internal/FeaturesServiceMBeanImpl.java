@@ -15,6 +15,8 @@ package org.apache.karaf.features.management.internal;
 
 import java.net.URI;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.management.MBeanNotificationInfo;
 import javax.management.MBeanRegistration;
 import javax.management.MBeanServer;
@@ -147,6 +149,27 @@ public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
 
     public void removeRepository(String uri, boolean uninstall) throws Exception {
         featuresService.removeRepository(new URI(uri), uninstall);
+    }
+
+    public void refreshRepository(String uri) throws Exception {
+        List<URI> uris = new ArrayList<URI>();
+        if (uri != null && uri.length() > 0) {
+            Pattern pattern = Pattern.compile(uri);
+            for (Repository repository : featuresService.listRepositories()) {
+                Matcher matcher = pattern.matcher(repository.getURI().toString());
+                if (matcher.matches()) {
+                    uris.add(repository.getURI());
+                }
+            }
+        } else {
+            for (Repository repository : featuresService.listRepositories()) {
+                uris.add(repository.getURI());
+            }
+        }
+        for (URI u : uris) {
+            featuresService.removeRepository(u);
+            featuresService.addRepository(u);
+        }
     }
 
     public void installFeature(String name) throws Exception {

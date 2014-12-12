@@ -112,6 +112,20 @@ public class FeaturesTest extends KarafTestSupport {
     }
 
     @Test
+    public void repoRefreshViaMBean() throws Exception {
+        JMXConnector connector = null;
+        try {
+            connector = this.getJMXConnector();
+            MBeanServerConnection connection = connector.getMBeanServerConnection();
+            ObjectName name = new ObjectName("org.apache.karaf:type=features,name=root");
+            connection.invoke(name, "refreshRepository", new Object[]{ ".*pax-.*" }, new String[]{ "java.lang.String" });
+        } finally {
+            if (connector != null)
+                connector.close();
+        }
+    }
+
+    @Test
     public void repoAddRemoveCommand() throws Exception {
         System.out.println(executeCommand("features:addurl mvn:org.apache.karaf.cellar/apache-karaf-cellar/2.2.4/xml/features"));
         String repoListOutput = executeCommand("features:listurl");
