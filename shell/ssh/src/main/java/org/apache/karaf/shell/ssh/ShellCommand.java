@@ -98,10 +98,10 @@ public class ShellCommand implements Command, SessionAware {
                 Object result;
                 if (subject != null) {
                     try {
-                        String scriptFileName = System.getProperty(SHELL_INIT_SCRIPT);
-                        executeScript(scriptFileName, session);
                         result = JaasHelper.doAs(subject, new PrivilegedExceptionAction<Object>() {
                             public Object run() throws Exception {
+                                String scriptFileName = System.getProperty(SHELL_INIT_SCRIPT);
+                                executeScript(scriptFileName, session);
                                 return session.execute(command);
                             }
                         });

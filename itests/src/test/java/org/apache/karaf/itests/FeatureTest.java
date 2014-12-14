@@ -111,4 +111,17 @@ public class FeatureTest extends KarafTestSupport {
         assertContains("pax-web", refreshedRepo);
     }
 
+    @Test
+    public void repoRefreshViaMBean() throws Exception {
+        JMXConnector connector = null;
+        try {
+            connector = this.getJMXConnector();
+            MBeanServerConnection connection = connector.getMBeanServerConnection();
+            ObjectName name = new ObjectName("org.apache.karaf:type=feature,name=root");
+            connection.invoke(name, "refreshRepository", new Object[] { ".*pax-web.*" }, new String[]{ "java.lang.String" });
+        } finally {
+            close(connector);
+        }
+    }
+
 }
