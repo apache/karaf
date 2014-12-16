@@ -48,7 +48,6 @@ import org.apache.felix.service.threadio.ThreadIO;
 import org.apache.karaf.shell.console.CloseShellException;
 import org.apache.karaf.shell.console.Completer;
 import org.apache.karaf.shell.console.completer.CommandsCompleter;
-import org.apache.karaf.shell.security.impl.SecuredCommandProcessorImpl;
 import org.apache.karaf.shell.console.util.Branding;
 import org.fusesource.jansi.Ansi;
 import org.osgi.framework.BundleContext;

@@ -98,12 +98,12 @@ public class ShellCommandFactory implements CommandFactory {
 
         public void start(final Environment env) throws IOException {
             int exitStatus = 0;
+            final CommandSession commandSession = commandProcessor.createSession(in, new PrintStream(out), new PrintStream(err));
             try {
-                final CommandSession session = commandProcessor.createSession(in, new PrintStream(out), new PrintStream(err));
-                session.put("SCOPE", "shell:osgi:*");
-                session.put("APPLICATION", System.getProperty("karaf.name", "root"));
+                commandSession.put("SCOPE", "shell:osgi:*");
+                commandSession.put("APPLICATION", System.getProperty("karaf.name", "root"));
                 for (Map.Entry<String,String> e : env.getEnv().entrySet()) {
-                    session.put(e.getKey(), e.getValue());
+                    commandSession.put(e.getKey(), e.getValue());
                 }
                 try {
                     Subject subject = this.session != null ? this.session.getAttribute(KarafJaasAuthenticator.SUBJECT_ATTRIBUTE_KEY) : null;
@@ -114,8 +114,8 @@ public class ShellCommandFactory implements CommandFactory {
                             result = JaasHelper.doAs(subject, new PrivilegedExceptionAction<Object>() {
                                 public Object run() throws Exception {
                                     String scriptFileName = System.getProperty(SHELL_INIT_SCRIPT);
-                                    executeScript(scriptFileName, session);
-                                    return session.execute(command);
+                                    executeScript(scriptFileName, commandSession);
+                                    return commandSession.execute(command);
                                 }
                             });
                         } catch (PrivilegedActionException e) {
@@ -123,12 +123,12 @@ public class ShellCommandFactory implements CommandFactory {
                         }
                     } else {
                         String scriptFileName = System.getProperty(SHELL_INIT_SCRIPT);
-                        executeScript(scriptFileName, session);
-                        result = session.execute(command);
+                        executeScript(scriptFileName, commandSession);
+                        result = commandSession.execute(command);
                     }
                     if (result != null)
                     {
-                        session.getConsole().println(session.format(result, Converter.INSPECT));
+                        commandSession.getConsole().println(commandSession.format(result, Converter.INSPECT));
                     }
                 } catch (Throwable t) {
                     exitStatus = 1;
@@ -139,9 +139,9 @@ public class ShellCommandFactory implements CommandFactory {
                         } else {
                             LOGGER.info("Exception caught while executing command", t);
                         }
-                        session.put(Console.LAST_EXCEPTION, t);
+                        commandSession.put(Console.LAST_EXCEPTION, t);
                         if (t instanceof CommandException) {
-                            session.getConsole().println(((CommandException) t).getNiceHelp());
+                            commandSession.getConsole().println(((CommandException) t).getNiceHelp());
                         } else if (isCommandNotFound) {
                             String str = Ansi.ansi()
                                     .fg(Ansi.Color.RED)
@@ -150,20 +150,20 @@ public class ShellCommandFactory implements CommandFactory {
                                     .a(t.getClass().getMethod("getCommand").invoke(t))
                                     .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
                                     .fg(Ansi.Color.DEFAULT).toString();
-                            session.getConsole().println(str);
+                            commandSession.getConsole().println(str);
                         }
-                        if (getBoolean(session, Console.PRINT_STACK_TRACES)) {
-                            session.getConsole().print(Ansi.ansi().fg(Ansi.Color.RED).toString());
-                            t.printStackTrace(session.getConsole());
-                            session.getConsole().print(Ansi.ansi().fg(Ansi.Color.DEFAULT).toString());
+                        if (getBoolean(commandSession, Console.PRINT_STACK_TRACES)) {
+                            commandSession.getConsole().print(Ansi.ansi().fg(Ansi.Color.RED).toString());
+                            t.printStackTrace(commandSession.getConsole());
+                            commandSession.getConsole().print(Ansi.ansi().fg(Ansi.Color.DEFAULT).toString());
                         }
                         else if (!(t instanceof CommandException) && !isCommandNotFound) {
-                            session.getConsole().print(Ansi.ansi().fg(Ansi.Color.RED).toString());
-                            session.getConsole().println("Error executing command: "
+                            commandSession.getConsole().print(Ansi.ansi().fg(Ansi.Color.RED).toString());
+                            commandSession.getConsole().println("Error executing command: "
                                     + (t.getMessage() != null ? t.getMessage() : t.getClass().getName()));
-                            session.getConsole().print(Ansi.ansi().fg(Ansi.Color.DEFAULT).toString());
+                            commandSession.getConsole().print(Ansi.ansi().fg(Ansi.Color.DEFAULT).toString());
                         }
-                        session.getConsole().flush();
+                        commandSession.getConsole().flush();
                     } catch (Exception ignore) {
                         // ignore
                     }
@@ -173,6 +173,7 @@ public class ShellCommandFactory implements CommandFactory {
                 throw (IOException) new IOException("Unable to start shell").initCause(e);
             } finally {
                 close(in, out, err);
+                commandSession.close();
                 callback.onExit(exitStatus);
             }
         }
