@@ -50,7 +50,6 @@ import org.apache.karaf.shell.console.Completer;
 import org.apache.karaf.shell.console.Console;
 import org.apache.karaf.shell.console.SessionProperties;
 import org.apache.karaf.shell.console.completer.CommandsCompleter;
-import org.apache.karaf.shell.security.impl.SecuredCommandProcessorImpl;
 import org.apache.karaf.shell.util.ShellUtil;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;

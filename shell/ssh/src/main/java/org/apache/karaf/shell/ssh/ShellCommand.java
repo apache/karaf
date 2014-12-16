@@ -86,12 +86,12 @@ public class ShellCommand implements Command, SessionAware {
 
     public void start(final Environment env) throws IOException {
         int exitStatus = 0;
+        final CommandSession commandSession = commandProcessor.createSession(in, new PrintStream(out), new PrintStream(err));
         try {
-            final CommandSession session = commandProcessor.createSession(in, new PrintStream(out), new PrintStream(err));
-            session.put("SCOPE", "shell:osgi:*");
-            session.put("APPLICATION", System.getProperty("karaf.name", "root"));
+            commandSession.put("SCOPE", "shell:osgi:*");
+            commandSession.put("APPLICATION", System.getProperty("karaf.name", "root"));
             for (Map.Entry<String,String> e : env.getEnv().entrySet()) {
-                session.put(e.getKey(), e.getValue());
+                commandSession.put(e.getKey(), e.getValue());
             }
             try {
                 Subject subject = this.session != null ? this.session.getAttribute(KarafJaasAuthenticator.SUBJECT_ATTRIBUTE_KEY) : null;
@@ -101,8 +101,8 @@ public class ShellCommand implements Command, SessionAware {
                         result = JaasHelper.doAs(subject, new PrivilegedExceptionAction<Object>() {
                             public Object run() throws Exception {
                                 String scriptFileName = System.getProperty(SHELL_INIT_SCRIPT);
-                                executeScript(scriptFileName, session);
-                                return session.execute(command);
+                                executeScript(scriptFileName, commandSession);
+                                return commandSession.execute(command);
                             }
                         });
                     } catch (PrivilegedActionException e) {
@@ -110,22 +110,23 @@ public class ShellCommand implements Command, SessionAware {
                     }
                 } else {
                     String scriptFileName = System.getProperty(SHELL_INIT_SCRIPT);
-                    executeScript(scriptFileName, session);
-                    result = session.execute(command);
+                    executeScript(scriptFileName, commandSession);
+                    result = commandSession.execute(command);
                 }
                 if (result != null)
                 {
-                    session.getConsole().println(session.format(result, Converter.INSPECT));
+                    commandSession.getConsole().println(commandSession.format(result, Converter.INSPECT));
                 }
             } catch (Throwable t) {
                 exitStatus = 1;
-                ShellUtil.logException(session, t);
+                ShellUtil.logException(commandSession, t);
             }
         } catch (Exception e) {
             exitStatus = 1;
             throw (IOException) new IOException("Unable to start shell").initCause(e);
         } finally {
             StreamUtils.close(in, out, err);
+            commandSession.close();
             callback.onExit(exitStatus);
         }
     }
