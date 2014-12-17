@@ -113,7 +113,7 @@ if not "%JAVA%" == "" goto :Check_JAVA_END
 if "%JAVA_OPTS%" == "" set JAVA_OPTS=%DEFAULT_JAVA_OPTS%
 
 if "%EXTRA_JAVA_OPTS%" == "" goto :KARAF_EXTRA_JAVA_OPTS_END
-    set JAVA_OPTS="%JAVA_OPTS% %EXTRA_JAVA_OPTS%"
+    set JAVA_OPTS=%JAVA_OPTS% %EXTRA_JAVA_OPTS%
 :KARAF_EXTRA_JAVA_OPTS_END
 
 set CLASSPATH=%KARAF_HOME%\lib\bin\karaf-client.jar
