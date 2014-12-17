@@ -15,7 +15,6 @@ package org.apache.karaf.itests;
 
 import static org.junit.Assert.assertTrue;
 import static org.ops4j.pax.exam.CoreOptions.maven;
-import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.configureSecurity;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.karafDistributionConfiguration;
@@ -369,7 +368,7 @@ public class KarafTestSupport {
     }
 
     public void assertFeatureInstalled(String featureName, String featureVersion) throws Exception {
-        Feature featureToAssert = featureService.getFeature(featureName, featureVersion);
+        Feature featureToAssert = featureService.getFeatures(featureName, featureVersion)[0];
         Feature[] features = featureService.listInstalledFeatures();
         for (Feature feature : features) {
             if (featureToAssert.equals(feature)) {
@@ -404,7 +403,7 @@ public class KarafTestSupport {
     }
 
     public void assertFeatureNotInstalled(String featureName, String featureVersion) throws Exception {
-        Feature featureToAssert = featureService.getFeature(featureName, featureVersion);
+        Feature featureToAssert = featureService.getFeatures(featureName, featureVersion)[0];
         Feature[] features = featureService.listInstalledFeatures();
         for (Feature feature : features) {
             if (featureToAssert.equals(feature)) {

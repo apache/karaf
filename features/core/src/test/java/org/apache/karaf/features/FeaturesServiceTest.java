@@ -19,7 +19,6 @@ package org.apache.karaf.features;
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.reset;
 import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -33,10 +32,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
@@ -350,10 +347,10 @@ public class FeaturesServiceTest extends TestBase {
         FeaturesServiceImpl svc = new FeaturesServiceImpl(null, null, new Storage(), null, null, null, null, null, null, null, null, null);
         svc.addRepository(uri);
 
-        assertEquals(feature("f2", "0.2"), svc.getFeature("f2", "[0.1,0.3)"));
-        assertEquals(feature("f2", "0.2"), svc.getFeature("f2", "0.0.0"));
-        assertEquals(feature("f2", "0.2"), svc.getFeature("f2", "0.2"));
-        assertNull(svc.getFeature("f2", "0.3"));
+        assertEquals(feature("f2", "0.2"), svc.getFeatures("f2", "[0.1,0.3)")[0]);
+        assertEquals(feature("f2", "0.2"), svc.getFeatures("f2", "0.0.0")[0]);
+        assertEquals(feature("f2", "0.2"), svc.getFeatures("f2", "0.2")[0]);
+        assertNull(svc.getFeatures("f2", "0.3")[0]);
     }
 
     @Test
@@ -418,7 +415,9 @@ public class FeaturesServiceTest extends TestBase {
 
         FeaturesServiceImpl svc = new FeaturesServiceImpl(null, null, new Storage(), null, null, null, null, null, null, null, null, null);
         svc.addRepository(uri);
-        Feature feature = svc.getFeature("f1");
+        Feature[] features = svc.getFeatures("f1");
+        Assert.assertEquals(1, features.length);
+        Feature feature = features[0];
         Assert.assertNotNull("No feature named fi found", feature);        
         List<BundleInfo> bundles = feature.getBundles();
         Assert.assertEquals(2, bundles.size());

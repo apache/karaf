@@ -43,6 +43,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.felix.utils.version.VersionCleaner;
 import org.apache.felix.utils.version.VersionRange;
@@ -464,12 +466,38 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
     //
 
     public Feature getFeature(String name) throws Exception {
-        return getFeature(name, null);
+        Feature[] features = this.getFeatures(name);
+        if (features.length < 1) {
+            return null;
+        } else {
+            return features[0];
+        }
     }
 
     public Feature getFeature(String name, String version) throws Exception {
-        Map<String, Feature> versions = getFeatures().get(name);
-        return getFeatureMatching(versions, version);
+        Feature[] features = this.getFeatures(name, version);
+        if (features.length < 1) {
+            return null;
+        } else {
+            return features[0];
+        }
+    }
+
+    public Feature[] getFeatures(String name) throws Exception {
+        return getFeatures(name, null);
+    }
+
+    public Feature[] getFeatures(String name, String version) throws Exception {
+        List<Feature> features = new ArrayList<>();
+        Pattern pattern = Pattern.compile(name);
+        for (String featureName : getFeatures().keySet()) {
+            Matcher matcher = pattern.matcher(featureName);
+            if (matcher.matches()) {
+                Map<String, Feature> versions = getFeatures().get(featureName);
+                features.add(getFeatureMatching(versions, version));
+            }
+        }
+        return features.toArray(new Feature[features.size()]);
     }
 
     protected Feature getFeatureMatching(Map<String, Feature> versions, String version) {
@@ -701,19 +729,24 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
             region = ROOT_REGION;
         }
         List<String> featuresToAdd = new ArrayList<>();
-        Map<String, Map<String, Feature>> featuresMap = getFeatures();
         for (String feature : features) {
             feature = normalize(feature);
             String name = feature.substring(0, feature.indexOf("/"));
             String version = feature.substring(feature.indexOf("/") + 1);
-            Feature f = getFeatureMatching(featuresMap.get(name), version);
-            if (f == null) {
-                if (!options.contains(Option.NoFailOnFeatureNotFound)) {
-                    throw new IllegalArgumentException("No matching features for " + feature);
+            Pattern pattern = Pattern.compile(name);
+            for (String fKey : getFeatures().keySet()) {
+                Matcher matcher = pattern.matcher(fKey);
+                if (matcher.matches()) {
+                    Feature f = getFeatureMatching(getFeatures().get(fKey), version);
+                    if (f == null) {
+                        if (!options.contains(Option.NoFailOnFeatureNotFound)) {
+                            throw new IllegalArgumentException("No matching features for " + feature);
+                        }
+                    } else {
+                        String req = f.getName() + "/" + new VersionRange(f.getVersion(), true);
+                        featuresToAdd.add(req);
+                    }
                 }
-            } else {
-                String req = f.getName() + "/" + new VersionRange(f.getVersion(), true);
-                featuresToAdd.add(req);
             }
         }
         featuresToAdd = new ArrayList<>(new LinkedHashSet<>(featuresToAdd));
@@ -756,33 +789,32 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
             if (feature.endsWith("/0.0.0")) {
                 String nameSep = "feature:" + feature.substring(0, feature.indexOf("/") + 1);
                 for (String f : fl) {
-                    if (normalize(f).startsWith(nameSep)) {
+                    Pattern pattern = Pattern.compile(nameSep.substring(0, nameSep.length() - 1));
+                    Matcher matcher = pattern.matcher(f);
+                    if (matcher.matches() || normalize(f).startsWith(nameSep)) {
                         toRemove.add(f);
                     }
                 }
             } else {
                 String name = feature.substring(0, feature.indexOf("/"));
                 String version = feature.substring(feature.indexOf("/") + 1);
-                String req = "feature:" + name + "/" + new VersionRange(version, true);
-                toRemove.add(req);
+                for (String f : fl) {
+                    String req = "feature:" + name + "/" + new VersionRange(version, true);
+                    req = req.replace("[", "\\[");
+                    req = req.replace("(", "\\(");
+                    req = req.replace("]", "\\]");
+                    req = req.replace(")", "\\)");
+                    Pattern pattern = Pattern.compile(req);
+                    Matcher matcher = pattern.matcher(f);
+                    if (matcher.matches()) {
+                        toRemove.add(f);
+                    }
+                }
             }
             toRemove.retainAll(fl);
+
             if (toRemove.isEmpty()) {
                 throw new IllegalArgumentException("Feature named '" + feature + "' is not installed");
-            } else if (toRemove.size() > 1) {
-                String name = feature.substring(0, feature.indexOf("/"));
-                StringBuilder sb = new StringBuilder();
-                sb.append("Feature named '").append(name).append("' has multiple versions installed (");
-                for (int i = 0; i < toRemove.size(); i++) {
-                    if (i > 0) {
-                        sb.append(", ");
-                    }
-                    String f = toRemove.get(i);
-                    String version = f.substring(f.indexOf("/") + 1);
-                    sb.append(version);
-                }
-                sb.append("). Please specify the version to uninstall.");
-                throw new IllegalArgumentException(sb.toString());
             }
             featuresToRemove.addAll(toRemove);
         }

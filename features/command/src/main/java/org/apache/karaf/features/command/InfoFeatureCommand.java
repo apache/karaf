@@ -16,10 +16,8 @@
  */
 package org.apache.karaf.features.command;
 
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Conditional;
@@ -66,15 +64,15 @@ public class InfoFeatureCommand extends FeaturesCommandSupport {
     private boolean tree;
 
     protected void doExecute(FeaturesService admin) throws Exception {
-        Feature feature = null;
+        Feature[] features = null;
 
         if (version != null && version.length() > 0) {
-            feature = admin.getFeature(name, version);
+            features = admin.getFeatures(name, version);
         } else {
-            feature = admin.getFeature(name);
+            features = admin.getFeatures(name);
         }
 
-        if (feature == null) {
+        if (features == null) {
             System.out.println("Feature not found");
             return;
         }
@@ -87,43 +85,46 @@ public class InfoFeatureCommand extends FeaturesCommandSupport {
             conditional = true;
         }
 
-        System.out.println("Feature " + feature.getName() + " " + feature.getVersion());
-        if (feature.getDescription() != null) {
-        	System.out.println("Description:");
-        	System.out.println(INDENT + feature.getDescription());
-        }
-        
-        if(feature.getDetails() != null) {
-        	System.out.println("Details:");
-        	printWithIndent(feature.getDetails());
-        }
-
-        if (config) {
-            displayConfigInformation(feature, FEATURE_CONTENT);
-            displayConfigFileInformation(feature, FEATURE_CONTENT);
-        }
-
-        if (dependency) {
-            displayDependencyInformation(feature, FEATURE_CONTENT);
-        }
-
-        if (bundle) {
-            displayBundleInformation(feature, FEATURE_CONTENT);
-        }
-
-        if(conditional) {
-           displayConditionalInfo(feature);
-        }
-
-        if (tree) {
-            if (config || dependency || bundle) {
-                System.out.println("\nFeature tree");
+        for (Feature feature : features) {
+            System.out.println("------------------------------------");
+            System.out.println("Feature " + feature.getName() + " " + feature.getVersion());
+            if (feature.getDescription() != null) {
+                System.out.println("Description:");
+                System.out.println(INDENT + feature.getDescription());
             }
 
-            int unresolved = displayFeatureTree(admin, feature.getName(), feature.getVersion(), "");
-            if (unresolved > 0) {
-                System.out.println("Tree contains " + unresolved + " unresolved dependencies");
-                System.out.println(" * means that node declares dependency but the dependent feature is not available.");
+            if (feature.getDetails() != null) {
+                System.out.println("Details:");
+                printWithIndent(feature.getDetails());
+            }
+
+            if (config) {
+                displayConfigInformation(feature, FEATURE_CONTENT);
+                displayConfigFileInformation(feature, FEATURE_CONTENT);
+            }
+
+            if (dependency) {
+                displayDependencyInformation(feature, FEATURE_CONTENT);
+            }
+
+            if (bundle) {
+                displayBundleInformation(feature, FEATURE_CONTENT);
+            }
+
+            if (conditional) {
+                displayConditionalInfo(feature);
+            }
+
+            if (tree) {
+                if (config || dependency || bundle) {
+                    System.out.println("\nFeature tree");
+                }
+
+                int unresolved = displayFeatureTree(admin, feature.getName(), feature.getVersion(), "");
+                if (unresolved > 0) {
+                    System.out.println("Tree contains " + unresolved + " unresolved dependencies");
+                    System.out.println(" * means that node declares dependency but the dependent feature is not available.");
+                }
             }
         }
     }
@@ -202,48 +203,50 @@ public class InfoFeatureCommand extends FeaturesCommandSupport {
     private int displayFeatureTree(FeaturesService admin, String featureName, String featureVersion, String prefix) throws Exception {
         int unresolved = 0;
 
-        Feature resolved = admin.getFeature(featureName, featureVersion);
-        if (resolved != null) {
-            System.out.println(prefix + " " + resolved.getName() + " " + resolved.getVersion());
-        } else {
-            System.out.println(prefix + " " + featureName + " " + featureVersion + " *");
-            unresolved++;
-        }
+        Feature[] resolvedFeatures = admin.getFeatures(featureName, featureVersion);
+        for (Feature resolved:resolvedFeatures) {
+            if (resolved != null) {
+                System.out.println(prefix + " " + resolved.getName() + " " + resolved.getVersion());
+            } else {
+                System.out.println(prefix + " " + featureName + " " + featureVersion + " *");
+                unresolved++;
+            }
 
-        if (resolved != null) {
-            if (bundle) {
-                List<String> bundleLocation = new LinkedList<String>();
-                List<BundleInfo> bundles = resolved.getBundles();
-                for (BundleInfo bundleInfo : bundles) {
-                    bundleLocation.add(bundleInfo.getLocation());
+            if (resolved != null) {
+                if (bundle) {
+                    List<String> bundleLocation = new LinkedList<String>();
+                    List<BundleInfo> bundles = resolved.getBundles();
+                    for (BundleInfo bundleInfo : bundles) {
+                        bundleLocation.add(bundleInfo.getLocation());
+                    }
+
+                    if (conditional) {
+                        for (Conditional cond : resolved.getConditional()) {
+                            List<String> condition = cond.getCondition();
+                            List<BundleInfo> conditionalBundles = cond.getBundles();
+                            for (BundleInfo bundleInfo : conditionalBundles) {
+                                bundleLocation.add(bundleInfo.getLocation() + "(condition:" + condition + ")");
+                            }
+                        }
+                    }
+                    for (int i = 0, j = bundleLocation.size(); i < j; i++) {
+                        System.out.println(prefix + " " + (i + 1 == j ? "\\" : "+") + " " + bundleLocation.get(i));
+                    }
+                }
+                prefix += "   ";
+                List<Dependency> dependencies = resolved.getDependencies();
+                for (int i = 0, j = dependencies.size(); i < j; i++) {
+                    Dependency toDisplay = dependencies.get(i);
+                    unresolved += displayFeatureTree(admin, toDisplay.getName(), toDisplay.getVersion(), prefix + 1);
                 }
 
                 if (conditional) {
                     for (Conditional cond : resolved.getConditional()) {
-                        List<String> condition = cond.getCondition();
-                        List<BundleInfo> conditionalBundles = cond.getBundles();
-                        for (BundleInfo bundleInfo : conditionalBundles) {
-                            bundleLocation.add(bundleInfo.getLocation() + "(condition:"+condition+")");
+                        List<Dependency> conditionDependencies = cond.getDependencies();
+                        for (int i = 0, j = conditionDependencies.size(); i < j; i++) {
+                            Dependency toDisplay = dependencies.get(i);
+                            unresolved += displayFeatureTree(admin, toDisplay.getName(), toDisplay.getVersion(), prefix + 1);
                         }
-                    }
-                }
-                for (int i = 0, j = bundleLocation.size(); i < j; i++) {
-                    System.out.println(prefix + " " + (i + 1 == j ? "\\" : "+") + " " + bundleLocation.get(i));
-                }
-            }
-            prefix += "   ";
-            List<Dependency> dependencies = resolved.getDependencies();
-            for (int i = 0, j = dependencies.size(); i < j; i++) {
-                Dependency toDisplay =  dependencies.get(i);
-                unresolved += displayFeatureTree(admin, toDisplay.getName(), toDisplay.getVersion(), prefix +1);
-            }
-
-            if (conditional) {
-                for (Conditional cond : resolved.getConditional()) {
-                    List<Dependency> conditionDependencies = cond.getDependencies();
-                    for (int i = 0, j = conditionDependencies.size(); i < j; i++) {
-                        Dependency toDisplay =  dependencies.get(i);
-                        unresolved += displayFeatureTree(admin, toDisplay.getName(), toDisplay.getVersion(), prefix +1);
                     }
                 }
             }

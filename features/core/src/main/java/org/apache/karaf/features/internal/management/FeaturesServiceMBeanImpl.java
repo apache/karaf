@@ -234,8 +234,8 @@ public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
 
     public TabularData infoFeature(String name) throws Exception {
         try {
-            Feature feature = featuresService.getFeature(name);
-            return infoFeature(feature);
+            Feature[] features = featuresService.getFeatures(name);
+            return infoFeature(features);
         } catch (Throwable t) {
             t.printStackTrace();
             return null;
@@ -244,23 +244,25 @@ public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
 
     public TabularData infoFeature(String name, String version) throws Exception {
         try {
-            Feature feature = featuresService.getFeature(name, version);
-            return infoFeature(feature);
+            Feature[] features = featuresService.getFeatures(name, version);
+            return infoFeature(features);
         } catch (Throwable t) {
             t.printStackTrace();
             return null;
         }
     }
 
-    private TabularData infoFeature(Feature feature) throws Exception {
-        JmxFeature jmxFeature;
-        if (featuresService.isInstalled(feature)) {
-            jmxFeature = new JmxFeature(feature, true);
-        } else {
-            jmxFeature = new JmxFeature(feature, false);
-        }
+    private TabularData infoFeature(Feature[] f) throws Exception {
         ArrayList<JmxFeature> features = new ArrayList<>();
-        features.add(jmxFeature);
+        for (Feature feature:f) {
+            JmxFeature jmxFeature;
+            if (featuresService.isInstalled(feature)) {
+                jmxFeature = new JmxFeature(feature, true);
+            } else {
+                jmxFeature = new JmxFeature(feature, false);
+            }
+            features.add(jmxFeature);
+        }
         return JmxFeature.tableFrom(features);
     }
 

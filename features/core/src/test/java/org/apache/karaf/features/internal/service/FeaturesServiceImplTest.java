@@ -54,8 +54,8 @@ public class FeaturesServiceImplTest extends TestBase {
                 return features;
             }
         };
-        assertNotNull(impl.getFeature("transaction", org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION));
-        assertSame(transactionFeature, impl.getFeature("transaction", org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION));
+        assertNotNull(impl.getFeatures("transaction", org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION));
+        assertSame(transactionFeature, impl.getFeatures("transaction", org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION)[0]);
     }
     
     @Test
@@ -65,7 +65,9 @@ public class FeaturesServiceImplTest extends TestBase {
                 return features(feature("transaction", "1.0.0"));
             }
         };
-        Feature feature = impl.getFeature("transaction", "  1.0.0  ");
+        Feature[] features = impl.getFeatures("transaction", "  1.0.0  ");
+        assertEquals(1, features.length);
+        Feature feature = features[0];
         assertNotNull(feature);
         assertSame("transaction", feature.getName());
     }
@@ -77,7 +79,7 @@ public class FeaturesServiceImplTest extends TestBase {
                 return features(feature("transaction", "1.0.0"));
             }
         };
-        assertNull(impl.getFeature("activemq", org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION));
+        assertEquals(0, impl.getFeatures("activemq", org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION).length);
     }
     
     @Test
@@ -91,8 +93,8 @@ public class FeaturesServiceImplTest extends TestBase {
                 return features;
             }
         };
-        assertNotNull(impl.getFeature("transaction", org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION));
-        assertEquals("2.0.0", impl.getFeature("transaction", org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION).getVersion());
+        assertNotNull(impl.getFeatures("transaction", org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION));
+        assertEquals("2.0.0", impl.getFeatures("transaction", org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION)[0].getVersion());
     }
 
     /**
