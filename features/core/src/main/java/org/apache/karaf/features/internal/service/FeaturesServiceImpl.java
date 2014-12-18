@@ -461,6 +461,34 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         }
     }
 
+    @Override
+    public Repository getRepository(URI uri) throws Exception {
+        // Make sure the cache is loaded
+        getFeatures();
+        synchronized (lock) {
+            for (Repository repo : this.repositoryCache.values()) {
+                if (repo.getURI().equals(uri)) {
+                    return repo;
+                }
+            }
+            return null;
+        }
+    }
+
+    @Override
+    public String getRepositoryName(URI uri) throws Exception {
+        // Make sure the cache is loaded
+        getFeatures();
+        synchronized (lock) {
+            for (Repository repo : this.repositoryCache.values()) {
+                if (repo.getURI().equals(uri)) {
+                    return repo.getName();
+                }
+            }
+            return null;
+        }
+    }
+
     //
     // Features support
     //
