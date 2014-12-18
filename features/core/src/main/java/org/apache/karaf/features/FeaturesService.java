@@ -56,6 +56,10 @@ public interface FeaturesService {
     
     Repository getRepository(String repoName);
 
+    Repository getRepository(URI uri);
+
+    String getRepositoryName(URI uri);
+
     void installFeature(String name) throws Exception;
 
     void installFeature(String name, EnumSet<Option> options) throws Exception;

@@ -315,6 +315,15 @@ public class FeaturesServiceImpl implements FeaturesService {
         return null;
     }
 
+    public Repository getRepository(URI uri) {
+        return repositories.get(uri);
+    }
+
+    @Override
+    public String getRepositoryName(URI uri) {
+        return repositories.get(uri).getName();
+    }
+
     /**
      * Install a feature identified by a name.
      *
