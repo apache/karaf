@@ -349,6 +349,44 @@ public class FeaturesServiceImpl implements FeaturesService {
     }
 
     /**
+     * Get the repository identified by the given URI.
+     *
+     * @param uri the repository URI.
+     * @return the repository.
+     */
+    public Repository getRepository(URI uri) {
+        return repositories.get(uri);
+    }
+
+    /**
+     * Get the repository identified by the given name.
+     *
+     * @param name the repository name.
+     * @return the repository.
+     */
+    public Repository getRepository(String name) {
+        for (Repository repo : repositories.values()) {
+            if (repo.getName().equals(name)) {
+                return repo;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Get the repository name for the given URI.
+     *
+     * @param uri the repository URI.
+     * @return the repository name.
+     */
+    public String getRepositoryName(URI uri) {
+        if (repositories.get(uri) != null) {
+            return repositories.get(uri).getName();
+        }
+        return null;
+    }
+
+    /**
      * Install a feature identified by a name.
      *
      * @param name the name of the feature.

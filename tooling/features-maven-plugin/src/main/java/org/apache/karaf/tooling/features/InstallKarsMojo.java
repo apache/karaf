@@ -141,6 +141,12 @@ public class InstallKarsMojo extends MojoSupport {
             return new Repository[0];
         }
 
+        public Repository getRepository(URI url) { return null; }
+
+        public Repository getRepository(String name) { return null; }
+
+        public String getRepositoryName(URI url) { return null; }
+
         public void installFeature(String name) throws Exception {
         }
 
