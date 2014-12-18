@@ -316,7 +316,10 @@ public class FeaturesServiceImpl implements FeaturesService {
     }
 
     public Repository getRepository(URI uri) {
-        return repositories.get(uri);
+        if (repositories.get(uri) != null) {
+            return repositories.get(uri);
+        }
+        return null;
     }
 
     @Override
