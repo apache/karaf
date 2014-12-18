@@ -52,9 +52,10 @@ public class ClientConfig {
         user = null;
         password = null;
         StringBuilder commandBuilder = new StringBuilder();
-
+        boolean endOfOptionsMarkerReached = false;
+        
         for (int i = 0; i < args.length; i++) {
-            if (args[i].charAt(0) == '-') {
+            if (!endOfOptionsMarkerReached && args[i].charAt(0) == '-') {
                 if (args[i].equals("-a")) {
                     if (args.length <= ++i) {
                         System.err.println("miss the port");
@@ -110,6 +111,8 @@ public class ClientConfig {
                     }
                 } else if (args[i].equals("--help")) {
                     showHelp();
+                } else if (args[i].equals("--")) {
+                    endOfOptionsMarkerReached = true;
                 } else {
                     System.err.println("Unknown option: " + args[i]);
                     System.err.println("Run with --help for usage");
@@ -147,7 +150,7 @@ public class ClientConfig {
         System.out.println("  -b            batch mode, specify multiple commands via standard input");
         System.out.println("  -f [file]     read commands from the specified file");
         System.out.println("  -k [keyFile]    specify the private keyFile location when using key login, need have BouncyCastle registered as security provider using this flag");
-        System.out.println("  [commands]    commands to run");
+        System.out.println("  [commands] [--]   commands to run");
         System.out.println("If no commands are specified, the client will be put in an interactive mode");
         System.exit(0);
     }
