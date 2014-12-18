@@ -152,25 +152,15 @@ public class FeaturesServiceTest extends TestBase {
         FeaturesServiceImpl svc = new FeaturesServiceImpl(bundleManager);
         svc.addRepository(uri);
 
-        try {
-            svc.uninstallFeature("f1");
-            fail("Uninstall should have failed as feature is not installed");
-        } catch (Exception e) {
-            // ok
-        }
+        svc.uninstallFeature("f1");
 
         svc.installFeature("f1", "0.1", EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
         svc.installFeature("f1", "0.2", EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
 
-        try {
-            svc.uninstallFeature("f1");
-            fail("Uninstall should have failed as feature is installed in multiple versions");
-        } catch (Exception e) {
-            // ok
-        }
-
+        svc.uninstallFeature("f1");
         svc.uninstallFeature("f1", "0.1");
         svc.uninstallFeature("f1");
+
         verify(bundleManager);
     }    
     
