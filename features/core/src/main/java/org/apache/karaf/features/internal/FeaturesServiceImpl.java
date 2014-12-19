@@ -369,8 +369,23 @@ public class FeaturesServiceImpl implements FeaturesService {
      */
     public void installFeature(String name, String version, EnumSet<Option> options) throws Exception {
         Feature[] features = getFeatures(name, version);
+        ArrayList<Exception> exceptions = new ArrayList<Exception>();
+        if (features.length < 1) {
+            throw new IllegalStateException("No feature matching " + name + "/" + version);
+        }
         for (Feature feature : features) {
-            installFeature(feature, options);
+            try {
+                installFeature(feature, options);
+            } catch (Exception e) {
+                exceptions.add(e);
+            }
+        }
+        if (!exceptions.isEmpty()) {
+            StringBuilder builder = new StringBuilder();
+            for (Exception exception : exceptions) {
+                builder.append("\t\n").append(exception.getMessage());
+            }
+            throw new IllegalStateException("Can't install feature " + name + "/" + version + ": " + builder.toString());
         }
     }
 
@@ -393,7 +408,6 @@ public class FeaturesServiceImpl implements FeaturesService {
      * @throws Exception in case of install failure.
      */
     public void installFeatures(Set<Feature> features, EnumSet<Option> options) throws Exception {
-
         final InstallationState state = new InstallationState();
         final InstallationState failure = new InstallationState();
         boolean verbose = options.contains(FeaturesService.Option.Verbose);
@@ -653,8 +667,23 @@ public class FeaturesServiceImpl implements FeaturesService {
                 toRemove.add(f);
             }
         }
+        if (toRemove.isEmpty()) {
+            throw new IllegalStateException("No installed feature matching " + name);
+        }
+        ArrayList<Exception> exceptions = new ArrayList<Exception>();
         for (Feature f : toRemove) {
-            uninstallFeature(f.getName(), f.getVersion(), options);
+            try {
+                uninstallFeature(f.getName(), f.getVersion(), options);
+            } catch (Exception e) {
+                exceptions.add(e);
+            }
+        }
+        if (!exceptions.isEmpty()) {
+            StringBuilder builder = new StringBuilder();
+            for (Exception exception : exceptions) {
+                builder.append("\t\n").append(exception);
+            }
+            throw new IllegalStateException("Can't uninstall feature " + name + ": " + builder.toString());
         }
     }
 

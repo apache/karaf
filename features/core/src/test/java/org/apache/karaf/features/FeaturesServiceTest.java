@@ -152,14 +152,24 @@ public class FeaturesServiceTest extends TestBase {
         FeaturesServiceImpl svc = new FeaturesServiceImpl(bundleManager);
         svc.addRepository(uri);
 
-        svc.uninstallFeature("f1");
+        try {
+            svc.uninstallFeature("f1");
+            fail("Exception expected as feature f1 is not installed");
+        } catch (Exception e) {
+            // normal
+        }
 
         svc.installFeature("f1", "0.1", EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
         svc.installFeature("f1", "0.2", EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
 
         svc.uninstallFeature("f1");
         svc.uninstallFeature("f1", "0.1");
-        svc.uninstallFeature("f1");
+        try {
+            svc.uninstallFeature("f1");
+            fail("Exception expected as feature f1 has already been uninstalled");
+        } catch (Exception e) {
+            // normal
+        }
 
         verify(bundleManager);
     }    
