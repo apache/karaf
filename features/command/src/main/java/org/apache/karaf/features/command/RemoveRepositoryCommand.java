@@ -16,7 +16,10 @@
  */
 package org.apache.karaf.features.command;
 
-import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
@@ -26,22 +29,29 @@ import org.apache.karaf.features.Repository;
 @Command(scope = "features", name = "removeRepository", description = "Removes the specified repository features service.")
 public class RemoveRepositoryCommand extends FeaturesCommandSupport {
 
-    @Argument(index = 0, name = "repository", description = "Name of the repository to remove.", required = true, multiValued = false)
-    private String repository;
+    @Argument(index = 0, name = "repositories", description = "Name of the repositories to remove.", required = true, multiValued = false)
+    private List<String> repositories;
 
     protected void doExecute(FeaturesService admin) throws Exception {
-    	URI uri = null;
-    	for (Repository r :admin.listRepositories()) {
-    		if (r.getName().equals(repository)) {
-    			uri = r.getURI();
-    			break;
-    		}
-    	}
+        ArrayList<Repository> repositoriesToRemove = new ArrayList<Repository>();
+        for (String repository : repositories) {
+            Pattern pattern = Pattern.compile(repository);
+            for (Repository r : admin.listRepositories()) {
+                Matcher matcher = pattern.matcher(r.getName());
+                if (matcher.matches()) {
+                    repositoriesToRemove.add(r);
+                }
+            }
+        }
 
-    	if (uri == null) {
-    		System.out.println("Repository '" + repository + "' not found.") ;
-    	} else {
-    		admin.removeRepository(uri);
-    	}
+        for (Repository r : repositoriesToRemove) {
+            System.out.println("Removing repository " + r.getName() + " (" + r.getURI() + ")");
+            try {
+                admin.removeRepository(r.getURI());
+            } catch (Exception e) {
+                System.err.println("Can't remove repository " + r.getName() + " (" + r.getURI() + "): " + e.getMessage());
+            }
+        }
+
     }
 }

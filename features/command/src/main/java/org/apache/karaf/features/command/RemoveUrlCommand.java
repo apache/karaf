@@ -17,12 +17,16 @@
 package org.apache.karaf.features.command;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 import org.apache.felix.gogo.commands.Option;
 import org.apache.karaf.features.FeaturesService;
+import org.apache.karaf.features.Repository;
 
 @Command(scope = "features", name = "removeUrl", description = "Removes the given list of repository URLs from the features service")
 public class RemoveUrlCommand extends FeaturesCommandSupport {
@@ -34,8 +38,24 @@ public class RemoveUrlCommand extends FeaturesCommandSupport {
     boolean uninstall;
 
     protected void doExecute(FeaturesService admin) throws Exception {
+        ArrayList<URI> urisToRemove = new ArrayList<URI>();
         for (String url : urls) {
-            admin.removeRepository(new URI(url), uninstall);
+            Pattern pattern = Pattern.compile(url);
+            for (Repository r : admin.listRepositories()) {
+                Matcher matcher = pattern.matcher(r.getURI().toString());
+                if (matcher.matches()) {
+                    urisToRemove.add(r.getURI());
+                }
+            }
+        }
+
+        for (URI uri : urisToRemove) {
+            System.out.println("Removing repository URI " + uri);
+            try {
+                admin.removeRepository(uri, uninstall);
+            } catch (Exception e) {
+                System.err.println("Can't remove repository URI " + uri + ": " + e.getMessage());
+            }
         }
     }
 }

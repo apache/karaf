@@ -144,11 +144,39 @@ public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
     }
 
     public void removeRepository(String uri) throws Exception {
-        featuresService.removeRepository(new URI(uri));
+        removeRepository(uri, false);
     }
 
     public void removeRepository(String uri, boolean uninstall) throws Exception {
-        featuresService.removeRepository(new URI(uri), uninstall);
+        Pattern pattern = Pattern.compile(uri);
+        ArrayList<URI> urisToRemove = new ArrayList<URI>();
+        for (Repository repository : featuresService.listRepositories()) {
+            Matcher matcher = pattern.matcher(repository.getURI().toString());
+            if (matcher.matches()) {
+                urisToRemove.add(repository.getURI());
+            }
+        }
+        for (URI uriToRemove : urisToRemove) {
+            featuresService.removeRepository(uriToRemove, uninstall);
+        }
+    }
+
+    public void removeRepositoryByName(String name) throws Exception {
+        removeRepositoryByName(name, false);
+    }
+    
+    public void removeRepositoryByName(String name, boolean uninstall) throws Exception {
+        Pattern pattern = Pattern.compile(name);
+        ArrayList<URI> urisToRemove = new ArrayList<URI>();
+        for (Repository repository : featuresService.listRepositories()) {
+            Matcher matcher = pattern.matcher(repository.getName());
+            if (matcher.matches()) {
+                urisToRemove.add(repository.getURI());
+            }
+        }
+        for (URI uriToRemove : urisToRemove) {
+            featuresService.removeRepository(uriToRemove, uninstall);
+        }
     }
 
     public void refreshRepository(String uri) throws Exception {
