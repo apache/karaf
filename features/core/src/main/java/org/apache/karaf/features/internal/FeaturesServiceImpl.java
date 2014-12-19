@@ -429,6 +429,9 @@ public class FeaturesServiceImpl implements FeaturesService {
     public void installFeature(String name, String version, EnumSet<Option> options) throws Exception {
         ArrayList<Exception> exceptions = new ArrayList<Exception>();
         Feature[] features = getFeatures(name, version);
+        if (features.length < 1) {
+            throw new IllegalStateException("No feature matching " + name + "/" + version);
+        }
         for (Feature f : features) {
             try {
                 installFeature(f, options);
