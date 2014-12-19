@@ -239,14 +239,6 @@ public class FeaturesServiceTest extends TestCase {
         svc.installFeature("f1", "0.1", EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
         svc.installFeature("f1", "0.2", EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
 
-        try {
-            svc.uninstallFeature("f1");
-            fail("Uninstall should have failed as feature is installed in multiple versions");
-        } catch (Exception e) {
-            // ok
-        }
-
-        svc.uninstallFeature("f1", "0.1");
         svc.uninstallFeature("f1");
     }    
     

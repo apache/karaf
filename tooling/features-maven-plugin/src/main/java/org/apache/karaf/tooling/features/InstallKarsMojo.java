@@ -189,6 +189,14 @@ public class InstallKarsMojo extends MojoSupport {
             return false;
         }
 
+        public Feature[] getFeatures(String name, String version) throws Exception {
+            return null;
+        }
+
+        public Feature[] getFeatures(String name) throws Exception {
+            return null;
+        }
+
         public Feature getFeature(String name, String version) throws Exception {
             return null;
         }

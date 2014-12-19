@@ -164,7 +164,7 @@ public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
     public void removeRepositoryByName(String name) throws Exception {
         removeRepositoryByName(name, false);
     }
-    
+
     public void removeRepositoryByName(String name, boolean uninstall) throws Exception {
         Pattern pattern = Pattern.compile(name);
         ArrayList<URI> urisToRemove = new ArrayList<URI>();

@@ -410,7 +410,7 @@ public class FeaturesServiceImpl implements FeaturesService {
     /**
      * Install a feature identified by a name and a version.
      *
-     * @param name    the name of the feature.
+     * @param name    the name of the feature (supporting regex).
      * @param version the version of the feature.
      * @throws Exception in case of installation failure.
      */
@@ -418,13 +418,31 @@ public class FeaturesServiceImpl implements FeaturesService {
         installFeature(name, version, EnumSet.noneOf(Option.class));
     }
 
+    /**
+     * Install a feature identified by a name and a version, and installation option.
+     *
+     * @param name the name of the feature (supporting regex).
+     * @param version the version of the feature.
+     * @param options the installation option.
+     * @throws Exception in case of installation failure.
+     */
     public void installFeature(String name, String version, EnumSet<Option> options) throws Exception {
-        Feature f = getFeature(name, version);
-        if (f == null) {
-            throw new Exception("No feature named '" + name
-                    + "' with version '" + version + "' available");
+        ArrayList<Exception> exceptions = new ArrayList<Exception>();
+        Feature[] features = getFeatures(name, version);
+        for (Feature f : features) {
+            try {
+                installFeature(f, options);
+            } catch (Exception e) {
+                exceptions.add(e);
+            }
         }
-        installFeature(f, options);
+        if (!exceptions.isEmpty()) {
+            StringBuilder builder = new StringBuilder();
+            for (Exception exception : exceptions) {
+                builder.append("\t\n").append(exception.getMessage());
+            }
+            throw new IllegalStateException("Can't install feature " + name + "/" + version + ": " + builder.toString());
+        }
     }
 
     public void installFeature(Feature f, EnumSet<Option> options) throws Exception {
@@ -1040,27 +1058,20 @@ public class FeaturesServiceImpl implements FeaturesService {
     }
 
     public void uninstallFeature(String name, EnumSet<Option> options) throws Exception {
-        List<String> versions = new ArrayList<String>();
+        ArrayList<Feature> featuresToUninstall = new ArrayList<Feature>();
+        Pattern pattern = Pattern.compile(name);
         for (Feature f : installed.keySet()) {
-            if (name.equals(f.getName())) {
-                versions.add(f.getVersion());
+            Matcher matcher = pattern.matcher(f.getName());
+            if (matcher.matches()) {
+                featuresToUninstall.add(f);
             }
         }
-        if (versions.size() == 0) {
-            throw new Exception("Feature named '" + name + "' is not installed");
-        } else if (versions.size() > 1) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Feature named '").append(name).append("' has multiple versions installed (");
-            for (int i = 0; i < versions.size(); i++) {
-                if (i > 0) {
-                    sb.append(", ");
-                }
-                sb.append(versions.get(i));
-            }
-            sb.append("). Please specify the version to uninstall.");
-            throw new Exception(sb.toString());
+        if (featuresToUninstall.isEmpty()) {
+            throw new IllegalStateException("No installed feature matching " + name);
         }
-        uninstallFeature(name, versions.get(0), options);
+        for (Feature f : featuresToUninstall) {
+            uninstallFeature(f.getName(), f.getVersion(), options);
+        }
     }
 
     public void uninstallFeature(String name, String version) throws Exception {
@@ -1068,60 +1079,79 @@ public class FeaturesServiceImpl implements FeaturesService {
     }
 
     public void uninstallFeature(String name, String version, EnumSet<Option> options) throws Exception {
-        Feature feature = getFeature(name, version);
-        if (feature == null || !installed.containsKey(feature)) {
-            throw new Exception("Feature named '" + name
-                    + "' with version '" + version + "' is not installed");
-        }
-        boolean verbose = options != null && options.contains(Option.Verbose);
-        boolean refresh = options == null || !options.contains(Option.NoAutoRefreshBundles);
-        if (verbose) {
-            System.out.println("Uninstalling feature " + feature.getName() + " " + feature.getVersion());
-        }
-        // Grab all the bundles installed by this feature
-        // and remove all those who will still be in use.
-        // This gives this list of bundles to uninstall.
-        Set<Long> bundles = installed.remove(feature);
-
-        // Also remove bundles installed as conditionals
-        for (Conditional conditional : feature.getConditional()) {
-            Set<Long> ids = installed.remove(conditional.asFeature(feature.getName(), feature.getVersion()));
-            if (ids != null) {
-                bundles.addAll(ids);
+        ArrayList<Exception> exceptions = new ArrayList<Exception>();
+        Feature[] features = getFeatures(name, version);
+        ArrayList<Feature> featuresToUninstall = new ArrayList<Feature>();
+        for (Feature feature : features) {
+            if (installed.containsKey(feature)) {
+                featuresToUninstall.add(feature);
             }
         }
-        // Verify all other conditionals
-        for (Feature dep : new ArrayList<Feature>(installed.keySet())) {
-            Feature f = getFeature(dep.getName(), dep.getVersion());
-            if (f != null) {
-                for (Conditional conditional : f.getConditional()) {
-                    if (!dependenciesSatisfied(conditional.getCondition(), installed.keySet())) {
-                        Set<Long> ids = installed.remove(conditional.asFeature(f.getName(), f.getVersion()));
-                        if (ids != null) {
-                            bundles.addAll(ids);
+        if (featuresToUninstall.isEmpty()) {
+            throw new IllegalStateException("No installed feature matching " + name + "/" + version);
+        }
+        for (Feature feature : featuresToUninstall) {
+            try {
+                boolean verbose = options != null && options.contains(Option.Verbose);
+                boolean refresh = options == null || !options.contains(Option.NoAutoRefreshBundles);
+                if (verbose) {
+                    System.out.println("Uninstalling feature " + feature.getName() + " " + feature.getVersion());
+                }
+                // Grab all the bundles installed by this feature
+                // and remove all those who will still be in use.
+                // This gives this list of bundles to uninstall.
+                Set<Long> bundles = installed.remove(feature);
+
+                // Also remove bundles installed as conditionals
+                for (Conditional conditional : feature.getConditional()) {
+                    Set<Long> ids = installed.remove(conditional.asFeature(feature.getName(), feature.getVersion()));
+                    if (ids != null) {
+                        bundles.addAll(ids);
+                    }
+                }
+                // Verify all other conditionals
+                for (Feature dep : new ArrayList<Feature>(installed.keySet())) {
+                    Feature f = getFeature(dep.getName(), dep.getVersion());
+                    if (f != null) {
+                        for (Conditional conditional : f.getConditional()) {
+                            if (!dependenciesSatisfied(conditional.getCondition(), installed.keySet())) {
+                                Set<Long> ids = installed.remove(conditional.asFeature(f.getName(), f.getVersion()));
+                                if (ids != null) {
+                                    bundles.addAll(ids);
+                                }
+                            }
                         }
                     }
                 }
-            }
-        }
 
-        for (Set<Long> b : installed.values()) {
-            bundles.removeAll(b);
-        }
-        for (long bundleId : bundles) {
-            Bundle b = getBundleContext().getBundle(bundleId);
-            if (b != null) {
-                b.uninstall();
+                for (Set<Long> b : installed.values()) {
+                    bundles.removeAll(b);
+                }
+                for (long bundleId : bundles) {
+                    Bundle b = getBundleContext().getBundle(bundleId);
+                    if (b != null) {
+                        b.uninstall();
+                    }
+                }
+                if (refresh) {
+                    if (verbose) {
+                        System.out.println("Refreshing packages");
+                    }
+                    refreshPackages(null);
+                }
+                callListeners(new FeatureEvent(feature, FeatureEvent.EventType.FeatureUninstalled, false));
+                saveState();
+            } catch (Exception e) {
+                exceptions.add(e);
             }
         }
-        if (refresh) {
-            if (verbose) {
-                System.out.println("Refreshing packages");
+        if (!exceptions.isEmpty()) {
+            StringBuilder builder = new StringBuilder();
+            for (Exception exception : exceptions) {
+                builder.append("\t\n").append(exception.getMessage());
             }
-            refreshPackages(null);
+            throw new IllegalStateException("Can't uninstall feature " + name + "/" + version + ": " + builder.toString());
         }
-        callListeners(new FeatureEvent(feature, FeatureEvent.EventType.FeatureUninstalled, false));
-        saveState();
     }
 
     public Feature[] listFeatures() throws Exception {
@@ -1143,42 +1173,64 @@ public class FeaturesServiceImpl implements FeaturesService {
         return installed.containsKey(f);
     }
 
-    public Feature getFeature(String name) throws Exception {
-        return getFeature(name, FeatureImpl.DEFAULT_VERSION);
-    }
-
-    public Feature getFeature(String name, String version) throws Exception {
+    public Feature[] getFeatures(String name, String version) throws Exception {
+        ArrayList<Feature> features = new ArrayList<Feature>();
         if (version != null) {
             version = version.trim();
         }
-        Map<String, Feature> versions = getFeatures().get(name);
-        if (versions == null || versions.isEmpty()) {
-            return null;
-        } else {
-            Feature feature = versions.get(version);
-            if (feature == null) {
-                if (FeatureImpl.DEFAULT_VERSION.equals(version)) {
-                    Version latest = new Version(cleanupVersion(version));
-                    for (String available : versions.keySet()) {
-                        Version availableVersion = new Version(cleanupVersion(available));
-                        if (availableVersion.compareTo(latest) > 0) {
-                            feature = versions.get(available);
-                            latest = availableVersion;
+        Pattern pattern = Pattern.compile(name);
+        for (String featureName : getFeatures().keySet()) {
+            Matcher matcher = pattern.matcher(featureName);
+            if (matcher.matches()) {
+                Map<String, Feature> versions = getFeatures().get(featureName);
+                if (versions != null && !versions.isEmpty()) {
+                    Feature feature = versions.get(version);
+                    if (feature == null) {
+                        if (FeatureImpl.DEFAULT_VERSION.equals(version)) {
+                            Version latest = new Version(cleanupVersion(version));
+                            for (String available : versions.keySet()) {
+                                Version availableVersion = new Version(cleanupVersion(available));
+                                if (availableVersion.compareTo(latest) > 0) {
+                                    feature = versions.get(available);
+                                    latest = availableVersion;
+                                }
+                            }
+                        } else {
+                            Version latest = new Version(cleanupVersion(FeatureImpl.DEFAULT_VERSION));
+                            VersionRange versionRange = new VersionRange(version, true, true);
+                            for (String available : versions.keySet()) {
+                                Version availableVersion = new Version(cleanupVersion(available));
+                                if (availableVersion.compareTo(latest) > 0 && versionRange.contains(availableVersion)) {
+                                    feature = versions.get(available);
+                                    latest = availableVersion;
+                                }
+                            }
                         }
                     }
-                } else {
-                    Version latest = new Version(cleanupVersion(FeatureImpl.DEFAULT_VERSION));
-                    VersionRange versionRange = new VersionRange(version, true, true);
-                    for (String available : versions.keySet()) {
-                        Version availableVersion = new Version(cleanupVersion(available));
-                        if (availableVersion.compareTo(latest) > 0 && versionRange.contains(availableVersion)) {
-                            feature = versions.get(available);
-                            latest = availableVersion;
-                        }
-                    }
+                    features.add(feature);
                 }
             }
-            return feature;
+        }
+        return features.toArray(new Feature[features.size()]);
+    }
+
+    public Feature[] getFeatures(String name) throws Exception {
+        return getFeatures(name, FeatureImpl.DEFAULT_VERSION);
+    }
+
+    public Feature getFeature(String name) throws Exception {
+        if (getFeatures(name).length < 1) {
+            return null;
+        } else {
+            return getFeatures(name)[0];
+        }
+    }
+
+    public Feature getFeature(String name, String version) throws Exception {
+        if (getFeatures(name, version).length < 1) {
+            return null;
+        } else {
+            return getFeatures(name, version)[0];
         }
     }
 
