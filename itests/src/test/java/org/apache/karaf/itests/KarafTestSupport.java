@@ -130,7 +130,8 @@ public class KarafTestSupport {
             editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiServerPort", RMI_SERVER_PORT),
             editConfigurationFilePut("etc/system.properties", "spring31.version", System.getProperty("spring31.version")),
             editConfigurationFilePut("etc/system.properties", "spring32.version", System.getProperty("spring32.version")),
-            editConfigurationFilePut("etc/system.properties", "spring40.version", System.getProperty("spring40.version"))
+            editConfigurationFilePut("etc/system.properties", "spring40.version", System.getProperty("spring40.version")),
+            editConfigurationFilePut("etc/system.properties", "spring41.version", System.getProperty("spring41.version"))
         };
     }
 
