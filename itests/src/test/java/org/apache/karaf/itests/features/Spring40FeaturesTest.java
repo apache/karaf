@@ -22,7 +22,7 @@ import org.ops4j.pax.exam.spi.reactors.PerClass;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
-public class Spring4FeaturesTest extends KarafTestSupport {
+public class Spring40FeaturesTest extends KarafTestSupport {
 
     @Test
     public void installSpringFeature() throws Exception {
