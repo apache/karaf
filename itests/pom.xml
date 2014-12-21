@@ -130,6 +130,7 @@
                         <spring31.version>${spring31.version}</spring31.version>
                         <spring32.version>${spring32.version}</spring32.version>
                         <spring40.version>${spring40.version}</spring40.version>
+                        <spring41.version>${spring41.version}</spring41.version>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
@@ -161,6 +162,7 @@
                                 <spring31.version>${spring31.version}</spring31.version>
                                 <spring32.version>${spring32.version}</spring32.version>
                                 <spring40.version>${spring40.version}</spring40.version>
+                                <spring41.version>${spring41.version}</spring41.version>
                             </systemPropertyVariables>
                         </configuration>
                     </plugin>
