@@ -273,7 +273,6 @@ public class InstanceServiceImpl implements InstanceService {
                 mkdir(karafBase, "system", printOutput);
                 mkdir(karafBase, "deploy", printOutput);
                 mkdir(karafBase, "data", printOutput);
-                mkdir(karafBase, "data/log", printOutput);
 
                 copyResourceToDir(karafBase, "etc/all.policy", printOutput);
                 copyResourceToDir(karafBase, "etc/config.properties", printOutput);
