@@ -298,7 +298,6 @@ public class InstanceServiceImpl implements InstanceService {
                 mkdir(karafBase, "system", printOutput);
                 mkdir(karafBase, "deploy", printOutput);
                 mkdir(karafBase, "data", printOutput);
-                mkdir(karafBase, "data/log", printOutput);
 
                 Map<String, URL> textResources = new HashMap<String, URL>(settings.getTextResources());
                 Map<String, URL> binaryResources = new HashMap<String, URL>(settings.getBinaryResources());
