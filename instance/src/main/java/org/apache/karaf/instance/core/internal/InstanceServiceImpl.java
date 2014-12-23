@@ -298,6 +298,7 @@ public class InstanceServiceImpl implements InstanceService {
                 mkdir(karafBase, "system", printOutput);
                 mkdir(karafBase, "deploy", printOutput);
                 mkdir(karafBase, "data", printOutput);
+                mkdir(karafBase, "data/log", printOutput);
 
                 Map<String, URL> textResources = new HashMap<String, URL>(settings.getTextResources());
                 Map<String, URL> binaryResources = new HashMap<String, URL>(settings.getBinaryResources());
@@ -484,7 +485,11 @@ public class InstanceServiceImpl implements InstanceService {
                 + " -Dkaraf.startLocalConsole=false"
                 + " -Dkaraf.startRemoteShell=true"
                 + " -classpath \"" + classpath.toString() + "\""
-                + " org.apache.karaf.main.Main";
+                + " org.apache.karaf.main.Main server";
+        if (System.getenv("KARAF_REDIRECT") != null && !System.getenv("KARAF_REDIRECT").isEmpty()) {
+            command = command + " >> " + System.getenv("KARAF_REDIRECT");
+        }
+
         LOGGER.debug("Starting instance " + name + " with command: " + command);
         Process process = new ProcessBuilderFactoryImpl().newBuilder()
                 .directory(new File(location))
