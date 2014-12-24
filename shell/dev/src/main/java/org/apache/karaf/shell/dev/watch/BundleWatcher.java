@@ -16,10 +16,7 @@
  */
 package org.apache.karaf.shell.dev.watch;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Dictionary;
@@ -31,11 +28,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.ops4j.pax.url.maven.commons.MavenConfiguration;
-import org.ops4j.pax.url.maven.commons.MavenConfigurationImpl;
-import org.ops4j.pax.url.maven.commons.MavenRepositoryURL;
-import org.ops4j.pax.url.mvn.ServiceConstants;
-import org.ops4j.pax.url.mvn.internal.Parser;
+import org.apache.karaf.util.maven.Parser;
 import org.ops4j.util.property.DictionaryPropertyResolver;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -44,13 +37,16 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.BundleListener;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
-import org.osgi.framework.ServiceReference;
 import org.osgi.framework.wiring.FrameworkWiring;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
-import org.osgi.service.packageadmin.PackageAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 
 /**
  * A Runnable singleton which watches at the defined location for bundle updates.
@@ -187,37 +183,6 @@ public class BundleWatcher implements Runnable, BundleListener {
         return null;
     }
 
-    public File getLocalRepository() {
-        // Attempt to retrieve local repository location from MavenConfiguration
-        MavenConfiguration configuration = retrieveMavenConfiguration();
-        if (configuration != null) {
-            MavenRepositoryURL localRepositoryURL = configuration.getLocalRepository();
-            if (localRepositoryURL != null) {
-                return localRepositoryURL.getFile().getAbsoluteFile();
-            }
-        }
-        // If local repository not found assume default.
-        String localRepo = System.getProperty("user.home") + File.separator + ".m2" + File.separator + "repository";
-        return new File(localRepo).getAbsoluteFile();
-    }
-
-    protected MavenConfiguration retrieveMavenConfiguration() {
-        MavenConfiguration mavenConfiguration = null;
-        try {
-            Configuration configuration = configurationAdmin.getConfiguration(ServiceConstants.PID, null);
-            if (configuration != null) {
-                Dictionary dictonary = configuration.getProperties();
-                if (dictonary != null) {
-                    DictionaryPropertyResolver resolver = new DictionaryPropertyResolver(dictonary);
-                    mavenConfiguration = new MavenConfigurationImpl(resolver, ServiceConstants.PID);
-                }
-            }
-        } catch (IOException e) {
-            logger.error("Error retrieving maven configuration",e);
-        }
-        return mavenConfiguration;
-    }
-
     /**
      * Returns the bundles that match
      * @param url
@@ -280,6 +245,59 @@ public class BundleWatcher implements Runnable, BundleListener {
                 thread.start();
             }
         }
+    }
+
+    public File getLocalRepository() {
+        String path = null;
+        try {
+            Configuration configuration = configurationAdmin.getConfiguration("org.ops4j.pax.url.mvn", null);
+            if (configuration != null) {
+                Dictionary<String, Object> dict = configuration.getProperties();
+                path = getLocalRepoFromConfig(dict);
+
+            }
+        } catch (Exception e) {
+            logger.error("Error retrieving maven configuration", e);
+        }
+        if (path == null) {
+            path = System.getProperty("user.home") + File.separator + ".m2" + File.separator + "repository";
+        }
+        int index = path.indexOf('@');
+        if (index > 0) {
+            return new File(path.substring(index)).getAbsoluteFile();
+        } else {
+            return new File(path).getAbsoluteFile();
+        }
+    }
+
+    static String getLocalRepoFromConfig(Dictionary<String, Object> dict) throws XMLStreamException, FileNotFoundException {
+        String path = null;
+        if (dict != null) {
+            path = (String) dict.get("org.ops4j.pax.url.mvn.localRepository");
+            if (path == null) {
+                String settings = (String) dict.get("org.ops4j.pax.url.mvn.settings");
+                if (settings != null) {
+                    File file = new File(settings);
+                    XMLStreamReader reader = XMLInputFactory.newFactory().createXMLStreamReader(new FileInputStream(file));
+                    try {
+                        int event;
+                        String elementName = null;
+                        while ((event = reader.next()) != XMLStreamConstants.END_DOCUMENT) {
+                            if (event == XMLStreamConstants.START_ELEMENT) {
+                                elementName = reader.getLocalName();
+                            } else if (event == XMLStreamConstants.END_ELEMENT) {
+                                elementName = null;
+                            } else if (event == XMLStreamConstants.CHARACTERS && "localRepository".equals(elementName))  {
+                                path = reader.getText().trim();
+                            }
+                        }
+                    } finally {
+                        reader.close();
+                    }
+                }
+            }
+        }
+        return path;
     }
 
     /**

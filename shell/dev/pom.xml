@@ -46,12 +46,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.ops4j.pax.url</groupId>
-            <artifactId>pax-url-mvn</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
             <scope>provided</scope>
@@ -72,6 +66,11 @@
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.utils</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.apache.karaf.util</artifactId>
             <scope>provided</scope>
         </dependency>
     </dependencies>
@@ -98,7 +97,6 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Embed-Dependency>pax-url-mvn</Embed-Dependency>
                         <Import-Package>
                             org.apache.felix.service.command,
                             org.apache.felix.gogo.commands,
@@ -107,6 +105,7 @@
                         </Import-Package>
                         <Private-Package>
                             org.apache.felix.utils*;-split-package:=merge-first,
+                            org.apache.karaf.util.maven;-split-package:=merge-first,
                             org.ops4j.pax.url.mvn
                         </Private-Package>
                     </instructions>

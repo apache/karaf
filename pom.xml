@@ -1025,11 +1025,6 @@
                 <version>${pax.url.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.ops4j.pax.url</groupId>
-                <artifactId>pax-url-mvn</artifactId>
-                <version>1.3.7</version>
-            </dependency>
-            <dependency>
                 <groupId>org.apache.geronimo.specs</groupId>
                 <artifactId>geronimo-jms_1.1_spec</artifactId>
                 <version>${geronimo.jms-spec.version}</version>
