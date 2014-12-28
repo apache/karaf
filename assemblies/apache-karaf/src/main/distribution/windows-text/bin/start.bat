@@ -30,13 +30,6 @@ if exist "%DIRNAME%setenv.bat" (
   call "%DIRNAME%setenv.bat"
 )
 
-rem Check console window title. Set to Karaf by default
-if not "%KARAF_TITLE%" == "" (
-    title %KARAF_TITLE%
-) else (
-    title Karaf
-)
-
 goto BEGIN
 
 :warn
@@ -86,8 +79,12 @@ if "%KARAF_ETC%" == "" (
     set "KARAF_ETC=%KARAF_BASE%\etc"
 )
 
+if "%KARAF_TITLE%" == "" (
+    set "KARAF_TITLE=Karaf"
+)
+
 :EXECUTE
-    start "Karaf" /MIN "%KARAF_HOME%\bin\karaf.bat" server %*
+    start "%KARAF_TITLE%" /MIN "%KARAF_HOME%\bin\karaf.bat" server %*
 
 rem # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
