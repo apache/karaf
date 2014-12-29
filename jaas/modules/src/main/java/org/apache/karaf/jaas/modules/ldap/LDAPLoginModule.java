@@ -32,9 +32,7 @@ import javax.security.auth.callback.*;
 import javax.security.auth.login.LoginException;
 import java.io.IOException;
 import java.security.Principal;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -57,6 +55,7 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
     public final static String ROLE_FILTER = "role.filter";
     public final static String ROLE_NAME_ATTRIBUTE = "role.name.attribute";
     public final static String ROLE_SEARCH_SUBTREE = "role.search.subtree";
+    public final static String ROLE_MAPPING = "role.mapping";
     public final static String AUTHENTICATION = "authentication";
     public final static String INITIAL_CONTEXT_FACTORY = "initial.context.factory";
     public static final String CONTEXT_PREFIX = "context.";
@@ -81,6 +80,7 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
     private String roleFilter;
     private String roleNameAttribute;
     private boolean roleSearchSubtree = true;
+    private Map<String, Set<String>> roleMapping;
     private String authentication = DEFAULT_AUTHENTICATION;
     private String initialContextFactory = null;
     private boolean ssl;
@@ -104,6 +104,7 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
         roleFilter = (String) options.get(ROLE_FILTER);
         roleNameAttribute = (String) options.get(ROLE_NAME_ATTRIBUTE);
         roleSearchSubtree = Boolean.parseBoolean((String) options.get(ROLE_SEARCH_SUBTREE));
+        roleMapping = parseRoleMapping((String) options.get(ROLE_MAPPING));
         initialContextFactory = (String) options.get(INITIAL_CONTEXT_FACTORY);
         if (initialContextFactory == null) {
             initialContextFactory = DEFAULT_INITIAL_CONTEXT_FACTORY;
@@ -131,6 +132,27 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
         if (options.get(SSL_TIMEOUT) != null) {
             sslTimeout = (Integer) options.get(SSL_TIMEOUT);
         }
+    }
+
+    private Map<String, Set<String>> parseRoleMapping(String option) {
+        Map<String, Set<String>> roleMapping = new HashMap<String, Set<String>>();
+        if (option != null) {
+            logger.debug("Parse role mapping {}", option);
+            String[] mappings = option.split(";");
+            for (String mapping : mappings) {
+                String[] map = mapping.split("=", 2);
+                String ldapRole = map[0];
+                String[] karafRoles = map[1].split(",");
+                if (roleMapping.get(ldapRole) == null) {
+                    roleMapping.put(ldapRole, new HashSet<String>());
+                }
+                final Set<String> karafRolesSet = roleMapping.get(ldapRole);
+                for (String karafRole : karafRoles) {
+                    karafRolesSet.add(karafRole);
+                }
+            }
+        }
+        return roleMapping;
     }
 
     public boolean login() throws LoginException {
@@ -307,7 +329,16 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
                     for (int i = 0; i < roles.size(); i++) {
                         String role = (String)roles.get(i);
                         if (role != null) {
-                            principals.add(new RolePrincipal(role));
+                            logger.debug("User {} is a member of role {}", user, role);
+                            // handle role mapping ...
+                            Set<RolePrincipal> mapped = tryMappingRole(role);
+                            if (mapped.isEmpty()) {
+                                principals.add(new RolePrincipal(role));
+                            } else {
+                                for (RolePrincipal r : mapped) {
+                                    principals.add(r);
+                                }
+                            }
                         }
                     }
                 }
@@ -325,6 +356,22 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
             }
         }
         return true;
+    }
+
+    protected Set<RolePrincipal> tryMappingRole(String role) {
+        Set<RolePrincipal> roles = new HashSet<RolePrincipal>();
+        if (roleMapping == null || roleMapping.isEmpty()) {
+            return roles;
+        }
+        Set<String> karafRoles = roleMapping.get(role);
+        if (karafRoles != null) {
+            // add all mapped roles
+            for (String karafRole : karafRoles) {
+                logger.debug("LDAP role {} is mapped to Karaf role {}", role, karafRole);
+                roles.add(new RolePrincipal(karafRole));
+            }
+        }
+        return roles;
     }
 
     protected void setupSsl(Hashtable env) throws LoginException {
