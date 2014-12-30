@@ -32,11 +32,7 @@ import javax.security.auth.callback.*;
 import javax.security.auth.login.LoginException;
 import java.io.IOException;
 import java.security.Principal;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -60,6 +56,7 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
     public final static String ROLE_FILTER = "role.filter";
     public final static String ROLE_NAME_ATTRIBUTE = "role.name.attribute";
     public final static String ROLE_SEARCH_SUBTREE = "role.search.subtree";
+    public final static String ROLE_MAPPING = "role.mapping";
     public final static String AUTHENTICATION = "authentication";
     public final static String ALLOW_EMPTY_PASSWORDS = "allowEmptyPasswords";
     public final static String INITIAL_CONTEXT_FACTORY = "initial.context.factory";
@@ -85,6 +82,7 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
     private String roleFilter;
     private String roleNameAttribute;
     private boolean roleSearchSubtree = true;
+    private Map<String, Set<String>> roleMapping;
     private String authentication = DEFAULT_AUTHENTICATION;
     private boolean allowEmptyPasswords = false;
     private String initialContextFactory = null;
@@ -102,9 +100,10 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
         connectionURL = (String) options.get(CONNECTION_URL);
         connectionUsername = (String) options.get(CONNECTION_USERNAME);
         connectionPassword = (String) options.get(CONNECTION_PASSWORD);
-        userBaseDN =  (String) options.get(USER_BASE_DN);
+        userBaseDN = (String) options.get(USER_BASE_DN);
         userFilter = (String) options.get(USER_FILTER);
         userSearchSubtree = Boolean.parseBoolean((String) options.get(USER_SEARCH_SUBTREE));
+        roleMapping = parseRoleMapping((String) options.get(ROLE_MAPPING));
         roleBaseDN = (String) options.get(ROLE_BASE_DN);
         roleFilter = (String) options.get(ROLE_FILTER);
         roleNameAttribute = (String) options.get(ROLE_NAME_ATTRIBUTE);
@@ -139,6 +138,27 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
         }
     }
 
+    private Map<String, Set<String>> parseRoleMapping(String option) {
+        Map<String, Set<String>> roleMapping = new HashMap<String, Set<String>>();
+        if (option != null) {
+            logger.debug("Parse role mapping {}", option);
+            String[] mappings = option.split(";");
+            for (String mapping : mappings) {
+                String[] map = mapping.split("=", 2);
+                String ldapRole = map[0];
+                String[] karafRoles = map[1].split(",");
+                if (roleMapping.get(ldapRole) == null) {
+                    roleMapping.put(ldapRole, new HashSet<String>());
+                }
+                final Set<String> karafRolesSet = roleMapping.get(ldapRole);
+                for (String karafRole : karafRoles) {
+                    karafRolesSet.add(karafRole);
+                }
+            }
+        }
+        return roleMapping;
+    }
+
     public boolean login() throws LoginException {
         ClassLoader tccl = Thread.currentThread().getContextClassLoader();
         try {
@@ -165,7 +185,7 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
         user = ((NameCallback) callbacks[0]).getName();
 
         char[] tmpPassword = ((PasswordCallback) callbacks[1]).getPassword();
-        
+
         // If either a username or password is specified don't allow authentication = "none".
         // This is to prevent someone from logging into Karaf as any user without providing a 
         // valid password (because if authentication = none, the password could be any 
@@ -176,7 +196,7 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
             authentication = "simple";
         }
         if (!"none".equals(authentication) && !allowEmptyPasswords
-                && (tmpPassword == null || tmpPassword.length ==0)) {
+                && (tmpPassword == null || tmpPassword.length == 0)) {
             throw new LoginException("Empty passwords not allowed");
         }
 
@@ -246,7 +266,7 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
                         // the second escapes the slashes correctly.
                         String userDN = result.getNameInNamespace().replace("," + userBaseDN, "");
                         String userDNNamespace = (String) result.getNameInNamespace();
-                        return new String[] { userDN, userDNNamespace };
+                        return new String[]{userDN, userDNNamespace};
                     } finally {
                         if (namingEnumeration != null) {
                             try {
@@ -340,7 +360,16 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
                                 for (int i = 0; i < roles.size(); i++) {
                                     String role = (String) roles.get(i);
                                     if (role != null) {
-                                        rolesList.add(role);
+                                        logger.debug("User {} is a member of role {}", user, role);
+                                        // handle role mapping ...
+                                        Set<String> mapped = tryMappingRole(role);
+                                        if (mapped.isEmpty()) {
+                                            rolesList.add(role);
+                                        } else {
+                                            for (String r : mapped) {
+                                                rolesList.add(r);
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -365,6 +394,22 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
             throw new LoginException("Can't get user " + user + " roles: " + e.getMessage());
         }
         return true;
+    }
+
+    protected Set<String> tryMappingRole(String role) {
+        Set<String> roles = new HashSet<String>();
+        if (roleMapping == null || roleMapping.isEmpty()) {
+            return roles;
+        }
+        Set<String> karafRoles = roleMapping.get(role);
+        if (karafRoles != null) {
+            // add all mapped roles
+            for (String karafRole : karafRoles) {
+                logger.debug("LDAP role {} is mapped to Karaf role {}", role, karafRole);
+                roles.add(karafRole);
+            }
+        }
+        return roles;
     }
 
     protected void setupSsl(Hashtable env) throws LoginException {
