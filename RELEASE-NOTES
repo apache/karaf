@@ -15,6 +15,105 @@
  * limitations under the License.
  */
 
+                    Apache Karaf 2.4.1
+                    ==================
+
+  Overview
+  --------
+
+This is an update patch for Apache Karaf 2.4.x, containing many bug fixes, dependency updates, and improvements. New features highlights include: Regex support in features commands, added an option to uninstall transitive features, and renamed jpa feature as jpa/jpa20 and jpa21. It is recommended that users update their deployment after reviewing the changelog below.
+
+  Changelog
+  ---------
+
+** Bug
+ * [KARAF-1701|https://issues.apache.org/jira/browse/KARAF-1701] - Parsing of config for a field with cardinality > 1 is incorrectlyprocessed and displayed on Admin Console
+ * [KARAF-2890|https://issues.apache.org/jira/browse/KARAF-2890] - The env variables can't be read while running karaf as a Linux service
+ * [KARAF-3023|https://issues.apache.org/jira/browse/KARAF-3023] - Wrong repositories for features after "features:list -o" command in 2.3.x
+ * [KARAF-3085|https://issues.apache.org/jira/browse/KARAF-3085] - features:chooseurl/feature:repo-add should support "real" version range
+ * [KARAF-3093|https://issues.apache.org/jira/browse/KARAF-3093] - ops4j repositories (release/snapshot) break pax-url resolution
+ * [KARAF-3103|https://issues.apache.org/jira/browse/KARAF-3103] - config:edit does not correctly handle configuration visibility for --factory calls.
+ * [KARAF-3239|https://issues.apache.org/jira/browse/KARAF-3239] - Add fileinstall dependency in the features-maven-plugin
+ * [KARAF-3240|https://issues.apache.org/jira/browse/KARAF-3240] - BundleWatcher should not depend to pax-url-mvn
+ * [KARAF-3250|https://issues.apache.org/jira/browse/KARAF-3250] - JVM options ignored on Windows
+ * [KARAF-3254|https://issues.apache.org/jira/browse/KARAF-3254] - Very high memory consumption with the watch command
+ * [KARAF-3257|https://issues.apache.org/jira/browse/KARAF-3257] - NullPointerException on Karaf osgi shell commands
+ * [KARAF-3261|https://issues.apache.org/jira/browse/KARAF-3261] - jdbc command (using JdbcConnector.java) does not honour service ranking and throws IllegalArgumentException instead
+ * [KARAF-3269|https://issues.apache.org/jira/browse/KARAF-3269] - ssh into karaf as user with no roles throws exception and user shell stays frozen
+ * [KARAF-3284|https://issues.apache.org/jira/browse/KARAF-3284] - The shell-log bundle should not import org.apache.log4j.* package
+ * [KARAF-3288|https://issues.apache.org/jira/browse/KARAF-3288] - karaf script doesn't start on Solaris if JAVA_HOME is not set
+ * [KARAF-3325|https://issues.apache.org/jira/browse/KARAF-3325] - Karaf throws SocketTimeoutException and exits after 49 days
+ * [KARAF-3327|https://issues.apache.org/jira/browse/KARAF-3327] - Incorrect LC_CTYPE parsing
+ * [KARAF-3335|https://issues.apache.org/jira/browse/KARAF-3335] - Endorsed org.apache.karaf.exception-3.0.2 jar causes issues with Java 8 Nashorn scripts
+ * [KARAF-3346|https://issues.apache.org/jira/browse/KARAF-3346] - Stopping Karaf 2.4.0 prints ugly ERRORS in the log
+ * [KARAF-3350|https://issues.apache.org/jira/browse/KARAF-3350] - The log:display command fails with CNFE if the pax-logging-service bundle has been refreshed
+ * [KARAF-3377|https://issues.apache.org/jira/browse/KARAF-3377] - Starting Karaf on Windows changes console title
+ * [KARAF-3379|https://issues.apache.org/jira/browse/KARAF-3379] - jpa feature incompatible to hibernate 4.3 feature
+ * [KARAF-3397|https://issues.apache.org/jira/browse/KARAF-3397] - FeaturesServiceMBeanImpl throws an Exception when listening the features
+ * [KARAF-3412|https://issues.apache.org/jira/browse/KARAF-3412] - should add javax.management.builder.initial flag for Karaf child instance
+ * [KARAF-3413|https://issues.apache.org/jira/browse/KARAF-3413] - should also associate the role to run executeScript
+ * [KARAF-3415|https://issues.apache.org/jira/browse/KARAF-3415] - memory leak when run ssh client
+ * [KARAF-3420|https://issues.apache.org/jira/browse/KARAF-3420] - Java Debug options are Pre Java 5.0
+
+** Dependency upgrade
+ * [KARAF-3226|https://issues.apache.org/jira/browse/KARAF-3226] - Upgrade to Spring 4.0.7.RELEASE
+ * [KARAF-3227|https://issues.apache.org/jira/browse/KARAF-3227] - Upgrade to Spring 3.2.11.RELEASE
+ * [KARAF-3229|https://issues.apache.org/jira/browse/KARAF-3229] - Upgrade to Felix EventAdmin 1.4.2
+ * [KARAF-3233|https://issues.apache.org/jira/browse/KARAF-3233] - Upgrade to Pax Exam 4.2.0
+ * [KARAF-3243|https://issues.apache.org/jira/browse/KARAF-3243] - Upgrade to Pax URL 2.2.0
+ * [KARAF-3265|https://issues.apache.org/jira/browse/KARAF-3265] - Upgrade to Aries Blueprint CM 1.0.5
+ * [KARAF-3281|https://issues.apache.org/jira/browse/KARAF-3281] - Upgrade to Pax Logging 1.8.0 (log4j v2 support)
+ * [KARAF-3291|https://issues.apache.org/jira/browse/KARAF-3291] - Upgrade to Pax Exam 4.3.0
+ * [KARAF-3305|https://issues.apache.org/jira/browse/KARAF-3305] - Upgrade to Aries Blueprint Core 1.4.2
+ * [KARAF-3306|https://issues.apache.org/jira/browse/KARAF-3306] - Upgrade to Aries JNDI API 1.1.0
+ * [KARAF-3307|https://issues.apache.org/jira/browse/KARAF-3307] - Upgrade to Aries JPA API 1.0.2/JPA Container 1.0.2/JPA Blueprint Aries 1.0.4/JPA Container Context 1.0.4
+ * [KARAF-3308|https://issues.apache.org/jira/browse/KARAF-3308] - Upgade to Aries Proxy Impl 1.0.4
+ * [KARAF-3309|https://issues.apache.org/jira/browse/KARAF-3309] - Upgrade to Felix Maven Bundle Plugin 2.5.3
+ * [KARAF-3312|https://issues.apache.org/jira/browse/KARAF-3312] - Upgrade to maven-assembly-plugin 2.4.1
+ * [KARAF-3313|https://issues.apache.org/jira/browse/KARAF-3313] - Upgrade to maven-compiler-plugin 3.2
+ * [KARAF-3314|https://issues.apache.org/jira/browse/KARAF-3314] - Upgrade to maven-dependency-plugin 2.9
+ * [KARAF-3315|https://issues.apache.org/jira/browse/KARAF-3315] - Upgrade to maven-jar-plugin 2.5
+ * [KARAF-3316|https://issues.apache.org/jira/browse/KARAF-3316] - Upgrade to maven-site-plugin 3.4
+ * [KARAF-3317|https://issues.apache.org/jira/browse/KARAF-3317] - Upgrade to maven-source-plugin 2.4
+ * [KARAF-3318|https://issues.apache.org/jira/browse/KARAF-3318] - Upgrade to maven-surefire-plugin 2.17
+ * [KARAF-3319|https://issues.apache.org/jira/browse/KARAF-3319] - Upgrade to maven-war-plugin 2.5
+ * [KARAF-3320|https://issues.apache.org/jira/browse/KARAF-3320] - Upgrade to apache-rat-plugin 0.11
+ * [KARAF-3321|https://issues.apache.org/jira/browse/KARAF-3321] - Upgrade to build-helper-maven-plugin 1.9.1
+ * [KARAF-3322|https://issues.apache.org/jira/browse/KARAF-3322] - Upgrade to exec-maven-plugin 1.3.2
+ * [KARAF-3331|https://issues.apache.org/jira/browse/KARAF-3331] - Upgrade to Aries Transaction Manager 1.1.1
+ * [KARAF-3338|https://issues.apache.org/jira/browse/KARAF-3338] - Upgrade to Apache POM 15
+ * [KARAF-3353|https://issues.apache.org/jira/browse/KARAF-3353] - Upgrade jandex in hibernate feature to avoid wrapping
+ * [KARAF-3396|https://issues.apache.org/jira/browse/KARAF-3396] - Upgrade to pax-logging 1.8.1
+
+** Improvement
+ * [KARAF-2104|https://issues.apache.org/jira/browse/KARAF-2104] - Add regex support in features:* commands
+ * [KARAF-2809|https://issues.apache.org/jira/browse/KARAF-2809] - Add an option to uninstall transitive features
+ * [KARAF-2984|https://issues.apache.org/jira/browse/KARAF-2984] - Improve setenv script to include placeholder for extra java options
+ * [KARAF-3016|https://issues.apache.org/jira/browse/KARAF-3016] - Be able to redirect child instance std out in a file
+ * [KARAF-3246|https://issues.apache.org/jira/browse/KARAF-3246] - Rename jpa features as jpa/jpa20 and jpa21
+ * [KARAF-3255|https://issues.apache.org/jira/browse/KARAF-3255] - Document jasypt property placeholder
+ * [KARAF-3268|https://issues.apache.org/jira/browse/KARAF-3268] - remove karaf.admin.role
+ * [KARAF-3293|https://issues.apache.org/jira/browse/KARAF-3293] - more fine-grained way to specify the jmx.acl.whitelist.cfg
+ * [KARAF-3367|https://issues.apache.org/jira/browse/KARAF-3367] - add additional configuration options when use wrapper:install
+ * [KARAF-3368|https://issues.apache.org/jira/browse/KARAF-3368] - Support reference:file:xxx urls in startup.properties
+ * [KARAF-3372|https://issues.apache.org/jira/browse/KARAF-3372] - only register HUP signal handler for non-windows platform
+ * [KARAF-3382|https://issues.apache.org/jira/browse/KARAF-3382] - Support configuration for custom LDAP group to JAAS role mapping
+ * [KARAF-3393|https://issues.apache.org/jira/browse/KARAF-3393] - Provide ready to use jpa20 and jpa21 features
+ * [KARAF-3403|https://issues.apache.org/jira/browse/KARAF-3403] - bin/client Utility Throws ArrayIndexOutOfBoundsException
+ * [KARAF-3411|https://issues.apache.org/jira/browse/KARAF-3411] - windows startup scripts don't handle setenv.bat correctly
+ * [KARAF-3421|https://issues.apache.org/jira/browse/KARAF-3421] - Add a variable for the debug port number.
+
+** New Feature
+ * [KARAF-3228|https://issues.apache.org/jira/browse/KARAF-3228] - Add Spring 4.1.2.RELEASE_1 features
+
+** Task
+ * [KARAF-3245|https://issues.apache.org/jira/browse/KARAF-3245] - Upgrade spring from 3.2.9 to 3.2.11
+ * [KARAF-3401|https://issues.apache.org/jira/browse/KARAF-3401] - Typo in users.properties
+ * [KARAF-3422|https://issues.apache.org/jira/browse/KARAF-3422] - Upgrade pax-url dependency to 2.3.0
+
+** Test
+ * [KARAF-3339|https://issues.apache.org/jira/browse/KARAF-3339] - itests execution is very long
+
                     Apache Karaf 2.4.0
                     ==================
 
