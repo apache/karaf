@@ -61,43 +61,41 @@ public class PaxCdiFeaturesTest extends KarafTestSupport {
     }
 
     @Test
-    @Ignore("PAXCDI-146 and Servlet API dependency")
     public void installPaxCdiWebFeature() throws Exception {
         installAssertAndUninstallFeatures("pax-cdi-web");
     }
 
     @Test
-    @Ignore("PAXCDI-146 and Servlet API dependency")
     public void installPaxCdi11WebFeature() throws Exception {
         installAssertAndUninstallFeatures("pax-cdi-1.1-web");
     }
 
     @Test
-    @Ignore("PAXCDI-146 and Servlet API dependency")
+    @Ignore("PAXCDI-146 Require Pax Web 4.x/Karaf 4")
     public void installPaxCdi12WebFeature() throws Exception {
         installAssertAndUninstallFeatures("pax-cdi-1.2-web");
     }
 
     @Test
-    @Ignore("PAXCDI-146 and Servlet API dependency")
+    @Ignore("PAXCDI-146: Require Pax Web 4.x/Karaf 4")
     public void installPaxCdiWebWeldFeature() throws Exception {
         installAssertAndUninstallFeatures("pax-cdi-web-weld");
     }
 
     @Test
-    @Ignore("PAXCDI-146 and Servlet API dependency")
+    @Ignore("PAXCDI-146: Require Pax Web 4.x/Karaf 4")
     public void installPaxCdi11WebWeldFeature() throws Exception {
         installAssertAndUninstallFeatures("pax-cdi-1.1-web-weld");
     }
 
     @Test
-    @Ignore("PAXCDI-146 and Servlet API dependency")
+    @Ignore("PAXCDI-146: Require Pax Web 4.x/Karaf 4")
     public void installPaxCdi12WebWeldFeature() throws Exception {
         installAssertAndUninstallFeatures("pax-cdi-1.2-web-weld");
     }
 
     @Test
-    @Ignore("PAXCDI-146 and Servlet API dependency")
+    @Ignore("PAXCDI-146: Require Pax Web 4.x/Karaf 4")
     public void installPaxCdiWebOpenwebbeansFeature() throws Exception {
         installAssertAndUninstallFeatures("pax-cdi-web-openwebbeans");
     }
