@@ -22,17 +22,7 @@ import org.ops4j.pax.exam.spi.reactors.PerClass;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
-public class CdiFeaturesTest extends KarafTestSupport {
-
-    @Test
-    public void installOpenWebBeansFeature() throws Exception {
-        installAssertAndUninstallFeatures("openwebbeans");
-    }
-
-    @Test
-    public void installWeldFeature() throws Exception {
-        installAssertAndUninstallFeatures("weld");
-    }
+public class PaxCdiFeaturesTest extends KarafTestSupport {
 
     @Test
     public void installPaxCdiFeature() throws Exception {
