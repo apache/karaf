@@ -37,9 +37,15 @@ public class CreateCommand extends JmsCommandSupport {
     @Option(name = "--url", description = "URL of the JMS broker. For WebsphereMQ type, the URL is hostname/port/queuemanager/channel", required = false, multiValued = false)
     String url = "tcp://localhost:61616";
 
+    @Option(name = "-u", aliases = { "--username" }, description = "Username to connect to the JMS broker", required = false, multiValued = false)
+    String username = "karaf";
+
+    @Option(name = "-p", aliases = { "--password" }, description = "Password to connect to the JMS broker", required = false, multiValued = false)
+    String password = "karaf";
+
     @Override
     public Object execute() throws Exception {
-        getJmsService().create(name, type, url);
+        getJmsService().create(name, type, url, username, password);
         return null;
     }
 

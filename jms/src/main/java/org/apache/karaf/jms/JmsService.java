@@ -51,6 +51,18 @@ public interface JmsService {
     void create(String name, String type, String url) throws Exception;
 
     /**
+     * Create a new JMS connection factory.
+     *
+     * @param name the JMS connection factory name.
+     * @param type the JMS connection factory type (ActiveMQ, WebsphereMQ, ...).
+     * @param url the JMS URL to use.
+     * @param username the username to use.
+     * @param password the password to use.
+     * @throws Exception
+     */
+    void create(String name, String type, String url, String username, String password) throws Exception;
+
+    /**
      * Delete a JMS connection factory.
      *
      * @param name the JMS connection factory name.
