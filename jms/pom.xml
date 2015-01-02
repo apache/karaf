@@ -101,6 +101,7 @@
                             org.apache.karaf.jms.internal,
                             org.apache.karaf.util
                         </Private-Package>
+                        <DynamicImport-Package>*</DynamicImport-Package>
                         <Karaf-Commands>*</Karaf-Commands>
                     </instructions>
                 </configuration>
