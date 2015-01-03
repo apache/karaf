@@ -45,6 +45,18 @@ public interface JmsMBean {
     void create(String name, String type, String url) throws MBeanException;
 
     /**
+     * Create a JMS connection factory.
+     *
+     * @param name the JMS connection factory name.
+     * @param type the JMS connection factory type (ActiveMQ or WebsphereMQ).
+     * @param url the JMS connection factory URL. NB: when type is WebsphereMQ, the URL has the format host/port/queuemanager/channel.
+     * @param username the JMS connection factory authentication username.
+     * @param password the JMS connection factory authentication password.
+     * @throws MBeanException
+     */
+    void create(String name, String type, String url, String username, String password) throws MBeanException;
+
+    /**
      * Delete a JMS connection factory.
      *
      * @param name the JMS connection factory name.

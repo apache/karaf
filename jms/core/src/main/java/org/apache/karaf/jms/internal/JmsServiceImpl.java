@@ -49,6 +49,11 @@ public class JmsServiceImpl implements JmsService {
 
     @Override
     public void create(String name, String type, String url) throws Exception {
+        create(name, type, url, null, null);
+    }
+
+    @Override
+    public void create(String name, String type, String url, String username, String password) throws Exception {
         if (!type.equalsIgnoreCase("activemq") && !type.equalsIgnoreCase("webspheremq")) {
             throw new IllegalArgumentException("JMS connection factory type not known");
         }
@@ -57,6 +62,8 @@ public class JmsServiceImpl implements JmsService {
         String template;
         HashMap<String, String> properties = new HashMap<String, String>();
         properties.put("name", name);
+        properties.put("username", username);
+        properties.put("password", password);
 
         if (type.equalsIgnoreCase("activemq")) {
             // activemq

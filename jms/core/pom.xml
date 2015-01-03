@@ -93,6 +93,7 @@
                             org.apache.karaf.jms.internal,
                             org.apache.karaf.util
                         </Private-Package>
+                        <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>
                 </configuration>
             </plugin>

@@ -80,6 +80,7 @@
                 <configuration>
                     <instructions>
                         <Export-Package>!*</Export-Package>
+                        <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>
                 </configuration>
             </plugin>
