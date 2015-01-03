@@ -274,18 +274,12 @@
         </conditional>
     </feature>
 
-    <feature name="openwebbeans" description="Apache OpenWebBeans CDI container support" version="${openwebbeans.version}" resolver="(obr)">
-        <details>Add support of Apache OpenWebBeans CDI container.</details>
-        <feature>http</feature>
+    <feature name="openwebbeans" description="Alias to pax-cdi-openwebbeans feature" version="${pax.cdi.version}" resolver="(obr)">
         <feature>pax-cdi-openwebbeans</feature>
-        <bundle>mvn:org.apache.openwebbeans/openwebbeans-impl/${openwebbeans.version}</bundle>
-        <bundle>mvn:org.apache.openwebbeans/openwebbeans-osgi/${openwebbeans.version}</bundle>
     </feature>
 
-    <feature name="weld" description="JBoss Weld CDI container support" version="${weld.version}" resolver="(obr)">
-        <details>Add support of JBoss Weld CDI container.</details>
+    <feature name="weld" description="Alias to pax-cdi-weld feature" version="${pax.cdi.version}" resolver="(obr)">
         <feature>pax-cdi-weld</feature>
-        <bundle>mvn:org.jboss.weld/weld-osgi-bundle/${weld.version}</bundle>
     </feature>
 
     <feature name="application-without-isolation" description="Provide EBA archive support" version="${aries.application.version}">
