@@ -666,12 +666,23 @@ public class InstallKarsMojo extends MojoSupport {
     private void addFeatures(Set<Feature> startupFeatures, Set<Feature> features, String feature) {
         int nbFound = 0;
         for (Feature f : features) {
-            if (feature.equals(f.getName())) {
-                for (Dependency dep : f.getFeature()) {
-                    addFeatures(startupFeatures, features, dep.getName());
+            String[] split = feature.split("/");
+            if (split.length == 2) {
+                if (f.getName().equals(split[0]) && f.getVersion().equals(split[1])) {
+                    for (Dependency dep : f.getFeature()) {
+                        addFeatures(startupFeatures, features, dep.getName());
+                    }
+                    startupFeatures.add(f);
+                    nbFound++;
                 }
-                startupFeatures.add(f);
-                nbFound++;
+            } else {
+                if (feature.equals(f.getName())) {
+                    for (Dependency dep : f.getFeature()) {
+                        addFeatures(startupFeatures, features, dep.getName());
+                    }
+                    startupFeatures.add(f);
+                    nbFound++;
+                }
             }
         }
         if (nbFound == 0) {
