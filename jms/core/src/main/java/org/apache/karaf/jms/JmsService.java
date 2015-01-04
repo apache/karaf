@@ -46,6 +46,18 @@ public interface JmsService {
      * @param name the JMS connection factory name.
      * @param type the JMS connection factory type (ActiveMQ, WebsphereMQ, ...).
      * @param url the JMS URL to use.
+     * @param username the JMS connection factory authentication username.
+     * @param password the JMS connection factory authentication password.
+     * @throws Exception
+     */
+    void create(String name, String type, String url, String username, String password) throws Exception;
+
+    /**
+     * Create a new JMS connection factory.
+     *
+     * @param name the JMS connection factory name.
+     * @param type the JMS connection factory type (ActiveMQ, WebsphereMQ, ...).
+     * @param url the JMS URL to use.
      * @throws Exception
      */
     void create(String name, String type, String url) throws Exception;

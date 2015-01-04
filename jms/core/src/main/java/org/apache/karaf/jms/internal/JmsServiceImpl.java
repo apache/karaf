@@ -39,20 +39,22 @@ public class JmsServiceImpl implements JmsService {
 
     private BundleContext bundleContext;
 
-    public void create(String name, String type, String url) throws Exception {
+    public void create(String name, String type, String url, String username, String password) throws Exception {
         if (!type.equalsIgnoreCase("activemq") && !type.equalsIgnoreCase("webspheremq")) {
             throw new IllegalArgumentException("JMS connection factory type not known");
         }
 
         File karafBase = new File(System.getProperty("karaf.base"));
         File deployFolder = new File(karafBase, "deploy");
-        File  outFile = new File(deployFolder, "connectionfactory-" + name + ".xml");
+        File outFile = new File(deployFolder, "connectionfactory-" + name + ".xml");
 
         if (type.equalsIgnoreCase("activemq")) {
             // activemq
             HashMap<String, String> properties = new HashMap<String, String>();
             properties.put("${name}", name);
             properties.put("${url}", url);
+            properties.put("${username}", username);
+            properties.put("${password}", password);
             copyDataSourceFile(outFile, "connectionfactory-activemq.xml", properties);
         } else {
             // webspheremq
@@ -68,6 +70,10 @@ public class JmsServiceImpl implements JmsService {
             properties.put("${channel}", splitted[3]);
             copyDataSourceFile(outFile, "connectionfactory-webspheremq.xml", properties);
         }
+    }
+
+    public void create(String name, String type, String url) throws Exception {
+        create(name, type, url, null, null);
     }
 
     public void delete(String name) throws Exception {
