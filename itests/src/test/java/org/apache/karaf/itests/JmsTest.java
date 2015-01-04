@@ -16,9 +16,9 @@ package org.apache.karaf.itests;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
-import org.ops4j.pax.exam.spi.reactors.PerClass;
+import org.ops4j.pax.exam.junit.ExamReactorStrategy;
+import org.ops4j.pax.exam.junit.JUnit4TestRunner;
+import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
@@ -29,15 +29,17 @@ import javax.management.remote.JMXConnector;
 import java.net.URI;
 import java.util.List;
 
-@RunWith(PaxExam.class)
-@ExamReactorStrategy(PerClass.class)
+@RunWith(JUnit4TestRunner.class)
+@ExamReactorStrategy(AllConfinedStagedReactorFactory.class)
 public class JmsTest extends KarafTestSupport {
 
     @Before
     public void installJmsFeatureAndActiveMQBroker() throws Exception {
-        installAndAssertFeature("jms");
+        featuresService.installFeature("jms");
+        assertFeatureInstalled("jms");
         featuresService.addRepository(new URI("mvn:org.apache.activemq/activemq-karaf/5.10.0/xml/features"));
-        installAndAssertFeature("activemq-broker-noweb");
+        featuresService.installFeature("activemq-broker-noweb");
+        assertFeatureInstalled("activemq-broker-noweb");
     }
 
     @Test
