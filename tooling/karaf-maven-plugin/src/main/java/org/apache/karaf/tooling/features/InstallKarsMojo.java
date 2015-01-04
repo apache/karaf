@@ -157,7 +157,7 @@ public class InstallKarsMojo extends MojoSupport {
         Set<String> repositories = new HashSet<String>();
         Map<Feature, Boolean> features = new HashMap<Feature, Boolean>();
 
-        // loading kar and featres repositories
+        // loading kar and features repositories
         getLog().info("Loading kar and features repositories dependencies with compile or runtime scopes");
         getLog().info("The startup.properties file is updated using kar and features dependency with a scope different from runtime, or defined in the <startupFeatures/> plugin configuration");
         Collection<Artifact> dependencies = project.getDependencyArtifacts();
@@ -192,28 +192,24 @@ public class InstallKarsMojo extends MojoSupport {
 
         // checking if all startup, installed, and boot features have been resolved
         getLog().info("Checking features resolution");
-        List<String> resolvedFeaturesNames = new ArrayList<String>();
-        for (Feature feature : features.keySet()) {
-            resolvedFeaturesNames.add(feature.getName());
-        }
         if (startupFeatures != null) {
             for (String startupFeature : startupFeatures) {
-                if (!resolvedFeaturesNames.contains(startupFeature)) {
-                    throw new MojoFailureException("Feature " + startupFeature + " is not resolved. Check that <dependencies/> provide the kar of features repository providing this feature (with compile or runtime scope)");
+                if (!resolveFeature(features.keySet(), startupFeature)) {
+                    throw new MojoFailureException("Startup feature " + startupFeature + " is not resolved. Check that <dependencies/> provide the kar of features repository providing this feature (with compile or runtime scope)");
                 }
             }
         }
         if (bootFeatures != null) {
             for (String bootFeature : bootFeatures) {
-                if (!resolvedFeaturesNames.contains(bootFeature)) {
-                    throw new MojoFailureException("Feature " + bootFeature + " is not resolved. Check that <dependencies/> provide the kar of features repository providing this feature (with compile or runtime scope)");
+                if (!resolveFeature(features.keySet(), bootFeature)) {
+                    throw new MojoFailureException("Boot feature " + bootFeature + " is not resolved. Check that <dependencies/> provide the kar of features repository providing this feature (with compile or runtime scope)");
                 }
             }
         }
         if (installedFeatures != null) {
             for (String installedFeature : installedFeatures) {
-                if (!resolvedFeaturesNames.contains(installedFeature)) {
-                    throw new MojoFailureException("Feature " + installedFeature + " is not resolved. Check that <dependencies/> provide the kar of features repository providing this feature (with compile or runtime scope)");
+                if (!resolveFeature(features.keySet(), installedFeature)) {
+                    throw new MojoFailureException("Boot feature " + installedFeature + " is not resolved. Check that <dependencies/> provide the kar of features repository providing this feature (with compile or runtime scope)");
                 }
             }
         }
@@ -222,9 +218,9 @@ public class InstallKarsMojo extends MojoSupport {
         getLog().info("Installing features");
         for (Feature feature : features.keySet()) {
             try {
-                if (features.get(feature) || (startupFeatures != null && startupFeatures.contains(feature.getName()))) {
+                if (features.get(feature) || (startupFeatures != null && resolveFeature(startupFeatures, feature))) {
                     // the feature is a startup feature, updating startup.properties file
-                    getLog().info("Feature " + feature.getName() + " is defined as a startup feature");
+                    getLog().info("Feature " + feature.getName() + "/" + feature.getVersion() + " is defined as a startup feature");
                     getLog().info("= Updating startup.properties file");
                     List<String> comment = Arrays.asList(new String[]{"", "# feature: " + feature.getName() + " version: " + feature.getVersion()});
                     for (BundleInfo bundleInfo : feature.getBundles()) {
@@ -246,9 +242,9 @@ public class InstallKarsMojo extends MojoSupport {
                     }
                     // add the feature in the system folder
                     resolveFeature(feature, features);
-                } else if (bootFeatures != null && bootFeatures.contains(feature.getName())) {
+                } else if (bootFeatures != null && resolveFeature(bootFeatures, feature)) {
                     // the feature is a boot feature, updating the etc/org.apache.karaf.features.cfg file
-                    getLog().info("Feature " + feature.getName() + " is defined as a boot feature");
+                    getLog().info("Feature " + feature.getName() + "/" + feature.getVersion() + " is defined as a boot feature");
                     if (featuresCfgFile.exists()) {
                         getLog().info("= Updating " + featuresCfgFile.getPath());
                         Properties featuresProperties = new Properties();
@@ -268,15 +264,15 @@ public class InstallKarsMojo extends MojoSupport {
                     }
                     // add the feature in the system folder
                     resolveFeature(feature, features);
-                } else if (installedFeatures != null && installedFeatures.contains(feature.getName())) {
-                    getLog().info("Feature " + feature.getName() + " is defined as a installed feature");
+                } else if (installedFeatures != null && resolveFeature(installedFeatures, feature)) {
+                    getLog().info("Feature " + feature.getName() + "/" + feature.getVersion() + " is defined as a installed feature");
                     // add the feature in the system folder
                     resolveFeature(feature, features);
                 } else {
-                    getLog().debug("Feature " + feature.getName() + " is not installed");
+                    getLog().debug("Feature " + feature.getName() + "/" + feature.getVersion() + " is not installed");
                 }
             } catch (Exception e) {
-                throw new MojoFailureException("Can not install " + feature.getName() + " feature", e);
+                throw new MojoFailureException("Can not install " + feature.getName() + "/" + feature.getVersion() + " feature", e);
             }
         }
 
@@ -305,6 +301,53 @@ public class InstallKarsMojo extends MojoSupport {
         } catch (IOException e) {
             throw new MojoFailureException("Can not write " + startupPropertiesFile, e);
         }
+    }
+
+    private boolean resolveFeature(Set<Feature> features, String featureToCheck) {
+        String name = featureToCheck;
+        // the format can be name/version
+        String[] split = name.split("/");
+        if (split.length == 2) {
+            // the feature used name/version format
+            name = split[0];
+            String version = split[1];
+            boolean found = false;
+            for (Feature feature : features) {
+                if (feature.getName().equals(name) && feature.getVersion().equals(version)) {
+                    found = true;
+                    break;
+                }
+            }
+            return found;
+        } else {
+            // the feature is just name
+            boolean found = false;
+            for (Feature feature : features) {
+                if (feature.getName().equals(name)) {
+                    found = true;
+                    break;
+                }
+            }
+            return found;
+        }
+    }
+
+    private boolean resolveFeature(List<String> features, Feature feature) {
+        for (String f : features) {
+            String[] split = f.split("/");
+            if (split.length == 2) {
+                String name = split[0];
+                String version = split[1];
+                if (feature.getName().equals(name) && feature.getVersion().equals(version)) {
+                    return true;
+                }
+            } else {
+                if (feature.getName().equals(f)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private void resolveRepository(String repository, Set<String> repositories, Map<Feature, Boolean> features, boolean updateFeaturesCfgFile, boolean updateStartupProperties) throws Exception {
