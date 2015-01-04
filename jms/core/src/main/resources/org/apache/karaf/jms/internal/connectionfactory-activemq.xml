@@ -19,6 +19,8 @@
 
     <bean id="activemqConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
         <property name="brokerURL" value="${url}" />
+        <property name="userName" value="${username}" />
+        <property name="password" value="${password}" />
     </bean>
 
     <bean id="pooledConnectionFactory" class="org.apache.activemq.pool.PooledConnectionFactory">

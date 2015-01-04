@@ -83,6 +83,7 @@
                             org.apache.karaf.shell.console,
                             *
                         </Import-Package>
+                        <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>
                 </configuration>
             </plugin>
