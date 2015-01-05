@@ -383,7 +383,7 @@ public class InstallKarsMojo extends MojoSupport {
             repositoryFile = new File(repository);
         }
         // copy the repository file in system folder
-        File repositoryFileInSystemFolder = new File(system.resolve(repository));
+        File repositoryFileInSystemFolder = new File(new File(system), repository);
         if (!repositoryFileInSystemFolder.exists()) {
             repositoryFileInSystemFolder.getParentFile().mkdirs();
             copy(repositoryFile, repositoryFileInSystemFolder);
