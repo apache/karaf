@@ -21,8 +21,6 @@ import java.io.PipedOutputStream;
 import java.util.Arrays;
 import java.util.HashSet;
 
-import org.junit.Assert;
-
 import org.apache.karaf.features.Feature;
 import org.apache.sshd.ClientChannel;
 import org.apache.sshd.ClientSession;
@@ -30,6 +28,7 @@ import org.apache.sshd.SshClient;
 import org.apache.sshd.client.future.ConnectFuture;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Assert;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
@@ -117,12 +116,13 @@ public class SshCommandTestBase extends KarafTestSupport {
     private OutputStream openSshChannel(String username, String password, OutputStream ... outputs) throws Exception {
         client = SshClient.setUpDefaultClient();
         client.start();
-        ConnectFuture future = client.connect("localhost", 8101).await();
+        ConnectFuture future = client.connect(username, "localhost", 8101).await();
         session = future.getSession();
 
         int ret = ClientSession.WAIT_AUTH;
         while ((ret & ClientSession.WAIT_AUTH) != 0) {
-            session.authPassword(username, password);
+            session.addPasswordIdentity(password);
+            session.auth().verify();
             ret = session.waitFor(ClientSession.WAIT_AUTH | ClientSession.CLOSED | ClientSession.AUTHED, 0);
         }
         if ((ret & ClientSession.CLOSED) != 0) {
