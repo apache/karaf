@@ -38,6 +38,7 @@ import org.apache.karaf.shell.console.Console;
 import org.apache.karaf.shell.console.ConsoleFactory;
 import org.apache.felix.service.command.Function;
 import org.apache.felix.service.threadio.ThreadIO;
+import org.apache.karaf.util.StreamLoggerInterceptor;
 import org.apache.sshd.common.Factory;
 import org.apache.sshd.server.Command;
 import org.apache.sshd.server.Environment;
@@ -59,11 +60,19 @@ public class ShellFactoryImpl implements Factory<Command> {
     private CommandProcessor commandProcessor;
     private ConsoleFactory consoleFactory;
     private ThreadIO threadIO;
+    private boolean consoleLogger;
+    private String consoleLoggerName;
+    private String consoleLoggerOutLevel;
+    private String consoleLoggerErrLevel;
 
-    public ShellFactoryImpl(CommandProcessor commandProcessor, ConsoleFactory consoleFactory, ThreadIO threadIO) {
+    public ShellFactoryImpl(CommandProcessor commandProcessor, ConsoleFactory consoleFactory, ThreadIO threadIO, boolean consoleLogger, String consoleLoggerName, String consoleLoggerOutLevel, String consoleLoggerErrLevel) {
         this.commandProcessor = commandProcessor;
         this.consoleFactory = consoleFactory;
         this.threadIO = threadIO;
+        this.consoleLogger = consoleLogger;
+        this.consoleLoggerName = consoleLoggerName;
+        this.consoleLoggerOutLevel = consoleLoggerOutLevel;
+        this.consoleLoggerErrLevel = consoleLoggerErrLevel;
     }
 
     public Command create() {
@@ -88,11 +97,19 @@ public class ShellFactoryImpl implements Factory<Command> {
         }
 
         public void setOutputStream(final OutputStream out) {
-            this.out = out;
+            if (consoleLogger) {
+                this.out = new StreamLoggerInterceptor(out, consoleLoggerName, consoleLoggerOutLevel);
+            } else {
+                this.out = out;
+            }
         }
 
         public void setErrorStream(final OutputStream err) {
-            this.err = err;
+            if (consoleLogger) {
+                this.err = new StreamLoggerInterceptor(err, consoleLoggerName, consoleLoggerErrLevel);
+            } else {
+                this.err = err;
+            }
         }
 
         public void setExitCallback(ExitCallback callback) {
@@ -262,5 +279,7 @@ public class ShellFactoryImpl implements Factory<Command> {
         }
 
     }
+
+
 
 }

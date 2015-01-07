@@ -25,13 +25,33 @@ import org.apache.sshd.server.CommandFactory;
 public class ShellCommandFactory implements CommandFactory {
 
     private CommandProcessor commandProcessor;
+    private boolean consoleLogger = false;
+    private String consoleLoggerName;
+    private String consoleLoggerOutLevel;
+    private String consoleLoggerErrLevel;
 
     public void setCommandProcessor(CommandProcessor commandProcessor) {
         this.commandProcessor = commandProcessor;
     }
 
+    public void setConsoleLogger(boolean consoleLogger) {
+        this.consoleLogger = consoleLogger;
+    }
+
+    public void setConsoleLoggerName(String consoleLoggerName) {
+        this.consoleLoggerName = consoleLoggerName;
+    }
+
+    public void setConsoleLoggerOutLevel(String consoleLoggerOutLevel) {
+        this.consoleLoggerOutLevel = consoleLoggerOutLevel;
+    }
+
+    public void setConsoleLoggerErrLevel(String consoleLoggerErrLevel) {
+        this.consoleLoggerErrLevel = consoleLoggerErrLevel;
+    }
+
     public Command createCommand(String command) {
-        return new ShellCommand(commandProcessor, command);
+        return new ShellCommand(commandProcessor, command, consoleLogger, consoleLoggerName, consoleLoggerOutLevel, consoleLoggerErrLevel);
     }
 
 }

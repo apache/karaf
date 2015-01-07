@@ -18,15 +18,7 @@
  */
 package org.apache.karaf.shell.console.impl.jline;
 
-import java.io.CharArrayWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.InterruptedIOException;
-import java.io.PrintStream;
-import java.io.Reader;
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -51,6 +43,7 @@ import org.apache.karaf.shell.console.Console;
 import org.apache.karaf.shell.console.SessionProperties;
 import org.apache.karaf.shell.console.completer.CommandsCompleter;
 import org.apache.karaf.shell.util.ShellUtil;
+import org.apache.karaf.util.StreamLoggerInterceptor;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,6 +75,12 @@ public class ConsoleImpl implements Console {
     private Thread thread;
     private final BundleContext bundleContext;
 
+    // logging
+    private boolean consoleLogger = false;
+    private String consoleLoggerName;
+    private String consoleLoggerOutLevel;
+    private String consoleLoggerErrLevel;
+
     public ConsoleImpl(CommandProcessor processor,
                        ThreadIO threadIO,
                        InputStream in,
@@ -93,12 +92,19 @@ public class ConsoleImpl implements Console {
                        BundleContext bc) {
         this.threadIO = threadIO;
         this.in = in;
-        this.out = out;
-        this.err = err;
+        // load and configure the logger
+        this.setLogger();
+        if (consoleLogger) {
+            this.out = new StreamLoggerInterceptor(out, consoleLoggerName, consoleLoggerOutLevel);
+            this.err = new StreamLoggerInterceptor(err, consoleLoggerName, consoleLoggerErrLevel);
+        } else {
+            this.out = out;
+            this.err = err;
+        }
         this.queue = new ArrayBlockingQueue<Integer>(1024);
         this.terminal = term == null ? new UnsupportedTerminal() : term;
         this.consoleInput = new ConsoleInputStream();
-        this.session = processor.createSession(consoleInput, out, err);
+        this.session = processor.createSession(consoleInput, this.out, this.err);
         this.session.put("SCOPE", "shell:bundle:*");
         this.session.put("SUBSHELL", "");
         this.setCompletionMode();
@@ -223,6 +229,37 @@ public class ConsoleImpl implements Console {
             }
         }
     }
+
+    private void setLogger() {
+        try {
+            File shellCfg = new File(System.getProperty("karaf.etc"), "/org.apache.karaf.shell.cfg");
+            Properties properties = new Properties();
+            properties.load(new FileInputStream(shellCfg));
+            if (properties.get("consoleLogger") != null && ((String) properties.get("consoleLogger")).equalsIgnoreCase("true")) {
+                consoleLogger = true;
+                if (properties.get("consoleLoggerName") != null && ((String) properties.get("consoleLoggerName")).isEmpty()) {
+                    consoleLoggerName = (String) properties.get("consoleLoggerName");
+                } else {
+                    consoleLoggerName = "org.apache.karaf.shell.console.Logger";
+                }
+                if (properties.get("consoleLoggerOutLevel") != null && ((String) properties.get("consoleLoggerOutLevel")).isEmpty()) {
+                    consoleLoggerOutLevel = (String) properties.get("consoleLoggerOutLevel");
+                } else {
+                    consoleLoggerOutLevel = "trace";
+                }
+                if (properties.get("consoleLoggerErrLevel") != null && ((String) properties.get("consoleLoggerErrLevel")).isEmpty()) {
+                    consoleLoggerErrLevel = (String) properties.get("consoleLoggerErrLevel");
+                } else {
+                    consoleLoggerErrLevel = "error";
+                }
+            } else {
+                LOGGER.debug("console logger is disabled.");
+            }
+        } catch (Exception e) {
+            LOGGER.warn("Can't read {}/org.apache.karaf.shell.cfg file. The console logger is disabled.", System.getProperty("karaf.etc"));
+        }
+    }
+
     private void setCompletionMode() {
         try {
             File shellCfg = new File(System.getProperty("karaf.etc"), "/org.apache.karaf.shell.cfg");

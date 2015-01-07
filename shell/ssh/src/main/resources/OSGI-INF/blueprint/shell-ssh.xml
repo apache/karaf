@@ -52,6 +52,10 @@
             <cm:property name="macs" value="hmac-sha1" />
             <cm:property name="ciphers" value="aes256-ctr,aes192-ctr,aes128-ctr,arcfour256" />
             <cm:property name="welcomeBanner" value="" />
+            <cm:property name="consoleLogger" value="false" />
+            <cm:property name="consoleLoggerName" value="org.apache.karaf.shell.console.Logger" />
+            <cm:property name="consoleLoggerOutLevel" value="trace" />
+            <cm:property name="consoleLoggerErrLevel" value="error" />
         </cm:default-properties>
     </cm:property-placeholder>
 
@@ -97,6 +101,10 @@
             	<argument ref="commandProcessor"/>
             	<argument ref="consoleFactory"/>
                 <argument ref="threadIO"/>
+                <argument value="${consoleLogger}"/>
+                <argument value="${consoleLoggerName}"/>
+                <argument value="${consoleLoggerOutLevel}"/>
+                <argument value="${consoleLoggerErrLevel}"/>
             </bean>
         </property>
         <property name="commandFactory">
@@ -104,6 +112,10 @@
                 <argument>
                     <bean class="org.apache.karaf.shell.ssh.ShellCommandFactory">
                         <property name="commandProcessor" ref="commandProcessor"/>
+                        <property name="consoleLogger" value="${consoleLogger}"/>
+                        <property name="consoleLoggerName" value="${consoleLoggerName}"/>
+                        <property name="consoleLoggerOutLevel" value="${consoleLoggerOutLevel}"/>
+                        <property name="consoleLoggerErrLevel" value="${consoleLoggerErrLevel}"/>
                     </bean>
                 </argument>
             </bean>

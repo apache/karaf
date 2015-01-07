@@ -86,6 +86,11 @@
             <groupId>org.apache.sshd</groupId>
             <artifactId>sshd-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.apache.karaf.util</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -163,6 +168,7 @@
                         <Private-Package>
                         	org.apache.karaf.shell.console.impl*,
                             org.apache.karaf.shell.security.impl*,
+                            org.apache.karaf.util,
                             
                             <!-- We need to embed gogo runtime to be able to create 
                                  SecuredCommandProcessorImpl which needs CommandProcessorImpl -->

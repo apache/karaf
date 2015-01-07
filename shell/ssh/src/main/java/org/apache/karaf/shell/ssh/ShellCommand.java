@@ -22,6 +22,7 @@ import java.io.*;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.security.auth.Subject;
 
@@ -30,6 +31,7 @@ import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Converter;
 import org.apache.karaf.jaas.modules.JaasHelper;
 import org.apache.karaf.shell.util.ShellUtil;
+import org.apache.karaf.util.StreamLoggerInterceptor;
 import org.apache.karaf.util.StreamUtils;
 import org.apache.sshd.server.Command;
 import org.apache.sshd.server.Environment;
@@ -59,9 +61,18 @@ public class ShellCommand implements Command, SessionAware {
     private ServerSession session;
     private CommandProcessor commandProcessor;
 
-    public ShellCommand(CommandProcessor commandProcessor, String command) {
+    private boolean consoleLogger = false;
+    private String consoleLoggerName;
+    private String consoleLoggerOutLevel;
+    private String consoleLoggerErrLevel;
+
+    public ShellCommand(CommandProcessor commandProcessor, String command, boolean consoleLogger, String consoleLoggerName, String consoleLoggerOutLevel, String consoleLoggerErrLevel) {
         this.commandProcessor = commandProcessor;
         this.command = command;
+        this.consoleLogger = consoleLogger;
+        this.consoleLoggerName = consoleLoggerName;
+        this.consoleLoggerOutLevel = consoleLoggerOutLevel;
+        this.consoleLoggerErrLevel = consoleLoggerErrLevel;
     }
 
     public void setInputStream(InputStream in) {
@@ -69,11 +80,19 @@ public class ShellCommand implements Command, SessionAware {
     }
 
     public void setOutputStream(OutputStream out) {
-        this.out = out;
+        if (consoleLogger) {
+            this.out = new StreamLoggerInterceptor(out, consoleLoggerName, consoleLoggerOutLevel);
+        } else {
+            this.out = out;
+        }
     }
 
     public void setErrorStream(OutputStream err) {
-        this.err = err;
+        if (consoleLogger) {
+            this.err = new StreamLoggerInterceptor(err, consoleLoggerName, consoleLoggerErrLevel);
+        } else {
+            this.err = err;
+        }
     }
 
     public void setExitCallback(ExitCallback callback) {
