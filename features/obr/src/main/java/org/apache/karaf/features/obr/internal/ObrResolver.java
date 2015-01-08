@@ -33,6 +33,7 @@ import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.felix.bundlerepository.Requirement;
 import org.apache.felix.bundlerepository.Resource;
 import org.apache.karaf.features.BundleInfo;
+import org.apache.karaf.features.Dependency;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Resolver;
@@ -179,9 +180,9 @@ public class ObrResolver implements Resolver {
     public List<BundleInfo> getAllBundles(Feature feature) throws Exception {
         List<BundleInfo> bundles = new ArrayList<BundleInfo>();
         bundles.addAll(feature.getBundles());
-        for (Feature dependency : feature.getDependencies()) {
-            dependency = getFeaturesService().getFeature(dependency.getName(), dependency.getVersion());
-            bundles.addAll(getAllBundles(dependency));
+        for (Dependency dependency : feature.getDependencies()) {
+            Feature dependencyfeature = getFeaturesService().getFeature(dependency.getName(), dependency.getVersion());
+            bundles.addAll(getAllBundles(dependencyfeature));
         }
         return bundles;
         
