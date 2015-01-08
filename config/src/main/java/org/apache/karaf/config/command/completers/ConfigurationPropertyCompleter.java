@@ -47,8 +47,6 @@ import org.osgi.service.cm.ConfigurationAdmin;
 @Service
 public class ConfigurationPropertyCompleter implements Completer {
 
-    private final StringsCompleter delegate = new StringsCompleter();
-
     private static final String OPTION = "-p";
     private static final String ALIAS = "--pid";
 
@@ -57,15 +55,15 @@ public class ConfigurationPropertyCompleter implements Completer {
 
     @SuppressWarnings("rawtypes")
     public int complete(final Session session, final CommandLine commandLine, final List<String> candidates) {
+        StringsCompleter strings = new StringsCompleter();
         if (session != null) {
             String pid = getPid(session, commandLine);
             Set<String> propertyNames = getPropertyNames(pid);
-            delegate.getStrings().clear();
             if (propertyNames != null && !propertyNames.isEmpty()) {
-                delegate.getStrings().addAll(propertyNames);
+                strings.getStrings().addAll(propertyNames);
             }
         }
-        return delegate.complete(session, commandLine, candidates);
+        return strings.complete(session, commandLine, candidates);
     }
 
     /**
