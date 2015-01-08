@@ -34,11 +34,13 @@ import org.apache.felix.bundlerepository.Requirement;
 import org.apache.felix.bundlerepository.Resource;
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Feature;
+import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Resolver;
 
 public class ObrResolver implements Resolver {
 
     private RepositoryAdmin repositoryAdmin;
+    private FeaturesService featuresService;
     private boolean resolveOptionalImports;
     private boolean startByDefault;
     private int startLevel;
@@ -78,8 +80,8 @@ public class ObrResolver implements Resolver {
         List<Resource> ress = new ArrayList<Resource>();
         List<Resource> featureDeploy = new ArrayList<Resource>();
         Map<Object, BundleInfo> infos = new HashMap<Object, BundleInfo>();
-        for (BundleInfo bundleInfo : feature.getBundles()) {
-        	URL url = null;
+        for (BundleInfo bundleInfo : getAllBundles(feature)) {
+            URL url = null;
             try {
                 url = new URL(bundleInfo.getLocation());
             } catch (MalformedURLException e) {
@@ -155,6 +157,7 @@ public class ObrResolver implements Resolver {
             }
             bundles.add(info);
         }
+        
         return bundles;
     }
 
@@ -166,6 +169,23 @@ public class ObrResolver implements Resolver {
         }
     }
 
+    /**
+     * get all bundles from a given feature, including the bundles from dependency
+     * features
+     *
+     * @param feature
+     */
+    public List<BundleInfo> getAllBundles(Feature feature) throws Exception {
+        List<BundleInfo> bundles = new ArrayList<BundleInfo>();
+        bundles.addAll(feature.getBundles());
+        for (Feature dependency : feature.getDependencies()) {
+            dependency = getFeaturesService().getFeature(dependency.getName(), dependency.getVersion());
+            bundles.addAll(getAllBundles(dependency));
+        }
+        return bundles;
+        
+    }
+    
     protected void printUnderline(PrintWriter out, int length) {
         for (int i = 0; i < length; i++) {
             out.print('-');
@@ -194,5 +214,13 @@ public class ObrResolver implements Resolver {
             filter = "(" + filter + ")";
         }
         return repositoryAdmin.getHelper().requirement(name, filter);
+    }
+
+    public FeaturesService getFeaturesService() {
+        return featuresService;
+    }
+
+    public void setFeaturesService(FeaturesService featuresService) {
+        this.featuresService = featuresService;
     }
 }

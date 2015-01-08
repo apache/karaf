@@ -34,12 +34,15 @@
 
     <bean id="obrResolver" class="org.apache.karaf.features.obr.internal.ObrResolver">
         <property name="repositoryAdmin" ref="repositoryAdmin" />
+        <property name="featuresService" ref="featuresService" />
         <property name="resolveOptionalImports" value="$[resolveOptionalImports]" />
         <property name="startByDefault" value="$[startByDefault]" />
         <property name="startLevel" value="$[startLevel]" />
     </bean>
 
     <reference id="repositoryAdmin" interface="org.apache.felix.bundlerepository.RepositoryAdmin" />
+ 
+    <reference id="featuresService" interface="org.apache.karaf.features.FeaturesService" />
 
     <service ref="obrResolver" interface="org.apache.karaf.features.Resolver">
         <service-properties>
