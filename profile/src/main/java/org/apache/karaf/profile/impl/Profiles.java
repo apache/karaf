@@ -52,7 +52,8 @@ public final class Profiles {
                 ProfileBuilder builder;
                 @Override
                 public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-                    if (dir.getFileName().toString().endsWith(PROFILE_FOLDER_SUFFIX)) {
+                    Path fileName = dir.getFileName();
+                    if (fileName != null && fileName.toString().endsWith(PROFILE_FOLDER_SUFFIX)) {
                         String profileId = root.relativize(dir).toString();
                         profileId = profileId.replaceAll(root.getFileSystem().getSeparator(), "-");
                         profileId = profileId.substring(0, profileId.length() - PROFILE_FOLDER_SUFFIX.length());
