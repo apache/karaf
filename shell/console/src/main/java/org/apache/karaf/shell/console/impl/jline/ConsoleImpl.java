@@ -237,17 +237,17 @@ public class ConsoleImpl implements Console {
             properties.load(new FileInputStream(shellCfg));
             if (properties.get("consoleLogger") != null && ((String) properties.get("consoleLogger")).equalsIgnoreCase("true")) {
                 consoleLogger = true;
-                if (properties.get("consoleLoggerName") != null && ((String) properties.get("consoleLoggerName")).isEmpty()) {
+                if (properties.get("consoleLoggerName") != null && !((String) properties.get("consoleLoggerName")).isEmpty()) {
                     consoleLoggerName = (String) properties.get("consoleLoggerName");
                 } else {
                     consoleLoggerName = "org.apache.karaf.shell.console.Logger";
                 }
-                if (properties.get("consoleLoggerOutLevel") != null && ((String) properties.get("consoleLoggerOutLevel")).isEmpty()) {
+                if (properties.get("consoleLoggerOutLevel") != null && !((String) properties.get("consoleLoggerOutLevel")).isEmpty()) {
                     consoleLoggerOutLevel = (String) properties.get("consoleLoggerOutLevel");
                 } else {
                     consoleLoggerOutLevel = "trace";
                 }
-                if (properties.get("consoleLoggerErrLevel") != null && ((String) properties.get("consoleLoggerErrLevel")).isEmpty()) {
+                if (properties.get("consoleLoggerErrLevel") != null && !((String) properties.get("consoleLoggerErrLevel")).isEmpty()) {
                     consoleLoggerErrLevel = (String) properties.get("consoleLoggerErrLevel");
                 } else {
                     consoleLoggerErrLevel = "error";
