@@ -343,6 +343,7 @@ public class InstallKarsMojo extends MojoSupport {
         //
         for (Map.Entry<String, byte[]> config : overallEffective.getFileConfigurations().entrySet()) {
             Path configFile = workDirectory.toPath().resolve("etc/" + config.getKey());
+            Files.createDirectories(configFile.getParent());
             Files.write(configFile, config.getValue());
         }
 
