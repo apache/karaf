@@ -111,9 +111,9 @@
                         org.apache.karaf.demo.profiles:org.apache.karaf.demo.profiles.registry
                     </profilesArtifact>
                     -->
-                    <profilesDirectory>
-                        ${basedir}/../registry/src/main/resources
-                    </profilesDirectory>
+                    <profilesUri>
+                        file://${basedir}/../registry/src/main/resources
+                    </profilesUri>
                     <bootFeatures>
                         <feature>deployer</feature>
                     </bootFeatures>

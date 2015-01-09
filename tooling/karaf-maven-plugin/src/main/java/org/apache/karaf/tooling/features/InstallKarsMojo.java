@@ -23,8 +23,12 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystemNotFoundException;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -138,7 +142,7 @@ public class InstallKarsMojo extends MojoSupport {
     private List<String> installedBundles;
     
     @Parameter
-    private File profilesDirectory;
+    private String profilesUri;
 
     @Parameter
     private List<String> bootProfiles;
@@ -220,7 +224,7 @@ public class InstallKarsMojo extends MojoSupport {
         installedProfiles = nonNullList(installedProfiles);
 
         if (!startupProfiles.isEmpty() || !bootProfiles.isEmpty() || !installedProfiles.isEmpty()) {
-            if (profilesDirectory == null) {
+            if (profilesUri == null) {
                 throw new IllegalArgumentException("profilesDirectory must be specified");
             }
         }
@@ -296,8 +300,17 @@ public class InstallKarsMojo extends MojoSupport {
 
         // Load profiles
         Map<String, Profile> allProfiles;
-        if (profilesDirectory != null) {
-            allProfiles = Profiles.loadProfiles(profilesDirectory.toPath());
+        if (profilesUri != null) {
+            URI profileURI = URI.create(profilesUri);
+            Path profilePath;
+            try {
+                profilePath = Paths.get(profileURI);
+            } catch (FileSystemNotFoundException e) {
+                // file system does not exist, try to create it
+                FileSystem fs = FileSystems.newFileSystem(profileURI, new HashMap<String, Object>(), InstallKarsMojo.class.getClassLoader());
+                profilePath = fs.provider().getPath(profileURI);
+            }
+            allProfiles = Profiles.loadProfiles(profilePath);
         } else {
             allProfiles = new HashMap<>();
         }
