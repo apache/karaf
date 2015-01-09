@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.profile.impl;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -157,13 +158,30 @@ public final class Profiles {
         assertNotNull(profile, "resolvers is null");
         // Build dynamic configurations which can support lazy computation of substituted values
         final Map<String, Map<String, String>> dynamic = new HashMap<>();
-        for (Map.Entry<String, Map<String, String>> cfg : profile.getConfigurations().entrySet()) {
-            dynamic.put(cfg.getKey(), new DynamicMap(dynamic, cfg.getKey(), cfg.getValue(), resolvers, finalSubstitution));
+        final Map<String, Properties> originals = new HashMap<>();
+        for (Map.Entry<String, byte[]> entry : profile.getFileConfigurations().entrySet()) {
+            if (entry.getKey().endsWith(Profile.PROPERTIES_SUFFIX)) {
+                try {
+                    String key = entry.getKey().substring(0, entry.getKey().length() - Profile.PROPERTIES_SUFFIX.length());
+                    Properties props = new Properties(false);
+                    props.load(new ByteArrayInputStream(entry.getValue()));
+                    originals.put(key, props);
+                    dynamic.put(key, new DynamicMap(dynamic, key, props, resolvers, finalSubstitution));
+                } catch (IOException e) {
+                    throw new IllegalArgumentException("Can not load properties for " + entry.getKey());
+                }
+            }
+        }
+        // Force computation while preserving layout
+        ProfileBuilder builder = ProfileBuilder.Factory.createFrom(profile);
+        for (Map.Entry<String, Map<String, String>> cfg : dynamic.entrySet()) {
+            Properties original = originals.get(cfg.getKey());
+            original.keySet().retainAll(cfg.getValue().keySet());
+            original.putAll(cfg.getValue());
+            builder.addFileConfiguration(cfg.getKey() + Profile.PROPERTIES_SUFFIX, Utils.toBytes(original));
         }
         // Compute the new profile
-        return ProfileBuilder.Factory.createFrom(profile)
-                .setConfigurations(dynamic)
-                .getProfile();
+        return builder.getProfile();
     }
 
     private static class DynamicMap extends AbstractMap<String, String> {
