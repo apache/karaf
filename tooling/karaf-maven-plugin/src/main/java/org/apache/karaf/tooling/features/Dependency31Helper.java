@@ -306,6 +306,14 @@ public class Dependency31Helper implements DependencyHelper {
 
     @Override
     public File resolveById(String id, Log log) throws MojoFailureException {
+        if (id.startsWith("mvn:")) {
+            if (id.contains("!")) {
+                id = id.substring(0, "mvn:".length()) + id.substring(id.indexOf("!") + 1);
+            }
+            if (id.endsWith("/")) {
+                id = id.substring(0, id.length() - 1);
+            }
+        }
         id = MavenUtil.mvnToAether(id);
         ArtifactRequest request = new ArtifactRequest();
         request.setArtifact(new DefaultArtifact(id));
@@ -377,6 +385,9 @@ public class Dependency31Helper implements DependencyHelper {
     public String pathFromMaven(String name) throws MojoExecutionException {
         if (name.indexOf(':') == -1) {
             return name;
+        }
+        if (name.endsWith("/")) {
+            name = name.substring(0, name.length() - 1);
         }
         name = MavenUtil.mvnToAether(name);
         return pathFromAether(name);
