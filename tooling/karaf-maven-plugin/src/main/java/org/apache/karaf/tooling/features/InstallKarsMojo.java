@@ -18,6 +18,8 @@
  */
 package org.apache.karaf.tooling.features;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -173,6 +175,9 @@ public class InstallKarsMojo extends MojoSupport {
 
     @Parameter
     protected boolean installAllFeaturesByDefault = true;
+
+    @Parameter
+    protected boolean use24SyntaxForStartup = false;
 
     // an access layer for available Aether implementation
     protected DependencyHelper dependencyHelper;
@@ -383,6 +388,23 @@ public class InstallKarsMojo extends MojoSupport {
                 installConfig(config);
             }
             for (Conditional cond : feature.getConditional()) {
+                boolean doInstall = true;
+                for (Dependency dep : cond.getFeature()) {
+                    if (!startupFeatures.contains(dep.getName())) {
+                        doInstall = false;
+                        break;
+                    }
+                }
+                if (doInstall) {
+                    for (Bundle bundleInfo : cond.getBundle()) {
+                        String bundleLocation = bundleInfo.getLocation();
+                        int bundleStartLevel = bundleInfo.getStartLevel() == 0 ? defaultStartLevel : bundleInfo.getStartLevel();
+                        if (allStartupBundles.containsKey(bundleLocation)) {
+                            bundleStartLevel = Math.min(bundleStartLevel, allStartupBundles.get(bundleLocation));
+                        }
+                        allStartupBundles.put(bundleLocation, bundleStartLevel);
+                    }
+                }
                 for (Config config : cond.getConfig()) {
                     installConfig(config);
                 }
@@ -425,9 +447,12 @@ public class InstallKarsMojo extends MojoSupport {
         for (Map.Entry<Integer, Set<String>> entry : invertedStartupBundles.entrySet()) {
             String startLevel = Integer.toString(entry.getKey());
             for (String location : new TreeSet<>(entry.getValue())) {
-                location = installStartupArtifact(location, useReferenceUrls);
+                location = installStartupArtifact(location, useReferenceUrls || use24SyntaxForStartup);
                 if (location.startsWith("file:") && useReferenceUrls) {
                     location = "reference:" + location;
+                }
+                if (location.startsWith("file:") && use24SyntaxForStartup) {
+                    location = location.substring("file:".length());
                 }
                 startupProperties.put(location, startLevel);
             }
@@ -549,11 +574,32 @@ public class InstallKarsMojo extends MojoSupport {
         // so keep the generated feature
         if (!generated.getBundle().isEmpty()) {
             File output = new File(workDirectory, "etc/" + rep.getName() + ".xml");
-            try (FileOutputStream os = new FileOutputStream(output)) {
-                JaxbUtil.marshal(rep, os);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            JaxbUtil.marshal(rep, baos);
+            ByteArrayInputStream bais;
+            String repoUrl;
+            if (use24SyntaxForStartup) {
+                String str = baos.toString();
+                str = str.replace("http://karaf.apache.org/xmlns/features/v1.3.0", "http://karaf.apache.org/xmlns/features/v1.2.0");
+                str = str.replaceAll(" dependency=\".*?\"", "");
+                str = str.replaceAll(" prerequisite=\".*?\"", "");
+                for (Feature f : rep.getFeature()) {
+                    for (Dependency d : f.getFeature()) {
+                        if (d.isPrerequisite()) {
+                            if (!startupEffective.getFeatures().contains(d.getName())) {
+                                getLog().warn("Feature " + d.getName() + " is a prerequisite and should be installed as a startup feature.");                }
+                        }
+                    }
+                }
+                bais = new ByteArrayInputStream(str.getBytes());
+                repoUrl = "file:etc/" + output.getName();
+            } else {
+                bais = new ByteArrayInputStream(baos.toByteArray());
+                repoUrl = "file:${karaf.home}/etc/" + output.getName();
             }
+            Files.copy(bais, output.toPath());
             Properties featuresProperties = new Properties(featuresCfgFile);
-            featuresProperties.put(FEATURES_REPOSITORIES, "file:${karaf.home}/etc/" + output.getName());
+            featuresProperties.put(FEATURES_REPOSITORIES, repoUrl);
             featuresProperties.put(FEATURES_BOOT, generated.getName());
             featuresProperties.save();
         }
