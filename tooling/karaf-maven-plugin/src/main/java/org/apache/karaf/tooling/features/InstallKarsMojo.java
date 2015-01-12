@@ -473,23 +473,11 @@ public class InstallKarsMojo extends MojoSupport {
         } else {
             getLog().info("== Installing bundle " + bundle.getLocation());
             String bundleLocation = bundle.getLocation();
-            // cleanup prefixes
-            if (bundleLocation.startsWith("wrap:")) {
-                bundleLocation = bundleLocation.substring("wrap:".length());
-                int index = bundleLocation.indexOf("$");
-                if (index != -1) {
-                    bundleLocation = bundleLocation.substring(0, index);
-                }
-            }
-            if (bundleLocation.startsWith("blueprint:")) {
-                bundleLocation = bundleLocation.substring("blueprint:".length());
-            }
-            if (bundleLocation.startsWith("webbundle:")) {
-                bundleLocation = bundleLocation.substring("webbundle:".length());
-            }
-            if (bundleLocation.startsWith("war:")) {
-                bundleLocation = bundleLocation.substring("war:".length());
-            }
+
+            // cleanup prefixes and headers after '?'
+            bundleLocation = bundleLocation.replaceFirst("^(wrap|blueprint|webbundle|war):", "");
+            bundleLocation = bundleLocation.replaceFirst("\\?.*", "");
+
             File bundleFile;
             if (bundleLocation.startsWith("mvn:")) {
                 if (bundleLocation.endsWith("/")) {
