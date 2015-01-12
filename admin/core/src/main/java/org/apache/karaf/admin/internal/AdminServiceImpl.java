@@ -440,8 +440,11 @@ public class AdminServiceImpl implements AdminService {
     }
 
     public void stopInstance(final String name) {
-        execute(new Task<Object>() {
+        
+        Integer pid = (Integer)execute(new Task<Object>() {
+            
             public Object call(State state) throws IOException {
+                int rootInstancePID = 0;
                 InstanceState instance = state.instances.get(name);
                 if (instance == null) {
                     throw new IllegalArgumentException("Instance " + name + " not found");
@@ -452,12 +455,31 @@ public class AdminServiceImpl implements AdminService {
                 }
                 cleanShutdown(instance);
                 if (instance.pid > 0) {
-                    Process process = ProcessBuilderFactory.newInstance().newBuilder().attach(instance.pid);
-                    process.destroy();
+                    if (!instance.root) {
+                        Process process = ProcessBuilderFactory.newInstance().newBuilder().attach(instance.pid);
+                        process.destroy();
+                    } else {
+                        //can't simply destroy root instance here
+                        //as it will lose the update in instances.properties
+                        //because of no chance to run the saveData
+                        rootInstancePID = instance.pid;
+                    }
+                    instance.pid = 0;
+                    
                 }
-                return null;
+                return rootInstancePID;
             }
         }, true);
+        if (pid.intValue() != 0 && isInstanceRoot(name)) {
+            Process process;
+            try {
+                process = ProcessBuilderFactory.newInstance().newBuilder().attach(pid.intValue());
+                process.destroy(); 
+            } catch (IOException e) {
+                LOGGER.debug("Unable to cleanly shutdown root instance ", e);
+            }
+                     
+        }
     }
 
     public void destroyInstance(final String name) {
