@@ -29,6 +29,7 @@ import org.apache.felix.gogo.runtime.CommandNotFoundException;
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Converter;
+import org.apache.karaf.shell.console.CloseShellException;
 import org.apache.karaf.shell.console.jline.Console;
 import org.apache.karaf.jaas.modules.JaasHelper;
 import org.apache.sshd.server.Command;
@@ -136,7 +137,7 @@ public class ShellCommandFactory implements CommandFactory {
                         boolean isCommandNotFound = "org.apache.felix.gogo.runtime.CommandNotFoundException".equals(t.getClass().getName());
                         if (isCommandNotFound) {
                             LOGGER.debug("Unknown command entered", t);
-                        } else {
+                        } else if (!(t instanceof CloseShellException)) {
                             LOGGER.info("Exception caught while executing command", t);
                         }
                         commandSession.put(Console.LAST_EXCEPTION, t);
@@ -157,7 +158,7 @@ public class ShellCommandFactory implements CommandFactory {
                             t.printStackTrace(commandSession.getConsole());
                             commandSession.getConsole().print(Ansi.ansi().fg(Ansi.Color.DEFAULT).toString());
                         }
-                        else if (!(t instanceof CommandException) && !isCommandNotFound) {
+                        else if (!(t instanceof CloseShellException) && !(t instanceof CommandException) && !isCommandNotFound) {
                             commandSession.getConsole().print(Ansi.ansi().fg(Ansi.Color.RED).toString());
                             commandSession.getConsole().println("Error executing command: "
                                     + (t.getMessage() != null ? t.getMessage() : t.getClass().getName()));
