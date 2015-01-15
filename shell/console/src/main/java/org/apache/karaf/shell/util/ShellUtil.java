@@ -32,6 +32,7 @@ import javax.security.auth.Subject;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.apache.karaf.shell.commands.CommandException;
+import org.apache.karaf.shell.console.CloseShellException;
 import org.apache.karaf.shell.console.SessionProperties;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -141,7 +142,7 @@ public class ShellUtil {
                 LOGGER.debug("Unknown command entered", t);
             } else if (t instanceof CommandException) {
                 LOGGER.debug("Command exception (Undefined option, ...)", t);
-            } else {
+            } else if (!(t instanceof CloseShellException)) {    
                 LOGGER.error("Exception caught while executing command", t);
             }
             session.put(SessionProperties.LAST_EXCEPTION, t);
@@ -157,7 +158,7 @@ public class ShellUtil {
                 session.getConsole().print(COLOR_RED);
                 t.printStackTrace(session.getConsole());
                 session.getConsole().print(COLOR_DEFAULT);
-            } else if (!(t instanceof CommandException) && !isCommandNotFound) {
+            } else if (!(t instanceof CloseShellException) && !(t instanceof CommandException) && !isCommandNotFound) {    
                 session.getConsole().print(COLOR_RED);
                 session.getConsole().println("Error executing command: "
                         + (t.getMessage() != null ? t.getMessage() : t.getClass().getName()));
