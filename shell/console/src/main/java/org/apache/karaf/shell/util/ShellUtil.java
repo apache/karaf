@@ -32,6 +32,7 @@ import java.util.Collection;
 import jline.console.ConsoleReader;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.shell.commands.CommandException;
+import org.apache.karaf.shell.console.CloseShellException;
 import org.apache.karaf.shell.console.SessionProperties;
 import org.fusesource.jansi.Ansi;
 import org.osgi.framework.Bundle;
@@ -194,7 +195,7 @@ public class ShellUtil {
                 LOGGER.debug("Unknown command entered", t);
             } else if (t instanceof CommandException) {
                 LOGGER.debug("Command exception (Undefined option, ...)", t);
-            } else {
+            } else if (!(t instanceof CloseShellException)) {
                 LOGGER.error("Exception caught while executing command", t);
             }
             session.put(SessionProperties.LAST_EXCEPTION, t);
@@ -214,7 +215,7 @@ public class ShellUtil {
                 session.getConsole().print(Ansi.ansi().fg(Ansi.Color.RED).toString());
                 t.printStackTrace(session.getConsole());
                 session.getConsole().print(Ansi.ansi().fg(Ansi.Color.DEFAULT).toString());
-            } else if (!(t instanceof CommandException) && !isCommandNotFound) {
+            } else if (!(t instanceof CloseShellException) && !(t instanceof CommandException) && !isCommandNotFound) {
                 session.getConsole().print(Ansi.ansi().fg(Ansi.Color.RED).toString());
                 session.getConsole().println("Error executing command: "
                         + (t.getMessage() != null ? t.getMessage() : t.getClass().getName()));
