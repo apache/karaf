@@ -60,8 +60,6 @@
         <bundle start-level="20">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.jexl.evaluator/${aries.blueprint.jexl.evaluator.version}</bundle>
     </feature>
 
-    <!-- NB: this file is not the one really used. This file is used by the karaf-maven-plugin to define the start-level of bundles in the generated feature.xml -->
-
     <feature name="wrapper" description="Provide OS integration" version="${project.version}">
         <bundle start-level="30">mvn:org.apache.karaf.wrapper/org.apache.karaf.wrapper.core/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.wrapper/org.apache.karaf.wrapper.command/${project.version}</bundle>
@@ -112,7 +110,7 @@
         <bundle start-level="30">mvn:org.apache.karaf.web/org.apache.karaf.web.core/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.web/org.apache.karaf.web.command/${project.version}</bundle>
     </feature>
-    
+
     <feature name="jetty" version="8.1.15.v20140411" resolver="(obr)">
     	<feature>pax-jetty</feature>
     </feature>
@@ -203,6 +201,16 @@
         blueprint inside web-bundle containers" version="${project.version}" resolver="(obr)">
         <feature>war</feature>
         <bundle>mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.webosgi/${aries.blueprint.web.version}</bundle>
+    </feature>
+
+    <feature name="jolokia" description="Jolokia monitoring support" version="${jolokia.version}">
+        <feature>http</feature>
+        <config name="org.jolokia.osgi">
+            org.jolokia.user=karaf
+            org.jolokia.realm=karaf
+            org.jolokia.authMode=jaas
+        </config>
+        <bundle>mvn:org.jolokia/jolokia-osgi/${jolokia.version}</bundle>
     </feature>
 
 </features>
