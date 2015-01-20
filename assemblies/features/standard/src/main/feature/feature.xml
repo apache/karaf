@@ -126,8 +126,6 @@
         </conditional>
     </feature>
 
-    <!-- NB: this file is not the one really used. This file is used by the karaf-maven-plugin to define the start-level of bundles in the generated feature.xml -->
-
     <feature name="wrapper" description="Provide OS integration" version="${project.version}">
         <bundle start-level="30">mvn:org.apache.karaf.wrapper/org.apache.karaf.wrapper.core/${project.version}</bundle>
     </feature>
@@ -551,6 +549,16 @@
             profilesDirectory = ${karaf.home}/profiles
         </config>
         <bundle>mvn:org.apache.karaf.profile/org.apache.karaf.profile.core/${project.version}</bundle>
+    </feature>
+
+    <feature name="jolokia" description="Jolokia monitoring support" version="${jolokia.version}">
+        <feature>http</feature>
+        <config name="org.jolokia.osgi">
+            org.jolokia.user=karaf
+            org.jolokia.realm=karaf
+            org.jolokia.authMode=jaas
+        </config>
+        <bundle>mvn:org.jolokia/jolokia-osgi/${jolokia.version}</bundle>
     </feature>
 
 </features>
