@@ -34,8 +34,17 @@ public class CompleterAsCompletor implements jline.console.completer.Completer {
         this.completer = completer;
     }
 
-    public int complete(String buffer, int cursor, List candidates) {
-        return completer.complete(session, CommandLineImpl.build(buffer, cursor), candidates);
+    @SuppressWarnings("unchecked")
+	public int complete(String buffer, int cursor, @SuppressWarnings("rawtypes") List candidates) {
+        return completer.complete(session, CommandLineImpl.build(buffer, cursor, isExpansionEnabled()), candidates); //CQL-Handling
     }
 
+    //special handling for CQL-Shell, disables the brackets from completion
+    private boolean isExpansionEnabled() {
+        Object v = session.get("org.apache.felix.gogo.expansion");
+        if (v != null) {
+            return Boolean.parseBoolean(v.toString());
+        }
+        return true;
+    }
 }

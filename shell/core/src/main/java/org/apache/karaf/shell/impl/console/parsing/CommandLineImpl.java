@@ -34,7 +34,11 @@ public class CommandLineImpl implements CommandLine {
     private final String buffer;
 
     public static CommandLine build(String buffer, int cursor) {
-        Parser parser = new Parser(buffer, cursor);
+        return build(buffer, cursor, true);
+    }
+    
+	public static CommandLine build(String buffer, int cursor, boolean expansionEnabled) { //CQL-Handling
+		Parser parser = new Parser(buffer, cursor, expansionEnabled);
         try {
             List<List<List<String>>> program = parser.program();
             List<String> pipe = program.get(parser.c0).get(parser.c1);
@@ -42,7 +46,7 @@ public class CommandLineImpl implements CommandLine {
         } catch (Throwable t) {
             return new CommandLineImpl(new String[] { buffer }, 0, cursor, cursor, buffer);
         }
-    }
+	}
 
     /**
      *  @param  arguments           the array of tokens
