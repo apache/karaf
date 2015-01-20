@@ -23,6 +23,7 @@ import org.ops4j.pax.exam.spi.reactors.PerClass;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
 
+import javax.jms.ConnectionFactory;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
@@ -44,8 +45,8 @@ public class JmsTest extends KarafTestSupport {
     public void testCommands() throws Exception {
         // jms:create command
         System.out.println(executeCommand("jms:create -t ActiveMQ -u karaf -p karaf --url tcp://localhost:61616 test"));
-        // give time to fileinstall to load the blueprint file
-        Thread.sleep(5000);
+        // give time to fileinstall to load the blueprint file by looking for the connection factory OSGi service
+        getOsgiService(ConnectionFactory.class, "name=test" , 30000);
         // jms:connectionfactories command
         String connectionFactories = executeCommand("jms:connectionfactories");
         System.out.println(connectionFactories);
@@ -98,7 +99,8 @@ public class JmsTest extends KarafTestSupport {
             ObjectName name = new ObjectName("org.apache.karaf:type=jms,name=root");
             // create operation
             connection.invoke(name, "create", new String[]{ "testMBean", "activemq", "tcp://localhost:61616", "karaf", "karaf" }, new String[]{ "java.lang.String", "java.lang.String", "java.lang.String", "java.lang.String", "java.lang.String" });
-            Thread.sleep(5000);
+            // give time to fileinstall to load the blueprint file by looking for the connection factory OSGi service
+            getOsgiService(ConnectionFactory.class, "name=testMBean" , 30000);
             List<String> connectionFactories = (List<String>) connection.getAttribute(name, "Connectionfactories");
             assertEquals(true, connectionFactories.size() >= 1);
             // send operation
