@@ -44,7 +44,7 @@ public class ExecuteAction implements Action {
 
         PumpStreamHandler handler = new PumpStreamHandler(System.in, System.out, System.err, "Command" + args.toString());
 
-        log.info("Executing: {}", builder.command());
+        log.debug("Executing: {}", builder.command());
         Process p = builder.start();
 
         handler.attach(p);
@@ -54,7 +54,7 @@ public class ExecuteAction implements Action {
         
         int status = p.waitFor();
 
-        log.info("Process exited w/status: {}", status);
+        log.debug("Process exited w/status: {}", status);
 
         handler.stop();
 
