@@ -78,12 +78,14 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
 
         callbacks[0] = new NameCallback("Username: ");
         callbacks[1] = new PasswordCallback("Password: ", false);
-        try {
-            callbackHandler.handle(callbacks);
-        } catch (IOException ioe) {
-            throw new LoginException(ioe.getMessage());
-        } catch (UnsupportedCallbackException uce) {
-            throw new LoginException(uce.getMessage() + " not available to obtain information from user");
+        if (callbackHandler != null) {
+            try {
+                callbackHandler.handle(callbacks);
+            } catch (IOException ioe) {
+                throw new LoginException(ioe.getMessage());
+            } catch (UnsupportedCallbackException uce) {
+                throw new LoginException(uce.getMessage() + " not available to obtain information from user");
+            }
         }
         // user callback get value
         if (((NameCallback) callbacks[0]).getName() == null) {

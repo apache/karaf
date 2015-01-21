@@ -27,12 +27,11 @@ import javax.security.auth.callback.*;
 import javax.security.auth.login.FailedLoginException;
 import javax.security.auth.login.LoginException;
 
-import junit.framework.Assert;
-
 import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.jaas.boot.principal.GroupPrincipal;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
+import org.junit.Assert;
 import org.junit.Test;
 
 public class PropertiesLoginModuleTest {
@@ -266,7 +265,7 @@ public class PropertiesLoginModuleTest {
         Subject subject = new Subject();
         CallbackHandler handler = new NullHandler();
         Map<String, String> options = new HashMap<String, String>();
-        options.put("users", this.getClass().getClassLoader().getResource("org/apache/karaf/jaas/modules/properties/test.properties").getFile());
+        options.put(PropertiesLoginModule.USER_FILE, getTestUsersFile());
         module.initialize(subject, handler, null, options);
 
         try {
@@ -282,9 +281,27 @@ public class PropertiesLoginModuleTest {
         Subject sub = new Subject();
         CallbackHandler handler = new NamePasswordHandler("test", "test");
         Map<String, String> options = new HashMap<String, String>();
-        options.put("users", usersFilePath);
+        options.put(PropertiesLoginModule.USER_FILE, usersFilePath);
         module.initialize(sub, handler, null, options);
         module.login();
     }
+    
+    @Test
+    public void testNullCallbackHandler() {
+        PropertiesLoginModule module = new PropertiesLoginModule();
+        Subject subject = new Subject();
+        Map<String, String> options = new HashMap<String, String>();
+        options.put(PropertiesLoginModule.USER_FILE, getTestUsersFile());
+        module.initialize(subject, null, null, options );
+        try {
+            module.login();
+            Assert.fail("LoginException expected");
+        } catch (LoginException e) {
+            Assert.assertEquals("Username can not be null", e.getMessage());
+        }
+    }
 
+    private String getTestUsersFile() {
+        return this.getClass().getClassLoader().getResource("org/apache/karaf/jaas/modules/properties/test.properties").getFile();
+    }
 }
