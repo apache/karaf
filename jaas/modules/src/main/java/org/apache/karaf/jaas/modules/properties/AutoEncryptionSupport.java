@@ -16,8 +16,10 @@
  */
 package org.apache.karaf.jaas.modules.properties;
 
+import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
+
+import java.io.Closeable;
 import java.io.IOException;
-import java.nio.file.ClosedWatchServiceException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -25,87 +27,81 @@ import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.jaas.modules.Encryption;
 import org.apache.karaf.jaas.modules.encryption.EncryptionSupport;
+import org.apache.karaf.util.StreamUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
-
-public class AutoEncryptionSupport implements Runnable {
+public class AutoEncryptionSupport implements Runnable, Closeable {
 
     private final Logger LOGGER = LoggerFactory.getLogger(AutoEncryptionSupport.class);
-
-    private WatchService watchService;
-
+    boolean running;
     private volatile EncryptionSupport encryptionSupport;
+    private ExecutorService executor;
 
     public AutoEncryptionSupport(Map<String, Object> properties) {
-        updated(properties);
+        running = true;
+        this.encryptionSupport = new EncryptionSupport(properties);
+        executor = Executors.newSingleThreadExecutor();
+        executor.execute(this);
     }
 
-    public synchronized void init() {
+    public void close() {
+        running = false;
+        executor.shutdown();
         try {
-            watchService = FileSystems.getDefault().newWatchService();
-            new Thread(this, "AutoEncryptionSupport").start();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public synchronized void destroy() {
-        try {
-            if (watchService != null) {
-                watchService.close();
-                watchService = null;
-            }
-        } catch (IOException e) {
+            executor.awaitTermination(10, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
             // Ignore
         }
     }
 
-    public void updated(Map<String, Object> properties) {
-        destroy();
-        this.encryptionSupport = new EncryptionSupport(properties);
-        init();
-    }
-
     @Override
     public void run() {
+        WatchService watchService = null;
         try {
+            watchService = FileSystems.getDefault().newWatchService();
             Path dir = Paths.get(System.getProperty("karaf.etc"));
-            if (watchService == null) {
-                // just to prevent NPE (KARAF-3460)
-                watchService = FileSystems.getDefault().newWatchService();
-            }
             dir.register(watchService, ENTRY_MODIFY);
 
             Path file = dir.resolve("users.properties");
             encryptedPassword(new Properties(file.toFile()));
 
-            while (true) {
-                WatchKey key = watchService.take();
-                for (WatchEvent<?> event : key.pollEvents()) {
-                    WatchEvent.Kind kind = event.kind();
-                    WatchEvent<Path> ev = (WatchEvent<Path>) event;
-
-                    // Context for directory entry event is the file name of entry
-                    Path name = dir.resolve(ev.context());
-                    if (file.equals(name)) {
-                        encryptedPassword(new Properties(file.toFile()));
+            while (running) {
+                try {
+                    WatchKey key = watchService.poll(1, TimeUnit.SECONDS);
+                    if (key == null) {
+                        continue;
                     }
+                    for (WatchEvent<?> event : key.pollEvents()) {
+                        @SuppressWarnings("unchecked")
+                        WatchEvent<Path> ev = (WatchEvent<Path>)event;
+
+                        // Context for directory entry event is the file name of entry
+                        Path name = dir.resolve(ev.context());
+                        if (file.equals(name)) {
+                            encryptedPassword(new Properties(file.toFile()));
+                        }
+                    }
+                    key.reset();
+                } catch (IOException e) {
+                    LOGGER.warn(e.getMessage(), e);
+                } catch (InterruptedException e) {
+                    // Ignore as this happens on shutdown
                 }
-                key.reset();
             }
 
-        } catch (ClosedWatchServiceException | InterruptedException e) {
-            // Ignore
         } catch (IOException e) {
-            LOGGER.warn("Unable to encrypt user properties file ", e);
+            LOGGER.warn(e.getMessage(), e);
+        } finally {
+            StreamUtils.close(watchService);
         }
-
     }
 
     void encryptedPassword(Properties users) throws IOException {

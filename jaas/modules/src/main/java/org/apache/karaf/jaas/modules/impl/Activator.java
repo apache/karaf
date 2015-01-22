@@ -26,6 +26,7 @@ import org.apache.karaf.jaas.modules.ldap.LDAPCache;
 import org.apache.karaf.jaas.modules.properties.AutoEncryptionSupport;
 import org.apache.karaf.jaas.modules.properties.PropertiesBackingEngineFactory;
 import org.apache.karaf.jaas.modules.publickey.PublickeyBackingEngineFactory;
+import org.apache.karaf.util.StreamUtils;
 import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.Managed;
 import org.apache.karaf.util.tracker.ProvideService;
@@ -76,9 +77,7 @@ public class Activator extends BaseActivator implements ManagedService {
 
     @Override
     protected void doStop() {
-        if (autoEncryptionSupport != null) {
-            autoEncryptionSupport.destroy();
-        }
+        StreamUtils.close(autoEncryptionSupport);
         super.doStop();
         LDAPCache.clear();
     }
@@ -90,8 +89,9 @@ public class Activator extends BaseActivator implements ManagedService {
             karafRealm.updated(config);
         }
         if (autoEncryptionSupport != null) {
-            autoEncryptionSupport.updated(config);
+            StreamUtils.close(autoEncryptionSupport);
         }
+        autoEncryptionSupport = new AutoEncryptionSupport(config);
     }
 
     private Map<String, Object> getConfig() {
