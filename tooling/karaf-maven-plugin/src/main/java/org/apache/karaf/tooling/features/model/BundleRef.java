@@ -22,11 +22,8 @@ import java.io.FileInputStream;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 
-import org.apache.maven.artifact.Artifact;
-
 public class BundleRef extends ArtifactRef {
     Integer startLevel;
-    Artifact artifact;
     String bundleSymbolicName;
     String bundleVersion;
 
