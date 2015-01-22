@@ -76,6 +76,10 @@ public class AutoEncryptionSupport implements Runnable {
     public void run() {
         try {
             Path dir = Paths.get(System.getProperty("karaf.etc"));
+            if (watchService == null) {
+                // just to prevent NPE (KARAF-3460)
+                watchService = FileSystems.getDefault().newWatchService();
+            }
             dir.register(watchService, ENTRY_MODIFY);
 
             Path file = dir.resolve("users.properties");
