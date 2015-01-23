@@ -14,7 +14,6 @@
 package org.apache.karaf.itests.features;
 
 import org.apache.karaf.itests.KarafTestSupport;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -71,31 +70,26 @@ public class PaxCdiFeaturesTest extends KarafTestSupport {
     }
 
     @Test
-    @Ignore("PAXCDI-146 Require Pax Web 4.x/Karaf 4")
     public void installPaxCdi12WebFeature() throws Exception {
         installAssertAndUninstallFeatures("pax-cdi-1.2-web");
     }
 
     @Test
-    @Ignore("PAXCDI-146: Require Pax Web 4.x/Karaf 4")
     public void installPaxCdiWebWeldFeature() throws Exception {
         installAssertAndUninstallFeatures("pax-cdi-web-weld");
     }
 
     @Test
-    @Ignore("PAXCDI-146: Require Pax Web 4.x/Karaf 4")
     public void installPaxCdi11WebWeldFeature() throws Exception {
         installAssertAndUninstallFeatures("pax-cdi-1.1-web-weld");
     }
 
     @Test
-    @Ignore("PAXCDI-146: Require Pax Web 4.x/Karaf 4")
     public void installPaxCdi12WebWeldFeature() throws Exception {
         installAssertAndUninstallFeatures("pax-cdi-1.2-web-weld");
     }
 
     @Test
-    @Ignore("PAXCDI-146: Require Pax Web 4.x/Karaf 4")
     public void installPaxCdiWebOpenwebbeansFeature() throws Exception {
         installAssertAndUninstallFeatures("pax-cdi-web-openwebbeans");
     }
