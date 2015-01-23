@@ -27,6 +27,7 @@ import javax.jms.ConnectionFactory;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
+import java.net.Socket;
 import java.net.URI;
 import java.util.List;
 
@@ -39,9 +40,21 @@ public class JmsTest extends KarafTestSupport {
         installAndAssertFeature("jms");
         featuresService.addRepository(new URI("mvn:org.apache.activemq/activemq-karaf/5.10.0/xml/features"));
         installAndAssertFeature("activemq-broker-noweb");
+        // check if ActiveMQ is completely started
+        System.out.println("Waiting for the ActiveMQ transport connector on 61616 ...");
+        boolean bound = false;
+        while (!bound) {
+            try {
+                Thread.sleep(2000);
+                Socket socket = new Socket("localhost", 61616);
+                bound = true;
+            } catch (Exception e) {
+                // wait the connection
+            }
+        }
     }
 
-    @Test
+    @Test(timeout = 120000)
     public void testCommands() throws Exception {
         // jms:create command
         System.out.println(executeCommand("jms:create -t ActiveMQ -u karaf -p karaf --url tcp://localhost:61616 test"));
@@ -90,7 +103,7 @@ public class JmsTest extends KarafTestSupport {
         System.out.println(connectionFactories);
     }
 
-    @Test
+    @Test(timeout = 120000)
     public void testMBean() throws Exception {
         JMXConnector connector = null;
         try {
@@ -98,20 +111,26 @@ public class JmsTest extends KarafTestSupport {
             MBeanServerConnection connection = connector.getMBeanServerConnection();
             ObjectName name = new ObjectName("org.apache.karaf:type=jms,name=root");
             // create operation
+            System.out.println("JMS MBean create operation invocation");
             connection.invoke(name, "create", new String[]{ "testMBean", "activemq", "tcp://localhost:61616", "karaf", "karaf" }, new String[]{ "java.lang.String", "java.lang.String", "java.lang.String", "java.lang.String", "java.lang.String" });
             getOsgiService(ConnectionFactory.class, "name=testMBean", 30000);
             List<String> connectionFactories = (List<String>) connection.getAttribute(name, "Connectionfactories");
             assertEquals(true, connectionFactories.size() >= 1);
             // send operation
+            System.out.println("JMS MBean send operation invocation");
             connection.invoke(name, "send", new String[]{ "testMBean", "queueMBean", "message", null, "karaf", "karaf" }, new String[]{ "java.lang.String", "java.lang.String", "java.lang.String", "java.lang.String", "java.lang.String", "java.lang.String"});
             // count operation
+            System.out.println("JMS MBean count operation invocation");
             Integer count = (Integer) connection.invoke(name, "count", new String[]{ "testMBean", "queueMBean", "karaf", "karaf" }, new String[]{ "java.lang.String", "java.lang.String", "java.lang.String", "java.lang.String"});
             assertEquals(1, count.intValue());
             // queues operation
+            System.out.print("JMS MBean queues operation invocation: ");
             List<String> queues = (List<String>) connection.invoke(name, "queues", new String[]{ "testMBean", "karaf", "karaf" }, new String[]{ "java.lang.String", "java.lang.String", "java.lang.String"});
+            System.out.println(queues);
             assertTrue(queues.size() >= 1);
             // delete operation
-            connection.invoke(name, "delete", new String[]{ "testMBean" }, new String[]{ "java.lang.String" });
+            System.out.println("JMS MBean delete operation invocation");
+            connection.invoke(name, "delete", new String[]{"testMBean"}, new String[]{"java.lang.String"});
         } finally {
             if (connector != null) {
                 connector.close();
