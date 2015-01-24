@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.util.*;
 
 import org.apache.felix.utils.properties.Properties;
@@ -115,7 +116,6 @@ public class InstallKarsMojo extends MojoSupport {
      */
     protected boolean ignoreDependencyFlag;
 
-    private URI system;
     private Properties startupProperties = new Properties();
 
     // an access layer for available Aether implementation
@@ -132,7 +132,6 @@ public class InstallKarsMojo extends MojoSupport {
         // creating system directory
         getLog().info("Creating system directory");
         systemDirectory.mkdirs();
-        system = systemDirectory.toURI();
 
         if (startupPropertiesFile.exists()) {
             getLog().info("Loading startup.properties");
@@ -169,7 +168,7 @@ public class InstallKarsMojo extends MojoSupport {
                     getLog().info("Extracting " + artifact.toString() + " kar");
                     try {
                         Kar kar = new Kar(karFile.toURI());
-                        kar.extract(new File(system.getPath()), new File(workDirectory));
+                        kar.extract(systemDirectory, new File(workDirectory));
                         for (URI repositoryUri : kar.getFeatureRepos()) {
                             resolveRepository(repositoryUri.getPath(), repositories, features, false, addToStartup);
                         }
@@ -281,7 +280,7 @@ public class InstallKarsMojo extends MojoSupport {
         Set<?> startupBundles = startupProperties.keySet();
         for (Object startupBundle : startupBundles) {
             String bundlePath = this.dependencyHelper.pathFromMaven((String) startupBundle);
-            File bundleFile = new File(system.resolve(bundlePath));
+            File bundleFile = new File(systemDirectory, bundlePath);
             if (!bundleFile.exists()) {
                 File bundleSource = this.dependencyHelper.resolveById((String) startupBundle, getLog());
                 bundleFile.getParentFile().mkdirs();
@@ -383,7 +382,8 @@ public class InstallKarsMojo extends MojoSupport {
             repositoryFile = new File(repository);
         }
         // copy the repository file in system folder
-        File repositoryFileInSystemFolder = new File(new File(system), repository);
+
+        File repositoryFileInSystemFolder = new File(systemDirectory, repository);
         if (!repositoryFileInSystemFolder.exists()) {
             repositoryFileInSystemFolder.getParentFile().mkdirs();
             copy(repositoryFile, repositoryFileInSystemFolder);
@@ -509,7 +509,7 @@ public class InstallKarsMojo extends MojoSupport {
             } else {
                 bundleFile = new File(new URI(bundleLocation));
             }
-            File bundleSystemFile = new File(system.resolve(bundleLocation));
+            File bundleSystemFile = new File(systemDirectory, bundleLocation);
             copy(bundleFile, bundleSystemFile);
             // add metadata for snapshot
             if (bundleLocation.startsWith("mvn")) {
@@ -537,7 +537,7 @@ public class InstallKarsMojo extends MojoSupport {
         } else {
             configFileFile = new File(new URI(configFileLocation));
         }
-        File configFileSystemFile = new File(system.resolve(configFileLocation));
+        File configFileSystemFile = new File(systemDirectory, configFileLocation);
         copy(configFileFile, configFileSystemFile);
         // add metadata for snapshot
         if (configFileLocation.startsWith("mvn")) {
