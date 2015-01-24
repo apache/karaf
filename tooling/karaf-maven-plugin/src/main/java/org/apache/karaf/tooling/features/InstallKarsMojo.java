@@ -55,7 +55,7 @@ public class InstallKarsMojo extends MojoSupport {
      * @parameter default-value="${project.build.directory}/assembly"
      * @required
      */
-    protected String workDirectory;
+    protected File workDirectory;
 
     /**
      * Features configuration file (etc/org.apache.karaf.features.cfg).
@@ -168,7 +168,7 @@ public class InstallKarsMojo extends MojoSupport {
                     getLog().info("Extracting " + artifact.toString() + " kar");
                     try {
                         Kar kar = new Kar(karFile.toURI());
-                        kar.extract(systemDirectory, new File(workDirectory));
+                        kar.extract(systemDirectory, workDirectory);
                         for (URI repositoryUri : kar.getFeatureRepos()) {
                             resolveRepository(repositoryUri.getPath(), repositories, features, false, addToStartup);
                         }
