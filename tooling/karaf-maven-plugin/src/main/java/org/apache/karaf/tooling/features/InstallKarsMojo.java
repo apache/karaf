@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
-import java.net.URLEncoder;
 import java.util.*;
 
 import org.apache.felix.utils.properties.Properties;
@@ -170,7 +169,7 @@ public class InstallKarsMojo extends MojoSupport {
                         Kar kar = new Kar(karFile.toURI());
                         kar.extract(systemDirectory, workDirectory);
                         for (URI repositoryUri : kar.getFeatureRepos()) {
-                            resolveRepository(repositoryUri.getPath(), repositories, features, false, addToStartup);
+                            resolveRepository(repositoryUri.getPath(), repositories, features, false, addToStartup, false);
                         }
                     } catch (Exception e) {
                         throw new RuntimeException("Can not install " + artifact.toString() + " kar", e);
@@ -180,7 +179,7 @@ public class InstallKarsMojo extends MojoSupport {
                         getLog().info("Resolving " + artifact.toString() + " features repository");
                         String repositoryUri = dependencyHelper.artifactToMvn(artifact);
                         try {
-                            resolveRepository(repositoryUri, repositories, features, true, addToStartup);
+                            resolveRepository(repositoryUri, repositories, features, true, addToStartup, true);
                         } catch (Exception e) {
                             throw new MojoFailureException("Can not install " + artifact.toString() + " features repository", e);
                         }
@@ -349,7 +348,7 @@ public class InstallKarsMojo extends MojoSupport {
         return false;
     }
 
-    private void resolveRepository(String repository, Set<String> repositories, Map<Feature, Boolean> features, boolean updateFeaturesCfgFile, boolean updateStartupProperties) throws Exception {
+    private void resolveRepository(String repository, Set<String> repositories, Map<Feature, Boolean> features, boolean updateFeaturesCfgFile, boolean updateStartupProperties, boolean copy) throws Exception {
         // check if the repository has not been processed
         if (repositories.contains(repository)) {
             return;
@@ -381,22 +380,23 @@ public class InstallKarsMojo extends MojoSupport {
         } else {
             repositoryFile = new File(repository);
         }
-        // copy the repository file in system folder
-
-        File repositoryFileInSystemFolder = new File(systemDirectory, repository);
-        if (!repositoryFileInSystemFolder.exists()) {
-            repositoryFileInSystemFolder.getParentFile().mkdirs();
-            copy(repositoryFile, repositoryFileInSystemFolder);
-            // add metadata for snapshot
-            if (repository.startsWith("mvn")) {
-                Artifact repositoryArtifact = dependencyHelper.mvnToArtifact(repository);
-                if (repositoryArtifact.isSnapshot()) {
-                    File metadataTarget = new File(repositoryFileInSystemFolder.getParentFile(), "maven-metadata-local.xml");
-                    try {
-                        MavenUtil.generateMavenMetadata(repositoryArtifact, metadataTarget);
-                    } catch (Exception e) {
-                        getLog().warn("Could not create maven-metadata-local.xml", e);
-                        getLog().warn("It means that this SNAPSHOT could be overwritten by an older one present on remote repositories");
+        // copy the repository file in system folder if required
+        if (copy) {
+            File repositoryFileInSystemFolder = new File(systemDirectory, repository);
+            if (!repositoryFileInSystemFolder.exists()) {
+                repositoryFileInSystemFolder.getParentFile().mkdirs();
+                copy(repositoryFile, repositoryFileInSystemFolder);
+                // add metadata for snapshot
+                if (repository.startsWith("mvn")) {
+                    Artifact repositoryArtifact = dependencyHelper.mvnToArtifact(repository);
+                    if (repositoryArtifact.isSnapshot()) {
+                        File metadataTarget = new File(repositoryFileInSystemFolder.getParentFile(), "maven-metadata-local.xml");
+                        try {
+                            MavenUtil.generateMavenMetadata(repositoryArtifact, metadataTarget);
+                        } catch (Exception e) {
+                            getLog().warn("Could not create maven-metadata-local.xml", e);
+                            getLog().warn("It means that this SNAPSHOT could be overwritten by an older one present on remote repositories");
+                        }
                     }
                 }
             }
@@ -405,7 +405,7 @@ public class InstallKarsMojo extends MojoSupport {
         Features featuresModel = JaxbUtil.unmarshal(new FileInputStream(repositoryFile), false);
         // recursively process the inner repositories
         for (String innerRepository : featuresModel.getRepository()) {
-            resolveRepository(innerRepository, repositories, features, false, updateStartupProperties);
+            resolveRepository(innerRepository, repositories, features, false, updateStartupProperties, true);
         }
         // update features
         for (Feature feature : featuresModel.getFeature()) {
