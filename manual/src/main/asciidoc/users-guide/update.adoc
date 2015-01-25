@@ -1,0 +1,5 @@
+=  Update procedure
+
+==  From Karaf 3.0.x to Karaf 3.0.x
+
+==  From Karaf 2.2.x to Karaf 3.0.x

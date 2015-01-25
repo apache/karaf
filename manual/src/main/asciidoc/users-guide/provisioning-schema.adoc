@@ -1,0 +1,32 @@
+=  Features XML Schemas (provisioning)
+
+Apache Karaf 3.0.0 supports different versions of the features XML schemas.
+
+The features XML schema can be found directly in the Apache Karaf sources, in the `features/core` module:
+
+----
+features/core/src/main/resources/org/apache/karaf/features/karaf-features-1.2.0.xsd
+features/core/src/main/resources/org/apache/karaf/features/karaf-features-1.1.0.xsd
+features/core/src/main/resources/org/apache/karaf/features/karaf-features-1.0.0.xsd
+----
+
+These schemas are also available on the Apache Karaf website:
+
+* [http://karaf.apache.org/xmlns/features/v1.2.0]
+* [http://karaf.apache.org/xmlns/features/v1.1.0]
+* [http://karaf.apache.org/xmlns/features/v1.0.0]
+
+==  karaf-features-1.2.0.xsd
+
+{snippet:url=../features/core/src/main/resources/org/apache/karaf/features/karaf-features-1.2.0.xsd|lang=xml|pygmentize=true}
+{snippet}
+
+==  karaf-features-1.1.0.xsd
+
+{snippet:url=../features/core/src/main/resources/org/apache/karaf/features/karaf-features-1.1.0.xsd|lang=xml|pygmentize=true}
+{snippet}
+
+==  karaf-features-1.0.0.xsd
+
+{snippet:url=../features/core/src/main/resources/org/apache/karaf/features/karaf-features-1.0.0.xsd|lang=xml|pygmentize=true}
+{snippet}
