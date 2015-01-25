@@ -54,9 +54,7 @@ NB: remember the restrictions concerning illegal characters in Java paths, e.g. 
 ====
 Handy Hint::
 In case you have to install Karaf into a very deep path or a path containing illegal characters for Java paths, e.g. \!, % etc., you may add a bat file to _start \-> startup_ that executes
-{noformat}
-subst S: "C:\your very % problematic path!\KARAF"
-{noformat}
+`subst S: "C:\your very % problematic path!\KARAF"`
 so your Karaf root directory is S: --- which works for sure and is short to type.
 ====
 
