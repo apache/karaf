@@ -124,9 +124,4 @@ public class StandardFeaturesTest extends KarafTestSupport {
         installAssertAndUninstallFeature("scr");
     }
 
-    @Test
-    public void installJolokiaFeature() throws Exception {
-        installAssertAndUninstallFeatures("jolokia");
-    }
-
 }
