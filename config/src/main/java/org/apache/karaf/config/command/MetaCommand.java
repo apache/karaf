@@ -37,15 +37,15 @@ import org.osgi.service.metatype.ObjectClassDefinition;
 @Command(scope = "config", name = "meta", description = "Lists meta type information.")
 @Service
 public class MetaCommand extends ConfigCommandSupport {
-    @Option(name = "-p", aliases = "--pid", description = "The configuration pid", required = false, multiValued = false)
+    @Option(name = "-p", aliases = "--pid", description = "The configuration pid", required = true, multiValued = false)
     @Completion(ConfigurationCompleter.class)
     protected String pid;
-    
+
     @Reference
     BundleContext context;
 
     private Map<Integer, String> typeMap;
-    
+
     public MetaCommand() {
         typeMap = new HashMap<>();
         typeMap.put(AttributeDefinition.BOOLEAN, "boolean");
@@ -62,14 +62,21 @@ public class MetaCommand extends ConfigCommandSupport {
 
     @Override
     protected Object doExecute() throws Exception {
-        System.out.println("pid:" + pid);
+
         ServiceReference<MetaTypeService> ref = context.getServiceReference(MetaTypeService.class);
         if (ref == null) {
-            System.out.println("No MetaTypeService present. You need to install an implementation to use this command.");
+            System.out
+                .println("No MetaTypeService present. You need to install an implementation to use this command.");
         }
         MetaTypeService metaTypeService = context.getService(ref);
         ObjectClassDefinition def = getMetatype(metaTypeService, pid);
         context.ungetService(ref);
+
+        if (def == null) {
+            System.out.println("No meta type definition found for pid: " + pid);
+            return null;
+        }
+        System.out.println("Meta type informations for pid: " + pid);
         ShellTable table = new ShellTable();
         table.column("key");
         table.column("name");
@@ -77,18 +84,20 @@ public class MetaCommand extends ConfigCommandSupport {
         table.column("default");
         table.column("description");
         AttributeDefinition[] attrs = def.getAttributeDefinitions(ObjectClassDefinition.ALL);
-        for (AttributeDefinition attr : attrs) {
-            table.addRow().addContent(attr.getID(), attr.getName(), getType(attr.getType()), 
-                                      getDefaultValueStr(attr.getDefaultValue()), attr.getDescription());
+        if (attrs != null) {
+            for (AttributeDefinition attr : attrs) {
+                table.addRow().addContent(attr.getID(), attr.getName(), getType(attr.getType()),
+                                          getDefaultValueStr(attr.getDefaultValue()), attr.getDescription());
+            }
         }
         table.print(System.out);
         return null;
     }
-    
+
     private String getType(int type) {
         return typeMap.get(type);
     }
-    
+
     private String getDefaultValueStr(String[] defaultValues) {
         if (defaultValues == null) {
             return "";
@@ -106,7 +115,7 @@ public class MetaCommand extends ConfigCommandSupport {
         return result.toString();
     }
 
-    public  ObjectClassDefinition getMetatype(MetaTypeService metaTypeService, String pid) {
+    public ObjectClassDefinition getMetatype(MetaTypeService metaTypeService, String pid) {
         for (Bundle bundle : context.getBundles()) {
             MetaTypeInformation info = metaTypeService.getMetaTypeInformation(bundle);
             if (info == null) {
