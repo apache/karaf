@@ -29,9 +29,11 @@ import java.util.jar.JarOutputStream;
 import java.util.regex.Matcher;
 
 import javax.servlet.AsyncContext;
+import javax.servlet.ReadListener;
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.WriteListener;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
@@ -50,11 +52,11 @@ import org.junit.Test;
 import org.ops4j.pax.url.mvn.MavenResolver;
 import org.ops4j.pax.url.mvn.internal.AetherBasedResolver;
 import org.ops4j.pax.url.mvn.internal.config.MavenConfigurationImpl;
+
 import shaded.org.apache.commons.io.FileUtils;
 import shaded.org.apache.maven.artifact.repository.metadata.io.xpp3.MetadataXpp3Reader;
 import shaded.org.apache.maven.settings.Proxy;
 import shaded.org.ops4j.util.property.DictionaryPropertyResolver;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -391,6 +393,18 @@ public class MavenProxyServletTest {
                 public void write(byte[] b, int off, int len) throws IOException {
                     baos.write(b, off, len);
                 }
+
+				@Override
+				public boolean isReady() {
+					// TODO Auto-generated method stub
+					return true;
+				}
+
+				@Override
+				public void setWriteListener(WriteListener writeListener) {
+					// TODO Auto-generated method stub
+					
+				}
             }).anyTimes();
             response.setStatus(EasyMock.anyInt());
             EasyMock.expectLastCall().anyTimes();
@@ -471,6 +485,18 @@ public class MavenProxyServletTest {
                 public void write(byte[] b, int off, int len) throws IOException {
                     baos.write(b, off, len);
                 }
+
+				@Override
+				public boolean isReady() {
+					// TODO Auto-generated method stub
+					return true;
+				}
+
+				@Override
+				public void setWriteListener(WriteListener writeListener) {
+					// TODO Auto-generated method stub
+					
+				}
             }).anyTimes();
             response.setStatus(EasyMock.anyInt());
             EasyMock.expectLastCall().anyTimes();
@@ -655,6 +681,24 @@ public class MavenProxyServletTest {
                     }
                     return (contents[i++] & 0xFF);
                 }
+
+				@Override
+				public boolean isFinished() {
+					// TODO Auto-generated method stub
+					return false;
+				}
+
+				@Override
+				public boolean isReady() {
+					// TODO Auto-generated method stub
+					return true;
+				}
+
+				@Override
+				public void setReadListener(ReadListener readListener) {
+					// TODO Auto-generated method stub
+					
+				}
             });
             EasyMock.expect(request.getHeader("X-Location")).andReturn(location);
 

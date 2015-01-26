@@ -14,6 +14,7 @@
 package org.apache.karaf.itests.features;
 
 import org.apache.karaf.itests.KarafTestSupport;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -64,6 +65,7 @@ public class Spring3FeaturesTest extends KarafTestSupport {
     }
 
     @Test
+    @Ignore("Skipped due to version range not matching to Servlet 3.1")
     public void installSpringStruts31Feature() throws Exception {
         installAssertAndUninstallFeature("spring-struts", System.getProperty("spring31.version"));
     }
