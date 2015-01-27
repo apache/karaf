@@ -23,6 +23,7 @@ import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.naming.CommunicationException;
 import javax.naming.Context;
 import javax.naming.NamingEnumeration;
 import javax.naming.directory.*;
@@ -97,7 +98,7 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
         connectionURL = (String) options.get(CONNECTION_URL);
         connectionUsername = (String) options.get(CONNECTION_USERNAME);
         connectionPassword = (String) options.get(CONNECTION_PASSWORD);
-        userBaseDN =  (String) options.get(USER_BASE_DN);
+        userBaseDN = (String) options.get(USER_BASE_DN);
         userFilter = (String) options.get(USER_FILTER);
         userSearchSubtree = Boolean.parseBoolean((String) options.get(USER_SEARCH_SUBTREE));
         roleBaseDN = (String) options.get(ROLE_BASE_DN);
@@ -181,7 +182,7 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
         user = ((NameCallback) callbacks[0]).getName();
 
         char[] tmpPassword = ((PasswordCallback) callbacks[1]).getPassword();
-        
+
         // If either a username or password is specified don't allow authentication = "none".
         // This is to prevent someone from logging into Karaf as any user without providing a 
         // valid password (because if authentication = none, the password could be any 
@@ -191,7 +192,7 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
             // default to simple so that the provided user/password will get checked
             authentication = "simple";
         }
-        
+
         if (tmpPassword == null) {
             tmpPassword = new char[0];
         }
@@ -243,7 +244,7 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
             }
             logger.debug("Get the user DN.");
             SearchResult result = (SearchResult) namingEnumeration.next();
-            
+
             // We need to do the following because slashes are handled badly. For example, when searching 
             // for a user with lots of special characters like cn=admin,=+<>#;\
             // SearchResult contains 2 different results:
@@ -255,7 +256,15 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
             userDN = result.getNameInNamespace().replace("," + userBaseDN, "");
             userDNNamespace = (String) result.getNameInNamespace();
             namingEnumeration.close();
+        } catch (CommunicationException ce) {
+            // explicitly catch CommunicationException as it my wrap a lower level root cause.
+            String rootCause = null;
+            if (ce.getRootCause() != null)
+                rootCause = ce.getRootCause().getMessage();
+            logger.warn("Can't connect to the LDAP server: {}", ce.getMessage(), rootCause);
+            throw new LoginException("Can't connect to the LDAP server: " + ce.getMessage());
         } catch (Exception e) {
+            logger.warn("Can't connect to the LDAP server: {}", e.getMessage(), e);
             throw new LoginException("Can't connect to the LDAP server: " + e.getMessage());
         } finally {
             if (context != null) {
@@ -310,7 +319,7 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
                 controls.setSearchScope(SearchControls.ONELEVEL_SCOPE);
             }
             if (roleNameAttribute != null) {
-                controls.setReturningAttributes(new String[]{ roleNameAttribute });
+                controls.setReturningAttributes(new String[]{roleNameAttribute});
             }
             logger.debug("Looking for the user roles in LDAP with ");
             logger.debug("  base DN: " + roleBaseDN);
@@ -322,12 +331,12 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
             logger.debug("  filter: " + roleFilter);
             NamingEnumeration namingEnumeration = context.search(roleBaseDN, roleFilter, controls);
             while (namingEnumeration.hasMore()) {
-                SearchResult result = (SearchResult)namingEnumeration.next();
+                SearchResult result = (SearchResult) namingEnumeration.next();
                 Attributes attributes = result.getAttributes();
                 Attribute roles = attributes.get(roleNameAttribute);
                 if (roles != null) {
                     for (int i = 0; i < roles.size(); i++) {
-                        String role = (String)roles.get(i);
+                        String role = (String) roles.get(i);
                         if (role != null) {
                             logger.debug("User {} is a member of role {}", user, role);
                             // handle role mapping ...
