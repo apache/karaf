@@ -23,6 +23,7 @@ import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.naming.CommunicationException;
 import javax.naming.Context;
 import javax.naming.NamingEnumeration;
 import javax.naming.directory.*;
@@ -100,7 +101,7 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
         connectionURL = (String) options.get(CONNECTION_URL);
         connectionUsername = (String) options.get(CONNECTION_USERNAME);
         connectionPassword = (String) options.get(CONNECTION_PASSWORD);
-        userBaseDN =  (String) options.get(USER_BASE_DN);
+        userBaseDN = (String) options.get(USER_BASE_DN);
         userFilter = (String) options.get(USER_FILTER);
         userSearchSubtree = Boolean.parseBoolean((String) options.get(USER_SEARCH_SUBTREE));
         roleBaseDN = (String) options.get(ROLE_BASE_DN);
@@ -185,7 +186,7 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
         user = ((NameCallback) callbacks[0]).getName();
 
         char[] tmpPassword = ((PasswordCallback) callbacks[1]).getPassword();
-        
+
         // If either a username or password is specified don't allow authentication = "none".
         // This is to prevent someone from logging into Karaf as any user without providing a 
         // valid password (because if authentication = none, the password could be any 
@@ -196,7 +197,7 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
             authentication = "simple";
         }
         if (!"none".equals(authentication) && !allowEmptyPasswords
-                && (tmpPassword == null || tmpPassword.length ==0)) {
+                && (tmpPassword == null || tmpPassword.length == 0)) {
             throw new LoginException("Empty passwords not allowed");
         }
 
@@ -267,7 +268,7 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
                         // the second escapes the slashes correctly.
                         String userDN = result.getNameInNamespace().replace("," + userBaseDN, "");
                         String userDNNamespace = (String) result.getNameInNamespace();
-                        return new String[] { userDN, userDNNamespace };
+                        return new String[]{userDN, userDNNamespace};
                     } finally {
                         if (namingEnumeration != null) {
                             try {
@@ -291,7 +292,15 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
             }
             userDN = userDnAndNamespace[0];
             userDNNamespace = userDnAndNamespace[1];
+        } catch (CommunicationException ce) {
+            // explicitly catch CommunicationException as it my wrap a lower level root cause.
+            String rootCause = null;
+            if (ce.getRootCause() != null)
+                rootCause = ce.getRootCause().getMessage();
+            logger.warn("Can't connect to the LDAP server: {}", ce.getMessage(), rootCause);
+            throw new LoginException("Can't connect to the LDAP server: " + ce.getMessage());
         } catch (Exception e) {
+            logger.warn("Can't connect to the LDAP server: {}", e.getMessage(), e);
             throw new LoginException("Can't connect to the LDAP server: " + e.getMessage());
         }
         // step 2: bind the user using the DN
