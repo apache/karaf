@@ -17,7 +17,6 @@
 package org.apache.karaf.bundle.command;
 
 import java.util.Collection;
-import java.util.List;
 
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Option;
@@ -25,7 +24,11 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.wiring.BundleWiring;
 
-@Command(scope = "bundle", name = "classes", description = "Displays a list of classes contained in the bundle")
+import static org.fusesource.jansi.Ansi.Attribute.INTENSITY_BOLD;
+import static org.fusesource.jansi.Ansi.Attribute.RESET;
+import static org.fusesource.jansi.Ansi.ansi;
+
+@Command(scope = "bundle", name = "classes", description = "Displays a list of classes/resources contained in the bundle")
 @Service
 public class Classes extends BundlesCommand {
 
@@ -39,11 +42,21 @@ public class Classes extends BundlesCommand {
             Collection<String> resources;
             if (displayAllFiles){
                 resources = wiring.listResources("/", null, BundleWiring.LISTRESOURCES_RECURSE);
-            }else{
+            } else {
                 resources = wiring.listResources("/", "*class", BundleWiring.LISTRESOURCES_RECURSE);
             }
+            Collection<String> localResources;
+            if (displayAllFiles) {
+                localResources = wiring.listResources("/", null, BundleWiring.LISTRESOURCES_RECURSE | BundleWiring.LISTRESOURCES_LOCAL);
+            } else {
+                localResources = wiring.listResources("/", "/*.class", BundleWiring.LISTRESOURCES_RECURSE | BundleWiring.LISTRESOURCES_LOCAL);
+            }
             for (String resource:resources){
-                System.out.println(resource);
+                if (localResources.contains(resource)) {
+                    System.out.println(ansi().a(INTENSITY_BOLD).a(resource).a(RESET));
+                } else {
+                    System.out.println(resource);
+                }
             }
         } else {
             System.out.println("Bundle " + bundle.getBundleId() + " is not resolved.");
