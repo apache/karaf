@@ -23,8 +23,11 @@ import org.osgi.framework.wiring.BundleWiring;
 
 import java.util.Collection;
 import java.util.List;
+import static org.fusesource.jansi.Ansi.Attribute.INTENSITY_BOLD;
+import static org.fusesource.jansi.Ansi.Attribute.RESET;
+import static org.fusesource.jansi.Ansi.ansi;
 
-@Command(scope = "bundle", name = "classes", description = "Displays a list of classes contained in the bundle")
+@Command(scope = "bundle", name = "classes", description = "Displays a list of classes/resources contained in the bundle")
 public class Classes extends BundlesCommand {
 
     @Option(name = "-a", aliases={"--display-all-files"}, description="List all classes and files in the bundle", required = false, multiValued = false)
@@ -49,8 +52,19 @@ public class Classes extends BundlesCommand {
             }else{
                 resources = wiring.listResources("/", "*class", BundleWiring.LISTRESOURCES_RECURSE);
             }
+            Collection<String> localresources;
+            if (displayAllFiles){
+                localresources = wiring.listResources("/", null, BundleWiring.LISTRESOURCES_RECURSE | BundleWiring.LISTRESOURCES_LOCAL);
+            }else{
+                localresources = wiring.listResources("/", "*class", BundleWiring.LISTRESOURCES_RECURSE | BundleWiring.LISTRESOURCES_LOCAL);
+            }
             for (String resource:resources){
-                System.out.println(resource);
+                if (localresources.contains(resource)) {
+                    System.out.println(ansi().a(INTENSITY_BOLD).a(resource).a(RESET));
+                }
+                else {
+                    System.out.println(resource);
+                }
             }
         } else {
             System.out.println("Bundle " + bundle.getBundleId() + " is not resolved.");
