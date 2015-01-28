@@ -20,14 +20,18 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.karaf.jdbc.command.completers.DataSourcesNameCompleter;
+import org.apache.karaf.jdbc.command.completers.SqlCompleter;
+import org.apache.karaf.jdbc.command.parsing.JdbcParser;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Completion;
+import org.apache.karaf.shell.api.action.Parsing;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.support.table.Row;
 import org.apache.karaf.shell.support.table.ShellTable;
 
 @Command(scope = "jdbc", name = "query", description = "Execute a SQL query on a JDBC datasource")
+@Parsing(JdbcParser.class)
 @Service
 public class QueryCommand extends JdbcCommandSupport {
 
@@ -36,6 +40,7 @@ public class QueryCommand extends JdbcCommandSupport {
     String datasource;
 
     @Argument(index = 1, name = "query", description = "The SQL query to execute", required = true, multiValued = false)
+    @Completion(SqlCompleter.class)
     String query;
 
     @Override

@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.apache.karaf.shell.api.console.Command;
 import org.apache.karaf.shell.api.console.Completer;
+import org.apache.karaf.shell.api.console.Parser;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.support.CommandException;
 
@@ -42,6 +43,11 @@ public abstract class TopLevelCommand implements Command {
     public Completer getCompleter(boolean scoped) {
         return null;
 //        return new StringsCompleter(new String[] { getName() });
+    }
+
+    @Override
+    public Parser getParser() {
+        return null;
     }
 
     @Override

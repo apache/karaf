@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.karaf.shell.impl.console.parsing;
+package org.apache.karaf.shell.support.parsing;
 
 import java.util.List;
 
@@ -32,21 +32,6 @@ public class CommandLineImpl implements CommandLine {
     private final int argumentPosition;
     private final int bufferPosition;
     private final String buffer;
-
-    public static CommandLine build(String buffer, int cursor) {
-        return build(buffer, cursor, true);
-    }
-    
-	public static CommandLine build(String buffer, int cursor, boolean expansionEnabled) { //CQL-Handling
-		Parser parser = new Parser(buffer, cursor, expansionEnabled);
-        try {
-            List<List<List<String>>> program = parser.program();
-            List<String> pipe = program.get(parser.c0).get(parser.c1);
-            return new CommandLineImpl(pipe.toArray(new String[pipe.size()]), parser.c2, parser.c3, cursor, buffer);
-        } catch (Throwable t) {
-            return new CommandLineImpl(new String[] { buffer }, 0, cursor, cursor, buffer);
-        }
-	}
 
     /**
      *  @param  arguments           the array of tokens

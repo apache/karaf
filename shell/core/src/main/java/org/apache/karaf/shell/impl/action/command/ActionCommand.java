@@ -22,8 +22,10 @@ import java.util.List;
 
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Parsing;
 import org.apache.karaf.shell.api.console.CommandLine;
 import org.apache.karaf.shell.api.console.Completer;
+import org.apache.karaf.shell.api.console.Parser;
 import org.apache.karaf.shell.api.console.Session;
 
 public class ActionCommand implements org.apache.karaf.shell.api.console.Command {
@@ -58,6 +60,15 @@ public class ActionCommand implements org.apache.karaf.shell.api.console.Command
     @Override
     public Completer getCompleter(boolean scoped) {
         return new ArgumentCompleter(this, scoped);
+    }
+
+    @Override
+    public Parser getParser() {
+        Parsing parsing = actionClass.getAnnotation(Parsing.class);
+        if (parsing != null) {
+            return new DelayedParser(parsing.value());
+        }
+        return null;
     }
 
     protected Completer getCompleter(Class<?> clazz) {
@@ -103,6 +114,23 @@ public class ActionCommand implements org.apache.karaf.shell.api.console.Command
                 return ((Completer) service).complete(session, commandLine, candidates);
             }
             return -1;
+        }
+    }
+
+    public static class DelayedParser implements Parser {
+        private final Class<?> clazz;
+
+        public DelayedParser(Class<?> clazz) {
+            this.clazz = clazz;
+        }
+
+        @Override
+        public CommandLine parse(Session session, String command, int cursor) {
+            Object service = session.getRegistry().getService(clazz);
+            if (service instanceof Parser) {
+                return ((Parser) service).parse(session, command, cursor);
+            }
+            throw new IllegalStateException("Could not find specified parser");
         }
     }
 

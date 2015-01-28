@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -16,29 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.karaf.shell.impl.console;
+// DWB14: parser loops if // comment at start of program
+// DWB15: allow program to have trailing ';'
+package org.apache.karaf.shell.support.parsing;
 
 import java.util.List;
 
 import org.apache.karaf.shell.api.console.CommandLine;
-import org.apache.karaf.shell.api.console.Completer;
+import org.apache.karaf.shell.api.console.Parser;
 import org.apache.karaf.shell.api.console.Session;
-import org.apache.karaf.shell.impl.console.parsing.CommandLineParser;
 
-public class CompleterAsCompletor implements jline.console.completer.Completer {
+public class DefaultParser implements Parser {
 
-    private final Session session;
-    private final Completer completer;
-
-    public CompleterAsCompletor(Session session, Completer completer) {
-        this.session = session;
-        this.completer = completer;
-    }
-
-    @SuppressWarnings("unchecked")
-	public int complete(String buffer, int cursor, @SuppressWarnings("rawtypes") List candidates) {
-        CommandLine cmdLine = CommandLineParser.buildCommandLine(session, buffer, cursor);
-        return completer.complete(session, cmdLine, candidates);
+    @Override
+    public CommandLine parse(Session session, String command, int cursor) {
+        GogoParser parser = new GogoParser(command, cursor);
+        List<String> args = parser.statement();
+        return new CommandLineImpl(
+                        args.toArray(new String[args.size()]),
+                        parser.cursorArgumentIndex(),
+                        parser.argumentPosition(),
+                        cursor,
+                        command.substring(0, parser.position()));
     }
 
 }

@@ -29,6 +29,7 @@ import org.apache.felix.utils.properties.InterpolationHelper;
 import org.apache.karaf.shell.api.console.Command;
 import org.apache.karaf.shell.api.console.CommandLine;
 import org.apache.karaf.shell.api.console.Completer;
+import org.apache.karaf.shell.api.console.Parser;
 import org.apache.karaf.shell.api.console.Registry;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.api.console.SessionFactory;
@@ -127,6 +128,11 @@ public class HelpCommand implements Command {
                 return completer.complete(session, new ArgumentCommandLine(argument, argument.length()), candidates) != -1 && !candidates.isEmpty();
             }
         };
+    }
+
+    @Override
+    public Parser getParser() {
+        return null;
     }
 
     protected void printHelp(PrintStream out) {

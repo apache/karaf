@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
+import org.apache.karaf.shell.api.console.Parser;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.CommandWithAction;
 import org.apache.karaf.shell.api.console.CommandLine;
@@ -97,6 +98,11 @@ public class CommandTracker implements ServiceTrackerCustomizer<Object, Object> 
                 }
 
                 @Override
+                public Parser getParser() {
+                    return null;
+                }
+
+                @Override
                 public Object execute(Session session, List<Object> arguments) throws Exception {
                     // TODO: remove not really nice cast
                     CommandSession commandSession = (CommandSession) session.get(".commandSession");
@@ -137,6 +143,11 @@ public class CommandTracker implements ServiceTrackerCustomizer<Object, Object> 
                             return completer.complete(session, commandLine, candidates);
                         }
                     };
+                }
+
+                @Override
+                public Parser getParser() {
+                    return null;
                 }
 
                 @Override

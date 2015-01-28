@@ -53,6 +53,7 @@ import org.apache.karaf.shell.api.console.Registry;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.api.console.SessionFactory;
 import org.apache.karaf.shell.api.console.Terminal;
+import org.apache.karaf.shell.impl.console.parsing.CommandLineParser;
 import org.apache.karaf.shell.support.ShellUtil;
 import org.apache.karaf.shell.support.completers.FileCompleter;
 import org.apache.karaf.shell.support.completers.FileOrUriCompleter;
@@ -358,13 +359,12 @@ public class ConsoleSessionImpl implements Session {
 
     private String readAndParseCommand() throws IOException {
         String command = null;
-        boolean loop = true;
         boolean first = true;
-        while (loop) {
+        while (true) {
             checkInterrupt();
             String line = reader.readLine(first ? getPrompt() : "> ");
             if (line == null) {
-                break;
+                return null;
             }
             if (command == null) {
                 command = line;
@@ -386,24 +386,15 @@ public class ConsoleSessionImpl implements Session {
                 }
             }
             if (command.length() > 0 && command.charAt(command.length() - 1) == '\\') {
-                loop = true;
                 first = false;
             } else {
                 try {
-                    Class<?> cl = CommandSession.class.getClassLoader().loadClass("org.apache.felix.gogo.runtime.Parser");
-                    Object parser = cl.getConstructor(CharSequence.class).newInstance(command);
-                    cl.getMethod("program").invoke(parser);
-                    loop = false;
+                    return CommandLineParser.parse(this, command);
                 } catch (Exception e) {
-                    loop = true;
                     first = false;
-                } catch (Throwable t) {
-                    // Reflection problem ? just quit
-                    loop = false;
                 }
             }
         }
-        return command;
     }
 
     private void executeScript(String scriptFileName) {

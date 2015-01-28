@@ -25,6 +25,7 @@ import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Function;
 import org.apache.karaf.shell.api.console.Command;
 import org.apache.karaf.shell.api.console.Completer;
+import org.apache.karaf.shell.api.console.Parser;
 import org.apache.karaf.shell.api.console.Session;
 
 public class SecuredCommand implements Command, Function {
@@ -53,6 +54,11 @@ public class SecuredCommand implements Command, Function {
     @Override
     public Completer getCompleter(boolean scoped) {
         return command.getCompleter(scoped);
+    }
+
+    @Override
+    public Parser getParser() {
+        return null;
     }
 
     @Override

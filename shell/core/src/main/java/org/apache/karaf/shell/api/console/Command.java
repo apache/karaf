@@ -48,4 +48,11 @@ public interface Command extends Function {
      */
     Completer getCompleter(boolean scoped);
 
+    /**
+     * Retrieve the parser associated with this command or null for the default one.
+     *
+     * @return
+     */
+    Parser getParser();
+
 }

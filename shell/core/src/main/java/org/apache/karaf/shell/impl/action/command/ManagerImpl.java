@@ -35,6 +35,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Manager;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Completer;
+import org.apache.karaf.shell.api.console.Parser;
 import org.apache.karaf.shell.api.console.Registry;
 import org.apache.karaf.shell.support.converter.GenericType;
 
@@ -140,7 +141,9 @@ public class ManagerImpl implements Manager {
             }
             registrations.register(command);
         }
-        if (allowCustomServices || Completer.class.isAssignableFrom(clazz)) {
+        if (allowCustomServices
+                || Completer.class.isAssignableFrom(clazz)
+                || Parser.class.isAssignableFrom(clazz)) {
             try {
                 // Create completer
                 Object completer = instantiate(clazz);

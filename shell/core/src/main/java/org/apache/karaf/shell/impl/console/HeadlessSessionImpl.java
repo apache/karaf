@@ -32,6 +32,7 @@ import org.apache.karaf.shell.api.console.Registry;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.api.console.SessionFactory;
 import org.apache.karaf.shell.api.console.Terminal;
+import org.apache.karaf.shell.impl.console.parsing.CommandLineParser;
 import org.apache.karaf.shell.support.ShellUtil;
 
 public class HeadlessSessionImpl implements Session {
@@ -68,7 +69,8 @@ public class HeadlessSessionImpl implements Session {
 
     @Override
     public Object execute(CharSequence commandline) throws Exception {
-        return session.execute(commandline);
+        String command = CommandLineParser.parse(this, commandline.toString());
+        return session.execute(command);
     }
 
     @Override

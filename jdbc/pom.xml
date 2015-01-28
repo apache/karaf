@@ -87,6 +87,7 @@
                         <Private-Package>
                             org.apache.karaf.jdbc.command,
                             org.apache.karaf.jdbc.command.completers,
+                            org.apache.karaf.jdbc.command.parsing,
                             org.apache.karaf.jdbc.internal,
                             org.apache.karaf.jdbc.internal.osgi,
                             org.apache.karaf.util,

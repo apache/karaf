@@ -18,12 +18,12 @@
  */
 // DWB14: parser loops if // comment at start of program
 // DWB15: allow program to have trailing ';'
-package org.apache.karaf.shell.impl.console.parsing;
+package org.apache.karaf.shell.support.parsing;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class Parser {
+public class GogoParser {
 
     int current = 0;
     String text;
@@ -40,20 +40,12 @@ public class Parser {
     int c2;
     int c3;
     
-    private boolean isExpansionEnabled; //CQL-Handling
-
-    public Parser(String text, int cursor) {
-        this(text, cursor, true);
-    }
-
-    //CQL-Handling
-    public Parser(String text, int cursor, boolean expansionEnabled) {
+    public GogoParser(String text, int cursor) {
     	this.text = text;
         this.cursor = cursor;
-        this.isExpansionEnabled = expansionEnabled; //CQL-Handling
 	}
 
-	void ws() {
+	public void ws() {
         // derek: BUGFIX: loop if comment  at beginning of input
         //while (!eof() && Character.isWhitespace(peek())) {
         while (!eof() && (!escaped && Character.isWhitespace(peek()) || current == 0)) {
@@ -76,11 +68,11 @@ public class Parser {
         }
     }
 
-    boolean eof() {
+    public boolean eof() {
         return current >= text.length();
     }
 
-    char peek() {
+    public char peek() {
         return peek(false);
     }
 
@@ -228,13 +220,25 @@ public class Parser {
         }
     }
 
-    String value() {
+    public int position() {
+        return current;
+    }
+
+    public int cursorArgumentIndex() {
+        return c2;
+    }
+
+    public int argumentPosition() {
+        return c3;
+    }
+
+    public String value() {
         ws();
 
         start = current;
         try {
             char c = next();
-            if (!escaped && isExpansionEnabled) { //CQL-Handling
+            if (!escaped) {
                 switch (c) {
                     case '{':
                         return text.substring(start, find('}', '{'));
@@ -260,11 +264,11 @@ public class Parser {
                     if (Character.isWhitespace(c) || c == ';' || c == '|' || c == '=') {
                         break;
                     }
-                    else if (c == '{' && isExpansionEnabled) { //CQL-Handling
+                    else if (c == '{') {
                         next();
                         find('}', '{');
                     }
-                    else if (c == '(' && isExpansionEnabled) { //CQL-Handling
+                    else if (c == '(') {
                         next();
                         find(')', '(');
                     }
@@ -295,11 +299,11 @@ public class Parser {
         }
     }
 
-    boolean escaped() {
+    public boolean escaped() {
         return escaped;
     }
 
-    char next() {
+    public char next() {
         return peek(true);
     }
 
