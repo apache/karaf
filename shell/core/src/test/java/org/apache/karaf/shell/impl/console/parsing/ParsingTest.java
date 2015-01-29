@@ -72,7 +72,22 @@ public class ParsingTest {
 
         String parsed = CommandLineParser.parse(session, " foo bar (a + b); another   command with spaces ");
         assertEquals("foo bar (a + b) ; another \"command with spaces\"", parsed);
+    }
 
+    @Test
+    public void testCommandLineParserMultiLine() {
+
+        SessionFactoryImpl sessionFactory = new SessionFactoryImpl(new ThreadIOImpl());
+        ManagerImpl manager = new ManagerImpl(sessionFactory, sessionFactory);
+        sessionFactory.getRegistry().register(new ActionCommand(manager, FooCommand.class));
+        sessionFactory.getRegistry().register(new ActionCommand(manager, AnotherCommand.class));
+        sessionFactory.getRegistry().register(new CustomParser());
+        Session session = new HeadlessSessionImpl(sessionFactory, sessionFactory.getCommandProcessor(),
+                new ByteArrayInputStream(new byte[0]), new PrintStream(new ByteArrayOutputStream()), new PrintStream(new ByteArrayOutputStream())
+        );
+
+        String parsed = CommandLineParser.parse(session, "echo a\necho b");
+        assertEquals("echo a\necho b", parsed);
     }
 
     @Command(scope = "scope", name = "foo")

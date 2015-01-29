@@ -47,9 +47,9 @@ public class GogoParser {
 
 	public void ws() {
         // derek: BUGFIX: loop if comment  at beginning of input
-        //while (!eof() && Character.isWhitespace(peek())) {
-        while (!eof() && (!escaped && Character.isWhitespace(peek()) || current == 0)) {
-            if (current != 0 || !escaped && Character.isWhitespace(peek())) {
+        //while (!eof() && isWhitespace(peek())) {
+        while (!eof() && (!escaped && isWhitespace(peek()) || current == 0)) {
+            if (current != 0 || !escaped && isWhitespace(peek())) {
                 current++;
             }
             if (peek() == '/' && current < text.length() - 2
@@ -60,6 +60,10 @@ public class GogoParser {
                 break;
             }
         }
+    }
+
+    private boolean isWhitespace(char ch) {
+        return ch != '\n' && Character.isWhitespace(ch);
     }
 
     private void comment() {
@@ -139,7 +143,7 @@ public class GogoParser {
         ws();
         if (!eof()) {
             program.add(pipeline());
-            while (peek() == ';') {
+            while (peek() == ';' || peek() == '\n') {
                 current++;
                 List<List<String>> pipeline = pipeline();
                 program.add(pipeline);
@@ -183,7 +187,7 @@ public class GogoParser {
         statement.add(value());
         while (!eof()) {
             ws();
-            if (peek() == '|' || peek() == ';') {
+            if (peek() == '|' || peek() == ';' || peek() == '\n') {
                 break;
             }
 
@@ -205,7 +209,7 @@ public class GogoParser {
             try {
                 while (!eof()) {
                     c = peek();
-                    if (!escaped && (c == ';' || c == '|' || Character.isWhitespace(c))) {
+                    if (!escaped && (c == ';' || c == '|' || c == '\n' || isWhitespace(c))) {
                         break;
                     }
                     next();
@@ -261,7 +265,7 @@ public class GogoParser {
             while (!eof()) {
                 c = peek();
                 if (!escaped) {
-                    if (Character.isWhitespace(c) || c == ';' || c == '|' || c == '=') {
+                    if (isWhitespace(c) || c == ';' || c == '|' || c == '=') {
                         break;
                     }
                     else if (c == '{') {

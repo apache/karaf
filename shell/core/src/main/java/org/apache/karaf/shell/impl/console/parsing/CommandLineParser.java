@@ -100,6 +100,9 @@ public class CommandLineParser {
                     parsed.append(ch);
                     parsed.append(" ");
                     length++;
+                } else if (ch == '\n') {
+                    parsed.append(ch);
+                    length++;
                 } else {
                     throw new IllegalArgumentException("Unrecognized character: '" + ch + "'");
                 }
