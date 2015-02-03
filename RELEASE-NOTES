@@ -15,6 +15,37 @@
  * limitations under the License.
  */
 
+                    Apache Karaf 2.3.10
+                    ===================
+
+  Overview
+  --------
+
+ This is an update patch for Apache Karaf 2.3.x, containing several bug fixes, and a dependency update. Amoung them are a fix for when config:edit does not correctly handle configuration visibility for factory calls, when User name/password missing in connection factory created with jms:create, and when admin:stop Command Does Not Zero Out Root Container PID. This release contains an update to jandex in hibernate feature to avoid wrapping. For more information, please read the below changelog.
+
+  Changelog
+  ---------
+
+** Bug
+ * [KARAF-3103|https://issues.apache.org/jira/browse/KARAF-3103] - config:edit does not correctly handle configuration visibility for --factory calls.
+ * [KARAF-3417|https://issues.apache.org/jira/browse/KARAF-3417] - karaf 3075 ticket not fixed in 2.3.6
+ * [KARAF-3430|https://issues.apache.org/jira/browse/KARAF-3430] - User name/password missing in connection factory created with jms:create
+ * [KARAF-3441|https://issues.apache.org/jira/browse/KARAF-3441] - The admin:stop Command Does Not Zero Out Root Container PID
+
+** Dependency upgrade
+ * [KARAF-3353|https://issues.apache.org/jira/browse/KARAF-3353] - Upgrade jandex in hibernate feature to avoid wrapping
+
+** Documentation
+ * [KARAF-3439|https://issues.apache.org/jira/browse/KARAF-3439] - [Docs] karaf.lock.delay in example is set to very low number.
+
+
+** Improvement
+ * [KARAF-3075|https://issues.apache.org/jira/browse/KARAF-3075] - AdminService should avoid writing file in case just read instance status
+ * [KARAF-3373|https://issues.apache.org/jira/browse/KARAF-3373] - Log lower level root cause exception in LDAPLoginModule.doLogin()
+ * [KARAF-3382|https://issues.apache.org/jira/browse/KARAF-3382] - Support configuration for custom LDAP group to JAAS role mapping
+ * [KARAF-3452|https://issues.apache.org/jira/browse/KARAF-3452] - Upgrade to maven-release-plugin 2.5.1
+
+
                     Apache Karaf 2.3.9
                     ==================
 
