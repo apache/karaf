@@ -21,6 +21,7 @@ import org.apache.karaf.jdbc.JdbcService;
 
 import javax.management.MBeanException;
 import javax.management.openmbean.*;
+
 import java.util.List;
 import java.util.Map;
 
@@ -63,9 +64,9 @@ public class JdbcMBeanImpl implements JdbcMBean {
     }
 
     @Override
-    public void create(String name, String type, String driver, String version, String url, String user, String password, boolean installBundles) throws MBeanException {
+    public void create(String name, String driverName, String driverClass, String databaseName, String url, String user, String password) throws MBeanException {
         try {
-            jdbcService.create(name, type, driver, version, url, user, password, installBundles);
+            jdbcService.create(name, driverName, driverClass, databaseName, url, user, password);
         } catch (Exception e) {
             throw new MBeanException(null, e.getMessage());
         }
@@ -89,6 +90,7 @@ public class JdbcMBeanImpl implements JdbcMBean {
         }
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public TabularData tables(String datasource) throws MBeanException {
         try {
@@ -131,6 +133,7 @@ public class JdbcMBeanImpl implements JdbcMBean {
         }
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public TabularData query(String datasource, String query) throws MBeanException {
         try {

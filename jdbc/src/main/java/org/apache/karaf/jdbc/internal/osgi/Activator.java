@@ -21,14 +21,21 @@ import org.apache.karaf.jdbc.internal.JdbcMBeanImpl;
 import org.apache.karaf.jdbc.internal.JdbcServiceImpl;
 import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.ProvideService;
+import org.apache.karaf.util.tracker.RequireService;
 import org.apache.karaf.util.tracker.Services;
+import org.osgi.service.cm.ConfigurationAdmin;
 
-@Services(provides = @ProvideService(JdbcService.class))
+@Services(
+    provides = @ProvideService(JdbcService.class),
+    requires = @RequireService(ConfigurationAdmin.class)
+)
 public class Activator extends BaseActivator {
     @Override
     protected void doStart() throws Exception {
+        ConfigurationAdmin configurationAdmin = getTrackedService(ConfigurationAdmin.class);
         JdbcServiceImpl service = new JdbcServiceImpl();
         service.setBundleContext(bundleContext);
+        service.setConfigAdmin(configurationAdmin);
         register(JdbcService.class, service);
 
         JdbcMBeanImpl mbean = new JdbcMBeanImpl();

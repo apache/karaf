@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.jdbc.command.completers;
+package org.apache.karaf.jdbc.command.ds;
 
 import org.apache.karaf.jdbc.JdbcService;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
@@ -27,10 +27,10 @@ import org.apache.karaf.shell.support.completers.StringsCompleter;
 import java.util.List;
 
 /**
- * Completer on the JDBC datasources file name.
+ * Completer on the JDBC datasources name (JNDI or OSGi service property).
  */
 @Service
-public class DataSourcesFileNameCompleter implements Completer {
+public class DataSourceFactoryNamesCompleter implements Completer {
 
     @Reference
     private JdbcService jdbcService;
@@ -39,13 +39,17 @@ public class DataSourcesFileNameCompleter implements Completer {
     public int complete(Session session, CommandLine commandLine, List<String> candidates) {
         StringsCompleter delegate = new StringsCompleter();
         try {
-            for (String datasourceFileName : jdbcService.datasources()) {
-                delegate.getStrings().add(datasourceFileName);
+            for (String datasource : jdbcService.factoryNames()) {
+                delegate.getStrings().add(datasource);
             }
         } catch (Exception e) {
             // nothing to do
         }
         return delegate.complete(session, commandLine, candidates);
+    }
+
+    public JdbcService getJdbcService() {
+        return jdbcService;
     }
 
     public void setJdbcService(JdbcService jdbcService) {

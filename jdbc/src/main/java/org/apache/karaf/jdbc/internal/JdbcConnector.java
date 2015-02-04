@@ -23,6 +23,7 @@ import java.sql.Statement;
 import java.util.Deque;
 import java.util.LinkedList;
 
+import javax.sql.CommonDataSource;
 import javax.sql.DataSource;
 import javax.sql.XAConnection;
 import javax.sql.XADataSource;
@@ -32,12 +33,12 @@ import org.osgi.framework.ServiceReference;
 
 public class JdbcConnector implements Closeable {
 
-    private Object datasource;
+    private CommonDataSource datasource;
     private Connection connection;
     private Deque<AutoCloseable> resources;
 
     public JdbcConnector(final BundleContext bundleContext, final ServiceReference<?> reference) {
-        this.datasource = bundleContext.getService(reference);
+        this.datasource = (CommonDataSource)bundleContext.getService(reference);
         this.resources = new LinkedList<>();
         this.resources.addFirst(new AutoCloseable() {
             @Override

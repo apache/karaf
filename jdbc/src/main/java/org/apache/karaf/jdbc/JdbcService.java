@@ -18,7 +18,6 @@ package org.apache.karaf.jdbc;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * JDBC Service.
@@ -26,47 +25,38 @@ import java.util.Set;
 public interface JdbcService {
 
     /**
-     * Create a JDBC datasource (using a default template).
+     * Create a JDBC datasource configuration.
      *
-     * @param name the JDBC datasource name.
-     * @param type the backend database type (generic, Oracle, MySQL, ...)
-     * @param driverClassName the JDBC driver classname.
-     * @param version the JDBC driver version to use.
-     * @param url the JDBC URL.
-     * @param user the database user name.
-     * @param password the database password.
-     * @param tryToInstallBundles true to try to automatically install the required bundles (JDBC driver, etc) when possible, false else.
+     * @param name Datasource name 
+     * @param driverName Backend database type (osgi.jdbc.driver.name of DataSourceFactory)
+     * @param url JDBC URL
+     * @param user Database user name
+     * @param password Database password
+     * @param password2 
      */
-    void create(String name, String type, String driverClassName, String version, String url, String user, String password, boolean tryToInstallBundles) throws Exception;
+    void create(String name, String driverName, String driverClass, String databaseName, String url, String user, String password) throws Exception;
 
     /**
-     * Delete a JDBC datasource identified by a name.
+     * Delete a JDBC datasource identified by a name. Works only
+     * for datasources that have a corresponding configuration
      *
-     * @param name the JDBC datasource name.
+     * @param name Datasource name
      */
     void delete(String name) throws Exception;
+    
+    /**
+     * List the JDBC DataSourceFactories available.
+     *
+     * @return a list of DataSourceFactory names
+     */
+    List<String> factoryNames() throws Exception;
 
     /**
      * List the JDBC datasources available.
      *
-     * @return a list of datasources name.
+     * @return a list of datasources names
      */
     List<String> datasources() throws Exception;
-
-    /**
-     * List the datasources available and
-     * group aliases for the same datasource.
-     *
-     * @return a list of aliases.
-     */
-    Map<String, Set<String>> aliases() throws Exception;
-
-    /**
-     * List the JDBC datasources configuration file names present in the deploy folder.
-     *
-     * @return a list of the JDBC datasources configuration file names.
-     */
-    List<String> datasourceFileNames() throws Exception;
 
     /**
      * Execute a SQL query on a given JDBC datasource.

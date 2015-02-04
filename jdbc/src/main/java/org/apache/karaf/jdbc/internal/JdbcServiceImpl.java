@@ -16,176 +16,99 @@
  */
 package org.apache.karaf.jdbc.internal;
 
-import org.apache.karaf.jdbc.JdbcService;
-import org.apache.karaf.util.TemplateUtils;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
 
 import javax.sql.DataSource;
 import javax.sql.XADataSource;
 
-import java.io.*;
-import java.sql.*;
-import java.util.*;
+import org.apache.karaf.jdbc.JdbcService;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.jdbc.DataSourceFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Default implementation of the JDBC Service.
  */
 public class JdbcServiceImpl implements JdbcService {
 
-    public static enum TYPES {
-        DB2("wrap:mvn:com.ibm.db2.jdbc/db2jcc/", "9.7", "datasource-db2.xml"),
-        DERBY("mvn:org.apache.derby/derby/", "10.8.2.2", "datasource-derby.xml"),
-        GENERIC(null, null, "datasource-generic.xml"),
-        H2("mvn:com.h2database/h2/", "1.3.163", "datasource-h2.xml"),
-        HSQL("mvn:org.hsqldb/hsqldb/", "2.3.2", "datasource-hsql.xml"),
-        MYSQL("mvn:mysql/mysql-connector-java/", "5.1.18", "datasource-mysql.xml"),
-        MSSQL("wrap:mvn:net.sourceforge.jtds/jtds/", "1.2.4", "datasource-mssql.xml"),
-        ORACLE("wrap:mvn:ojdbc/ojdbc/", "11.2.0.2.0", "datasource-oracle.xml"),
-        POSTGRES("wrap:mvn:postgresql/postgresql/", "9.1-901.jdbc4", "datasource-postgres.xml");
-
-        private final String bundleUrl;
-        private final String defaultVersion;
-        private final String templateFile;
-
-        TYPES(String bundleUrl, String defaultVersion, String templateFile) {
-            this.bundleUrl = bundleUrl;
-            this.defaultVersion = defaultVersion;
-            this.templateFile = templateFile;
-        }
-
-        public void installBundle(BundleContext bundleContext, String version) throws Exception {
-            String location = this.bundleUrl + getWithDefault(version, this.defaultVersion);
-            bundleContext.installBundle(location, null).start();
-        }
-
-        private String getWithDefault(String st, String defaultSt) {
-            return (st == null)? defaultSt : st;
-        }
-
-        public void copyDataSourceFile(File outFile, HashMap<String, String> properties) {
-            InputStream is = this.getClass().getResourceAsStream(templateFile);
-            if (is == null) {
-                throw new IllegalArgumentException("Template resource " + templateFile + " doesn't exist");
-            }
-            TemplateUtils.createFromTemplate(outFile, is, properties);
-        }
-
-    }
-
     private static final Logger LOGGER = LoggerFactory.getLogger(JdbcServiceImpl.class);
 
     private BundleContext bundleContext;
-
+    private ConfigurationAdmin configAdmin;
+    
     @Override
-    public void create(String name, String type, String driverClassName, String version, String url, String user, String password, boolean tryToInstallBundles) throws Exception {
-        if (type == null) {
-            throw new IllegalStateException("No database type supplied");
+    public void create(String name, String driverName, String driverClass, String databaseName, String url, String user, String password) throws Exception {
+        if (driverName == null && driverClass == null) {
+            throw new IllegalStateException("No driverName or driverClass supplied");
         }
-        TYPES dbType = TYPES.valueOf(type.toUpperCase());
-
-        if (tryToInstallBundles) {
-            dbType.installBundle(bundleContext, version);
+        if (datasources().contains(name)) {
+            throw new IllegalArgumentException("There is already a DataSource with the name " + name);
         }
-
-        File karafBase = new File(System.getProperty("karaf.base"));
-        File deployFolder = new File(karafBase, "deploy");
-        File outFile = new File(deployFolder, "datasource-" + name + ".xml");
-
-        HashMap<String, String> properties = new HashMap<String, String>();
-        properties.put("name", name);
-        properties.put("driver", driverClassName);
-        properties.put("url", url);
-        properties.put("user", user);
-        properties.put("password", password);
-
-        dbType.copyDataSourceFile(outFile, properties);
+        Dictionary<String, String> properties = new Hashtable<String, String>();
+        properties.put(DataSourceFactory.JDBC_DATASOURCE_NAME, name);
+        if (driverName != null) {
+            properties.put(DataSourceFactory.OSGI_JDBC_DRIVER_NAME, driverName);
+        }
+        if (driverClass != null) {
+            properties.put(DataSourceFactory.OSGI_JDBC_DRIVER_CLASS, driverClass);
+        }
+        if (databaseName != null) {
+            properties.put(DataSourceFactory.JDBC_DATABASE_NAME, databaseName);
+        }
+        if (url != null) {
+            properties.put(DataSourceFactory.JDBC_URL, url);
+        }
+        if (user != null) {
+            properties.put(DataSourceFactory.JDBC_USER, user);
+        }
+        if (password != null) {
+            properties.put(DataSourceFactory.JDBC_PASSWORD, password);
+        }
+        Configuration config = configAdmin.createFactoryConfiguration("org.ops4j.datasource", null);
+        config.update(properties);
     }
 
     @Override
     public void delete(String name) throws Exception {
-        File karafBase = new File(System.getProperty("karaf.base"));
-        File deployFolder = new File(karafBase, "deploy");
-        File datasourceFile = new File(deployFolder, "datasource-" + name + ".xml");
-        if (!datasourceFile.exists()) {
-            throw new IllegalArgumentException("The JDBC datasource file "+ datasourceFile.getPath() + " doesn't exist");
+        String filter = String.format("(%s=%s)", DataSourceFactory.JDBC_DATASOURCE_NAME, name);
+        Configuration[] configs = configAdmin.listConfigurations(filter);
+        for (Configuration config : configs) {
+            config.delete();
         }
-        datasourceFile.delete();
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public List<String> datasources() throws Exception {
         List<String> datasources = new ArrayList<>();
-
-        ServiceReference<?>[] references = bundleContext.getServiceReferences((String) null,
-                "(|(" + Constants.OBJECTCLASS + "=" + DataSource.class.getName() + ")("
-                        + Constants.OBJECTCLASS + "=" + XADataSource.class.getName() + "))");
-        if (references != null) {
-            for (ServiceReference reference : references) {
-                if (reference.getProperty("osgi.jndi.service.name") != null) {
-                    datasources.add(reference.getProperty("osgi.jndi.service.name").toString());
-                }
-                if (reference.getProperty("datasource") != null) {
-                    datasources.add(reference.getProperty("datasource").toString());
-                }
-                if (reference.getProperty("name") != null) {
-                    datasources.add(reference.getProperty("name").toString());
-                }
-                datasources.add(reference.getProperty(Constants.SERVICE_ID).toString());
+        Collection<ServiceReference<DataSource>> references = bundleContext.getServiceReferences(DataSource.class, null);
+        if (references == null) {
+            return datasources;
+        }
+        for (ServiceReference reference : references) {
+            String dsName = (String)reference.getProperty(DataSourceFactory.JDBC_DATASOURCE_NAME);
+            if (dsName != null) {
+                datasources.add(dsName);
             }
         }
         return datasources;
-    }
-
-    @Override
-    public Map<String, Set<String>> aliases() throws Exception {
-        Map<String, Set<String>> aliases = new LinkedHashMap<>();
-
-        ServiceReference<?>[] references = bundleContext.getServiceReferences((String) null,
-                "(|(" + Constants.OBJECTCLASS + "=" + DataSource.class.getName() + ")("
-                        + Constants.OBJECTCLASS + "=" + XADataSource.class.getName() + "))");
-        if (references != null) {
-            List<ServiceReference<?>> refs = Arrays.asList(references);
-            Collections.sort(refs);
-            Collections.reverse(refs);
-            for (ServiceReference<?> reference : refs) {
-                Set<String> names = new LinkedHashSet<>();
-                if (reference.getProperty("osgi.jndi.service.name") != null) {
-                    names.add(reference.getProperty("osgi.jndi.service.name").toString());
-                }
-                if (reference.getProperty("datasource") != null) {
-                    names.add(reference.getProperty("datasource").toString());
-                }
-                if (reference.getProperty("name") != null) {
-                    names.add(reference.getProperty("name").toString());
-                }
-                String id = reference.getProperty(Constants.SERVICE_ID).toString();
-                names.add(id);
-                aliases.put(id, names);
-            }
-        }
-        return aliases;
-    }
-
-    @Override
-    public List<String> datasourceFileNames() throws Exception {
-        File karafBase = new File(System.getProperty("karaf.base"));
-        File deployFolder = new File(karafBase, "deploy");
-
-        String[] datasourceFileNames = deployFolder.list(new FilenameFilter() {
-
-            @Override
-            public boolean accept(File dir, String name) {
-                return name.startsWith("datasource-") && name.endsWith(".xml");
-            }
-        });
-
-        return Arrays.asList(datasourceFileNames);
     }
 
     @Override
@@ -264,10 +187,6 @@ public class JdbcServiceImpl implements JdbcService {
         }
     }
 
-    public void setBundleContext(BundleContext bundleContext) {
-        this.bundleContext = bundleContext;
-    }
-
     private ServiceReference<?> lookupDataSource(String name) {
         ServiceReference<?>[] references;
         try {
@@ -298,4 +217,29 @@ public class JdbcServiceImpl implements JdbcService {
         return (rankObj instanceof Integer) ? (Integer) rankObj : 0;
     }
 
+    @Override
+    public List<String> factoryNames() throws Exception {
+        List<String> factories = new ArrayList<>();
+
+        Collection<ServiceReference<DataSourceFactory>> references = bundleContext.getServiceReferences(DataSourceFactory.class, null);
+        if (references == null) {
+            return factories;
+        }
+        for (ServiceReference<DataSourceFactory> reference : references) {
+            String driverName = (String)reference.getProperty(DataSourceFactory.OSGI_JDBC_DRIVER_NAME);
+            if (driverName != null) {
+                factories.add(driverName);
+            }
+        }
+
+        return factories;
+    }
+
+    public void setBundleContext(BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
+    }
+
+    public void setConfigAdmin(ConfigurationAdmin configAdmin) {
+        this.configAdmin = configAdmin;
+    }
 }

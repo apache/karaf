@@ -14,39 +14,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.jdbc.command;
+package org.apache.karaf.jdbc.command.ds;
 
-import org.apache.karaf.jdbc.command.completers.DataSourcesNameCompleter;
+import org.apache.karaf.jdbc.command.JdbcCommandSupport;
+import org.apache.karaf.jdbc.command.completers.DataSourcesFileNameCompleter;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.apache.karaf.shell.support.table.ShellTable;
 
-import java.util.Map;
-
-@Command(scope = "jdbc", name = "info", description = "Display details about a JDBC datasource")
+@Command(scope = "jdbc", name = "ds-delete", description = "Delete a JDBC datasource")
 @Service
-public class InfoCommand extends JdbcCommandSupport {
+public class DeleteCommand extends JdbcCommandSupport {
 
-    @Argument(index = 0, name = "datasource", description = "The JDBC datasource name", required = true, multiValued = false)
-    @Completion(DataSourcesNameCompleter.class)
-    String datasource;
+    @Argument(index = 0, name = "name", description = "The JDBC datasource name (the one used at creation time)", required = true, multiValued = false)
+    @Completion(DataSourcesFileNameCompleter.class)
+    String name;
 
     @Override
     public Object execute() throws Exception {
-        ShellTable table = new ShellTable();
-
-        table.column("Property");
-        table.column("Value");
-
-        Map<String, String> info = this.getJdbcService().info(datasource);
-        for (String property : info.keySet()) {
-            table.addRow().addContent(property, info.get(property));
-        }
-
-        table.print(System.out);
-
+        this.getJdbcService().delete(name);
         return null;
     }
 

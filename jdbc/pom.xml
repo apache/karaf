@@ -45,6 +45,12 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.enterprise</artifactId>
+            <version>5.0.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.apache.karaf</groupId>
             <artifactId>org.apache.karaf.util</artifactId>
         </dependency>
@@ -82,10 +88,12 @@
                 <configuration>
                     <instructions>
                         <Export-Package>
-                            org.apache.karaf.jdbc
+                            org.apache.karaf.jdbc,
+                            org.osgi.service.jdbc
                         </Export-Package>
                         <Private-Package>
                             org.apache.karaf.jdbc.command,
+                            org.apache.karaf.jdbc.command.ds,
                             org.apache.karaf.jdbc.command.completers,
                             org.apache.karaf.jdbc.command.parsing,
                             org.apache.karaf.jdbc.internal,

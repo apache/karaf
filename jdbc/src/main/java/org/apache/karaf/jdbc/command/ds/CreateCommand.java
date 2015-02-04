@@ -14,32 +14,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.jdbc.command;
+package org.apache.karaf.jdbc.command.ds;
 
+import org.apache.karaf.jdbc.command.JdbcCommandSupport;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
-import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.apache.karaf.shell.support.completers.StringsCompleter;
 
-@Command(scope = "jdbc", name = "create", description = "Create a JDBC datasource")
+@Command(scope = "jdbc", name = "ds-create", description = "Create a JDBC datasource config for pax-jdbc-config from a DataSourceFactory")
 @Service
 public class CreateCommand extends JdbcCommandSupport {
-
     @Argument(index = 0, name = "name", description = "The JDBC datasource name", required = true, multiValued = false)
     String name;
+    
+    @Option(name = "-dn", aliases = { "--driverName" }, description = "org.osgi.driver.name property of the DataSourceFactory", required = false, multiValued = false)
+    String driverName;
+    
+    @Option(name = "-dc", aliases = { "--driverClass" }, description = "org.osgi.driver.class property  of the DataSourceFactory", required = false, multiValued = false)
+    String driverClass;
 
-    @Option(name = "-t", aliases = { "--type" }, description = "The JDBC datasource type (generic, MySQL, Oracle, Postgres, H2, HSQL, Derby, MSSQL)", required = false, multiValued = false)
-    @Completion(value = StringsCompleter.class, values = { "db2", "derby", "generic", "h2", "hsql", "mysql", "oracle", "postgres", "mssql" })
-    String type;
-
-    @Option(name = "-d", aliases = { "--driver" }, description = "The classname of the JDBC driver to use. NB: this option is used only the type generic", required = false, multiValued = false)
-    String driver;
-
-    @Option(name = "-v", aliases = { "--version" }, description = "The version of the driver to use", required = false, multiValued = false)
-    String version;
-
+    @Option(name = "-dbName", description = "Database name to use", required = false, multiValued = false)
+    String databaseName;
+    
     @Option(name = "-url", description = "The JDBC URL to use", required = false, multiValued = false)
     String url;
 
@@ -49,12 +46,9 @@ public class CreateCommand extends JdbcCommandSupport {
     @Option(name = "-p", aliases = { "--password" }, description = "The database password", required = false, multiValued = false)
     String password;
 
-    @Option(name = "-i", aliases = { "--install-bundles" }, description = "Try to install the bundles providing the JDBC driver", required = false, multiValued = false)
-    boolean installBundles = false;
-
     @Override
     public Object execute() throws Exception {
-        this.getJdbcService().create(name, type, driver, version, url, username, password, installBundles);
+        this.getJdbcService().create(name, driverName, driverClass, databaseName, url, username, password);
         return null;
     }
 

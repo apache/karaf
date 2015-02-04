@@ -18,6 +18,7 @@ package org.apache.karaf.jdbc;
 
 import javax.management.MBeanException;
 import javax.management.openmbean.TabularData;
+
 import java.util.Map;
 
 /**
@@ -36,17 +37,16 @@ public interface JdbcMBean {
     /**
      * Create a JDBC datasource.
      *
-     * @param name the JDBC datasource name.
-     * @param type the JDBC datasource type (generic, MySQL, Oracle, Postgres, H2, HSQL, Derby, MSSQL).
-     * @param driver the JDBC datasource driver class name (can be null).
-     * @param version the target JDBC driver version (can be null).
-     * @param url the JDBC URL.
-     * @param user the database username.
-     * @param password the database password.
-     * @param installBundles true to install the bundles providing the JDBC driver, false to not install.
+     * @param name the JDBC datasource name
+     * @param driverName org.osgi.driver.name of the DataSourceFactory to use
+     * @param driverClass org.osgi.driver.class of the DataSourceFactory to use
+     * @param databaseName name of the database to access
+     * @param url JDBC URL
+     * @param user Database username
+     * @param password Database password
      * @throws MBeanException
      */
-    void create(String name, String type, String driver, String version, String url, String user, String password, boolean installBundles) throws MBeanException;
+    void create(String name, String driverName, String driverClass, String databaseName, String url, String user, String password) throws MBeanException;
 
     /**
      * Delete a JDBC datasource.

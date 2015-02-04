@@ -206,7 +206,7 @@
         <aries.proxy.api.version>1.0.1</aries.proxy.api.version>
         <aries.subsystem.api.version>1.0.0</aries.subsystem.api.version>
         <aries.subsystem.core.version>1.1.0</aries.subsystem.core.version>
-        <aries.transaction.manager.version>1.1.1</aries.transaction.manager.version>
+        <aries.transaction.manager.version>1.1.2-SNAPSHOT</aries.transaction.manager.version>
         <aries.transaction.blueprint.version>1.0.1</aries.transaction.blueprint.version>
         <aries.transaction.jdbc.version>2.0.0</aries.transaction.jdbc.version>
         <aries.util.version>1.1.0</aries.util.version>
