@@ -68,12 +68,11 @@ public class EventAdminAuditLoginModule extends AbstractAuditLoginModule {
                 EventAdmin eventAdmin = bundleContext.getService(ref);
                 try {
                     Map<String, Object> props = new HashMap<String, Object>();
-                    Event event = new Event(topic, props);
                     props.put("type", topic.substring(topic.lastIndexOf("/") + 1).toLowerCase());
                     props.put("timestamp", System.currentTimeMillis());
                     props.put("username", username);
                     props.put("subject", subject);
-                    eventAdmin.postEvent(event);
+                    eventAdmin.postEvent(new Event(topic, props));
                 } finally {
                     bundleContext.ungetService(ref);
                 }
