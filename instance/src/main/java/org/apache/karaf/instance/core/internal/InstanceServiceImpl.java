@@ -329,6 +329,7 @@ public class InstanceServiceImpl implements InstanceService {
                     "etc/org.ops4j.pax.logging.cfg",
                     "etc/org.ops4j.pax.url.mvn.cfg",
                     "etc/shell.init.script",
+                    "etc/users.properties",
                     FEATURES_CFG
                 };
                 copyResourcesToDir(resources, karafBase, textResources, printOutput);
