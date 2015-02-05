@@ -55,7 +55,18 @@ public class Main {
         Properties shellCfg = loadProps(new File(System.getProperty("karaf.etc"), "org.apache.karaf.shell.cfg"));
 
         String host = shellCfg.getProperty("sshHost", "localhost");
-        int port = Integer.parseInt(shellCfg.getProperty("sshPort", "8101"));
+        if (host.contains("${")) {
+            // if sshHost property contains a reference to another property (coming from etc/config.properties\r
+            // or etc/custom.properties), we fall back to "localhost" default value\r
+            host = "localhost";
+        }
+        String portString = shellCfg.getProperty("sshPort", "8101");
+        if (portString.contains("${")) {
+            // if sshPort property contains a reference to another property (coming from etc/config.properties\r
+            // or etc/custom.properties), we fall back to "8101" default value\r
+            portString = "8101";
+        }
+        int port = Integer.parseInt(portString);
         int level = 1;
         int retryAttempts = 0;
         int retryDelay = 2;
@@ -70,10 +81,10 @@ public class Main {
         if (!usersCfg.isEmpty()) {
             Iterator iter = usersCfg.keySet().iterator();
             while (iter.hasNext()) {
-              user = (String) iter.next();
-              if (!user.startsWith(GROUP_PREFIX)) {
-                  break;
-              }
+                user = (String) iter.next();
+                if (!user.startsWith(GROUP_PREFIX)) {
+                    break;
+                }
             }
             password = (String) usersCfg.getProperty(user);
             if (password.contains(ROLE_DELIMITER)) {
@@ -226,7 +237,7 @@ public class Main {
             if (console != null) {
                 console.printf("Logging in as %s\n", user);
             }
-            
+
             ClientSession session = null;
             int retries = 0;
             do {
@@ -243,20 +254,20 @@ public class Main {
                     }
                 }
             } while (session == null);
-            
-            
+
+
             if (password != null) {
                 session.addPasswordIdentity(password);
             }
             session.auth().verify();
 
             ClientChannel channel;
-			if (command.length() > 0) {
+            if (command.length() > 0) {
                 channel = session.createChannel("exec", command.append("\n").toString());
                 channel.setIn(new ByteArrayInputStream(new byte[0]));
-			} else {
+            } else {
                 terminal = new TerminalFactory().getTerminal();
- 				channel = session.createChannel("shell");
+                channel = session.createChannel("shell");
                 ConsoleInputStream in = new ConsoleInputStream(terminal.wrapInIfNeeded(System.in));
                 new Thread(in).start();
                 channel.setIn(in);
@@ -266,7 +277,7 @@ public class Main {
                 String ctype = System.getenv("LC_CTYPE");
                 if (ctype == null) {
                     ctype = Locale.getDefault().toString() + "."
-                                + System.getProperty("input.encoding", Charset.defaultCharset().name());
+                            + System.getProperty("input.encoding", Charset.defaultCharset().name());
                 }
                 ((ChannelShell) channel).setEnv("LC_CTYPE", ctype);
             }
@@ -287,12 +298,14 @@ public class Main {
         } finally {
             try {
                 client.stop();
-            } catch (Throwable t) { }
+            } catch (Throwable t) {
+            }
             try {
                 if (terminal != null) {
                     terminal.restore();
                 }
-            } catch (Throwable t) { }
+            } catch (Throwable t) {
+            }
         }
         System.exit(exitStatus);
     }
@@ -337,15 +350,15 @@ public class Main {
             KeyPair keyPair = (KeyPair) r.readObject();
             is.close();
             agent.addIdentity(keyPair, user);
-            
+
             if (keyFile != null) {
                 String[] keyFiles = new String[]{keyFile};
                 FileKeyPairProvider fileKeyPairProvider = new FileKeyPairProvider(keyFiles);
                 for (KeyPair key : fileKeyPairProvider.loadKeys()) {
-                    agent.addIdentity(key, user);                
+                    agent.addIdentity(key, user);
                 }
             }
-            
+
             return agent;
         } catch (Throwable e) {
             close(is);
@@ -353,7 +366,7 @@ public class Main {
             return null;
         }
     }
-    
+
     private static void close(Closeable is) {
         if (is != null) {
             try {
@@ -363,12 +376,12 @@ public class Main {
             }
         }
     }
-    
+
     public static String readLine(String msg) throws IOException {
         StringBuffer sb = new StringBuffer();
         System.err.print(msg);
         System.err.flush();
-        for (;;) {
+        for (; ; ) {
             int c = System.in.read();
             if (c < 0) {
                 return null;
@@ -392,8 +405,7 @@ public class Main {
             this.in = in;
         }
 
-        private int read(boolean wait) throws IOException
-        {
+        private int read(boolean wait) throws IOException {
             if (eof && queue.isEmpty()) {
                 return -1;
             }
@@ -414,14 +426,12 @@ public class Main {
         }
 
         @Override
-        public int read() throws IOException
-        {
+        public int read() throws IOException {
             return read(true);
         }
 
         @Override
-        public int read(byte b[], int off, int len) throws IOException
-        {
+        public int read(byte b[], int off, int len) throws IOException {
             if (b == null) {
                 throw new NullPointerException();
             } else if (off < 0 || len < 0 || len > b.length - off) {
