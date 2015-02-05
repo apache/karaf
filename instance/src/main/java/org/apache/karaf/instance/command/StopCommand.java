@@ -17,7 +17,6 @@
 package org.apache.karaf.instance.command;
 
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 
 import org.apache.karaf.instance.command.completers.StartedInstanceCompleter;
 import org.apache.karaf.instance.core.Instance;
@@ -35,6 +34,7 @@ public class StopCommand extends InstanceCommandSupport {
     @Completion(StartedInstanceCompleter.class)
     private List<String> instances = null;
 
+    @SuppressWarnings("deprecation")
     protected Object doExecute() throws Exception {
         final MultiException exception = new MultiException("Error stopping instance(s)");
         for (Instance instance : getMatchingInstances(instances)) {

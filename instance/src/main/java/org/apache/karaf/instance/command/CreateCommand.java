@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.features.command.completers.AllFeatureCompleter;

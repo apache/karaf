@@ -37,6 +37,7 @@ public class DestroyCommand extends InstanceCommandSupport
     @Completion(InstanceCompleter.class)
     private List<String> instances = null;
 
+    @SuppressWarnings("deprecation")
     protected Object doExecute() throws Exception {
         final MultiException exception = new MultiException("Error destroying instance(s)");
         for (Instance instance : getMatchingInstances(instances)) {

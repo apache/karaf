@@ -45,6 +45,7 @@ public class RestartCommand extends InstanceCommandSupport {
     static final String DEBUG_OPTS = " -Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005";
     static final String DEFAULT_OPTS = "-server -Xmx512M -Dcom.sun.management.jmxremote";
 
+    @SuppressWarnings("deprecation")
     protected Object doExecute() throws Exception {
         MultiException exception = new MultiException("Error starting instance(s)");
         List<Instance> toWaitFor = new ArrayList<>();

@@ -71,6 +71,7 @@ public class ScriptUtils {
                     line = filter(line, props);
                     out.println(line);
                 }
+                scanner.close();
             } finally {
                 safeClose(out);
             }

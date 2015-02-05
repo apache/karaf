@@ -17,7 +17,6 @@
 package org.apache.karaf.instance.core.internal;
 
 import java.io.BufferedReader;
-import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -64,6 +63,7 @@ import org.slf4j.LoggerFactory;
 
 public class InstanceServiceImpl implements InstanceService {
 
+    private static final String RESOURCE_BASE = "org/apache/karaf/instance/resources/";
     public static final String STORAGE_FILE = "instance.properties";
     public static final String BACKUP_EXTENSION = ".bak";
     private static final String FEATURES_CFG = "etc/org.apache.karaf.features.cfg";
@@ -80,8 +80,6 @@ public class InstanceServiceImpl implements InstanceService {
 
     private static final String KARAF_SHUTDOWN_COMMAND = "karaf.shutdown.command";
 
-    private static final String KARAF_SHUTDOWN_PID_FILE = "karaf.shutdown.pid.file";
-    
     private static final String KARAF_SHUTDOWN_TIMEOUT = "karaf.shutdown.timeout";
 
     private static final String DEFAULT_SHUTDOWN_COMMAND = "SHUTDOWN";
@@ -257,6 +255,16 @@ public class InstanceServiceImpl implements InstanceService {
             }
         }
     }
+    
+    private static void logDebug(String message, boolean printOutput, Object... args) {
+        if (LOGGER.isDebugEnabled() || printOutput) {
+            String formatted = String.format(message, args);
+            LOGGER.debug(formatted);
+            if (printOutput) {
+                println(formatted);
+            }
+        }
+    }
 
     public synchronized Instance createInstance(final String name, final InstanceSettings settings, final boolean printOutput) throws Exception {
         return execute(new Task<Instance>() {
@@ -302,26 +310,28 @@ public class InstanceServiceImpl implements InstanceService {
                 Map<String, URL> textResources = new HashMap<String, URL>(settings.getTextResources());
                 Map<String, URL> binaryResources = new HashMap<String, URL>(settings.getBinaryResources());
 
-                copyResourceToDir("etc/all.policy", karafBase, textResources, printOutput);
-                copyResourceToDir("etc/config.properties", karafBase, textResources, printOutput);
-                copyResourceToDir("etc/custom.properties", karafBase, textResources, printOutput);
-                copyResourceToDir("etc/distribution.info", karafBase, textResources, printOutput);
-                copyResourceToDir("etc/equinox-debug.properties", karafBase, textResources, printOutput);
-                copyResourceToDir("etc/java.util.logging.properties", karafBase, textResources, printOutput);
-                copyResourceToDir("etc/jmx.acl.cfg", karafBase, textResources, printOutput);
-                copyResourceToDir("etc/jre.properties", karafBase, textResources, printOutput);
-                copyResourceToDir("etc/keys.properties", karafBase, textResources, printOutput);
-                copyResourceToDir("etc/org.apache.felix.fileinstall-deploy.cfg", karafBase, textResources, printOutput);
-                copyResourceToDir("etc/org.apache.karaf.features.repos.cfg", karafBase, textResources, printOutput);
-                copyResourceToDir("etc/org.apache.karaf.jaas.cfg", karafBase, textResources, printOutput);
-                copyResourceToDir("etc/org.apache.karaf.kar.cfg", karafBase, textResources, printOutput);
-                copyResourceToDir("etc/org.apache.karaf.log.cfg", karafBase, textResources, printOutput);
-                copyResourceToDir("etc/org.ops4j.pax.logging.cfg", karafBase, textResources, printOutput);
-                copyResourceToDir("etc/org.ops4j.pax.url.mvn.cfg", karafBase, textResources, printOutput);
-                copyResourceToDir("etc/shell.init.script", karafBase, textResources, printOutput);
-                copyResourceToDir("etc/users.properties", karafBase, textResources, printOutput);
-
-                copyResourceToDir(FEATURES_CFG, karafBase, textResources, printOutput);
+                String[] resources = 
+                {
+                    "etc/all.policy",
+                    "etc/config.properties",
+                    "etc/custom.properties",
+                    "etc/distribution.info",
+                    "etc/equinox-debug.properties",
+                    "etc/java.util.logging.properties",
+                    "etc/jmx.acl.cfg",
+                    "etc/jre.properties",
+                    "etc/keys.properties",
+                    "etc/org.apache.felix.fileinstall-deploy.cfg",
+                    "etc/org.apache.karaf.features.repos.cfg",
+                    "etc/org.apache.karaf.jaas.cfg",
+                    "etc/org.apache.karaf.kar.cfg",
+                    "etc/org.apache.karaf.log.cfg",
+                    "etc/org.ops4j.pax.logging.cfg",
+                    "etc/org.ops4j.pax.url.mvn.cfg",
+                    "etc/shell.init.script",
+                    FEATURES_CFG
+                };
+                copyResourcesToDir(resources, karafBase, textResources, printOutput);
                 addFeaturesFromSettings(new File(karafBase, FEATURES_CFG), settings);
 
                 // The startup.properties is now generated by the karaf maven plugin, so
@@ -338,17 +348,19 @@ public class InstanceServiceImpl implements InstanceService {
                 props.put("${SUBST-RMI-REGISTRY-PORT}", Integer.toString(rmiRegistryPort));
                 props.put("${SUBST-RMI-SERVER-PORT}", Integer.toString(rmiServerPort));
 
-                copyFilteredResourceToDir("etc/system.properties", karafBase, textResources, props, printOutput);
-                copyFilteredResourceToDir("etc/org.apache.karaf.shell.cfg", karafBase, textResources, props, printOutput);
-                copyFilteredResourceToDir("etc/org.apache.karaf.management.cfg", karafBase, textResources, props, printOutput);
-               
-                copyFilteredResourceToDir("bin/karaf", karafBase, textResources, props, printOutput);
-                copyFilteredResourceToDir("bin/start", karafBase, textResources, props, printOutput);
-                copyFilteredResourceToDir("bin/stop", karafBase, textResources, props, printOutput);
-
-                copyFilteredResourceToDir("bin/karaf.bat", karafBase, textResources, props, printOutput);
-                copyFilteredResourceToDir("bin/start.bat", karafBase, textResources, props, printOutput);
-                copyFilteredResourceToDir("bin/stop.bat", karafBase, textResources, props, printOutput);
+                String[] filteredResources =
+                {
+                     "etc/system.properties",
+                     "etc/org.apache.karaf.shell.cfg",
+                     "etc/org.apache.karaf.management.cfg",
+                     "bin/karaf",
+                     "bin/start",
+                     "bin/stop",
+                     "bin/karaf.bat",
+                     "bin/start.bat",
+                     "bin/stop.bat"
+                };
+                copyFilteredResourcesToDir(filteredResources, karafBase, textResources, props, printOutput);
 
                 try {
                     chmod(new File(karafBase, "bin/karaf"), "a+x");
@@ -567,7 +579,7 @@ public class InstanceServiceImpl implements InstanceService {
                             + " -classpath \"" + classpath.toString() + "\""
                             + " " + Execute.class.getName()
                             + " restart --java-opts \"" + javaOpts + "\" " + name;
-                    org.apache.karaf.jpm.Process process = new ProcessBuilderFactoryImpl().newBuilder()
+                    new ProcessBuilderFactoryImpl().newBuilder()
                             .directory(new File(System.getProperty("karaf.home")))
                             .command(command)
                             .start();
@@ -789,7 +801,7 @@ public class InstanceServiceImpl implements InstanceService {
             props.put("karaf.home", System.getProperty("karaf.home"));
             props.put("karaf.data", new File(new File(instance.loc), "data").getCanonicalPath());
             props.put("karaf.etc", new File(new File(instance.loc), "etc").getCanonicalPath());
-            for (Enumeration e = props.propertyNames(); e.hasMoreElements();) {
+            for (Enumeration<?> e = props.propertyNames(); e.hasMoreElements();) {
                 String key = (String) e.nextElement();
                 props.setProperty(key,
                         substVars(props.getProperty(key), key, null, props));
@@ -1030,22 +1042,30 @@ public class InstanceServiceImpl implements InstanceService {
         result &= fileToDelete.delete();
         return result;
     }
+    
+    private void copyResourcesToDir(String[] resourcesToCopy, File target, Map<String, URL> resources, boolean printOutput) throws IOException {
+        for (String resource : resourcesToCopy) {
+            copyResourceToDir(resource, target, resources, printOutput);
+        }
+    }
 
     private void copyResourceToDir(String resource, File target, Map<String, URL> resources, boolean printOutput) throws IOException {
         File outFile = new File(target, resource);
         if( !outFile.exists() ) {
-            logInfo("Creating file: %s", printOutput, outFile.getPath());
-            try (InputStream is = resources.containsKey(resource) ? resources.remove(resource).openStream() : getClass().getClassLoader().getResourceAsStream("org/apache/karaf/instance/resources/" + resource);
-                 OutputStream os = new FileOutputStream(outFile)) {
-                // Read it line at a time so that we can use the platform line ending when we write it out.
-                PrintStream out = new PrintStream(os);
-                Scanner scanner = new Scanner(is);
-                while (scanner.hasNextLine() ) {
-                    String line = scanner.nextLine();
-                    out.println(line);
-                }
+            logDebug("Creating file: %s", printOutput, outFile.getPath());
+            try (
+                InputStream is = getResourceStream(resource, resources);
+                OutputStream os = new FileOutputStream(outFile)
+            ) {
+                copyStream(is, os);
             }
         }
+    }
+
+    private InputStream getResourceStream(String resource, Map<String, URL> resources) throws IOException {
+        return resources.containsKey(resource) 
+                ? resources.remove(resource).openStream() 
+                : getClass().getClassLoader().getResourceAsStream(RESOURCE_BASE + resource);
     }
 
     private static void println(String st) {
@@ -1053,26 +1073,34 @@ public class InstanceServiceImpl implements InstanceService {
     }
 
     protected static Properties loadPropertiesFile(URL configPropURL) throws Exception {
-        // Read the properties file.
-        Properties configProps = new Properties();
-        InputStream is = null;
-        try {
-            is = configPropURL.openConnection().getInputStream();
+        try (
+            InputStream is = configPropURL.openConnection().getInputStream();
+        ){
+            Properties configProps = new Properties();
             configProps.load(is);
-            is.close();
+            return configProps;
         }
         catch (Exception ex) {
             System.err.println("Error loading config properties from " + configPropURL);
             System.err.println("Main: " + ex);
-            try {
-                if (is != null) is.close();
-            }
-            catch (IOException ex2) {
-                // Nothing we can do.
-            }
             return null;
         }
-        return configProps;
+    }
+    
+    /**
+     * Read stream one line at a time so that we can use the platform
+     * line ending when we write it out.
+     * @param is
+     * @param os
+     */
+    private void copyStream(InputStream is, OutputStream os) {
+        PrintStream out = new PrintStream(os);
+        Scanner scanner = new Scanner(is);
+        while (scanner.hasNextLine() ) {
+            String line = scanner.nextLine();
+            out.println(line);
+        }
+        scanner.close();
     }
 
     private void filterResource(File basedir, String path, HashMap<String, String> props) throws IOException {
@@ -1089,12 +1117,20 @@ public class InstanceServiceImpl implements InstanceService {
         bak.delete();
     }
 
+    private void copyFilteredResourcesToDir(String[] resourcesToCopy, File target, Map<String, URL> resources, Map<String, String> props, boolean printOutput) throws IOException {
+        for (String resource : resourcesToCopy) {
+            copyFilteredResourceToDir(resource, target, resources, props, printOutput);
+        }
+    }
+    
     private void copyFilteredResourceToDir(String resource, File target, Map<String, URL> resources, Map<String, String> props, boolean printOutput) throws IOException {
         File outFile = new File(target, resource);
         if( !outFile.exists() ) {
-            logInfo("Creating file: %s", printOutput, outFile.getPath());
-            try (InputStream is = resources.containsKey(resource) ? resources.remove(resource).openStream() : getClass().getClassLoader().getResourceAsStream("org/apache/karaf/instance/resources/" + resource);
-                 OutputStream os = new FileOutputStream(outFile)) {
+            logDebug("Creating file: %s", printOutput, outFile.getPath());
+            try (
+                InputStream is = getResourceStream(resource, resources);
+                OutputStream os = new FileOutputStream(outFile)
+            ) {
                 copyAndFilterResource(is, os, props);
             }
         }
@@ -1109,26 +1145,19 @@ public class InstanceServiceImpl implements InstanceService {
             line = filter(line, props);
             out.println(line);
         }
+        scanner.close();
     }
 
     private void copyBinaryResourceToDir(String resource, File target, Map<String, URL> resources, boolean printOutput) throws IOException {
         File outFile = new File(target, resource);
         if( !outFile.exists() ) {
-            logInfo("Creating file: %s", printOutput, outFile.getPath());
-            try (InputStream is = resources.containsKey(resource) ? resources.remove(resource).openStream() : getClass().getClassLoader().getResourceAsStream("org/apache/karaf/instance/resources/" + resource);
-                 OutputStream os = new FileOutputStream(outFile)) {
+            logDebug("Creating file: %s", printOutput, outFile.getPath());
+            try (
+                InputStream is = getResourceStream(resource, resources);
+                OutputStream os = new FileOutputStream(outFile)
+            ) {
                 StreamUtils.copy(is, os);
             }
-        }
-    }
-
-    private void safeClose(Closeable is) throws IOException {
-        if (is == null) {
-            return;
-        }
-        try {
-            is.close();
-        } catch (Throwable ignore) {
         }
     }
 
@@ -1147,7 +1176,7 @@ public class InstanceServiceImpl implements InstanceService {
     private void mkdir(File karafBase, String path, boolean printOutput) {
         File file = new File(karafBase, path);
         if( !file.exists() ) {
-            logInfo("Creating dir: %s", printOutput, file.getPath());
+            logDebug("Creating dir: %s", printOutput, file.getPath());
             file.mkdirs();
         }
     }
@@ -1346,7 +1375,7 @@ public class InstanceServiceImpl implements InstanceService {
                 String pid = config.getKey();
                 if (!pid.equals(Profile.INTERNAL_PID + Profile.PROPERTIES_SUFFIX)) {
                     Path configFile = Paths.get(karafBase.toString(), "etc", pid);
-                    logInfo("Creating file: %s", printOutput, configFile.toString());
+                    logDebug("Creating file: %s", printOutput, configFile.toString());
                     Files.write(configFile, config.getValue());
                 }
             }
