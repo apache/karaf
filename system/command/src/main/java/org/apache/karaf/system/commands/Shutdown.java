@@ -69,6 +69,12 @@ public class Shutdown extends AbstractSystemAction {
                 msg = String.format("Confirm: halt instance %s (yes/no): ", karafName);
             }
             ConsoleReader reader = (ConsoleReader) session.get(".jline.reader");
+            if (reader == null) {
+                //this is a remote client with shutdown argument so here isn't a interactive way
+                // so return a prompt message instead of NPE
+                System.out.println("please use \"shutdown -f\" or \"shutdown --force\" to shutdown instance: " + karafName );
+                return null;
+            }
             String str = reader.readLine(msg);
             if (str.equalsIgnoreCase("yes")) {
                 if (reboot) {
