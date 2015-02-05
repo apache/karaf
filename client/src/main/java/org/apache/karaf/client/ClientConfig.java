@@ -43,7 +43,18 @@ public class ClientConfig {
         Properties shellCfg = loadProps(new File(System.getProperty("karaf.etc"), "org.apache.karaf.shell.cfg"));
 
         host = shellCfg.getProperty("sshHost", "localhost");
-        port = Integer.parseInt(shellCfg.getProperty("sshPort", "8101"));
+        if (host.contains("${")) {
+            // if sshHost property contains a reference to another property (coming from etc/config.properties
+            // or etc/custom.properties), we fall back to "localhost" default value
+            host = "localhost";
+        }
+        String portString = shellCfg.getProperty("sshPort", "8101");
+        if (portString.contains("${")) {
+            // if sshPort property contains a reference to another property (coming from etc/config.properties
+            // or etc/custom.properties), we fall back to "8101" default value
+            portString = "8101";
+        }
+        port = Integer.parseInt(portString);
         level = SimpleLogger.WARN;
         retryAttempts = 0;
         retryDelay = 2;
@@ -162,7 +173,7 @@ public class ClientConfig {
             }
 
         } catch (Exception e) {
-                System.err.println("Could not load properties from: " + file + ", Reason: " + e.getMessage());
+                System.err.println("Warning: could not load properties from: " + file + ", Reason: " + e.getMessage());
         } finally {
             if (is != null) {
                 try {
