@@ -79,7 +79,15 @@ public class Shutdown implements Action {
             } else {
                 msg = String.format("Confirm: halt instance %s (yes/no): ", karafName);
             }
-            String str = session.readLine(msg, null);
+            String str = null;
+            try {
+                str = session.readLine(msg, null);
+            } catch (UnsupportedOperationException e) {
+                //this is a remote client with shutdown argument so here isn't a interactive way
+                // so return a prompt message instead of NPE
+                System.out.println("please use \"shutdown -f\" or \"shutdown --force\" to shutdown instance: " + karafName );
+                return null;
+            }
             if (str.equalsIgnoreCase("yes")) {
                 if (reboot) {
                     systemService.reboot(time, determineSwipeType());
