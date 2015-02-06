@@ -109,7 +109,12 @@ public class CreateArchiveMojo extends MojoSupport {
 
     public File archive(File source, File dest, Artifact artifact) throws //ArchiverException,
             IOException {
-        String serverName = artifact.getArtifactId() + "-" + artifact.getVersion();
+        String serverName = null;
+        if (targetFile != null && project.getPackaging().equals("karaf-assembly")) {
+            serverName = targetFile.getName();
+        } else {
+           serverName = artifact.getArtifactId() + "-" + artifact.getVersion();
+        }
         dest = new File(dest, serverName + "." + artifact.getType());
         Project project = new Project();
         MatchingTask archiver;
