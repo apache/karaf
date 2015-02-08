@@ -376,7 +376,7 @@ public class InstallKarsMojo extends MojoSupport {
         Map<String, Integer> allStartupBundles = new LinkedHashMap<>();
         for (Feature feature : startupFeatures) {
             for (Bundle bundleInfo : feature.getBundle()) {
-                String bundleLocation = bundleInfo.getLocation();
+                String bundleLocation = bundleInfo.getLocation().trim();
                 int bundleStartLevel = bundleInfo.getStartLevel() == 0 ? defaultStartLevel : bundleInfo.getStartLevel();
                 if (allStartupBundles.containsKey(bundleLocation)) {
                     bundleStartLevel = Math.min(bundleStartLevel, allStartupBundles.get(bundleLocation));
@@ -397,7 +397,7 @@ public class InstallKarsMojo extends MojoSupport {
                 }
                 if (doInstall) {
                     for (Bundle bundleInfo : cond.getBundle()) {
-                        String bundleLocation = bundleInfo.getLocation();
+                        String bundleLocation = bundleInfo.getLocation().trim();
                         int bundleStartLevel = bundleInfo.getStartLevel() == 0 ? defaultStartLevel : bundleInfo.getStartLevel();
                         if (allStartupBundles.containsKey(bundleLocation)) {
                             bundleStartLevel = Math.min(bundleStartLevel, allStartupBundles.get(bundleLocation));
@@ -411,7 +411,7 @@ public class InstallKarsMojo extends MojoSupport {
             }
             // Install config files
             for (ConfigFile configFile : feature.getConfigfile()) {
-                try (InputStream is = new URL(configFile.getLocation()).openStream()) {
+                try (InputStream is = new URL(configFile.getLocation().trim()).openStream()) {
                     String path = configFile.getFinalname();
                     if (path.startsWith("/")) {
                         path = path.substring(1);
@@ -422,7 +422,7 @@ public class InstallKarsMojo extends MojoSupport {
             }
             for (Conditional cond : feature.getConditional()) {
                 for (ConfigFile configFile : cond.getConfigfile()) {
-                    try (InputStream is = new URL(configFile.getLocation()).openStream()) {
+                    try (InputStream is = new URL(configFile.getLocation().trim()).openStream()) {
                         Path output = workDirectory.toPath().resolve(configFile.getFinalname());
                         Files.copy(is, output, StandardCopyOption.REPLACE_EXISTING); // TODO: be smarter about overwrites
                     }
@@ -532,13 +532,13 @@ public class InstallKarsMojo extends MojoSupport {
             Set<String> locations = new HashSet<>();
             for (Bundle bundle : feature.getBundle()) {
                 if (!ignoreDependencyFlag || !bundle.isDependency()) {
-                    locations.add(bundle.getLocation());
+                    locations.add(bundle.getLocation().trim());
                 }
             }
             for (Conditional cond : feature.getConditional()) {
                 for (Bundle bundle : cond.getBundle()) {
                     if (!ignoreDependencyFlag || !bundle.isDependency()) {
-                        locations.add(bundle.getLocation());
+                        locations.add(bundle.getLocation().trim());
                     }
                 }
             }
@@ -561,11 +561,11 @@ public class InstallKarsMojo extends MojoSupport {
             }
             // Install config files
             for (ConfigFile configFile : feature.getConfigfile()) {
-                installArtifact(configFile.getLocation());
+                installArtifact(configFile.getLocation().trim());
             }
             for (Conditional cond : feature.getConditional()) {
                 for (ConfigFile configFile : cond.getConfigfile()) {
-                    installArtifact(configFile.getLocation());
+                    installArtifact(configFile.getLocation().trim());
                 }
             }
         }
@@ -672,13 +672,13 @@ public class InstallKarsMojo extends MojoSupport {
         for (Feature feature : installedFeatures) {
             for (Bundle bundle : feature.getBundle()) {
                 if (!ignoreDependencyFlag || !bundle.isDependency()) {
-                    installArtifact(bundle.getLocation());
+                    installArtifact(bundle.getLocation().trim());
                 }
             }
             for (Conditional cond : feature.getConditional()) {
                 for (Bundle bundle : cond.getBundle()) {
                     if (!ignoreDependencyFlag || !bundle.isDependency()) {
-                        installArtifact(bundle.getLocation());
+                        installArtifact(bundle.getLocation().trim());
                     }
                 }
             }
