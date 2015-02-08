@@ -222,7 +222,7 @@ public class InstallKarsMojo extends MojoSupport {
                     getLog().info("= Updating startup.properties file");
                     List<String> comment = Arrays.asList(new String[]{"", "# feature: " + feature.getName() + " version: " + feature.getVersion()});
                     for (BundleInfo bundleInfo : feature.getBundles()) {
-                        String bundleLocation = bundleInfo.getLocation();
+                        String bundleLocation = bundleInfo.getLocation().trim();
                         String bundleStartLevel = Integer.toString(bundleInfo.getStartLevel() == 0 ? defaultStartLevel : bundleInfo.getStartLevel());
                         if (startupProperties.containsKey(bundleLocation)) {
                             int oldStartLevel = Integer.decode((String) startupProperties.get(bundleLocation));
@@ -469,10 +469,10 @@ public class InstallKarsMojo extends MojoSupport {
 
     private void installBundle(Bundle bundle) throws Exception {
         if (!ignoreDependencyFlag && bundle.isDependency()) {
-            getLog().warn("== Bundle " + bundle.getLocation() + " is defined as dependency, so it's not installed");
+            getLog().warn("== Bundle " + bundle.getLocation().trim() + " is defined as dependency, so it's not installed");
         } else {
-            getLog().info("== Installing bundle " + bundle.getLocation());
-            String bundleLocation = bundle.getLocation();
+            getLog().info("== Installing bundle " + bundle.getLocation().trim());
+            String bundleLocation = bundle.getLocation().trim();
             // cleanup prefixes
             if (bundleLocation.startsWith("wrap:")) {
                 bundleLocation = bundleLocation.substring("wrap:".length());
@@ -528,8 +528,8 @@ public class InstallKarsMojo extends MojoSupport {
     }
 
     private void installConfigFile(ConfigFile configFile) throws Exception {
-        getLog().warn("== Installing configuration file " + configFile.getLocation());
-        String configFileLocation = configFile.getLocation();
+        getLog().warn("== Installing configuration file " + configFile.getLocation().trim());
+        String configFileLocation = configFile.getLocation().trim();
         File configFileFile;
         if (configFileLocation.startsWith("mvn:")) {
             configFileFile = dependencyHelper.resolveById(configFileLocation, getLog());
