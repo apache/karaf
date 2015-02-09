@@ -39,6 +39,9 @@ public class ConnectCommand extends InstanceCommandSupport {
     @Option(name = "-p", aliases = {"--password"}, description = "Remote password", required = false, multiValued = false)
     private String password;
 
+    @Option(name = "-k", aliases = {"--keyfile"}, description = "Remote key file to use for key authentication", required = false, multiValued = false)
+    private String keyFile;
+
     @Argument(index = 0, name="name", description="The name of the container instance", required = true, multiValued = false)
     @Completion(InstanceCompleter.class)
     private String instance = null;
@@ -65,12 +68,20 @@ public class ConnectCommand extends InstanceCommandSupport {
         int port = getExistingInstance(instance).getSshPort();
         if (username != null) {
             if (password == null) {
-                session.execute("ssh:ssh -q -l " + username + " -p " + port + " localhost " + cmdStr);
+                if (keyFile == null) {
+                    session.execute("ssh:ssh -q -l " + username + " -p " + port + " localhost " + cmdStr);
+                } else {
+                    session.execute("ssh:ssh -q -l " + username + " -p " + port + " -k " + keyFile + " localhost " + cmdStr);
+                }
             } else {
                 session.execute("ssh:ssh -q -l " + username + " -P " + password + " -p " + port + " localhost " + cmdStr);
             }
         } else {
-            session.execute("ssh:ssh -q -p " + port + " localhost " + cmdStr);
+            if (keyFile == null) {
+                session.execute("ssh:ssh -q -p " + port + " localhost " + cmdStr);
+            } else {
+                session.execute("ssh:ssh -q -p " + port + " -k " + keyFile + " localhost " + cmdStr);
+            }
         }
         return null;
     }

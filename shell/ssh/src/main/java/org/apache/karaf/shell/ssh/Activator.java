@@ -54,13 +54,11 @@ public class Activator extends BaseActivator implements ManagedService {
     ServiceTracker<Session, Session> sessionTracker;
     KarafAgentFactory agentFactory;
     SessionFactory sessionFactory;
-    SshClientFactory sshClientFactory;
     SshServer server;
 
     @Override
     protected void doOpen() throws Exception {
         agentFactory = new KarafAgentFactory();
-        sshClientFactory = new SshClientFactory(agentFactory, new File(bundleContext.getProperty("user.home"), ".sshkaraf/known_hosts"));
 
         super.doOpen();
 
@@ -94,7 +92,6 @@ public class Activator extends BaseActivator implements ManagedService {
         }
 
         sessionFactory = sf;
-        sessionFactory.getRegistry().register(sshClientFactory);
         sessionFactory.getRegistry().getService(Manager.class).register(SshAction.class);
         if (Boolean.parseBoolean(bundleContext.getProperty("karaf.startRemoteShell"))) {
             server = createSshServer(sessionFactory);
@@ -110,7 +107,6 @@ public class Activator extends BaseActivator implements ManagedService {
     protected void doStop() {
         if (sessionFactory != null) {
             sessionFactory.getRegistry().getService(Manager.class).unregister(SshAction.class);
-            sessionFactory.getRegistry().unregister(sshClientFactory);
             sessionFactory = null;
         }
         if (server != null) {
