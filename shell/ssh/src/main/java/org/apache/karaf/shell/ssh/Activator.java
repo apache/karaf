@@ -18,7 +18,6 @@
  */
 package org.apache.karaf.shell.ssh;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 

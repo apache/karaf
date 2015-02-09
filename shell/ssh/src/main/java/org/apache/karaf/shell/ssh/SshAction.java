@@ -41,8 +41,6 @@ import org.apache.sshd.client.ServerKeyVerifier;
 import org.apache.sshd.client.UserInteraction;
 import org.apache.sshd.client.channel.ChannelShell;
 import org.apache.sshd.client.future.ConnectFuture;
-import org.apache.sshd.common.RuntimeSshException;
-import org.apache.sshd.common.SshException;
 import org.apache.sshd.common.keyprovider.FileKeyPairProvider;
 import org.apache.sshd.common.util.NoCloseInputStream;
 import org.apache.sshd.common.util.NoCloseOutputStream;
@@ -81,18 +79,7 @@ public class SshAction implements Action {
     @Reference
     private Session session;
 
-    private final static String keyChangedMessage =
-            " @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ \n" +
-                    " @    WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!      @ \n" +
-                    " @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ \n" +
-                    "IT IS POSSIBLE THAT SOMEONE IS DOING SOMETHING NASTY!\n" +
-                    "Someone could be eavesdropping on you right now (man-in-the-middle attack)!\n" +
-                    "It is also possible that the RSA host key has just been changed.\n" +
-                    "Please contact your system administrator.\n" +
-                    "Add correct host key in " + System.getProperty("user.home") + "/.sshkaraf/known_hosts to get rid of this message.\n" +
-                    "Offending key in " + System.getProperty("user.home") + "/.sshkaraf/known_hosts\n" +
-                    "RSA host key has changed and you have requested strict checking.\n" +
-                    "Host key verification failed.";
+
 
     @Override
     public Object execute() throws Exception {
@@ -145,19 +132,17 @@ public class SshAction implements Action {
         try {
             ClientSession sshSession = connectWithRetries(client, username, hostname, port, retries);
             Object oldIgnoreInterrupts = this.session.get(Session.IGNORE_INTERRUPTS);
+
             try {
                 if (password != null) {
                     sshSession.addPasswordIdentity(password);
                 }
-                try {
-                    sshSession.auth().verify();
-                } catch (Exception e) {
-                    if (e.getCause() != null && e.getCause().getMessage().contains("Session is closed")) {
-                        System.err.println(keyChangedMessage);
-                    }
-                    throw e;
-                }
+
+                sshSession.auth().verify();
+
+                System.out.println("Connected");
                 this.session.put(Session.IGNORE_INTERRUPTS, Boolean.TRUE);
+
                 StringBuilder sb = new StringBuilder();
                 if (command != null) {
                     for (String cmd : command) {
