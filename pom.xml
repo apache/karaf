@@ -130,7 +130,7 @@
         <injection.bundle.version>1.0</injection.bundle.version>
         <jasypt.bundle.version>1.9.2_1</jasypt.bundle.version>
         <javassist.version>3.9.0.GA</javassist.version>
-        <jetty.version>8.1.10.v20130312</jetty.version>
+        <jetty.version>8.1.15.v20140411</jetty.version>
         <geronimo.annotation-spec.version>1.0.1</geronimo.annotation-spec.version>
         <geronimo.jaspic-spec.version>1.1</geronimo.jaspic-spec.version>
         <geronimo.jms-spec.version>1.1.1</geronimo.jms-spec.version>
@@ -203,7 +203,7 @@
         <pax.logging.version>1.8.1</pax.logging.version>
         <pax.url.version>2.3.0</pax.url.version>
         <pax.swissbox.version>1.7.1</pax.swissbox.version>
-        <pax.web.version>3.1.2</pax.web.version>
+        <pax.web.version>3.1.4</pax.web.version>
         <pax.tinybundles.version>1.3.2</pax.tinybundles.version>
         <plexus.utils.version>3.0</plexus.utils.version>
         <portlet-api.version>2.0</portlet-api.version>
