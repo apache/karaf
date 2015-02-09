@@ -117,6 +117,7 @@ public class KnownHostsManager {
 		serverKey.getEncoded();
 		bw.append(new String(Base64.encodeBase64(serverKey.getEncoded()),
 				"UTF-8"));
+        bw.append("\n");
 	}
 
 	String getAddressString(SocketAddress address) {

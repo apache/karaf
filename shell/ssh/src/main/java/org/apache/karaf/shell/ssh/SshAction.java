@@ -18,8 +18,9 @@
  */
 package org.apache.karaf.shell.ssh;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
+import java.io.*;
+import java.net.URL;
+import java.security.KeyPair;
 import java.util.List;
 
 import jline.Terminal;
@@ -34,8 +35,13 @@ import org.apache.sshd.ClientChannel;
 import org.apache.sshd.ClientSession;
 import org.apache.sshd.SshClient;
 import org.apache.sshd.agent.SshAgent;
+import org.apache.sshd.agent.local.AgentImpl;
+import org.apache.sshd.agent.local.LocalAgentFactory;
+import org.apache.sshd.client.ServerKeyVerifier;
 import org.apache.sshd.client.UserInteraction;
 import org.apache.sshd.client.channel.ChannelShell;
+import org.apache.sshd.client.future.ConnectFuture;
+import org.apache.sshd.common.keyprovider.FileKeyPairProvider;
 import org.apache.sshd.common.util.NoCloseInputStream;
 import org.apache.sshd.common.util.NoCloseOutputStream;
 import org.slf4j.Logger;
@@ -45,17 +51,23 @@ import org.slf4j.LoggerFactory;
 public class SshAction extends OsgiCommandSupport {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    @Option(name="-l", aliases={"--username"}, description = "The user name for remote login", required = false, multiValued = false)
+    @Option(name = "-l", aliases = {"--username"}, description = "The user name for remote login", required = false, multiValued = false)
     private String username;
 
-    @Option(name="-P", aliases={"--password"}, description = "The password for remote login", required = false, multiValued = false)
+    @Option(name = "-P", aliases = {"--password"}, description = "The password for remote login", required = false, multiValued = false)
     private String password;
 
-    @Option(name="-p", aliases={"--port"}, description = "The port to use for SSH connection", required = false, multiValued = false)
+    @Option(name = "-p", aliases = {"--port"}, description = "The port to use for SSH connection", required = false, multiValued = false)
     private int port = 22;
-    
-    @Option(name="-q", description = "Quiet Mode. Do not ask for confirmations", required = false, multiValued = false)
+
+    @Option(name = "-k", aliases = {"--keyfile"}, description = "The private keyFile location when using key login, need have BouncyCastle registered as security provider using this flag", required = false, multiValued = false)
+    private String keyFile;
+
+    @Option(name = "-q", description = "Quiet Mode. Do not ask for confirmations", required = false, multiValued = false)
     private boolean quiet;
+
+    @Option(name = "-r", aliases = { "--retries" }, description = "Retry connection establishment (up to attempts times)", required = false, multiValued = false)
+    private int retries = 0;
 
     @Argument(index = 0, name = "hostname", description = "The host name to connect to via SSH", required = true, multiValued = false)
     private String hostname;
@@ -63,28 +75,11 @@ public class SshAction extends OsgiCommandSupport {
     @Argument(index = 1, name = "command", description = "Optional command to execute", required = false, multiValued = true)
     private List<String> command;
 
-	private ClientSession sshSession;
+    private ClientSession sshSession;
 
-	private SshClientFactory sshClientFactory;
 
-    private final static String keyChangedMessage =
-            " @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ \n" +
-            " @    WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!      @ \n" +
-            " @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ \n" +
-            "IT IS POSSIBLE THAT SOMEONE IS DOING SOMETHING NASTY!\n" +
-            "Someone could be eavesdropping on you right now (man-in-the-middle attack)!\n" +
-            "It is also possible that the RSA host key has just been changed.\n" +
-            "Please contact your system administrator.\n" +
-            "Add correct host key in " + System.getProperty("user.home") + "/.sshkaraf/known_hosts to get rid of this message.\n" +
-            "Offending key in " + System.getProperty("user.home") + "/.sshkaraf/known_hosts\n" +
-            "RSA host key has changed and you have requested strict checking.\n" +
-            "Host key verification failed.";
 
-    public void setSshClientFactory(SshClientFactory sshClientFactory) {
-		this.sshClientFactory = sshClientFactory;
-	}
-
-	@Override
+    @Override
     protected Object doExecute() throws Exception {
 
         if (hostname.indexOf('@') >= 0) {
@@ -108,19 +103,18 @@ public class SshAction extends OsgiCommandSupport {
             }
         }
 
-        SshClient client = sshClientFactory.create(quiet);
+        SshClient client = SshClient.setUpDefaultClient();
+        setupAgent(username, keyFile, client);
+        KnownHostsManager knownHostsManager = new KnownHostsManager(new File(System.getProperty("user.home"), ".sshkaraf/known_hosts"));
+        ServerKeyVerifier serverKeyVerifier = new ServerKeyVerifierImpl(knownHostsManager, quiet);
+        client.setServerKeyVerifier(serverKeyVerifier);
         log.debug("Created client: {}", client);
-        client.start();
 
-        String agentSocket = null;
-        if (this.session.get(SshAgent.SSH_AUTHSOCKET_ENV_NAME) != null) {
-            agentSocket = this.session.get(SshAgent.SSH_AUTHSOCKET_ENV_NAME).toString();
-            client.getProperties().put(SshAgent.SSH_AUTHSOCKET_ENV_NAME,agentSocket);
-        }
         client.setUserInteraction(new UserInteraction() {
             public void welcome(String banner) {
                 System.out.println(banner);
             }
+
             public String[] interactive(String destination, String name, String instruction, String[] prompt, boolean[] echo) {
                 String[] answers = new String[prompt.length];
                 try {
@@ -132,6 +126,7 @@ public class SshAction extends OsgiCommandSupport {
                 return answers;
             }
         });
+        client.start();
 
         try {
             ClientSession sshSession = client.connect(username, hostname, port).await().getSession();
@@ -141,10 +136,11 @@ public class SshAction extends OsgiCommandSupport {
                 if (password != null) {
                     sshSession.addPasswordIdentity(password);
                 }
+
                 sshSession.auth().verify();
 
                 System.out.println("Connected");
-                this.session.put( SessionProperties.IGNORE_INTERRUPTS, Boolean.TRUE );
+                this.session.put(SessionProperties.IGNORE_INTERRUPTS, Boolean.TRUE);
 
                 StringBuilder sb = new StringBuilder();
                 if (command != null) {
@@ -176,7 +172,7 @@ public class SshAction extends OsgiCommandSupport {
                 channel.open().verify();
                 channel.waitFor(ClientChannel.CLOSED, 0);
             } finally {
-                session.put( SessionProperties.IGNORE_INTERRUPTS, oldIgnoreInterrupts );
+                session.put(SessionProperties.IGNORE_INTERRUPTS, oldIgnoreInterrupts);
                 sshSession.close(false);
             }
         } finally {
@@ -198,6 +194,68 @@ public class SshAction extends OsgiCommandSupport {
     public String readLine(String msg, Character mask) throws IOException {
         ConsoleReader reader = (ConsoleReader) session.get(".jline.reader");
         return reader.readLine(msg, mask);
+    }
+
+    private void setupAgent(String user, String keyFile, SshClient client) {
+        SshAgent agent;
+        URL url = getClass().getClassLoader().getResource("karaf.key");
+        agent = startAgent(user, url, keyFile);
+        client.setAgentFactory(new LocalAgentFactory(agent));
+        client.getProperties().put(SshAgent.SSH_AUTHSOCKET_ENV_NAME, "local");
+    }
+
+    private SshAgent startAgent(String user, URL privateKeyUrl, String keyFile) {
+        InputStream is = null;
+        try {
+            SshAgent agent = new AgentImpl();
+            is = privateKeyUrl.openStream();
+            ObjectInputStream r = new ObjectInputStream(is);
+            KeyPair keyPair = (KeyPair) r.readObject();
+            is.close();
+            agent.addIdentity(keyPair, user);
+            if (keyFile != null) {
+                String[] keyFiles = new String[]{keyFile};
+                FileKeyPairProvider fileKeyPairProvider = new FileKeyPairProvider(keyFiles);
+                for (KeyPair key : fileKeyPairProvider.loadKeys()) {
+                    agent.addIdentity(key, user);
+                }
+            }
+            return agent;
+        } catch (Throwable e) {
+            close(is);
+            System.err.println("Error starting ssh agent for: " + e.getMessage());
+            return null;
+        }
+    }
+
+    private static ClientSession connectWithRetries(SshClient client, String username, String host, int port, int maxAttempts) throws Exception, InterruptedException {
+        ClientSession session = null;
+        int retries = 0;
+        do {
+            ConnectFuture future = client.connect(username, host, port);
+            future.await();
+            try {
+                session = future.getSession();
+            } catch (Exception ex) {
+                if (retries++ < maxAttempts) {
+                    Thread.sleep(2 * 1000);
+                    System.out.println("retrying (attempt " + retries + ") ...");
+                } else {
+                    throw ex;
+                }
+            }
+        } while (session == null);
+        return session;
+    }
+
+    private void close(Closeable is) {
+        if (is != null) {
+            try {
+                is.close();
+            } catch (IOException e1) {
+                // Ignore
+            }
+        }
     }
 
 }

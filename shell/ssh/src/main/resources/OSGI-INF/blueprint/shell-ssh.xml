@@ -61,9 +61,7 @@
 
     <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
         <command>
-            <action class="org.apache.karaf.shell.ssh.SshAction">
-                <property name="sshClientFactory" ref="sshClientFactory" />
-            </action>
+            <action class="org.apache.karaf.shell.ssh.SshAction" />
         </command>
         <command>
             <action class="org.apache.karaf.shell.ssh.SshServerAction">
@@ -73,11 +71,6 @@
             </action>
         </command>
     </command-bundle>
-    
-    <bean id="sshClientFactory" class="org.apache.karaf.shell.ssh.SshClientFactory">
-        <argument ref="agentFactory" />
-        <argument value="$[user.home]/.sshkaraf/known_hosts"/>
-    </bean>
 
     <bean id="userAuthFactoriesFactory" class="org.apache.karaf.shell.ssh.UserAuthFactoriesFactory">
         <property name="authMethods" value="${authMethods}"/>

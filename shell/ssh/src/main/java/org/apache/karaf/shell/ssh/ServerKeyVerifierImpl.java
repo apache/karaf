@@ -27,8 +27,22 @@ import org.apache.sshd.ClientSession;
 import org.apache.sshd.client.ServerKeyVerifier;
 
 public class ServerKeyVerifierImpl implements ServerKeyVerifier {
+
     private final KnownHostsManager knownHostsManager;
 	private final boolean quiet;
+
+    private final static String keyChangedMessage =
+            " @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ \n" +
+                    " @    WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!      @ \n" +
+                    " @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ \n" +
+                    "IT IS POSSIBLE THAT SOMEONE IS DOING SOMETHING NASTY!\n" +
+                    "Someone could be eavesdropping on you right now (man-in-the-middle attack)!\n" +
+                    "It is also possible that the RSA host key has just been changed.\n" +
+                    "Please contact your system administrator.\n" +
+                    "Add correct host key in " + System.getProperty("user.home") + "/.sshkaraf/known_hosts to get rid of this message.\n" +
+                    "Offending key in " + System.getProperty("user.home") + "/.sshkaraf/known_hosts\n" +
+                    "RSA host key has changed and you have requested strict checking.\n" +
+                    "Host key verification failed.";
 
 	public ServerKeyVerifierImpl(KnownHostsManager knownHostsManager, boolean quiet) {
 		this.knownHostsManager = knownHostsManager;
@@ -63,11 +77,12 @@ public class ServerKeyVerifierImpl implements ServerKeyVerifier {
 			return confirm;
 		}
 		
-		boolean verifed = (knownKey.equals(serverKey));
-		if (!verifed) {
+		boolean verified = (knownKey.equals(serverKey));
+		if (!verified) {
 			System.err.println("Server key for host " + remoteAddress + " does not match the stored key !! Terminating session.");
+            System.err.println(keyChangedMessage);
 		}
-		return verifed;
+		return verified;
 	}
 
 	private boolean getConfirmation() {
