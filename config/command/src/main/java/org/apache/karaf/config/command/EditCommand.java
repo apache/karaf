@@ -45,6 +45,9 @@ public class EditCommand extends ConfigCommandSupport {
         
         if (pid.startsWith("(")) {
         	Configuration[] configs = this.configRepository.getConfigAdmin().listConfigurations(pid);
+            if (configs == null) {
+                throw new RuntimeException("No config found");
+            }
         	if (configs.length == 0) {
         		throw new RuntimeException("Filter matches no config");
         	}
