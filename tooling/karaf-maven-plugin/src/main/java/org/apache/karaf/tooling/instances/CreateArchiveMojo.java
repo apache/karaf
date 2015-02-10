@@ -58,7 +58,7 @@ public class CreateArchiveMojo extends MojoSupport {
     /**
      * The target file to set as the project's artifact.
      */
-    @Parameter(defaultValue="${project.file}")
+    @Parameter(defaultValue="${project.artifactId}-${project.version}")
     private File targetFile;
 
     /**
