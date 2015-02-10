@@ -29,7 +29,7 @@ public class CreateCommand extends JmsCommandSupport {
     @Option(name = "-t", aliases = { "--type" }, description = "The JMS connection factory type (ActiveMQ or WebsphereMQ)", required = true, multiValued = false)
     String type;
 
-    @Option(name = "-u", aliases = { "--url" }, description = "The JMS URL. NB: for WebsphereMQ type, the URL is hostname/port/queuemanager/channel", required = true, multiValued = false)
+    @Option(name = "--url", description = "The JMS URL. NB: for WebsphereMQ type, the URL is hostname/port/queuemanager/channel", required = true, multiValued = false)
     String url;
 
     @Option(name = "-u", aliases = { "--username" }, description = "Username to connect to the JMS broker", required = false, multiValued = false)
