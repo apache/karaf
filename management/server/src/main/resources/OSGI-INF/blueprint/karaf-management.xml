@@ -121,5 +121,11 @@
         </service-properties>
     </service>
 
+
+    <reference-list id="keystores"
+                    interface="org.apache.karaf.jaas.config.KeystoreInstance"
+                    availability="optional">
+        <reference-listener ref="connectorFactory" bind-method="register" unbind-method="unregister" />
+    </reference-list>
 </blueprint>
 

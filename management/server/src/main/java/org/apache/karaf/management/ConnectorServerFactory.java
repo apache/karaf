@@ -16,7 +16,10 @@
  */
 package org.apache.karaf.management;
 
+import org.apache.karaf.jaas.config.KeystoreInstance;
 import org.apache.karaf.jaas.config.KeystoreManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.BindException;
@@ -41,6 +44,8 @@ import javax.net.ssl.SSLServerSocketFactory;
 import javax.rmi.ssl.SslRMIClientSocketFactory;
 
 public class ConnectorServerFactory {
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConnectorServerFactory.class);
 
     private enum AuthenticatorType {NONE, PASSWORD, CERTIFICATE};
 
@@ -223,8 +228,13 @@ public class ConnectorServerFactory {
             this.secured = true;
         }
 
-        if ( this.secured ) {
-            this.setupSsl();
+        if (this.secured) {
+            try {
+                this.setupSsl();
+            } catch (Exception e) {
+                LOGGER.error("Can't init JMXConnectorServer with SSL enabled: " + e.getMessage());
+                return;
+            }
         }
 
         if ( ! AuthenticatorType.PASSWORD.equals( this.authenticatorType ) ) {
@@ -333,6 +343,26 @@ public class ConnectorServerFactory {
         public ServerSocket createServerSocket(int port) throws IOException {
             ServerSocket serverSocket = (ServerSocket) ServerSocketFactory.getDefault().createServerSocket(port, 50, InetAddress.getByName(rmiServerHost));
             return serverSocket;
+        }
+    }
+    
+    public void register(KeystoreInstance keystore, Map<String,?> properties) {
+        if (this.secured) {
+            try {
+                this.init();
+            } catch (Exception e) {
+                LOGGER.error("Can't re-init JMXConnectorServer with SSL enabled when register a keystore:" + e.getMessage());
+            }
+        }
+    }
+
+    public void unregister(KeystoreInstance keystore, Map<String,?> properties) {
+        if (this.secured) {
+            try {
+                this.init();
+            } catch (Exception e) {
+                LOGGER.error("Can't re-init JMXConnectorServer with SSL enabled when unregister a keystore: " + e.getMessage());
+            }
         }
     }
 
