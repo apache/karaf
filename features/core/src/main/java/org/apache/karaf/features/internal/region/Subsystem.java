@@ -258,8 +258,12 @@ public class Subsystem extends ResourceImpl {
 
     @SuppressWarnings("InfiniteLoopStatement")
     public void build(Collection<Feature> features) throws Exception {
+        doBuild(features, true);
+    }
+
+    private void doBuild(Collection<Feature> features, boolean mandatory) throws Exception {
         for (Subsystem child : children) {
-            child.build(features);
+            child.doBuild(features, true);
         }
         if (feature != null) {
             for (Dependency dep : feature.getDependencies()) {
@@ -267,7 +271,18 @@ public class Subsystem extends ResourceImpl {
                 while (!ss.isAcceptDependencies()) {
                     ss = ss.getParent();
                 }
-                ss.requireFeature(dep.getName(), dep.getVersion(), !dep.isDependency());
+                ss.requireFeature(dep.getName(), dep.getVersion(), mandatory && !dep.isDependency());
+            }
+            for (Conditional cond : feature.getConditional()) {
+                Feature fcond = cond.asFeature(feature.getName(), feature.getVersion());
+                String ssName = this.name + "#" + (fcond.hasVersion() ? fcond.getName() + "-" + fcond.getVersion() : fcond.getName());
+                Subsystem fs = getChild(ssName);
+                if (fs == null) {
+                    fs = new Subsystem(ssName, fcond, this);
+                    fs.doBuild(features, false);
+                    installable.add(fs);
+                    children.add(fs);
+                }
             }
         }
         List<Requirement> processed = new ArrayList<>();
