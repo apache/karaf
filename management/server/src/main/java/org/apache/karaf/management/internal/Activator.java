@@ -22,6 +22,7 @@ import java.util.Map;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
+import org.apache.karaf.jaas.config.KeystoreInstance;
 import org.apache.karaf.jaas.config.KeystoreManager;
 import org.apache.karaf.management.ConnectorServerFactory;
 import org.apache.karaf.management.JaasAuthenticator;
@@ -33,8 +34,13 @@ import org.apache.karaf.util.tracker.Managed;
 import org.apache.karaf.util.tracker.ProvideService;
 import org.apache.karaf.util.tracker.RequireService;
 import org.apache.karaf.util.tracker.Services;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ManagedService;
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Services(
         requires = {
@@ -45,10 +51,14 @@ import org.osgi.service.cm.ManagedService;
 )
 @Managed("org.apache.karaf.management")
 public class Activator extends BaseActivator implements ManagedService {
+    
+    private static final Logger LOG = LoggerFactory.getLogger(Activator.class); 
 
     private ConnectorServerFactory connectorServerFactory;
     private RmiRegistryFactory rmiRegistryFactory;
     private MBeanServerFactory mbeanServerFactory;
+    
+    private ServiceTracker<KeystoreInstance, KeystoreInstance> keystoreInstanceServiceTracker;
 
     protected void doStart() throws Exception {
         // Verify dependencies
@@ -72,7 +82,7 @@ public class Activator extends BaseActivator implements ManagedService {
         ObjectName objectName = new ObjectName(getString("objectName", "connector:name=rmi"));
         long keyStoreAvailabilityTimeout = getLong("keyStoreAvailabilityTimeout", 5000);
         String authenticatorType = getString("authenticatorType", "password");
-        boolean secured = getBoolean("secured", false);
+        final boolean secured = getBoolean("secured", false);
         String secureAlgorithm = getString("secureAlgorithm", "default");
         String secureProtocol = getString("secureProtocol", "TLS");
         String keyStore = getString("keyStore", "karaf.ks");
@@ -109,23 +119,56 @@ public class Activator extends BaseActivator implements ManagedService {
         connectorServerFactory.setObjectName(objectName);
         Map<String, Object> environment = new HashMap<String, Object>();
         environment.put("jmx.remote.authenticator", jaasAuthenticator);
-        connectorServerFactory.setEnvironment(environment);
-        connectorServerFactory.setKeyStoreAvailabilityTimeout(keyStoreAvailabilityTimeout);
-        connectorServerFactory.setAuthenticatorType(authenticatorType);
-        connectorServerFactory.setSecured(secured);
-        connectorServerFactory.setAlgorithm(secureAlgorithm);
-        connectorServerFactory.setSecureProtocol(secureProtocol);
-        connectorServerFactory.setKeyStore(keyStore);
-        connectorServerFactory.setKeyAlias(keyAlias);
-        connectorServerFactory.setTrustStore(trustStore);
-        connectorServerFactory.setKeystoreManager(keystoreManager);
-        connectorServerFactory.init();
+        try {
+            connectorServerFactory.setEnvironment(environment);
+            connectorServerFactory.setKeyStoreAvailabilityTimeout(keyStoreAvailabilityTimeout);
+            connectorServerFactory.setAuthenticatorType(authenticatorType);
+            connectorServerFactory.setSecured(secured);
+            connectorServerFactory.setAlgorithm(secureAlgorithm);
+            connectorServerFactory.setSecureProtocol(secureProtocol);
+            connectorServerFactory.setKeyStore(keyStore);
+            connectorServerFactory.setKeyAlias(keyAlias);
+            connectorServerFactory.setTrustStore(trustStore);
+            connectorServerFactory.setKeystoreManager(keystoreManager);
+            connectorServerFactory.init();
+        } catch (Exception e) {
+            LOG.error("Can't init JMXConnectorServer: " + e.getMessage());
+        }
 
         JMXSecurityMBeanImpl securityMBean = new JMXSecurityMBeanImpl();
         securityMBean.setMBeanServer(mbeanServer);
         registerMBean(securityMBean, "type=security,area=jmx");
 
         register(MBeanServer.class, mbeanServer);
+        
+        keystoreInstanceServiceTracker = new ServiceTracker<KeystoreInstance, KeystoreInstance>(
+            bundleContext, KeystoreInstance.class, new ServiceTrackerCustomizer<KeystoreInstance, KeystoreInstance>() {
+                @Override
+                public KeystoreInstance addingService(ServiceReference<KeystoreInstance> reference) {
+                    if (secured) {
+                        try {
+                            connectorServerFactory.init();
+                        } catch (Exception e) {
+                            LOG.error("Can't re-init JMXConnectorServer with SSL enabled when register a keystore:" + e.getMessage());
+                        }
+                    }
+                    return null;
+                }
+                @Override
+                public void modifiedService(ServiceReference<KeystoreInstance> reference, KeystoreInstance service) {
+                }
+                @Override
+                public void removedService(ServiceReference<KeystoreInstance> reference, KeystoreInstance service) {
+                    if (secured) {
+                        try {
+                            connectorServerFactory.init();
+                        } catch (Exception e) {
+                            LOG.error("Can't re-init JMXConnectorServer with SSL enabled when unregister a keystore: " + e.getMessage());
+                        }
+                    }
+                }
+            });
+        keystoreInstanceServiceTracker.open();
     }
 
     protected void doStop() {
@@ -153,6 +196,9 @@ public class Activator extends BaseActivator implements ManagedService {
                 logger.warn("Error destroying RMIRegistryFactory", e);
             }
             rmiRegistryFactory = null;
+        }
+        if (keystoreInstanceServiceTracker != null) {
+            keystoreInstanceServiceTracker.close();
         }
     }
 
