@@ -249,19 +249,7 @@
 
     <feature name="jdbc" description="JDBC service and commands" version="${project.version}">
         <details>JDBC support providing service, commands, and MBean.</details>
-        <feature dependency="true">aries-blueprint</feature>
-        <feature version="[1.1,2)">transaction</feature>
-        <bundle>mvn:commons-pool/commons-pool/${commons-pool.version}</bundle>
-        <bundle>mvn:commons-dbcp/commons-dbcp/${commons-dbcp.version}</bundle>
         <bundle>mvn:org.apache.karaf.jdbc/org.apache.karaf.jdbc.core/${project.version}</bundle>
-        <!--
-           Requirement on Blueprint.
-           We don't use a feature dependency to allow the choice between aries-blueprint and gemini-blueprint.
-           This means that you need to install one of the above to be able to install the jdbc feature.
-        -->
-        <requirement>
-            osgi.extender;filter:="(&amp;(osgi.extender=osgi.blueprint)(version>=1.0))"
-        </requirement>
     </feature>
 
     <feature name="jms" description="JMS service and commands" version="${project.version}">
