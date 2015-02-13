@@ -762,19 +762,20 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
             String name = feature.substring(0, feature.indexOf("/"));
             String version = feature.substring(feature.indexOf("/") + 1);
             Pattern pattern = Pattern.compile(name);
+            boolean matched = false;
             for (String fKey : getFeatures().keySet()) {
                 Matcher matcher = pattern.matcher(fKey);
                 if (matcher.matches()) {
                     Feature f = getFeatureMatching(getFeatures().get(fKey), version);
-                    if (f == null) {
-                        if (!options.contains(Option.NoFailOnFeatureNotFound)) {
-                            throw new IllegalArgumentException("No matching features for " + feature);
-                        }
-                    } else {
+                    if (f != null) {
                         String req = f.getName() + "/" + new VersionRange(f.getVersion(), true);
                         featuresToAdd.add(req);
+                        matched = true;
                     }
                 }
+            }
+            if (!matched && !options.contains(Option.NoFailOnFeatureNotFound)) {
+                throw new IllegalArgumentException("No matching features for " + feature);
             }
         }
         featuresToAdd = new ArrayList<>(new LinkedHashSet<>(featuresToAdd));

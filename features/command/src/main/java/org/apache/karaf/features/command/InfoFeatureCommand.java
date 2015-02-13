@@ -72,7 +72,7 @@ public class InfoFeatureCommand extends FeaturesCommandSupport {
             features = admin.getFeatures(name);
         }
 
-        if (features == null) {
+        if (features == null || features.length == 0) {
             System.out.println("Feature not found");
             return;
         }
