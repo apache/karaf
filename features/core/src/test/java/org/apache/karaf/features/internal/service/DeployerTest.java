@@ -137,7 +137,7 @@ public class DeployerTest {
                 return null;
             }
         });
-        callback.updateBundle(EasyMock.eq(bundleA), EasyMock.<InputStream>anyObject());
+        callback.updateBundle(EasyMock.eq(bundleA), EasyMock.<String>anyObject(), EasyMock.<InputStream>anyObject());
         EasyMock.expectLastCall().andStubAnswer(new IAnswer<Object>() {
             @Override
             public Object answer() throws Throwable {

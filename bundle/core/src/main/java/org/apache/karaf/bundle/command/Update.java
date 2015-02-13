@@ -16,13 +16,20 @@
  */
 package org.apache.karaf.bundle.command;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URL;
 
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.util.bundles.BundleUtils;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
 
 @Command(scope = "bundle", name = "update", description = "Update bundle.")
 @Service
@@ -33,15 +40,26 @@ public class Update extends BundleCommand {
 
     protected Object doExecute(Bundle bundle) throws Exception {
         if (location != null) {
-            try (
-                InputStream is = location.toURL().openStream()
-            ) {
-                bundle.update(is);
-            }
+            update(bundle, location.toURL());
         } else {
-            bundle.update();
+            String loc = bundle.getHeaders().get(Constants.BUNDLE_UPDATELOCATION);
+            if (loc != null && !loc.equals(bundle.getLocation())) {
+                update(bundle, new URL(loc));
+            } else {
+                bundle.update();
+            }
         }
         return null;
+    }
+
+    private void update(Bundle bundle, URL location) throws IOException, BundleException {
+        try (InputStream is = location.openStream()) {
+            File file = BundleUtils.fixBundleWithUpdateLocation(is, location.toString());
+            try (FileInputStream fis = new FileInputStream(file)) {
+                bundle.update(fis);
+            }
+            file.delete();
+        }
     }
 
 }

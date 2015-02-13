@@ -108,7 +108,7 @@ public class Deployer {
         void callListeners(FeatureEvent featureEvent);
 
         Bundle installBundle(String region, String uri, InputStream is) throws BundleException;
-        void updateBundle(Bundle bundle, InputStream is) throws BundleException;
+        void updateBundle(Bundle bundle, String uri, InputStream is) throws BundleException;
         void uninstall(Bundle bundle) throws BundleException;
         void startBundle(Bundle bundle) throws BundleException;
         void stopBundle(Bundle bundle, int options) throws BundleException;
@@ -507,7 +507,7 @@ public class Deployer {
             try (
                     InputStream is = getBundleInputStream(resource, providers)
             ) {
-                callback.updateBundle(dstate.serviceBundle, is);
+                callback.updateBundle(dstate.serviceBundle, uri, is);
             }
             callback.refreshPackages(toRefresh.keySet());
             callback.startBundle(dstate.serviceBundle);
@@ -624,7 +624,7 @@ public class Deployer {
                     try (
                             InputStream is = getBundleInputStream(resource, providers)
                     ) {
-                        callback.updateBundle(bundle, is);
+                        callback.updateBundle(bundle, uri, is);
                     }
                     toStart.add(bundle);
                 }

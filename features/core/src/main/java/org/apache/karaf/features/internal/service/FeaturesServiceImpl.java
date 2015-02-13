@@ -59,6 +59,7 @@ import org.apache.karaf.features.internal.download.DownloadManager;
 import org.apache.karaf.features.internal.download.DownloadManagers;
 import org.apache.karaf.features.internal.util.JsonReader;
 import org.apache.karaf.features.internal.util.JsonWriter;
+import org.apache.karaf.util.bundles.BundleUtils;
 import org.apache.karaf.util.collections.CopyOnWriteArrayIdentityList;
 import org.eclipse.equinox.region.Region;
 import org.eclipse.equinox.region.RegionDigraph;
@@ -1117,8 +1118,15 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
     }
 
     @Override
-    public void updateBundle(Bundle bundle, InputStream is) throws BundleException {
-        bundle.update(is);
+    public void updateBundle(Bundle bundle, String uri, InputStream is) throws BundleException {
+        // We need to wrap the bundle to insert a Bundle-UpdateLocation header
+        try {
+            File file = BundleUtils.fixBundleWithUpdateLocation(is, uri);
+            bundle.update(new FileInputStream(file));
+            file.delete();
+        } catch (IOException e) {
+            throw new BundleException("Unable to update bundle", e);
+        }
     }
 
     @Override

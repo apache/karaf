@@ -716,7 +716,7 @@ public class VerifyFeatureResolutionMojo extends MojoSupport {
         }
 
         @Override
-        public void updateBundle(Bundle bundle, InputStream is) throws BundleException {
+        public void updateBundle(Bundle bundle, String uri, InputStream is) throws BundleException {
             throw new UnsupportedOperationException();
         }
 
