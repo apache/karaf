@@ -56,10 +56,15 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.Version;
+import org.osgi.framework.namespace.BundleNamespace;
+import org.osgi.framework.namespace.HostNamespace;
+import org.osgi.framework.namespace.PackageNamespace;
 import org.osgi.framework.startlevel.BundleStartLevel;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.BundleWire;
 import org.osgi.framework.wiring.BundleWiring;
+import org.osgi.resource.Namespace;
+import org.osgi.resource.Requirement;
 import org.osgi.resource.Resource;
 import org.osgi.resource.Wire;
 import org.osgi.service.repository.Repository;
@@ -115,7 +120,7 @@ public class Deployer {
         void setBundleStartLevel(Bundle bundle, int startLevel);
 
         void refreshPackages(Collection<Bundle> bundles) throws InterruptedException;
-        void resolveBundles(Set<Bundle> bundles);
+        void resolveBundles(Set<Bundle> bundles, Map<Resource, List<Wire>> wiring, Map<Resource, Bundle> resToBnd);
 
         void replaceDigraph(Map<String, Map<String,Map<String,Set<String>>>> policies, Map<String, Set<Long>> bundles) throws BundleException, InvalidSyntaxException;
     }
@@ -757,7 +762,7 @@ public class Deployer {
         toResolve.addAll(toStart);
         toResolve.addAll(toRefresh.keySet());
         removeFragmentsAndBundlesInState(toResolve, UNINSTALLED);
-        callback.resolveBundles(toResolve);
+        callback.resolveBundles(toResolve, resolver.getWiring(), deployment.resToBnd);
 
         // Compute bundles to start
         removeFragmentsAndBundlesInState(toStart, UNINSTALLED | ACTIVE | STARTING);
@@ -870,9 +875,18 @@ public class Deployer {
         }
         // Main loop
         int size;
+        Map<Bundle, Resource> bndToRes = new HashMap<>();
+        for (Map.Entry<Resource, Bundle> entry : resources.entrySet()) {
+            bndToRes.put(entry.getValue(), entry.getKey());
+        }
         do {
             size = toRefresh.size();
-            for (Bundle bundle : bundles) {
+            main: for (Bundle bundle : bundles) {
+                Resource resource = bndToRes.get(bundle);
+                // This bundle is not managed
+                if (resource == null) {
+                    continue;
+                }
                 // Continue if we already know about this bundle
                 if (toRefresh.containsKey(bundle)) {
                     continue;
@@ -880,6 +894,11 @@ public class Deployer {
                 // Ignore non resolved bundle
                 BundleWiring wiring = bundle.adapt(BundleWiring.class);
                 if (wiring == null) {
+                    continue;
+                }
+                // Ignore bundles that won't be wired
+                List<Wire> newWires = resolution.get(resource);
+                if (newWires == null) {
                     continue;
                 }
                 // Check if this bundle is a host and its fragments changed
@@ -893,37 +912,67 @@ public class Deployer {
                     toRefresh.put(bundle, "Attached fragments changed: " + new ArrayList<>(newFragments.get(bundle)));
                     break;
                 }
-                // Get through the old resolution and flag this bundle
-                // if it was wired to a bundle to be refreshed
+                // Compare the old and new resolutions
+                Set<Resource> wiredBundles = new HashSet<>();
                 for (BundleWire wire : wiring.getRequiredWires(null)) {
-                    Bundle provider = wire.getProvider().getBundle();
+                    BundleRevision rev = wire.getProvider();
+                    Bundle provider = rev.getBundle();
                     if (toRefresh.containsKey(provider)) {
+                        // The bundle is wired to a bundle being refreshed,
+                        // so we need to refresh it too
                         toRefresh.put(bundle, "Wired to " + provider.getSymbolicName() + "/" + provider.getVersion() + " which is being refreshed");
-                        break;
+                        continue main;
+                    }
+                    Resource res = bndToRes.get(provider);
+                    wiredBundles.add(res != null ? res : rev);
+                }
+                Map<Resource, Requirement> wiredResources = new HashMap<>();
+                for (Wire wire : newWires) {
+                    // Handle only packages, hosts, and required bundles
+                    String namespace = wire.getRequirement().getNamespace();
+                    if (!namespace.equals(BundleNamespace.BUNDLE_NAMESPACE)
+                            && !namespace.equals(PackageNamespace.PACKAGE_NAMESPACE)
+                            && !namespace.equals(HostNamespace.HOST_NAMESPACE)) {
+                        continue;
+                    }
+                    // Ignore non-resolution time requirements
+                    String effective = wire.getRequirement().getDirectives().get(Namespace.CAPABILITY_EFFECTIVE_DIRECTIVE);
+                    if (effective != null && !Namespace.EFFECTIVE_RESOLVE.equals(effective)) {
+                        continue;
+                    }
+                    // Ignore non bundle resources
+                    if (!isBundle(wire.getProvider())) {
+                        continue;
+                    }
+                    // Ignore bundles that won't get deployed for some reason
+                    if (!resources.containsKey(wire.getProvider())
+                            && !(wire.getProvider() instanceof BundleRevision)) {
+                        continue;
+                    }
+                    if (!wiredResources.containsKey(wire.getProvider())) {
+                        wiredResources.put(wire.getProvider(), wire.getRequirement());
                     }
                 }
-                // Get through the new resolution and flag this bundle
-                // if it's wired to any new bundle
-                List<Wire> newWires = resolution.get(wiring.getRevision());
-                if (newWires != null) {
-                    for (Wire wire : newWires) {
-                        if (!isBundle(wire.getProvider())) {
-                            continue;
-                        }
-                        Bundle b;
-                        if (wire.getProvider() instanceof BundleRevision) {
-                            b = ((BundleRevision) wire.getProvider()).getBundle();
+                if (!wiredBundles.containsAll(wiredResources.keySet())) {
+                    Map<Resource, Requirement> newResources = new HashMap<>(wiredResources);
+                    newResources.keySet().removeAll(wiredBundles);
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("Should be wired to: ");
+                    boolean first = true;
+                    for (Map.Entry<Resource, Requirement> entry : newResources.entrySet()) {
+                        if (!first) {
+                            sb.append(", ");
                         } else {
-                            b = resources.get(wire.getProvider());
+                            first = false;
                         }
-                        if (b == null) {
-                            toRefresh.put(bundle, "Wired to a new bundle " + wire.getProvider());
-                            break;
-                        } else if (toRefresh.containsKey(b)) {
-                            toRefresh.put(bundle, "Wired to " + b.getSymbolicName() + "/" + b.getVersion() + " which is being refreshed");
-                            break;
-                        }
+                        Resource res = entry.getKey();
+                        Requirement req = entry.getValue();
+                        sb.append(getSymbolicName(res)).append("/").append(getVersion(res));
+                        sb.append(" (through ");
+                        sb.append(req);
+                        sb.append(")");
                     }
+                    toRefresh.put(bundle, sb.toString());
                 }
             }
         } while (toRefresh.size() > size);

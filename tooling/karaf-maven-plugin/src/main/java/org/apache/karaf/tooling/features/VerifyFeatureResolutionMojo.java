@@ -108,6 +108,8 @@ import org.osgi.framework.wiring.BundleRequirement;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.resource.Requirement;
+import org.osgi.resource.Resource;
+import org.osgi.resource.Wire;
 import org.osgi.service.resolver.ResolutionException;
 import shaded.org.ops4j.util.property.PropertiesPropertyResolver;
 
@@ -742,7 +744,7 @@ public class VerifyFeatureResolutionMojo extends MojoSupport {
         }
 
         @Override
-        public void resolveBundles(Set<Bundle> bundles) {
+        public void resolveBundles(Set<Bundle> bundles, Map<Resource, List<Wire>> wiring, Map<Resource, Bundle> resToBnd) {
         }
 
         @Override

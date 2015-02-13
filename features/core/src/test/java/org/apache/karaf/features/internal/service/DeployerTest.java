@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.jar.Manifest;
@@ -39,6 +40,8 @@ import org.easymock.IArgumentMatcher;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
+import org.osgi.resource.Resource;
+import org.osgi.resource.Wire;
 
 import static org.apache.karaf.features.FeaturesService.*;
 import static org.apache.karaf.features.internal.util.MapUtils.addToMapSet;
@@ -72,7 +75,9 @@ public class DeployerTest {
         EasyMock.expectLastCall();
         callback.installFeatureConfigs(f100);
         EasyMock.expectLastCall();
-        callback.resolveBundles(EasyMock.<Set<Bundle>>anyObject());
+        callback.resolveBundles(EasyMock.<Set<Bundle>>anyObject(),
+                                EasyMock.<Map<Resource, List<Wire>>>anyObject(),
+                                EasyMock.<Map<Resource, Bundle>>anyObject());
         EasyMock.expectLastCall();
         callback.callListeners(EasyMock.<FeatureEvent>anyObject());
         EasyMock.expectLastCall();
@@ -161,7 +166,9 @@ public class DeployerTest {
         EasyMock.expectLastCall();
         callback.installFeatureConfigs(f101);
         EasyMock.expectLastCall();
-        callback.resolveBundles(EasyMock.eq(Collections.<Bundle>singleton(bundleA)));
+        callback.resolveBundles(EasyMock.eq(Collections.<Bundle>singleton(bundleA)),
+                                EasyMock.<Map<Resource, List<Wire>>>anyObject(),
+                                EasyMock.<Map<Resource, Bundle>>anyObject());
         EasyMock.expectLastCall();
         callback.refreshPackages(EasyMock.eq(Collections.<Bundle>singleton(bundleA)));
         EasyMock.expectLastCall();
@@ -227,7 +234,9 @@ public class DeployerTest {
         EasyMock.expectLastCall();
         callback.installFeatureConfigs(f1);
         EasyMock.expectLastCall();
-        callback.resolveBundles(EasyMock.<Set<Bundle>>anyObject());
+        callback.resolveBundles(EasyMock.<Set<Bundle>>anyObject(),
+                                EasyMock.<Map<Resource, List<Wire>>>anyObject(),
+                                EasyMock.<Map<Resource, Bundle>>anyObject());
         EasyMock.expectLastCall();
         callback.callListeners(EasyMock.<FeatureEvent>anyObject());
         EasyMock.expectLastCall();
@@ -289,7 +298,9 @@ public class DeployerTest {
         EasyMock.expectLastCall();
         callback.installFeatureConfigs(f1);
         EasyMock.expectLastCall();
-        callback.resolveBundles(EasyMock.<Set<Bundle>>anyObject());
+        callback.resolveBundles(EasyMock.<Set<Bundle>>anyObject(),
+                                EasyMock.<Map<Resource, List<Wire>>>anyObject(),
+                                EasyMock.<Map<Resource, Bundle>>anyObject());
         EasyMock.expectLastCall();
         callback.callListeners(EasyMock.<FeatureEvent>anyObject());
         EasyMock.expectLastCall();
@@ -339,7 +350,9 @@ public class DeployerTest {
         EasyMock.expectLastCall();
         callback.installFeatureConfigs(f2);
         EasyMock.expectLastCall();
-        callback.resolveBundles(EasyMock.<Set<Bundle>>anyObject());
+        callback.resolveBundles(EasyMock.<Set<Bundle>>anyObject(),
+                                EasyMock.<Map<Resource, List<Wire>>>anyObject(),
+                                EasyMock.<Map<Resource, Bundle>>anyObject());
         EasyMock.expectLastCall();
         callback.callListeners(EasyMock.<FeatureEvent>anyObject());
         EasyMock.expectLastCall();
