@@ -65,8 +65,8 @@
             <scope>runtime</scope>
         </dependency>
         <dependency>
-            <groupId>org.eclipse</groupId>
-            <artifactId>osgi</artifactId>
+            <groupId>${equinox.groupId}</groupId>
+            <artifactId>${equinox.artifactId}</artifactId>
             <scope>runtime</scope>
         </dependency>
         <dependency>
@@ -296,9 +296,9 @@
                                     <outputDirectory>target/classes/resources/lib/endorsed</outputDirectory>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.eclipse</groupId>
-                                    <artifactId>osgi</artifactId>
-                                    <outputDirectory>target/classes/resources/system/org/eclipse/osgi/${equinox.version}</outputDirectory>
+                                    <groupId>${equinox.groupId}</groupId>
+                                    <artifactId>${equinox.artifactId}</artifactId>
+                                    <outputDirectory>target/classes/resources/system/${equinox.path}/${equinox.artifactId}/${equinox.version}</outputDirectory>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.apache.felix</groupId>
@@ -375,6 +375,20 @@
                                     <type>xml</type>
                                 </artifact>
                             </artifacts>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>regex-property</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>regex-property</goal>
+                        </goals>
+                        <configuration>
+                            <name>equinox.path</name>
+                            <value>${equinox.groupId}</value>
+                            <regex>\.</regex>
+                            <replacement>/</replacement>
+                            <failIfNoMatch>false</failIfNoMatch>
                         </configuration>
                     </execution>
                 </executions>

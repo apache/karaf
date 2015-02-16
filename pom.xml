@@ -155,14 +155,16 @@
         <geronimo.atinject-spec.version>1.0</geronimo.atinject-spec.version>
         <geronimo.jaspic-spec.version>1.1</geronimo.jaspic-spec.version>
         <easymock.version>3.2</easymock.version>
-        <equinox.version>3.9.1-v20140110-1610</equinox.version>
+        <equinox.groupId>org.eclipse.birt.runtime</equinox.groupId>
+        <equinox.artifactId>org.eclipse.osgi</equinox.artifactId>
+        <equinox.version>3.10.1.v20140909-1633</equinox.version>
         <bndlib.version>2.3.0</bndlib.version>
         <equinox.region.version>1.1.0.v20120522-1841</equinox.region.version>
         <equinox.coordinator.version>1.1.0.v20120522-1841</equinox.coordinator.version>
         <felix.bundlerepository.version>2.0.2</felix.bundlerepository.version>
         <felix.configadmin.version>1.8.0</felix.configadmin.version>
         <felix.fileinstall.version>3.4.3-SNAPSHOT</felix.fileinstall.version>
-        <felix.framework.version>4.4.1</felix.framework.version>
+        <felix.framework.version>4.6.0</felix.framework.version>
         <felix.framework.security.version>2.4.0</felix.framework.security.version>
         <felix.gogo.version>0.14.1-SNAPSHOT</felix.gogo.version>
         <felix.plugin.version>2.5.3</felix.plugin.version>
@@ -227,7 +229,7 @@
         <log4j.version>1.2.17</log4j.version>
         <maven.version>2.0.9</maven.version>
         <mina.version>2.0.7</mina.version>
-        <osgi.version>5.0.0</osgi.version>
+        <osgi.version>6.0.0</osgi.version>
         <osgi.compendium.version>5.0.0</osgi.compendium.version>
         <org.json.version>20140107</org.json.version>
         <pax.cdi.version>0.12.0-SNAPSHOT</pax.cdi.version>
@@ -1466,8 +1468,8 @@
                 <version>${pax.tinybundle.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.eclipse</groupId>
-                <artifactId>osgi</artifactId>
+                <groupId>${equinox.groupId}</groupId>
+                <artifactId>${equinox.artifactId}</artifactId>
                 <version>${equinox.version}</version>
             </dependency>
 
