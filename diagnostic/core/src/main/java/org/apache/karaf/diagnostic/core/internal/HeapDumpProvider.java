@@ -16,17 +16,18 @@
  */
 package org.apache.karaf.diagnostic.core.internal;
 
-import com.sun.management.HotSpotDiagnosticMXBean;
 import org.apache.karaf.diagnostic.core.DumpDestination;
 import org.apache.karaf.diagnostic.core.DumpProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.management.MBeanServer;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.OutputStream;
 import java.lang.management.ManagementFactory;
+import java.lang.reflect.Method;
 
 /**
  * Create a heap dump.
@@ -40,9 +41,13 @@ public class HeapDumpProvider implements DumpProvider {
         OutputStream out = null;
         try {
             MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
-            HotSpotDiagnosticMXBean diagnosticMXBean = ManagementFactory.newPlatformMXBeanProxy(mBeanServer,
-                    "com.sun.management:type=HotSpotDiagnostic", HotSpotDiagnosticMXBean.class);
-            diagnosticMXBean.dumpHeap("heapdump.txt", false);
+            Class<?> diagnosticMXBeanClass = Class.forName("com.sun.management.HotSpotDiagnosticMXBean");
+            Object diagnosticMXBean = ManagementFactory.newPlatformMXBeanProxy(mBeanServer,
+                "com.sun.management:type=HotSpotDiagnostic", diagnosticMXBeanClass);
+
+            Method method = diagnosticMXBeanClass.getMethod("dumpHeap", String.class, boolean.class);
+            method.invoke(diagnosticMXBean, "heapdump.txt", false);
+
             // copy the dump in the destination
             File heapDumpFile = new File("heapdump.txt");
             in = new FileInputStream(heapDumpFile);
