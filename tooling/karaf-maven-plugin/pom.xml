@@ -232,4 +232,5 @@
         </plugins>
     </reporting>
 
+    <groupId>org.apache.karaf.tooling</groupId>
 </project>
