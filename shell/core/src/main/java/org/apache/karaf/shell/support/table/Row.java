@@ -49,20 +49,39 @@ public class Row {
     }
     
     String getContent(List<Col> cols, String separator) {
-        StringBuilder st = new StringBuilder();
-        int c = 0;
         if (cols.size() != content.size()) {
             throw new RuntimeException("Number of columns and number of content elements do not match");
         }
 
-        for (Col col : cols) {
-            st.append(col.getContent(content.get(c)));
-            if (c + 1 < cols.size()) {
-                st.append(separator);
-            }
-            c++;
+        List<String[]> contents = new ArrayList<>();
+        int lines = 0;
+        for (int col = 0; col < cols.size(); col++) {
+            String[] cnt = cols.get(col).getContent(content.get(col)).split("\n");
+            lines = Math.max(lines, cnt.length);
+            contents.add(cnt);
         }
-
+        StringBuilder st = new StringBuilder();
+        for (int line = 0; line < lines; line++) {
+            if (line > 0) {
+                st.append("\n");
+            }
+            StringBuilder st2 = new StringBuilder();
+            for (int col = 0; col < cols.size(); col++) {
+                String[] strings = contents.get(col);
+                if (col > 0) {
+                    st2.append(separator);
+                }
+                if (line < strings.length) {
+                    st2.append(strings[line]);
+                } else {
+                    st2.append(StringUtil.repeat(" ", cols.get(col).getSize()));
+                }
+            }
+            while (st2.charAt(st2.length() - 1) == ' ') {
+                st2.setLength(st2.length() - 1);
+            }
+            st.append(st2);
+        }
         return st.toString();
     }
 

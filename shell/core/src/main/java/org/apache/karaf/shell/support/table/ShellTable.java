@@ -90,7 +90,7 @@ public class ShellTable {
         }
 
         if (size > 0) {
-            tryGrowToMaxSize();
+            adjustSize();
         }
 
         if (format && showHeaders) {
@@ -117,7 +117,7 @@ public class ShellTable {
         }
     }
 
-    private void tryGrowToMaxSize() {
+    private void adjustSize() {
         int currentSize = 0;
         for (Col col : cols) {
             currentSize += col.size + separator.length();
@@ -125,7 +125,8 @@ public class ShellTable {
         currentSize -= separator.length();
         int sizeToGrow = size - currentSize;
 
-        for (Col col : cols) {
+        for (int i = cols.size() - 1; i >= 0; i--) {
+            Col col = cols.get(i);
             if (col.maxSize == -1) {
                 col.size = Math.max(0, col.size + sizeToGrow);
                 return;

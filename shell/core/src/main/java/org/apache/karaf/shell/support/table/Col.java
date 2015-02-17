@@ -15,6 +15,14 @@
  */
 package org.apache.karaf.shell.support.table;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.karaf.shell.support.ansi.SimpleAnsi;
+
 /**
  * Column definition.
  */
@@ -32,7 +40,10 @@ public class Col {
     int maxSize = -1;
     
     int size = 0;
-    
+
+    boolean wrap;
+    boolean bold;
+
     /**
      * Alignment
      */
@@ -67,6 +78,24 @@ public class Col {
         return this;
     }
 
+    public Col wrap() {
+        return wrap(true);
+    }
+
+    public Col wrap(boolean wrap) {
+        this.wrap = wrap;
+        return this;
+    }
+
+    public Col bold() {
+        return bold(true);
+    }
+
+    public Col bold(boolean bold) {
+        this.bold = bold;
+        return this;
+    }
+
     public int getSize() {
         return size;
     }
@@ -89,7 +118,7 @@ public class Col {
         if (fullContent.length() == 0) {
             return "";
         }
-        String finalContent = fullContent.substring(0, getClippedSize(fullContent.length()));
+        String finalContent = cut(fullContent, getClippedSize(fullContent.length()));
         updateSize(finalContent.length());
         return finalContent;
     }
@@ -99,15 +128,60 @@ public class Col {
     }
 
     String getContent(String content) {
-        return this.align.position(cut(content, this.size), this.size);
+        List<String> lines = new ArrayList<>();
+        lines.addAll(Arrays.asList(content.split("\n")));
+        if (wrap) {
+            List<String> wrapped = new ArrayList<>();
+            for (String line : lines) {
+                wrapped.addAll(wrap(line));
+            }
+            lines = wrapped;
+        }
+        StringBuilder sb = new StringBuilder();
+        for (String line : lines) {
+            if (sb.length() > 0) {
+                sb.append("\n");
+            }
+            line = this.align.position(cut(line, size), this.size);
+            if (bold) {
+                line = SimpleAnsi.INTENSITY_BOLD + line + SimpleAnsi.INTENSITY_NORMAL;
+            }
+            sb.append(line);
+        }
+        return sb.toString();
     }
 
-    private String cut(String content, int size) {
+    protected String cut(String content, int size) {
         if (content.length() <= size) {
             return content;
         } else {
             return content.substring(0, Math.max(0, size - 1));
         }
     }
+
+    protected List<String> wrap(String str) {
+        List<String> result = new ArrayList<>();
+        Pattern wrap = Pattern.compile("(\\S\\S{" + size + ",}|.{1," + size + "})(\\s+|$)");
+        int cur = 0;
+        while (cur >= 0) {
+            int lst = str.indexOf('\n', cur);
+            String s = (lst >= 0) ? str.substring(cur, lst) : str.substring(cur);
+            if (s.length() == 0) {
+                result.add(s);
+            } else {
+                Matcher m = wrap.matcher(s);
+                while (m.find()) {
+                    result.add(m.group());
+                }
+            }
+            if (lst >= 0) {
+                cur = lst + 1;
+            } else {
+                break;
+            }
+        }
+        return result;
+    }
+
 
 }
