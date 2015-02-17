@@ -17,20 +17,18 @@
 package org.apache.karaf.shell.commands.impl;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
-import java.util.LinkedList;
-import java.util.List;
 
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Option;
-import org.apache.karaf.shell.api.console.Session;
-import org.apache.karaf.shell.api.console.Terminal;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.api.console.Session;
+import org.apache.karaf.shell.api.console.Terminal;
+import org.apache.karaf.shell.support.ansi.AnsiSplitter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,7 +64,7 @@ public class MoreAction implements Action {
                 if (lines == 0) {
                     lines = terminal.getHeight();
                 }
-                LineSplitter reader = new LineSplitter(new BufferedReader(new InputStreamReader(System.in)), terminal.getWidth());
+                AnsiSplitter.AnsiBufferedReader reader = AnsiSplitter.splitter(System.in, terminal.getWidth());
                 int count = 0;
                 int c;
                 do {
@@ -118,33 +116,6 @@ public class MoreAction implements Action {
             }
         }
         return null;
-    }
-
-    public static class LineSplitter {
-
-        private final BufferedReader reader;
-        private final int width;
-        private final List<String> lines = new LinkedList<String>();
-
-        public LineSplitter(BufferedReader reader, int width) {
-            this.reader = reader;
-            this.width = width;
-        }
-
-        public String readLine() throws IOException {
-            if (lines.isEmpty()) {
-                String str = reader.readLine();
-                if (str == null) {
-                    return null;
-                }
-                while (str.length() > width) {
-                    lines.add(str.substring(0, width));
-                    str = str.substring(width);
-                }
-                lines.add(str);
-            }
-            return lines.remove(0);
-        }
     }
 
     protected boolean isTty(OutputStream out) {

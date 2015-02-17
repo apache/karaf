@@ -48,6 +48,7 @@ import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.api.console.Signal;
 import org.apache.karaf.shell.api.console.SignalListener;
 import org.apache.karaf.shell.api.console.Terminal;
+import org.apache.karaf.shell.support.ansi.AnsiSplitter;
 import org.jledit.jline.NonBlockingInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -454,7 +455,7 @@ public class LessAction implements Action, SignalListener {
                 int off = offsetInLine;
                 for (int l = 0; l < height - 1; l++) {
                     String line = getLine(lastLineToDisplay);
-                    if (line.length() > off + width) {
+                    if (ansiLength(line) > off + width) {
                         off += width;
                     } else {
                         off = 0;
@@ -468,7 +469,7 @@ public class LessAction implements Action, SignalListener {
             }
 
             String line = getLine(firstLineToDisplay);
-            if (line.length() > width + offsetInLine) {
+            if (ansiLength(line) > width + offsetInLine) {
                 offsetInLine += width;
             } else {
                 offsetInLine = 0;
@@ -485,7 +486,8 @@ public class LessAction implements Action, SignalListener {
             } else if (firstLineInMemory < firstLineToDisplay) {
                 firstLineToDisplay--;
                 String line = getLine(firstLineToDisplay);
-                offsetInLine = line.length() - line.length() % width;
+                int length = ansiLength(line);
+                offsetInLine = length - length % width;
             } else {
                 bof();
                 return;
@@ -557,7 +559,7 @@ public class LessAction implements Action, SignalListener {
                     curLine = "";
                 }
                 if (compiled != null) {
-                    curLine = compiled.matcher(curLine).replaceAll("\033[7m$1\033[0m");
+                    curLine = compiled.matcher(curLine).replaceAll("\033[7m$1\033[27m");
                 }
             }
             String toDisplay;
@@ -605,40 +607,12 @@ public class LessAction implements Action, SignalListener {
         return compiled;
     }
 
-    private String ansiSubstring(String curLine, int begin, int end) {
-        int printPos = 0;
-        int csi = 0;
-        char sgr = '0';
+    private int ansiLength(String curLine) throws IOException {
+        return AnsiSplitter.length(curLine);
+    }
 
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < curLine.length() && printPos < end; i++) {
-            char c = curLine.charAt(i);
-            if (csi == 0 && c == '\033') {
-                csi++;
-            } else if (csi == 1 && c == '[') {
-                csi++;
-            } else if (csi == 2) {
-                sgr = c;
-                csi++;
-            } else if (csi == 3 && c == 'm') {
-                csi = 0;
-                if (printPos >= begin) {
-                    sb.append("\033[").append(sgr).append("m");
-                }
-            } else {
-                if (printPos == begin && sgr != '0') {
-                    sb.append("\033[7m");
-                }
-                if (printPos >= begin && printPos < end) {
-                    sb.append(c);
-                }
-                ++printPos;
-            }
-        }
-        if (sgr != '0') {
-            sb.append("\033[0m");
-        }
-        return sb.toString();
+    private String ansiSubstring(String curLine, int begin, int end) throws IOException {
+        return AnsiSplitter.substring(curLine, begin, end);
     }
 
     String getLine(int line) throws IOException {
