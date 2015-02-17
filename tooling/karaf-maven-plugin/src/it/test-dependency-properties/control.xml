@@ -21,6 +21,10 @@
 <features xmlns="http://karaf.apache.org/xmlns/features/v1.2.1" name="test-input-file">
     <feature description="Test Description" version="1.0-SNAPSHOT" name="test-input-file">
         <details>Test Description</details>
-        <bundle>mvn:test/test-input-file/1.0-SNAPSHOT</bundle>
+        <configfile finalname="etc/test.cfg" override="false">mvn:test/dependency-module-c/1.0-SNAPSHOT/cfg</configfile>
+        <bundle>mvn:test/test-dependency-properties/1.0-SNAPSHOT</bundle>
+        <bundle>mvn:test/dependency-module-c/1.0-SNAPSHOT</bundle>
+        <bundle>mvn:test/dependency-module-a/1.0-SNAPSHOT</bundle>
+        <bundle>mvn:test/dependency-module-b/1.0-SNAPSHOT</bundle>
     </feature>
 </features>
