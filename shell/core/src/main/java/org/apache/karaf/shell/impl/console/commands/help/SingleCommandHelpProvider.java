@@ -33,12 +33,9 @@ public class SingleCommandHelpProvider implements HelpProvider {
             }
         }
 
-        String resolved = session.resolveCommand(path);
-
-
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PrintStream ps = new PrintStream(baos, true);
-        Session s = session.getFactory().create(null, ps, ps);
+        Session s = session.getFactory().create(null, ps, ps, session);
         s.put(Session.SCOPE, session.get(Session.SCOPE));
         s.put(Session.SUBSHELL, session.get(Session.SUBSHELL));
         try {

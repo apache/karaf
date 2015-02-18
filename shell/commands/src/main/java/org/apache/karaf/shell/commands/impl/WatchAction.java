@@ -98,9 +98,7 @@ public class WatchAction implements Action {
             try {
                 byteArrayOutputStream = new ByteArrayOutputStream();
                 printStream = new PrintStream(byteArrayOutputStream);
-                session = sessionFactory.create(null, printStream, printStream);
-                session.put(Session.SCOPE, WatchAction.this.session.get(Session.SCOPE));
-                session.put(Session.SUBSHELL, WatchAction.this.session.get(Session.SUBSHELL));
+                session = sessionFactory.create(null, printStream, printStream, WatchAction.this.session);
                 String output = "";
                 try {
                     session.execute(command);

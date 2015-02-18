@@ -21,6 +21,7 @@ package org.apache.karaf.shell.impl.console;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Properties;
 
@@ -31,17 +32,29 @@ import org.apache.karaf.shell.api.console.History;
 import org.apache.karaf.shell.api.console.Registry;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.api.console.SessionFactory;
+import org.apache.karaf.shell.api.console.Signal;
+import org.apache.karaf.shell.api.console.SignalListener;
 import org.apache.karaf.shell.api.console.Terminal;
 import org.apache.karaf.shell.impl.console.parsing.CommandLineParser;
 import org.apache.karaf.shell.support.ShellUtil;
 
 public class HeadlessSessionImpl implements Session {
 
+    final Session parent;
+    final Terminal terminal;
     final SessionFactory factory;
     final CommandSession session;
     final Registry registry;
 
     public HeadlessSessionImpl(SessionFactory factory, CommandProcessor processor, InputStream in, PrintStream out, PrintStream err) {
+        this(factory, processor, in, out, err, null);
+    }
+
+    public HeadlessSessionImpl(SessionFactory factory, CommandProcessor processor, InputStream in, PrintStream out, PrintStream err, Session parent) {
+        // Parent session
+        this.parent = parent;
+        // Terminal
+        this.terminal = parent != null ? new ReadOnlyTerminal(parent.getTerminal()) : null;
         // Factory
         this.factory = factory;
         // Registry
@@ -51,16 +64,20 @@ public class HeadlessSessionImpl implements Session {
         registry.register(registry);
         // Session
         session = processor.createSession(in, out, err);
-        Properties sysProps = System.getProperties();
-        for (Object key : sysProps.keySet()) {
-            session.put(key.toString(), sysProps.get(key));
+        if (parent == null) {
+            Properties sysProps = System.getProperties();
+            for (Object key : sysProps.keySet()) {
+                session.put(key.toString(), sysProps.get(key));
+            }
         }
         session.put(".session", this);
         session.put(".commandSession", session);
-        session.put(Session.SCOPE, "shell:bundle:*");
-        session.put(Session.SUBSHELL, "");
-        session.put("USER", ShellUtil.getCurrentUserName());
-        session.put("APPLICATION", System.getProperty("karaf.name", "root"));
+        if (parent == null) {
+            session.put(Session.SCOPE, "shell:bundle:*");
+            session.put(Session.SUBSHELL, "");
+            session.put("USER", ShellUtil.getCurrentUserName());
+            session.put("APPLICATION", System.getProperty("karaf.name", "root"));
+        }
     }
 
     public CommandSession getSession() {
@@ -75,7 +92,11 @@ public class HeadlessSessionImpl implements Session {
 
     @Override
     public Object get(String name) {
-        return session.get(name);
+        Object val = session.get(name);
+        if (val == null && parent != null) {
+            val = parent.get(name);
+        }
+        return val;
     }
 
     @Override
@@ -100,7 +121,7 @@ public class HeadlessSessionImpl implements Session {
 
     @Override
     public Terminal getTerminal() {
-        return null;
+        return terminal;
     }
 
     @Override
@@ -143,6 +164,55 @@ public class HeadlessSessionImpl implements Session {
     @Override
     public void close() {
         session.close();
+    }
+
+    static class ReadOnlyTerminal implements Terminal {
+
+        private final Terminal terminal;
+
+        public ReadOnlyTerminal(Terminal terminal) {
+            this.terminal = terminal;
+        }
+
+        @Override
+        public int getWidth() {
+            return terminal.getWidth();
+        }
+
+        @Override
+        public int getHeight() {
+            return terminal.getHeight();
+        }
+
+        @Override
+        public boolean isAnsiSupported() {
+            return terminal.isAnsiSupported();
+        }
+
+        @Override
+        public boolean isEchoEnabled() {
+            return terminal.isEchoEnabled();
+        }
+
+        @Override
+        public void setEchoEnabled(boolean enabled) {
+        }
+
+        @Override
+        public void addSignalListener(SignalListener listener, Signal... signal) {
+        }
+
+        @Override
+        public void addSignalListener(SignalListener listener, EnumSet<Signal> signals) {
+        }
+
+        @Override
+        public void addSignalListener(SignalListener listener) {
+        }
+
+        @Override
+        public void removeSignalListener(SignalListener listener) {
+        }
     }
 
 }
