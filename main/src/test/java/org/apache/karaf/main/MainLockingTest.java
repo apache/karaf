@@ -42,9 +42,9 @@ public class MainLockingTest {
 
         Utils.deleteDirectory(data);
 
-                String[] args = new String[0];
-                System.setProperty("karaf.home", home.toString());
-                System.setProperty("karaf.data", data.toString());
+        String[] args = new String[0];
+        System.setProperty("karaf.home", home.toString());
+        System.setProperty("karaf.data", data.toString());
         System.setProperty("karaf.framework.factory", "org.apache.felix.framework.FrameworkFactory");
 
         System.setProperty("karaf.lock","true");
