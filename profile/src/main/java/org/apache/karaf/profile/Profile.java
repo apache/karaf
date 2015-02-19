@@ -76,6 +76,7 @@ public interface Profile {
     List<String> getLibraries();
     List<String> getEndorsedLibraries();
     List<String> getExtensionLibraries();
+    List<String> getBootLibraries();
     List<String> getBundles();
     List<String> getFeatures();
     List<String> getRepositories();

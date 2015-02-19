@@ -34,7 +34,9 @@
     <name>Apache Karaf :: Assemblies :: Features</name>
 
     <modules>
+        <module>base</module>
         <module>framework</module>
+        <module>static</module>
         <module>standard</module>
         <module>spring</module>
         <module>enterprise</module>

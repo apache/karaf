@@ -36,7 +36,7 @@
     <dependencies>
         <dependency>
             <groupId>org.apache.karaf.features</groupId>
-            <artifactId>framework</artifactId>
+            <artifactId>static</artifactId>
             <type>kar</type>
             <scope>compile</scope>
         </dependency>
@@ -129,12 +129,6 @@
                     <profilesUri>
                         file://${basedir}/../registry/src/main/resources
                     </profilesUri>
-                    <startupRepositories>
-                        <repository>${project.build.outputDirectory}/features.xml</repository>
-                    </startupRepositories>
-                    <startupFeatures>
-                        <feature>static-framework</feature>
-                    </startupFeatures>
                     <startupProfiles>
                         <profile>karaf</profile>
                         <profile>example-loanbroker-bank1</profile>

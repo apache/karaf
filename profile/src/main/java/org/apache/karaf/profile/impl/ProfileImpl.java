@@ -106,7 +106,12 @@ final class ProfileImpl implements Profile {
 
     @Override
     public List<String> getExtensionLibraries() {
-        return getContainerConfigList(ConfigListType.EXTENSION);
+        return getContainerConfigList(ConfigListType.EXTENSIONS);
+    }
+
+    @Override
+    public List<String> getBootLibraries() {
+        return getContainerConfigList(ConfigListType.BOOT);
     }
 
     @Override
@@ -225,10 +230,11 @@ final class ProfileImpl implements Profile {
 
     enum ConfigListType {
         BUNDLES("bundle"),
-        ENDORSED("endorsed"),
-        EXTENSION("extension"),
         FEATURES("feature"),
-        LIBRARIES("lib"),
+        ENDORSED("endorsed"),
+        EXTENSIONS("extension"),
+        BOOT("boot"),
+        LIBRARIES("library"),
         OPTIONALS("optional"),
         OVERRIDES("override"),
         REPOSITORIES("repository");
