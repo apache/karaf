@@ -132,6 +132,19 @@ public class ParsingTest {
                             parser.position(),
                             command.substring(0, parser.position()));
         }
+
+        @Override
+        public String preprocess(Session session, CommandLine cmdLine) {
+            StringBuilder parsed = new StringBuilder();
+            for (int i = 0 ; i < cmdLine.getArguments().length; i++) {
+                String arg = cmdLine.getArguments()[i];
+                if (i > 0) {
+                    parsed.append(" ");
+                }
+                parsed.append(arg);
+            }
+            return parsed.toString();
+        }
     }
 
 }

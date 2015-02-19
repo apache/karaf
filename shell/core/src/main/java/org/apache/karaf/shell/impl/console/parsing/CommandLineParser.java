@@ -84,13 +84,7 @@ public class CommandLineParser {
             }
 
             CommandLine cmdLine = cmdParser.parse(session, rem, rem.length());
-            for (int i = 0 ; i < cmdLine.getArguments().length; i++) {
-                String arg = cmdLine.getArguments()[i];
-                if (i > 0) {
-                    parsed.append(" ");
-                }
-                parsed.append(arg);
-            }
+            parsed.append(cmdParser.preprocess(session, cmdLine));
 
             int length = cmdLine.getBuffer().length();
             if (length < rem.length()) {

@@ -25,4 +25,6 @@ public interface Parser {
 
     CommandLine parse(Session session, String command, int cursor);
 
+    String preprocess(Session session, CommandLine commandLine);
+
 }

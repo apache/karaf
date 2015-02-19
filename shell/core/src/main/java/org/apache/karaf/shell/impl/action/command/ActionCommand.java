@@ -132,6 +132,15 @@ public class ActionCommand implements org.apache.karaf.shell.api.console.Command
             }
             throw new IllegalStateException("Could not find specified parser");
         }
+
+        @Override
+        public String preprocess(Session session, CommandLine commandLine) {
+            Object service = session.getRegistry().getService(clazz);
+            if (service instanceof Parser) {
+                return ((Parser) service).preprocess(session, commandLine);
+            }
+            throw new IllegalStateException("Could not find specified parser");
+        }
     }
 
 }

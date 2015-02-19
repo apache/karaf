@@ -289,7 +289,8 @@ public class ConsoleSessionImpl implements Session {
 
     @Override
     public Object execute(CharSequence commandline) throws Exception {
-        return session.execute(commandline);
+        String command = CommandLineParser.parse(this, commandline.toString());
+        return session.execute(command);
     }
 
     @Override
