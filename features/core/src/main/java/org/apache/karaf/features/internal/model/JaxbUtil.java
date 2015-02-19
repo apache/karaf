@@ -197,7 +197,7 @@ public final class JaxbUtil {
             if (stream != null) {
                 is.setByteStream(stream);
             }
-            SAXSource source = new SAXSource(xmlFilter, new InputSource(uri));
+            SAXSource source = new SAXSource(xmlFilter, is);
             return (Features) unmarshaller.unmarshal(source);
 
         } catch (RuntimeException e) {

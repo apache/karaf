@@ -155,7 +155,9 @@ public class SpringTransformer {
     }
 
     protected static Document parse(URL url) throws Exception {
-        return XmlUtils.parse(url.toString());
+        try (InputStream is = url.openStream()) {
+            return XmlUtils.parse(is);
+        }
     }
 
     protected static String getPath(URL url) {
