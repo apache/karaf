@@ -27,7 +27,7 @@ public final class ChecksumUtils {
     }
 
     /**
-     * Compute a cheksum for the file or directory that consists of the name, length and the last modified date
+     * Compute a checksum for the file or directory that consists of the name, length and the last modified date
      * for a file and its children in case of a directory
      *
      * @param is the input stream
