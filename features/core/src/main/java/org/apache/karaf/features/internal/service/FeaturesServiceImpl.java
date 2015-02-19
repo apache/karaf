@@ -1214,15 +1214,8 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         };
         ServiceRegistration<ResolverHookFactory> registration = systemBundleContext.registerService(ResolverHookFactory.class, factory, null);
         try {
-            // Given we already have computed the wiring,
-            // there's no need to resolve the bundles all at the same time.
-            // It's much more efficient to resolve them by small chunks.
-            // We could be even smarter and order the bundles according to the
-            // order given by RequirementSort to minimize the size of needed chunks.
             FrameworkWiring frameworkWiring = systemBundleContext.getBundle().adapt(FrameworkWiring.class);
-            for (Bundle bundle : bundles) {
-                frameworkWiring.resolveBundles(Collections.singleton(bundle));
-            }
+            frameworkWiring.resolveBundles(bundles);
         } finally {
             registration.unregister();
         }
