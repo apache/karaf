@@ -88,53 +88,33 @@ public class FeatureConfigInstaller {
         return null;
     }
 
-    void installFeatureConfigs(Feature feature, boolean verbose) throws IOException, InvalidSyntaxException {
-//        for (String config : feature.getConfigurations().keySet()) {
-//            Dictionary<String,String> props = new Hashtable<String, String>(feature.getConfigurations().get(config));
-//            String[] pid = parsePid(config);
-//            Configuration cfg = findExistingConfiguration(configAdmin, pid[0], pid[1]);
-//            if (cfg == null) {
-//                cfg = createConfiguration(configAdmin, pid[0], pid[1]);
-//                String key = createConfigurationKey(pid[0], pid[1]);
-//                props.put(CONFIG_KEY, key);
-//                if (cfg.getBundleLocation() != null) {
-//                    cfg.setBundleLocation(null);
-//                }
-//                cfg.update(props);
-//            }
-//        }
+    public void installFeatureConfigs(Feature feature, boolean verbose) throws IOException, InvalidSyntaxException {
     	for (ConfigInfo config : feature.getConfigurations()) {
-    		String name = config.getName();
 			Properties props = config.getProperties();
 
 			// interpolation(props);
             
 
 			String[] pid = parsePid(config.getName());
-			Configuration cfg = findExistingConfiguration(configAdmin, pid[0],
-					pid[1]);
+			Configuration cfg = findExistingConfiguration(configAdmin, pid[0], pid[1]);
 			if (cfg == null) {
 				Dictionary<String, String> cfgProps = convertToDict(props);
-
 				cfg = createConfiguration(configAdmin, pid[0], pid[1]);
 				String key = createConfigurationKey(pid[0], pid[1]);
 				cfgProps.put(CONFIG_KEY, key);
 				cfg.update(cfgProps);
 			} else if (config.isAppend()) {
+                boolean update = false;
 				Dictionary<String,Object> properties = cfg.getProperties();
-				for (Enumeration<String> propKeys = properties.keys(); propKeys
-						.hasMoreElements();) {
-					String key = propKeys.nextElement();
-					// remove existing entry, since it's about appending.
-					if (props.containsKey(key)) {
-						props.remove(key);
-					} 
-				}
-				if (props.size() > 0) {
-					// convert props to dictionary
-					Dictionary<String, String> cfgProps = convertToDict(props);
-					cfg.update(cfgProps);
-				}
+                for (String key : props.stringPropertyNames()) {
+                    if (properties.get(key) == null) {
+                        properties.put(key, props.getProperty(key));
+                        update = true;
+                    }
+                }
+                if (update) {
+                    cfg.update(properties);
+                }
 			}
 		}
         for (ConfigFileInfo configFile : feature.getConfigurationFiles()) {
