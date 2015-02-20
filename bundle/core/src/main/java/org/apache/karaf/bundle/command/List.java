@@ -24,6 +24,8 @@ import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.api.console.Terminal;
+import org.apache.karaf.shell.support.table.Col;
 import org.apache.karaf.shell.support.table.ShellTable;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -48,11 +50,17 @@ public class List extends BundlesCommand {
     @Option(name = "--no-format", description = "Disable table rendered output", required = false, multiValued = false)
     boolean noFormat;
 
+    @Option(name = "--no-ellipsis")
+    boolean noEllipsis;
+
     @Reference
     BundleContext bundleContext;
 
     @Reference
     BundleService bundleService;
+
+    @Reference
+    Terminal terminal;
 
     @Override
     protected void executeOnBundle(Bundle bundle) throws Exception {
@@ -60,6 +68,10 @@ public class List extends BundlesCommand {
 
     @Override
     protected Object doExecute(java.util.List<Bundle> bundles) throws Exception {
+        if (noFormat) {
+            noEllipsis = true;
+        }
+
         determineBundleLevelThreshold();
         
         // Display active start level.
@@ -69,12 +81,35 @@ public class List extends BundlesCommand {
         }
 
         ShellTable table = new ShellTable();
+        if (!noEllipsis && showLocation && terminal != null && terminal.getWidth() > 0) {
+            table.size(terminal.getWidth());
+        }
         table.column("ID").alignRight();
         table.column("State");
         table.column("Lvl").alignRight();
         table.column("Version");
-        table.column(getNameHeader());
-        
+        table.column(new Col(getNameHeader()) {
+            @Override
+            protected String cut(String value, int size) {
+                if (showLocation && value.length() > size) {
+                    String[] parts = value.split("/");
+                    String cut = "";
+                    int c = parts[0].length() + 4;
+                    for (int idx = parts.length - 1; idx > 0; idx--) {
+                        if (cut.length() + c + parts[idx].length() + 1 < size) {
+                            cut = "/" + parts[idx] + cut;
+                        } else {
+                            break;
+                        }
+                    }
+                    cut = parts[0] + "/..." + cut;
+                    return cut;
+                } else {
+                    return super.cut(value, size);
+                }
+            }
+        });
+
         for (Bundle bundle : bundles) {
             BundleInfo info = this.bundleService.getInfo(bundle);
             if (info.getStartLevel() >= bundleLevelThreshold) {
