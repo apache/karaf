@@ -86,7 +86,7 @@ public class SimpleDownloadTask extends AbstractRetryableDownloadTask {
                 throw new IOException("Unable to rename file " + tmpFile.toString() + " to " + file.toString());
             }
             return file;
-        } catch (IOException ignore) {
+        } catch (Exception ignore) {
             throw new IOException("Could not download [" + this.url + "]", ignore);
         }
     }
