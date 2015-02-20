@@ -690,36 +690,28 @@ public class FeaturesServiceImpl implements FeaturesService {
             }
         }
 		for (ConfigInfo config : feature.getConfigurations()) {
-			String name = config.getName();
 			Map<String, String> props = config.getProperties();
 
 			String[] pid = parsePid(config.getName());
-			Configuration cfg = findExistingConfiguration(configAdmin, pid[0],
-					pid[1]);
+			Configuration cfg = findExistingConfiguration(configAdmin, pid[0], pid[1]);
 			if (cfg == null) {
-				
-				Dictionary<String, String> cfgProps = convertToDict(config
-						.getProperties());
-
+				Dictionary<String, String> cfgProps = convertToDict(config.getProperties());
 				cfg = createConfiguration(configAdmin, pid[0], pid[1]);
 				String key = createConfigurationKey(pid[0], pid[1]);
 				cfgProps.put(CONFIG_KEY, key);
 				cfg.update(cfgProps);
 			} else if (config.isAppend()) {
-				Dictionary<String, Object> properties = cfg.getProperties();
-				for (Enumeration<String> propKeys = properties.keys(); propKeys
-						.hasMoreElements();) {
-					String key = propKeys.nextElement();
-					// remove existing entry, since it's about appending.
-					if (props.containsKey(key)) {
-						props.remove(key);
-					}
-				}
-				if (props.size() > 0) {
-					// convert props to dictionary
-					Dictionary<String, String> cfgProps = convertToDict(props);
-					cfg.update(cfgProps);
-				}
+                boolean update = false;
+                Dictionary<String,Object> properties = cfg.getProperties();
+                for (String key : props.keySet()) {
+                    if (properties.get(key) == null) {
+                        properties.put(key, props.get(key));
+                        update = true;
+                    }
+                }
+                if (update) {
+                    cfg.update(properties);
+                }
 			}
         }
         for (ConfigFileInfo configFile : feature.getConfigurationFiles()) {
