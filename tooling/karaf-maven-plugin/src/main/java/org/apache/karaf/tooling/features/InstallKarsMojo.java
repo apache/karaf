@@ -158,7 +158,7 @@ public class InstallKarsMojo extends MojoSupport {
     /**
      * Ignore the dependency attribute (dependency="[true|false]") on bundle
      */
-    @Parameter(defaultValue = "true")
+    @Parameter(defaultValue = "false")
     protected boolean ignoreDependencyFlag;
 
     /**
