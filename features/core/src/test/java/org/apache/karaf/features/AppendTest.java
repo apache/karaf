@@ -16,10 +16,15 @@
  */
 package org.apache.karaf.features;
 
+import java.util.Hashtable;
 import java.util.Properties;
 
 import junit.framework.TestCase;
+import org.apache.karaf.features.internal.service.FeatureConfigInstaller;
 import org.apache.karaf.features.internal.service.RepositoryImpl;
+import org.easymock.EasyMock;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 
 public class AppendTest extends TestCase {
 
@@ -39,10 +44,39 @@ public class AppendTest extends TestCase {
 
 		Properties properties = configInfo.getProperties();
 		assertNotNull(properties);
-		String property = properties
-				.getProperty("javax.servlet.context.tempdir");
+		String property = properties.getProperty("javax.servlet.context.tempdir");
 		assertNotNull(property);
 		assertFalse(property.contains("${"));
 
+		ConfigurationAdmin admin = EasyMock.createMock(ConfigurationAdmin.class);
+		Configuration config = EasyMock.createMock(Configuration.class);
+		EasyMock.expect(admin.listConfigurations(EasyMock.eq("(service.pid=org.ops4j.pax.web)")))
+				.andReturn(new Configuration[] { config });
+		Hashtable<String, Object> original = new Hashtable<>();
+		original.put("org.apache.karaf.features.configKey", "org.ops4j.pax.web");
+		original.put("foo", "bar");
+		EasyMock.expect(config.getProperties()).andReturn(original);
+		Hashtable<String, Object> expected = new Hashtable<>();
+		expected.put("org.apache.karaf.features.configKey", "org.ops4j.pax.web");
+		expected.put("javax.servlet.context.tempdir", "data/pax-web-jsp");
+		expected.put("foo", "bar");
+		config.update(EasyMock.eq(expected));
+		EasyMock.expectLastCall();
+		EasyMock.replay(admin, config);
+		FeatureConfigInstaller installer = new FeatureConfigInstaller(admin);
+		installer.installFeatureConfigs(feature);
+		EasyMock.verify(admin, config);
+
+		EasyMock.reset(admin, config);
+		EasyMock.expect(admin.listConfigurations(EasyMock.eq("(service.pid=org.ops4j.pax.web)")))
+				.andReturn(new Configuration[]{config});
+		original = new Hashtable<>();
+		original.put("org.apache.karaf.features.configKey", "org.ops4j.pax.web");
+		original.put("javax.servlet.context.tempdir", "value");
+		original.put("foo", "bar");
+		EasyMock.expect(config.getProperties()).andReturn(original);
+		EasyMock.replay(admin, config);
+		installer.installFeatureConfigs(feature);
+		EasyMock.verify(admin, config);
 	}
 }
