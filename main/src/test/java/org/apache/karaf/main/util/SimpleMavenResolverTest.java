@@ -19,20 +19,22 @@
 package org.apache.karaf.main.util;
 
 import java.io.File;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
 
 import junit.framework.Assert;
 
+import org.apache.karaf.util.maven.Parser;
 import org.junit.Test;
 
 public class SimpleMavenResolverTest {
     private static final String ARTIFACT_COORDS = "mvn:org.apache.karaf.features/framework/1.0.0/xml/features";
 
     @Test
-    public void mavenToPath() throws URISyntaxException {
-        String resolvedPath = SimpleMavenResolver.fromMaven(new URI(ARTIFACT_COORDS));
+    public void mavenToPath() throws MalformedURLException {
+        String resolvedPath = Parser.pathFromMaven(ARTIFACT_COORDS);
         Assert.assertEquals("org/apache/karaf/features/framework/1.0.0/framework-1.0.0-features.xml", resolvedPath);
     }
     

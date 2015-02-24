@@ -40,7 +40,7 @@ final class ProfileImpl implements Profile {
     private static final Pattern ALLOWED_PROFILE_NAMES_PATTERN = Pattern.compile("^[A-Za-z0-9]+[\\.A-Za-z0-9_-]*$");
 
     private final String profileId;
-    private final Map<String, String> attributes = new HashMap<>();
+    private final Map<String, String> attributes;
     private final List<String> parents = new ArrayList<>();
     private final Map<String, byte[]> fileConfigurations = new HashMap<>();
     private final Map<String, Map<String, String>> configurations = new HashMap<>();
@@ -72,17 +72,8 @@ final class ProfileImpl implements Profile {
             }
         }
 
-        // Attributes are agent configuration with prefix 'attribute.'  
-        Map<String, String> agentConfig = configurations.get(Profile.INTERNAL_PID);
-        if (agentConfig != null) {
-            int prefixLength = Profile.ATTRIBUTE_PREFIX.length();
-            for (Entry<String, String> entry : agentConfig.entrySet()) {
-                String key = entry.getKey();
-                if (key.startsWith(Profile.ATTRIBUTE_PREFIX)) {
-                    attributes.put(key.substring(prefixLength), entry.getValue());
-                }
-            }
-        }
+        // Attributes are agent configuration with prefix 'attribute.'
+        attributes = getPrefixedMap(ATTRIBUTE_PREFIX);
     }
 
     public String getId() {
@@ -92,6 +83,31 @@ final class ProfileImpl implements Profile {
     @Override
     public Map<String, String> getAttributes() {
         return Collections.unmodifiableMap(attributes);
+    }
+
+    @Override
+    public Map<String, String> getConfig() {
+        return getPrefixedMap(CONFIG_PREFIX);
+    }
+
+    @Override
+    public Map<String, String> getSystem() {
+        return getPrefixedMap(SYSTEM_PREFIX);
+    }
+
+    private Map<String, String> getPrefixedMap(String prefix) {
+        Map<String, String> map = new HashMap<>();
+        Map<String, String> agentConfig = configurations.get(Profile.INTERNAL_PID);
+        if (agentConfig != null) {
+            int prefixLength = prefix.length();
+            for (Entry<String, String> entry : agentConfig.entrySet()) {
+                String key = entry.getKey();
+                if (key.startsWith(prefix)) {
+                    map.put(key.substring(prefixLength), entry.getValue());
+                }
+            }
+        }
+        return map;
     }
 
     @Override

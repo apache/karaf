@@ -29,6 +29,7 @@ import org.apache.felix.utils.properties.Properties;
 
 import org.apache.karaf.main.lock.SimpleFileLock;
 import org.apache.karaf.main.util.Utils;
+import org.apache.karaf.util.config.PropertiesLoader;
 import org.osgi.framework.Constants;
 
 public class ConfigProperties {

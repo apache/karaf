@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.karaf.tooling.utils;
+package org.apache.karaf.util.config;
 
 import java.io.File;
 import java.io.FileInputStream;

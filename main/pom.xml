@@ -94,6 +94,8 @@
                         <Private-Package>
                             org.apache.karaf.main*,
                             org.apache.felix.utils.properties;-split-package:=merge-first,
+                            org.apache.karaf.util.config,
+                            org.apache.karaf.util.maven,
                             org.apache.karaf.util.locks;-split-package:=merge-first,
                             META-INF;-split-package:=merge-first
                         </Private-Package>

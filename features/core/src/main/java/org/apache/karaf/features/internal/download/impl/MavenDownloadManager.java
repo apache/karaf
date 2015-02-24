@@ -33,11 +33,11 @@ import org.ops4j.pax.url.mvn.MavenResolver;
 
 public class MavenDownloadManager implements DownloadManager {
 
-    private final MavenResolver mavenResolver;
+    protected final MavenResolver mavenResolver;
 
-    private final ScheduledExecutorService executorService;
+    protected final ScheduledExecutorService executorService;
 
-    private File tmpPath;
+    protected File tmpPath;
 
     private final Map<String, AbstractDownloadTask> downloaded = new HashMap<>();
 
@@ -143,7 +143,7 @@ public class MavenDownloadManager implements DownloadManager {
             });
         }
 
-        private AbstractDownloadTask createDownloadTask(final String url) {
+        protected AbstractDownloadTask createDownloadTask(final String url) {
             final String mvnUrl = DownloadManagerHelper.stripUrl(url);
             if (mvnUrl.startsWith("mvn:")) {
                 if (!mvnUrl.equals(url)) {
@@ -152,7 +152,7 @@ public class MavenDownloadManager implements DownloadManager {
                     return new MavenDownloadTask(executorService, mavenResolver, mvnUrl);
                 }
             } else {
-                return new SimpleDownloadTask(executorService, url, tmpPath);
+                return createCustomDownloadTask(url);
             }
         }
 
@@ -203,6 +203,10 @@ public class MavenDownloadManager implements DownloadManager {
 
         }
 
+    }
+
+    protected AbstractDownloadTask createCustomDownloadTask(final String url) {
+        return new SimpleDownloadTask(executorService, url, tmpPath);
     }
 
 }

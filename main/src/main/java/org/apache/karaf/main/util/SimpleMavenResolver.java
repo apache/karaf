@@ -19,16 +19,16 @@
 package org.apache.karaf.main.util;
 
 import java.io.File;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
+import org.apache.karaf.util.maven.Parser;
 
 /**
  * Resolves local maven artifacts and raw file paths
  */
 public class SimpleMavenResolver implements ArtifactResolver {
-    private static final Pattern mvnPattern = Pattern.compile("mvn:([^/ ]+)/([^/ ]+)/([^/ ]*)(/([^/ ]+)(/([^/ ]+))?)?");
     private final List<File> mavenRepos;
 
     /**
@@ -60,54 +60,17 @@ public class SimpleMavenResolver implements ArtifactResolver {
     }
 
     private static File findFile(File dir, URI mvnUri) {
-        String path = fromMaven(mvnUri);
-        File theFile = new File(dir, path);
+        try {
+            String path = Parser.pathFromMaven(mvnUri.toString());
+            File theFile = new File(dir, path);
 
-        if (theFile.exists() && !theFile.isDirectory()) {
-            return theFile;
+            if (theFile.exists() && !theFile.isDirectory()) {
+                return theFile;
+            }
+            return null;
+        } catch (MalformedURLException e) {
+            return null;
         }
-        return null;
     }
 
-    
-
-    /**
-     * Returns a path for an srtifact.
-     * Input: path (no ':') returns path
-     * Input:  converts to default repo location path
-     * type and classifier are optional.
-     *
-     *
-     * @param name input artifact info
-     * @return path as supplied or a default maven repo path
-     */
-    static String fromMaven(URI name) {
-        Matcher m = mvnPattern.matcher(name.toString());
-        if (!m.matches()) {
-            return name.toString();
-        }
-        StringBuilder path = new StringBuilder();
-        path.append(m.group(1).replace(".", "/"));
-        path.append("/");//groupId
-        String artifactId = m.group(2);
-        String version = m.group(3);
-        String extension = m.group(5);
-        String classifier = m.group(7);
-        path.append(artifactId).append("/");//artifactId
-        path.append(version).append("/");//version
-        path.append(artifactId).append("-").append(version);
-        if (present(classifier)) {
-            path.append("-").append(classifier);
-        }
-        if (present(extension)) {
-            path.append(".").append(extension);
-        } else {
-            path.append(".jar");
-        }
-        return path.toString();
-    }
-
-    private static boolean present(String part) {
-        return part != null && !part.isEmpty();
-    }
 }

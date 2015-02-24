@@ -77,6 +77,56 @@
         </dependency>
 
         <dependency>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>org.apache.karaf.features.core</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.equinox</groupId>
+            <artifactId>org.eclipse.equinox.region</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.resolver</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.karaf.kar</groupId>
+            <artifactId>org.apache.karaf.kar.core</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.karaf.deployer</groupId>
+            <artifactId>org.apache.karaf.deployer.blueprint</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.karaf.deployer</groupId>
+            <artifactId>org.apache.karaf.deployer.spring</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.ops4j.pax.url</groupId>
+            <artifactId>pax-url-wrap</artifactId>
+            <classifier>uber</classifier>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.ops4j.pax.url</groupId>
+            <artifactId>pax-url-war</artifactId>
+            <classifier>uber</classifier>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
             <groupId>org.jledit</groupId>
             <artifactId>core</artifactId>
             <optional>true</optional>
@@ -85,6 +135,12 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-jdk14</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.karaf.demos.profiles</groupId>
+            <artifactId>registry</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -123,10 +179,13 @@
                         <Private-Package>
                             org.apache.karaf.profile.command,
                             org.apache.karaf.profile.command.completers,
+                            org.apache.karaf.profile.assembly,
                             org.apache.karaf.profile.impl,
                             org.apache.karaf.profile.impl.osgi,
+                            org.apache.karaf.util.config,
+                            org.apache.karaf.util.maven,
                             org.apache.karaf.util.tracker,
-                            org.apache.karaf.util.properties,
+                            org.apache.felix.utils.version,
                             org.apache.felix.utils.properties,
                         </Private-Package>
                         <Provide-Capability>

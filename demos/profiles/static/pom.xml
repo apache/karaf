@@ -121,13 +121,9 @@
                 </executions>
                 <configuration>
                     <useReferenceUrls>true</useReferenceUrls>
-                    <!--
-                    <profilesArtifact>
-                        org.apache.karaf.demo.profiles:org.apache.karaf.demo.profiles.registry
-                    </profilesArtifact>
-                    -->
+                    <environment>static</environment>
                     <profilesUri>
-                        file://${basedir}/../registry/src/main/resources
+                        jar:mvn:org.apache.karaf.demos.profiles/registry/${project.version}!/
                     </profilesUri>
                     <startupProfiles>
                         <profile>karaf</profile>

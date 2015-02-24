@@ -532,6 +532,11 @@
                 <artifactId>demos</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.demos.profiles</groupId>
+                <artifactId>registry</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>org.apache.karaf.features</groupId>

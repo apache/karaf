@@ -150,6 +150,19 @@ public class Parser
     }
 
     /**
+     * Returns the artifact path from the given maven uri.
+     * @param uri the maven uri
+     * @return the artifact path
+     * @throws MalformedURLException
+     */
+    public static String pathFromMaven(String uri) throws MalformedURLException {
+        if (!uri.startsWith("mvn:")) {
+            return uri;
+        }
+        return new Parser(uri.substring("mvn:".length())).getArtifactPath();
+    }
+
+    /**
      * Parses the artifact part of the url ( without the repository).
      *
      * @param part url part without protocol and repository.

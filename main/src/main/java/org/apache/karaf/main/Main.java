@@ -46,6 +46,7 @@ import org.apache.karaf.main.util.ArtifactResolver;
 import org.apache.karaf.main.util.BootstrapLogManager;
 import org.apache.karaf.main.util.SimpleMavenResolver;
 import org.apache.karaf.main.util.Utils;
+import org.apache.karaf.util.config.PropertiesLoader;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;

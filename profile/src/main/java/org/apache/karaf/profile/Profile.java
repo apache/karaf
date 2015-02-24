@@ -69,7 +69,19 @@ public interface Profile {
      */
     String ATTRIBUTE_PREFIX = "attribute.";
 
+    /**
+     * The config prefix for in the agent configuration
+     */
+    String CONFIG_PREFIX = "config.";
+
+    /**
+     * The config prefix for in the agent configuration
+     */
+    String SYSTEM_PREFIX = "system.";
+
     Map<String, String> getAttributes();
+    Map<String, String> getConfig();
+    Map<String, String> getSystem();
 
     List<String> getParentIds();
 
