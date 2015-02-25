@@ -29,6 +29,8 @@ import java.util.Map;
 
 import org.easymock.EasyMock;
 import org.easymock.IAnswer;
+import org.easymock.internal.Invocation;
+import org.easymock.internal.LastControl;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -65,7 +67,7 @@ public class GuardingEventHookTest {
         Map<BundleContext, Collection<ListenerInfo>> listeners = new HashMap<BundleContext, Collection<ListenerInfo>>();
         listeners.put(client1BC, Collections.<ListenerInfo>emptyList());
 
-        // Send the event. It should have no effect because the service doens't match the filter
+        // Send the event. It should have no effect because the service doesn't match the filter
         assertEquals("Precondition", 0, gpc.proxyMap.size());
         geh.event(new ServiceEvent(ServiceEvent.REGISTERED, sref), listeners);
         assertEquals("No proxy should have been created because the service doesn't match the filter", 0, gpc.proxyMap.size());
@@ -118,7 +120,7 @@ public class GuardingEventHookTest {
         listeners5.put(client1BC, Collections.<ListenerInfo>emptyList());
         listeners5.put(client1BC, Collections.<ListenerInfo>emptyList()); // Should be ignored
         geh.event(new ServiceEvent(ServiceEvent.REGISTERED, sref3), listeners5);
-        assertEquals("There should be an additional procy for client1 to the new service", 2, gpc.proxyMap.size());
+        assertEquals("There should be an additional proxy for client1 to the new service", 2, gpc.proxyMap.size());
         assertEquals("The service should be hidden from these listeners", 0, listeners5.size());
         assertNotNull(gpc.proxyMap.get(service2ID));
         assertNotNull(gpc.proxyMap.get(service3ID));
@@ -175,7 +177,6 @@ public class GuardingEventHookTest {
         BundleContext bc = EasyMock.createNiceMock(BundleContext.class);
         EasyMock.expect(bc.getBundle()).andReturn(bundle).anyTimes();
         EasyMock.expect(bc.createFilter(EasyMock.isA(String.class))).andAnswer(new IAnswer<Filter>() {
-            @Override
             public Filter answer() throws Throwable {
                 return FrameworkUtil.createFilter((String) EasyMock.getCurrentArguments()[0]);
             }
@@ -215,7 +216,6 @@ public class GuardingEventHookTest {
         BundleContext bc = EasyMock.createNiceMock(BundleContext.class);
         EasyMock.expect(bc.getBundle()).andReturn(b).anyTimes();
         EasyMock.expect(bc.createFilter(EasyMock.isA(String.class))).andAnswer(new IAnswer<Filter>() {
-            @Override
             public Filter answer() throws Throwable {
                 return FrameworkUtil.createFilter((String) EasyMock.getCurrentArguments()[0]);
             }
@@ -236,15 +236,19 @@ public class GuardingEventHookTest {
 
         // Make sure the properties are 'live' in that if they change the reference changes too
         EasyMock.expect(sr.getPropertyKeys()).andAnswer(new IAnswer<String[]>() {
-            @Override
             public String[] answer() throws Throwable {
-                return Collections.list(props.keys()).toArray(new String [] {});
+                return Collections.list(props.keys()).toArray(new String [props.size()]);
             }
         }).anyTimes();
         EasyMock.expect(sr.getProperty(EasyMock.isA(String.class))).andAnswer(new IAnswer<Object>() {
-            @Override
             public Object answer() throws Throwable {
                 return props.get(EasyMock.getCurrentArguments()[0]);
+            }
+        }).anyTimes();
+        EasyMock.expect(sr.compareTo(EasyMock.anyObject())).andAnswer(new IAnswer<Integer>() {
+            public Integer answer() throws Throwable {
+                final Invocation result = LastControl.getCurrentInvocation();
+                return result.getMock() == result.getArguments()[0] ? 0 : -1;
             }
         }).anyTimes();
         EasyMock.replay(sr);
