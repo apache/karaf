@@ -49,13 +49,13 @@ public class WrapperServiceImpl implements WrapperService {
         File base = new File(System.getProperty("karaf.base"));
         File etc = new File(System.getProperty("karaf.etc"));
         File bin = new File(base, "bin");
-        File lib = new File(base, "lib");
+        File lib = new File(base, "lib/wrapper");
 
         if (name == null) {
             name = base.getName();
         }
 
-        HashMap<String, String> props = new HashMap<String, String>();
+        HashMap<String, String> props = new HashMap<>();
         props.put("${java.home}", System.getenv("JAVA_HOME"));
         props.put("${karaf.home}", System.getProperty("karaf.home"));
         props.put("${karaf.base}", base.getPath());
@@ -67,8 +67,8 @@ public class WrapperServiceImpl implements WrapperService {
         props.put("${startType}", startType);
 
         String os = System.getProperty("os.name", "Unknown");
-        File serviceFile = null;
-        File wrapperConf = null;
+        File serviceFile;
+        File wrapperConf;
         if (os.startsWith("Win")) {
             String arch = System.getProperty("os.arch");
             if (arch.equalsIgnoreCase("amd64") || arch.equalsIgnoreCase("x86_64")) {
@@ -280,7 +280,7 @@ public class WrapperServiceImpl implements WrapperService {
         copyResourceTo(new File(lib, "karaf-wrapper.jar"), "all/karaf-wrapper.jar", false);
         mkdir(etc);
 
-        createJar(new File(lib, "karaf-wrapper-main.jar"), "org/apache/karaf/wrapper/internal/Main.class");
+        createJar(new File(lib, "karaf-wrapper-main.jar"), "org/apache/karaf/wrapper/internal/service/Main.class");
 
         File[] wrapperPaths = new File[2];
         wrapperPaths[0] = wrapperConf;
@@ -325,7 +325,7 @@ public class WrapperServiceImpl implements WrapperService {
                     // binary resource so just write it out the way it came in
                     FileOutputStream out = new FileOutputStream(outFile);
                     try {
-                        int c = 0;
+                        int c;
                         while ((c = is.read()) >= 0) {
                             out.write(c);
                         }
