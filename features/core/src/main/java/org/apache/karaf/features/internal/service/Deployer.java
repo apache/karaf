@@ -761,7 +761,7 @@ public class Deployer {
         // Resolve bundles
         toResolve.addAll(toStart);
         toResolve.addAll(toRefresh.keySet());
-        removeFragmentsAndBundlesInState(toResolve, UNINSTALLED);
+        removeBundlesInState(toResolve, UNINSTALLED);
         callback.resolveBundles(toResolve, resolver.getWiring(), deployment.resToBnd);
 
         // Compute bundles to start
@@ -987,6 +987,15 @@ public class Deployer {
             Bundle bundle = iterator.next();
             if ((bundle.getState() & state) != 0
                     || bundle.getHeaders().get(Constants.FRAGMENT_HOST) != null) {
+                iterator.remove();
+            }
+        }
+    }
+
+    private void removeBundlesInState(Collection<Bundle> bundles, int state) {
+        for (Iterator<Bundle> iterator = bundles.iterator(); iterator.hasNext();) {
+            Bundle bundle = iterator.next();
+            if ((bundle.getState() & state) != 0) {
                 iterator.remove();
             }
         }

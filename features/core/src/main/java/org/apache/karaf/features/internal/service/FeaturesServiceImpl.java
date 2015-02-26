@@ -77,13 +77,13 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.Version;
 import org.osgi.framework.hooks.resolver.ResolverHook;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
+import org.osgi.framework.namespace.HostNamespace;
 import org.osgi.framework.startlevel.BundleStartLevel;
 import org.osgi.framework.startlevel.FrameworkStartLevel;
 import org.osgi.framework.wiring.BundleCapability;
 import org.osgi.framework.wiring.BundleRequirement;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.FrameworkWiring;
-import org.osgi.resource.Requirement;
 import org.osgi.resource.Resource;
 import org.osgi.resource.Wire;
 import org.osgi.service.cm.Configuration;
@@ -1181,23 +1181,24 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
                 if (Thread.currentThread() == thread) {
                     Bundle sourceBundle = requirement.getRevision().getBundle();
                     Resource sourceResource = bndToRes.get(sourceBundle);
+                    Set<Resource> wired = new HashSet<>();
+                    // Get a list of allowed wired resources
+                    wired.add(sourceResource);
                     for (Wire wire : wiring.get(sourceResource)) {
-                        Requirement req = wire.getRequirement();
-                        if (req.getNamespace().equals(requirement.getNamespace())
-                                && req.getAttributes().equals(requirement.getAttributes())
-                                && req.getDirectives().equals(requirement.getDirectives())) {
-                            for (Iterator<BundleCapability> capIter = candidates.iterator(); capIter.hasNext(); ) {
-                                BundleCapability cap = capIter.next();
-                                BundleRevision br = cap.getRevision();
-                                if (br == wire.getCapability().getResource()) {
-                                    continue;
-                                }
-                                Resource res = bndToRes.get(br.getBundle());
-                                if (res != wire.getCapability().getResource()) {
-                                    capIter.remove();
-                                }
+                        wired.add(wire.getProvider());
+                        if (HostNamespace.HOST_NAMESPACE.equals(wire.getRequirement().getNamespace())) {
+                            for (Wire hostWire : wiring.get(wire.getProvider())) {
+                                wired.add(hostWire.getProvider());
                             }
-                            break;
+                        }
+                    }
+                    // Remove candidates that are not allowed
+                    for (Iterator<BundleCapability> candIter = candidates.iterator(); candIter.hasNext(); ) {
+                        BundleCapability cand = candIter.next();
+                        BundleRevision br = cand.getRevision();
+                        Resource res = bndToRes.get(br.getBundle());
+                        if (!wired.contains(br) && !wired.contains(res)) {
+                            candIter.remove();
                         }
                     }
                 }
