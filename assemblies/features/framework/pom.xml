@@ -112,6 +112,10 @@
                     <artifactId>slf4j-api</artifactId>
                 </exclusion>
                 <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>jcl-over-slf4j</artifactId>
+                </exclusion>
+                <exclusion>
                     <groupId>org.eclipse.aether</groupId>
                     <artifactId>aether-api</artifactId>
                 </exclusion>
