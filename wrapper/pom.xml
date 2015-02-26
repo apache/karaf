@@ -112,15 +112,16 @@
                             org.apache.karaf.wrapper.commands,
                             org.apache.karaf.wrapper.internal,
                             org.apache.karaf.wrapper.internal.osgi,
+                            org.apache.karaf.wrapper.internal.service,
                             org.apache.karaf.wrapper.management.internal,
-                            org.tanukisoftware.wrapper*,
-                            org.apache.karaf.main*,
                             org.apache.karaf.util.tracker
                         </Private-Package>
                         <Import-Package>
                             !org.apache.felix.utils.properties,
                             !org.apache.karaf.util.locks,
                             !org.apache.karaf.info,
+                            !org.apache.karaf.main,
+                            !org.tanukisoftware.wrapper*,
                             *
                         </Import-Package>
                         <Bundle-Activator>

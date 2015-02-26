@@ -60,30 +60,39 @@ public class KarafRealm implements JaasRealm {
     @Override
     public AppConfigurationEntry[] getEntries() {
         Map<String, Object> propertiesOptions = new HashMap<String, Object>();
-        propertiesOptions.putAll(properties);
         propertiesOptions.put(BundleContext.class.getName(), bundleContext);
         propertiesOptions.put(ProxyLoginModule.PROPERTY_MODULE, PROPERTIES_MODULE);
         propertiesOptions.put(ProxyLoginModule.PROPERTY_BUNDLE, Long.toString(bundleContext.getBundle().getBundleId()));
         propertiesOptions.put("users", KARAF_ETC + File.separatorChar + "users.properties");
+        propertiesOptions.put("detailed.login.exception", properties.get("detailed.login.exception"));
+        propertiesOptions.put("encryption.name", properties.get("encryption.name"));
+        propertiesOptions.put("encryption.enabled", properties.get("encryption.enabled"));
+        propertiesOptions.put("encryption.prefix", properties.get("encryption.prefix"));
+        propertiesOptions.put("encryption.suffix", properties.get("encryption.suffix"));
+        propertiesOptions.put("encryption.algorithm", properties.get("encryption.algorithm"));
+        propertiesOptions.put("encryption.encoding", properties.get("encryption.encoding"));
 
         Map<String, Object> publicKeyOptions = new HashMap<String, Object>();
-        publicKeyOptions.putAll(properties);
         publicKeyOptions.put(BundleContext.class.getName(), bundleContext);
         publicKeyOptions.put(ProxyLoginModule.PROPERTY_MODULE, PUBLIC_KEY_MODULE);
         publicKeyOptions.put(ProxyLoginModule.PROPERTY_BUNDLE, Long.toString(bundleContext.getBundle().getBundleId()));
         publicKeyOptions.put("users", KARAF_ETC + File.separatorChar + "keys.properties");
+        publicKeyOptions.put("detailed.login.exception", properties.get("detailed.login.exception"));
 
         Map<String, Object> fileOptions = new HashMap<>();
-        fileOptions.putAll(properties);
         fileOptions.put(BundleContext.class.getName(), bundleContext);
         fileOptions.put(ProxyLoginModule.PROPERTY_MODULE, FILE_AUDIT_MODULE);
         fileOptions.put(ProxyLoginModule.PROPERTY_BUNDLE, Long.toString(bundleContext.getBundle().getBundleId()));
+        fileOptions.put("enabled", properties.get("audit.file.enabled"));
+        fileOptions.put("file", properties.get("audit.file.file"));
 
         Map<String, Object> eventadminOptions = new HashMap<>();
         eventadminOptions.putAll(properties);
         eventadminOptions.put(BundleContext.class.getName(), bundleContext);
         eventadminOptions.put(ProxyLoginModule.PROPERTY_MODULE, EVENTADMIN_AUDIT_MODULE);
         eventadminOptions.put(ProxyLoginModule.PROPERTY_BUNDLE, Long.toString(bundleContext.getBundle().getBundleId()));
+        eventadminOptions.put("enabled", properties.get("audit.eventadmin.enabled"));
+        eventadminOptions.put("topic", properties.get("audit.eventadmin.topic"));
 
         return new AppConfigurationEntry[] {
                 new AppConfigurationEntry(ProxyLoginModule.class.getName(), AppConfigurationEntry.LoginModuleControlFlag.OPTIONAL, propertiesOptions),

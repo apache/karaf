@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.wrapper.internal;
+package org.apache.karaf.wrapper.internal.service;
 
 import org.apache.karaf.main.ShutdownCallback;
 import org.tanukisoftware.wrapper.WrapperListener;
