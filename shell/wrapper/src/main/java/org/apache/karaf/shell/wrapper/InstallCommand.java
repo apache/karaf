@@ -392,13 +392,7 @@ public class InstallCommand extends AbstractAction {
         ProcessBuilder builder = new ProcessBuilder();
         builder.command("chmod", mode, serviceFile.getCanonicalPath());
         Process p = builder.start();
-
-        PumpStreamHandler handler = new PumpStreamHandler(System.in, System.out, System.err);
-        handler.attach(p);
-        handler.start();
-        int status = p.waitFor();
-        handler.stop();
-        return status;
+        return p.waitFor();
     }
 
     private void createJar(File outFile, String resource) throws Exception {
