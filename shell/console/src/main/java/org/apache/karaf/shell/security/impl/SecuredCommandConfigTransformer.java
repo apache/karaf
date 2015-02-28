@@ -74,8 +74,10 @@ public class SecuredCommandConfigTransformer implements ConfigurationListener {
         }
         scopeName = scopeName.trim();
 
+        Dictionary<String, Object> configProps = config.getProperties();
+
         Map<String, Dictionary<String, Object>> configMaps = new HashMap<String, Dictionary<String, Object>>();
-        for (Enumeration<String> e = config.getProperties().keys(); e.hasMoreElements(); ) {
+        for (Enumeration<String> e = configProps.keys(); e.hasMoreElements(); ) {
             String key = e.nextElement();
             String bareCommand = key;
             String arguments = "";
@@ -104,7 +106,7 @@ public class SecuredCommandConfigTransformer implements ConfigurationListener {
 
             // put rules on the map twice, once for commands that 'execute' (implement Function) and
             // once for commands that are invoked directly
-            Object roleString = config.getProperties().get(key);
+            Object roleString = configProps.get(key);
             map.put("execute" + arguments, roleString);
             map.put(key, roleString);
             map.put("*", "*"); // any other method may be invoked by anyone
@@ -160,8 +162,9 @@ public class SecuredCommandConfigTransformer implements ConfigurationListener {
                     deleteServiceGuardConfig(event.getPid(), event.getPid().substring(PROXY_COMMAND_ACL_PID_PREFIX.length()));
                     break;
                 case ConfigurationEvent.CM_UPDATED:
-                    generateServiceGuardConfig(configAdmin.getConfiguration(event.getPid()));
-                    refreshTheAffectedShellCommandBundle(event, configAdmin.getConfiguration(event.getPid()));
+                    Configuration config = configAdmin.getConfiguration(event.getPid());
+                    generateServiceGuardConfig(config);
+                    refreshTheAffectedShellCommandBundle(event, config);
                     break;
             }
         } catch (Exception e) {
