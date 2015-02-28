@@ -22,16 +22,7 @@ import java.lang.reflect.Modifier;
 import java.security.AccessControlContext;
 import java.security.AccessController;
 import java.security.Principal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Dictionary;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -77,6 +68,7 @@ public class GuardProxyCatalog implements ServiceListener {
     private static final String ROLE_WILDCARD = "*";
 
     private final BundleContext myBundleContext;
+    private final Map<String, Filter> filters = new ConcurrentHashMap<String, Filter>();
 
     final ServiceTracker<ConfigurationAdmin, ConfigurationAdmin> configAdminTracker;
     final ServiceTracker<ProxyManager, ProxyManager> proxyManagerTracker;
@@ -304,12 +296,13 @@ public class GuardProxyCatalog implements ServiceListener {
         // This can probably be optimized. Maybe we can cache the config object relevant instead of
         // walking through all of the ones that have 'service.guard'.
         for (Configuration config : getServiceGuardConfigs()) {
-            Object guardFilter = config.getProperties().get(SERVICE_GUARD_KEY);
+            Dictionary<String, Object> properties = config.getProperties();
+            Object guardFilter = properties.get(SERVICE_GUARD_KEY);
             if (guardFilter instanceof String) {
-                Filter filter = myBundleContext.createFilter((String) guardFilter);
+                Filter filter = getFilter((String) guardFilter);
                 if (filter.match(serviceReference)) {
                     definitionFound = true;
-                    for (Enumeration<String> e = config.getProperties().keys(); e.hasMoreElements(); ) {
+                    for (Enumeration<String> e = properties.keys(); e.hasMoreElements(); ) {
                         String key = e.nextElement();
                         String bareKey = key;
                         int idx = bareKey.indexOf('(');
@@ -327,7 +320,7 @@ public class GuardProxyCatalog implements ServiceListener {
                         if (!isValidMethodName(bareKey)) {
                             continue;
                         }
-                        Object value = config.getProperties().get(key);
+                        Object value = properties.get(key);
                         if (value instanceof String) {
                             allRoles.addAll(ACLConfigurationParser.parseRoles((String) value));
                         }
@@ -336,6 +329,15 @@ public class GuardProxyCatalog implements ServiceListener {
             }
         }
         return definitionFound ? allRoles : null;
+    }
+
+    private Filter getFilter(String string) throws InvalidSyntaxException {
+        Filter filter = filters.get(string);
+        if (filter == null) {
+            filter = myBundleContext.createFilter(string);
+            filters.put(string, filter);
+        }
+        return filter;
     }
 
     // Ensures that it never returns null
