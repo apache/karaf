@@ -110,7 +110,7 @@
 
     <feature name="spring-web-portlet" description="Spring 3.1.x Web Portlet support" version="${spring31.version}">
         <feature version="[${spring31.version},3.2)">spring-web</feature>
-        <bundle dependency="true" start-level="30">wrap:mvn:javax.portlet/portlet-api/${portlet-api.version}</bundle>
+        <bundle dependency="true" start-level="30">wrap:mvn:javax.portlet/portlet-api/${portlet-api.version}$Export-Package=javax.portlet.*;version=2.0</bundle>
         <bundle start-level="30">mvn:org.springframework/spring-webmvc-portlet/${spring31.version}</bundle>
     </feature>
 
@@ -186,7 +186,7 @@
 
     <feature name="spring-web-portlet" description="Spring 3.2.x Web Portlet support" version="${spring32.version}">
         <feature version="[${spring32.version},3.3)">spring-web</feature>
-        <bundle dependency="true" start-level="30">wrap:mvn:javax.portlet/portlet-api/${portlet-api.version}</bundle>
+        <bundle dependency="true" start-level="30">wrap:mvn:javax.portlet/portlet-api/${portlet-api.version}$Export-Package=javax.portlet.*;version=2.0</bundle>
         <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-webmvc-portlet/${spring32.version}</bundle>
     </feature>
 
@@ -253,7 +253,7 @@
 
     <feature name="spring-web-portlet" description="Spring 4.0.x Web Portlet support" version="${spring40.version}">
         <feature version="[${spring40.version},4.1)">spring-web</feature>
-        <bundle dependency="true" start-level="30">wrap:mvn:javax.portlet/portlet-api/${portlet-api.version}</bundle>
+        <bundle dependency="true" start-level="30">wrap:mvn:javax.portlet/portlet-api/${portlet-api.version}$Export-Package=javax.portlet.*;version=2.0</bundle>
         <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-webmvc-portlet/${spring40.version}</bundle>
     </feature>
 
@@ -325,7 +325,7 @@
 
     <feature name="spring-web-portlet" description="Spring 4.1.x Web Portlet support" version="${spring41.version}">
         <feature version="[${spring41.version},4.2)">spring-web</feature>
-        <bundle dependency="true" start-level="30">wrap:mvn:javax.portlet/portlet-api/${portlet-api.version}</bundle>
+        <bundle dependency="true" start-level="30">wrap:mvn:javax.portlet/portlet-api/${portlet-api.version}$Export-Package=javax.portlet.*;version=2.0</bundle>
         <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-webmvc-portlet/${spring41.version}</bundle>
     </feature>
 
