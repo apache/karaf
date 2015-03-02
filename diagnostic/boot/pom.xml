@@ -54,7 +54,8 @@
                 <configuration>
                     <instructions>
                         <Export-Package>
-                            org.apache.karaf.diagnostic.core
+                            org.apache.karaf.diagnostic.core,
+                            org.apache.karaf.diagnostic.core.common
                         </Export-Package>
                         <Private-Package>
                             org.apache.karaf.diagnostic.core.common,
