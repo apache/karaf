@@ -89,6 +89,20 @@ public class ClientConfig {
                     }
                 } else if (args[i].equals("-v")) {
                     level++;
+                } else if (args[i].equals("-l")) {
+                    if (args.length <= ++i) {
+                        System.err.println("miss the log level");
+                        System.exit(1);
+                    } else {
+                        int levelValue = Integer.parseInt(args[i]);
+                        if (levelValue < 0 || levelValue > 4) {
+                            System.err.println("log level can only be 0, 1, 2, 3, or 4");
+                            System.exit(1);
+                        } else {
+                            level = levelValue;
+                        }
+                    }
+
                 } else if (args[i].equals("-r")) {
                     if (args.length <= ++i) {
                         System.err.println("miss the attempts");
@@ -153,6 +167,7 @@ public class ClientConfig {
         System.out.println("  -u [user]     specify the user name");
         System.out.println("  --help        shows this help message");
         System.out.println("  -v            raise verbosity");
+        System.out.println("  -l            set client logging level. Set to 0 for ERROR logging and up to 4 for TRACE.");
         System.out.println("  -r [attempts] retry connection establishment (up to attempts times)");
         System.out.println("  -d [delay]    intra-retry delay (defaults to 2 seconds)");
         System.out.println("  -b            batch mode, specify multiple commands via standard input");
