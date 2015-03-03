@@ -564,9 +564,13 @@ public class FeaturesServiceImpl implements FeaturesService {
                 if (verbose) {
                     System.out.println(msg2);
                 }
-
-                bundles.add(result.bundle.getBundleId());
-                state.bundleInfos.put(result.bundle.getBundleId(), bInfo);
+                if (result.isNew) {
+                    //only associate the bundles installed by this feature
+                    //so that when uninstall this feature, won't uninstall bundles
+                    //installed by other features or from the startup.properties
+                    bundles.add(result.bundle.getBundleId());
+                    state.bundleInfos.put(result.bundle.getBundleId(), bInfo);
+                }
 
             }
             state.features.put(feature, bundles);
