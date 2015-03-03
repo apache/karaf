@@ -722,9 +722,14 @@ public class FeaturesServiceImpl implements FeaturesService {
         List<InstallResult> installResultList = new LinkedList<InstallResult>();
         for (BundleInfo bInfo : resolve(feature)) {
             InstallResult result = installBundleIfNeeded(state, bInfo, verbose);
-            bundles.add(result.getBundle().getBundleId());
-            state.bundleInfos.put(result.getBundle().getBundleId(), bInfo);
-            installResultList.add(result);
+            if (!result.isPreviouslyInstalled()) {
+                //only associate the bundles installed by this feature
+                //so that when uninstall this feature, won't uninstall bundles
+                //installed by other features or from the startup.properties
+                bundles.add(result.getBundle().getBundleId());
+                state.bundleInfos.put(result.getBundle().getBundleId(), bInfo);
+                installResultList.add(result);
+            }
         }
         for (InstallResult result : installResultList) {
             if (!result.isPreviouslyInstalled()) {
