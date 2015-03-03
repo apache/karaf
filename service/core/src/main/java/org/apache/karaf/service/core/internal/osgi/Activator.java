@@ -18,7 +18,9 @@ package org.apache.karaf.service.core.internal.osgi;
 
 import org.apache.karaf.service.core.internal.ServicesMBeanImpl;
 import org.apache.karaf.util.tracker.BaseActivator;
+import org.apache.karaf.util.tracker.Services;
 
+@Services
 public class Activator extends BaseActivator {
 
     @Override

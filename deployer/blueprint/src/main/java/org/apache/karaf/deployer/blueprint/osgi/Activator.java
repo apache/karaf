@@ -24,8 +24,10 @@ import org.apache.felix.fileinstall.ArtifactUrlTransformer;
 import org.apache.karaf.deployer.blueprint.BlueprintDeploymentListener;
 import org.apache.karaf.deployer.blueprint.BlueprintURLHandler;
 import org.apache.karaf.util.tracker.BaseActivator;
+import org.apache.karaf.util.tracker.Services;
 import org.osgi.service.url.URLStreamHandlerService;
 
+@Services
 public class Activator extends BaseActivator {
 
     @Override

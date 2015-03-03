@@ -17,6 +17,8 @@
 package org.apache.karaf.features.internal.resolver;
 
 import java.util.ArrayList;
+import java.util.Deque;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -57,74 +59,101 @@ public class SimpleFilter {
         return op;
     }
 
-    @SuppressWarnings("unchecked")
     public String toString() {
-        String s;
-        switch (op) {
-        case AND:
-            s = "(&" + toString((List) value) + ")";
-            break;
-        case OR:
-            s = "(|" + toString((List) value) + ")";
-            break;
-        case NOT:
-            s = "(!" + toString((List) value) + ")";
-            break;
-        case EQ:
-            s = "(" + name + "=" + toEncodedString(value) + ")";
-            break;
-        case LTE:
-            s = "(" + name + "<=" + toEncodedString(value) + ")";
-            break;
-        case GTE:
-            s = "(" + name + ">=" + toEncodedString(value) + ")";
-            break;
-        case SUBSTRING:
-            s = "(" + name + "=" + unparseSubstring((List<String>) value) + ")";
-            break;
-        case PRESENT:
-            s = "(" + name + "=*)";
-            break;
-        case APPROX:
-            s = "(" + name + "~=" + toEncodedString(value) + ")";
-            break;
-        case MATCH_ALL:
-            s = "(*)";
-            break;
-        default:
-            throw new IllegalStateException("Unsupported operator " + op);
-        }
-        return s;
-    }
-
-    private static String toString(List list) {
         StringBuilder sb = new StringBuilder();
-        for (Object aList : list) {
-            sb.append(aList.toString());
-        }
+        toString(sb);
         return sb.toString();
     }
 
+    private void toString(StringBuilder sb)
+    {
+        switch (op)
+        {
+        case AND:
+            sb.append("(&");
+            toString(sb, (List) value);
+            sb.append(")");
+            break;
+        case OR:
+            sb.append("(|");
+            toString(sb, (List) value);
+            sb.append(")");
+            break;
+        case NOT:
+            sb.append("(!");
+            toString(sb, (List) value);
+            sb.append(")");
+            break;
+        case EQ:
+            sb.append("(")
+                    .append(name)
+                    .append("=");
+            toEncodedString(sb, value);
+            sb.append(")");
+            break;
+        case LTE:
+            sb.append("(")
+                    .append(name)
+                    .append("<=");
+            toEncodedString(sb, value);
+            sb.append(")");
+            break;
+        case GTE:
+            sb.append("(")
+                    .append(name)
+                    .append(">=");
+            toEncodedString(sb, value);
+            sb.append(")");
+            break;
+        case SUBSTRING:
+            sb.append("(").append(name).append("=");
+            unparseSubstring(sb, (List) value);
+            sb.append(")");
+            break;
+        case PRESENT:
+            sb.append("(").append(name).append("=*)");
+            break;
+        case APPROX:
+            sb.append("(").append(name).append("~=");
+            toEncodedString(sb, value);
+            sb.append(")");
+            break;
+        case MATCH_ALL:
+            sb.append("(*)");
+            break;
+        }
+    }
+
+    private static void toString(StringBuilder sb, List list) {
+        for (Object o : list) {
+            SimpleFilter sf = (SimpleFilter) o;
+            sf.toString(sb);
+        }
+    }
+
+
     private static String toDecodedString(String s, int startIdx, int endIdx) {
-        StringBuilder sb = new StringBuilder(endIdx - startIdx);
+        StringBuilder sb = null;
         boolean escaped = false;
-        for (int i = 0; i < (endIdx - startIdx); i++) {
-            char c = s.charAt(startIdx + i);
+        for (int i = startIdx; i < endIdx; i++) {
+            char c = s.charAt(i);
             if (!escaped && (c == '\\')) {
+                sb = new StringBuilder(endIdx - startIdx);
+                sb.append(s, startIdx, i);
                 escaped = true;
             } else {
                 escaped = false;
-                sb.append(c);
+                if (sb != null) {
+                    sb.append(c);
+                }
             }
         }
-
-        return sb.toString();
+        return sb != null ? sb.toString() : s.substring(startIdx, endIdx);
     }
 
-    private static String toEncodedString(Object o) {
+    private static void toEncodedString(StringBuilder sb, Object o) {
         if (o instanceof String) {
             String s = (String) o;
-            StringBuilder sb = new StringBuilder();
             for (int i = 0; i < s.length(); i++) {
                 char c = s.charAt(i);
                 if ((c == '\\') || (c == '(') || (c == ')') || (c == '*')) {
@@ -132,11 +161,9 @@ public class SimpleFilter {
                 }
                 sb.append(c);
             }
-
-            o = sb.toString();
+        } else {
+            sb.append(o);
         }
-
-        return o.toString();
     }
 
     @SuppressWarnings("unchecked")
@@ -150,7 +177,7 @@ public class SimpleFilter {
         }
 
         SimpleFilter sf = null;
-        List<Object> stack = new ArrayList<>();
+        Deque<Object> stack = new LinkedList<>();
         boolean isEscaped = false;
         while (idx < filter.length()) {
             if (sf != null) {
@@ -166,39 +193,40 @@ public class SimpleFilter {
                     int peek = skipWhitespace(filter, idx + 1);
                     if (filter.charAt(peek) == '(') {
                         idx = peek - 1;
-                        stack.add(0, new SimpleFilter(null, new ArrayList(), SimpleFilter.AND));
+                        stack.addFirst(new SimpleFilter(null, new ArrayList(), SimpleFilter.AND));
                     } else {
-                        stack.add(0, idx);
+                        stack.addFirst(idx);
                     }
                 } else if (filter.charAt(idx) == '|') {
                     int peek = skipWhitespace(filter, idx + 1);
                     if (filter.charAt(peek) == '(') {
                         idx = peek - 1;
-                        stack.add(0, new SimpleFilter(null, new ArrayList(), SimpleFilter.OR));
+                        stack.addFirst(new SimpleFilter(null, new ArrayList(), SimpleFilter.OR));
                     } else {
-                        stack.add(0, idx);
+                        stack.addFirst(idx);
                     }
                 } else if (filter.charAt(idx) == '!') {
                     int peek = skipWhitespace(filter, idx + 1);
                     if (filter.charAt(peek) == '(') {
                         idx = peek - 1;
-                        stack.add(0, new SimpleFilter(null, new ArrayList(), SimpleFilter.NOT));
+                        stack.addFirst(new SimpleFilter(null, new ArrayList(), SimpleFilter.NOT));
                     } else {
-                        stack.add(0, idx);
+                        stack.addFirst(idx);
                     }
                 } else {
-                    stack.add(0, idx);
+                    stack.addFirst(idx);
                 }
             } else if (!isEscaped && (filter.charAt(idx) == ')')) {
-                Object top = stack.remove(0);
+                Object top = stack.removeFirst();
+                Object next = stack.peekFirst();
                 if (top instanceof SimpleFilter) {
-                    if (!stack.isEmpty() && (stack.get(0) instanceof SimpleFilter)) {
-                        ((List<Object>) ((SimpleFilter) stack.get(0)).value).add(top);
+                    if (next instanceof SimpleFilter) {
+                        ((List<Object>) ((SimpleFilter) next).value).add(top);
                     } else {
                         sf = (SimpleFilter) top;
                     }
-                } else if (!stack.isEmpty() && (stack.get(0) instanceof SimpleFilter)) {
-                    ((List<Object>) ((SimpleFilter) stack.get(0)).value).add(
+                } else if (next instanceof SimpleFilter) {
+                    ((List<Object>) ((SimpleFilter) next).value).add(
                             SimpleFilter.subfilter(filter, (Integer) top, idx));
                 } else {
                     sf = SimpleFilter.subfilter(filter, (Integer) top, idx);
@@ -298,6 +326,21 @@ public class SimpleFilter {
 
     public static List<String> parseSubstring(String value) {
         List<String> pieces = new ArrayList<>();
+        int length = value.length();
+
+        boolean isSimple = true;
+        for (int idx = 0; idx < length; idx++) {
+            char c = value.charAt(idx);
+            if (c == '*' || c == '\\') {
+                isSimple = false;
+                break;
+            }
+        }
+        if (isSimple) {
+            pieces.add(value);
+            return pieces;
+        }
+
         StringBuilder ss = new StringBuilder();
         // int kind = SIMPLE; // assume until proven otherwise
         boolean wasStar = false; // indicates last piece was a star
@@ -309,7 +352,7 @@ public class SimpleFilter {
         // We assume (sub)strings can contain leading and trailing blanks
         boolean escaped = false;
         for (;;) {
-            if (idx >= value.length()) {
+            if (idx >= length) {
                 if (wasStar) {
                     // insert last piece as "" to handle trailing star
                     rightstar = true;
@@ -361,15 +404,13 @@ public class SimpleFilter {
         return pieces;
     }
 
-    public static String unparseSubstring(List<String> pieces) {
-        StringBuilder sb = new StringBuilder();
+    public static void unparseSubstring(StringBuilder sb, List<String> pieces) {
         for (int i = 0; i < pieces.size(); i++) {
             if (i > 0) {
                 sb.append("*");
             }
-            sb.append(toEncodedString(pieces.get(i)));
+            toEncodedString(sb, pieces.get(i));
         }
-        return sb.toString();
     }
 
     public static boolean compareSubstring(List<String> pieces, String s) {
@@ -453,7 +494,7 @@ public class SimpleFilter {
         // Rather than building a filter string to be parsed into a SimpleFilter,
         // we will just create the parsed SimpleFilter directly.
 
-        List<SimpleFilter> filters = new ArrayList<>();
+        List<SimpleFilter> filters = new ArrayList<>(attrs.size());
 
         for (Entry<String, Object> entry : attrs.entrySet()) {
             if (entry.getValue() instanceof VersionRange) {

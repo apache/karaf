@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.felix.utils.version.VersionRange;
+import org.apache.felix.utils.version.VersionTable;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
@@ -76,7 +77,7 @@ public final class ResourceBuilder {
 
         Version bundleVersion = Version.emptyVersion;
         if (headerMap.get(Constants.BUNDLE_VERSION) != null) {
-            bundleVersion = Version.parseVersion(headerMap.get(Constants.BUNDLE_VERSION));
+            bundleVersion = VersionTable.getVersion(headerMap.get(Constants.BUNDLE_VERSION));
         }
 
         //
@@ -620,7 +621,7 @@ public final class ResourceBuilder {
                 // Convert version attribute to type Version.
                 clause.attrs.remove(Constants.PACKAGE_SPECIFICATION_VERSION);
                 v = (v == null) ? sv : v;
-                clause.attrs.put(Constants.VERSION_ATTRIBUTE, Version.parseVersion(v.toString()));
+                clause.attrs.put(Constants.VERSION_ATTRIBUTE, VersionTable.getVersion(v.toString()));
             }
 
             // Find symbolic name and version attribute, if present.
@@ -671,7 +672,7 @@ public final class ResourceBuilder {
             // Get bundle version.
             Version bundleVersion = Version.emptyVersion;
             if (headerMap.get(Constants.BUNDLE_VERSION) != null) {
-                bundleVersion = Version.parseVersion(headerMap.get(Constants.BUNDLE_VERSION));
+                bundleVersion = VersionTable.getVersion(headerMap.get(Constants.BUNDLE_VERSION));
             }
 
             // Create a require capability and return it.

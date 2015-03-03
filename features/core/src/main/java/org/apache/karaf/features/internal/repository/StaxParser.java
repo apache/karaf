@@ -27,6 +27,7 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
+import org.apache.felix.utils.version.VersionTable;
 import org.apache.karaf.features.internal.resolver.CapabilityImpl;
 import org.apache.karaf.features.internal.resolver.RequirementImpl;
 import org.apache.karaf.features.internal.resolver.ResourceImpl;
@@ -286,7 +287,7 @@ public final class StaxParser {
         if ("String".equals(type)) {
             return value;
         } else if ("Version".equals(type)) {
-            return Version.parseVersion(value);
+            return VersionTable.getVersion(value);
         } else if ("Long".equals(type)) {
             return Long.parseLong(value.trim());
         } else if ("Double".equals(type)) {

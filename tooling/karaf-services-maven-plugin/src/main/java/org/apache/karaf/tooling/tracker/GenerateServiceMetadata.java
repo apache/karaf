@@ -17,15 +17,20 @@
 package org.apache.karaf.tooling.tracker;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
+import org.apache.karaf.util.tracker.Managed;
 import org.apache.karaf.util.tracker.ProvideService;
 import org.apache.karaf.util.tracker.RequireService;
 import org.apache.karaf.util.tracker.Services;
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.model.Resource;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -54,6 +59,9 @@ public class GenerateServiceMetadata extends AbstractMojo {
     @Parameter(defaultValue="capabilities")
     protected String capabilitiesProperty;
 
+    @Parameter(defaultValue = "${project.build.directory}/generated/karaf-tracker")
+    protected String outputDirectory;
+
     /**
      * The classloader to use for loading the commands.
      * Can be "project" or "plugin"
@@ -63,6 +71,8 @@ public class GenerateServiceMetadata extends AbstractMojo {
 
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
+            boolean addSourceDirectory = false;
+
             StringBuilder requirements = new StringBuilder();
             StringBuilder capabilities = new StringBuilder();
 
@@ -75,21 +85,28 @@ public class GenerateServiceMetadata extends AbstractMojo {
                     System.out.println("Ignoring " + classUrl);
                     continue;
                 }
+
+                Properties props = new Properties();
                 Services services = clazz.getAnnotation(Services.class);
                 if (services != null) {
                     for (RequireService req : services.requires()) {
                         String flt = req.filter();
-                        if (flt != null && !flt.isEmpty()) {
-                            flt = "(&(objectClass=" + req.value().getName() + ")" + flt + ")";
+                        if (flt == null) {
+                            flt = "";
+                        }
+                        String fltWithClass;
+                        if (!flt.isEmpty()) {
+                            fltWithClass = "(&(objectClass=" + req.value().getName() + ")" + flt + ")";
                         } else {
-                            flt = "(objectClass=" + req.value().getName() + ")";
+                            fltWithClass = "(objectClass=" + req.value().getName() + ")";
                         }
                         if (requirements.length() > 0) {
                             requirements.append(",");
                         }
                         requirements.append("osgi.service;effective:=active;filter:=\"")
-                                    .append(flt)
+                                    .append(fltWithClass)
                                     .append("\"");
+                        props.setProperty(req.value().getName(), flt);
                     }
                     for (ProvideService cap : services.provides()) {
                         if (capabilities.length() > 0) {
@@ -99,6 +116,23 @@ public class GenerateServiceMetadata extends AbstractMojo {
                                     .append(cap.value().getName());
                     }
                 }
+                Managed managed = clazz.getAnnotation(Managed.class);
+                if (managed != null) {
+                    props.setProperty("pid", managed.value());
+                }
+
+                File file = new File(outputDirectory, "OSGI-INF/karaf-tracker/" + clazz.getName());
+                file.getParentFile().mkdirs();
+                try (OutputStream os = new FileOutputStream(file)) {
+                    props.store(os, null);
+                }
+                addSourceDirectory = true;
+            }
+
+            if (addSourceDirectory) {
+                Resource resource = new Resource();
+                resource.setDirectory(outputDirectory);
+                project.addResource(resource);
             }
 
             project.getProperties().setProperty(requirementsProperty, requirements.toString());

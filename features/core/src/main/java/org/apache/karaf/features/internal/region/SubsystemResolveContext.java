@@ -60,7 +60,7 @@ import static org.osgi.resource.Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE;
 public class SubsystemResolveContext extends ResolveContext {
 
     private final Subsystem root;
-    private final RegionDigraph digraph;
+    private final Map<String, Region> regions;
     private final Set<Resource> mandatory = new HashSet<>();
     private final CandidateComparator candidateComparator = new CandidateComparator(mandatory);
 
@@ -71,13 +71,16 @@ public class SubsystemResolveContext extends ResolveContext {
 
     public SubsystemResolveContext(Subsystem root, RegionDigraph digraph, Repository globalRepository, Downloader downloader) throws BundleException {
         this.root = root;
-        this.digraph = digraph;
         this.globalRepository = globalRepository != null ? new SubsystemRepository(globalRepository) : null;
         this.downloader = downloader;
 
         prepare(root);
         repository = new BaseRepository(resToSub.keySet());
 
+        regions = new HashMap<>();
+        for (Region region : digraph) {
+            regions.put(region.getName(), region);
+        }
         // Add a heuristic to sort capabilities :
         //  if a capability comes from a resource which needs to be installed,
         //  prefer that one over any capabilities from other resources
@@ -115,7 +118,7 @@ public class SubsystemResolveContext extends ResolveContext {
 
     @Override
     public List<Capability> findProviders(Requirement requirement) {
-        List<Capability> caps = new ArrayList<Capability>();
+        List<Capability> caps = new ArrayList<>();
         Region requirerRegion = getRegion(requirement.getResource());
         if (requirerRegion != null) {
             Map<Requirement, Collection<Capability>> resMap =
@@ -179,7 +182,7 @@ public class SubsystemResolveContext extends ResolveContext {
     }
 
     private Region getRegion(Resource resource) {
-        return digraph.getRegion(getSubsystem(resource).getName());
+        return regions.get(getSubsystem(resource).getName());
     }
 
     @Override

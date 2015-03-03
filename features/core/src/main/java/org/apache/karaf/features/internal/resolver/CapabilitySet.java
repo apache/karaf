@@ -29,7 +29,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 
+import org.apache.felix.utils.version.VersionTable;
 import org.osgi.framework.Constants;
+import org.osgi.framework.Version;
 import org.osgi.resource.Capability;
 
 public class CapabilitySet {
@@ -418,6 +420,9 @@ public class CapabilitySet {
         // the string constructor of the LHS class, if it has one.
         Object rhs;
         try {
+            if (lhs instanceof Version) {
+                rhs = VersionTable.getVersion(rhsString, false);
+            } else
             // The Character class is a special case, since its constructor
             // does not take a string, so handle it separately.
             if (lhs instanceof Character) {

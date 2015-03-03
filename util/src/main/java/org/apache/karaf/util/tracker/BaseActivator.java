@@ -16,12 +16,15 @@
  */
 package org.apache.karaf.util.tracker;
 
+import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -88,15 +91,29 @@ public class BaseActivator implements BundleActivator, SingleServiceTracker.Sing
     }
 
     protected void doOpen() throws Exception {
-        Services services = getClass().getAnnotation(Services.class);
-        if (services != null) {
-            for (RequireService require : services.requires()) {
-                trackService(require.value(), require.filter());
+        URL data = bundleContext.getBundle().getResource("OSGI-INF/karaf-tracker/" + getClass().getName());
+        if (data != null) {
+            Properties props = new Properties();
+            try (InputStream is = data.openStream()) {
+                props.load(is);
             }
-        }
-        Managed managed = getClass().getAnnotation(Managed.class);
-        if (managed != null) {
-            manage(managed.value());
+            for (String key : props.stringPropertyNames())
+                if ("pid".equals(key)) {
+                    manage(props.getProperty(key));
+                } else {
+                    trackService(key, props.getProperty(key));
+                }
+        } else {
+            Services services = getClass().getAnnotation(Services.class);
+            if (services != null) {
+                for (RequireService require : services.requires()) {
+                    trackService(require.value(), require.filter());
+                }
+            }
+            Managed managed = getClass().getAnnotation(Managed.class);
+            if (managed != null) {
+                manage(managed.value());
+            }
         }
     }
 
@@ -252,6 +269,14 @@ public class BaseActivator implements BundleActivator, SingleServiceTracker.Sing
             SingleServiceTracker tracker = new SingleServiceTracker<>(bundleContext, clazz, filter, this);
             tracker.open();
             trackers.put(clazz.getName(), tracker);
+        }
+    }
+
+    protected void trackService(String className, String filter) throws InvalidSyntaxException {
+        if (!trackers.containsKey(className)) {
+            SingleServiceTracker tracker = new SingleServiceTracker<>(bundleContext, className, filter, this);
+            tracker.open();
+            trackers.put(className, tracker);
         }
     }
 

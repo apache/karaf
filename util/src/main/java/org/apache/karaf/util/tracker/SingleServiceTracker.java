@@ -71,11 +71,20 @@ public final class SingleServiceTracker<T> {
     }
 
     public SingleServiceTracker(BundleContext context, Class<T> clazz, String filterString, SingleServiceListener sl) throws InvalidSyntaxException {
+        this(context, clazz.getName(), filterString, sl);
+    }
+
+    public SingleServiceTracker(BundleContext context, String className, String filterString, SingleServiceListener sl) throws InvalidSyntaxException {
         this.ctx = context;
-        this.className = clazz.getName();
+        this.className = className;
         this.serviceListener = sl;
-        this.filterString = filterString;
-        this.filter = (filterString != null) ? context.createFilter(filterString) : null;
+        if (filterString == null || filterString.isEmpty()) {
+            this.filterString = null;
+            this.filter = null;
+        } else {
+            this.filterString = filterString;
+            this.filter = context.createFilter(filterString);
+        }
     }
 
     public T getService() {
