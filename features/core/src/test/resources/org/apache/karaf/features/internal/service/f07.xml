@@ -31,6 +31,7 @@
         <capability>
             osgi.service;effective:=active;objectClass=org.apache.aries.proxy.ProxyManager
         </capability>
+        <library type="endorsed" delegate="true">my-library</library>
         <scoping>
             <export namespace="osgi.service">
                 (objectClass=org.apache.aries.proxy.ProxyManager)

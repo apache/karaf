@@ -125,6 +125,9 @@ public class InstallKarsMojo extends MojoSupport {
     @Parameter
     protected List<String> featureRepositories;
 
+    @Parameter
+    protected List<String> libraries;
+
     /**
      * Use reference: style urls in startup.properties
      */
@@ -240,6 +243,9 @@ public class InstallKarsMojo extends MojoSupport {
                .ignoreDependencyFlag(ignoreDependencyFlag);
         if (profilesUri != null) {
             builder.profilesUris(profilesUri);
+        }
+        if (libraries != null) {
+            builder.libraries(libraries.toArray(new String[libraries.size()]));
         }
         // Startup
         builder.defaultStage(Builder.Stage.Startup)

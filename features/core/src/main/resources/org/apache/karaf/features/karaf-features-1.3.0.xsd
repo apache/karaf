@@ -78,6 +78,7 @@ Definition of the Feature.
                 <xs:element name="conditional" type="tns:conditional" />
                 <xs:element name="requirement" type="tns:requirement" />
                 <xs:element name="capability" type="tns:capability" />
+                <xs:element name="library" type="tns:library" />
             </xs:choice>
             <xs:element name="scoping" minOccurs="0" maxOccurs="1" type="tns:scoping" />
         </xs:sequence>
@@ -246,6 +247,30 @@ Additional capability of this feature.
             </xs:extension>
         </xs:simpleContent>
     </xs:complexType>
+
+    <xs:complexType name="library">
+        <xs:annotation>
+            <xs:documentation><![CDATA[
+Additional capability of this feature.
+            ]]></xs:documentation>
+        </xs:annotation>
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="type" type="tns:libraryType" default="default"/>
+                <xs:attribute name="export" type="xs:boolean" default="false"/>
+                <xs:attribute name="delegate" type="xs:boolean" default="false"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <xs:simpleType name="libraryType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="default"/>
+            <xs:enumeration value="endorsed"/>
+            <xs:enumeration value="extension"/>
+            <xs:enumeration value="boot"/>
+        </xs:restriction>
+    </xs:simpleType>
 
     <xs:complexType name="scoping">
         <xs:annotation>

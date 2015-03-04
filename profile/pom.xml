@@ -184,6 +184,7 @@
                             org.apache.karaf.profile.impl.osgi,
                             org.apache.karaf.util.config,
                             org.apache.karaf.util.maven,
+                            org.apache.felix.utils.manifest,
                             org.apache.felix.utils.version,
                             org.apache.felix.utils.properties,
                         </Private-Package>

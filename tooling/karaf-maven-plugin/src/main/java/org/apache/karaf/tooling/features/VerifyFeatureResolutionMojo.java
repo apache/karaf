@@ -675,7 +675,7 @@ public class VerifyFeatureResolutionMojo extends MojoSupport {
         }
 
         @Override
-        public void installFeatureConfigs(Feature feature) throws IOException, InvalidSyntaxException {
+        public void installFeature(Feature feature) throws IOException, InvalidSyntaxException {
         }
 
         @Override

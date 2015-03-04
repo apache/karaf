@@ -18,11 +18,13 @@ package org.apache.karaf.features.internal.service;
 
 import java.net.URL;
 
+import org.apache.karaf.features.Library;
 import org.apache.karaf.features.internal.model.Features;
 import org.apache.karaf.features.internal.model.JaxbUtil;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -99,6 +101,12 @@ public class FeaturesValidationTest {
         assertNotNull(features);
         assertEquals("2.5.6.SEC02", features.getFeature().get(0).getVersion());
         assertTrue(features.getFeature().get(1).isHidden());
+        assertNotNull(features.getFeature().get(1).getLibraries());
+        assertEquals(1, features.getFeature().get(0).getLibraries().size());
+        assertEquals("my-library", features.getFeature().get(0).getLibraries().get(0).getLocation());
+        assertEquals(Library.TYPE_ENDORSED, features.getFeature().get(0).getLibraries().get(0).getType());
+        assertFalse(features.getFeature().get(0).getLibraries().get(0).isExport());
+        assertTrue(features.getFeature().get(0).getLibraries().get(0).isDelegate());
     }
 
 }

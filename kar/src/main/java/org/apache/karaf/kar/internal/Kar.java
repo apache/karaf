@@ -31,6 +31,7 @@ import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 
 import org.apache.karaf.util.StreamUtils;
+import org.apache.karaf.util.maven.Parser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -117,7 +118,8 @@ public class Kar {
                     File destFile = new File(repoDir, path);
                     extract(zipIs, entry, destFile);
                     if (scanForRepos && featureDetector.isFeaturesRepository(destFile)) {
-                        featureRepos.add(destFile.toURI());
+                        String uri = Parser.pathToMaven(path);
+                        featureRepos.add(URI.create(uri));
                     }
                 }
 

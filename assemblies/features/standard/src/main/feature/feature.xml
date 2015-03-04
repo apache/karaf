@@ -25,6 +25,7 @@
     </feature>
 
     <feature version="${project.version}" description="Services Security for Karaf" name="service-security">
+        <feature>jaas-boot</feature>
         <feature>aries-proxy</feature>
         <bundle start="true" start-level="10">mvn:org.apache.karaf.service/org.apache.karaf.service.guard/${project.version}</bundle>
     </feature>
@@ -83,7 +84,14 @@
         </conditional>
     </feature>
 
+    <feature name="jaas-boot" hidden="true">
+        <library export="true" delegate="true" type="boot">
+            mvn:org.apache.karaf.jaas/org.apache.karaf.jaas.boot/${project.version}
+        </library>
+    </feature>
+
     <feature name="shell" description="Karaf Shell" version="${project.version}">
+        <feature>jaas-boot</feature>
         <config name="org.apache.karaf.command.acl.shell">
             #
             # This configuration file defines the ACLs for commands in the shell subshell
@@ -141,6 +149,7 @@
     </feature>
 
     <feature name="bundle" description="Provide Bundle support" version="${project.version}">
+        <feature>jaas-boot</feature>
         <bundle start-level="30" start="true">mvn:org.apache.karaf.bundle/org.apache.karaf.bundle.core/${project.version}</bundle>
         <conditional>
             <condition>management</condition>
@@ -272,6 +281,9 @@
 
     <feature name="diagnostic" description="Provide Diagnostic support" version="${project.version}">
         <bundle start-level="30" start="true">mvn:org.apache.karaf.diagnostic/org.apache.karaf.diagnostic.core/${project.version}</bundle>
+        <library export="true" type="boot">
+            mvn:org.apache.karaf.diagnostic/org.apache.karaf.diagnostic.boot/${project.version}
+        </library>
     </feature>
 
     <feature name="instance" description="Provide Instance support" version="${project.version}">
@@ -279,6 +291,7 @@
     </feature>
 
     <feature name="jaas" description="Provide JAAS support" version="${project.version}">
+        <feature>jaas-boot</feature>
         <bundle start-level="30" start="true">mvn:org.apache.karaf.jaas/org.apache.karaf.jaas.config/${project.version}</bundle>
         <bundle start-level="30" start="true">mvn:org.apache.karaf.jaas/org.apache.karaf.jaas.modules/${project.version}</bundle>
         <conditional>
@@ -365,6 +378,7 @@
     </feature>
 
     <feature name="webconsole" description="Base support of the Karaf WebConsole" version="${project.version}">
+        <feature>jaas-boot</feature>
         <config name="org.apache.karaf.webconsole">
             realm=karaf
         </config>
@@ -478,6 +492,9 @@
             <bundle start-level="30">mvn:org.apache.aries.jmx/org.apache.aries.jmx.blueprint.api/${aries.jmx.blueprint.api.version}</bundle>
             <bundle start-level="30">mvn:org.apache.aries.jmx/org.apache.aries.jmx.blueprint.core/${aries.jmx.blueprint.core.version}</bundle>
         </conditional>
+        <library export="true" delegate="true" type="boot">
+            mvn:org.apache.karaf.management/org.apache.karaf.management.boot/${project.version}
+        </library>
     </feature>
 
     <feature name="scheduler" description="Provide a scheduler service in Karaf to fire events" version="${project.version}">

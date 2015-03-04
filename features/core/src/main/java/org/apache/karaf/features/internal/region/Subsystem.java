@@ -41,6 +41,7 @@ import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Conditional;
 import org.apache.karaf.features.Dependency;
 import org.apache.karaf.features.Feature;
+import org.apache.karaf.features.Library;
 import org.apache.karaf.features.ScopeFilter;
 import org.apache.karaf.features.internal.download.DownloadCallback;
 import org.apache.karaf.features.internal.download.DownloadManager;
@@ -389,6 +390,20 @@ public class Subsystem extends ResourceImpl {
                 }
             });
         }
+        if (feature != null) {
+            for (Library library : feature.getLibraries()) {
+                if (library.isExport()) {
+                    final String loc = library.getLocation();
+                    downloader.download(loc, new DownloadCallback() {
+                        @Override
+                        public void downloaded(StreamProvider provider) throws Exception {
+                            ResourceImpl res = createResource(loc, getMetadata(provider));
+                            bundles.put(loc, res);
+                        }
+                    });
+                }
+            }
+        }
         downloader.await();
         Overrides.override(bundles, overrides);
         if (feature != null) {
@@ -418,6 +433,13 @@ public class Subsystem extends ResourceImpl {
                 }
                 if (cond != null) {
                     addIdentityRequirement(res, resConds.get(cond), true);
+                }
+            }
+            for (Library library : feature.getLibraries()) {
+                if (library.isExport()) {
+                    final String loc = library.getLocation();
+                    ResourceImpl res = bundles.get(loc);
+                    addDependency(res, false, false, 0);
                 }
             }
         }

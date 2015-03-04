@@ -1112,10 +1112,11 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
     }
 
     @Override
-    public void installFeatureConfigs(Feature feature) throws IOException, InvalidSyntaxException {
+    public void installFeature(Feature feature) throws IOException, InvalidSyntaxException {
         if (configInstaller != null) {
             configInstaller.installFeatureConfigs(feature);
         }
+        // TODO: install libraries
     }
 
     @Override

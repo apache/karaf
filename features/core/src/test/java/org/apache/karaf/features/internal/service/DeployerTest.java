@@ -73,7 +73,7 @@ public class DeployerTest {
         EasyMock.expectLastCall();
         callback.saveState(EasyMock.<State>anyObject());
         EasyMock.expectLastCall();
-        callback.installFeatureConfigs(f100);
+        callback.installFeature(f100);
         EasyMock.expectLastCall();
         callback.resolveBundles(EasyMock.<Set<Bundle>>anyObject(),
                                 EasyMock.<Map<Resource, List<Wire>>>anyObject(),
@@ -164,7 +164,7 @@ public class DeployerTest {
         EasyMock.expectLastCall();
         callback.saveState(EasyMock.<State>anyObject());
         EasyMock.expectLastCall();
-        callback.installFeatureConfigs(f101);
+        callback.installFeature(f101);
         EasyMock.expectLastCall();
         callback.resolveBundles(EasyMock.eq(Collections.<Bundle>singleton(bundleA)),
                                 EasyMock.<Map<Resource, List<Wire>>>anyObject(),
@@ -232,7 +232,7 @@ public class DeployerTest {
         EasyMock.expectLastCall();
         callback.saveState(EasyMock.<State>anyObject());
         EasyMock.expectLastCall();
-        callback.installFeatureConfigs(f1);
+        callback.installFeature(f1);
         EasyMock.expectLastCall();
         callback.resolveBundles(EasyMock.<Set<Bundle>>anyObject(),
                                 EasyMock.<Map<Resource, List<Wire>>>anyObject(),
@@ -296,7 +296,7 @@ public class DeployerTest {
         EasyMock.expectLastCall();
         callback.saveState(EasyMock.<State>anyObject());
         EasyMock.expectLastCall();
-        callback.installFeatureConfigs(f1);
+        callback.installFeature(f1);
         EasyMock.expectLastCall();
         callback.resolveBundles(EasyMock.<Set<Bundle>>anyObject(),
                                 EasyMock.<Map<Resource, List<Wire>>>anyObject(),
@@ -348,7 +348,7 @@ public class DeployerTest {
         EasyMock.expectLastCall();
         callback.saveState(EasyMock.<State>anyObject());
         EasyMock.expectLastCall();
-        callback.installFeatureConfigs(f2);
+        callback.installFeature(f2);
         EasyMock.expectLastCall();
         callback.resolveBundles(EasyMock.<Set<Bundle>>anyObject(),
                                 EasyMock.<Map<Resource, List<Wire>>>anyObject(),

@@ -22,6 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -32,8 +33,10 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 
+import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.features.FeatureEvent;
 import org.apache.karaf.features.FeaturesService;
+import org.apache.karaf.features.internal.model.Library;
 import org.apache.karaf.features.internal.download.DownloadCallback;
 import org.apache.karaf.features.internal.download.DownloadManager;
 import org.apache.karaf.features.internal.download.Downloader;
@@ -61,6 +64,7 @@ public class AssemblyDeployCallback implements Deployer.DeployCallback {
     private static final Logger LOGGER = LoggerFactory.getLogger(Builder.class);
 
     private final DownloadManager manager;
+    private final Builder builder;
     private final Path homeDirectory;
     private final int defaultStartLevel;
     private final Path etcDirectory;
@@ -70,12 +74,13 @@ public class AssemblyDeployCallback implements Deployer.DeployCallback {
 
     private final Map<String, Bundle> bundles = new HashMap<>();
 
-    public AssemblyDeployCallback(DownloadManager manager, Path homeDirectory, int defaultStartLevel, BundleRevision systemBundle, Collection<Features> repositories) throws Exception {
+    public AssemblyDeployCallback(DownloadManager manager, Builder builder, BundleRevision systemBundle, Collection<Features> repositories) throws Exception {
         this.manager = manager;
-        this.homeDirectory = homeDirectory;
+        this.builder = builder;
+        this.homeDirectory = builder.homeDirectory;
         this.etcDirectory = homeDirectory.resolve("etc");
         this.systemDirectory = homeDirectory.resolve("system");
-        this.defaultStartLevel = defaultStartLevel;
+        this.defaultStartLevel = builder.defaultStartLevel;
         dstate = new Deployer.DeploymentState();
         dstate.bundles = new HashMap<>();
         dstate.features = new HashMap<>();
@@ -122,7 +127,7 @@ public class AssemblyDeployCallback implements Deployer.DeployCallback {
     }
 
     @Override
-    public void installFeatureConfigs(org.apache.karaf.features.Feature feature) throws IOException, InvalidSyntaxException {
+    public void installFeature(org.apache.karaf.features.Feature feature) throws IOException, InvalidSyntaxException {
         LOGGER.info("Installing feature config for " + feature.getId());
         for (Config config : ((Feature) feature).getConfig()) {
             Path configFile = etcDirectory.resolve(config.getName());
@@ -146,6 +151,19 @@ public class AssemblyDeployCallback implements Deployer.DeployCallback {
                     Files.copy(input, output, StandardCopyOption.REPLACE_EXISTING);
                 }
             });
+        }
+        List<String> libraries = new ArrayList<>();
+        for (Library library : ((Feature) feature).getLibraries()) {
+            String lib = library.getLocation() +
+                    ";type:=" + library.getType() +
+                    ";export:=" + library.isExport() +
+                    ";delegate:=" + library.isDelegate();
+            libraries.add(lib);
+        }
+        if (!libraries.isEmpty()) {
+            Path configPropertiesPath = etcDirectory.resolve("config.properties");
+            Properties configProperties = new Properties(configPropertiesPath.toFile());
+            builder.downloadLibraries(downloader, configProperties, libraries);
         }
         try {
             downloader.await();

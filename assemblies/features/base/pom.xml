@@ -130,21 +130,6 @@
                                     <outputDirectory>target/classes/resources/lib/boot</outputDirectory>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.apache.karaf.diagnostic</groupId>
-                                    <artifactId>org.apache.karaf.diagnostic.boot</artifactId>
-                                    <outputDirectory>target/classes/resources/lib/boot</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.karaf.jaas</groupId>
-                                    <artifactId>org.apache.karaf.jaas.boot</artifactId>
-                                    <outputDirectory>target/classes/resources/lib/boot</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.karaf.management</groupId>
-                                    <artifactId>org.apache.karaf.management.boot</artifactId>
-                                    <outputDirectory>target/classes/resources/lib/boot</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
                                     <groupId>org.apache.karaf</groupId>
                                     <artifactId>org.apache.karaf.client</artifactId>
                                     <outputDirectory>target/classes/resources/system/org/apache/karaf/org.apache.karaf.client/${project.version}</outputDirectory>
@@ -153,16 +138,6 @@
                                     <groupId>org.apache.karaf</groupId>
                                     <artifactId>org.apache.karaf.exception</artifactId>
                                     <outputDirectory>target/classes/resources/lib/endorsed</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.servicemix.specs</groupId>
-                                    <artifactId>org.apache.servicemix.specs.activator</artifactId>
-                                    <outputDirectory>target/classes/resources/lib</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.servicemix.specs</groupId>
-                                    <artifactId>org.apache.servicemix.specs.locator</artifactId>
-                                    <outputDirectory>target/classes/resources/lib</outputDirectory>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.apache.felix</groupId>

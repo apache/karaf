@@ -53,9 +53,11 @@ import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.apache.felix.utils.manifest.Clause;
 import org.apache.felix.utils.properties.InterpolationHelper;
 import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.features.FeaturesService;
+import org.apache.karaf.features.Library;
 import org.apache.karaf.features.internal.download.DownloadCallback;
 import org.apache.karaf.features.internal.download.DownloadManager;
 import org.apache.karaf.features.internal.download.Downloader;
@@ -95,6 +97,10 @@ public class Builder {
     private static final String FEATURES_REPOSITORIES = "featuresRepositories";
     private static final String FEATURES_BOOT = "featuresBoot";
 
+    private static final String LIBRARY_CLAUSE_TYPE = "type";
+    private static final String LIBRARY_CLAUSE_EXPORT = "export";
+    private static final String LIBRARY_CLAUSE_DELEGATE = "delegate";
+
     public static enum Stage {
         Startup, Boot, Installed
     }
@@ -116,6 +122,7 @@ public class Builder {
     Map<String, RepositoryInfo> repositories = new LinkedHashMap<>();
     Map<String, Stage> features = new LinkedHashMap<>();
     Map<String, Stage> bundles = new LinkedHashMap<>();
+    List<String> libraries = new ArrayList<>();
     String javase = "1.7";
     String environment = null;
     boolean useReferenceUrls;
@@ -146,6 +153,11 @@ public class Builder {
 
     public Builder profilesUris(String... profilesUri) {
         Collections.addAll(this.profilesUris, profilesUri);
+        return this;
+    }
+
+    public Builder libraries(String... libraries) {
+        Collections.addAll(this.libraries, libraries);
         return this;
     }
 
@@ -419,11 +431,13 @@ public class Builder {
         // TODO: handle karaf 2.x and 3.x libraries
         LOGGER.info("Downloading libraries");
         downloader = manager.createDownloader();
-        downloadLibraries(downloader, overallEffective.getLibraries(), "lib");
-        downloadLibraries(downloader, overallEffective.getEndorsedLibraries(), "lib/endorsed");
-        downloadLibraries(downloader, overallEffective.getExtensionLibraries(), "lib/ext");
-        downloadLibraries(downloader, overallEffective.getBootLibraries(), "lib/boot");
+        downloadLibraries(downloader, configProperties, overallEffective.getLibraries());
+        downloadLibraries(downloader, configProperties, libraries);
         downloader.await();
+        // Reformat clauses
+        reformatClauses(configProperties, "org.osgi.framework.system.packages.extra");
+        reformatClauses(configProperties, "org.osgi.framework.bootdelegation");
+        configProperties.save();
 
         //
         // Write all configuration files
@@ -450,15 +464,81 @@ public class Builder {
         installStage(installedProfile, allBootFeatures);
     }
 
-    private void downloadLibraries(Downloader downloader, List<String> libraries, final String path) throws MalformedURLException {
-        for (String library : libraries) {
+    private void reformatClauses(Properties config, String key) {
+        String val = config.getProperty(key);
+        if (val != null && !val.isEmpty()) {
+            List<String> comments = config.getComments(key);
+            Clause[] clauses = org.apache.felix.utils.manifest.Parser.parseHeader(val);
+            Set<String> strings = new TreeSet<>();
+            for (Clause clause : clauses) {
+                strings.add(clause.toString());
+            }
+            List<String> lines = new ArrayList<>();
+            lines.add("");
+            int index = 0;
+            for (String string : strings) {
+                String s = "    " + string;
+                if (index++ < strings.size() - 1) {
+                    s += ", ";
+                }
+                lines.add(s);
+            }
+            config.put(key, comments, lines);
+        }
+    }
+
+    protected void downloadLibraries(Downloader downloader, final Properties config, Collection<String> libraries) throws MalformedURLException {
+        Clause[] clauses = org.apache.felix.utils.manifest.Parser.parseClauses(libraries.toArray(new String[libraries.size()]));
+        for (final Clause clause : clauses) {
+            final String filename;
+            final String library;
+            if (clause.getDirective("url") != null) {
+                filename = clause.getName();
+                library = clause.getDirective("url");
+            } else {
+                filename = null;
+                library = clause.getName();
+            }
+            final String type = clause.getDirective(LIBRARY_CLAUSE_TYPE) != null
+                    ? clause.getDirective(LIBRARY_CLAUSE_TYPE) : Library.TYPE_DEFAULT;
+            final String path;
+            switch (type) {
+            case Library.TYPE_ENDORSED:  path = "lib/endorsed"; break;
+            case Library.TYPE_EXTENSION: path = "lib/ext"; break;
+            case Library.TYPE_BOOT:      path = "lib/boot"; break;
+            default:                     path = "lib"; break;
+            }
             downloader.download(library, new DownloadCallback() {
                 @Override
                 public void downloaded(final StreamProvider provider) throws Exception {
                     synchronized (provider) {
                         Path input = provider.getFile().toPath();
-                        Path output = homeDirectory.resolve(path).resolve(input.getFileName().toString());
-                        Files.copy(input, output);
+                        String name = filename != null ? filename : input.getFileName().toString();
+                        Path output = homeDirectory.resolve(path).resolve(name);
+                        Files.copy(input, output, StandardCopyOption.REPLACE_EXISTING);
+                    }
+                    boolean export = Boolean.parseBoolean(clause.getDirective(LIBRARY_CLAUSE_EXPORT));
+                    boolean delegate = Boolean.parseBoolean(clause.getDirective(LIBRARY_CLAUSE_DELEGATE));
+                    if (export || delegate) {
+                        Map<String, String> headers = getHeaders(provider);
+                        String packages = headers.get(Constants.EXPORT_PACKAGE);
+                        if (packages != null) {
+                            Clause[] clauses = org.apache.felix.utils.manifest.Parser.parseHeader(packages);
+                            if (export) {
+                                String val = config.getProperty(Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA);
+                                for (Clause clause : clauses) {
+                                    val += "," + clause.toString();
+                                }
+                                config.setProperty(Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA, val);
+                            }
+                            if (delegate) {
+                                String val = config.getProperty(Constants.FRAMEWORK_BOOTDELEGATION);
+                                for (Clause clause : clauses) {
+                                    val += "," + clause.getName();
+                                }
+                                config.setProperty(Constants.FRAMEWORK_BOOTDELEGATION, val);
+                            }
+                        }
                     }
                 }
             });
@@ -466,13 +546,13 @@ public class Builder {
     }
 
     private void installStage(Profile installedProfile, Set<Feature> allBootFeatures) throws Exception {
-        Downloader downloader;//
+        //
         // Handle installed profiles
         //
         Profile installedOverlay = Profiles.getOverlay(installedProfile, allProfiles, environment);
         Profile installedEffective = Profiles.getEffective(installedOverlay, false);
 
-        downloader = manager.createDownloader();
+        Downloader downloader = manager.createDownloader();
 
         // Load startup repositories
         Map<String, Features> installedRepositories = loadRepositories(manager, installedEffective.getRepositories(), true);
@@ -603,6 +683,24 @@ public class Builder {
                     installArtifact(downloader, configFile.getLocation().trim());
                 }
             }
+            // Install libraries
+            List<String> libraries = new ArrayList<>();
+            for (Library library : feature.getLibraries()) {
+                String lib = library.getLocation() +
+                        ";type:=" + library.getType() +
+                        ";export:=" + library.isExport() +
+                        ";delegate:=" + library.isDelegate();
+                libraries.add(lib);
+            }
+            Path configPropertiesPath = etcDirectory.resolve("config.properties");
+            Properties configProperties = new Properties(configPropertiesPath.toFile());
+            downloader = manager.createDownloader();
+            downloadLibraries(downloader, configProperties, libraries);
+            downloader.await();
+            // Reformat clauses
+            reformatClauses(configProperties, "org.osgi.framework.system.packages.extra");
+            reformatClauses(configProperties, "org.osgi.framework.bootdelegation");
+            configProperties.save();
         }
 
         // If there are bundles to install, we can't use the boot features only
@@ -674,7 +772,8 @@ public class Builder {
             Properties featuresProperties = new Properties(featuresCfgFile.toFile());
             featuresProperties.put(FEATURES_REPOSITORIES, repos);
             featuresProperties.put(FEATURES_BOOT, boot);
-            // TODO: reformat to multiline values
+            reformatClauses(featuresProperties, FEATURES_REPOSITORIES);
+            reformatClauses(featuresProperties, FEATURES_BOOT);
             featuresProperties.save();
         }
         downloader.await();
@@ -803,7 +902,9 @@ public class Builder {
     private List<String> getStagedRepositories(Stage stage, Map<String, RepositoryInfo> data) {
         List<String> staged = new ArrayList<>();
         for (String s : data.keySet()) {
-            if (data.get(s).stage == stage) {
+            if (data.get(s).stage == stage ||
+                    data.get(s).stage == Stage.Startup && stage == Stage.Boot) {
+                // For boot stage, we also want the startup repositories
                 staged.add(s);
             }
         }
@@ -859,7 +960,7 @@ public class Builder {
                     Collection<String> overrides,
                     Collection<String> optionals) throws Exception {
         BundleRevision systemBundle = getSystemBundle();
-        AssemblyDeployCallback callback = new AssemblyDeployCallback(manager, homeDirectory, defaultStartLevel, systemBundle, repositories);
+        AssemblyDeployCallback callback = new AssemblyDeployCallback(manager, this, systemBundle, repositories);
         Deployer deployer = new Deployer(manager, callback);
 
         // Install framework

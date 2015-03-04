@@ -157,6 +157,7 @@ public class FeatureConfigInstaller {
             LOGGER.info("Creating configuration file {}", finalname);
         }
 
+        // TODO: use download manager to download the configuration
         try (
                 InputStream is = new BufferedInputStream(new URL(fileLocation).openStream())
         ) {

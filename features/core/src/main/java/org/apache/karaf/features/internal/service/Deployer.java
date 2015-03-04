@@ -109,7 +109,7 @@ public class Deployer {
 
         void saveState(State state);
         void persistResolveRequest(DeploymentRequest request) throws IOException;
-        void installFeatureConfigs(Feature feature) throws IOException, InvalidSyntaxException;
+        void installFeature(Feature feature) throws IOException, InvalidSyntaxException;
         void callListeners(FeatureEvent featureEvent);
 
         Bundle installBundle(String region, String uri, InputStream is) throws BundleException;
@@ -708,18 +708,18 @@ public class Deployer {
         callback.saveState(newState);
 
         //
-        // Install configurations
+        // Install configurations and libraries
         //
         if (!newFeatures.isEmpty()) {
             Set<String> featureIds = flatten(newFeatures);
             for (Feature feature : dstate.features.values()) {
                 if (featureIds.contains(feature.getId())) {
-                    callback.installFeatureConfigs(feature);
+                    callback.installFeature(feature);
                 }
                 for (Conditional cond : feature.getConditional()) {
                     Feature condFeature = cond.asFeature(feature.getName(), feature.getVersion());
                     if (featureIds.contains(condFeature.getId())) {
-                        callback.installFeatureConfigs(condFeature);
+                        callback.installFeature(condFeature);
                     }
                 }
             }

@@ -16,12 +16,12 @@
       See the License for the specific language governing permissions and
       limitations under the License.
 -->
-<features name="framework-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.1 http://karaf.apache.org/xmlns/features/v1.2.1">
+<features name="framework-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.3.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.3.0 http://karaf.apache.org/xmlns/features/v1.3.0">
 
     <!-- This file is not used in the assembly., This file is used by the karaf-maven-plugin to generate a "final" feature.xml
               including the correct start-level for the generation of the startup.propertie file -->
 
-    <feature version="${project.version}" description="Karaf core feature" name="framework">
+    <feature version="${project.version}" description="Karaf core feature" name="framework" hidden="true">
         <!-- mvn: and wrap: url handlers -->
         <bundle start="true" start-level="5">mvn:org.ops4j.pax.url/pax-url-aether/${pax.url.version}</bundle>
         <!-- logging -->

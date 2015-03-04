@@ -73,6 +73,7 @@ import org.apache.felix.utils.version.VersionCleaner;
         "conditional",
         "capability",
         "requirement",
+        "library",
         "scoping"
         })
 public class Feature extends Content implements org.apache.karaf.features.Feature {
@@ -100,6 +101,7 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
     protected List<Capability> capability;
     protected List<Requirement> requirement;
     protected Scoping scoping;
+    protected List<Library> library;
 
     public Feature() {
     }
@@ -368,6 +370,13 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
             }
             properties.put(key, val);
         }
+    }
+
+    public List<Library> getLibraries() {
+        if (library == null) {
+            library = new ArrayList<>();
+        }
+        return this.library;
     }
 
 }

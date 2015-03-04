@@ -26,6 +26,7 @@ import org.apache.karaf.features.ConfigFileInfo;
 import org.apache.karaf.features.ConfigInfo;
 import org.apache.karaf.features.Dependency;
 import org.apache.karaf.features.Feature;
+import org.apache.karaf.features.Library;
 import org.apache.karaf.features.Requirement;
 import org.apache.karaf.features.Scoping;
 
@@ -148,5 +149,10 @@ public class ExtendedFeature implements Feature {
     @Override
     public Scoping getScoping() {
         return feature.getScoping();
+    }
+
+    @Override
+    public List<? extends Library> getLibraries() {
+        return feature.getLibraries();
     }
 }
