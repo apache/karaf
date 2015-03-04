@@ -116,9 +116,6 @@
                             org.apache.karaf.util.tracker,
                             org.apache.felix.utils.properties
                         </Private-Package>
-                        <Bundle-Activator>
-                            org.apache.karaf.kar.internal.osgi.Activator
-                        </Bundle-Activator>
                         <Karaf-Commands>org.apache.karaf.kar.command.*</Karaf-Commands>
                     </instructions>
                 </configuration>

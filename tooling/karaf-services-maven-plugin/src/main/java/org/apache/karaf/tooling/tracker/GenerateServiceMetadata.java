@@ -40,6 +40,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.apache.xbean.finder.ClassFinder;
+import org.osgi.framework.BundleActivator;
 
 /**
  * Generates service requirement and capabilities for activators
@@ -53,10 +54,13 @@ public class GenerateServiceMetadata extends AbstractMojo {
     @Parameter(defaultValue = "${project}")
     protected MavenProject project;
 
-    @Parameter(defaultValue="requirements")
+    @Parameter(defaultValue="BNDExtension-Bundle-Activator")
+    protected String activatorProperty;
+
+    @Parameter(defaultValue="BNDExtension-Require-Capability")
     protected String requirementsProperty;
 
-    @Parameter(defaultValue="capabilities")
+    @Parameter(defaultValue="BNDExtension-Provide-Capability")
     protected String capabilitiesProperty;
 
     @Parameter(defaultValue = "${project.build.directory}/generated/karaf-tracker")
@@ -79,11 +83,16 @@ public class GenerateServiceMetadata extends AbstractMojo {
             ClassFinder finder = createFinder(classLoader);
             List<Class<?>> classes = finder.findAnnotatedClasses(Services.class);
 
+            List<Class> activators = new ArrayList<>();
             for (Class<?> clazz : classes) {
                 URL classUrl = clazz.getClassLoader().getResource(clazz.getName().replace('.', '/') + ".class");
                 if (classUrl == null || !classUrl.getPath().startsWith(project.getBuild().getOutputDirectory())) {
                     System.out.println("Ignoring " + classUrl);
                     continue;
+                }
+
+                if (BundleActivator.class.isAssignableFrom(clazz)) {
+                    activators.add(clazz);
                 }
 
                 Properties props = new Properties();
@@ -137,6 +146,9 @@ public class GenerateServiceMetadata extends AbstractMojo {
 
             project.getProperties().setProperty(requirementsProperty, requirements.toString());
             project.getProperties().setProperty(capabilitiesProperty, capabilities.toString());
+            if (activators.size() == 1) {
+                project.getProperties().setProperty(activatorProperty, activators.get(0).getName());
+            }
 
         } catch (Exception e) {
             throw new MojoExecutionException("Error building commands help", e);

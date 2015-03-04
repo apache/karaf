@@ -105,15 +105,6 @@
                             org.apache.karaf.web.management.internal,
                             org.apache.karaf.util.tracker
                         </Private-Package>
-                        <Provide-Capability>
-                            ${capabilities}
-                        </Provide-Capability>
-                        <Require-Capability>
-                            ${requirements}
-                        </Require-Capability>
-                        <Bundle-Activator>
-                            org.apache.karaf.web.internal.osgi.Activator
-                        </Bundle-Activator>
                         <Karaf-Commands>*</Karaf-Commands>
                     </instructions>
                 </configuration>

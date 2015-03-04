@@ -188,15 +188,6 @@
                             org.apache.felix.utils.version,
                             org.apache.felix.utils.properties,
                         </Private-Package>
-                        <Provide-Capability>
-                            ${capabilities}
-                        </Provide-Capability>
-                        <Require-Capability>
-                            ${requirements}
-                        </Require-Capability>
-                        <Bundle-Activator>
-                            org.apache.karaf.profile.impl.osgi.Activator
-                        </Bundle-Activator>
                         <Karaf-Commands>
                             org.apache.karaf.profile.command.*
                         </Karaf-Commands>

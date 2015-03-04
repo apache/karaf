@@ -155,9 +155,6 @@
                         <Embed-Dependency>
                             org.apache.karaf.util;inline="org/apache/karaf/util/XmlUtils*.class"
                         </Embed-Dependency>
-                        <Bundle-Activator>
-                            org.apache.karaf.features.internal.osgi.Activator
-                        </Bundle-Activator>
                     </instructions>
                 </configuration>
             </plugin>

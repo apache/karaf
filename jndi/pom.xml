@@ -99,16 +99,7 @@
                             org.apache.karaf.jndi.internal.osgi,
                             org.apache.karaf.util.tracker
                         </Private-Package>
-                        <Provide-Capability>
-                            ${capabilities}
-                        </Provide-Capability>
-                        <Require-Capability>
-                            ${requirements}
-                        </Require-Capability>
                         <Karaf-Commands>*</Karaf-Commands>
-                        <Bundle-Activator>
-                            org.apache.karaf.jndi.internal.osgi.Activator
-                        </Bundle-Activator>
                     </instructions>
                 </configuration>
             </plugin>

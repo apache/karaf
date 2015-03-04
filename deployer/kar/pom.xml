@@ -115,15 +115,6 @@
                             org.apache.karaf.deployer.kar.osgi,
                             org.apache.karaf.util.tracker
                         </Private-Package>
-                        <Provide-Capability>
-                            ${capabilities}
-                        </Provide-Capability>
-                        <Require-Capability>
-                            ${requirements}
-                        </Require-Capability>
-                        <Bundle-Activator>
-                            org.apache.karaf.deployer.kar.osgi.Activator
-                        </Bundle-Activator>
                     </instructions>
                 </configuration>
             </plugin>

@@ -163,9 +163,6 @@
                             org.apache.http*,
                             org.apache.commons.codec*
                         </Private-Package>
-                        <Bundle-Activator>
-                            org.apache.karaf.jaas.modules.impl.Activator
-                        </Bundle-Activator>
                     </instructions>
                 </configuration>
             </plugin>

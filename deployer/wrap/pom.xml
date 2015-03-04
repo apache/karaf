@@ -88,16 +88,6 @@
                             org.apache.karaf.util,
                             org.apache.karaf.util.tracker
                         </Private-Package>
-                        <Provide-Capability>
-                            ${capabilities}
-                        </Provide-Capability>
-                        <Require-Capability>
-                            ${requirements}
-                        </Require-Capability>
-                        <Bundle-Activator>
-                            org.apache.karaf.deployer.wrap.osgi.Activator
-                        </Bundle-Activator>
-                        <_versionpolicy>${bnd.version.policy}</_versionpolicy>
                     </instructions>
                 </configuration>
             </plugin>

@@ -122,15 +122,6 @@
                             org.apache.karaf.util.jaas,
                             org.apache.karaf.util.tracker
                         </Private-Package>
-                        <Provide-Capability>
-                            ${capabilities}
-                        </Provide-Capability>
-                        <Require-Capability>
-                            ${requirements}
-                        </Require-Capability>
-                        <Bundle-Activator>
-                            org.apache.karaf.management.internal.Activator
-                        </Bundle-Activator>
                     </instructions>
                 </configuration>
             </plugin>

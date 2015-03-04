@@ -2167,9 +2167,8 @@
                         <nsh_interface>org.apache.aries.blueprint.NamespaceHandler</nsh_interface>
                         <nsh_namespace>osgi.service.blueprint.namespace</nsh_namespace>
                         <_removeheaders>Private-Package,Include-Resource,Embed-Dependency,Created-By,Bnd-LastModified,Built-By,Tool</_removeheaders>
+                        <_versionpolicy>${bnd.version.policy}</_versionpolicy>
                         <Bundle-DocURL>http://karaf.apache.org/</Bundle-DocURL>
-                        <Provide-Capability>${capabilities}</Provide-Capability>
-                        <Require-Capability>${requirements}</Require-Capability>
                     </instructions>
                 </configuration>
                 <executions>

@@ -124,15 +124,6 @@
                             !org.tanukisoftware.wrapper*,
                             *
                         </Import-Package>
-                        <Bundle-Activator>
-                            org.apache.karaf.wrapper.internal.osgi.Activator
-                        </Bundle-Activator>
-                        <Provide-Capability>
-                            ${capabilities}
-                        </Provide-Capability>
-                        <Require-Capability>
-                            ${requirements}
-                        </Require-Capability>
                         <Karaf-Commands>
                             org.apache.karaf.wrapper.commands
                         </Karaf-Commands>

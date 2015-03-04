@@ -97,15 +97,6 @@
                             org.apache.karaf.obr.core.internal.osgi,
                             org.apache.karaf.util.tracker
                         </Private-Package>
-                        <Provide-Capability>
-                            ${capabilities}
-                        </Provide-Capability>
-                        <Require-Capability>
-                            ${requirements}
-                        </Require-Capability>
-                        <Bundle-Activator>
-                            org.apache.karaf.obr.core.internal.osgi.Activator
-                        </Bundle-Activator>
                         <Karaf-Commands>*</Karaf-Commands>
                     </instructions>
                 </configuration>

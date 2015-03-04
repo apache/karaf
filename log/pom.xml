@@ -111,15 +111,6 @@
                             org.apache.karaf.log.core.internal.osgi,
                             org.apache.karaf.util.tracker
                         </Private-Package>
-                        <Provide-Capability>
-                            ${capabilities}
-                        </Provide-Capability>
-                        <Require-Capability>
-                            ${requirements}
-                        </Require-Capability>
-                        <Bundle-Activator>
-                            org.apache.karaf.log.core.internal.osgi.Activator
-                        </Bundle-Activator>
                         <Karaf-Commands>
                             org.apache.karaf.log.command*
                         </Karaf-Commands>

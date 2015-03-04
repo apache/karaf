@@ -114,15 +114,6 @@
                             org.apache.karaf.util.tracker,
                             org.apache.felix.utils.properties
                         </Private-Package>
-                        <Provide-Capability>
-                            ${capabilities}
-                        </Provide-Capability>
-                        <Require-Capability>
-                            ${requirements}
-                        </Require-Capability>
-                        <Bundle-Activator>
-                            org.apache.karaf.config.core.impl.osgi.Activator
-                        </Bundle-Activator>
                         <Karaf-Commands>org.apache.karaf.config.command.*</Karaf-Commands>
                     </instructions>
                 </configuration>

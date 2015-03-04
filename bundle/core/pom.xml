@@ -138,18 +138,9 @@
                             org.apache.felix.utils.version,
                             org.apache.felix.utils.manifest
                         </Private-Package>
-                        <Provide-Capability>
-                            ${capabilities}
-                        </Provide-Capability>
-                        <Require-Capability>
-                            ${requirements}
-                        </Require-Capability>
                         <Embed-Dependency>
                             org.apache.karaf.jaas.modules;inline="org/apache/karaf/jaas/modules/JaasHelper*.class"
                         </Embed-Dependency>
-                        <Bundle-Activator>
-                            org.apache.karaf.bundle.core.internal.osgi.Activator
-                        </Bundle-Activator>
                         <Karaf-Commands>org.apache.karaf.bundle.command.*</Karaf-Commands>
                     </instructions>
                 </configuration>

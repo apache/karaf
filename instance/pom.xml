@@ -187,12 +187,6 @@
                             !org.apache.karaf.instance.core.internal,
                             *
                         </Import-Package>
-                        <Provide-Capability>
-                            ${capabilities}
-                        </Provide-Capability>
-                        <Require-Capability>
-                            ${requirements}
-                        </Require-Capability>
                         <Private-Package>
                             org.apache.karaf.jpm,
                             org.apache.karaf.jpm.impl,
@@ -206,9 +200,6 @@
                             org.apache.karaf.util.locks,
                             org.apache.karaf.util.tracker
                         </Private-Package>
-                        <Bundle-Activator>
-                            org.apache.karaf.instance.core.internal.osgi.Activator
-                        </Bundle-Activator>
                         <Karaf-Commands>org.apache.karaf.instance.command.*</Karaf-Commands>
                     </instructions>
                 </configuration>
