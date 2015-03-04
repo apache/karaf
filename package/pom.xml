@@ -116,13 +116,9 @@
                             org.apache.karaf.packages.core.internal.filter,
                             org.apache.karaf.packages.core.internal,
                             org.apache.karaf.packages.core.internal.osgi,
-                            org.apache.karaf.util.tracker,
                             org.apache.felix.utils.version,
                             org.apache.felix.utils.manifest
                         </Private-Package>
-                        <Karaf-Commands>
-                            org.apache.karaf.packages.command
-                        </Karaf-Commands>
                     </instructions>
                 </configuration>
             </plugin>

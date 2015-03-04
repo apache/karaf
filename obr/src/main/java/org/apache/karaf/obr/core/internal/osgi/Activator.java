@@ -19,8 +19,8 @@ package org.apache.karaf.obr.core.internal.osgi;
 import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.karaf.obr.core.internal.ObrMBeanImpl;
 import org.apache.karaf.util.tracker.BaseActivator;
-import org.apache.karaf.util.tracker.RequireService;
-import org.apache.karaf.util.tracker.Services;
+import org.apache.karaf.util.tracker.annotation.RequireService;
+import org.apache.karaf.util.tracker.annotation.Services;
 
 @Services(
         requires = @RequireService(RepositoryAdmin.class)

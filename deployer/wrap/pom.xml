@@ -86,7 +86,6 @@
                             org.apache.karaf.deployer.wrap,
                             org.apache.karaf.deployer.wrap.osgi,
                             org.apache.karaf.util,
-                            org.apache.karaf.util.tracker
                         </Private-Package>
                     </instructions>
                 </configuration>

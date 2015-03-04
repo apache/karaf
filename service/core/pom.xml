@@ -74,6 +74,10 @@
         </resources>
         <plugins>
             <plugin>
+                <groupId>org.apache.karaf.tooling</groupId>
+                <artifactId>karaf-services-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
@@ -85,12 +89,7 @@
                             org.apache.karaf.service.command,
                             org.apache.karaf.service.core.internal,
                             org.apache.karaf.service.core.internal.osgi,
-                            org.apache.karaf.util.tracker
                         </Private-Package>
-                        <Bundle-Activator>
-                            org.apache.karaf.service.core.internal.osgi.Activator
-                        </Bundle-Activator>
-                        <Karaf-Commands>org.apache.karaf.service.command</Karaf-Commands>
                     </instructions>
                 </configuration>
             </plugin>

@@ -18,8 +18,8 @@ package org.apache.karaf.scheduler.core;
 
 import org.apache.karaf.scheduler.Scheduler;
 import org.apache.karaf.util.tracker.BaseActivator;
-import org.apache.karaf.util.tracker.ProvideService;
-import org.apache.karaf.util.tracker.Services;
+import org.apache.karaf.util.tracker.annotation.ProvideService;
+import org.apache.karaf.util.tracker.annotation.Services;
 import org.quartz.simpl.SimpleThreadPool;
 import org.quartz.spi.ThreadPool;
 

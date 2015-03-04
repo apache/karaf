@@ -198,9 +198,7 @@
                             org.apache.felix.utils.properties;-split-package:=merge-first,
                             org.apache.karaf.util,
                             org.apache.karaf.util.locks,
-                            org.apache.karaf.util.tracker
                         </Private-Package>
-                        <Karaf-Commands>org.apache.karaf.instance.command.*</Karaf-Commands>
                     </instructions>
                 </configuration>
             </plugin>

@@ -103,9 +103,7 @@
                             org.apache.karaf.web.internal,
                             org.apache.karaf.web.internal.osgi,
                             org.apache.karaf.web.management.internal,
-                            org.apache.karaf.util.tracker
                         </Private-Package>
-                        <Karaf-Commands>*</Karaf-Commands>
                     </instructions>
                 </configuration>
             </plugin>

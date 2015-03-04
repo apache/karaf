@@ -102,10 +102,8 @@
                             org.apache.karaf.system.internal,
                             org.apache.karaf.system.internal.osgi,
                             org.apache.karaf.system.management.internal,
-                            org.apache.karaf.util.tracker,
                             org.apache.felix.utils.properties
                         </Private-Package>
-                        <Karaf-Commands>*</Karaf-Commands>
                     </instructions>
                 </configuration>
             </plugin>

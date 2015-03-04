@@ -111,10 +111,8 @@
                         <Private-Package>
                             org.apache.karaf.config.core.impl,
                             org.apache.karaf.config.core.impl.osgi,
-                            org.apache.karaf.util.tracker,
                             org.apache.felix.utils.properties
                         </Private-Package>
-                        <Karaf-Commands>org.apache.karaf.config.command.*</Karaf-Commands>
                     </instructions>
                 </configuration>
             </plugin>

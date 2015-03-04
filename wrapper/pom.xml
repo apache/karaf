@@ -114,7 +114,6 @@
                             org.apache.karaf.wrapper.internal.osgi,
                             org.apache.karaf.wrapper.internal.service,
                             org.apache.karaf.wrapper.management.internal,
-                            org.apache.karaf.util.tracker
                         </Private-Package>
                         <Import-Package>
                             !org.apache.felix.utils.properties,
@@ -124,9 +123,6 @@
                             !org.tanukisoftware.wrapper*,
                             *
                         </Import-Package>
-                        <Karaf-Commands>
-                            org.apache.karaf.wrapper.commands
-                        </Karaf-Commands>
                     </instructions>
                 </configuration>
             </plugin>

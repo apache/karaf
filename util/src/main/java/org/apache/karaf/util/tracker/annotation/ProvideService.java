@@ -14,19 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.util.tracker;
+package org.apache.karaf.util.tracker.annotation;
 
-import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE})
-public @interface Services {
+public @interface ProvideService {
 
-    ProvideService[] provides() default {};
-
-    RequireService[] requires() default {};
+    Class value();
 
 }

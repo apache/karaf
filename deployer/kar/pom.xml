@@ -113,7 +113,6 @@
                         <Private-Package>
                             org.apache.karaf.deployer.kar,
                             org.apache.karaf.deployer.kar.osgi,
-                            org.apache.karaf.util.tracker
                         </Private-Package>
                     </instructions>
                 </configuration>

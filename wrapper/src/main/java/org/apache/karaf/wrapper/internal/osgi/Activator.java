@@ -17,8 +17,8 @@
 package org.apache.karaf.wrapper.internal.osgi;
 
 import org.apache.karaf.util.tracker.BaseActivator;
-import org.apache.karaf.util.tracker.ProvideService;
-import org.apache.karaf.util.tracker.Services;
+import org.apache.karaf.util.tracker.annotation.ProvideService;
+import org.apache.karaf.util.tracker.annotation.Services;
 import org.apache.karaf.wrapper.WrapperService;
 import org.apache.karaf.wrapper.internal.WrapperServiceImpl;
 import org.apache.karaf.wrapper.management.internal.WrapperMBeanImpl;

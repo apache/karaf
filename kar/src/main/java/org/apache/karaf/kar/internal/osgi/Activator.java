@@ -21,10 +21,10 @@ import org.apache.karaf.kar.KarService;
 import org.apache.karaf.kar.internal.KarServiceImpl;
 import org.apache.karaf.kar.internal.KarsMBeanImpl;
 import org.apache.karaf.util.tracker.BaseActivator;
-import org.apache.karaf.util.tracker.Managed;
-import org.apache.karaf.util.tracker.ProvideService;
-import org.apache.karaf.util.tracker.RequireService;
-import org.apache.karaf.util.tracker.Services;
+import org.apache.karaf.util.tracker.annotation.Managed;
+import org.apache.karaf.util.tracker.annotation.ProvideService;
+import org.apache.karaf.util.tracker.annotation.RequireService;
+import org.apache.karaf.util.tracker.annotation.Services;
 import org.osgi.service.cm.ManagedService;
 
 @Services(

@@ -33,7 +33,8 @@ import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 
 //This is from aries util
-public final class SingleServiceTracker<T> {
+public final class SingleServiceTracker<T> implements ServiceListener {
+
     public static interface SingleServiceListener {
         public void serviceFound();
 
@@ -44,27 +45,12 @@ public final class SingleServiceTracker<T> {
 
     private final BundleContext ctx;
     private final String className;
-    private final AtomicReference<T> service = new AtomicReference<T>();
-    private final AtomicReference<ServiceReference> ref = new AtomicReference<ServiceReference>();
+    private final AtomicReference<T> service = new AtomicReference<>();
+    private final AtomicReference<ServiceReference> ref = new AtomicReference<>();
     private final AtomicBoolean open = new AtomicBoolean(false);
     private final SingleServiceListener serviceListener;
     private final String filterString;
     private final Filter filter;
-
-    private final ServiceListener listener = new ServiceListener() {
-        public void serviceChanged(ServiceEvent event) {
-            if (open.get()) {
-                if (event.getType() == ServiceEvent.UNREGISTERING) {
-                    ServiceReference deadRef = event.getServiceReference();
-                    if (deadRef.equals(ref.get())) {
-                        findMatchingReference(deadRef);
-                    }
-                } else if (event.getType() == ServiceEvent.REGISTERED && ref.get() == null) {
-                    findMatchingReference(null);
-                }
-            }
-        }
-    };
 
     public SingleServiceTracker(BundleContext context, Class<T> clazz, SingleServiceListener sl) throws InvalidSyntaxException {
         this(context, clazz, null, sl);
@@ -100,10 +86,23 @@ public final class SingleServiceTracker<T> {
             try {
                 String filterString = '(' + Constants.OBJECTCLASS + '=' + className + ')';
                 if (filter != null) filterString = "(&" + filterString + filter + ')';
-                ctx.addServiceListener(listener, filterString);
+                ctx.addServiceListener(this, filterString);
                 findMatchingReference(null);
             } catch (InvalidSyntaxException e) {
                 // this can never happen. (famous last words :)
+            }
+        }
+    }
+
+    public void serviceChanged(ServiceEvent event) {
+        if (open.get()) {
+            if (event.getType() == ServiceEvent.UNREGISTERING) {
+                ServiceReference deadRef = event.getServiceReference();
+                if (deadRef.equals(ref.get())) {
+                    findMatchingReference(deadRef);
+                }
+            } else if (event.getType() == ServiceEvent.REGISTERED && ref.get() == null) {
+                findMatchingReference(null);
             }
         }
     }
@@ -176,7 +175,7 @@ public final class SingleServiceTracker<T> {
 
     public void close() {
         if (open.compareAndSet(true, false)) {
-            ctx.removeServiceListener(listener);
+            ctx.removeServiceListener(this);
 
             ServiceReference deadRef;
             synchronized (this) {

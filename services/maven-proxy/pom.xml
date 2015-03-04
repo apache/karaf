@@ -45,9 +45,6 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Bundle-Activator>
-                            org.apache.karaf.services.mavenproxy.internal.Activator
-                        </Bundle-Activator>
                         <Import-Package>
                             javax.servlet.*;version="[3.0,4)",
                             !shaded.*,
@@ -56,7 +53,6 @@
                         <Private-Package>
                             org.apache.karaf.services.mavenproxy.internal,
                             org.apache.karaf.util,
-                            org.apache.karaf.util.tracker,
                             org.apache.karaf.util.base64
                         </Private-Package>
                     </instructions>

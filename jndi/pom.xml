@@ -97,9 +97,7 @@
                             org.apache.karaf.jndi.command.completers,
                             org.apache.karaf.jndi.internal,
                             org.apache.karaf.jndi.internal.osgi,
-                            org.apache.karaf.util.tracker
                         </Private-Package>
-                        <Karaf-Commands>*</Karaf-Commands>
                     </instructions>
                 </configuration>
             </plugin>

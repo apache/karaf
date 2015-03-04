@@ -92,6 +92,10 @@
         </resources>
         <plugins>
             <plugin>
+                <groupId>org.apache.karaf.tooling</groupId>
+                <artifactId>karaf-services-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
@@ -103,9 +107,6 @@
                         <Private-Package>
                             org.apache.karaf.util.jaas,
                         </Private-Package>
-                        <Karaf-Commands>
-                            org.apache.karaf.jaas.command.*
-                        </Karaf-Commands>
                     </instructions>
                 </configuration>
             </plugin>

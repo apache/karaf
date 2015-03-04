@@ -39,7 +39,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BaseActivator implements BundleActivator, SingleServiceTracker.SingleServiceListener {
+public class BaseActivator implements BundleActivator, SingleServiceTracker.SingleServiceListener, Runnable {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
     protected BundleContext bundleContext;
@@ -97,22 +97,12 @@ public class BaseActivator implements BundleActivator, SingleServiceTracker.Sing
             try (InputStream is = data.openStream()) {
                 props.load(is);
             }
-            for (String key : props.stringPropertyNames())
+            for (String key : props.stringPropertyNames()) {
                 if ("pid".equals(key)) {
                     manage(props.getProperty(key));
                 } else {
                     trackService(key, props.getProperty(key));
                 }
-        } else {
-            Services services = getClass().getAnnotation(Services.class);
-            if (services != null) {
-                for (RequireService require : services.requires()) {
-                    trackService(require.value(), require.filter());
-                }
-            }
-            Managed managed = getClass().getAnnotation(Managed.class);
-            if (managed != null) {
-                manage(managed.value());
             }
         }
     }
@@ -231,19 +221,19 @@ public class BaseActivator implements BundleActivator, SingleServiceTracker.Sing
 
     protected void reconfigure() {
         if (scheduled.compareAndSet(false, true)) {
-            executor.submit(new Runnable() {
-                @Override
-                public void run() {
-                    scheduled.set(false);
-                    doStop();
-                    try {
-                        doStart();
-                    } catch (Exception e) {
-                        logger.warn("Error starting activator", e);
-                        doStop();
-                    }
-                }
-            });
+            executor.submit(this);
+        }
+    }
+
+    @Override
+    public void run() {
+        scheduled.set(false);
+        doStop();
+        try {
+            doStart();
+        } catch (Exception e) {
+            logger.warn("Error starting activator", e);
+            doStop();
         }
     }
 

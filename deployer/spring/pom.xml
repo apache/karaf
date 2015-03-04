@@ -101,7 +101,6 @@
                             org.apache.karaf.deployer.spring,
                             org.apache.karaf.deployer.spring.osgi,
                             org.apache.karaf.util,
-                            org.apache.karaf.util.tracker
                         </Private-Package>
                     </instructions>
                 </configuration>

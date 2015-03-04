@@ -184,13 +184,9 @@
                             org.apache.karaf.profile.impl.osgi,
                             org.apache.karaf.util.config,
                             org.apache.karaf.util.maven,
-                            org.apache.karaf.util.tracker,
                             org.apache.felix.utils.version,
                             org.apache.felix.utils.properties,
                         </Private-Package>
-                        <Karaf-Commands>
-                            org.apache.karaf.profile.command.*
-                        </Karaf-Commands>
                     </instructions>
                 </configuration>
             </plugin>

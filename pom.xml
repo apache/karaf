@@ -167,7 +167,7 @@
         <felix.framework.version>4.7.0-SNAPSHOT</felix.framework.version>
         <felix.framework.security.version>2.4.0</felix.framework.security.version>
         <felix.gogo.version>0.14.1-SNAPSHOT</felix.gogo.version>
-        <felix.plugin.version>2.5.3</felix.plugin.version>
+        <felix.plugin.version>2.5.4-SNAPSHOT</felix.plugin.version>
         <felix.utils.version>1.6.1-SNAPSHOT</felix.utils.version>
         <felix.webconsole.version>4.2.2</felix.webconsole.version>
         <felix.webconsole.api.version>3.1.2</felix.webconsole.api.version>

@@ -26,9 +26,9 @@ import org.apache.karaf.jndi.KarafInitialContextFactory;
 import org.apache.karaf.jndi.internal.JndiMBeanImpl;
 import org.apache.karaf.jndi.internal.JndiServiceImpl;
 import org.apache.karaf.util.tracker.BaseActivator;
-import org.apache.karaf.util.tracker.ProvideService;
-import org.apache.karaf.util.tracker.RequireService;
-import org.apache.karaf.util.tracker.Services;
+import org.apache.karaf.util.tracker.annotation.ProvideService;
+import org.apache.karaf.util.tracker.annotation.RequireService;
+import org.apache.karaf.util.tracker.annotation.Services;
 
 @Services(
         requires = @RequireService(ProxyManager.class),

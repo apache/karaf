@@ -18,7 +18,7 @@ package org.apache.karaf.service.core.internal.osgi;
 
 import org.apache.karaf.service.core.internal.ServicesMBeanImpl;
 import org.apache.karaf.util.tracker.BaseActivator;
-import org.apache.karaf.util.tracker.Services;
+import org.apache.karaf.util.tracker.annotation.Services;
 
 @Services
 public class Activator extends BaseActivator {

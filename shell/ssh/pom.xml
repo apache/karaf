@@ -117,7 +117,6 @@
                         <Private-Package>
                             org.apache.karaf.util,
                             org.apache.karaf.util.jaas,
-                            org.apache.karaf.util.tracker
                         </Private-Package>
                     </instructions>
                 </configuration>

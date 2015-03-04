@@ -81,11 +81,14 @@
         </resources>
         <plugins>
             <plugin>
+                <groupId>org.apache.karaf.tooling</groupId>
+                <artifactId>karaf-services-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Karaf-Commands>org.apache.karaf.features.command.*</Karaf-Commands>
                     </instructions>
                 </configuration>
             </plugin>

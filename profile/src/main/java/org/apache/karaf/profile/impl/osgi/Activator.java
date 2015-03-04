@@ -16,16 +16,15 @@
  */
 package org.apache.karaf.profile.impl.osgi;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.apache.karaf.profile.ProfileService;
 import org.apache.karaf.profile.impl.ProfileServiceImpl;
 import org.apache.karaf.util.tracker.BaseActivator;
-import org.apache.karaf.util.tracker.Managed;
-import org.apache.karaf.util.tracker.ProvideService;
-import org.apache.karaf.util.tracker.Services;
+import org.apache.karaf.util.tracker.annotation.Managed;
+import org.apache.karaf.util.tracker.annotation.ProvideService;
+import org.apache.karaf.util.tracker.annotation.Services;
 import org.osgi.service.cm.ManagedService;
 
 @Services(

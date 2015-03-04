@@ -24,7 +24,7 @@ import org.apache.felix.fileinstall.ArtifactUrlTransformer;
 import org.apache.karaf.deployer.blueprint.BlueprintDeploymentListener;
 import org.apache.karaf.deployer.blueprint.BlueprintURLHandler;
 import org.apache.karaf.util.tracker.BaseActivator;
-import org.apache.karaf.util.tracker.Services;
+import org.apache.karaf.util.tracker.annotation.Services;
 import org.osgi.service.url.URLStreamHandlerService;
 
 @Services

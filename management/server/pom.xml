@@ -120,7 +120,6 @@
                             org.apache.karaf.management.internal,
                             org.apache.karaf.service.guard.tools,
                             org.apache.karaf.util.jaas,
-                            org.apache.karaf.util.tracker
                         </Private-Package>
                     </instructions>
                 </configuration>

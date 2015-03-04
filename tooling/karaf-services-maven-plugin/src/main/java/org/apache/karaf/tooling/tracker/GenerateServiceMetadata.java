@@ -24,11 +24,14 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
+import java.util.TreeSet;
 
-import org.apache.karaf.util.tracker.Managed;
-import org.apache.karaf.util.tracker.ProvideService;
-import org.apache.karaf.util.tracker.RequireService;
-import org.apache.karaf.util.tracker.Services;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.util.tracker.annotation.Managed;
+import org.apache.karaf.util.tracker.annotation.ProvideService;
+import org.apache.karaf.util.tracker.annotation.RequireService;
+import org.apache.karaf.util.tracker.annotation.Services;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Resource;
 import org.apache.maven.plugin.AbstractMojo;
@@ -148,6 +151,24 @@ public class GenerateServiceMetadata extends AbstractMojo {
             project.getProperties().setProperty(capabilitiesProperty, capabilities.toString());
             if (activators.size() == 1) {
                 project.getProperties().setProperty(activatorProperty, activators.get(0).getName());
+            }
+            project.getProperties().setProperty("BNDExtension-Private-Package", "org.apache.karaf.util.tracker");
+            project.getProperties().setProperty("BNDPrependExtension-Import-Package", "!org.apache.karaf.util.tracker.annotation");
+
+            List<Class<?>> services = finder.findAnnotatedClasses(Service.class);
+            Set<String> packages = new TreeSet<>();
+            for (Class<?> clazz : services) {
+                packages.add(clazz.getPackage().getName());
+            }
+            if (!packages.isEmpty()) {
+                StringBuilder sb = new StringBuilder();
+                for (String pkg : packages) {
+                    if (sb.length() > 0) {
+                        sb.append(",");
+                    }
+                    sb.append(pkg);
+                }
+                project.getProperties().setProperty("BNDExtension-Karaf-Commands", sb.toString());
             }
 
         } catch (Exception e) {

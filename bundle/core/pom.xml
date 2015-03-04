@@ -134,14 +134,12 @@
                             org.apache.karaf.util.bundles,
                             org.apache.karaf.util.jaas,
                             org.apache.karaf.util.maven,
-                            org.apache.karaf.util.tracker,
                             org.apache.felix.utils.version,
                             org.apache.felix.utils.manifest
                         </Private-Package>
                         <Embed-Dependency>
                             org.apache.karaf.jaas.modules;inline="org/apache/karaf/jaas/modules/JaasHelper*.class"
                         </Embed-Dependency>
-                        <Karaf-Commands>org.apache.karaf.bundle.command.*</Karaf-Commands>
                     </instructions>
                 </configuration>
             </plugin>

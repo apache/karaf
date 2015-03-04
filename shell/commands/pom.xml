@@ -91,6 +91,10 @@
         </resources>
         <plugins>
             <plugin>
+                <groupId>org.apache.karaf.tooling</groupId>
+                <artifactId>karaf-services-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
@@ -109,9 +113,6 @@
                         <Require-Capability>
                             osgi.service;filter:="(objectClass=org.jledit.EditorFactory)";effective:=active
                         </Require-Capability>
-                        <Karaf-Commands>
-                            org.apache.karaf.shell.commands.impl
-                        </Karaf-Commands>
                     </instructions>
                 </configuration>
             </plugin>

@@ -20,8 +20,8 @@ import org.apache.karaf.packages.core.PackageService;
 import org.apache.karaf.packages.core.internal.PackageServiceImpl;
 import org.apache.karaf.packages.core.internal.PackagesMBeanImpl;
 import org.apache.karaf.util.tracker.BaseActivator;
-import org.apache.karaf.util.tracker.ProvideService;
-import org.apache.karaf.util.tracker.Services;
+import org.apache.karaf.util.tracker.annotation.ProvideService;
+import org.apache.karaf.util.tracker.annotation.Services;
 
 @Services(provides = @ProvideService(PackageService.class))
 public class Activator extends BaseActivator {
