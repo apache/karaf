@@ -16,12 +16,15 @@
  */
 package org.apache.karaf.util.bundles;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
+import java.util.zip.CRC32;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -33,7 +36,7 @@ public class BundleUtils {
     public static File fixBundleWithUpdateLocation(InputStream is, String uri) throws IOException {
         File file = File.createTempFile("update-", ".jar");
         try (ZipInputStream zis = new ZipInputStream(is);
-                ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(file))) {
+             ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(file))) {
 
             byte[] buf = new byte[8192];
             zos.setLevel(0);
@@ -42,19 +45,27 @@ public class BundleUtils {
                 if (entry == null) {
                     break;
                 }
-                zos.putNextEntry(entry);
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                int n;
+                while (-1 != (n = zis.read(buf))) {
+                    baos.write(buf, 0, n);
+                }
                 if (entry.getName().equals(JarFile.MANIFEST_NAME)) {
-                    Manifest man = new Manifest(zis);
+                    Manifest man = new Manifest(new ByteArrayInputStream(baos.toByteArray()));
                     if (man.getMainAttributes().getValue(Constants.BUNDLE_UPDATELOCATION) == null) {
                         man.getMainAttributes().putValue(Constants.BUNDLE_UPDATELOCATION, uri);
                     }
-                    man.write(zos);
-                } else {
-                    int n;
-                    while (-1 != (n = zis.read(buf))) {
-                        zos.write(buf, 0, n);
-                    }
+                    baos.reset();
+                    man.write(baos);
                 }
+                byte[] data = baos.toByteArray();
+                CRC32 crc = new CRC32();
+                crc.update(data);
+                entry = new ZipEntry(entry.getName());
+                entry.setSize(data.length);
+                entry.setCrc(crc.getValue());
+                zos.putNextEntry(entry);
+                zos.write(data);
                 zis.closeEntry();
                 zos.closeEntry();
             }
