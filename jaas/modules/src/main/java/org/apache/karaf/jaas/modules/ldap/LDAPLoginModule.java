@@ -325,8 +325,7 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
             logger.debug("  base DN: " + roleBaseDN);
             roleFilter = roleFilter.replaceAll(Pattern.quote("%u"), Matcher.quoteReplacement(user));
             roleFilter = roleFilter.replaceAll(Pattern.quote("%dn"), Matcher.quoteReplacement(userDN));
-            roleFilter = roleFilter.replaceAll(Pattern.quote("%fqdn"), Matcher.quoteReplacement(userDN + "," + userBaseDN));
-            roleFilter = roleFilter.replaceAll(Pattern.quote("%nsdn"), Matcher.quoteReplacement(userDNNamespace));
+            roleFilter = roleFilter.replaceAll(Pattern.quote("%fqdn"), Matcher.quoteReplacement(userDNNamespace));
             roleFilter = roleFilter.replace("\\", "\\\\");
             logger.debug("  filter: " + roleFilter);
             NamingEnumeration namingEnumeration = context.search(roleBaseDN, roleFilter, controls);
