@@ -89,8 +89,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static java.util.jar.JarFile.MANIFEST_NAME;
+import static org.apache.karaf.profile.assembly.Builder.Stage.Startup;
 
 public class Builder {
+
+    private static final String STATIC_FEATURES_KAR = "mvn:org.apache.karaf.features/static/%s/kar";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Builder.class);
 
@@ -289,9 +292,8 @@ public class Builder {
     }
 
     public Builder staticFramework(String version) {
-        return this.defaultStage(Stage.Startup)
-                   .useReferenceUrls()
-                   .kars(Stage.Startup, true, "mvn:org.apache.karaf.features/static/" + version + "/kar");
+        String staticFeaturesKar = String.format(STATIC_FEATURES_KAR, version);
+        return this.defaultStage(Startup).useReferenceUrls().kars(Startup, true, staticFeaturesKar);
     }
 
     public void generateAssembly() throws Exception {
