@@ -274,7 +274,7 @@ public class Deployer {
         for (Map.Entry<String, Set<String>> entry : delFeatures.entrySet()) {
             Map<String, String> map = stateFeatures.get(entry.getKey());
             if (map != null) {
-                map.entrySet().removeAll(entry.getValue());
+                map.keySet().removeAll(entry.getValue());
                 if (map.isEmpty()) {
                     stateFeatures.remove(entry.getKey());
                 }
@@ -942,11 +942,6 @@ public class Deployer {
                     }
                     // Ignore non bundle resources
                     if (!isBundle(wire.getProvider())) {
-                        continue;
-                    }
-                    // Ignore bundles that won't get deployed for some reason
-                    if (!resources.containsKey(wire.getProvider())
-                            && !(wire.getProvider() instanceof BundleRevision)) {
                         continue;
                     }
                     if (!wiredResources.containsKey(wire.getProvider())) {

@@ -77,6 +77,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.Version;
 import org.osgi.framework.hooks.resolver.ResolverHook;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
+import org.osgi.framework.namespace.ExecutionEnvironmentNamespace;
 import org.osgi.framework.namespace.HostNamespace;
 import org.osgi.framework.startlevel.BundleStartLevel;
 import org.osgi.framework.startlevel.FrameworkStartLevel;
@@ -1180,6 +1181,11 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
             @Override
             public void filterMatches(BundleRequirement requirement, Collection<BundleCapability> candidates) {
                 if (Thread.currentThread() == thread) {
+                    // osgi.ee capabilities are provided by the system bundle, so just ignore those
+                    if (ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE
+                            .equals(requirement.getNamespace())) {
+                        return;
+                    }
                     Bundle sourceBundle = requirement.getRevision().getBundle();
                     Resource sourceResource = bndToRes.get(sourceBundle);
                     Set<Resource> wired = new HashSet<>();
