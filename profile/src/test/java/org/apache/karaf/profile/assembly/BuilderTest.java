@@ -22,11 +22,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class BuilderTest {
 
+    // TODO This test can not run at this position as it needs the staticFramework kar which is not yet available 
     @Test
+    @Ignore 
     public void testBuilder() throws Exception {
 
         Path workDir = Paths.get("target/distrib");
