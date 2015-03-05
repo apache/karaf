@@ -142,4 +142,8 @@ public interface FeaturesService {
 
     String[] getRepositoryNames();
 
+    void registerListener(FeaturesListener listener);
+
+    void unregisterListener(FeaturesListener listener);
+
 }
