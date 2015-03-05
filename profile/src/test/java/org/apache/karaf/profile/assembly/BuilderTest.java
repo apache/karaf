@@ -27,9 +27,8 @@ import org.junit.Test;
 
 public class BuilderTest {
 
-    // TODO This test can not run at this position as it needs the staticFramework kar which is not yet available 
     @Test
-    @Ignore 
+    @Ignore("This test can not run at this position as it needs the staticFramework kar which is not yet available")
     public void testBuilder() throws Exception {
 
         Path workDir = Paths.get("target/distrib");
