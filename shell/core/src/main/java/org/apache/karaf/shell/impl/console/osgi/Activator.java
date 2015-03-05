@@ -19,8 +19,10 @@
 package org.apache.karaf.shell.impl.console.osgi;
 
 import java.io.Closeable;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.apache.felix.gogo.runtime.threadio.ThreadIOImpl;
+import org.apache.karaf.shell.api.console.CommandLoggingFilter;
 import org.apache.karaf.shell.api.console.SessionFactory;
 import org.apache.karaf.shell.impl.action.command.ManagerImpl;
 import org.apache.karaf.shell.impl.action.osgi.CommandExtender;
@@ -29,7 +31,10 @@ import org.apache.karaf.shell.impl.console.TerminalFactory;
 import org.apache.karaf.shell.impl.console.osgi.secured.SecuredSessionFactoryImpl;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 public class Activator implements BundleActivator {
 
@@ -47,15 +52,42 @@ public class Activator implements BundleActivator {
     private TerminalFactory terminalFactory;
     private LocalConsoleManager localConsoleManager;
 
+    ServiceTracker<CommandLoggingFilter, CommandLoggingFilter> filterTracker;
+
     @Override
-    public void start(BundleContext context) throws Exception {
+    public void start(final BundleContext context) throws Exception {
         threadIO = new ThreadIOImpl();
         threadIO.start();
 
         sessionFactory = new SecuredSessionFactoryImpl(context, threadIO);
         sessionFactory.getCommandProcessor().addConverter(new Converters(context));
         sessionFactory.getCommandProcessor().addConstant(".context", context.getBundle(0).getBundleContext());
-        sessionFactory.getCommandProcessor().addListener(new LoggingCommandSessionListener());
+
+        final CopyOnWriteArraySet<CommandLoggingFilter> listeners = new CopyOnWriteArraySet<>();
+        filterTracker = new ServiceTracker<CommandLoggingFilter, CommandLoggingFilter>(
+                context, CommandLoggingFilter.class, new ServiceTrackerCustomizer<CommandLoggingFilter, CommandLoggingFilter>() {
+            @Override
+            public CommandLoggingFilter addingService(ServiceReference<CommandLoggingFilter> reference) {
+                CommandLoggingFilter service = context.getService(reference);
+                listeners.add(service);
+                return service;
+            }
+
+            @Override
+            public void modifiedService(ServiceReference<CommandLoggingFilter> reference, CommandLoggingFilter service) {
+            }
+
+            @Override
+            public void removedService(ServiceReference<CommandLoggingFilter> reference, CommandLoggingFilter service) {
+                listeners.remove(service);
+                context.ungetService(reference);
+            }
+        });
+        filterTracker.open();
+        LoggingCommandSessionListener loggingCommandSessionListener = new LoggingCommandSessionListener();
+        loggingCommandSessionListener.setFilters(listeners);
+        sessionFactory.getCommandProcessor().addListener(loggingCommandSessionListener);
+
         try {
             EventAdminListener listener = new EventAdminListener(context);
             sessionFactory.getCommandProcessor().addListener(listener);
@@ -80,6 +112,7 @@ public class Activator implements BundleActivator {
 
     @Override
     public void stop(BundleContext context) throws Exception {
+        filterTracker.close();
         sessionFactoryRegistration.unregister();
         if (localConsoleManager != null) {
             localConsoleManager.stop();

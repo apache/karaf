@@ -38,4 +38,18 @@
         </service-properties>
     </service>
 
+    <!-- Lets try to filter passwords out of the logs -->
+    <service auto-export="interfaces">
+        <bean class="org.apache.karaf.shell.support.RegexCommandLoggingFilter">
+            <property name="pattern" value="create +.*?--password ([^ ]+)"/>
+            <property name="group" value="2"/>
+        </bean>
+    </service>
+    <service auto-export="interfaces">
+        <bean class="org.apache.karaf.shell.support.RegexCommandLoggingFilter">
+            <property name="pattern" value="create +.*?-p ([^ ]+)"/>
+            <property name="group" value="2"/>
+        </bean>
+    </service>
+
 </blueprint>
