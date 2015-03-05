@@ -94,5 +94,9 @@ public interface FeaturesService {
 
     Feature getFeature(String name) throws Exception;
 
-	void refreshRepository(URI uri) throws Exception;
+    void refreshRepository(URI uri) throws Exception;
+
+    void registerListener(FeaturesListener listener);
+
+    void unregisterListener(FeaturesListener listener);
 }
