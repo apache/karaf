@@ -22,8 +22,10 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import org.apache.karaf.shell.api.action.lifecycle.Manager;
+import org.apache.karaf.shell.api.console.CommandLoggingFilter;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.api.console.SessionFactory;
+import org.apache.karaf.shell.support.RegexCommandLoggingFilter;
 import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.Managed;
 import org.apache.karaf.util.tracker.annotation.RequireService;
@@ -89,6 +91,16 @@ public class Activator extends BaseActivator implements ManagedService {
         if (sf == null) {
             return;
         }
+
+        RegexCommandLoggingFilter filter = new RegexCommandLoggingFilter();
+        filter.setPattern("ssh (.*?)-P +([^ ]+)");
+        filter.setGroup(2);
+        register(CommandLoggingFilter.class, filter);
+
+        filter = new RegexCommandLoggingFilter();
+        filter.setPattern("ssh (.*?)--password +([^ ]+)");
+        filter.setGroup(2);
+        register(CommandLoggingFilter.class, filter);
 
         sessionFactory = sf;
         sessionFactory.getRegistry().getService(Manager.class).register(SshAction.class);

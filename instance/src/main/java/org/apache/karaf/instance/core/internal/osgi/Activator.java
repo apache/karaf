@@ -19,6 +19,8 @@ package org.apache.karaf.instance.core.internal.osgi;
 import org.apache.karaf.instance.core.InstanceService;
 import org.apache.karaf.instance.core.internal.InstanceServiceImpl;
 import org.apache.karaf.instance.core.internal.InstancesMBeanImpl;
+import org.apache.karaf.shell.api.console.CommandLoggingFilter;
+import org.apache.karaf.shell.support.RegexCommandLoggingFilter;
 import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.ProvideService;
 import org.apache.karaf.util.tracker.annotation.Services;
@@ -30,6 +32,11 @@ public class Activator extends BaseActivator {
     protected void doStart() throws Exception {
         InstanceService instanceService = new InstanceServiceImpl();
         register(InstanceService.class, instanceService);
+
+        RegexCommandLoggingFilter filter = new RegexCommandLoggingFilter();
+        filter.addCommandOption("--password", "connect");
+        filter.addCommandOption("-p", "connect");
+        register(CommandLoggingFilter.class, filter);
 
         InstancesMBeanImpl mbean = new InstancesMBeanImpl(instanceService);
         registerMBean(mbean, "type=instance");
