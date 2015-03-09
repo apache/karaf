@@ -186,8 +186,7 @@ public final class ProfileBuilderImpl implements ProfileBuilder {
 
     @Override
     public Map<String, String> getConfiguration(String pid) {
-        Map<String, String> config = getConfigurationInternal(pid);
-        return Collections.unmodifiableMap(config);
+        return getConfigurationInternal(pid);
     }
 
     private Map<String, String> getConfigurationInternal(String pid) {

@@ -47,7 +47,14 @@ public interface ProfileBuilder {
     ProfileBuilder removeParent(String parentId);
 
     Set<String> getConfigurationKeys();
-    
+
+    /**
+     * Returns a copy of the configuration with the specified pid
+     * or an empty map if it does not exist yet.
+     * The copy should be used for updates and then used with
+     * {@link #addConfiguration(String, java.util.Map)} to keep
+     * the layout and comments.
+     */
     Map<String, String> getConfiguration(String pid);
     
     ProfileBuilder addConfiguration(String pid, Map<String, String> config);

@@ -85,6 +85,9 @@ public final class Utils {
 
     public static Properties toProperties(Map<String, String> source) {
         try {
+            if (source instanceof Properties) {
+                return (Properties) source;
+            }
             Properties rc = new Properties(false);
             rc.putAll(source);
             return rc;

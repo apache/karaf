@@ -536,8 +536,7 @@ public class ProfileEdit implements Action {
     }
 
     private Map<String, String> getConfigurationFromBuilder(ProfileBuilder builder, String pid) {
-        Map<String, String> config = builder.getConfiguration(pid);
-        return config != null ? new HashMap<>(config) : new HashMap<String, String>();
+        return builder.getConfiguration(pid);
     }
 
     static class DatastoreContentManager implements ContentManager {
