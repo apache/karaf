@@ -144,7 +144,32 @@
                                     <artifactId>org.apache.felix.framework</artifactId>
                                     <outputDirectory>target/classes/resources/system/org/apache/felix/org.apache.felix.framework/${felix.framework.version}</outputDirectory>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>${equinox.groupId}</groupId>
+                                    <artifactId>${equinox.artifactId}</artifactId>
+                                    <outputDirectory>target/classes/resources/system/${equinox.path}/${equinox.artifactId}/${equinox.version}</outputDirectory>
+                                </artifactItem>
                             </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>regex-property</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>regex-property</goal>
+                        </goals>
+                        <configuration>
+                            <name>equinox.path</name>
+                            <value>${equinox.groupId}</value>
+                            <regex>\.</regex>
+                            <replacement>/</replacement>
+                            <failIfNoMatch>false</failIfNoMatch>
                         </configuration>
                     </execution>
                 </executions>

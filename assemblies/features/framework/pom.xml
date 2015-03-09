@@ -236,16 +236,6 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>${equinox.groupId}</groupId>
-                                    <artifactId>${equinox.artifactId}</artifactId>
-                                    <outputDirectory>target/classes/resources/system/${equinox.path}/${equinox.artifactId}/${equinox.version}</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.felix</groupId>
-                                    <artifactId>org.apache.felix.framework</artifactId>
-                                    <outputDirectory>target/classes/resources/system/org/apache/felix/org.apache.felix.framework/${felix.framework.version}</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
                                     <groupId>jline</groupId>
                                     <artifactId>jline</artifactId>
                                     <outputDirectory>target/classes/resources/system/jline/jline/${jline.version}</outputDirectory>
@@ -315,20 +305,6 @@
                                     <type>xml</type>
                                 </artifact>
                             </artifacts>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>regex-property</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>regex-property</goal>
-                        </goals>
-                        <configuration>
-                            <name>equinox.path</name>
-                            <value>${equinox.groupId}</value>
-                            <regex>\.</regex>
-                            <replacement>/</replacement>
-                            <failIfNoMatch>false</failIfNoMatch>
                         </configuration>
                     </execution>
                 </executions>
