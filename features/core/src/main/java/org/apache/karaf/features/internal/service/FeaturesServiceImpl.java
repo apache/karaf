@@ -1012,6 +1012,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         Deployer.DeploymentRequest request = new Deployer.DeploymentRequest();
         request.bundleUpdateRange = bundleUpdateRange;
         request.featureResolutionRange = featureResolutionRange;
+        request.updateSnaphots = updateSnaphots;
         request.globalRepository = globalRepository;
         request.overrides = Overrides.loadOverrides(overrides);
         request.requirements = requirements;

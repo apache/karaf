@@ -16,8 +16,12 @@
  */
 package org.apache.karaf.features.internal.service;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -1088,18 +1092,46 @@ public class Deployer {
                                 LOGGER.debug("Update snapshot for " + bundle.getLocation());
                                 deployment.toUpdate.put(bundle, resource);
                             } else if (UPDATE_SNAPSHOTS_CRC.equalsIgnoreCase(request.updateSnaphots)) {
-                                // if the checksum are different
+                                // Retrieve current bundle checksum
+                                long oldCrc;
+                                if (dstate.state.bundleChecksums.containsKey(bundleId)) {
+                                    oldCrc = dstate.state.bundleChecksums.get(bundleId);
+                                } else {
+                                    // Load bundle checksums if not already done
+                                    // This is a bit hacky, but we can't get a hold on the real bundle location
+                                    // in a standard way in OSGi.  Therefore, hack into Felix/Equinox to obtain the
+                                    // corresponding jar url and use that one to compute the checksum of the bundle.
+                                    oldCrc = 0l;
+                                    try {
+                                        URL url = bundle.getResource("META-INF/MANIFEST.MF");
+                                        URLConnection con = url.openConnection();
+                                        Method method = con.getClass().getDeclaredMethod("getLocalURL");
+                                        method.setAccessible(true);
+                                        String jarUrl = ((URL) method.invoke(con)).toExternalForm();
+                                        if (jarUrl.startsWith("jar:")) {
+                                            String jar = jarUrl.substring("jar:".length(), jarUrl.indexOf("!/"));
+                                            jar = new URL(jar).getFile();
+                                            try (InputStream is = new FileInputStream(jar)) {
+                                                oldCrc = ChecksumUtils.checksum(is);
+                                            }
+                                            result.bundleChecksums.put(bundleId, oldCrc);
+                                        }
+                                    } catch (Throwable t) {
+                                        LOGGER.debug("Error calculating checksum for bundle: %s", bundle, t);
+                                    }
+                                }
+                                // Compute new bundle checksum
+                                long newCrc;
                                 try (
                                         InputStream is = getBundleInputStream(resource, resolver.getProviders())
                                 ) {
-                                    long newCrc = ChecksumUtils.checksum(is);
-                                    long oldCrc = dstate.state.bundleChecksums.containsKey(bundle.getBundleId())
-                                                    ? dstate.state.bundleChecksums.get(bundle.getBundleId()) : 0L;
-                                    if (newCrc != oldCrc) {
-                                        LOGGER.debug("New snapshot available for " + bundle.getLocation());
-                                        deployment.toUpdate.put(bundle, resource);
-                                    }
+                                    newCrc = ChecksumUtils.checksum(is);
                                     result.bundleChecksums.put(bundle.getBundleId(), newCrc);
+                                }
+                                // if the checksum are different
+                                if (newCrc != oldCrc) {
+                                    LOGGER.debug("New snapshot available for " + bundle.getLocation());
+                                    deployment.toUpdate.put(bundle, resource);
                                 }
                             }
                         }
