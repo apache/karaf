@@ -43,7 +43,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -148,6 +148,12 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
      */
     private final String updateSnaphots;
 
+    private final int downloadThreads;
+
+    private final long scheduleDelay;
+
+    private final int scheduleMaxRun;
+
     /**
      * Optional global repository
      */
@@ -173,7 +179,10 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
                                String featureResolutionRange,
                                String bundleUpdateRange,
                                String updateSnaphots,
-                               org.osgi.service.repository.Repository globalRepository) {
+                               org.osgi.service.repository.Repository globalRepository,
+                               int downloadThreads,
+                               long scheduleDelay,
+                               int scheduleMaxRun) {
         this.bundle = bundle;
         this.systemBundleContext = systemBundleContext;
         this.storage = storage;
@@ -187,6 +196,9 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         this.bundleUpdateRange = bundleUpdateRange;
         this.updateSnaphots = updateSnaphots;
         this.globalRepository = globalRepository;
+        this.downloadThreads = downloadThreads > 0 ? downloadThreads : 1;
+        this.scheduleDelay = scheduleDelay;
+        this.scheduleMaxRun = scheduleMaxRun;
         loadState();
         checkResolve();
 
@@ -1031,8 +1043,9 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
 
         Dictionary<String, String> props = getMavenConfig();
         MavenResolver resolver = MavenResolvers.createMavenResolver(props, "org.ops4j.pax.url.mvn");
-        ScheduledExecutorService executor = Executors.newScheduledThreadPool(8);
-        DownloadManager manager = DownloadManagers.createDownloadManager(resolver, executor);
+        ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(downloadThreads);
+        executor.setMaximumPoolSize(downloadThreads);
+        DownloadManager manager = DownloadManagers.createDownloadManager(resolver, executor, scheduleDelay, scheduleMaxRun);
         try {
             Set<String> prereqs = new HashSet<>();
             while (true) {

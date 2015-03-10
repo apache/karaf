@@ -170,11 +170,13 @@ public class Activator extends BaseActivator {
             break;
         }
 
-        FeatureConfigInstaller configInstaller = new FeatureConfigInstaller(configurationAdmin);
         String overrides = getString("overrides", new File(System.getProperty("karaf.etc"), "overrides.properties").toURI().toString());
         String featureResolutionRange = getString("featureResolutionRange", FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE);
         String bundleUpdateRange = getString("bundleUpdateRange", FeaturesService.DEFAULT_BUNDLE_UPDATE_RANGE);
         String updateSnapshots = getString("updateSnapshots", FeaturesService.DEFAULT_UPDATE_SNAPSHOTS);
+        int downloadThreads = getInt("downloadThreads", FeaturesService.DEFAULT_DOWNLOAD_THREADS);
+        long scheduleDelay = getLong("scheduleDelay", FeaturesService.DEFAULT_SCHEDULE_DELAY);
+        int scheduleMaxRun = getInt("scheduleMaxRun", FeaturesService.DEFAULT_SCHEDULE_MAX_RUN);
         StateStorage stateStorage = new StateStorage() {
             @Override
             protected InputStream getInputStream() throws IOException {
@@ -210,7 +212,10 @@ public class Activator extends BaseActivator {
                 featureResolutionRange,
                 bundleUpdateRange,
                 updateSnapshots,
-                globalRepository);
+                globalRepository,
+                downloadThreads,
+                scheduleDelay,
+                scheduleMaxRun);
         register(FeaturesService.class, featuresService);
 
         featuresListenerTracker = new ServiceTracker<>(

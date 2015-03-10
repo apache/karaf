@@ -29,7 +29,11 @@ public final class DownloadManagers {
      * Creates a DownloadManager
      */
     public static DownloadManager createDownloadManager(MavenResolver resolver, ScheduledExecutorService executorService) {
-        return new MavenDownloadManager(resolver, executorService);
+        return createDownloadManager(resolver, executorService, 0, 0);
     }
 
+    public static DownloadManager createDownloadManager(MavenResolver resolver, ScheduledExecutorService executorService,
+                                                        long scheduleDelay, int scheduleMaxRun) {
+        return new MavenDownloadManager(resolver, executorService, scheduleDelay, scheduleMaxRun);
+    }
 }

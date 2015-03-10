@@ -29,10 +29,27 @@ public abstract class AbstractRetryableDownloadTask extends AbstractDownloadTask
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRetryableDownloadTask.class);
 
     private long scheduleDelay = 250;
+    private int scheduleMaxRun = 9;
     private int scheduleNbRun = 0;
 
     public AbstractRetryableDownloadTask(ScheduledExecutorService executorService, String url) {
         super(executorService, url);
+    }
+
+    public long getScheduleDelay() {
+        return scheduleDelay;
+    }
+
+    public void setScheduleDelay(long scheduleDelay) {
+        this.scheduleDelay = scheduleDelay;
+    }
+
+    public int getScheduleMaxRun() {
+        return scheduleMaxRun;
+    }
+
+    public void setScheduleMaxRun(int scheduleMaxRun) {
+        this.scheduleMaxRun = scheduleMaxRun;
     }
 
     public void run() {
@@ -41,7 +58,7 @@ public abstract class AbstractRetryableDownloadTask extends AbstractDownloadTask
                 File file = download();
                 setFile(file);
             } catch (IOException e) {
-                if (++scheduleNbRun < 9) {
+                if (++scheduleNbRun < scheduleMaxRun) {
                     long delay = (long)(scheduleDelay * 3 / 2 + Math.random() * scheduleDelay / 2);
                     LOGGER.debug("Error downloading " + url + ": " + e.getMessage() + ". Retrying in approx " + delay + " ms.");
                     executorService.schedule(this, delay, TimeUnit.MILLISECONDS);

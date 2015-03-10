@@ -18,6 +18,7 @@ package org.apache.karaf.profile.assembly;
 
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.internal.download.impl.AbstractDownloadTask;
 import org.apache.karaf.features.internal.download.impl.MavenDownloadManager;
 import org.apache.karaf.profile.Profile;
@@ -32,7 +33,7 @@ public class CustomDownloadManager extends MavenDownloadManager {
     }
 
     public CustomDownloadManager(MavenResolver resolver, ScheduledExecutorService executor, Profile profile) {
-        super(resolver, executor);
+        super(resolver, executor, 0, 1);
         this.profile = profile;
     }
 

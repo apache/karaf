@@ -37,6 +37,10 @@ public class MavenDownloadManager implements DownloadManager {
 
     protected final ScheduledExecutorService executorService;
 
+    protected final long scheduleDelay;
+
+    protected final int scheduleMaxRun;
+
     protected File tmpPath;
 
     private final Map<String, AbstractDownloadTask> downloaded = new HashMap<>();
@@ -47,9 +51,12 @@ public class MavenDownloadManager implements DownloadManager {
 
     private volatile int allPending = 0;
 
-    public MavenDownloadManager(MavenResolver mavenResolver, ScheduledExecutorService executorService) {
+    public MavenDownloadManager(MavenResolver mavenResolver, ScheduledExecutorService executorService,
+                                long scheduleDelay, int scheduleMaxRun) {
         this.mavenResolver = mavenResolver;
         this.executorService = executorService;
+        this.scheduleDelay = scheduleDelay;
+        this.scheduleMaxRun = scheduleMaxRun;
 
         String karafRoot = System.getProperty("karaf.home", "karaf");
         String karafData = System.getProperty("karaf.data", karafRoot + "/data");
@@ -143,7 +150,21 @@ public class MavenDownloadManager implements DownloadManager {
             });
         }
 
-        protected AbstractDownloadTask createDownloadTask(final String url) {
+        protected AbstractDownloadTask createDownloadTask(String url) {
+            AbstractDownloadTask task = doCreateDownloadTask(url);
+            if (task instanceof AbstractRetryableDownloadTask) {
+                AbstractRetryableDownloadTask rt = (AbstractRetryableDownloadTask) task;
+                if (scheduleDelay > 0) {
+                    rt.setScheduleDelay(scheduleDelay);
+                }
+                if (scheduleMaxRun > 0) {
+                    rt.setScheduleMaxRun(scheduleMaxRun);
+                }
+            }
+            return task;
+        }
+
+        protected AbstractDownloadTask doCreateDownloadTask(final String url) {
             final String mvnUrl = DownloadManagerHelper.stripUrl(url);
             if (mvnUrl.startsWith("mvn:")) {
                 if (!mvnUrl.equals(url)) {

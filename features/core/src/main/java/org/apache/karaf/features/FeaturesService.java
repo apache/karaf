@@ -39,6 +39,11 @@ public interface FeaturesService {
 
     String UPDATEABLE_URIS = "mvn:.*SNAPSHOT|(?!mvn:).*";
 
+    int DEFAULT_DOWNLOAD_THREADS = 8;
+    long DEFAULT_SCHEDULE_DELAY = 250;
+    int DEFAULT_SCHEDULE_MAX_RUN = 9;
+
+
     enum Option {
         NoFailOnFeatureNotFound,
         NoAutoRefreshManagedBundles,
