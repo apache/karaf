@@ -17,7 +17,9 @@ package org.apache.karaf.jaas.modules.publickey;
 
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.jaas.boot.principal.GroupPrincipal;
@@ -253,6 +255,29 @@ public class PublickeyBackingEngine implements BackingEngine {
     @Override
     public void deleteGroupRole(String group, String role) {
         deleteRole(GROUP_PREFIX + group, role);
+    }
+
+
+
+    public Map<GroupPrincipal, String> listGroups() {
+        Map<GroupPrincipal, String> result = new HashMap<GroupPrincipal, String>();
+        for (String name : users.keySet()) {
+            if (name.startsWith(GROUP_PREFIX)) {
+                result.put(new GroupPrincipal(name.substring(GROUP_PREFIX.length())), users.get(name));
+            }
+        }
+        return result;
+    }
+
+
+
+    public void createGroup(String group) {
+        String groupName = GROUP_PREFIX + group;
+        if (users.get(groupName) == null) {
+            addUserInternal(groupName, "group");
+        } else {
+            throw new IllegalArgumentException("Group: " + group + " already exist");
+        }
     }
 
 }

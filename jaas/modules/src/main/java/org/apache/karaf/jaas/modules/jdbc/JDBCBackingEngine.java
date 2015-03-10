@@ -23,6 +23,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import javax.sql.DataSource;
 
@@ -433,5 +434,16 @@ public class JDBCBackingEngine implements BackingEngine {
     @Override
     public void deleteGroupRole(String groupname, String role) {
         throw new UnsupportedOperationException();
+    }
+    
+    @Override
+    public Map<GroupPrincipal, String> listGroups() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void createGroup(String group) {
+        throw new UnsupportedOperationException();
+        
     }
 }

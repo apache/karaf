@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class SyncopeBackingEngine implements BackingEngine {
 
@@ -170,6 +171,14 @@ public class SyncopeBackingEngine implements BackingEngine {
 
     public void deleteGroupRole(String group, String role) {
         throw new RuntimeException("Group management is not supported by Syncope backend");
+    }
+
+    public Map<GroupPrincipal, String> listGroups() {
+        throw new RuntimeException("Group management is not supported by Syncope backend");
+    }
+
+    public void createGroup(String group) {
+            throw new RuntimeException("Group management is not supported by Syncope backend");
     }
 
 }
