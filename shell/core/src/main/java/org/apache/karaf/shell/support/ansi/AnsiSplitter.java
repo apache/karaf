@@ -30,38 +30,43 @@ import org.fusesource.jansi.AnsiOutputStream;
 
 public class AnsiSplitter {
 
-    public static List<String> splitLines(String text, int maxLength) throws IOException {
+    public static List<String> splitLines(String text, int maxLength, int tabs) throws IOException {
         AnsiOutputStreamSplitter splitter = new AnsiOutputStreamSplitter(maxLength);
+        splitter.setTabs(tabs);
         splitter.write(text.getBytes());
         splitter.close();
         return splitter.lines;
     }
 
-    public static String substring(String text, int begin, int end) throws IOException {
+    public static String substring(String text, int begin, int end, int tabs) throws IOException {
         AnsiOutputStreamSplitter splitter = new AnsiOutputStreamSplitter(begin, end, Integer.MAX_VALUE);
+        splitter.setTabs(tabs);
         splitter.write(text.getBytes());
         splitter.close();
         return splitter.lines.get(0);
     }
 
-    public static int length(String curLine) throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        AnsiOutputStream aos = new AnsiOutputStream(baos);
-        aos.write(curLine.getBytes());
-        aos.close();
-        return baos.toString().length();
+    public static int length(String curLine, int tabs) throws IOException {
+        AnsiOutputStreamSplitter splitter = new AnsiOutputStreamSplitter(0, Integer.MAX_VALUE, Integer.MAX_VALUE);
+        splitter.setTabs(tabs);
+        splitter.write(curLine.getBytes());
+        return splitter.getRealLength();
     }
 
-    public static String cut(String text, int maxLength)  throws IOException {
-        return splitLines(text, maxLength).get(0);
+    public static String cut(String text, int maxLength, int tabs)  throws IOException {
+        return splitLines(text, maxLength, tabs).get(0);
     }
 
-    public static AnsiBufferedReader window(InputStream is, int begin, int end) throws IOException {
-        return new AnsiBufferedReader(is, begin, end, Integer.MAX_VALUE);
+    public static AnsiBufferedReader window(InputStream is, int begin, int end, int tabs) throws IOException {
+        AnsiBufferedReader reader = new AnsiBufferedReader(is, begin, end, Integer.MAX_VALUE);
+        reader.setTabs(tabs);
+        return reader;
     }
 
-    public static AnsiBufferedReader splitter(InputStream is, int maxLength) throws IOException {
-        return new AnsiBufferedReader(is, 0, Integer.MAX_VALUE, maxLength);
+    public static AnsiBufferedReader splitter(InputStream is, int maxLength, int tabs) throws IOException {
+        AnsiBufferedReader reader = new AnsiBufferedReader(is, 0, Integer.MAX_VALUE, maxLength);
+        reader.setTabs(tabs);
+        return reader;
     }
 
 
@@ -95,6 +100,10 @@ public class AnsiSplitter {
         @Override
         public void close() throws IOException {
         }
+
+        public void setTabs(int tabs) {
+            this.splitter.setTabs(tabs);
+        }
     }
 
     static class AnsiOutputStreamSplitter extends AnsiOutputStream {
@@ -113,6 +122,7 @@ public class AnsiSplitter {
         private int maxLength;
         private int escapeLength;
         private int windowState;
+        private int tabs;
         private List<String> lines = new ArrayList<>();
 
         public AnsiOutputStreamSplitter(int maxLength) {
@@ -128,6 +138,14 @@ public class AnsiSplitter {
             reset();
         }
 
+        public int getTabs() {
+            return tabs;
+        }
+
+        public void setTabs(int tabs) {
+            this.tabs = tabs;
+        }
+
         protected void reset() {
             intensity = Ansi.Attribute.INTENSITY_BOLD_OFF;
             underline = Ansi.Attribute.UNDERLINE_OFF;
@@ -137,10 +155,19 @@ public class AnsiSplitter {
             bg = Ansi.Color.DEFAULT;
         }
 
+        public int getRealLength() {
+            return ((ByteArrayOutputStream) out).size() - escapeLength;
+        }
+
         @Override
         public void write(int data) throws IOException {
             if (data == '\n') {
                 flushLine(true);
+            } else if (data == '\t') {
+                ByteArrayOutputStream baos = (ByteArrayOutputStream) out;
+                do {
+                    write(' ');
+                } while ((baos.size() - escapeLength) % tabs > 0);
             } else {
                 if (windowState != 2) {
                     super.write(data);

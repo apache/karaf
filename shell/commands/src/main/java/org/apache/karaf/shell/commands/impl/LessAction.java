@@ -87,6 +87,9 @@ public class LessAction implements Action, SignalListener {
     @Option(name = "-I", aliases = "--IGNORE-CASE")
     boolean ignoreCaseAlways;
 
+    @Option(name = "-x", aliases = "--tabs")
+    int tabs = 4;
+
     @Argument(multiValued = true)
     List<File> files;
 
@@ -608,11 +611,11 @@ public class LessAction implements Action, SignalListener {
     }
 
     private int ansiLength(String curLine) throws IOException {
-        return AnsiSplitter.length(curLine);
+        return AnsiSplitter.length(curLine, tabs);
     }
 
     private String ansiSubstring(String curLine, int begin, int end) throws IOException {
-        return AnsiSplitter.substring(curLine, begin, end);
+        return AnsiSplitter.substring(curLine, begin, end, tabs);
     }
 
     String getLine(int line) throws IOException {

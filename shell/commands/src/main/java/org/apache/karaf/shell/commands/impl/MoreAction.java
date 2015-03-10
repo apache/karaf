@@ -64,7 +64,7 @@ public class MoreAction implements Action {
                 if (lines == 0) {
                     lines = terminal.getHeight();
                 }
-                AnsiSplitter.AnsiBufferedReader reader = AnsiSplitter.splitter(System.in, terminal.getWidth());
+                AnsiSplitter.AnsiBufferedReader reader = AnsiSplitter.splitter(System.in, terminal.getWidth(), 4);
                 int count = 0;
                 int c;
                 do {
