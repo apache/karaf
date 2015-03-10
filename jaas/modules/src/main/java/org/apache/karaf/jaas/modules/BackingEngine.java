@@ -16,6 +16,7 @@ package org.apache.karaf.jaas.modules;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.karaf.jaas.boot.principal.GroupPrincipal;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
@@ -52,6 +53,12 @@ public interface BackingEngine {
      * @return
      */
     List<GroupPrincipal> listGroups(UserPrincipal user);
+    
+    /**
+     * List groups in a certain realm
+     * @return the groups in a certain realm
+     */
+    Map<GroupPrincipal, String> listGroups();
 
     /**
      * Add a user to a group.
@@ -60,6 +67,12 @@ public interface BackingEngine {
      * @param group
      */
     void addGroup(String username, String group);
+    
+    /**
+     * Create a group
+     * @param group
+     */
+    void createGroup(String group);
 
     /**
      * Remove a user from a group.

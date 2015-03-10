@@ -32,6 +32,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 public class JDBCBackingEngine implements BackingEngine {
 
@@ -437,5 +438,15 @@ public class JDBCBackingEngine implements BackingEngine {
         // TODO support of groups has to be added
         throw new UnsupportedOperationException();
     }
+    
+    @Override
+    public Map<GroupPrincipal, String> listGroups() {
+        throw new UnsupportedOperationException();
+    }
 
+    @Override
+    public void createGroup(String group) {
+        throw new UnsupportedOperationException();
+        
+    }
 }

@@ -47,6 +47,11 @@
             </action>
         </command>
         <command>
+            <action class="org.apache.karaf.jaas.command.ListGroupsCommand">
+                <property name="backingEngineService" ref="engineService"/>
+            </action>
+        </command>
+        <command>
             <action class="org.apache.karaf.jaas.command.ListRealmsCommand">
                 <property name="realms" ref="realms"/>
             </action>
@@ -62,6 +67,9 @@
         </command>
         <command>
             <action class="org.apache.karaf.jaas.command.RoleDeleteCommand"/>
+        </command>
+        <command>
+            <action class="org.apache.karaf.jaas.command.GroupCreateCommand"/>
         </command>
         <command>
             <action class="org.apache.karaf.jaas.command.GroupAddCommand"/>
