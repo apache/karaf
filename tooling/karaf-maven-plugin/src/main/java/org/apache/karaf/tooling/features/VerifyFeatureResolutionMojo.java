@@ -27,10 +27,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -58,24 +56,25 @@ import aQute.bnd.osgi.Macro;
 import aQute.bnd.osgi.Processor;
 import org.apache.felix.utils.version.VersionRange;
 import org.apache.felix.utils.version.VersionTable;
-import org.apache.karaf.features.Conditional;
-import org.apache.karaf.features.ConfigFileInfo;
-import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeatureEvent;
 import org.apache.karaf.features.FeaturesService;
-import org.apache.karaf.features.Repository;
+import org.apache.karaf.features.internal.download.DownloadCallback;
 import org.apache.karaf.features.internal.download.DownloadManager;
-import org.apache.karaf.features.internal.download.DownloadManagers;
+import org.apache.karaf.features.internal.download.Downloader;
+import org.apache.karaf.features.internal.download.StreamProvider;
+import org.apache.karaf.features.internal.model.Conditional;
+import org.apache.karaf.features.internal.model.ConfigFile;
+import org.apache.karaf.features.internal.model.Feature;
+import org.apache.karaf.features.internal.model.Features;
+import org.apache.karaf.features.internal.model.JaxbUtil;
 import org.apache.karaf.features.internal.resolver.ResourceBuilder;
 import org.apache.karaf.features.internal.resolver.ResourceImpl;
 import org.apache.karaf.features.internal.resolver.ResourceUtils;
 import org.apache.karaf.features.internal.service.Deployer;
-import org.apache.karaf.features.internal.service.RepositoryImpl;
 import org.apache.karaf.features.internal.service.State;
 import org.apache.karaf.features.internal.util.MapUtils;
 import org.apache.karaf.features.internal.util.MultiException;
-import org.apache.karaf.tooling.url.CustomBundleURLStreamHandlerFactory;
-import org.apache.karaf.tooling.utils.InternalMavenResolver;
+import org.apache.karaf.profile.assembly.CustomDownloadManager;
 import org.apache.karaf.tooling.utils.MojoSupport;
 import org.apache.karaf.util.config.PropertiesLoader;
 import org.apache.maven.artifact.Artifact;
@@ -86,6 +85,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.ops4j.pax.url.mvn.MavenResolver;
+import org.ops4j.pax.url.mvn.MavenResolvers;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
@@ -147,13 +147,26 @@ public class VerifyFeatureResolutionMojo extends MojoSupport {
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        DependencyHelper helper = DependencyHelperFactory.createDependencyHelper(this.container, this.project, this.mavenSession, getLog());
-        resolver = new InternalMavenResolver(helper, getLog());
-        CustomBundleURLStreamHandlerFactory.install(resolver);
+        Hashtable<String, String> config = new Hashtable<>();
+        StringBuilder remote = new StringBuilder();
+        for (Object obj : project.getRemoteProjectRepositories()) {
+            if (remote.length() > 0) {
+                remote.append(",");
+            }
+            remote.append(invoke(obj, "getUrl"));
+            remote.append("@id=").append(invoke(obj, "getId"));
+        }
+        config.put("remoteRepositories", remote.toString());
+        // TODO: add more configuration bits ?
+        resolver = MavenResolvers.createMavenResolver(config, null);
+        doExecute();
+    }
+
+    private Object invoke(Object object, String getter) throws MojoExecutionException {
         try {
-            doExecute();
-        } finally {
-            CustomBundleURLStreamHandlerFactory.uninstall();
+            return object.getClass().getMethod(getter).invoke(object);
+        } catch (Exception e) {
+            throw new MojoExecutionException("Unable to build remote repository from " + object.toString(), e);
         }
     }
 
@@ -179,20 +192,20 @@ public class VerifyFeatureResolutionMojo extends MojoSupport {
 
         // TODO: allow using external configuration ?
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(8);
-        DownloadManager manager = DownloadManagers.createDownloadManager(resolver, executor);
-        final Map<String, Repository> repositories;
-        Map<String, Feature[]> allFeatures = new HashMap<>();
+        DownloadManager manager = new CustomDownloadManager(resolver, executor);
+        final Map<String, Features> repositories;
+        Map<String, List<Feature>> allFeatures = new HashMap<>();
         try {
             repositories = loadRepositories(manager, descriptors);
             for (String repoUri : repositories.keySet()) {
-                Feature[] features = repositories.get(repoUri).getFeatures();
+                List<Feature> features = repositories.get(repoUri).getFeature();
                 // Ack features to inline configuration files urls
                 for (Feature feature : features) {
-                    for (org.apache.karaf.features.BundleInfo bi : feature.getBundles()) {
+                    for (org.apache.karaf.features.internal.model.Bundle bi : feature.getBundle()) {
                         String loc = bi.getLocation();
                         String nloc = null;
                         if (loc.contains("file:")) {
-                            for (ConfigFileInfo cfi : feature.getConfigurationFiles()) {
+                            for (ConfigFile cfi : feature.getConfigfile()) {
                                 if (cfi.getFinalname().substring(1)
                                         .equals(loc.substring(loc.indexOf("file:") + "file:".length()))) {
                                     nloc = cfi.getLocation();
@@ -214,12 +227,12 @@ public class VerifyFeatureResolutionMojo extends MojoSupport {
 
         List<Feature> featuresToTest = new ArrayList<>();
         if (verifyTransitive) {
-            for (Feature[] features : allFeatures.values()) {
-                featuresToTest.addAll(Arrays.asList(features));
+            for (List<Feature> features : allFeatures.values()) {
+                featuresToTest.addAll(features);
             }
         } else {
             for (String uri : descriptors) {
-                featuresToTest.addAll(Arrays.asList(allFeatures.get(uri)));
+                featuresToTest.addAll(allFeatures.get(uri));
             }
         }
         if (features != null && !features.isEmpty()) {
@@ -303,7 +316,7 @@ public class VerifyFeatureResolutionMojo extends MojoSupport {
         }
     }
 
-    private void verifyResolution(DownloadManager manager, final Map<String, Repository> repositories, Set<String> features, Hashtable<String, String> properties) throws MojoExecutionException {
+    private void verifyResolution(DownloadManager manager, final Map<String, Features> repositories, Set<String> features, Hashtable<String, String> properties) throws MojoExecutionException {
         try {
             Bundle systemBundle = getSystemBundle(getMetadata(properties, "metadata#"));
             DummyDeployCallback callback = new DummyDeployCallback(systemBundle, repositories.values());
@@ -458,24 +471,27 @@ public class VerifyFeatureResolutionMojo extends MojoSupport {
     }
 
 
-    public static Map<String, Repository> loadRepositories(DownloadManager manager, Set<String> uris) throws Exception {
-        // TODO: use downloader
-        final Map<String, Repository> repositories = new HashMap<>();
-        for (String uri : uris) {
-            doLoadRepository(manager, repositories, URI.create(uri));
+    public static Map<String, Features> loadRepositories(DownloadManager manager, Set<String> uris) throws Exception {
+        final Map<String, Features> loaded = new HashMap<>();
+        final Downloader downloader = manager.createDownloader();
+        for (String repository : uris) {
+            downloader.download(repository, new DownloadCallback() {
+                @Override
+                public void downloaded(final StreamProvider provider) throws Exception {
+                    try (InputStream is = provider.open()) {
+                        Features featuresModel = JaxbUtil.unmarshal(provider.getUrl(), is, false);
+                        synchronized (loaded) {
+                            loaded.put(provider.getUrl(), featuresModel);
+                            for (String innerRepository : featuresModel.getRepository()) {
+                                downloader.download(innerRepository, this);
+                            }
+                        }
+                    }
+                }
+            });
         }
-        return repositories;
-    }
-
-    private static void doLoadRepository(DownloadManager manager, Map<String, Repository> repositories, URI uri) throws IOException {
-        if (!repositories.containsKey(uri.toString())) {
-            RepositoryImpl repository = new RepositoryImpl(uri);
-            repository.load(true);
-            repositories.put(uri.toString(), repository);
-            for (URI dep : repository.getRepositories()) {
-                doLoadRepository(manager, repositories, dep);
-            }
-        }
+        downloader.await();
+        return loaded;
     }
 
     public static Set<String> getPrefixedProperties(Map<String, String> properties, String prefix) {
@@ -639,7 +655,7 @@ public class VerifyFeatureResolutionMojo extends MojoSupport {
         private final Deployer.DeploymentState dstate;
         private final AtomicLong nextBundleId = new AtomicLong(0);
 
-        public DummyDeployCallback(Bundle sysBundle, Collection<Repository> repositories) throws Exception {
+        public DummyDeployCallback(Bundle sysBundle, Collection<Features> repositories) throws Exception {
             systemBundle = sysBundle;
             dstate = new Deployer.DeploymentState();
             dstate.bundles = new HashMap<>();
@@ -650,8 +666,8 @@ public class VerifyFeatureResolutionMojo extends MojoSupport {
 
             MapUtils.addToMapSet(dstate.bundlesPerRegion, FeaturesService.ROOT_REGION, 0l);
             dstate.bundles.put(0l, systemBundle);
-            for (Repository repo : repositories) {
-                for (Feature f : repo.getFeatures()) {
+            for (Features repo : repositories) {
+                for (Feature f : repo.getFeature()) {
                     dstate.features.put(f.getId(), f);
                 }
             }
@@ -675,7 +691,7 @@ public class VerifyFeatureResolutionMojo extends MojoSupport {
         }
 
         @Override
-        public void installFeature(Feature feature) throws IOException, InvalidSyntaxException {
+        public void installFeature(org.apache.karaf.features.Feature feature) throws IOException, InvalidSyntaxException {
         }
 
         @Override
