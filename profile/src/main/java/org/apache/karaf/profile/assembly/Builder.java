@@ -107,12 +107,16 @@ public class Builder {
     public static enum Stage {
         Startup, Boot, Installed
     }
-    
+
+    public static enum KarafVersion {
+        v24, v3x, v4x
+    }
+
     static class RepositoryInfo {
         Stage stage;
         boolean addAll;
     }
-    
+
     //
     // Input parameters
     //
@@ -127,9 +131,9 @@ public class Builder {
     Map<String, Stage> bundles = new LinkedHashMap<>();
     List<String> libraries = new ArrayList<>();
     String javase = "1.7";
+    KarafVersion karafVersion = KarafVersion.v4x;
     String environment = null;
     boolean useReferenceUrls;
-    boolean use24SyntaxForStartup;
     boolean ignoreDependencyFlag;
     int defaultStartLevel = 50;
     Path homeDirectory;
@@ -263,12 +267,8 @@ public class Builder {
         return this;
     }
 
-    public Builder use24SyntaxForStartup() {
-        return use24SyntaxForStartup(true);
-    }
-
-    public Builder use24SyntaxForStartup(boolean use24SyntaxForStartup) {
-        this.use24SyntaxForStartup = use24SyntaxForStartup;
+    public Builder karafVersion(KarafVersion karafVersion) {
+        this.karafVersion = karafVersion;
         return this;
     }
 
@@ -611,7 +611,11 @@ public class Builder {
             Dependency dep = generatedDep.get(dependency);
             if (dep == null) {
                 dep = new Dependency();
-                dep.setName(dependency);
+                String[] split = dependency.split("/");
+                dep.setName(split[0]);
+                if (split.length > 1) {
+                    dep.setVersion(split[1]);
+                }
                 generated.getFeature().add(dep);
                 generatedDep.put(dep.getName(), dep);
             }
@@ -714,7 +718,7 @@ public class Builder {
             JaxbUtil.marshal(rep, baos);
             ByteArrayInputStream bais;
             String repoUrl;
-            if (use24SyntaxForStartup) {
+            if (karafVersion == KarafVersion.v24) {
                 String str = baos.toString();
                 str = str.replace("http://karaf.apache.org/xmlns/features/v1.3.0", "http://karaf.apache.org/xmlns/features/v1.2.0");
                 str = str.replaceAll(" dependency=\".*?\"", "");
@@ -740,40 +744,48 @@ public class Builder {
             featuresProperties.save();
         }
         else {
-            String boot = "";
+            StringBuilder boot = new StringBuilder();
             for (Dependency dep : generatedDep.values()) {
                 if (dep.isPrerequisite()) {
-                    if (boot.isEmpty()) {
-                        boot = "(";
+                    if (boot.length() == 0) {
+                        boot.append("(");
                     } else {
-                        boot = boot + ",";
+                        boot.append(",");
                     }
-                    boot = boot + dep.getName();
+                    boot.append(dep.getName());
                 }
             }
-            if (!boot.isEmpty()) {
-                boot = boot + ")";
+            if (boot.length() > 0) {
+                boot.append(")");
             }
             // TODO: for dependencies, we'd need to resolve the features completely
             for (Dependency dep : generatedDep.values()) {
                 if (!dep.isPrerequisite() && !dep.isDependency()) {
-                    if (!boot.isEmpty()) {
-                        boot = boot + ",";
+                    if (boot.length() > 0) {
+                        boot.append(",");
                     }
-                    boot = boot + dep.getName();
+                    boot.append(dep.getName());
+                    if (!Feature.DEFAULT_VERSION.equals(dep.getVersion())) {
+                        if (karafVersion == KarafVersion.v4x) {
+                            boot.append("/");
+                        } else {
+                            boot.append(";version=");
+                        }
+                        boot.append(dep.getVersion());
+                    }
                 }
             }
-            String repos = "";
+            StringBuilder repos = new StringBuilder();
             for (String repo : new HashSet<>(rep.getRepository())) {
-                if (!repos.isEmpty()) {
-                    repos = repos + ",";
+                if (repos.length() > 0) {
+                    repos.append(",");
                 }
-                repos = repos + repo;
+                repos.append(repo);
             }
 
             Properties featuresProperties = new Properties(featuresCfgFile.toFile());
-            featuresProperties.put(FEATURES_REPOSITORIES, repos);
-            featuresProperties.put(FEATURES_BOOT, boot);
+            featuresProperties.put(FEATURES_REPOSITORIES, repos.toString());
+            featuresProperties.put(FEATURES_BOOT, boot.toString());
             reformatClauses(featuresProperties, FEATURES_REPOSITORIES);
             reformatClauses(featuresProperties, FEATURES_BOOT);
             featuresProperties.save();
@@ -816,7 +828,7 @@ public class Builder {
                 if (location.startsWith("file:") && useReferenceUrls) {
                     location = "reference:" + location;
                 }
-                if (location.startsWith("file:") && use24SyntaxForStartup) {
+                if (location.startsWith("file:") && karafVersion == KarafVersion.v24) {
                     location = location.substring("file:".length());
                 }
                 startup.put(location, startLevel);

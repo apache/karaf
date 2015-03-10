@@ -138,7 +138,7 @@ public class InstallKarsMojo extends MojoSupport {
     protected boolean installAllFeaturesByDefault = true;
 
     @Parameter
-    protected boolean use24SyntaxForStartup = false;
+    protected Builder.KarafVersion karafVersion = Builder.KarafVersion.v4x;
 
     // an access layer for available Aether implementation
     protected DependencyHelper dependencyHelper;
@@ -237,7 +237,7 @@ public class InstallKarsMojo extends MojoSupport {
             }
         }
 
-        builder.use24SyntaxForStartup(use24SyntaxForStartup)
+        builder.karafVersion(karafVersion)
                .useReferenceUrls(useReferenceUrls)
                .defaultAddAll(installAllFeaturesByDefault)
                .ignoreDependencyFlag(ignoreDependencyFlag);
