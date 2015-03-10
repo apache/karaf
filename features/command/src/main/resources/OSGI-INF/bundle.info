@@ -13,18 +13,21 @@ This bundle provides the Karaf shell commands to manipulate features.
 
 The following commands are available:
 
-* features:addUrl - Adds a list of repository URLs to the features service.
-* features:info- Shows information about selected information.
-* features:install- Installs a feature with the specified name and version.
-* features:list - Lists all existing features available from the defined repositories.
-* features:listVersions- Lists all versions of a feature available from the currently available repositories.
-* features:listRepositories- Displays a list of all defined repositories.
-* features:listUrl- Displays a list of all defined repository URLs.
-* features:refreshUrl- Reloads the list of available features from the repositories.
-* features:removeRepository- Removes the specified repository features service.
-* features:removeUrl- Removes the given list of repository URLs from the features service.
-* features:uninstall- Uninstalls a feature with the specified name and version.
+* feature:repo-add Add a list of repository URLs to the features service.
+* feature:info Show information about selected information.
+* feature:install Install a feature with the specified name and version.
+* feature:list List all existing features available from the defined repositories.
+* feature:repo-list Display a list of all defined repositories.
+* feature:repo-refresh Reload the list of available features from the repositories.
+* feature:repo-remove Remove the specified repository features service.
+* feature:uninstall Uninstall a feature with the specified name and version.
+* feature:version-list List all versions available for a given feature.
+* feature:requirement-list List provisioning requirements.
+* feature:requirement-add Add provisioning requirements.
+* feature:requirement-remove Remove provisioning requirements.
+* feature:start Start features with the specified name and version.
+* feature:regions Print information about region digraph.
 
 h1. See also
 
-Commands- and Provisioning- sections of the Karaf User Guide.
+"Provisioning and features" section of the Karaf User Guide.
