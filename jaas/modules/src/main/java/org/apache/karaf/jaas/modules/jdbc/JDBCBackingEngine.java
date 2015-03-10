@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 public class JDBCBackingEngine implements BackingEngine {
 
@@ -323,4 +324,15 @@ public class JDBCBackingEngine implements BackingEngine {
         this.selectRolesQuery = selectRolesQuery;
     }
 
+    
+    @Override
+    public Map<GroupPrincipal, String> listGroups() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void createGroup(String group) {
+        throw new UnsupportedOperationException();
+        
+    }
 }
