@@ -155,6 +155,9 @@ public final class JaxbUtil {
             case FeaturesNamespaces.URI_1_2_0:
                 schemaLocation = "/org/apache/karaf/features/karaf-features-1.2.0.xsd";
                 break;
+            case FeaturesNamespaces.URI_1_2_1:
+                schemaLocation = "/org/apache/karaf/features/karaf-features-1.2.1.xsd";
+                break;
             case FeaturesNamespaces.URI_1_3_0:
                 schemaLocation = "/org/apache/karaf/features/karaf-features-1.3.0.xsd";
                 break;
