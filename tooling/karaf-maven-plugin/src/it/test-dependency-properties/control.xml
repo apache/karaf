@@ -18,8 +18,8 @@
   ~ under the License.
   -->
 
-<features xmlns="http://karaf.apache.org/xmlns/features/v1.2.1" name="test-input-file">
-    <feature description="Test Description" version="1.0-SNAPSHOT" name="test-input-file">
+<features xmlns="http://karaf.apache.org/xmlns/features/v1.2.1" name="test-dependency-properties">
+    <feature description="Test Description" version="1.0-SNAPSHOT" name="test-dependency-properties">
         <details>Test Description</details>
         <configfile finalname="etc/test.cfg" override="false">mvn:test/dependency-module-c/1.0-SNAPSHOT/cfg</configfile>
         <bundle>mvn:test/test-dependency-properties/1.0-SNAPSHOT</bundle>
