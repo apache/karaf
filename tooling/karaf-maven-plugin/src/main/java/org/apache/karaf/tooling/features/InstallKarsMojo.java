@@ -26,8 +26,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.felix.utils.properties.Properties;
+import org.apache.felix.utils.version.VersionRange;
+import org.apache.felix.utils.version.VersionTable;
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Dependency;
 import org.apache.karaf.features.internal.model.*;
@@ -243,23 +247,6 @@ public class InstallKarsMojo extends MojoSupport {
                 } else if (bootFeatures != null && resolveFeature(bootFeatures, feature)) {
                     // the feature is a boot feature, updating the etc/org.apache.karaf.features.cfg file
                     getLog().info("Feature " + feature.getName() + "/" + feature.getVersion() + " is defined as a boot feature");
-                    if (featuresCfgFile.exists()) {
-                        getLog().info("= Updating " + featuresCfgFile.getPath());
-                        Properties featuresProperties = new Properties();
-                        InputStream in = new FileInputStream(featuresCfgFile);
-                        try {
-                            featuresProperties.load(in);
-                        } finally {
-                            in.close();
-                        }
-                        String featuresBoot = featuresProperties.getProperty(FEATURES_BOOT);
-                        featuresBoot = featuresBoot != null && featuresBoot.length() > 0 ? featuresBoot + "," : "";
-                        if (!featuresBoot.contains(feature.getName())) {
-                            featuresBoot = featuresBoot + feature.getName();
-                            featuresProperties.put(FEATURES_BOOT, featuresBoot);
-                            featuresProperties.save(featuresCfgFile);
-                        }
-                    }
                     // add the feature in the system folder
                     resolveFeature(feature, features);
                 } else if (installedFeatures != null && resolveFeature(installedFeatures, feature)) {
@@ -273,6 +260,33 @@ public class InstallKarsMojo extends MojoSupport {
                 throw new MojoFailureException("Can not install " + feature.getName() + "/" + feature.getVersion() + " feature", e);
             }
         }
+        // Add boot features to the configuration file
+        if (bootFeatures != null && featuresCfgFile.exists()) {
+            try {
+                getLog().info("= Updating " + featuresCfgFile.getPath());
+                Properties featuresProperties = new Properties(featuresCfgFile);
+                String featuresBoot = featuresProperties.getProperty(FEATURES_BOOT);
+                if (featuresBoot == null) {
+                    featuresBoot = "";
+                }
+                Set<String> boot = parseBootFeatures(featuresBoot);
+                for (String bootFeature : bootFeatures) {
+                    String[] split = bootFeature.split("/");
+                    String name = split[0].trim();
+                    if (split.length == 2) {
+                        name += ";version=\"" + split[1].trim() + "\"";
+                    }
+                    if (boot.add(name)) {
+                        featuresBoot = featuresBoot + (featuresBoot.isEmpty() ? "" : ",") + name;
+                    }
+                }
+                featuresProperties.put(FEATURES_BOOT, featuresBoot);
+                featuresProperties.save(featuresCfgFile);
+            } catch (Exception e) {
+                throw new MojoFailureException("Can not update " + featuresCfgFile, e);
+            }
+        }
+
 
         // install bundles defined in startup.properties
         getLog().info("Installing bundles defined in startup.properties in the system");
@@ -299,6 +313,21 @@ public class InstallKarsMojo extends MojoSupport {
         } catch (IOException e) {
             throw new MojoFailureException("Can not write " + startupPropertiesFile, e);
         }
+    }
+
+    protected Set<String> parseBootFeatures(String bootFeatures) {
+        Pattern pattern = Pattern.compile("(\\s*\\(([^)]+))\\s*\\)\\s*,\\s*|.+");
+        Matcher matcher = pattern.matcher(bootFeatures);
+        Set<String> result = new HashSet<String>();
+        while (matcher.find()) {
+            String group = matcher.group(2) != null ? matcher.group(2) : matcher.group();
+            for (String feature : Arrays.asList(group.trim().split("\\s*,\\s*"))) {
+                if (feature.length() > 0) {
+                    result.add(feature);
+                }
+            }
+        }
+        return result;
     }
 
     private boolean resolveFeature(Set<Feature> features, String featureToCheck) {
