@@ -25,7 +25,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.felix.resolver.ResolverImpl;
 import org.apache.karaf.features.FeaturesService;
+import org.apache.karaf.features.Slf4jResolverLog;
 import org.apache.karaf.features.internal.service.RepositoryImpl;
 import org.apache.karaf.features.internal.support.TestDownloadManager;
 import org.junit.Test;
@@ -34,13 +36,17 @@ import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.resource.Capability;
 import org.osgi.resource.Resource;
 import org.osgi.resource.Wire;
+import org.osgi.service.resolver.Resolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import static org.apache.karaf.features.internal.resolver.ResourceUtils.toFeatureCapability;
-import static org.apache.karaf.features.internal.resolver.ResourceUtils.toFeatureRequirement;
 import static org.apache.karaf.features.internal.util.MapUtils.addToMapSet;
 import static org.junit.Assert.assertEquals;
 
 public class SubsystemTest {
+
+    Logger logger = LoggerFactory.getLogger(SubsystemTest.class);;
+    Resolver resolver = new ResolverImpl(new Slf4jResolverLog(logger));
 
     @Test
     public void test1() throws Exception {
@@ -55,7 +61,7 @@ public class SubsystemTest {
         addToMapSet(expected, "root", "c/1.0.0");
         addToMapSet(expected, "root/apps1", "b/1.0.0");
 
-        SubsystemResolver resolver = new SubsystemResolver(new TestDownloadManager(getClass(), "data1"));
+        SubsystemResolver resolver = new SubsystemResolver(this.resolver, new TestDownloadManager(getClass(), "data1"));
         resolver.prepare(Arrays.asList(repo.getFeatures()),
                          features,
                          Collections.<String, Set<BundleRevision>>emptyMap());
@@ -86,7 +92,7 @@ public class SubsystemTest {
         addToMapSet(expected, "root/apps2", "c/1.0.0");
         addToMapSet(expected, "root/apps2#f1", "a/1.0.0");
 
-        SubsystemResolver resolver = new SubsystemResolver(new TestDownloadManager(getClass(), "data2"));
+        SubsystemResolver resolver = new SubsystemResolver(this.resolver, new TestDownloadManager(getClass(), "data2"));
         resolver.prepare(Arrays.asList(repo.getFeatures()),
                          features,
                          Collections.<String, Set<BundleRevision>>emptyMap());
@@ -107,7 +113,7 @@ public class SubsystemTest {
         Map<String, Set<String>> expected = new HashMap<String, Set<String>>();
         addToMapSet(expected, "root/apps1", "a/1.0.1");
 
-        SubsystemResolver resolver = new SubsystemResolver(new TestDownloadManager(getClass(), "data3"));
+        SubsystemResolver resolver = new SubsystemResolver(this.resolver, new TestDownloadManager(getClass(), "data3"));
         resolver.prepare(Arrays.asList(repo.getFeatures()),
                          features,
                          Collections.<String, Set<BundleRevision>>emptyMap());
@@ -127,7 +133,7 @@ public class SubsystemTest {
         Map<String, Set<String>> expected = new HashMap<String, Set<String>>();
         addToMapSet(expected, "root/apps1", "a/1.0.0");
 
-        SubsystemResolver resolver = new SubsystemResolver(new TestDownloadManager(getClass(), "data4"));
+        SubsystemResolver resolver = new SubsystemResolver(this.resolver, new TestDownloadManager(getClass(), "data4"));
         resolver.prepare(Arrays.asList(repo.getFeatures()),
                          features,
                          Collections.<String, Set<BundleRevision>>emptyMap());
@@ -149,7 +155,7 @@ public class SubsystemTest {
         addToMapSet(expected, "root/apps1", "a/1.0.0");
         addToMapSet(expected, "root/apps1", "b/1.0.0");
 
-        SubsystemResolver resolver = new SubsystemResolver(new TestDownloadManager(getClass(), "data4"));
+        SubsystemResolver resolver = new SubsystemResolver(this.resolver, new TestDownloadManager(getClass(), "data4"));
         resolver.prepare(Arrays.asList(repo.getFeatures()),
                          features,
                          Collections.<String, Set<BundleRevision>>emptyMap());
@@ -171,7 +177,7 @@ public class SubsystemTest {
         addToMapSet(expected, "root/apps1", "a/1.0.0");
         addToMapSet(expected, "root/apps1", "c/1.0.0");
 
-        SubsystemResolver resolver = new SubsystemResolver(new TestDownloadManager(getClass(), "data1"));
+        SubsystemResolver resolver = new SubsystemResolver(this.resolver, new TestDownloadManager(getClass(), "data1"));
         resolver.prepare(Arrays.asList(repo.getFeatures()),
                 features,
                 Collections.<String, Set<BundleRevision>>emptyMap());
@@ -192,7 +198,7 @@ public class SubsystemTest {
         addToMapSet(expected, "root", "a/1.0.0");
         addToMapSet(expected, "root", "b/1.0.0");
 
-        SubsystemResolver resolver = new SubsystemResolver(new TestDownloadManager(getClass(), "data5"));
+        SubsystemResolver resolver = new SubsystemResolver(this.resolver, new TestDownloadManager(getClass(), "data5"));
         resolver.prepare(Arrays.asList(repo.getFeatures()),
                 features,
                 Collections.<String, Set<BundleRevision>>emptyMap());
@@ -214,7 +220,7 @@ public class SubsystemTest {
         addToMapSet(expected, "root", "a/1.0.0");
         addToMapSet(expected, "root", "c/1.0.0");
 
-        SubsystemResolver resolver = new SubsystemResolver(new TestDownloadManager(getClass(), "data5"));
+        SubsystemResolver resolver = new SubsystemResolver(this.resolver, new TestDownloadManager(getClass(), "data5"));
         resolver.prepare(Arrays.asList(repo.getFeatures()),
                 features,
                 Collections.<String, Set<BundleRevision>>emptyMap());

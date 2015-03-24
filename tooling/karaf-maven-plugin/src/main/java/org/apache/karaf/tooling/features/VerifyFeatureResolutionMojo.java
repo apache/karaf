@@ -54,6 +54,8 @@ import java.util.zip.ZipInputStream;
 
 import aQute.bnd.osgi.Macro;
 import aQute.bnd.osgi.Processor;
+import org.apache.felix.resolver.Logger;
+import org.apache.felix.resolver.ResolverImpl;
 import org.apache.felix.utils.version.VersionRange;
 import org.apache.felix.utils.version.VersionTable;
 import org.apache.karaf.features.FeatureEvent;
@@ -320,7 +322,7 @@ public class VerifyFeatureResolutionMojo extends MojoSupport {
         try {
             Bundle systemBundle = getSystemBundle(getMetadata(properties, "metadata#"));
             DummyDeployCallback callback = new DummyDeployCallback(systemBundle, repositories.values());
-            Deployer deployer = new Deployer(manager, callback);
+            Deployer deployer = new Deployer(manager, new ResolverImpl(new MavenResolverLog()), callback);
 
 
             // Install framework
@@ -757,4 +759,28 @@ public class VerifyFeatureResolutionMojo extends MojoSupport {
         }
     }
 
+    public class MavenResolverLog extends org.apache.felix.resolver.Logger {
+
+        public MavenResolverLog() {
+            super(Logger.LOG_DEBUG);
+        }
+
+        @Override
+        protected void doLog(int level, String msg, Throwable throwable) {
+            switch (level) {
+            case LOG_DEBUG:
+                getLog().debug(msg, throwable);
+                break;
+            case LOG_INFO:
+                getLog().info(msg, throwable);
+                break;
+            case LOG_WARNING:
+                getLog().warn(msg, throwable);
+                break;
+            case LOG_ERROR:
+                getLog().error(msg, throwable);
+                break;
+            }
+        }
+    }
 }

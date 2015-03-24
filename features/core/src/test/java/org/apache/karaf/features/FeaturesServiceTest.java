@@ -16,16 +16,6 @@
  */
 package org.apache.karaf.features;
 
-import static org.easymock.EasyMock.eq;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -39,6 +29,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+import org.apache.felix.resolver.ResolverImpl;
 import org.apache.karaf.features.internal.service.FeaturesServiceImpl;
 import org.apache.karaf.features.internal.service.StateStorage;
 import org.easymock.EasyMock;
@@ -48,6 +39,17 @@ import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.startlevel.FrameworkStartLevel;
+import org.osgi.service.resolver.Resolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class FeaturesServiceTest extends TestBase {
     private static final String FEATURE_WITH_INVALID_BUNDLE = "<features name='test' xmlns='http://karaf.apache.org/xmlns/features/v1.0.0'>"
@@ -56,6 +58,8 @@ public class FeaturesServiceTest extends TestBase {
             + "</features>";
 
     File dataFile;
+    Logger logger = LoggerFactory.getLogger(FeaturesServiceTest.class);;
+    Resolver resolver = new ResolverImpl(new Slf4jResolverLog(logger));
 
     @Before
     public void setUp() throws IOException {
@@ -344,7 +348,7 @@ public class FeaturesServiceTest extends TestBase {
                 + "  <feature name='f2' version='0.2'><bundle>bundle2</bundle></feature>"
                 + "</features>");
 
-        FeaturesServiceImpl svc = new FeaturesServiceImpl(null, null, new Storage(), null, null, null, null, null, null, null, null, null, 0, 0, 0);
+        FeaturesServiceImpl svc = new FeaturesServiceImpl(null, null, new Storage(), null, null, null, resolver, null, null, null, null, null, null, 0, 0, 0);
         svc.addRepository(uri);
 
         assertEquals(feature("f2", "0.2"), svc.getFeatures("f2", "[0.1,0.3)")[0]);
@@ -370,7 +374,7 @@ public class FeaturesServiceTest extends TestBase {
         expect(fsl.getStartLevel()).andReturn(100);
         replay(bundleContext, bundle, fsl);
 
-        FeaturesServiceImpl svc = new FeaturesServiceImpl(null, bundleContext, new Storage(), null, null, null, null, null, null, null, null, null, 0, 0, 0);
+        FeaturesServiceImpl svc = new FeaturesServiceImpl(null, bundleContext, new Storage(), null, null, null, resolver, null, null, null, null, null, null, 0, 0, 0);
         svc.addRepository(uri);
         try {
             List<String> features = new ArrayList<String>();
@@ -395,7 +399,7 @@ public class FeaturesServiceTest extends TestBase {
         URI uri = createTempRepo("<features name='test' xmlns='http://karaf.apache.org/xmlns/features/v1.0.0'>"
                 + "  <featur><bundle>somebundle</bundle></featur></features>");
 
-        FeaturesServiceImpl svc = new FeaturesServiceImpl(null, null, new Storage(), null, null, null, null, null, null, null, null, null, 0, 0, 0);
+        FeaturesServiceImpl svc = new FeaturesServiceImpl(null, null, new Storage(), null, null, null, resolver, null, null, null, null, null, null, 0, 0, 0);
         try {
             svc.addRepository(uri);
             fail("exception expected");
@@ -413,7 +417,7 @@ public class FeaturesServiceTest extends TestBase {
                 + "  <feature name='f1'><bundle>file:bundle1</bundle><bundle>file:bundle2</bundle></feature>"
                 + "</features>");
 
-        FeaturesServiceImpl svc = new FeaturesServiceImpl(null, null, new Storage(), null, null, null, null, null, null, null, null, null, 0, 0, 0);
+        FeaturesServiceImpl svc = new FeaturesServiceImpl(null, null, new Storage(), null, null, null, resolver, null, null, null, null, null, null, 0, 0, 0);
         svc.addRepository(uri);
         Feature[] features = svc.getFeatures("f1");
         Assert.assertEquals(1, features.length);

@@ -28,10 +28,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.jar.Manifest;
 
+import org.apache.felix.resolver.ResolverImpl;
 import org.apache.felix.utils.version.VersionRange;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeatureEvent;
 import org.apache.karaf.features.FeaturesService;
+import org.apache.karaf.features.Slf4jResolverLog;
 import org.apache.karaf.features.internal.support.TestBundle;
 import org.apache.karaf.features.internal.support.TestDownloadManager;
 import org.easymock.EasyMock;
@@ -42,14 +44,19 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.resource.Resource;
 import org.osgi.resource.Wire;
+import org.osgi.service.resolver.Resolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.apache.karaf.features.FeaturesService.*;
 import static org.apache.karaf.features.internal.util.MapUtils.addToMapSet;
 import static org.easymock.EasyMock.anyInt;
-import static org.easymock.EasyMock.anyObject;
 import static org.junit.Assert.fail;
 
 public class DeployerTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DeployerTest.class);
+    private Resolver resolver = new ResolverImpl(new Slf4jResolverLog(LOGGER));
 
     @Test
     public void testInstallSimpleFeature() throws Exception {
@@ -64,7 +71,7 @@ public class DeployerTest {
         Feature f101 = repo.getFeatures()[1];
 
         Deployer.DeployCallback callback = EasyMock.createMock(Deployer.DeployCallback.class);
-        Deployer deployer = new Deployer(manager, callback);
+        Deployer deployer = new Deployer(manager, resolver, callback);
 
         callback.print(EasyMock.anyString(), EasyMock.anyBoolean());
         EasyMock.expectLastCall().anyTimes();
@@ -127,7 +134,7 @@ public class DeployerTest {
         Feature f101 = repo.getFeatures()[1];
 
         Deployer.DeployCallback callback = EasyMock.createMock(Deployer.DeployCallback.class);
-        Deployer deployer = new Deployer(manager, callback);
+        Deployer deployer = new Deployer(manager, resolver, callback);
 
         final TestBundle bundleA = createTestBundle(1L, Bundle.ACTIVE, dataDir, "a100");
 
@@ -223,7 +230,7 @@ public class DeployerTest {
         Bundle serviceBundle = createTestBundle(1, Bundle.ACTIVE, dataDir, "a100");
 
         Deployer.DeployCallback callback = EasyMock.createMock(Deployer.DeployCallback.class);
-        Deployer deployer = new Deployer(manager, callback);
+        Deployer deployer = new Deployer(manager, resolver, callback);
 
         callback.print(EasyMock.anyString(), EasyMock.anyBoolean());
         EasyMock.expectLastCall().anyTimes();
@@ -285,7 +292,7 @@ public class DeployerTest {
         Bundle serviceBundle2 = createTestBundle(2, Bundle.ACTIVE, dataDir, "b100");
 
         Deployer.DeployCallback callback = EasyMock.createMock(Deployer.DeployCallback.class);
-        Deployer deployer = new Deployer(manager, callback);
+        Deployer deployer = new Deployer(manager, resolver, callback);
 
         callback.print(EasyMock.anyString(), EasyMock.anyBoolean());
         EasyMock.expectLastCall().anyTimes();

@@ -89,6 +89,7 @@ import org.osgi.resource.Resource;
 import org.osgi.resource.Wire;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.resolver.Resolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -125,6 +126,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
     private final FeatureFinder featureFinder;
     private final EventAdminListener eventAdminListener;
     private final ConfigurationAdmin configurationAdmin;
+    private final Resolver resolver;
     private final FeatureConfigInstaller configInstaller;
     private final RegionDigraph digraph;
     private final String overrides;
@@ -174,6 +176,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
                                FeatureFinder featureFinder,
                                EventAdminListener eventAdminListener,
                                ConfigurationAdmin configurationAdmin,
+                               Resolver resolver,
                                RegionDigraph digraph,
                                String overrides,
                                String featureResolutionRange,
@@ -189,6 +192,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         this.featureFinder = featureFinder;
         this.eventAdminListener = eventAdminListener;
         this.configurationAdmin = configurationAdmin;
+        this.resolver = resolver;
         this.configInstaller = configurationAdmin != null ? new FeatureConfigInstaller(configurationAdmin) : null;
         this.digraph = digraph;
         this.overrides = overrides;
@@ -1052,7 +1056,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
                 try {
                     Deployer.DeploymentState dstate = getDeploymentState(state);
                     Deployer.DeploymentRequest request = getDeploymentRequest(requirements, stateChanges, options);
-                    new Deployer(manager, this).deploy(dstate, request);
+                    new Deployer(manager, this.resolver, this).deploy(dstate, request);
                     break;
                 } catch (Deployer.PartialDeploymentException e) {
                     if (!prereqs.containsAll(e.getMissing())) {

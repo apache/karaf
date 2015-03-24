@@ -72,19 +72,20 @@ import org.osgi.resource.Requirement;
 import org.osgi.resource.Resource;
 import org.osgi.resource.Wire;
 import org.osgi.service.repository.Repository;
+import org.osgi.service.resolver.Resolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.apache.felix.resolver.Util.getSymbolicName;
-import static org.apache.felix.resolver.Util.getVersion;
 import static org.apache.karaf.features.FeaturesService.ROOT_REGION;
+import static org.apache.karaf.features.FeaturesService.UPDATEABLE_URIS;
+import static org.apache.karaf.features.FeaturesService.UPDATE_SNAPSHOTS_ALWAYS;
+import static org.apache.karaf.features.FeaturesService.UPDATE_SNAPSHOTS_CRC;
+import static org.apache.karaf.features.internal.resolver.ResolverUtil.getSymbolicName;
+import static org.apache.karaf.features.internal.resolver.ResolverUtil.getVersion;
 import static org.apache.karaf.features.internal.resolver.ResourceUtils.TYPE_SUBSYSTEM;
 import static org.apache.karaf.features.internal.resolver.ResourceUtils.getFeatureId;
 import static org.apache.karaf.features.internal.resolver.ResourceUtils.getType;
 import static org.apache.karaf.features.internal.resolver.ResourceUtils.getUri;
-import static org.apache.karaf.features.FeaturesService.UPDATEABLE_URIS;
-import static org.apache.karaf.features.FeaturesService.UPDATE_SNAPSHOTS_ALWAYS;
-import static org.apache.karaf.features.FeaturesService.UPDATE_SNAPSHOTS_CRC;
 import static org.apache.karaf.features.internal.util.MapUtils.add;
 import static org.apache.karaf.features.internal.util.MapUtils.addToMapSet;
 import static org.apache.karaf.features.internal.util.MapUtils.apply;
@@ -179,10 +180,12 @@ public class Deployer {
     private static final Logger LOGGER = LoggerFactory.getLogger(Deployer.class);
 
     private final DownloadManager manager;
+    private final Resolver resolver;
     private final DeployCallback callback;
 
-    public Deployer(DownloadManager manager, DeployCallback callback) {
+    public Deployer(DownloadManager manager, Resolver resolver, DeployCallback callback) {
         this.manager = manager;
+        this.resolver = resolver;
         this.callback = callback;
     }
 
@@ -210,7 +213,7 @@ public class Deployer {
                 map(dstate.bundles));
 
         // Resolve
-        SubsystemResolver resolver = new SubsystemResolver(manager);
+        SubsystemResolver resolver = new SubsystemResolver(this.resolver, manager);
         resolver.prepare(
                 dstate.features.values(),
                 request.requirements,

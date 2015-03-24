@@ -32,7 +32,6 @@ import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import org.apache.felix.resolver.Util;
 import org.apache.felix.utils.manifest.Clause;
 import org.apache.felix.utils.manifest.Parser;
 import org.apache.felix.utils.version.VersionRange;
@@ -48,6 +47,7 @@ import org.apache.karaf.features.internal.download.DownloadManager;
 import org.apache.karaf.features.internal.download.Downloader;
 import org.apache.karaf.features.internal.download.StreamProvider;
 import org.apache.karaf.features.internal.resolver.FeatureResource;
+import org.apache.karaf.features.internal.resolver.ResolverUtil;
 import org.apache.karaf.features.internal.resolver.ResourceBuilder;
 import org.apache.karaf.features.internal.resolver.ResourceImpl;
 import org.apache.karaf.features.internal.resolver.ResourceUtils;
@@ -496,7 +496,7 @@ public class Subsystem extends ResourceImpl {
     }
 
     private void doAddDependency(ResourceImpl resource, boolean mandatory, boolean start, int startLevel) {
-        String id = Util.getSymbolicName(resource) + "|" + Util.getVersion(resource);
+        String id = ResolverUtil.getSymbolicName(resource) + "|" + ResolverUtil.getVersion(resource);
         DependencyInfo info = dependencies.get(id);
         if (info == null) {
             info = new DependencyInfo();

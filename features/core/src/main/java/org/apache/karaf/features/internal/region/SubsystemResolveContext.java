@@ -27,11 +27,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.felix.resolver.Util;
 import org.apache.karaf.features.internal.download.Downloader;
 import org.apache.karaf.features.internal.repository.BaseRepository;
 import org.apache.karaf.features.internal.resolver.CapabilityImpl;
 import org.apache.karaf.features.internal.resolver.RequirementImpl;
+import org.apache.karaf.features.internal.resolver.ResolverUtil;
 import org.apache.karaf.features.internal.resolver.ResourceImpl;
 import org.eclipse.equinox.region.Region;
 import org.eclipse.equinox.region.RegionDigraph;
@@ -150,7 +150,7 @@ public class SubsystemResolveContext extends ResolveContext {
                 Map<String, Resource> providers = new HashMap<String, Resource>();
                 for (Capability cap : caps) {
                     Resource resource = cap.getResource();
-                    String id = Util.getSymbolicName(resource) + "|" + Util.getVersion(resource);
+                    String id = ResolverUtil.getSymbolicName(resource) + "|" + ResolverUtil.getVersion(resource);
                     Resource prev = providers.get(id);
                     if (prev != null && prev != resource) {
                         String r1 = getRegion(prev).getName();

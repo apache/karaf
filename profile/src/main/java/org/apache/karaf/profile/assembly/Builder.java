@@ -53,6 +53,7 @@ import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.apache.felix.resolver.ResolverImpl;
 import org.apache.felix.utils.manifest.Clause;
 import org.apache.felix.utils.properties.InterpolationHelper;
 import org.apache.felix.utils.properties.Properties;
@@ -85,6 +86,7 @@ import org.ops4j.pax.url.mvn.MavenResolvers;
 import org.osgi.framework.Constants;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.resource.Resource;
+import org.osgi.service.resolver.Resolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -140,6 +142,7 @@ public class Builder {
 
     private ScheduledExecutorService executor;
     private DownloadManager manager;
+    private Resolver resolver;
     private Path etcDirectory;
     private Path systemDirectory;
     private Map<String, Profile> allProfiles;
@@ -325,6 +328,7 @@ public class Builder {
         MavenResolver resolver = MavenResolvers.createMavenResolver(props, "org.ops4j.pax.url.mvn");
         executor = Executors.newScheduledThreadPool(8);
         manager = new CustomDownloadManager(resolver, executor);
+        this.resolver = new ResolverImpl(new Slf4jResolverLog(LOGGER));
 
         //
         // Unzip kars
@@ -810,6 +814,7 @@ public class Builder {
         LOGGER.info("Resolving features");
         Map<String, Integer> bundles =
                 resolve(manager,
+                        resolver,
                         startupRepositories.values(),
                         startupEffective.getFeatures(),
                         startupEffective.getBundles(),
@@ -968,6 +973,7 @@ public class Builder {
 
     private Map<String, Integer> resolve(
                     DownloadManager manager,
+                    Resolver resolver,
                     Collection<Features> repositories,
                     Collection<String> features,
                     Collection<String> bundles,
@@ -975,7 +981,7 @@ public class Builder {
                     Collection<String> optionals) throws Exception {
         BundleRevision systemBundle = getSystemBundle();
         AssemblyDeployCallback callback = new AssemblyDeployCallback(manager, this, systemBundle, repositories);
-        Deployer deployer = new Deployer(manager, callback);
+        Deployer deployer = new Deployer(manager, resolver, callback);
 
         // Install framework
         Deployer.DeploymentRequest request = createDeploymentRequest();

@@ -27,7 +27,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.felix.resolver.Util;
+import org.apache.karaf.features.internal.resolver.ResolverUtil;
 import org.apache.karaf.features.internal.resolver.ResourceBuilder;
 import org.apache.karaf.features.internal.resolver.ResourceImpl;
 import org.osgi.framework.Bundle;
@@ -200,12 +200,12 @@ public class TestBundle extends ResourceImpl implements BundleRevision, Bundle, 
 
     @Override
     public String getSymbolicName() {
-        return Util.getSymbolicName(this);
+        return ResolverUtil.getSymbolicName(this);
     }
 
     @Override
     public Version getVersion() {
-        return Util.getVersion(this);
+        return ResolverUtil.getVersion(this);
     }
 
     @Override

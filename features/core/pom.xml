@@ -131,7 +131,6 @@
                             org.apache.karaf.features.management;
                             org.apache.karaf.features.management.codec;
                                 -noimport:=true,
-                            org.osgi.service.resolver;-split-package:=merge-first,
                             org.osgi.service.repository,
                             org.eclipse.equinox.region.*
                         </Export-Package>
@@ -141,8 +140,6 @@
                         </Import-Package>
                         <Private-Package>
                             org.apache.karaf.features.internal.*,
-                            org.apache.felix.resolver,
-                            org.apache.felix.resolver.util,
                             org.apache.felix.utils.collections,
                             org.apache.felix.utils.version,
                             org.apache.felix.utils.properties,

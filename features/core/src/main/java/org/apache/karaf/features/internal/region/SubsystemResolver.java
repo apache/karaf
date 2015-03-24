@@ -24,8 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.felix.resolver.ResolverImpl;
-import org.apache.felix.resolver.Util;
 import org.apache.felix.utils.collections.DictionaryAsMap;
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Feature;
@@ -34,10 +32,10 @@ import org.apache.karaf.features.internal.download.Downloader;
 import org.apache.karaf.features.internal.download.StreamProvider;
 import org.apache.karaf.features.internal.resolver.CapabilityImpl;
 import org.apache.karaf.features.internal.resolver.CapabilitySet;
+import org.apache.karaf.features.internal.resolver.ResolverUtil;
 import org.apache.karaf.features.internal.resolver.ResourceBuilder;
 import org.apache.karaf.features.internal.resolver.ResourceImpl;
 import org.apache.karaf.features.internal.resolver.SimpleFilter;
-import org.apache.karaf.features.internal.resolver.Slf4jResolverLog;
 import org.eclipse.equinox.internal.region.StandardRegionDigraph;
 import org.eclipse.equinox.region.Region;
 import org.eclipse.equinox.region.RegionDigraph;
@@ -70,6 +68,7 @@ public class SubsystemResolver {
     private static final Logger LOGGER = LoggerFactory.getLogger(SubsystemResolver.class);
 
     private DownloadManager manager;
+    private Resolver resolver;
     private RegionDigraph digraph;
     private Subsystem root;
     private Map<Resource, List<Wire>> wiring;
@@ -84,7 +83,8 @@ public class SubsystemResolver {
     private RegionDigraph flatDigraph;
     private Map<String, Map<String, BundleInfo>> bundleInfos;
 
-    public SubsystemResolver(DownloadManager manager) {
+    public SubsystemResolver(Resolver resolver, DownloadManager manager) {
+        this.resolver = resolver;
         this.manager = manager;
     }
 
@@ -181,7 +181,6 @@ public class SubsystemResolver {
         digraph = new StandardRegionDigraph(null, null);
         populateDigraph(digraph, root);
 
-        Resolver resolver = new ResolverImpl(new Slf4jResolverLog(LOGGER));
         Downloader downloader = manager.createDownloader();
         wiring = resolver.resolve(new SubsystemResolveContext(root, digraph, globalRepository, downloader));
         downloader.await();
@@ -334,7 +333,7 @@ public class SubsystemResolver {
         for (Map.Entry<Resource, List<Wire>> entry : wiring.entrySet()) {
             final Resource resource = entry.getKey();
             final Requirement requirement = getSubsystemRequirement(resource);
-            if (Util.isFragment(resource)) {
+            if (ResolverUtil.isFragment(resource)) {
                 List<Wire> wires = entry.getValue();
                 final Resource host = wires.get(0).getProvider();
                 final Wire wire = findMatchingWire(sf, wiring.get(host));

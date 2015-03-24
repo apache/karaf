@@ -34,8 +34,8 @@ import org.osgi.resource.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.apache.felix.resolver.Util.getSymbolicName;
-import static org.apache.felix.resolver.Util.getVersion;
+import static org.apache.karaf.features.internal.resolver.ResolverUtil.getSymbolicName;
+import static org.apache.karaf.features.internal.resolver.ResolverUtil.getVersion;
 
 /**
  * Helper class to deal with overriden bundles at feature installation time.

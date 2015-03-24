@@ -14,30 +14,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.features.internal.service;
+package org.apache.karaf.profile.assembly;
 
-import java.util.Comparator;
+import org.slf4j.Logger;
 
-import org.apache.karaf.features.internal.resolver.ResolverUtil;
-import org.osgi.framework.Version;
-import org.osgi.resource.Resource;
+/**
+ */
+public class Slf4jResolverLog extends org.apache.felix.resolver.Logger {
 
-public class ResourceComparator implements Comparator<Resource> {
+    private final Logger logger;
 
-    @Override
-    public int compare(Resource o1, Resource o2) {
-        String bsn1 = ResolverUtil.getSymbolicName(o1);
-        String bsn2 = ResolverUtil.getSymbolicName(o2);
-        int c = bsn1.compareTo(bsn2);
-        if (c == 0) {
-            Version v1 = ResolverUtil.getVersion(o1);
-            Version v2 = ResolverUtil.getVersion(o2);
-            c = v1.compareTo(v2);
-            if (c == 0) {
-                c = o1.hashCode() - o2.hashCode();
-            }
-        }
-        return c;
+    public Slf4jResolverLog(Logger logger) {
+        super(LOG_DEBUG);
+        this.logger = logger;
     }
 
+    @Override
+    protected void doLog(int level, String msg, Throwable throwable) {
+        switch (level) {
+        case LOG_ERROR:
+            logger.error(msg, throwable);
+            break;
+        case LOG_WARNING:
+            logger.warn(msg, throwable);
+            break;
+        case LOG_INFO:
+            logger.info(msg, throwable);
+            break;
+        default:
+            logger.debug(msg, throwable);
+            break;
+        }
+    }
 }

@@ -16,28 +16,33 @@
  */
 package org.apache.karaf.features.internal.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Map;
 
+import org.apache.felix.resolver.ResolverImpl;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.TestBase;
+import org.apache.karaf.features.Slf4jResolverLog;
 import org.junit.Before;
 import org.junit.Test;
+import org.osgi.service.resolver.Resolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 
 /**
  * Test cases for {@link org.apache.karaf.features.internal.service.FeaturesServiceImpl}
  */
 public class FeaturesServiceImplTest extends TestBase {
-    
+
+    Logger logger = LoggerFactory.getLogger(FeaturesServiceImplTest.class);;
+    Resolver resolver = new ResolverImpl(new Slf4jResolverLog(logger));
     File dataFile;
 
     @Before
@@ -49,7 +54,7 @@ public class FeaturesServiceImplTest extends TestBase {
     public void testGetFeature() throws Exception {
         Feature transactionFeature = feature("transaction", "1.0.0");
         final Map<String, Map<String, Feature>> features = features(transactionFeature);
-        final FeaturesServiceImpl impl = new FeaturesServiceImpl(null, null, new Storage(), null, null, null, null, "", null, null, null, null, 0, 0, 0) {
+        final FeaturesServiceImpl impl = new FeaturesServiceImpl(null, null, new Storage(), null, null, null, this.resolver, null, "", null, null, null, null, 0, 0, 0) {
             protected Map<String,Map<String,Feature>> getFeatures() throws Exception {
                 return features;
             }
@@ -60,7 +65,7 @@ public class FeaturesServiceImplTest extends TestBase {
     
     @Test
     public void testGetFeatureStripVersion() throws Exception {
-        final FeaturesServiceImpl impl = new FeaturesServiceImpl(null, null, new Storage(), null, null, null, null, "", null, null, null, null, 0, 0, 0) {
+        final FeaturesServiceImpl impl = new FeaturesServiceImpl(null, null, new Storage(), null, null, null, this.resolver, null, "", null, null, null, null, 0, 0, 0) {
             protected Map<String,Map<String,Feature>> getFeatures() throws Exception {
                 return features(feature("transaction", "1.0.0"));
             }
@@ -74,7 +79,7 @@ public class FeaturesServiceImplTest extends TestBase {
     
     @Test
     public void testGetFeatureNotAvailable() throws Exception {
-        final FeaturesServiceImpl impl = new FeaturesServiceImpl(null, null, new Storage(), null, null, null, null, "", null, null, null, null, 0, 0, 0) {
+        final FeaturesServiceImpl impl = new FeaturesServiceImpl(null, null, new Storage(), null, null, null, this.resolver, null, "", null, null, null, null, 0, 0, 0) {
             protected Map<String,Map<String,Feature>> getFeatures() throws Exception {
                 return features(feature("transaction", "1.0.0"));
             }
@@ -88,7 +93,7 @@ public class FeaturesServiceImplTest extends TestBase {
                 feature("transaction", "1.0.0"),
                 feature("transaction", "2.0.0")
         );
-        final FeaturesServiceImpl impl = new FeaturesServiceImpl(null, null, new Storage(), null, null, null, null, "", null, null, null, null, 0, 0, 0) {
+        final FeaturesServiceImpl impl = new FeaturesServiceImpl(null, null, new Storage(), null, null, null, this.resolver, null, "", null, null, null, null, 0, 0, 0) {
             protected Map<String,Map<String,Feature>> getFeatures() throws Exception {
                 return features;
             }
