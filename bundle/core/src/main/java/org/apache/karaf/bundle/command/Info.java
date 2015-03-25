@@ -16,24 +16,18 @@
  */
 package org.apache.karaf.bundle.command;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.nio.Buffer;
-import java.util.List;
-
-import org.apache.karaf.bundle.command.wikidoc.AnsiPrintingWikiVisitor;
-import org.apache.karaf.bundle.command.wikidoc.WikiParser;
-import org.apache.karaf.bundle.command.wikidoc.WikiVisitor;
 import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.apache.karaf.shell.support.ShellUtil;
+import org.apache.karaf.shell.api.console.Session;
 import org.osgi.framework.Bundle;
 
 @Command(scope = "bundle", name = "info", description = "Displays detailed information of a given bundles.")
 @Service
 public class Info extends BundlesCommand {
+
+    @Reference
+    Session session;
 
     /**
      * <p>
@@ -44,21 +38,7 @@ public class Info extends BundlesCommand {
      */
     @Override
     protected void executeOnBundle(Bundle bundle) throws Exception {
-        String title = ShellUtil.getBundleName(bundle);
-        System.out.println("\n" + title);
-        System.out.println(ShellUtil.getUnderlineString(title));
-        URL bundleInfo = bundle.getEntry("OSGI-INF/bundle.info");
-        if (bundleInfo != null) {
-            try (
-                BufferedReader reader = new BufferedReader(new InputStreamReader(bundleInfo.openStream()));
-            ) {
-                WikiVisitor visitor = new AnsiPrintingWikiVisitor(System.out);
-                WikiParser parser = new WikiParser(visitor);
-                parser.parse(reader);
-            } catch (Exception e) {
-                // ignore
-            }
-        }
+        session.execute("help 'bundle|" + bundle.getBundleId() + "'");
     }
 
 }

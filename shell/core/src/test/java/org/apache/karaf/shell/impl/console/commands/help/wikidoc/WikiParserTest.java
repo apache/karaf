@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.bundle.command.wikidoc;
+package org.apache.karaf.shell.impl.console.commands.help.wikidoc;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -39,31 +39,43 @@ public class WikiParserTest {
 	@Test
 	public void parseTestDoc() throws IOException {
 		WikiVisitor visitor = EasyMock.createStrictMock(WikiVisitor.class);
+		visitor.startPara(0);
+		EasyMock.expectLastCall();
 		visitor.heading(1, "myTestdoc");
 		EasyMock.expectLastCall();
-		visitor.text("\n");
+		visitor.endPara();
 		EasyMock.expectLastCall();
-		visitor.text("\n");
+		visitor.startPara(0);
+		EasyMock.expectLastCall();
+		visitor.endPara();
+		EasyMock.expectLastCall();
+		visitor.startPara(0);
 		EasyMock.expectLastCall();
 		visitor.text("Some text");
 		EasyMock.expectLastCall();
-		visitor.text("\n");
+		visitor.endPara();
+		EasyMock.expectLastCall();
+		visitor.startPara(0);
 		EasyMock.expectLastCall();
 		visitor.enumeration("enumeration");
 		EasyMock.expectLastCall();
-		visitor.text("\n");
-		EasyMock.expectLastCall();		
-		visitor.text(" some text ");
+		visitor.endPara();
+		EasyMock.expectLastCall();
+		visitor.startPara(1);
+		EasyMock.expectLastCall();
+		visitor.text("some text ");
 		EasyMock.expectLastCall();
 		visitor.link("a link", "");
 		EasyMock.expectLastCall();
 		visitor.text(" some more text");
 		EasyMock.expectLastCall();
-		visitor.text("\n");
+		visitor.endPara();
+		EasyMock.expectLastCall();
+		visitor.startPara(0);
 		EasyMock.expectLastCall();
 		visitor.text("h1 is no heading");
 		EasyMock.expectLastCall();
-		visitor.text("\n");
+		visitor.endPara();
 		EasyMock.expectLastCall();
 
 		EasyMock.replay(visitor);
@@ -76,14 +88,18 @@ public class WikiParserTest {
 	public void parseHeadingSpecialCases() throws IOException {
 		WikiVisitor visitor = EasyMock.createStrictMock(WikiVisitor.class);
 
+		visitor.startPara(0);
+		EasyMock.expectLastCall();
 		visitor.heading(1, "");
 		EasyMock.expectLastCall();
-		visitor.text("\n");
+		visitor.endPara();
 		EasyMock.expectLastCall();
 
+		visitor.startPara(0);
+		EasyMock.expectLastCall();
 		visitor.text("hf.");
 		EasyMock.expectLastCall();
-		visitor.text("\n");
+		visitor.endPara();
 		EasyMock.expectLastCall();
 		
 		EasyMock.replay(visitor);

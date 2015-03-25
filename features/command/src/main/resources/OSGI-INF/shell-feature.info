@@ -16,32 +16,14 @@
 #    limitations under the License.
 #
 #
-h1. Synopsis
+h1. SUBSHELL
+    **feature**
 
-	${project.name}
+h1. SYNOPSIS
+    This shell provides the Karaf shell commands to manipulate features.
 
-	${project.description}
+h1. COMMANDS
+\${command-list|feature|indent=4}
 
-	Maven URL:
-		[mvn:${project.groupId}/${project.artifactId}/${project.version}]
-
-h1. Description
-
-	The log mbean management bundle exposes a Log MBean that can be used with any JMX client (for instance JConsole).
-
-	The Log MBean allows quite the same actions that can be performed using log:* commands:
-  		* display()
-  		* display(logger)
-  		* get()
-  		* get(logger)
-  		* set(level)
-  		* list(level, logger)
-
-h1. Commands
-
-	The bundle contains the following commands:
-\${command-list|log|indent=8,list,cyan}
-
-h1. See also
-
-	* Monitoring and Administration using JMX - section of the Karaf User Guide
+h1. SEE ALSO
+    Commands- and Provisioning- sections of the Karaf User Guide.

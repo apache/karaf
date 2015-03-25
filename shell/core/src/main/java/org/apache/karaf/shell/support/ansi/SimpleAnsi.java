@@ -23,6 +23,7 @@ import org.fusesource.jansi.Ansi.Color;
 
 public class SimpleAnsi {
     public static String COLOR_RED = Ansi.ansi().fg(Color.RED).toString();
+    public static String COLOR_CYAN = Ansi.ansi().fg(Color.CYAN).toString();
     public static String COLOR_DEFAULT = Ansi.ansi().fg(Color.DEFAULT).toString();
     
     public static String INTENSITY_BOLD = Ansi.ansi().bold().toString();

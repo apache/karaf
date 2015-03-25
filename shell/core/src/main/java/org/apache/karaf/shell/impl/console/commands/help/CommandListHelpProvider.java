@@ -19,8 +19,12 @@ package org.apache.karaf.shell.impl.console.commands.help;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -28,33 +32,55 @@ import org.apache.karaf.shell.api.console.Command;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.api.console.Terminal;
 import org.apache.karaf.shell.support.NameScoping;
-import org.apache.karaf.shell.support.ansi.SimpleAnsi;
 import org.apache.karaf.shell.support.table.Col;
 import org.apache.karaf.shell.support.table.ShellTable;
 
 public class CommandListHelpProvider implements HelpProvider {
 
     public String getHelp(Session session, String path) {
+        String mode = "raw";
         if (path.indexOf('|') > 0) {
             if (path.startsWith("command-list|")) {
                 path = path.substring("command-list|".length());
+                if (path.indexOf('|') > 0) {
+                    mode = path.substring(path.indexOf('|') + 1);
+                    path = path.substring(0, path.indexOf('|'));
+                }
             } else {
                 return null;
             }
-        }
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        SortedMap<String, String> commands = getCommandDescriptions(session, path);
-        if (commands.isEmpty()) {
+        } else {
             return null;
-        } else if (commands.size() == 1 && commands.containsKey(path)) {
+        }
+
+        // Retrieve matching commands
+        Set<Command> commands = getCommands(session, path);
+        SortedMap<String,String> descriptions = new TreeMap<>();
+        for (Command command : commands) {
+            String subshell = (String) session.get(Session.SUBSHELL);
+            String name = command.getScope() + ":" + command.getName();
+            String description = command.getDescription();
+            if (name.startsWith("*:")) {
+                name = name.substring(2);
+            }
+            if (subshell != null && !subshell.trim().isEmpty() && name.startsWith(subshell + ":")) {
+                name = name.substring(subshell.length() + 1);
+            }
+            descriptions.put(name, description);
+        }
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        if (descriptions.isEmpty()) {
+            return null;
+        } else if (descriptions.size() == 1 && descriptions.containsKey(path)) {
             return null;
         } else {
-            printMethodList(session, new PrintStream(baos), commands);
+            printMethodList(session, new PrintStream(baos), descriptions, Arrays.asList(mode.split(",")));
             return baos.toString();
         }
     }
 
-    private SortedMap<String, String> getCommandDescriptions(Session session, String path) {
+    private Set<Command> getCommands(Session session, String path) {
         // TODO: this is not really clean
 
         List<Command> commands = session.getRegistry().getCommands();
@@ -62,12 +88,12 @@ public class CommandListHelpProvider implements HelpProvider {
         String subshell = (String) session.get(Session.SUBSHELL);
         String completionMode = (String) session.get(Session.COMPLETION_MODE);
 
-        SortedMap<String,String> descriptions = new TreeMap<String,String>();
+        Set<Command> matchingCommands = new HashSet<>();
         for (Command command : commands) {
 
             String name = command.getScope() + ":" + command.getName();
 
-            if (command != null && !name.startsWith(path)) {
+            if (!name.startsWith(path)) {
                 continue;
             }
 
@@ -88,28 +114,51 @@ public class CommandListHelpProvider implements HelpProvider {
                 }
             }
 
-            String description = command.getDescription();
-            if (name.startsWith("*:")) {
-                name = name.substring(2);
-            }
-            if (subshell != null && !subshell.trim().isEmpty() && name.startsWith(subshell + ":")) {
-                name = name.substring(subshell.length() + 1);
-            }
-            descriptions.put(name, description);
+            matchingCommands.add(command);
         }
-        return descriptions;
+        return matchingCommands;
     }
 
-    protected void printMethodList(Session session, PrintStream out, SortedMap<String, String> commands) {
+    protected void printMethodList(Session session, PrintStream out, SortedMap<String, String> commands, Collection<String> modes) {
+        boolean list = false;
+        boolean cyan = false;
+        int indent = 0;
+        for (String mode : modes) {
+            if (mode.equals("list")) {
+                list = true;
+            } else if (mode.equals("cyan")) {
+                cyan = true;
+            } else if (mode.equals("indent")) {
+                indent = 4;
+            } else if (mode.startsWith("indent=")) {
+                indent = Integer.parseInt(mode.substring("indent=".length()));
+            }
+        }
+
         Terminal term = session.getTerminal();
         int termWidth = term != null ? term.getWidth() : 80;
-        out.println(SimpleAnsi.INTENSITY_BOLD + "COMMANDS" + SimpleAnsi.INTENSITY_NORMAL);
-        ShellTable table = new ShellTable().noHeaders().separator(" ").size(termWidth);
-        table.column(new Col("Command").maxSize(64));
-        table.column(new Col("Description"));
+        ShellTable table = new ShellTable().noHeaders().separator(" ").size(termWidth - 1);
+        Col col = new Col("Command").maxSize(64);
+        if (indent > 0 || list) {
+            table.column(new Col(""));
+        }
+        if (cyan) {
+            col.cyan();
+        } else {
+            col.bold();
+        }
+        table.column(col);
+        table.column(new Col("Description").wrap());
         for (Map.Entry<String,String> entry : commands.entrySet()) {
             String key = NameScoping.getCommandNameWithoutGlobalPrefix(session, entry.getKey());
-            table.addRow().addContent(SimpleAnsi.INTENSITY_BOLD + key + SimpleAnsi.INTENSITY_NORMAL, entry.getValue());
+            String prefix = "";
+            for (int i = 0; i < indent; i++) {
+                prefix += " ";
+            }
+            if (list) {
+                prefix += " *";
+            }
+            table.addRow().addContent(prefix, key, entry.getValue());
         }
         table.print(out, true);
     }

@@ -1,3 +1,21 @@
+#
+#
+#    Licensed to the Apache Software Foundation (ASF) under one or more
+#    contributor license agreements.  See the NOTICE file distributed with
+#    this work for additional information regarding copyright ownership.
+#    The ASF licenses this file to You under the Apache License, Version 2.0
+#    (the "License"); you may not use this file except in compliance with
+#    the License.  You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+#
+#
 h1. Synopsis
 
 ${project.name}
@@ -13,13 +31,15 @@ This bundle provides Karaf shell commands to manipulate the ConfigAdmin OSGi ser
 
 The following commands are available:
 * config:cancel - Cancels the changes to the configuration being edited.
+* config:delete - Delete a configuration.
 * config:edit - Creates or edits a configuration.
 * config:list - Lists existing configurations.
-* config:propappend - Appends the given value to an existing property or creates
+* config:meta - Lists meta type information.
+* config:property\\-append - Appends the given value to an existing property or creates
  the property with the specified name and value.
-* config:propdel - Deletes a property from the edited configuration.
-* config:proplist - Lists properties from the currently edited configuration.
-* config:propset - Sets a property in the currently edited configuration.
+* config:property\\-delete - Deletes a property from the edited configuration.
+* config:property\\-list - Lists properties from the currently edited configuration.
+* config:property\\-set - Sets a property in the currently edited configuration.
 * config:update - Saves and propagates changes from the configuration being edited.
 
 h1. See also

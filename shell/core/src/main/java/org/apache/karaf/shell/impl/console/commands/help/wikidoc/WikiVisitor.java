@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.bundle.command.wikidoc;
+package org.apache.karaf.shell.impl.console.commands.help.wikidoc;
 
 /**
  * Will be used by WikiParser to call the respective handler when it recognizes the tag 
@@ -25,5 +25,7 @@ public interface WikiVisitor {
 	void heading(int level, String title);
 	void enumeration(String text);
 	void text(String text);
-
+	void bold(boolean on);
+	void startPara(int size);
+	void endPara();
 }

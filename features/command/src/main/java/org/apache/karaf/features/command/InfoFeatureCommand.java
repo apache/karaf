@@ -85,8 +85,13 @@ public class InfoFeatureCommand extends FeaturesCommandSupport {
             conditional = true;
         }
 
+        boolean first = true;
         for (Feature feature : features) {
-            System.out.println("------------------------------------");
+            if (first) {
+                first = false;
+            } else {
+                System.out.println("------------------------------------");
+            }
             System.out.println("Feature " + feature.getName() + " " + feature.getVersion());
             if (feature.getDescription() != null) {
                 System.out.println("Description:");

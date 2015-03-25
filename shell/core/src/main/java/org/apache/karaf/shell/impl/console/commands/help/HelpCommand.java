@@ -18,7 +18,9 @@
  */
 package org.apache.karaf.shell.impl.console.commands.help;
 
+import java.io.BufferedReader;
 import java.io.PrintStream;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -48,8 +50,11 @@ public class HelpCommand implements Command {
         Registry registry = factory.getRegistry();
         registry.register(this);
         registry.register(new SimpleHelpProvider());
-        registry.register(new CommandListHelpProvider());
+        registry.register(new ShellHelpProvider());
         registry.register(new SingleCommandHelpProvider());
+        registry.register(new CommandsHelpProvider());
+        registry.register(new CommandListHelpProvider());
+        registry.register(new BundleHelpProvider());
     }
 
     @Override
@@ -83,7 +88,12 @@ public class HelpCommand implements Command {
         String path = arguments.isEmpty() ? null : arguments.get(0) == null ? null : arguments.get(0).toString();
         String help = getHelp(session, path);
         if (help != null) {
-            System.out.println(help);
+            try (BufferedReader reader = new BufferedReader(new StringReader(help))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    System.out.println(line);
+                }
+            }
         }
         return null;
     }
@@ -184,7 +194,7 @@ public class HelpCommand implements Command {
 
     private String removeNewLine(String help) {
         if (help != null && help.endsWith("\n")) {
-            help = help.substring(0, help.length()  -1);
+            help = help.substring(0, help.length() - 1);
         }
         return help;
     }

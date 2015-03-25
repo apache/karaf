@@ -2270,7 +2270,6 @@
                                 <exclude>**/.settings/**</exclude>
                                 <exclude>**/bin/**</exclude>
                                 <!-- resources file -->
-                                <exclude>**/bundle.info</exclude>
                                 <exclude>**/goal.txt</exclude>
                                 <exclude>**/grep.txt</exclude>
                                 <exclude>**/edit.txt</exclude>

@@ -53,7 +53,7 @@ public abstract class TopLevelCommand implements Command {
     @Override
     public Object execute(Session session, List<Object> arguments) throws Exception {
         if (arguments.contains("--help")) {
-            printHelp(System.out);
+            printHelp(session, System.out);
             return null;
         }
         if (!arguments.isEmpty()) {
@@ -67,7 +67,7 @@ public abstract class TopLevelCommand implements Command {
         return null;
     }
 
-    protected void printHelp(PrintStream out) {
+    protected void printHelp(Session session, PrintStream out) {
         out.println(INTENSITY_BOLD + "DESCRIPTION" + INTENSITY_NORMAL);
         out.print("        ");
         out.println(INTENSITY_BOLD + getName() + INTENSITY_NORMAL);

@@ -43,6 +43,8 @@ public class Col {
 
     boolean wrap;
     boolean bold;
+    boolean cyan;
+
 
     /**
      * Alignment
@@ -96,6 +98,15 @@ public class Col {
         return this;
     }
 
+    public Col cyan() {
+        return cyan(true);
+    }
+
+    public Col cyan(boolean cyan) {
+        this.cyan = cyan;
+        return this;
+    }
+
     public int getSize() {
         return size;
     }
@@ -145,6 +156,9 @@ public class Col {
             line = this.align.position(cut(line, size), this.size);
             if (bold) {
                 line = SimpleAnsi.INTENSITY_BOLD + line + SimpleAnsi.INTENSITY_NORMAL;
+            }
+            if (cyan) {
+                line = SimpleAnsi.COLOR_CYAN + line + SimpleAnsi.COLOR_DEFAULT;
             }
             sb.append(line);
         }

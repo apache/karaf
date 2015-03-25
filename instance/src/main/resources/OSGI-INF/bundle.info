@@ -1,36 +1,60 @@
+#
+#
+#    Licensed to the Apache Software Foundation (ASF) under one or more
+#    contributor license agreements.  See the NOTICE file distributed with
+#    this work for additional information regarding copyright ownership.
+#    The ASF licenses this file to You under the Apache License, Version 2.0
+#    (the "License"); you may not use this file except in compliance with
+#    the License.  You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+#
+#
 h1. Synopsis
 
-${project.name}
+	${project.name}
 
-${project.description}
+	${project.description}
 
-Maven URL:
-[mvn:${project.groupId}/${project.artifactId}/${project.version}]
+	Maven URL:
+		[mvn:${project.groupId}/${project.artifactId}/${project.version}]
 
 h1. Description
 
-This bundle is the core implementation of the Karaf instance feature.
+	This bundle is the core implementation of the Karaf instance feature.
 
-Karaf instance allows you to manage Karaf child instances.
+	Karaf instance allows you to manage Karaf child instances.
 
-You can create new Karaf instances, configure attributes, rename instances, stop instances, etc.
+	You can create new Karaf instances, configure attributes, rename instances, stop instances, etc.
 
-It also provides JMX MBeans related to the Karaf instance feature.
+h1. Commands
 
-In particular, an InstanceServiceMBean is provided that can be remotely administered using a JMX client (for instance
-JConsole).
+	The following commands are available:
+\${command-list|instance|indent=8,list,cyan}
 
-With this InstanceServiceMBean, you have the following operations available:
-* createInstance(name, sshPort, rmiPort, location, javaOpts, features, featureURLs) - Creates a new Karaf instance.
-* changeSshPort(name, port) - Changes the SSH port number of an existing Karaf instance.
-* changeRmiRegistryPort(name, port) - Changes the RMI registry port number of an existing Karaf instance.
-* changeRmiServerPort(name, port) - Changes the RMI server port number of an existing Karaf instance.
-* changeJavaOpts(name, javaopts) - Changes the Java options of an existing Karaf instance.
-* destroyInstance(name) - Destroys an existing Karaf instance.
-* startInstance(name) - Starts an existing Karaf instance.
-* stopInstance(name) - Stops an existing Karaf instance.
-* renameInstance(originalName, newName) - Renames an existing Karaf instance.
+h1. MBean
+
+	It also provides JMX MBeans related to the Karaf instance feature.
+
+	In particular, an InstanceServiceMBean is provided that can be remotely administered using a JMX client (for instance JConsole).
+
+	With this InstanceServiceMBean, you have the following operations available:
+		* createInstance(name, sshPort, rmiPort, location, javaOpts, features, featureURLs) - Creates a new Karaf instance.
+		* changeSshPort(name, port) - Changes the SSH port number of an existing Karaf instance.
+		* changeRmiRegistryPort(name, port) - Changes the RMI registry port number of an existing Karaf instance.
+		* changeRmiServerPort(name, port) - Changes the RMI server port number of an existing Karaf instance.
+		* changeJavaOpts(name, javaopts) - Changes the Java options of an existing Karaf instance.
+		* destroyInstance(name) - Destroys an existing Karaf instance.
+		* startInstance(name) - Starts an existing Karaf instance.
+		* stopInstance(name) - Stops an existing Karaf instance.
+		* renameInstance(originalName, newName) - Renames an existing Karaf instance.
 
 h1. See also
 
-Managing child instances - of the Karaf User Guide.
+	Managing child instances - of the Karaf User Guide.
