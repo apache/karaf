@@ -1454,11 +1454,11 @@ public class Main {
         lock = (Lock) Class.forName(clz).getConstructor(Properties.class).newInstance(props);
         boolean lockLogged = false;
         while (!exiting) {
+            setupShutdown(props);
             if (lock.lock()) {
                 if (lockLogged) {
                     LOG.info("Lock acquired.");
                 }
-                setupShutdown(props);
                 setStartLevel(defaultStartLevel, 0);
                 for (;;) {
                     if (!dataDir.isDirectory()) {
