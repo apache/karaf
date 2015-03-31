@@ -18,12 +18,8 @@
  */
 package org.apache.karaf.main.lock;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
+
 import org.apache.felix.utils.properties.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -163,8 +159,21 @@ public class DefaultJDBCLock implements Lock {
         ResultSet rs = null;
         boolean schemaExists = false;
         try {
-            rs = getConnection().getMetaData().getTables(null, null, tableName, new String[] {"TABLE"});
+            DatabaseMetaData metadata = getConnection().getMetaData();
+            rs = metadata.getTables(null, null, tableName, new String[] {"TABLE"});
             schemaExists = rs.next();
+            if (schemaExists == false) {
+                // try table name in lower case
+                rs = metadata.getTables(null, null, tableName.toLowerCase(), new String[] {"TABLE"});
+                schemaExists = rs.next();
+            }
+            /*
+            if (schemaExists == false) {
+                // try table name in upper case
+                rs = getConnection().getMetaData().getTables(null, null, tableName.toUpperCase(), new String[] {"TABLE"});
+                schemaExists = rs.next();
+            }
+            */
         } catch (Exception ignore) {
             LOG.log(Level.SEVERE, "Error testing for db table", ignore);
         } finally {
