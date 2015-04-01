@@ -421,6 +421,14 @@
             <artifactId>org.apache.karaf.scr.management</artifactId>
             <scope>provided</scope>
         </dependency>
+
+        <!-- jolokia -->
+        <dependency>
+            <groupId>org.jolokia</groupId>
+            <artifactId>jolokia-osgi</artifactId>
+            <version>${jolokia.version}</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>

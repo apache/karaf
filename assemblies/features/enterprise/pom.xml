@@ -187,6 +187,14 @@
             <artifactId>org.apache.karaf.subsystem.core</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.cdi</groupId>
+            <artifactId>pax-cdi-features</artifactId>
+            <version>${pax.cdi.version}</version>
+            <classifier>features</classifier>
+            <type>xml</type>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>

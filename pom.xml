@@ -353,6 +353,29 @@
                 <enabled>true</enabled>
             </snapshots>
         </repository>
+        <repository>
+            <id>ops4j.snapshots</id>
+            <name>OPS4j Snapshots</name>
+            <url>https://oss.sonatype.org/content/repositories/ops4j-snapshots/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+        <!-- Jolokia snapshots -->
+        <repository>
+            <id>labs-consol-snapshot</id>
+            <name>ConSol* Labs Repository (Snapshots)</name>
+            <url>http://labs.consol.de/maven/snapshots-repository</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </repository>
     </repositories>
     <pluginRepositories>
         <!-- Apache snapshots -->

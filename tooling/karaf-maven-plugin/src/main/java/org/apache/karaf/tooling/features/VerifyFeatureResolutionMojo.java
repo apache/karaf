@@ -157,16 +157,35 @@ public class VerifyFeatureResolutionMojo extends MojoSupport {
             }
             remote.append(invoke(obj, "getUrl"));
             remote.append("@id=").append(invoke(obj, "getId"));
+            if (!((Boolean) invoke(getPolicy(obj, false), "isEnabled"))) {
+                remote.append("@noreleases");
+            }
+            if ((Boolean) invoke(getPolicy(obj, true), "isEnabled")) {
+                remote.append("@snapshots");
+            }
         }
-        config.put("remoteRepositories", remote.toString());
+        getLog().info("Using repositories: " + remote.toString());
+        config.put("maven.repositories", remote.toString());
         // TODO: add more configuration bits ?
-        resolver = MavenResolvers.createMavenResolver(config, null);
+        resolver = MavenResolvers.createMavenResolver(config, "maven");
         doExecute();
     }
 
     private Object invoke(Object object, String getter) throws MojoExecutionException {
         try {
             return object.getClass().getMethod(getter).invoke(object);
+        } catch (Exception e) {
+            throw new MojoExecutionException("Unable to build remote repository from " + object.toString(), e);
+        }
+    }
+
+    private Object getPolicy(Object object, boolean snapshots) throws MojoExecutionException {
+        return invoke(object, "getPolicy", new Class[] { Boolean.TYPE }, new Object[] { snapshots });
+    }
+
+    private Object invoke(Object object, String getter, Class[] types, Object[] params) throws MojoExecutionException {
+        try {
+            return object.getClass().getMethod(getter, types).invoke(object, params);
         } catch (Exception e) {
             throw new MojoExecutionException("Unable to build remote repository from " + object.toString(), e);
         }
