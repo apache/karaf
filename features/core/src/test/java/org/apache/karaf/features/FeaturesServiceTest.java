@@ -122,7 +122,7 @@ public class FeaturesServiceTest extends TestCase {
         // required since the sorted set uses it
         expect(installedBundle.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
 
-        expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
+        expect(bundleContext.getBundles()).andReturn(new Bundle[0]).times(3);
         expect(bundleContext.installBundle(isA(String.class),
                                            isA(InputStream.class))).andReturn(installedBundle);
         expect(installedBundle.getBundleId()).andReturn(12345L);
@@ -182,7 +182,7 @@ public class FeaturesServiceTest extends TestCase {
         expect(installedBundle.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
 
         // Installs f1 and 0.1
-        expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
+        expect(bundleContext.getBundles()).andReturn(new Bundle[0]).times(3);
         expect(bundleContext.installBundle(isA(String.class),
                                            isA(InputStream.class))).andReturn(installedBundle);
         expect(installedBundle.getBundleId()).andReturn(12345L);
@@ -788,7 +788,7 @@ public class FeaturesServiceTest extends TestCase {
         expect(installedBundle2.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
 
         // Installs feature f1 and f2
-        expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
+        expect(bundleContext.getBundles()).andReturn(new Bundle[0]).times(3);
         expect(bundleContext.installBundle(eq(bundle1), isA(InputStream.class))).andReturn(installedBundle1);
         expect(installedBundle1.getBundleId()).andReturn(12345L);
         expect(installedBundle1.getBundleId()).andReturn(12345L);
@@ -849,7 +849,7 @@ public class FeaturesServiceTest extends TestCase {
         expect(installedBundle2.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
 
         // Installs feature f1 and f2
-        expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
+        expect(bundleContext.getBundles()).andReturn(new Bundle[0]).times(3);
         expect(bundleContext.installBundle(eq(bundle1), isA(InputStream.class))).andReturn(installedBundle1);
         expect(installedBundle1.getBundleId()).andReturn(12345L);
         expect(installedBundle1.getBundleId()).andReturn(12345L);
@@ -922,7 +922,7 @@ public class FeaturesServiceTest extends TestCase {
         expect(installedBundle1.getBundleId()).andReturn(12345L);
         expect(installedBundle1.getSymbolicName()).andReturn(headers.get(Constants.BUNDLE_SYMBOLICNAME)).anyTimes();
         expect(installedBundle1.getHeaders()).andReturn(headers).anyTimes();
-        expect(bundleContext.getBundles()).andReturn(new Bundle[] { installedBundle1 });
+        expect(bundleContext.getBundles()).andReturn(new Bundle[] { installedBundle1 }).times(3);
         expect(bundleContext.getBundles()).andReturn(new Bundle[] { installedBundle1 });
 
         expect(bundleContext.installBundle(eq(bundle2), isA(InputStream.class))).andReturn(installedBundle2);

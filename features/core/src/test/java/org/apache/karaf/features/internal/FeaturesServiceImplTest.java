@@ -218,6 +218,15 @@ public class FeaturesServiceImplTest extends TestCase {
                 replay(bundle);
                 return new InstallResult(false, bundle, 0);
             }
+            
+            @Override
+            protected  Bundle isBundleInstalled(BundleInfo bundleInfo) throws IOException, BundleException {
+                // let's return a mock bundle and bundle id to keep the features service happy
+                Bundle bundle = createNiceMock(Bundle.class);
+                expect(bundle.getBundleId()).andReturn(10l).anyTimes();
+                replay(bundle);
+                return bundle;
+            }
 
             @Override
             protected Set<Bundle> findBundlesToRefresh() {

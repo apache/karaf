@@ -736,16 +736,77 @@ public class FeaturesServiceImpl implements FeaturesService {
                 startBundleIfNeeded(result.getBundle(), result.getStartLevel());
             }
         }
+        
+        for (BundleInfo bInfo : feature.getBundles()) {
+            Bundle bundle = isBundleInstalled(bInfo);
+            if (bundle != null && !bundles.contains(bundle.getBundleId())) {
+                bundles.add(bundle.getBundleId());
+            }
+        }
         state.features.put(feature, bundles);
     }
+    
+    protected Bundle isBundleInstalled(BundleInfo bundleInfo) throws IOException, BundleException {
+        InputStream is;
+        String bundleLocation = bundleInfo.getLocation();
+        LOGGER.debug("Checking " + bundleLocation);
+        try {
+            is = new BufferedInputStream(new URL(bundleLocation).openStream());
+        } catch (RuntimeException e) {
+            LOGGER.error(e.getMessage());
+            throw e;
+        }
+        try {
+            is.mark(256 * 1024);
+            JarInputStream jar = new JarInputStream(is);
+            Manifest m = jar.getManifest();
+            if (m == null) {
+                ZipEntry entry;
+                while ((entry = jar.getNextEntry()) != null) {
+                    if (MANIFEST_NAME.equals(entry.getName())) {
+                        m = new Manifest(jar);
+                        break;
+                    }
+                }
+                if (m == null) {
+                    throw new BundleException("Manifest not present in the zip " + bundleLocation);
+                }
+            }
+            String sn = m.getMainAttributes().getValue(Constants.BUNDLE_SYMBOLICNAME);
+            if (sn == null) {
+                throw new BundleException("Jar is not a bundle, no Bundle-SymbolicName " + bundleLocation);
+            }
+            // remove attributes from the symbolic name (like ;blueprint.graceperiod:=false suffix)
+            int attributeIndexSep = sn.indexOf(';');
+            if (attributeIndexSep != -1) {
+                sn = sn.substring(0, attributeIndexSep);
+            }
+            String vStr = m.getMainAttributes().getValue(Constants.BUNDLE_VERSION);
+            Version v = vStr == null ? Version.emptyVersion : Version.parseVersion(vStr);
+            for (Bundle b : bundleContext.getBundles()) {
+                if (b.getSymbolicName() != null && b.getSymbolicName().equals(sn)) {
+                    vStr = (String) b.getHeaders().get(Constants.BUNDLE_VERSION);
+                    Version bv = vStr == null ? Version.emptyVersion : Version.parseVersion(vStr);
+                    if (v.equals(bv)) {
+                        LOGGER.debug("Found installed bundle: " + b);
+                        return b;
+                    }
+                }
+            }
+            return null;
+        } finally {
+            is.close();
+        }
+        
+    }
 
-	private Dictionary<String, String> convertToDict(Map<String, String> props) {
-		Dictionary<String, String> cfgProps = new Hashtable<String, String>();
-		for (Entry<String, String> property : props.entrySet()) {
-			cfgProps.put(property.getKey(), property.getValue());
-		}
-		return cfgProps;
-	}
+    private Dictionary<String, String> convertToDict(Map<String, String> props) {
+        Dictionary<String, String> cfgProps = new Hashtable<String, String>();
+        for (Entry<String, String> property : props.entrySet()) {
+            cfgProps.put(property.getKey(), property.getValue());
+        }
+        return cfgProps;
+    }
 
     private String createConfigurationKey(String pid, String factoryPid) {
         return factoryPid == null ? pid : pid + "-" + factoryPid;
