@@ -89,6 +89,10 @@ public abstract class BaseJDBCLockTest {
         connection.setAutoCommit(false);
         expect(connection.getMetaData()).andReturn(metaData);
         expect(metaData.getTables((String) isNull(), (String) isNull(), eq("LOCK_TABLE"), aryEq(new String[] {"TABLE"}))).andReturn(resultSet);
+        expect(metaData.getTables((String) isNull(), (String) isNull(), eq("LOCK_TABLE"), aryEq(new String[] {"TABLE"}))).andReturn(resultSet);
+        expect(metaData.getTables((String) isNull(), (String) isNull(), eq("lock_table"), aryEq(new String[] {"TABLE"}))).andReturn(resultSet);
+        expect(resultSet.next()).andReturn(false);
+        expect(resultSet.next()).andReturn(false);
         expect(resultSet.next()).andReturn(false);
         resultSet.close();
         expect(connection.isClosed()).andReturn(false);
@@ -109,7 +113,7 @@ public abstract class BaseJDBCLockTest {
     public void initShouldNotCreateTheSchemaIfItAlreadyExists() throws Exception {
         connection.setAutoCommit(false);
         expect(connection.getMetaData()).andReturn(metaData);
-        expect(metaData.getTables((String) isNull(), (String) isNull(), eq("LOCK_TABLE"), aryEq(new String[] {"TABLE"}))).andReturn(resultSet);
+        expect(metaData.getTables((String) isNull(), (String) isNull(), anyString(), aryEq(new String[] {"TABLE"}))).andReturn(resultSet);
         expect(resultSet.next()).andReturn(true);
         resultSet.close();
         

@@ -18,12 +18,7 @@
  */
 package org.apache.karaf.main;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -98,7 +93,7 @@ public class DefaultJDBCLock implements Lock {
             createDatabase();
             createSchema();
         } catch (Exception e) {
-            LOG.log(Level.SEVERE, "Error occured while attempting to obtain connection", e);
+            LOG.log(Level.SEVERE, "Error occurred while attempting to obtain connection", e);
         }
     }
 
@@ -162,8 +157,17 @@ public class DefaultJDBCLock implements Lock {
         ResultSet rs = null;
         boolean schemaExists = false;
         try {
-            rs = getConnection().getMetaData().getTables(null, null, tableName, new String[] {"TABLE"});
+            DatabaseMetaData metadata = getConnection().getMetaData();
+            rs = metadata.getTables(null, null, tableName, new String[]{"TABLE"});
             schemaExists = rs.next();
+            if (!schemaExists) {
+                rs = metadata.getTables(null, null, tableName.toLowerCase(), new String[] {"TABLE"});
+                schemaExists = rs.next();
+            }
+            if (!schemaExists) {
+                rs = metadata.getTables(null, null, tableName.toUpperCase(), new String[] {"TABLE"});
+                schemaExists = rs.next();
+            }
         } catch (Exception ignore) {
             LOG.log(Level.SEVERE, "Error testing for db table", ignore);
         } finally {
