@@ -88,7 +88,11 @@ public abstract class BaseJDBCLockTest {
         expect(connection.isClosed()).andReturn(false);
         connection.setAutoCommit(false);
         expect(connection.getMetaData()).andReturn(metaData);
-        expect(metaData.getTables((String) isNull(), (String) isNull(), eq("LOCK_TABLE"), aryEq(new String[] {"TABLE"}))).andReturn(resultSet);
+        expect(metaData.getTables((String) isNull(), (String) isNull(), eq("LOCK_TABLE"), aryEq(new String[]{"TABLE"}))).andReturn(resultSet);
+        expect(metaData.getTables((String) isNull(), (String) isNull(), eq("LOCK_TABLE"), aryEq(new String[]{"TABLE"}))).andReturn(resultSet);
+        expect(metaData.getTables((String) isNull(), (String) isNull(), eq("lock_table"), aryEq(new String[] {"TABLE"}))).andReturn(resultSet);
+        expect(resultSet.next()).andReturn(false);
+        expect(resultSet.next()).andReturn(false);
         expect(resultSet.next()).andReturn(false);
         resultSet.close();
         expect(connection.isClosed()).andReturn(false);
