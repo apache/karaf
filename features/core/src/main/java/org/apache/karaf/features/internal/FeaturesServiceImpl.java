@@ -573,6 +573,14 @@ public class FeaturesServiceImpl implements FeaturesService {
                 }
 
             }
+            
+            for (BundleInfo bInfo : feature.getBundles()) {
+                Bundle bundle = bundleManager.isBundleInstalled(bInfo.getLocation());
+                if (bundle != null && !bundles.contains(bundle.getBundleId())) {
+                    bundles.add(bundle.getBundleId());
+                }
+            }
+
             state.features.put(feature, bundles);
         }
     }

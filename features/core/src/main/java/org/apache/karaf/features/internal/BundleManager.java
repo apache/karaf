@@ -157,6 +157,48 @@ public class BundleManager {
             is.close();
         }
     }
+    
+    public Bundle isBundleInstalled(String bundleLocation) throws IOException, BundleException {
+        InputStream is = getInputStreamForBundle(bundleLocation);
+        try {
+            is.mark(256 * 1024);
+            @SuppressWarnings("resource")
+            JarInputStream jar = new JarInputStream(is);
+            Manifest m = jar.getManifest();
+            if (m == null) {
+                ZipEntry entry;
+                while ((entry = jar.getNextEntry()) != null) {
+                    if (MANIFEST_NAME.equals(entry.getName())) {
+                        m = new Manifest(jar);
+                        break;
+                    }
+                }
+                if (m == null) {
+                    throw new BundleException("Manifest not present in the zip " + bundleLocation);
+                }
+            }
+            String sn = m.getMainAttributes().getValue(Constants.BUNDLE_SYMBOLICNAME);
+            if (sn == null) {
+                throw new BundleException("Jar is not a bundle, no Bundle-SymbolicName " + bundleLocation);
+            }
+            // remove attributes from the symbolic name (like
+            // ;blueprint.graceperiod:=false suffix)
+            int attributeIndexSep = sn.indexOf(';');
+            if (attributeIndexSep != -1) {
+                sn = sn.substring(0, attributeIndexSep);
+            }
+            String vStr = m.getMainAttributes().getValue(Constants.BUNDLE_VERSION);
+            Version v = vStr == null ? Version.emptyVersion : Version.parseVersion(vStr);
+            Bundle existingBundle = findInstalled(sn, v);
+            if (existingBundle != null) {
+                LOGGER.debug("Found installed bundle: " + existingBundle);
+                return existingBundle;
+            }
+            return null;
+        } finally {
+            is.close();
+        }
+    }
 
     private Bundle findInstalled(String symbolicName, Version version) {
         String vStr;

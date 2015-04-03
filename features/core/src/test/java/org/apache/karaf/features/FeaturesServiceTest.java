@@ -88,6 +88,7 @@ public class FeaturesServiceTest extends TestBase {
         reset(bundleManager);
         
         expect(bundleManager.installBundleIfNeeded(eq("bundle-f1"), eq(0), eq((String)null))).andReturn(new BundleInstallerResult(installedBundle, true));
+        expect(bundleManager.isBundleInstalled("bundle-f1")).andReturn(installedBundle);
         expect(bundleManager.getDataFile(EasyMock.anyObject(String.class))).andReturn(dataFile);
         ignoreRefreshes(bundleManager);
         replay(bundleManager);
@@ -142,6 +143,7 @@ public class FeaturesServiceTest extends TestBase {
         expect(bundleManager.getDataFile(EasyMock.anyObject(String.class))).andReturn(dataFile).anyTimes();
         expect(bundleManager.installBundleIfNeeded("bundle-0.1", 0, null)).andReturn(new BundleInstallerResult(bundlef101, true));
         expect(bundleManager.installBundleIfNeeded("bundle-0.1", 0, null)).andReturn(new BundleInstallerResult(bundlef101, false));
+        expect(bundleManager.isBundleInstalled("bundle-0.1")).andReturn(bundlef101).times(2);
         expect(bundleManager.getBundleContext()).andReturn(bundleContext);
         ignoreRefreshes(bundleManager);
         bundleManager.uninstall(Collections.EMPTY_LIST, true);
@@ -213,6 +215,8 @@ public class FeaturesServiceTest extends TestBase {
             .andReturn(new BundleInstallerResult(bundlef101, true));
         expect(bundleManager.installBundleIfNeeded("bundle-f2-0.1", 0, null))
             .andReturn(new BundleInstallerResult(bundlef201, true));
+        expect(bundleManager.isBundleInstalled("bundle-f2-0.1")).andReturn(bundlef201);
+        expect(bundleManager.isBundleInstalled("bundle-f1-0.1")).andReturn(bundlef101);
         expect(bundleManager.getBundleContext()).andReturn(bundleContext).anyTimes();
         expect(bundleContext.getBundle(12345)).andReturn(bundlef101).anyTimes();
         ignoreRefreshes(bundleManager);
@@ -236,6 +240,7 @@ public class FeaturesServiceTest extends TestBase {
         Bundle installedBundle = createDummyBundle(12345L, bundlename, headers());
         expect(bundleManager.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
         expect(bundleManager.installBundleIfNeeded(bundleUri, 0, null)).andReturn(new BundleInstallerResult(installedBundle, true));
+        expect(bundleManager.isBundleInstalled(bundlename)).andReturn(installedBundle);
         expect(bundleManager.getBundleContext()).andReturn(bundleContext);
         ignoreRefreshes(bundleManager);
         bundleManager.uninstall(Collections.EMPTY_LIST, true);
@@ -296,6 +301,7 @@ public class FeaturesServiceTest extends TestBase {
         expect(bundleManager.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
         expect(bundleManager.installBundleIfNeeded("bundle-0.2", 0, null)).andReturn(new BundleInstallerResult(bundleVer02, true));
         expect(bundleManager.getBundleContext()).andReturn(bundleContext);
+        expect(bundleManager.isBundleInstalled("bundle-0.2")).andReturn(bundleVer02);
         ignoreRefreshes(bundleManager);
         bundleManager.uninstall(Collections.EMPTY_LIST, true);
 
@@ -328,6 +334,8 @@ public class FeaturesServiceTest extends TestBase {
         expect(bundleManager.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
         expect(bundleManager.installBundleIfNeeded(bundleVer01Uri, 0, null)).andReturn(new BundleInstallerResult(bundleVer01, true));
         expect(bundleManager.installBundleIfNeeded(bundleVer01Uri, 0, null)).andReturn(new BundleInstallerResult(bundleVer01, false));
+        expect(bundleManager.isBundleInstalled("bundle-0.1")).andReturn(bundleVer01).times(2);
+        expect(bundleManager.getBundleContext()).andReturn(bundleContext);
         ignoreRefreshes(bundleManager);
         bundleManager.uninstall(Collections.EMPTY_LIST, true);
         
@@ -379,6 +387,7 @@ public class FeaturesServiceTest extends TestBase {
         expect(bundleManager.installBundleIfNeeded(bundle1Uri, 0, null)).andReturn(new BundleInstallerResult(installedBundle1, true));
         expect(bundleManager.installBundleIfNeeded(bundle2Uri, 0, null)).andReturn(new BundleInstallerResult(installedBundle2, true));
         expect(bundleManager.installBundleIfNeeded("zfs:unknown", 0, null)).andThrow(new MalformedURLException());
+        expect(bundleManager.isBundleInstalled("bundle2")).andReturn(installedBundle2);
         EasyMock.expectLastCall();
         ignoreRefreshes(bundleManager);
 
@@ -404,6 +413,7 @@ public class FeaturesServiceTest extends TestBase {
         expect(bundleManager.installBundleIfNeeded(bundle1Uri, 0, null)).andReturn(new BundleInstallerResult(installedBundle1, true));
         expect(bundleManager.installBundleIfNeeded(bundle2Uri, 0, null)).andReturn(new BundleInstallerResult(installedBundle2, true));
         expect(bundleManager.installBundleIfNeeded("zfs:unknown", 0, null)).andThrow(new MalformedURLException());
+        expect(bundleManager.isBundleInstalled("file:bundle2")).andReturn(installedBundle2);
         bundleManager.uninstall(setOf(installedBundle1));
         EasyMock.expectLastCall();
         ignoreRefreshes(bundleManager);
@@ -430,7 +440,7 @@ public class FeaturesServiceTest extends TestBase {
         expect(bundleManager.installBundleIfNeeded(bundle1Uri, 0, null)).andReturn(new BundleInstallerResult(installedBundle1, true));
         expect(bundleManager.installBundleIfNeeded(bundle2Uri, 0, null)).andReturn(new BundleInstallerResult(installedBundle2, true));
         expect(bundleManager.installBundleIfNeeded("zfs:unknown", 0, null)).andThrow(new MalformedURLException());
-        
+        expect(bundleManager.isBundleInstalled("file:bundle2")).andReturn(installedBundle2);
         replay(bundleManager);
         FeaturesServiceImpl svc = new FeaturesServiceImpl(bundleManager);
         svc.addRepository(uri);
@@ -459,6 +469,7 @@ public class FeaturesServiceTest extends TestBase {
         expect(bundleManager.installBundleIfNeeded(bundle1Uri, 0, null)).andReturn(new BundleInstallerResult(installedBundle1, true));
         expect(bundleManager.installBundleIfNeeded(bundle2Uri, 0, null)).andReturn(new BundleInstallerResult(installedBundle2, true));
         expect(bundleManager.installBundleIfNeeded("zfs:unknown", 0, null)).andThrow(new MalformedURLException());
+        expect(bundleManager.isBundleInstalled("file:bundle2")).andReturn(installedBundle2);
         bundleManager.uninstall(setOf(installedBundle1, installedBundle2));
         EasyMock.expectLastCall();
 

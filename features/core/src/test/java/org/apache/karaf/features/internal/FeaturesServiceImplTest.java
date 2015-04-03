@@ -130,7 +130,12 @@ public class FeaturesServiceImplTest extends TestBase {
         BundleManager bundleManager = EasyMock.createMock(BundleManager.class);
         expect(bundleManager.installBundleIfNeeded(EasyMock.anyObject(String.class), EasyMock.anyInt(), EasyMock.anyObject(String.class)))
             .andReturn(new BundleInstallerResult(createDummyBundle(1l, "", headers()), true)).anyTimes();
+        expect(bundleManager.isBundleInstalled("b1")).andReturn(createDummyBundle(1l, "", headers()));
+        expect(bundleManager.isBundleInstalled("b2")).andReturn(createDummyBundle(2l, "", headers()));
+        expect(bundleManager.isBundleInstalled("b3")).andReturn(createDummyBundle(3l, "", headers()));
+        expect(bundleManager.isBundleInstalled("b4")).andReturn(createDummyBundle(4l, "", headers()));
         bundleManager.refreshBundles(EasyMock.anyObject(Set.class), EasyMock.anyObject(Set.class), EasyMock.anyObject(EnumSet.class));
+        
         EasyMock.expectLastCall();
         final FeaturesServiceImpl impl = new FeaturesServiceImpl(bundleManager, null) {
             // override methods which refers to bundle context to avoid mocking everything
