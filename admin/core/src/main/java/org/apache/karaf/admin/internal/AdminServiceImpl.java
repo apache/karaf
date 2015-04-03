@@ -1093,6 +1093,10 @@ public class AdminServiceImpl implements AdminService {
             // ignore active txlog files
             return;
         }
+        if (source.getName().endsWith(".instance")) {
+            // ignore instance bundles cache
+            return;
+        }
         if (source.isDirectory()) {
             if (!destination.exists()) {
                 destination.mkdirs();
