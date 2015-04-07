@@ -78,6 +78,20 @@ public class EncryptionSupport {
                     encryptionServiceReferences = bundleContext.getServiceReferences(
                             EncryptionService.class.getName(),
                             name != null && name.length() > 0 ? "(name=" + name + ")" : null);
+                    int timeout = 0;
+                    while (encryptionServiceReferences == null || encryptionServiceReferences.length == 0) {
+                        try {
+                            Thread.sleep(500);
+                        } catch (InterruptedException  ie) {
+                            // nothing to do
+                        }
+                        encryptionServiceReferences = bundleContext.getServiceReferences(
+                                EncryptionService.class.getName(),
+                                name != null && name.length() > 0 ? "(name=" + name + ")" : null);
+                        timeout++;
+                        if (timeout == 40)
+                            break;
+                    }
                 } catch (InvalidSyntaxException e) {
                     throw new IllegalStateException("The encryption service filter is not well formed.", e);
                 }
@@ -85,7 +99,7 @@ public class EncryptionSupport {
                     if (name != null && name.length() > 0) {
                         throw new IllegalStateException("Encryption service " + name + " not found. Please check that the encryption service is correctly set up.");
                     } else {
-                        throw new IllegalStateException("No encryption service found. Please install the Karaf encryption feature and check that the encryption algorithm is supported..");
+                        throw new IllegalStateException("No encryption service found. Please install the Karaf encryption feature and check that the encryption algorithm is supported.");
                     }
                 }
                 Arrays.sort(encryptionServiceReferences);
