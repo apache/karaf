@@ -71,7 +71,7 @@
         </jaas:module>
     </jaas:config>
 
-    <!-- Properties installer -->
+    <!-- AutoEncryption support -->
     <bean class="org.apache.karaf.jaas.modules.properties.AutoEncryptionSupport"
             init-method="init" destroy-method="destroy">
         <argument>
