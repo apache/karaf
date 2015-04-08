@@ -224,19 +224,14 @@ public class Deployer {
             for (Iterator<String> iterator = prereqs.iterator(); iterator.hasNext(); ) {
                 String prereq = iterator.next();
                 String[] parts = prereq.split("/");
-                VersionRange range;
-                if (parts[1].equals("0.0.0")) {
-                    range = VersionRange.ANY_VERSION;
-                } else if (!parts[1].startsWith("[") && !parts[1].startsWith("(")) {
-                    range = new VersionRange(Macro.transform(request.featureResolutionRange, parts[1]));
-                } else {
-                    range = new VersionRange(parts[1]);
-                }
+                String name = parts[0];
+                String version = parts[1];
+                VersionRange range = getRange(version, request.featureResolutionRange);
                 boolean found = false;
                 for (Set<String> featureSet : dstate.state.installedFeatures.values()) {
                     for (String feature : featureSet) {
                         String[] p = feature.split("/");
-                        found = parts[0].equals(p[0]) && range.contains(VersionTable.getVersion(p[1]));
+                        found = name.equals(p[0]) && range.contains(VersionTable.getVersion(p[1]));
                         if (found) break;
                     }
                     if (found) break;
@@ -813,6 +808,18 @@ public class Deployer {
         }
 
         print("Done.", verbose);
+    }
+
+    private VersionRange getRange(String version, String featureResolutionRange) {
+        VersionRange range;
+        if (version.equals("0.0.0")) {
+            range = VersionRange.ANY_VERSION;
+        } else if (!version.startsWith("[") && !version.startsWith("(")) {
+            range = new VersionRange(Macro.transform(featureResolutionRange, version));
+        } else {
+            range = new VersionRange(version);
+        }
+        return range;
     }
 
     private void propagateState(Map<Resource, FeaturesService.RequestedState> states, Resource resource, FeaturesService.RequestedState state, SubsystemResolver resolver) {

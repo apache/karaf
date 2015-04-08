@@ -505,16 +505,8 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
 
     @Override
     public String getRepositoryName(URI uri) throws Exception {
-        // Make sure the cache is loaded
-        getFeatures();
-        synchronized (lock) {
-            for (Repository repo : this.repositoryCache.values()) {
-                if (repo.getURI().equals(uri)) {
-                    return repo.getName();
-                }
-            }
-            return null;
-        }
+        Repository repo = getRepository(uri);
+        return (repo != null) ? repo.getName() : null;
     }
 
     //
@@ -807,15 +799,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
             }
         }
         featuresToAdd = new ArrayList<>(new LinkedHashSet<>(featuresToAdd));
-        StringBuilder sb = new StringBuilder();
-        sb.append("Adding features: ");
-        for (int i = 0; i < featuresToAdd.size(); i++) {
-            if (i > 0) {
-                sb.append(", ");
-            }
-            sb.append(featuresToAdd.get(i));
-        }
-        print(sb.toString(), options.contains(Option.Verbose));
+        print("Adding features: " + join(featuresToAdd), options.contains(Option.Verbose));
         Set<String> fl = required.get(region);
         if (fl == null) {
             fl = new HashSet<>();
@@ -844,6 +828,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
             List<String> toRemove = new ArrayList<>();
             feature = normalize(feature);
             if (feature.endsWith("/0.0.0")) {
+                // Match only on name
                 String nameSep = "feature:" + feature.substring(0, feature.indexOf("/") + 1);
                 for (String f : fl) {
                     Pattern pattern = Pattern.compile(nameSep.substring(0, nameSep.length() - 1));
@@ -853,15 +838,11 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
                     }
                 }
             } else {
+                // Match on name and version
                 String name = feature.substring(0, feature.indexOf("/"));
                 String version = feature.substring(feature.indexOf("/") + 1);
+                Pattern pattern = getFeaturePattern(name, version);
                 for (String f : fl) {
-                    String req = "feature:" + name + "/" + new VersionRange(version, true);
-                    req = req.replace("[", "\\[");
-                    req = req.replace("(", "\\(");
-                    req = req.replace("]", "\\]");
-                    req = req.replace(")", "\\)");
-                    Pattern pattern = Pattern.compile(req);
                     Matcher matcher = pattern.matcher(f);
                     if (matcher.matches()) {
                         toRemove.add(f);
@@ -876,15 +857,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
             featuresToRemove.addAll(toRemove);
         }
         featuresToRemove = new ArrayList<>(new LinkedHashSet<>(featuresToRemove));
-        StringBuilder sb = new StringBuilder();
-        sb.append("Removing features: ");
-        for (int i = 0; i < featuresToRemove.size(); i++) {
-            if (i > 0) {
-                sb.append(", ");
-            }
-            sb.append(featuresToRemove.get(i));
-        }
-        print(sb.toString(), options.contains(Option.Verbose));
+        print("Removing features: " + join(featuresToRemove), options.contains(Option.Verbose));
         fl.removeAll(featuresToRemove);
         if (fl.isEmpty()) {
             required.remove(region);
@@ -1280,5 +1253,26 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
             }
         }
         digraph.replace(temp);
+    }
+    
+    private Pattern getFeaturePattern(String name, String version) {
+        String req = "feature:" + name + "/" + new VersionRange(version, true);
+        req = req.replace("[", "\\[");
+        req = req.replace("(", "\\(");
+        req = req.replace("]", "\\]");
+        req = req.replace(")", "\\)");
+        Pattern pattern = Pattern.compile(req);
+        return pattern;
+    }
+
+    private String join(List<String> list) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < list.size(); i++) {
+            if (i > 0) {
+                sb.append(", ");
+            }
+            sb.append(list.get(i));
+        }
+        return sb.toString();
     }
 }
