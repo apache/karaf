@@ -31,7 +31,7 @@
             aries.transaction.howl.logFileDir = ${karaf.data}/txlog
             aries.transaction.howl.maxLogFiles = 2
             aries.transaction.howl.maxBlocksPerFile = 512
-            aries.transaction.howl.bufferSizeKBytes = 4
+            aries.transaction.howl.bufferSize = 4
         </config>
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.aries/org.apache.aries.util/${aries.util.version}</bundle>
@@ -50,7 +50,7 @@
             aries.transaction.howl.logFileDir = ${karaf.data}/txlog
             aries.transaction.howl.maxLogFiles = 2
             aries.transaction.howl.maxBlocksPerFile = 512
-            aries.transaction.howl.bufferSizeKBytes = 4
+            aries.transaction.howl.bufferSize = 4
         </config>
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.aries/org.apache.aries.util/${aries.util.version}</bundle>
@@ -69,7 +69,7 @@
             aries.transaction.howl.logFileDir = ${karaf.data}/txlog
             aries.transaction.howl.maxLogFiles = 2
             aries.transaction.howl.maxBlocksPerFile = 512
-            aries.transaction.howl.bufferSizeKBytes = 4
+            aries.transaction.howl.bufferSize = 4
         </config>
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.aries/org.apache.aries.util/${aries.util.version}</bundle>
