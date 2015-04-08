@@ -262,7 +262,7 @@ public class Main {
         // Load system properties.
         loadSystemProperties(karafEtc);
 
-        updateInstancePid();
+        updateInstancePid(true);
 
         // Read configuration properties.
         configProps = loadConfigProperties();
@@ -562,6 +562,7 @@ public class Main {
                 main.awaitShutdown();
                 boolean stopped = main.destroy();
                 restart = Boolean.getBoolean("karaf.restart");
+                main.updateInstancePid(false);
                 if (!stopped) {
                     if (restart) {
                         System.err.println("Timeout waiting for framework to stop.  Restarting now.");
@@ -602,10 +603,10 @@ public class Main {
         }
     }
 
-    private void updateInstancePid() {
+    private void updateInstancePid(final boolean isStartingInstance) {
         try {
             final String instanceName = System.getProperty("karaf.name");
-            final String pid = getPid();
+            final String pid = isStartingInstance ? getPid() : "0";
             
             final boolean isRoot = karafHome.equals(karafBase);
             
@@ -636,7 +637,8 @@ public class Main {
                                 props.setProperty("item.0.pid", pid);
                                 props.setProperty("item.0.root", "true");
                             } else {
-                                throw new IllegalStateException("Child instance started but no root registered in " + propertiesFile);
+                                String errMsg = "Child instance " + (isStartingInstance ? "started" : "stopped") + " but no root registered in ";
+                                throw new IllegalStateException(errMsg + propertiesFile);
                             }
                         } else {
                             int count = Integer.parseInt(props.getProperty("count"));
