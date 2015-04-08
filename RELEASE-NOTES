@@ -15,6 +15,25 @@
  * limitations under the License.
  */
 
+                    Apache Karaf 2.3.11
+                    ===================
+  Overview
+  --------
+
+  This is an update patch for Apache Karaf 2.3.11, containing several bug fixes. Amoung them are a fix for password encryption, txlog files locked during admin clone on windows, and an issue with using LDAPLoginModule with ActiveDirectory is resolved. For more information, please read the below changelog.
+
+  Changelog
+  ---------
+
+** Bug
+ * [KARAF-2678|https://issues.apache.org/jira/browse/KARAF-2678] - txlog files locked during admin clone on windows
+ * [KARAF-3105|https://issues.apache.org/jira/browse/KARAF-3105] - Cannot use LDAPLoginModule with ActiveDirectory
+ * [KARAF-3136|https://issues.apache.org/jira/browse/KARAF-3136] - Karaf can't start if you have whitespaces in brackets in JAVA_OPTS
+ * [KARAF-3507|https://issues.apache.org/jira/browse/KARAF-3507] - jms:create url and username options share the same -u alias
+ * [KARAF-3562|https://issues.apache.org/jira/browse/KARAF-3562] - DefaultJDBCLock case sensitive issue
+ * [KARAF-3564|https://issues.apache.org/jira/browse/KARAF-3564] - bin/stop fails for slave in case of Lock strategies
+ * [KARAF-3625|https://issues.apache.org/jira/browse/KARAF-3625] - Password encryption doesn't work
+
                     Apache Karaf 2.3.10
                     ===================
 
