@@ -20,7 +20,6 @@ package org.apache.karaf.tooling.utils;
 import java.io.File;
 import java.io.IOException;
 
-import org.apache.karaf.tooling.features.DependencyHelper;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.ops4j.pax.url.mvn.MavenResolver;

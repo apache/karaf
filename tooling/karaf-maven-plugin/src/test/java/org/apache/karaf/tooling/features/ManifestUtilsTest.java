@@ -17,17 +17,18 @@
  */
 package org.apache.karaf.tooling.features;
 
-import static org.apache.karaf.tooling.features.ManifestUtils.matches;
+import static org.apache.karaf.tooling.utils.ManifestUtils.matches;
 
 import junit.framework.TestCase;
 
 import org.apache.felix.utils.manifest.Attribute;
 import org.apache.felix.utils.manifest.Clause;
 import org.apache.felix.utils.manifest.Directive;
+import org.apache.karaf.tooling.utils.ManifestUtils;
 import org.osgi.framework.Constants;
 
 /**
- * Test cased for {@link org.apache.karaf.tooling.features.ManifestUtils} 
+ * Test cased for {@link org.apache.karaf.tooling.utils.ManifestUtils}
  */
 public class ManifestUtilsTest extends TestCase {
 

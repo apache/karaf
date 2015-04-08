@@ -26,6 +26,7 @@ import org.apache.karaf.features.Repository;
 import org.apache.karaf.features.internal.service.FeatureValidationUtil;
 import org.apache.karaf.features.internal.service.RepositoryImpl;
 import org.apache.karaf.tooling.url.CustomBundleURLStreamHandlerFactory;
+import org.apache.karaf.tooling.utils.ManifestUtils;
 import org.apache.karaf.tooling.utils.MojoSupport;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
@@ -55,7 +56,7 @@ import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import static org.apache.karaf.tooling.features.ManifestUtils.*;
+import static org.apache.karaf.tooling.utils.ManifestUtils.*;
 
 /**
  * Validates a features XML file

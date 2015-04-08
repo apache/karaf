@@ -17,7 +17,6 @@
  */
 package org.apache.karaf.tooling.features;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -28,9 +27,12 @@ import java.util.Set;
 
 import org.apache.felix.utils.version.VersionRange;
 import org.apache.felix.utils.version.VersionTable;
-import org.apache.karaf.tooling.features.model.ArtifactRef;
-import org.apache.karaf.tooling.features.model.Feature;
-import org.apache.karaf.tooling.features.model.Repository;
+import org.apache.karaf.features.internal.model.Bundle;
+import org.apache.karaf.features.internal.model.ConfigFile;
+import org.apache.karaf.features.internal.model.Dependency;
+import org.apache.karaf.features.internal.model.Feature;
+import org.apache.karaf.features.internal.model.Features;
+import org.apache.karaf.features.internal.model.JaxbUtil;
 import org.apache.karaf.tooling.utils.MojoSupport;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
@@ -112,13 +114,12 @@ public abstract class AbstractFeatureMojo extends MojoSupport {
         if (includeMvnBasedDescriptors) {
             bundles.add(uri);
         }
-        URI repoURI = URI.create(translateFromMaven(uri.replaceAll(" ", "%20")));
-        Repository repo = new Repository(repoURI, defaultStartLevel);
-        for (Feature f : repo.getFeatures()) {
-            featuresMap.put(f.getName() + "/" + f.getVersion(), f);
+        Features repo = JaxbUtil.unmarshal(translateFromMaven(uri.replaceAll(" ", "%20")), true);
+        for (Feature f : repo.getFeature()) {
+            featuresMap.put(f.getId(), f);
         }
         if (resolveDefinedRepositoriesRecursively) {
-            for (String r : repo.getDefinedRepositories()) {
+            for (String r : repo.getRepository()) {
                 retrieveDescriptorsRecursively(r, bundles, featuresMap);
             }
         }
@@ -159,24 +160,28 @@ public abstract class AbstractFeatureMojo extends MojoSupport {
      */
     protected void addFeatures(List<String> featureNames, Set<Feature> features, Map<String, Feature> featuresMap, boolean transitive) {
         for (String feature : featureNames) {
-            Feature f = getMatchingFeature(featuresMap, feature);
+            String[] split = feature.split("/");
+            Feature f = getMatchingFeature(featuresMap, split[0], split.length > 1 ? split[1] : null);
             features.add(f);
             if (transitive) {
-            	addFeatures(f.getDependencies(), features, featuresMap, true);
+                addFeaturesDependencies(f.getFeature(), features, featuresMap, true);
             }
         }
     }
 
-    private Feature getMatchingFeature(Map<String, Feature> featuresMap, String feature) {
-        // feature could be only the name or name/version
-        int delimIndex = feature.indexOf('/');
-        String version = null;
-        if (delimIndex > 0) {
-            version = feature.substring(delimIndex + 1);
-            feature = feature.substring(0, delimIndex);
+    protected void addFeaturesDependencies(List<Dependency> featureNames, Set<Feature> features, Map<String, Feature> featuresMap, boolean transitive) {
+        for (Dependency dependency : featureNames) {
+            Feature f = getMatchingFeature(featuresMap, dependency.getName(), dependency.getVersion());
+            features.add(f);
+            if (transitive) {
+                addFeaturesDependencies(f.getFeature(), features, featuresMap, true);
+            }
         }
+    }
+
+    private Feature getMatchingFeature(Map<String, Feature> featuresMap, String feature, String version) {
         Feature f = null;
-        if (version != null) {
+        if (version != null && !version.equals(Feature.DEFAULT_VERSION)) {
             // looking for a specific feature with name and version
             f = featuresMap.get(feature + "/" + version);
             if (f == null) {
@@ -230,8 +235,12 @@ public abstract class AbstractFeatureMojo extends MojoSupport {
             getLog().info("Base repo: " + localRepo.getUrl());
             for (Feature feature : featuresSet) {
                 try {
-                    resolveArtifacts(feature.getBundles());
-                    resolveArtifacts(feature.getConfigFiles());
+                    for (Bundle bundle : feature.getBundle()) {
+                        resolveArtifact(bundle.getLocation());
+                    }
+                    for (ConfigFile configfile : feature.getConfigfile()) {
+                        resolveArtifact(configfile.getLocation());
+                    }
                 } catch (RuntimeException e) {
                     throw new RuntimeException("Error resolving feature " + feature.getName() + "/" + feature.getVersion(), e);
                 }
@@ -241,22 +250,20 @@ public abstract class AbstractFeatureMojo extends MojoSupport {
         }
         return featuresSet;
     }
-    
-    private void resolveArtifacts(List<? extends ArtifactRef> artifactRefs) throws MojoExecutionException {
-        for (ArtifactRef artifactRef : artifactRefs) {
-            Artifact artifact = resourceToArtifact(artifactRef.getUrl(), skipNonMavenProtocols);
-            if (artifact != null) {
-                artifactRef.setArtifact(artifact);
-                try {
-                    resolveArtifact(artifact, remoteRepos);
-                } catch (RuntimeException e) {
-                    throw new RuntimeException("Error resolving artifact " + artifactRef.getUrl(), e);
-                }
+
+    private Artifact resolveArtifact(String location) throws MojoExecutionException {
+        Artifact artifact = resourceToArtifact(location, skipNonMavenProtocols);
+        if (artifact != null) {
+            try {
+                resolveArtifact(artifact, remoteRepos);
+            } catch (RuntimeException e) {
+                throw new RuntimeException("Error resolving artifact " + location, e);
             }
-            checkDoGarbageCollect();
         }
+        checkDoGarbageCollect();
+        return artifact;
     }
-    
+
     /**
      * Maven ArtifactResolver leaves file handles around so need to clean up
      * or we will run out of file descriptors

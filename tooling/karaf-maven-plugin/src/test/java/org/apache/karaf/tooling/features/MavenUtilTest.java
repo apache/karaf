@@ -18,12 +18,13 @@
  */
 package org.apache.karaf.tooling.features;
 
+import org.apache.karaf.tooling.utils.Dependency30Helper;
+import org.apache.karaf.tooling.utils.Dependency31Helper;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.sonatype.aether.util.artifact.DefaultArtifact;
 
-import static org.apache.karaf.tooling.features.MavenUtil.aetherToMvn;
-import static org.apache.karaf.tooling.features.MavenUtil.mvnToAether;
+import static org.apache.karaf.tooling.utils.MavenUtil.aetherToMvn;
+import static org.apache.karaf.tooling.utils.MavenUtil.mvnToAether;
 import static org.junit.Assert.assertEquals;
 
 public class MavenUtilTest {

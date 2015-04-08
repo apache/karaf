@@ -18,14 +18,24 @@
 package org.apache.karaf.tooling.features;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.jar.Attributes;
+import java.util.jar.JarInputStream;
+import java.util.jar.Manifest;
 
-import org.apache.karaf.tooling.features.model.BundleRef;
-import org.apache.karaf.tooling.features.model.Feature;
+import org.apache.karaf.features.internal.model.Bundle;
+import org.apache.karaf.features.internal.model.Feature;
+import org.apache.karaf.features.internal.model.Features;
+import org.apache.karaf.features.internal.model.JaxbUtil;
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
@@ -68,23 +78,22 @@ public class ExportFeatureMetaDataMojo extends AbstractFeatureMojo {
         }
         try {
             metaDataFile.getParentFile().mkdirs();
-            FeatureMetaDataExporter exporter = new FeatureMetaDataExporter(new FileOutputStream(metaDataFile));
-            for (Feature feature : featuresSet) {
-                exporter.writeFeature(feature);
+            Features features = new Features();
+            features.getFeature().addAll(featuresSet);
+            try (OutputStream os = new FileOutputStream(metaDataFile)) {
+                JaxbUtil.marshal(features, os);
             }
-            exporter.close();
         } catch (Exception e) {
             throw new RuntimeException("Error writing feature meta data to " + metaDataFile + ": " + e.getMessage(), e);
         }
     }
 
-    private Feature mergeFeature(Set<Feature> featuresSet) {
+    private Feature mergeFeature(Set<Feature> featuresSet) throws MojoExecutionException {
         Feature merged = new Feature("merged");
         Set<String> bundleIds = new HashSet<String>();
         for (Feature feature : featuresSet) {
-            for (BundleRef bundle : feature.getBundles()) {
-                bundle.readManifest();
-                String bundleId = bundle.getBundleSymbolicName() + ":" + bundle.getBundleVersion();
+            for (Bundle bundle : feature.getBundle()) {
+                String bundleId = getBundleSymbolicName(bundle) + ":" + getBundleVersion(bundle);
                 if (!bundleIds.contains(bundleId)) {
                     bundleIds.add(bundleId);
                     merged.getBundles().add(bundle);
@@ -94,28 +103,51 @@ public class ExportFeatureMetaDataMojo extends AbstractFeatureMojo {
         return merged;
     }
     
-    private Feature mergeFeatureOneVersion(Set<Feature> featuresSet) {
+    private Feature mergeFeatureOneVersion(Set<Feature> featuresSet) throws MojoExecutionException {
         Feature merged = new Feature("merged");
-        Map<String, BundleRef> bundleVersions = new HashMap<String, BundleRef>();
+        Map<String, Bundle> bundleVersions = new HashMap<>();
         for (Feature feature : featuresSet) {
-            for (BundleRef bundle : feature.getBundles()) {
-                bundle.readManifest();
-                BundleRef existingBundle = bundleVersions.get(bundle.getBundleSymbolicName());
+            for (Bundle bundle : feature.getBundle()) {
+                Bundle existingBundle = bundleVersions.get(getBundleSymbolicName(bundle));
                 if (existingBundle != null) {
-                    Version existingVersion = new Version(existingBundle.getBundleVersion());
-                    Version newVersion = new Version(bundle.getBundleVersion());
+                    Version existingVersion = new Version(getBundleVersion(existingBundle));
+                    Version newVersion = new Version(getBundleVersion(bundle));
                     if (newVersion.compareTo(existingVersion) > 0) {
-                        bundleVersions.put(bundle.getBundleSymbolicName(), bundle);
+                        bundleVersions.put(getBundleSymbolicName(bundle), bundle);
                     }
                 } else {
-                    bundleVersions.put(bundle.getBundleSymbolicName(), bundle);
+                    bundleVersions.put(getBundleSymbolicName(bundle), bundle);
                 }
             }
         }
-        for (BundleRef bundle : bundleVersions.values()) {
+        for (Bundle bundle : bundleVersions.values()) {
             merged.getBundles().add(bundle);
         }
         return merged;
+    }
+
+    private Map<String, Attributes> manifests = new HashMap<>();
+
+    private String getBundleVersion(Bundle bundle) throws MojoExecutionException {
+        return getManifest(bundle).getValue("Bundle-Version");
+    }
+
+    private String getBundleSymbolicName(Bundle bundle) throws MojoExecutionException {
+        return getManifest(bundle).getValue("Bundle-SymbolicName");
+    }
+
+    private Attributes getManifest(Bundle bundle) throws MojoExecutionException {
+        Attributes attributes = manifests.get(bundle.getLocation());
+        if (attributes == null) {
+            Artifact artifact = resourceToArtifact(bundle.getLocation(), skipNonMavenProtocols);
+            try (JarInputStream jis = new JarInputStream(new FileInputStream(artifact.getFile()))) {
+                attributes = jis.getManifest().getMainAttributes();
+                manifests.put(bundle.getLocation(), attributes);
+            } catch (IOException e) {
+                throw new MojoExecutionException("Error reading bundle manifest from " + bundle.getLocation(), e);
+            }
+        }
+        return attributes;
     }
 
 }

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.karaf.tooling.features;
+package org.apache.karaf.tooling.utils;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -51,7 +51,7 @@ public class MavenUtil {
      * @param name PAX URL mvn format: mvn-uri := [ 'wrap:' ] 'mvn:' [ repository-url '!' ] group-id '/' artifact-id [ '/' [version] [ '/' [type] [ '/' classifier ] ] ] ]
      * @return aether coordinate format: <groupId>:<artifactId>[:<extension>[:<classifier>]]:<version>
      */
-    static String mvnToAether(String name) {
+    public static String mvnToAether(String name) {
         Matcher m = mvnPattern.matcher(name);
         if (!m.matches()) {
             return name;
@@ -89,7 +89,7 @@ public class MavenUtil {
      * @param name aether coordinate format: <groupId>:<artifactId>[:<extension>[:<classifier>]]:<version>
      * @return PAX URL mvn format: mvn-uri := 'mvn:' [ repository-url '!' ] group-id '/' artifact-id [ '/' [version] [ '/' [type] [ '/' classifier ] ] ] ]
      */
-    static String aetherToMvn(String name) {
+    public static String aetherToMvn(String name) {
         Matcher m = aetherPattern.matcher(name);
         if (!m.matches()) {
             return name;
@@ -114,7 +114,7 @@ public class MavenUtil {
         return b.toString();
     }
 
-    static boolean isEmpty(String classifier) {
+    public static boolean isEmpty(String classifier) {
         return classifier == null || classifier.length() == 0;
     }
 
@@ -125,7 +125,7 @@ public class MavenUtil {
      * @param target   the target maven-metadata-local.xml file to generate.
      * @throws IOException if the maven-metadata-local.xml can't be generated.
      */
-    static void generateMavenMetadata(Artifact artifact, File target) throws IOException {
+    public static void generateMavenMetadata(Artifact artifact, File target) throws IOException {
         target.getParentFile().mkdirs();
         Metadata metadata = new Metadata();
         metadata.setGroupId(artifact.getGroupId());
@@ -152,13 +152,13 @@ public class MavenUtil {
         metadataWriter.write(writer, metadata);
     }
     
-    static String getFileName(Artifact artifact) {
+    public static String getFileName(Artifact artifact) {
         String name = artifact.getArtifactId() + "-" + artifact.getBaseVersion()
             + (artifact.getClassifier() != null ? "-" + artifact.getClassifier() : "") + "." + artifact.getType();
         return name;
     }
     
-    static String getDir(Artifact artifact) {
+    public static String getDir(Artifact artifact) {
         return artifact.getGroupId().replace('.', '/') + "/" + artifact.getArtifactId() + "/" + artifact.getBaseVersion() + "/";
     }
 

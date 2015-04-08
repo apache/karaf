@@ -21,8 +21,10 @@ import java.io.File;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.karaf.tooling.features.model.ArtifactRef;
-import org.apache.karaf.tooling.features.model.Feature;
+import org.apache.karaf.features.internal.model.Bundle;
+import org.apache.karaf.features.internal.model.ConfigFile;
+import org.apache.karaf.features.internal.model.Feature;
+import org.apache.karaf.tooling.utils.MavenUtil;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -61,17 +63,26 @@ public class AddToRepositoryMojo extends AbstractFeatureMojo {
         }
 
         for (Feature feature : featuresSet) {
-        	copyArtifactsToDestRepository(feature.getBundles());
-            copyArtifactsToDestRepository(feature.getConfigFiles());
+        	copyBundlesToDestRepository(feature.getBundle());
+            copyConfigFilesToDestRepository(feature.getConfigfile());
         }
         
         copyFileBasedDescriptorsToDestRepository();
         
     }
 
-    private void copyArtifactsToDestRepository(List<? extends ArtifactRef> artifactRefs) throws MojoExecutionException {
-        for (ArtifactRef artifactRef : artifactRefs) {
-            Artifact artifact = artifactRef.getArtifact();
+    private void copyBundlesToDestRepository(List<? extends Bundle> artifactRefs) throws MojoExecutionException {
+        for (Bundle artifactRef : artifactRefs) {
+            Artifact artifact = resourceToArtifact(artifactRef.getLocation(), skipNonMavenProtocols);
+            if (artifact != null) {
+                copy(artifact, repository);
+            }
+        }
+    }
+
+    private void copyConfigFilesToDestRepository(List<? extends ConfigFile> artifactRefs) throws MojoExecutionException {
+        for (ConfigFile artifactRef : artifactRefs) {
+            Artifact artifact = resourceToArtifact(artifactRef.getLocation(), skipNonMavenProtocols);
             if (artifact != null) {
                 copy(artifact, repository);
             }
