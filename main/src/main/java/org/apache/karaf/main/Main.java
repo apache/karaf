@@ -177,6 +177,7 @@ public class Main {
                 main.awaitShutdown();
                 boolean stopped = main.destroy();
                 restart = Boolean.getBoolean("karaf.restart");
+                main.updateInstancePidAfterShutdown();
                 if (!stopped) {
                     if (restart) {
                         System.err.println("Timeout waiting for framework to stop.  Restarting now.");
@@ -206,6 +207,13 @@ public class Main {
     public void setShutdownCallback(ShutdownCallback shutdownCallback) {
         this.shutdownCallback = shutdownCallback;
     }
+    
+    public void updateInstancePidAfterShutdown() throws Exception {
+        if (config == null) {
+            config = new ConfigProperties();
+        }
+        InstanceHelper.updateInstancePid(config.karafHome, config.karafBase, false);
+    }
 
     public void launch() throws Exception {
         config = new ConfigProperties();
@@ -215,7 +223,7 @@ public class Main {
         String log4jConfigPath = System.getProperty("karaf.etc") + "/org.ops4j.pax.logging.cfg";
         BootstrapLogManager.setProperties(config.props, log4jConfigPath);
         lockCallback = new KarafLockCallback();
-        InstanceHelper.updateInstancePid(config.karafHome, config.karafBase);
+        InstanceHelper.updateInstancePid(config.karafHome, config.karafBase, true);
         LOG.addHandler(BootstrapLogManager.getDefaultHandler());
 
         for (String provider : config.securityProviders) {
