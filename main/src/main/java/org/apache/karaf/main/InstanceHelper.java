@@ -36,10 +36,10 @@ import org.osgi.framework.launch.Framework;
 
 public class InstanceHelper {
 
-    static void updateInstancePid(final File karafHome, File karafBase) {
+    static void updateInstancePid(final File karafHome, File karafBase, final boolean isStartingInstance) {
         try {
             final String instanceName = System.getProperty("karaf.name");
-            final String pid = getPid();
+            final String pid = isStartingInstance ? getPid() : "0";
 
             final boolean isRoot = karafHome.equals(karafBase);
             
@@ -70,7 +70,9 @@ public class InstanceHelper {
                                 props.setProperty("item.0.pid", pid);
                                 props.setProperty("item.0.root", "true");
                             } else {
-                                throw new IllegalStateException("Child instance started but no root registered in " + propertiesFile);
+                                String errMsg = "Child instance " + (isStartingInstance ? "started" : "stopped") + " but no root registered in ";
+                                throw new IllegalStateException(errMsg + propertiesFile);
+
                             }
                         } else {
                             int count = Integer.parseInt(props.getProperty("count"));

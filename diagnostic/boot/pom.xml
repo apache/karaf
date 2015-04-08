@@ -62,6 +62,10 @@
                             org.apache.karaf.diagnostic.core.internal,
                             org.apache.karaf.diagnostic.core.providers
                         </Private-Package>
+                        <Import-Package>
+                            sun.misc;resolution:=optional,
+                            *
+                        </Import-Package>
                         <Karaf-Activator>
                             org.apache.karaf.diagnostic.core.internal.Activator
                         </Karaf-Activator>

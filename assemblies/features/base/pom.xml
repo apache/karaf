@@ -143,6 +143,7 @@
                                     <groupId>org.apache.felix</groupId>
                                     <artifactId>org.apache.felix.framework</artifactId>
                                     <outputDirectory>target/classes/resources/system/org/apache/felix/org.apache.felix.framework/${felix.framework.version}</outputDirectory>
+                                    <destFileName>org.apache.felix.framework-${felix.framework.version}.jar</destFileName>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>${equinox.groupId}</groupId>

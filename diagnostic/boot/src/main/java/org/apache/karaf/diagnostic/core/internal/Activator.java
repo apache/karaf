@@ -16,52 +16,34 @@
  */
 package org.apache.karaf.diagnostic.core.internal;
 
-import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.io.Closeable;
 
-import org.apache.karaf.diagnostic.core.Dump;
-import org.apache.karaf.diagnostic.core.DumpDestination;
-import org.apache.karaf.diagnostic.core.common.ZipDumpDestination;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import sun.misc.Signal;
-import sun.misc.SignalHandler;
 
-public class Activator implements BundleActivator, SignalHandler {
-
-    private static final String SIGNAL = "HUP";
-
-    private BundleContext bundleContext;
-    private SignalHandler previous;
+public class Activator implements BundleActivator {
+    Closeable dumpHandler;
 
     public void start(BundleContext context) throws Exception {
-        bundleContext = context;
         if (!isWindows()) {
-            previous = sun.misc.Signal.handle(new Signal(SIGNAL), this);
+            ClassLoader cl = this.getClass().getClassLoader();
+            try {
+                Class<?> dumpHandlerClazz = cl.loadClass("org.apache.karaf.diagnostic.core.internal.DumpHandler");
+                dumpHandler = (Closeable)dumpHandlerClazz.getConstructor(BundleContext.class).newInstance(context);
+            } catch (Exception e) {
+                // Will happen if sun.misc.SignalHandler is not available
+            }
         }
     }
 
     public void stop(BundleContext context) throws Exception {
-        if (!isWindows()) {
-            sun.misc.Signal.handle(new Signal(SIGNAL), previous);
+        if (dumpHandler != null && !isWindows()) {
+            dumpHandler.close();
         }
-    }
-
-    public void handle(Signal signal) {
-        SimpleDateFormat dumpFormat = new SimpleDateFormat("yyyy-MM-dd_HHmmss-SSS");
-        String fileName = "dump-" + dumpFormat.format(new Date()) + ".zip";
-        DumpDestination destination = new ZipDumpDestination(new File(fileName));
-        Dump.dump(bundleContext, destination);
     }
 
     private boolean isWindows() {
-        String os = System.getProperty("os.name", "Unknown");
-        if (os.startsWith("Win")) {
-            return true;
-        } else {
-            return false;
-        }
+        return System.getProperty("os.name", "Unknown").startsWith("Win");
     }
 
 }
