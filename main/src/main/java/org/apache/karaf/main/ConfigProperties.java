@@ -20,6 +20,7 @@ package org.apache.karaf.main;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
@@ -241,10 +242,14 @@ public class ConfigProperties {
         System.setProperty(KARAF_DELAY_CONSOLE, new Boolean(this.delayConsoleStart).toString());
 
         if (shutdownCommand == null || shutdownCommand.isEmpty()) {
-            shutdownCommand = UUID.randomUUID().toString();
-            Properties temp = new Properties(file);
-            temp.put(KARAF_SHUTDOWN_COMMAND, Arrays.asList("", "#", "# Generated command shutdown", "#"), shutdownCommand);
-            temp.save();
+            try {
+                shutdownCommand = UUID.randomUUID().toString();
+                Properties temp = new Properties(file);
+                temp.put(KARAF_SHUTDOWN_COMMAND, Arrays.asList("", "#", "# Generated command shutdown", "#"), shutdownCommand);
+                temp.save();
+            } catch (IOException ioException) {
+                System.err.println("WARN: can't update etc/config.properties with the generated command shutdown. We advise to manually add the karaf.shutdown.command property.");
+            }
         }
     }
     
