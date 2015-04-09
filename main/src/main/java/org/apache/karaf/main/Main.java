@@ -1562,7 +1562,7 @@ public class Main {
                 thread.start();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("WARN: can't update etc/config.properties with the generated command shutdown. We advise to manually add the karaf.shutdown.command property.");
         }
     }
 
