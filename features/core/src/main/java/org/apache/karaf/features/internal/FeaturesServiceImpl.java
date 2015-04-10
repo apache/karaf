@@ -378,6 +378,9 @@ public class FeaturesServiceImpl implements FeaturesService {
                 installFeature(feature, options);
             } catch (Exception e) {
                 exceptions.add(e);
+                if (options.contains(Option.PrintExecptionPerFeature)) {
+                    LOGGER.warn("Error when installing feature {}: {}", feature.getName(), e);
+                }
             }
         }
         if (!exceptions.isEmpty()) {

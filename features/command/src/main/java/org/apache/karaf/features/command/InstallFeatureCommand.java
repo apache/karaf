@@ -39,6 +39,8 @@ public class InstallFeatureCommand extends FeaturesCommandSupport {
     boolean noStart;
     @Option(name = "-v", aliases = "--verbose", description = "Explain what is being done", required = false, multiValued = false)
     boolean verbose;
+    @Option(name = "-p", aliases = "--print-exception-per-feature", description = "Log a warn message per each feature installation failure", required = false, multiValued = false)
+    boolean print;
 
     protected void doExecute(FeaturesService admin) throws Exception {
         for (String feature : features) {
@@ -63,6 +65,9 @@ public class InstallFeatureCommand extends FeaturesCommandSupport {
             }
             if (verbose) {
                 options.add(FeaturesService.Option.Verbose);
+            }
+            if (print) {
+                options.add(FeaturesService.Option.PrintExecptionPerFeature);
             }
             admin.installFeature(name, version, options);
         }
