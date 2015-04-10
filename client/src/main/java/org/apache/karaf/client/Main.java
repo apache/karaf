@@ -221,32 +221,35 @@ public class Main {
         SshAgent agent = null;
         int exitStatus = 0;
         try {
-
-            final Console console = System.console();
             client = SshClient.setUpDefaultClient();
             setupAgent(user, client, keyFile);
-            client.setUserInteraction(new UserInteraction() {
-                public void welcome(String banner) {
-                    System.out.println(banner);
-                }
+            final Console console = System.console();
+            if (console != null) {
+                client.setUserInteraction(new UserInteraction() {
+                    public void welcome(String banner) {
+                        System.out.println(banner);
+                    }
 
-                public String[] interactive(String destination, String name, String instruction, String[] prompt, boolean[] echo) {
-                    String[] answers = new String[prompt.length];
-                    try {
-                        for (int i = 0; i < prompt.length; i++) {
-                            if (console != null) {
+                    public String[] interactive(String destination, String name, String instruction, String[] prompt, boolean[] echo) {
+                        String[] answers = new String[prompt.length];
+                        try {
+                            for (int i = 0; i < prompt.length; i++) {
                                 if (echo[i]) {
                                     answers[i] = console.readLine(prompt[i] + " ");
                                 } else {
                                     answers[i] = new String(console.readPassword(prompt[i] + " "));
                                 }
+                                if (answers[i] == null) {
+                                    return null;
+                                }
                             }
+                            return answers;
+                        } catch (IOError e) {
+                            return null;
                         }
-                    } catch (IOError e) {
                     }
-                    return answers;
-                }
-            });
+                });
+            }
             client.start();
             if (console != null) {
                 console.printf("Logging in as %s\n", user);
