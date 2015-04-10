@@ -43,6 +43,7 @@ import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Conditional;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeatureEvent;
+import org.apache.karaf.features.FeatureState;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.internal.download.DownloadManager;
 import org.apache.karaf.features.internal.download.StreamProvider;
@@ -161,7 +162,7 @@ public class Deployer {
         public Repository globalRepository;
 
         public Map<String, Set<String>> requirements;
-        public Map<String, Map<String, FeaturesService.RequestedState>> stateChanges;
+        public Map<String, Map<String, FeatureState>> stateChanges;
         public EnumSet<FeaturesService.Option> options;
     }
 
@@ -282,11 +283,11 @@ public class Deployer {
                 }
             }
         }
-        for (Map.Entry<String, Map<String, FeaturesService.RequestedState>> entry1 : request.stateChanges.entrySet()) {
+        for (Map.Entry<String, Map<String, FeatureState>> entry1 : request.stateChanges.entrySet()) {
             String region = entry1.getKey();
             Map<String, String> regionStates = stateFeatures.get(region);
             if (regionStates != null) {
-                for (Map.Entry<String, FeaturesService.RequestedState> entry2 : entry1.getValue().entrySet()) {
+                for (Map.Entry<String, FeatureState> entry2 : entry1.getValue().entrySet()) {
                     String feature = entry2.getKey();
                     if (regionStates.containsKey(feature)) {
                         regionStates.put(feature, entry2.getValue().name());
@@ -301,7 +302,7 @@ public class Deployer {
                     map = new HashMap<>();
                     stateFeatures.put(entry.getKey(), map);
                 }
-                map.put(feature, noStart ? FeaturesService.RequestedState.Installed.name() : FeaturesService.RequestedState.Started.name());
+                map.put(feature, noStart ? FeatureState.Installed.name() : FeatureState.Started.name());
             }
         }
 
@@ -381,20 +382,20 @@ public class Deployer {
         //
         // Compute bundle states
         //
-        Map<Resource, FeaturesService.RequestedState> states = new HashMap<>();
+        Map<Resource, FeatureState> states = new HashMap<>();
         for (Map.Entry<String, Set<Resource>> entry : resolver.getFeaturesPerRegions().entrySet()) {
             String region = entry.getKey();
             Map<String, String> fss = stateFeatures.get(region);
             for (Resource feature : entry.getValue()) {
                 String fs = fss.get(getFeatureId(feature));
-                propagateState(states, feature, FeaturesService.RequestedState.valueOf(fs), resolver);
+                propagateState(states, feature, FeatureState.valueOf(fs), resolver);
             }
         }
         states.keySet().retainAll(resolver.getBundles().keySet());
         //
         // Compute bundles to start, stop and resolve
         //
-        for (Map.Entry<Resource, FeaturesService.RequestedState> entry : states.entrySet()) {
+        for (Map.Entry<Resource, FeatureState> entry : states.entrySet()) {
             Bundle bundle = deployment.resToBnd.get(entry.getKey());
             if (bundle != null) {
                 switch (entry.getValue()) {
@@ -681,9 +682,9 @@ public class Deployer {
                     if (startLevel != dstate.initialBundleStartLevel) {
                         callback.setBundleStartLevel(bundle, startLevel);
                     }
-                    FeaturesService.RequestedState reqState = states.get(resource);
+                    FeatureState reqState = states.get(resource);
                     if (reqState == null) {
-                        reqState = FeaturesService.RequestedState.Started;
+                        reqState = FeatureState.Started;
                     }
                     switch (reqState) {
                     case Started:
@@ -822,25 +823,25 @@ public class Deployer {
         return range;
     }
 
-    private void propagateState(Map<Resource, FeaturesService.RequestedState> states, Resource resource, FeaturesService.RequestedState state, SubsystemResolver resolver) {
+    private void propagateState(Map<Resource, FeatureState> states, Resource resource, FeatureState state, SubsystemResolver resolver) {
         if (!isSubsystem(resource)) {
-            FeaturesService.RequestedState reqState = mergeStates(state, states.get(resource));
+            FeatureState reqState = mergeStates(state, states.get(resource));
             if (reqState != states.get(resource)) {
                 states.put(resource, reqState);
                 for (Wire wire : resolver.getWiring().get(resource)) {
                     Resource provider = wire.getProvider();
-                    FeaturesService.RequestedState stateToMerge;
+                    FeatureState stateToMerge;
                     String region = resolver.getBundles().get(provider);
                     BundleInfo bi = region != null ? resolver.getBundleInfos().get(region).get(getUri(provider)) : null;
-                    if (reqState == FeaturesService.RequestedState.Started) {
+                    if (reqState == FeatureState.Started) {
                         String effective = wire.getCapability().getDirectives().get(CAPABILITY_EFFECTIVE_DIRECTIVE);
                         // If there is an active effective capability or a requirement from the feature
                         // and if the bundle is flagged as to start, start it
                         if ((EFFECTIVE_ACTIVE.equals(effective) || IDENTITY_NAMESPACE.equals(wire.getCapability().getNamespace()))
                                 && (bi == null || bi.isStart())) {
-                            stateToMerge = FeaturesService.RequestedState.Started;
+                            stateToMerge = FeatureState.Started;
                         } else {
-                            stateToMerge = FeaturesService.RequestedState.Resolved;
+                            stateToMerge = FeatureState.Resolved;
                         }
                     } else {
                         stateToMerge = reqState;
@@ -859,14 +860,17 @@ public class Deployer {
         return TYPE_BUNDLE.equals(getType(resource));
     }
 
-    private FeaturesService.RequestedState mergeStates(FeaturesService.RequestedState s1, FeaturesService.RequestedState s2) {
-        if (s1 == FeaturesService.RequestedState.Started || s2 == FeaturesService.RequestedState.Started) {
-            return FeaturesService.RequestedState.Started;
+    /**
+     * Returns the most active state of the given states
+     */
+    private FeatureState mergeStates(FeatureState s1, FeatureState s2) {
+        if (s1 == FeatureState.Started || s2 == FeatureState.Started) {
+            return FeatureState.Started;
         }
-        if (s1 == FeaturesService.RequestedState.Resolved || s2 == FeaturesService.RequestedState.Resolved) {
-            return FeaturesService.RequestedState.Resolved;
+        if (s1 == FeatureState.Resolved || s2 == FeatureState.Resolved) {
+            return FeatureState.Resolved;
         }
-        return FeaturesService.RequestedState.Installed;
+        return FeatureState.Installed;
     }
 
     private void computeBundlesToRefresh(Map<Bundle, String> toRefresh, Collection<Bundle> bundles, Map<Resource, Bundle> resources, Map<Resource, List<Wire>> resolution) {

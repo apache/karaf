@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.karaf.features.FeatureState;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.command.completers.AvailableFeatureCompleter;
 import org.apache.karaf.shell.api.action.Argument;
@@ -54,13 +55,13 @@ public class StopFeaturesCommand extends FeaturesCommandSupport {
         if (verbose) {
             options.add(FeaturesService.Option.Verbose);
         }
-        Map<String, Map<String, FeaturesService.RequestedState>> stateChanges = new HashMap<>();
+        Map<String, Map<String, FeatureState>> stateChanges = new HashMap<>();
         if (region == null) {
             region = FeaturesService.ROOT_REGION;
         }
-        Map<String, FeaturesService.RequestedState> regionChanges = new HashMap<>();
+        Map<String, FeatureState> regionChanges = new HashMap<>();
         for (String feature : features) {
-            regionChanges.put(feature, FeaturesService.RequestedState.Resolved);
+            regionChanges.put(feature, FeatureState.Resolved);
         }
         stateChanges.put(region, regionChanges);
         admin.updateFeaturesState(stateChanges, options);

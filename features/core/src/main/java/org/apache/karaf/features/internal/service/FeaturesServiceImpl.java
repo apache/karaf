@@ -52,6 +52,7 @@ import org.apache.felix.utils.version.VersionRange;
 import org.apache.felix.utils.version.VersionTable;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeatureEvent;
+import org.apache.karaf.features.FeatureState;
 import org.apache.karaf.features.FeaturesListener;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
@@ -238,7 +239,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         }
         // Resolve
         try {
-            Map<String, Map<String, RequestedState>> stateChanges = Collections.emptyMap();
+            Map<String, Map<String, FeatureState>> stateChanges = Collections.emptyMap();
             doProvisionInThread(requestedFeatures, stateChanges, copyState(), options);
         } catch (Exception e) {
             LOGGER.warn("Error updating state", e);
@@ -812,7 +813,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         for (String feature : featuresToAdd) {
             fl.add("feature:" + feature);
         }
-        Map<String, Map<String, RequestedState>> stateChanges = Collections.emptyMap();
+        Map<String, Map<String, FeatureState>> stateChanges = Collections.emptyMap();
         doProvisionInThread(required, stateChanges, state, options);
     }
 
@@ -866,12 +867,12 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         if (fl.isEmpty()) {
             required.remove(region);
         }
-        Map<String, Map<String, RequestedState>> stateChanges = Collections.emptyMap();
+        Map<String, Map<String, FeatureState>> stateChanges = Collections.emptyMap();
         doProvisionInThread(required, stateChanges, state, options);
     }
 
     @Override
-    public void updateFeaturesState(Map<String, Map<String, RequestedState>> stateChanges, EnumSet<Option> options) throws Exception {
+    public void updateFeaturesState(Map<String, Map<String, FeatureState>> stateChanges, EnumSet<Option> options) throws Exception {
         State state = copyState();
         doProvisionInThread(copy(state.requirements), stateChanges, state, options);
     }
@@ -881,7 +882,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         State state = copyState();
         Map<String, Set<String>> required = copy(state.requirements);
         add(required, requirements);
-        Map<String, Map<String, RequestedState>> stateChanges = Collections.emptyMap();
+        Map<String, Map<String, FeatureState>> stateChanges = Collections.emptyMap();
         doProvisionInThread(required, stateChanges, state, options);
     }
 
@@ -890,7 +891,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         State state = copyState();
         Map<String, Set<String>> required = copy(state.requirements);
         remove(required, requirements);
-        Map<String, Map<String, RequestedState>> stateChanges = Collections.emptyMap();
+        Map<String, Map<String, FeatureState>> stateChanges = Collections.emptyMap();
         doProvisionInThread(required, stateChanges, state, options);
     }
 
@@ -924,7 +925,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
      * to bundles not being started after the refresh.
      */
     public void doProvisionInThread(final Map<String, Set<String>> requirements,
-                                    final Map<String, Map<String, RequestedState>> stateChanges,
+                                    final Map<String, Map<String, FeatureState>> stateChanges,
                                     final State state,
                                     final EnumSet<Option> options) throws Exception {
         ExecutorService executor = Executors.newCachedThreadPool();
@@ -1001,7 +1002,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         return dstate;
     }
 
-    private Deployer.DeploymentRequest getDeploymentRequest(Map<String, Set<String>> requirements, Map<String, Map<String, RequestedState>> stateChanges, EnumSet<Option> options) {
+    private Deployer.DeploymentRequest getDeploymentRequest(Map<String, Set<String>> requirements, Map<String, Map<String, FeatureState>> stateChanges, EnumSet<Option> options) {
         Deployer.DeploymentRequest request = new Deployer.DeploymentRequest();
         request.bundleUpdateRange = bundleUpdateRange;
         request.featureResolutionRange = featureResolutionRange;
@@ -1017,7 +1018,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
 
 
     public void doProvision(Map<String, Set<String>> requirements,                 // all requirements
-                            Map<String, Map<String, RequestedState>> stateChanges, // features state changes
+                            Map<String, Map<String, FeatureState>> stateChanges, // features state changes
                             State state,                                           // current state
                             EnumSet<Option> options                                // installation options
     ) throws Exception {

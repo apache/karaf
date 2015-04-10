@@ -18,7 +18,6 @@ package org.apache.karaf.features;
 
 import java.net.URI;
 import java.util.EnumSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -53,12 +52,6 @@ public interface FeaturesService {
         NoAutoManageBundles,
         Simulate,
         Verbose
-    }
-
-    enum RequestedState {
-        Installed,
-        Resolved,
-        Started
     }
 
     /**
@@ -119,7 +112,7 @@ public interface FeaturesService {
 
     void removeRequirements(Map<String, Set<String>> requirements, EnumSet<Option> options) throws Exception;
 
-    void updateFeaturesState(Map<String, Map<String, RequestedState>> stateChanges, EnumSet<Option> options) throws Exception;
+    void updateFeaturesState(Map<String, Map<String, FeatureState>> stateChanges, EnumSet<Option> options) throws Exception;
 
     Feature[] listFeatures() throws Exception;
 
