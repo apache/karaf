@@ -156,6 +156,8 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
 
     private final int scheduleMaxRun;
 
+    private final String blacklisted;
+
     /**
      * Optional global repository
      */
@@ -185,7 +187,8 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
                                org.osgi.service.repository.Repository globalRepository,
                                int downloadThreads,
                                long scheduleDelay,
-                               int scheduleMaxRun) {
+                               int scheduleMaxRun,
+                               String blacklisted) {
         this.bundle = bundle;
         this.systemBundleContext = systemBundleContext;
         this.storage = storage;
@@ -203,6 +206,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         this.downloadThreads = downloadThreads > 0 ? downloadThreads : 1;
         this.scheduleDelay = scheduleDelay;
         this.scheduleMaxRun = scheduleMaxRun;
+        this.blacklisted = blacklisted;
         loadState();
         checkResolve();
 
@@ -314,7 +318,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
                 installedFeatures.putAll(copy(state.installedFeatures));
             }
             for (String uri : repositories) {
-                Repository repository = new RepositoryImpl(URI.create(uri));
+                Repository repository = new RepositoryImpl(URI.create(uri), blacklisted);
                 listener.repositoryEvent(new RepositoryEvent(repository, RepositoryEvent.EventType.RepositoryAdded, true));
             }
             for (Map.Entry<String, Set<String>> entry : installedFeatures.entrySet()) {
@@ -370,7 +374,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
     //
 
     public Repository loadRepository(URI uri) throws Exception {
-        RepositoryImpl repo = new RepositoryImpl(uri);
+        RepositoryImpl repo = new RepositoryImpl(uri, blacklisted);
         repo.load(true);
         return repo;
     }
@@ -435,7 +439,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
             saveState();
         }
         if (repo == null) {
-            repo = new RepositoryImpl(uri);
+            repo = new RepositoryImpl(uri, blacklisted);
         }
         callListeners(new RepositoryEvent(repo, RepositoryEvent.EventType.RepositoryRemoved, false));
     }
@@ -609,7 +613,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
                 repo = repositoryCache.get(uri);
             }
             if (repo == null) {
-                RepositoryImpl rep = new RepositoryImpl(URI.create(uri));
+                RepositoryImpl rep = new RepositoryImpl(URI.create(uri), blacklisted);
                 rep.load();
                 repo = rep;
                 synchronized (lock) {

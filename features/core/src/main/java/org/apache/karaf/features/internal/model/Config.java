@@ -53,7 +53,7 @@ import org.apache.karaf.features.ConfigInfo;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "config", propOrder = {"value"})
-public class Config implements ConfigInfo{
+public class Config implements ConfigInfo {
 
     @XmlValue
     protected String value;

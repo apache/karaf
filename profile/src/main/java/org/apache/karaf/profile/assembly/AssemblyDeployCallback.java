@@ -45,6 +45,7 @@ import org.apache.karaf.features.internal.model.Config;
 import org.apache.karaf.features.internal.model.ConfigFile;
 import org.apache.karaf.features.internal.model.Feature;
 import org.apache.karaf.features.internal.model.Features;
+import org.apache.karaf.features.internal.service.Blacklist;
 import org.apache.karaf.features.internal.service.Deployer;
 import org.apache.karaf.features.internal.service.State;
 import org.apache.karaf.features.internal.util.MapUtils;
@@ -128,6 +129,13 @@ public class AssemblyDeployCallback implements Deployer.DeployCallback {
 
     @Override
     public void installFeature(org.apache.karaf.features.Feature feature) throws IOException, InvalidSyntaxException {
+        // Check blacklist
+        if (Blacklist.isFeatureBlacklisted(builder.getBlacklistedFeatures(), feature.getName(), feature.getVersion())) {
+            if (builder.getBlacklistPolicy() == Builder.BlacklistPolicy.Fail) {
+                throw new RuntimeException("Feature " + feature.getId() + " is blacklisted");
+            }
+        }
+        // Install
         LOGGER.info("Installing feature config for " + feature.getId());
         for (Config config : ((Feature) feature).getConfig()) {
             Path configFile = etcDirectory.resolve(config.getName());
@@ -178,6 +186,13 @@ public class AssemblyDeployCallback implements Deployer.DeployCallback {
 
     @Override
     public Bundle installBundle(String region, String uri, InputStream is) throws BundleException {
+        // Check blacklist
+        if (Blacklist.isBundleBlacklisted(builder.getBlacklistedBundles(), uri)) {
+            if (builder.getBlacklistPolicy() == Builder.BlacklistPolicy.Fail) {
+                throw new RuntimeException("Bundle " + uri + " is blacklisted");
+            }
+        }
+        // Install
         LOGGER.info("Installing bundle " + uri);
         try {
             String path;

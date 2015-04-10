@@ -32,10 +32,16 @@ import org.apache.karaf.features.internal.model.JaxbUtil;
 public class RepositoryImpl implements Repository {
 
     private final URI uri;
+    private final String blacklisted;
     private Features features;
 
     public RepositoryImpl(URI uri) {
+        this(uri, null);
+    }
+
+    public RepositoryImpl(URI uri, String blacklisted) {
         this.uri = uri;
+        this.blacklisted = blacklisted;
     }
 
     public URI getURI() {
@@ -74,6 +80,7 @@ public class RepositoryImpl implements Repository {
                     InputStream inputStream = new InterruptibleInputStream(uri.toURL().openStream())
             ) {
                 features = JaxbUtil.unmarshal(uri.toASCIIString(), inputStream, validate);
+                Blacklist.blacklist(features, blacklisted);
             } catch (Exception e) {
                 throw (IOException) new IOException(e.getMessage() + " : " + uri).initCause(e);
             }

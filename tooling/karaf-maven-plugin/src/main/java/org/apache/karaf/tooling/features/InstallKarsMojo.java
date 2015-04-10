@@ -97,11 +97,16 @@ public class InstallKarsMojo extends MojoSupport {
     private List<String> installedFeatures;
 
     @Parameter
+    private List<String> blacklistedFeatures;
+
+    @Parameter
     private List<String> startupBundles;
     @Parameter
     private List<String> bootBundles;
     @Parameter
     private List<String> installedBundles;
+    @Parameter
+    private List<String> blacklistedBundles;
     
     @Parameter
     private String profilesUri;
@@ -114,6 +119,12 @@ public class InstallKarsMojo extends MojoSupport {
 
     @Parameter
     private List<String> installedProfiles;
+
+    @Parameter
+    private List<String> blacklistedProfiles;
+
+    @Parameter
+    private Builder.BlacklistPolicy blacklistPolicy;
 
     /**
      * Ignore the dependency attribute (dependency="[true|false]") on bundle
@@ -166,12 +177,15 @@ public class InstallKarsMojo extends MojoSupport {
         startupBundles = nonNullList(startupBundles);
         bootBundles = nonNullList(bootBundles);
         installedBundles = nonNullList(installedBundles);
+        blacklistedBundles = nonNullList(blacklistedBundles);
         startupFeatures = nonNullList(startupFeatures);
         bootFeatures = nonNullList(bootFeatures);
         installedFeatures = nonNullList(installedFeatures);
+        blacklistedFeatures = nonNullList(blacklistedFeatures);
         startupProfiles = nonNullList(startupProfiles);
         bootProfiles = nonNullList(bootProfiles);
         installedProfiles = nonNullList(installedProfiles);
+        blacklistedProfiles = nonNullList(blacklistedProfiles);
 
         if (!startupProfiles.isEmpty() || !bootProfiles.isEmpty() || !installedProfiles.isEmpty()) {
             if (profilesUri == null) {
@@ -187,6 +201,12 @@ public class InstallKarsMojo extends MojoSupport {
         }
 
         Builder builder = Builder.newInstance();
+
+        // Set up blacklisted items
+        builder.blacklistBundles(blacklistedBundles);
+        builder.blacklistFeatures(blacklistedFeatures);
+        builder.blacklistProfiles(blacklistedProfiles);
+        builder.blacklistPolicy(blacklistPolicy);
 
         // creating system directory
         getLog().info("Creating work directory");
