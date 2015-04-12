@@ -130,7 +130,9 @@ public class ResourceKeystoreInstance implements KeystoreInstance {
             for (int i = 0; i < keys.length; i++) {
                 String key = keys[i];
                 int pos = key.indexOf('=');
-                this.keyPasswords.put(key.substring(0, pos), key.substring(pos + 1).toCharArray());
+                if (pos > 0) {
+                    this.keyPasswords.put(key.substring(0, pos), key.substring(pos + 1).toCharArray());
+                }
             }
         }
     }
