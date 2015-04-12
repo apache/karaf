@@ -273,7 +273,9 @@ public class ConnectorServerFactory {
 
     public void destroy() throws Exception {
         try {
-            this.connectorServer.stop();
+            if (this.connectorServer != null) {
+                this.connectorServer.stop();
+            }
         } finally {
             doUnregister(this.objectName);
         }
