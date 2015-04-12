@@ -22,45 +22,27 @@
               including the correct start-level for the generation of the startup.propertie file -->
 
     <feature version="${project.version}" description="Karaf core feature" name="framework">
-        <bundle start="true" start-level="3">mvn:log4j/log4j/${log4j.version}</bundle>
-        <bundle start="true" start-level="4">mvn:org.slf4j/slf4j-log4j12/${slf4j.version}</bundle>
-        <bundle start="true" start-level="4">mvn:org.slf4j/slf4j-api/${slf4j.version}</bundle>
         <bundle start="true" start-level="5">mvn:org.ops4j.pax.url/pax-url-aether/${pax.url.version}</bundle>
         <bundle start="true" start-level="5">mvn:org.ops4j.pax.url/pax-url-wrap/${pax.url.version}/jar/uber</bundle>
-        <bundle start="true" start-level="7">mvn:org.apache.felix/org.apache.felix.configadmin/${felix.configadmin.version}</bundle>
         <bundle start="true" start-level="8">mvn:org.ops4j.pax.logging/pax-logging-api/${pax.logging.version}</bundle>
         <bundle start="true" start-level="8">mvn:org.ops4j.pax.logging/pax-logging-service/${pax.logging.version}</bundle>
-        <bundle start="true" start-level="9">mvn:org.apache.aries/org.apache.aries.util/${aries.util.version}</bundle>
-        <bundle start="true" start-level="9">mvn:org.apache.aries.proxy/org.apache.aries.proxy.api/${aries.proxy.api.version}</bundle>
-        <bundle start="true" start-level="9">mvn:org.apache.aries.proxy/org.apache.aries.proxy.impl/${aries.proxy.version}</bundle>
         <bundle start="true" start-level="10">mvn:org.apache.karaf.service/org.apache.karaf.service.guard/${project.version}</bundle>
+        <bundle start="true" start-level="10">mvn:org.apache.felix/org.apache.felix.configadmin/${felix.configadmin.version}</bundle>
         <bundle start="true" start-level="11">mvn:org.apache.felix/org.apache.felix.fileinstall/${felix.fileinstall.version}</bundle>
         <bundle start="true" start-level="12">mvn:org.ow2.asm/asm-all/${asm.version}</bundle>
+        <bundle start="true" start-level="20">mvn:org.apache.aries/org.apache.aries.util/${aries.util.version}</bundle>
+        <bundle start="true" start-level="20">mvn:org.apache.aries.proxy/org.apache.aries.proxy.api/${aries.proxy.api.version}</bundle>
+        <bundle start="true" start-level="20">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.cm/${aries.blueprint.cm.version}</bundle>
+        <bundle start="true" start-level="20">mvn:org.apache.aries.proxy/org.apache.aries.proxy.impl/${aries.proxy.version}</bundle>
         <bundle start="true" start-level="20">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.api/${aries.blueprint.api.version}</bundle>
         <bundle start="true" start-level="20">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.core.compatibility/${aries.blueprint.core.compatibility.version}</bundle>
         <bundle start="true" start-level="20">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.core/${aries.blueprint.core.version}</bundle>
-        <bundle start="true" start-level="20">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.cm/${aries.blueprint.cm.version}</bundle>
         <bundle start="true" start-level="24">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.spring/${project.version}</bundle>
         <bundle start="true" start-level="24">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.blueprint/${project.version}</bundle>
         <bundle start="true" start-level="24">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.wrap/${project.version}</bundle>
         <bundle start="true" start-level="25">mvn:org.apache.karaf.region/org.apache.karaf.region.core/${project.version}</bundle>
         <bundle start="true" start-level="25">mvn:org.apache.karaf.features/org.apache.karaf.features.core/${project.version}</bundle>
         <bundle start="true" start-level="26">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.features/${project.version}</bundle>
-        <bundle start="true" start-level="30">mvn:jline/jline/${jline.version}</bundle>
-        <bundle start="true" start-level="30">mvn:org.jledit/core/${jledit.version}</bundle>
-        <bundle start="true" start-level="30">mvn:org.apache.karaf.shell/org.apache.karaf.shell.console/${project.version}</bundle>
-        <bundle start="true" start-level="30">mvn:org.apache.karaf.jaas/org.apache.karaf.jaas.modules/${project.version}</bundle>
-        <bundle start="true" start-level="30">mvn:org.apache.karaf.jaas/org.apache.karaf.jaas.config/${project.version}</bundle>
-        <bundle start="true" start-level="30">mvn:org.apache.sshd/sshd-core/${sshd.version}</bundle>
-        <bundle start="true" start-level="30">mvn:org.apache.karaf.bundle/org.apache.karaf.bundle.core/${project.version}</bundle>
-        <bundle start="true" start-level="30">mvn:org.apache.karaf.system/org.apache.karaf.system.core/${project.version}</bundle>
-        <bundle start="true" start-level="30">mvn:org.apache.aries.quiesce/org.apache.aries.quiesce.api/${aries.quiesce.api.version}</bundle>
-        <bundle start="true" start-level="30">mvn:org.apache.karaf.shell/org.apache.karaf.shell.table/${project.version}</bundle>
-        <bundle start="true" start-level="30">mvn:org.apache.karaf.shell/org.apache.karaf.shell.help/${project.version}</bundle>
-        <bundle start="true" start-level="30">mvn:org.apache.karaf.shell/org.apache.karaf.shell.commands/${project.version}</bundle>
-        <bundle start="true" start-level="30">mvn:org.apache.karaf.system/org.apache.karaf.system.command/${project.version}</bundle>
-        <bundle start="true" start-level="30">mvn:org.apache.karaf.features/org.apache.karaf.features.command/${project.version}</bundle>
-        <bundle start="true" start-level="30">mvn:org.apache.karaf.bundle/org.apache.karaf.bundle.command/${project.version}</bundle>
     </feature>
 
 </features>
