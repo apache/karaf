@@ -209,7 +209,7 @@
         <plexus.utils.version>3.0</plexus.utils.version>
         <portlet-api.version>2.0</portlet-api.version>
         <serp.bundle.version>1.14.1_1</serp.bundle.version>
-        <servicemix.specs.version>2.4.0</servicemix.specs.version>
+        <servicemix.specs.version>2.5.0</servicemix.specs.version>
         <servlet.api.version>2.5</servlet.api.version>
         <slf4j.version>1.7.7</slf4j.version>
 
