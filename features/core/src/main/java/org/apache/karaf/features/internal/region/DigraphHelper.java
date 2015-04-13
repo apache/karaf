@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eclipse.equinox.internal.region;
+package org.apache.karaf.features.internal.region;
 
 import java.io.DataInputStream;
 import java.io.File;
@@ -34,6 +34,7 @@ import java.util.Set;
 import org.apache.karaf.features.internal.service.FeaturesServiceImpl;
 import org.apache.karaf.features.internal.util.JsonReader;
 import org.apache.karaf.features.internal.util.JsonWriter;
+import org.eclipse.equinox.internal.region.StandardRegionDigraph;
 import org.eclipse.equinox.region.Region;
 import org.eclipse.equinox.region.RegionDigraph;
 import org.eclipse.equinox.region.RegionFilterBuilder;
@@ -41,7 +42,6 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.hooks.bundle.CollisionHook;
 
 public final class DigraphHelper {
 
@@ -86,11 +86,6 @@ public final class DigraphHelper {
             // Ignore
         }
     }
-
-    public static CollisionHook getCollisionHook(StandardRegionDigraph digraph) {
-        return (CollisionHook) digraph.getBundleCollisionHook();
-    }
-
 
     @SuppressWarnings("unchecked")
     static StandardRegionDigraph readDigraph(InputStream in, BundleContext bundleContext, ThreadLocal<Region> threadLocal) throws IOException, BundleException, InvalidSyntaxException {

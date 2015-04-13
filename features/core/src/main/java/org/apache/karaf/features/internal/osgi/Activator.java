@@ -33,6 +33,7 @@ import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.features.FeaturesListener;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.internal.management.FeaturesServiceMBeanImpl;
+import org.apache.karaf.features.internal.region.DigraphHelper;
 import org.apache.karaf.features.internal.repository.AggregateRepository;
 import org.apache.karaf.features.internal.repository.JsonRepository;
 import org.apache.karaf.features.internal.repository.XmlRepository;
@@ -45,7 +46,7 @@ import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.ProvideService;
 import org.apache.karaf.util.tracker.annotation.RequireService;
 import org.apache.karaf.util.tracker.annotation.Services;
-import org.eclipse.equinox.internal.region.DigraphHelper;
+import org.eclipse.equinox.internal.region.CollisionHookHelper;
 import org.eclipse.equinox.internal.region.StandardRegionDigraph;
 import org.eclipse.equinox.internal.region.management.StandardManageableRegionDigraph;
 import org.eclipse.equinox.region.RegionDigraph;
@@ -125,7 +126,7 @@ public class Activator extends BaseActivator {
         // RegionDigraph
         digraph = DigraphHelper.loadDigraph(bundleContext);
         register(ResolverHookFactory.class, digraph.getResolverHookFactory());
-        register(CollisionHook.class, DigraphHelper.getCollisionHook(digraph));
+        register(CollisionHook.class, CollisionHookHelper.getCollisionHook(digraph));
         register(org.osgi.framework.hooks.bundle.FindHook.class, digraph.getBundleFindHook());
         register(org.osgi.framework.hooks.bundle.EventHook.class, digraph.getBundleEventHook());
         register(org.osgi.framework.hooks.service.FindHook.class, digraph.getServiceFindHook());
