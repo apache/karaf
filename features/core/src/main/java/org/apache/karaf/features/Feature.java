@@ -17,9 +17,6 @@
 package org.apache.karaf.features;
 
 import java.util.List;
-import java.util.Map;
-
-import org.apache.karaf.features.internal.model.Config;
 
 /**
  * A feature is a list of bundles associated identified by its name.

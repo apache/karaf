@@ -144,4 +144,6 @@ public interface FeaturesService {
 
     void unregisterListener(FeaturesListener listener);
 
+    FeatureState getState(String featureId);
+
 }

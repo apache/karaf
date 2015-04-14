@@ -30,6 +30,8 @@ public class State {
     public final Set<String> repositories = new TreeSet<>();
     public final Map<String, Set<String>> requirements = new HashMap<>();
     public final Map<String, Set<String>> installedFeatures = new HashMap<>();
+    
+    // State of features by region and feature id (name/version)
     public final Map<String, Map<String, String>> stateFeatures = new HashMap<>();
     public final Map<String, Set<Long>> managedBundles = new HashMap<>();
     public final Map<Long, Long> bundleChecksums = new HashMap<>();

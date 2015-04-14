@@ -695,6 +695,20 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
             return installed != null && installed.contains(id);
         }
     }
+    
+    @Override
+    public FeatureState getState(String featureId) {
+        String id = normalize(featureId);
+        synchronized (lock) {
+            Set<String> installed = state.installedFeatures.get(ROOT_REGION);
+            if (!installed.contains(id)) {
+                return FeatureState.Uninstalled;
+            } else {
+                String stateSt = state.stateFeatures.get(ROOT_REGION).get(id);
+                return FeatureState.valueOf(stateSt);
+            }
+        }
+    }
 
     @Override
     public boolean isRequired(Feature f) {

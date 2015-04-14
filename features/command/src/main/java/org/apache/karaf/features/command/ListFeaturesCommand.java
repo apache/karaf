@@ -55,7 +55,7 @@ public class ListFeaturesCommand extends FeaturesCommandSupport {
         table.column("Name");
         table.column("Version");
         table.column("Required");
-        table.column("Installed");
+        table.column("State");
         table.column("Repository");
         table.column("Description").maxSize(50);
         table.emptyTableText(onlyInstalled ? "No features installed" : "No features available");
@@ -83,7 +83,7 @@ public class ListFeaturesCommand extends FeaturesCommandSupport {
                         f.getName(),
                         f.getVersion(),
                         featuresService.isRequired(f) ? "x" : "",
-                        featuresService.isInstalled(f) ? "x" : "",
+                        featuresService.getState(f.getId()),
                         r.getName(),
                         f.getDescription());
                 if (isInstalledViaDeployDir(r.getName())) {

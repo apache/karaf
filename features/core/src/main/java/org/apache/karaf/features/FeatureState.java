@@ -17,6 +17,7 @@
 package org.apache.karaf.features;
 
 public enum FeatureState {
+    Uninstalled,
     Installed,
     Resolved,
     Started

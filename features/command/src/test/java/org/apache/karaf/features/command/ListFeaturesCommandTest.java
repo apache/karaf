@@ -20,6 +20,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
 import org.apache.karaf.features.Feature;
+import org.apache.karaf.features.FeatureState;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
 import org.easymock.EasyMock;
@@ -69,10 +70,11 @@ public class ListFeaturesCommandTest {
         EasyMock.expect(repo.getFeatures()).andReturn(new Feature[] { feature });
         EasyMock.expect(feature.isHidden()).andReturn(true).anyTimes();
         EasyMock.expect(feature.getName()).andReturn("feature");
+        EasyMock.expect(feature.getId()).andReturn("feature/1.0.0");
+        EasyMock.expect(service.getState(EasyMock.eq("feature/1.0.0"))).andReturn(FeatureState.Started);
         EasyMock.expect(feature.getDescription()).andReturn("description");
         EasyMock.expect(feature.getVersion()).andReturn("1.0.0");
         EasyMock.expect(service.isRequired(feature)).andReturn(true);
-        EasyMock.expect(service.isInstalled(feature)).andReturn(true);
         EasyMock.expect(repo.getName()).andReturn("repository").anyTimes();
 
         EasyMock.replay(service, repo, feature);

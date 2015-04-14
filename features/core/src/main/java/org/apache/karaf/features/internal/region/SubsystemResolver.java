@@ -280,6 +280,10 @@ public class SubsystemResolver {
         return bundlesPerRegions;
     }
 
+    /**
+     * 
+     * @return map of bundles and the region they are deployed in
+     */
     public Map<Resource, String> getBundles() {
         if (bundles == null) {
             String filter = String.format("(&(%s=*)(|(%s=%s)(%s=%s)))",
@@ -308,6 +312,11 @@ public class SubsystemResolver {
         return features;
     }
 
+    /**
+     * 
+     * @param resourceFilter
+     * @return map from resource to region name
+     */
     private Map<Resource, String> getResourceMapping(SimpleFilter resourceFilter) {
         Map<String, String> flats = getFlatSubsystemsMap();
         Map<Resource, List<Wire>> wiring = getWiring();
