@@ -127,7 +127,7 @@ if "%KARAF_DEBUG%" == "" goto :KARAF_DEBUG_END
 
 rem Setup the classpath
 pushd "%KARAF_HOME%\lib"
-for %%G in (karaf*.jar) do call:APPEND_TO_CLASSPATH %%G
+for %%G in (*.jar) do call:APPEND_TO_CLASSPATH %%G
 popd
 goto CLASSPATH_END
 
