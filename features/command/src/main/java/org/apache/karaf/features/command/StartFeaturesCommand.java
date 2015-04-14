@@ -49,14 +49,11 @@ public class StartFeaturesCommand extends FeaturesCommandSupport {
     protected void doExecute(FeaturesService admin) throws Exception {
         addOption(FeaturesService.Option.Simulate, simulate);
         addOption(FeaturesService.Option.Verbose, verbose);
-        setFeaturesToStatus(admin);
-    }
-
-    private void setFeaturesToStatus(FeaturesService admin) throws Exception {
         Map<String, Map<String, FeatureState>> stateChanges = new HashMap<>();
         Map<String, FeatureState> regionChanges = new HashMap<>();
-        for (String feature : features) {
-            regionChanges.put(feature, FeatureState.Started);
+        for (String featureName : features) {
+            String featureId = getFeatureId(admin, featureName);
+            regionChanges.put(featureId, FeatureState.Started);
         }
         stateChanges.put(region, regionChanges);
         admin.updateFeaturesState(stateChanges, options);

@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeatureState;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.command.completers.StartedFeatureCompleter;
@@ -51,10 +52,12 @@ public class StopFeaturesCommand extends FeaturesCommandSupport {
         addOption(FeaturesService.Option.Verbose, verbose);
         Map<String, Map<String, FeatureState>> stateChanges = new HashMap<>();
         Map<String, FeatureState> regionChanges = new HashMap<>();
-        for (String feature : features) {
-            regionChanges.put(feature, FeatureState.Resolved);
+        for (String featureName : features) {
+            String featureId = getFeatureId(admin, featureName);
+            regionChanges.put(featureId, FeatureState.Resolved);
         }
         stateChanges.put(region, regionChanges);
         admin.updateFeaturesState(stateChanges, options);
     }
+
 }
