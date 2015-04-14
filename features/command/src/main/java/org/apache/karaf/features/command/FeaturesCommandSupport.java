@@ -51,7 +51,10 @@ public abstract class FeaturesCommandSupport implements Action {
     }
     
     protected String getFeatureId(FeaturesService admin, String featureName) throws Exception {
-        Feature[] matchingFeatures = admin.getFeatures(featureName);
+        String[] parts = featureName.split("/");
+        String name = parts.length > 0 ? parts[0] : featureName;
+        String version = parts.length > 1 ? parts[1] : null;
+        Feature[] matchingFeatures = admin.getFeatures(name, version);
         if (matchingFeatures.length == 0) {
             throw new IllegalArgumentException("No matching feature found for " + featureName);
         }
