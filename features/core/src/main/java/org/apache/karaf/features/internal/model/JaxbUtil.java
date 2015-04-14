@@ -92,19 +92,18 @@ public final class JaxbUtil {
      * @return a Features read from the input stream
      */
     public static Features unmarshal(String uri, boolean validate) {
-        if (validate) {
-            return unmarshalValidate(uri, null);
-        } else {
-            return unmarshalNoValidate(uri, null);
-        }
+        return unmarshal(uri, null, validate);
     }
 
     public static Features unmarshal(String uri, InputStream stream, boolean validate) {
+        Features features;
         if (validate) {
-            return unmarshalValidate(uri, stream);
+            features = unmarshalValidate(uri, stream);
         } else {
-            return unmarshalNoValidate(uri, stream);
+            features = unmarshalNoValidate(uri, stream);
         }
+        features.postUnmarshall();
+        return features;
     }
 
     private static Features unmarshalValidate(String uri, InputStream stream) {

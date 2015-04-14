@@ -767,7 +767,7 @@ public class Deployer {
                     callback.installFeature(feature);
                 }
                 for (Conditional cond : feature.getConditional()) {
-                    Feature condFeature = cond.asFeature(feature.getName(), feature.getVersion());
+                    Feature condFeature = cond.asFeature();
                     if (featureIds.contains(condFeature.getId())) {
                         callback.installFeature(condFeature);
                     }

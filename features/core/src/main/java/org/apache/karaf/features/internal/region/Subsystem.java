@@ -275,7 +275,7 @@ public class Subsystem extends ResourceImpl {
                 ss.requireFeature(dep.getName(), dep.getVersion(), mandatory && !dep.isDependency());
             }
             for (Conditional cond : feature.getConditional()) {
-                Feature fcond = cond.asFeature(feature.getName(), feature.getVersion());
+                Feature fcond = cond.asFeature();
                 String ssName = this.name + "#" + (fcond.hasVersion() ? fcond.getName() + "-" + fcond.getVersion() : fcond.getName());
                 Subsystem fs = getChild(ssName);
                 if (fs == null) {

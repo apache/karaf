@@ -46,7 +46,7 @@ public final class FeatureResource extends ResourceImpl {
     }
 
     public static FeatureResource build(Feature feature, Conditional conditional, String featureRange, Map<String, ? extends Resource> locToRes) throws BundleException {
-        Feature fcond = conditional.asFeature(feature.getName(), feature.getVersion());
+        Feature fcond = conditional.asFeature();
         FeatureResource resource = build(fcond, featureRange, locToRes);
         for (String cond : conditional.getCondition()) {
             if (cond.startsWith("req:")) {

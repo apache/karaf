@@ -136,4 +136,11 @@ public class Features {
         this.name = value;
     }
 
+    public void postUnmarshall() {
+        if (feature != null) {
+            for (Feature f : feature) {
+                f.postUnmarshall();
+            }
+        }
+    }
 }

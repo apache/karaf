@@ -379,4 +379,11 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
         return this.library;
     }
 
+    public void postUnmarshall() {
+        if (conditional != null) {
+            for (Conditional c : conditional) {
+                c.setOwner(this);
+            }
+        }
+    }
 }

@@ -268,7 +268,7 @@ public class InfoFeatureCommand extends FeaturesCommandSupport {
             System.out.println("Feature contains followed conditionals:");
             for (Conditional featureConditional : conditionals) {
                 String conditionDescription = getConditionDescription(featureConditional);
-                Feature wrappedConditional = featureConditional.asFeature(feature.getName(), feature.getVersion());
+                Feature wrappedConditional = featureConditional.asFeature();
                 if (config) {
                     displayConfigInformation(wrappedConditional, String.format(CONDITIONAL_CONTENT, conditionDescription));
                     displayConfigFileInformation(wrappedConditional, String.format(CONDITIONAL_CONTENT, conditionDescription));

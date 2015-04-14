@@ -22,6 +22,7 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
 import org.apache.karaf.features.Feature;
@@ -39,6 +40,17 @@ public class Conditional extends Content implements org.apache.karaf.features.Co
     @XmlElement(name = "condition")
     protected List<String> condition;
 
+    @XmlTransient
+    protected Feature owner;
+
+    public Feature getOwner() {
+        return owner;
+    }
+
+    public void setOwner(Feature owner) {
+        this.owner = owner;
+    }
+
     public List<String> getCondition() {
         if (condition == null) {
             this.condition = new ArrayList<>();
@@ -47,7 +59,12 @@ public class Conditional extends Content implements org.apache.karaf.features.Co
     }
 
     @Override
-    public Feature asFeature(String name, String version) {
+    public Feature asFeature() {
+        if (owner == null) {
+            throw new IllegalStateException("No owner set for conditional");
+        }
+        String name = owner.getName();
+        String version = owner.getVersion();
         String conditionName = name + "-condition-" + getConditionId().replaceAll("[^A-Za-z0-9 ]", "_");
         org.apache.karaf.features.internal.model.Feature f = new org.apache.karaf.features.internal.model.Feature(conditionName, version);
         f.getBundle().addAll(getBundle());

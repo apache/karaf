@@ -32,5 +32,5 @@ public interface Conditional {
 
     List<ConfigFileInfo> getConfigurationFiles();
 
-    Feature asFeature(String name, String version);
+    Feature asFeature();
 }
