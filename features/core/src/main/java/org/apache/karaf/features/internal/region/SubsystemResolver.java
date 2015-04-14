@@ -16,8 +16,6 @@
  */
 package org.apache.karaf.features.internal.region;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -57,7 +55,6 @@ import org.slf4j.LoggerFactory;
 
 import static org.apache.karaf.features.internal.resolver.ResourceUtils.TYPE_FEATURE;
 import static org.apache.karaf.features.internal.resolver.ResourceUtils.TYPE_SUBSYSTEM;
-import static org.apache.karaf.features.internal.resolver.ResourceUtils.getUri;
 import static org.apache.karaf.features.internal.util.MapUtils.invert;
 import static org.osgi.framework.Constants.PROVIDE_CAPABILITY;
 import static org.osgi.framework.namespace.ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE;
@@ -447,15 +444,4 @@ public class SubsystemResolver {
         return result;
     }
 
-    public InputStream getBundleInputStream(Resource resource) throws IOException {
-        String uri = getUri(resource);
-        if (uri == null) {
-            throw new IllegalStateException("Resource has no uri");
-        }
-        StreamProvider provider = manager.getProviders().get(uri);
-        if (provider == null) {
-            throw new IllegalStateException("Resource " + uri + " has no StreamProvider");
-        }
-        return provider.open();
-    }
 }
