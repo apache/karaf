@@ -80,19 +80,19 @@ public final class ResourceUtils {
         return null;
     }
 
-    public static void addIdentityRequirement(ResourceImpl resource, String name, String type, String range) {
-        addIdentityRequirement(resource, name, type, range, true);
+    public static RequirementImpl addIdentityRequirement(ResourceImpl resource, String name, String type, String range) {
+        return addIdentityRequirement(resource, name, type, range, true);
     }
 
-    public static void addIdentityRequirement(ResourceImpl resource, String name, String type, String range, boolean mandatory) {
-        addIdentityRequirement(resource, name, type, range != null ? new VersionRange(range) : null, mandatory);
+    public static RequirementImpl addIdentityRequirement(ResourceImpl resource, String name, String type, String range, boolean mandatory) {
+        return addIdentityRequirement(resource, name, type, range != null ? new VersionRange(range) : null, mandatory);
     }
 
-    public static void addIdentityRequirement(ResourceImpl resource, String name, String type, VersionRange range) {
-        addIdentityRequirement(resource, name, type, range, true);
+    public static RequirementImpl addIdentityRequirement(ResourceImpl resource, String name, String type, VersionRange range) {
+        return addIdentityRequirement(resource, name, type, range, true);
     }
 
-    public static void addIdentityRequirement(ResourceImpl resource, String name, String type, VersionRange range, boolean mandatory) {
+    public static RequirementImpl addIdentityRequirement(ResourceImpl resource, String name, String type, VersionRange range, boolean mandatory) {
         Map<String, String> dirs = new HashMap<>();
         Map<String, Object> attrs = new HashMap<>();
         if (!mandatory) {
@@ -107,7 +107,9 @@ public final class ResourceUtils {
         if (range != null) {
             attrs.put(CAPABILITY_VERSION_ATTRIBUTE, range);
         }
-        resource.addRequirement(new RequirementImpl(resource, IDENTITY_NAMESPACE, dirs, attrs));
+        RequirementImpl requirement = new RequirementImpl(resource, IDENTITY_NAMESPACE, dirs, attrs);
+        resource.addRequirement(requirement);
+        return requirement;
     }
 
     public static void addIdentityRequirement(ResourceImpl resource, Resource required) {

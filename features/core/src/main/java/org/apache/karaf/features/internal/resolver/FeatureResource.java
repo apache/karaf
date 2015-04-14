@@ -36,6 +36,8 @@ import static org.apache.karaf.features.internal.resolver.ResourceUtils.addIdent
  */
 public final class FeatureResource extends ResourceImpl {
 
+    public static final String REQUIREMENT_CONDITIONAL_DIRECTIVE = "condition";
+    public static final String CONDITIONAL_TRUE = "true";
     private final Feature feature;
 
     private FeatureResource(Feature feature) {
@@ -58,13 +60,13 @@ public final class FeatureResource extends ResourceImpl {
                 if (p.length > 1) {
                     dep.setVersion(p[1]);
                 }
-                addDependency(resource, dep, featureRange);
+                addDependency(resource, dep, featureRange, true);
             }
         }
         org.apache.karaf.features.internal.model.Dependency dep = new org.apache.karaf.features.internal.model.Dependency();
         dep.setName(feature.getName());
         dep.setVersion(feature.getVersion());
-        addDependency(resource, dep, featureRange);
+        addDependency(resource, dep, featureRange, true);
         return resource;
     }
 
@@ -94,6 +96,10 @@ public final class FeatureResource extends ResourceImpl {
     }
 
     protected static void addDependency(FeatureResource resource, Dependency dep, String featureRange) {
+        addDependency(resource, dep, featureRange, false);
+    }
+
+    protected static void addDependency(FeatureResource resource, Dependency dep, String featureRange, boolean condition) {
         String name = dep.getName();
         String version = dep.getVersion();
         if (version.equals("0.0.0")) {
@@ -101,7 +107,10 @@ public final class FeatureResource extends ResourceImpl {
         } else if (!version.startsWith("[") && !version.startsWith("(")) {
             version = Macro.transform(featureRange, version);
         }
-        addIdentityRequirement(resource, name, TYPE_FEATURE, version);
+        RequirementImpl requirement = addIdentityRequirement(resource, name, TYPE_FEATURE, version);
+        if (condition) {
+            requirement.getDirectives().put(REQUIREMENT_CONDITIONAL_DIRECTIVE, CONDITIONAL_TRUE);
+        }
     }
 
     public Feature getFeature() {

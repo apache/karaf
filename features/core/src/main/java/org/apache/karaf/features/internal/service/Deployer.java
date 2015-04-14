@@ -48,6 +48,7 @@ import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.internal.download.DownloadManager;
 import org.apache.karaf.features.internal.download.StreamProvider;
 import org.apache.karaf.features.internal.region.SubsystemResolver;
+import org.apache.karaf.features.internal.resolver.FeatureResource;
 import org.apache.karaf.features.internal.util.ChecksumUtils;
 import org.apache.karaf.features.internal.util.Macro;
 import org.apache.karaf.features.internal.util.MapUtils;
@@ -383,14 +384,60 @@ public class Deployer {
         // Compute bundle states
         //
         Map<Resource, FeatureState> states = new HashMap<>();
+        // Find all features state
+        Map<Resource, FeatureState> featuresState = new HashMap<>();
+        Map<Resource, Set<Resource>> conditionals = new HashMap<>();
         for (Map.Entry<String, Set<Resource>> entry : resolver.getFeaturesPerRegions().entrySet()) {
             String region = entry.getKey();
             Map<String, String> fss = stateFeatures.get(region);
             for (Resource feature : entry.getValue()) {
-                String fs = fss.get(getFeatureId(feature));
-                propagateState(states, feature, FeatureState.valueOf(fs), resolver);
+                Set<Resource> conditions = new HashSet<>();
+                for (Wire wire : resolver.getWiring().get(feature)) {
+                    if (IDENTITY_NAMESPACE.equals(wire.getRequirement().getNamespace()) &&
+                            FeatureResource.CONDITIONAL_TRUE.equals(wire.getRequirement().getDirectives().get(FeatureResource.REQUIREMENT_CONDITIONAL_DIRECTIVE))) {
+                        conditions.add(wire.getProvider());
+                    }
+                }
+                if (conditions.isEmpty()) {
+                    String fs = fss.get(getFeatureId(feature));
+                    featuresState.put(feature, FeatureState.valueOf(fs));
+                } else {
+                    conditionals.put(feature, conditions);
+                }
             }
         }
+        // Compute conditional features state
+        for (Resource feature : conditionals.keySet()) {
+            FeatureState state = null;
+            for (Resource cond : conditionals.get(feature)) {
+                FeatureState s = featuresState.get(cond);
+                if (state == null) {
+                    state = s;
+                } else if (state == FeatureState.Started && s == FeatureState.Resolved) {
+                    state = FeatureState.Resolved;
+                }
+            }
+            featuresState.put(feature, state);
+        }
+        // Propagate Resolved state
+        for (Resource feature : featuresState.keySet()) {
+            if (featuresState.get(feature) == FeatureState.Resolved) {
+                propagateState(states, feature, FeatureState.Resolved, resolver);
+            }
+        }
+        // Propagate Started state
+        for (Resource feature : featuresState.keySet()) {
+            if (featuresState.get(feature) == FeatureState.Started) {
+                propagateState(states, feature, FeatureState.Started, resolver);
+            }
+        }
+        // Put default Started state for other bundles
+        for (Resource resource : resolver.getBundles().keySet()) {
+            if (!states.containsKey(resource)) {
+                states.put(resource, FeatureState.Started);
+            }
+        }
+        // Only keep bundles resources
         states.keySet().retainAll(resolver.getBundles().keySet());
         //
         // Compute bundles to start, stop and resolve
@@ -829,24 +876,9 @@ public class Deployer {
             if (reqState != states.get(resource)) {
                 states.put(resource, reqState);
                 for (Wire wire : resolver.getWiring().get(resource)) {
-                    Resource provider = wire.getProvider();
-                    FeatureState stateToMerge;
-                    String region = resolver.getBundles().get(provider);
-                    BundleInfo bi = region != null ? resolver.getBundleInfos().get(region).get(getUri(provider)) : null;
-                    if (reqState == FeatureState.Started) {
-                        String effective = wire.getCapability().getDirectives().get(CAPABILITY_EFFECTIVE_DIRECTIVE);
-                        // If there is an active effective capability or a requirement from the feature
-                        // and if the bundle is flagged as to start, start it
-                        if ((EFFECTIVE_ACTIVE.equals(effective) || IDENTITY_NAMESPACE.equals(wire.getCapability().getNamespace()))
-                                && (bi == null || bi.isStart())) {
-                            stateToMerge = FeatureState.Started;
-                        } else {
-                            stateToMerge = FeatureState.Resolved;
-                        }
-                    } else {
-                        stateToMerge = reqState;
+                    if (IDENTITY_NAMESPACE.equals(wire.getCapability().getNamespace())) {
+                        propagateState(states, wire.getProvider(), reqState, resolver);
                     }
-                    propagateState(states, provider, stateToMerge, resolver);
                 }
             }
         }
