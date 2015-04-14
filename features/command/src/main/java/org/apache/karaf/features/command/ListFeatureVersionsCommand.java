@@ -33,7 +33,7 @@ import org.apache.karaf.shell.support.table.ShellTable;
 @Service
 public class ListFeatureVersionsCommand extends FeaturesCommandSupport {
 
-	@Argument(index = 0, name = "feature", description = "Name of feature.", required = true, multiValued = false)
+    @Argument(index = 0, name = "feature", description = "Name of feature.", required = true, multiValued = false)
     @Completion(AllFeatureCompleter.class)
 	String feature;
 

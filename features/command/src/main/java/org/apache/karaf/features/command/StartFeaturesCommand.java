@@ -16,7 +16,6 @@
  */
 package org.apache.karaf.features.command;
 
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,21 +43,17 @@ public class StartFeaturesCommand extends FeaturesCommandSupport {
     @Option(name = "-t", aliases = "--simulate", description = "Perform a simulation only", required = false, multiValued = false)
     boolean simulate;
 
-    @Option(name = "-g", aliases = "--region", description = "Region to install to")
-    String region;
+    @Option(name = "-g", aliases = "--region", description = "Region to apply to")
+    String region = FeaturesService.ROOT_REGION;
 
     protected void doExecute(FeaturesService admin) throws Exception {
-        EnumSet<FeaturesService.Option> options = EnumSet.noneOf(FeaturesService.Option.class);
-        if (simulate) {
-            options.add(FeaturesService.Option.Simulate);
-        }
-        if (verbose) {
-            options.add(FeaturesService.Option.Verbose);
-        }
+        addOption(FeaturesService.Option.Simulate, simulate);
+        addOption(FeaturesService.Option.Verbose, verbose);
+        setFeaturesToStatus(admin);
+    }
+
+    private void setFeaturesToStatus(FeaturesService admin) throws Exception {
         Map<String, Map<String, FeatureState>> stateChanges = new HashMap<>();
-        if (region == null) {
-            region = FeaturesService.ROOT_REGION;
-        }
         Map<String, FeatureState> regionChanges = new HashMap<>();
         for (String feature : features) {
             regionChanges.put(feature, FeatureState.Started);

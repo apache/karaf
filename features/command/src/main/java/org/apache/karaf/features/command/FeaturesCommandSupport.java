@@ -16,11 +16,14 @@
  */
 package org.apache.karaf.features.command;
 
+import java.util.EnumSet;
+
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 
 public abstract class FeaturesCommandSupport implements Action {
+    protected EnumSet<FeaturesService.Option> options = EnumSet.noneOf(FeaturesService.Option.class);  
 
     @Reference
     private FeaturesService featuresService;
@@ -38,5 +41,11 @@ public abstract class FeaturesCommandSupport implements Action {
 
     public void setFeaturesService(FeaturesService featuresService) {
         this.featuresService = featuresService;
+    }
+    
+    protected void addOption(FeaturesService.Option option, boolean shouldAdd) {
+        if (shouldAdd) {
+            options.add(option);
+        }
     }
 }

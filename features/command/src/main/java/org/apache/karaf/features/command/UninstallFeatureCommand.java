@@ -16,7 +16,6 @@
  */
 package org.apache.karaf.features.command;
 
-import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 
@@ -49,17 +48,9 @@ public class UninstallFeatureCommand extends FeaturesCommandSupport {
     String region;
 
     protected void doExecute(FeaturesService admin) throws Exception {
-        // iterate in the provided feature
-        EnumSet<FeaturesService.Option> options = EnumSet.noneOf(FeaturesService.Option.class);
-        if (simulate) {
-            options.add(FeaturesService.Option.Simulate);
-        }
-        if (noRefresh) {
-            options.add(FeaturesService.Option.NoAutoRefreshBundles);
-        }
-        if (verbose) {
-            options.add(FeaturesService.Option.Verbose);
-        }
+        addOption(FeaturesService.Option.Simulate, simulate);
+        addOption(FeaturesService.Option.Verbose, verbose);
+        addOption(FeaturesService.Option.NoAutoRefreshBundles, noRefresh);
         admin.uninstallFeatures(new HashSet<String>(features), region, options);
     }
 }

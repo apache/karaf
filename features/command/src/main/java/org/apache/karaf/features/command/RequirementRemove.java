@@ -16,7 +16,6 @@
  */
 package org.apache.karaf.features.command;
 
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -24,19 +23,14 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.karaf.features.FeaturesService;
-import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Option;
-import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
 @Command(scope = "feature", name = "requirement-remove", description = "Remove provisioning requirements.")
 @Service
-public class RequirementRemove implements Action {
-
-    @Reference
-    private FeaturesService featuresService;
+public class RequirementRemove extends FeaturesCommandSupport {
 
     @Argument(required = true, multiValued = true)
     List<String> requirements;
@@ -56,30 +50,19 @@ public class RequirementRemove implements Action {
     @Option(name = "-t", aliases = "--simulate", description = "Perform a simulation only")
     boolean simulate;
 
-    @Option(name = "-g", aliases = "--region", description = "Region to install to")
-    String region;
+    @Option(name = "-g", aliases = "--region", description = "Region to apply to")
+    String region = FeaturesService.ROOT_REGION;
 
     @Override
-    public Object execute() throws Exception {
-        EnumSet<FeaturesService.Option> options = EnumSet.noneOf(FeaturesService.Option.class);
-        if (simulate) {
-            options.add(FeaturesService.Option.Simulate);
-        }
-        if (noStart) {
-            options.add(FeaturesService.Option.NoAutoStartBundles);
-        }
-        if (noRefresh) {
-            options.add(FeaturesService.Option.NoAutoRefreshBundles);
-        }
-        if (noManage) {
-            options.add(FeaturesService.Option.NoAutoManageBundles);
-        }
-        if (verbose) {
-            options.add(FeaturesService.Option.Verbose);
-        }
+    protected void doExecute(FeaturesService featuresService) throws Exception {
+        addOption(FeaturesService.Option.Simulate, simulate);
+        addOption(FeaturesService.Option.NoAutoStartBundles, noStart);
+        addOption(FeaturesService.Option.NoAutoRefreshBundles, noRefresh);
+        addOption(FeaturesService.Option.NoAutoManageBundles, noManage);
+        addOption(FeaturesService.Option.Verbose, verbose);
         Map<String, Set<String>> reqs = new HashMap<>();
-        reqs.put(region == null ? FeaturesService.ROOT_REGION : region, new HashSet<>(requirements));
+        reqs.put(region, new HashSet<>(requirements));
         featuresService.removeRequirements(reqs, options);
-        return null;
     }
+
 }

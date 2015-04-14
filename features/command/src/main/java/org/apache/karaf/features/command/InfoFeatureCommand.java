@@ -41,7 +41,7 @@ public class InfoFeatureCommand extends FeaturesCommandSupport {
     private static final String FEATURE_CONTENT = "Feature";
     private static final String CONDITIONAL_CONTENT = "Conditional(%s)";
 
-	@Argument(index = 0, name = "name", description = "The name of the feature", required = true, multiValued = false)
+    @Argument(index = 0, name = "name", description = "The name of the feature", required = true, multiValued = false)
     @Completion(AllFeatureCompleter.class)
     private String name;
 
