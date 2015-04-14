@@ -18,13 +18,12 @@ package org.apache.karaf.features.command;
 
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.karaf.features.FeatureState;
 import org.apache.karaf.features.FeaturesService;
-import org.apache.karaf.features.command.completers.AvailableFeatureCompleter;
+import org.apache.karaf.features.command.completers.ResolvedFeatureCompleter;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Completion;
@@ -35,8 +34,8 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 @Service
 public class StartFeaturesCommand extends FeaturesCommandSupport {
 
-    @Argument(index = 0, name = "feature", description = "The name and version of the features to install. A feature id looks like name/version. The version is optional.", required = true, multiValued = true)
-    @Completion(AvailableFeatureCompleter.class)
+    @Argument(index = 0, name = "feature", description = "The name and version of the features to start. A feature id looks like name/version.", required = true, multiValued = true)
+    @Completion(ResolvedFeatureCompleter.class)
     List<String> features;
 
     @Option(name = "-v", aliases = "--verbose", description = "Explain what is being done", required = false, multiValued = false)

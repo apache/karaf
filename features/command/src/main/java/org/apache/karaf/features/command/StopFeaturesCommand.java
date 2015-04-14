@@ -24,6 +24,7 @@ import java.util.Map;
 import org.apache.karaf.features.FeatureState;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.command.completers.AvailableFeatureCompleter;
+import org.apache.karaf.features.command.completers.StartedFeatureCompleter;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Completion;
@@ -34,8 +35,8 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 @Service
 public class StopFeaturesCommand extends FeaturesCommandSupport {
 
-    @Argument(index = 0, name = "feature", description = "The name and version of the features to install. A feature id looks like name/version. The version is optional.", required = true, multiValued = true)
-    @Completion(AvailableFeatureCompleter.class)
+    @Argument(index = 0, name = "feature", description = "The name and version of the features to stop. A feature id looks like name/version.", required = true, multiValued = true)
+    @Completion(StartedFeatureCompleter.class)
     List<String> features;
 
     @Option(name = "-v", aliases = "--verbose", description = "Explain what is being done", required = false, multiValued = false)

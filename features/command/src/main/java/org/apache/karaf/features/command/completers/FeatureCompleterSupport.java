@@ -17,6 +17,7 @@
 package org.apache.karaf.features.command.completers;
 
 import java.util.List;
+import java.util.SortedSet;
 
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
@@ -46,13 +47,17 @@ public abstract class FeatureCompleterSupport implements Completer {
         try {
             for (Feature feature : featuresService.listFeatures()) {
                 if (acceptsFeature(feature)) {
-                    delegate.getStrings().add(feature.getName());
+                    add(delegate.getStrings(), feature);
                 }
             }
         } catch (Exception e) {
             // Ignore
         }
         return delegate.complete(session, commandLine, candidates);
+    }
+
+    protected void add(SortedSet<String> candidates, Feature feature) {
+        candidates.add(feature.getName());
     }
 
     /**
