@@ -104,6 +104,8 @@ import static org.osgi.framework.Bundle.UNINSTALLED;
 import static org.osgi.framework.namespace.HostNamespace.HOST_NAMESPACE;
 import static org.osgi.framework.namespace.IdentityNamespace.IDENTITY_NAMESPACE;
 import static org.osgi.framework.namespace.IdentityNamespace.TYPE_BUNDLE;
+import static org.osgi.resource.Namespace.CAPABILITY_EFFECTIVE_DIRECTIVE;
+import static org.osgi.resource.Namespace.EFFECTIVE_ACTIVE;
 
 public class Deployer {
 
@@ -828,29 +830,28 @@ public class Deployer {
                 states.put(resource, reqState);
                 for (Wire wire : resolver.getWiring().get(resource)) {
                     Resource provider = wire.getProvider();
+                    FeatureState stateToMerge;
                     String region = resolver.getBundles().get(provider);
                     BundleInfo bi = region != null ? resolver.getBundleInfos().get(region).get(getUri(provider)) : null;
-                    FeatureState stateToMerge = determineBundleState(reqState, wire, bi);
+                    if (reqState == FeatureState.Started) {
+                        String effective = wire.getCapability().getDirectives().get(CAPABILITY_EFFECTIVE_DIRECTIVE);
+                        // If there is an active effective capability or a requirement from the feature
+                        // and if the bundle is flagged as to start, start it
+                        if ((EFFECTIVE_ACTIVE.equals(effective) || IDENTITY_NAMESPACE.equals(wire.getCapability().getNamespace()))
+                                && (bi == null || bi.isStart())) {
+                            stateToMerge = FeatureState.Started;
+                        } else {
+                            stateToMerge = FeatureState.Resolved;
+                        }
+                    } else {
+                        stateToMerge = reqState;
+                    }
                     propagateState(states, provider, stateToMerge, resolver);
                 }
             }
         }
     }
 
-    private FeatureState determineBundleState(FeatureState reqState, Wire wire, BundleInfo bi) {
-        if (reqState == FeatureState.Started) {
-            boolean isIdentity = IDENTITY_NAMESPACE.equals(wire.getCapability().getNamespace());
-            if (isIdentity && (bi != null && !bi.isStart())) {
-                // Always start bundles unless they are explicitly set to not start
-                return FeatureState.Resolved;
-            } else {
-                return FeatureState.Started; 
-            }
-        } else {
-            return reqState;
-        }
-    }
-    
     private boolean isSubsystem(Resource resource) {
         return TYPE_SUBSYSTEM.equals(getType(resource));
     }
