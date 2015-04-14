@@ -29,8 +29,8 @@ public class Activator implements BundleActivator {
             ClassLoader cl = this.getClass().getClassLoader();
             try {
                 Class<?> dumpHandlerClazz = cl.loadClass("org.apache.karaf.diagnostic.core.internal.DumpHandler");
-                dumpHandler = (Closeable)dumpHandlerClazz.getConstructor(BundleContext.class).newInstance(context);
-            } catch (Exception e) {
+                dumpHandler = (Closeable) dumpHandlerClazz.getConstructor(BundleContext.class).newInstance(context);
+            } catch (Throwable e) {
                 // Will happen if sun.misc.SignalHandler is not available
             }
         }
