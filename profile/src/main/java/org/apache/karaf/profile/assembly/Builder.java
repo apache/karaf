@@ -617,8 +617,17 @@ public class Builder {
                     synchronized (provider) {
                         Path input = provider.getFile().toPath();
                         String name = filename != null ? filename : input.getFileName().toString();
-                        Path output = homeDirectory.resolve(path).resolve(name);
-                        Files.copy(input, output, StandardCopyOption.REPLACE_EXISTING);
+                        if (provider.getUrl().startsWith("mvn:")) {
+                            String mvnPath = Parser.pathFromMaven(provider.getUrl());
+                            Path sysOutput = systemDirectory.resolve(mvnPath);
+                            Files.createDirectories(sysOutput.getParent());
+                            Files.copy(input, sysOutput, StandardCopyOption.REPLACE_EXISTING);
+                            Path libOutput = homeDirectory.resolve(path).resolve(name);
+                            Files.createSymbolicLink(libOutput, libOutput.getParent().relativize(sysOutput));
+                        } else {
+                            Path output = homeDirectory.resolve(path).resolve(name);
+                            Files.copy(input, output, StandardCopyOption.REPLACE_EXISTING);
+                        }
                     }
                     boolean export = Boolean.parseBoolean(clause.getDirective(LIBRARY_CLAUSE_EXPORT));
                     boolean delegate = Boolean.parseBoolean(clause.getDirective(LIBRARY_CLAUSE_DELEGATE));

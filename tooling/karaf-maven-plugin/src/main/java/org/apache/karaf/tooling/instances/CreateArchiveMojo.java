@@ -18,24 +18,29 @@
  */
 package org.apache.karaf.tooling.instances;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
+import org.apache.commons.compress.archivers.tar.TarConstants;
+import org.apache.commons.compress.archivers.zip.UnixStat;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.karaf.tooling.utils.MojoSupport;
-import org.apache.maven.model.Resource;
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
-import org.apache.tools.ant.Project;
-import org.apache.tools.ant.taskdefs.MatchingTask;
-import org.apache.tools.ant.taskdefs.Tar;
-import org.apache.tools.ant.taskdefs.Zip;
-import org.apache.tools.ant.types.TarFileSet;
-import org.apache.tools.ant.types.ZipFileSet;
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
 
 /**
  * Package a server archive from an assembled server
@@ -73,6 +78,16 @@ public class CreateArchiveMojo extends MojoSupport {
     @Parameter
     private boolean archiveZip = true;
 
+    /**
+     * use symbolic links in tar.gz or zip archives
+     *
+     * Symbolic links are not very well supported by windows Platform.
+     * At least, is does not work on WinXP + NTFS, so do not include them
+     * for now. So the default is false.
+     */
+    @Parameter
+    private boolean useSymLinks = false;
+
     public void execute() throws MojoExecutionException, MojoFailureException {
         getLog().debug("Setting artifact file: " + targetFile);
         org.apache.maven.artifact.Artifact artifact = project.getArtifact();
@@ -106,100 +121,106 @@ public class CreateArchiveMojo extends MojoSupport {
            serverName = artifact.getArtifactId() + "-" + artifact.getVersion();
         }
         dest = new File(dest, serverName + "." + artifact.getType());
-        Project project = new Project();
-        MatchingTask archiver;
+
         if ("tar.gz".equals(artifact.getType())) {
-            Tar tar = new Tar();
-            Tar.TarCompressionMethod tarCompressionMethod = new Tar.TarCompressionMethod();
-            tarCompressionMethod.setValue("gzip");
-            tar.setCompression(tarCompressionMethod);
-            Tar.TarLongFileMode fileMode = new Tar.TarLongFileMode();
-            fileMode.setValue(Tar.TarLongFileMode.GNU);
-            tar.setLongfile(fileMode);
-            tar.setDestFile(dest);
-            TarFileSet rc = new TarFileSet();
-            rc.setDir(source);
-            rc.setPrefix(serverName);
-            rc.setProject(project);
-            rc.setExcludes("bin/");
-            tar.add(rc);
+            try (
+                    OutputStream fOut = Files.newOutputStream(dest.toPath());
+                    OutputStream bOut = new BufferedOutputStream(fOut);
+                    OutputStream gzOut = new GzipCompressorOutputStream(bOut);
+                    TarArchiveOutputStream tOut = new TarArchiveOutputStream(gzOut);
+                    DirectoryStream<Path> children = Files.newDirectoryStream(source.toPath())
 
-            rc = new TarFileSet();
-            rc.setDir(source);
-            rc.setPrefix(serverName);
-            rc.setProject(project);
-            rc.setIncludes("bin/");
-            rc.setExcludes("bin/*.bat");
-            rc.setFileMode("755");
-            tar.add(rc);
-
-            rc = new TarFileSet();
-            rc.setDir(source);
-            rc.setPrefix(serverName);
-            rc.setProject(project);
-            rc.setIncludes("bin/*.bat");
-            tar.add(rc);
-
-            for (Resource resource: this.project.getResources()) {
-                File resourceFile = new File(resource.getDirectory());
-                if (resourceFile.exists()) {
-                    rc = new TarFileSet();
-                    rc.setPrefix(serverName);
-                    rc.setProject(project);
-                    rc.setDir(resourceFile);
-                    rc.appendIncludes(resource.getIncludes().toArray(new String[0]));
-                    rc.appendExcludes(resource.getExcludes().toArray(new String[0]));
-                    tar.add(rc);
+            ) {
+                tOut.setLongFileMode(TarArchiveOutputStream.LONGFILE_POSIX);
+                tOut.setBigNumberMode(TarArchiveOutputStream.BIGNUMBER_POSIX);
+                for (Path child : children) {
+                    addFileToTarGz(tOut, child, serverName + "/");
                 }
             }
-
-            archiver = tar;
         } else if ("zip".equals(artifact.getType())) {
-            Zip zip = new Zip();
-            zip.setDestFile(dest);
-            ZipFileSet fs = new ZipFileSet();
-            fs.setDir(source);
-            fs.setPrefix(serverName);
-            fs.setProject(project);
-            fs.setExcludes("bin/");
-            zip.addFileset(fs);
+            try (
+                    OutputStream fOut = Files.newOutputStream(dest.toPath());
+                    OutputStream bOut = new BufferedOutputStream(fOut);
+                    ZipArchiveOutputStream tOut = new ZipArchiveOutputStream(bOut);
+                    DirectoryStream<Path> children = Files.newDirectoryStream(source.toPath())
 
-            fs = new ZipFileSet();
-            fs.setDir(source);
-            fs.setPrefix(serverName);
-            fs.setProject(project);
-            fs.setIncludes("bin/");
-            fs.setExcludes("bin/*.bat");
-            fs.setFileMode("755");
-            zip.add(fs);
-
-            fs = new ZipFileSet();
-            fs.setDir(source);
-            fs.setPrefix(serverName);
-            fs.setProject(project);
-            fs.setIncludes("bin/*.bat");
-            zip.add(fs);
-
-            for (Resource resource: this.project.getResources()) {
-                File resourceFile = new File(resource.getDirectory());
-                if (resourceFile.exists()) {
-                    fs = new ZipFileSet();
-                    fs.setPrefix(serverName);
-                    fs.setProject(project);
-                    fs.setDir(resourceFile);
-                    fs.appendIncludes(resource.getIncludes().toArray(new String[0]));
-                    fs.appendExcludes(resource.getExcludes().toArray(new String[0]));
-                    zip.add(fs);
+            ) {
+                for (Path child : children) {
+                    addFileToZip(tOut, child, serverName + "/");
                 }
             }
-
-            archiver = zip;
         } else {
             throw new IllegalArgumentException("Unknown target type: " + artifact.getType());
         }
-        archiver.setProject(project);
-        archiver.execute();
+
         return dest;
+    }
+
+    private void addFileToTarGz(TarArchiveOutputStream tOut, Path f, String base) throws IOException {
+        if (Files.isDirectory(f)) {
+            String entryName = base + f.getFileName().toString() + "/";
+            TarArchiveEntry tarEntry = new TarArchiveEntry(entryName);
+            tOut.putArchiveEntry(tarEntry);
+            tOut.closeArchiveEntry();
+            try (DirectoryStream<Path> children = Files.newDirectoryStream(f)) {
+                for (Path child : children) {
+                    addFileToTarGz(tOut, child, entryName);
+                }
+            }
+        } else if (useSymLinks && Files.isSymbolicLink(f)) {
+            String entryName = base + f.getFileName().toString();
+            TarArchiveEntry tarEntry = new TarArchiveEntry(entryName, TarConstants.LF_SYMLINK);
+            tarEntry.setLinkName(Files.readSymbolicLink(f).toString());
+            tOut.putArchiveEntry(tarEntry);
+            tOut.closeArchiveEntry();
+        }  else {
+            String entryName = base + f.getFileName().toString();
+            TarArchiveEntry tarEntry = new TarArchiveEntry(entryName);
+            tarEntry.setSize(Files.size(f));
+            if (entryName.contains("/bin/")) {
+                tarEntry.setMode(0755);
+                if (entryName.endsWith(".bat")) {
+                    return;
+                }
+            }
+            tOut.putArchiveEntry(tarEntry);
+            Files.copy(f, tOut);
+            tOut.closeArchiveEntry();
+        }
+    }
+
+    private void addFileToZip(ZipArchiveOutputStream tOut, Path f, String base) throws IOException {
+        if (Files.isDirectory(f)) {
+            String entryName = base + f.getFileName().toString() + "/";
+            ZipArchiveEntry zipEntry = new ZipArchiveEntry(entryName);
+            tOut.putArchiveEntry(zipEntry);
+            tOut.closeArchiveEntry();
+            try (DirectoryStream<Path> children = Files.newDirectoryStream(f)) {
+                for (Path child : children) {
+                    addFileToZip(tOut, child, entryName);
+                }
+            }
+        } else if (useSymLinks && Files.isSymbolicLink(f)) {
+            String entryName = base + f.getFileName().toString();
+            ZipArchiveEntry zipEntry = new ZipArchiveEntry(entryName);
+            zipEntry.setUnixMode(UnixStat.LINK_FLAG | UnixStat.DEFAULT_FILE_PERM);
+            tOut.putArchiveEntry(zipEntry);
+            tOut.write(Files.readSymbolicLink(f).toString().getBytes());
+            tOut.closeArchiveEntry();
+        }  else {
+            String entryName = base + f.getFileName().toString();
+            ZipArchiveEntry zipEntry = new ZipArchiveEntry(entryName);
+            zipEntry.setSize(Files.size(f));
+            if (entryName.contains("/bin/")) {
+                if (!entryName.endsWith(".bat")) {
+                    return;
+                }
+                zipEntry.setUnixMode(0755);
+            }
+            tOut.putArchiveEntry(zipEntry);
+            Files.copy(f, tOut);
+            tOut.closeArchiveEntry();
+        }
     }
 
 }
