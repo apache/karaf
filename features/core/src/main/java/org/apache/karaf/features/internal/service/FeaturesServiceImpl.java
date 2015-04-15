@@ -536,8 +536,11 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         }
     }
 
-    public Feature[] getFeatures(String name) throws Exception {
-        return getFeatures(name, null);
+    public Feature[] getFeatures(String nameOrId) throws Exception {
+        String[] parts = nameOrId.split("/");
+        String name = parts.length > 0 ? parts[0] : nameOrId;
+        String version = parts.length > 1 ? parts[1] : null;
+        return getFeatures(name, version);
     }
 
     public Feature[] getFeatures(String name, String version) throws Exception {
@@ -547,7 +550,10 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
             Matcher matcher = pattern.matcher(featureName);
             if (matcher.matches()) {
                 Map<String, Feature> versions = getFeatures().get(featureName);
-                features.add(getFeatureMatching(versions, version));
+                Feature matchingFeature = getFeatureMatching(versions, version);
+                if (matchingFeature != null) {
+                    features.add(matchingFeature);
+                }
             }
         }
         return features.toArray(new Feature[features.size()]);

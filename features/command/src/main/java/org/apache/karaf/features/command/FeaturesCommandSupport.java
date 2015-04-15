@@ -50,16 +50,13 @@ public abstract class FeaturesCommandSupport implements Action {
         }
     }
     
-    protected String getFeatureId(FeaturesService admin, String featureName) throws Exception {
-        String[] parts = featureName.split("/");
-        String name = parts.length > 0 ? parts[0] : featureName;
-        String version = parts.length > 1 ? parts[1] : null;
-        Feature[] matchingFeatures = admin.getFeatures(name, version);
+    protected String getFeatureId(FeaturesService admin, String nameOrId) throws Exception {
+        Feature[] matchingFeatures = admin.getFeatures(nameOrId);
         if (matchingFeatures.length == 0) {
-            throw new IllegalArgumentException("No matching feature found for " + featureName);
+            throw new IllegalArgumentException("No matching feature found for " + nameOrId);
         }
         if (matchingFeatures.length > 1) {
-            throw new IllegalArgumentException("More than one matching feature found for " + featureName);
+            throw new IllegalArgumentException("More than one matching feature found for " + nameOrId);
         }
         return matchingFeatures[0].getId();
     }

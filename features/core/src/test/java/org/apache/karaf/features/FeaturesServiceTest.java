@@ -354,7 +354,7 @@ public class FeaturesServiceTest extends TestBase {
         assertEquals(feature("f2", "0.2"), svc.getFeatures("f2", "[0.1,0.3)")[0]);
         assertEquals(feature("f2", "0.2"), svc.getFeatures("f2", "0.0.0")[0]);
         assertEquals(feature("f2", "0.2"), svc.getFeatures("f2", "0.2")[0]);
-        assertNull(svc.getFeatures("f2", "0.3")[0]);
+        assertEquals(0, svc.getFeatures("f2", "0.3").length);
     }
 
     @Test
