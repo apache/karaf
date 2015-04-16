@@ -289,7 +289,7 @@ public class InstallKarsMojo extends MojoSupport {
 
 
         // install bundles defined in startup.properties
-        getLog().info("Installing bundles defined in startup.properties in the system");
+        /*getLog().info("Installing bundles defined in startup.properties in the system");
         Set<?> startupBundles = startupProperties.keySet();
         for (Object startupBundle : startupBundles) {
             String bundlePath = this.dependencyHelper.pathFromMaven((String) startupBundle);
@@ -299,7 +299,7 @@ public class InstallKarsMojo extends MojoSupport {
                 bundleFile.getParentFile().mkdirs();
                 copy(bundleSource, bundleFile);
             }
-        }
+        }*/
 
         // generate the startup.properties file
         getLog().info("Generating the startup.properties file");
