@@ -41,7 +41,7 @@ import org.apache.sshd.server.session.ServerSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ShellCommand implements Command, SessionAware {
+public class ShellCommand implements Command, Runnable, SessionAware {
 
     public static final String SHELL_INIT_SCRIPT = "karaf.shell.init.script";
 
@@ -60,6 +60,7 @@ public class ShellCommand implements Command, SessionAware {
     private ExitCallback callback;
     private ServerSession session;
     private CommandProcessor commandProcessor;
+    private Environment env;
 
     private boolean consoleLogger = false;
     private String consoleLoggerName;
@@ -104,6 +105,11 @@ public class ShellCommand implements Command, SessionAware {
     }
 
     public void start(final Environment env) throws IOException {
+        this.env = env;
+        new Thread(this).start();
+    }
+
+    public void run() {
         int exitStatus = 0;
         final CommandSession commandSession = commandProcessor.createSession(in, new PrintStream(out), new PrintStream(err));
         try {
@@ -142,7 +148,7 @@ public class ShellCommand implements Command, SessionAware {
             }
         } catch (Exception e) {
             exitStatus = 1;
-            throw (IOException) new IOException("Unable to start shell").initCause(e);
+            LOGGER.error("Unable to start shell", e);
         } finally {
             StreamUtils.close(in, out, err);
             commandSession.close();
