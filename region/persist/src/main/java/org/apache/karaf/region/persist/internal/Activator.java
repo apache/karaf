@@ -28,6 +28,8 @@ import org.eclipse.equinox.region.RegionDigraph;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleEvent;
+import org.osgi.framework.BundleListener;
 import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +52,7 @@ public class Activator implements BundleActivator {
                 Bundle framework = bundleContext.getBundle(0);
                 RegionsPersistenceImpl persistence = null;
                 try {
-                    persistence = new RegionsPersistenceImpl(regionDigraph, framework);
+                    persistence = new RegionsPersistenceImpl(regionDigraph, tracker.getServiceReference().getBundle(), framework);
                     reg = bundleContext.registerService(RegionsPersistence.class, persistence, null);
 
                     RegionsBundleTracker bundleTracker = new RegionsBundleTracker();
@@ -76,6 +78,23 @@ public class Activator implements BundleActivator {
             }
         });
         tracker.open();
+
+        bundleContext.addBundleListener(new BundleListener() {
+            @Override
+            public void bundleChanged(BundleEvent bundleEvent) {
+                if (bundleEvent.getType() == BundleEvent.INSTALLED
+                        || bundleEvent.getType() == BundleEvent.UNINSTALLED) {
+                    RegionsPersistence persist = Activator.this.persistence.get();
+                    if (persist != null) {
+                        try {
+                            persist.save();
+                        } catch (Exception e) {
+                            log.warn("Unable to persist region digraph", e);
+                        }
+                    }
+                }
+            }
+        });
     }
 
     @Override

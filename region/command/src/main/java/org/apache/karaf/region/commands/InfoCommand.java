@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.karaf.region.persist.RegionsPersistence;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
@@ -46,7 +47,7 @@ public class InfoCommand extends RegionCommandSupport {
     @Argument(index = 0, name = "regions", description = "Regions to provide detailed info for.", required = false, multiValued = true)
     List<String> regions;
 
-    protected void doExecute(RegionDigraph regionDigraph) throws Exception {
+    protected void doExecute(RegionDigraph regionDigraph, RegionsPersistence persist) throws Exception {
         System.out.println("Regions");
         if (regions == null) {
             for (Region region : regionDigraph.getRegions()) {

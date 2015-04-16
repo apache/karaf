@@ -61,9 +61,10 @@ public class RegionsBundleTracker {
         if (region != null) {
             try {
                 regionsPersistence.install(bundle, region);
+                regionsPersistence.save();
                 log.debug("Installed bundle " + bundle + " in region " + region);
                 return bundle;
-            } catch (BundleException e) {
+            } catch (Exception e) {
                 log.info("Could not install bundle " + bundle + " in region " + region, e);
             }
         }

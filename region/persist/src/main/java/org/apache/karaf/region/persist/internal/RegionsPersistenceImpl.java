@@ -19,6 +19,7 @@
 package org.apache.karaf.region.persist.internal;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
@@ -60,10 +61,12 @@ public class RegionsPersistenceImpl implements RegionsPersistence {
     private JAXBContext jaxbContext;
     private RegionDigraph regionDigraph;
     private Region kernel;
+    private Bundle digraphBundle;
     private Bundle framework;
 
-    public RegionsPersistenceImpl(RegionDigraph regionDigraph, Bundle framework) throws JAXBException, BundleException, IOException, InvalidSyntaxException {
+    public RegionsPersistenceImpl(RegionDigraph regionDigraph, Bundle digraphBundle, Bundle framework) throws JAXBException, BundleException, IOException, InvalidSyntaxException {
         log.info("Loading region digraph persistence");
+        this.digraphBundle = digraphBundle;
         this.framework = framework;
         this.regionDigraph = regionDigraph;
         kernel = regionDigraph.getRegion(0);
@@ -79,6 +82,21 @@ public class RegionsPersistenceImpl implements RegionsPersistence {
         }
         kernel.removeBundle(b);
         region.addBundle(b);
+    }
+
+    @Override
+    public void save() throws BundleException, IOException {
+        File digraphFile = digraphBundle.getBundleContext().getDataFile("digraph");
+        FileOutputStream digraphStream = new FileOutputStream(digraphFile);
+        try  {
+            regionDigraph.getRegionDigraphPersistence().save(
+                    regionDigraph,
+                    digraphStream
+
+            );
+        } finally {
+            digraphStream.close();
+        }
     }
 
     void save(RegionsType regionsType, Writer out) throws JAXBException {

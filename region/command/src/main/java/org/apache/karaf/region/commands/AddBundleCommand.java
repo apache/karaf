@@ -18,6 +18,7 @@ package org.apache.karaf.region.commands;
 
 import java.util.List;
 
+import org.apache.karaf.region.persist.RegionsPersistence;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.eclipse.equinox.region.Region;
@@ -33,18 +34,21 @@ public class AddBundleCommand extends RegionCommandSupport {
     @Argument(index = 1, name = "bundles", description = "Bundles by id to add to the region", required = true, multiValued = true)
     List<Long> ids;
 
-    protected void doExecute(RegionDigraph regionDigraph) throws Exception {
+    protected void doExecute(RegionDigraph regionDigraph, RegionsPersistence persist) throws Exception {
         Region r = getRegion(regionDigraph, region);
-        for (Long id : ids) {
-            for (Region existing: regionDigraph.getRegions()) {
-                if (existing.contains(id)) {
-                    Bundle b = getBundleContext().getBundle(id);
-                    System.out.println("Removing bundle " + id + " from region " + existing.getName());
-                    existing.removeBundle(b);
-                    break;
+        if (!ids.isEmpty()) {
+            for (Long id : ids) {
+                for (Region existing : regionDigraph.getRegions()) {
+                    if (existing.contains(id)) {
+                        Bundle b = getBundleContext().getBundle(id);
+                        System.out.println("Removing bundle " + id + " from region " + existing.getName());
+                        existing.removeBundle(b);
+                        break;
+                    }
                 }
+                r.addBundle(id);
             }
-            r.addBundle(id);
+            persist.save();
         }
     }
 }

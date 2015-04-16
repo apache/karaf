@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.apache.aries.util.VersionRange;
 import org.apache.aries.util.manifest.ManifestHeaderProcessor;
+import org.apache.karaf.region.persist.RegionsPersistence;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.eclipse.equinox.region.Region;
@@ -44,7 +45,7 @@ public class AddFilterCommand extends RegionCommandSupport {
     @Argument(index = 2, name = "items", description = "The bundles by id and packages with version to allow.", required = false, multiValued = true)
     List<String> items;
 
-    protected void doExecute(RegionDigraph regionDigraph) throws Exception {
+    protected void doExecute(RegionDigraph regionDigraph, RegionsPersistence persist) throws Exception {
         Region rFrom = getRegion(regionDigraph, fromRegion);
         Region rTo = getRegion(regionDigraph, toRegion);
         RegionFilterBuilder builder = regionDigraph.createRegionFilterBuilder();
@@ -70,6 +71,7 @@ public class AddFilterCommand extends RegionCommandSupport {
         }
         RegionFilter f = builder.build();
         regionDigraph.connect(rFrom, f, rTo);
+        persist.save();
     }
 
     //from aries util, with obr specific weirdness removed

@@ -18,6 +18,7 @@ package org.apache.karaf.region.commands;
 
 import java.util.List;
 
+import org.apache.karaf.region.persist.RegionsPersistence;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.eclipse.equinox.region.RegionDigraph;
@@ -28,9 +29,10 @@ public class AddRegionCommand extends RegionCommandSupport {
     @Argument(index = 0, name = "name", description = "Regions to add to the region digraph service separated by whitespaces.", required = true, multiValued = true)
     List<String> regions;
 
-    protected void doExecute(RegionDigraph regionDigraph) throws Exception {
+    protected void doExecute(RegionDigraph regionDigraph, RegionsPersistence persist) throws Exception {
         for (String region : regions) {
             regionDigraph.createRegion(region);
         }
+        persist.save();
     }
 }

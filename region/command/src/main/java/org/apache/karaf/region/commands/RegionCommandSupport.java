@@ -18,48 +18,31 @@ package org.apache.karaf.region.commands;
 
 import java.io.PrintStream;
 
+import org.apache.karaf.region.persist.RegionsPersistence;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.eclipse.equinox.region.Region;
 import org.eclipse.equinox.region.RegionDigraph;
+import org.eclipse.equinox.region.RegionDigraphPersistence;
 import org.osgi.framework.BundleException;
-import org.osgi.framework.ServiceReference;
 
 public abstract class RegionCommandSupport extends OsgiCommandSupport {
 
-    protected static final char VERSION_DELIM = ',';
-
     protected Object doExecute() throws Exception {
-        // Get repository instance service.
-        ServiceReference ref = getBundleContext().getServiceReference(RegionDigraph.class.getName());
-        if (ref == null) {
+        RegionDigraph digraph = getService(RegionDigraph.class);
+        if (digraph == null) {
             System.out.println("RegionDigraph service is unavailable.");
             return null;
         }
-        try {
-            RegionDigraph admin = (RegionDigraph) getBundleContext().getService(ref);
-            if (admin == null) {
-                System.out.println("RegionDigraph service is unavailable.");
-                return null;
-            }
-
-            doExecute(admin);
+        RegionsPersistence persist = getService(RegionsPersistence.class);
+        if (persist == null) {
+            System.out.println("RegionsPersistence service is unavailable.");
+            return null;
         }
-        finally {
-            getBundleContext().ungetService(ref);
-        }
+        doExecute(digraph, persist);
         return null;
     }
 
-    abstract void doExecute(RegionDigraph admin) throws Exception;
-
-    protected void printUnderline(PrintStream out, int length)
-    {
-        for (int i = 0; i < length; i++)
-        {
-            out.print('-');
-        }
-        out.println("");
-    }
+    abstract void doExecute(RegionDigraph admin, RegionsPersistence persist) throws Exception;
 
 
     protected Region getRegion(RegionDigraph regionDigraph, String region) throws BundleException {
