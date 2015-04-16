@@ -26,6 +26,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,15 +63,33 @@ public final class DigraphHelper {
         File digraphFile = bundleContext.getDataFile(DIGRAPH_FILE);
         if (digraphFile == null || !digraphFile.exists()) {
             digraph = new StandardRegionDigraph(bundleContext, threadLocal);
-            Region root = digraph.createRegion(FeaturesServiceImpl.ROOT_REGION);
-            for (Bundle bundle : bundleContext.getBundles()) {
-                root.addBundle(bundle);
-            }
         } else {
             try (
                     InputStream in = new FileInputStream(digraphFile)
             ) {
                 digraph = readDigraph(new DataInputStream(in), bundleContext, threadLocal);
+            }
+        }
+        // Create default region is missing
+        Region defaultRegion = digraph.getRegion(FeaturesServiceImpl.ROOT_REGION);
+        if (defaultRegion == null) {
+            defaultRegion = digraph.createRegion(FeaturesServiceImpl.ROOT_REGION);
+        }
+        // Add all unknown bundle to default region
+        Set<Long> ids = new HashSet<>();
+        for (Bundle bundle : bundleContext.getBundles()) {
+            long id = bundle.getBundleId();
+            ids.add(id);
+            if (digraph.getRegion(id) == null) {
+                defaultRegion.addBundle(id);
+            }
+        }
+        // Clean stalled bundles
+        for (Region region : digraph) {
+            Set<Long> bundleIds = new HashSet<>(region.getBundleIds());
+            bundleIds.removeAll(ids);
+            for (long id : bundleIds) {
+                region.removeBundle(id);
             }
         }
         return digraph;

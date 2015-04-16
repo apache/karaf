@@ -59,6 +59,7 @@ import org.apache.karaf.features.Repository;
 import org.apache.karaf.features.RepositoryEvent;
 import org.apache.karaf.features.internal.download.DownloadManager;
 import org.apache.karaf.features.internal.download.DownloadManagers;
+import org.apache.karaf.features.internal.region.DigraphHelper;
 import org.apache.karaf.features.internal.util.JsonReader;
 import org.apache.karaf.features.internal.util.JsonWriter;
 import org.apache.karaf.util.bundles.BundleUtils;
@@ -286,6 +287,9 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
                     state.bundleChecksums.clear();
                 }
                 storage.save(state);
+                if (bundle != null) { // For tests, this should never happen at runtime
+                    DigraphHelper.saveDigraph(bundle.getBundleContext(), digraph);
+                }
             }
         } catch (IOException e) {
             LOGGER.warn("Error saving FeaturesService state", e);
