@@ -56,7 +56,7 @@ public class ShellCommandFactory implements CommandFactory {
         return new ShellCommand(command);
     }
 
-    public class ShellCommand implements Command, SessionAware {
+    public class ShellCommand implements Command, Runnable, SessionAware {
 
         private String command;
         private InputStream in;
@@ -64,6 +64,7 @@ public class ShellCommandFactory implements CommandFactory {
         private OutputStream err;
         private ExitCallback callback;
         private ServerSession session;
+        private Environment env;
 
         public ShellCommand(String command) {
             this.command = command;
@@ -90,6 +91,11 @@ public class ShellCommandFactory implements CommandFactory {
         }
 
         public void start(final Environment env) throws IOException {
+            this.env = env;
+            new Thread(this).start();
+        }
+
+        public void run() {
             int exitStatus = 0;
             try {
                 final CommandSession session = commandProcessor.createSession(in, new PrintStream(out), new PrintStream(err));
@@ -161,7 +167,7 @@ public class ShellCommandFactory implements CommandFactory {
                 }
             } catch (Exception e) {
                 exitStatus = 1;
-                throw (IOException) new IOException("Unable to start shell").initCause(e);
+                LOGGER.error("Unable to start shell", e);
             } finally {
                 close(in, out, err);
                 callback.onExit(exitStatus);
