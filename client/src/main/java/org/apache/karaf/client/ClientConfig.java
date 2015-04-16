@@ -19,13 +19,16 @@ package org.apache.karaf.client;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Properties;
+import java.util.Set;
 
 import org.slf4j.impl.SimpleLogger;
 
 public class ClientConfig {
 
     private static final String ROLE_DELIMITER = ",";
+    private static final String GROUP_PREFIX = "_g_:";
 
     private String host;
     private int port;
@@ -149,8 +152,14 @@ public class ClientConfig {
 
         Properties usersCfg = loadProps(new File(System.getProperty("karaf.etc") + "/users.properties"));
         if (!usersCfg.isEmpty()) {
+            Set<String> users = new HashSet<>();
+            for (String user : usersCfg.stringPropertyNames()) {
+                if (!user.startsWith(GROUP_PREFIX)) {
+                    users.add(user);
+                }
+            }
             if (user == null) {
-                user = (String) usersCfg.keySet().iterator().next();
+                user = (String) users.iterator().next();
             }
             password = (String) usersCfg.getProperty(user);
             if (password != null && password.contains(ROLE_DELIMITER)) {
