@@ -105,8 +105,6 @@ import static org.osgi.framework.Bundle.UNINSTALLED;
 import static org.osgi.framework.namespace.HostNamespace.HOST_NAMESPACE;
 import static org.osgi.framework.namespace.IdentityNamespace.IDENTITY_NAMESPACE;
 import static org.osgi.framework.namespace.IdentityNamespace.TYPE_BUNDLE;
-import static org.osgi.resource.Namespace.CAPABILITY_EFFECTIVE_DIRECTIVE;
-import static org.osgi.resource.Namespace.EFFECTIVE_ACTIVE;
 
 public class Deployer {
 
