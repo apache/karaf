@@ -233,6 +233,56 @@
 						<artifactId>org.apache.karaf.scr.command</artifactId>
 						<version>${project.version}</version>
 					</dependency>
+					<dependency>
+						<groupId>org.apache.karaf.jdbc</groupId>
+						<artifactId>org.apache.karaf.jdbc.core</artifactId>
+						<version>${project.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.apache.karaf.jms</groupId>
+						<artifactId>org.apache.karaf.jms.core</artifactId>
+						<version>${project.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.apache.karaf.jndi</groupId>
+						<artifactId>org.apache.karaf.jndi.core</artifactId>
+						<version>${project.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.apache.karaf.config</groupId>
+						<artifactId>org.apache.karaf.config.core</artifactId>
+						<version>${project.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.apache.karaf.http</groupId>
+						<artifactId>org.apache.karaf.http.core</artifactId>
+						<version>${project.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.apache.karaf.kar</groupId>
+						<artifactId>org.apache.karaf.kar.core</artifactId>
+						<version>${project.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.apache.karaf.package</groupId>
+						<artifactId>org.apache.karaf.package.core</artifactId>
+						<version>${project.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.apache.karaf.profile</groupId>
+						<artifactId>org.apache.karaf.profile.core</artifactId>
+						<version>${project.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.apache.karaf.scheduler</groupId>
+						<artifactId>org.apache.karaf.scheduler.core</artifactId>
+						<version>${project.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.apache.karaf.subsystem</groupId>
+						<artifactId>org.apache.karaf.subsystem.core</artifactId>
+						<version>${project.version}</version>
+					</dependency>
 					<!-- Additional Required Dependencies -->
 					<dependency>
 						<groupId>org.apache.felix</groupId>
