@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.karaf.tooling.instances;
+package org.apache.karaf.tooling;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -45,8 +45,8 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 /**
  * Package a server archive from an assembled server
  */
-@Mojo(name = "instance-create-archive", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME)
-public class CreateArchiveMojo extends MojoSupport {
+@Mojo(name = "archive", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME)
+public class ArchiveMojo extends MojoSupport {
 
     /**
      * The target directory of the project.

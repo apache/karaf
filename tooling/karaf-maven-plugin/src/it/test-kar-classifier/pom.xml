@@ -40,9 +40,9 @@
                         </goals>
                     </execution>
                     <execution>
-                        <id>features-create-kar</id>
+                        <id>kar</id>
                         <goals>
-                            <goal>features-create-kar</goal>
+                            <goal>kar</goal>
                         </goals>
                         <configuration>
                             <classifier>classy</classifier>

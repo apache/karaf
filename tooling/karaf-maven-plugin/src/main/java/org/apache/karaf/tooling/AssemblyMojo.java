@@ -16,16 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.karaf.tooling.features;
+package org.apache.karaf.tooling;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.karaf.profile.assembly.Builder;
-import org.apache.karaf.tooling.utils.DependencyHelper;
-import org.apache.karaf.tooling.utils.DependencyHelperFactory;
 import org.apache.karaf.tooling.utils.IoUtils;
+import org.apache.karaf.tooling.utils.MavenUtil;
 import org.apache.karaf.tooling.utils.MojoSupport;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -38,8 +37,8 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 /**
  * Installs kar dependencies into a server-under-construction in target/assembly
  */
-@Mojo(name = "install-kars", defaultPhase = LifecyclePhase.PROCESS_RESOURCES, requiresDependencyResolution = ResolutionScope.RUNTIME)
-public class InstallKarsMojo extends MojoSupport {
+@Mojo(name = "assembly", defaultPhase = LifecyclePhase.PROCESS_RESOURCES, requiresDependencyResolution = ResolutionScope.RUNTIME)
+public class AssemblyMojo extends MojoSupport {
 
     /**
      * Base directory used to copy the resources during the build (working directory).
@@ -153,12 +152,8 @@ public class InstallKarsMojo extends MojoSupport {
     @Parameter
     protected Builder.KarafVersion karafVersion = Builder.KarafVersion.v4x;
 
-    // an access layer for available Aether implementation
-    protected DependencyHelper dependencyHelper;
-
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        this.dependencyHelper = DependencyHelperFactory.createDependencyHelper(this.container, this.project, this.mavenSession, getLog());
         try {
             doExecute();
         }
@@ -236,21 +231,21 @@ public class InstallKarsMojo extends MojoSupport {
                 continue;
             }
             if ("kar".equals(artifact.getType())) {
-                String uri = dependencyHelper.artifactToMvn(artifact);
+                String uri = artifactToMvn(artifact);
                 switch (stage) {
                 case Startup:   startupKars.add(uri); break;
                 case Boot:      bootKars.add(uri); break;
                 case Installed: installedKars.add(uri); break;
                 }
             } else if ("features".equals(artifact.getClassifier())) {
-                String uri = dependencyHelper.artifactToMvn(artifact);
+                String uri = artifactToMvn(artifact);
                 switch (stage) {
                 case Startup:   startupRepositories.add(uri); break;
                 case Boot:      bootRepositories.add(uri); break;
                 case Installed: installedRepositories.add(uri); break;
                 }
             } else if ("jar".equals(artifact.getType()) || "bundle".equals(artifact.getType())) {
-                String uri = dependencyHelper.artifactToMvn(artifact);
+                String uri = artifactToMvn(artifact);
                 switch (stage) {
                 case Startup:   startupBundles.add(uri); break;
                 case Boot:      bootBundles.add(uri); break;
@@ -292,6 +287,27 @@ public class InstallKarsMojo extends MojoSupport {
                 .profiles(toArray(installedProfiles));
 
         builder.generateAssembly();
+    }
+
+    private String artifactToMvn(Artifact artifact) throws MojoExecutionException {
+        String uri;
+
+        String groupId = artifact.getGroupId();
+        String artifactId = artifact.getArtifactId();
+        String version = artifact.getBaseVersion();
+        String type = artifact.getArtifactHandler().getExtension();
+        String classifier = artifact.getClassifier();
+
+        if (MavenUtil.isEmpty(classifier)) {
+            if ("jar".equals(type)) {
+                uri = String.format("mvn:%s/%s/%s", groupId, artifactId, version);
+            } else {
+                uri = String.format("mvn:%s/%s/%s/%s", groupId, artifactId, version, type);
+            }
+        } else {
+            uri = String.format("mvn:%s/%s/%s/%s/%s", groupId, artifactId, version, type, classifier);
+        }
+        return uri;
     }
 
     private String[] toArray(List<String> strings) {

@@ -72,7 +72,7 @@
                                 org.apache.karaf.tooling:karaf-maven-plugin:features-generate-descriptor
                             </compile>
                             <package>
-                                org.apache.karaf.tooling:karaf-maven-plugin:features-create-kar
+                                org.apache.karaf.tooling:karaf-maven-plugin:kar
                             </package>
                             <install>
                                 org.apache.maven.plugins:maven-install-plugin:install
@@ -115,12 +115,12 @@
                         <phases>
                             <process-resources>
                                 org.apache.maven.plugins:maven-resources-plugin:resources,
-                                org.apache.karaf.tooling:karaf-maven-plugin:install-kars
+                                org.apache.karaf.tooling:karaf-maven-plugin:assembly
                             </process-resources>
                             <compile>
                             </compile>
                             <package>
-                                org.apache.karaf.tooling:karaf-maven-plugin:instance-create-archive
+                                org.apache.karaf.tooling:karaf-maven-plugin:archive
                             </package>
                             <install>
                                 org.apache.maven.plugins:maven-install-plugin:install

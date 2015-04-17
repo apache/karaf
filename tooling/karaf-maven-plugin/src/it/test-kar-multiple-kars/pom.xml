@@ -55,9 +55,9 @@
                     </execution>
 
                     <execution>
-                        <id>features-create-kar1</id>
+                        <id>kar1</id>
                         <goals>
-                            <goal>features-create-kar</goal>
+                            <goal>kar</goal>
                         </goals>
                         <configuration>
                             <classifier>kar1</classifier>
@@ -65,9 +65,9 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>features-create-kar2</id>
+                        <id>kar2</id>
                         <goals>
-                            <goal>features-create-kar</goal>
+                            <goal>kar</goal>
                         </goals>
                         <configuration>
                             <classifier>kar2</classifier>

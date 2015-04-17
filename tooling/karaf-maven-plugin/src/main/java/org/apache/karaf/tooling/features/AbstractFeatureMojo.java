@@ -42,7 +42,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.osgi.framework.Version;
 
 /**
- * Common functionality for mojos that need to reolve features
+ * Common functionality for mojos that need to resolve features
  */
 public abstract class AbstractFeatureMojo extends MojoSupport {
     

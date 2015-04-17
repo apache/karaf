@@ -158,7 +158,7 @@ Packagings
                         <phases>
                             <process-resources>
                                 org.apache.maven.plugins:maven-resources-plugin:resources,
-                                org.apache.karaf.tooling:karaf-maven-plugin:install-kars
+                                org.apache.karaf.tooling:karaf-maven-plugin:assembly
                             </process-resources>
                             <compile>
                             </compile>

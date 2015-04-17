@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.karaf.tooling.features;
+package org.apache.karaf.tooling;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -58,8 +58,8 @@ import org.codehaus.plexus.archiver.jar.JarArchiver;
 /**
  * Assemble a kar archive from a features.xml file
  */
-@Mojo(name = "features-create-kar", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME)
-public class CreateKarMojo extends MojoSupport {
+@Mojo(name = "kar", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME)
+public class KarMojo extends MojoSupport {
 
     /**
      * The maven archive configuration to use.

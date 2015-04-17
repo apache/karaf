@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.karaf.tooling.features;
+package org.apache.karaf.tooling;
 
 import java.io.File;
 import java.io.FileReader;
@@ -106,8 +106,8 @@ import org.osgi.service.resolver.ResolutionException;
 
 import static java.util.jar.JarFile.MANIFEST_NAME;
 
-@Mojo(name = "verify-features", requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
-public class VerifyFeatureResolutionMojo extends MojoSupport {
+@Mojo(name = "verify", requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
+public class VerifyMojo extends MojoSupport {
 
     @Parameter(property = "descriptors")
     protected Set<String> descriptors;

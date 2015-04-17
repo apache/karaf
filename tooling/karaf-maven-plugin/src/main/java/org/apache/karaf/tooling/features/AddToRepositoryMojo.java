@@ -28,18 +28,15 @@ import org.apache.karaf.tooling.utils.MavenUtil;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 
 /**
  * Add features to a repository directory
- *
- * @goal features-add-to-repository
- * @phase compile
- * @execute phase="compile"
- * @requiresDependencyResolution runtime
- * @inheritByDefault true
- * @description Add the features to the repository
  */
+@Mojo(name = "features-add-to-repository", defaultPhase = LifecyclePhase.COMPILE, requiresDependencyResolution = ResolutionScope.RUNTIME)
 public class AddToRepositoryMojo extends AbstractFeatureMojo {
 
     @Parameter(defaultValue = "${project.build.directory}/features-repo")

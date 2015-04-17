@@ -338,7 +338,7 @@
                         <id>verify</id>
                         <phase>process-resources</phase>
                         <goals>
-                            <goal>verify-features</goal>
+                            <goal>verify</goal>
                         </goals>
                         <configuration>
                             <descriptors>

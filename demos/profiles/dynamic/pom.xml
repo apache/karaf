@@ -95,13 +95,13 @@
                         <id>process-resources</id>
                         <phase>process-resources</phase>
                         <goals>
-                            <goal>install-kars</goal>
+                            <goal>assembly</goal>
                         </goals>
                     </execution>
                     <execution>
                         <id>package</id>
                         <goals>
-                            <goal>instance-create-archive</goal>
+                            <goal>archive</goal>
                         </goals>
                     </execution>
                 </executions>
