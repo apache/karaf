@@ -37,6 +37,7 @@ public class BundleInfoImpl implements BundleInfo {
     private String symbolicName;
     private String updateLocation;
     private String version;
+    private String revisions;
     private long bundleId;
     private BundleState state;
     private boolean isFragment;
@@ -62,6 +63,7 @@ public class BundleInfoImpl implements BundleInfo {
         String locationFromHeader = (String)bundle.getHeaders().get(Constants.BUNDLE_UPDATELOCATION);
         this.updateLocation = locationFromHeader != null ? locationFromHeader : bundle.getLocation();
         this.version = (String)bundle.getHeaders().get(Constants.BUNDLE_VERSION);
+        this.revisions = populateRevisions(bundle);
         this.bundleId = bundle.getBundleId();
         this.state = (extState != BundleState.Unknown) ? extState : getBundleState(bundle);
         populateFragementInfos(bundle);
@@ -81,6 +83,18 @@ public class BundleInfoImpl implements BundleInfo {
                 getFragmentHosts(revision);
             }
         }
+    }
+    
+    private String populateRevisions(Bundle bundle) {
+        String ret = "";
+        BundleRevisions revisions = bundle.adapt(BundleRevisions.class);
+        if (revisions == null) {
+            return ret;
+        }
+        for (BundleRevision revision : revisions.getRevisions()) {
+            ret = ret + "[" + revision + "]" + " ";
+        }
+        return ret;
     }
 
     private void getFragments(BundleRevision revision) {
@@ -158,6 +172,11 @@ public class BundleInfoImpl implements BundleInfo {
     @Override
     public List<Bundle> getFragmentHosts() {
         return this.fragmentHosts;
+    }
+
+    @Override
+    public String getRevisions() {
+        return this.revisions;
     }
 
 }
