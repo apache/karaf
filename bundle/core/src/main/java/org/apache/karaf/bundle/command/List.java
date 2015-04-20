@@ -43,6 +43,9 @@ public class List extends BundlesCommand {
 
     @Option(name = "-u", description = "Shows the update locations", required = false, multiValued = false)
     boolean showUpdate;
+    
+    @Option(name = "-r", description = "Shows the bundle revisions", required = false, multiValued = false)
+    boolean showRevisions;
 
     @Option(name = "-t", valueToShowInHelp = "", description = "Specifies the bundle threshold; bundles with a start-level less than this value will not get printed out.", required = false, multiValued = false)
     int bundleLevelThreshold = -1;
@@ -131,6 +134,8 @@ public class List extends BundlesCommand {
             msg = "Symbolic name";
         } else if (showUpdate) {
             msg = "Update location";
+        } else if (showRevisions) {
+            msg = "Revisions";
         }
         return msg;
     }
@@ -187,6 +192,8 @@ public class List extends BundlesCommand {
             return info.getSymbolicName() == null ? "<no symbolic name>" : info.getSymbolicName();
         } else if (showUpdate) {
             return info.getUpdateLocation();
+        } else if (showRevisions) {
+            return info.getRevisions();
         } else {
             String name = (info.getName() == null) ? info.getSymbolicName() : info.getName();
             return (name == null) ? info.getUpdateLocation() : name;

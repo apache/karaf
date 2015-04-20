@@ -26,6 +26,7 @@ public interface BundleInfo {
     String getName();
     String getUpdateLocation();
     String getVersion();
+    String getRevisions();
     
     /**
      * Combined bundle state from OSGi and all BundleStateServices
