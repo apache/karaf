@@ -1714,7 +1714,7 @@
             <dependency>
                 <groupId>org.apache.aries.jpa</groupId>
                 <artifactId>org.apache.aries.jpa.container.context</artifactId>
-                <version>${aries.jpa.version}</version>
+                <version>${aries.jpa.container.context.version}</version>
             </dependency>
 
             <dependency>
