@@ -15,6 +15,103 @@
  * limitations under the License.
  */
 
+                    Apache Karaf 2.4.2
+                    ==================
+
+  Overview
+  --------
+
+This is an update patch for Apache Karaf 2.4.x, containing many bug fixes, dependency updates, and improvements. New feature highlights include: jaas commands to create and list groups, and bundles in etc/startup.properties should not be uninstalled through feature service (protecting essential features from accidental removal). It is recommended that users update their deployment after reviewing the changelog below.
+
+  Changelog
+  ---------
+
+** Bug
+ * [KARAF-2456|https://issues.apache.org/jira/browse/KARAF-2456] - Shutdown is stuck after wrapper:install
+ * [KARAF-2678|https://issues.apache.org/jira/browse/KARAF-2678] - txlog files locked during admin clone on windows
+ * [KARAF-3105|https://issues.apache.org/jira/browse/KARAF-3105] - Cannot use LDAPLoginModule with ActiveDirectory
+ * [KARAF-3136|https://issues.apache.org/jira/browse/KARAF-3136] - Karaf can't start if you have whitespaces in brackets in JAVA_OPTS
+ * [KARAF-3239|https://issues.apache.org/jira/browse/KARAF-3239] - Add fileinstall dependency in the features-maven-plugin
+ * [KARAF-3414|https://issues.apache.org/jira/browse/KARAF-3414] - SshCommandTestBase uses some deprecated sshd APIs
+ * [KARAF-3428|https://issues.apache.org/jira/browse/KARAF-3428] - Upgrade to Pax CDI 0.10.0
+ * [KARAF-3430|https://issues.apache.org/jira/browse/KARAF-3430] - User name/password missing in connection factory created with jms:create
+ * [KARAF-3441|https://issues.apache.org/jira/browse/KARAF-3441] - The admin:stop Command Does Not Zero Out Root Container PID
+ * [KARAF-3465|https://issues.apache.org/jira/browse/KARAF-3465] - Add pax-* projects URLs in the etc/org.apache.karaf.features.repos.cfg
+ * [KARAF-3471|https://issues.apache.org/jira/browse/KARAF-3471] - Karaf can't start if etc/config.properties is not writable
+ * [KARAF-3494|https://issues.apache.org/jira/browse/KARAF-3494] - client should not fail if it can't read etc/org.apache.karaf.shell.cfg file
+ * [KARAF-3499|https://issues.apache.org/jira/browse/KARAF-3499] - Missing properties on the eventadmin events for jaas
+ * [KARAF-3507|https://issues.apache.org/jira/browse/KARAF-3507] - jms:create url and username options share the same -u alias
+ * [KARAF-3527|https://issues.apache.org/jira/browse/KARAF-3527] - Appending config from feature doesn't work
+ * [KARAF-3535|https://issues.apache.org/jira/browse/KARAF-3535] - Wrapper does not include classpath and JVM options for making JMX ACLs work
+ * [KARAF-3536|https://issues.apache.org/jira/browse/KARAF-3536] - Diagnostic module won't compile with IBM JDK
+ * [KARAF-3562|https://issues.apache.org/jira/browse/KARAF-3562] - DefaultJDBCLock case sensitive issue
+ * [KARAF-3564|https://issues.apache.org/jira/browse/KARAF-3564] - bin/stop fails for slave in case of Lock strategies
+ * [KARAF-3578|https://issues.apache.org/jira/browse/KARAF-3578] - restore web:list command
+ * [KARAF-3625|https://issues.apache.org/jira/browse/KARAF-3625] - Password encryption doesn't work
+ * [KARAF-3632|https://issues.apache.org/jira/browse/KARAF-3632] - Change transaction parameter in features
+ * [KARAF-3642|https://issues.apache.org/jira/browse/KARAF-3642] - bundles mistaken got unstalled even though it has a depending feature with it.
+ * [KARAF-3648|https://issues.apache.org/jira/browse/KARAF-3648] - should zero out instance pid in instance.properties when we shutdown an instance from shell
+ * [KARAF-3651|https://issues.apache.org/jira/browse/KARAF-3651] - The karaf client can cause a NPE in org.apache.sshd.common.util.Buffer.putString(Buffer.java:434)
+ * [KARAF-3656|https://issues.apache.org/jira/browse/KARAF-3656] - SSH message channel closed too early
+ * [KARAF-3659|https://issues.apache.org/jira/browse/KARAF-3659] - shutdown of karaf throws NullPointerException if jmx ssl keystore is not configured properly
+ * [KARAF-3660|https://issues.apache.org/jira/browse/KARAF-3660] - Setting JMX SSL causes StringIndexOutOfBoundsException when setting keyPasswords without = symbol
+
+** Dependency upgrade
+ * [KARAF-3470|https://issues.apache.org/jira/browse/KARAF-3470] - Upgrade to Pax Exam 4.4.0
+ * [KARAF-3510|https://issues.apache.org/jira/browse/KARAF-3510] - Upgrade to pax-web 3.1.4
+ * [KARAF-3548|https://issues.apache.org/jira/browse/KARAF-3548] - Upgrade to bndlib 2.4.0
+ * [KARAF-3549|https://issues.apache.org/jira/browse/KARAF-3549] - Upgrade to commons-codec 1.10
+ * [KARAF-3552|https://issues.apache.org/jira/browse/KARAF-3552] - Upgrade to Aries Blueprint CM 1.0.6
+ * [KARAF-3553|https://issues.apache.org/jira/browse/KARAF-3553] - Upgrade to Aries Blueprint Core 1.4.3
+ * [KARAF-3554|https://issues.apache.org/jira/browse/KARAF-3554] - Upgrade to Aries JNDI Core 1.0.2
+ * [KARAF-3556|https://issues.apache.org/jira/browse/KARAF-3556] - Upgrade to Aries Transaction Blueprint 1.0.2
+ * [KARAF-3558|https://issues.apache.org/jira/browse/KARAF-3558] - Upgrade to sshd-core 0.13.0
+ * [KARAF-3563|https://issues.apache.org/jira/browse/KARAF-3563] - Upgrade to Pax-URL-Aether 2.4.0
+ * [KARAF-3586|https://issues.apache.org/jira/browse/KARAF-3586] - Upgrade to pax-logging 1.8.2
+ * [KARAF-3587|https://issues.apache.org/jira/browse/KARAF-3587] - Upgrade to pax-url 2.4.0
+ * [KARAF-3591|https://issues.apache.org/jira/browse/KARAF-3591] - Upgrade to pax-web 3.2.0
+ * [KARAF-3594|https://issues.apache.org/jira/browse/KARAF-3594] - Upgrade to Aries JMX Core 1.1.3
+ * [KARAF-3595|https://issues.apache.org/jira/browse/KARAF-3595] - Upgrade to Aries Transaction JDBC 2.1.1
+ * [KARAF-3598|https://issues.apache.org/jira/browse/KARAF-3598] - Upgrade to bundlerepository 2.0.4
+ * [KARAF-3599|https://issues.apache.org/jira/browse/KARAF-3599] - Upgrade to configadmin 1.8.2
+ * [KARAF-3600|https://issues.apache.org/jira/browse/KARAF-3600] - Upgrade to felix utils 1.8.0
+ * [KARAF-3657|https://issues.apache.org/jira/browse/KARAF-3657] - Upgrade to ServiceMix Specs 2.5.0
+ * [KARAF-3667|https://issues.apache.org/jira/browse/KARAF-3667] - Upgrade to sshd 0.14.0
+ * [KARAF-3678|https://issues.apache.org/jira/browse/KARAF-3678] - Upgrade to Pax Web 3.2.2
+ * [KARAF-3685|https://issues.apache.org/jira/browse/KARAF-3685] - Upgrade to Aries JNDI URL 1.1.0
+ * [KARAF-3686|https://issues.apache.org/jira/browse/KARAF-3686] - Upgrade to Pax Exam 4.5.0
+ * [KARAF-3688|https://issues.apache.org/jira/browse/KARAF-3688] - Upgrade to Pax URL 2.4.1
+ * [KARAF-3691|https://issues.apache.org/jira/browse/KARAF-3691] - Upgrade to Felix Metatype 1.0.12
+ * [KARAF-3692|https://issues.apache.org/jira/browse/KARAF-3692] - Upgrade to Felix WebConsole 4.2.8
+
+** Documentation
+ * [KARAF-3439|https://issues.apache.org/jira/browse/KARAF-3439] - [Docs] karaf.lock.delay in example is set to very low number.
+
+** Improvement
+ * [KARAF-3373|https://issues.apache.org/jira/browse/KARAF-3373] - Log lower level root cause exception in LDAPLoginModule.doLogin()
+ * [KARAF-3433|https://issues.apache.org/jira/browse/KARAF-3433] - when OBR resolver to resolve the bundles in a given feature, it should also take the dependency feature bundles into account
+ * [KARAF-3446|https://issues.apache.org/jira/browse/KARAF-3446] - avoid Karaf client script "logout" command throwing an exception
+ * [KARAF-3452|https://issues.apache.org/jira/browse/KARAF-3452] - Upgrade to maven-release-plugin 2.5.1
+ * [KARAF-3461|https://issues.apache.org/jira/browse/KARAF-3461] - bin/karaf doesn't use the provided KARAF_HOME
+ * [KARAF-3500|https://issues.apache.org/jira/browse/KARAF-3500] - NPE throws when executing "bin/client shutdown"
+ * [KARAF-3513|https://issues.apache.org/jira/browse/KARAF-3513] - JMXConnectorServer should be able to pick up the new KeystoreInstance available in container
+ * [KARAF-3575|https://issues.apache.org/jira/browse/KARAF-3575] - Enhance diagnostic core to allow "external" dump providers
+ * [KARAF-3576|https://issues.apache.org/jira/browse/KARAF-3576] - Optimize GuardProxyCatalog#getServiceInvocationRoles
+ * [KARAF-3577|https://issues.apache.org/jira/browse/KARAF-3577] - Optimize SecuredCommandConfigTransformer#generateServiceGuardConfig
+ * [KARAF-3583|https://issues.apache.org/jira/browse/KARAF-3583] - Add option to configure log level in the client script
+ * [KARAF-3673|https://issues.apache.org/jira/browse/KARAF-3673] - Align classmate version between hibernate and hibernate-validator features
+
+** New Feature
+ * [KARAF-3579|https://issues.apache.org/jira/browse/KARAF-3579] - bundles in etc/startup.properties shouldn't be uninstalled through feature service
+ * [KARAF-3592|https://issues.apache.org/jira/browse/KARAF-3592] - Add jaas commands to create group and list group
+
+** Task
+ * [KARAF-3464|https://issues.apache.org/jira/browse/KARAF-3464] - Upgrade to Pax CDI 0.11.0
+
+** Wish
+ * [KARAF-3444|https://issues.apache.org/jira/browse/KARAF-3444] - ExecuteAction - consider log level INFO changing to DEBUG
+
+
                     Apache Karaf 2.4.1
                     ==================
 
