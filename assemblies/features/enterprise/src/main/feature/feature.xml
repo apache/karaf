@@ -186,7 +186,7 @@
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.ant/${ant.bundle.version}</bundle>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.dom4j/${dom4j.bundle.version}</bundle>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.serp/${serp.bundle.version}</bundle>
-        <bundle dependency="true">mvn:com.fasterxml/classmate/0.9.0</bundle>
+        <bundle dependency="true">mvn:com.fasterxml/classmate/1.1.0</bundle>
         <bundle dependency="true">mvn:org.javassist/javassist/3.18.1-GA</bundle>
         <bundle dependency="true">mvn:org.jboss.spec.javax.security.jacc/jboss-jacc-api_1.4_spec/1.0.2.Final</bundle>
         <bundle dependency="true">mvn:org.jboss/jandex/1.2.2.Final</bundle>
@@ -211,7 +211,7 @@
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.ant/${ant.bundle.version}</bundle>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.dom4j/${dom4j.bundle.version}</bundle>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.serp/${serp.bundle.version}</bundle>
-        <bundle dependency="true">mvn:com.fasterxml/classmate/0.9.0</bundle>
+        <bundle dependency="true">mvn:com.fasterxml/classmate/1.1.0</bundle>
         <bundle dependency="true">mvn:org.javassist/javassist/3.18.1-GA</bundle>
         <bundle dependency="true">mvn:org.jboss.spec.javax.security.jacc/jboss-jacc-api_1.4_spec/1.0.2.Final</bundle>
         <bundle dependency="true">mvn:org.jboss/jandex/1.2.2.Final</bundle>
@@ -230,7 +230,7 @@
 
     <feature name="hibernate-validator" description="Hibernate Validator support" version="${hibernate.validator.version}">
         <bundle dependency="true">mvn:javax.validation/validation-api/1.1.0.Final</bundle>
-        <bundle dependency="true">mvn:com.fasterxml/classmate/1.0.0</bundle>
+        <bundle dependency="true">mvn:com.fasterxml/classmate/1.1.0</bundle>
         <bundle dependency="true">mvn:javax.el/javax.el-api/2.2.4</bundle>
         <bundle dependency="true">mvn:org.glassfish.web/javax.el/2.2.4</bundle>
         <bundle dependency="true">mvn:org.jboss.logging/jboss-logging/3.1.4.GA</bundle>
