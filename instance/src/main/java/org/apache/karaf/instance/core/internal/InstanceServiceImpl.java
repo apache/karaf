@@ -948,6 +948,7 @@ public class InstanceServiceImpl implements InstanceService {
     }
 
     int getInstancePid(final String name) {
+        boolean updateInstanceProperties = isInstancePidNeedUpdate(name);
         return execute(new Task<Integer>() {
             public Integer call(State state) throws IOException {
                 InstanceState instance = state.instances.get(name);
@@ -957,7 +958,7 @@ public class InstanceServiceImpl implements InstanceService {
                 checkPid(instance);
                 return instance.pid;
             }
-        }, false);
+        }, updateInstanceProperties);
     }
 
     String getInstanceJavaOpts(final String name) {
@@ -986,6 +987,7 @@ public class InstanceServiceImpl implements InstanceService {
     }
 
     String getInstanceState(final String name) {
+        boolean updateInstanceProperties = isInstancePidNeedUpdate(name);
         return execute(new Task<String>() {
             public String call(State state) throws IOException {
                 InstanceState instance = state.instances.get(name);
@@ -1014,7 +1016,7 @@ public class InstanceServiceImpl implements InstanceService {
                     return Instance.STARTING;
                 }
             }
-        }, true);
+        }, updateInstanceProperties);
     }
 
     private boolean deleteFile(File fileToDelete) {
@@ -1355,6 +1357,26 @@ public class InstanceServiceImpl implements InstanceService {
                 return null;
             }
         }, true);
+    }
+    
+    private Boolean isInstancePidNeedUpdate(final String name) {
+        return execute(new Task<Boolean>() {
+            public Boolean call(State state) throws IOException {
+                InstanceState instance = state.instances.get(name);
+                if (instance == null) {
+                    throw new IllegalArgumentException("Instance " + name + " not found");
+                }
+                int origialPid = instance.pid;
+                checkPid(instance);
+                int newPid = instance.pid;
+                if (origialPid == newPid) {
+                    return false;
+                } else {
+                    return true;
+                }
+                
+            }
+        }, false);
     }
 
     private static class ProfileApplier {
