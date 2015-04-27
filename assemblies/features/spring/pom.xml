@@ -58,11 +58,6 @@
 
         <!-- spring-dm deps -->
         <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.cglib</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>org.springframework.osgi</groupId>
             <artifactId>spring-osgi-io</artifactId>
             <scope>provided</scope>

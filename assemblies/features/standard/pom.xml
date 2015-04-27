@@ -116,11 +116,6 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-jexl</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>org.ow2.asm</groupId>
             <artifactId>asm-all</artifactId>
             <scope>provided</scope>
@@ -134,16 +129,6 @@
         </dependency>
 
         <!-- obr deps -->
-        <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>commons-collections</groupId>
-            <artifactId>commons-collections</artifactId>
-            <scope>provided</scope>
-        </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.osgi.service.obr</artifactId>
@@ -187,21 +172,6 @@
         <dependency>
             <groupId>javax.mail</groupId>
             <artifactId>mail</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.geronimo.specs</groupId>
-            <artifactId>geronimo-jta_1.1_spec</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.geronimo.specs</groupId>
-            <artifactId>geronimo-annotation_1.1_spec</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.geronimo.specs</groupId>
-            <artifactId>geronimo-jaspic_1.0_spec</artifactId>
             <scope>provided</scope>
         </dependency>
 
@@ -390,11 +360,6 @@
 
         <!-- jasypt-encryption deps -->
         <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.jasypt</artifactId>
             <scope>provided</scope>
@@ -419,14 +384,6 @@
         <dependency>
             <groupId>org.apache.karaf.scr</groupId>
             <artifactId>org.apache.karaf.scr.management</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <!-- jolokia -->
-        <dependency>
-            <groupId>org.jolokia</groupId>
-            <artifactId>jolokia-osgi</artifactId>
-            <version>${jolokia.version}</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
