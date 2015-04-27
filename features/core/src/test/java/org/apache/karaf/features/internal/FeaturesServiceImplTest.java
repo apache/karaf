@@ -114,6 +114,7 @@ public class FeaturesServiceImplTest extends TestCase {
 
     public void testStartDoesNotFailWithOneInvalidUri()  {
         BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
+        expect(bundleContext.getBundles()).andReturn(null);
         expect(bundleContext.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
         bundleContext.addFrameworkListener(EasyMock.<FrameworkListener>anyObject());
         bundleContext.removeFrameworkListener(EasyMock.<FrameworkListener>anyObject());

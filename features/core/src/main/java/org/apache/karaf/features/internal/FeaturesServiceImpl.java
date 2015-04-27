@@ -138,6 +138,18 @@ public class FeaturesServiceImpl implements FeaturesService {
 
     public void setBundleContext(BundleContext bundleContext) {
         this.bundleContext = bundleContext;
+        //put all bundles before FeaturesService available as startup feature
+        //so those bundles are hold by this feature and won't be uninstalled by
+        //any other feature easily
+        Set<Long> startupBundleSet = new HashSet<Long>();
+        if (bundleContext != null && bundleContext.getBundles() != null
+            && installed.size() == 0) {
+            for(Bundle startupBundle : bundleContext.getBundles()) {
+                startupBundleSet.add(startupBundle.getBundleId());
+            }
+            installed.put(new FeatureImpl("startup"), startupBundleSet);
+        }
+
     }
 
     public ConfigurationAdmin getConfigAdmin() {

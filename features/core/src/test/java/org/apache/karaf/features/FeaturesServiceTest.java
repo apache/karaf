@@ -87,7 +87,7 @@ public class FeaturesServiceTest extends TestCase {
 
         BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
         Bundle installedBundle = EasyMock.createMock(Bundle.class);
-
+        expect(bundleContext.getBundles()).andReturn(null);
         // required since the sorted set uses it
         expect(installedBundle.compareTo(EasyMock.<Bundle>anyObject())).andReturn(0).anyTimes();
 
@@ -165,7 +165,7 @@ public class FeaturesServiceTest extends TestCase {
         final Bundle sysBundle = EasyMock.createMock(Bundle.class);
         FrameworkWiring frameworkWiring = EasyMock.createMock(FrameworkWiring.class);
         Bundle installedBundle = EasyMock.createMock(Bundle.class);
-
+        expect(bundleContext.getBundles()).andReturn(null);
         expect(bundleContext.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
 
         replay(bundleContext, installedBundle);
@@ -266,7 +266,7 @@ public class FeaturesServiceTest extends TestCase {
 
         // loads the state
         BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
-
+        expect(bundleContext.getBundles()).andReturn(null);
         expect(bundleContext.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
 
         replay(bundleContext);
@@ -780,6 +780,7 @@ public class FeaturesServiceTest extends TestCase {
         URI uri = tmp.toURI();
 
         BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
+        expect(bundleContext.getBundles()).andReturn(null);
         Bundle installedBundle1 = EasyMock.createMock(Bundle.class);
         Bundle installedBundle2 = EasyMock.createMock(Bundle.class);
 
@@ -841,6 +842,7 @@ public class FeaturesServiceTest extends TestCase {
         URI uri = tmp.toURI();
 
         BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
+        expect(bundleContext.getBundles()).andReturn(null);
         Bundle installedBundle1 = EasyMock.createMock(Bundle.class);
         Bundle installedBundle2 = EasyMock.createMock(Bundle.class);
 
@@ -907,6 +909,7 @@ public class FeaturesServiceTest extends TestCase {
 
         // loads the state
         BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
+        expect(bundleContext.getBundles()).andReturn(null);
         final Bundle sysBundle = EasyMock.createMock(Bundle.class);
         FrameworkWiring frameworkWiring = EasyMock.createMock(FrameworkWiring.class);
         Bundle installedBundle1 = EasyMock.createMock(Bundle.class);
@@ -1017,6 +1020,7 @@ public class FeaturesServiceTest extends TestCase {
         URI uri = tmp.toURI();
 
         BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
+        expect(bundleContext.getBundles()).andReturn(null);
         expect(bundleContext.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
         replay(bundleContext);
 
