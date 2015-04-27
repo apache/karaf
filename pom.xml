@@ -160,6 +160,7 @@
         <equinox.coordinator.version>1.1.0.v20120522-1841</equinox.coordinator.version>
         <felix.bundlerepository.version>2.0.4</felix.bundlerepository.version>
         <felix.configadmin.version>1.8.3-SNAPSHOT</felix.configadmin.version>
+        <felix.connect.version>0.1.0-SNAPSHOT</felix.connect.version>
         <felix.fileinstall.version>3.5.0</felix.fileinstall.version>
         <felix.framework.version>4.9.0-SNAPSHOT</felix.framework.version>
         <felix.framework.security.version>2.4.0</felix.framework.security.version>
@@ -987,6 +988,12 @@
                 <artifactId>org.apache.felix.resolver</artifactId>
                 <version>${felix.resolver.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>org.apache.felix.connect</artifactId>
+                <version>${felix.connect.version}</version>
+            </dependency>
+
 
             <dependency>
                 <groupId>org.ow2.asm</groupId>
@@ -1191,6 +1198,11 @@
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>jcl-over-slf4j</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-log4j12</artifactId>
                 <version>${slf4j.version}</version>
             </dependency>
 
@@ -1620,6 +1632,11 @@
             <dependency>
                 <groupId>org.ops4j.pax.web</groupId>
                 <artifactId>pax-web-jetty</artifactId>
+                <version>${pax.web.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ops4j.pax.web</groupId>
+                <artifactId>pax-web-jetty-bundle</artifactId>
                 <version>${pax.web.version}</version>
             </dependency>
             <dependency>

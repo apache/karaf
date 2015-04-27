@@ -83,9 +83,8 @@
         </dependency>
 
         <dependency>
-            <groupId>com.googlecode.pojosr</groupId>
-            <artifactId>de.kalpatec.pojosr.framework</artifactId>
-            <version>0.1.6</version>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.connect</artifactId>
             <scope>test</scope>
         </dependency>
 
@@ -114,14 +113,12 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
-            <version>${slf4j.version}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>jcl-over-slf4j</artifactId>
-            <version>${slf4j.version}</version>
             <scope>test</scope>
         </dependency>
 
