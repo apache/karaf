@@ -82,6 +82,7 @@ public class FeaturesServiceTest extends TestBase {
                 + "</features>");
 
         BundleManager bundleManager = EasyMock.createMock(BundleManager.class);
+        expect(bundleManager.getBundleContext()).andReturn(null);
         Bundle installedBundle = createDummyBundle(12345L, "bundle-f1", headers());
         FeaturesServiceImpl svc = testAddRepository("bundle-f1", uri, bundleManager, installedBundle);
         
@@ -141,6 +142,7 @@ public class FeaturesServiceTest extends TestBase {
         BundleManager bundleManager = EasyMock.createMock(BundleManager.class);
         BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
         expect(bundleManager.getDataFile(EasyMock.anyObject(String.class))).andReturn(dataFile).anyTimes();
+        expect(bundleManager.getBundleContext()).andReturn(null);
         expect(bundleManager.installBundleIfNeeded("bundle-0.1", 0, null)).andReturn(new BundleInstallerResult(bundlef101, true));
         expect(bundleManager.installBundleIfNeeded("bundle-0.1", 0, null)).andReturn(new BundleInstallerResult(bundlef101, false));
         expect(bundleManager.isBundleInstalled("bundle-0.1")).andReturn(bundlef101).times(2);
@@ -184,7 +186,7 @@ public class FeaturesServiceTest extends TestBase {
 
         BundleManager bundleManager = EasyMock.createMock(BundleManager.class);
         expect(bundleManager.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
-
+        expect(bundleManager.getBundleContext()).andReturn(null);
         replay(bundleManager);
         FeaturesServiceImpl svc = new FeaturesServiceImpl(bundleManager);
         EasyMock.verify(bundleManager);
@@ -208,6 +210,7 @@ public class FeaturesServiceTest extends TestBase {
 
         BundleManager bundleManager = EasyMock.createMock(BundleManager.class);
         BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
+        expect(bundleManager.getBundleContext()).andReturn(null);
         Bundle bundlef101 = createDummyBundle(12345L, "bundle-f1-0.1", headers());
         Bundle bundlef201 = createDummyBundle(54321L, "bundle-f2-0.1", headers());
         expect(bundleManager.getDataFile(EasyMock.<String> anyObject())).andReturn(dataFile).anyTimes();
@@ -257,7 +260,8 @@ public class FeaturesServiceTest extends TestBase {
                 + "</features>");
 
         BundleManager bundleManager = prepareBundleManagerForInstallUninstall("bundle-0.1", "bundle-0.1");
-
+        BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
+        expect(bundleManager.getBundleContext()).andReturn(bundleContext);
         replay(bundleManager);
         FeaturesServiceImpl svc = new FeaturesServiceImpl(bundleManager);
         svc.addRepository(uri);
@@ -276,7 +280,8 @@ public class FeaturesServiceTest extends TestBase {
                 + "</features>");
 
         BundleManager bundleManager = prepareBundleManagerForInstallUninstall("bundle-0.2", "bundle-0.2");
-
+        BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
+        expect(bundleManager.getBundleContext()).andReturn(bundleContext);
         replay(bundleManager);
         FeaturesServiceImpl svc = new FeaturesServiceImpl(bundleManager);
         svc.addRepository(uri);
@@ -298,6 +303,7 @@ public class FeaturesServiceTest extends TestBase {
         BundleManager bundleManager = EasyMock.createMock(BundleManager.class);
         BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
         Bundle bundleVer02 = createDummyBundle(54321L, "bundleVer02", headers());
+        expect(bundleManager.getBundleContext()).andReturn(null);
         expect(bundleManager.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
         expect(bundleManager.installBundleIfNeeded("bundle-0.2", 0, null)).andReturn(new BundleInstallerResult(bundleVer02, true));
         expect(bundleManager.getBundleContext()).andReturn(bundleContext);
@@ -332,6 +338,7 @@ public class FeaturesServiceTest extends TestBase {
         BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
         Bundle bundleVer01 = createDummyBundle(12345L, "bundleVer01", headers());
         expect(bundleManager.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
+        expect(bundleManager.getBundleContext()).andReturn(null);
         expect(bundleManager.installBundleIfNeeded(bundleVer01Uri, 0, null)).andReturn(new BundleInstallerResult(bundleVer01, true));
         expect(bundleManager.installBundleIfNeeded(bundleVer01Uri, 0, null)).andReturn(new BundleInstallerResult(bundleVer01, false));
         expect(bundleManager.isBundleInstalled("bundle-0.1")).andReturn(bundleVer01).times(2);
@@ -361,7 +368,7 @@ public class FeaturesServiceTest extends TestBase {
         
         BundleManager bundleManager = EasyMock.createMock(BundleManager.class);
         expect(bundleManager.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
-        
+        expect(bundleManager.getBundleContext()).andReturn(null);
         replay(bundleManager);
         FeaturesServiceImpl svc = new FeaturesServiceImpl(bundleManager);
         svc.addRepository(uri);
@@ -384,6 +391,7 @@ public class FeaturesServiceTest extends TestBase {
         Bundle installedBundle1 = createDummyBundle(12345L, "bundle1", headers());
         Bundle installedBundle2 = createDummyBundle(54321L, "bundle2", headers());
         expect(bundleManager.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
+        expect(bundleManager.getBundleContext()).andReturn(null);
         expect(bundleManager.installBundleIfNeeded(bundle1Uri, 0, null)).andReturn(new BundleInstallerResult(installedBundle1, true));
         expect(bundleManager.installBundleIfNeeded(bundle2Uri, 0, null)).andReturn(new BundleInstallerResult(installedBundle2, true));
         expect(bundleManager.installBundleIfNeeded("zfs:unknown", 0, null)).andThrow(new MalformedURLException());
@@ -410,6 +418,7 @@ public class FeaturesServiceTest extends TestBase {
         Bundle installedBundle1 = createDummyBundle(12345L, "bundle1", headers());
         Bundle installedBundle2 = createDummyBundle(54321L, "bundle2", headers());
         expect(bundleManager.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
+        expect(bundleManager.getBundleContext()).andReturn(null);
         expect(bundleManager.installBundleIfNeeded(bundle1Uri, 0, null)).andReturn(new BundleInstallerResult(installedBundle1, true));
         expect(bundleManager.installBundleIfNeeded(bundle2Uri, 0, null)).andReturn(new BundleInstallerResult(installedBundle2, true));
         expect(bundleManager.installBundleIfNeeded("zfs:unknown", 0, null)).andThrow(new MalformedURLException());
@@ -434,6 +443,7 @@ public class FeaturesServiceTest extends TestBase {
         URI uri = createTempRepo(FEATURE_WITH_INVALID_BUNDLE, bundle1Uri, bundle2Uri);
 
         BundleManager bundleManager = EasyMock.createMock(BundleManager.class);
+        expect(bundleManager.getBundleContext()).andReturn(null);
         Bundle installedBundle1 = createDummyBundle(12345L, bundle1Uri, headers());
         Bundle installedBundle2 = createDummyBundle(54321L, bundle2Uri, headers());
         expect(bundleManager.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
@@ -466,6 +476,7 @@ public class FeaturesServiceTest extends TestBase {
         Bundle installedBundle1 = createDummyBundle(12345L, "bundle1", headers());
         Bundle installedBundle2 = createDummyBundle(54321L, "bundle2", headers());
         expect(bundleManager.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
+        expect(bundleManager.getBundleContext()).andReturn(null);
         expect(bundleManager.installBundleIfNeeded(bundle1Uri, 0, null)).andReturn(new BundleInstallerResult(installedBundle1, true));
         expect(bundleManager.installBundleIfNeeded(bundle2Uri, 0, null)).andReturn(new BundleInstallerResult(installedBundle2, true));
         expect(bundleManager.installBundleIfNeeded("zfs:unknown", 0, null)).andThrow(new MalformedURLException());
@@ -497,7 +508,7 @@ public class FeaturesServiceTest extends TestBase {
 
         BundleManager bundleManager = EasyMock.createMock(BundleManager.class);
         expect(bundleManager.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
-
+        expect(bundleManager.getBundleContext()).andReturn(null);
         replay(bundleManager);
         FeaturesServiceImpl svc = new FeaturesServiceImpl(bundleManager);
         try {
@@ -520,7 +531,7 @@ public class FeaturesServiceTest extends TestBase {
 
         BundleManager bundleManager = EasyMock.createMock(BundleManager.class);
         expect(bundleManager.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
-
+        expect(bundleManager.getBundleContext()).andReturn(null);
         replay(bundleManager);
         FeaturesServiceImpl svc = new FeaturesServiceImpl(bundleManager);
         svc.addRepository(uri);

@@ -31,6 +31,7 @@ import org.apache.karaf.features.Resolver;
 import org.apache.karaf.features.internal.BundleManager.BundleInstallerResult;
 import org.apache.karaf.util.collections.CopyOnWriteArrayIdentityList;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
@@ -105,6 +106,19 @@ public class FeaturesServiceImpl implements FeaturesService {
     public FeaturesServiceImpl(BundleManager bundleManager, FeatureConfigInstaller configManager) {
         this.bundleManager = bundleManager;
         this.configManager = configManager;
+        // put all bundles before FeaturesService available as startup feature
+        // so those bundles are hold by this feature and won't be uninstalled by
+        // any other feature easily
+        Set<Long> startupBundleSet = new HashSet<Long>();
+        if (bundleManager != null) {
+            BundleContext bundleContext = bundleManager.getBundleContext();
+            if (bundleContext != null && bundleContext.getBundles() != null && installed.size() == 0) {
+                for (Bundle startupBundle : bundleContext.getBundles()) {
+                    startupBundleSet.add(startupBundle.getBundleId());
+                }
+                installed.put(new org.apache.karaf.features.internal.model.Feature("startup"), startupBundleSet);
+            }
+        }
     }
     
     public long getResolverTimeout() {

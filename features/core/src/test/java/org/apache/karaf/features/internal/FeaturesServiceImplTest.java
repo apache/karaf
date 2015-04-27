@@ -37,6 +37,8 @@ import org.apache.felix.utils.manifest.Clause;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.internal.BundleManager.BundleInstallerResult;
 import org.easymock.EasyMock;
+import org.osgi.framework.BundleContext;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -106,6 +108,7 @@ public class FeaturesServiceImplTest extends TestBase {
     public void testStartDoesNotFailWithOneInvalidUri()  {
         BundleManager bundleManager = EasyMock.createMock(BundleManager.class);
         expect(bundleManager.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
+        expect(bundleManager.getBundleContext()).andReturn(null);
         expect(bundleManager.createAndRegisterEventAdminListener()).andReturn(null);
         replay(bundleManager);
         FeaturesServiceImpl service = new FeaturesServiceImpl(bundleManager, null);
@@ -128,6 +131,8 @@ public class FeaturesServiceImplTest extends TestBase {
     public void testNoDuplicateFeaturesInstallation() throws Exception {
         final List<Feature> installed = new LinkedList<Feature>();
         BundleManager bundleManager = EasyMock.createMock(BundleManager.class);
+        BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
+        expect(bundleManager.getBundleContext()).andReturn(bundleContext);
         expect(bundleManager.installBundleIfNeeded(EasyMock.anyObject(String.class), EasyMock.anyInt(), EasyMock.anyObject(String.class)))
             .andReturn(new BundleInstallerResult(createDummyBundle(1l, "", headers()), true)).anyTimes();
         expect(bundleManager.isBundleInstalled("b1")).andReturn(createDummyBundle(1l, "", headers()));
@@ -135,8 +140,8 @@ public class FeaturesServiceImplTest extends TestBase {
         expect(bundleManager.isBundleInstalled("b3")).andReturn(createDummyBundle(3l, "", headers()));
         expect(bundleManager.isBundleInstalled("b4")).andReturn(createDummyBundle(4l, "", headers()));
         bundleManager.refreshBundles(EasyMock.anyObject(Set.class), EasyMock.anyObject(Set.class), EasyMock.anyObject(EnumSet.class));
-        
-        EasyMock.expectLastCall();
+        replay(bundleManager);
+
         final FeaturesServiceImpl impl = new FeaturesServiceImpl(bundleManager, null) {
             // override methods which refers to bundle context to avoid mocking everything
             @Override
@@ -157,7 +162,7 @@ public class FeaturesServiceImplTest extends TestBase {
             }
 
         };
-        replay(bundleManager);
+        
         impl.addRepository(getClass().getResource("repo2.xml").toURI());
         impl.installFeature("all");
 
