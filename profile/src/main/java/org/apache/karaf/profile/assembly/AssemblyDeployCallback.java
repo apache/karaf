@@ -195,11 +195,14 @@ public class AssemblyDeployCallback implements Deployer.DeployCallback {
         // Install
         LOGGER.info("Installing bundle " + uri);
         try {
+            String regUri;
             String path;
             if (uri.startsWith("mvn:")) {
+                regUri = uri;
                 path = Parser.pathFromMaven(uri);
             } else {
                 path = "generated/" + uri.replaceAll("[^0-9a-zA-Z.\\-_]+", "_");
+                regUri = "file:" + path;
             }
             final Path bundleSystemFile = systemDirectory.resolve(path);
             Files.createDirectories(bundleSystemFile.getParent());
@@ -216,7 +219,7 @@ public class AssemblyDeployCallback implements Deployer.DeployCallback {
             MapUtils.addToMapSet(dstate.bundlesPerRegion, region, bundle.getBundleId());
             dstate.bundles.put(bundle.getBundleId(), bundle);
 
-            bundles.put(path, bundle);
+            bundles.put(regUri, bundle);
             return bundle;
         } catch (IOException e) {
             throw new BundleException("Unable to install bundle", e);
