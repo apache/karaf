@@ -114,7 +114,7 @@
 							</sources>
 						</configuration>
 					</execution>
-					<!--
+                                       <!--
                     <execution>
                         <id>attach-artifacts</id>
                         <phase>install</phase>
@@ -130,7 +130,7 @@
                             </artifacts>
                         </configuration>
                     </execution>
-					-->
+                                       -->
 				</executions>
 			</plugin>
 			<plugin>
@@ -368,7 +368,21 @@
 					</supportedProjectTypes>
 					<instructions>
 						<Import-Package>
-
+				                            javax.servlet,
+                            				    javax.servlet.http,
+                            				    javax.servlet.jsp;resolution:=optional,
+                            				    javax.servlet.jsp.el;resolution:=optional,
+                            				    org.apache.commons.logging;resolution:=optional;provider=paxlogging,
+                            				    org.apache.commons.logging.impl;resolution:=optional;provider=paxlogging,
+                            				    org.apache.log4j;resolution:=optional;provider=paxlogging,
+                            				    org.apache.log4j.spi;resolution:=optional;provider=paxlogging,
+                            				    org.apache.log4j.xml;resolution:=optional;provider=paxlogging,
+                            			            org.slf4j;resolution:=optional;provider=paxlogging,
+                            				    org.slf4j.helpers;resolution:=optional;provider=paxlogging,
+                            			            org.slf4j.spi;resolution:=optional;provider=paxlogging,
+                            				    org.osgi.framework,
+                                                            javax.swing.tree,
+             						    org.osgi.service.packageadmin
 						</Import-Package>
 						<Bundle-ClassPath>.,WEB-INF/classes</Bundle-ClassPath>
 						<Embed-Directory>WEB-INF/lib</Embed-Directory>
