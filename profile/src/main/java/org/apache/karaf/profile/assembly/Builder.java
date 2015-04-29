@@ -935,8 +935,13 @@ public class Builder {
         for (Map.Entry<Integer, Set<String>> entry : invertedStartupBundles.entrySet()) {
             String startLevel = Integer.toString(entry.getKey());
             for (String location : new TreeSet<>(entry.getValue())) {
-                if (location.startsWith("file:") && useReferenceUrls) {
-                    location = "reference:" + location;
+                if (useReferenceUrls) {
+                    if (location.startsWith("mvn:")) {
+                        location = "file:" + Parser.pathFromMaven(location);
+                    }
+                    if (location.startsWith("file:")) {
+                        location = "reference:" + location;
+                    }
                 }
                 if (location.startsWith("file:") && karafVersion == KarafVersion.v24) {
                     location = location.substring("file:".length());

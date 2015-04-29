@@ -246,6 +246,10 @@ public class Main {
         FrameworkFactory factory = loadFrameworkFactory(classLoader);
         framework = factory.newFramework(config.props);
 
+        /*
+         * KARAF-3706: disable the logger related code to avoid the exception
+         * It needs to be revisited when the FELIX-4871 is fixed.
+         *
         // Hack to set felix logger
         try {
             if (framework.getClass().getName().startsWith("org.apache.felix.")) {
@@ -281,6 +285,7 @@ public class Main {
         } catch (Throwable t) {
             t.printStackTrace();
         }
+        */
 
         framework.init();
         framework.getBundleContext().addFrameworkListener(lockCallback);
