@@ -129,9 +129,9 @@ public class CommandListHelpProvider implements HelpProvider {
             } else if (mode.equals("cyan")) {
                 cyan = true;
             } else if (mode.equals("indent")) {
-                indent = 4;
+                indent = 3;
             } else if (mode.startsWith("indent=")) {
-                indent = Integer.parseInt(mode.substring("indent=".length()));
+                indent = Integer.parseInt(mode.substring("indent=".length())) - 1;
             }
         }
 
@@ -158,7 +158,11 @@ public class CommandListHelpProvider implements HelpProvider {
             if (list) {
                 prefix += " *";
             }
-            table.addRow().addContent(prefix, key, entry.getValue());
+            if (indent > 0 || list) {
+                table.addRow().addContent(prefix, key, entry.getValue());
+            } else {
+                table.addRow().addContent(key, entry.getValue());
+            }
         }
         table.print(out, true);
     }

@@ -138,7 +138,7 @@ public class ShellHelpProvider implements HelpProvider {
         out.println("\t" + SimpleAnsi.INTENSITY_BOLD + path + SimpleAnsi.INTENSITY_NORMAL);
         out.println();
         out.println(SimpleAnsi.INTENSITY_BOLD + "COMMANDS" + SimpleAnsi.INTENSITY_NORMAL);
-        out.println("${command-list|" + path + "|embedded}");
+        out.println("${command-list|" + path + "|indent}");
     }
 
 }
