@@ -58,7 +58,7 @@ public abstract class UrlLoader {
                 }
             }
             long lm = connection.getLastModified();
-            if (lm <= lastModified) {
+            if (lm > 0 && lm <= lastModified) {
                 return false;
             }
             try (

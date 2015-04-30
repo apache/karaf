@@ -44,9 +44,9 @@ import static org.osgi.framework.namespace.IdentityNamespace.IDENTITY_NAMESPACE;
  */
 public class XmlRepository extends BaseRepository {
 
-    private final String url;
-    private final Map<String, XmlLoader> loaders = new HashMap<String, XmlLoader>();
-    private final ReadWriteLock lock = new ReentrantReadWriteLock();
+    final String url;
+    final Map<String, XmlLoader> loaders = new HashMap<String, XmlLoader>();
+    final ReadWriteLock lock = new ReentrantReadWriteLock();
 
     public XmlRepository(String url) {
         this.url = url;
@@ -62,6 +62,14 @@ public class XmlRepository extends BaseRepository {
     public Map<Requirement, Collection<Capability>> findProviders(Collection<? extends Requirement> requirements) {
         checkAndLoadCache();
         return super.findProviders(requirements);
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    protected Map<String, XmlLoader> getLoaders() {
+        return loaders;
     }
 
     @Override
@@ -140,12 +148,17 @@ public class XmlRepository extends BaseRepository {
         return modified;
     }
 
-    static class XmlLoader extends UrlLoader {
+    protected static class XmlLoader extends UrlLoader {
 
-        StaxParser.XmlRepository xml;
+        protected StaxParser.XmlRepository xml;
 
-        XmlLoader(String url) {
+        public XmlLoader(String url) {
             super(url);
+        }
+
+        public XmlLoader(String url, StaxParser.XmlRepository xml) {
+            super(url);
+            this.xml = xml;
         }
 
         @Override

@@ -17,6 +17,7 @@
 package org.apache.karaf.features.internal.repository;
 
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,14 +25,18 @@ import java.util.Map;
 
 import javax.xml.stream.Location;
 import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamWriter;
 
 import org.apache.felix.utils.version.VersionTable;
 import org.apache.karaf.features.internal.resolver.CapabilityImpl;
 import org.apache.karaf.features.internal.resolver.RequirementImpl;
 import org.apache.karaf.features.internal.resolver.ResourceImpl;
 import org.osgi.framework.Version;
+import org.osgi.resource.Capability;
+import org.osgi.resource.Requirement;
 import org.osgi.resource.Resource;
 
 import static javax.xml.stream.XMLStreamConstants.CHARACTERS;
@@ -59,21 +64,116 @@ public final class StaxParser {
     public static final String VALUE = "value";
     public static final String TYPE = "type";
 
-    static XMLInputFactory factory;
+    public static final String REPOSITORY_NAMESPACE = "http://www.osgi.org/xmlns/repository/v1.0.0";
+
+    static XMLInputFactory inputFactory;
+    static XMLOutputFactory outputFactory;
 
     private StaxParser() {
     }
 
     public static class Referral {
-        String url;
-        int depth = Integer.MAX_VALUE;
+        public String url;
+        public int depth = Integer.MAX_VALUE;
     }
 
     public static class XmlRepository {
-        String name;
-        long increment;
-        List<Referral> referrals = new ArrayList<>();
-        List<Resource> resources = new ArrayList<>();
+        public String name;
+        public long increment;
+        public List<Referral> referrals = new ArrayList<>();
+        public List<Resource> resources = new ArrayList<>();
+    }
+
+    public static void write(XmlRepository repository, OutputStreamWriter os) throws XMLStreamException {
+        XMLStreamWriter writer = getOutputFactory().createXMLStreamWriter(os);
+        writer.writeStartDocument();
+        writer.setDefaultNamespace(REPOSITORY_NAMESPACE);
+        // repository element
+        writer.writeStartElement(REPOSITORY_NAMESPACE, REPOSITORY);
+        writer.writeAttribute("xmlns", REPOSITORY_NAMESPACE);
+        writer.writeAttribute(REPO_NAME, repository.name);
+        writer.writeAttribute(INCREMENT, Long.toString(repository.increment));
+        // referrals
+        for (Referral referral : repository.referrals) {
+            writer.writeStartElement(REPOSITORY_NAMESPACE, REFERRAL);
+            writer.writeAttribute(DEPTH, Integer.toString(referral.depth));
+            writer.writeAttribute(URL, referral.url);
+            writer.writeEndElement();
+        }
+        // resources
+        for (Resource resource : repository.resources) {
+            writer.writeStartElement(REPOSITORY_NAMESPACE, RESOURCE);
+            for (Capability cap : resource.getCapabilities(null)) {
+                writeClause(writer, CAPABILITY, cap.getNamespace(), cap.getDirectives(), cap.getAttributes());
+            }
+            for (Requirement req : resource.getRequirements(null)) {
+                writeClause(writer, REQUIREMENT, req.getNamespace(), req.getDirectives(), req.getAttributes());
+            }
+            writer.writeEndElement();
+        }
+        writer.writeEndDocument();
+        writer.flush();
+    }
+
+    private static void writeClause(XMLStreamWriter writer, String element, String namespace, Map<String, String> directives, Map<String, Object> attributes) throws XMLStreamException {
+        writer.writeStartElement(REPOSITORY_NAMESPACE, element);
+        writer.writeAttribute(NAMESPACE, namespace);
+        for (Map.Entry<String, String> dir : directives.entrySet()) {
+            writer.writeStartElement(REPOSITORY_NAMESPACE, DIRECTIVE);
+            writer.writeAttribute(NAME, dir.getKey());
+            writer.writeAttribute(VALUE, dir.getValue());
+            writer.writeEndElement();
+        }
+        for (Map.Entry<String, Object> att : attributes.entrySet()) {
+            String key = att.getKey();
+            Object val = att.getValue();
+            writer.writeStartElement(REPOSITORY_NAMESPACE, DIRECTIVE);
+            writer.writeAttribute(NAME, key);
+            if (val instanceof Version) {
+                writer.writeAttribute(TYPE, "Version");
+            } else if (val instanceof Long) {
+                writer.writeAttribute(TYPE, "Long");
+            } else if (val instanceof Double) {
+                writer.writeAttribute(TYPE, "Double");
+            } else if (val instanceof Iterable) {
+                Iterable it = (Iterable) att.getValue();
+                String scalar = null;
+                for (Object o : it) {
+                    String ts;
+                    if (o instanceof String) {
+                        ts = "String";
+                    } else if (o instanceof Long) {
+                        ts = "Long";
+                    } else if (o instanceof Double) {
+                        ts = "Double";
+                    } else if (o instanceof Version) {
+                        ts = "Version";
+                    } else {
+                        throw new IllegalArgumentException("Unsupported scalar type: " + o);
+                    }
+                    if (scalar == null) {
+                        scalar = ts;
+                    } else if (!scalar.equals(ts)) {
+                        throw new IllegalArgumentException("Unconsistent list type for attribute " + key);
+                    }
+                }
+                writer.writeAttribute(TYPE, "List<" + scalar + ">");
+                StringBuilder sb = new StringBuilder();
+                boolean first = true;
+                for (Object o : it) {
+                    if (first) {
+                        first = false;
+                    } else {
+                        sb.append(",");
+                    }
+                    sb.append(o.toString().replace(",", "\\,"));
+                }
+                val = sb.toString();
+            }
+            writer.writeAttribute(VALUE, val.toString());
+            writer.writeEndElement();
+        }
+        writer.writeEndElement();
     }
 
     public static XmlRepository parse(InputStream is) throws XMLStreamException {
@@ -81,7 +181,7 @@ public final class StaxParser {
     }
 
     public static XmlRepository parse(InputStream is, XmlRepository previous) throws XMLStreamException {
-        XMLStreamReader reader = getFactory().createXMLStreamReader(is);
+        XMLStreamReader reader = getInputFactory().createXMLStreamReader(is);
         int event = reader.nextTag();
         if (event != START_ELEMENT || !REPOSITORY.equals(reader.getLocalName())) {
             throw new IllegalStateException("Expected element 'repository' at the root of the document");
@@ -304,13 +404,20 @@ public final class StaxParser {
         }
     }
 
-    private static synchronized XMLInputFactory getFactory() {
-        if (StaxParser.factory == null) {
+    private static synchronized XMLInputFactory getInputFactory() {
+        if (StaxParser.inputFactory == null) {
             XMLInputFactory factory = XMLInputFactory.newInstance();
             factory.setProperty(XMLInputFactory.IS_NAMESPACE_AWARE, true);
-            StaxParser.factory = factory;
+            StaxParser.inputFactory = factory;
         }
-        return StaxParser.factory;
+        return StaxParser.inputFactory;
+    }
+
+    private static synchronized XMLOutputFactory getOutputFactory() {
+        if (StaxParser.outputFactory == null) {
+            StaxParser.outputFactory = XMLOutputFactory.newInstance();
+        }
+        return StaxParser.outputFactory;
     }
 
 }
