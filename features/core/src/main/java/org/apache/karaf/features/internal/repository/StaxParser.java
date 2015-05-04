@@ -127,7 +127,7 @@ public final class StaxParser {
         for (Map.Entry<String, Object> att : attributes.entrySet()) {
             String key = att.getKey();
             Object val = att.getValue();
-            writer.writeStartElement(REPOSITORY_NAMESPACE, DIRECTIVE);
+            writer.writeStartElement(REPOSITORY_NAMESPACE, ATTRIBUTE);
             writer.writeAttribute(NAME, key);
             if (val instanceof Version) {
                 writer.writeAttribute(TYPE, "Version");
@@ -195,7 +195,7 @@ public final class StaxParser {
                 repo.name = attrName;
                 break;
             case INCREMENT:
-                repo.increment = Integer.parseInt(attrValue);
+                repo.increment = Long.parseLong(attrValue);
                 break;
             default:
                 throw new IllegalStateException("Unexpected attribute '" + attrName + "'");
