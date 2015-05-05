@@ -37,7 +37,6 @@
         <module>coordinator</module>
         <module>eventadmin</module>
         <module>staticcm</module>
-        <module>maven-proxy</module>
     </modules>
 
 </project>
