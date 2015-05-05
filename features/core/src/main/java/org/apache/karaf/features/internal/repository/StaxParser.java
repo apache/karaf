@@ -18,6 +18,7 @@ package org.apache.karaf.features.internal.repository;
 
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -84,7 +85,7 @@ public final class StaxParser {
         public List<Resource> resources = new ArrayList<>();
     }
 
-    public static void write(XmlRepository repository, OutputStreamWriter os) throws XMLStreamException {
+    public static void write(XmlRepository repository, Writer os) throws XMLStreamException {
         XMLStreamWriter writer = getOutputFactory().createXMLStreamWriter(os);
         writer.writeStartDocument();
         writer.setDefaultNamespace(REPOSITORY_NAMESPACE);
@@ -192,7 +193,7 @@ public final class StaxParser {
             String attrValue = reader.getAttributeValue(i);
             switch (attrName) {
             case REPO_NAME:
-                repo.name = attrName;
+                repo.name = attrValue;
                 break;
             case INCREMENT:
                 repo.increment = Long.parseLong(attrValue);

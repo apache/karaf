@@ -44,9 +44,9 @@ import static org.osgi.framework.namespace.IdentityNamespace.IDENTITY_NAMESPACE;
  */
 public class XmlRepository extends BaseRepository {
 
-    final String url;
-    final Map<String, XmlLoader> loaders = new HashMap<String, XmlLoader>();
-    final ReadWriteLock lock = new ReentrantReadWriteLock();
+    protected final String url;
+    protected final Map<String, XmlLoader> loaders = new HashMap<String, XmlLoader>();
+    protected final ReadWriteLock lock = new ReentrantReadWriteLock();
 
     public XmlRepository(String url) {
         this.url = url;
