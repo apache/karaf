@@ -20,7 +20,7 @@
     <bean id="dataSource" destroy-method="close" class="org.apache.commons.dbcp.BasicDataSource">
         <property name="driverClassName" value="${driver}"/>
         <property name="url" value="${url}"/>
-        <property name="user" value="${user}"/>
+        <property name="username" value="${user}"/>
         <property name="password" value="${password}"/>
         <property name="maxIdle" value="1"/>
     </bean>
