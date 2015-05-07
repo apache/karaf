@@ -69,7 +69,6 @@ public class JMXSecurityTest extends KarafTestSupport {
 
         // Add some extra options used by this test...
         options.addAll(Arrays.asList(
-            new VMOption("-Djavax.management.builder.initial=org.apache.karaf.management.boot.KarafMBeanServerBuilder"),
             editConfigurationFilePut("etc/jmx.acl.org.apache.karaf.service.cfg", "getServices()", "admin"),
             editConfigurationFilePut("etc/jmx.acl.org.apache.karaf.service.cfg", "getServices(boolean)", "viewer"),
             editConfigurationFilePut("etc/jmx.acl.org.apache.karaf.service.cfg", "getServices(long)", "manager"),

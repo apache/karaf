@@ -61,10 +61,6 @@ public class KarafMBeanServerGuard implements InvocationHandler {
         this.configAdmin = configAdmin;
     }
 
-    public void init() {
-        KarafMBeanServerBuilder.setGuard(this);
-    }
-
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         if (method.getParameterTypes().length == 0)
             return null;

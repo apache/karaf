@@ -54,6 +54,7 @@ public class JMXSecurityMBeanImplTestCase extends TestCase {
 
             JMXSecurityMBeanImpl mb = new JMXSecurityMBeanImpl();
             mb.setMBeanServer(mbs);
+            mb.setGuard(testGuard);
             assertTrue(mb.canInvoke(objectName));
         } finally {
             KarafMBeanServerBuilder.setGuard(prevGuard);
@@ -74,6 +75,7 @@ public class JMXSecurityMBeanImplTestCase extends TestCase {
 
             JMXSecurityMBeanImpl mb = new JMXSecurityMBeanImpl();
             mb.setMBeanServer(mbs);
+            mb.setGuard(testGuard);
             assertFalse(mb.canInvoke(objectName));
         } finally {
             KarafMBeanServerBuilder.setGuard(prevGuard);
@@ -94,6 +96,7 @@ public class JMXSecurityMBeanImplTestCase extends TestCase {
 
             JMXSecurityMBeanImpl mb = new JMXSecurityMBeanImpl();
             mb.setMBeanServer(mbs);
+            mb.setGuard(testGuard);
             mb.canInvoke(objectName);
             fail("Should have thrown an exception");
         } catch (IOException ioe) {
@@ -132,6 +135,7 @@ public class JMXSecurityMBeanImplTestCase extends TestCase {
 
             JMXSecurityMBeanImpl mb = new JMXSecurityMBeanImpl();
             mb.setMBeanServer(mbs);
+            mb.setGuard(testGuard);
             assertTrue(mb.canInvoke(objectName, "testMethod", la));
             assertTrue(mb.canInvoke(objectName, "testMethod", sa));
             assertFalse(mb.canInvoke(objectName, "otherMethod", sa2));
@@ -155,6 +159,7 @@ public class JMXSecurityMBeanImplTestCase extends TestCase {
 
             JMXSecurityMBeanImpl mb = new JMXSecurityMBeanImpl();
             mb.setMBeanServer(mbs);
+            mb.setGuard(testGuard);
             mb.canInvoke(objectName, "testMethod", ea);
             fail("Should have thrown an exception");
         } catch (IOException ioe) {
@@ -196,6 +201,7 @@ public class JMXSecurityMBeanImplTestCase extends TestCase {
 
             JMXSecurityMBeanImpl mb = new JMXSecurityMBeanImpl();
             mb.setMBeanServer(mbs);
+            mb.setGuard(testGuard);
             Map<String, List<String>> query = new HashMap<String, List<String>>();
             query.put(objectName, Arrays.asList("otherMethod", "testMethod(long)", "testMethod(java.lang.String)"));
             query.put(objectName2, Collections.<String>emptyList());
