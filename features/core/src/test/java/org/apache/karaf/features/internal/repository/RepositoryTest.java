@@ -18,7 +18,6 @@
  */
 package org.apache.karaf.features.internal.repository;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -42,14 +41,14 @@ public class RepositoryTest {
     @Test
     public void testXml() throws Exception {
         URL url = getClass().getResource("repo.xml");
-        XmlRepository repo = new XmlRepository(url.toExternalForm());
+        XmlRepository repo = new XmlRepository(url.toExternalForm(), 0, false);
         verify(repo);
     }
 
     @Test
     public void testJson() throws Exception {
         URL url = getClass().getResource("repo.json");
-        JsonRepository repo = new JsonRepository(url.toExternalForm());
+        JsonRepository repo = new JsonRepository(url.toExternalForm(), 0, false);
         verify(repo);
     }
 
@@ -57,7 +56,7 @@ public class RepositoryTest {
     public void testXmlGzip() throws Exception {
         URL url = getClass().getResource("repo.xml");
         url = gzip(url);
-        XmlRepository repo = new XmlRepository(url.toExternalForm());
+        XmlRepository repo = new XmlRepository(url.toExternalForm(), 0, false);
         verify(repo);
     }
 
@@ -65,7 +64,7 @@ public class RepositoryTest {
     public void testJsonGzip() throws Exception {
         URL url = getClass().getResource("repo.json");
         url = gzip(url);
-        JsonRepository repo = new JsonRepository(url.toExternalForm());
+        JsonRepository repo = new JsonRepository(url.toExternalForm(), 0, false);
         verify(repo);
     }
 
