@@ -32,4 +32,30 @@
     <artifactId>registry</artifactId>
     <name>Apache Karaf :: Demos :: Profiles :: Registry</name>
 
+    <properties>
+        <activemq.version>5.11.1</activemq.version>
+        <camel.version>2.15.2</camel.version>
+        <cxf.version>3.1.0</cxf.version>
+    </properties>
+
+
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+                <excludes>
+                    <exclude>**/version.cfg</exclude>
+                </excludes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/version.cfg</include>
+                </includes>
+            </resource>
+        </resources>
+    </build>
+
 </project>

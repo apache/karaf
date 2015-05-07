@@ -173,7 +173,7 @@
                             org.apache.karaf.shell.util;version=2.3.0;-noimport:=true,
                             org.apache.felix.gogo*;version=${felix.gogo.version};-noimport:=true,
                             org.apache.felix.service.command;version=${felix.gogo.version};-noimport:=true,
-                            org.apache.felix.service.threadio;version=${felix.gogo.version};status=provisional;mandatory:=status;-noimport:=true,
+                            org.apache.felix.service.threadio;version=${felix.gogo.version};-noimport:=true,
                         </Export-Package>
                         <Private-Package>
                         	org.apache.karaf.shell.commands.ansi,
