@@ -31,11 +31,14 @@ import org.osgi.resource.Capability;
 import org.osgi.resource.Requirement;
 import org.osgi.resource.Resource;
 import org.osgi.service.repository.Repository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  */
 public class BaseRepository implements Repository {
 
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
     protected final List<Resource> resources;
     protected final Map<String, CapabilitySet> capSets;
 

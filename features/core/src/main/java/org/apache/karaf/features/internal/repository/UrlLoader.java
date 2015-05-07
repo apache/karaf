@@ -34,13 +34,22 @@ public abstract class UrlLoader {
     public static final String GZIP = "gzip";
 
     private final String url;
+    private final long expiration;
     private long lastModified;
+    private long lastChecked;
 
-    public UrlLoader(String url) {
+    public UrlLoader(String url, long expiration) {
         this.url = url;
+        this.expiration = expiration;
     }
 
     protected boolean checkAndLoadCache() {
+        long time = System.currentTimeMillis();
+        if (lastChecked > 0) {
+            if (expiration < 0 || time - lastChecked < expiration) {
+                return false;
+            }
+        }
         try {
             URLConnection connection = new java.net.URL(url).openConnection();
             if (connection instanceof HttpURLConnection) {
@@ -51,14 +60,16 @@ public abstract class UrlLoader {
                 con.setRequestProperty(HEADER_ACCEPT_ENCODING, GZIP);
                 int rc = con.getResponseCode();
                 if (rc == HTTP_NOT_MODIFIED) {
+                    lastChecked = time;
                     return false;
                 }
                 if (rc != HTTP_OK) {
-                    throw new IOException("Unexpected http response: " + rc + " " + con.getResponseMessage());
+                    throw new IOException("Unexpected http response loading " + url + " : " + rc + " " + con.getResponseMessage());
                 }
             }
             long lm = connection.getLastModified();
             if (lm > 0 && lm <= lastModified) {
+                lastChecked = time;
                 return false;
             }
             try (
@@ -75,6 +86,7 @@ public abstract class UrlLoader {
                 }
                 boolean r = doRead(is);
                 lastModified = lm;
+                lastChecked = time;
                 return r;
             }
         } catch (IOException e) {

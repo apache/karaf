@@ -143,13 +143,15 @@ public class Activator extends BaseActivator {
 
         List<Repository> repositories = new ArrayList<>();
         String[] resourceRepositories = getString("resourceRepositories", "").split(",");
+        long repositoryExpiration = getLong("repositoryExpiration", FeaturesService.DEFAULT_REPOSITORY_EXPIRATION);
+        boolean repositoryIgnoreFailures = getBoolean("repositoryIgnoreFailures", true);
         for (String url : resourceRepositories) {
             url = url.trim();
             if (!url.isEmpty()) {
                 if (url.startsWith("json:")) {
-                    repositories.add(new JsonRepository(url.substring("json:".length())));
+                    repositories.add(new JsonRepository(url.substring("json:".length()), repositoryExpiration, repositoryIgnoreFailures));
                 } else if (url.startsWith("xml:")) {
-                    repositories.add(new XmlRepository(url.substring("xml:".length())));
+                    repositories.add(new XmlRepository(url.substring("xml:".length()), repositoryExpiration, repositoryIgnoreFailures));
                 } else {
                     logger.warn("Unrecognized resource repository: " + url);
                 }

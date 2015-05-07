@@ -41,6 +41,7 @@ public interface FeaturesService {
     int DEFAULT_DOWNLOAD_THREADS = 8;
     long DEFAULT_SCHEDULE_DELAY = 250;
     int DEFAULT_SCHEDULE_MAX_RUN = 9;
+    long DEFAULT_REPOSITORY_EXPIRATION = 60000; // 1 minute
 
 
     enum Option {

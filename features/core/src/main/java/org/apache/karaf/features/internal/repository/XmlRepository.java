@@ -45,11 +45,15 @@ import static org.osgi.framework.namespace.IdentityNamespace.IDENTITY_NAMESPACE;
 public class XmlRepository extends BaseRepository {
 
     protected final String url;
+    protected final long expiration;
+    protected final boolean ignoreFailures;
     protected final Map<String, XmlLoader> loaders = new HashMap<String, XmlLoader>();
     protected final ReadWriteLock lock = new ReentrantReadWriteLock();
 
-    public XmlRepository(String url) {
+    public XmlRepository(String url, long expiration, boolean ignoreFailures) {
         this.url = url;
+        this.expiration = expiration;
+        this.ignoreFailures = ignoreFailures;
     }
 
     @Override
@@ -109,14 +113,22 @@ public class XmlRepository extends BaseRepository {
     }
 
     private void checkAndLoadCache() {
-        if (checkAndLoadReferrals(url, Integer.MAX_VALUE)) {
-            lock.writeLock().lock();
-            try {
-                resources.clear();
-                capSets.clear();
-                populate(loaders.get(url).xml, Integer.MAX_VALUE);
-            } finally {
-                lock.writeLock().unlock();
+        try {
+            if (checkAndLoadReferrals(url, Integer.MAX_VALUE)) {
+                lock.writeLock().lock();
+                try {
+                    resources.clear();
+                    capSets.clear();
+                    populate(loaders.get(url).xml, Integer.MAX_VALUE);
+                } finally {
+                    lock.writeLock().unlock();
+                }
+            }
+        } catch (Exception e) {
+            if (ignoreFailures) {
+                logger.warn("Ignoring failure: " + e.getMessage(), e);
+            } else {
+                throw e;
             }
         }
     }
@@ -137,7 +149,7 @@ public class XmlRepository extends BaseRepository {
         if (hopCount > 0) {
             XmlLoader loader = loaders.get(url);
             if (loader == null) {
-                loader = new XmlLoader(url);
+                loader = new XmlLoader(url, expiration);
                 loaders.put(url, loader);
             }
             modified = loader.checkAndLoadCache();
@@ -152,12 +164,12 @@ public class XmlRepository extends BaseRepository {
 
         protected StaxParser.XmlRepository xml;
 
-        public XmlLoader(String url) {
-            super(url);
+        public XmlLoader(String url, long expiration) {
+            super(url, expiration);
         }
 
-        public XmlLoader(String url, StaxParser.XmlRepository xml) {
-            super(url);
+        public XmlLoader(String url, long expiration, StaxParser.XmlRepository xml) {
+            super(url, expiration);
             this.xml = xml;
         }
 

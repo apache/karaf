@@ -42,16 +42,18 @@ public class JsonRepository extends BaseRepository {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JsonRepository.class);
 
+    private final boolean ignoreFailures;
     private final UrlLoader loader;
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
 
-    public JsonRepository(String url) {
-        loader = new UrlLoader(url) {
+    public JsonRepository(String url, long expiration, boolean ignoreFailures) {
+        loader = new UrlLoader(url, expiration) {
             @Override
             protected boolean doRead(InputStream is) throws IOException {
                 return JsonRepository.this.doRead(is);
             }
         };
+        this.ignoreFailures = ignoreFailures;
     }
 
     @Override
@@ -77,7 +79,15 @@ public class JsonRepository extends BaseRepository {
     }
 
     private void checkAndLoadCache() {
-        loader.checkAndLoadCache();
+        try {
+            loader.checkAndLoadCache();
+        } catch (Exception e) {
+            if (ignoreFailures) {
+                logger.warn("Ignoring failure: " + e.getMessage(), e);
+            } else {
+                throw e;
+            }
+        }
     }
 
     protected boolean doRead(InputStream is) throws IOException {
