@@ -205,4 +205,14 @@
         <bundle>mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.webosgi/${aries.blueprint.web.version}</bundle>
     </feature>
 
+    <feature name="jolokia" description="Jolokia monitoring support" version="${jolokia.version}">
+        <feature>http</feature>
+        <config name="org.jolokia.osgi">
+            org.jolokia.user=karaf
+            org.jolokia.realm=karaf
+            org.jolokia.authMode=jaas
+        </config>
+        <bundle>mvn:org.jolokia/jolokia-osgi/${jolokia.version}</bundle>
+    </feature>
+
 </features>
