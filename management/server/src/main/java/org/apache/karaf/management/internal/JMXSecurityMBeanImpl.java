@@ -18,7 +18,6 @@ package org.apache.karaf.management.internal;
 
 import org.apache.karaf.management.JMXSecurityMBean;
 import org.apache.karaf.management.KarafMBeanServerGuard;
-import org.apache.karaf.management.boot.KarafMBeanServerBuilder;
 
 import javax.management.MBeanServer;
 import javax.management.NotCompliantMBeanException;

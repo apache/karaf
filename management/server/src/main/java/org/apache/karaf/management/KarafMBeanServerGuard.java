@@ -17,7 +17,6 @@
 package org.apache.karaf.management;
 
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
-import org.apache.karaf.management.boot.KarafMBeanServerBuilder;
 import org.apache.karaf.service.guard.tools.ACLConfigurationParser;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
