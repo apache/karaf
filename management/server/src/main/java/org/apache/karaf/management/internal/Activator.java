@@ -91,7 +91,6 @@ public class Activator extends BaseActivator implements ManagedService {
 
         KarafMBeanServerGuard guard = new KarafMBeanServerGuard();
         guard.setConfigAdmin(configurationAdmin);
-        guard.init();
 
         rmiRegistryFactory = new RmiRegistryFactory();
         rmiRegistryFactory.setCreate(true);
@@ -113,6 +112,7 @@ public class Activator extends BaseActivator implements ManagedService {
         connectorServerFactory = new ConnectorServerFactory();
         connectorServerFactory.setServer(mbeanServer);
         connectorServerFactory.setServiceUrl(serviceUrl);
+        connectorServerFactory.setGuard(guard);
         connectorServerFactory.setRmiServerHost(rmiServerHost);
         connectorServerFactory.setDaemon(daemon);
         connectorServerFactory.setThreaded(threaded);
@@ -137,6 +137,7 @@ public class Activator extends BaseActivator implements ManagedService {
 
         JMXSecurityMBeanImpl securityMBean = new JMXSecurityMBeanImpl();
         securityMBean.setMBeanServer(mbeanServer);
+        securityMBean.setGuard(guard);
         registerMBean(securityMBean, "type=security,area=jmx");
 
         register(MBeanServer.class, mbeanServer);

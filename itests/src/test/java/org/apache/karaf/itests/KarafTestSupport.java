@@ -129,7 +129,7 @@ public class KarafTestSupport {
             // KarafDistributionOption.debugConfiguration("8889", true),
             karafDistributionConfiguration().frameworkUrl(karafUrl).name("Apache Karaf").unpackDirectory(new File("target/exam")),
             // enable JMX RBAC security, thanks to the KarafMBeanServerBuilder
-            configureSecurity().enableKarafMBeanServerBuilder(),
+            configureSecurity().disableKarafMBeanServerBuilder(),
             keepRuntimeFolder(),
 				logLevel(LogLevel.INFO),
             replaceConfigurationFile("etc/org.ops4j.pax.logging.cfg", getConfigFile("/etc/org.ops4j.pax.logging.cfg")),

@@ -281,8 +281,6 @@ setupDefaults() {
     CLASSPATH="$CLASSPATH:$KARAF_HOME/system/org/ops4j/pax/logging/pax-logging-api/${pax.logging.version}/pax-logging-api-${pax.logging.version}.jar"
     CLASSPATH="$CLASSPATH:$KARAF_HOME/system/jline/jline/${jline.version}/jline-${jline.version}.jar"
 
-    CLASSPATH="$CLASSPATH:$KARAF_HOME/lib/karaf-jmx-boot.jar"
-
     DEFAULT_JAVA_DEBUG_PORT="5005"
     if [ "x$JAVA_DEBUG_PORT" = "x" ]; then
         JAVA_DEBUG_PORT="$DEFAULT_JAVA_DEBUG_PORT"
@@ -342,7 +340,7 @@ run() {
         CLASSPATH=`cygpath --path --windows "$CLASSPATH"`
     fi
 
-    exec "$JAVA" $JAVA_OPTS -Dkaraf.instances="${KARAF_HOME}/instances" -Dkaraf.home="$KARAF_HOME" -Dkaraf.base="$KARAF_BASE" -Dkaraf.etc="$KARAF_ETC" -Djava.io.tmpdir="$KARAF_DATA/tmp" -Djava.util.logging.config.file="$KARAF_BASE/etc/java.util.logging.properties" -Djavax.management.builder.initial=org.apache.karaf.management.boot.KarafMBeanServerBuilder $KARAF_OPTS $OPTS -classpath "$CLASSPATH" org.apache.karaf.instance.main.Execute "$@"
+    exec "$JAVA" $JAVA_OPTS -Dkaraf.instances="${KARAF_HOME}/instances" -Dkaraf.home="$KARAF_HOME" -Dkaraf.base="$KARAF_BASE" -Dkaraf.etc="$KARAF_ETC" -Djava.io.tmpdir="$KARAF_DATA/tmp" -Djava.util.logging.config.file="$KARAF_BASE/etc/java.util.logging.properties" $KARAF_OPTS $OPTS -classpath "$CLASSPATH" org.apache.karaf.instance.main.Execute "$@"
 }
 
 main() {

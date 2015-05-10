@@ -488,9 +488,6 @@
             <bundle start-level="30">mvn:org.apache.aries.jmx/org.apache.aries.jmx.blueprint.api/${aries.jmx.blueprint.api.version}</bundle>
             <bundle start-level="30">mvn:org.apache.aries.jmx/org.apache.aries.jmx.blueprint.core/${aries.jmx.blueprint.core.version}</bundle>
         </conditional>
-        <library export="true" delegate="true" type="boot">
-            mvn:org.apache.karaf.management/org.apache.karaf.management.boot/${project.version}
-        </library>
     </feature>
 
     <feature name="scheduler" description="Provide a scheduler service in Karaf to fire events" version="${project.version}">

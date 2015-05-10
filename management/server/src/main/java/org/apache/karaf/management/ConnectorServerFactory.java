@@ -17,8 +17,10 @@
 package org.apache.karaf.management;
 
 import org.apache.karaf.jaas.config.KeystoreManager;
+import org.apache.karaf.management.internal.MBeanInvocationHandler;
 
 import java.io.IOException;
+import java.lang.reflect.Proxy;
 import java.net.BindException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -45,6 +47,7 @@ public class ConnectorServerFactory {
     private enum AuthenticatorType {NONE, PASSWORD, CERTIFICATE};
 
     private MBeanServer server;
+    private KarafMBeanServerGuard guard;
     private String serviceUrl;
     private String rmiServerHost;
     private Map environment;
@@ -69,6 +72,14 @@ public class ConnectorServerFactory {
 
     public void setServer(MBeanServer server) {
         this.server = server;
+    }
+
+    public KarafMBeanServerGuard getGuard() {
+        return guard;
+    }
+
+    public void setGuard(KarafMBeanServerGuard guard) {
+        this.guard = guard;
     }
 
     public String getServiceUrl() {
@@ -231,7 +242,10 @@ public class ConnectorServerFactory {
             this.environment.remove( "jmx.remote.authenticator" );
         }
 
-        this.connectorServer = JMXConnectorServerFactory.newJMXConnectorServer(url, this.environment, this.server);
+        MBeanInvocationHandler handler = new MBeanInvocationHandler(server, guard);
+        MBeanServer guardedServer = (MBeanServer) Proxy.newProxyInstance(server.getClass().getClassLoader(), new Class[]{ MBeanServer.class }, handler);
+        this.connectorServer = JMXConnectorServerFactory.newJMXConnectorServer(url, this.environment, guardedServer);
+
         if (this.objectName != null) {
             this.server.registerMBean(this.connectorServer, this.objectName);
         }

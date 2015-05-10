@@ -16,7 +16,6 @@
  */
 package org.apache.karaf.management;
 
-import org.apache.karaf.management.boot.KarafMBeanServerBuilder;
 import org.apache.karaf.service.guard.tools.ACLConfigurationParser;
 import org.apache.karaf.util.jaas.JaasHelper;
 import org.osgi.framework.InvalidSyntaxException;
@@ -24,13 +23,9 @@ import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 
 import javax.management.*;
-import javax.security.auth.Subject;
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.security.AccessControlContext;
-import java.security.AccessController;
-import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -58,10 +53,6 @@ public class KarafMBeanServerGuard implements InvocationHandler {
 
     public void setConfigAdmin(ConfigurationAdmin configAdmin) {
         this.configAdmin = configAdmin;
-    }
-
-    public void init() {
-        KarafMBeanServerBuilder.setGuard(this);
     }
 
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {

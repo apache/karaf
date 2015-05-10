@@ -486,14 +486,12 @@ public class InstanceServiceImpl implements InstanceService {
                 + "\" " + opts
                 + " " + karafOpts
                 + " -Djava.util.logging.config.file=\"" + new File(location, "etc/java.util.logging.properties").getCanonicalPath() + "\""
-                + " -Djavax.management.builder.initial=org.apache.karaf.management.boot.KarafMBeanServerBuilder"
                 + " -Djava.endorsed.dirs=\"" + new File(new File(new File(System.getProperty("java.home"), "jre"), "lib"), "endorsed") + System.getProperty("path.separator") + new File(new File(System.getProperty("java.home"), "lib"), "endorsed") + System.getProperty("path.separator") + new File(libDir, "endorsed").getCanonicalPath() + "\""
                 + " -Djava.ext.dirs=\"" + new File(new File(new File(System.getProperty("java.home"), "jre"), "lib"), "ext") + System.getProperty("path.separator") + new File(new File(System.getProperty("java.home"), "lib"), "ext") + System.getProperty("path.separator") + new File(libDir, "ext").getCanonicalPath() + "\""
                 + " -Dkaraf.home=\"" + System.getProperty("karaf.home") + "\""
                 + " -Dkaraf.base=\"" + new File(location).getCanonicalPath() + "\""
                 + " -Dkaraf.data=\"" + new File(new File(location).getCanonicalPath(), "data") + "\""
                 + " -Dkaraf.etc=\"" + new File(new File(location).getCanonicalPath(), "etc") + "\""
-                + " -Djavax.management.builder.initial=org.apache.karaf.management.boot.KarafMBeanServerBuilder"
                 + " -Dkaraf.startLocalConsole=false"
                 + " -Dkaraf.startRemoteShell=true"
                 + " -classpath \"" + classpath.toString() + "\""
@@ -576,7 +574,6 @@ public class InstanceServiceImpl implements InstanceService {
                             + " -Dkaraf.data=\"" + new File(new File(location).getCanonicalPath(), "data") + "\""
                             + " -Dkaraf.etc=\"" + new File(new File(location).getCanonicalPath(), "etc") + "\""
                             + " -Dkaraf.instances=\"" + System.getProperty("karaf.instances") + "\""
-                            + " -Djavax.management.builder.initial=org.apache.karaf.management.boot.KarafMBeanServerBuilder"
                             + " -classpath \"" + classpath.toString() + "\""
                             + " " + Execute.class.getName()
                             + " restart --java-opts \"" + javaOpts + "\" " + name;
