@@ -34,7 +34,6 @@
     <name>Apache Karaf :: Management</name>
 
     <modules>
-        <module>boot</module>
         <module>server</module>
         <module>mbeans</module>
     </modules>

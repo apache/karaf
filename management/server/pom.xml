@@ -59,11 +59,6 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.karaf.management</groupId>
-            <artifactId>org.apache.karaf.management.boot</artifactId>
-            <scope>provided</scope>
-        </dependency>        
-        <dependency>
             <groupId>org.apache.karaf.service</groupId>
             <artifactId>org.apache.karaf.service.guard</artifactId>
             <scope>provided</scope>

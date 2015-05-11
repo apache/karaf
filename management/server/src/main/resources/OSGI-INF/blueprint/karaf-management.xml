@@ -75,6 +75,7 @@
     <bean id="connectorFactory" class="org.apache.karaf.management.ConnectorServerFactory" init-method="init"
           destroy-method="destroy">
         <property name="server" ref="mbeanServer"/>
+        <property name="guard" ref="karafMBeanServerGuard"/>
         <property name="serviceUrl" value="${serviceUrl}"/>
         <property name="rmiServerHost" value="${rmiServerHost}"/>
         <property name="daemon" value="${daemon}"/>
@@ -105,13 +106,14 @@
     <reference id="configAdmin" interface="org.osgi.service.cm.ConfigurationAdmin" />
 
     <!-- For role-based security on the JMX API -->
-    <bean id="karafMBeanServerGuard" class="org.apache.karaf.management.KarafMBeanServerGuard" init-method="init">
+    <bean id="karafMBeanServerGuard" class="org.apache.karaf.management.KarafMBeanServerGuard">
         <property name="configAdmin" ref="configAdmin" />
     </bean>
 
     <!-- JMX Security MBean -->
     <bean id="jmxSecurityMBean" class="org.apache.karaf.management.internal.JMXSecurityMBeanImpl">
         <property name="MBeanServer" ref="mbeanServer"/>
+        <property name="guard" ref="karafMBeanServerGuard"/>
     </bean>
 
     <!-- Reference to the MBean Server -->

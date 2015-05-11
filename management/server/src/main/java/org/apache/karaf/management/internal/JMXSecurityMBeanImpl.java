@@ -31,18 +31,17 @@ import javax.management.openmbean.TabularDataSupport;
 
 import org.apache.karaf.management.JMXSecurityMBean;
 import org.apache.karaf.management.KarafMBeanServerGuard;
-import org.apache.karaf.management.boot.KarafMBeanServerBuilder;
 
 public class JMXSecurityMBeanImpl extends StandardMBean implements JMXSecurityMBean {
 
     private MBeanServer mbeanServer;
+    private KarafMBeanServerGuard guard;
 
     public JMXSecurityMBeanImpl() throws NotCompliantMBeanException {
         super(JMXSecurityMBean.class);
     }
 
     public boolean canInvoke(String objectName) throws Exception {
-        KarafMBeanServerGuard guard = (KarafMBeanServerGuard) KarafMBeanServerBuilder.getGuard();
         if (guard == null)
             return true;
 
@@ -50,7 +49,6 @@ public class JMXSecurityMBeanImpl extends StandardMBean implements JMXSecurityMB
     }
 
     public boolean canInvoke(String objectName, String methodName) throws Exception {
-        KarafMBeanServerGuard guard = (KarafMBeanServerGuard) KarafMBeanServerBuilder.getGuard();
         if (guard == null)
             return true;
 
@@ -60,7 +58,6 @@ public class JMXSecurityMBeanImpl extends StandardMBean implements JMXSecurityMB
     public boolean canInvoke(String objectName, String methodName, String[] argumentTypes) throws Exception {
         ObjectName on = new ObjectName(objectName);
 
-        KarafMBeanServerGuard guard = (KarafMBeanServerGuard) KarafMBeanServerBuilder.getGuard();
         if (guard == null)
             return true;
 
@@ -117,6 +114,14 @@ public class JMXSecurityMBeanImpl extends StandardMBean implements JMXSecurityMB
 
     public void setMBeanServer(MBeanServer mbeanServer) {
         this.mbeanServer = mbeanServer;
+    }
+
+    public KarafMBeanServerGuard getGuard() {
+        return guard;
+    }
+
+    public void setGuard(KarafMBeanServerGuard guard) {
+        this.guard = guard;
     }
 
 }

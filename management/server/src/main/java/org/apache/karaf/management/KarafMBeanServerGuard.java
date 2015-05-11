@@ -40,7 +40,6 @@ import javax.management.ObjectName;
 import javax.security.auth.Subject;
 
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
-import org.apache.karaf.management.boot.KarafMBeanServerBuilder;
 import org.apache.karaf.management.tools.ACLConfigurationParser;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
@@ -48,8 +47,6 @@ import org.osgi.service.cm.ConfigurationAdmin;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-
 
 public class KarafMBeanServerGuard implements InvocationHandler {
     
@@ -71,10 +68,6 @@ public class KarafMBeanServerGuard implements InvocationHandler {
 
     public void setConfigAdmin(ConfigurationAdmin configAdmin) {
         this.configAdmin = configAdmin;
-    }
-
-    public void init() {
-        KarafMBeanServerBuilder.setGuard(this);
     }
 
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
