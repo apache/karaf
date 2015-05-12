@@ -24,6 +24,7 @@ import javax.management.StandardMBean;
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.CompositeType;
+import javax.management.openmbean.KeyAlreadyExistsException;
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
@@ -65,10 +66,9 @@ public class PackagesMBeanImpl extends StandardMBean implements PackagesMBean {
                                                     new String[] {"Name", "Version", "ID"});
             TabularData table = new TabularDataSupport(tableType);
 
-            SortedMap<String, PackageVersion> exports = packageService.getExports();
+            List<PackageVersion> exports = packageService.getExports();
 
-            for (String key : exports.keySet()) {
-                PackageVersion export = exports.get(key);
+            for (PackageVersion export : exports) {
                 for (Bundle bundle : export.getBundles()) {
                     Object[] data = new Object[] {
                                          export.getPackageName(),
@@ -76,7 +76,7 @@ public class PackagesMBeanImpl extends StandardMBean implements PackagesMBean {
                                          bundle.getBundleId(),
                                          bundle.getSymbolicName()};
                     CompositeData comp = new CompositeDataSupport(bundleType, names, data);
-                    LOGGER.debug("Adding CompositeDataSupport {} for key: {}", comp, key);
+                    LOGGER.debug("Adding CompositeDataSupport {}", comp);
                     table.put(comp);
                 }
             }
@@ -104,10 +104,9 @@ public class PackagesMBeanImpl extends StandardMBean implements PackagesMBean {
                                                     new String[] {"Filter", "ID"});
             TabularData table = new TabularDataSupport(tableType);
 
-            SortedMap<String, PackageRequirement> imports = packageService.getImports();
+            List<PackageRequirement> imports = packageService.getImports();
 
-            for (String key : imports.keySet()) {
-                PackageRequirement req = imports.get(key);
+            for (PackageRequirement req : imports) {
                 Object[] data = new Object[] {
                                          req.getPackageName(),
                                          req.getFilter(),
@@ -116,7 +115,11 @@ public class PackagesMBeanImpl extends StandardMBean implements PackagesMBean {
                                          req.getBundle().getSymbolicName(),
                                          req.isResolveable()};
                 CompositeData comp = new CompositeDataSupport(bundleType, names, data);
-                table.put(comp);
+                try {
+                    table.put(comp);
+                }catch (KeyAlreadyExistsException e) {
+                    throw new RuntimeException("Id: " + req.getBundle().getBundleId() + ", filter: " + req.getFilter(), e);
+                }
              }
             return table;
         } catch (RuntimeException e) {

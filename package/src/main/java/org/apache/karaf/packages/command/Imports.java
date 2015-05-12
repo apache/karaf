@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.packages.command;
 
+import java.util.List;
 import java.util.SortedMap;
 
 import org.apache.karaf.packages.core.PackageRequirement;
@@ -50,7 +51,7 @@ public class Imports implements Action {
 
     @Override
     public Object execute() throws Exception {
-        SortedMap<String, PackageRequirement> imports = packageService.getImports();
+        List<PackageRequirement> imports = packageService.getImports();
         ShellTable table = new ShellTable();
         if (showFilter) {
             table.column("Filter");
@@ -62,13 +63,12 @@ public class Imports implements Action {
         table.column("ID");
         table.column("Bundle Name");
 
-        for (String filter : imports.keySet()) {
-            PackageRequirement req = imports.get(filter);
+        for (PackageRequirement req : imports) {
             if (matchesFilter(req)) {
                 Bundle bundle = req.getBundle();
                 Row row = table.addRow();
                 if (showFilter) {
-                    row.addContent(filter);
+                    row.addContent(req.getFilter());
                 } else {
                     row.addContent(req.getPackageName(), req.getVersionRange());
                 }

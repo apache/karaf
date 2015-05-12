@@ -70,14 +70,13 @@ public class Exports implements Action {
     }
 
     private void showExports() {
-        SortedMap<String, PackageVersion> exports = packageService.getExports();
+        List<PackageVersion> exports = packageService.getExports();
         ShellTable table = new ShellTable();
         table.column("Package Name");
         table.column("Version");
         table.column("ID");
         table.column("Bundle Name");
-        for (String key : exports.keySet()) {
-            PackageVersion pVer = exports.get(key);
+        for (PackageVersion pVer : exports) {
             for (Bundle bundle : pVer.getBundles()) {
                 if (matchesFilter(pVer, bundle)) {
                     table.addRow().addContent(pVer.getPackageName(),

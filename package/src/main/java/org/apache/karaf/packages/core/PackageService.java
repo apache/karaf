@@ -38,7 +38,7 @@ public interface PackageService {
 	 * 
 	 * @return 
 	 */
-    SortedMap<String, PackageVersion> getExports();
+    List<PackageVersion> getExports();
 
     /**
      * Gets a map of all package imports. 
@@ -46,6 +46,6 @@ public interface PackageService {
      *  
      * @return
      */
-    SortedMap<String, PackageRequirement> getImports();
+    List<PackageRequirement> getImports();
 
 }

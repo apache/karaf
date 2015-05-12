@@ -17,6 +17,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 
@@ -88,14 +89,13 @@ public class PackageTest extends KarafTestSupport {
         // Leaving out version to make test easier to manage
         // We currently expect no duplicate package exports
         Map<String, Integer> expectedDups = new HashMap<String, Integer>();
-        SortedMap<String, PackageVersion> packageVersionMap = packageService.getExports();
+        List<PackageVersion> packageVersionMap = packageService.getExports();
        
-        for (String packageNameVersion : packageVersionMap.keySet()) {
-            PackageVersion pVer = packageVersionMap.get(packageNameVersion);
+        for (PackageVersion pVer : packageVersionMap) {
             if (pVer.getBundles().size() > 1) {
-                String packageName = packageNameVersion.split(":")[0];
+                String packageName = pVer.getPackageName();
                 int expectedNum = expectedDups.containsKey(packageName) ? expectedDups.get(packageName) : 0;
-                Assert.assertEquals("Expecting number of duplicates for package " + packageNameVersion, expectedNum, pVer.getBundles().size());
+                Assert.assertEquals("Expecting number of duplicates for package " + packageName, expectedNum, pVer.getBundles().size());
             }
         }
     }

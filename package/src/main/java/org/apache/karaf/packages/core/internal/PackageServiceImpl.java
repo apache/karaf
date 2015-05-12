@@ -17,6 +17,8 @@
 package org.apache.karaf.packages.core.internal;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
@@ -40,7 +42,7 @@ public class PackageServiceImpl implements PackageService {
         this.bundleContext = bundleContext;
     }
 
-    public SortedMap<String, PackageVersion> getExports() {
+    public List<PackageVersion> getExports() {
         Bundle[] bundles = bundleContext.getBundles();
         SortedMap<String, PackageVersion> packageVersionMap = new TreeMap<String, PackageVersion>();
         for (Bundle bundle : bundles) {
@@ -61,24 +63,24 @@ public class PackageServiceImpl implements PackageService {
                 }
             }
         }
-        return packageVersionMap;
+        return new ArrayList<>(packageVersionMap.values());
     }
 
     @Override
-    public SortedMap<String, PackageRequirement> getImports() {
+    public List<PackageRequirement> getImports() {
         Bundle[] bundles = bundleContext.getBundles();
-        SortedMap<String, PackageRequirement> filterMap = new TreeMap<String, PackageRequirement>();
+        SortedMap<String, PackageRequirement> requirements = new TreeMap<>();
         for (Bundle bundle : bundles) {
             BundleRevision rev = bundle.adapt(BundleRevision.class);
             if (rev != null) {
                 List<BundleRequirement> reqs = rev.getDeclaredRequirements(BundleRevision.PACKAGE_NAMESPACE);
                 for (BundleRequirement req : reqs) {
                     PackageRequirement preq = create(req, bundle);
-                    filterMap.put(preq.getFilter(), preq);
+                    requirements.put(preq.getPackageName() + "|" + preq.getFilter() + "|" + preq.getBundle().getBundleId(), preq);
                 }
             }
         }
-        return filterMap;
+        return new ArrayList<>(requirements.values());
     }
 
     private boolean checkResolveAble(BundleRequirement req) {
