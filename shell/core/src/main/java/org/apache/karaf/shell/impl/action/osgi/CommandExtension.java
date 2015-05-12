@@ -95,7 +95,11 @@ public class CommandExtension implements Extension {
                 Collection<String> classes = wiring.listResources(name, "*.class", options);
                 for (String className : classes) {
                     className = className.replace('/', '.').replace(".class", "");
-                    inspectClass(bundle.loadClass(className));
+                    try {
+                        inspectClass(bundle.loadClass(className));
+                    } catch (final ClassNotFoundException | NoClassDefFoundError ex) {
+                        LOGGER.info("Inspection of class {} failed.", className, ex);
+                    }
                 }
             }
             AggregateServiceTracker.State state = tracker.open();
