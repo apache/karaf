@@ -138,8 +138,8 @@ public class Activator extends BaseActivator implements ManagedService {
         String sshRealm       = getString("sshRealm", "karaf");
         String hostKey        = getString("hostKey", System.getProperty("karaf.etc") + "/host.key");
         String authMethods    = getString("authMethods", "keyboard-interactive,password,publickey");
-        int keySize           = getInt("keySize", 1024);
-        String algorithm      = getString("algorithm", "DSA");
+        int keySize           = getInt("keySize", 4096);
+        String algorithm      = getString("algorithm", "RSA");
         String macs           = getString("macs", "hmac-sha1");
         String ciphers        = getString("ciphers", "aes256-ctr,aes192-ctr,aes128-ctr,arcfour256");
         String welcomeBanner  = getString("welcomeBanner", null);
