@@ -47,8 +47,8 @@
             <cm:property name="hostKey" value="$[karaf.etc]/host.key"/>
             <cm:property name="authorizedKeys" value="$[karaf.etc]/authorized_keys"/>
             <cm:property name="authMethods" value="keyboard-interactive,password,publickey"/>
-            <cm:property name="keySize" value="1024"/>
-            <cm:property name="algorithm" value="DSA"/>
+            <cm:property name="keySize" value="4096"/>
+            <cm:property name="algorithm" value="RSA"/>
             <cm:property name="macs" value="hmac-sha1" />
             <cm:property name="ciphers" value="aes256-ctr,aes192-ctr,aes128-ctr,arcfour256" />
             <cm:property name="welcomeBanner" value="" />

@@ -18,6 +18,7 @@
  */
 package org.apache.karaf.shell.ssh;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.security.KeyPair;
@@ -28,15 +29,25 @@ import java.security.spec.InvalidKeySpecException;
 
 import org.easymock.EasyMock;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class ServerKeyVerifierImplTest {
 
 	private static final InetSocketAddress LOCALHOST = new InetSocketAddress("localhost", 1001);
-	private static final String ALGORITHM = "DSA";
+	private static String ALGORITHM;
+	private static int KEY_SIZE;
+
+	@BeforeClass
+	public static void init() throws IOException {
+		// test key algorithm and size as configured...
+		ALGORITHM = ConfigHelper.getValue(ConfigHelper.CONFIG_ALGORITHM);
+		KEY_SIZE = ConfigHelper.getValueAsInt(ConfigHelper.CONFIG_KEYSIZE);
+	}
 
 	private PublicKey createPubKey() throws NoSuchAlgorithmException {
 		KeyPairGenerator gen = KeyPairGenerator.getInstance(ALGORITHM);
+		gen.initialize(KEY_SIZE);
 		KeyPair keyPair = gen.generateKeyPair();
 		return keyPair.getPublic();
 	}
