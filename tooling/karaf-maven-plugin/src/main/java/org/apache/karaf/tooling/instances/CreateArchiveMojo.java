@@ -21,7 +21,10 @@ package org.apache.karaf.tooling.instances;
 import java.io.File;
 import java.io.IOException;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.karaf.tooling.utils.MojoSupport;
+import org.apache.maven.model.FileSet;
 import org.apache.maven.model.Resource;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.MatchingTask;
@@ -101,7 +104,7 @@ public class CreateArchiveMojo extends MojoSupport {
     }
 
     @SuppressWarnings("deprecation")
-	private void archive(String type) throws IOException {
+    private void archive(String type) throws IOException {
         Artifact artifact1 = factory.createArtifactWithClassifier(project.getArtifact().getGroupId(), project.getArtifact().getArtifactId(), project.getArtifact().getVersion(), type, "bin");
         File target1 = archive(targetServerDirectory, destDir, artifact1);
         projectHelper.attachArtifact( project, artifact1.getType(), null, target1 );
@@ -113,11 +116,12 @@ public class CreateArchiveMojo extends MojoSupport {
         if (targetFile != null && project.getPackaging().equals("karaf-assembly")) {
             serverName = targetFile.getName();
         } else {
-           serverName = artifact.getArtifactId() + "-" + artifact.getVersion();
+            serverName = artifact.getArtifactId() + "-" + artifact.getVersion();
         }
         dest = new File(dest, serverName + "." + artifact.getType());
         Project project = new Project();
         MatchingTask archiver;
+        File outputDirectory = new File(this.project.getBuild().getOutputDirectory());
         if ("tar.gz".equals(artifact.getType())) {
             Tar tar = new Tar();
             Tar.TarCompressionMethod tarCompressionMethod = new Tar.TarCompressionMethod();
@@ -150,17 +154,15 @@ public class CreateArchiveMojo extends MojoSupport {
             rc.setIncludes("bin/*.bat");
             tar.add(rc);
 
-            for (Resource resource: this.project.getResources()) {
-                File resourceFile = new File(resource.getDirectory());
-                if (resourceFile.exists()) {
-                    rc = new TarFileSet();
-                    rc.setPrefix(serverName);
-                    rc.setProject(project);
-                    rc.setDir(resourceFile);
-                    rc.appendIncludes(resource.getIncludes().toArray(new String[0]));
-                    rc.appendExcludes(resource.getExcludes().toArray(new String[0]));
-                    tar.add(rc);
-                }
+
+            if(outputDirectory.exists()) {
+                System.out.println("Adding all files from " + outputDirectory.getAbsolutePath() + " to " + dest.getAbsolutePath());
+                rc = new TarFileSet();
+                rc.setPrefix(serverName);
+                rc.setDir(outputDirectory);
+                rc.setProject(project);
+                rc.setExcludes("**/*.class");
+                tar.add(rc);
             }
 
             archiver = tar;
@@ -190,17 +192,14 @@ public class CreateArchiveMojo extends MojoSupport {
             fs.setIncludes("bin/*.bat");
             zip.add(fs);
 
-            for (Resource resource: this.project.getResources()) {
-                File resourceFile = new File(resource.getDirectory());
-                if (resourceFile.exists()) {
-                    fs = new ZipFileSet();
-                    fs.setPrefix(serverName);
-                    fs.setProject(project);
-                    fs.setDir(resourceFile);
-                    fs.appendIncludes(resource.getIncludes().toArray(new String[0]));
-                    fs.appendExcludes(resource.getExcludes().toArray(new String[0]));
-                    zip.add(fs);
-                }
+
+            if(outputDirectory.exists()) {
+                fs = new ZipFileSet();
+                fs.setPrefix(serverName);
+                fs.setDir(outputDirectory);
+                fs.setProject(project);
+                fs.setExcludes("**/*.class");
+                zip.add(fs);
             }
 
             archiver = zip;
