@@ -21,11 +21,7 @@ package org.apache.karaf.tooling.instances;
 import java.io.File;
 import java.io.IOException;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.karaf.tooling.utils.MojoSupport;
-import org.apache.maven.model.FileSet;
-import org.apache.maven.model.Resource;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.MatchingTask;
 import org.apache.tools.ant.taskdefs.Tar;
@@ -156,7 +152,6 @@ public class CreateArchiveMojo extends MojoSupport {
 
 
             if(outputDirectory.exists()) {
-                System.out.println("Adding all files from " + outputDirectory.getAbsolutePath() + " to " + dest.getAbsolutePath());
                 rc = new TarFileSet();
                 rc.setPrefix(serverName);
                 rc.setDir(outputDirectory);
