@@ -26,6 +26,7 @@ import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.MatchingTask;
 import org.apache.tools.ant.taskdefs.Tar;
 import org.apache.tools.ant.taskdefs.Zip;
+import org.apache.tools.ant.types.ArchiveFileSet;
 import org.apache.tools.ant.types.TarFileSet;
 import org.apache.tools.ant.types.ZipFileSet;
 import org.apache.maven.artifact.Artifact;
@@ -103,7 +104,7 @@ public class CreateArchiveMojo extends MojoSupport {
     private void archive(String type) throws IOException {
         Artifact artifact1 = factory.createArtifactWithClassifier(project.getArtifact().getGroupId(), project.getArtifact().getArtifactId(), project.getArtifact().getVersion(), type, "bin");
         File target1 = archive(targetServerDirectory, destDir, artifact1);
-        projectHelper.attachArtifact( project, artifact1.getType(), null, target1 );
+        projectHelper.attachArtifact(project, artifact1.getType(), null, target1);
     }
 
     public File archive(File source, File dest, Artifact artifact) throws //ArchiverException,
@@ -115,11 +116,90 @@ public class CreateArchiveMojo extends MojoSupport {
             serverName = artifact.getArtifactId() + "-" + artifact.getVersion();
         }
         dest = new File(dest, serverName + "." + artifact.getType());
-        Project project = new Project();
-        MatchingTask archiver;
-        File outputDirectory = new File(this.project.getBuild().getOutputDirectory());
+        Archiver archiver;
         if ("tar.gz".equals(artifact.getType())) {
-            Tar tar = new Tar();
+            archiver = new TarArchiver(dest);
+        } else if ("zip".equals(artifact.getType())) {
+            archiver = new ZipArchiver(dest);
+        } else {
+            throw new IllegalArgumentException("Unknown target type: " + artifact.getType());
+        }
+        populateArchive(archiver, source, serverName);
+        return dest;
+    }
+
+    private <T extends ArchiveFileSet> void populateArchive(Archiver<T> archiver, File source, String serverName) {
+        Project project = new Project();
+        T fileSet = archiver.createFileSet();
+        fileSet.setDir(source);
+        fileSet.setPrefix(serverName);
+        fileSet.setProject(project);
+        fileSet.setExcludes("bin/");
+        archiver.add(fileSet);
+
+        fileSet = archiver.createFileSet();
+        fileSet.setDir(source);
+        fileSet.setPrefix(serverName);
+        fileSet.setProject(project);
+        fileSet.setIncludes("bin/");
+        fileSet.setExcludes("bin/*.bat");
+        fileSet.setFileMode("755");
+        archiver.add(fileSet);
+
+        fileSet = archiver.createFileSet();
+        fileSet.setDir(source);
+        fileSet.setPrefix(serverName);
+        fileSet.setProject(project);
+        fileSet.setIncludes("bin/*.bat");
+        archiver.add(fileSet);
+
+        File outputDirectory = new File(this.project.getBuild().getOutputDirectory());
+        if(outputDirectory.exists()) {
+            fileSet = archiver.createFileSet();
+            fileSet.setPrefix(serverName);
+            fileSet.setDir(outputDirectory);
+            fileSet.setProject(project);
+            fileSet.setExcludes("**/*.class");
+            archiver.add(fileSet);
+        }
+
+        MatchingTask task = archiver.getTask();
+        task.setProject(project);
+        task.execute();
+
+    }
+
+    private class ZipArchiver implements Archiver<ZipFileSet> {
+
+        private final Zip zip;
+
+        public ZipArchiver(File dest) {
+            zip = new Zip();
+            zip.setDestFile(dest);
+        }
+
+        @Override
+        public ZipFileSet createFileSet() {
+            return new ZipFileSet();
+        }
+
+        @Override
+        public void add(ZipFileSet fileSet) {
+            zip.add(fileSet);
+        }
+
+        @Override
+        public MatchingTask getTask() {
+            return zip;
+        }
+    }
+
+    private class TarArchiver implements Archiver<TarFileSet> {
+
+        private final Tar tar;
+
+        public TarArchiver(File dest) {
+            tar = new Tar();
             Tar.TarCompressionMethod tarCompressionMethod = new Tar.TarCompressionMethod();
             tarCompressionMethod.setValue("gzip");
             tar.setCompression(tarCompressionMethod);
@@ -127,83 +207,31 @@ public class CreateArchiveMojo extends MojoSupport {
             fileMode.setValue(Tar.TarLongFileMode.GNU);
             tar.setLongfile(fileMode);
             tar.setDestFile(dest);
-            TarFileSet rc = new TarFileSet();
-            rc.setDir(source);
-            rc.setPrefix(serverName);
-            rc.setProject(project);
-            rc.setExcludes("bin/");
-            tar.add(rc);
-
-            rc = new TarFileSet();
-            rc.setDir(source);
-            rc.setPrefix(serverName);
-            rc.setProject(project);
-            rc.setIncludes("bin/");
-            rc.setExcludes("bin/*.bat");
-            rc.setFileMode("755");
-            tar.add(rc);
-
-            rc = new TarFileSet();
-            rc.setDir(source);
-            rc.setPrefix(serverName);
-            rc.setProject(project);
-            rc.setIncludes("bin/*.bat");
-            tar.add(rc);
-
-
-            if(outputDirectory.exists()) {
-                rc = new TarFileSet();
-                rc.setPrefix(serverName);
-                rc.setDir(outputDirectory);
-                rc.setProject(project);
-                rc.setExcludes("**/*.class");
-                tar.add(rc);
-            }
-
-            archiver = tar;
-        } else if ("zip".equals(artifact.getType())) {
-            Zip zip = new Zip();
-            zip.setDestFile(dest);
-            ZipFileSet fs = new ZipFileSet();
-            fs.setDir(source);
-            fs.setPrefix(serverName);
-            fs.setProject(project);
-            fs.setExcludes("bin/");
-            zip.addFileset(fs);
-
-            fs = new ZipFileSet();
-            fs.setDir(source);
-            fs.setPrefix(serverName);
-            fs.setProject(project);
-            fs.setIncludes("bin/");
-            fs.setExcludes("bin/*.bat");
-            fs.setFileMode("755");
-            zip.add(fs);
-
-            fs = new ZipFileSet();
-            fs.setDir(source);
-            fs.setPrefix(serverName);
-            fs.setProject(project);
-            fs.setIncludes("bin/*.bat");
-            zip.add(fs);
-
-
-            if(outputDirectory.exists()) {
-                fs = new ZipFileSet();
-                fs.setPrefix(serverName);
-                fs.setDir(outputDirectory);
-                fs.setProject(project);
-                fs.setExcludes("**/*.class");
-                zip.add(fs);
-            }
-
-            archiver = zip;
-        } else {
-            throw new IllegalArgumentException("Unknown target type: " + artifact.getType());
         }
-        archiver.setProject(project);
-        archiver.execute();
-        return dest;
+
+        @Override
+        public TarFileSet createFileSet() {
+            return new TarFileSet();
+        }
+
+        @Override
+        public void add(TarFileSet fileSet) {
+            tar.add(fileSet);
+        }
+
+        @Override
+        public MatchingTask getTask() {
+            return tar;
+        }
+    }
+
+    private interface Archiver<T extends ArchiveFileSet> {
+
+        MatchingTask getTask();
+
+        T createFileSet();
+
+        void add(T fileSet);
     }
 
 }
