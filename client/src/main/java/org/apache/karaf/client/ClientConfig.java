@@ -159,7 +159,9 @@ public class ClientConfig {
                 }
             }
             if (user == null) {
-                user = (String) users.iterator().next();
+                if (users.iterator().hasNext()) {
+                    user = (String) users.iterator().next();
+                }
             }
             password = (String) usersCfg.getProperty(user);
             if (password != null && password.contains(ROLE_DELIMITER)) {
