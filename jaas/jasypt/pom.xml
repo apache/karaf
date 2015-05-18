@@ -113,6 +113,11 @@
             <artifactId>org.apache.aries.util</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm-all</artifactId>
+            <scope>test</scope>
+        </dependency>
 
         <dependency>
             <groupId>org.slf4j</groupId>
