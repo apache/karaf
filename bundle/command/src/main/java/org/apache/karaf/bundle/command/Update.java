@@ -36,7 +36,8 @@ public class Update extends BundleCommandWithConfirmation {
                 is = new URL(location).openStream();
                 bundle.update(is);
             } finally {
-                is.close();
+                if (is != null)
+                    is.close();
             }
         } else {
             bundle.update();
