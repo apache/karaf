@@ -221,7 +221,9 @@ public class BundleManager {
             int protocolIndex = bundleLocation.indexOf(":");
             if (protocolIndex != -1) {
                 String protocol = bundleLocation.substring(0, protocolIndex);
-                waitForUrlHandler(protocol);
+                if (!protocol.endsWith("file") && !protocol.endsWith("http")) {
+                    waitForUrlHandler(protocol);
+                }
             }
             URL bundleUrl = new URL(bundleLocation);
             is = new BufferedInputStream(bundleUrl.openStream());
