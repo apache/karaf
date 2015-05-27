@@ -19,7 +19,10 @@ package org.apache.karaf.client;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Map;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.slf4j.impl.SimpleLogger;
 
@@ -43,12 +46,14 @@ public class ClientConfig {
         Properties shellCfg = loadProps(new File(System.getProperty("karaf.etc"), "org.apache.karaf.shell.cfg"));
 
         host = shellCfg.getProperty("sshHost", "localhost");
+        host = expandEnvVars(host);
         if (host.contains("${")) {
             // if sshHost property contains a reference to another property (coming from etc/config.properties
             // or etc/custom.properties), we fall back to "localhost" default value
             host = "localhost";
         }
         String portString = shellCfg.getProperty("sshPort", "8101");
+        portString = expandEnvVars(portString);
         if (portString.contains("${")) {
             // if sshPort property contains a reference to another property (coming from etc/config.properties
             // or etc/custom.properties), we fall back to "8101" default value
@@ -201,6 +206,23 @@ public class ClientConfig {
         return props;
     }
 
+    
+    private static String expandEnvVars(String text) {
+        Map<String, String> envMap = System.getenv();
+        String pattern = "\\$\\{([A-Za-z0-9]+)\\}";
+        Pattern expr = Pattern.compile(pattern);
+        Matcher matcher = expr.matcher(text);
+        while (matcher.find()) {
+            String envValue = envMap.get(matcher.group(1).toUpperCase());
+            if (envValue != null) {
+                envValue = envValue.replace("\\", "\\\\");
+                Pattern subexpr = Pattern.compile(Pattern.quote(matcher.group(0)));
+                text = subexpr.matcher(text).replaceAll(envValue);
+            }
+        }
+        return text;
+    }
+    
     public String getHost() {
         return host;
     }
