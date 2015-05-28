@@ -32,22 +32,22 @@ public class FeatureSshCommandSecurityTest extends SshCommandTestBase {
         Assert.assertFalse("Precondition failed, this test uses the " + feature + " subsystem to test features with...",
                 r.contains(feature));
 
-        assertCommand(vieweruser, "feature:install " + feature, Result.NOT_FOUND);
+        assertCommand(vieweruser, "feature:install -r " + feature, Result.NOT_FOUND);
         String r2 = assertCommand("karaf", "feature:list -i --no-format", Result.OK);
         Assert.assertFalse(feature + " features should not have been installed, as viewer doesn't have credentials",
                 r2.contains(feature));
 
-        assertCommand("karaf", "feature:install " + feature, Result.OK);
+        assertCommand("karaf", "feature:install -r " + feature, Result.OK);
         String r3 = assertCommand(vieweruser, "feature:list -i --no-format", Result.OK);
         Assert.assertTrue(feature + " feature should have been installed by 'karaf' user",
                 r3.contains(feature));
 
-        assertCommand(vieweruser, "feature:uninstall " + feature, Result.NOT_FOUND);
+        assertCommand(vieweruser, "feature:uninstall -r " + feature, Result.NOT_FOUND);
         String r4 = assertCommand("karaf", "feature:list -i --no-format", Result.OK);
         Assert.assertTrue(feature + " feature should still be there, as viewer doesn't have credentials",
                 r4.contains(feature));
 
-        assertCommand("karaf", "feature:uninstall " + feature, Result.OK);
+        assertCommand("karaf", "feature:uninstall -r " + feature, Result.OK);
         String r5 = assertCommand(vieweruser, "feature:list -i --no-format", Result.OK);
         Assert.assertFalse(feature + " feature should have been uninstalled",
                 r5.contains(feature));

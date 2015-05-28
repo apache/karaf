@@ -82,18 +82,9 @@ public class ConditionalFeaturesTest extends KarafTestSupport {
         assertBundleInstalled("org.apache.karaf.webconsole.instance");
         assertBundleInstalled("org.apache.karaf.webconsole.gogo");
         assertBundleInstalled("org.apache.karaf.webconsole.http");
-
-        assertBundleNotInstalled("org.apache.felix.webconsole.plugins.event");
-
-        //Add eventadmin
-        try {
-            featureService.installFeature("eventadmin", EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
-        } catch (Exception ex) {
-          //ignore as the eventadmin activator might throw an error.
-        }
         assertBundleInstalled("org.apache.felix.webconsole.plugins.event");
 
-        //Remove eventadmin
+        // remove eventadmin
         featureService.uninstallFeature("eventadmin", EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
         assertBundleNotInstalled("org.apache.felix.webconsole.plugins.event");
     }

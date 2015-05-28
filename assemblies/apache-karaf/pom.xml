@@ -160,6 +160,7 @@
                         <feature>wrapper</feature>
                     </installedFeatures>
                     <bootFeatures>
+                        <feature>eventadmin</feature>
                         <feature>wrap</feature>
                         <feature>aries-blueprint</feature>
                         <feature>shell</feature>

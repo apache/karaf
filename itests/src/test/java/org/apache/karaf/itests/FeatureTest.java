@@ -34,7 +34,7 @@ public class FeatureTest extends KarafTestSupport {
 
     @Test
     public void bootFeatures() throws Exception {
-        assertFeaturesInstalled("jaas", "ssh", "management", "bundle", "config", "deployer", "diagnostic",
+        assertFeaturesInstalled("eventadmin","jaas", "ssh", "management", "bundle", "config", "deployer", "diagnostic",
                                 "instance", "kar", "log", "package", "service", "system");
     }
 
@@ -64,9 +64,9 @@ public class FeatureTest extends KarafTestSupport {
 
     @Test
     public void installUninstallCommand() throws Exception {
-        System.out.println(executeCommand("feature:install -v wrapper", new RolePrincipal("admin")));
+        System.out.println(executeCommand("feature:install -v -r wrapper", new RolePrincipal("admin")));
         assertFeatureInstalled("wrapper");
-        System.out.println(executeCommand("feature:uninstall wrapper", new RolePrincipal("admin")));
+        System.out.println(executeCommand("feature:uninstall -r wrapper", new RolePrincipal("admin")));
         assertFeatureNotInstalled("wrapper");
     }
 
@@ -77,9 +77,9 @@ public class FeatureTest extends KarafTestSupport {
             connector = this.getJMXConnector();
             MBeanServerConnection connection = connector.getMBeanServerConnection();
             ObjectName name = new ObjectName("org.apache.karaf:type=feature,name=root");
-            connection.invoke(name, "installFeature", new Object[] { "wrapper" }, new String[]{ "java.lang.String" });
+            connection.invoke(name, "installFeature", new Object[] { "wrapper", true }, new String[]{ "java.lang.String", "boolean" });
             assertFeatureInstalled("wrapper");
-            connection.invoke(name, "uninstallFeature", new Object[] { "wrapper" }, new String[]{ "java.lang.String" });
+            connection.invoke(name, "uninstallFeature", new Object[] { "wrapper", true }, new String[]{ "java.lang.String", "boolean" });
             assertFeatureNotInstalled("wrapper");
         } finally {
         	close(connector);
