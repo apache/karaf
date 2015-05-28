@@ -56,4 +56,12 @@ public interface WebContainerService {
      */
     void stop(List<Long> bundleIds) throws Exception;
 
+    /**
+     * Retrieves the Web-ContextPath of the corresponding bundle
+     * 
+     * @param id of the bundle. 
+     * @return 
+     */
+	String getWebContextPath(Long id);
+
 }

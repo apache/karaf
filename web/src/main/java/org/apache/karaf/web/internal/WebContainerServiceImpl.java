@@ -202,4 +202,11 @@ public class WebContainerServiceImpl implements WebContainerService {
         }
     }
 
+	@Override
+	public String getWebContextPath(Long id) {
+		Map<Long, WebEvent> bundleEvents = webEventHandler.getBundleEvents();
+		WebEvent webEvent = bundleEvents.get(id);
+		return webEvent.getContextPath();
+	}
+
 }
