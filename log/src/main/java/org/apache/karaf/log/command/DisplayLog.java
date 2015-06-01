@@ -23,9 +23,11 @@ import org.apache.karaf.log.core.LogService;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.support.completers.StringsCompleter;
 import org.ops4j.pax.logging.spi.PaxLoggingEvent;
 
 /**
@@ -35,6 +37,11 @@ import org.ops4j.pax.logging.spi.PaxLoggingEvent;
 @Service
 public class DisplayLog implements Action {
 
+    public final static int ERROR_INT = 3;
+    public final static int WARN_INT  = 4;
+    public final static int INFO_INT  = 6;
+    public final static int DEBUG_INT = 7;
+
     @Option(name = "-n", aliases = {}, description="Number of entries to display", required = false, multiValued = false)
     int entries;
 
@@ -43,6 +50,10 @@ public class DisplayLog implements Action {
 
     @Option(name = "--no-color", description="Disable syntax coloring of log events", required = false, multiValued = false)
     boolean noColor;
+
+    @Option(name = "-l", aliases = { "--level" }, description = "The miniml log level to display", required = false, multiValued = false)
+    @Completion(value = StringsCompleter.class, values = { "TRACE", "DEBUG", "INFO", "WARN", "ERROR", "DEFAULT" })
+    String level;
 
     @Argument(index = 0, name = "logger", description = "The name of the logger. This can be ROOT, ALL, or the name of a logger specified in the org.ops4j.pax.logger.cfg file.", required = false, multiValued = false)
     String logger;
@@ -55,19 +66,33 @@ public class DisplayLog implements Action {
 
     @Override
     public Object execute() throws Exception {
-        
+
+        int minLevel = Integer.MAX_VALUE;
+        if (level != null) {
+            switch (level.toLowerCase()) {
+            case "debug": minLevel = DEBUG_INT; break;
+            case "info":  minLevel = INFO_INT; break;
+            case "warn":  minLevel = WARN_INT; break;
+            case "error": minLevel = ERROR_INT; break;
+            }
+        }
+
+
         final PrintStream out = System.out;
 
         Iterable<PaxLoggingEvent> le = logService.getEvents(entries == 0 ? Integer.MAX_VALUE : entries);
         for (PaxLoggingEvent event : le) {
-            printEvent(out, event);
+            int sl = event.getLevel().getSyslogEquivalent();
+            if (sl <= minLevel) {
+                printEvent(out, event);
+            }
         }
         out.println();
         return null;
     }
         
     protected boolean checkIfFromRequestedLog(PaxLoggingEvent event) {
-    	return (event.getLoggerName().lastIndexOf(logger)>=0) ? true : false;
+    	return event.getLoggerName().contains(logger);
     }
 
     protected void printEvent(final PrintStream out, PaxLoggingEvent event) {
