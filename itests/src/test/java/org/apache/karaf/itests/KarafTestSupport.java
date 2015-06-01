@@ -85,6 +85,7 @@ public class KarafTestSupport {
 
     static final Long COMMAND_TIMEOUT = 30000L;
     static final Long SERVICE_TIMEOUT = 30000L;
+    static final long BUNDLE_TIMEOUT = 30000L;
 
     private static Logger LOG = LoggerFactory.getLogger(KarafTestSupport.class);
 
@@ -131,7 +132,7 @@ public class KarafTestSupport {
             // enable JMX RBAC security, thanks to the KarafMBeanServerBuilder
             configureSecurity().disableKarafMBeanServerBuilder(),
             keepRuntimeFolder(),
-				logLevel(LogLevel.INFO),
+            logLevel(LogLevel.INFO),
             replaceConfigurationFile("etc/org.ops4j.pax.logging.cfg", getConfigFile("/etc/org.ops4j.pax.logging.cfg")),
             editConfigurationFilePut("etc/org.ops4j.pax.web.cfg", "org.osgi.service.http.port", HTTP_PORT),
             editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiRegistryPort", RMI_REG_PORT),
@@ -315,6 +316,23 @@ public class KarafTestSupport {
         } finally {
             st.close();
         }
+    }
+    
+    protected Bundle waitBundleState(String symbolicName, int state) {
+        long endTime = System.currentTimeMillis() + BUNDLE_TIMEOUT;
+        while (System.currentTimeMillis() < endTime) {
+            Bundle bundle = findBundleByName(symbolicName);
+            if (bundle != null && bundle.getState() == state) {
+                return bundle;
+            }
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                throw new IllegalStateException(e);
+            }
+        }
+        Assert.fail("Manadatory bundle " + symbolicName + " not found.");
+        throw new IllegalStateException("Should not be reached");
     }
 
     /*
