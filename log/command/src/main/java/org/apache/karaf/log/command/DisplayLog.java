@@ -30,6 +30,11 @@ import org.ops4j.pax.logging.spi.PaxLoggingEvent;
 @Command(scope = "log", name = "display", description = "Displays log entries.")
 public class DisplayLog extends LogCommandSupport {
 
+    public final static int ERROR_INT = 3;
+    public final static int WARN_INT  = 4;
+    public final static int INFO_INT  = 6;
+    public final static int DEBUG_INT = 7;
+
     @Option(name = "-n", aliases = {}, description="Number of entries to display", required = false, multiValued = false)
     protected int entries;
 
@@ -38,6 +43,9 @@ public class DisplayLog extends LogCommandSupport {
 
     @Option(name = "--no-color", description="Disable syntax coloring of log events", required = false, multiValued = false)
     protected boolean noColor;
+
+    @Option(name = "-l", aliases = { "--level" }, description = "The minimal log level to display", required = false, multiValued = false)
+    String level;
 
     @Argument(index = 0, name = "logger", description = "The name of the logger. This can be ROOT, ALL, or the name of a logger specified in the org.ops4j.pax.logger.cfg file.", required = false, multiValued = false)
     String logger;
@@ -49,19 +57,36 @@ public class DisplayLog extends LogCommandSupport {
     }
 
     protected Object doExecute() throws Exception {
-        
+
+        int minLevel = Integer.MAX_VALUE;
+        if (level != null) {
+            String lvl = level.toLowerCase();
+            if ("debug".equals(lvl)) {
+                minLevel = DEBUG_INT;
+            } else if ("info".equals(lvl)) {
+                minLevel = INFO_INT;
+            } else if ("warn".equals(lvl)) {
+                minLevel = WARN_INT;
+            } else if ("error".equals(lvl)) {
+                minLevel = ERROR_INT;
+            }
+        }
+
         final PrintStream out = System.out;
 
         Iterable<PaxLoggingEvent> le = logService.getEvents(entries == 0 ? Integer.MAX_VALUE : entries);
         for (PaxLoggingEvent event : le) {
-            printEvent(out, event);
+            int sl = event.getLevel().getSyslogEquivalent();
+            if (sl <= minLevel) {
+                printEvent(out, event);
+            }
         }
         out.println();
         return null;
     }
         
     protected boolean checkIfFromRequestedLog(PaxLoggingEvent event) {
-    	return (event.getLoggerName().lastIndexOf(logger)>=0) ? true : false;
+    	return event.getLoggerName().contains(logger);
     }
 
     protected void printEvent(final PrintStream out, PaxLoggingEvent event) {

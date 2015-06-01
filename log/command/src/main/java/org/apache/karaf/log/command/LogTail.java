@@ -82,10 +82,26 @@ public class LogTail extends DisplayLog {
         boolean doDisplay = true;
 
         public void run() {
+            int minLevel = Integer.MAX_VALUE;
+            if (level != null) {
+                String lvl = level.toLowerCase();
+                if ("debug".equals(lvl)) {
+                    minLevel = DEBUG_INT;
+                } else if ("info".equals(lvl)) {
+                    minLevel = INFO_INT;
+                } else if ("warn".equals(lvl)) {
+                    minLevel = WARN_INT;
+                } else if ("error".equals(lvl)) {
+                    minLevel = ERROR_INT;
+                }
+            }
             Iterable<PaxLoggingEvent> le = logService.getEvents(entries == 0 ? Integer.MAX_VALUE : entries);
             for (PaxLoggingEvent event : le) {
                 if (event != null) {
-                    printEvent(out, event);
+                    int sl = event.getLevel().getSyslogEquivalent();
+                    if (sl <= minLevel) {
+                        printEvent(out, event);
+                    }
                 }
             }
             // Tail
@@ -101,7 +117,10 @@ public class LogTail extends DisplayLog {
                 while (doDisplay) {
                     PaxLoggingEvent event = queue.take();
                     if (event != null) {
-                        printEvent(out, event);
+                        int sl = event.getLevel().getSyslogEquivalent();
+                        if (sl <= minLevel) {
+                            printEvent(out, event);
+                        }
                     }
                 }
             } catch (InterruptedException e) {
