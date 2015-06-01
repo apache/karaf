@@ -315,6 +315,12 @@ public class InstanceServiceImpl implements InstanceService {
                 File rootEtc = new File(System.getProperty("karaf.etc"));
                 copy(new File(rootEtc, "startup.properties"), new File(karafBase, "etc/startup.properties"));
 
+                // align child with any bundles we have overriden in the root instance
+                File rootOverrides = new File(rootEtc, "overrides.properties");
+                if (rootOverrides.exists()) {
+                    copy(rootOverrides, new File(karafBase, "etc/overrides.properties"));
+                }
+                
                 HashMap<String, String> props = new HashMap<String, String>();
                 props.put("${SUBST-KARAF-NAME}", name);
                 props.put("${SUBST-KARAF-HOME}", System.getProperty("karaf.home"));
