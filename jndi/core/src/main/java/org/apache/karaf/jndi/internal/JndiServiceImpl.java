@@ -37,7 +37,7 @@ public class JndiServiceImpl implements JndiService {
     private BundleContext bundleContext;
     private ProxyManager proxyManager;
 
-    private final static String OSGI_JNDI_CONTEXT_PREFIX = "osgi:service/";
+    private final static String OSGI_JNDI_CONTEXT_PREFIX = "osgi:service";
     private final static String OSGI_JNDI_SERVICE_PROPERTY = "osgi.jndi.service.name";
 
     public Map<String, String> names() throws Exception {
@@ -61,7 +61,9 @@ public class JndiServiceImpl implements JndiService {
                             if (proxyManager.isProxy(actualService)) {
                                 actualService = proxyManager.unwrap(actualService).call();
                             }
-                            map.put(OSGI_JNDI_CONTEXT_PREFIX + service.getProperty(OSGI_JNDI_SERVICE_PROPERTY), actualService.getClass().getName());
+                            if (service.getProperty(OSGI_JNDI_SERVICE_PROPERTY).toString().startsWith("/"))
+                                map.put(OSGI_JNDI_CONTEXT_PREFIX + service.getProperty(OSGI_JNDI_SERVICE_PROPERTY), actualService.getClass().getName());
+                            else map.put(OSGI_JNDI_CONTEXT_PREFIX + "/" + service.getProperty(OSGI_JNDI_SERVICE_PROPERTY), actualService.getClass().getName());
                             bundleContext.ungetService(service);
                         }
                     }
@@ -81,10 +83,14 @@ public class JndiServiceImpl implements JndiService {
                 }
                 if (o instanceof Context) {
                     StringBuilder sb = new StringBuilder();
-                    sb.append("/" + pair.getName());
+                    if (pair.getName().contains(":"))
+                        sb.append(pair.getName());
+                    else sb.append("/" + pair.getName());
                     names((Context) o, sb, map);
                 } else {
-                    map.put("/" + pair.getName(), pair.getClassName());
+                    if (pair.getName().contains(":"))
+                        map.put(pair.getName(), pair.getClassName());
+                    else map.put("/" + pair.getName(), pair.getClassName());
                 }
             }
         }
@@ -229,7 +235,7 @@ public class JndiServiceImpl implements JndiService {
                 ServiceReference<?>[] services = bundle.getRegisteredServices();
                 if (services != null) {
                     for (ServiceReference service : services) {
-                        if (service.getProperty(OSGI_JNDI_SERVICE_PROPERTY) != null && ((String) service.getProperty(OSGI_JNDI_SERVICE_PROPERTY)).equals(name.substring(OSGI_JNDI_CONTEXT_PREFIX.length()))) {
+                        if (service.getProperty(OSGI_JNDI_SERVICE_PROPERTY) != null && ((String) service.getProperty(OSGI_JNDI_SERVICE_PROPERTY)).equals(name.substring(OSGI_JNDI_CONTEXT_PREFIX.length() + 1))) {
                             Object actualService = bundleContext.getService(service);
                             try {
                                 if (proxyManager.isProxy(actualService)) {
