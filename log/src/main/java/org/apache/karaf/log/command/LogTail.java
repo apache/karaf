@@ -95,7 +95,7 @@ public class LogTail extends DisplayLog {
         boolean doDisplay = true;
 
         public void run() {
-            int minLevel = Integer.MIN_VALUE;
+            int minLevel = Integer.MAX_VALUE;
             if (level != null) {
                 switch (level.toLowerCase()) {
                 case "debug": minLevel = DEBUG_INT; break;

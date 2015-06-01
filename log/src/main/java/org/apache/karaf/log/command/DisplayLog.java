@@ -51,7 +51,7 @@ public class DisplayLog implements Action {
     @Option(name = "--no-color", description="Disable syntax coloring of log events", required = false, multiValued = false)
     boolean noColor;
 
-    @Option(name = "-l", aliases = { "--level" }, description = "The miniml log level to display", required = false, multiValued = false)
+    @Option(name = "-l", aliases = { "--level" }, description = "The minimal log level to display", required = false, multiValued = false)
     @Completion(value = StringsCompleter.class, values = { "TRACE", "DEBUG", "INFO", "WARN", "ERROR", "DEFAULT" })
     String level;
 
