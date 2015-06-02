@@ -36,7 +36,7 @@ public class ShellTableTest {
         table.addRow().addContent("my first column value", "my second column value is quite long");
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         table.print(new PrintStream(baos), false);
-        assertEquals("my first column value|my second column value is quite long\n", baos.toString());
+        assertEquals(String.format("%s%n","my first column value|my second column value is quite long"), baos.toString());
     }
 
     @Test
@@ -49,7 +49,7 @@ public class ShellTableTest {
         table.size(50);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         table.print(new PrintStream(baos), false);
-        assertEquals("my first column value|my second column value is q\n", baos.toString());
+        assertEquals(String.format("%s%n","my first column value|my second column value is q"), baos.toString());
     }
 
     @Test
@@ -62,8 +62,8 @@ public class ShellTableTest {
         table.size(50);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         table.print(new PrintStream(baos), false);
-        assertEquals("my first column value|my second column value is\n" +
-                "                     |quite long\n", baos.toString());
+        assertEquals(String.format("%1$s\n%2$s%n","my first column value|my second column value is",
+                "                     |quite long"), baos.toString());
     }
 
 }
