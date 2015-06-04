@@ -73,6 +73,9 @@ public class CustomSimpleDownloadTask extends AbstractRetryableDownloadTask {
     }
 
     private URLStreamHandler getUrlStreamHandler(String url) throws URISyntaxException {
+        if(url.contains("\\")){
+            url = url.replace("\\","/");
+        }
         String scheme = new URI(url).getScheme();
         switch (scheme) {
         case WRAP_URI_PREFIX:
