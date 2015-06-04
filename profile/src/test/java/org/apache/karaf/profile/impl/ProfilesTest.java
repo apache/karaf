@@ -85,6 +85,6 @@ public class ProfilesTest {
         Profile overlay = Profiles.getOverlay(profile, profiles);
 
         String outPid1 = new String(overlay.getFileConfiguration("pid1.cfg"));
-        assertEquals("# My comment\nfoo = bar2\n", outPid1);
+        assertEquals(String.format("%1$s%n%2$s%n","# My comment","foo = bar2"), outPid1);
     }
 }
