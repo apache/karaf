@@ -1,0 +1,58 @@
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//      http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// 
+
+== Goal _karaf:commands-generate-help_
+
+The _karaf:commands-generate-help_ goal generates documentation containing Karaf commands help.
+
+It looks for Karaf commands in the current project class loader and generates the help as displayed with the --help
+option in the Karaf shell console.
+
+=== Example
+The example below generates help for the commands in the current project:
+[source,xml]
+----
+<project>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.karaf.tooling</groupId>
+        <artifactId>karaf-maven-plugin</artifactId>
+        <version>${project.version}</version>
+
+        <executions>
+          <execution>
+            <id>document-commands</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>commands-generate-help</goal>
+            </goals>
+            <configuration>
+              <targetFolder>${project.build.directory}/docbook/sources</targetFolder>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>
+----
+
+=== Parameters
+|===
+|Name | Type | Description 
+| _targetFolder_ | _File_ | The directory where the documentation output files are to be generated \\ Default value: ${project.build.directory}/docbkx/sources 
+| _format_ | _String_ | The output format (docbx or conf) of the commands documentation. \\ Default value: docbx 
+| _classLoader_ | _String_ | The class loader to use in loading the commands. \\ Default value: ${project} 
+|===

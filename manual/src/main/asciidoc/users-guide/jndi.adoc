@@ -96,10 +96,8 @@ JNDI Name | Class Name
 service   | org.apache.karaf.jndi.internal.JndiServiceImpl
 ----
 
-{warning}
-The `jndi:names` lists only names (the full qualified name). It means that the empty JNDI sub-contexts are not displayed.
+WARNING: The `jndi:names` lists only names (the full qualified name). It means that the empty JNDI sub-contexts are not displayed.
 To display all JNDI sub-contexts (empty or not), you can use the `jndi:contexts` command.
-{warning}
 
 ===  `jndi:contexts`
 
@@ -192,9 +190,7 @@ JNDI Name         | Class Name
 osgi:service/jndi | org.apache.karaf.jndi.internal.JndiServiceImpl
 ----
 
-{warning}
-It's not possible to unbind a name from the `osgi:service` schema, as it's linked to a OSGi service.
-{warning}
+WARNING: It's not possible to unbind a name from the `osgi:service` schema, as it's linked to a OSGi service.
 
 ==  JMX JndiMBean
 

@@ -58,7 +58,7 @@ is that the minimal distribution will download the features from Internet.
 
 NB: the JAVA_HOME environment variable has to be correctly defined. To accomplish that, press Windows key and Break key together, switch to "Advanced" tab and click on "Environment Variables".
 
-. From a browser, navigate to [http://karaf.apache.org/index/community/download.html].
+. From a browser, navigate to http://karaf.apache.org/index/community/download.html.
 . Download Apache Karaf binary distribution in the zip format: `apache-karaf-3.0.0.zip`.
 . Extract the files from the zip file into a directory of your choice (it's the `KARAF_HOME`.
 NB: remember the restrictions concerning illegal characters in Java paths, e.g. \!, % etc.
@@ -83,7 +83,7 @@ If it's not correct, fix it using:
 export JAVA_HOME=....
 ----
 
-. From a browser, navigate to [http://karaf.apache.org/index/community/download.html].
+. From a browser, navigate to http://karaf.apache.org/index/community/download.html.
 . Download Apache Karaf binary distribution in the tar.gz format: `apache-karaf-3.0.0.tar.gz`.
 . Extract the files from the tar.gz file into a directory of your choice (it's the `KARAF_HOME`). For example:
 ----

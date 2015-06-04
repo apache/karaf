@@ -102,10 +102,8 @@ The `jdbc:delete` command deletes a datasource by removing the `deploy/datasourc
 karaf@root()> jdbc:delete test
 ----
 
-{warning}
-The `jdbc:delete` does not uninstall the JDBC driver bundles and does not remove the files created by the JDBC driver (or the database in case of embedded database).
+WARNING: The `jdbc:delete` does not uninstall the JDBC driver bundles and does not remove the files created by the JDBC driver (or the database in case of embedded database).
 It's up to you to remove it.
-{warning}
 
 ==  `jdbc:datasources`
 

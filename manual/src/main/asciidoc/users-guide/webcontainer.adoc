@@ -45,7 +45,8 @@ The `etc/jetty.xml` is a standard Eclipse Jetty configuration file.
 
 The default Apache Karaf WebContainer `etc/jetty.xml` contains:
 
-{code:lang=xml}
+[source,xml]
+----
 <?xml version="1.0"?>
 <!--
  Licensed to the Apache Software Foundation (ASF) under one
@@ -146,9 +147,9 @@ to bind on a specific network interface (with a given IP address).
 
 The following resources give you details about advanced `etc/jetty.xml` configurations:
 
-* [Standard configuration|http://wiki.eclipse.org/Jetty/Howto/Configure_Jetty]
-* [Enable SSL|http://wiki.eclipse.org/Jetty/Howto/Configure_SSL]
-* [Reference|http://wiki.eclipse.org/Jetty/Reference/jetty.xml_syntax]
+* http://wiki.eclipse.org/Jetty/Howto/Configure_Jetty[Standard configuration]
+* http://wiki.eclipse.org/Jetty/Howto/Configure_SSL[Enable SSL]
+* http://wiki.eclipse.org/Jetty/Reference/jetty.xml_syntax[Reference]
 
 ==  Deploy
 

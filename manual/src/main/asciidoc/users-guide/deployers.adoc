@@ -16,7 +16,7 @@
 
 The following picture describes the architecture of the deployers.
 
-!/images/deployer.png!
+image::deployer.png[]
 
 Apache Karaf polls the `deploy` folder for new files.
 
@@ -89,7 +89,8 @@ The default imported packages are extracted from the spring file definition and 
 
 If you need to customize the generated manifest, you can do so by including an xml element in your blueprint configuration:
 
-{code:lang=xml}
+[source,xml]
+----
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
   <manifest xmlns="http://karaf.apache.org/xmlns/deployer/blueprint/v1.0.0">
     Require-Bundle= my-bundle
@@ -115,7 +116,8 @@ DynamicImport-Package: *
 
 If you need to customize the generated manifest, you can do so by including a XML element in your Spring configuration:
 
-{code:lang=xml}
+[source,xml]
+----
 <spring:beans ...>
   <manifest xmlns="http://karaf.apache.org/xmlns/deployer/spring/v1.0.0">
     Require-Bundle= my-bundle
@@ -281,6 +283,7 @@ karaf@root()> bundle:install -s 'wrap:mvn:jboss/jbossall-client/4.2.3.GA/$Bundle
 
 When defined in a features.xml file, it's necessary to escape any ampersands and quotes, or use a CDATA tag:
 
-{code:lang=xml}
+[source,xml]
+----
 <bundle>wrap:mvn:jboss/jbossall-client/4.3.2.GA/$Bundle-SymbolicName=jbossall-client&amp;Bundle-Version=4.3.2.GA&amp;Export-Package=org.jboss.remoting;version=&quot;4.3.2.GA&quot;,!*</bundle>
 ----

@@ -70,6 +70,36 @@
 
 	<build>
 		<plugins>
+				<plugin>
+						<groupId>org.asciidoctor</groupId>
+						<artifactId>asciidoctor-maven-plugin</artifactId>
+						<version>1.5.2</version>
+						<executions>
+							<execution>
+								<id>output-html</id>
+								<phase>generate-resources</phase>
+									<goals>
+										<goal>process-asciidoc</goal>
+									</goals>
+								<configuration>
+									<sourceHighlighter>coderay</sourceHighlighter>
+									<backend>html5</backend>
+									<attributes>
+										<toc />
+										<linkcss>false</linkcss>
+										<doctype>book</doctype>
+										<docVersion>${project.version}</docVersion>
+									</attributes>
+								</configuration>
+							</execution>
+						</executions>
+						<configuration>
+							<sourceDirectory>src/main/asciidoc</sourceDirectory>
+							<outputDirectory>target/docs</outputDirectory>
+							<headerFooter>true</headerFooter>
+							<imagesDir>images/</imagesDir>
+						</configuration>
+					</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-resources-plugin</artifactId>
@@ -513,7 +543,10 @@
 								<configuration>
 									<tasks>
 										<mkdir dir="${manual.dir}" />
-                                        <move file="${project.build.directory}/sitegen/manual.html" tofile="${manual}.html" />
+                                        <move file="${project.build.directory}/docs/manual.html" tofile="${manual}.html" />
+					<copy todir="./target/manual/images">
+						<fileset dir="${project.build.directory}/docs/images"/>					
+					</copy> 
                                         <echo message="Generating PDF using Prince XML (http://www.princexml.com/)" />
 										<exec executable="prince">
 											<arg value="${manual}.html" />
@@ -562,9 +595,9 @@
 							<execution>
 								<id>output-html</id>
 								<phase>generate-resources</phase>
-								<goals>
-									<goal>process-asciidoc</goal>
-								</goals>
+									<goals>
+										<goal>process-asciidoc</goal>
+									</goals>
 								<configuration>
 									<sourceHighlighter>coderay</sourceHighlighter>
 									<backend>html5</backend>
@@ -572,14 +605,16 @@
 										<toc />
 										<linkcss>false</linkcss>
 										<doctype>book</doctype>
+										<docVersion>${project.version}</docVersion>
 									</attributes>
 								</configuration>
 							</execution>
 						</executions>
 						<configuration>
 							<sourceDirectory>src/main/asciidoc</sourceDirectory>
+							<outputDirectory>target/docs</outputDirectory>
 							<headerFooter>true</headerFooter>
-							<imagesDir>../resources/images</imagesDir>
+							<imagesDir>images/</imagesDir>
 						</configuration>
 					</plugin>
 				</plugins>

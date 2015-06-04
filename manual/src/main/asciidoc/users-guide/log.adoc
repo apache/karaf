@@ -32,7 +32,7 @@ loggers, appenders, etc.
 
 The initial log configuration is loaded from `etc/org.ops4j.pax.logging.cfg`.
 
-This file is a [standard Log4j configuration file|http://logging.apache.org/log4j/1.2/manual.html].
+This file is a http://logging.apache.org/log4j/1.2/manual.html[standard Log4j configuration file].
 
 You find the different Log4j element:
 

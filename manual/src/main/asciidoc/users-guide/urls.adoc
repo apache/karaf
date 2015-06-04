@@ -16,7 +16,8 @@
 
 // TODO temp
 The main information provided by a feature is the set of OSGi bundles that defines the application.  Such bundles are URLs pointing to the actual bundle jars.  For example, one would write the following definition:
-{code:lang=xml}
+[source,xml]
+----
 <bundle>http://repo1.maven.org/maven2/org/apache/servicemix/nmr/org.apache.servicemix.nmr.api/1.0.0-m2/org.apache.servicemix.nmr.api-1.0.0-m2.jar</bundle>
 ----
 Doing this will make sure the above bundle is installed while installing the feature.
@@ -28,7 +29,8 @@ You can deploy bundles from file system without using Maven
 As we can use file: as protocol handler to deploy bundles, you can use the following syntax to deploy bundles when they are
 located in a directory which is not available using Maven
 
-{code:lang=xml}
+[source,xml]
+----
 <bundle>file:base/bundles/org.apache.servicemix.nmr.api-1.0.0-m2.jar</bundle>
 ----
 
@@ -37,7 +39,9 @@ Note: The path is relative to the Apache Karaf installation directory
 h4. Maven URL Handler
 
 The equivalent of the above bundle would be:
-{code:lang=xml}
+
+[source,xml]
+----
 <bundle>mvn:org.apache.servicemix.nmr/org.apache.servicemix.nmr.api/1.0.0-m2</bundle>
 ----
 

@@ -16,8 +16,8 @@
 
 The goal of OBR (OSGi Bundle Repository) is:
 
-1. to simplify deploying and using bundles
-2. to encourage independent bundle development.
+. to simplify deploying and using bundles
+. to encourage independent bundle development.
 
 OBR achieves the first goal by providing a service that can automatically install a bundle, with its deployment dependencies,
 from a bundle repository. This makes it easier for people to experiment with existing bundles.
@@ -370,4 +370,4 @@ The name to identify a bundle uses the following syntax: `symbolic_name,version`
 
 In addition of being an OBR client, Apache Karaf can act as an OBR repositories server, thanks to Apache Karaf Cave.
 
-See the [Apache Karaf Cave sub-project|http://karaf.apache.org/index/subprojects/cave.html] for details.
+See the http://karaf.apache.org/index/subprojects/cave.html[Apache Karaf Cave sub-project] for details.

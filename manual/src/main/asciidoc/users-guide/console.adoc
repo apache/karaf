@@ -411,9 +411,8 @@ Error executing command: Cannot coerce echo "true!"() to any of []
 ----
 
 because a space is missing after the `if` statement.
-{warning}
 
-As for the aliases, you can create init scripts in the `etc/shell.init.script` file.
+WARNING: As for the aliases, you can create init scripts in the `etc/shell.init.script` file.
 You can also named you script with an alias. Actually, the aliases are just scripts.
 
 See the Scripting section of the developers guide for details.

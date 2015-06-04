@@ -59,7 +59,8 @@ the features repository that provides the feature (using `feature:repo-add` comm
 
 For instance, the following XML file (or "features repository") describes the `feature1` and `feature2` features:
 
-{code:lang=xml}
+[source,xml]
+----
 <features xmlns="http://karaf.apache.org/xmlns/features/v1.2.0">
   <feature name="feature1" version="1.0.0">
     <bundle>...</bundle>
@@ -124,7 +125,8 @@ configuration file, in the `karaf.startlevel.bundle` property.
 
 This value can be "overrided" by the `start-level` attribute of the `<bundle/>` element, in the features XML.
 
-{code:lang=xml}
+[source,xml]
+----
   <feature name="my-project" version="1.0.0">
     <bundle start-level="80">mvn:com.mycompany.myproject/myproject-dao</bundle>
     <bundle start-level="85">mvn:com.mycompany.myproject/myproject-service</bundle>
@@ -136,6 +138,19 @@ The start-level attribute insure that the `myproject-dao` bundle is started befo
 Instead of using start-level, a better solution is to simply let the OSGi framework know what your dependencies are by
 defining the packages or services you need. It is more robust than setting start levels.
 
+==== Start level inheritance
+
+[source,xml]
+
+It is possible to define a start-level on a feature , this will be also applied to all the bundles in the feature. 
+Unless you override it on the bundle, like the first bundle defined beneath.
+----
+  <feature name="my-project" version="1.0.0" start-level="90">
+    <bundle start-level="80">mvn:com.mycompany.myproject/myproject-dao</bundle>
+    <bundle>mvn:com.mycompany.myproject/myproject-service</bundle>
+  </feature>
+----
+
 ===  Start and stop
 
 You can install a bundle without starting it. By default, the bundles in a feature are automatically started.
@@ -143,21 +158,20 @@ You can install a bundle without starting it. By default, the bundles in a featu
 A feature can specify that a bundle should not be started automatically (the bundle stays in resolved state).
 To do so, a feature can specify the `start` attribute to false in the `<bundle/>` element:
 
-{code:lang=xml}
+[source,xml]
+----
   <feature name="my-project" version="1.0.0">
     <bundle start-level="80" start="false">mvn:com.mycompany.myproject/myproject-dao</bundle>
     <bundle start-level="85" start="false">mvn:com.mycompany.myproject/myproject-service</bundle>
   </feature>
 ----
 
-{warning}
-Before Apache Karaf 3.0.0 the start-level was not considered during the feature startup, but only the order in which bundles
+WARNING: Before Apache Karaf 3.0.0 the start-level was not considered during the feature startup, but only the order in which bundles
 are defined in your feature.xml.
 Starting with Apache Karaf 3.0.0, the start-level is considered correctly.
 If you need to use the old behavior you can uncomment and set the `respectStartLvlDuringFeatureStartup` property to false in
 `etc/org.apache.karaf.features.xml` configuration file.
 Note that it will be removed in 4.0 and should therefore be used only temporarily.
-{warning}
 
 ===  Dependency
 
@@ -169,7 +183,8 @@ This information can be used by resolvers to compute the full list of bundles to
 
 A feature can depend to a set of other features:
 
-{code:lang=xml}
+[source,xml]
+----
   <feature name="my-project" version="1.0.0">
     <feature>other</feature>
     <bundle start-level="80" start="false">mvn:com.mycompany.myproject/myproject-dao</bundle>
@@ -181,7 +196,8 @@ When the `my-project` feature will be installed, the `other` feature will be aut
 
 It's possible to define a version range for a dependent feature:
 
-{code:lang=xml}
+[source,xml]
+----
 <feature name="spring-dm">
   <feature version="[2.5.6,4)">spring</feature>
   ...
@@ -198,7 +214,8 @@ If nothing is specified, the highest available will be installed.
 
 The `<config/>` element in a feature XML allows a feature to create and/or populate a configuration (identified by a configuration PID).
 
-{code:lang=xml}
+[source,xml]
+----
 <config name="com.foo.bar">
   myProperty = myValue
 </config>
@@ -214,7 +231,8 @@ The content of the `<config/>` element is a set of properties, following the key
 
 Instead of using the `<config/>` element, a feature can specify `<configfile/>` elements.
 
-{code:lang=xml}
+[source,xml]
+----
 <configfile finalname="/etc/myfile.cfg" override="false">URL</configfile>
 ----
 
@@ -230,7 +248,8 @@ The file URL is any URL supported by Apache Karaf (see the [Artifacts repositori
 
 A feature accepts a `resolver` attribute:
 
-{code:lang=xml}
+[source,xml]
+----
 <feature name="my-project" version="1.0.0" resolver="(obr)">
 ...
 </feature>
@@ -529,7 +548,8 @@ When you drop a features XML in the deploy folder, the features deployer does:
 For instance, dropping the following XML in the deploy folder will automatically install feature1 and feature2, whereas
 feature3 won't be installed:
 
-{code:lang=xml}
+[source,xml]
+----
 <?xml version="1.0" encoding="UTF-8"?>
 <features name="my-features" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">

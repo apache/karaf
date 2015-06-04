@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 // 
-
 =  Start, stop, restart, connect
+
+This section will talk about starting,stopping,restarting and connecting to Apache Karaf.
 
 ==  Start
 
@@ -68,9 +69,7 @@ Hit '<ctrl-d>' or type 'system:shutdown' or 'logout' to shutdown Karaf.
 karaf@root()>
 ----
 
-{warning:title=Warning}
-Closing the console or shell window will cause Apache Karaf to terminate.
-{warning}
+WARNING: Closing the console or shell window will cause Apache Karaf to terminate.
 
 ===  Server mode
 
@@ -92,9 +91,7 @@ bin\karaf.bat server
 
 ----
 
-{warning:title=Warning}
-Closing the console or shell window will cause Apache Karaf to terminate.
-{warning}
+WARNING: Closing the console or shell window will cause Apache Karaf to terminate.
 
 You can connect to the shell console using SSH or client (see the Connect section in this page).
 
@@ -413,9 +410,7 @@ The `shutdown` command accepts the `-r` (`--restart`) option to restart Apache K
 karaf@root()> system:shutdown -r
 ----
 
-{warning:title=Warning}
-This command does not start a new JVM. It simply restarts the OSGi framework.
-{warning}
+WARNING: This command does not start a new JVM. It simply restarts the OSGi framework.
 
 ==  SystemMBean
 

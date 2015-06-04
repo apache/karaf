@@ -1,0 +1,56 @@
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//      http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// 
+
+= Developers Guide
+:icons: font
+
+// Push titles down one level
+:leveloffset: 1
+
+
+include::developer-commands.adoc[]
+
+include::scripting.adoc[]
+
+include::connect.adoc[]
+
+include::branding.adoc[]
+
+include::extending.adoc[]
+
+include::karaf-maven-plugin.adoc[]
+
+include::custom-distribution.adoc[]
+
+include::services.adoc[]
+
+include::creating-bundles.adoc[]
+
+include::blueprint.adoc[]
+
+include::cdi.adoc[]
+
+include::archetypes.adoc[]
+
+include::security-framework.adoc[]
+
+include::debugging.adoc[]
+
+include::writing-tests.adoc[]
+
+include::github-contributions.adoc[]
+
+
+// Return to normal title levels
+:leveloffset: 0

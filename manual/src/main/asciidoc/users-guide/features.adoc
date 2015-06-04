@@ -55,10 +55,10 @@ As a very extend-able container, OpenSource and commercial projects provide "nat
 
 We can mention (this list is not exhaustive):
 
-* [Apache ActiveMQ|http://activemq.apache.org/osgi-integration.html]
-* [Apache Camel|http://camel.apache.org/karaf.html]
-* [Apache CXF|http://cxf.apache.org]
-* [JClouds|http://www.jclouds.org/documentation/userguide/karaf/]
-* [Apache Wicket|http://team.ops4j.org/wiki/display/paxwicket/Install+Pax+Wicket]
+* http://activemq.apache.org/osgi-integration.html[Apache ActiveMQ]
+* http://camel.apache.org/karaf.html[Apache Camel]
+* http://cxf.apache.org[Apache CXF]
+* http://www.jclouds.org/documentation/userguide/karaf/[JClouds]
+* http://team.ops4j.org/wiki/display/paxwicket/Install+Pax+Wicket[Apache Wicket]
 * ...
 

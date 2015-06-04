@@ -1,0 +1,70 @@
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//      http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// 
+
+== Goal _karaf:features-validate-descriptor_
+
+The _karaf:features-validate-descriptor_ goal validates a features XML descriptor by checking if all the required imports for the bundles defined in the features can be matched to a provided export.
+
+By default, the plugin tries to add the Karaf core features (standard and enterprise) in the repositories set.
+It means that it's not required to explicitly define the Karaf features descriptor in the repository section of your features descriptor.
+
+=== Example
+The example below validates the features defined in the _target/features.xml_ by checking all the imports and exports.  It reads the definition for the packages that are exported by the 
+system bundle from the _src/main/resources/config.properties_ file.
+
+[source,xml]
+----
+<project>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.karaf.tooling</groupId>
+        <artifactId>karaf-maven-plugin</artifactId>
+        <version>${project.version}</version>
+          <executions>
+            <execution>
+              <id>validate</id>
+              <phase>process-resources</phase>
+              <goals>
+                <goal>features-validate-descriptor</goal>
+              </goals>
+              <configuration>
+                <file>target/features.xml</file>
+                <karafConfig>src/main/resources/config.properties</karafConfig>
+              </configuration>
+            </execution>
+          </executions>
+          <dependencies>
+            <dependency>
+              <groupId>org.slf4j</groupId>
+              <artifactId>slf4j-simple</artifactId>
+              <version>1.4.3</version>
+	        </dependency>
+          </dependencies>
+        </plugin>
+    </plugins>
+  </build>
+</project>
+----
+
+=== Parameters
+[cols="1,1,5"]
+|===
+| Name | Type | Description 
+| _file_ | _File_ | The features XML descriptor file to validate. \\ Default value: _${project.build.directory}/classes/features.xml_ 
+| _karafConfig_ | _String_ | The Karaf _config.properties_ file to use during the validation process \\ Default value: _config.properties_ 
+| _jreVersion_ | _String_ | The JRE version that is used during the validation process \\ Default value: _jre-1.5}) 
+| _karafVersion_ | _String_ | The target Karaf version used to get the Karaf core features (standard and enterprise) \\ Default is the version of the plugin 
+| _repositories_ | _String[]_ | Additional features XML descriptors that will be used during the validation process 
+|===
