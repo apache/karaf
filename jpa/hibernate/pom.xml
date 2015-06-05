@@ -22,7 +22,7 @@
   <parent>
     <groupId>org.apache.karaf.jpa</groupId>
     <artifactId>jpa-parent</artifactId>
-    <version>4.0.0-SNAPSHOT</version>
+    <version>4.0.0.M3</version>
   </parent>
   <artifactId>hibernate</artifactId>
   <packaging>bundle</packaging>
