@@ -163,6 +163,7 @@ public class Deployer {
         public Map<String, Set<String>> requirements;
         public Map<String, Map<String, FeatureState>> stateChanges;
         public EnumSet<FeaturesService.Option> options;
+        public String outputFile;
     }
 
     static class Deployment {
@@ -261,7 +262,8 @@ public class Deployer {
         resolver.resolve(
                 request.overrides,
                 request.featureResolutionRange,
-                request.globalRepository);
+                request.globalRepository,
+                request.outputFile);
 
         Map<String, StreamProvider> providers = resolver.getProviders();
         Map<String, Set<Resource>> featuresPerRegion = resolver.getFeaturesPerRegions();

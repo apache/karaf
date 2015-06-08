@@ -87,6 +87,14 @@ public class SubsystemResolveContext extends ResolveContext {
         findMandatory(root);
     }
 
+    public Repository getRepository() {
+        return repository;
+    }
+
+    public Repository getGlobalRepository() {
+        return globalRepository;
+    }
+
     void findMandatory(Resource res) {
         if (mandatory.add(res)) {
             for (Requirement req : res.getRequirements(null)) {
