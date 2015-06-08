@@ -160,6 +160,8 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
 
     private final String blacklisted;
 
+    private final ThreadLocal<String> outputFile = new ThreadLocal<>();
+
     /**
      * Optional global repository
      */
@@ -799,6 +801,11 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
 
 
     @Override
+    public void setResolutionOutputFile(String outputFile) {
+        this.outputFile.set(outputFile);
+    }
+
+    @Override
     public void installFeatures(Set<String> features, String region, EnumSet<Option> options) throws Exception {
         State state = copyState();
         Map<String, Set<String>> required = copy(state.requirements);
@@ -954,10 +961,12 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
                                     final EnumSet<Option> options) throws Exception {
         ExecutorService executor = Executors.newCachedThreadPool();
         try {
+            final String outputFile = this.outputFile.get();
+            this.outputFile.set(null);
             executor.submit(new Callable<Object>() {
                 @Override
                 public Object call() throws Exception {
-                    doProvision(requirements, stateChanges, state, options);
+                    doProvision(requirements, stateChanges, state, options, outputFile);
                     return null;
                 }
             }).get();
@@ -1026,7 +1035,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         return dstate;
     }
 
-    private Deployer.DeploymentRequest getDeploymentRequest(Map<String, Set<String>> requirements, Map<String, Map<String, FeatureState>> stateChanges, EnumSet<Option> options) {
+    private Deployer.DeploymentRequest getDeploymentRequest(Map<String, Set<String>> requirements, Map<String, Map<String, FeatureState>> stateChanges, EnumSet<Option> options, String outputFile) {
         Deployer.DeploymentRequest request = new Deployer.DeploymentRequest();
         request.bundleUpdateRange = bundleUpdateRange;
         request.featureResolutionRange = featureResolutionRange;
@@ -1036,15 +1045,17 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         request.requirements = requirements;
         request.stateChanges = stateChanges;
         request.options = options;
+        request.outputFile = outputFile;
         return request;
     }
 
 
 
-    public void doProvision(Map<String, Set<String>> requirements,                 // all requirements
-                            Map<String, Map<String, FeatureState>> stateChanges, // features state changes
-                            State state,                                           // current state
-                            EnumSet<Option> options                                // installation options
+    public void doProvision(Map<String, Set<String>> requirements,                // all requirements
+                            Map<String, Map<String, FeatureState>> stateChanges,  // features state changes
+                            State state,                                          // current state
+                            EnumSet<Option> options,                              // installation options
+                            String outputFile                                     // file to store the resolution or null
     ) throws Exception {
 
         Dictionary<String, String> props = getMavenConfig();
@@ -1057,7 +1068,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
             while (true) {
                 try {
                     Deployer.DeploymentState dstate = getDeploymentState(state);
-                    Deployer.DeploymentRequest request = getDeploymentRequest(requirements, stateChanges, options);
+                    Deployer.DeploymentRequest request = getDeploymentRequest(requirements, stateChanges, options, outputFile);
                     new Deployer(manager, this.resolver, this).deploy(dstate, request);
                     break;
                 } catch (Deployer.PartialDeploymentException e) {

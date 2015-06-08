@@ -455,6 +455,87 @@ public final class ResourceBuilder {
     private static List<ParsedHeaderClause> normalizeRequireCapabilityClauses(
             List<ParsedHeaderClause> clauses) throws BundleException {
 
+        // Convert attributes into specified types.
+        for (ParsedHeaderClause clause : clauses) {
+            for (Map.Entry<String, Object> entry : clause.attrs.entrySet()) {
+                if (entry.getKey().equals("version")) {
+                    clause.attrs.put(entry.getKey(), new VersionRange(entry.getValue().toString()));
+                }
+            }
+            for (Map.Entry<String, String> entry : clause.types.entrySet()) {
+                String type = entry.getValue();
+                if (!type.equals("String")) {
+                    if (type.equals("Double")) {
+                        clause.attrs.put(
+                                entry.getKey(),
+                                new Double(clause.attrs.get(entry.getKey()).toString().trim()));
+                    } else if (type.equals("Version")) {
+                        clause.attrs.put(
+                                entry.getKey(),
+                                new Version(clause.attrs.get(entry.getKey()).toString().trim()));
+                    } else if (type.equals("Long")) {
+                        clause.attrs.put(
+                                entry.getKey(),
+                                new Long(clause.attrs.get(entry.getKey()).toString().trim()));
+                    } else if (type.startsWith("List")) {
+                        int startIdx = type.indexOf('<');
+                        int endIdx = type.indexOf('>');
+                        if (((startIdx > 0) && (endIdx <= startIdx))
+                                || ((startIdx < 0) && (endIdx > 0))) {
+                            throw new BundleException(
+                                    "Invalid Provide-Capability attribute list type for '"
+                                            + entry.getKey()
+                                            + "' : "
+                                            + type
+                            );
+                        }
+
+                        String listType = "String";
+                        if (endIdx > startIdx) {
+                            listType = type.substring(startIdx + 1, endIdx).trim();
+                        }
+
+                        List<String> tokens = parseDelimitedString(
+                                clause.attrs.get(entry.getKey()).toString(), ",", false);
+                        List<Object> values = new ArrayList<>(tokens.size());
+                        for (String token : tokens) {
+                            switch (listType) {
+                            case "String":
+                                values.add(token);
+                                break;
+                            case "Double":
+                                values.add(new Double(token.trim()));
+                                break;
+                            case "Version":
+                                values.add(new Version(token.trim()));
+                                break;
+                            case "Long":
+                                values.add(new Long(token.trim()));
+                                break;
+                            default:
+                                throw new BundleException(
+                                        "Unknown Provide-Capability attribute list type for '"
+                                                + entry.getKey()
+                                                + "' : "
+                                                + type
+                                );
+                            }
+                        }
+                        clause.attrs.put(
+                                entry.getKey(),
+                                values);
+                    } else {
+                        throw new BundleException(
+                                "Unknown Provide-Capability attribute type for '"
+                                        + entry.getKey()
+                                        + "' : "
+                                        + type
+                        );
+                    }
+                }
+            }
+        }
+
         return clauses;
     }
 
@@ -550,7 +631,7 @@ public final class ResourceBuilder {
                 String filterStr = clause.dirs.get(Constants.FILTER_DIRECTIVE);
                 SimpleFilter sf = (filterStr != null)
                         ? SimpleFilter.parse(filterStr)
-                        : new SimpleFilter(null, null, SimpleFilter.MATCH_ALL);
+                        : SimpleFilter.convert(clause.attrs);
                 for (String path : clause.paths) {
                     // Create requirement and add to requirement list.
                     reqList.add(new RequirementImpl(
