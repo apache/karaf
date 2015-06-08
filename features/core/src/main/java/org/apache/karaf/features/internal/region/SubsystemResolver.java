@@ -16,6 +16,12 @@
  */
 package org.apache.karaf.features.internal.region;
 
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -30,12 +36,16 @@ import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.internal.download.DownloadManager;
 import org.apache.karaf.features.internal.download.Downloader;
 import org.apache.karaf.features.internal.download.StreamProvider;
+import org.apache.karaf.features.internal.resolver.BaseClause;
 import org.apache.karaf.features.internal.resolver.CapabilityImpl;
 import org.apache.karaf.features.internal.resolver.CapabilitySet;
+import org.apache.karaf.features.internal.resolver.RequirementImpl;
 import org.apache.karaf.features.internal.resolver.ResolverUtil;
 import org.apache.karaf.features.internal.resolver.ResourceBuilder;
 import org.apache.karaf.features.internal.resolver.ResourceImpl;
+import org.apache.karaf.features.internal.resolver.ResourceUtils;
 import org.apache.karaf.features.internal.resolver.SimpleFilter;
+import org.apache.karaf.features.internal.util.JsonWriter;
 import org.eclipse.equinox.internal.region.StandardRegionDigraph;
 import org.eclipse.equinox.region.Region;
 import org.eclipse.equinox.region.RegionDigraph;
@@ -49,6 +59,7 @@ import org.osgi.resource.Capability;
 import org.osgi.resource.Requirement;
 import org.osgi.resource.Resource;
 import org.osgi.resource.Wire;
+import org.osgi.service.repository.Repository;
 import org.osgi.service.resolver.Resolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -168,8 +179,9 @@ public class SubsystemResolver {
     public Map<Resource, List<Wire>> resolve(
             Set<String> overrides,
             String featureResolutionRange,
-            final org.osgi.service.repository.Repository globalRepository
-    ) throws Exception {
+            final Repository globalRepository,
+            String outputFile) throws Exception {
+
         if (root == null) {
             return Collections.emptyMap();
         }
@@ -182,7 +194,30 @@ public class SubsystemResolver {
         populateDigraph(digraph, root);
 
         Downloader downloader = manager.createDownloader();
-        wiring = resolver.resolve(new SubsystemResolveContext(root, digraph, globalRepository, downloader));
+        SubsystemResolveContext context = new SubsystemResolveContext(root, digraph, globalRepository, downloader);
+        if (outputFile != null) {
+            Map<String, Object> json = new HashMap<>();
+            if (globalRepository != null) {
+                json.put("globalRepository", toJson(globalRepository));
+            }
+            json.put("repository", toJson(context.getRepository()));
+            try {
+                wiring = resolver.resolve(context);
+                json.put("success", "true");
+            } catch (Exception e) {
+                json.put("exception", e.toString());
+                throw e;
+            } finally {
+                try (Writer writer = Files.newBufferedWriter(
+                        Paths.get(outputFile),
+                        StandardCharsets.UTF_8,
+                        StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
+                    JsonWriter.write(writer, json);
+                }
+            }
+        } else {
+            wiring = resolver.resolve(context);
+        }
         downloader.await();
 
         // Remove wiring to the fake environment resource
@@ -201,6 +236,37 @@ public class SubsystemResolver {
         associateFragments();
 
         return wiring;
+    }
+
+    private Object toJson(Repository repository) {
+        Requirement req = new RequirementImpl(
+                null,
+                IDENTITY_NAMESPACE,
+                Collections.<String, String>emptyMap(),
+                Collections.<String, Object>emptyMap(),
+                new SimpleFilter(null, null, SimpleFilter.MATCH_ALL));
+        Collection<Capability> identities = repository.findProviders(Collections.singleton(req)).get(req);
+        List<Object> resources = new ArrayList<>();
+        for (Capability identity : identities) {
+            String id = BaseClause.toString(null, identity.getNamespace(), identity.getAttributes(), identity.getDirectives());
+            resources.add(toJson(identity.getResource()));
+        }
+        return resources;
+    }
+
+    private Object toJson(Resource resource) {
+        Map<String, Object> obj = new HashMap<>();
+        List<Object> caps = new ArrayList<>();
+        List<Object> reqs = new ArrayList<>();
+        for (Capability cap : resource.getCapabilities(null)) {
+            caps.add(BaseClause.toString(null, cap.getNamespace(), cap.getAttributes(), cap.getDirectives()));
+        }
+        for (Requirement req : resource.getRequirements(null)) {
+            reqs.add(BaseClause.toString(null, req.getNamespace(), req.getAttributes(), req.getDirectives()));
+        }
+        obj.put("capabilities", caps);
+        obj.put("requirements", reqs);
+        return obj;
     }
 
     public Map<String, Map<String, BundleInfo>> getBundleInfos() {

@@ -76,14 +76,25 @@ public final class JsonWriter {
             char c = value.charAt(i);
             switch (c) {
             case '\"':
+                writer.append("\\\"");
+                break;
             case '\\':
+                writer.append("\\\\");
+                break;
             case '\b':
+                writer.append("\\b");
+                break;
             case '\f':
+                writer.append("\\f");
+                break;
             case '\n':
+                writer.append("\\n");
+                break;
             case '\r':
+                writer.append("\\r");
+                break;
             case '\t':
-                writer.append('\\');
-                writer.append(c);
+                writer.append("\\t");
                 break;
             default:
                 if (c < ' ' || (c >= '\u0080' && c < '\u00a0') || (c >= '\u2000' && c < '\u2100')) {

@@ -83,6 +83,8 @@ public interface FeaturesService {
 
     String getRepositoryName(URI uri) throws Exception;
 
+    void setResolutionOutputFile(String outputFile);
+
     void installFeature(String name) throws Exception;
 
     void installFeature(String name, EnumSet<Option> options) throws Exception;

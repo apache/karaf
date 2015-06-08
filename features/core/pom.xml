@@ -52,6 +52,11 @@
 
         <dependency>
             <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.resolver</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.utils</artifactId>
             <scope>provided</scope>
         </dependency>
@@ -135,6 +140,7 @@
                             org.eclipse.equinox.region.*
                         </Export-Package>
                         <Import-Package>
+                            !org.apache.felix.resolver,
                             !org.eclipse.osgi.service.resolver,
                             *
                         </Import-Package>
