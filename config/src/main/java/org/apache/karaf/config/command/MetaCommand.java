@@ -61,74 +61,87 @@ public class MetaCommand extends ConfigCommandSupport {
     }
 
     @Override
-    protected Object doExecute() throws Exception {
-
-        ServiceReference<MetaTypeService> ref = context.getServiceReference(MetaTypeService.class);
-        if (ref == null) {
+    public Object doExecute() throws Exception {
+        try {
+            new InnerCommand().doExecute();
+        } catch (NoClassDefFoundError e) {
             System.out
-                .println("No MetaTypeService present. You need to install an implementation to use this command.");
+                    .println("No MetaTypeService present. You need to install an implementation to use this command.");
         }
-        MetaTypeService metaTypeService = context.getService(ref);
-        ObjectClassDefinition def = getMetatype(metaTypeService, pid);
-        context.ungetService(ref);
-
-        if (def == null) {
-            System.out.println("No meta type definition found for pid: " + pid);
-            return null;
-        }
-        System.out.println("Meta type informations for pid: " + pid);
-        ShellTable table = new ShellTable();
-        table.column("key");
-        table.column("name");
-        table.column("type");
-        table.column("default");
-        table.column("description");
-        AttributeDefinition[] attrs = def.getAttributeDefinitions(ObjectClassDefinition.ALL);
-        if (attrs != null) {
-            for (AttributeDefinition attr : attrs) {
-                table.addRow().addContent(attr.getID(), attr.getName(), getType(attr.getType()),
-                                          getDefaultValueStr(attr.getDefaultValue()), attr.getDescription());
-            }
-        }
-        table.print(System.out);
         return null;
     }
 
-    private String getType(int type) {
-        return typeMap.get(type);
-    }
+    class InnerCommand {
 
-    private String getDefaultValueStr(String[] defaultValues) {
-        if (defaultValues == null) {
-            return "";
-        }
-        StringBuilder result = new StringBuilder();
-        boolean first = true;
-        for (String defaultValue : defaultValues) {
-            if (first) {
-                first = false;
-            } else {
-                result.append(",");
-            }
-            result.append(defaultValue);
-        }
-        return result.toString();
-    }
+        protected Object doExecute() throws Exception {
 
-    public ObjectClassDefinition getMetatype(MetaTypeService metaTypeService, String pid) {
-        for (Bundle bundle : context.getBundles()) {
-            MetaTypeInformation info = metaTypeService.getMetaTypeInformation(bundle);
-            if (info == null) {
-                continue;
+            ServiceReference<MetaTypeService> ref = context.getServiceReference(MetaTypeService.class);
+            if (ref == null) {
+                System.out
+                        .println("No MetaTypeService present. You need to install an implementation to use this command.");
             }
-            String[] pids = info.getPids();
-            for (String cPid : pids) {
-                if (cPid.equals(pid)) {
-                    return info.getObjectClassDefinition(cPid, null);
+            MetaTypeService metaTypeService = context.getService(ref);
+            ObjectClassDefinition def = getMetatype(metaTypeService, pid);
+            context.ungetService(ref);
+
+            if (def == null) {
+                System.out.println("No meta type definition found for pid: " + pid);
+                return null;
+            }
+            System.out.println("Meta type informations for pid: " + pid);
+            ShellTable table = new ShellTable();
+            table.column("key");
+            table.column("name");
+            table.column("type");
+            table.column("default");
+            table.column("description");
+            AttributeDefinition[] attrs = def.getAttributeDefinitions(ObjectClassDefinition.ALL);
+            if (attrs != null) {
+                for (AttributeDefinition attr : attrs) {
+                    table.addRow().addContent(attr.getID(), attr.getName(), getType(attr.getType()),
+                            getDefaultValueStr(attr.getDefaultValue()), attr.getDescription());
                 }
             }
+            table.print(System.out);
+            return null;
         }
-        return null;
-    }
 
+        private String getType(int type) {
+            return typeMap.get(type);
+        }
+
+        private String getDefaultValueStr(String[] defaultValues) {
+            if (defaultValues == null) {
+                return "";
+            }
+            StringBuilder result = new StringBuilder();
+            boolean first = true;
+            for (String defaultValue : defaultValues) {
+                if (first) {
+                    first = false;
+                } else {
+                    result.append(",");
+                }
+                result.append(defaultValue);
+            }
+            return result.toString();
+        }
+
+        public ObjectClassDefinition getMetatype(MetaTypeService metaTypeService, String pid) {
+            for (Bundle bundle : context.getBundles()) {
+                MetaTypeInformation info = metaTypeService.getMetaTypeInformation(bundle);
+                if (info == null) {
+                    continue;
+                }
+                String[] pids = info.getPids();
+                for (String cPid : pids) {
+                    if (cPid.equals(pid)) {
+                        return info.getObjectClassDefinition(cPid, null);
+                    }
+                }
+            }
+            return null;
+        }
+
+    }
 }
