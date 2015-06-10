@@ -775,10 +775,6 @@ public class Deployer {
             }
         }
 
-        // TODO: remove this hack, but it avoids loading the class after the bundle is refreshed
-        new CopyOnWriteArrayIdentityList().iterator();
-        RequirementSort.sort(Collections.<Resource>emptyList());
-
         if (!noRefresh) {
             toStop = new HashSet<>();
             toStop.addAll(toRefresh.keySet());
@@ -802,9 +798,12 @@ public class Deployer {
                     Bundle bundle = entry.getKey();
                     print("    " + bundle.getSymbolicName() + " / " + bundle.getVersion() + " (" + entry.getValue() + ")", verbose);
                 }
-                if (!toRefresh.isEmpty()) {
-                    callback.refreshPackages(toRefresh.keySet());
+                // Ensure all classes are loaded in case the bundle will be refreshed
+                if (dstate.serviceBundle != null && toRefresh.containsKey(dstate.serviceBundle)) {
+                    ensureAllClassesLoaded(dstate.serviceBundle);
                 }
+                callback.refreshPackages(toRefresh.keySet());
+
             }
         }
 
@@ -935,7 +934,7 @@ public class Deployer {
                 Resource resource = bndToRes.get(bundle);
                 // This bundle is not managed
                 if (resource == null) {
-                    continue;
+                    resource = bundle.adapt(BundleRevision.class);
                 }
                 // Continue if we already know about this bundle
                 if (toRefresh.containsKey(bundle)) {
@@ -1368,6 +1367,17 @@ public class Deployer {
             throw new IllegalStateException("Resource " + uri + " has no StreamProvider");
         }
         return provider.open();
+    }
+
+    public static void ensureAllClassesLoaded(Bundle bundle) throws ClassNotFoundException {
+        BundleWiring wiring = bundle.adapt(BundleWiring.class);
+        if (wiring != null) {
+            for (String path : wiring.listResources("/", "*.class", BundleWiring.LISTRESOURCES_RECURSE)) {
+                String className = path.substring(0, path.length() - ".class".length());
+                className = className.replace('/', '.');
+                bundle.loadClass(className);
+            }
+        }
     }
 
 }

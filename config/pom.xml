@@ -102,11 +102,10 @@
                         <Export-Package>
                             org.apache.karaf.config.command*,
                             org.apache.karaf.config.core,
-                            org.osgi.service.metatype
                         </Export-Package>
                         <Import-Package>
-                            *,
-                            org.osgi.service.metatype
+                            org.osgi.service.metatype;resolution:=optional,
+                            *
                         </Import-Package>
                         <Private-Package>
                             org.apache.karaf.config.core.impl,
