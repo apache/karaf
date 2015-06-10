@@ -499,7 +499,7 @@
             org.apache.felix.eventadmin.AddTimestamp=true
             org.apache.felix.eventadmin.AddSubject=true
         </config>
-        <bundle start-level="30">mvn:org.apache.karaf.services/org.apache.karaf.services.eventadmin/${project.version}</bundle>
+        <bundle start-level="5">mvn:org.apache.karaf.services/org.apache.karaf.services.eventadmin/${project.version}</bundle>
         <conditional>
             <condition>webconsole</condition>
             <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.webconsole.plugins.event/${felix.eventadmin.webconsole.plugin.version}</bundle>

@@ -48,7 +48,6 @@
             <artifactId>standard</artifactId>
             <classifier>features</classifier>
             <type>xml</type>
-            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.karaf.features</groupId>
@@ -159,8 +158,10 @@
                     <installedFeatures>
                         <feature>wrapper</feature>
                     </installedFeatures>
-                    <bootFeatures>
+                    <startupFeatures>
                         <feature>eventadmin</feature>
+                    </startupFeatures>
+                    <bootFeatures>
                         <feature>wrap</feature>
                         <feature>aries-blueprint</feature>
                         <feature>shell</feature>

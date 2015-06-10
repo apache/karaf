@@ -76,6 +76,7 @@ public class ConditionalFeaturesTest extends KarafTestSupport {
             featureService.uninstallFeature("scr", EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
         } catch (Exception e) {
         }
+        featureService.installFeature("eventadmin", EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
         featureService.installFeature("webconsole", EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
 
         assertBundleInstalled("org.apache.karaf.webconsole.features");
@@ -84,7 +85,7 @@ public class ConditionalFeaturesTest extends KarafTestSupport {
         assertBundleInstalled("org.apache.karaf.webconsole.http");
         assertBundleInstalled("org.apache.felix.webconsole.plugins.event");
 
-        // remove eventadmin
+        // add eventadmin
         featureService.uninstallFeature("eventadmin", EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
         assertBundleNotInstalled("org.apache.felix.webconsole.plugins.event");
     }
