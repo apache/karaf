@@ -42,16 +42,16 @@
         <!--
             specifies the behavior of the borrowObject() method when the pool is exhausted:
 
-            When whenExhaustedAction is WHEN_EXHAUSTED_FAIL, borrowObject() will throw a NoSuchElementException
-            When whenExhaustedAction is WHEN_EXHAUSTED_GROW, borrowObject() will create a new object and return it
+            When whenExhaustedAction is WHEN_EXHAUSTED_FAIL (value is 0), borrowObject() will throw a NoSuchElementException
+            When whenExhaustedAction is WHEN_EXHAUSTED_GROW (value is 2), borrowObject() will create a new object and return it
             (essentially making maxActive meaningless.)
-            When whenExhaustedAction is WHEN_EXHAUSTED_BLOCK, borrowObject() will block (invoke Object.wait()) until
+            When whenExhaustedAction is WHEN_EXHAUSTED_BLOCK (value is 1), borrowObject() will block (invoke Object.wait()) until
             a new or idle object is available. If a positive maxWait value is supplied, then borrowObject() will block for at most that many milliseconds, after which a NoSuchElementException will be thrown. If maxWait is non-positive, the borrowObject() method will block indefinitely.
 
             The default whenExhaustedAction setting is WHEN_EXHAUSTED_BLOCK and the default maxWait setting is -1.
             By default, therefore, borrowObject will block indefinitely until an idle instance becomes available.
         -->
-        <argument value="WHEN_EXHAUSTED_BLOCK" /> <!-- whenExhaustedAction -->
+        <argument value="1" /> <!-- whenExhaustedAction -->
         <!--
             the maximum amount of time to wait for an idle object when the pool is exhausted and whenExhaustedAction
             is WHEN_EXHAUSTED_BLOCK (otherwise ignored)
