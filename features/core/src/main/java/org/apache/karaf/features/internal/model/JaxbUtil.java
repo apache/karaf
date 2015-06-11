@@ -41,6 +41,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLFilter;
 import org.xml.sax.XMLReader;
+import org.xml.sax.helpers.AttributesImpl;
 import org.xml.sax.helpers.XMLFilterImpl;
 
 public class JaxbUtil {
@@ -101,7 +102,7 @@ public class JaxbUtil {
             }
         });
 
-        XMLFilter xmlFilter = new NoSourceAndNamespaceFilter(parser.getXMLReader());
+        XMLFilter xmlFilter = new NoSourceAndNamespaceFilter(new SchemaTranslator(parser.getXMLReader()));
         xmlFilter.setContentHandler(unmarshaller.getUnmarshallerHandler());
 
         SAXSource source = new SAXSource(xmlFilter, inputSource);
@@ -114,6 +115,56 @@ public class JaxbUtil {
             throw new RuntimeException(e);
         } catch (SAXException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    /*
+     * Translate 1.3.0 into 1.2.1 format
+     */
+    public static class SchemaTranslator extends XMLFilterImpl {
+
+        int skip;
+
+        public SchemaTranslator(XMLReader parent) {
+            super(parent);
+        }
+
+        @Override
+        public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
+            if (FeaturesNamespaces.URI_1_3_0.equals(uri)) {
+                if (skip == 0) {
+                    if ("capability".equals(localName)
+                            || "requirement".equals(localName)
+                            || "library".equals(localName)
+                            || "scoping".equals(localName)) {
+                        skip++;
+                    } else {
+                        if ("feature".equals(localName)) {
+                            AttributesImpl atts2 = new AttributesImpl(atts);
+                            atts2.addAttribute("", "resolver", "resolver", "CDATA", "(obr)");
+                            atts = atts2;
+                        }
+                        super.startElement(uri, localName, qName, atts);
+                    }
+                } else {
+                    skip++;
+                }
+            } else {
+                super.startElement(uri, localName, qName, atts);
+            }
+        }
+
+        @Override
+        public void endElement(String uri, String localName, String qName) throws SAXException {
+            if (FeaturesNamespaces.URI_1_3_0.equals(uri)) {
+                if (skip == 0) {
+                    super.endElement(uri, localName, qName);
+                } else {
+                    skip--;
+                }
+            } else {
+                super.endElement(uri, localName, qName);
+            }
         }
     }
 

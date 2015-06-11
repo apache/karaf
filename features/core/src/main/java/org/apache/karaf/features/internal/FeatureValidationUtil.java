@@ -45,6 +45,7 @@ public class FeatureValidationUtil {
     public static final QName FEATURES_1_1 = new QName("http://karaf.apache.org/xmlns/features/v1.1.0", "features");
     public static final QName FEATURES_1_2 = new QName("http://karaf.apache.org/xmlns/features/v1.2.0", "features");
     public static final QName FEATURES_1_2_1 = new QName("http://karaf.apache.org/xmlns/features/v1.2.1", "features");
+    public static final QName FEATURES_1_3 = new QName("http://karaf.apache.org/xmlns/features/v1.3.0", "features");
     private static final Logger LOGGER = LoggerFactory.getLogger(FeatureValidationUtil.class);
 
     /**
@@ -71,9 +72,12 @@ public class FeatureValidationUtil {
         } else if (FeaturesNamespaces.FEATURES_1_2_0.equals(name)) {
 			LOGGER.debug("validating with schema version 1.2.0");
 			validate(doc, "/org/apache/karaf/features/karaf-features-1.2.0.xsd");
-		} else if (FeaturesNamespaces.FEATURES_1_2_1.equals(name)) {
-			LOGGER.debug("validating with schema version 1.2.1");
-			validate(doc, "/org/apache/karaf/features/karaf-features-1.2.1.xsd");
+        } else if (FeaturesNamespaces.FEATURES_1_2_1.equals(name)) {
+            LOGGER.debug("validating with schema version 1.2.1");
+            validate(doc, "/org/apache/karaf/features/karaf-features-1.2.1.xsd");
+        } else if (FeaturesNamespaces.FEATURES_1_3_0.equals(name)) {
+            LOGGER.debug("validating with schema version 1.3.0");
+            validate(doc, "/org/apache/karaf/features/karaf-features-1.3.0.xsd");
         }
         else {
             throw new IllegalArgumentException("Unrecognized root element: " + name);
