@@ -98,6 +98,7 @@
                 <configuration>
                     <instructions>
                         <Import-Package>
+                            javax.servlet.*;version="[2.6,4)",
                             org.apache.aries.blueprint,
 			                org.apache.felix.webconsole*;version="[3,5)",
                             org.json,

@@ -103,11 +103,13 @@
                 <configuration>
                     <instructions>
                         <Import-Package>
+                            javax.servlet.*;version="[2.6,4)",
                             org.apache.aries.blueprint,
 			                org.apache.felix.webconsole*;version="[3,5)",
                             org.json,
                             org.osgi.service.blueprint.container,
                             org.osgi.service.blueprint.reflect,
+                            org.ops4j.pax.web.service.spi*;version="[3.2,5)",
                             *
                         </Import-Package>
                     </instructions>

@@ -113,6 +113,7 @@
                 <configuration>
                     <instructions>
                         <Import-Package>
+                            javax.servlet.*;version="[2.6,4)",
                             jline;version="[${jline.version}, ${jline.version}]",
                             org.apache.aries.blueprint,
 			                org.apache.felix.webconsole*;version="[3,5)",

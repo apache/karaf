@@ -78,6 +78,7 @@
                 <configuration>
                     <instructions>
                     	<Import-Package>
+                            javax.servlet;version="[2.6,4)",
                     		org.ops4j.pax.web.service.spi;version="[3.1,5)",
                     		*
                     	</Import-Package>
