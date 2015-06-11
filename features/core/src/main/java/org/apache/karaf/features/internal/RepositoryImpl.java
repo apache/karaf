@@ -17,6 +17,7 @@
 package org.apache.karaf.features.internal;
 
 import org.apache.karaf.features.Feature;
+import org.apache.karaf.features.FeaturesNamespaces;
 import org.apache.karaf.features.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -134,6 +135,8 @@ public class RepositoryImpl implements Repository {
                     String resolver = e.getAttribute("resolver");
                     if (resolver != null && resolver.length() > 0) {
                         f.setResolver(resolver);
+                    } else if (FeaturesNamespaces.URI_1_3_0.equals(node.getNamespaceURI())) {
+                        f.setResolver("(obr)");
                     }
 
                     String install = e.getAttribute("install");
