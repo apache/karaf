@@ -306,7 +306,7 @@ public class Configuration
             {
                 m_ignoreTimeout = (String[])value;
             }
-            else
+            else if ( value != null )
             {
                 LogWrapper.getLogger().log(LogWrapper.LOG_WARNING,
                         "Value for property: " + PROP_IGNORE_TIMEOUT + " is neither a string nor a string array - Using default");
@@ -321,7 +321,7 @@ public class Configuration
             {
                 m_ignoreTopics = (String[])valueIT;
             }
-            else
+            else if ( valueIT != null )
             {
                 LogWrapper.getLogger().log(LogWrapper.LOG_WARNING,
                         "Value for property: " + PROP_IGNORE_TOPIC + " is neither a string nor a string array - Using default");
