@@ -67,13 +67,13 @@ public class KarServiceImpl implements KarService {
     
     private boolean noAutoRefreshBundles;
 
-    public KarServiceImpl(String karafBase, FeaturesService featuresService) {
-        this.base = new File(karafBase);
-        this.storage = new File(this.base, "data" + File.separator + "kar");
+    public KarServiceImpl(String storage, FeaturesService featuresService) {
+        this.base = new File(storage);
+        this.storage = new File(storage);
         this.featuresService = featuresService;
         this.storage.mkdirs();
-        if (!storage.isDirectory()) {
-            throw new IllegalStateException("KAR storage " + storage + " is not a directory");
+        if (!this.storage.isDirectory()) {
+            throw new IllegalStateException("KAR storage " + this.storage + " is not a directory");
         }
     }
     
