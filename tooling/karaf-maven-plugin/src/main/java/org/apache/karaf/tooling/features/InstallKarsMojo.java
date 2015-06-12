@@ -194,23 +194,23 @@ public class InstallKarsMojo extends MojoSupport {
 
         // checking if all startup, installed, and boot features have been resolved
         getLog().info("Checking features resolution");
-        if (startupFeatures != null) {
+        if (features != null && startupFeatures != null) {
             for (String startupFeature : startupFeatures) {
-                if (!resolveFeature(features.keySet(), startupFeature)) {
+                if (startupFeature != null && !startupFeature.isEmpty() && !resolveFeature(features.keySet(), startupFeature)) {
                     throw new MojoFailureException("Startup feature " + startupFeature + " is not resolved. Check that <dependencies/> provide the kar of features repository providing this feature (with compile or runtime scope)");
                 }
             }
         }
-        if (bootFeatures != null) {
+        if (features != null && bootFeatures != null) {
             for (String bootFeature : bootFeatures) {
-                if (!resolveFeature(features.keySet(), bootFeature)) {
+                if (bootFeature != null && !bootFeature.isEmpty() && !resolveFeature(features.keySet(), bootFeature)) {
                     throw new MojoFailureException("Boot feature " + bootFeature + " is not resolved. Check that <dependencies/> provide the kar of features repository providing this feature (with compile or runtime scope)");
                 }
             }
         }
-        if (installedFeatures != null) {
+        if (features != null && installedFeatures != null) {
             for (String installedFeature : installedFeatures) {
-                if (!resolveFeature(features.keySet(), installedFeature)) {
+                if (installedFeature != null && !installedFeature.isEmpty() && !resolveFeature(features.keySet(), installedFeature)) {
                     throw new MojoFailureException("Boot feature " + installedFeature + " is not resolved. Check that <dependencies/> provide the kar of features repository providing this feature (with compile or runtime scope)");
                 }
             }
