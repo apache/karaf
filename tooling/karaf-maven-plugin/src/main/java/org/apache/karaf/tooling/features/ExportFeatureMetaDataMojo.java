@@ -96,7 +96,7 @@ public class ExportFeatureMetaDataMojo extends AbstractFeatureMojo {
                 String bundleId = getBundleSymbolicName(bundle) + ":" + getBundleVersion(bundle);
                 if (!bundleIds.contains(bundleId)) {
                     bundleIds.add(bundleId);
-                    merged.getBundles().add(bundle);
+                    merged.getBundle().add(bundle);
                 }
             }
         }
@@ -140,6 +140,9 @@ public class ExportFeatureMetaDataMojo extends AbstractFeatureMojo {
         Attributes attributes = manifests.get(bundle.getLocation());
         if (attributes == null) {
             Artifact artifact = resourceToArtifact(bundle.getLocation(), skipNonMavenProtocols);
+            if (artifact.getFile() == null) {
+                resolveArtifact(artifact, remoteRepos);
+            }
             try (JarInputStream jis = new JarInputStream(new FileInputStream(artifact.getFile()))) {
                 attributes = jis.getManifest().getMainAttributes();
                 manifests.put(bundle.getLocation(), attributes);
