@@ -27,8 +27,6 @@ import org.apache.karaf.util.tracker.annotation.RequireService;
 import org.apache.karaf.util.tracker.annotation.Services;
 import org.osgi.service.cm.ManagedService;
 
-import java.io.File;
-
 @Services(
         requires = @RequireService(FeaturesService.class),
         provides = @ProvideService(KarService.class)
@@ -43,10 +41,9 @@ public class Activator extends BaseActivator implements ManagedService {
         }
 
         boolean noAutoRefreshBundles = getBoolean("noAutoRefreshBundles", false);
-        String karStorage = getString("storage", System.getProperty("karaf.base") + File.separator + "kar");
 
         KarServiceImpl karService = new KarServiceImpl(
-                karStorage,
+                System.getProperty("karaf.base"),
                 featuresService
         );
         karService.setNoAutoRefreshBundles(noAutoRefreshBundles);
