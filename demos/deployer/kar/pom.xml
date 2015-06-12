@@ -31,34 +31,15 @@
     <groupId>org.apache.karaf.demos</groupId>
     <artifactId>my-kar</artifactId>
     <version>4.0.0-SNAPSHOT</version>
-    <packaging>pom</packaging>
+    <packaging>kar</packaging>
     <name>Apache Karaf :: Demos :: Deployer :: Kar</name>
-
-    <dependencies>
-        <dependency>
-            <groupId>commons-collections</groupId>
-            <artifactId>commons-collections</artifactId>
-            <version>${commons-collections.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-    </dependencies>
 
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.karaf.tooling</groupId>
                 <artifactId>karaf-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>package</id>
-                        <goals>
-                            <goal>kar</goal>
-                        </goals>
-                        <configuration>
-                            <featuresFile>${project.basedir}/src/main/resources/features.xml</featuresFile>
-                        </configuration>
-                    </execution>
-                </executions>
+                <extensions>true</extensions>
             </plugin>
         </plugins>
     </build>
