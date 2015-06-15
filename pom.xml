@@ -163,7 +163,7 @@
         <felix.configadmin.version>1.8.4</felix.configadmin.version>
         <felix.connect.version>0.1.0</felix.connect.version>
         <felix.fileinstall.version>3.5.0</felix.fileinstall.version>
-        <felix.framework.version>5.0.0</felix.framework.version>
+        <felix.framework.version>5.0.1</felix.framework.version>
         <felix.framework.security.version>2.4.0</felix.framework.security.version>
         <felix.gogo.version>0.16.2</felix.gogo.version>
         <felix.plugin.version>2.5.4</felix.plugin.version>
@@ -373,6 +373,17 @@
             </snapshots>
             <releases>
                 <enabled>false</enabled>
+            </releases>
+        </repository>
+        <repository>
+            <id>Felix Staging</id>
+            <name>Felix  Staging</name>
+            <url>https://repository.apache.org/content/repositories/orgapachefelix-1072</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <releases>
+                <enabled>true</enabled>
             </releases>
         </repository>
     </repositories>
