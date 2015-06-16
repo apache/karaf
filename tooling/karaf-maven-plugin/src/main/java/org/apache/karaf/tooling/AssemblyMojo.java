@@ -146,6 +146,12 @@ public class AssemblyMojo extends MojoSupport {
     @Parameter(defaultValue = "false")
     protected boolean useReferenceUrls;
 
+    /**
+     * Include project build output directory in the assembly
+     */
+    @Parameter(defaultValue = "true")
+    protected boolean includeBuildOutputDirectory;
+
     @Parameter
     protected boolean installAllFeaturesByDefault = true;
 
@@ -286,7 +292,12 @@ public class AssemblyMojo extends MojoSupport {
                 .bundles(toArray(installedBundles))
                 .profiles(toArray(installedProfiles));
 
+        // Generate the assembly
         builder.generateAssembly();
+
+        // Include project classes content
+        if (includeBuildOutputDirectory)
+            IoUtils.copyDirectory(new File(project.getBuild().getOutputDirectory()), workDirectory);
     }
 
     private String artifactToMvn(Artifact artifact) throws MojoExecutionException {
