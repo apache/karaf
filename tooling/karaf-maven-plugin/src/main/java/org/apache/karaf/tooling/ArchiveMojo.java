@@ -178,9 +178,10 @@ public class ArchiveMojo extends MojoSupport {
             TarArchiveEntry tarEntry = new TarArchiveEntry(entryName);
             tarEntry.setSize(Files.size(f));
             if (entryName.contains("/bin/")) {
-                tarEntry.setMode(0755);
                 if (entryName.endsWith(".bat")) {
-                    return;
+                    tarEntry.setMode(0644);
+                } else {
+                    tarEntry.setMode(0755);
                 }
             }
             tOut.putArchiveEntry(tarEntry);
@@ -213,9 +214,10 @@ public class ArchiveMojo extends MojoSupport {
             zipEntry.setSize(Files.size(f));
             if (entryName.contains("/bin/")) {
                 if (!entryName.endsWith(".bat")) {
-                    return;
+                    zipEntry.setUnixMode(0755);
+                } else {
+                    zipEntry.setUnixMode(0644);
                 }
-                zipEntry.setUnixMode(0755);
             }
             tOut.putArchiveEntry(zipEntry);
             Files.copy(f, tOut);
