@@ -477,7 +477,7 @@ public class InstanceServiceImpl implements InstanceService {
 
         String location = instance.loc;
 
-        File libDir = new File(System.getProperty("karaf.home"), "lib");
+        File libDir = new File(System.getProperty("karaf.home"), "lib" + File.separator + "boot");
         File childLibDir = new File(location, "lib");
 
         StringBuilder classpath = classpathFromLibDir(libDir);
@@ -498,6 +498,7 @@ public class InstanceServiceImpl implements InstanceService {
                 + " -Dkaraf.base=\"" + new File(location).getCanonicalPath() + "\""
                 + " -Dkaraf.data=\"" + new File(new File(location).getCanonicalPath(), "data") + "\""
                 + " -Dkaraf.etc=\"" + new File(new File(location).getCanonicalPath(), "etc") + "\""
+                + " -Djava.io.tmpdir=\"" + new File(new File(location).getCanonicalPath(), "data" + File.separator + "tmp") + "\""
                 + " -Dkaraf.startLocalConsole=false"
                 + " -Dkaraf.startRemoteShell=true"
                 + " -classpath \"" + classpath.toString() + "\""
