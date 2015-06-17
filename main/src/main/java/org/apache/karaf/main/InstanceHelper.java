@@ -22,11 +22,13 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.RandomAccessFile;
 import java.io.Writer;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.net.InetAddress;
 import java.net.ServerSocket;
+import java.nio.channels.FileLock;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -58,6 +60,28 @@ public class InstanceHelper {
                         }
                     } catch (SecurityException se) {
                         throw new Exception(se.getMessage());
+                    }
+                }
+                // don't instance.properties if we're stopping and can't acquire lock
+                if (!isStartingInstance) {
+                    RandomAccessFile raf = new RandomAccessFile(propertiesFile, "rw");
+                    boolean proceed = true;
+                    try {
+                        FileLock lock = raf.getChannel().tryLock();
+                        if (lock == null) {
+                            proceed = false;
+                        } else {
+                            lock.release();
+                        }
+                    } finally {
+                        // if proceed is true than we got the lock or OverlappingFileLockException
+                        // but we may proceed in either case
+                        raf.close();
+                    }
+                    if (!proceed) {
+                        // we didn't acquire lock, it may mean that root container is holding the lock when
+                        // stopping the child
+                        return;
                     }
                 }
                 FileLockUtils.execute(propertiesFile, new FileLockUtils.RunnableWithProperties() {
