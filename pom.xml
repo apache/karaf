@@ -1674,6 +1674,8 @@
                                 <exclude>**/*.conf</exclude>
                                 <!-- SSH keys -->
                                 <exclude>**/*.key</exclude>
+                                <!-- JLEdit loader -->
+                                <exclude>**/org/jledit/simple</exclude>
                             </excludes>
                         </configuration>
                     </plugin>
