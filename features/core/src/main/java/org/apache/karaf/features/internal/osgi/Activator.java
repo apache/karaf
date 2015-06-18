@@ -34,10 +34,10 @@ import org.apache.karaf.features.FeaturesListener;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.internal.management.FeaturesServiceMBeanImpl;
 import org.apache.karaf.features.internal.region.DigraphHelper;
+import org.apache.karaf.features.internal.region.SubsystemResolveContext;
 import org.apache.karaf.features.internal.repository.AggregateRepository;
 import org.apache.karaf.features.internal.repository.JsonRepository;
 import org.apache.karaf.features.internal.repository.XmlRepository;
-import org.apache.karaf.features.internal.resolver.ResourceBuilder;
 import org.apache.karaf.features.internal.service.BootFeaturesInstaller;
 import org.apache.karaf.features.internal.service.EventAdminListener;
 import org.apache.karaf.features.internal.service.FeatureFinder;
@@ -180,7 +180,7 @@ public class Activator extends BaseActivator {
         int scheduleMaxRun = getInt("scheduleMaxRun", FeaturesService.DEFAULT_SCHEDULE_MAX_RUN);
         String blacklisted = getString("blacklisted", new File(System.getProperty("karaf.etc"), "blacklisted.properties").toURI().toString());
         boolean ignoreServiceReqs = getBoolean("ignoreServiceReqs", true);
-        ResourceBuilder.setIgnoreServiceReqs(ignoreServiceReqs);
+        SubsystemResolveContext.setIgnoreServiceReqs(ignoreServiceReqs);
         StateStorage stateStorage = new StateStorage() {
             @Override
             protected InputStream getInputStream() throws IOException {
