@@ -38,6 +38,7 @@ import org.eclipse.equinox.region.RegionDigraph;
 import org.eclipse.equinox.region.RegionFilter;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.wiring.BundleRevision;
+import org.osgi.namespace.service.ServiceNamespace;
 import org.osgi.resource.Capability;
 import org.osgi.resource.Requirement;
 import org.osgi.resource.Resource;
@@ -68,6 +69,7 @@ public class SubsystemResolveContext extends ResolveContext {
     private final Repository repository;
     private final Repository globalRepository;
     private final Downloader downloader;
+    private static boolean ignoreServiceReqs = true; 
 
     public SubsystemResolveContext(Subsystem root, RegionDigraph digraph, Repository globalRepository, Downloader downloader) throws BundleException {
         this.root = root;
@@ -85,6 +87,10 @@ public class SubsystemResolveContext extends ResolveContext {
         //  if a capability comes from a resource which needs to be installed,
         //  prefer that one over any capabilities from other resources
         findMandatory(root);
+    }
+    
+    public static void setIgnoreServiceReqs(boolean ignoreServiceReqs) {
+        SubsystemResolveContext.ignoreServiceReqs = ignoreServiceReqs;
     }
 
     public Repository getRepository() {
@@ -205,7 +211,8 @@ public class SubsystemResolveContext extends ResolveContext {
 
     @Override
     public boolean isEffective(Requirement requirement) {
-        return true;
+        boolean isServiceReq = ServiceNamespace.SERVICE_NAMESPACE.equals(requirement.getNamespace());
+        return !ignoreServiceReqs || !isServiceReq;
     }
 
     @Override
