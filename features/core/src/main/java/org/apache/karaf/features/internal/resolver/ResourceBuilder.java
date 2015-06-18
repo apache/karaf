@@ -56,15 +56,10 @@ public final class ResourceBuilder {
     private static final int DELIMITER = 2;
     private static final int STARTQUOTE = 4;
     private static final int ENDQUOTE = 8;
-    private static boolean ignoreServiceReqs = true;
 
     private ResourceBuilder() {
     }
     
-    public static void setIgnoreServiceReqs(boolean ignoreServiceReqs) {
-        ResourceBuilder.ignoreServiceReqs = ignoreServiceReqs;
-    }
-
     public static ResourceImpl build(String uri, Map<String, String> headerMap) throws BundleException {
         return build(new ResourceImpl(), uri, headerMap);
     }
@@ -221,10 +216,6 @@ public final class ResourceBuilder {
             requireReqs.addAll(reqs);
         }
         
-        if (ignoreServiceReqs) {
-            requireReqs = filterServiceReqs(requireReqs);
-        }
-
         // Combine all capabilities.
         resource.addCapabilities(exportCaps);
         resource.addCapabilities(provideCaps);
@@ -237,16 +228,6 @@ public final class ResourceBuilder {
         resource.addRequirements(dynamicReqs);
 
         return resource;
-    }
-
-    private static List<Requirement> filterServiceReqs(List<Requirement> requireReqs) {
-        ArrayList<Requirement> filtered = new ArrayList<Requirement>();
-        for (Requirement req : requireReqs) {
-            if (!ServiceNamespace.SERVICE_NAMESPACE.equals(req.getNamespace())) {
-                filtered.add(req);
-            }
-        }
-        return filtered;
     }
 
     public static List<Requirement> parseRequirement(Resource resource, String requirement) throws BundleException {
