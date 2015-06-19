@@ -24,15 +24,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystemNotFoundException;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.OpenOption;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.nio.file.StandardOpenOption;
+import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -623,7 +615,9 @@ public class Builder {
                             Files.createDirectories(sysOutput.getParent());
                             Files.copy(input, sysOutput, StandardCopyOption.REPLACE_EXISTING);
                             Path libOutput = homeDirectory.resolve(path).resolve(name);
-                            Files.createSymbolicLink(libOutput, libOutput.getParent().relativize(sysOutput));
+                            if (Files.notExists(libOutput, LinkOption.NOFOLLOW_LINKS)) {
+                                Files.createSymbolicLink(libOutput, libOutput.getParent().relativize(sysOutput));
+                            }
                         } else {
                             Path output = homeDirectory.resolve(path).resolve(name);
                             Files.copy(input, output, StandardCopyOption.REPLACE_EXISTING);
