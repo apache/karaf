@@ -135,13 +135,14 @@
         <commons-codec.version>1.10</commons-codec.version>
         <commons-compress.version>1.9</commons-compress.version>
         <commons-collections.version>3.2.1</commons-collections.version>
-        <commons-dbcp.version>1.4</commons-dbcp.version>
+        <commons-dbcp.version>1.4_3</commons-dbcp.version>
         <commons-fileupload.version>1.3.1</commons-fileupload.version>
         <commons-jexl.version>2.1.1</commons-jexl.version>
         <commons-lang.version>2.6</commons-lang.version>
         <commons-pool.version>1.6</commons-pool.version>
         <commons-io.version>2.4</commons-io.version>
         <dom4j.bundle.version>1.6.1_5</dom4j.bundle.version>
+        <eclipselink.version>2.6.1-RC1</eclipselink.version>
         <jasypt.bundle.version>1.9.2_1</jasypt.bundle.version>
         <jolokia.version>1.3.0</jolokia.version>
         <serp.bundle.version>1.14.1_1</serp.bundle.version>
