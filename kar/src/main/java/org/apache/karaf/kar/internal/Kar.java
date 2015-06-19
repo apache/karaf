@@ -118,8 +118,9 @@ public class Kar {
                     File destFile = new File(repoDir, path);
                     extract(zipIs, entry, destFile);
                     if (scanForRepos && featureDetector.isFeaturesRepository(destFile)) {
-                        String uri = Parser.pathToMaven(path);
-                        featureRepos.add(URI.create(uri));
+                        // String uri = Parser.pathToMaven(path);
+                        // featureRepos.add(URI.create(uri));
+                        featureRepos.add(destFile.toURI());
                     }
                 }
 
