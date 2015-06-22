@@ -376,17 +376,6 @@
                 <enabled>false</enabled>
             </releases>
         </repository>
-        <repository>
-            <id>Felix Staging</id>
-            <name>Felix  Staging</name>
-            <url>https://repository.apache.org/content/repositories/orgapachefelix-1073</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-        </repository>
     </repositories>
     <pluginRepositories>
         <!-- Apache snapshots -->
