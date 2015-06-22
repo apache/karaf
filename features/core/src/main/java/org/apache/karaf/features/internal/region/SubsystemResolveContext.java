@@ -86,7 +86,7 @@ public class SubsystemResolveContext extends ResolveContext {
         // Add a heuristic to sort capabilities :
         //  if a capability comes from a resource which needs to be installed,
         //  prefer that one over any capabilities from other resources
-        findMandatory(root);
+        findMandatory();
     }
     
     public static void setIgnoreServiceReqs(boolean ignoreServiceReqs) {
@@ -101,18 +101,63 @@ public class SubsystemResolveContext extends ResolveContext {
         return globalRepository;
     }
 
-    void findMandatory(Resource res) {
-        if (mandatory.add(res)) {
-            for (Requirement req : res.getRequirements(null)) {
-                String resolution = req.getDirectives().get(REQUIREMENT_RESOLUTION_DIRECTIVE);
-                if (!RESOLUTION_OPTIONAL.equals(resolution)) {
+    void findMandatory() {
+        mandatory.add(root);
+        int nbMandatory;
+        // Iterate while we find more mandatory resources
+        do {
+            nbMandatory = mandatory.size();
+            for (Resource res : new ArrayList<>(mandatory)) {
+                // Check mandatory requirements of mandatory resources
+                for (Requirement req : res.getRequirements(null)) {
+                    if (isOptional(req)) {
+                        continue;
+                    }
                     List<Capability> caps = findProviders(req);
+                    // If there's a single provider for any kind of mandatory requirement,
+                    // this means the resource is also mandatory
                     if (caps.size() == 1) {
-                        findMandatory(caps.get(0).getResource());
+                        mandatory.add(caps.get(0).getResource());
+                    } else {
+                        // In case there are multiple providers
+                        // check if there is a single provider which has
+                        // a mandatory identity requirement on a mandatory
+                        // resource, in which case we also assume this one
+                        // is mandatory
+                        Set<Resource> mand = new HashSet<>();
+                        for (Capability cap : caps) {
+                            Resource r = cap.getResource();
+                            if (mandatory.contains(r)) {
+                                mand.add(r);
+                            } else {
+                                for (Requirement req2 : r.getRequirements(null)) {
+                                    if (!IDENTITY_NAMESPACE.equals(req2.getNamespace()) || !isOptional(req2)) {
+                                        continue;
+                                    }
+                                    List<Capability> caps2 = findProviders(req2);
+                                    if (caps2.size() == 1) {
+                                        Resource r2 =  caps2.get(0).getResource();
+                                        if (mandatory.contains(r2)) {
+                                            mand.add(r);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        if (mand.size() == 1) {
+                            mandatory.add(mand.iterator().next());
+                        } else {
+                            mand.clear();
+                        }
                     }
                 }
             }
-        }
+        } while (mandatory.size() != nbMandatory);
+    }
+
+    static boolean isOptional(Requirement req) {
+        String resolution = req.getDirectives().get(REQUIREMENT_RESOLUTION_DIRECTIVE);
+        return RESOLUTION_OPTIONAL.equalsIgnoreCase(resolution);
     }
 
     void prepare(Subsystem subsystem) {
