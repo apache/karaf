@@ -231,6 +231,28 @@ public class SubsystemTest {
         verify(resolver, expected);
     }
 
+    @Test
+    public void testFeatureOptionalAlreadyProvided2() throws Exception {
+        RepositoryImpl repo = new RepositoryImpl(getClass().getResource("data6/features.xml").toURI());
+
+        Map<String, Set<String>> features = new HashMap<String, Set<String>>();
+        addToMapSet(features, "root", "pax-http");
+        addToMapSet(features, "root", "pax-http-tomcat");
+        Map<String, Set<String>> expected = new HashMap<String, Set<String>>();
+        addToMapSet(expected, "root", "a/1.0.0");
+        addToMapSet(expected, "root", "c/1.0.0");
+
+        SubsystemResolver resolver = new SubsystemResolver(this.resolver, new TestDownloadManager(getClass(), "data6"));
+        resolver.prepare(Arrays.asList(repo.getFeatures()),
+                features,
+                Collections.<String, Set<BundleRevision>>emptyMap());
+        resolver.resolve(Collections.<String>emptySet(),
+                FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
+                null, null);
+
+        verify(resolver, expected);
+    }
+
     private void verify(SubsystemResolver resolver, Map<String, Set<String>> expected) {
         Map<String, Set<String>> mapping = getBundleNamesPerRegions(resolver);
         if (!expected.equals(mapping)) {
