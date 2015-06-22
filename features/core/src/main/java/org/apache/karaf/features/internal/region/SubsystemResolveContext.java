@@ -161,26 +161,48 @@ public class SubsystemResolveContext extends ResolveContext {
             // need to remove the one from the child if it can view
             // the parent one
             if (caps.size() > 1) {
-                Map<String, Resource> providers = new HashMap<String, Resource>();
+                Set<Resource> providers = new HashSet<>();
                 for (Capability cap : caps) {
                     Resource resource = cap.getResource();
                     String id = ResolverUtil.getSymbolicName(resource) + "|" + ResolverUtil.getVersion(resource);
-                    Resource prev = providers.get(id);
-                    if (prev != null && prev != resource) {
-                        String r1 = getRegion(prev).getName();
-                        String r2 = getRegion(resource).getName();
-                        int c = r1.compareTo(r2);
-                        if (c == 0) {
-                            // One of the resource has to be a bundle, use that one
-                            c = (prev instanceof BundleRevision) ? -1 : +1;
+                    if (!providers.contains(resource)) {
+                        Set<Resource> newRes = new HashSet<>();
+                        String r1 = getRegion(resource).getName();
+                        boolean superceded = false;
+                        for (Resource r : providers) {
+                            String id2 = ResolverUtil.getSymbolicName(r) + "|" + ResolverUtil.getVersion(r);
+                            if (id.equals(id2)) {
+                                String r2 = getRegion(r).getName();
+                                if (r1.equals(r2)) {
+                                    if (r instanceof BundleRevision) {
+                                        newRes.add(r);
+                                        superceded = true;
+                                    } else if (resource instanceof BundleRevision) {
+                                        newRes.add(resource);
+                                    } else {
+                                        throw new InternalError();
+                                    }
+                                } else if (r1.startsWith(r2)) {
+                                    newRes.add(r);
+                                    superceded = true;
+                                } else if (r2.startsWith(r1)) {
+                                    newRes.add(resource);
+                                } else {
+                                    newRes.add(r);
+                                }
+                            } else {
+                                newRes.add(r);
+                            }
                         }
-                        resource = c < 0 ? prev : resource;
+                        if (!superceded) {
+                            newRes.add(resource);
+                        }
+                        providers = newRes;
                     }
-                    providers.put(id, resource);
                 }
                 for (Iterator<Capability> it = caps.iterator(); it.hasNext();) {
                     Capability cap = it.next();
-                    if (!providers.values().contains(cap.getResource())) {
+                    if (!providers.contains(cap.getResource())) {
                         it.remove();
                     }
                 }
