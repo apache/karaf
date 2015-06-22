@@ -179,7 +179,7 @@ public class Activator extends BaseActivator {
         long scheduleDelay = getLong("scheduleDelay", FeaturesService.DEFAULT_SCHEDULE_DELAY);
         int scheduleMaxRun = getInt("scheduleMaxRun", FeaturesService.DEFAULT_SCHEDULE_MAX_RUN);
         String blacklisted = getString("blacklisted", new File(System.getProperty("karaf.etc"), "blacklisted.properties").toURI().toString());
-        boolean ignoreServiceReqs = getBoolean("ignoreServiceReqs", true);
+        boolean ignoreServiceReqs = getBoolean("ignoreServiceReqs", false);
         SubsystemResolveContext.setIgnoreServiceReqs(ignoreServiceReqs);
         StateStorage stateStorage = new StateStorage() {
             @Override
