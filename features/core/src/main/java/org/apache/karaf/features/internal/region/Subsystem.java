@@ -32,6 +32,7 @@ import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.apache.felix.resolver.Util;
 import org.apache.felix.utils.manifest.Clause;
 import org.apache.felix.utils.manifest.Parser;
 import org.apache.felix.utils.version.VersionRange;
@@ -95,6 +96,7 @@ public class Subsystem extends ResourceImpl {
     private final boolean acceptDependencies;
     private final Subsystem parent;
     private final Feature feature;
+    private final boolean mandatory;
     private final List<Subsystem> children = new ArrayList<>();
     private final Map<String, Set<String>> importPolicy;
     private final Map<String, Set<String>> exportPolicy;
@@ -112,14 +114,16 @@ public class Subsystem extends ResourceImpl {
         this.feature = null;
         this.importPolicy = SHARE_NONE_POLICY;
         this.exportPolicy = SHARE_NONE_POLICY;
+        this.mandatory = true;
     }
 
-    public Subsystem(String name, Feature feature, Subsystem parent) {
+    public Subsystem(String name, Feature feature, Subsystem parent, boolean mandatory) {
         super(name, TYPE_SUBSYSTEM, Version.emptyVersion);
         this.name = name;
         this.parent = parent;
         this.acceptDependencies = feature.getScoping() != null && feature.getScoping().acceptDependencies();
         this.feature = feature;
+        this.mandatory = mandatory;
         if (feature.getScoping() != null) {
             this.importPolicy = createPolicy(feature.getScoping().getImports());
             this.importPolicy.put(IDENTITY_NAMESPACE, Collections.singleton(SUBSYSTEM_OR_FEATURE_FILTER));
@@ -136,12 +140,13 @@ public class Subsystem extends ResourceImpl {
                 new VersionRange(VersionTable.getVersion(feature.getVersion()), true));
     }
 
-    public Subsystem(String name, Subsystem parent, boolean acceptDependencies) {
+    public Subsystem(String name, Subsystem parent, boolean acceptDependencies, boolean mandatory) {
         super(name, TYPE_SUBSYSTEM, Version.emptyVersion);
         this.name = name;
         this.parent = parent;
         this.acceptDependencies = acceptDependencies;
         this.feature = null;
+        this.mandatory = mandatory;
         this.importPolicy = SHARE_ALL_POLICY;
         this.exportPolicy = SHARE_NONE_POLICY;
     }
@@ -193,7 +198,7 @@ public class Subsystem extends ResourceImpl {
         }
         // Create subsystem
         String childName = getName() + "/" + name;
-        Subsystem as = new Subsystem(childName, this, acceptDependencies);
+        Subsystem as = new Subsystem(childName, this, acceptDependencies, true);
         children.add(as);
         // Add a requirement to force its resolution
         ResourceUtils.addIdentityRequirement(this, childName, TYPE_SUBSYSTEM, (VersionRange) null);
@@ -211,7 +216,7 @@ public class Subsystem extends ResourceImpl {
             ResourceUtils.addIdentityRequirement(this, name, TYPE_FEATURE, range);
         } else {
             ResourceImpl res = new ResourceImpl();
-            ResourceUtils.addIdentityRequirement(res, name, TYPE_FEATURE, range);
+            ResourceUtils.addIdentityRequirement(res, name, TYPE_FEATURE, range, false);
             dependentFeatures.addAll(res.getRequirements(null));
         }
     }
@@ -272,14 +277,14 @@ public class Subsystem extends ResourceImpl {
                 while (!ss.isAcceptDependencies()) {
                     ss = ss.getParent();
                 }
-                ss.requireFeature(dep.getName(), dep.getVersion(), mandatory && !dep.isDependency());
+                ss.requireFeature(dep.getName(), dep.getVersion(), this.mandatory && (mandatory && !dep.isDependency()));
             }
             for (Conditional cond : feature.getConditional()) {
                 Feature fcond = cond.asFeature();
                 String ssName = this.name + "#" + (fcond.hasVersion() ? fcond.getName() + "-" + fcond.getVersion() : fcond.getName());
                 Subsystem fs = getChild(ssName);
                 if (fs == null) {
-                    fs = new Subsystem(ssName, fcond, this);
+                    fs = new Subsystem(ssName, fcond, this, true);
                     fs.doBuild(features, false);
                     installable.add(fs);
                     children.add(fs);
@@ -306,7 +311,7 @@ public class Subsystem extends ResourceImpl {
                                 String ssName = this.name + "#" + (feature.hasVersion() ? feature.getName() + "-" + feature.getVersion() : feature.getName());
                                 Subsystem fs = getChild(ssName);
                                 if (fs == null) {
-                                    fs = new Subsystem(ssName, feature, this);
+                                    fs = new Subsystem(ssName, feature, this, mandatory && !SubsystemResolveContext.isOptional(requirement));
                                     fs.build(features);
                                     installable.add(fs);
                                     children.add(fs);
