@@ -179,6 +179,7 @@ public class SubsystemResolver {
     public Map<Resource, List<Wire>> resolve(
             Set<String> overrides,
             String featureResolutionRange,
+            String serviceRequirements,
             final Repository globalRepository,
             String outputFile) throws Exception {
 
@@ -187,14 +188,14 @@ public class SubsystemResolver {
         }
 
         // Download bundles
-        root.downloadBundles(manager, overrides, featureResolutionRange);
+        root.downloadBundles(manager, overrides, featureResolutionRange, serviceRequirements);
 
         // Populate digraph and resolve
         digraph = new StandardRegionDigraph(null, null);
         populateDigraph(digraph, root);
 
         Downloader downloader = manager.createDownloader();
-        SubsystemResolveContext context = new SubsystemResolveContext(root, digraph, globalRepository, downloader);
+        SubsystemResolveContext context = new SubsystemResolveContext(root, digraph, globalRepository, downloader, serviceRequirements);
         if (outputFile != null) {
             Map<String, Object> json = new HashMap<>();
             if (globalRepository != null) {

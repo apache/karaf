@@ -38,6 +38,7 @@ public class RepositoryTest extends TestCase {
         assertNotNull(features);
         assertEquals(3, features.length);
         assertNotNull(features[0]);
+        assertEquals("http://karaf.apache.org/xmlns/features/v1.1.0", features[0].getNamespace());
         assertEquals("f1", features[0].getName());
         assertNotNull(features[0].getConfigurations());
         assertEquals(1, features[0].getConfigurations().size());

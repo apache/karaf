@@ -102,6 +102,8 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
     protected List<Requirement> requirement;
     protected Scoping scoping;
     protected List<Library> library;
+    @XmlTransient
+    protected String namespace;
 
     public Feature() {
     }
@@ -385,5 +387,14 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
                 c.setOwner(this);
             }
         }
+    }
+
+    @Override
+    public String getNamespace() {
+        return namespace;
+    }
+
+    public void setNamespace(String namespace) {
+        this.namespace = namespace;
     }
 }

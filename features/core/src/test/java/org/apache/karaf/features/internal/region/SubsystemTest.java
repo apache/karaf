@@ -67,7 +67,7 @@ public class SubsystemTest {
                          Collections.<String, Set<BundleRevision>>emptyMap());
         resolver.resolve(Collections.<String>emptySet(),
                          FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
-                         null, null);
+                         null, null, null);
 
         verify(resolver, expected);
     }
@@ -98,7 +98,7 @@ public class SubsystemTest {
                          Collections.<String, Set<BundleRevision>>emptyMap());
         resolver.resolve(Collections.<String>emptySet(),
                          FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
-                         null, null);
+                         null, null, null);
 
         verify(resolver, expected);
     }
@@ -119,7 +119,7 @@ public class SubsystemTest {
                          Collections.<String, Set<BundleRevision>>emptyMap());
         resolver.resolve(Collections.singleton("b"),
                          FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
-                         null, null);
+                         null, null, null);
 
         verify(resolver, expected);
     }
@@ -139,7 +139,7 @@ public class SubsystemTest {
                          Collections.<String, Set<BundleRevision>>emptyMap());
         resolver.resolve(Collections.<String>emptySet(),
                          FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
-                         null, null);
+                         null, null, null);
 
         verify(resolver, expected);
     }
@@ -161,7 +161,7 @@ public class SubsystemTest {
                          Collections.<String, Set<BundleRevision>>emptyMap());
         resolver.resolve(Collections.<String>emptySet(),
                          FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
-                         null, null);
+                         null, null, null);
 
         verify(resolver, expected);
     }
@@ -183,7 +183,7 @@ public class SubsystemTest {
                 Collections.<String, Set<BundleRevision>>emptyMap());
         resolver.resolve(Collections.<String>emptySet(),
                 FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
-                null, null);
+                null, null, null);
 
         verify(resolver, expected);
     }
@@ -204,7 +204,7 @@ public class SubsystemTest {
                 Collections.<String, Set<BundleRevision>>emptyMap());
         resolver.resolve(Collections.<String>emptySet(),
                 FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
-                null, null);
+                null, null, null);
 
         verify(resolver, expected);
     }
@@ -226,7 +226,7 @@ public class SubsystemTest {
                 Collections.<String, Set<BundleRevision>>emptyMap());
         resolver.resolve(Collections.<String>emptySet(),
                 FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
-                null, null);
+                null, null, null);
 
         verify(resolver, expected);
     }
@@ -248,7 +248,7 @@ public class SubsystemTest {
                 Collections.<String, Set<BundleRevision>>emptyMap());
         resolver.resolve(Collections.<String>emptySet(),
                 FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
-                null, null);
+                null, null, null);
 
         verify(resolver, expected);
     }

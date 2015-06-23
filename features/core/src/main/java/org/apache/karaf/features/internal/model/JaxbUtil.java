@@ -130,8 +130,9 @@ public final class JaxbUtil {
 
             fixDom(doc, doc.getDocumentElement());
             Unmarshaller unmarshaller = FEATURES_CONTEXT.createUnmarshaller();
-            return (Features) unmarshaller.unmarshal(new DOMSource(doc));
-
+            Features features = (Features) unmarshaller.unmarshal(new DOMSource(doc));
+            features.setNamespace(nsuri);
+            return features;
 
         } catch (RuntimeException e) {
             throw e;
@@ -192,7 +193,7 @@ public final class JaxbUtil {
     private static Features unmarshalNoValidate(String uri, InputStream stream) {
         try {
             Unmarshaller unmarshaller = FEATURES_CONTEXT.createUnmarshaller();
-            XMLFilter xmlFilter = new NoSourceAndNamespaceFilter(XmlUtils.xmlReader());
+            NoSourceAndNamespaceFilter xmlFilter = new NoSourceAndNamespaceFilter(XmlUtils.xmlReader());
             xmlFilter.setContentHandler(unmarshaller.getUnmarshallerHandler());
 
             InputSource is = new InputSource(uri);
@@ -200,7 +201,9 @@ public final class JaxbUtil {
                 is.setByteStream(stream);
             }
             SAXSource source = new SAXSource(xmlFilter, is);
-            return (Features) unmarshaller.unmarshal(source);
+            Features features = (Features) unmarshaller.unmarshal(source);
+            features.setNamespace(xmlFilter.getNamespace());
+            return features;
 
         } catch (RuntimeException e) {
             throw e;
@@ -217,6 +220,8 @@ public final class JaxbUtil {
     public static class NoSourceAndNamespaceFilter extends XMLFilterImpl {
         private static final InputSource EMPTY_INPUT_SOURCE = new InputSource(new ByteArrayInputStream(new byte[0]));
 
+        private String namespace;
+
         public NoSourceAndNamespaceFilter(XMLReader xmlReader) {
             super(xmlReader);
         }
@@ -228,12 +233,19 @@ public final class JaxbUtil {
 
         @Override
         public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
+            if ("features".equals(localName)) {
+                namespace = uri;
+            }
             super.startElement(FeaturesNamespaces.URI_CURRENT, localName, qName, atts);
         }
 
         @Override
         public void endElement(String uri, String localName, String qName) throws SAXException {
             super.endElement(FeaturesNamespaces.URI_CURRENT, localName, qName);
+        }
+
+        public String getNamespace() {
+            return namespace;
         }
     }
 

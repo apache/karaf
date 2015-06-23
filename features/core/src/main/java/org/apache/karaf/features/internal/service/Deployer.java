@@ -156,6 +156,7 @@ public class Deployer {
     public static class DeploymentRequest {
         public Set<String> overrides;
         public String featureResolutionRange;
+        public String serviceRequirements;
         public String bundleUpdateRange;
         public String updateSnaphots;
         public Repository globalRepository;
@@ -246,6 +247,7 @@ public class Deployer {
             DeploymentRequest newRequest = new DeploymentRequest();
             newRequest.bundleUpdateRange = request.bundleUpdateRange;
             newRequest.featureResolutionRange = request.featureResolutionRange;
+            newRequest.serviceRequirements = request.serviceRequirements;
             newRequest.globalRepository = request.globalRepository;
             newRequest.options = request.options;
             newRequest.overrides = request.overrides;
@@ -262,6 +264,7 @@ public class Deployer {
         resolver.resolve(
                 request.overrides,
                 request.featureResolutionRange,
+                request.serviceRequirements,
                 request.globalRepository,
                 request.outputFile);
 
