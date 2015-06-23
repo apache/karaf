@@ -31,7 +31,9 @@
     <groupId>org.apache.karaf.demos</groupId>
     <artifactId>my-kar</artifactId>
     <version>4.0.0-SNAPSHOT</version>
-    <packaging>kar</packaging>
+    <packaging>pom</packaging>
+    <!-- You can directly use the kar packaging -->
+    <!-- <packaging>kar</packaging> -->
     <name>Apache Karaf :: Demos :: Deployer :: Kar</name>
 
     <build>
@@ -39,7 +41,20 @@
             <plugin>
                 <groupId>org.apache.karaf.tooling</groupId>
                 <artifactId>karaf-maven-plugin</artifactId>
-                <extensions>true</extensions>
+                <!-- using the kar packaging, you just have to use plugin extensions -->
+                <!-- <extensions>true</extensions> -->
+                <!-- if you use the pom packaging, you have to explicitly define the plugin execution -->
+                <executions>
+                    <execution>
+                        <id>package</id>
+                        <goals>
+                            <goal>kar</goal>
+                        </goals>
+                        <configuration>
+                            <featuresFile>${project.basedir}/src/main/feature/feature.xml</featuresFile>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
