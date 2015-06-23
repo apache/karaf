@@ -155,4 +155,9 @@ public class ExtendedFeature implements Feature {
     public List<? extends Library> getLibraries() {
         return feature.getLibraries();
     }
+
+    @Override
+    public String getNamespace() {
+        return feature.getNamespace();
+    }
 }
