@@ -38,6 +38,7 @@ import org.eclipse.equinox.region.Region;
 import org.eclipse.equinox.region.RegionDigraph;
 import org.eclipse.equinox.region.RegionFilter;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.namespace.PackageNamespace;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.namespace.service.ServiceNamespace;
 import org.osgi.resource.Capability;
@@ -108,7 +109,7 @@ public class SubsystemResolveContext extends ResolveContext {
             for (Resource res : new ArrayList<>(mandatory)) {
                 // Check mandatory requirements of mandatory resources
                 for (Requirement req : res.getRequirements(null)) {
-                    if (isOptional(req)) {
+                    if (isOptional(req) || isDynamic(req)) {
                         continue;
                     }
                     List<Capability> caps = findProviders(req);
@@ -129,7 +130,7 @@ public class SubsystemResolveContext extends ResolveContext {
                                 mand.add(r);
                             } else {
                                 for (Requirement req2 : r.getRequirements(null)) {
-                                    if (!IDENTITY_NAMESPACE.equals(req2.getNamespace()) || !isOptional(req2)) {
+                                    if (!IDENTITY_NAMESPACE.equals(req2.getNamespace()) || isOptional(req2) || isDynamic(req2)) {
                                         continue;
                                     }
                                     List<Capability> caps2 = findProviders(req2);
@@ -155,7 +156,12 @@ public class SubsystemResolveContext extends ResolveContext {
 
     static boolean isOptional(Requirement req) {
         String resolution = req.getDirectives().get(REQUIREMENT_RESOLUTION_DIRECTIVE);
-        return RESOLUTION_OPTIONAL.equalsIgnoreCase(resolution);
+        return RESOLUTION_OPTIONAL.equals(resolution);
+    }
+
+    static boolean isDynamic(Requirement req) {
+        String resolution = req.getDirectives().get(REQUIREMENT_RESOLUTION_DIRECTIVE);
+        return PackageNamespace.RESOLUTION_DYNAMIC.equals(resolution);
     }
 
     void prepare(Subsystem subsystem) {
