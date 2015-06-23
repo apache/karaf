@@ -382,6 +382,7 @@
         <config name="org.apache.karaf.webconsole">
             realm=karaf
         </config>
+        <feature>pax-http-jetty</feature>
         <feature>http</feature>
         <feature>aries-blueprint</feature>
         <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.metatype/${felix.metatype.version}</bundle>
