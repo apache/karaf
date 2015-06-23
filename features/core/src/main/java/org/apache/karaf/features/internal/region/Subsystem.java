@@ -41,6 +41,8 @@ import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Conditional;
 import org.apache.karaf.features.Dependency;
 import org.apache.karaf.features.Feature;
+import org.apache.karaf.features.FeaturesNamespaces;
+import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Library;
 import org.apache.karaf.features.ScopeFilter;
 import org.apache.karaf.features.internal.download.DownloadCallback;
@@ -347,9 +349,10 @@ public class Subsystem extends ResourceImpl {
     @SuppressWarnings("InfiniteLoopStatement")
     public void downloadBundles(DownloadManager manager,
                                 Set<String> overrides,
-                                String featureResolutionRange) throws Exception {
+                                String featureResolutionRange,
+                                final String serviceRequirements) throws Exception {
         for (Subsystem child : children) {
-            child.downloadBundles(manager, overrides, featureResolutionRange);
+            child.downloadBundles(manager, overrides, featureResolutionRange, serviceRequirements);
         }
         final Map<String, ResourceImpl> bundles = new ConcurrentHashMap<>();
         final Downloader downloader = manager.createDownloader();
@@ -370,7 +373,7 @@ public class Subsystem extends ResourceImpl {
             downloader.download(loc, new DownloadCallback() {
                 @Override
                 public void downloaded(StreamProvider provider) throws Exception {
-                    ResourceImpl res = createResource(loc, getMetadata(provider));
+                    ResourceImpl res = createResource(loc, getMetadata(provider), serviceRequirements);
                     bundles.put(loc, res);
                 }
             });
@@ -380,7 +383,7 @@ public class Subsystem extends ResourceImpl {
             downloader.download(loc, new DownloadCallback() {
                 @Override
                 public void downloaded(StreamProvider provider) throws Exception {
-                    ResourceImpl res = createResource(loc, getMetadata(provider));
+                    ResourceImpl res = createResource(loc, getMetadata(provider), serviceRequirements);
                     bundles.put(loc, res);
                 }
             });
@@ -390,7 +393,7 @@ public class Subsystem extends ResourceImpl {
             downloader.download(loc, new DownloadCallback() {
                 @Override
                 public void downloaded(StreamProvider provider) throws Exception {
-                    ResourceImpl res = createResource(loc, getMetadata(provider));
+                    ResourceImpl res = createResource(loc, getMetadata(provider), serviceRequirements);
                     bundles.put(loc, res);
                 }
             });
@@ -402,7 +405,7 @@ public class Subsystem extends ResourceImpl {
                     downloader.download(loc, new DownloadCallback() {
                         @Override
                         public void downloaded(StreamProvider provider) throws Exception {
-                            ResourceImpl res = createResource(loc, getMetadata(provider));
+                            ResourceImpl res = createResource(loc, getMetadata(provider), serviceRequirements);
                             bundles.put(loc, res);
                         }
                     });
@@ -552,9 +555,14 @@ public class Subsystem extends ResourceImpl {
         return policy;
     }
 
-    ResourceImpl createResource(String uri, Map<String, String> headers) throws Exception {
+    ResourceImpl createResource(String uri, Map<String, String> headers, String serviceRequirements) throws Exception {
+        boolean removeServiceRequirements = false;
+        if (feature != null && FeaturesService.SERVICE_REQUIREMENTS_DEFAULT.equals(serviceRequirements)
+                && !FeaturesNamespaces.URI_1_3_0.equals(uri)) {
+            removeServiceRequirements = true;
+        }
         try {
-            return ResourceBuilder.build(uri, headers);
+            return ResourceBuilder.build(uri, headers, removeServiceRequirements);
         } catch (BundleException e) {
             throw new Exception("Unable to create resource for bundle " + uri, e);
         }

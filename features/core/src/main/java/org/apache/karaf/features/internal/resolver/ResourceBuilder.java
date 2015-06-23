@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,12 +60,20 @@ public final class ResourceBuilder {
 
     private ResourceBuilder() {
     }
-    
+
     public static ResourceImpl build(String uri, Map<String, String> headerMap) throws BundleException {
-        return build(new ResourceImpl(), uri, headerMap);
+        return build(new ResourceImpl(), uri, headerMap, false);
+    }
+
+    public static ResourceImpl build(String uri, Map<String, String> headerMap, boolean removeServiceRequirements) throws BundleException {
+        return build(new ResourceImpl(), uri, headerMap, removeServiceRequirements);
     }
 
     public static ResourceImpl build(ResourceImpl resource, String uri, Map<String, String> headerMap) throws BundleException {
+        return build(resource, uri, headerMap, false);
+    }
+
+    public static ResourceImpl build(ResourceImpl resource, String uri, Map<String, String> headerMap, boolean removeServiceRequirements) throws BundleException {
         // Verify that only manifest version 2 is specified.
         String manifestVersion = getManifestVersion(headerMap);
         if (manifestVersion == null || !manifestVersion.equals("2")) {
@@ -213,7 +222,19 @@ public final class ResourceBuilder {
         if (!hasServiceReferenceRequirement) {
             List<ParsedHeaderClause> importServices = parseStandardHeader(headerMap.get(Constants.IMPORT_SERVICE));
             List<Requirement> reqs = convertImportService(importServices, resource);
-            requireReqs.addAll(reqs);
+            if (!reqs.isEmpty()) {
+                requireReqs.addAll(reqs);
+                hasServiceReferenceRequirement = true;
+            }
+        }
+
+        if (hasServiceReferenceRequirement && removeServiceRequirements) {
+            for (Iterator<Requirement> iterator = requireReqs.iterator(); iterator.hasNext();) {
+                Requirement req = iterator.next();
+                if (ServiceNamespace.SERVICE_NAMESPACE.equals(req.getNamespace())) {
+                    iterator.remove();
+                }
+            }
         }
         
         // Combine all capabilities.

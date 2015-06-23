@@ -24,6 +24,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSchemaType;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
 
@@ -61,6 +62,8 @@ public class Features {
     protected List<Feature> feature;
     @XmlAttribute
     protected String name;
+    @XmlTransient
+    private String namespace;
 
     /**
      * Gets the value of the repository property.
@@ -139,8 +142,17 @@ public class Features {
     public void postUnmarshall() {
         if (feature != null) {
             for (Feature f : feature) {
+                f.setNamespace(namespace);
                 f.postUnmarshall();
             }
         }
+    }
+
+    public void setNamespace(String namespace) {
+        this.namespace = namespace;
+    }
+
+    public String getNamespace() {
+        return namespace;
     }
 }

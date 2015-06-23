@@ -179,8 +179,7 @@ public class Activator extends BaseActivator {
         long scheduleDelay = getLong("scheduleDelay", FeaturesService.DEFAULT_SCHEDULE_DELAY);
         int scheduleMaxRun = getInt("scheduleMaxRun", FeaturesService.DEFAULT_SCHEDULE_MAX_RUN);
         String blacklisted = getString("blacklisted", new File(System.getProperty("karaf.etc"), "blacklisted.properties").toURI().toString());
-        boolean ignoreServiceReqs = getBoolean("ignoreServiceReqs", false);
-        SubsystemResolveContext.setIgnoreServiceReqs(ignoreServiceReqs);
+        String serviceRequirements = getString("serviceRequirements", FeaturesService.SERVICE_REQUIREMENTS_DEFAULT);
         StateStorage stateStorage = new StateStorage() {
             @Override
             protected InputStream getInputStream() throws IOException {
@@ -217,6 +216,7 @@ public class Activator extends BaseActivator {
                 featureResolutionRange,
                 bundleUpdateRange,
                 updateSnapshots,
+                serviceRequirements,
                 globalRepository,
                 downloadThreads,
                 scheduleDelay,
