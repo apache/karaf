@@ -15,6 +15,55 @@
  * limitations under the License.
  */
 
+                    Apache Karaf 4.0.0
+                    ==================
+
+ Apache Karaf 4.0.0 is the first production ready version of the new 4.0.0 branch.
+ It's a major step forward, including a complete new features resolver, a large set of new features, improvements, and bug fixes.
+
+ For more information, please see the below changelog:
+
+ ChangeLog:
+ ----------
+
+** Bug
+    * [KARAF-3181|https://issues.apache.org/jira/browse/KARAF-3181] - framework-security feature doesn't install
+    * [KARAF-3236|https://issues.apache.org/jira/browse/KARAF-3236] - Unable to use character @ in Karaf console
+    * [KARAF-3520|https://issues.apache.org/jira/browse/KARAF-3520] - FeatureService fails to install feature in case of missing capability
+    * [KARAF-3648|https://issues.apache.org/jira/browse/KARAF-3648] - should zero out instance pid in instance.properties when we shutdown an instance from shell
+    * [KARAF-3663|https://issues.apache.org/jira/browse/KARAF-3663] - Unable to deploy KAR
+    * [KARAF-3669|https://issues.apache.org/jira/browse/KARAF-3669] - Missing files in standard distribution
+    * [KARAF-3711|https://issues.apache.org/jira/browse/KARAF-3711] - LDAP login module doesn't handle case where CN, OU, DC case doesn't match
+    * [KARAF-3740|https://issues.apache.org/jira/browse/KARAF-3740] - NPE on container startup
+    * [KARAF-3757|https://issues.apache.org/jira/browse/KARAF-3757] - Unable to resolve org.apache.activemq.activemq-blueprint while installing feature activemq-blueprint
+    * [KARAF-3764|https://issues.apache.org/jira/browse/KARAF-3764] - Features Service Refresh
+    * [KARAF-3765|https://issues.apache.org/jira/browse/KARAF-3765] - Eventadmin logs warnings about wrong values
+    * [KARAF-3767|https://issues.apache.org/jira/browse/KARAF-3767] - Generic JDBC datasource should use 1 instead of WHEN_EXHAUSTED_BLOCK
+    * [KARAF-3768|https://issues.apache.org/jira/browse/KARAF-3768] - Unable to start child instance
+    * [KARAF-3769|https://issues.apache.org/jira/browse/KARAF-3769] - NPE in resolver when installing CXF and ActiveMQ
+    * [KARAF-3783|https://issues.apache.org/jira/browse/KARAF-3783] - NPE in karaf-maven-plugin features-export-meta-data
+    * [KARAF-3784|https://issues.apache.org/jira/browse/KARAF-3784] - Kar hotdeployment doesn't work
+    * [KARAF-3791|https://issues.apache.org/jira/browse/KARAF-3791] - Unable to connect to an instance with instance:connect command
+    * [KARAF-3793|https://issues.apache.org/jira/browse/KARAF-3793] - WebConsole installs but it's not actually available
+
+** Dependency upgrade
+    * [KARAF-3561|https://issues.apache.org/jira/browse/KARAF-3561] - Upgrade to slf4j 1.7.12
+    * [KARAF-3707|https://issues.apache.org/jira/browse/KARAF-3707] - Upgrade to Felix Framework 5.0.1/Resolver 1.4.0
+    * [KARAF-3792|https://issues.apache.org/jira/browse/KARAF-3792] - Upgrade to Pax Web 4.1.3
+    * [KARAF-3794|https://issues.apache.org/jira/browse/KARAF-3794] - Upgrade to equinox 3.10.2.v20150203-1939
+    * [KARAF-3801|https://issues.apache.org/jira/browse/KARAF-3801] - Upgrade to Pax Web 4.1.4
+
+** Improvement
+    * [KARAF-1113|https://issues.apache.org/jira/browse/KARAF-1113] - Add a web:launch command
+    * [KARAF-3790|https://issues.apache.org/jira/browse/KARAF-3790] - Add comment with karaf.lock.dir property in etc/system.properties
+    * [KARAF-3796|https://issues.apache.org/jira/browse/KARAF-3796] - Provide aries jpa 2.0.0 and use feature for persistence-api
+    * [KARAF-3799|https://issues.apache.org/jira/browse/KARAF-3799] - Add eclipselink feature
+    * [KARAF-3802|https://issues.apache.org/jira/browse/KARAF-3802] - Disabling service requirements check for "old style" features
+
+** New Feature
+    * [KARAF-3759|https://issues.apache.org/jira/browse/KARAF-3759] - Provide tooling to store a resolution attempt that failed so that it can be replayed offline for analysis
+
+
                     Apache Karaf 4.0.0.M3
                     =====================
 
