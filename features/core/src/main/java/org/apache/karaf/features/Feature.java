@@ -63,4 +63,7 @@ public interface Feature {
     Scoping getScoping();
 
     List<? extends Library> getLibraries();
+
+    String getNamespace();
+
 }

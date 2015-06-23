@@ -151,6 +151,10 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
      * - crc : use CRC to detect changes
      */
     private final String updateSnaphots;
+    /**
+     * Service requirements enforcement
+     */
+    private final String serviceRequirements;
 
     private final int downloadThreads;
 
@@ -188,6 +192,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
                                String featureResolutionRange,
                                String bundleUpdateRange,
                                String updateSnaphots,
+                               String serviceRequirements,
                                org.osgi.service.repository.Repository globalRepository,
                                int downloadThreads,
                                long scheduleDelay,
@@ -206,6 +211,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         this.featureResolutionRange = featureResolutionRange;
         this.bundleUpdateRange = bundleUpdateRange;
         this.updateSnaphots = updateSnaphots;
+        this.serviceRequirements = serviceRequirements;
         this.globalRepository = globalRepository;
         this.downloadThreads = downloadThreads > 0 ? downloadThreads : 1;
         this.scheduleDelay = scheduleDelay;
@@ -1039,6 +1045,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         Deployer.DeploymentRequest request = new Deployer.DeploymentRequest();
         request.bundleUpdateRange = bundleUpdateRange;
         request.featureResolutionRange = featureResolutionRange;
+        request.serviceRequirements = serviceRequirements;
         request.updateSnaphots = updateSnaphots;
         request.globalRepository = globalRepository;
         request.overrides = Overrides.loadOverrides(overrides);

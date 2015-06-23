@@ -38,6 +38,10 @@ public interface FeaturesService {
 
     String UPDATEABLE_URIS = "mvn:.*SNAPSHOT|(?!mvn:).*";
 
+    String SERVICE_REQUIREMENTS_DISABLE = "disable";
+    String SERVICE_REQUIREMENTS_DEFAULT = "default";
+    String SERVICE_REQUIREMENTS_ENFORCE = "enforce";
+
     int DEFAULT_DOWNLOAD_THREADS = 8;
     long DEFAULT_SCHEDULE_DELAY = 250;
     int DEFAULT_SCHEDULE_MAX_RUN = 9;

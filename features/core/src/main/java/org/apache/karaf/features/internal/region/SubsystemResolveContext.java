@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.internal.download.Downloader;
 import org.apache.karaf.features.internal.repository.BaseRepository;
 import org.apache.karaf.features.internal.resolver.CapabilityImpl;
@@ -69,12 +70,13 @@ public class SubsystemResolveContext extends ResolveContext {
     private final Repository repository;
     private final Repository globalRepository;
     private final Downloader downloader;
-    private static boolean ignoreServiceReqs = true; 
+    private final String serviceRequirements;
 
-    public SubsystemResolveContext(Subsystem root, RegionDigraph digraph, Repository globalRepository, Downloader downloader) throws BundleException {
+    public SubsystemResolveContext(Subsystem root, RegionDigraph digraph, Repository globalRepository, Downloader downloader, String serviceRequirements) throws BundleException {
         this.root = root;
         this.globalRepository = globalRepository != null ? new SubsystemRepository(globalRepository) : null;
         this.downloader = downloader;
+        this.serviceRequirements = serviceRequirements;
 
         prepare(root);
         repository = new BaseRepository(resToSub.keySet());
@@ -89,10 +91,6 @@ public class SubsystemResolveContext extends ResolveContext {
         findMandatory();
     }
     
-    public static void setIgnoreServiceReqs(boolean ignoreServiceReqs) {
-        SubsystemResolveContext.ignoreServiceReqs = ignoreServiceReqs;
-    }
-
     public Repository getRepository() {
         return repository;
     }
@@ -279,7 +277,7 @@ public class SubsystemResolveContext extends ResolveContext {
     @Override
     public boolean isEffective(Requirement requirement) {
         boolean isServiceReq = ServiceNamespace.SERVICE_NAMESPACE.equals(requirement.getNamespace());
-        return !ignoreServiceReqs || !isServiceReq;
+        return !(isServiceReq && FeaturesService.SERVICE_REQUIREMENTS_DISABLE.equals(serviceRequirements));
     }
 
     @Override
