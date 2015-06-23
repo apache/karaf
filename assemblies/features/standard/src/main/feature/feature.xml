@@ -342,6 +342,7 @@
 
     <feature name="http" version="${project.version}" description="Implementation of the OSGI HTTP Service">
         <feature>pax-http</feature>
+        <feature>pax-http-jetty</feature>
         <bundle start-level="30">mvn:org.apache.karaf.http/org.apache.karaf.http.core/${project.version}</bundle>
     </feature>
 
@@ -382,7 +383,6 @@
         <config name="org.apache.karaf.webconsole">
             realm=karaf
         </config>
-        <feature>pax-http-jetty</feature>
         <feature>http</feature>
         <feature>aries-blueprint</feature>
         <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.metatype/${felix.metatype.version}</bundle>
