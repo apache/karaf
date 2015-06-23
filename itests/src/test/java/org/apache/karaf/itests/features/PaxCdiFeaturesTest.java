@@ -87,6 +87,7 @@ public class PaxCdiFeaturesTest extends KarafTestSupport {
     }
 
     @Test
+    @Ignore
     public void installPaxCdi12WebWeldFeature() throws Exception {
         installAssertAndUninstallFeatures("pax-cdi-1.2-web-weld");
     }
