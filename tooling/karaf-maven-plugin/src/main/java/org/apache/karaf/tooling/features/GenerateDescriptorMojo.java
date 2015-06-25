@@ -17,8 +17,26 @@
  */
 package org.apache.karaf.tooling.features;
 
-import java.io.*;
-import java.util.*;
+import static org.apache.karaf.deployer.kar.KarArtifactInstaller.FEATURE_CLASSIFIER;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintStream;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 
@@ -49,9 +67,8 @@ import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.logging.AbstractLogEnabled;
 import org.codehaus.plexus.util.ReaderFactory;
 import org.codehaus.plexus.util.StringUtils;
+import org.sonatype.aether.artifact.Artifact;
 import org.xml.sax.SAXException;
-
-import static org.apache.karaf.deployer.kar.KarArtifactInstaller.FEATURE_CLASSIFIER;
 
 /**
  * Generates the features XML file
@@ -688,6 +705,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
                                 + ", i.e. build is platform dependent!");
             }
             targetFile.getParentFile().mkdirs();
+            fillDependencyProperties();
             @SuppressWarnings("rawtypes")
             List filters = mavenFileFilter.getDefaultFilterWrappers(project, null, true, session, null);
             mavenFileFilter.copyFile(sourceFile, targetFile, true, filters, encoding, true);
@@ -696,7 +714,30 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
         }
     }
 
-    protected String saveTreeListing() throws IOException {
+    private void fillDependencyProperties() {
+    	Map<String,String> versionProperties = new HashMap<String, String>();
+    	for (Map.Entry<?, String> entry : localDependencies.entrySet()) {
+            Object artifact = entry.getKey();
+
+            if (excludedArtifactIds.contains(this.dependencyHelper.getArtifactId(artifact))) {
+                continue;
+            }
+
+            if (!this.dependencyHelper.isArtifactAFeature(artifact)) {
+                
+            	Artifact currentDep = ((Artifact) artifact);
+                String artifactName = this.dependencyHelper.getArtifactId(artifact);
+                String groupName = currentDep.getGroupId();
+                String version = currentDep.getVersion();
+                String propertyName = (artifactName.startsWith(groupName)?artifactName:groupName+"."+artifactName)+".version";
+                versionProperties.put(propertyName, version);
+            }
+        }
+		project.getProperties().putAll(versionProperties);
+		
+	}
+
+	protected String saveTreeListing() throws IOException {
         File treeListFile = new File(filteredDependencyCache.getParentFile(), "treeListing.txt");
         OutputStream os = new FileOutputStream(treeListFile);
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os));

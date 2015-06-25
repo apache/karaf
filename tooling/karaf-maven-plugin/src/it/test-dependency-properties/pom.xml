@@ -1,4 +1,5 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
+
 <!--
   ~ Licensed to the Apache Software Foundation (ASF) under one
   ~ or more contributor license agreements.  See the NOTICE file
@@ -21,61 +22,37 @@
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>test</groupId>
-        <artifactId>test-check-dependencies</artifactId>
-        <version>1.0-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
-    </parent>
 
     <groupId>test</groupId>
-    <artifactId>check-dependencies-features</artifactId>
+    <artifactId>test-dependency-properties</artifactId>
     <version>1.0-SNAPSHOT</version>
-
-    <packaging>feature</packaging>
+    <packaging>bundle</packaging>
+    <description>Test Description</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>test</groupId>
-            <artifactId>dependency-module-a</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <type>xml</type>
-            <classifier>features</classifier>
-        </dependency>
-        <dependency>
-            <groupId>test</groupId>
-            <artifactId>dependency-module-b</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <type>xml</type>
-            <classifier>features</classifier>
-        </dependency>
-        <dependency>
+	    <dependency>
             <groupId>test</groupId>
             <artifactId>dependency-module-c</artifactId>
             <version>1.0-SNAPSHOT</version>
-            <type>xml</type>
-            <classifier>features</classifier>
-        </dependency>
-        <dependency>
-            <groupId>test</groupId>
-            <artifactId>dependency-module-d</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <type>xml</type>
-            <classifier>features</classifier>
         </dependency>
     </dependencies>
 
     <build>
         <plugins>
             <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <version>2.3.7</version>
+                <extensions>true</extensions>
+            </plugin>
+            <plugin>
                 <groupId>com.cloudyle.karaf.tooling</groupId>
                 <artifactId>karaf-maven-plugin</artifactId>
                 <version>@pom.version@</version>
-                <extensions>true</extensions>
                 <executions>
                     <execution>
                         <id>generate-features-file</id>
@@ -84,8 +61,6 @@
                             <goal>features-generate-descriptor</goal>
                         </goals>
                         <configuration>
-                            <aggregateFeatures>true</aggregateFeatures>
-                            <checkDependencyChange>true</checkDependencyChange>
                         </configuration>
                     </execution>
                 </executions>

@@ -39,7 +39,7 @@
                 <extensions>true</extensions>
             </plugin>
             <plugin>
-                <groupId>org.apache.karaf.tooling</groupId>
+                <groupId>com.cloudyle.karaf.tooling</groupId>
                 <artifactId>karaf-maven-plugin</artifactId>
                 <version>@pom.version@</version>
                 <executions>
