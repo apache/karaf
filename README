@@ -18,7 +18,7 @@
 Welcome to Apache Karaf
 =======================
 Apache Karaf is a modern and polymorphic container.
-It's a lightweight, performent, and enterprise ready container powered by OSGi.
+It's a lightweight, powerful, and enterprise ready container powered by OSGi.
 The container is able to host different kind of applications, OSGi or non OSGi.
 
 The following features are included:
