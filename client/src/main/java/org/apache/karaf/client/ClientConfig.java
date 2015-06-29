@@ -21,6 +21,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -155,11 +156,20 @@ public class ClientConfig {
         Properties usersCfg = loadProps(new File(System.getProperty("karaf.etc") + "/users.properties"));
         if (!usersCfg.isEmpty()) {
             if (user == null) {
-                user = (String) usersCfg.keySet().iterator().next();
+                Set keys = usersCfg.keySet();
+                for (Object key : keys) {
+                    String s = (String) key;
+                    if (s != null && !s.startsWith("_g_")) {
+                        user = s;
+                        break;
+                    }
+                }
             }
-            password = (String) usersCfg.getProperty(user);
-            if (password != null && password.contains(ROLE_DELIMITER)) {
-                password = password.substring(0, password.indexOf(ROLE_DELIMITER));
+            if (user != null) {
+                password = usersCfg.getProperty(user);
+                if (password != null && password.contains(ROLE_DELIMITER)) {
+                    password = password.substring(0, password.indexOf(ROLE_DELIMITER));
+                }
             }
         }
 
