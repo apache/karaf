@@ -77,6 +77,7 @@ import org.apache.karaf.profile.ProfileBuilder;
 import org.apache.karaf.profile.impl.Profiles;
 import org.apache.karaf.util.config.PropertiesLoader;
 import org.apache.karaf.util.maven.Parser;
+import org.apache.sshd.common.util.OsUtils;
 import org.ops4j.pax.url.mvn.MavenResolver;
 import org.ops4j.pax.url.mvn.MavenResolvers;
 import org.osgi.framework.Constants;
@@ -614,9 +615,13 @@ public class Builder {
                             Path sysOutput = systemDirectory.resolve(mvnPath);
                             Files.createDirectories(sysOutput.getParent());
                             Files.copy(input, sysOutput, StandardCopyOption.REPLACE_EXISTING);
-                            Path libOutput = homeDirectory.resolve(path).resolve(name);
-                            if (Files.notExists(libOutput, LinkOption.NOFOLLOW_LINKS)) {
-                                Files.createSymbolicLink(libOutput, libOutput.getParent().relativize(sysOutput));
+                            
+                            // symlink does not work on windows
+                            if (!OsUtils.isWin32()) {
+	                            Path libOutput = homeDirectory.resolve(path).resolve(name);
+	                            if (Files.notExists(libOutput, LinkOption.NOFOLLOW_LINKS)) {
+	                                Files.createSymbolicLink(libOutput, libOutput.getParent().relativize(sysOutput));
+	                            }
                             }
                         } else {
                             Path output = homeDirectory.resolve(path).resolve(name);
@@ -966,7 +971,12 @@ public class Builder {
                     Path path = systemDirectory.resolve(Parser.pathFromMaven(uri));
                     synchronized (provider) {
                         Files.createDirectories(path.getParent());
-                        Files.copy(provider.getFile().toPath(), path, StandardCopyOption.REPLACE_EXISTING);
+                        if (!path.toFile().exists()) {
+                        	Files.copy(provider.getFile().toPath(), path, StandardCopyOption.REPLACE_EXISTING);
+                        }
+                        else {
+                        	LOGGER.info("Copy file is skipped because the file exists already: {}", path.toUri().toString());
+                        }
                     }
                 }
             });
@@ -1037,9 +1047,15 @@ public class Builder {
                 public void downloaded(final StreamProvider provider) throws Exception {
                     if (install) {
                         synchronized (provider) {
-                            Path path = systemDirectory.resolve(Parser.pathFromMaven(provider.getUrl()));
+                        	Path path = null;
+                        	if (OsUtils.isWin32() && provider.getUrl().startsWith("file:/")) {
+                        		path = systemDirectory.resolve(provider.getUrl().substring("file:/".length()));
+                        	}
+                        	else {
+                        		path = systemDirectory.resolve(Parser.pathFromMaven(provider.getUrl()));
+                        	}
                             Files.createDirectories(path.getParent());
-                            Files.copy(provider.getFile().toPath(), path, StandardCopyOption.REPLACE_EXISTING);
+                           	Files.copy(provider.getFile().toPath(), path, StandardCopyOption.REPLACE_EXISTING);
                         }
                     }
                     try (InputStream is = provider.open()) {
