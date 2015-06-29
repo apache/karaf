@@ -407,7 +407,7 @@ public class BundleManager {
 
     protected void refreshPackages(Collection<Bundle> bundles) {
         final Object refreshLock = new Object();
-        FrameworkWiring wiring = bundleContext.getBundle().adapt(FrameworkWiring.class);
+        FrameworkWiring wiring = bundleContext.getBundle(0).adapt(FrameworkWiring.class);
         if (wiring != null) {
             synchronized (refreshLock) {
                 wiring.refreshBundles(bundles, new FrameworkListener() {
