@@ -77,7 +77,6 @@ import org.apache.karaf.profile.ProfileBuilder;
 import org.apache.karaf.profile.impl.Profiles;
 import org.apache.karaf.util.config.PropertiesLoader;
 import org.apache.karaf.util.maven.Parser;
-import org.apache.sshd.common.util.OsUtils;
 import org.ops4j.pax.url.mvn.MavenResolver;
 import org.ops4j.pax.url.mvn.MavenResolvers;
 import org.osgi.framework.Constants;
@@ -617,11 +616,15 @@ public class Builder {
                             Files.copy(input, sysOutput, StandardCopyOption.REPLACE_EXISTING);
                             
                             // symlink does not work on windows
-                            if (!OsUtils.isWin32()) {
+                            String os = System.getProperty("os.name", "Unknown");
+                            if (!os.startsWith("Win")) {
 	                            Path libOutput = homeDirectory.resolve(path).resolve(name);
 	                            if (Files.notExists(libOutput, LinkOption.NOFOLLOW_LINKS)) {
 	                                Files.createSymbolicLink(libOutput, libOutput.getParent().relativize(sysOutput));
 	                            }
+                            } else {
+                            	Path output = homeDirectory.resolve(path).resolve(name);
+                                Files.copy(input, output, StandardCopyOption.REPLACE_EXISTING);
                             }
                         } else {
                             Path output = homeDirectory.resolve(path).resolve(name);
@@ -1048,7 +1051,8 @@ public class Builder {
                     if (install) {
                         synchronized (provider) {
                         	Path path = null;
-                        	if (OsUtils.isWin32() && provider.getUrl().startsWith("file:/")) {
+                            String os = System.getProperty("os.name", "Unknown");
+                            if (os.startsWith("Win") && provider.getUrl().startsWith("file:/")) {
                         		path = systemDirectory.resolve(provider.getUrl().substring("file:/".length()));
                         	}
                         	else {
