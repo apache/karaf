@@ -62,6 +62,7 @@ import org.slf4j.LoggerFactory;
 public class GuardProxyCatalog implements ServiceListener {
     public static final String KARAF_SECURED_SERVICES_SYSPROP = "karaf.secured.services";
     public static final String SERVICE_GUARD_ROLES_PROPERTY = "org.apache.karaf.service.guard.roles";
+    public static final String KARAF_SECURED_COMMAND_COMPULSORY_ROLES_PROPERTY = "karaf.secured.command.compulsory.roles";
 
     static final String PROXY_CREATOR_THREAD_NAME = "Secure OSGi Service Proxy Creator";
     static final String PROXY_SERVICE_KEY = "." + GuardProxyCatalog.class.getName(); // The only currently used value is Boolean.TRUE
@@ -79,15 +80,24 @@ public class GuardProxyCatalog implements ServiceListener {
     final ServiceTracker<ProxyManager, ProxyManager> proxyManagerTracker;
     final ConcurrentMap<Long, ServiceRegistrationHolder> proxyMap = new ConcurrentHashMap<Long, ServiceRegistrationHolder>();
     final BlockingQueue<CreateProxyRunnable> createProxyQueue = new LinkedBlockingQueue<CreateProxyRunnable>();
+    final String compulsoryRoles;
 
     // These two variables control the proxy creator thread, which is started as soon as a ProxyManager Service
     // becomes available.
     volatile boolean runProxyCreator = true;
     volatile Thread proxyCreatorThread = null;
+    
+    
 
     GuardProxyCatalog(BundleContext bc) throws Exception {
         LOG.trace("Starting GuardProxyCatalog");
         myBundleContext = bc;
+        
+        compulsoryRoles = System.getProperty(GuardProxyCatalog.KARAF_SECURED_COMMAND_COMPULSORY_ROLES_PROPERTY);
+        if (compulsoryRoles == null) {
+            //default behavior as before, no compulsory roles for a karaf command without the ACL
+            LOG.info("No compulsory roles for a karaf command without the ACL as its system property is not set: {}", GuardProxyCatalog.KARAF_SECURED_COMMAND_COMPULSORY_ROLES_PROPERTY);
+        } 
 
         // The service listener is used to update/unregister proxies if the backing service changes/goes away
         bc.addServiceListener(this);
@@ -461,8 +471,9 @@ public class GuardProxyCatalog implements ServiceListener {
 
             // This can probably be optimized. Maybe we can cache the config object relevant instead of
             // walking through all of the ones that have 'service.guard'.
+            Object guardFilter = null;
             for (Configuration config : getServiceGuardConfigs()) {
-                Object guardFilter = config.getProperties().get(SERVICE_GUARD_KEY);
+                guardFilter = config.getProperties().get(SERVICE_GUARD_KEY);
                 if (guardFilter instanceof String) {
                     Filter filter = myBundleContext.createFilter((String) guardFilter);
                     if (filter.match(serviceReference)) {
@@ -482,8 +493,15 @@ public class GuardProxyCatalog implements ServiceListener {
             }
 
             if (!foundMatchingConfig) {
-                // No mappings for this service, anyone can invoke
-                return null;
+                if (compulsoryRoles != null && (guardFilter instanceof String) 
+                    && ((String)guardFilter).indexOf("osgi.command.scope") > 0 
+                    && ((String)guardFilter).indexOf("osgi.command.functio") > 0) {
+                    //use compulsoryRoles roles for those karaf command without any ACL
+                    roleMappings.put(Specificity.NAME_MATCH, ACLConfigurationParser.parseRoles(compulsoryRoles));
+                } else {
+                    // No mappings for this service, anyone can invoke
+                    return null;
+                }
             }
 
             if (roleMappings.size() == 0) {
