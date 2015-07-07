@@ -89,7 +89,8 @@ public class GenerateServiceMetadata extends AbstractMojo {
             List<Class> activators = new ArrayList<>();
             for (Class<?> clazz : classes) {
                 URL classUrl = clazz.getClassLoader().getResource(clazz.getName().replace('.', '/') + ".class");
-                if (classUrl == null || !classUrl.getPath().startsWith(project.getBuild().getOutputDirectory())) {
+                URL outputDirectoryUrl = new File(project.getBuild().getOutputDirectory()).toURI().toURL();
+                if (classUrl == null || !classUrl.getPath().startsWith(outputDirectoryUrl.getPath())) {
                     System.out.println("Ignoring " + classUrl);
                     continue;
                 }
