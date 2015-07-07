@@ -74,6 +74,14 @@ public final class ResourceBuilder {
     }
 
     public static ResourceImpl build(ResourceImpl resource, String uri, Map<String, String> headerMap, boolean removeServiceRequirements) throws BundleException {
+        try {
+            return doBuild(resource, uri, headerMap, removeServiceRequirements);
+        } catch (Exception e) {
+            throw new BundleException("Unable to build resource for " + uri + ": " + e.getMessage(), e);
+        }
+    }
+
+    private static ResourceImpl doBuild(ResourceImpl resource, String uri, Map<String, String> headerMap, boolean removeServiceRequirements) throws BundleException {
         // Verify that only manifest version 2 is specified.
         String manifestVersion = getManifestVersion(headerMap);
         if (manifestVersion == null || !manifestVersion.equals("2")) {
