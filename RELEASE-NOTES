@@ -15,6 +15,49 @@
  * limitations under the License.
  */
 
+                    Apache Karaf 2.4.3
+                    ==================
+
+  Overview
+  --------
+ 
+  This is an update patch for Apache Karaf 2.4.x, containing many bug fixes, dependency updates, and improvements. New feature highlights include: Support for Karaf 4 feature repositories in degraded mode, support for Pax-web 4.x, and updates to Felix FileInstall 3.5.0 and Felix ConfigAdmin 1.8.4. 
+  It is recommended that users update their deployment after reviewing the changelog below.
+  
+
+  Changelog
+  ---------
+
+** Bug
+    * [KARAF-1823] - Memory leak on windows in SSHD ServerSession
+    * [KARAF-3648] - should zero out instance pid in instance.properties when we shutdown an instance from shell
+    * [KARAF-3683] - Improve message when feature is not found
+    * [KARAF-3704] - Command jaas:groupadd allows adding duplicite groups
+    * [KARAF-3711] - LDAP login module doesn't handle case where CN, OU, DC case doesn't match
+    * [KARAF-3713] - JDBC generic datasource doesn't use the correct username property
+    * [KARAF-3737] - ActiveMQ Broker disappears after Karaf restart
+    * [KARAF-3747] - jndi:alias prefix a name with a /
+    * [KARAF-3767] - Generic JDBC datasource should use 1 instead of WHEN_EXHAUSTED_BLOCK
+    * [KARAF-3785] - jledit doesn't deal with comment, blocking the loader
+
+** Dependency upgrade
+    * [KARAF-3689] - Upgrade to Felix FileInstall 3.5.0
+    * [KARAF-3699] - Upgrade to Felix ConfigAdmin 1.8.4
+    * [KARAF-3724] - Upgrade to Pax Web 3.2.3
+    * [KARAF-3731] - Upgrade to Spring 4.1.6_RELEASE
+    * [KARAF-3735] - Upgrade to Pax Logging 1.8.3
+    * [KARAF-3800] - Upgrade to Pax Web 3.2.4
+
+** Improvement
+    * [KARAF-2698] - Add -l (level) option to log:display/log:tail in order to filter messages only for a given log level (and higher)
+    * [KARAF-3693] - only update the instances.properties when the "read" operation detect instance pid changes
+    * [KARAF-3705] - put all bundles before FeaturesService available as startup feature
+    * [KARAF-3776] - Support Karaf 4 feature repositories in a degraded mode
+    * [KARAF-3780] - Support for pax-web 4.x
+    * [KARAF-3790] - Add comment with karaf.lock.dir property in etc/system.properties
+    * [KARAF-3823] - introduce karaf.secured.command.compulsory.roles system property
+
+
                     Apache Karaf 2.4.2
                     ==================
 
