@@ -14,6 +14,9 @@
 package org.apache.karaf.itests.features;
 
 import org.apache.karaf.itests.KarafTestSupport;
+import org.apache.karaf.itests.util.RunIfRules.RunIfNotOnJdk8;
+import org.apache.karaf.itests.util.RunIfRule;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -23,6 +26,9 @@ import org.ops4j.pax.exam.spi.reactors.PerClass;
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
 public class EnterpriseFeaturesTest extends KarafTestSupport {
+
+    @Rule
+    public RunIfRule rule = new RunIfRule();
 
     @Test
     public void installTransaction100Feature() throws Exception {
@@ -55,11 +61,13 @@ public class EnterpriseFeaturesTest extends KarafTestSupport {
     }
 
     @Test
+    @RunIfNotOnJdk8
     public void installOpenJpa222Feature() throws Exception {
         installAssertAndUninstallFeature("openjpa", "2.2.2");
     }
 
     @Test
+    @RunIfNotOnJdk8
     public void installOpenJpa230Feature() throws Exception {
         installAssertAndUninstallFeature("openjpa", "2.3.0");
     }

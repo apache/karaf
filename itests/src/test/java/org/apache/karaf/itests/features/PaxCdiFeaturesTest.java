@@ -14,7 +14,10 @@
 package org.apache.karaf.itests.features;
 
 import org.apache.karaf.itests.KarafTestSupport;
+import org.apache.karaf.itests.util.RunIfRule;
+import org.apache.karaf.itests.util.RunIfRules.RunIfNotOnJdk8;
 import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -24,6 +27,9 @@ import org.ops4j.pax.exam.spi.reactors.PerClass;
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
 public class PaxCdiFeaturesTest extends KarafTestSupport {
+
+    @Rule
+    public RunIfRule rule = new RunIfRule();
 
     @Test
     public void installPaxCdiFeature() throws Exception {
@@ -62,37 +68,44 @@ public class PaxCdiFeaturesTest extends KarafTestSupport {
     }
 
     @Test
+    @RunIfNotOnJdk8
     public void installPaxCdiWebFeature() throws Exception {
         installAssertAndUninstallFeatures("pax-cdi-web");
     }
 
     @Test
+    @RunIfNotOnJdk8
     public void installPaxCdi11WebFeature() throws Exception {
         installAssertAndUninstallFeatures("pax-cdi-1.1-web");
     }
 
     @Test
+    @RunIfNotOnJdk8
     public void installPaxCdi12WebFeature() throws Exception {
         installAssertAndUninstallFeatures("pax-cdi-1.2-web");
     }
 
     @Test
+    @RunIfNotOnJdk8
     public void installPaxCdiWebWeldFeature() throws Exception {
         installAssertAndUninstallFeatures("pax-cdi-web-weld");
     }
 
     @Test
+    @RunIfNotOnJdk8
     public void installPaxCdi11WebWeldFeature() throws Exception {
         installAssertAndUninstallFeatures("pax-cdi-1.1-web-weld");
     }
 
     @Test
     @Ignore
+    @RunIfNotOnJdk8
     public void installPaxCdi12WebWeldFeature() throws Exception {
         installAssertAndUninstallFeatures("pax-cdi-1.2-web-weld");
     }
 
     @Test
+    @RunIfNotOnJdk8
     public void installPaxCdiWebOpenwebbeansFeature() throws Exception {
         installAssertAndUninstallFeatures("pax-cdi-web-openwebbeans");
     }
