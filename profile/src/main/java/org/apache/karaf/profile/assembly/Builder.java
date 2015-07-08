@@ -963,7 +963,7 @@ public class Builder {
                     if (Blacklist.isBundleBlacklisted(blacklistedBundles, uri)) {
                         throw new RuntimeException("Bundle " + uri + " is blacklisted");
                     }
-                    Path path = systemDirectory.resolve(Parser.pathFromMaven(uri));
+                    Path path = systemDirectory.resolve(pathFromProviderUrl(uri));
                     synchronized (provider) {
                         Files.createDirectories(path.getParent());
                         Files.copy(provider.getFile().toPath(), path, StandardCopyOption.REPLACE_EXISTING);
@@ -1037,7 +1037,7 @@ public class Builder {
                 public void downloaded(final StreamProvider provider) throws Exception {
                     if (install) {
                         synchronized (provider) {
-                            Path path = systemDirectory.resolve(Parser.pathFromMaven(provider.getUrl()));
+                            Path path = systemDirectory.resolve(pathFromProviderUrl(provider.getUrl()));
                             Files.createDirectories(path.getParent());
                             Files.copy(provider.getFile().toPath(), path, StandardCopyOption.REPLACE_EXISTING);
                         }
@@ -1186,6 +1186,20 @@ public class Builder {
             }
         }
         throw new IllegalArgumentException("Resource " + provider.getUrl() + " does not contain a manifest");
+    }
+
+    private static String pathFromProviderUrl(String url) throws MalformedURLException {
+        String pathString;
+        if (url.startsWith("file:")) {
+            pathString = url.substring("file:".length());
+        }
+        else if (url.startsWith("mvn:")) {
+            pathString = Parser.pathFromMaven(url);
+        }
+        else {
+            pathString = url;
+        }
+        return pathString;
     }
 
 }
