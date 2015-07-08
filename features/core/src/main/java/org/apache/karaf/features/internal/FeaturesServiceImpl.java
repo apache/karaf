@@ -1280,7 +1280,9 @@ public class FeaturesServiceImpl implements FeaturesService {
                             }
                         }
                     }
-                    features.add(feature);
+                    if (feature != null) {
+                        features.add(feature);
+                    }
                 }
             }
         }
