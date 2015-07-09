@@ -61,6 +61,7 @@ public class Activator implements BundleActivator {
                 featuresProviderRegistration.unregister();
             }
         });
+        featuresServiceTracker.open();
 
         final DiagnosticDumpMBeanImpl diagnostic = new DiagnosticDumpMBeanImpl();
         diagnostic.setBundleContext(context);
