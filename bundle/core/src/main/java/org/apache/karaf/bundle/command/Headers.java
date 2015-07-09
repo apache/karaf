@@ -60,7 +60,7 @@ public class Headers extends BundlesCommand {
     @Option(name = "--indent", description = "Indentation method")
     int indent = -1;
 
-    @Reference
+    @Reference(optional = true)
     Terminal terminal;
 
     @Override

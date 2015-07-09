@@ -93,7 +93,7 @@ public class LessAction implements Action, SignalListener {
     @Argument(multiValued = true)
     List<File> files;
 
-    @Reference
+    @Reference(optional = true)
     Terminal terminal;
 
     @Reference

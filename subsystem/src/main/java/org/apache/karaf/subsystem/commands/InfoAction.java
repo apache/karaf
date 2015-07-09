@@ -54,7 +54,7 @@ public class InfoAction extends SubsystemSupport implements Action {
     @Completion(SubsystemCompleter.class)
     String id;
 
-    @Reference
+    @Reference(optional = true)
     Terminal terminal;
 
     @Override
@@ -233,7 +233,7 @@ public class InfoAction extends SubsystemSupport implements Action {
     }
 
     protected int getTermWidth() {
-        return terminal.getWidth();
+        return terminal != null ? terminal.getWidth() : 80;
 
     }
 

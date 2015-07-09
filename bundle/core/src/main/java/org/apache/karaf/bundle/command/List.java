@@ -62,7 +62,7 @@ public class List extends BundlesCommand {
     @Reference
     BundleService bundleService;
 
-    @Reference
+    @Reference(optional = true)
     Terminal terminal;
 
     @Override

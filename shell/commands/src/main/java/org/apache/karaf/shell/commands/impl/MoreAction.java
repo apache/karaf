@@ -41,7 +41,7 @@ public class MoreAction implements Action {
     @Option(name = "--lines", description = "stop after N lines")
     int lines;
 
-    @Reference
+    @Reference(optional = true)
     Terminal terminal;
 
     @Reference

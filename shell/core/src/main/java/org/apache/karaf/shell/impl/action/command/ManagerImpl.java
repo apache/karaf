@@ -71,7 +71,8 @@ public class ManagerImpl implements Manager {
         // Inject services
         for (Class<?> cl = clazz; cl != Object.class; cl = cl.getSuperclass()) {
             for (Field field : cl.getDeclaredFields()) {
-                if (field.getAnnotation(Reference.class) != null) {
+                Reference ref = field.getAnnotation(Reference.class);
+                if (ref != null) {
                     GenericType type = new GenericType(field.getGenericType());
                     Object value;
                     if (type.getRawClass() == List.class) {
@@ -87,7 +88,7 @@ public class ManagerImpl implements Manager {
                             value = this.dependencies.getService(type.getRawClass());
                         }
                     }
-                    if (!allowCustomServices && value == null) {
+                    if (!allowCustomServices && value == null && !ref.optional()) {
                         throw new IllegalStateException("No service matching " + field.getType().getName());
                     }
                     field.setAccessible(true);
