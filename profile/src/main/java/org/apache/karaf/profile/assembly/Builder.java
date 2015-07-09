@@ -963,7 +963,7 @@ public class Builder {
                     if (Blacklist.isBundleBlacklisted(blacklistedBundles, uri)) {
                         throw new RuntimeException("Bundle " + uri + " is blacklisted");
                     }
-                    Path path = systemDirectory.resolve(pathFromProviderUrl(uri));
+                    Path path = pathFromProviderUrl(uri);
                     synchronized (provider) {
                         Files.createDirectories(path.getParent());
                         Files.copy(provider.getFile().toPath(), path, StandardCopyOption.REPLACE_EXISTING);
@@ -1188,10 +1188,10 @@ public class Builder {
         throw new IllegalArgumentException("Resource " + provider.getUrl() + " does not contain a manifest");
     }
 
-    private static String pathFromProviderUrl(String url) throws MalformedURLException {
+    private Path pathFromProviderUrl(String url) throws MalformedURLException {
         String pathString;
         if (url.startsWith("file:")) {
-            pathString = url.substring("file:".length());
+            return Paths.get(URI.create(url));
         }
         else if (url.startsWith("mvn:")) {
             pathString = Parser.pathFromMaven(url);
@@ -1199,7 +1199,7 @@ public class Builder {
         else {
             pathString = url;
         }
-        return pathString;
+        return systemDirectory.resolve(pathString);
     }
 
 }
