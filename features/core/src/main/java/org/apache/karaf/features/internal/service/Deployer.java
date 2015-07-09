@@ -496,13 +496,13 @@ public class Deployer {
                 print("  Bundles to refresh:", verbose);
                 for (Map.Entry<Bundle, String> entry : toRefresh.entrySet()) {
                     Bundle bundle = entry.getKey();
-                    print("    " + bundle.getSymbolicName() + " / " + bundle.getVersion() + " (" + entry.getValue() + ")", verbose);
+                    print("    " + bundle.getSymbolicName() + "/" + bundle.getVersion() + " (" + entry.getValue() + ")", verbose);
                 }
             }
             if (!toManage.isEmpty()) {
                 print("  Managing bundle:", verbose);
                 for (Bundle bundle : toManage) {
-                    print("    " + bundle.getSymbolicName() + " / " + bundle.getVersion(), verbose);
+                    print("    " + bundle.getSymbolicName() + "/" + bundle.getVersion(), verbose);
                 }
             }
             return;
@@ -589,7 +589,7 @@ public class Deployer {
             while (!toStop.isEmpty()) {
                 List<Bundle> bs = getBundlesToStop(toStop);
                 for (Bundle bundle : bs) {
-                    print("  " + bundle.getSymbolicName() + " / " + bundle.getVersion(), verbose);
+                    print("  " + bundle.getSymbolicName() + "/" + bundle.getVersion(), verbose);
                     // If the bundle start level will be changed, stop it persistently to
                     // avoid a restart when the start level is actually changed
                     callback.stopBundle(bundle, toUpdateStartLevel.containsKey(bundle) ? 0 : STOP_TRANSIENT);
@@ -613,7 +613,7 @@ public class Deployer {
                 String name = entry.getKey();
                 Deployer.RegionDeployment regionDeployment = entry.getValue();
                 for (Bundle bundle : regionDeployment.toDelete) {
-                    print("  " + bundle.getSymbolicName() + " / " + bundle.getVersion(), verbose);
+                    print("  " + bundle.getSymbolicName() + "/" + bundle.getVersion(), verbose);
                     callback.uninstall(bundle);
                     removeFromMapSet(managedBundles, name, bundle.getBundleId());
                 }
@@ -787,7 +787,7 @@ public class Deployer {
                 while (!toStop.isEmpty()) {
                     List<Bundle> bs = getBundlesToStop(toStop);
                     for (Bundle bundle : bs) {
-                        print("  " + bundle.getSymbolicName() + " / " + bundle.getVersion(), verbose);
+                        print("  " + bundle.getSymbolicName() + "/" + bundle.getVersion(), verbose);
                         callback.stopBundle(bundle, STOP_TRANSIENT);
                         toStop.remove(bundle);
                         toStart.add(bundle);
@@ -799,7 +799,7 @@ public class Deployer {
                 print("Refreshing bundles:", verbose);
                 for (Map.Entry<Bundle, String> entry : toRefresh.entrySet()) {
                     Bundle bundle = entry.getKey();
-                    print("    " + bundle.getSymbolicName() + " / " + bundle.getVersion() + " (" + entry.getValue() + ")", verbose);
+                    print("    " + bundle.getSymbolicName() + "/" + bundle.getVersion() + " (" + entry.getValue() + ")", verbose);
                 }
                 // Ensure all classes are loaded in case the bundle will be refreshed
                 if (dstate.serviceBundle != null && toRefresh.containsKey(dstate.serviceBundle)) {
@@ -825,7 +825,7 @@ public class Deployer {
             while (!toStart.isEmpty()) {
                 List<Bundle> bs = getBundlesToStart(toStart, dstate.serviceBundle);
                 for (Bundle bundle : bs) {
-                    print("  " + bundle.getSymbolicName() + " / " + bundle.getVersion(), verbose);
+                    print("  " + bundle.getSymbolicName() + "/" + bundle.getVersion(), verbose);
                     try {
                         callback.startBundle(bundle);
                     } catch (BundleException e) {
@@ -1060,13 +1060,13 @@ public class Deployer {
             if (!deployment.toDelete.isEmpty()) {
                 print("    Bundles to uninstall:", verbose);
                 for (Bundle bundle : deployment.toDelete) {
-                    print("      " + bundle.getSymbolicName() + " / " + bundle.getVersion(), verbose);
+                    print("      " + bundle.getSymbolicName() + "/" + bundle.getVersion(), verbose);
                 }
             }
             if (!deployment.toUpdate.isEmpty()) {
                 print("    Bundles to update:", verbose);
                 for (Map.Entry<Bundle, Resource> entry : deployment.toUpdate.entrySet()) {
-                    print("      " + entry.getKey().getSymbolicName() + " / " + entry.getKey().getVersion() + " with " + getUri(entry.getValue()), verbose);
+                    print("      " + entry.getKey().getSymbolicName() + "/" + entry.getKey().getVersion() + " with " + getUri(entry.getValue()), verbose);
                 }
             }
             if (!deployment.toInstall.isEmpty()) {
