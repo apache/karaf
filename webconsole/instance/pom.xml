@@ -69,6 +69,11 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.apache.karaf</groupId>
+			<artifactId>org.apache.karaf.util</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
 			<scope>provided</scope>
@@ -102,16 +107,16 @@
 		</resources>
 		<plugins>
 			<plugin>
+				<groupId>org.apache.karaf.tooling</groupId>
+				<artifactId>karaf-services-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
 				<configuration>
 					<instructions>
 						<Import-Package>
-							org.apache.aries.blueprint,
 							org.apache.felix.webconsole*;version="[3,5)",
-                            org.json,
-							org.osgi.service.blueprint.container,
-							org.osgi.service.blueprint.reflect,
 							*
 						</Import-Package>
 					</instructions>

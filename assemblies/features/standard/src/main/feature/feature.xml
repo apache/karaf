@@ -383,18 +383,9 @@
             realm=karaf
         </config>
         <feature>http</feature>
-        <feature>aries-blueprint</feature>
         <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.metatype/${felix.metatype.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.console/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.http/${project.version}</bundle>
-        <conditional>
-            <condition>eventadmin</condition>
-            <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.webconsole.plugins.event/${felix.eventadmin.webconsole.plugin.version}</bundle>
-        </conditional>
-        <conditional>
-            <condition>scr</condition>
-            <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.webconsole.plugins.ds/${felix.scr.webconsole.plugin.version}</bundle>
-        </conditional>
         <conditional>
             <condition>instance</condition>
             <bundle start-level="30">mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.instance/${project.version}</bundle>
