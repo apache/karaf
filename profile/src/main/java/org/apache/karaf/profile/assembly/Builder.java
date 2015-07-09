@@ -610,14 +610,25 @@ public class Builder {
                         Path input = provider.getFile().toPath();
                         String name = filename != null ? filename : input.getFileName().toString();
                         if (provider.getUrl().startsWith("mvn:")) {
+                            Path libOutput = homeDirectory.resolve(path).resolve(name);
+                            Files.copy(input, libOutput, StandardCopyOption.REPLACE_EXISTING);
+                            /*
+                             * Do not use symbolic links for now, and do not put the jar
+                             * in the system folder
+                             *
                             String mvnPath = Parser.pathFromMaven(provider.getUrl());
                             Path sysOutput = systemDirectory.resolve(mvnPath);
                             Files.createDirectories(sysOutput.getParent());
                             Files.copy(input, sysOutput, StandardCopyOption.REPLACE_EXISTING);
                             Path libOutput = homeDirectory.resolve(path).resolve(name);
                             if (Files.notExists(libOutput, LinkOption.NOFOLLOW_LINKS)) {
-                                Files.createSymbolicLink(libOutput, libOutput.getParent().relativize(sysOutput));
+                                try {
+                                    Files.createSymbolicLink(libOutput, libOutput.getParent().relativize(sysOutput));
+                                } catch (FileSystemException e) {
+                                    Files.copy(input, libOutput, StandardCopyOption.REPLACE_EXISTING);
+                                }
                             }
+                            */
                         } else {
                             Path output = homeDirectory.resolve(path).resolve(name);
                             Files.copy(input, output, StandardCopyOption.REPLACE_EXISTING);
