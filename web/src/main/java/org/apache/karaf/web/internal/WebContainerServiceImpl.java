@@ -22,6 +22,8 @@ import org.ops4j.pax.web.service.spi.WarManager;
 import org.ops4j.pax.web.service.spi.WebEvent;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleEvent;
+import org.osgi.framework.BundleListener;
 import org.osgi.framework.Constants;
 import org.osgi.framework.startlevel.BundleStartLevel;
 import org.slf4j.Logger;
@@ -34,7 +36,7 @@ import java.util.Map;
 /**
  * Implementation of the WebContainer service.
  */
-public class WebContainerServiceImpl implements WebContainerService {
+public class WebContainerServiceImpl implements WebContainerService, BundleListener {
     
     private BundleContext bundleContext;
     private WebEventHandler webEventHandler;
@@ -53,7 +55,16 @@ public class WebContainerServiceImpl implements WebContainerService {
     public void setWarManager(WarManager warManager) {
         this.warManager = warManager;
     }
-    
+
+    @Override
+    public void bundleChanged(BundleEvent bundleEvent) {
+        if (bundleEvent.getType() == BundleEvent.UNINSTALLED
+                || bundleEvent.getType() == BundleEvent.UNRESOLVED
+                || bundleEvent.getType() == BundleEvent.STOPPED) {
+            webEventHandler.getBundleEvents().remove(bundleEvent.getBundle().getBundleId());
+        }
+    }
+
     public List<WebBundle> list() throws Exception {
         Bundle[] bundles = bundleContext.getBundles();
         Map<Long, WebEvent> bundleEvents = webEventHandler.getBundleEvents();

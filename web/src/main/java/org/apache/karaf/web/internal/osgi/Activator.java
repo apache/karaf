@@ -33,6 +33,8 @@ import org.ops4j.pax.web.service.spi.WebListener;
 )
 public class Activator extends BaseActivator {
 
+    private WebContainerServiceImpl webContainerService;
+
     @Override
     protected void doStart() throws Exception {
         WarManager warManager = getTrackedService(WarManager.class);
@@ -43,7 +45,8 @@ public class Activator extends BaseActivator {
         WebEventHandler webEventHandler = new WebEventHandler();
         register(WebListener.class, webEventHandler);
 
-        WebContainerServiceImpl webContainerService = new WebContainerServiceImpl();
+        webContainerService = new WebContainerServiceImpl();
+        bundleContext.addBundleListener(webContainerService);
         webContainerService.setBundleContext(bundleContext);
         webContainerService.setWarManager(warManager);
         webContainerService.setWebEventHandler(webEventHandler);
@@ -52,6 +55,15 @@ public class Activator extends BaseActivator {
         WebMBeanImpl webMBean = new WebMBeanImpl();
         webMBean.setWebContainerService(webContainerService);
         registerMBean(webMBean, "type=web");
+    }
+
+    @Override
+    protected void doStop() {
+        if (webContainerService != null) {
+            bundleContext.removeBundleListener(webContainerService);
+            webContainerService = null;
+        }
+        super.doStop();
     }
 
 }

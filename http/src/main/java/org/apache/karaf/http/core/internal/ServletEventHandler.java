@@ -16,26 +16,39 @@
  */
 package org.apache.karaf.http.core.internal;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.ops4j.pax.web.service.spi.ServletEvent;
 import org.ops4j.pax.web.service.spi.ServletListener;
+import org.osgi.framework.Bundle;
 
 public class ServletEventHandler implements ServletListener {
 
 	Map<String, ServletEvent> servletEvents =  new HashMap<String, ServletEvent>();
 	
-	public void servletEvent(ServletEvent event) {
+	public synchronized void servletEvent(ServletEvent event) {
 		servletEvents.put(event.getServletName(), event);
 	}
 
 	/**
 	 * @return the servletEvents
 	 */
-	public Collection<ServletEvent> getServletEvents() {
-		return servletEvents.values();
+	public synchronized Collection<ServletEvent> getServletEvents() {
+		return new ArrayList<>(servletEvents.values());
+	}
+
+	public synchronized void removeEventsForBundle(Bundle bundle) {
+		Iterator<Map.Entry<String,ServletEvent>> iterator = servletEvents.entrySet().iterator();
+		while (iterator.hasNext()) {
+			Map.Entry<String,ServletEvent> entry = iterator.next();
+			if (entry.getValue().getBundle() == bundle) {
+				iterator.remove();
+			}
+		}
 	}
 
 }

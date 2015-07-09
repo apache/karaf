@@ -24,20 +24,41 @@ import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.ProvideService;
 import org.apache.karaf.util.tracker.annotation.Services;
 import org.ops4j.pax.web.service.spi.ServletListener;
+import org.osgi.framework.BundleEvent;
+import org.osgi.framework.BundleListener;
 
 @Services(provides = @ProvideService(ServletService.class))
 public class Activator extends BaseActivator {
 
+    private BundleListener listener;
+
     @Override
     protected void doStart() throws Exception {
-        ServletEventHandler servletEventHandler = new ServletEventHandler();
+        final ServletEventHandler servletEventHandler = new ServletEventHandler();
         register(ServletListener.class, servletEventHandler);
 
         ServletServiceImpl servletService = new ServletServiceImpl(servletEventHandler);
         register(ServletService.class, servletService);
 
+        listener = new BundleListener() {
+            @Override
+            public void bundleChanged(BundleEvent event) {
+                if (event.getType() == BundleEvent.UNINSTALLED
+                        || event.getType() == BundleEvent.UNRESOLVED
+                        || event.getType() == BundleEvent.STOPPED) {
+                    servletEventHandler.removeEventsForBundle(event.getBundle());
+                }
+            }
+        };
+        bundleContext.addBundleListener(listener);
+
         HttpMBeanImpl httpMBean = new HttpMBeanImpl(servletService);
         registerMBean(httpMBean, "type=http");
     }
 
+    @Override
+    protected void doStop() {
+        bundleContext.removeBundleListener(listener);
+        super.doStop();
+    }
 }
