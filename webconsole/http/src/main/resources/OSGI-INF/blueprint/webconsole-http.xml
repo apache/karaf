@@ -27,7 +27,10 @@
              interface="org.ops4j.pax.web.service.spi.ServletListener"
              ref="eaHandler" />
 
-	<bean id="webEaHandler" class="org.apache.karaf.webconsole.http.WebEventHandler"/>
+	<bean id="webEaHandler" class="org.apache.karaf.webconsole.http.WebEventHandler"
+          init-method="init" destroy-method="destroy">
+        <property name="bundleContext" ref="blueprintBundleContext" />
+    </bean>
 	<service id="webListener" interface="org.ops4j.pax.web.service.spi.WebListener" ref="webEaHandler"/>
 
     <bean id="httpPlugin" class="org.apache.karaf.webconsole.http.HttpPlugin" init-method="start" destroy-method="stop">

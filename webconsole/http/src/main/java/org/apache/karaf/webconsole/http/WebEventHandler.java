@@ -21,18 +21,48 @@ import java.util.Map;
 
 import org.ops4j.pax.web.service.spi.WebEvent;
 import org.ops4j.pax.web.service.spi.WebListener;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleEvent;
+import org.osgi.framework.BundleListener;
 
-public class WebEventHandler implements WebListener {
+public class WebEventHandler implements WebListener, BundleListener {
 
+    BundleContext bundleContext;
     private final Map<Long, WebEvent> bundleEvents = new HashMap<Long, WebEvent>();
 
+    public void setBundleContext(BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
+    }
+
+    public void init() {
+        bundleContext.addBundleListener(this);
+    }
+
+    public void destroy() {
+        bundleContext.removeBundleListener(this);
+    }
+
     @Override
-    public void webEvent(WebEvent event) {
+    public void bundleChanged(BundleEvent event) {
+        if (event.getType() == BundleEvent.UNINSTALLED
+                || event.getType() == BundleEvent.UNRESOLVED
+                || event.getType() == BundleEvent.STOPPED) {
+            removeEventsForBundle(event.getBundle());
+        }
+    }
+
+    @Override
+    public synchronized void webEvent(WebEvent event) {
         bundleEvents.put(event.getBundle().getBundleId(), event);
     }
 
-    public Map<Long, WebEvent> getBundleEvents() {
-        return bundleEvents;
+    public synchronized Map<Long, WebEvent> getBundleEvents() {
+        return new HashMap<>(bundleEvents);
+    }
+
+    public synchronized void removeEventsForBundle(Bundle bundle) {
+        bundleEvents.remove(bundle.getBundleId());
     }
 
 }
