@@ -778,6 +778,13 @@ public class Deployer {
         }
 
         if (!noRefresh) {
+            if (toRefresh.containsKey(dstate.bundles.get(0l))) {
+                print("The system bundle needs to be refreshed, restarting Karaf...", verbose);
+                System.setProperty("karaf.restart", "true");
+                dstate.bundles.get(0l).stop();
+                return;
+            }
+
             toStop = new HashSet<>();
             toStop.addAll(toRefresh.keySet());
             removeFragmentsAndBundlesInState(toStop, UNINSTALLED | RESOLVED | STOPPING);
