@@ -25,6 +25,9 @@ public class BundleComparator implements Comparator<Bundle> {
 
     @Override
     public int compare(Bundle o1, Bundle o2) {
+        if ((o1 == null) || (o2 == null)) {
+            return -1;
+        }
         String bsn1 = o1.getSymbolicName();
         String bsn2 = o2.getSymbolicName();
         int c = bsn1.compareTo(bsn2);
