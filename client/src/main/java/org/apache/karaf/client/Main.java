@@ -114,6 +114,7 @@ public class Main {
                         System.exit(1);
                     } else {
                         user = args[i];
+                        password = null;//get chance to input the password with interactive way
                     }
                 } else if (args[i].equals("-v")) {
                     level++;
