@@ -32,12 +32,16 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
@@ -66,6 +70,9 @@ public class KarServiceImpl implements KarService {
     private FeaturesService featuresService;
     
     private boolean noAutoRefreshBundles;
+    private List<Kar> unsatisfiedKars;
+    private AtomicBoolean busy;
+    private DelayedDeployerThread delayedDeployerThread;
 
     public KarServiceImpl(String karafBase, FeaturesService featuresService) {
         this.base = new File(karafBase);
@@ -75,6 +82,8 @@ public class KarServiceImpl implements KarService {
         if (!storage.isDirectory()) {
             throw new IllegalStateException("KAR storage " + storage + " is not a directory");
         }
+        unsatisfiedKars = Collections.synchronizedList(new ArrayList<Kar>());
+        busy = new AtomicBoolean();
     }
     
     @Override
@@ -87,16 +96,74 @@ public class KarServiceImpl implements KarService {
     
     @Override
     public void install(URI karUri, File repoDir, File resourceDir) throws Exception {
-        Kar kar = new Kar(karUri);
-        kar.extract(repoDir, resourceDir);
-        writeToFile(kar.getFeatureRepos(), new File(repoDir, FEATURE_CONFIG_FILE));
-        for (URI uri : kar.getFeatureRepos()) {
-            addToFeaturesRepositories(uri);
-        }
-        if (kar.isShouldInstallFeatures()) {
-            installFeatures(kar.getFeatureRepos());
+        busy.set(true);
+        try {
+            Kar kar = new Kar(karUri);
+            kar.extract(repoDir, resourceDir);
+            writeToFile(kar.getFeatureRepos(), new File(repoDir, FEATURE_CONFIG_FILE));
+            for (URI uri : kar.getFeatureRepos()) {
+                addToFeaturesRepositories(uri);
+            }
+            
+            if (kar.isShouldInstallFeatures()) {
+                List<URI> featureRepos = kar.getFeatureRepos();
+                Dependency missingDependency = findMissingDependency(featureRepos);
+                if(missingDependency==null) {
+                    installFeatures(featureRepos);              
+                }
+                else {
+                    LOGGER.warn("Feature dependency {} is not available. Kar deployment postponed to see if it is about to be deployed",missingDependency);
+                    unsatisfiedKars.add(kar);
+                    if(delayedDeployerThread==null) {
+                        delayedDeployerThread = new DelayedDeployerThread();                        
+                        delayedDeployerThread.start();
+                    }
+                }
+            }
+            if(!unsatisfiedKars.isEmpty()) {
+                for (Iterator<Kar> iterator = unsatisfiedKars.iterator(); iterator.hasNext();) {
+                    Kar delayedKar = iterator.next();
+                    if(findMissingDependency(delayedKar.getFeatureRepos())==null) {
+                        LOGGER.info("Dependencies of kar {} are now satisfied. Installing",delayedKar.getKarName());
+                        iterator.remove();
+                        installFeatures(delayedKar.getFeatureRepos());
+                    }
+                }
+            }
+            if(unsatisfiedKars.isEmpty()) {
+                if(delayedDeployerThread!=null) {
+                    delayedDeployerThread.cancel();                 
+                }
+                delayedDeployerThread = null;
+            }
+        } finally {
+            busy.set(false);
         }
 
+    }
+
+    /**
+     * checks if all required features are available
+     * @param featureRepos the repositories within the kar
+     * @return <code>null</code> if the contained features have no unresolvable dependencies. Otherwise the first missing dependency
+     * @throws Exception
+     */
+    private Dependency findMissingDependency(List<URI> featureRepos)
+            throws Exception {
+        for (URI uri : featureRepos) {
+            Feature[] includedFeatures = featuresService.getRepository(uri).getFeatures();
+            for (Feature includedFeature : includedFeatures) {
+                List<Dependency> dependencies = includedFeature.getDependencies();
+                for (Dependency dependency : dependencies) {
+                    Feature feature = featuresService.getFeature(dependency.getName(), dependency.getVersion());
+                    if(feature==null)
+                    {
+                        return dependency;
+                    }
+                }
+            }
+        }
+        return null;
     }
 
 
@@ -380,6 +447,47 @@ public class KarServiceImpl implements KarService {
 
     public void setNoAutoRefreshBundles(boolean noAutoRefreshBundles) {
         this.noAutoRefreshBundles = noAutoRefreshBundles;
+    }
+
+    private class DelayedDeployerThread extends Thread
+    {
+        private AtomicBoolean cancel;
+        
+        public DelayedDeployerThread() {
+            super("Delayed kar deployment");
+            cancel = new AtomicBoolean();
+        }
+        
+        public void cancel() {
+            cancel.set(true);
+        }
+        
+        @Override
+        public void run() {
+            
+            try {
+                while(busy.get() && !cancel.get()) {
+                    Thread.sleep(TimeUnit.SECONDS.toMillis(2));
+                }
+            } catch (InterruptedException e) {
+                // nothing to do
+            }
+            if (!cancel.get()) {
+                installDelayedKars();
+            }
+        }
+
+        private void installDelayedKars() {
+            for (Iterator<Kar> iterator = unsatisfiedKars.iterator(); iterator.hasNext();) {
+                Kar kar = iterator.next();
+                iterator.remove();
+                try {   
+                    installFeatures(kar.getFeatureRepos());
+                } catch (Exception e) {
+                    LOGGER.error("Delayed deployment of kar "+kar.getKarName()+" failed",e);
+                }
+            }
+        }
     }
 
 }
