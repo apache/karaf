@@ -23,7 +23,6 @@ import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.naming.CommunicationException;
 import javax.naming.Context;
 import javax.naming.NamingEnumeration;
 import javax.naming.directory.*;
@@ -256,13 +255,6 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
             userDN = result.getNameInNamespace().replace("," + userBaseDN, "");
             userDNNamespace = (String) result.getNameInNamespace();
             namingEnumeration.close();
-        } catch (CommunicationException ce) {
-            // explicitly catch CommunicationException as it my wrap a lower level root cause.
-            String rootCause = null;
-            if (ce.getRootCause() != null)
-                rootCause = ce.getRootCause().getMessage();
-            logger.warn("Can't connect to the LDAP server: {}", ce.getMessage(), rootCause);
-            throw new LoginException("Can't connect to the LDAP server: " + ce.getMessage());
         } catch (Exception e) {
             logger.warn("Can't connect to the LDAP server: {}", e.getMessage(), e);
             throw new LoginException("Can't connect to the LDAP server: " + e.getMessage());
