@@ -19,6 +19,7 @@
 package org.apache.karaf.util.maven;
 
 import java.net.MalformedURLException;
+import java.util.Map;
 
 /**
  * Parser for mvn: protocol.<br/>
@@ -162,7 +163,7 @@ public class Parser
         return new Parser(uri.substring("mvn:".length())).getArtifactPath();
     }
 
-    public static String pathToMaven(String location) {
+    public static String pathToMaven(String location, Map parts) {
         String[] p = location.split("/");
         if (p.length >= 4 && p[p.length-1].startsWith(p[p.length-3] + "-" + p[p.length-2])) {
             String artifactId = p[p.length-3];
@@ -178,6 +179,12 @@ public class Parser
             }
             type = p[p.length-1].substring(p[p.length-1].lastIndexOf('.') + 1);
             sb.append("mvn:");
+            if (parts != null) {
+                parts.put("artifactId", artifactId);
+                parts.put("version", version);
+                parts.put("classifier", classifier);
+                parts.put("type", type);
+            }
             for (int j = 0; j < p.length - 3; j++) {
                 if (j > 0) {
                     sb.append('.');
@@ -197,6 +204,10 @@ public class Parser
             return sb.toString();
         }
         return location;
+    }
+
+    public static String pathToMaven(String location) {
+        return pathToMaven(location, null);
     }
 
     /**

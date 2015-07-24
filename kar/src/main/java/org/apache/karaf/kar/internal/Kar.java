@@ -24,7 +24,9 @@ import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.jar.Attributes;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
@@ -118,9 +120,11 @@ public class Kar {
                     File destFile = new File(repoDir, path);
                     extract(zipIs, entry, destFile);
                     if (scanForRepos && featureDetector.isFeaturesRepository(destFile)) {
-                        // String uri = Parser.pathToMaven(path);
-                        // featureRepos.add(URI.create(uri));
-                        featureRepos.add(destFile.toURI());
+                        Map map = new HashMap<>();
+                        String uri = Parser.pathToMaven(path, map);
+                        if (map.get("classifier") != null && ((String) map.get("classifier")).equalsIgnoreCase("features"))
+                            featureRepos.add(URI.create(uri));
+                        else featureRepos.add(destFile.toURI());
                     }
                 }
 
