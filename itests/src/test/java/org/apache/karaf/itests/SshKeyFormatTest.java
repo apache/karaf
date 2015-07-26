@@ -23,6 +23,10 @@ package org.apache.karaf.itests;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 
+import static org.ops4j.pax.exam.CoreOptions.composite;
+import static org.ops4j.pax.exam.CoreOptions.options;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
+
 
 /**
  * Test use of PEM keys.
@@ -31,8 +35,12 @@ public class SshKeyFormatTest extends SshCommandTestBase {
 
     @Configuration
     public Option[] config() {
-        
-
+        return options(composite(super.config()),
+                editConfigurationFilePut("org.apache.karaf.shell.cfg", "hostKey", "/etc/test.pem"),
+                editConfigurationFilePut("org.apache.karaf.shell.cfg", "hostKeyFormat", "PEM")
+                );
     }
+
+
 
 }
