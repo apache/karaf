@@ -75,7 +75,7 @@ public class SecuredCommandProcessorImpl extends CommandProcessorImpl {
                 sb.append('(');
                 sb.append("org.apache.karaf.service.guard.roles");
                 sb.append('=');
-                sb.append(rp.getName());
+                sb.append(escapeforFilterString(rp.getName()));
                 sb.append(')');
             }
             sb.append("(!(org.apache.karaf.service.guard.roles=*))"); // Or no roles specified at all
@@ -226,4 +226,14 @@ public class SecuredCommandProcessorImpl extends CommandProcessorImpl {
         };
     }
 
+    private String escapeforFilterString(String original) {
+        //the filter string follow the LDAP rule
+        //where we need escape the special char
+        String ret = original;
+        ret = ret.replace("\\", "\\\\");
+        ret = ret.replace("*", "\\*");
+        ret = ret.replace("(", "\\(");
+        ret = ret.replace(")", "\\)");
+        return ret;
+    }
 }
