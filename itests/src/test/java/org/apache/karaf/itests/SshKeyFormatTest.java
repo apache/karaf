@@ -22,21 +22,18 @@ package org.apache.karaf.itests;
 
 import org.apache.sshd.ClientSession;
 import org.apache.sshd.SshClient;
+import org.apache.sshd.client.ServerKeyVerifier;
 import org.apache.sshd.client.future.ConnectFuture;
 import org.junit.Test;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.TestProbeBuilder;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.OutputStream;
-import java.util.Map;
+import java.net.SocketAddress;
+import java.security.PublicKey;
 
-import static org.ops4j.pax.exam.CoreOptions.composite;
-import static org.ops4j.pax.exam.CoreOptions.options;
+import static org.ops4j.pax.exam.CoreOptions.*;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
-
 
 /**
  * Test use of PEM keys.
@@ -47,8 +44,9 @@ public class SshKeyFormatTest extends SshCommandTestBase {
     public Option[] config() {
         File keyFile = new File("src/test/resources/test.pem");
         return options(composite(super.config()),
-                editConfigurationFilePut("org.apache.karaf.shell.cfg", "hostKey", keyFile.getAbsolutePath()),
-                editConfigurationFilePut("org.apache.karaf.shell.cfg", "hostKeyFormat", "PEM")
+                editConfigurationFilePut("etc/org.apache.karaf.shell.cfg", "hostKey", keyFile.getAbsolutePath()),
+                editConfigurationFilePut("etc/org.apache.karaf.shell.cfg", "hostKeyFormat", "PEM"),
+                vmOption("-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005")
                 );
     }
 
@@ -56,10 +54,31 @@ public class SshKeyFormatTest extends SshCommandTestBase {
     @Test
     public void usePemKey() throws Exception {
         SshClient client = SshClient.setUpDefaultClient();
+        client.setServerKeyVerifier(new ServerKeyVerifier() {
+            @Override
+            public boolean verifyServerKey(ClientSession sshClientSession, SocketAddress remoteAddress, PublicKey serverKey) {
+                System.err.println(serverKey.getAlgorithm());
+                System.err.println(serverKey.getFormat());
+                StringBuilder dump = new StringBuilder();
+                for (byte b : serverKey.getEncoded()) {
+                    dump.append(String.format("%02x", b));
+                }
+                System.err.println(dump.toString());
+                return true;
+            }
+        });
         client.start();
         ConnectFuture future = client.connect("karaf", "localhost", 8101).await();
         ClientSession session = future.getSession();
-        Map<Object, Object> metadata = session.getMetadataMap();
+        int ret = ClientSession.WAIT_AUTH;
+        while ((ret & ClientSession.WAIT_AUTH) != 0) {
+            session.addPasswordIdentity("karaf");
+            session.auth().verify();
+            ret = session.waitFor(ClientSession.WAIT_AUTH | ClientSession.CLOSED | ClientSession.AUTHED, 0);
+        }
+        if ((ret & ClientSession.CLOSED) != 0) {
+            throw new Exception("Could not open SSH channel");
+        }
         session.close(true);
     }
 }
