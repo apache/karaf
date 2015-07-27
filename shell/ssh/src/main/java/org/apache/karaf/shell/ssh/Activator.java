@@ -18,6 +18,7 @@
  */
 package org.apache.karaf.shell.ssh;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -161,8 +162,13 @@ public class Activator extends BaseActivator implements ManagedService {
         }
 
         keyPairProvider.setPath(hostKey);
-        keyPairProvider.setKeySize(keySize);
-        keyPairProvider.setAlgorithm(algorithm);
+        if (new File(hostKey).exists()) {
+            // do not trash key file if there's something wrong with it.
+            keyPairProvider.setOverwriteAllowed(false);
+        } else {
+            keyPairProvider.setKeySize(keySize);
+            keyPairProvider.setAlgorithm(algorithm);
+        }
 
         KarafJaasAuthenticator authenticator = new KarafJaasAuthenticator(sshRealm);
 

@@ -77,6 +77,7 @@ public class SshKeyFormatTest extends SshCommandTestBase {
             ret = session.waitFor(ClientSession.WAIT_AUTH | ClientSession.CLOSED | ClientSession.AUTHED, 0);
         }
         if ((ret & ClientSession.CLOSED) != 0) {
+            System.err.format("ret %d%n", ret);
             throw new Exception("Could not open SSH channel");
         }
         session.close(true);
