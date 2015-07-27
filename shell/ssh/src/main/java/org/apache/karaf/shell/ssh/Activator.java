@@ -155,7 +155,7 @@ public class Activator extends BaseActivator implements ManagedService {
         if ("simple".equalsIgnoreCase(hostKeyFormat)) {
             keyPairProvider = new SimpleGeneratorHostKeyProvider();
         } else if ("PEM".equalsIgnoreCase(hostKeyFormat)) {
-            keyPairProvider = new PEMGeneratorHostKeyProvider();
+            keyPairProvider = new OpenSSHGeneratorFileKeyProvider();
         } else {
             LOGGER.error("Invalid host key format " + hostKeyFormat);
             return null;

@@ -42,16 +42,14 @@ public class SshKeyFormatTest extends SshCommandTestBase {
 
     @Configuration
     public Option[] config() {
-        File keyFile = new File("src/test/resources/test.pem");
+        File keyFile = new File("src/test/resources/etc/test.pem");
         return options(composite(super.config()),
                 editConfigurationFilePut("etc/org.apache.karaf.shell.cfg", "hostKey", keyFile.getAbsolutePath()),
-                editConfigurationFilePut("etc/org.apache.karaf.shell.cfg", "hostKeyFormat", "PEM"),
-                mavenBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.bcpg-jdk16")
-                ,
-                vmOption("-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005")
+                editConfigurationFilePut("etc/org.apache.karaf.shell.cfg", "hostKeyFormat", "PEM")
+//                ,
+//                vmOption("-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005")
                 );
     }
-
 
     @Test
     public void usePemKey() throws Exception {
