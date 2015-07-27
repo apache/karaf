@@ -46,6 +46,8 @@ public class SshKeyFormatTest extends SshCommandTestBase {
         return options(composite(super.config()),
                 editConfigurationFilePut("etc/org.apache.karaf.shell.cfg", "hostKey", keyFile.getAbsolutePath()),
                 editConfigurationFilePut("etc/org.apache.karaf.shell.cfg", "hostKeyFormat", "PEM"),
+                mavenBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.bcpg-jdk16")
+                ,
                 vmOption("-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005")
                 );
     }
