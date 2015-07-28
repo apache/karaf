@@ -22,6 +22,18 @@
 
     <repository>mvn:org.ops4j.pax.cdi/pax-cdi-features/${pax.cdi.version}/xml/features</repository>
     <repository>mvn:org.apache.karaf.features/standard/${project.version}/xml/features</repository>
+    
+    <feature name="transaction-api" version="1.1.0">
+        <bundle>mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
+    </feature>
+    
+    <feature name="transaction-api" version="1.2.0">
+        <bundle>mvn:javax.interceptor/javax.interceptor-api/1.2</bundle>
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.javax-inject/1_2</bundle>
+        <bundle>mvn:javax.el/javax.el-api/3.0.0</bundle>
+        <bundle>mvn:javax.enterprise/cdi-api/1.2</bundle>
+        <bundle>mvn:javax.transaction/javax.transaction-api/1.2</bundle>
+    </feature>
 
     <feature name="transaction" description="OSGi Transaction Manager" version="1.0.0">
         <details>JTA implementation provided by Apache Aries Transaction 1.0.0</details>
@@ -33,7 +45,7 @@
             aries.transaction.howl.maxBlocksPerFile = 512
             aries.transaction.howl.bufferSize = 4
         </config>
-        <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
+        <feature version="[1.1,2)">transaction-api</feature>
         <bundle dependency="true" start-level="30">mvn:org.apache.aries/org.apache.aries.util/${aries.util.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.transaction/org.apache.aries.transaction.manager/1.0.0</bundle>
         <conditional>
@@ -52,7 +64,7 @@
             aries.transaction.howl.maxBlocksPerFile = 512
             aries.transaction.howl.bufferSize = 4
         </config>
-        <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
+        <feature version="[1.1,2)">transaction-api</feature>
         <bundle dependency="true" start-level="30">mvn:org.apache.aries/org.apache.aries.util/${aries.util.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.transaction/org.apache.aries.transaction.manager/1.0.1</bundle>
         <conditional>
@@ -71,7 +83,7 @@
             aries.transaction.howl.maxBlocksPerFile = 512
             aries.transaction.howl.bufferSize = 4
         </config>
-        <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
+        <feature version="[1.1,2)">transaction-api</feature>
         <bundle dependency="true" start-level="30">mvn:org.apache.aries/org.apache.aries.util/${aries.util.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.transaction/org.apache.aries.transaction.manager/1.1.1</bundle>
         <conditional>
