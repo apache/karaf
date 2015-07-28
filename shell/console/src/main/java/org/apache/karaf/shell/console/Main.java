@@ -202,6 +202,10 @@ public class Main {
             final Terminal terminal = terminalFactory.getTerminal();
             Console console = createConsole(commandProcessor, threadIO, in, out, err, terminal);
             CommandSession session = console.getSession();
+            for (Object o : System.getProperties().keySet()) {
+                String key = o.toString();
+                session.put(key, System.getProperty(key));
+            }
             session.put("USER", user);
             session.put("APPLICATION", application);
             session.put(NameScoping.MULTI_SCOPE_MODE_KEY, Boolean.toString(isMultiScopeMode()));

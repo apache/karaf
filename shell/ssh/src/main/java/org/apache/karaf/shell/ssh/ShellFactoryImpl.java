@@ -149,6 +149,10 @@ public class ShellFactoryImpl implements Factory<Command> {
                                 },
                                 bundleContext);
                         final CommandSession session = console.getSession();
+                        for (Object o : System.getProperties().keySet()) {
+                            String key = o.toString();
+                            session.put(key, System.getProperty(key));
+                        }
                         session.put("APPLICATION", System.getProperty("karaf.name", "root"));
                         for (Map.Entry<String,String> e : env.getEnv().entrySet()) {
                             session.put(e.getKey(), e.getValue());
