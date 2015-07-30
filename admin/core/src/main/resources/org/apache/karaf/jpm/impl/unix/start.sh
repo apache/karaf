@@ -26,4 +26,4 @@ if [ "x${dir}" != "x" ]; then
     cd ${dir}
 fi
 nohup ${command} &
-echo $! > ${pid.file}
+echo $! > "${pid.file}"
