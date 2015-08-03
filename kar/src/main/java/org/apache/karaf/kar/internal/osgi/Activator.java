@@ -44,6 +44,7 @@ public class Activator extends BaseActivator implements ManagedService {
 
         KarServiceImpl karService = new KarServiceImpl(
                 System.getProperty("karaf.base"),
+                System.getProperty("karaf.data"),
                 featuresService
         );
         karService.setNoAutoRefreshBundles(noAutoRefreshBundles);
