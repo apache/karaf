@@ -66,9 +66,9 @@ public class KarServiceImpl implements KarService {
     
     private boolean noAutoRefreshBundles;
 
-    public KarServiceImpl(String karafBase, FeaturesService featuresService) {
+    public KarServiceImpl(String karafBase, String karafData, FeaturesService featuresService) {
         this.base = new File(karafBase);
-        this.storage = new File(this.base, "data" + File.separator + "kar");
+        this.storage = new File(new File(karafData), "kar");
         this.featuresService = featuresService;
         this.storage.mkdirs();
         if (!storage.isDirectory()) {
