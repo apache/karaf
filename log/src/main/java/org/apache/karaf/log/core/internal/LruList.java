@@ -61,6 +61,7 @@ public class LruList implements PaxAppender {
     public synchronized void clear() {
         start = 0;
         end = 0;
+        full = false;
         elements = new PaxLoggingEvent[maxElements];
     }
 
