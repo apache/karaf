@@ -61,7 +61,7 @@ public class ClientConfig {
             portString = "8101";
         }
         port = Integer.parseInt(portString);
-        level = SimpleLogger.WARN;
+        level = Integer.parseInt(shellCfg.getProperty("logLevel", "1"));
         retryAttempts = 0;
         retryDelay = 2;
         batch = false;
