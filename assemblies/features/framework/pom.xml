@@ -270,7 +270,6 @@
                         <configuration>
                             <excludedArtifactIds>
                                 <excludedArtifactId>slf4j-api</excludedArtifactId>
-                                <excludedArtifactId>mina-core</excludedArtifactId>
                                 <excludedArtifactId>sshd-core</excludedArtifactId>
                                 <excludedArtifactId>jline</excludedArtifactId>
                                 <excludedArtifactId>core</excludedArtifactId>

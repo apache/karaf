@@ -298,40 +298,6 @@
   </supplement>
   <supplement>
     <project>
-      <groupId>org.apache.mina</groupId>
-      <artifactId>mina-core</artifactId>
-      <name>Apache MINA Core API</name>
-      <organization>
-        <name>The Apache Software Foundation</name>
-        <url>http://www.apache.org/</url>
-      </organization>
-      <licenses>
-        <license>
-          <name>The Apache Software License, Version 2.0</name>
-          <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-        </license>
-      </licenses>
-    </project>
-  </supplement>
-  <supplement>
-    <project>
-      <groupId>org.apache.mina</groupId>
-      <artifactId>mina-filter-ssl</artifactId>
-      <name>Apache MINA SSL Filter</name>
-      <organization>
-        <name>The Apache Software Foundation</name>
-        <url>http://www.apache.org/</url>
-      </organization>
-      <licenses>
-        <license>
-          <name>The Apache Software License, Version 2.0</name>
-          <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-        </license>
-      </licenses>
-    </project>
-  </supplement>
-  <supplement>
-    <project>
       <groupId>commons-codec</groupId>
       <artifactId>commons-codec</artifactId>
       <name>Apache Commons Codec</name>
