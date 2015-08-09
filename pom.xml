@@ -229,7 +229,6 @@
         <jsw.version>3.2.3</jsw.version>
         <log4j.version>1.2.17</log4j.version>
         <maven.version>2.0.9</maven.version>
-        <mina.version>2.0.7</mina.version>
         <osgi.version>6.0.0</osgi.version>
         <osgi.compendium.version>5.0.0</osgi.compendium.version>
         <org.json.version>20140107</org.json.version>
@@ -1152,25 +1151,6 @@
                 <groupId>org.apache.maven.artifact</groupId>
                 <artifactId>maven-artifact</artifactId>
                 <version>3.0-alpha-1</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.mina</groupId>
-                <artifactId>mina-core</artifactId>
-                <version>${mina.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.easymock</groupId>
-                        <artifactId>easymock</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.easymock</groupId>
-                        <artifactId>easymockclassextension</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-api</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
