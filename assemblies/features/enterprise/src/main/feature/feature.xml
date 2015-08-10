@@ -73,8 +73,8 @@
         </conditional>
     </feature>
 
-    <feature name="transaction" description="OSGi Transaction Manager" version="1.1.1">
-        <details>JTA implementation provided by Apache Aries Transaction 1.1.1</details>
+    <feature name="transaction" description="OSGi Transaction Manager" version="${aries.transaction.manager.version}">
+        <details>JTA implementation provided by Apache Aries Transaction</details>
         <config name="org.apache.aries.transaction">
             aries.transaction.recoverable = true
             aries.transaction.timeout = 600
@@ -85,7 +85,7 @@
         </config>
         <feature version="[1.1,2)">transaction-api</feature>
         <bundle dependency="true" start-level="30">mvn:org.apache.aries/org.apache.aries.util/${aries.util.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.aries.transaction/org.apache.aries.transaction.manager/1.1.1</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.transaction/org.apache.aries.transaction.manager/${aries.transaction.manager.version}</bundle>
         <conditional>
             <condition>aries-blueprint</condition>
             <bundle start-level="30">mvn:org.apache.aries.transaction/org.apache.aries.transaction.blueprint/${aries.transaction.blueprint.version}</bundle>
@@ -135,7 +135,7 @@
         <details>JPA implementation provided by Apache Aries JPA 2.x. NB: this feature doesn't provide the JPA engine, you have to install one by yourself (OpenJPA for instance)</details>
         <feature version="[1.1,2)">transaction</feature>
         <feature version="[2.0.0,2.2.0)">persistence-api</feature>
-        <bundle dependency="true" start-level="30">mvn:org.hibernate.javax.persistence/hibernate-jpa-2.1-api/1.0.0.Final</bundle>
+        <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.coordinator/${felix.coordinator.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.jpa/org.apache.aries.jpa.api/${aries.jpa.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.jpa/org.apache.aries.jpa.container/${aries.jpa.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.jpa/org.apache.aries.jpa.support/${aries.jpa.version}</bundle>
