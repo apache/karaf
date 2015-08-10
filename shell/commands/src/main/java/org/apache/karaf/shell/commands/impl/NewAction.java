@@ -16,7 +16,6 @@
  */
 package org.apache.karaf.shell.commands.impl;
 
-import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
@@ -31,10 +30,16 @@ import java.util.Map;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.support.converter.DefaultConverter;
 import org.apache.karaf.shell.support.converter.GenericType;
 import org.apache.karaf.shell.support.converter.ReifiedType;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.wiring.BundleCapability;
+import org.osgi.framework.wiring.BundleRevision;
+import org.osgi.framework.wiring.BundleWiring;
 
 /**
  * Instantiate a new object
@@ -43,22 +48,30 @@ import org.apache.karaf.shell.support.converter.ReifiedType;
 @Service
 public class NewAction implements Action {
 
-    @Argument(name = "class", index = 0, multiValued = false, required = true, description = "The object class")
-    Class clazz;
+    @Argument(name = "class", index = 0, multiValued = false, required = true, description = "FQN of the class to load")
+    String clazzName;
 
     @Argument(name = "args", index = 1, multiValued = true, required = false, description = "Constructor arguments")
     List<Object> args;
 
     boolean reorderArguments;
 
-    protected DefaultConverter converter = new DefaultConverter(getClass().getClassLoader());
+    protected DefaultConverter converter;
+    
+    @Reference
+    BundleContext context;
 
     @Override
     public Object execute() throws Exception {
         if (args == null) {
             args = Collections.emptyList();
         }
+        String packageName = getPackageName(clazzName);
+        ClassLoader classLoader = getClassLoaderForPackage(packageName);
+        converter = new DefaultConverter(classLoader);
+        Class<?> clazz = (Class<?>)converter.convert(clazzName, Class.class);
         // Handle arrays
+        /*
         if (clazz.isArray()) {
             Object obj = Array.newInstance(clazz.getComponentType(), args.size());
             for (int i = 0; i < args.size(); i++) {
@@ -66,6 +79,7 @@ public class NewAction implements Action {
             }
             return obj;
         }
+        */
         // Map of matching constructors
         Map<Constructor, List<Object>> matches = findMatchingConstructors(clazz, args, Arrays.asList(new ReifiedType[args.size()]));
         if (matches.size() == 1) {
@@ -82,12 +96,44 @@ public class NewAction implements Action {
         }
     }
 
+    private String getPackageName(String name) {
+        int nameSeperator = name.lastIndexOf(".");
+        if (nameSeperator <= 0) {
+            return null;
+        }
+        return name.substring(0, nameSeperator - 1);
+    }
+
+    /**
+     * Get class loader offering a named package. This only works if we do not care
+     * which package we get in case of several package versions
+     *  
+     * @param reqPackageName
+     * @return
+     */
+    private ClassLoader getClassLoaderForPackage(String reqPackageName) {
+        Bundle[] bundles = context.getBundles();
+        for (Bundle bundle : bundles) {
+            BundleRevision rev = bundle.adapt(BundleRevision.class);
+            if (rev != null) {
+                List<BundleCapability> caps = rev.getDeclaredCapabilities(BundleRevision.PACKAGE_NAMESPACE);
+                for (BundleCapability cap : caps) {
+                    Map<String, Object> attr = cap.getAttributes();
+                    String packageName = (String)attr.get(BundleRevision.PACKAGE_NAMESPACE);
+                    if (packageName.equals(reqPackageName)) {
+                        BundleWiring wiring = bundle.adapt(BundleWiring.class);
+                        return wiring.getClassLoader();
+                    }
+                }
+            }
+        }
+        return null;
+    }
 
     //
     // Code below comes from Aries blueprint implementation.  Given this code is not available
     // from a public API it has been copied here.
     //
-
     private Object newInstance(Constructor constructor, Object... args) throws Exception {
         return constructor.newInstance(args);
     }
