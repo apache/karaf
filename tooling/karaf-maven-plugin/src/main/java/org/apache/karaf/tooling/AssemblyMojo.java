@@ -18,10 +18,6 @@
  */
 package org.apache.karaf.tooling;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.karaf.profile.assembly.Builder;
 import org.apache.karaf.tooling.utils.IoUtils;
 import org.apache.karaf.tooling.utils.MavenUtil;
@@ -33,6 +29,12 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
+
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.attribute.PosixFilePermissions;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Installs kar dependencies into a server-under-construction in target/assembly
@@ -298,6 +300,20 @@ public class AssemblyMojo extends MojoSupport {
         // Include project classes content
         if (includeBuildOutputDirectory)
             IoUtils.copyDirectory(new File(project.getBuild().getOutputDirectory()), workDirectory);
+
+        // Chmod the bin/* scripts
+        File[] files = new File(workDirectory, "bin").listFiles();
+        if( files!=null ) {
+            for (File file : files) {
+                if( !file.getName().endsWith(".bat") ) {
+                    try {
+                        Files.setPosixFilePermissions(file.toPath(), PosixFilePermissions.fromString("rwxr-xr-x"));
+                    } catch (Throwable ignore) {
+                        // we tried our best, perhaps the OS does not support posix file perms.
+                    }
+                }
+            }
+        }
     }
 
     private String artifactToMvn(Artifact artifact) throws MojoExecutionException {
