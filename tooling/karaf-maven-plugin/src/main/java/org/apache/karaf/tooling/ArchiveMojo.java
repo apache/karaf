@@ -61,6 +61,12 @@ public class ArchiveMojo extends MojoSupport {
     private File targetServerDirectory;
 
     /**
+     * Path prefix of files in the created archive.
+     */
+    @Parameter(defaultValue="${project.artifactId}-${project.version}")
+    private String pathPrefix;
+
+    /**
      * The target file to set as the project's artifact.
      */
     @Parameter(defaultValue="${project.artifactId}-${project.version}")
@@ -121,6 +127,11 @@ public class ArchiveMojo extends MojoSupport {
            serverName = artifact.getArtifactId() + "-" + artifact.getVersion();
         }
         dest = new File(dest, serverName + "." + artifact.getType());
+        
+        String prefix = pathPrefix.trim();
+        if( prefix.length() > 0 && !prefix.endsWith("/") ) {
+            prefix += "/";
+        }
 
         if ("tar.gz".equals(artifact.getType())) {
             try (
@@ -134,7 +145,7 @@ public class ArchiveMojo extends MojoSupport {
                 tOut.setLongFileMode(TarArchiveOutputStream.LONGFILE_POSIX);
                 tOut.setBigNumberMode(TarArchiveOutputStream.BIGNUMBER_POSIX);
                 for (Path child : children) {
-                    addFileToTarGz(tOut, child, serverName + "/");
+                    addFileToTarGz(tOut, child, prefix);
                 }
             }
         } else if ("zip".equals(artifact.getType())) {
@@ -146,7 +157,7 @@ public class ArchiveMojo extends MojoSupport {
 
             ) {
                 for (Path child : children) {
-                    addFileToZip(tOut, child, serverName + "/");
+                    addFileToZip(tOut, child, prefix);
                 }
             }
         } else {
