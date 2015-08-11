@@ -61,7 +61,6 @@ public class EnterpriseFeaturesTest extends KarafTestSupport {
     }
 
     @Test
-    @RunIfNotOnJdk8
     public void installOpenJpa222Feature() throws Exception {
         installAssertAndUninstallFeature("openjpa", "2.2.2");
     }
