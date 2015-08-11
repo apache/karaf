@@ -31,33 +31,51 @@ import java.util.Map;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.support.converter.DefaultConverter;
 import org.apache.karaf.shell.support.converter.GenericType;
 import org.apache.karaf.shell.support.converter.ReifiedType;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.wiring.BundleCapability;
+import org.osgi.framework.wiring.BundleRevision;
+import org.osgi.framework.wiring.BundleWiring;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Instantiate a new object
  */
 @Command(scope = "shell", name = "new", description = "Creates a new java object.")
 @Service
+@SuppressWarnings("rawtypes")
 public class NewAction implements Action {
-
-    @Argument(name = "class", index = 0, multiValued = false, required = true, description = "The object class")
-    Class clazz;
+    private static final Logger LOG = LoggerFactory.getLogger(NewAction.class);
+    @Argument(name = "class", index = 0, multiValued = false, required = true, description = "FQN of the class to load")
+    String clazzName;
 
     @Argument(name = "args", index = 1, multiValued = true, required = false, description = "Constructor arguments")
     List<Object> args;
 
     boolean reorderArguments;
 
-    protected DefaultConverter converter = new DefaultConverter(getClass().getClassLoader());
+    protected DefaultConverter converter;
+    
+    @Reference
+    BundleContext context;
 
     @Override
     public Object execute() throws Exception {
         if (args == null) {
             args = Collections.emptyList();
         }
+        String packageName = getPackageName(clazzName);
+        Bundle bundle = getBundleOfferingPackage(packageName);
+        LOG.info("Using bundle {} classloader to load {}.", bundle.getSymbolicName(), clazzName);
+        ClassLoader classLoader = getClassLoader(bundle);
+        converter = new DefaultConverter(classLoader);
+        Class<?> clazz = (Class<?>)converter.convert(clazzName, Class.class);
         // Handle arrays
         if (clazz.isArray()) {
             Object obj = Array.newInstance(clazz.getComponentType(), args.size());
@@ -66,6 +84,7 @@ public class NewAction implements Action {
             }
             return obj;
         }
+
         // Map of matching constructors
         Map<Constructor, List<Object>> matches = findMatchingConstructors(clazz, args, Arrays.asList(new ReifiedType[args.size()]));
         if (matches.size() == 1) {
@@ -82,12 +101,48 @@ public class NewAction implements Action {
         }
     }
 
+    private String getPackageName(String name) {
+        int nameSeperator = name.lastIndexOf(".");
+        if (nameSeperator <= 0) {
+            return null;
+        }
+        return name.substring(0, nameSeperator);
+    }
+
+    /**
+     * Get class loader offering a named package. This only works if we do not care
+     * which package we get in case of several package versions
+     *  
+     * @param reqPackageName
+     * @return
+     */
+    private Bundle getBundleOfferingPackage(String reqPackageName) {
+        Bundle[] bundles = context.getBundles();
+        for (Bundle bundle : bundles) {
+            BundleRevision rev = bundle.adapt(BundleRevision.class);
+            if (rev != null) {
+                List<BundleCapability> caps = rev.getDeclaredCapabilities(BundleRevision.PACKAGE_NAMESPACE);
+                for (BundleCapability cap : caps) {
+                    Map<String, Object> attr = cap.getAttributes();
+                    String packageName = (String)attr.get(BundleRevision.PACKAGE_NAMESPACE);
+                    if (packageName.equals(reqPackageName)) {
+                        return bundle;
+                    }
+                }
+            }
+        }
+        return context.getBundle(0);
+    }
+
+    private ClassLoader getClassLoader(Bundle bundle) {
+        BundleWiring wiring = bundle.adapt(BundleWiring.class);
+        return wiring.getClassLoader();
+    }
 
     //
     // Code below comes from Aries blueprint implementation.  Given this code is not available
     // from a public API it has been copied here.
     //
-
     private Object newInstance(Constructor constructor, Object... args) throws Exception {
         return constructor.newInstance(args);
     }
@@ -200,6 +255,7 @@ public class NewAction implements Action {
         return converter.convert(obj, type);
     }
 
+    @SuppressWarnings("unchecked")
     public static boolean isAssignable(Object source, ReifiedType target) {
         return source == null
                 || (target.size() == 0
