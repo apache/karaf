@@ -117,6 +117,7 @@
     <!-- Spring 3.2.x support -->
 
     <feature name="spring" description="Spring 3.2.x support" version="${spring32.version}">
+        <bundle dependency='true'>mvn:javax.annotation/javax.annotation-api/1.2</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.aopalliance/${aopalliance.bundle.version}</bundle>
         <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-core/${spring32.version}</bundle>
         <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-expression/${spring32.version}</bundle>
