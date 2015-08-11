@@ -406,7 +406,6 @@
     </feature>
 
     <feature name="spring-web-portlet" description="Spring 4.2.x Web Portlet support" version="${spring42.version}">
-        <feature prerequisite="true">wrap</feature>
         <feature version="[${spring42.version},4.3)">spring-web</feature>
         <bundle dependency="true" start-level="30">wrap:mvn:javax.portlet/portlet-api/${portlet-api.version}$Export-Package=javax.portlet.*;version=2.0</bundle>
         <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-webmvc-portlet/${spring42.version}</bundle>
