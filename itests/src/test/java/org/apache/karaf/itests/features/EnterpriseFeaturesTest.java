@@ -72,6 +72,11 @@ public class EnterpriseFeaturesTest extends KarafTestSupport {
     }
 
     @Test
+    public void installOpenJpa240Feature() throws Exception {
+        installAssertAndUninstallFeature("openjpa", "2.4.0");
+    }
+
+    @Test
     public void installHibernate332GAFeature() throws Exception {
         installAssertAndUninstallFeature("hibernate", "3.3.2.GA");
     }
