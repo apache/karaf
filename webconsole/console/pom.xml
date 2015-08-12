@@ -126,7 +126,7 @@
                             http://felix.apache.org/site/apache-felix-web-console.html
                         </Bundle-DocURL>
                         <Bundle-Activator>
-                            org.apache.felix.webconsole.internal.KarafOsgiManagerActivator
+                            org.apache.felix.webconsole.internal.servlet.KarafOsgiManagerActivator
                         </Bundle-Activator>
                         <Export-Package>
                             org.apache.felix.webconsole;version="${felix.webconsole.api.version}",

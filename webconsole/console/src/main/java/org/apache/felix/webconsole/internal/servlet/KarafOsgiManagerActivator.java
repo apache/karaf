@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.webconsole.internal;
+package org.apache.felix.webconsole.internal.servlet;
 
 
 import java.util.Hashtable;

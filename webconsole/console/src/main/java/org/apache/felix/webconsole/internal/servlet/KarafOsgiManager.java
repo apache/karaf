@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.webconsole.internal;
+package org.apache.felix.webconsole.internal.servlet;
 
 import java.io.IOException;
 import java.security.PrivilegedActionException;
@@ -26,6 +26,8 @@ import javax.security.auth.Subject;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.felix.webconsole.internal.servlet.OsgiManager;
 import org.apache.karaf.util.jaas.JaasHelper;
@@ -53,7 +55,7 @@ public class KarafOsgiManager extends OsgiManager {
             try {
                 JaasHelper.doAs((Subject) obj, new PrivilegedExceptionAction<Object>() {
                     public Object run() throws Exception {
-                        doService(req, res);
+                        doService((HttpServletRequest) req, (HttpServletResponse) res);
                         return null;
                     }
                 });
@@ -72,7 +74,7 @@ public class KarafOsgiManager extends OsgiManager {
         }
     }
 
-    protected void doService(final ServletRequest req, final ServletResponse res) throws ServletException, IOException {
+    protected void doService(final HttpServletRequest req, final HttpServletResponse res) throws ServletException, IOException {
         super.service(req, res);
     }
 }

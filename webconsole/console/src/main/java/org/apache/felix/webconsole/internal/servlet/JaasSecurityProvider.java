@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.felix.webconsole.internal;
+package org.apache.felix.webconsole.internal.servlet;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -37,7 +37,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.felix.webconsole.WebConsoleSecurityProvider2;
 import org.apache.felix.webconsole.internal.servlet.Base64;
-import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
