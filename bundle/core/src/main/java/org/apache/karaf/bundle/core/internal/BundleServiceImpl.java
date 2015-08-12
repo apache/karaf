@@ -157,7 +157,7 @@ public class BundleServiceImpl implements BundleService {
         if (context == null || context.trim().isEmpty()) {
             return bundleContext;
         } else {
-            List<Bundle> bundles = doSelectBundles(bundleContext, Collections.singletonList(context), false);
+            List<Bundle> bundles = new BundleSelectorImpl(bundleContext).selectBundles(Collections.singletonList(context), false);
             if (bundles.isEmpty()) {
                 throw new IllegalArgumentException("Context " + context + " does not evaluate to a bundle");
             } else if (bundles.size() > 1) {
