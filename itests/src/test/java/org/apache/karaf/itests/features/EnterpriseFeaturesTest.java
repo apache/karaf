@@ -31,23 +31,8 @@ public class EnterpriseFeaturesTest extends KarafTestSupport {
     public RunIfRule rule = new RunIfRule();
 
     @Test
-    public void installTransaction100Feature() throws Exception {
-        installAssertAndUninstallFeature("transaction", "1.0.0");
-    }
-
-    @Test
-    public void installTransaction101Feature() throws Exception {
-        installAssertAndUninstallFeature("transaction", "1.0.1");
-    }
-
-    @Test
     public void installTransaction130Feature() throws Exception {
         installAssertAndUninstallFeature("transaction", "1.3.0");
-    }
-
-    @Test
-    public void installConnector222Feature() throws Exception {
-        installAssertAndUninstallFeature("connector", "2.2.2");
     }
 
     @Test
