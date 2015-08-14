@@ -238,7 +238,7 @@
         <pax.logging.version>1.8.3</pax.logging.version>
         <pax.base.version>1.5.0</pax.base.version>
         <pax.url.version>2.4.1</pax.url.version>
-        <pax.web.version>4.1.4</pax.web.version>
+        <pax.web.version>4.2.0</pax.web.version>
         <pax.tinybundle.version>2.1.0</pax.tinybundle.version>
         <portlet-api.version>2.0</portlet-api.version>
         <slf4j.version>1.7.12</slf4j.version>
