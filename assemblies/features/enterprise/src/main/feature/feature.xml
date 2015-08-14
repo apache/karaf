@@ -140,7 +140,7 @@
     <feature name="openjpa" description="Apache OpenJPA 2.4.x persistence engine support" version="2.4.0">
         <details>Enable Apache OpenJPA as persistence engine.</details>
         <feature version="[1.1,1.2)">transaction-api</feature>
-        <feature version="[2.0.0,2.2.0)">persistence-api</feature>
+        <feature version="[2.0.0,2.1.0)">persistence-api</feature>
         <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-annotation_1.0_spec/1.1.1</bundle>
         <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-servlet_2.5_spec/1.2</bundle>
         <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-el_1.0_spec/1.0.1</bundle>
