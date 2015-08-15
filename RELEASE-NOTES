@@ -15,6 +15,65 @@
  * limitations under the License.
  */
 
+                    Apache Karaf 4.0.1
+                    ==================
+
+ This is an update patch for Apache Karaf 4.0.x, containing many bug fixes, dependency updates, and improvements. New feature highlights include: Providing Spring 4.2.0.RELEASE, OpenJPA 2.4.0, and JTA 1.2 features. Important dependency upgrades include: Spring 4.1.7.RELEASE, Spring 3.2.14.RELEASE, transaction.blueprint 1.1.1, and Pax-Web 4.2.0. It is recommended that users update their deployment after reviewing the changelog below.
+
+ ChangeLog:
+ ----------
+
+** Bug
+    * [KARAF-969] - Feature installer should not accept different features with equal names
+    * [KARAF-3362] - Version for Jetty in standard features is wrong.
+    * [KARAF-3758] - Uninstalling activemq-blueprint may cause the shell to be refreshed
+    * [KARAF-3805] - Distribution contains absolute path instead of mvn URL
+    * [KARAF-3811] - Exception thrown when including the feature "feature" in Maven karaf:assembly goal
+    * [KARAF-3813] - InvalidPathException thrown on karaf:assembly Maven goal
+    * [KARAF-3819] - bundle:list command is not able to be executed from client script
+    * [KARAF-3821] - dev:dump-create doesn't include feature.txt anymore
+    * [KARAF-3830] - karaf-services-maven-plugin ignores certain files
+    * [KARAF-3833] - Project org.apache.karaf.jpa:hibernate does not have name set in pom.xml
+    * [KARAF-3837] - The installation of the activemq feature is not stable wrt to the resolver
+    * [KARAF-3843] - Get rid of blueprint dependency in the web console
+    * [KARAF-3846] - Version number not correct for the subsystems feature
+    * [KARAF-3850] - Better support for extension fragments
+    * [KARAF-3886] - should escape specify characters in ROLE names
+    * [KARAF-3888] - Karaf refreshes a lot of unrelated bundles during feature installation
+    * [KARAF-3894] - Still class cast exception for LazyLocalResourceImpl => LocalResourceImpl
+    * [KARAF-3896] - KAR Deployer not using karaf.data property, hardcoded to "data"
+    * [KARAF-3899] - PID file for child instances not getting written when dir has spaces
+    * [KARAF-3906] - NPE when doing log:clear and log:display and log full=true
+    * [KARAF-3908] - shell:new does not work for most classes
+    * [KARAF-3910] - Client.sh references nonexistant mina-core jar
+    * [KARAF-3911] - bin/client and ssh doesn't work in interactive mode (can't type only one character)
+    * [KARAF-3917] - bundle:list does not work from gogo webconsole.
+    * [KARAF-3926] - Several transaction manager versions are installed
+    * [KARAF-3929] - Syncope LoginModule throws a StringIndexOutOfBoundsException if the user has no roles
+    * [KARAF-3930] - When starting the gogo shell in the webconsole the user is not fully authenticated
+    * [KARAF-3931] - Typed characters in webconsole do not show
+
+** Dependency upgrade
+    * [KARAF-3914] - Upgrade to Spring 4.1.7.RELEASE
+    * [KARAF-3915] - Upgrade to Spring 3.2.14.RELEASE
+    * [KARAF-3924] - Upgrade to transaction.blueprint 1.1.1
+    * [KARAF-3932] - Upgrade to Pax-Web 4.2.0
+
+** Improvement
+    * [KARAF-2862] - Reenable pax-cdi integration tests
+    * [KARAF-3823] - introduce karaf.secured.command.compulsory.roles system property
+    * [KARAF-3860] - fix [KARAF-3373] Log lower level root cause exception in LDAPLoginModule.doLogin()
+    * [KARAF-3891] - Add JTA 1.2 features
+    * [KARAF-3912] - Make default client log level configurable
+    * [KARAF-3919] - Upgrade to JPA 2.1.0
+    * [KARAF-3934] - Update Apache Directory + make use of random port generation
+
+** New Feature
+    * [KARAF-3913] - Provide Spring 4.2.0.RELEASE feature
+    * [KARAF-3920] - Provide OpenJPA 2.4.0 feature
+    * [KARAF-3927] - karaf-maven-plugin:assembly goal should chmod bin shell scripts a+x
+    * [KARAF-3928] - karaf-maven-plugin:archive goal should support a pathPrefix config setting to control the prefix added to each entry in the archives that are produced.
+
                     Apache Karaf 4.0.0
                     ==================
 
