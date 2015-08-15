@@ -17,6 +17,7 @@ package org.apache.karaf.jaas.modules.ldap;
 
 import org.apache.directory.server.core.integ.AbstractLdapTestUnit;
 import org.apache.directory.server.core.integ.FrameworkRunner;
+import org.apache.commons.io.IOUtils;
 import org.apache.directory.server.annotations.CreateLdapServer;
 import org.apache.directory.server.annotations.CreateTransport;
 import org.apache.directory.server.core.annotations.ApplyLdifFiles;
@@ -26,6 +27,7 @@ import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -34,6 +36,8 @@ import javax.security.auth.callback.*;
 import javax.security.auth.login.LoginException;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.ArrayList;
@@ -46,14 +50,40 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 @RunWith(FrameworkRunner.class)
-@CreateLdapServer(transports = {@CreateTransport(protocol = "LDAP", port = 9999)})
+@CreateLdapServer(transports = {@CreateTransport(protocol = "LDAP")})
 @CreateDS(name = "LdapLoginModuleTest-class",
         partitions = {@CreatePartition(name = "example", suffix = "dc=example,dc=com")})
 @ApplyLdifFiles(
         "org/apache/karaf/jaas/modules/ldap/example.com.ldif"
 )
 public class LdapLoginModuleTest extends AbstractLdapTestUnit {
+    
+    private static boolean portUpdated;
 
+    @Before
+    public void updatePort() throws Exception {
+        if (!portUpdated) {
+            String basedir = System.getProperty("basedir");
+            if (basedir == null) {
+                basedir = new File(".").getCanonicalPath();
+            }
+
+            // Read in ldap.properties and substitute in the correct port
+            File f = new File(basedir + "/src/test/resources/org/apache/karaf/jaas/modules/ldap/ldap.properties");
+
+            FileInputStream inputStream = new FileInputStream(f);
+            String content = IOUtils.toString(inputStream, "UTF-8");
+            inputStream.close();
+            content = content.replaceAll("portno", "" + super.getLdapServer().getPort());
+
+            File f2 = new File(basedir + "/target/test-classes/org/apache/karaf/jaas/modules/ldap/ldap.properties");
+            FileOutputStream outputStream = new FileOutputStream(f2);
+            IOUtils.write(content, outputStream, "UTF-8");
+            outputStream.close();
+            portUpdated = true;
+        }
+    }
+            
     @After
     public void tearDown() {
         LDAPCache.clear();
@@ -102,7 +132,12 @@ public class LdapLoginModuleTest extends AbstractLdapTestUnit {
     }
 
     protected Properties ldapLoginModuleOptions() throws IOException {
-        return new Properties(new File("src/test/resources/org/apache/karaf/jaas/modules/ldap/ldap.properties"));
+        String basedir = System.getProperty("basedir");
+        if (basedir == null) {
+            basedir = new File(".").getCanonicalPath();
+        }
+        File file = new File(basedir + "/target/test-classes/org/apache/karaf/jaas/modules/ldap/ldap.properties");
+        return new Properties(file);
     }
 
     @Test

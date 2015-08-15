@@ -16,7 +16,11 @@
 package org.apache.karaf.jaas.modules.ldap;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+
+import org.apache.commons.io.IOUtils;
 import org.apache.directory.api.ldap.model.constants.SchemaConstants;
 import org.apache.directory.api.ldap.model.message.ModifyRequest;
 import org.apache.directory.api.ldap.model.message.ModifyRequestImpl;
@@ -35,7 +39,7 @@ import org.junit.Before;
 import org.junit.runner.RunWith;
 
 @RunWith ( FrameworkRunner.class )
-@CreateLdapServer(transports = {@CreateTransport(protocol = "LDAP", port=9999)})
+@CreateLdapServer(transports = {@CreateTransport(protocol = "LDAP")})
 @CreateDS(name = "LdapSpecialCharsInPasswordTest-class",
  partitions = { @CreatePartition(name = "example", suffix = "dc=example,dc=com") })
 @ApplyLdifFiles(
@@ -43,15 +47,46 @@ import org.junit.runner.RunWith;
 )
 public class LdapSpecialCharsInPasswordTest extends LdapLoginModuleTest {
     
+    private static boolean portUpdated;
     private static final String NEW_CONNECTION_PASSWORD = "#a&b{>c=<12~d%";
+    
+    @Before
+    @Override
+    public void updatePort() throws Exception {
+        if (!portUpdated) {
+            String basedir = System.getProperty("basedir");
+            if (basedir == null) {
+                basedir = new File(".").getCanonicalPath();
+            }
+
+            // Read in ldap.properties and substitute in the correct port
+            File f = new File(basedir + "/src/test/resources/org/apache/karaf/jaas/modules/ldap/ldap_special_char_in_password.properties");
+
+            FileInputStream inputStream = new FileInputStream(f);
+            String content = IOUtils.toString(inputStream, "UTF-8");
+            inputStream.close();
+            content = content.replaceAll("portno", "" + super.getLdapServer().getPort());
+
+            File f2 = new File(basedir + "/target/test-classes/org/apache/karaf/jaas/modules/ldap/ldap_special_char_in_password.properties");
+            FileOutputStream outputStream = new FileOutputStream(f2);
+            IOUtils.write(content, outputStream, "UTF-8");
+            outputStream.close();
+            portUpdated = true;
+        }
+    }
 
     protected Properties ldapLoginModuleOptions() throws IOException {
-        return new Properties(new File("src/test/resources/org/apache/karaf/jaas/modules/ldap/ldap_special_char_in_password.properties"));
+        String basedir = System.getProperty("basedir");
+        if (basedir == null) {
+            basedir = new File(".").getCanonicalPath();
+        }
+        File file = new File(basedir + "/target/test-classes/org/apache/karaf/jaas/modules/ldap/ldap_special_char_in_password.properties");
+        return new Properties(file);
     }
     
     @Before
     public void changeAdminPassword() throws Exception {
-        LdapConnection connection = new LdapNetworkConnection( "localhost", 9999 );
+        LdapConnection connection = new LdapNetworkConnection( "localhost", super.getLdapServer().getPort() );
         connection.bind( "uid=admin,ou=system", "secret");
         Dn adminDn = new Dn( "uid=admin,ou=system" );
         ModifyRequest modReq = new ModifyRequestImpl();
@@ -61,7 +96,7 @@ public class LdapSpecialCharsInPasswordTest extends LdapLoginModuleTest {
         connection.close();
         
         // check that we actually changed the admin connection password
-        connection = new LdapNetworkConnection( "localhost", 9999 );
+        connection = new LdapNetworkConnection( "localhost", super.getLdapServer().getPort() );
         connection.bind( "uid=admin,ou=system", NEW_CONNECTION_PASSWORD);
         connection.close();
     }

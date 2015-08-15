@@ -19,6 +19,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.Principal;
 
@@ -29,6 +31,7 @@ import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.directory.api.ldap.model.constants.SchemaConstants;
 import org.apache.directory.api.ldap.model.message.ModifyRequest;
 import org.apache.directory.api.ldap.model.message.ModifyRequestImpl;
@@ -50,13 +53,40 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith ( FrameworkRunner.class )
-@CreateLdapServer(transports = {@CreateTransport(protocol = "LDAP", port=9999)})
+@CreateLdapServer(transports = {@CreateTransport(protocol = "LDAP")})
 @CreateDS(name = "LdapCaseInsensitiveDNTest-class",
  partitions = { @CreatePartition(name = "example", suffix = "dc=example,dc=com") })
 @ApplyLdifFiles(
    "org/apache/karaf/jaas/modules/ldap/example.com.ldif"
 )
 public class LdapCaseInsensitiveDNTest extends LdapLoginModuleTest {
+    
+    private static boolean portUpdated;
+    
+    @Before
+    @Override
+    public void updatePort() throws Exception {
+        if (!portUpdated) {
+            String basedir = System.getProperty("basedir");
+            if (basedir == null) {
+                basedir = new File(".").getCanonicalPath();
+            }
+
+            // Read in ldap.properties and substitute in the correct port
+            File f = new File(basedir + "/src/test/resources/org/apache/karaf/jaas/modules/ldap/ldapCaseInsensitiveDN.properties");
+
+            FileInputStream inputStream = new FileInputStream(f);
+            String content = IOUtils.toString(inputStream, "UTF-8");
+            inputStream.close();
+            content = content.replaceAll("portno", "" + super.getLdapServer().getPort());
+
+            File f2 = new File(basedir + "/target/test-classes/org/apache/karaf/jaas/modules/ldap/ldapCaseInsensitiveDN.properties");
+            FileOutputStream outputStream = new FileOutputStream(f2);
+            IOUtils.write(content, outputStream, "UTF-8");
+            outputStream.close();
+            portUpdated = true;
+        }
+    }
     
     @Test
     public void testCaseInsensitiveDN() throws Exception {
@@ -101,7 +131,12 @@ public class LdapCaseInsensitiveDNTest extends LdapLoginModuleTest {
     }
 
     protected Properties ldapLoginModuleOptions() throws IOException {
-        return new Properties(new File("src/test/resources/org/apache/karaf/jaas/modules/ldap/ldapCaseInsensitiveDN.properties"));
+        String basedir = System.getProperty("basedir");
+        if (basedir == null) {
+            basedir = new File(".").getCanonicalPath();
+        }
+        File file = new File(basedir + "/target/test-classes/org/apache/karaf/jaas/modules/ldap/ldapCaseInsensitiveDN.properties");
+        return new Properties(file);
     }
 }
             
