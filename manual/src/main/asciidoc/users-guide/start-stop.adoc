@@ -170,7 +170,7 @@ On Unix:
 ----
 # Content of bin/setenv
 export JAVA_MIN_MEM=256M
-exoprt JAVA_MAX_MEM=1024M
+export JAVA_MAX_MEM=1024M
 ----
 
 On Windows:
