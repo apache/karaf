@@ -74,7 +74,7 @@ public class LocalConsoleManager {
                                       StreamWrapUtil.reWrapIn(terminal, System.in),
                                       StreamWrapUtil.reWrap(System.out), 
                                       StreamWrapUtil.reWrap(System.err),
-                                      new JLineTerminal(terminal),
+                                      new JLineTerminal(terminal, System.getenv("TERM")),
                                       encoding, 
                                       callback);
                 registration = bundleContext.registerService(Session.class, session, null);

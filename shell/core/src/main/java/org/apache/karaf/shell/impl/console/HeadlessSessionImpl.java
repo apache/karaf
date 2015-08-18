@@ -175,6 +175,11 @@ public class HeadlessSessionImpl implements Session {
         }
 
         @Override
+        public String getType() {
+            return terminal.getType();
+        }
+
+        @Override
         public int getWidth() {
             return terminal.getWidth();
         }

@@ -34,14 +34,21 @@ import org.apache.karaf.shell.support.terminal.SignalSupport;
 public class JLineTerminal extends SignalSupport implements Terminal, Closeable {
 
     private final jline.Terminal terminal;
+    private final String type;
 
-    public JLineTerminal(jline.Terminal terminal) {
+    public JLineTerminal(jline.Terminal terminal, String type) {
         this.terminal = terminal;
+        this.type = type;
         registerSignalHandler();
     }
 
     public jline.Terminal getTerminal() {
         return terminal;
+    }
+
+    @Override
+    public String getType() {
+        return type;
     }
 
     @Override

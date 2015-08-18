@@ -21,11 +21,13 @@ package org.apache.karaf.shell.ssh;
 import org.apache.karaf.shell.api.console.Signal;
 import org.apache.karaf.shell.api.console.Terminal;
 import org.apache.karaf.shell.support.terminal.SignalSupport;
+import org.apache.sshd.common.PtyMode;
 import org.apache.sshd.server.Environment;
 
 public class SshTerminal extends SignalSupport implements Terminal {
 
     private Environment environment;
+    private boolean echo;
 
     public SshTerminal(Environment environment) {
         this.environment = environment;
@@ -35,6 +37,12 @@ public class SshTerminal extends SignalSupport implements Terminal {
                 SshTerminal.this.signal(Signal.WINCH);
             }
         }, org.apache.sshd.server.Signal.WINCH);
+        this.echo = environment.getPtyModes().containsKey(PtyMode.ECHO);
+    }
+
+    @Override
+    public String getType() {
+        return environment.getEnv().get(Environment.ENV_TERM);
     }
 
     @Override
@@ -66,12 +74,12 @@ public class SshTerminal extends SignalSupport implements Terminal {
 
     @Override
     public boolean isEchoEnabled() {
-        return true;
+        return echo;
     }
 
     @Override
     public void setEchoEnabled(boolean enabled) {
-        // TODO: how to disable echo over ssh ?
+        echo = enabled;
     }
 
 }

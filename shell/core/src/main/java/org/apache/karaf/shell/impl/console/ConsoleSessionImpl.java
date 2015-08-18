@@ -111,11 +111,11 @@ public class ConsoleSessionImpl implements Session {
         this.closeCallback = closeCallback;
 
         // Terminal
-        terminal = term == null ? new JLineTerminal(new UnsupportedTerminal()) : term;
-
+        terminal = term == null ? new JLineTerminal(new UnsupportedTerminal(), "dumb") : term;
 
         // Console reader
         try {
+            System.setProperty("jline.sigcont", "true");
             reader = new ConsoleReader(null,
                     in != null ? console : null,
                     out,
@@ -173,6 +173,7 @@ public class ConsoleSessionImpl implements Session {
         session.put(Session.SUBSHELL, "");
         session.put(Session.COMPLETION_MODE, loadCompletionMode());
         session.put("USER", ShellUtil.getCurrentUserName());
+        session.put("TERM", terminal.getType());
         session.put("APPLICATION", System.getProperty("karaf.name", "root"));
         session.put("#LINES", new Function() {
             public Object execute(CommandSession session, List<Object> arguments) throws Exception {

@@ -140,7 +140,8 @@ public class Main {
 
         final TerminalFactory terminalFactory = new TerminalFactory();
         try {
-            final Terminal terminal = new JLineTerminal(terminalFactory.getTerminal());
+            String term = System.getenv("TERM");
+            final Terminal terminal = new JLineTerminal(terminalFactory.getTerminal(), term);
             Session session = createSession(sessionFactory, command.length() > 0 ? null : in, out, err, terminal);
             session.put("USER", user);
             session.put("APPLICATION", application);

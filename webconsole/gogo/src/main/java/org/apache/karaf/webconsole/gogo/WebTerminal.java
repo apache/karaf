@@ -31,6 +31,11 @@ public class WebTerminal extends SignalSupport implements Terminal {
     }
 
     @Override
+    public String getType() {
+        return "ansi";
+    }
+
+    @Override
     public boolean isAnsiSupported() {
         return true;
     }

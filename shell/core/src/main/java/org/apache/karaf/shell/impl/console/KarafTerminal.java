@@ -18,16 +18,37 @@
  */
 package org.apache.karaf.shell.impl.console;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import jline.Terminal2;
 import jline.TerminalSupport;
+import jline.internal.InfoCmp;
 import org.apache.karaf.shell.api.console.Terminal;
 
-public class KarafTerminal extends TerminalSupport {
+public class KarafTerminal extends TerminalSupport implements Terminal2 {
 
     private final Terminal terminal;
+    private Set<String> bools = new HashSet<>();
+    private Map<String, Integer> ints = new HashMap<>();
+    private Map<String, String> strings = new HashMap<>();
 
     public KarafTerminal(Terminal terminal) {
         super(true);
         this.terminal = terminal;
+
+        String type = terminal.getType();
+        if (type == null && terminal.isAnsiSupported()) {
+            type = "ansi";
+        }
+        try {
+            String caps = InfoCmp.getInfoCmp(type);
+            InfoCmp.parseInfoCmp(caps, bools, ints, strings);
+        } catch (Exception e) {
+            // TODO
+        }
     }
 
     @Override
@@ -47,11 +68,25 @@ public class KarafTerminal extends TerminalSupport {
 
     @Override
     public synchronized boolean isEchoEnabled() {
-        return terminal.isEchoEnabled();
+        return false;
     }
 
     @Override
     public synchronized void setEchoEnabled(boolean enabled) {
-        terminal.setEchoEnabled(enabled);
+    }
+
+    @Override
+    public boolean getBooleanCapability(String capability) {
+        return bools.contains(capability);
+    }
+
+    @Override
+    public Integer getNumericCapability(String capability) {
+        return ints.get(capability);
+    }
+
+    @Override
+    public String getStringCapability(String capability) {
+        return strings.get(capability);
     }
 }

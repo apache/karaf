@@ -28,6 +28,7 @@ import jline.NoInterruptUnixTerminal;
 import jline.Terminal;
 import jline.TerminalFactory;
 
+import jline.UnixTerminal;
 import org.apache.sshd.ClientChannel;
 import org.apache.sshd.ClientSession;
 import org.apache.sshd.SshClient;
@@ -123,6 +124,9 @@ public class Main {
             } else {
                 TerminalFactory.registerFlavor(TerminalFactory.Flavor.UNIX, NoInterruptUnixTerminal.class);
                 terminal = TerminalFactory.create();
+                if (terminal instanceof UnixTerminal) {
+                    ((UnixTerminal) terminal).disableLitteralNextCharacter();
+                }
                 channel = session.createChannel("shell");
                 ConsoleInputStream in = new ConsoleInputStream(terminal.wrapInIfNeeded(System.in));
                 new Thread(in).start();

@@ -26,6 +26,11 @@ import java.util.EnumSet;
 public interface Terminal {
 
     /**
+     * The infocmp type of this terminal
+     */
+    String getType();
+
+    /**
      * Width of the terminal.
      */
     int getWidth();
@@ -75,4 +80,5 @@ public interface Terminal {
      * @param listener the listener to remove
      */
     void removeSignalListener(SignalListener listener);
+
 }
