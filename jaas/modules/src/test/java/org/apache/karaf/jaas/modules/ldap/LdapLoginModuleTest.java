@@ -307,5 +307,50 @@ public class LdapLoginModuleTest extends AbstractLdapTestUnit {
         assertEquals("Principals should be gone as the user has logged out", 0, subject.getPrincipals().size());
     }
 
+    @Test
+    public void testRoleMappingParsing() throws Exception {
+        Properties options = ldapLoginModuleOptions();
+        options.put(LDAPLoginModule.ROLE_MAPPING, "admin = karaf, test; admin = another");
+        LDAPLoginModule module = new LDAPLoginModule();
+        CallbackHandler cb = new CallbackHandler() {
+            public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
+                for (Callback cb : callbacks) {
+                    if (cb instanceof NameCallback) {
+                        ((NameCallback) cb).setName("admin");
+                    } else if (cb instanceof PasswordCallback) {
+                        ((PasswordCallback) cb).setPassword("admin123".toCharArray());
+                    }
+                }
+            }
+        };
+        Subject subject = new Subject();
+        module.initialize(subject, cb, null, options);
+
+        assertEquals("Precondition", 0, subject.getPrincipals().size());
+        assertTrue(module.login());
+        assertTrue(module.commit());
+
+        assertEquals(4, subject.getPrincipals().size());
+
+        final List<String> roles = new ArrayList<String>(Arrays.asList("karaf", "test", "another"));
+
+        boolean foundUser = false;
+        boolean foundRole = false;
+        for (Principal pr : subject.getPrincipals()) {
+            if (pr instanceof UserPrincipal) {
+                assertEquals("admin", pr.getName());
+                foundUser = true;
+            } else if (pr instanceof RolePrincipal) {
+                assertTrue(roles.remove(pr.getName()));
+                foundRole = true;
+            }
+        }
+        assertTrue(foundUser);
+        assertTrue(foundRole);
+        assertTrue(roles.isEmpty());
+
+        assertTrue(module.logout());
+        assertEquals("Principals should be gone as the user has logged out", 0, subject.getPrincipals().size());
+    }
 }
             
