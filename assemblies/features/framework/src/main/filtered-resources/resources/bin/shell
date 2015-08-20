@@ -255,14 +255,16 @@ setupDefaults() {
 
     #Set the JVM_VENDOR specific JVM flags
     if [ "$JVM_VENDOR" = "SUN" ]; then
-        #
-        # Check some easily accessible MIN/MAX params for JVM mem usage
-        #
-        if [ "x$JAVA_PERM_MEM" != "x" ]; then
-            DEFAULT_JAVA_OPTS="$DEFAULT_JAVA_OPTS -XX:PermSize=$JAVA_PERM_MEM"
-        fi
-        if [ "x$JAVA_MAX_PERM_MEM" != "x" ]; then
-            DEFAULT_JAVA_OPTS="$DEFAULT_JAVA_OPTS -XX:MaxPermSize=$JAVA_MAX_PERM_MEM"
+        # permgen was removed in Java 8
+        VERSION=`$JAVA -version 2>&1 | egrep '"([0-9].[0-9]\..*[0-9]).*"' | awk '{print substr($3,2,length($3)-2)}' | awk '{print substr($1, 3, 3)}' | sed -e 's;\.;;g'`
+        if [ "$VERSION" -lt "80" ]; then
+            # Check some easily accessible MIN/MAX params for JVM mem usage
+            if [ "x$JAVA_PERM_MEM" != "x" ]; then
+                DEFAULT_JAVA_OPTS="$DEFAULT_JAVA_OPTS -XX:PermSize=$JAVA_PERM_MEM"
+            fi
+            if [ "x$JAVA_MAX_PERM_MEM" != "x" ]; then
+                DEFAULT_JAVA_OPTS="$DEFAULT_JAVA_OPTS -XX:MaxPermSize=$JAVA_MAX_PERM_MEM"
+            fi
         fi
         DEFAULT_JAVA_OPTS="-server $DEFAULT_JAVA_OPTS -Dcom.sun.management.jmxremote"
     elif [ "$JVM_VENDOR" = "IBM" ]; then
