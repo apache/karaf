@@ -145,14 +145,14 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
             String[] mappings = option.split(";");
             for (String mapping : mappings) {
                 String[] map = mapping.split("=", 2);
-                String ldapRole = map[0];
+                String ldapRole = map[0].trim();
                 String[] karafRoles = map[1].split(",");
                 if (roleMapping.get(ldapRole) == null) {
                     roleMapping.put(ldapRole, new HashSet<String>());
                 }
                 final Set<String> karafRolesSet = roleMapping.get(ldapRole);
                 for (String karafRole : karafRoles) {
-                    karafRolesSet.add(karafRole);
+                    karafRolesSet.add(karafRole.trim());
                 }
             }
         }
