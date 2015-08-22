@@ -18,6 +18,7 @@
  */
 package org.apache.karaf.shell.ssh;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -33,6 +34,8 @@ import org.apache.karaf.util.tracker.annotation.Services;
 import org.apache.sshd.SshServer;
 import org.apache.sshd.common.NamedFactory;
 import org.apache.sshd.server.command.ScpCommandFactory;
+import org.apache.sshd.server.keyprovider.AbstractGeneratorHostKeyProvider;
+import org.apache.sshd.server.keyprovider.PEMGeneratorHostKeyProvider;
 import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
 import org.apache.sshd.server.sftp.SftpSubsystem;
 import org.osgi.framework.ServiceReference;
@@ -106,6 +109,9 @@ public class Activator extends BaseActivator implements ManagedService {
         sessionFactory.getRegistry().getService(Manager.class).register(SshAction.class);
         if (Boolean.parseBoolean(bundleContext.getProperty("karaf.startRemoteShell"))) {
             server = createSshServer(sessionFactory);
+            if (server == null) {
+                return; // can result from bad specification.
+            }
             try {
                 server.start();
             } catch (IOException e) {
@@ -137,17 +143,32 @@ public class Activator extends BaseActivator implements ManagedService {
         long sshIdleTimeout   = getLong("sshIdleTimeout", 1800000);
         String sshRealm       = getString("sshRealm", "karaf");
         String hostKey        = getString("hostKey", System.getProperty("karaf.etc") + "/host.key");
+        String hostKeyFormat  = getString("hostKeyFormat", "simple");
         String authMethods    = getString("authMethods", "keyboard-interactive,password,publickey");
         int keySize           = getInt("keySize", 4096);
         String algorithm      = getString("algorithm", "RSA");
         String macs           = getString("macs", "hmac-sha1");
         String ciphers        = getString("ciphers", "aes256-ctr,aes192-ctr,aes128-ctr,arcfour256");
         String welcomeBanner  = getString("welcomeBanner", null);
-        
-        SimpleGeneratorHostKeyProvider keyPairProvider = new SimpleGeneratorHostKeyProvider();
+
+        AbstractGeneratorHostKeyProvider keyPairProvider;
+        if ("simple".equalsIgnoreCase(hostKeyFormat)) {
+            keyPairProvider = new SimpleGeneratorHostKeyProvider();
+        } else if ("PEM".equalsIgnoreCase(hostKeyFormat)) {
+            keyPairProvider = new OpenSSHGeneratorFileKeyProvider();
+        } else {
+            LOGGER.error("Invalid host key format " + hostKeyFormat);
+            return null;
+        }
+
         keyPairProvider.setPath(hostKey);
-        keyPairProvider.setKeySize(keySize);
-        keyPairProvider.setAlgorithm(algorithm);
+        if (new File(hostKey).exists()) {
+            // do not trash key file if there's something wrong with it.
+            keyPairProvider.setOverwriteAllowed(false);
+        } else {
+            keyPairProvider.setKeySize(keySize);
+            keyPairProvider.setAlgorithm(algorithm);
+        }
 
         KarafJaasAuthenticator authenticator = new KarafJaasAuthenticator(sshRealm);
 

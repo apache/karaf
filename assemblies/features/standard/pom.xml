@@ -312,6 +312,12 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.not-yet-commons-ssl</artifactId>
+            <version>0.3.11_1</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.apache.karaf.shell</groupId>
             <artifactId>org.apache.karaf.shell.ssh</artifactId>
             <scope>provided</scope>
