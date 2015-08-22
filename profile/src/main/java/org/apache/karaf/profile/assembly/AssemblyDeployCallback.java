@@ -209,17 +209,8 @@ public class AssemblyDeployCallback implements Deployer.DeployCallback {
             Files.copy(is, bundleSystemFile, StandardCopyOption.REPLACE_EXISTING);
 
             Hashtable<String, String> headers = new Hashtable<>();
-            JarFile jar = null;
-            Attributes attributes;
-            try {
-                jar = new JarFile(bundleSystemFile.toFile());
-                attributes = jar.getManifest().getMainAttributes();
-            }
-            finally {
-                if (jar != null) {
-                    jar.close();
-                }
-            }
+            JarFile jar = new JarFile(bundleSystemFile.toFile());
+            Attributes attributes = jar.getManifest().getMainAttributes();
             for (Map.Entry attr : attributes.entrySet()) {
                 headers.put(attr.getKey().toString(), attr.getValue().toString());
             }
