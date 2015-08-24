@@ -17,10 +17,16 @@
 package org.apache.karaf.client;
 
 import java.io.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.net.URL;
 import java.security.KeyPair;
 import java.nio.charset.Charset;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -29,6 +35,7 @@ import jline.Terminal;
 import jline.TerminalFactory;
 
 import jline.UnixTerminal;
+import jline.internal.TerminalLineSettings;
 import org.apache.sshd.ClientChannel;
 import org.apache.sshd.ClientSession;
 import org.apache.sshd.SshClient;
@@ -37,9 +44,14 @@ import org.apache.sshd.agent.local.AgentImpl;
 import org.apache.sshd.agent.local.LocalAgentFactory;
 import org.apache.sshd.client.UserInteraction;
 import org.apache.sshd.client.channel.ChannelShell;
+import org.apache.sshd.client.channel.PtyCapableChannelSession;
 import org.apache.sshd.client.future.ConnectFuture;
+import org.apache.sshd.common.PtyMode;
 import org.apache.sshd.common.RuntimeSshException;
+import org.apache.sshd.common.Session;
+import org.apache.sshd.common.SshConstants;
 import org.apache.sshd.common.keyprovider.FileKeyPairProvider;
+import org.apache.sshd.common.util.Buffer;
 import org.fusesource.jansi.AnsiConsole;
 import org.slf4j.impl.SimpleLogger;
 
@@ -131,8 +143,60 @@ public class Main {
                 ConsoleInputStream in = new ConsoleInputStream(terminal.wrapInIfNeeded(System.in));
                 new Thread(in).start();
                 channel.setIn(in);
-                ((ChannelShell) channel).setPtyColumns(terminal != null ? terminal.getWidth() : 80);
-                ((ChannelShell) channel).setupSensibleDefaultPty();
+                if (terminal instanceof UnixTerminal) {
+                    TerminalLineSettings settings = ((UnixTerminal) terminal).getSettings();
+                    Map<PtyMode, Integer> modes = new HashMap<>();
+                    // Control chars
+                    modes.put(PtyMode.VINTR, settings.getProperty("vintr"));
+                    modes.put(PtyMode.VQUIT, settings.getProperty("vquit"));
+                    modes.put(PtyMode.VERASE, settings.getProperty("verase"));
+                    modes.put(PtyMode.VKILL, settings.getProperty("vkill"));
+                    modes.put(PtyMode.VEOF, settings.getProperty("veof"));
+                    modes.put(PtyMode.VEOL, settings.getProperty("veol"));
+                    modes.put(PtyMode.VEOL2, settings.getProperty("veol2"));
+                    modes.put(PtyMode.VSTART, settings.getProperty("vstart"));
+                    modes.put(PtyMode.VSTOP, settings.getProperty("vstop"));
+                    modes.put(PtyMode.VSUSP, settings.getProperty("vsusp"));
+                    modes.put(PtyMode.VDSUSP, settings.getProperty("vdusp"));
+                    modes.put(PtyMode.VREPRINT, settings.getProperty("vreprint"));
+                    modes.put(PtyMode.VWERASE, settings.getProperty("vwerase"));
+                    modes.put(PtyMode.VLNEXT, settings.getProperty("vlnext"));
+                    modes.put(PtyMode.VSTATUS, settings.getProperty("vstatus"));
+                    modes.put(PtyMode.VDISCARD, settings.getProperty("vdiscard"));
+                    // Input flags
+                    modes.put(PtyMode.IGNPAR, getFlag(settings, PtyMode.IGNPAR));
+                    modes.put(PtyMode.PARMRK, getFlag(settings, PtyMode.PARMRK));
+                    modes.put(PtyMode.INPCK, getFlag(settings, PtyMode.INPCK));
+                    modes.put(PtyMode.ISTRIP, getFlag(settings, PtyMode.ISTRIP));
+                    modes.put(PtyMode.INLCR, getFlag(settings, PtyMode.INLCR));
+                    modes.put(PtyMode.IGNCR, getFlag(settings, PtyMode.IGNCR));
+                    modes.put(PtyMode.ICRNL, getFlag(settings, PtyMode.ICRNL));
+                    modes.put(PtyMode.IXON, getFlag(settings, PtyMode.IXON));
+                    modes.put(PtyMode.IXANY, getFlag(settings, PtyMode.IXANY));
+                    modes.put(PtyMode.IXOFF, getFlag(settings, PtyMode.IXOFF));
+                    // Local flags
+                    modes.put(PtyMode.ISIG, getFlag(settings, PtyMode.ISIG));
+                    modes.put(PtyMode.ICANON, getFlag(settings, PtyMode.ICANON));
+                    modes.put(PtyMode.ECHO, getFlag(settings, PtyMode.ECHO));
+                    modes.put(PtyMode.ECHOE, getFlag(settings, PtyMode.ECHOE));
+                    modes.put(PtyMode.ECHOK, getFlag(settings, PtyMode.ECHOK));
+                    modes.put(PtyMode.ECHONL, getFlag(settings, PtyMode.ECHONL));
+                    modes.put(PtyMode.NOFLSH, getFlag(settings, PtyMode.NOFLSH));
+                    modes.put(PtyMode.TOSTOP, getFlag(settings, PtyMode.TOSTOP));
+                    modes.put(PtyMode.IEXTEN, getFlag(settings, PtyMode.IEXTEN));
+                    // Output flags
+                    modes.put(PtyMode.OPOST, getFlag(settings, PtyMode.OPOST));
+                    modes.put(PtyMode.OLCUC, getFlag(settings, PtyMode.OLCUC));
+                    modes.put(PtyMode.ONLCR, getFlag(settings, PtyMode.ONLCR));
+                    modes.put(PtyMode.OCRNL, getFlag(settings, PtyMode.OCRNL));
+                    modes.put(PtyMode.ONOCR, getFlag(settings, PtyMode.ONOCR));
+                    modes.put(PtyMode.ONLRET, getFlag(settings, PtyMode.ONLRET));
+                    ((ChannelShell) channel).setPtyModes(modes);
+                } else {
+                    ((ChannelShell) channel).setupSensibleDefaultPty();
+                }
+                ((ChannelShell) channel).setPtyColumns(terminal.getWidth());
+                ((ChannelShell) channel).setPtyLines(terminal.getHeight());
                 ((ChannelShell) channel).setAgentForwarding(true);
                 String ctype = System.getenv("LC_CTYPE");
                 if (ctype == null) {
@@ -143,7 +207,10 @@ public class Main {
             }
             channel.setOut(AnsiConsole.wrapOutputStream(System.out));
             channel.setErr(AnsiConsole.wrapOutputStream(System.err));
-            channel.open();
+            channel.open().verify();
+            if (channel instanceof PtyCapableChannelSession) {
+                registerSignalHandler(terminal, (PtyCapableChannelSession) channel);
+            }
             channel.waitFor(ClientChannel.CLOSED, 0);
             if (channel.getExitStatus() != null) {
                 exitStatus = channel.getExitStatus();
@@ -168,6 +235,11 @@ public class Main {
             }
         }
         System.exit(exitStatus);
+    }
+
+    private static int getFlag(TerminalLineSettings settings, PtyMode mode) {
+        String name = mode.toString().toLowerCase();
+        return (settings.getPropertyAsString(name) != null) ? 1 : 0;
     }
 
     private static void setupAgent(String user, String keyFile, SshClient client) {
@@ -248,6 +320,65 @@ public class Main {
             sb.append((char) c);
         }
         return sb.toString();
+    }
+
+    private static void registerSignalHandler(final Terminal terminal, final PtyCapableChannelSession channel) {
+        try {
+            Class<?> signalClass = Class.forName("sun.misc.Signal");
+            Class<?> signalHandlerClass = Class.forName("sun.misc.SignalHandler");
+            // Implement signal handler
+            Object signalHandler = Proxy.newProxyInstance(Main.class.getClassLoader(),
+                    new Class<?>[]{signalHandlerClass}, new InvocationHandler() {
+                        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                            // Ugly hack to force the jline unix terminal to retrieve the width/height of the terminal
+                            // because results are cached for 1 second.
+                            try {
+                                Field field = terminal.getClass().getSuperclass().getDeclaredField("settings");
+                                field.setAccessible(true);
+                                Object settings = field.get(terminal);
+                                field = settings.getClass().getDeclaredField("configLastFetched");
+                                field.setAccessible(true);
+                                field.setLong(settings, 0L);
+                            } catch (Throwable t) {
+                                // Ignore
+                            }
+                            // TODO: replace with PtyCapableChannelSession#sendWindowChange
+                            Session session = channel.getSession();
+                            Buffer buffer = session.createBuffer(SshConstants.SSH_MSG_CHANNEL_REQUEST);
+                            buffer.putInt(channel.getRecipient());
+                            buffer.putString("window-change");
+                            buffer.putBoolean(false);
+                            buffer.putInt(terminal.getWidth());
+                            buffer.putInt(terminal.getHeight());
+                            buffer.putInt(0);
+                            buffer.putInt(0);
+                            session.writePacket(buffer);
+                            return null;
+                        }
+                    }
+            );
+            // Register the signal handler, this code is equivalent to:
+            // Signal.handle(new Signal("CONT"), signalHandler);
+            signalClass.getMethod("handle", signalClass, signalHandlerClass).invoke(null, signalClass.getConstructor(String.class).newInstance("WINCH"), signalHandler);
+        } catch (Exception e) {
+            // Ignore this exception, if the above failed, the signal API is incompatible with what we're expecting
+
+        }
+    }
+
+    private static void unregisterSignalHandler() {
+        try {
+            Class<?> signalClass = Class.forName("sun.misc.Signal");
+            Class<?> signalHandlerClass = Class.forName("sun.misc.SignalHandler");
+
+            Object signalHandler = signalHandlerClass.getField("SIG_DFL").get(null);
+            // Register the signal handler, this code is equivalent to:
+            // Signal.handle(new Signal("CONT"), signalHandler);
+            signalClass.getMethod("handle", signalClass, signalHandlerClass).invoke(null, signalClass.getConstructor(String.class).newInstance("WINCH"), signalHandler);
+        } catch (Exception e) {
+            // Ignore this exception, if the above failed, the signal API is incompatible with what we're expecting
+
+        }
     }
 
     private static class ConsoleInputStream extends InputStream implements Runnable {

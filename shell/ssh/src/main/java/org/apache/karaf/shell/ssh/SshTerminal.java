@@ -82,4 +82,8 @@ public class SshTerminal extends SignalSupport implements Terminal {
         echo = enabled;
     }
 
+    public Environment getEnvironment() {
+        return environment;
+    }
+
 }
