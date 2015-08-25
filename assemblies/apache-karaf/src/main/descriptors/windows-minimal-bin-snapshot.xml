@@ -126,6 +126,8 @@
                 <include>org.apache.karaf:org.apache.karaf.exception</include>
                 <include>org.apache.servicemix.specs:org.apache.servicemix.specs.jaxp-api-1.4</include>
                 <include>xerces:xercesImpl</include>
+                <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.xalan</include>
+                <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.xalan-serializer</include>
             </includes>
         </dependencySet>
 

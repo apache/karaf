@@ -131,6 +131,8 @@
                 <include>org.apache.servicemix.specs:org.apache.servicemix.specs.stax-api-1.2</include>
                 <include>org.apache.servicemix.specs:org.apache.servicemix.specs.activation-api-1.1</include>
                 <include>xerces:xercesImpl</include>
+                <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.xalan</include>
+                <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.xalan-serializer</include>
             </includes>
         </dependencySet>
 

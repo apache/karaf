@@ -225,6 +225,8 @@
         <struts.bundle.version>1.3.10_1</struts.bundle.version>
         <xbean.version>3.18</xbean.version>
         <xerces.version>2.11.0</xerces.version>
+        <xalan.bundle.version>2.7.2_2</xalan.bundle.version>
+        <xalan-serializer.bundle.version>2.7.2_1</xalan-serializer.bundle.version>
         <javax.mail.version>1.4.5</javax.mail.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <appendedResourcesDirectory>${basedir}/etc/appended-resources</appendedResourcesDirectory>
@@ -693,6 +695,16 @@
                 <groupId>xerces</groupId>
                 <artifactId>xercesImpl</artifactId>
                 <version>${xerces.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.xalan</artifactId>
+                <version>${xalan.bundle.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.xalan-serializer</artifactId>
+                <version>${xalan-serializer.bundle.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.json</groupId>
