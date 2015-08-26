@@ -43,12 +43,25 @@ public class CreateCommand extends JdbcCommandSupport {
 
     @Option(name = "-p", aliases = { "--password" }, description = "The database password", required = false, multiValued = false)
     String password;
+    
+    @Option(name = "-sn", aliases = { "--servername" }, description = "The server name of the database machine, applicable for MSSQL only", required = false, multiValued = false)
+    String servername;
+    
+    @Option(name = "-dbn", aliases = { "--databasename" }, description = "The database name, applicable for MSSQL only", required = false, multiValued = false)
+    String databasename;
+    
+    @Option(name = "-ptn", aliases = { "--portnumber" }, description = "The portnumber for MS SQL SERVER, applicable for MSSQL only", required = false, multiValued = false)
+    String portnumber = "1433";
 
     @Option(name = "-i", aliases = { "--install-bundles" }, description = "Try to install the bundles providing the JDBC driver", required = false, multiValued = false)
     boolean installBundles = false;
 
     public Object doExecute() throws Exception {
-        this.getJdbcService().create(name, type, driver, version, url, username, password, installBundles);
+        if (type.equals("MSSQL")) {
+            this.getJdbcService().create(name, type, driver, version, username, password, servername, databasename, portnumber, installBundles);
+        } else {
+            this.getJdbcService().create(name, type, driver, version, url, username, password, installBundles);
+        }
         return null;
     }
 
