@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.management.MBeanException;
+
 /**
  * JDBC Service.
  */
@@ -38,6 +40,23 @@ public interface JdbcService {
      * @param tryToInstallBundles true to try to automatically install the required bundles (JDBC driver, etc) when possible, false else.
      */
     void create(String name, String type, String driverClassName, String version, String url, String user, String password, boolean tryToInstallBundles) throws Exception;
+    
+    /**
+     * Create a JDBC datasource for MSSQL.
+     *
+     * @param name the JDBC datasource name.
+     * @param type the JDBC datasource type (generic, MySQL, MSSQL, Oracle, Postgres, H2, HSQL, Derby).
+     * @param driver the JDBC datasource driver class name (can be null).
+     * @param version the target JDBC driver version (can be null).
+     * @param user the database username.
+     * @param password the database password.
+     * @param servername the database servername.
+     * @param databasename the database name.
+     * @param portnumber the database port number.
+     * @param installBundles true to install the bundles providing the JDBC driver, false to not install.
+     * @throws MBeanException
+     */
+    void create(String name, String type, String driver, String version, String user, String password, String servername, String databasename, String portnumber,boolean installBundles) throws Exception;
 
     /**
      * Delete a JDBC datasource identified by a name.

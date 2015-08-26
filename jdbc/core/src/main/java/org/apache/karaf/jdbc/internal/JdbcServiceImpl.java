@@ -127,7 +127,14 @@ public class JdbcServiceImpl implements JdbcService {
 
     private BundleContext bundleContext;
 
-    public void create(String name, String type, String driverClassName, String version, String url, String user, String password, boolean tryToInstallBundles) throws Exception {
+    public void create(String name, 
+                       String type, 
+                       String driverClassName, 
+                       String version, 
+                       String url, 
+                       String user, 
+                       String password, 
+                       boolean tryToInstallBundles) throws Exception {
         if (tryToInstallBundles) {
             TYPES.valueOf(type.toUpperCase()).installBundle(bundleContext, version);
         }
@@ -142,10 +149,40 @@ public class JdbcServiceImpl implements JdbcService {
         properties.put("${url}", url);
         properties.put("${user}", user);
         properties.put("${password}", password);
-
+        
         TYPES.valueOf(type.toUpperCase()).copyDataSourceFile(outFile, properties);
     }
 
+    public void create(String name, 
+                       String type, 
+                       String driverClassName, 
+                       String version, 
+                       String user, 
+                       String password, 
+                       String servername, 
+                       String databasename, 
+                       String portnumber,
+                       boolean tryToInstallBundles) throws Exception {
+        if (tryToInstallBundles) {
+            TYPES.valueOf(type.toUpperCase()).installBundle(bundleContext, version);
+        }
+
+        File karafBase = new File(System.getProperty("karaf.base"));
+        File deployFolder = new File(karafBase, "deploy");
+        File outFile = new File(deployFolder, "datasource-" + name + ".xml");
+
+        HashMap<String, String> properties = new HashMap<String, String>();
+        properties.put("${name}", name);
+        properties.put("${driver}", driverClassName);
+        properties.put("${user}", user);
+        properties.put("${password}", password);
+        properties.put("${servername}", servername);
+        properties.put("${databasename}", databasename);
+        properties.put("${portnumber}", portnumber);
+        
+        TYPES.valueOf(type.toUpperCase()).copyDataSourceFile(outFile, properties);
+    }
+    
     public void delete(String name) throws Exception {
         File karafBase = new File(System.getProperty("karaf.base"));
         File deployFolder = new File(karafBase, "deploy");

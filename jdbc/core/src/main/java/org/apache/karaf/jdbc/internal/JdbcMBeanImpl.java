@@ -75,6 +75,14 @@ public class JdbcMBeanImpl extends StandardMBean implements JdbcMBean {
             throw new MBeanException(null, e.getMessage());
         }
     }
+    
+    public void create(String name, String type, String driver, String version, String user, String password, String servername, String databasename, String portnumber, boolean installBundles) throws MBeanException {
+        try {
+            jdbcService.create(name, type, driver, version, user, password, servername, databasename, portnumber, installBundles);
+        } catch (Exception e) {
+            throw new MBeanException(null, e.getMessage());
+        }
+    }
 
     public void delete(String name) throws MBeanException {
         try {
