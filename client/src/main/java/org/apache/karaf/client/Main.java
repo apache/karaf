@@ -53,18 +53,17 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         Properties shellCfg = loadProps(new File(System.getProperty("karaf.etc"), "org.apache.karaf.shell.cfg"));
+        Properties customCfg = loadProps(new File(System.getProperty("karaf.etc"), "custom.properties"));
 
         String host = shellCfg.getProperty("sshHost", "localhost");
-        if (host.contains("${")) {
-            // if sshHost property contains a reference to another property (coming from etc/config.properties\r
-            // or etc/custom.properties), we fall back to "localhost" default value\r
-            host = "localhost";
-        }
         String portString = shellCfg.getProperty("sshPort", "8101");
+        // if sshHost of sshPort properties contain a reference to another property (coming from etc/custom.properties
+        // , we try to use the custom.properties value
+        if (host.contains("${")) {
+            host = replaceVariable(host, "localhost", customCfg);
+        }
         if (portString.contains("${")) {
-            // if sshPort property contains a reference to another property (coming from etc/config.properties\r
-            // or etc/custom.properties), we fall back to "8101" default value\r
-            portString = "8101";
+            portString = replaceVariable(portString, "8101", customCfg);
         }
         int port = Integer.parseInt(portString);
         int level = 1;
@@ -328,6 +327,18 @@ public class Main {
         System.exit(exitStatus);
     }
 
+    // tries a very basic variable substitution
+    private static String replaceVariable(String input, String defaultValue, Properties customCfg) {
+        try {
+            int indexOfDollar = input.indexOf('$');      
+            int indexOfClosingBrace = input.indexOf('}', indexOfDollar + 1);
+            String varName = input.substring(indexOfDollar + 2, indexOfClosingBrace);
+            String varValue = customCfg.getProperty(varName, defaultValue);                
+            return input.replace("${" + varName + "}", varValue);
+        } catch (Exception e) {
+            return input;
+        }
+    }
 
     private static Properties loadProps(File file) {
         Properties props = new Properties();
