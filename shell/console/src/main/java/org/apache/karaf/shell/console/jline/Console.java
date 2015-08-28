@@ -83,6 +83,7 @@ public class Console implements Runnable
     private PrintStream err;
     private Thread thread;
     private final BundleContext bundleContext;
+    private CommandsCompleter completer;
 
     public Console(CommandProcessor processor,
                    ThreadIO threadIO,
@@ -130,7 +131,7 @@ public class Console implements Runnable
 
         session.put(".jline.reader", reader);
         session.put(".jline.history", reader.getHistory());
-        Completer completer = createCompleter();
+        completer = createCompleter();
         if (completer != null) {
             reader.addCompleter(new CompleterAsCompletor(completer));
         }
@@ -169,6 +170,7 @@ public class Console implements Runnable
         pipe.interrupt();
         thread.interrupt();
         reader.shutdown();
+        completer.dispose();
         if (closedByUser && closeCallback != null) {
             closeCallback.run();
         }
@@ -370,7 +372,7 @@ public class Console implements Runnable
         }
     }
 
-    protected Completer createCompleter() {
+    protected CommandsCompleter createCompleter() {
         return new CommandsCompleter(session);
     }
 

@@ -52,6 +52,7 @@ public class CommandsCompleter implements Completer {
     private CommandSession session;
     private final List<Completer> completers = new ArrayList<Completer>();
     private final Set<String> commands = new HashSet<String>();
+    private CommandTracker tracker;
 
     public CommandsCompleter() {
         this(CommandSessionHolder.getSession());
@@ -60,13 +61,18 @@ public class CommandsCompleter implements Completer {
     public CommandsCompleter(CommandSession session) {
         this.session = session;
         try {
-            new CommandTracker();
+            tracker = new CommandTracker();
         } catch (Throwable t) {
             // Ignore in case we're not in OSGi
         }
     }
 
-
+    public void dispose() {
+        if (tracker != null) {
+            tracker.dispose();
+        }
+    }
+    
     public int complete(String buffer, int cursor, List<String> candidates) {
         if (session == null) {
             session = CommandSessionHolder.getSession();
@@ -162,12 +168,13 @@ public class CommandsCompleter implements Completer {
     }
 
     private class CommandTracker {
+        private final ServiceListener listener;
         public CommandTracker() throws Exception {
             BundleContext context = FrameworkUtil.getBundle(getClass()).getBundleContext();
             if (context == null) {
                 throw new IllegalStateException("Bundle is stopped");
             }
-            ServiceListener listener = new ServiceListener() {
+            listener = new ServiceListener() {
                 public void serviceChanged(ServiceEvent event) {
                     synchronized (CommandsCompleter.this) {
                         commands.clear();
@@ -178,6 +185,11 @@ public class CommandsCompleter implements Completer {
                     String.format("(&(%s=*)(%s=*))",
                             CommandProcessor.COMMAND_SCOPE,
                             CommandProcessor.COMMAND_FUNCTION));
+        }
+        
+        public void dispose() {
+            BundleContext context = FrameworkUtil.getBundle(getClass()).getBundleContext();
+            context.removeServiceListener(listener);
         }
     }
 }
