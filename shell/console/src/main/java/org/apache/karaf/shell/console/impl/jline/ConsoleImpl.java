@@ -74,6 +74,7 @@ public class ConsoleImpl implements Console {
     private boolean secured;
     private Thread thread;
     private final BundleContext bundleContext;
+    private CommandsCompleter completer;
 
     // logging
     private boolean consoleLogger = false;
@@ -139,7 +140,7 @@ public class ConsoleImpl implements Console {
 
         session.put(".jline.reader", reader);
         session.put(".jline.history", reader.getHistory());
-        Completer completer = createCompleter();
+        completer = createCompleter();
         if (completer != null) {
             reader.addCompleter(new CompleterAsCompletor(completer));
         }
@@ -181,6 +182,7 @@ public class ConsoleImpl implements Console {
         running = false;
         CommandSessionHolder.unset();
         pipe.interrupt();
+        completer.dispose();
         if (closedByUser && closeCallback != null) {
             closeCallback.run();
         }
@@ -369,7 +371,7 @@ public class ConsoleImpl implements Console {
         }
     }
 
-    protected Completer createCompleter() {
+    protected CommandsCompleter createCompleter() {
         return new CommandsCompleter(session);
     }
 
