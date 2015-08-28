@@ -45,20 +45,20 @@ public class ClientConfig {
 
     public ClientConfig(String[] args) throws IOException {
         Properties shellCfg = loadProps(new File(System.getProperty("karaf.etc"), "org.apache.karaf.shell.cfg"));
-
-        host = shellCfg.getProperty("sshHost", "localhost");
+        Properties customCfg = loadProps(new File(System.getProperty("karaf.etc"), "custom.properties"));
+        
+        host = shellCfg.getProperty("sshHost", "localhost");        
         host = expandEnvVars(host);
-        if (host.contains("${")) {
-            // if sshHost property contains a reference to another property (coming from etc/config.properties
-            // or etc/custom.properties), we fall back to "localhost" default value
-            host = "localhost";
-        }
         String portString = shellCfg.getProperty("sshPort", "8101");
         portString = expandEnvVars(portString);
+        
+        // if sshHost of sshPort properties contain a reference to another property (coming from 
+        // , we try to use the custom.properties value
+        if (host.contains("${")) {
+            host = replaceVariable(host, "localhost", customCfg);
+        }
         if (portString.contains("${")) {
-            // if sshPort property contains a reference to another property (coming from etc/config.properties
-            // or etc/custom.properties), we fall back to "8101" default value
-            portString = "8101";
+            portString = replaceVariable(portString, "8101", customCfg);
         }
         port = Integer.parseInt(portString);
         level = Integer.parseInt(shellCfg.getProperty("logLevel", "1"));
@@ -191,6 +191,19 @@ public class ClientConfig {
         System.out.println("  [commands]    commands to run");
         System.out.println("If no commands are specified, the client will be put in an interactive mode");
         System.exit(0);
+    }
+
+    // tries a very basic variable substitution
+    private static String replaceVariable(String input, String defaultValue, Properties customCfg) {
+        try {
+            int indexOfDollar = input.indexOf('$');
+            int indexOfClosingBrace = input.indexOf('}', indexOfDollar + 1);
+            String varName = input.substring(indexOfDollar + 2, indexOfClosingBrace);
+            String varValue = customCfg.getProperty(varName, defaultValue);
+            return input.replace("${" + varName + "}", varValue);
+        } catch (Exception e) {
+            return input;
+        }
     }
 
     private static Properties loadProps(File file) {
