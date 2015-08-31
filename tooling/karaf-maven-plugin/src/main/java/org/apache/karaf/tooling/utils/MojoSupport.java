@@ -93,7 +93,7 @@ public abstract class MojoSupport extends AbstractMojo {
     protected ArtifactFactory factory;
     
     /**
-     * The artifact type of a feature
+     * The artifact type of a feature.
      */
     @Parameter(defaultValue = "xml")
     private String featureArtifactType = "xml";
