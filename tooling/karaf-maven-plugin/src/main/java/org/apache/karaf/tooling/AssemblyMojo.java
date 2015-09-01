@@ -204,6 +204,7 @@ public class AssemblyMojo extends MojoSupport {
         }
 
         Builder builder = Builder.newInstance();
+        builder.offline(mavenSession.isOffline());
 
         // Set up blacklisted items
         builder.blacklistBundles(blacklistedBundles);

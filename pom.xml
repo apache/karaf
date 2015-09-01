@@ -2086,7 +2086,8 @@
         <profile>
             <id>fastinstall</id>
             <properties>
-                <maven.test.skip>true</maven.test.skip>
+              <maven.test.skip>true</maven.test.skip>
+              <invoker.skip>true</invoker.skip>
             </properties>
         </profile>
         <profile>
