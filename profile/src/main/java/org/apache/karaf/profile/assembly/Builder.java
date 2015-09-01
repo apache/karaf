@@ -495,8 +495,8 @@ public class Builder {
         downloadLibraries(downloader, configProperties, libraries);
         downloader.await();
         // Reformat clauses
-        reformatClauses(configProperties, "org.osgi.framework.system.packages.extra");
-        reformatClauses(configProperties, "org.osgi.framework.bootdelegation");
+        reformatClauses(configProperties, Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA);
+        reformatClauses(configProperties, Constants.FRAMEWORK_BOOTDELEGATION);
         configProperties.save();
 
         //
@@ -818,8 +818,8 @@ public class Builder {
             downloadLibraries(downloader, configProperties, libraries);
             downloader.await();
             // Reformat clauses
-            reformatClauses(configProperties, "org.osgi.framework.system.packages.extra");
-            reformatClauses(configProperties, "org.osgi.framework.bootdelegation");
+            reformatClauses(configProperties, Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA);
+            reformatClauses(configProperties, Constants.FRAMEWORK_BOOTDELEGATION);
             configProperties.save();
         }
 
@@ -1161,14 +1161,14 @@ public class Builder {
         attributes.putValue(Constants.BUNDLE_SYMBOLICNAME, "system.bundle");
         attributes.putValue(Constants.BUNDLE_VERSION, "0.0.0");
 
-        String exportPackages = configProps.getProperty("org.osgi.framework.system.packages");
-        if (configProps.containsKey("org.osgi.framework.system.packages.extra")) {
-            exportPackages += "," + configProps.getProperty("org.osgi.framework.system.packages.extra");
+        String exportPackages = configProps.getProperty(Constants.FRAMEWORK_SYSTEMPACKAGES);
+        if (configProps.containsKey(Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA)) {
+            exportPackages += "," + configProps.getProperty(Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA);
         }
         exportPackages = exportPackages.replaceAll(",\\s*,", ",");
         attributes.putValue(Constants.EXPORT_PACKAGE, exportPackages);
 
-        String systemCaps = configProps.getProperty("org.osgi.framework.system.capabilities");
+        String systemCaps = configProps.getProperty(Constants.FRAMEWORK_SYSTEMCAPABILITIES);
         attributes.putValue(Constants.PROVIDE_CAPABILITY, systemCaps);
 
         final Hashtable<String, String> headers = new Hashtable<>();
