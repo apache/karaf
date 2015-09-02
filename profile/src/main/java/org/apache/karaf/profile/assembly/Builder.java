@@ -101,6 +101,7 @@ public class Builder {
     private static final String LIBRARY_CLAUSE_TYPE = "type";
     private static final String LIBRARY_CLAUSE_EXPORT = "export";
     private static final String LIBRARY_CLAUSE_DELEGATE = "delegate";
+    public static final String ORG_OPS4J_PAX_URL_MVN_PID = "org.ops4j.pax.url.mvn";
 
     public static enum Stage {
         Startup, Boot, Installed
@@ -145,6 +146,7 @@ public class Builder {
     boolean ignoreDependencyFlag;
     int defaultStartLevel = 50;
     Path homeDirectory;
+    boolean offline;
 
     private ScheduledExecutorService executor;
     private DownloadManager manager;
@@ -295,6 +297,15 @@ public class Builder {
         return this;
     }
 
+    public Builder offline(boolean offline) {
+        this.offline = offline;
+        return this;
+    }
+
+    public Builder offline() {
+        return offline(true);
+    }
+
     public Builder staticFramework() {
         // TODO: load this from resources
         return staticFramework("4.0.0-SNAPSHOT");
@@ -367,7 +378,10 @@ public class Builder {
         // Create download manager
         //
         Dictionary<String, String> props = new Hashtable<>();
-        MavenResolver resolver = MavenResolvers.createMavenResolver(props, "org.ops4j.pax.url.mvn");
+        if (offline) {
+            props.put(ORG_OPS4J_PAX_URL_MVN_PID + "offline", "true");
+        }
+        MavenResolver resolver = MavenResolvers.createMavenResolver(props, ORG_OPS4J_PAX_URL_MVN_PID);
         executor = Executors.newScheduledThreadPool(8);
         manager = new CustomDownloadManager(resolver, executor);
         this.resolver = new ResolverImpl(new Slf4jResolverLog(LOGGER));
@@ -462,7 +476,7 @@ public class Builder {
 
         manager = new CustomDownloadManager(resolver, executor, overallEffective);
 
-        Hashtable<String, String> agentProps = new Hashtable<>(overallEffective.getConfiguration("org.ops4j.pax.url.mvn"));
+        Hashtable<String, String> agentProps = new Hashtable<>(overallEffective.getConfiguration(ORG_OPS4J_PAX_URL_MVN_PID));
         final Map<String, String> properties = new HashMap<>();
         properties.put("karaf.default.repository", "system");
         InterpolationHelper.performSubstitution(agentProps, new InterpolationHelper.SubstitutionCallback() {

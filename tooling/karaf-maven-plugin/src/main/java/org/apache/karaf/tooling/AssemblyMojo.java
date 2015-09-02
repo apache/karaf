@@ -160,6 +160,12 @@ public class AssemblyMojo extends MojoSupport {
     @Parameter
     protected Builder.KarafVersion karafVersion = Builder.KarafVersion.v4x;
 
+    /**
+     * Specify the version of Java SE to be assumed for osgi.ee.
+     */
+    @Parameter(defaultValue = "1.7")
+    protected String javase;
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
@@ -204,6 +210,8 @@ public class AssemblyMojo extends MojoSupport {
         }
 
         Builder builder = Builder.newInstance();
+        builder.offline(mavenSession.isOffline());
+        builder.javase(javase);
 
         // Set up blacklisted items
         builder.blacklistBundles(blacklistedBundles);
