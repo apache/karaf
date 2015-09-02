@@ -503,6 +503,7 @@ public class ConsoleImpl implements Console {
                             return;
                         } else if (c == 4 && !ShellUtil.getBoolean(session, SessionProperties.IGNORE_INTERRUPTS)) {
                             err.println("^D");
+                            interrupt();
                             return;
                         } else if (c == 3 && !ShellUtil.getBoolean(session, SessionProperties.IGNORE_INTERRUPTS)) {
                             err.println("^C");
