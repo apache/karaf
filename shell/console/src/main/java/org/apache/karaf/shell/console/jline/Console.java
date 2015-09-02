@@ -515,6 +515,7 @@ public class Console implements Runnable
                         else if (c == 4 && !getBoolean(IGNORE_INTERRUPTS))
                         {
                             err.println("^D");
+                            interrupt();
                             return;
                         }
                         else if (c == 3 && !getBoolean(IGNORE_INTERRUPTS))
