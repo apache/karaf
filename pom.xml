@@ -103,6 +103,19 @@
         </mailingList>
     </mailingLists>
 
+    <developers>
+        <developer>
+            <name>The Apache Karaf Team</name>
+            <email>dev@karaf.apache.org</email>
+            <url>http://karaf.apache.org</url>
+            <organization>Apache Software Foundation</organization>
+            <organizationUrl>http://apache.org/</organizationUrl>
+            <properties>
+                <picUrl>http://karaf.apache.org/images/karaf-logo.png</picUrl>
+            </properties>
+        </developer>
+    </developers>
+
     <prerequisites>
         <maven>3.0.4</maven>
     </prerequisites>
