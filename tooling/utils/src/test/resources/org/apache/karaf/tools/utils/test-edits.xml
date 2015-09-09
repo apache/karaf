@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<property-edits xmlns="http://karaf.apache.org/tools/property-edits/1.0.0">
+    <edits>
+        <edit>
+            <file>config.properties</file>
+            <operation>put</operation>
+            <key>karaf.framework</key>
+            <value>equinox</value>
+        </edit>
+        <edit>
+            <file>config.properties</file>
+            <operation>extend</operation>
+            <key>karaf.name</key>
+            <value>toor</value>
+        </edit>
+        <edit>
+            <file>jre.properties</file>
+            <operation>put</operation>
+            <key>test-add-one</key>
+            <value>This is the cereal: shot from guns</value>
+        </edit>
+        <edit>
+            <file>jre.properties</file>
+            <operation>extend</operation>
+            <key>test-add-two</key>
+            <value>This is the gun that shoots cereal</value>
+        </edit>
+    </edits>
+</property-edits>
