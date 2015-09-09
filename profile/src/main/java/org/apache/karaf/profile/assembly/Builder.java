@@ -75,6 +75,9 @@ import org.apache.karaf.kar.internal.Kar;
 import org.apache.karaf.profile.Profile;
 import org.apache.karaf.profile.ProfileBuilder;
 import org.apache.karaf.profile.impl.Profiles;
+import org.apache.karaf.tools.utils.KarafPropertiesEditor;
+import org.apache.karaf.tools.utils.model.KarafPropertyEdit;
+import org.apache.karaf.tools.utils.model.KarafPropertyEdits;
 import org.apache.karaf.util.config.PropertiesLoader;
 import org.apache.karaf.util.maven.Parser;
 import org.ops4j.pax.url.mvn.MavenResolver;
@@ -154,6 +157,7 @@ public class Builder {
     private Path etcDirectory;
     private Path systemDirectory;
     private Map<String, Profile> allProfiles;
+    private KarafPropertyEdits propertyEdits;
 
     public static Builder newInstance() {
         return new Builder();
@@ -336,6 +340,16 @@ public class Builder {
         return this;
     }
 
+    /**
+     * Specify a set of edits to apply when moving etc files.
+     * @param propertyEdits the edits.
+     * @return this.
+     */
+    public Builder propertyEdits(KarafPropertyEdits propertyEdits) {
+        this.propertyEdits = propertyEdits;
+        return this;
+    }
+
     public List<String> getBlacklistedProfiles() {
         return blacklistedProfiles;
     }
@@ -486,6 +500,8 @@ public class Builder {
             }
         }, false, false, true);
 
+        Map<String, List<KarafPropertyEdit>> editsByFile = new HashMap<>();
+
         //
         // Write config and system properties
         //
@@ -520,6 +536,15 @@ public class Builder {
             Path configFile = etcDirectory.resolve(config.getKey());
             Files.createDirectories(configFile.getParent());
             Files.write(configFile, config.getValue());
+        }
+
+        // 'improve' configuration files.
+        if (propertyEdits != null) {
+            KarafPropertiesEditor editor = new KarafPropertiesEditor();
+            editor.setInputEtc(etcDirectory.toFile())
+                    .setOutputEtc(etcDirectory.toFile())
+                    .setEdits(propertyEdits);
+            editor.run();
         }
 
         //
