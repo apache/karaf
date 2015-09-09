@@ -75,7 +75,9 @@
                 <configuration>
                     <instructions>
                         <Export-Package>
-                            org.apache.karaf.tools.utils
+                            org.apache.karaf.tools.utils,
+                            org.apache.karaf.tools.utils.model,
+                            org.apache.karaf.tools.utils.model.io.stax
                         </Export-Package>
                     </instructions>
                 </configuration>

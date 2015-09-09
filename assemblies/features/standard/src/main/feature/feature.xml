@@ -562,6 +562,8 @@
             profilesDirectory = ${karaf.home}/profiles
         </config>
         <bundle>mvn:org.apache.karaf.profile/org.apache.karaf.profile.core/${project.version}</bundle>
+        <bundle>mvn:org.apache.karaf.tooling/org.apache.karaf.tools.utils/${project.version}</bundle>
+        <bundle>mvn:commons-io/commons-io/${commons-io.version}</bundle>
     </feature>
 
     <feature name="jolokia" description="Jolokia monitoring support" version="${jolokia.version}">
