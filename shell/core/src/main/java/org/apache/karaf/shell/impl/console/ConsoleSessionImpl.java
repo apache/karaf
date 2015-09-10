@@ -583,6 +583,7 @@ public class ConsoleSessionImpl implements Session {
                         } else if (c == 4 && !ShellUtil.getBoolean(ConsoleSessionImpl.this, Session.IGNORE_INTERRUPTS)) {
                             err.print("^D");
                             err.flush();
+                            ConsoleSessionImpl.this.interrupt();
                             return;
                         } else if (c == 3 && !ShellUtil.getBoolean(ConsoleSessionImpl.this, Session.IGNORE_INTERRUPTS)) {
                             err.println("^C");
