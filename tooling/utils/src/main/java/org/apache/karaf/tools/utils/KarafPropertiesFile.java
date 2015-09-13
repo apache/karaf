@@ -60,18 +60,21 @@ public class KarafPropertiesFile {
         properties.put(key, value);
     }
 
-    public void extend(String key, String value) {
+    public void extend(String key, String value, boolean prepend) {
         if (properties.get(key) == null) {
             properties.put(key, value);
             return;
+        } else if (prepend) {
+            properties.put(key, JoinUtil.join(value, (String) properties.get(key)));
+        } else {
+            properties.put(key, JoinUtil.join((String) properties.get(key), value));
         }
-        properties.put(key, JoinUtil.join((String)properties.get(key), value));
     }
 
     public void apply(KarafPropertyEdit editSpec) {
-        if ("extend".equals(editSpec.getOperation())) {
-            extend(editSpec.getKey(), editSpec.getValue());
-        } else if ("put".equals(editSpec.getOperation())) {
+        if ("extend".equals(editSpec.getOperation().getOperation())) {
+            extend(editSpec.getKey(), editSpec.getValue(), editSpec.getOperation().isPrepend());
+        } else if ("put".equals(editSpec.getOperation().getOperation())) {
             put(editSpec.getKey(), editSpec.getValue());
         } else {
             throw new IllegalArgumentException("Operation must be 'extend' or 'put', not " + editSpec.getOperation());

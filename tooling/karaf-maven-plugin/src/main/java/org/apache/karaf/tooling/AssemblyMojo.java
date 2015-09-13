@@ -199,6 +199,12 @@ public class AssemblyMojo extends MojoSupport {
             <key>org.osgi.framework.system.capabilities</key>
             <value>my-magic-capability</value>
           </edit>
+          <edit>
+            <file>config.properties</file>
+            <operation prepend='true'>extend</operation>
+            <key>some-other-list</key>
+            <value>my-value-goes-first</value>
+            </edit>
          </edits>
       </property-edits>
      </pre>

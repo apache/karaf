@@ -42,5 +42,11 @@
             <key>test-add-two</key>
             <value>This is the gun that shoots cereal</value>
         </edit>
+        <edit>
+            <file>config.properties</file>
+            <operation prepend="true">extend</operation>
+            <key>karaf.name</key>
+            <value>prepended</value>
+        </edit>
     </edits>
 </property-edits>

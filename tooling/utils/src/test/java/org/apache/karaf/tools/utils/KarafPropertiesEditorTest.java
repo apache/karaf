@@ -51,6 +51,7 @@ public class KarafPropertiesEditorTest {
 
         Path path = FileSystems.getDefault().getPath("target");
         Path outputEtc = Files.createTempDirectory(path, "test-etc");
+        outputEtc.toFile().deleteOnExit();
 
         KarafPropertiesEditor editor = new KarafPropertiesEditor();
         editor.setInputEtc(new File(ETC_TO_START_WITH))
@@ -64,7 +65,7 @@ public class KarafPropertiesEditorTest {
             properties.load(resultInputStream);
         }
         assertEquals("equinox", properties.getProperty("karaf.framework"));
-        assertEquals("root,toor", properties.getProperty("karaf.name"));
+        assertEquals("prepended,root,toor", properties.getProperty("karaf.name"));
 
         resultConfigProps = new File(outputEtc.toFile(), "jre.properties");
         try (InputStream resultInputStream = new FileInputStream(resultConfigProps)) {

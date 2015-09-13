@@ -51,6 +51,25 @@
                 </field>
             </fields>
         </class>
+        <class>
+            <name>Operation</name>
+            <fields>
+                <field xml.content="true">
+                    <name>operation</name>
+                    <type>String</type>
+                    <description>
+                        'extend' to extend the existing value, 'put' to replace.
+                    </description>
+                    <required>true</required>
+                </field>
+                <field xml.attribute="true">
+                    <name>prepend</name>
+                    <version>1.0.0</version>
+                    <type>boolean</type>
+                    <description><![CDATA[for the 'extend' operation, indicates that the value should be placed at the head of the list.]]></description>
+                </field>
+            </fields>
+        </class>
         <class xml.tagName="edit">
             <name>KarafPropertyEdit</name>
             <version>1.0.0+</version>
@@ -61,12 +80,16 @@
                 <field>
                     <name>operation</name>
                     <version>1.0.0+</version>
-                    <type>String</type>
+                    <association>
+                        <type>Operation</type>
+                        <multiplicity>1</multiplicity>
+                    </association>
                     <description>
-                        'extend' to extend the existing value, 'put' to replace.
+                        The operation to perform: 'put' or 'extend'.
                     </description>
                     <required>true</required>
                 </field>
+
                 <field>
                     <name>file</name>
                     <version>1.0.0+</version>

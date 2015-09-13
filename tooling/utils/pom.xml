@@ -53,11 +53,13 @@
                 <version>1.8.3</version>
                 <executions>
                     <execution>
+                        <phase>generate-sources</phase>
                         <goals>
                             <goal>java</goal>
                             <goal>stax-reader</goal>
                             <goal>stax-writer</goal>
                             <goal>xsd</goal>
+                            <goal>xdoc</goal>
                         </goals>
                     </execution>
                 </executions>
