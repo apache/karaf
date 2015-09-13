@@ -35,7 +35,7 @@
         <class rootElement="true" xml.tagName="property-edits">
             <description>
                 A collection instructions. Each instruction is either a 'put' or an 'edit',
-                and calls out a file and a series of name/value pairs.
+                and calls out a file, a property name, and a property value.
             </description>
             <name>KarafPropertyEdits</name>
             <version>1.0.0+</version>

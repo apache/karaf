@@ -180,7 +180,10 @@ public class AssemblyMojo extends MojoSupport {
 
     /**
      * Specify an XML file that instructs this goal to apply edits to
-     * one or more standard Karaf property files. This allows you to
+     * one or more standard Karaf property files.
+     * The contents of this file are documented in detail on
+     * <a href="karaf-property-instructions-model.html">this page</a>.
+     * This allows you to
      * customize these files without making copies in your resources
      * directories. Here's a simple example:
      * <pre>
