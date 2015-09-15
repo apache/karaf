@@ -69,6 +69,7 @@ public class WrapperServiceImpl implements WrapperService {
         String os = System.getProperty("os.name", "Unknown");
         File serviceFile = null;
         File wrapperConf = null;
+        File systemdFile = null;
         if (os.startsWith("Win")) {
             String arch = System.getProperty("os.arch");
             if (arch.equalsIgnoreCase("amd64") || arch.equalsIgnoreCase("x86_64")) {
@@ -131,6 +132,10 @@ public class WrapperServiceImpl implements WrapperService {
                 copyFilteredResourceTo(serviceFile, "unix/karaf-service", props, envs, includes);
                 chmod(serviceFile, "a+x");
 
+                systemdFile = new File(bin, name + ".service");
+                copyFilteredResourceTo(systemdFile, "unix/karaf.service", props, envs, includes);
+                chmod(systemdFile, "a+x");
+
                 wrapperConf = new File(etc, name + "-wrapper.conf");
                 copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props, envs, includes);
 
@@ -146,6 +151,10 @@ public class WrapperServiceImpl implements WrapperService {
                 serviceFile = new File(bin, name + "-service");
                 copyFilteredResourceTo(serviceFile, "unix/karaf-service", props, envs, includes);
                 chmod(serviceFile, "a+x");
+
+                systemdFile = new File(bin, name + ".service");
+                copyFilteredResourceTo(systemdFile, "unix/karaf.service", props, envs, includes);
+                chmod(systemdFile, "a+x");
 
                 wrapperConf = new File(etc, name + "-wrapper.conf");
                 copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props, envs, includes);
@@ -282,9 +291,10 @@ public class WrapperServiceImpl implements WrapperService {
 
         createJar(new File(lib, "karaf-wrapper-main.jar"), "org/apache/karaf/wrapper/internal/Main.class");
 
-        File[] wrapperPaths = new File[2];
+        File[] wrapperPaths = new File[3];
         wrapperPaths[0] = wrapperConf;
         wrapperPaths[1] = serviceFile;
+        wrapperPaths[2] = systemdFile;
 
         return wrapperPaths;
     }

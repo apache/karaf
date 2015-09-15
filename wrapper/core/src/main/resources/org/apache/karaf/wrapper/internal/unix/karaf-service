@@ -17,6 +17,10 @@
 # limitations under the License.
 # ------------------------------------------------------------------------
 
+#
+# This script is an Unix SystemV script
+#
+
 # If require, set the JAVA_HOME to launch the wrapper
 #
 #JAVA_HOME=
