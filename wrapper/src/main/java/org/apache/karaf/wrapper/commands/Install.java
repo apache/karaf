@@ -63,6 +63,7 @@ public class Install implements Action {
         String os = System.getProperty("os.name", "Unknown");
         File wrapperConf = wrapperPaths[0];
         File serviceFile = wrapperPaths[1];
+        File systemdFile = wrapperPaths[2];
 
         System.out.println("");
         System.out.println("Setup complete.  You may wish to tweak the JVM properties in the wrapper configuration file:");
@@ -114,7 +115,7 @@ public class Install implements Action {
 
             if (redhatRelease.exists()) {
                 System.out.println("");
-                System.out.println(INTENSITY_BOLD + "RedHat/Fedora/CentOS Linux system detected:" + INTENSITY_NORMAL);
+                System.out.println(INTENSITY_BOLD + "RedHat/Fedora/CentOS Linux system detected (SystemV):" + INTENSITY_NORMAL);
                 System.out.println("  To install the service:");
                 System.out.println("    $ ln -s " + serviceFile.getPath() + " /etc/init.d/");
                 System.out.println("    $ chkconfig " + serviceFile.getName() + " --add");
@@ -136,7 +137,7 @@ public class Install implements Action {
                 System.out.println("    $ rm /etc/init.d/" + serviceFile.getPath());
             } else if (debianVersion.exists()) {
                 System.out.println("");
-                System.out.println(INTENSITY_BOLD + "Ubuntu/Debian Linux system detected:" + INTENSITY_NORMAL);
+                System.out.println(INTENSITY_BOLD + "Ubuntu/Debian Linux system detected (SystemV):" + INTENSITY_NORMAL);
                 System.out.println("  To install the service:");
                 System.out.println("    $ ln -s " + serviceFile.getPath() + " /etc/init.d/");
                 System.out.println("");
@@ -156,7 +157,7 @@ public class Install implements Action {
                 System.out.println("    $ rm /etc/init.d/" + serviceFile.getName());
             } else {
 				System.out.println("");
-                System.out.println(INTENSITY_BOLD + "On Redhat/Fedora/CentOS Systems:" + INTENSITY_NORMAL);
+                System.out.println(INTENSITY_BOLD + "On Redhat/Fedora/CentOS Systems (SystemV):" + INTENSITY_NORMAL);
 				System.out.println("  To install the service:");
 				System.out.println("    $ ln -s "+serviceFile.getPath()+" /etc/init.d/");
 				System.out.println("    $ chkconfig "+serviceFile.getName()+" --add");
@@ -178,7 +179,7 @@ public class Install implements Action {
 				System.out.println("    $ rm /etc/init.d/"+serviceFile.getName());
 
 				System.out.println("");
-                System.out.println(INTENSITY_BOLD + "On Ubuntu/Debian Systems:" + INTENSITY_NORMAL);
+                System.out.println(INTENSITY_BOLD + "On Ubuntu/Debian Systems (SystemV):" + INTENSITY_NORMAL);
 				System.out.println("  To install the service:");
 				System.out.println("    $ ln -s "+serviceFile.getPath()+" /etc/init.d/");
 				System.out.println("");
@@ -196,6 +197,28 @@ public class Install implements Action {
 				System.out.println("");
 				System.out.println("  To uninstall the service :");
 				System.out.println("    $ rm /etc/init.d/"+serviceFile.getName());
+            }
+
+            if (systemdFile != null) {
+                System.out.println("");
+                System.out.println(INTENSITY_BOLD + "For SystemD compliant Linux: " + INTENSITY_NORMAL);
+                System.out.println("  To install the service (and enable at system boot):");
+                System.out.println("   $ systemctl enable " + systemdFile.getPath());
+                System.out.println("");
+                System.out.println("  To start the service:");
+                System.out.println("   $ systemctl start " + name);
+                System.out.println("");
+                System.out.println("  To stop the service:");
+                System.out.println("   $ systemctl stop " + name);
+                System.out.println("");
+                System.out.println("  To check the current service status:");
+                System.out.println("   $ systemctl status " + name);
+                System.out.println("");
+                System.out.println("  To see service activity journal:");
+                System.out.println("   $ journalctl -u " + name);
+                System.out.println("");
+                System.out.println("  To uninstall the service (and disable at system boot):");
+                System.out.println("   $ systemctl disable " + name);
             }
 
         }
