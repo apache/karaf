@@ -50,6 +50,7 @@
         <bundle start-level="30">mvn:org.apache.aries.transaction/org.apache.aries.transaction.manager/${aries.transaction.manager.version}</bundle>
         <conditional>
             <condition>aries-blueprint</condition>
+            <bundle start-level="30" dependency="true">mvn:org.apache.felix/org.apache.felix.coordinator/${felix.coordinator.version}</bundle>
             <bundle start-level="30">mvn:org.apache.aries.transaction/org.apache.aries.transaction.blueprint/${aries.transaction.blueprint.version}</bundle>
         </conditional>
     </feature>
@@ -90,7 +91,7 @@
         <details>JPA implementation provided by Apache Aries JPA 2.x. NB: this feature doesn't provide the JPA engine, you have to install one by yourself (OpenJPA for instance)</details>
         <feature version="[1.1,2)">transaction-api</feature>
         <feature version="[2.0.0,2.2.0)">persistence-api</feature>
-        <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.coordinator/${felix.coordinator.version}</bundle>
+        <bundle start-level="30" dependency="true">mvn:org.apache.felix/org.apache.felix.coordinator/${felix.coordinator.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.jpa/org.apache.aries.jpa.api/${aries.jpa.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.jpa/org.apache.aries.jpa.container/${aries.jpa.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.jpa/org.apache.aries.jpa.support/${aries.jpa.version}</bundle>
