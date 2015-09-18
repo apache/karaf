@@ -232,7 +232,7 @@ public abstract class AbstractFeatureMojo extends MojoSupport {
             
             addFeatures(features, featuresSet, featuresMap, addTransitiveFeatures);
     
-            getLog().info("Base repo: " + localRepo.getUrl());
+            getLog().info("Using local repository at: " + localRepo.getUrl());
             for (Feature feature : featuresSet) {
                 try {
                     for (Bundle bundle : feature.getBundle()) {

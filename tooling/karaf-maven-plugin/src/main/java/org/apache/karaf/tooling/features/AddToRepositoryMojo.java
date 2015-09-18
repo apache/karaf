@@ -60,7 +60,7 @@ public class AddToRepositoryMojo extends AbstractFeatureMojo {
         }
 
         for (Feature feature : featuresSet) {
-        	copyBundlesToDestRepository(feature.getBundle());
+            copyBundlesToDestRepository(feature.getBundle());
             copyConfigFilesToDestRepository(feature.getConfigfile());
         }
         
@@ -71,6 +71,8 @@ public class AddToRepositoryMojo extends AbstractFeatureMojo {
     private void copyBundlesToDestRepository(List<? extends Bundle> artifactRefs) throws MojoExecutionException {
         for (Bundle artifactRef : artifactRefs) {
             Artifact artifact = resourceToArtifact(artifactRef.getLocation(), skipNonMavenProtocols);
+            // Avoid getting NPE on artifact.getFile in some cases 
+            resolveArtifact(artifact, remoteRepos);
             if (artifact != null) {
                 copy(artifact, repository);
             }
@@ -80,6 +82,8 @@ public class AddToRepositoryMojo extends AbstractFeatureMojo {
     private void copyConfigFilesToDestRepository(List<? extends ConfigFile> artifactRefs) throws MojoExecutionException {
         for (ConfigFile artifactRef : artifactRefs) {
             Artifact artifact = resourceToArtifact(artifactRef.getLocation(), skipNonMavenProtocols);
+            // Avoid getting NPE on artifact.getFile in some cases
+            resolveArtifact(artifact, remoteRepos);
             if (artifact != null) {
                 copy(artifact, repository);
             }
@@ -90,6 +94,9 @@ public class AddToRepositoryMojo extends AbstractFeatureMojo {
         try {
             getLog().info("Copying artifact: " + artifact);
             File destFile = new File(destRepository, getRelativePath(artifact));
+            if (artifact.getFile() == null) {
+                throw new IllegalStateException("Artifact is not present in local repo."); 
+            }
             copy(artifact.getFile(), destFile);
         } catch (Exception e) {
             getLog().warn("Error copying artifact " + artifact, e);
