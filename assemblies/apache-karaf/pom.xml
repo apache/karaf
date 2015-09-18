@@ -155,6 +155,7 @@
                     </execution>
                 </executions>
                 <configuration>
+		    <localRepository>${maven.repo.local}</localRepository>
                     <installedFeatures>
                         <feature>wrapper</feature>
                     </installedFeatures>
