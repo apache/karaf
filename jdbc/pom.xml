@@ -46,9 +46,7 @@
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.enterprise</artifactId>
-            <version>5.0.0</version>
-            <scope>provided</scope>
+            <artifactId>org.osgi.compendium</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.karaf</groupId>
@@ -88,8 +86,7 @@
                 <configuration>
                     <instructions>
                         <Export-Package>
-                            org.apache.karaf.jdbc,
-                            org.osgi.service.jdbc
+                            org.apache.karaf.jdbc
                         </Export-Package>
                         <Private-Package>
                             org.apache.karaf.jdbc.command,

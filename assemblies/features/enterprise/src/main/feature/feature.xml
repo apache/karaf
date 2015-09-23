@@ -262,6 +262,7 @@
 
     <feature name="jdbc" description="JDBC service and commands" version="${project.version}">
         <details>JDBC support providing service, commands, and MBean.</details>
+        <bundle>mvn:org.osgi/org.osgi.service.jdbc/${org.osgi.service.jdbc.version}</bundle>
         <bundle>mvn:org.apache.karaf.jdbc/org.apache.karaf.jdbc.core/${project.version}</bundle>
     </feature>
 
