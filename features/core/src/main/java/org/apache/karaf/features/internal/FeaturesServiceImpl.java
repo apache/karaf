@@ -98,11 +98,11 @@ public class FeaturesServiceImpl implements FeaturesService {
     private ThreadLocal<Repository> repo = new ThreadLocal<Repository>();
     private EventAdminListener eventAdminListener;
     private String overrides;
-    
+
     public FeaturesServiceImpl(BundleManager bundleManager) {
         this(bundleManager, null);
     }
-    
+
     public FeaturesServiceImpl(BundleManager bundleManager, FeatureConfigInstaller configManager) {
         this.bundleManager = bundleManager;
         this.configManager = configManager;
@@ -120,7 +120,7 @@ public class FeaturesServiceImpl implements FeaturesService {
             }
         }
     }
-    
+
     public long getResolverTimeout() {
         return resolverTimeout;
     }
@@ -172,7 +172,7 @@ public class FeaturesServiceImpl implements FeaturesService {
      * @param uri the features repository URI.
      */
     public void validateRepository(URI uri) throws Exception {
-        
+
         FeatureValidationUtil.validate(uri);
     }
 
@@ -189,7 +189,7 @@ public class FeaturesServiceImpl implements FeaturesService {
     /**
      * Add a features repository.
      *
-     * @param uri the features repository URI.
+     * @param uri     the features repository URI.
      * @param install if true, install all features contained in the features repository.
      * @throws Exception in case of adding failure.
      */
@@ -206,7 +206,7 @@ public class FeaturesServiceImpl implements FeaturesService {
             refreshRepository(uri, install);
         }
     }
-    
+
     /**
      * Refresh a features repository.
      *
@@ -221,7 +221,7 @@ public class FeaturesServiceImpl implements FeaturesService {
     /**
      * Refresh a features repository.
      *
-     * @param uri the features repository URI.
+     * @param uri     the features repository URI.
      * @param install if true, install all features in the features repository.
      * @throws Exception in case of refresh failure.
      */
@@ -251,7 +251,7 @@ public class FeaturesServiceImpl implements FeaturesService {
         callListeners(new RepositoryEvent(repo, RepositoryEvent.EventType.RepositoryAdded, false));
         features = null;
         return repo;
-        
+
     }
 
     /**
@@ -267,7 +267,7 @@ public class FeaturesServiceImpl implements FeaturesService {
     /**
      * Remove a features repository.
      *
-     * @param uri the features repository URI.
+     * @param uri       the features repository URI.
      * @param uninstall if true, uninstall all features from the features repository.
      * @throws Exception in case of remove failure.
      */
@@ -303,8 +303,8 @@ public class FeaturesServiceImpl implements FeaturesService {
      * @throws Exception in case of restore failure.
      */
     public void restoreRepository(URI uri) throws Exception {
-    	repositories.put(uri, repo.get());
-    	callListeners(new RepositoryEvent(repo.get(), RepositoryEvent.EventType.RepositoryAdded, false));
+        repositories.put(uri, repo.get());
+        callListeners(new RepositoryEvent(repo.get(), RepositoryEvent.EventType.RepositoryAdded, false));
         features = null;
     }
 
@@ -318,7 +318,7 @@ public class FeaturesServiceImpl implements FeaturesService {
         Collection<Repository> repos = new ArrayList<Repository>(repositories.values());
         return repos.toArray(new Repository[repos.size()]);
     }
-    
+
     @Override
     public Repository getRepository(String repoName) {
         for (Repository repo : this.repositories.values()) {
@@ -348,13 +348,13 @@ public class FeaturesServiceImpl implements FeaturesService {
      * @throws Exception in case of install failure.
      */
     public void installFeature(String name) throws Exception {
-    	installFeature(name, org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION);
+        installFeature(name, org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION);
     }
 
     /**
      * Install a feature identified by a name, including a set of options.
      *
-     * @param name the name of the feature.
+     * @param name    the name of the feature.
      * @param options the installation options.
      * @throws Exception in case of install failure.
      */
@@ -365,7 +365,7 @@ public class FeaturesServiceImpl implements FeaturesService {
     /**
      * Install a feature identified by a name and a version.
      *
-     * @param name the name of the feature.
+     * @param name    the name of the feature.
      * @param version the version of the feature.
      * @throws Exception in case of install failure.
      */
@@ -376,7 +376,7 @@ public class FeaturesServiceImpl implements FeaturesService {
     /**
      * Install a feature identified by a name and a version, including a set of options.
      *
-     * @param name the name of the feature.
+     * @param name    the name of the feature.
      * @param version the version of the feature.
      * @param options the installation options.
      * @throws Exception in case of install failure.
@@ -421,7 +421,7 @@ public class FeaturesServiceImpl implements FeaturesService {
      * Install a set of features, including a set of options.
      *
      * @param features a set of <code>Feature</code>.
-     * @param options the installation options set.
+     * @param options  the installation options set.
      * @throws Exception in case of install failure.
      */
     public void installFeatures(Set<Feature> features, EnumSet<Option> options) throws Exception {
@@ -432,7 +432,7 @@ public class FeaturesServiceImpl implements FeaturesService {
             // Install everything
             for (Feature f : features) {
                 InstallationState s = new InstallationState();
-            	try {
+                try {
                     doInstallFeature(s, f, verbose);
                     doInstallFeatureConditionals(s, f, verbose);
                     //Check if current feature satisfies the conditionals of existing features
@@ -448,7 +448,7 @@ public class FeaturesServiceImpl implements FeaturesService {
                     state.features.putAll(s.features);
                     state.installed.addAll(s.installed);
                     state.bundleStartLevels.putAll(s.bundleStartLevels);
-            	} catch (Exception e) {
+                } catch (Exception e) {
                     failure.bundles.addAll(s.bundles);
                     failure.features.putAll(s.features);
                     failure.installed.addAll(s.installed);
@@ -457,7 +457,7 @@ public class FeaturesServiceImpl implements FeaturesService {
                     } else {
                         throw e;
                     }
-            	}
+                }
             }
             bundleManager.refreshBundles(state.bundles, state.installed, options);
             // start all bundles sorted by startlvl if wished for
@@ -479,7 +479,7 @@ public class FeaturesServiceImpl implements FeaturesService {
             // Clean up for batch
             if (!options.contains(Option.NoCleanIfFailure)) {
                 failure.installed.removeAll(state.bundles);
-                if (failure.installed.size()>0) {
+                if (failure.installed.size() > 0) {
                     bundleManager.uninstall(failure.installed);
                 }
             }
@@ -500,61 +500,69 @@ public class FeaturesServiceImpl implements FeaturesService {
     /**
      * Start a bundle.
      *
-     * @param state the current bundle installation state.
+     * @param state  the current bundle installation state.
      * @param bundle the bundle to start.
      * @throws Exception in case of start failure.
      */
-	private void startBundle(InstallationState state, Bundle bundle) throws Exception {
-		if (!isFragment(bundle)) {
-		    // do not start bundles that are persistently stopped
-		    if (state.installed.contains(bundle)
-		            || (bundle.getState() != Bundle.STARTING && bundle.getState() != Bundle.ACTIVE
-		                    && bundle.adapt(BundleStartLevel.class).isPersistentlyStarted())) {
-		    	// do no start bundles when user request it
-		    	Long bundleId = bundle.getBundleId();
-		    	BundleInfo bundleInfo = state.bundleInfos.get(bundleId);
-		        if (bundleInfo == null || bundleInfo.isStart()) {
-		            try {
-		                bundle.start();
-		            } catch (BundleException be) {
-		                String msg = format("Could not start bundle %s in feature(s) %s: %s", bundle.getLocation(), getFeaturesContainingBundleList(bundle), be.getMessage());
-		                throw new Exception(msg, be);
-		            }
-		    	}
-		    }
-		}
-	}
-	
-	private boolean isFragment(Bundle b) {
-	    @SuppressWarnings("rawtypes")
+    private void startBundle(InstallationState state, Bundle bundle) throws Exception {
+        if (!isFragment(bundle)) {
+            // do not start bundles that are persistently stopped
+            if (state.installed.contains(bundle)
+                    || (bundle.getState() != Bundle.STARTING && bundle.getState() != Bundle.ACTIVE
+                    && bundle.adapt(BundleStartLevel.class).isPersistentlyStarted())) {
+                // do no start bundles when user request it
+                Long bundleId = bundle.getBundleId();
+                BundleInfo bundleInfo = state.bundleInfos.get(bundleId);
+                if (bundleInfo == null || bundleInfo.isStart()) {
+                    try {
+                        bundle.start();
+                    } catch (BundleException be) {
+                        String msg = format("Could not start bundle %s in feature(s) %s: %s", bundle.getLocation(), getFeaturesContainingBundleList(bundle), be.getMessage());
+                        throw new Exception(msg, be);
+                    }
+                }
+            }
+        }
+    }
+
+    private boolean isFragment(Bundle b) {
+        @SuppressWarnings("rawtypes")
         Dictionary d = b.getHeaders();
         String fragmentHostHeader = (String) d.get(Constants.FRAGMENT_HOST);
         return fragmentHostHeader != null && fragmentHostHeader.trim().length() > 0;
-	}
+    }
 
-	private void cleanUpOnFailure(InstallationState state, InstallationState failure, boolean noCleanIfFailure) {
-		// cleanup on error
-		if (!noCleanIfFailure) {
-		    HashSet<Bundle> uninstall = new HashSet<Bundle>();
-		    uninstall.addAll(state.installed);
-		    uninstall.addAll(failure.installed);
-		    if (uninstall.size() > 0) {
-		        bundleManager.uninstall(uninstall);
-		    }
-		} else {
-		    // Force start of bundles so that they are flagged as persistently started
-		    for (Bundle b : state.installed) {
-		        try {
-		            b.start();
-		        } catch (Exception e2) {
-		            // Ignore
-		        }
-		    }
-		}
-	}
+    private void cleanUpOnFailure(InstallationState state, InstallationState failure, boolean noCleanIfFailure) {
+        // cleanup on error
+        if (!noCleanIfFailure) {
+            HashSet<Bundle> uninstall = new HashSet<Bundle>();
+            uninstall.addAll(state.installed);
+            uninstall.addAll(failure.installed);
+            if (uninstall.size() > 0) {
+                bundleManager.uninstall(uninstall);
+            }
+        } else {
+            // Force start of bundles so that they are flagged as persistently started
+            for (Bundle b : state.installed) {
+                try {
+                    b.start();
+                } catch (Exception e2) {
+                    // Ignore
+                }
+            }
+        }
+    }
 
     protected void doInstallFeature(InstallationState state, Feature feature, boolean verbose) throws Exception {
         if (feature != null) {
+            if (isInstalled(feature)) {
+                String msg = "Found installed feature " + feature.getName() + " " + feature.getVersion();
+                LOGGER.info(msg);
+                if (verbose) {
+                    System.out.println(msg);
+                }
+                return;
+            }
             String msg = "Installing feature " + feature.getName() + " " + feature.getVersion();
             LOGGER.info(msg);
             if (verbose) {
@@ -576,7 +584,7 @@ public class FeaturesServiceImpl implements FeaturesService {
                 if (result.isNew) {
                     state.installed.add(result.bundle);
                 }
-                String msg2 = (result.isNew) ? "Found installed bundle: " + result.bundle : "Installing bundle " + bInfo.getLocation();
+                String msg2 = (!result.isNew) ? "Found installed bundle: " + result.bundle : "Installing bundle " + bInfo.getLocation();
                 LOGGER.debug(msg2);
                 if (verbose) {
                     System.out.println(msg2);
@@ -590,7 +598,7 @@ public class FeaturesServiceImpl implements FeaturesService {
                 }
 
             }
-            
+
             for (BundleInfo bInfo : feature.getBundles()) {
                 Bundle bundle = bundleManager.isBundleInstalled(bInfo.getLocation());
                 if (bundle != null && !bundles.contains(bundle.getBundleId())) {
@@ -606,11 +614,11 @@ public class FeaturesServiceImpl implements FeaturesService {
         return (bundleStartLevel > 0) ? bundleStartLevel : featureStartLevel;
     }
 
-    private int getBundleStartLevelForOrdering(int startLevel){
+    private int getBundleStartLevelForOrdering(int startLevel) {
         return startLevel == 0 ? KARAF_BUNDLE_START_LEVEL : startLevel;
     }
 
-    protected void doInstallFeatureConditionals(InstallationState state, Feature feature,  boolean verbose) throws Exception {
+    protected void doInstallFeatureConditionals(InstallationState state, Feature feature, boolean verbose) throws Exception {
         //Check conditions of the current feature.
         feature = getFeature(feature.getName(), feature.getVersion());
         if (feature != null) {
@@ -642,19 +650,19 @@ public class FeaturesServiceImpl implements FeaturesService {
             doInstallFeature(state, fi, verbose);
         }
     }
-    
+
     protected List<BundleInfo> resolve(Feature feature) throws Exception {
         String resolver = feature.getResolver();
         // If no resolver is specified, we expect a list of uris
         if (resolver == null || resolver.length() == 0) {
-        	return feature.getBundles();
+            return feature.getBundles();
         }
         boolean optional = false;
         if (resolver.startsWith("(") && resolver.endsWith(")")) {
             resolver = resolver.substring(1, resolver.length() - 1);
             optional = true;
         }
-        
+
 
         @SuppressWarnings("unchecked")
         ServiceTracker<Resolver, Resolver> tracker = bundleManager.createServiceTrackerForResolverName(resolver);
@@ -721,7 +729,7 @@ public class FeaturesServiceImpl implements FeaturesService {
     }
 
     public void uninstallFeature(String name, String version, EnumSet<Option> options) throws Exception {
-    	Feature[] features = getFeatures(name, version);
+        Feature[] features = getFeatures(name, version);
         for (Feature feature : features) {
             if (installed.containsKey(feature)) {
                 boolean verbose = options != null && options.contains(Option.Verbose);
@@ -805,7 +813,7 @@ public class FeaturesServiceImpl implements FeaturesService {
     public Feature[] listFeatures() throws Exception {
         Collection<Feature> features = new ArrayList<Feature>();
         for (Map<String, Feature> featureWithDifferentVersion : getFeatures().values()) {
-			for (Feature f : featureWithDifferentVersion.values()) {
+            for (Feature f : featureWithDifferentVersion.values()) {
                 features.add(f);
             }
         }
@@ -880,11 +888,11 @@ public class FeaturesServiceImpl implements FeaturesService {
 
     protected Map<String, Map<String, Feature>> getFeatures() throws Exception {
         if (features == null) {
-        	//the outer map's key is feature name, the inner map's key is feature version       
+            //the outer map's key is feature name, the inner map's key is feature version
             Map<String, Map<String, Feature>> map = new HashMap<String, Map<String, Feature>>();
             // Two phase load:
             // * first load dependent repositories
-            for (;;) {
+            for (; ; ) {
                 boolean newRepo = false;
                 for (Repository repo : listRepositories()) {
                     for (URI uri : repo.getRepositories()) {
@@ -901,13 +909,13 @@ public class FeaturesServiceImpl implements FeaturesService {
             // * then load all features
             for (Repository repo : repositories.values()) {
                 for (Feature f : repo.getFeatures()) {
-                	if (map.get(f.getName()) == null) {
-                		Map<String, Feature> versionMap = new HashMap<String, Feature>();
-                		versionMap.put(f.getVersion(), f);
-                		map.put(f.getName(), versionMap);
-                	} else {
-                		map.get(f.getName()).put(f.getVersion(), f);
-                	}
+                    if (map.get(f.getName()) == null) {
+                        Map<String, Feature> versionMap = new HashMap<String, Feature>();
+                        versionMap.put(f.getVersion(), f);
+                        map.put(f.getName(), versionMap);
+                    } else {
+                        map.get(f.getName()).put(f.getVersion(), f);
+                    }
                 }
             }
             features = map;
@@ -915,21 +923,21 @@ public class FeaturesServiceImpl implements FeaturesService {
         return features;
     }
 
-	private void initState() {
+    private void initState() {
         if (!loadState()) {
             if (uris != null) {
                 for (URI uri : uris) {
                     try {
-                    	internalAddRepository(uri);
+                        internalAddRepository(uri);
                     } catch (Exception e) {
-                        LOGGER.warn(format("Unable to add features repository %s at startup", uri), e);    
+                        LOGGER.warn(format("Unable to add features repository %s at startup", uri), e);
                     }
                 }
             }
             saveState();
         }
-	}
-    
+    }
+
     public void start() throws Exception {
         this.eventAdminListener = bundleManager.createAndRegisterEventAdminListener();
         initState();
@@ -978,11 +986,11 @@ public class FeaturesServiceImpl implements FeaturesService {
             }
             Set<URI> repositories = loadSet(props, "repositories.");
             for (URI repo : repositories) {
-            	try {
-            		internalAddRepository(repo);
-            	} catch (Exception e) {
-            		LOGGER.warn(format("Unable to add features repository %s at startup", repo), e);
-            	}
+                try {
+                    internalAddRepository(repo);
+                } catch (Exception e) {
+                    LOGGER.warn(format("Unable to add features repository %s at startup", repo), e);
+                }
             }
             installed = loadMap(props, "features.");
             for (Feature f : installed.keySet()) {
@@ -1036,7 +1044,7 @@ public class FeaturesServiceImpl implements FeaturesService {
 
     protected Map<Feature, Set<Long>> loadMap(Properties props, String prefix) {
         Map<Feature, Set<Long>> map = new HashMap<Feature, Set<Long>>();
-        for (@SuppressWarnings("rawtypes") Enumeration e = props.propertyNames(); e.hasMoreElements();) {
+        for (@SuppressWarnings("rawtypes") Enumeration e = props.propertyNames(); e.hasMoreElements(); ) {
             String key = (String) e.nextElement();
             if (key.startsWith(prefix)) {
                 String val = (String) props.get(key);
@@ -1061,9 +1069,9 @@ public class FeaturesServiceImpl implements FeaturesService {
     protected Set<Long> readValue(String val) {
         Set<Long> set = new HashSet<Long>();
         if (val != null && val.length() != 0) {
-        	for (String str : val.split(",")) {
-        		set.add(Long.parseLong(str));
-        	}
+            for (String str : val.split(",")) {
+                set.add(Long.parseLong(str));
+            }
         }
         return set;
     }
@@ -1086,10 +1094,10 @@ public class FeaturesServiceImpl implements FeaturesService {
         }
     }
 
-    static Pattern fuzzyVersion  = Pattern.compile("(\\d+)(\\.(\\d+)(\\.(\\d+))?)?([^a-zA-Z0-9](.*))?",
-                                                   Pattern.DOTALL);
+    static Pattern fuzzyVersion = Pattern.compile("(\\d+)(\\.(\\d+)(\\.(\\d+))?)?([^a-zA-Z0-9](.*))?",
+            Pattern.DOTALL);
     static Pattern fuzzyModifier = Pattern.compile("(\\d+[.-])*(.*)",
-                                                   Pattern.DOTALL);
+            Pattern.DOTALL);
 
     /**
      * Clean up version parameters. Other builders use more fuzzy definitions of
@@ -1147,7 +1155,7 @@ public class FeaturesServiceImpl implements FeaturesService {
         }
     }
 
-    public Set<Feature> getFeaturesContainingBundle (Bundle bundle) throws Exception {
+    public Set<Feature> getFeaturesContainingBundle(Bundle bundle) throws Exception {
         Set<Feature> features = new HashSet<Feature>();
         for (Map<String, Feature> featureMap : this.getFeatures().values()) {
             for (Feature f : featureMap.values()) {
@@ -1167,7 +1175,7 @@ public class FeaturesServiceImpl implements FeaturesService {
         StringBuilder buffer = new StringBuilder();
         Iterator<Feature> iter = features.iterator();
         while (iter.hasNext()) {
-            Feature feature= iter.next();
+            Feature feature = iter.next();
             buffer.append(feature.getId());
             if (iter.hasNext()) {
                 buffer.append(", ");
@@ -1178,6 +1186,7 @@ public class FeaturesServiceImpl implements FeaturesService {
 
     /**
      * Returns the {@link Feature} that matches the {@link Dependency}.
+     *
      * @param dependency
      * @return
      * @throws Exception
@@ -1215,19 +1224,20 @@ public class FeaturesServiceImpl implements FeaturesService {
     /**
      * Estimates if the {@link List} of {@link Dependency} is satisfied.
      * The method will look into {@link Feature}s that are already installed or now being installed (if {@link InstallationState} is provided (not null)).
+     *
      * @param dependencies
      * @param state
      * @return
      */
     private boolean dependenciesSatisfied(List<? extends Dependency> dependencies, InstallationState state) throws Exception {
-       boolean satisfied = true;
-       for (Dependency dep : dependencies) {
-           Feature f = getFeatureForDependency(dep);
-           if (f != null && !isInstalled(f) && (state != null && !state.features.keySet().contains(f))) {
-               satisfied = false;
-           }
-       }
-       return satisfied;
+        boolean satisfied = true;
+        for (Dependency dep : dependencies) {
+            Feature f = getFeatureForDependency(dep);
+            if (f != null && !isInstalled(f) && (state != null && !state.features.keySet().contains(f))) {
+                satisfied = false;
+            }
+        }
+        return satisfied;
     }
 
     public boolean isRespectStartLvlDuringFeatureUninstall() {

@@ -340,8 +340,7 @@ public class FeaturesServiceTest extends TestBase {
         expect(bundleManager.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
         expect(bundleManager.getBundleContext()).andReturn(null);
         expect(bundleManager.installBundleIfNeeded(bundleVer01Uri, 0, null)).andReturn(new BundleInstallerResult(bundleVer01, true));
-        expect(bundleManager.installBundleIfNeeded(bundleVer01Uri, 0, null)).andReturn(new BundleInstallerResult(bundleVer01, false));
-        expect(bundleManager.isBundleInstalled("bundle-0.1")).andReturn(bundleVer01).times(2);
+        expect(bundleManager.isBundleInstalled("bundle-0.1")).andReturn(bundleVer01);
         expect(bundleManager.getBundleContext()).andReturn(bundleContext);
         ignoreRefreshes(bundleManager);
         bundleManager.uninstall(Collections.EMPTY_LIST, true);
