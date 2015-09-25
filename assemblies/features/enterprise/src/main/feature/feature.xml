@@ -52,6 +52,7 @@
             <condition>aries-blueprint</condition>
             <bundle dependency="true">mvn:org.apache.felix/org.apache.felix.coordinator/${felix.coordinator.version}</bundle>
             <bundle>mvn:org.apache.aries.transaction/org.apache.aries.transaction.blueprint/${aries.transaction.blueprint.version}</bundle>
+            <bundle>mvn:org.apache.aries.transaction/org.apache.aries.transaction.blueprint/${aries.transaction.blueprint.version2}</bundle>
         </conditional>
     </feature>
 
