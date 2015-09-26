@@ -67,6 +67,12 @@ public class ArchiveMojo extends MojoSupport {
     private String pathPrefix;
 
     /**
+     * Use a path prefix of files in the created archive
+     */
+    @Parameter
+    private boolean usePathPrefix = true;
+
+    /**
      * The target file to set as the project's artifact.
      */
     @Parameter(defaultValue="${project.artifactId}-${project.version}")
@@ -128,9 +134,12 @@ public class ArchiveMojo extends MojoSupport {
         }
         dest = new File(dest, serverName + "." + artifact.getType());
         
-        String prefix = pathPrefix.trim();
-        if( prefix.length() > 0 && !prefix.endsWith("/") ) {
-            prefix += "/";
+        String prefix = "";
+        if (usePathPrefix) {
+        	prefix = pathPrefix.trim();
+	        if( prefix.length() > 0 && !prefix.endsWith("/") ) {
+	            prefix += "/";
+	        }
         }
 
         if ("tar.gz".equals(artifact.getType())) {
