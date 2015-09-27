@@ -89,7 +89,7 @@ public class BootFeaturesInstaller {
         try {
             for (Set<Feature> features : stagedFeatures) {
                 features.removeAll(installedFeatures);
-                featuresService.installFeatures(features, EnumSet.of(Option.NoCleanIfFailure, Option.ContinueBatchOnFailure));                
+                featuresService.installFeatures(features, EnumSet.of(Option.NoAutoRefreshBundles, Option.NoCleanIfFailure, Option.ContinueBatchOnFailure));
             }
         } catch (Exception e) {
             LOGGER.error("Error installing boot features", e);
