@@ -25,13 +25,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
+import java.net.URL;
+import java.net.URLStreamHandler;
+import java.net.URLStreamHandlerFactory;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.felix.utils.properties.Properties;
-import org.apache.felix.utils.version.VersionRange;
-import org.apache.felix.utils.version.VersionTable;
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Dependency;
 import org.apache.karaf.features.internal.model.*;
@@ -51,6 +52,8 @@ import org.apache.maven.plugin.MojoFailureException;
  * @description Install kar dependencies
  */
 public class InstallKarsMojo extends MojoSupport {
+    
+    private static String GENERATED_BUNDLE_FOLDER = "generated";
 
     /**
      * Base directory used to copy the resources during the build (working directory).
@@ -287,6 +290,55 @@ public class InstallKarsMojo extends MojoSupport {
             }
         }
 
+        // install bundles defined in startup.properties
+        getLog().info("Installing bundles defined in startup.properties in the system");
+        Set<?> startupBundles = startupProperties.keySet();
+        URL.setURLStreamHandlerFactory(new URLStreamHandlerFactory() {
+            public URLStreamHandler createURLStreamHandler(String protocol) {
+                if ("wrap".equals(protocol)) {
+                    return new org.ops4j.pax.url.wrap.Handler();
+                }
+                if ("mvn".equals(protocol)) {
+                    return new org.ops4j.pax.url.mvn.Handler();
+                }
+                return null;
+            }
+        });
+        
+        for (Object startupBundle : startupBundles) {
+            if (((String)startupBundle).startsWith("wrap:")) {
+                try {
+                    InputStream input = new URL((String)startupBundle).openStream();
+                    String startLevel = startupProperties.remove(startupBundle);
+                    String uri = (String)startupBundle;
+                    uri = uri.replaceAll("[^0-9a-zA-Z.\\-_]+", "_");
+                    if (uri.length() > 256) {
+                        //to avoid the File name too long exception
+                        uri = uri.substring(0, 255);
+                    }
+                    File bundleFile = new File(systemDirectory + File.separator + GENERATED_BUNDLE_FOLDER, uri);
+                    if (!bundleFile.exists()) {
+                        bundleFile.getParentFile().mkdirs();
+                        copy(input, bundleFile);
+                    }
+                    uri = GENERATED_BUNDLE_FOLDER + File.separator + uri;
+                    uri = "file:" + uri;
+                    startupProperties.put(uri, startLevel);
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    throw new MojoExecutionException("Can't open wrap URL", e);
+                }
+            } else {
+                String bundlePath = this.dependencyHelper.pathFromMaven((String)startupBundle);
+                File bundleFile = new File(systemDirectory, bundlePath);
+                if (!bundleFile.exists()) {
+                    File bundleSource = this.dependencyHelper.resolveById((String)startupBundle, getLog());
+                    bundleFile.getParentFile().mkdirs();
+                    copy(bundleSource, bundleFile);
+                }
+            }
+        }
 
         
         // generate the startup.properties file

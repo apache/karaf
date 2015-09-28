@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
@@ -389,6 +390,26 @@ public abstract class MojoSupport extends AbstractMojo {
         }
     }
     
+    protected void copy(InputStream is, File destFile) {
+        File targetDir = destFile.getParentFile();
+        ensureDirExists(targetDir);
+
+        BufferedOutputStream bos = null;
+        try {
+            bos = new BufferedOutputStream(new FileOutputStream(destFile));
+            int count = 0;
+            byte[] buffer = new byte[8192];
+            while ((count = is.read(buffer)) > 0) {
+                bos.write(buffer, 0, count);
+            }
+            bos.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        } finally {
+            silentClose(is);
+            silentClose(bos);
+        }
+    }
 
     /**
      * Make sure the target directory exists and

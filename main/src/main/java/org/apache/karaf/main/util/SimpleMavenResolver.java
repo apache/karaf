@@ -61,6 +61,11 @@ public class SimpleMavenResolver implements ArtifactResolver {
 
     private static File findFile(File dir, URI mvnUri) {
         String path = fromMaven(mvnUri);
+
+        if (path.startsWith("file:")) {
+            path = path.substring(5);
+        }
+
         File theFile = new File(dir, path);
 
         if (theFile.exists() && !theFile.isDirectory()) {
