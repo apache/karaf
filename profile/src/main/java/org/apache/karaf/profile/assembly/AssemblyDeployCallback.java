@@ -201,7 +201,12 @@ public class AssemblyDeployCallback implements Deployer.DeployCallback {
                 regUri = uri;
                 path = Parser.pathFromMaven(uri);
             } else {
-                path = "generated/" + uri.replaceAll("[^0-9a-zA-Z.\\-_]+", "_");
+                uri = uri.replaceAll("[^0-9a-zA-Z.\\-_]+", "_");
+		if (uri.length() > 256) {
+                    //to avoid the File name too long exception
+                    uri = uri.substring(0, 255);
+                }
+                path = "generated/" + uri;
                 regUri = "file:" + path;
             }
             final Path bundleSystemFile = systemDirectory.resolve(path);
