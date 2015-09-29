@@ -147,6 +147,7 @@ public class Builder {
     int defaultStartLevel = 50;
     Path homeDirectory;
     boolean offline;
+    String localRepository;
 
     private ScheduledExecutorService executor;
     private DownloadManager manager;
@@ -304,6 +305,11 @@ public class Builder {
 
     public Builder offline() {
         return offline(true);
+    }
+
+    public Builder localRepository(String localRepository) {
+        this.localRepository = localRepository;
+        return this;
     }
 
     public Builder staticFramework() {

@@ -211,6 +211,7 @@ public class AssemblyMojo extends MojoSupport {
 
         Builder builder = Builder.newInstance();
         builder.offline(mavenSession.isOffline());
+        builder.localRepository(localRepo.getBasedir());
         builder.javase(javase);
 
         // Set up blacklisted items

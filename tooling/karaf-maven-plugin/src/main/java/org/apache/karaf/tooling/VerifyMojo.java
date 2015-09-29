@@ -82,10 +82,12 @@ import org.apache.karaf.util.config.PropertiesLoader;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.settings.Settings;
 import org.ops4j.pax.url.mvn.MavenResolver;
 import org.ops4j.pax.url.mvn.MavenResolvers;
 import org.osgi.framework.Bundle;
@@ -166,6 +168,7 @@ public class VerifyMojo extends MojoSupport {
         }
         getLog().info("Using repositories: " + remote.toString());
         config.put("maven.repositories", remote.toString());
+        config.put("maven.localRepository", localRepo.getBasedir());
         // TODO: add more configuration bits ?
         resolver = MavenResolvers.createMavenResolver(config, "maven");
         doExecute();
