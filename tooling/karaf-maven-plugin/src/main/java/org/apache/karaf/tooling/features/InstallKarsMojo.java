@@ -52,6 +52,19 @@ import org.apache.maven.plugin.MojoFailureException;
  * @description Install kar dependencies
  */
 public class InstallKarsMojo extends MojoSupport {
+    static {
+        URL.setURLStreamHandlerFactory(new URLStreamHandlerFactory() {
+            public URLStreamHandler createURLStreamHandler(String protocol) {
+                if ("wrap".equals(protocol)) {
+                    return new org.ops4j.pax.url.wrap.Handler();
+                }
+                if ("mvn".equals(protocol)) {
+                    return new org.ops4j.pax.url.mvn.Handler();
+                }
+                return null;
+            }
+        });
+    }
     
     private static String GENERATED_BUNDLE_FOLDER = "generated";
 
@@ -293,24 +306,7 @@ public class InstallKarsMojo extends MojoSupport {
         // install bundles defined in startup.properties
         getLog().info("Installing bundles defined in startup.properties in the system");
         Set<?> startupBundles = startupProperties.keySet();
-        try {
-            URL.setURLStreamHandlerFactory(new URLStreamHandlerFactory() {
-                public URLStreamHandler createURLStreamHandler(String protocol) {
-                    if ("wrap".equals(protocol)) {
-                        return new org.ops4j.pax.url.wrap.Handler();
-                    }
-                    if ("mvn".equals(protocol)) {
-                        return new org.ops4j.pax.url.mvn.Handler();
-                    }
-                    return null;
-                }
-            });
-        } catch (Error er) {
-            if (!er.getMessage().equals("factory already defined")) {
-                throw new MojoExecutionException("can't set customer URLStreamHandlerFactory", er);
-            } 
-        }
-        
+                
         for (Object startupBundle : startupBundles) {
             if (((String)startupBundle).startsWith("wrap:")) {
                 try {
