@@ -15,6 +15,59 @@
  * limitations under the License.
  */
 
+                    Apache Karaf 3.0.5
+                    ==================
+
+  This is an update patch for Apache Karaf 3.0.x, containing many bug fixes, dependency updates, and some improvements.
+
+
+  Changelog
+  ---------
+
+** Bug
+    * [KARAF-969] - Feature installer should not accept different features with equal names
+    * [KARAF-1159] - Region support should be part of karaf-features-1.1.0.xsd
+    * [KARAF-3786] - ClassCastException in OBR module
+    * [KARAF-3852] - The karaf-wrapper.conf template for windows isn't correct
+    * [KARAF-3885] - Memory leak when use interactive client shell
+    * [KARAF-3886] - should escape specify characters in ROLE names
+    * [KARAF-3896] - KAR Deployer not using karaf.data property, hardcoded to "data"
+    * [KARAF-3899] - PID file for child instances not getting written when dir has spaces
+    * [KARAF-3933] - Features with shared bundles have an install/uninstall issue
+    * [KARAF-3941] - Deadlock when starting Karaf 3.0.4
+    * [KARAF-3945] - Don't try and set permgen settings in Java 8
+    * [KARAF-3946] - LDAP role mapping too sensitive to extra whitespace
+    * [KARAF-3956] - should also add xalan into the endorse folder of distributions
+    * [KARAF-3965] - Calling Ctrl+D in Karaf console, when karaf asks if it is necessary to dispay all console commands, causes console not responding forever
+    * [KARAF-3984] - bin/client with a command can't exit automatically
+    * [KARAF-3993] - Can not start Karaf 3.0.4 as a Windows service
+    * [KARAF-3996] - bin/karaf does not set ulimit if MAX_FD_LIMIT="unlimited"
+    * [KARAF-4012] - On MacOSX, java_home check should be on 1.8
+
+** Dependency upgrade
+    * [KARAF-3914] - Upgrade to Spring 4.1.7.RELEASE
+    * [KARAF-3915] - Upgrade to Spring 3.2.14.RELEASE
+    * [KARAF-3943] - Upgrade to Aries Util 1.1.1
+    * [KARAF-3947] - Upgrade to Aries Blueprint Core 1.4.4 & Aries Blueprint CM 1.0.7
+    * [KARAF-4021] - Upgrade to Pax-Web 3.2.6
+
+** Improvement
+    * [KARAF-2698] - Add -l (level) option to log:display/log:tail in order to filter messages only for a given log level (and higher)
+    * [KARAF-3823] - introduce karaf.secured.command.compulsory.roles system property
+    * [KARAF-3858] - Add systemd support in the wrapper
+    * [KARAF-3860] - fix [KARAF-3373] Log lower level root cause exception in LDAPLoginModule.doLogin()
+    * [KARAF-3912] - Make default client log level configurable
+    * [KARAF-3959] - make jdbc:create work better with MS SQL Server
+    * [KARAF-3962] - Client can't use properties defined in custom.properties
+    * [KARAF-3978] - enable specify different shell.init.script env for remote shell in "exec" and "shell" mode
+
+** New Feature
+    * [KARAF-365] - Merge .kar files in features-maven-plugin during "add-features-to-repo" goal
+    * [KARAF-3913] - Provide Spring 4.2.0.RELEASE feature
+
+** Test
+    * [KARAF-3957] - PackageTest is broken on 3.0.x branch
+
                     Apache Karaf 3.0.4
                     ==================
 
