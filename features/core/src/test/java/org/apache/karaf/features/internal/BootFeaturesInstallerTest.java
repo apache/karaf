@@ -50,7 +50,7 @@ public class BootFeaturesInstallerTest extends TestBase {
         expect(impl.getFeature("standard", "0.0.0")).andReturn(standardFeature);
         expect(impl.getFeature("region", "0.0.0")).andReturn(regionFeature);
 
-        impl.installFeatures(setOf(configFeature, standardFeature, regionFeature), EnumSet.of(Option.NoCleanIfFailure, Option.ContinueBatchOnFailure));
+        impl.installFeatures(setOf(configFeature, standardFeature, regionFeature), EnumSet.of(Option.NoAutoRefreshBundles, Option.NoCleanIfFailure, Option.ContinueBatchOnFailure));
         EasyMock.expectLastCall();
         
         replay(impl);
@@ -73,7 +73,7 @@ public class BootFeaturesInstallerTest extends TestBase {
         expect(impl.getFeature("transaction", "1.2")).andReturn(null);
         
         // Only the ssh feature should get installed
-        impl.installFeatures(setOf(sshFeature), EnumSet.of(Option.NoCleanIfFailure, Option.ContinueBatchOnFailure));
+        impl.installFeatures(setOf(sshFeature), EnumSet.of(Option.NoAutoRefreshBundles, Option.NoCleanIfFailure, Option.ContinueBatchOnFailure));
         EasyMock.expectLastCall();
         
         replay(impl);
@@ -91,9 +91,9 @@ public class BootFeaturesInstallerTest extends TestBase {
         expect(impl.getFeature("transaction", "0.0.0")).andStubReturn(transactionFeature);
         expect(impl.getFeature("ssh", "0.0.0")).andStubReturn(sshFeature);
 
-        impl.installFeatures(setOf(transactionFeature), EnumSet.of(Option.NoCleanIfFailure, Option.ContinueBatchOnFailure));
+        impl.installFeatures(setOf(transactionFeature), EnumSet.of(Option.NoAutoRefreshBundles, Option.NoCleanIfFailure, Option.ContinueBatchOnFailure));
         EasyMock.expectLastCall();
-        impl.installFeatures(setOf(sshFeature), EnumSet.of(Option.NoCleanIfFailure, Option.ContinueBatchOnFailure));
+        impl.installFeatures(setOf(sshFeature), EnumSet.of(Option.NoAutoRefreshBundles, Option.NoCleanIfFailure, Option.ContinueBatchOnFailure));
         EasyMock.expectLastCall();
         
         replay(impl);
