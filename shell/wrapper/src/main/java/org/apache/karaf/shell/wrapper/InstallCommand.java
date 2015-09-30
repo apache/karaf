@@ -237,7 +237,7 @@ public class InstallCommand extends AbstractAction {
 
                     mkdir(lib);
                     copyResourceTo(new File(lib, "libwrapper.so"), "solaris/x86/libwrapper.so", false);
-                } else if (arch.equalsIgnoreCase("x86_64")) {
+                } else if (arch.equalsIgnoreCase("amd64") || arch.equalsIgnoreCase("x86_64")) {
                     mkdir(bin);
 
                     File file = new File(bin, name + "-wrapper");
