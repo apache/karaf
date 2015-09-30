@@ -60,6 +60,10 @@
             <artifactId>org.apache.felix.scr</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.compat</artifactId>
+        </dependency>
+        <dependency>
             <groupId>biz.aQute.bnd</groupId>
             <artifactId>bndlib</artifactId>
             <scope>provided</scope>

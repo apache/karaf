@@ -378,6 +378,11 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.compat</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.apache.karaf.scr</groupId>
             <artifactId>org.apache.karaf.scr.command</artifactId>
             <scope>provided</scope>
