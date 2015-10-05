@@ -451,7 +451,7 @@ public class WrapperServiceImpl implements WrapperService {
                 JarOutputStream jar = new JarOutputStream(new FileOutputStream(outFile));
                 int idx = resource.indexOf('/');
                 while (idx > 0) {
-                    jar.putNextEntry(new ZipEntry(resource.substring(0, idx)));
+                    jar.putNextEntry(new ZipEntry(resource.substring(0, idx + 1)));
                     jar.closeEntry();
                     idx = resource.indexOf('/', idx + 1);
                 }
