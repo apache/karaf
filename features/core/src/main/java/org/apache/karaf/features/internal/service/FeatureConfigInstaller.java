@@ -32,6 +32,8 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.felix.utils.properties.InterpolationHelper;
+import org.apache.felix.utils.properties.InterpolationHelper.SubstitutionCallback;
 import org.apache.karaf.features.ConfigFileInfo;
 import org.apache.karaf.features.ConfigInfo;
 import org.apache.karaf.features.Feature;
@@ -134,16 +136,62 @@ public class FeatureConfigInstaller {
         return factoryPid == null ? pid : pid + "-" + factoryPid;
     }
 
-    private void installConfigurationFile(String fileLocation, String finalname, boolean override) throws IOException {
-        String basePath = System.getProperty("karaf.base");
+    /**
+     * Substitute variables in the final name and append prefix if necessary.
+     * 
+     * <p>
+     * <ol>
+     * <li>If the final name does not start with '${' it is prefixed with
+     * karaf.base (+ file separator).</li>
+     * <li>It substitute also all variables (scheme ${...}) with the respective
+     * configuration values and system properties.</li>
+     * <li>All unknown variables kept unchanged.</li>
+     * <li>If the substituted string starts with an variable that could not be
+     * substituted, it will be prefixed with karaf.base (+ file separator), too.
+     * </li>
+     * </ol>
+     * </p>
+     * 
+     * @param finalname
+     *            The final name that should be processed.
+     * @return the location in the file system that should be accesses.
+     */
+    protected static String substFinalName(String finalname) {
+        final String markerVarBeg = "${";
+        final String markerVarEnd = "}";
 
-        if (finalname.contains("${")) {
-            //remove any placeholder or variable part, this is not valid.
-            int marker = finalname.indexOf("}");
-            finalname = finalname.substring(marker + 1);
+        boolean startsWithVariable = finalname.startsWith(markerVarBeg) && finalname.contains(markerVarEnd);
+
+        // Substitute all variables, but keep unknown ones.
+        final String dummyKey = "";
+        try {
+            finalname = InterpolationHelper.substVars(finalname, dummyKey, null, null, (SubstitutionCallback) null,
+                    true, true, false);
+        } catch (final IllegalArgumentException ex) {
+            LOGGER.info("Substitution failed. Skip substitution of variables of configuration final name ({}).",
+                    finalname);
         }
 
-        finalname = basePath + File.separator + finalname;
+        // Prefix with karaf base if the initial final name does not start with
+        // a variable or the first variable was not substituted.
+        if (!startsWithVariable || finalname.startsWith(markerVarBeg)) {
+            final String basePath = System.getProperty("karaf.base");
+            finalname = basePath + File.separator + finalname;
+        }
+
+        // Remove all unknown variables.
+        while (finalname.contains(markerVarBeg) && finalname.contains(markerVarEnd)) {
+            int beg = finalname.indexOf(markerVarBeg);
+            int end = finalname.indexOf(markerVarEnd);
+            final String rem = finalname.substring(beg, end + markerVarEnd.length());
+            finalname = finalname.replace(rem, "");
+        }
+
+        return finalname;
+    }
+
+    private void installConfigurationFile(String fileLocation, String finalname, boolean override) throws IOException {
+        finalname = substFinalName(finalname);
 
         File file = new File(finalname);
         if (file.exists()) {
