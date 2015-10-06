@@ -199,7 +199,7 @@ public class Install extends AbstractAction {
 
             if (systemdFile != null) {
                 System.out.println("");
-                System.out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("For SystemD compliant Linux: ").a(Ansi.Attribute.RESET).toString());
+                System.out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("For systemd compliant Linux: ").a(Ansi.Attribute.RESET).toString());
                 System.out.println("  To install the service (and enable at system boot):");
                 System.out.println("   $ systemctl enable " + systemdFile.getPath());
                 System.out.println("");
