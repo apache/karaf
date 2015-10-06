@@ -201,7 +201,7 @@ public class Install implements Action {
 
             if (systemdFile != null) {
                 System.out.println("");
-                System.out.println(INTENSITY_BOLD + "For SystemD compliant Linux: " + INTENSITY_NORMAL);
+                System.out.println(INTENSITY_BOLD + "For systemd compliant Linux: " + INTENSITY_NORMAL);
                 System.out.println("  To install the service (and enable at system boot):");
                 System.out.println("   $ systemctl enable " + systemdFile.getPath());
                 System.out.println("");

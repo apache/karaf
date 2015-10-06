@@ -16,7 +16,7 @@
 # ------------------------------------------------------------------------
 
 #
-# This script is an Unix SystemD script
+# This script is an Unix systemd script
 #
 [Unit]
 Description=${displayName}
