@@ -148,6 +148,7 @@ public class Builder {
     Path homeDirectory;
     boolean offline;
     String localRepository;
+    String mavenRepositories;
 
     private ScheduledExecutorService executor;
     private DownloadManager manager;
@@ -312,6 +313,11 @@ public class Builder {
         return this;
     }
 
+    public Builder mavenRepositories(String mavenRepositories) {
+        this.mavenRepositories = mavenRepositories;
+        return this;
+    }
+
     public Builder staticFramework() {
         // TODO: load this from resources
         return staticFramework("4.0.0-SNAPSHOT");
@@ -386,6 +392,12 @@ public class Builder {
         Dictionary<String, String> props = new Hashtable<>();
         if (offline) {
             props.put(ORG_OPS4J_PAX_URL_MVN_PID + "offline", "true");
+        }
+        if (localRepository != null) {
+            props.put(Builder.ORG_OPS4J_PAX_URL_MVN_PID + ".localRepository", localRepository);
+        }
+        if (mavenRepositories != null) {
+            props.put(Builder.ORG_OPS4J_PAX_URL_MVN_PID + ".repositories", mavenRepositories);
         }
         MavenResolver resolver = MavenResolvers.createMavenResolver(props, ORG_OPS4J_PAX_URL_MVN_PID);
         executor = Executors.newScheduledThreadPool(8);
