@@ -169,7 +169,7 @@
         <geronimo.jpa-spec.version>1.1</geronimo.jpa-spec.version>
         <geronimo.jta-spec.version>1.1.1</geronimo.jta-spec.version>
 
-        <easymock.version>3.3.1</easymock.version>
+        <easymock.version>3.4</easymock.version>
         <equinox.groupId>org.eclipse.birt.runtime</equinox.groupId>
         <equinox.artifactId>org.eclipse.osgi</equinox.artifactId>
         <equinox.version>3.10.2.v20150203-1939</equinox.version>
