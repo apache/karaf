@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.jar.JarInputStream;
@@ -53,6 +54,7 @@ import org.apache.karaf.tooling.utils.ManifestUtils;
 import org.apache.karaf.tooling.utils.MojoSupport;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
+import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
@@ -62,8 +64,10 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
+import org.apache.maven.project.MavenProject;
 import org.apache.maven.shared.filtering.MavenFileFilter;
 import org.apache.maven.shared.filtering.MavenFilteringException;
+import org.apache.maven.shared.filtering.MavenResourcesExecution;
 import org.apache.maven.shared.filtering.MavenResourcesFiltering;
 import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.util.ReaderFactory;
@@ -652,8 +656,18 @@ public class GenerateDescriptorMojo extends MojoSupport {
                                 + ", i.e. build is platform dependent!");
             }
             targetFile.getParentFile().mkdirs();
+
+            final MavenResourcesExecution mre = new MavenResourcesExecution();
+            mre.setMavenProject(project);
+            mre.setMavenSession(mavenSession);
+            mre.setFilters(null);
+            mre.setEscapedBackslashesInFilePath(true);
+            final LinkedHashSet<String> delimiters = new LinkedHashSet<>();
+            delimiters.add("${*}");
+            mre.setDelimiters(delimiters);
+
             @SuppressWarnings("rawtypes")
-            List filters = mavenFileFilter.getDefaultFilterWrappers(project, null, true, mavenSession, null);
+            List filters = mavenFileFilter.getDefaultFilterWrappers(mre);
             mavenFileFilter.copyFile(sourceFile, targetFile, true, filters, encoding, true);
         } catch (MavenFilteringException e) {
             throw new MojoExecutionException(e.getMessage(), e);
