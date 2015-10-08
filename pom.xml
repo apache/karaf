@@ -193,7 +193,7 @@
         <felix.eventadmin.version>1.4.2</felix.eventadmin.version>
         <felix.eventadmin.webconsole.plugin.version>1.1.2</felix.eventadmin.webconsole.plugin.version>
         <felix.obr.version>1.0.2</felix.obr.version>
-        <felix.scr.version>2.0.0</felix.scr.version>
+        <felix.scr.version>2.0.2</felix.scr.version>
         <felix.scr.compat.version>1.0.2</felix.scr.compat.version>
         <felix.scr.webconsole.plugin.version>1.0.0</felix.scr.webconsole.plugin.version>
         <felix.scr.annotation.version>1.6.0</felix.scr.annotation.version>
