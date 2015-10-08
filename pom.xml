@@ -254,7 +254,7 @@
         <pax.base.version>1.5.0</pax.base.version>
         <pax.url.version>2.4.3</pax.url.version>
         <pax.web.version>4.2.0</pax.web.version>
-        <pax.tinybundle.version>2.1.0</pax.tinybundle.version>
+        <pax.tinybundle.version>2.1.1</pax.tinybundle.version>
         <portlet-api.version>2.0</portlet-api.version>
         <slf4j.version>1.7.12</slf4j.version>
         <servicemix.specs.version>2.5.0</servicemix.specs.version>
