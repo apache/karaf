@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache.karaf.assemblies</groupId>
         <artifactId>assemblies</artifactId>
-        <version>4.0.2</version>
+        <version>4.0.3-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
