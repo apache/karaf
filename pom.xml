@@ -187,15 +187,15 @@
         <felix.gogo.version>0.16.2</felix.gogo.version>
         <felix.plugin.version>3.0.0</felix.plugin.version>
         <felix.utils.version>1.8.0</felix.utils.version>
-        <felix.webconsole.version>4.2.8</felix.webconsole.version>
+        <felix.webconsole.version>4.2.12</felix.webconsole.version>
         <felix.webconsole.api.version>3.1.2</felix.webconsole.api.version>
         <felix.metatype.version>1.1.2</felix.metatype.version>
         <felix.eventadmin.version>1.4.4</felix.eventadmin.version>
-        <felix.eventadmin.webconsole.plugin.version>1.1.2</felix.eventadmin.webconsole.plugin.version>
+        <felix.eventadmin.webconsole.plugin.version>1.1.4</felix.eventadmin.webconsole.plugin.version>
         <felix.obr.version>1.0.2</felix.obr.version>
         <felix.scr.version>2.0.2</felix.scr.version>
         <felix.scr.compat.version>1.0.2</felix.scr.compat.version>
-        <felix.scr.webconsole.plugin.version>1.0.0</felix.scr.webconsole.plugin.version>
+        <felix.scr.webconsole.plugin.version>2.0.2</felix.scr.webconsole.plugin.version>
         <felix.scr.annotation.version>1.6.0</felix.scr.annotation.version>
         <felix.resolver.version>1.6.0</felix.resolver.version>
 
