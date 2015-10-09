@@ -131,7 +131,9 @@ run() {
         KARAF_BASE=`cygpath --path --windows "$KARAF_BASE"`
         KARAF_DATA=`cygpath --path --windows "$KARAF_DATA"`
         KARAF_ETC=`cygpath --path --windows "$KARAF_ETC"`
-        CLASSPATH=`cygpath --path --windows "$CLASSPATH"`
+        if [ ! -z "$CLASSPATH" ]; then
+            CLASSPATH=`cygpath --path --windows "$CLASSPATH"`
+        fi
     fi
     # Ensure the log directory exists -- we need to have a place to redirect stdout/stderr
     if [ ! -d "$KARAF_DATA/log" ]; then

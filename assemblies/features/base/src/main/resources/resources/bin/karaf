@@ -408,7 +408,9 @@ run() {
         KARAF_BASE=`cygpath --path --windows "$KARAF_BASE"`
         KARAF_DATA=`cygpath --path --windows "$KARAF_DATA"`
         KARAF_ETC=`cygpath --path --windows "$KARAF_ETC"`
-        CLASSPATH=`cygpath --path --windows "$CLASSPATH"`
+        if [ ! -z "$CLASSPATH" ]; then
+            CLASSPATH=`cygpath --path --windows "$CLASSPATH"`
+        fi
         JAVA_HOME=`cygpath --path --windows "$JAVA_HOME"`
         JAVA_ENDORSED_DIRS=`cygpath --path --windows "$JAVA_ENDORSED_DIRS"`
         JAVA_EXT_DIRS=`cygpath --path --windows "$JAVA_EXT_DIRS"`
