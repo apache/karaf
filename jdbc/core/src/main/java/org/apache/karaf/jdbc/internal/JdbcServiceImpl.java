@@ -227,11 +227,19 @@ public class JdbcServiceImpl implements JdbcService {
             ResultSet resultSet = jdbcConnector.register(statement.executeQuery(query));
             ResultSetMetaData metaData = resultSet.getMetaData();
             for (int c = 1; c <= metaData.getColumnCount(); c++) {
-                map.put(metaData.getColumnLabel(c), new ArrayList<String>());
+                String columnLabel = metaData.getColumnLabel(c);
+                if (columnLabel.isEmpty()) {
+                    columnLabel = new Integer(c).toString();
+                }
+                map.put(columnLabel, new ArrayList<String>());
             }
             while (resultSet.next()) {
                 for (int c = 1; c <= metaData.getColumnCount(); c++) {
-                    map.get(metaData.getColumnLabel(c)).add(resultSet.getString(c));
+                    String columnLabel = metaData.getColumnLabel(c);
+                    if (columnLabel.isEmpty()) {
+                        columnLabel = new Integer(c).toString();
+                    }
+                    map.get(columnLabel).add(resultSet.getString(c));
                 }
             }
             return map;
