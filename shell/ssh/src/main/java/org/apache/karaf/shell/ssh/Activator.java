@@ -109,6 +109,7 @@ public class Activator extends BaseActivator implements ManagedService {
         sessionFactory.getRegistry().getService(Manager.class).register(SshAction.class);
         if (Boolean.parseBoolean(bundleContext.getProperty("karaf.startRemoteShell"))) {
             server = createSshServer(sessionFactory);
+            this.bundleContext.registerService(SshServer.class, server, null);
             if (server == null) {
                 return; // can result from bad specification.
             }
