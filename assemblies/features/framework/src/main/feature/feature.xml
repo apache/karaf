@@ -33,6 +33,9 @@
         <bundle start="true" start-level="11">mvn:org.apache.felix/org.apache.felix.fileinstall/${felix.fileinstall.version}</bundle>
         <!-- features service -->
         <bundle start="true" start-level="15">mvn:org.apache.karaf.features/org.apache.karaf.features.core/${project.version}</bundle>
+        <!-- sshd -->
+        <bundle start="true" start-level="20">mvn:org.apache.sshd/sshd-core/${sshd.version}</bundle>
+
     </feature>
 
 </features>
