@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.features.internal.service;
 
+import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,7 +43,22 @@ public class BootFeaturesInstaller {
     private final String repositories;
     private final String features;
     private final boolean asynchronous;
+    
+    /**
+     * The Unix separator character.
+     */
+    private static final char UNIX_SEPARATOR = '/';
 
+    /**
+     * The Windows separator character.
+     */
+    private static final char WINDOWS_SEPARATOR = '\\';
+
+    /**
+     * The system separator character.
+     */
+    private static final char SYSTEM_SEPARATOR = File.separatorChar;
+    
     /**
      * @param features list of boot features separated by comma. Optionally contains ;version=x.x.x to specify a specific feature version
      */
@@ -82,6 +98,7 @@ public class BootFeaturesInstaller {
             for (String repo : repositories.split(",")) {
                 repo = repo.trim();
                 if (!repo.isEmpty()) {
+                    repo = separatorsToUnix(repo);
                     try {
                         featuresService.addRepository(URI.create(repo));
                     } catch (Exception e) {
@@ -141,4 +158,23 @@ public class BootFeaturesInstaller {
         }
     }
 
+    //-----------------------------------------------------------------------
+    /**
+     * Converts all separators to the Unix separator of forward slash.
+     * 
+     * @param path  the path to be changed, null ignored
+     * @return the updated path
+     */
+    private String separatorsToUnix(String path) {
+        if (SYSTEM_SEPARATOR == WINDOWS_SEPARATOR) {
+            // running under windows
+            if (path == null || path.indexOf(WINDOWS_SEPARATOR) == -1) {
+                return path;
+            }
+            
+            path = path.replace(WINDOWS_SEPARATOR, UNIX_SEPARATOR);
+            LOGGER.debug("Converted path to unix separators: {}", path);
+        }
+        return path;
+    }
 }
