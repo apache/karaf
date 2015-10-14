@@ -24,6 +24,7 @@ import java.lang.reflect.Proxy;
 import java.net.URL;
 import java.security.KeyPair;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -38,6 +39,7 @@ import jline.UnixTerminal;
 import jline.internal.TerminalLineSettings;
 import org.apache.sshd.ClientChannel;
 import org.apache.sshd.ClientSession;
+import org.apache.sshd.SshBuilder;
 import org.apache.sshd.SshClient;
 import org.apache.sshd.agent.SshAgent;
 import org.apache.sshd.agent.local.AgentImpl;
@@ -46,6 +48,11 @@ import org.apache.sshd.client.UserInteraction;
 import org.apache.sshd.client.channel.ChannelShell;
 import org.apache.sshd.client.channel.PtyCapableChannelSession;
 import org.apache.sshd.client.future.ConnectFuture;
+import org.apache.sshd.client.kex.ECDHP256;
+import org.apache.sshd.client.kex.ECDHP384;
+import org.apache.sshd.client.kex.ECDHP521;
+import org.apache.sshd.common.KeyExchange;
+import org.apache.sshd.common.NamedFactory;
 import org.apache.sshd.common.PtyMode;
 import org.apache.sshd.common.RuntimeSshException;
 import org.apache.sshd.common.Session;
@@ -90,7 +97,18 @@ public class Main {
         Terminal terminal = null;
         int exitStatus = 0;
         try {
-            client = SshClient.setUpDefaultClient();
+            SshBuilder.ClientBuilder clientBuilder = SshBuilder.client();
+            clientBuilder.keyExchangeFactories(Arrays.<NamedFactory<KeyExchange>>asList(
+                     new ECDHP256.Factory(),
+                     new ECDHP256.Factory(),
+                     new ECDHP384.Factory(),
+                     new ECDHP384.Factory(),
+                     new ECDHP521.Factory(),
+                     new ECDHP521.Factory()
+                     )
+                );
+
+            client = (SshClient)clientBuilder.build();
             setupAgent(config.getUser(), config.getKeyFile(), client);
             final Console console = System.console();
             if (console != null) {
