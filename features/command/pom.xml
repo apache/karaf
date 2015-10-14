@@ -110,6 +110,8 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
+                        <!-- Set the blueprint.graceperiod flag to false to allow the bundle to start -->
+                        <Bundle-SymbolicName>${project.artifactId};blueprint.graceperiod:=false</Bundle-SymbolicName>
                         <Import-Package>
                             javax.management,
                             javax.management.loading,
