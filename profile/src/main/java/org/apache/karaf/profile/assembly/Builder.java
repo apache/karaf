@@ -760,12 +760,7 @@ public class Builder {
         for (String dependency : bootEffective.getFeatures()) {
             Dependency dep = generatedDep.get(dependency);
             if (dep == null) {
-                dep = new Dependency();
-                String[] split = dependency.split("/");
-                dep.setName(split[0]);
-                if (split.length > 1) {
-                    dep.setVersion(split[1]);
-                }
+                dep = createDependency(dependency);
                 generated.getFeature().add(dep);
                 generatedDep.put(dep.getName(), dep);
             }
@@ -893,54 +888,75 @@ public class Builder {
             featuresProperties.save();
         }
         else {
-            StringBuilder boot = new StringBuilder();
-            for (Dependency dep : generatedDep.values()) {
-                if (dep.isPrerequisite()) {
-                    if (boot.length() == 0) {
-                        boot.append("(");
-                    } else {
-                        boot.append(",");
-                    }
-                    boot.append(dep.getName());
-                }
-            }
-            if (boot.length() > 0) {
-                boot.append(")");
-            }
-            // TODO: for dependencies, we'd need to resolve the features completely
-            for (Dependency dep : generatedDep.values()) {
-                if (!dep.isPrerequisite() && !dep.isDependency()) {
-                    if (boot.length() > 0) {
-                        boot.append(",");
-                    }
-                    boot.append(dep.getName());
-                    if (!Feature.DEFAULT_VERSION.equals(dep.getVersion())) {
-                        if (karafVersion == KarafVersion.v4x) {
-                            boot.append("/");
-                        } else {
-                            boot.append(";version=");
-                        }
-                        boot.append(dep.getVersion());
-                    }
-                }
-            }
-            StringBuilder repos = new StringBuilder();
-            for (String repo : new HashSet<>(rep.getRepository())) {
-                if (repos.length() > 0) {
-                    repos.append(",");
-                }
-                repos.append(repo);
-            }
+            String repos = getRepos(rep);
+            String boot = getBootFeatures(generatedDep);
 
             Properties featuresProperties = new Properties(featuresCfgFile.toFile());
-            featuresProperties.put(FEATURES_REPOSITORIES, repos.toString());
-            featuresProperties.put(FEATURES_BOOT, boot.toString());
+            featuresProperties.put(FEATURES_REPOSITORIES, repos);
+            featuresProperties.put(FEATURES_BOOT, boot);
             reformatClauses(featuresProperties, FEATURES_REPOSITORIES);
             reformatClauses(featuresProperties, FEATURES_BOOT);
             featuresProperties.save();
         }
         downloader.await();
         return allBootFeatures;
+    }
+
+    private String getRepos(Features rep) {
+        StringBuilder repos = new StringBuilder();
+        for (String repo : new HashSet<>(rep.getRepository())) {
+            if (repos.length() > 0) {
+                repos.append(",");
+            }
+            repos.append(repo);
+        }
+        return repos.toString();
+    }
+
+    private String getBootFeatures(Map<String, Dependency> generatedDep) {
+        StringBuilder boot = new StringBuilder();
+        for (Dependency dep : generatedDep.values()) {
+            if (dep.isPrerequisite()) {
+                if (boot.length() == 0) {
+                    boot.append("(");
+                } else {
+                    boot.append(",");
+                }
+                boot.append(dep.getName());
+            }
+        }
+        if (boot.length() > 0) {
+            boot.append(")");
+        }
+        // TODO: for dependencies, we'd need to resolve the features completely
+        for (Dependency dep : generatedDep.values()) {
+            if (!dep.isPrerequisite() && !dep.isDependency()) {
+                if (boot.length() > 0) {
+                    boot.append(",");
+                }
+                boot.append(dep.getName());
+                if (!Feature.DEFAULT_VERSION.equals(dep.getVersion())) {
+                    if (karafVersion == KarafVersion.v4x) {
+                        boot.append("/");
+                    } else {
+                        boot.append(";version=");
+                    }
+                    boot.append(dep.getVersion());
+                }
+            }
+        }
+        return boot.toString();
+    }
+
+    private Dependency createDependency(String dependency) {
+        Dependency dep;
+        dep = new Dependency();
+        String[] split = dependency.split("/");
+        dep.setName(split[0]);
+        if (split.length > 1) {
+            dep.setVersion(split[1]);
+        }
+        return dep;
     }
 
     private Profile startupStage(Profile startupProfile) throws Exception {
@@ -1021,31 +1037,41 @@ public class Builder {
         }
     }
 
-    private void addFeatures(Set<Feature> startupFeatures, Set<Feature> features, String feature) {
+    private void addFeatures(Set<Feature> startupFeatures, Set<Feature> features, String featureSt) {
         int nbFound = 0;
+        Dependency featureRef = createDependency(featureSt);
         for (Feature f : features) {
-            String[] split = feature.split("/");
-            if (split.length == 2) {
-                if (f.getName().equals(split[0]) && f.getVersion().equals(split[1])) {
-                    for (Dependency dep : f.getFeature()) {
-                        addFeatures(startupFeatures, features, dep.getName());
-                    }
-                    startupFeatures.add(f);
-                    nbFound++;
+            if (matches(f, featureRef)) {
+                for (Dependency dep : f.getFeature()) {
+                    addFeatures(startupFeatures, features, getFeatureSt(dep));
                 }
-            } else {
-                if (feature.equals(f.getName())) {
-                    for (Dependency dep : f.getFeature()) {
-                        addFeatures(startupFeatures, features, dep.getName());
-                    }
-                    startupFeatures.add(f);
-                    nbFound++;
-                }
+                startupFeatures.add(f);
+                nbFound++;
             }
         }
         if (nbFound == 0) {
-            throw new IllegalStateException("Could not find matching feature for " + feature);
+            throw new IllegalStateException("Could not find matching feature for " + featureSt);
         }
+    }
+
+    private String getFeatureSt(Dependency dep) {
+        String version = dep.getVersion() == null || "0.0.0".equals(dep.getVersion()) ? "" : "/" + dep.getVersion();
+        return dep.getName() + version;
+    }
+
+    /**
+     * Checks if a given feature f matches the featureRef.
+     * TODO Need to also check for version ranges. Currently ranges are ignored and all features matching the name
+     * are copied in that case.
+     *  
+     * @param f
+     * @param featureRef
+     * @return
+     */
+    private boolean matches(Feature f, Dependency featureRef) {
+        String version = featureRef.getVersion();
+        return f.getName().equals(featureRef.getName()) 
+            && (version == null || version.equals("0.0.0")|| version.startsWith("[") || f.getVersion().equals(version));
     }
 
     private List<String> getStaged(Stage stage, Map<String, Stage> data) {
