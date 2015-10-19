@@ -149,7 +149,12 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
     }
 
     private File getPropertiesFile() {
-        return bundleContext.getDataFile("FeatureDeploymentListener.cfg");
+        try {
+            return bundleContext.getDataFile("FeatureDeploymentListener.cfg");
+        } catch (Exception e){
+            logger.debug("Unable to get FeatureDeploymentListener.cfg", e);
+            return null;
+        }
     }
 
     public boolean canHandle(File artifact) {
