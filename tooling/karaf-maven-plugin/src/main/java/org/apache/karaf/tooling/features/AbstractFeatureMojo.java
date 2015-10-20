@@ -135,6 +135,9 @@ public abstract class AbstractFeatureMojo extends MojoSupport {
     @SuppressWarnings("deprecation")
     protected void resolveArtifact(Artifact artifact, List<ArtifactRepository> remoteRepos) {
         try {
+            if (artifact == null) {
+                return;
+            }
             List<ArtifactRepository> usedRemoteRepos = artifact.getRepository() != null ? 
                     Collections.singletonList(artifact.getRepository())
                     : remoteRepos;
