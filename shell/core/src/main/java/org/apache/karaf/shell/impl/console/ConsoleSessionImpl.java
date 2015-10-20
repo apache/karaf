@@ -245,6 +245,8 @@ public class ConsoleSessionImpl implements Session {
                 // Ignore
             }
         }
+        if (session != null)
+            session.close();
     }
 
     public void run() {
