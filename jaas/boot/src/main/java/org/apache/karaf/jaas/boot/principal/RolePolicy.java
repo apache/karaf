@@ -15,6 +15,7 @@
 package org.apache.karaf.jaas.boot.principal;
 
 import java.security.Principal;
+import java.security.acl.Group;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
@@ -35,8 +36,8 @@ public enum RolePolicy {
                 }
             }
         }
-    }; // ,
-    /* TODO Is this used anywhere?
+    },
+    
     GROUP_ROLES("group") {
         public void handleRoles(Subject subject,Set<Principal> principals,String discriminator) {
             Group group = new GroupPrincipal(discriminator);
@@ -50,7 +51,7 @@ public enum RolePolicy {
             subject.getPrincipals().add(group);
         }
     };
-    */
+    
 
     private String value;
 
