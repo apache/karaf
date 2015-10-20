@@ -41,7 +41,6 @@ public class SessionFactoryImpl extends RegistryImpl implements SessionFactory, 
 
     final CommandProcessorImpl commandProcessor;
     final ThreadIO threadIO;
-    final List<Session> sessions = new ArrayList<Session>();
     final Map<String, SubShellCommand> subshells = new HashMap<String, SubShellCommand>();
     boolean closed;
 
@@ -108,12 +107,11 @@ public class SessionFactoryImpl extends RegistryImpl implements SessionFactory, 
 
     @Override
     public Session create(InputStream in, PrintStream out, PrintStream err, Terminal term, String encoding, Runnable closeCallback) {
-        synchronized (sessions) {
+        synchronized (commandProcessor) {
             if (closed) {
                 throw new IllegalStateException("SessionFactory has been closed");
             }
             final Session session = new ConsoleSessionImpl(this, commandProcessor, threadIO, in, out, err, term, encoding, closeCallback);
-            sessions.add(session);
             return session;
         }
     }
@@ -125,22 +123,18 @@ public class SessionFactoryImpl extends RegistryImpl implements SessionFactory, 
 
     @Override
     public Session create(InputStream in, PrintStream out, PrintStream err, Session parent) {
-        synchronized (sessions) {
+        synchronized (commandProcessor) {
             if (closed) {
                 throw new IllegalStateException("SessionFactory has been closed");
             }
             final Session session = new HeadlessSessionImpl(this, commandProcessor, in, out, err, parent);
-            sessions.add(session);
             return session;
         }
     }
 
     public void stop() {
-        synchronized (sessions) {
+        synchronized (commandProcessor) {
             closed = true;
-            for (Session session : sessions) {
-                session.close();
-            }
             commandProcessor.stop();
         }
     }
