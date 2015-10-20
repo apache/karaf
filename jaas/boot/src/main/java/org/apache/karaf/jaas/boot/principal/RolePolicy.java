@@ -15,6 +15,7 @@
 package org.apache.karaf.jaas.boot.principal;
 
 import java.security.Principal;
+import java.security.acl.Group;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
@@ -34,7 +35,22 @@ public enum RolePolicy {
                 }
             }
         }
+    },
+    
+    GROUP_ROLES("group") {
+        public void handleRoles(Subject subject,Set<Principal> principals,String discriminator) {
+            Group group = new GroupPrincipal(discriminator);
+            for(Principal p:principals) {
+                if(p instanceof RolePrincipal) {
+                    group.addMember(p);
+                } else {
+                    subject.getPrincipals().add(p);
+                }
+            }
+            subject.getPrincipals().add(group);
+        }
     };
+    
 
     private String value;
 
