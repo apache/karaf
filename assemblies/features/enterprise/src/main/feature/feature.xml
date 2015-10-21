@@ -45,7 +45,7 @@
             aries.transaction.howl.maxBlocksPerFile = 512
             aries.transaction.howl.bufferSize = 4
         </config>
-        <feature version="[1.1,1.2)">transaction-api</feature>
+        <feature version="[1.1,2)">transaction-api</feature>
         <bundle dependency="true">mvn:org.apache.aries/org.apache.aries.util/${aries.util.version}</bundle>
         <bundle>mvn:org.apache.aries.transaction/org.apache.aries.transaction.manager/${aries.transaction.manager.version}</bundle>
         <conditional>
@@ -76,7 +76,7 @@
     
     <feature name="jpa" description="OSGi Persistence Container" version="${aries.jpa.container.context.version}">
         <details>JPA implementation provided by Apache Aries JPA 1.x. NB: this feature doesn"t provide the JPA engine, you have to install one by yourself (OpenJPA for instance)</details>
-        <feature version="[1.1,1.2)">transaction-api</feature>
+        <feature version="[1.1,2)">transaction-api</feature>
         <feature version="[2.0.0,2.2.0)">persistence-api</feature>
         <bundle dependency="true" start-level="30">mvn:org.apache.aries/org.apache.aries.util/${aries.util.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.jpa/org.apache.aries.jpa.api/${aries.jpa.api.version}</bundle>
@@ -90,7 +90,7 @@
 
     <feature name="jpa" description="OSGi Persistence Container" version="${aries.jpa.version}">
         <details>JPA implementation provided by Apache Aries JPA 2.x. NB: this feature doesn't provide the JPA engine, you have to install one by yourself (OpenJPA for instance)</details>
-        <feature version="[1.1,1.2)">transaction-api</feature>
+        <feature version="[1.1,2)">transaction-api</feature>
         <feature version="[2.0.0,2.2.0)">persistence-api</feature>
         <bundle dependency="true">mvn:org.apache.felix/org.apache.felix.coordinator/${felix.coordinator.version}</bundle>
         <bundle>mvn:org.apache.aries.jpa/org.apache.aries.jpa.api/${aries.jpa.version}</bundle>
