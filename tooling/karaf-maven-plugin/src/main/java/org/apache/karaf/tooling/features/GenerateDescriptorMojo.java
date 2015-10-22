@@ -54,7 +54,6 @@ import org.apache.karaf.tooling.utils.ManifestUtils;
 import org.apache.karaf.tooling.utils.MojoSupport;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
-import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
@@ -64,7 +63,6 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
-import org.apache.maven.project.MavenProject;
 import org.apache.maven.shared.filtering.MavenFileFilter;
 import org.apache.maven.shared.filtering.MavenFilteringException;
 import org.apache.maven.shared.filtering.MavenResourcesExecution;
@@ -322,6 +320,7 @@ public class GenerateDescriptorMojo extends MojoSupport {
             }
             feature.getBundle().add(bundle);
         }
+        boolean needWrap = false;
         for (Map.Entry<?, String> entry : localDependencies.entrySet()) {
             Object artifact = entry.getKey();
 
@@ -346,6 +345,7 @@ public class GenerateDescriptorMojo extends MojoSupport {
 
                 if (manifest == null || !ManifestUtils.isBundle(getManifest(bundleFile))) {
                     bundleName = "wrap:" + bundleName;
+                    needWrap = true;
                 }
 
                 Bundle bundle = null;
@@ -371,6 +371,14 @@ public class GenerateDescriptorMojo extends MojoSupport {
             }
         }
 
+        if (needWrap) {
+            Dependency wrapDependency = new Dependency();
+            wrapDependency.setName("wrap");
+            wrapDependency.setDependency(false);
+            wrapDependency.setPrerequisite(true);
+            feature.getFeature().add(wrapDependency);
+        }
+        
         if ((!feature.getBundle().isEmpty() || !feature.getFeature().isEmpty()) && !features.getFeature().contains(feature)) {
             features.getFeature().add(feature);
         }
