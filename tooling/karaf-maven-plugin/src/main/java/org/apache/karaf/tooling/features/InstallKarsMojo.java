@@ -305,7 +305,7 @@ public class InstallKarsMojo extends MojoSupport {
 
         // install bundles defined in startup.properties
         getLog().info("Installing bundles defined in startup.properties in the system");
-        Set<?> startupBundles = startupProperties.keySet();
+        Set<?> startupBundles = new HashSet<Object>(startupProperties.keySet());
                 
         for (Object startupBundle : startupBundles) {
             if (((String)startupBundle).startsWith("wrap:")) {
