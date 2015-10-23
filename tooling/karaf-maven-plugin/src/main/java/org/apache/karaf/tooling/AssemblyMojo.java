@@ -39,7 +39,7 @@ import java.util.List;
 /**
  * Installs kar dependencies into a server-under-construction in target/assembly
  */
-@Mojo(name = "assembly", defaultPhase = LifecyclePhase.PROCESS_RESOURCES, requiresDependencyResolution = ResolutionScope.RUNTIME)
+@Mojo(name = "assembly", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME)
 public class AssemblyMojo extends MojoSupport {
 
     /**
