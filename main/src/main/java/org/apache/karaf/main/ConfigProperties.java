@@ -181,15 +181,16 @@ public class ConfigProperties {
         this.karafData = Utils.getKarafDirectory(PROP_KARAF_DATA, ENV_KARAF_DATA, new File(karafBase, "data"), true, true);
         this.karafEtc = Utils.getKarafDirectory(PROP_KARAF_ETC, ENV_KARAF_ETC, new File(karafBase, "etc"), true, true);
         
+              
         this.karafInstances = Utils.getKarafDirectory(PROP_KARAF_INSTANCES, ENV_KARAF_INSTANCES, new File(karafHome, "instances"), false, false);
 
         Package p = Package.getPackage("org.apache.karaf.main");
         if (p != null && p.getImplementationVersion() != null)
             System.setProperty(PROP_KARAF_VERSION, p.getImplementationVersion());
-        System.setProperty(PROP_KARAF_HOME, karafHome.getPath());
-        System.setProperty(PROP_KARAF_BASE, karafBase.getPath());
-        System.setProperty(PROP_KARAF_DATA, karafData.getPath());
-        System.setProperty(PROP_KARAF_INSTANCES, karafInstances.getPath());
+        System.setProperty(PROP_KARAF_HOME, karafHome.toURI().getRawPath());
+        System.setProperty(PROP_KARAF_BASE, karafBase.toURI().getRawPath());
+        System.setProperty(PROP_KARAF_DATA, karafData.toURI().getRawPath());
+        System.setProperty(PROP_KARAF_INSTANCES, karafInstances.toURI().getRawPath());
 
         if (!karafEtc.exists()) {
             throw new FileNotFoundException("Karaf etc folder not found: " + karafEtc.getAbsolutePath());
