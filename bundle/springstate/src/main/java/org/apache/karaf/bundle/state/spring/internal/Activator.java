@@ -19,24 +19,21 @@ package org.apache.karaf.bundle.state.spring.internal;
 import org.apache.karaf.bundle.core.BundleStateService;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
 import org.springframework.osgi.context.event.OsgiBundleApplicationContextListener;
 
 public class Activator implements BundleActivator {
 
-    private ServiceRegistration registration;
-
     public void start(BundleContext bundleContext) {
-		SpringStateService services = new SpringStateService();
-	    String[] classes = new String[] {
-				OsgiBundleApplicationContextListener.class.getName(),
-				BundleStateService.class.getName()
-			};
-        registration = bundleContext.registerService(classes, services, null);
-	}
+        SpringStateService services = new SpringStateService();
+        String[] classes = new String[] {
+                                         OsgiBundleApplicationContextListener.class.getName(),
+                                         BundleStateService.class.getName()
+        };
+        bundleContext.registerService(classes, services, null);
+    }
 
     public void stop(BundleContext context) {
-        registration.unregister();
+        // unregister happens automatically
     }
 
 }

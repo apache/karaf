@@ -35,9 +35,11 @@ import org.springframework.osgi.context.event.OsgiBundleApplicationContextListen
 import org.springframework.osgi.context.event.OsgiBundleContextFailedEvent;
 import org.springframework.osgi.context.event.OsgiBundleContextRefreshedEvent;
 import org.springframework.osgi.extender.event.BootstrappingDependencyEvent;
+import org.springframework.osgi.service.importer.OsgiServiceDependency;
+import org.springframework.osgi.service.importer.event.OsgiServiceDependencyEvent;
 
-public class SpringStateService implements OsgiBundleApplicationContextListener,
-        BundleListener, BundleStateService {
+public class SpringStateService
+    implements OsgiBundleApplicationContextListener, BundleListener, BundleStateService {
 
     private static final Logger LOG = LoggerFactory.getLogger(SpringStateService.class);
 
@@ -56,17 +58,20 @@ public class SpringStateService implements OsgiBundleApplicationContextListener,
         BundleState state = mapEventToState(event);
         return (bundle.getState() != Bundle.ACTIVE) ? BundleState.Unknown : state;
     }
-    
+
     public String getDiag(Bundle bundle) {
-    	OsgiBundleApplicationContextEvent event = states.get(bundle.getBundleId());
+        OsgiBundleApplicationContextEvent event = states.get(bundle.getBundleId());
         if (event == null) {
             return null;
         }
-        
+
         StringBuilder message = new StringBuilder();
         Date date = new Date(event.getTimestamp());
         SimpleDateFormat df = new SimpleDateFormat();
         message.append(df.format(date) + "\n");
+        if (event instanceof BootstrappingDependencyEvent) {
+            message.append(getServiceInfo((BootstrappingDependencyEvent)event));
+        }
         Throwable ex = getException(event);
         if (ex != null) {
             message.append("Exception: \n");
@@ -74,24 +79,35 @@ public class SpringStateService implements OsgiBundleApplicationContextListener,
         }
         return message.toString();
     }
-    
+
+    private String getServiceInfo(BootstrappingDependencyEvent event) {
+        OsgiServiceDependencyEvent depEvent = event.getDependencyEvent(); 
+        if (depEvent == null || depEvent.getServiceDependency() == null) {
+            return "";
+        }
+        OsgiServiceDependency dep = depEvent.getServiceDependency();
+        return String.format("Bean %s is wating for OSGi service with filter %s", 
+                             dep.getBeanName(), 
+                             dep.getServiceFilter());
+    }
+
     private void addMessages(StringBuilder message, Throwable ex) {
-    	if (ex != null) {
-    		message.append(ex.getMessage());
-    		message.append("\n");
+        if (ex != null) {
+            message.append(ex.getMessage());
+            message.append("\n");
             StringWriter errorWriter = new StringWriter();
             ex.printStackTrace(new PrintWriter(errorWriter));
             message.append(errorWriter.toString());
             message.append("\n");
-    	}
-    }
-    
-    private Throwable getException(OsgiBundleApplicationContextEvent event) {
-    	if (!(event instanceof OsgiBundleContextFailedEvent)) {
-        	return null;
         }
-    	OsgiBundleContextFailedEvent failureEvent = (OsgiBundleContextFailedEvent) event;
-    	return failureEvent.getFailureCause();
+    }
+
+    private Throwable getException(OsgiBundleApplicationContextEvent event) {
+        if (!(event instanceof OsgiBundleContextFailedEvent)) {
+            return null;
+        }
+        OsgiBundleContextFailedEvent failureEvent = (OsgiBundleContextFailedEvent)event;
+        return failureEvent.getFailureCause();
     }
 
     public void onOsgiApplicationEvent(OsgiBundleApplicationContextEvent event) {
