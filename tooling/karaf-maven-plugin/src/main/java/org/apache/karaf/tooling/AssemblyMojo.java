@@ -43,6 +43,12 @@ import java.util.List;
 public class AssemblyMojo extends MojoSupport {
 
     /**
+     * Base directory used to overwrite resources in generated assembly after the build (resource directory).
+     */
+    @Parameter(defaultValue = "${project.basedir}/src/main/resources/assembly")
+    protected File sourceDirectory;
+
+    /**
      * Base directory used to copy the resources during the build (working directory).
      */
     @Parameter(defaultValue = "${project.build.directory}/assembly")
@@ -326,6 +332,10 @@ public class AssemblyMojo extends MojoSupport {
         // Include project classes content
         if (includeBuildOutputDirectory)
             IoUtils.copyDirectory(new File(project.getBuild().getOutputDirectory()), workDirectory);
+
+        // Overwrite assembly dir contents
+        if (sourceDirectory.exists())
+            IoUtils.copyDirectory(sourceDirectory, workDirectory);
 
         // Chmod the bin/* scripts
         File[] files = new File(workDirectory, "bin").listFiles();
