@@ -130,7 +130,7 @@ public class ExportFeatureMetaDataMojo extends AbstractFeatureMojo {
             }
         }
         for (Bundle bundle : bundleVersions.values()) {
-            merged.getBundles().add(bundle);
+            merged.getBundle().add(bundle);
         }
         return merged;
     }
