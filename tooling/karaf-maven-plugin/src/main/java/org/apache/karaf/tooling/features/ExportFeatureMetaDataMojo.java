@@ -92,7 +92,12 @@ public class ExportFeatureMetaDataMojo extends AbstractFeatureMojo {
         Set<String> bundleIds = new HashSet<String>();
         for (Feature feature : featuresSet) {
             for (Bundle bundle : feature.getBundle()) {
-                String bundleId = getBundleSymbolicName(bundle) + ":" + getBundleVersion(bundle);
+                String symbolicName = getBundleSymbolicName(bundle);
+                if (symbolicName == null) {
+                    logIgnored(bundle);
+                    continue;
+                }
+                String bundleId = symbolicName + ":" + getBundleVersion(bundle);
                 if (!bundleIds.contains(bundleId)) {
                     bundleIds.add(bundleId);
                     merged.getBundle().add(bundle);
@@ -107,15 +112,20 @@ public class ExportFeatureMetaDataMojo extends AbstractFeatureMojo {
         Map<String, Bundle> bundleVersions = new HashMap<>();
         for (Feature feature : featuresSet) {
             for (Bundle bundle : feature.getBundle()) {
-                Bundle existingBundle = bundleVersions.get(getBundleSymbolicName(bundle));
+                String symbolicName = getBundleSymbolicName(bundle);
+                if (symbolicName == null) {
+                    logIgnored(bundle);
+                    continue;
+                }
+                Bundle existingBundle = bundleVersions.get(symbolicName);
                 if (existingBundle != null) {
                     Version existingVersion = new Version(getBundleVersion(existingBundle));
                     Version newVersion = new Version(getBundleVersion(bundle));
                     if (newVersion.compareTo(existingVersion) > 0) {
-                        bundleVersions.put(getBundleSymbolicName(bundle), bundle);
+                        bundleVersions.put(symbolicName, bundle);
                     }
                 } else {
-                    bundleVersions.put(getBundleSymbolicName(bundle), bundle);
+                    bundleVersions.put(symbolicName, bundle);
                 }
             }
         }
@@ -123,6 +133,10 @@ public class ExportFeatureMetaDataMojo extends AbstractFeatureMojo {
             merged.getBundles().add(bundle);
         }
         return merged;
+    }
+
+    private void logIgnored(Bundle bundle) {
+        getLog().warn("Ignoring jar without BundleSymbolicName: " + bundle.getLocation());
     }
 
     private Map<String, Attributes> manifests = new HashMap<>();
