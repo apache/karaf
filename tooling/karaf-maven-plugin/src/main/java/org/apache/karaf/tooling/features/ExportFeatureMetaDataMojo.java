@@ -146,8 +146,10 @@ public class ExportFeatureMetaDataMojo extends AbstractFeatureMojo {
                 Manifest manifest = jis.getManifest();
                 if (manifest != null) {
                     attributes = manifest.getMainAttributes();
-                    manifests.put(bundle.getLocation(), attributes);
+                } else {
+                    attributes = new Attributes();
                 }
+                manifests.put(bundle.getLocation(), attributes);
             } catch (IOException e) {
                 throw new MojoExecutionException("Error reading bundle manifest from " + bundle.getLocation(), e);
             }
