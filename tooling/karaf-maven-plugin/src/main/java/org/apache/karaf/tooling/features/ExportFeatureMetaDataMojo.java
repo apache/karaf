@@ -19,7 +19,6 @@ package org.apache.karaf.tooling.features;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -144,8 +143,11 @@ public class ExportFeatureMetaDataMojo extends AbstractFeatureMojo {
                 resolveArtifact(artifact, remoteRepos);
             }
             try (JarInputStream jis = new JarInputStream(new FileInputStream(artifact.getFile()))) {
-                attributes = jis.getManifest().getMainAttributes();
-                manifests.put(bundle.getLocation(), attributes);
+                Manifest manifest = jis.getManifest();
+                if (manifest != null) {
+                    attributes = manifest.getMainAttributes();
+                    manifests.put(bundle.getLocation(), attributes);
+                }
             } catch (IOException e) {
                 throw new MojoExecutionException("Error reading bundle manifest from " + bundle.getLocation(), e);
             }
