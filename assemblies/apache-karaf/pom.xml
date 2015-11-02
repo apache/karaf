@@ -85,7 +85,7 @@
             </resource>
             <resource>
                 <directory>${project.build.directory}/demos</directory>
-                <filtering>true</filtering>
+                <filtering>false</filtering>
                 <excludes>
                     <exclude>**/*.i??</exclude>
                     <exclude>**/.target</exclude>
