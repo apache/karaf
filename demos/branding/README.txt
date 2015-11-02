@@ -27,7 +27,7 @@ Prerequisites for Running this Example
 --------------------------------------
 You must have the following installed on your machine:
 
-   - JDK 1.6 or higher.
+   - JDK 1.7 or higher.
 
    - Apache Maven 3.0.3 or higher.
 
