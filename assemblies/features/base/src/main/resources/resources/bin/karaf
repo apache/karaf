@@ -417,7 +417,42 @@ run() {
     fi
     cd "$KARAF_BASE"
 
-    exec "$JAVA" $JAVA_OPTS -Djava.endorsed.dirs="${JAVA_ENDORSED_DIRS}" -Djava.ext.dirs="${JAVA_EXT_DIRS}" -Dkaraf.instances="${KARAF_HOME}/instances" -Dkaraf.home="$KARAF_HOME" -Dkaraf.base="$KARAF_BASE" -Dkaraf.data="$KARAF_DATA" -Dkaraf.etc="$KARAF_ETC" -Djava.io.tmpdir="$KARAF_DATA/tmp" -Djava.util.logging.config.file="$KARAF_BASE/etc/java.util.logging.properties" $KARAF_OPTS $OPTS -classpath "$CLASSPATH" $MAIN "$@"
+    if [ -z "$KARAF_EXEC" ]; then
+        KARAF_EXEC=""
+    fi
+
+    while true; do
+
+        # When users want to update the lib version of, they just need to create
+        # a lib.next directory and on the new restart, it will replace the current lib directory.
+        if [ -d ${KARAF_HOME}/lib.next ] ; then
+            echo "Updating libs..."
+            rm -rf "${KARAF_HOME}/lib"
+            mv -f "${KARAF_HOME}/lib.next" "${KARAF_HOME}/lib"
+        fi
+
+        $KARAF_EXEC "$JAVA" $JAVA_OPTS \
+            -Djava.endorsed.dirs="${JAVA_ENDORSED_DIRS}" \
+            -Djava.ext.dirs="${JAVA_EXT_DIRS}" \
+            -Dkaraf.instances="${KARAF_HOME}/instances" \
+            -Dkaraf.home="$KARAF_HOME" \
+            -Dkaraf.base="$KARAF_BASE" \
+            -Dkaraf.data="$KARAF_DATA" \
+            -Dkaraf.etc="$KARAF_ETC" \
+            -Dkaraf.restart.jvm.supported=true \
+            -Djava.io.tmpdir="$KARAF_DATA/tmp" \
+            -Djava.util.logging.config.file="$KARAF_BASE/etc/java.util.logging.properties" \
+            $KARAF_OPTS $OPTS \
+            -classpath "$CLASSPATH" \
+            $MAIN "$@"
+
+        KARAF_RC=$?
+        if [ "$KARAF_RC" -eq 10 ]; then
+           echo "Restarting JVM..."
+        else
+           exit $KARAF_RC
+        fi
+    done
 }
 
 main() {

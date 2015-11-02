@@ -169,6 +169,9 @@ public class Main {
     public static void main(String[] args) throws Exception {
         while (true) {
             boolean restart = false;
+            boolean restartJvm = false;
+            // karaf.restart.jvm take priority over karaf.restart
+            System.setProperty("karaf.restart.jvm", "false");
             System.setProperty("karaf.restart", "false");
             final Main main = new Main(args);
             try {
@@ -185,6 +188,7 @@ public class Main {
                 main.awaitShutdown();
                 boolean stopped = main.destroy();
                 restart = Boolean.getBoolean("karaf.restart");
+                restartJvm = Boolean.getBoolean("karaf.restart.jvm");
                 main.updateInstancePidAfterShutdown();
                 if (!stopped) {
                     if (restart) {
@@ -199,7 +203,9 @@ public class Main {
                 System.err.println("Error occurred shutting down framework: " + ex);
                 ex.printStackTrace();
             } finally {
-                if (!restart) {
+                if (restartJvm) {
+                    System.exit(10);
+                } else if (!restart) {
                     System.exit(main.getExitCode());
                 } else {
                     System.gc();
