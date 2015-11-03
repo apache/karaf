@@ -21,6 +21,7 @@
     <!-- NB: this file is not the one really used. This file is used by the karaf-maven-plugin to define the start-level of bundles in the generated feature.xml -->
 
     <repository>mvn:org.ops4j.pax.cdi/pax-cdi-features/${pax.cdi.version}/xml/features</repository>
+    <repository>mvn:org.ops4j.pax.jdbc/pax-jdbc-features/${pax.jdbc.version}/xml/features</repository>
     <repository>mvn:org.apache.karaf.features/standard/${project.version}/xml/features</repository>
     
     <feature name="transaction-api" version="1.1.0">
@@ -263,6 +264,7 @@
 
     <feature name="jdbc" description="JDBC service and commands" version="${project.version}">
         <details>JDBC support providing service, commands, and MBean.</details>
+        <feature>pax-jdbc</feature>
         <bundle dependency="true">mvn:org.osgi/org.osgi.service.jdbc/${org.osgi.service.jdbc.version}</bundle>
         <bundle>mvn:org.apache.karaf.jdbc/org.apache.karaf.jdbc.core/${project.version}</bundle>
     </feature>
