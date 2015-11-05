@@ -264,7 +264,8 @@
 
     <feature name="jdbc" description="JDBC service and commands" version="${project.version}">
         <details>JDBC support providing service, commands, and MBean.</details>
-        <feature>pax-jdbc</feature>
+        <feature prerequisite="true">pax-jdbc</feature>
+        <feature prerequisite="true">pax-jdbc-config</feature>
         <bundle dependency="true">mvn:org.osgi/org.osgi.service.jdbc/${org.osgi.service.jdbc.version}</bundle>
         <bundle>mvn:org.apache.karaf.jdbc/org.apache.karaf.jdbc.core/${project.version}</bundle>
     </feature>
