@@ -1479,8 +1479,13 @@ public class Main {
         String clz = props.getProperty(PROPERTY_LOCK_CLASS, PROPERTY_LOCK_CLASS_DEFAULT);
         lock = (Lock) Class.forName(clz).getConstructor(Properties.class).newInstance(props);
         boolean lockLogged = false;
+        boolean setupShutdownCompleted = false;
         while (!exiting) {
-            setupShutdown(props);
+            // only perform the shutdown setup once
+            if (!setupShutdownCompleted) {
+                setupShutdown(props);
+                setupShutdownCompleted = true;
+            }
             if (lock.lock()) {
                 if (lockLogged) {
                     LOG.info("Lock acquired.");
