@@ -15,6 +15,54 @@
  * limitations under the License.
  */
 
+                    Apache Karaf 4.0.3
+                    ==================
+
+ This is an update patch for Apache Karaf 4.0.x, containing many bug fixes, dependency updates, and improvements. It is recommended that users update their deployment after reviewing the changelog below.
+
+ ChangeLog:
+ ----------
+
+** Bug
+    * [KARAF-3443] - Deployed KAR files may be installed in the wrong order.
+    * [KARAF-3812] - Exception caused by featuresRepositories property being set incorrectly
+    * [KARAF-3879] - jdbc feature should installs pax-jdbc feature
+    * [KARAF-3961] - Reference to generated featuresRepositories is invalid on Windows
+    * [KARAF-3972] - can't genrate feature with prerequisite using karaf-maven-plugin
+    * [KARAF-3974] - SSH :: impossible to connect through SSH after reboot clean
+    * [KARAF-3994] - karaf-maven-plugin is ignoring the feature version and installing all available versions of given feature in the repository.  
+    * [KARAF-4003] - Karaf jenkins build fails at apache-karaf-minimal as it can not find framework kar
+    * [KARAF-4011] - karaf-maven-plugin:features-add-to-repository NPE with blueprint:file: URL
+    * [KARAF-4024] - role.policy "group" ceased to function
+    * [KARAF-4026] - Karaf wrapper:install produces a SPARC32 binary on Solaris x86_64
+    * [KARAF-4029] - Karaf maven plugin assembly goal requires project artifact to be installed first
+    * [KARAF-4058] - ssh:sshd command isn't available
+    * [KARAF-4062] - Karaf client does now work after installing BouncyCastle
+    * [KARAF-4065] - Standard distribution doesn't ship the ACL files in the etc folder
+    * [KARAF-4066] - Features command bundle should recover if FeatureService unavailable initially
+    * [KARAF-4068] - Memory leak in SessionFactoryImpl class
+    * [KARAF-4069] - ConsoleSessionImpl does not close the session in function close()
+    * [KARAF-4070] - Unable to install deployed features for bundle
+    * [KARAF-4076] - Support Windows 10 for Bundle-NativeCode
+    * [KARAF-4079] - Karaf maven plugin doesn't support overriding configuration files
+    * [KARAF-4080] - Karaf 3.0.5 demo POMs contain a few invalid path references
+    * [KARAF-4081] - Karaf-Command 'diag' does not provide full information for Spring-DM bundles
+    * [KARAF-4086] - NPE in karaf-maven-plugin features-export-meta-data when there is no Manifest
+
+** Dependency upgrade
+    * [KARAF-4077] - Update to blueprint core 1.4.5
+    * [KARAF-4085] - Upgrade to Felix Framework 5.4.0
+    * [KARAF-4087] - Upgrade to Aries Subsystem 2.0.4
+    * [KARAF-4088] - Upgrade to Felix Resolver 1.8.0
+    * [KARAF-4089] - Upgrade to Felix WebConsole 4.2.14
+    * [KARAF-4090] - Upgrade to Aries Subsystem 2.0.6
+    * [KARAF-4096] - Upgrade Jolokia to version 1.3.2
+    * [KARAF-4097] - Upgrade to Spring 4.2.2.RELEASE
+    * [KARAF-4098] - Upgrade to Pax Web 4.2.3
+
+** Documentation
+    * [KARAF-3923] - Karaf opens RMI port even when not using the management feature
+
                     Apache Karaf 4.0.2
                     ==================
 
