@@ -213,6 +213,15 @@ public class GenerateDescriptorMojo extends MojoSupport {
     @Parameter(defaultValue = "false")
     private boolean includeProjectArtifact;
 
+    /**
+     * The name of the primary feature. This is the feature that will be created or modified to include the
+     * main project artifact and/or the bundles.
+     * @see #addBundlesToPrimaryFeature
+     * @see #includeProjectArtifact
+     */
+    @Parameter(defaultValue = "${project.artifactId}")
+    private String primaryFeatureName;
+
     // *************************************************
     // READ-ONLY MAVEN PLUGIN PARAMETERS
     // *************************************************
@@ -289,13 +298,13 @@ public class GenerateDescriptorMojo extends MojoSupport {
 
         Feature feature = null;
         for (Feature test : features.getFeature()) {
-            if (test.getName().equals(project.getArtifactId())) {
+            if (test.getName().equals(primaryFeatureName)) {
                 feature = test;
             }
         }
         if (feature == null) {
             feature = objectFactory.createFeature();
-            feature.setName(project.getArtifactId());
+            feature.setName(primaryFeatureName);
         }
         if (!feature.hasVersion()) {
             feature.setVersion(project.getArtifact().getBaseVersion());
@@ -397,7 +406,7 @@ public class GenerateDescriptorMojo extends MojoSupport {
      */
 
     private Manifest getManifest(File file) throws IOException {
-        InputStream is = null;
+        InputStream is;
         try {
             is = new BufferedInputStream(new FileInputStream(file));
         } catch (Exception e) {
@@ -415,9 +424,8 @@ public class GenerateDescriptorMojo extends MojoSupport {
             jar.close();
             return m;
         } finally {
-            if (is != null) { // just in case when we did not open bundle
-                is.close();
-            }
+            // just in case when we did not open bundle
+            is.close();
         }
     }
 
