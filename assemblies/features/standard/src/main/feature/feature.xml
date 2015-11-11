@@ -575,4 +575,44 @@
         <bundle>mvn:org.jolokia/jolokia-osgi/${jolokia.version}</bundle>
     </feature>
 
+    <feature name="standard" description="Wrap feature describing all features part of a standard distribution" version="${project.version}">
+        <feature>wrap</feature>
+        <feature>aries-blueprint</feature>
+        <feature>shell</feature>
+        <feature>shell-compat</feature>
+        <feature>feature</feature>
+        <feature>jaas</feature>
+        <feature>ssh</feature>
+        <feature>management</feature>
+        <feature>bundle</feature>
+        <feature>config</feature>
+        <feature>deployer</feature>
+        <feature>diagnostic</feature>
+        <feature>feature</feature>
+        <feature>instance</feature>
+        <feature>kar</feature>
+        <feature>log</feature>
+        <feature>package</feature>
+        <feature>service</feature>
+        <feature>system</feature>
+    </feature>
+
+    <feature name="minimal" description="Wrap feature describing all features part of a minimal distribution" version="${project.version}">
+        <feature>jaas</feature>
+        <feature>shell</feature>
+        <feature>feature</feature>
+        <feature>ssh</feature>
+        <feature>management</feature>
+        <feature>bundle</feature>
+        <feature>config</feature>
+        <feature>deployer</feature>
+        <feature>diagnostic</feature>
+        <feature>instance</feature>
+        <feature>kar</feature>
+        <feature>log</feature>
+        <feature>package</feature>
+        <feature>service</feature>
+        <feature>system</feature>
+    </feature>
+
 </features>

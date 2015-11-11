@@ -158,20 +158,10 @@
                     </installedFeatures>
                     <!-- <startupFeatures/> -->
                     <bootFeatures>
-                        <feature>jaas</feature>
-                        <feature>shell</feature>
-                        <feature>ssh</feature>
-                        <feature>management</feature>
-                        <feature>bundle</feature>
-                        <feature>config</feature>
-                        <feature>deployer</feature>
-                        <feature>diagnostic</feature>
-                        <feature>instance</feature>
-                        <feature>kar</feature>
-                        <feature>log</feature>
-                        <feature>package</feature>
-                        <feature>service</feature>
-                        <feature>system</feature>
+                        <!-- standard distribution -->
+                        <feature>standard</feature>
+                        <!-- minimal distribution -->
+                        <!--<feature>minimal</feature>-->
                     </bootFeatures>
                 </configuration>
             </plugin>
