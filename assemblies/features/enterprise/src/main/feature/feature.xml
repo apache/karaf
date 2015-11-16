@@ -38,6 +38,11 @@
 
     <feature name="transaction" description="OSGi Transaction Manager" version="${aries.transaction.manager.version}">
         <details>JTA implementation provided by Apache Aries Transaction</details>
+        <feature version="${aries.transaction.manager.version}">transaction-manager-geronimo</feature>
+    </feature>
+
+    <feature name="transaction-manager-geronimo" description="Geronimo Transaction Manager" version="${aries.transaction.manager.version}">
+        <details>JTA implementation provided by Apache Aries Transaction</details>
         <config name="org.apache.aries.transaction">
             aries.transaction.recoverable = true
             aries.transaction.timeout = 600
@@ -49,6 +54,30 @@
         <feature version="[1.1,2)">transaction-api</feature>
         <bundle dependency="true">mvn:org.apache.aries/org.apache.aries.util/${aries.util.version}</bundle>
         <bundle>mvn:org.apache.aries.transaction/org.apache.aries.transaction.manager/${aries.transaction.manager.version}</bundle>
+        <capability>
+            transaction-manager;provider:=geronimo
+        </capability>
+    </feature>
+
+    <feature name="transaction-manager-narayana" description="Narayana Transaction Manager" version="${narayana.version}">
+        <details>JTA implementation provided by Narayana</details>
+        <config name="org.jboss.narayana">
+            ObjectStoreEnvironmentBean.objectStoreDir=${karaf.data}/narayana
+            ObjectStoreEnvironmentBean.communicationStore.objectStoreDir=${karaf.data}/narayana
+            HornetqJournalEnvironmentBean.storeDir=${karaf.data}/narayana/hornetq
+        </config>
+        <bundle>mvn:org.jboss.narayana.osgi/narayana-osgi-jta/${narayana.version}</bundle>
+        <capability>
+            transaction-manager;provider:=narayana
+        </capability>
+    </feature>
+
+    <feature name="transaction" description="OSGi Transaction Manager" version="2.0">
+        <details>JTA Support</details>
+        <feature dependency="true">transaction-manager-geronimo</feature>
+        <requirement>
+            transaction-manager
+        </requirement>
         <conditional>
             <condition>aries-blueprint</condition>
             <bundle dependency="true">mvn:org.apache.felix/org.apache.felix.coordinator/${felix.coordinator.version}</bundle>
@@ -59,7 +88,7 @@
 
     <feature name="connector" description="OSGi support for JCA Connector 1.6" version="3.1.1">
         <details>OSGi support for JCA Connector 1.6</details>
-        <feature version="[1.1,2)">transaction</feature>
+        <feature version="[2,3)">transaction</feature>
         <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-j2ee-connector_1.6_spec/1.0</bundle>
         <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-validation_1.0_spec/1.1</bundle>
         <bundle>mvn:org.apache.geronimo.components/geronimo-connector/3.1.1</bundle>
@@ -241,7 +270,7 @@
     <feature name="eclipselink" description="Eclipselink JPA persistence engine support" version="${eclipselink.version}">
         <details>Eclipselink persistence engine.</details>
         <feature version="[2.1.0,2.2.0)">persistence-api</feature>
-        <feature version="[1.1,2)">transaction</feature>
+        <feature version="[2,3)">transaction</feature>
         <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.commons-dbcp/${commons-dbcp.version}</bundle>
         <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.jpa/${eclipselink.version}</bundle>
         <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.core/${eclipselink.version}</bundle>
@@ -273,7 +302,7 @@
 
     <feature name="jms" description="JMS service and commands" version="${project.version}">
         <details>JMS support provinding service, commands, and MBean.</details>
-        <feature version="[1.1,2)">transaction</feature>
+        <feature version="[2,3)">transaction</feature>
         <feature>aries-blueprint</feature>
         <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-jms_1.1_spec/${geronimo.jms-spec.version}</bundle>
         <bundle>mvn:org.apache.karaf.jms/org.apache.karaf.jms.core/${project.version}</bundle>
