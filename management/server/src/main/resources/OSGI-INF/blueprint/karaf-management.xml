@@ -33,7 +33,7 @@
             <cm:property name="rmiServerHost" value="0.0.0.0"/>
             <cm:property name="rmiServerPort" value="44444"/>
             <cm:property name="jmxRealm" value="karaf"/>
-            <cm:property name="serviceUrl" value="service:jmx:rmi://localhost:44444/jndi/rmi://localhost:1099/karaf-$[karaf.name]"/>
+            <cm:property name="serviceUrl" value="service:jmx:rmi://${rmiServerHost}:${rmiServerPort}/jndi/rmi://${rmiRegistryHost}:${rmiRegistryPort}/karaf-$[karaf.name]"/>
             <cm:property name="daemon" value="true"/>
             <cm:property name="threaded" value="true"/>
             <cm:property name="objectName" value="connector:name=rmi"/>
