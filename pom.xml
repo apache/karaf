@@ -142,7 +142,7 @@
         <antlr.bundle.version>2.7.7_5</antlr.bundle.version>
         <asm.version>5.0.4</asm.version>
         <asm.springsource.version>1.5.3</asm.springsource.version>
-        <cglib.bundle.version>3.0_1</cglib.bundle.version>
+        <cglib.bundle.version>3.1_1</cglib.bundle.version>
         <cglib2.version>2.2.0</cglib2.version>
 
         <commons-beanutils.version>1.9.2</commons-beanutils.version>
