@@ -18,6 +18,7 @@ package org.apache.karaf.bundle.core.internal;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -46,7 +47,8 @@ public class BundleSelectorImpl {
         } else if (defaultAllBundles) {
             Collections.addAll(bundles, bundleContext.getBundles());
         }
-        return bundles;
+        List<Bundle> filteredBundleList = new ArrayList<>(new LinkedHashSet<>(bundles));
+        return filteredBundleList;
     }
     
     private void addMatchingBundles(String id, List<Bundle> bundles) {

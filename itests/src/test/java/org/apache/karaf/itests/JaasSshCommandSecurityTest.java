@@ -13,7 +13,8 @@
  */
 package org.apache.karaf.itests;
 
-import junit.framework.Assert;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
@@ -34,7 +35,7 @@ public class JaasSshCommandSecurityTest extends SshCommandTestBase {
 				"jaas:update", Result.NOT_FOUND);
         String r = assertCommand(vieweruser, "jaas:realm-manage --realm karaf;" +
 				"jaas:user-list", Result.OK);
-        Assert.assertFalse("The viewer should not have the credentials to add the new user",
+        assertFalse("The viewer should not have the credentials to add the new user",
                 r.contains(userName));
 
         assertCommand("karaf", "jaas:realm-manage --realm karaf;" +
@@ -42,7 +43,7 @@ public class JaasSshCommandSecurityTest extends SshCommandTestBase {
                 "jaas:update", Result.OK);
         String r2 = assertCommand(vieweruser, "jaas:realm-manage --realm karaf;" +
                 "jaas:user-list", Result.OK);
-        Assert.assertTrue("The admin user should have the rights to add the new user",
+        assertTrue("The admin user should have the rights to add the new user",
                 r2.contains(userName));
     }
 }
