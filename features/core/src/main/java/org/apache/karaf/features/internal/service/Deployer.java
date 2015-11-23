@@ -823,7 +823,7 @@ public class Deployer {
         callback.resolveBundles(toResolve, resolver.getWiring(), deployment.resToBnd);
 
         // Compute bundles to start
-        removeFragmentsAndBundlesInState(toStart, UNINSTALLED | ACTIVE | STARTING);
+        removeFragmentsAndBundlesInState(toStart, UNINSTALLED | ACTIVE);
         if (!toStart.isEmpty()) {
             // Compute correct start order
             List<Exception> exceptions = new ArrayList<>();
