@@ -727,8 +727,8 @@ public class Deployer {
                             && isUpdateable(resource) && !deployment.bundleChecksums.containsKey(bundle.getBundleId())) {
                         deployment.bundleChecksums.put(bundle.getBundleId(), crc);
                     }
-                    int startLevel = startLevels.get(resource);
-                    if (startLevel != dstate.initialBundleStartLevel) {
+                    Integer startLevel = startLevels.get(resource);
+                    if (startLevel != null && startLevel != dstate.initialBundleStartLevel) {
                         callback.setBundleStartLevel(bundle, startLevel);
                     }
                     FeatureState reqState = states.get(resource);
