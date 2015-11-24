@@ -34,6 +34,7 @@
     <name>Apache Karaf :: Tooling</name>
 
     <modules>
+        <module>utils</module>
         <module>karaf-services-maven-plugin</module>
         <module>karaf-maven-plugin</module>
     </modules>

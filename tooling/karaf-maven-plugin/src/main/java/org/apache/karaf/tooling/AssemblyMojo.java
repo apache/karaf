@@ -22,6 +22,9 @@ import org.apache.karaf.profile.assembly.Builder;
 import org.apache.karaf.tooling.utils.IoUtils;
 import org.apache.karaf.tooling.utils.MavenUtil;
 import org.apache.karaf.tooling.utils.MojoSupport;
+import org.apache.karaf.tools.utils.KarafPropertiesEditor;
+import org.apache.karaf.tools.utils.model.KarafPropertyEdits;
+import org.apache.karaf.tools.utils.model.io.stax.KarafPropertyInstructionsModelStaxReader;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -31,13 +34,22 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Installs kar dependencies into a server-under-construction in target/assembly
+ * Creates a customized Karaf distribution by installing features and setting up
+ * configuration files. The plugin gets features from feature.xml files and KAR
+ * archives declared as dependencies or as files configured with the
+ * featureRespositories parameter. It picks up other files, such as config files,
+ * from ${project.build.directory}/classes. Thus, a file in src/main/resources/etc
+ * will be copied by the resource plugin to ${project.build.directory}/classes/etc,
+ * and then added to the assembly by this goal.
+ * <br>
  */
 @Mojo(name = "assembly", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME)
 public class AssemblyMojo extends MojoSupport {
@@ -172,6 +184,44 @@ public class AssemblyMojo extends MojoSupport {
     @Parameter(defaultValue = "1.7")
     protected String javase;
 
+    /**
+     * Specify an XML file that instructs this goal to apply edits to
+     * one or more standard Karaf property files.
+     * The contents of this file are documented in detail on
+     * <a href="karaf-property-instructions-model.html">this page</a>.
+     * This allows you to
+     * customize these files without making copies in your resources
+     * directories. Here's a simple example:
+     * <pre>
+     * {@literal
+      <property-edits xmlns="http://karaf.apache.org/tools/property-edits/1.0.0">
+         <edits>
+          <edit>
+            <file>config.properties</file>
+            <operation>put</operation>
+            <key>karaf.framework</key>
+            <value>equinox</value>
+          </edit>
+          <edit>
+            <file>config.properties</file>
+            <operation>extend</operation>
+            <key>org.osgi.framework.system.capabilities</key>
+            <value>my-magic-capability</value>
+          </edit>
+          <edit>
+            <file>config.properties</file>
+            <operation prepend='true'>extend</operation>
+            <key>some-other-list</key>
+            <value>my-value-goes-first</value>
+            </edit>
+         </edits>
+      </property-edits>
+     </pre>
+    }
+     */
+    @Parameter(defaultValue = "${project.basedir}/src/main/karaf/assembly-property-edits.xml")
+    protected String propertyFileEdits;
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
@@ -242,6 +292,18 @@ public class AssemblyMojo extends MojoSupport {
         builder.blacklistFeatures(blacklistedFeatures);
         builder.blacklistProfiles(blacklistedProfiles);
         builder.blacklistPolicy(blacklistPolicy);
+
+        if (propertyFileEdits != null) {
+            File file = new File(propertyFileEdits);
+            if (file.exists()) {
+                KarafPropertyEdits edits;
+                try (InputStream editsStream = new FileInputStream(propertyFileEdits)) {
+                    KarafPropertyInstructionsModelStaxReader kipmsr = new KarafPropertyInstructionsModelStaxReader();
+                    edits = kipmsr.read(editsStream, true);
+                }
+                builder.propertyEdits(edits);
+            }
+        }
 
         // creating system directory
         getLog().info("Creating work directory");

@@ -1,0 +1,123 @@
+<?xml version="1.0"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one or more
+    contributor license agreements.  See the NOTICE file distributed with
+    this work for additional information regarding copyright ownership.
+    The ASF licenses this file to You under the Apache License, Version 2.0
+    (the "License"); you may not use this file except in compliance with
+    the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<model  xmlns="http://modello.codehaus.org/MODELLO/1.4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://modello.codehaus.org/MODELLO/1.4.0 http://modello.codehaus.org/xsd/modello-1.4.0.xsd"
+        xml.namespace="http://karaf.apache.org/tools/property-edits/${version}"
+        xml.schemaLocation="http://karaf.apache.org/xsd/property-edits-${version}.xsd">
+    <id>karaf-property-instructions-model</id>
+    <name>KarafPropertyInstructionsModel</name>
+    <description>
+        Specifications for how to modify Karaf property files to customize an installation.
+    </description>
+    <defaults>
+        <default>
+            <key>package</key>
+            <value>org.apache.karaf.tools.utils.model</value>
+        </default>
+    </defaults>
+    <classes>
+        <class rootElement="true" xml.tagName="property-edits">
+            <description>
+                A collection instructions. Each instruction is either a 'put' or an 'edit',
+                and calls out a file, a property name, and a property value.
+            </description>
+            <name>KarafPropertyEdits</name>
+            <version>1.0.0+</version>
+            <fields>
+                <field>
+                    <name>edits</name>
+                    <version>1.0.0+</version>
+                    <association>
+                        <type>KarafPropertyEdit</type>
+                        <multiplicity>*</multiplicity>
+                    </association>
+                    <description>The list of edits to perform.</description>
+                </field>
+            </fields>
+        </class>
+        <class>
+            <name>Operation</name>
+            <fields>
+                <field xml.content="true">
+                    <name>operation</name>
+                    <type>String</type>
+                    <description>
+                        'extend' to extend the existing value, 'put' to replace.
+                    </description>
+                    <required>true</required>
+                </field>
+                <field xml.attribute="true">
+                    <name>prepend</name>
+                    <version>1.0.0</version>
+                    <type>boolean</type>
+                    <description><![CDATA[for the 'extend' operation, indicates that the value should be placed at the head of the list.]]></description>
+                </field>
+            </fields>
+        </class>
+        <class xml.tagName="edit">
+            <name>KarafPropertyEdit</name>
+            <version>1.0.0+</version>
+            <description>
+                A single property edit.
+            </description>
+            <fields>
+                <field>
+                    <name>operation</name>
+                    <version>1.0.0+</version>
+                    <association>
+                        <type>Operation</type>
+                        <multiplicity>1</multiplicity>
+                    </association>
+                    <description>
+                        The operation to perform: 'put' or 'extend'.
+                    </description>
+                    <required>true</required>
+                </field>
+
+                <field>
+                    <name>file</name>
+                    <version>1.0.0+</version>
+                    <type>String</type>
+                    <description>
+                        The pathname, relative to the the Karaf etc directory, of the file to manipulate.
+                    </description>
+                    <required>true</required>
+                </field>
+                <field>
+                    <name>key</name>
+                    <version>1.0.0+</version>
+                    <type>String</type>
+                    <description>
+                        The property key.
+                    </description>
+                    <required>true</required>
+                </field>
+                <field>
+                    <name>value</name>
+                    <version>1.0.0+</version>
+                    <type>String</type>
+                    <description>
+                        The property value.
+                    </description>
+                    <required>true</required>
+                </field>
+            </fields>
+        </class>
+    </classes>
+</model>

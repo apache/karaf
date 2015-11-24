@@ -186,6 +186,10 @@ Packagings
             </plugin>
 +---+
 
+  property-file-edits specifies the location of an XML file that specifies edits to 'etc' files as they are
+  copied from the reference to the assembly. By default, the value of this parameter is src/main/karaf/assembly-property-edits.xml;
+  if you add a file at that location, the plugin will apply the edits you specify in it.
+
   defaultStartLevel determines the start level of bundles that do not have startLevel set in the feature xml descriptor. If not set, the default is 30.
 
   Project dependencies that are feature or kar packaging are treated differently depending on whether they are scope runtime, or compile/provided.  Runtime scope dependencies are installed
