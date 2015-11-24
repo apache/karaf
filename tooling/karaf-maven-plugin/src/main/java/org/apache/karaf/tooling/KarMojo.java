@@ -299,28 +299,33 @@ public class KarMojo extends MojoSupport {
 
             for (Artifact artifact : bundles) {
                 artifactResolver.resolve(artifact, remoteRepos, localRepo);
-                File localFile = artifact.getFile();
-
-                if (artifact.isSnapshot()) {
-                    // the artifact is a snapshot, create the maven-metadata-local.xml
-                    File metadataTarget = new File(localFile.getParentFile(), "maven-metadata-local.xml");
-                    if (!metadataTarget.exists()) {
-                        // the maven-metadata-local.xml doesn't exist, create it
-                        try {
-                            MavenUtil.generateMavenMetadata(artifact, metadataTarget);
-                        } catch (Exception e) {
-                            getLog().warn("Could not create maven-metadata-local.xml", e);
-                            getLog().warn("It means that this SNAPSHOT could be overwritten by an older one present on remote repositories");
-                        }
-                    }
-                    jarArchiver.addFile(metadataTarget, repositoryPath + layout.pathOf(artifact).substring(0, layout.pathOf(artifact).lastIndexOf('/')) + "/maven-metadata-local.xml");
-                }
 
                 //TODO this may not be reasonable, but... resolved snapshot artifacts have timestamped versions
                 //which do not work in startup.properties.
                 artifact.setVersion(artifact.getBaseVersion());
+
+                if (artifact.isSnapshot()) {
+                    // the artifact is a snapshot, create the maven-metadata-local.xml
+                    final File metadataTmp = File.createTempFile("maven-metadata-local.xml", ".tmp");
+
+                    try {
+                        MavenUtil.generateMavenMetadata(artifact, metadataTmp);
+                    } catch (Exception e) {
+                        getLog().warn("Could not create maven-metadata-local.xml", e);
+                        getLog().warn("It means that this SNAPSHOT could be overwritten by an older one present on remote repositories");
+                    }
+
+                    jarArchiver.addFile(metadataTmp, repositoryPath + layout.pathOf(artifact).substring(0, layout.pathOf(artifact).lastIndexOf('/')) + "/maven-metadata-local.xml");
+
+                    try {
+                        metadataTmp.delete();
+                    } catch (final Exception ex) {
+                        getLog().warn("Cannot delete temporary created file.", ex);
+                    }
+                }
+
                 String targetFileName = repositoryPath + layout.pathOf(artifact);
-                jarArchiver.addFile(localFile, targetFileName);
+                jarArchiver.addFile(artifact.getFile(), targetFileName);
             }
 
             if (resourcesDir.isDirectory()) {
