@@ -832,6 +832,12 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
                     if (f != null) {
                         String req = f.getName() + "/" + new VersionRange(f.getVersion(), true);
                         featuresToAdd.add(req);
+                        Feature[] installedFeatures = listInstalledFeatures();
+                        for (int i=0;i<installedFeatures.length;i++) {
+                            if (installedFeatures[i].getName().equals(f.getName()) && installedFeatures[i].getVersion().equals(f.getVersion())) {
+                                System.out.println("The specified feature: '" + installedFeatures[i].getName() + "' version '" + installedFeatures[i].getVersion() + "' is already installed");
+                            }
+                        }
                         matched = true;
                     }
                 }
