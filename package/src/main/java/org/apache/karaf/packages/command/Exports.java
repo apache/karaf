@@ -47,6 +47,9 @@ public class Exports implements Action {
     @Option(name = "--no-format", description = "Disable table rendered output", required = false, multiValued = false)
     boolean noFormat;
     
+    @Option(name = "--show-name-only", description = "Show only package name", required = false, multiValued = false)
+    boolean showOnlyName = false;
+    
     @Option(name = "-b", description = "Only show packages exported by given bundle id", required = false, multiValued = false)
     private Integer bundleId;
     
@@ -73,16 +76,22 @@ public class Exports implements Action {
         List<PackageVersion> exports = packageService.getExports();
         ShellTable table = new ShellTable();
         table.column("Package Name");
-        table.column("Version");
-        table.column("ID");
-        table.column("Bundle Name");
+        if (!showOnlyName) {
+            table.column("Version");
+            table.column("ID");
+            table.column("Bundle Name");
+        }
         for (PackageVersion pVer : exports) {
             for (Bundle bundle : pVer.getBundles()) {
                 if (matchesFilter(pVer, bundle)) {
-                    table.addRow().addContent(pVer.getPackageName(),
+                    if (!showOnlyName) {
+                        table.addRow().addContent(pVer.getPackageName(),
                                               pVer.getVersion().toString(),
                                               bundle.getBundleId(),
                                               bundle.getSymbolicName());
+                    } else {
+                        table.addRow().addContent(pVer.getPackageName());
+                    }
                 }
             }
         }

@@ -17,7 +17,6 @@
 package org.apache.karaf.packages.command;
 
 import java.util.List;
-import java.util.SortedMap;
 
 import org.apache.karaf.packages.core.PackageRequirement;
 import org.apache.karaf.packages.core.PackageService;
@@ -40,6 +39,9 @@ public class Imports implements Action {
     @Option(name = "--no-format", description = "Disable table rendered output", required = false, multiValued = false)
     boolean noFormat;
     
+    @Option(name = "--show-name-only", description = "Show only package name", required = false, multiValued = false)
+    boolean showOnlyName = false;
+    
     @Option(name = "-p", description = "Only show package starting with given name", required = false, multiValued = false)
     String packageName;
     
@@ -55,13 +57,18 @@ public class Imports implements Action {
         ShellTable table = new ShellTable();
         if (showFilter) {
             table.column("Filter");
+            table.column("Optional");
+            table.column("ID");
+            table.column("Bundle Name");
         } else {
             table.column("Package");
-            table.column("Version");
+            if (!showOnlyName) {
+                table.column("Version");
+                table.column("Optional");
+                table.column("ID");
+                table.column("Bundle Name");
+            }
         }
-        table.column("Optional");
-        table.column("ID");
-        table.column("Bundle Name");
 
         for (PackageRequirement req : imports) {
             if (matchesFilter(req)) {
@@ -69,12 +76,18 @@ public class Imports implements Action {
                 Row row = table.addRow();
                 if (showFilter) {
                     row.addContent(req.getFilter());
+                    row.addContent(getOptional(req),
+                            bundle.getBundleId(),
+                            bundle.getSymbolicName());
                 } else {
-                    row.addContent(req.getPackageName(), req.getVersionRange());
+                    row.addContent(req.getPackageName());
+                    if (!showOnlyName) {
+                        row.addContent(req.getVersionRange());
+                        row.addContent(getOptional(req),
+                                bundle.getBundleId(),
+                                bundle.getSymbolicName());
+                    }
                 }
-                row.addContent(getOptional(req),
-                               bundle.getBundleId(),
-                               bundle.getSymbolicName());
             }
         }
         table.print(System.out, !noFormat);
