@@ -32,6 +32,9 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentConstants;
 
 import java.util.Hashtable;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Display the details associated with a given component by supplying its component name.
@@ -57,10 +60,11 @@ public class DetailsAction extends ScrActionSupport {
             printDetail("  State               : ", ScrUtils.getState(component.getState()));
 
             Hashtable props = (Hashtable)component.getProperties();
-            if (!props.isEmpty()) {
+            Map map = new TreeMap(props);
+            if (!map.isEmpty()) {
                 System.out.println(SimpleAnsi.INTENSITY_BOLD + "  Properties          : " + SimpleAnsi.INTENSITY_NORMAL);
-                for (Object key : props.keySet()) {
-                    Object value = props.get(key);
+                for (Object key : map.keySet()) {
+                    Object value = map.get(key);
                     printDetail("    ", key + "=" + value);
                 }
             }
