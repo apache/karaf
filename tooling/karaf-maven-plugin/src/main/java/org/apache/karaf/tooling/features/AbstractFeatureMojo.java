@@ -27,6 +27,8 @@ import java.util.Set;
 
 import org.apache.felix.utils.version.VersionRange;
 import org.apache.felix.utils.version.VersionTable;
+import org.apache.karaf.features.BundleInfo;
+import org.apache.karaf.features.Conditional;
 import org.apache.karaf.features.internal.model.Bundle;
 import org.apache.karaf.features.internal.model.ConfigFile;
 import org.apache.karaf.features.internal.model.Dependency;
@@ -69,6 +71,12 @@ public abstract class AbstractFeatureMojo extends MojoSupport {
     @Parameter
     protected boolean skipNonMavenProtocols = true;
 
+    /**
+     * Ignore the dependency flag on the bundles in the features XML
+     */
+    @Parameter(defaultValue = "false")
+    protected boolean ignoreDependencyFlag;
+    
     /**
      * The start level exported when no explicit start level is set for a bundle
      */
@@ -240,6 +248,13 @@ public abstract class AbstractFeatureMojo extends MojoSupport {
                 try {
                     for (Bundle bundle : feature.getBundle()) {
                         resolveArtifact(bundle.getLocation());
+                    }
+                    for (Conditional conditional : feature.getConditional()) {
+                        for (BundleInfo bundle : conditional.getBundles()) {
+                            if (ignoreDependencyFlag || (!ignoreDependencyFlag && !bundle.isDependency())) {
+                                resolveArtifact(bundle.getLocation());
+                            }
+                        }
                     }
                     for (ConfigFile configfile : feature.getConfigfile()) {
                         resolveArtifact(configfile.getLocation());

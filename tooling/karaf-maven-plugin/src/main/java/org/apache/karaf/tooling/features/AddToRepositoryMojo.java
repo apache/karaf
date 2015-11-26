@@ -21,6 +21,8 @@ import java.io.File;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.karaf.features.BundleInfo;
+import org.apache.karaf.features.Conditional;
 import org.apache.karaf.features.internal.model.Bundle;
 import org.apache.karaf.features.internal.model.ConfigFile;
 import org.apache.karaf.features.internal.model.Feature;
@@ -61,6 +63,9 @@ public class AddToRepositoryMojo extends AbstractFeatureMojo {
 
         for (Feature feature : featuresSet) {
             copyBundlesToDestRepository(feature.getBundle());
+            for(Conditional conditional : feature.getConditional()) {
+                copyBundlesConditionalToDestRepository(conditional.getBundles());
+            }
             copyConfigFilesToDestRepository(feature.getConfigfile());
         }
         
@@ -68,6 +73,19 @@ public class AddToRepositoryMojo extends AbstractFeatureMojo {
         
     }
 
+    private void copyBundlesConditionalToDestRepository(List<? extends BundleInfo> artifactRefsConditional) throws MojoExecutionException {
+        for (BundleInfo artifactRef : artifactRefsConditional) {
+            if (ignoreDependencyFlag || (!ignoreDependencyFlag && !artifactRef.isDependency())) {
+                Artifact artifact = resourceToArtifact(artifactRef.getLocation(), skipNonMavenProtocols);
+                // Avoid getting NPE on artifact.getFile in some cases 
+                resolveArtifact(artifact, remoteRepos);
+                if (artifact != null) {
+                    copy(artifact, repository);
+                }
+            }
+        }
+    }
+    
     private void copyBundlesToDestRepository(List<? extends Bundle> artifactRefs) throws MojoExecutionException {
         for (Bundle artifactRef : artifactRefs) {
             Artifact artifact = resourceToArtifact(artifactRef.getLocation(), skipNonMavenProtocols);
