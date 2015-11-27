@@ -59,6 +59,9 @@ public class Headers extends BundlesCommand {
 
     @Option(name = "--indent", description = "Indentation method")
     int indent = -1;
+    
+    @Option(name = "--no-uses", description = "Print or not the Export-Package uses section")
+    boolean noUses = false;
 
     @Reference(optional = true)
     Terminal terminal;
@@ -266,6 +269,9 @@ public class Headers extends BundlesCommand {
         });
         builder.append(name);
         for (int i = 0; directives != null && i < directives.length; i++) {
+            if (noUses && directives[i].getName().equalsIgnoreCase("uses")) {
+                continue;
+            }
             builder.append(";");
             if (indent > 1) {
                 builder.append("\n\t\t");
