@@ -621,7 +621,7 @@ public class Builder {
         if (val != null && !val.isEmpty()) {
             List<String> comments = config.getComments(key);
             Clause[] clauses = org.apache.felix.utils.manifest.Parser.parseHeader(val);
-            Set<String> strings = new TreeSet<>();
+            Set<String> strings = new LinkedHashSet<>();
             for (Clause clause : clauses) {
                 strings.add(clause.toString());
             }
