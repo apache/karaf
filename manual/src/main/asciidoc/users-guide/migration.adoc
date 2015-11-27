@@ -26,27 +26,29 @@ In general the command names now have the scheme <object in singular>:<command o
 For cases when one scope cares for more than one object type like feature:* that cares for features and feature repositories the sheme is partly: <scope>:<object-command>.
 The following table shows side by side the old and new command names.
 
-|| Name 2.x || Name 3.x ||
-| features:add-url | feature:repo-add |
-| features:chooseurl | feature:repo-add |
-| features:chooseurl | feature:repo-add |
-| features:listrepositories | feature:repo-list |
-| features:listurl | feature:repo-list |
-| features:listversions | feature:version-list |
-| features:refreshurl | feature:repo-add |
-| features:removerepository | feature:repo-remove |
-| features:removeurl | feature:repo-remove |
-| features:* | feature:* |
-| osgi:* | bundle:* |
-| dev:dynamic-import | bundle:dynamic-import |
-| dev:framework | system:framework |
-| dev:print-stack-traces | shell:print-stack-traces |
-| dev:restart | system:shutdown -r |
-| dev:show-tree | bundle:tree-show |
-| dev:watch | bundle:watch |
-| admin:* | instance:* |
-| config: | config: |
-| jaas: | jaas: |
+|=== 
+|Name 2.x | Name 3.x 
+| features:add-url | feature:repo-add 
+| features:chooseurl | feature:repo-add 
+| features:chooseurl | feature:repo-add 
+| features:listrepositories | feature:repo-list 
+| features:listurl | feature:repo-list 
+| features:listversions | feature:version-list 
+| features:refreshurl | feature:repo-add 
+| features:removerepository | feature:repo-remove 
+| features:removeurl | feature:repo-remove 
+| features:* | feature:* 
+| osgi:* | bundle:* 
+| dev:dynamic-import | bundle:dynamic-import 
+| dev:framework | system:framework 
+| dev:print-stack-traces | shell:print-stack-traces 
+| dev:restart | system:shutdown -r 
+| dev:show-tree | bundle:tree-show 
+| dev:watch | bundle:watch 
+| admin:* | instance:* 
+| config: | config: 
+| jaas: | jaas: 
+|===
 
 ==  Changes in MBeans
 
@@ -54,12 +56,14 @@ For Karaf 3 we did a major refactoring of the module and package structure of Ka
 
 Like the commands the bean types have bean renamed to the singular form:
 
-|| Type Karaf 2.x || Type Karaf 3.x ||
-| admin | instance |
-| bundles | bundle |
-| features | feature |
-| packages | package |
-| services | service |
+|===
+| Type Karaf 2.x | Type Karaf 3.x 
+| admin | instance 
+| bundles | bundle 
+| features | feature
+| packages | package 
+| services | service 
+|===
 
 Besides the type in the objectname a lot of the operations / attributes changed. 
 

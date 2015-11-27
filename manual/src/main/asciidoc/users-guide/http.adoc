@@ -51,7 +51,7 @@ The Pax Web whiteboard extender is an enhancement of the http feature. So use th
 root@karaf> feature:install http-whiteboard
 ----
 
-The [Pax Web whiteboard|http://team.ops4j.org/wiki/display/ops4j/Pax+Web+Extender+-+Whiteboard] extender listens to services
+The http://team.ops4j.org/wiki/display/ops4j/Pax+Web+Extender+-+Whiteboard[Pax Web whiteboard] extender listens to services
 of interface type HttpServlet and Filter.
 It will register each of these interfaces with the HttpService and remove them as soon as the service goes down.
 So it is much more convenient than registering with the HttpService directly.
@@ -71,4 +71,4 @@ The above snippet publishes the Servlet MyServlet on http://localhost:8080/mySer
 
 Please keep in mind that the Whiteboard pattern for Servlets is not standardized and only works with Pax Web.
 
-For commands take a look at the command section in the [webcontainer|webcontainer] chapter.
+For commands take a look at the command section in the  link:webcontainer[webcontainer] chapter.

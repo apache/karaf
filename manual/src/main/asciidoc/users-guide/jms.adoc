@@ -96,10 +96,8 @@ For instance, to create a JMS connection factory for a Apache ActiveMQ broker, y
 karaf@root()> jms:create -t activemq -u tcp://localhost:61616 test
 ----
 
-{warning}
-The `jms:create` command doesn't install any feature or bundle providing the JMS connection factory classes (and dependencies).
+WARNING: The `jms:create` command doesn't install any feature or bundle providing the JMS connection factory classes (and dependencies).
 You have to install the required features (for instance `activemq-broker` feature for Apache ActiveMQ), or bundles (for IBM WebsphereMQ) providing the JMS connection factory packages and classes.
-{warning}
 
 In the previous example, we assume that you previously installed the `activemq-broker` feature.
 
@@ -167,10 +165,8 @@ where `/jms/test` is the name of the JMS connection factory.
 
 If the JMS broker requires an authentication, you can use the `-u` (`--username`) and `-p` (`--password`) options.
 
-{warning}
-Depending of the JMS connection factory type, this command may not work.
+WARNING: Depending of the JMS connection factory type, this command may not work.
 For now, the command works only with Apache ActiveMQ.
-{warning}
 
 ===  `jms:topics`
 
@@ -187,10 +183,8 @@ where `/jms/test` is the name of the JMS connection factory.
 
 If the JMS broker requires an authentication, you can use the `-u` (`--username`) and `-p` (`--password`) options.
 
-{warning}
-Depending of the JMS connection factory type, this command may not work.
+WARNING: Depending of the JMS connection factory type, this command may not work.
 For now, the command works only with Apache ActiveMQ.
-{warning}
 
 ===  `jms:send`
 
@@ -219,10 +213,8 @@ If you want to consume only some messages, you can define a selector using the `
 
 If the JMS broker requires an authentication, you can use the `-u` (`--username`) and `-p` (`--password`) options.
 
-{warning}
-The `jms:consume` command just consumes (so removes) messages from a JMS queue. It doesn't display the messages.
+WARNING: The `jms:consume` command just consumes (so removes) messages from a JMS queue. It doesn't display the messages.
 If you want to see the details of messages, you can use the `jms:browse` command.
-{warning}
 
 ===  `jms:count`
 

@@ -122,7 +122,7 @@ It means that the `karaf` user will have the roles defined by the `admingroup`.
 
 The `jaas:*` commands manage the realms, users, groups, roles in the console.
 
-h4. `jaas:realm-list`
+==== `jaas:realm-list`
 
 We already used the `jaas:realm-list` previously in this section.
 
@@ -140,7 +140,7 @@ We have here one realm (`karaf`) containing two login modules (`PropertiesLoginM
 
 The `index` is used by the `jaas:realm-manage` command to easily identify the realm/login module that we want to manage.
 
-h4. `jaas:realm-manage`
+==== `jaas:realm-manage`
 
 The `jaas:realm-manage` command switch in realm/login module edit mode, where you can manage the users, groups, and roles in the login module.
 
@@ -158,7 +158,7 @@ option expects the login module class name:
 karaf@root()> jaas:realm-manage --realm karaf --module org.apache.karaf.jaas.modules.properties.PropertiesLoginModule
 ----
 
-h4. `jaas:user-list`
+==== `jaas:user-list`
 
 When you are in edit mode, you can list the users in the login module using the `jaas:user-list`:
 
@@ -173,7 +173,7 @@ karaf     | admingroup | viewer
 
 You can see the user name and the group by role.
 
-h4. `jaas:user-add`
+==== `jaas:user-add`
 
 The `jaas:user-add` command adds a new user (and the password) in the currently edited login module:
 
@@ -197,7 +197,7 @@ foo       |            |
 
 On the other hand, if you want to rollback the user addition, you can use the `jaas:cancel` command.
 
-h4. `jaas:user-delete`
+==== `jaas:user-delete`
 
 The `jaas:user-delete` command deletes an user from the currently edited login module:
 
@@ -218,7 +218,7 @@ karaf     | admingroup | manager
 karaf     | admingroup | viewer
 ----
 
-h4. `jaas:group-add`
+==== `jaas:group-add`
 
 The `jaas:group-add` command assigns a group (and eventually creates the group) to an user in the currently edited login module:
 
@@ -226,7 +226,7 @@ The `jaas:group-add` command assigns a group (and eventually creates the group) 
 karaf@root()> jaas:group-add karaf mygroup
 ----
 
-h4. `jaas:group-delete`
+==== `jaas:group-delete`
 
 The `jaas:group-delete` command removes an user from a group in the currently edited login module:
 
@@ -234,7 +234,7 @@ The `jaas:group-delete` command removes an user from a group in the currently ed
 karaf@root()> jaas:group-delete karaf mygroup
 ----
 
-h4. `jaas:group-role-add`
+==== `jaas:group-role-add`
 
 The `jaas:group-role-add` command adds a role in a group in the currently edited login module:
 
@@ -242,7 +242,7 @@ The `jaas:group-role-add` command adds a role in a group in the currently edited
 karaf@root()> jaas:group-role-add mygroup myrole
 ----
 
-h4. `jaas:group-role-delete`
+==== `jaas:group-role-delete`
 
 The `jaas:group-role-delete` command removes a role from a group in the currently edited login module:
 
@@ -250,12 +250,12 @@ The `jaas:group-role-delete` command removes a role from a group in the currentl
 karaf@root()> jaas:group-role-delete mygroup myrole
 ----
 
-h4. `jaas:update`
+==== `jaas:update`
 
 The `jaas:update` command commits your changes in the login module backend. For instance, in the case of the PropertiesLoginModule,
 the `etc/users.properties` will be updated only after the execution of the `jaas:update` command.
 
-h4. `jaas:cancel`
+==== `jaas:cancel`
 
 The `jaas:cancel` command rollback your changes and doesn't update the login module backend.
 
@@ -364,9 +364,7 @@ By default, Karaf allows a key for the karaf user:
 # karaf=AAAAB3NzaC1kc3MAAACBAP1/U4EddRIpUt9KnC7s5Of2EbdSPO9EAMMeP4C2USZpRV1AIlH7WT2NWPq/xfW6MPbLm1Vs14E7gB00b/JmYLdrmVClpJ+f6AR7ECLCT7up1/63xhv4O1fnxqimFQ8E+4P208UewwI1VBNaFpEy9nXzrith1yrv8iIDGZ3RSAHHAAAAFQCXYFCPFSMLzLKSuYKi64QL8Fgc9QAAAIEA9+GghdabPd7LvKtcNrhXuXmUr7v6OuqC+VdMCz0HgmdRWVeOutRZT+ZxBxCBgLRJFnEj6EwoFhO3zwkyjMim4TwWeotUfI0o4KOuHiuzpnWRbqN/C/ohNWLx+2J6ASQ7zKTxvqhRkImog9/hWuWfBpKLZl6Ae1UlZAFMO/7PSSoAAACBAKKSU2PFl/qOLxIwmBZPPIcJshVe7bVUpFvyl3BbJDow8rXfskl8wO63OzP/qLmcJM0+JbcRU/53JjTuyk31drV2qxhIOsLDC9dGCWj47Y7TyhPdXh/0dthTRBy6bqGtRPxGa7gJov1xm/UuYYXPIUR/3x9MAZvZ5xvE0kYXO+rx,admin
 ----
 
-{warning}
-For security reason, this key is disabled. We encourage to create the keys pair per client and update the `etc/keys.properties` file.
-{warning}
+WARNING: For security reason, this key is disabled. We encourage to create the keys pair per client and update the `etc/keys.properties` file.
 
 The easiest way to create key pair is to use OpenSSH.
 
@@ -548,7 +546,7 @@ is `true` or `false`.
 
 ==  Security providers
 
-Some applications require specific security providers to be available, such as [BouncyCastle|http://www.bouncycastle.org].
+Some applications require specific security providers to be available, such as http://www.bouncycastle.org[BouncyCastle].
 
 The JVM imposes some restrictions about the use of such jars: they have to be signed and be available on the boot classpath.
 

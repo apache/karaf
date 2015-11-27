@@ -397,7 +397,7 @@ You can also use graphic client like `filezilla`, `gftp`, `nautilus`, etc.
 
 On Windows, you can use `filezilla`, `WinSCP`, etc.
 
-h4. Apache Maven
+==== Apache Maven
 
 Apache Karaf `system` folder is the Karaf repository, that use a Maven directory structure. It's where Apache Karaf
 looks for the artifacts (bundles, features, kars, etc).
@@ -410,9 +410,7 @@ For instance, you want to add the Apache ServiceMix facebook4j OSGi bundle, you 
 mvn deploy:deploy-file -Dfile=org.apache.servicemix.bundles.facebook4j-2.0.2_1.jar -DgroupId=org.apache.servicemix.bundles -DartifactId=org.apache.servicemix.bundles.facebook4j -Dversion=2.0.2_1 -Dpackaging=jar -Durl=scp://localhost:8101/system
 ----
 
-{tip}
-If you want to turn Apache Karaf as a simple Maven repository, you can use [Apache Karaf Cave|http://karaf.apache.org/index/subprojects/cave.html].
-{tip}
+TIP: If you want to turn Apache Karaf as a simple Maven repository, you can use http://karaf.apache.org/index/subprojects/cave.html[Apache Karaf Cave].
 
 ==  JMX MBeanServer
 
@@ -420,4 +418,4 @@ Apache Karaf provides a JMX MBeanServer.
 
 This MBeanServer is available remotely, using any JMX client like `jconsole`.
 
-You can find details on the [Monitoring section|monitoring] of the user guide.
+You can find details on the link:monitoring[] of the user guide.

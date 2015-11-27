@@ -17,7 +17,7 @@
 Apache Karaf natively provides a failover mechanism. It uses a kind of master/slave topology where one instance is active
 and the others are in standby.
 
-If you are looking for cluster of Apache Karaf instances (active/active), [Apache Karaf Cellar|http://karaf.apache.org/index/subprojects/cellar.html] is a solution.
+If you are looking for cluster of Apache Karaf instances (active/active), http://karaf.apache.org/index/subprojects/cellar.html[Apache Karaf Cellar] is a solution.
 
 Karaf provides failover capability using either a simple lock file or a JDBC locking mechanism.
 In both cases, a container-level lock system allows bundles to be preloaded into the slave Karaf instance in order to provide faster failover performance.
@@ -96,20 +96,15 @@ karaf.lock.jdbc.timeout=30
 * `karaf.lock.jdbc.password` property contains the password to use to connet to the database.
 * `karaf.lock.jdbc.table` property contains the database table to use for the lock.
 
-{warning}
-Apache Karaf won't start if the JDBC driver is not present in the `lib/ext` folder.
-{warning}
+WARNING: Apache Karaf won't start if the JDBC driver is not present in the `lib/ext` folder.
 
-{warning}
-The `sample` database will be created automatically if it does not exist.
-{warning}
 
-{warning}
-If the connection to the database is lost, the master instance tries to gracefully shutdown, allowing a slave instance to
+WARNING: The `sample` database will be created automatically if it does not exist.
+
+WARNING: If the connection to the database is lost, the master instance tries to gracefully shutdown, allowing a slave instance to
 become the master when the database is back. The former master instance will required a manual restart.
-{warning}
 
-h4. Lock on Oracle
+==== Lock on Oracle
 
 Apache Karaf supports Oracle database for locking. The lock implementation class name to use is `org.apache.karaf.main.lock.OracleJDBCLock`:
 
@@ -127,12 +122,10 @@ karaf.lock.jdbc.timeout=30
 
 The Oracle JDBC driver file (`ojdbc*.jar`) has to be copied in the `lib/ext` folder.
 
-{warning}
-The `karaf.lock.jdbc.url` property contains a JDBC URL which requires an active SID. It means that you must manually create the Oracle
+WARNING: The `karaf.lock.jdbc.url` property contains a JDBC URL which requires an active SID. It means that you must manually create the Oracle
 database instance first before using the lock mechanism.
-{warning}
 
-h4. Lock on Derby
+==== Lock on Derby
 
 Apache Karaf supports Apache Derby database for locking. The lock implementation class name to use is `org.apache.karaf.main.lock.DerbyJDBCLock`:
 
@@ -224,20 +217,20 @@ All bundles with an ID equals or lower to this start level will be started in th
 
 As reminder, the bundles start levels are specified in `etc/startup.properties`, in the `url=level` format.
 
-|| Level || Behavior ||
-| 1 | A 'cold' standby instance. Core bundles are not loaded into container. Slaves will wait until lock acquired to start server. |
-| <50 | A 'hot' standby instance. Core bundles are loaded into the container. Slaves will wait until lock acquired to start user level bundles. The console will be accessible for each slave instance at this level. |
-| >50 | This setting is not recommended as user bundles will end up being started. |
+|===
+| Level | Behavior
+| 1 | A 'cold' standby instance. Core bundles are not loaded into container. Slaves will wait until lock acquired to start server. 
+| <50 | A 'hot' standby instance. Core bundles are loaded into the container. Slaves will wait until lock acquired to start user level bundles. The console will be accessible for each slave instance at this level. 
+| >50 | This setting is not recommended as user bundles will end up being started. 
+|===
 
-{warning}
-Using 'hot' standby means that the slave instances are running and bind some ports. So, if you use master and slave instances on the same machine, you have
+WARNING: Using 'hot' standby means that the slave instances are running and bind some ports. So, if you use master and slave instances on the same machine, you have
 to update the slave configuration to bind the services (ssh, JMX, etc) on different port numbers.
-{warning}
 
 ==  Cluster (active/active)
 
 Apache Karaf doesn't natively support cluster. By cluster, we mean several active instances, synchronized with each other.
 
-However, [Apache Karaf Cellar|http://karaf.apache.org/index/subprojects/cellar.html] can be installed to provide cluster support.
+However, http://karaf.apache.org/index/subprojects/cellar.html[Apache Karaf Cellar] can be installed to provide cluster support.
 
-See the [Apache Karaf Cellar website|http://karaf.apache.org/index/subprojects/cellar.html] for details.
+See the http://karaf.apache.org/index/subprojects/cellar.html[Apache Karaf Cellar website] for details.

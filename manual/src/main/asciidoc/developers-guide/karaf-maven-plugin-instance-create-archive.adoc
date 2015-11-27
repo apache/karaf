@@ -1,0 +1,61 @@
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//      http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// 
+
+== Goal _karaf:archive_
+
+Normally this is run as part of the karaf-assembly packaging.
+
+The _karaf:archive_ goal packages a Karaf instance archive from a given assembled instance.
+
+Both tar.gz and zip formats are generated in the destination folder.
+
+=== Example
+The example below create archives for the given Karaf instance:
+[source,xml]
+----
+<project>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.karaf.tooling</groupId>
+        <artifactId>karaf-maven-plugin</artifactId>
+        <version>${project.version}</version>
+          <executions>
+            <execution>
+              <id>generate</id>
+              <phase>package</phase>
+              <goals>
+                <goal>archive</goal>
+              </goals>
+              <configuration>
+                <destDir>${project.build.directory}</destDir>
+                <targetServerDirectory>${project.build.directory}/assembly</targetServerDirectory>
+                <targetFile>${project.file}</targetFile>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+    </plugins>
+  </build>
+</project>
+----
+
+=== Parameters
+[cols="1,1,5"]
+|===
+| Name | Type | Description 
+| _destDir_ | _File_ | The target directory of the project. \\ Default value: ${project.build.directory} 
+| _targetServerDirectory_ | _File_ | The location of the server repository. \\ Default value: ${project.build.directory}/assembly 
+| _targetFile_ | _File_ | The target file to set as the project's artifact. \\ Default value: ${project.file} 
+|===

@@ -89,6 +89,6 @@ A custom distribution of Apache Karaf embedding OpenEJB is available in the Apac
 
 The name of this custom distribution is KarafEE:
 
-[https://svn.apache.org/repos/asf/tomee/karafee/]
+https://svn.apache.org/repos/asf/tomee/karafee/
 
 However, this project is now "deprecated", and all resources from KarafEE will move directly in Apache Karaf soon.

@@ -228,7 +228,7 @@ The `instance:connect` command accepts shell commands as argument. It allows you
 ----
 karaf@root()> instance:connect test feature:list
 Name                          | Version         | Installed | Repository                | Description
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------
 standard                      | 3.0.0           | x         | standard-3.0.0            | Karaf standard feature
 aries-annotation              | 3.0.0           |           | standard-3.0.0            | Aries Annotations
 wrapper                       | 3.0.0           |           | standard-3.0.0            | Provide OS integration
@@ -363,6 +363,7 @@ The `Instances` attribute is a tabular data attribute providing details about th
 ===  Operations
 
 The InstanceMBean provides the following operations, corresponding to the previous `instance:*` commands:
+
 * `createInstance(instanceName, sshPort, rmiRegistryPort, rmiServerPort, location, javaOpts, features, featuresUrls)`: create a new instance.
 * `changeSshPort(instanceName, port)`: change the SSH port of an instance.
 * `changeRmiServerPort(instanceName, port)`: change the RMI server port of an instance.

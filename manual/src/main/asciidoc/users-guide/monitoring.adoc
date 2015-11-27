@@ -171,19 +171,19 @@ Apache Karaf looks for required roles using the following process
 The most specific configuration file is tried first. It means that in the previous example, the `etc/jmx.acl.foo.bar.Test.cfg` is looked at first.
 In this configuration, Apache Karaf looks for a:
 
-1. Specific match for the invocation, e.g. `test(int)["17"] = role1`
+. Specific match for the invocation, e.g. `test(int)["17"] = role1`
 
-2. Regex match for the invocation, e.g. `test(int)[/[0-9]/] = role2`
+. Regex match for the invocation, e.g. `test(int)[/[0-9]/] = role2`
  In both cases, the passed argument is converted to a String for the comparison.
  If any of the above match, the search stops and the associated roles are used.
 
-3. Signature match for the invocation, e.g. `test(int) = role3`
+. Signature match for the invocation, e.g. `test(int) = role3`
  If matched, the search stops and the associated roles are used.
 
-4. Method name match for the invocation, e.g. `test = role4`
+. Method name match for the invocation, e.g. `test = role4`
  If matched, the search stops and the associated roles are used.
 
-5. A method name wildcard match, e.g. `te* = role5`
+. A method name wildcard match, e.g. `te* = role5`
  For all the wildcard matches found in the current configuration file, the roles associated with the longest match are used.
  So if you have te* and * and the method invoked is 'test', then the roles defined with te* are used, not the ones defined with *.
 
@@ -231,7 +231,7 @@ But most of them can use HTTP.
 
 More over, you may want to write your own application/web application. In that case, HTTP and JSON can be very interesting and easy to remotely manage Apache Karaf.
 
-[Jolokia|http://www.jolokia.org/] can be installed in Apache Karaf as a remote JMX-HTTP bridge.
+http://www.jolokia.org/[Jolokia] can be installed in Apache Karaf as a remote JMX-HTTP bridge.
 
 Karaf provides a jolokia feature, ready to install:
 
@@ -241,7 +241,7 @@ karaf@root()> feature:install jolokia
 
 By default, Jolokia is listening on the port `8181` (see the [WebContainer (JSP/Servlet)|webcontainer] page for details about the HTTP configuration).
 
-If you point a browser on [http://localhost:8181/jolokia] you will see a JSON output like:
+If you point a browser on http://localhost:8181/jolokia you will see a JSON output like:
 
 ----
 {"timestamp":1421765829,"status":200,"request":{"type":"version"},"value":{"protocol":"7.2","config":{"useRestrictorService":"false","canonicalNaming":"true","includeStackTrace":"true","listenForHttpService":"true","historyMaxEntries":"10","agentId":"192.168.134.10-5922-6eb8d517-osgi","debug":"false","realm":"karaf","serializeException":"false","agentContext":"\/jolokia","agentType":"servlet","policyLocation":"classpath:\/jolokia-access.xml","user":"karaf","debugMaxEntries":"100","authMode":"jaas","mimeType":"text\/plain"},"agent":"1.2.4-SNAPSHOT","info":{"product":"felix","vendor":"Apache","version":"4.4.1"`}
@@ -270,4 +270,4 @@ Enter host password for user 'karaf':
 {"timestamp":1421765948,"status":200,"request":{"mbean":"java.lang:type=Memory","path":"used","attribute":"HeapMemoryUsage","type":"read"},"value":69121000}
 ----
 
-You can find details on the [Jolokia website|http://www.jolokia.org] and in the [documentation|http://www.jolokia.org/reference/html/].
+You can find details on the http://www.jolokia.org[Jolokia website] and in the http://www.jolokia.org/reference/html/[documentation].

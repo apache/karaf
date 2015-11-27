@@ -33,3 +33,22 @@ The enterprise features available are:
 * [CDI|cdi] providing ready to use CDI containers in Apache Karaf.
 * [HA/failover and cluster|failover] providing active/passive or active/active topologies with multiple Apache Karaf instances.
 
+include::http.adoc[]
+
+include::webcontainer.adoc[]
+
+include::jndi.adoc[]
+
+include::jta.adoc[]
+
+include::jdbc.adoc[]
+
+include::jms.adoc[]
+
+include::jpa.adoc[]
+
+include::ejb.adoc[]
+
+include::cdi.adoc[]
+
+include::failover.adoc[]

@@ -26,21 +26,27 @@ features/core/src/main/resources/org/apache/karaf/features/karaf-features-1.0.0.
 
 These schemas are also available on the Apache Karaf website:
 
-* [http://karaf.apache.org/xmlns/features/v1.2.0]
-* [http://karaf.apache.org/xmlns/features/v1.1.0]
-* [http://karaf.apache.org/xmlns/features/v1.0.0]
+* http://karaf.apache.org/xmlns/features/v1.2.0
+* http://karaf.apache.org/xmlns/features/v1.1.0
+* http://karaf.apache.org/xmlns/features/v1.0.0
 
 ==  karaf-features-1.2.0.xsd
 
-{snippet:url=../features/core/src/main/resources/org/apache/karaf/features/karaf-features-1.2.0.xsd|lang=xml|pygmentize=true}
-{snippet}
+[source,xml]
+----
+include::../features/core/src/main/resources/org/apache/karaf/features/karaf-features-1.2.0.xsd[lines=1..10]
+----
 
 ==  karaf-features-1.1.0.xsd
 
-{snippet:url=../features/core/src/main/resources/org/apache/karaf/features/karaf-features-1.1.0.xsd|lang=xml|pygmentize=true}
-{snippet}
+[source,xml]
+----
+include::../features/core/src/main/resources/org/apache/karaf/features/karaf-features-1.1.0.xsd[lines=1..10]
+----
 
 ==  karaf-features-1.0.0.xsd
 
-{snippet:url=../features/core/src/main/resources/org/apache/karaf/features/karaf-features-1.0.0.xsd|lang=xml|pygmentize=true}
-{snippet}
+[source,xml]
+----
+include::../features/core/src/main/resources/org/apache/karaf/features/karaf-features-1.0.0.xsd[lines=1..10]
+----

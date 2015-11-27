@@ -101,8 +101,7 @@ Properties:
    aries.transaction.howl.bufferSizeKBytes = 4
 ----
 
-{warning}
-The `transaction` feature defines the configuration in memory by default. It means that changes that you can do will
+WARNING: The `transaction` feature defines the configuration in memory by default. It means that changes that you can do will
 be lost in case of Apache Karaf restart.
 If you want to define your own transaction configuration at startup, you have to create a `etc/org.apache.aries.transaction.cfg`
 configuration file and set the properties and values in the file. For instance:
@@ -116,4 +115,3 @@ aries.transaction.howl.maxLogFiles = 2
 aries.transaction.howl.logFileDir = /opt/apache-karaf-3.0.0/data/txlog
 aries.transaction.howl.bufferSizeKBytes = 4
 ----
-{warning}
