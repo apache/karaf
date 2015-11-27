@@ -254,11 +254,14 @@ setupDebugOptions() {
 
     # Set Debug options if enabled
     if [ "x$KARAF_DEBUG" != "x" ]; then
-        # Ignore DEBUG in case of stop or client mode
+        # Ignore DEBUG in case of stop, client, or status mode
         if [ "x$MODE" = "xstop" ]; then
             return
         fi
         if [ "x$MODE" = "xclient" ]; then
+            return
+        fi
+        if [ "x$MODE" = "xstatus" ]; then
             return
         fi
         # Use the defaults if JAVA_DEBUG_OPTS was not set
