@@ -253,6 +253,30 @@ public class SubsystemTest {
         verify(resolver, expected);
     }
 
+    @Test
+    public void testResourceRepositories() throws Exception {
+        RepositoryImpl repo = new RepositoryImpl(getClass().getResource("data7/features.xml").toURI());
+
+        Map<String, Set<String>> features = new HashMap<String, Set<String>>();
+        addToMapSet(features, "root", "f1");
+        addToMapSet(features, "root/apps1", "f2");
+
+        Map<String, Set<String>> expected = new HashMap<String, Set<String>>();
+        addToMapSet(expected, "root", "a/1.0.0");
+        addToMapSet(expected, "root", "c/1.0.0");
+        addToMapSet(expected, "root/apps1", "b/1.0.0");
+
+        SubsystemResolver resolver = new SubsystemResolver(this.resolver, new TestDownloadManager(getClass(), "data7"));
+        resolver.prepare(Arrays.asList(repo.getFeatures()),
+                features,
+                Collections.<String, Set<BundleRevision>>emptyMap());
+        resolver.resolve(Collections.<String>emptySet(),
+                FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
+                null, null, null);
+
+        verify(resolver, expected);
+    }
+
     private void verify(SubsystemResolver resolver, Map<String, Set<String>> expected) {
         Map<String, Set<String>> mapping = getBundleNamesPerRegions(resolver);
         if (!expected.equals(mapping)) {

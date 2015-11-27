@@ -66,4 +66,8 @@ public interface Feature {
 
     String getNamespace();
 
+    List<String> getResourceRepositories();
+
+    String getRepositoryUrl();
+
 }

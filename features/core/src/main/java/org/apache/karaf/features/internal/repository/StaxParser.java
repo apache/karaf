@@ -34,6 +34,8 @@ import org.apache.felix.utils.version.VersionTable;
 import org.apache.karaf.features.internal.resolver.CapabilityImpl;
 import org.apache.karaf.features.internal.resolver.RequirementImpl;
 import org.apache.karaf.features.internal.resolver.ResourceImpl;
+import org.apache.karaf.features.internal.resolver.SimpleFilter;
+import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
 import org.osgi.resource.Capability;
 import org.osgi.resource.Requirement;
@@ -272,7 +274,7 @@ public final class StaxParser {
                             cap.getAttributes().put(ContentNamespace.CAPABILITY_URL_ATTRIBUTE, url);
                         }
                     }
-                    resource.addCapability(parseCapability(reader, resource));
+                    resource.addCapability(cap);
                     break;
                 case REQUIREMENT:
                     resource.addRequirement(parseRequirement(reader, resource));
@@ -319,7 +321,11 @@ public final class StaxParser {
         Map<String, Object> attributes = new HashMap<>();
         parseClause(reader, namespace, directives, attributes);
         sanityCheckEndElement(reader, reader.getEventType(), REQUIREMENT);
-        return new RequirementImpl(resource, namespace[0], directives, attributes);
+        String filterStr = directives.get(Constants.FILTER_DIRECTIVE);
+        SimpleFilter sf = (filterStr != null)
+                ? SimpleFilter.parse(filterStr)
+                : SimpleFilter.convert(attributes);
+        return new RequirementImpl(resource, namespace[0], directives, attributes, sf);
     }
 
     private static void parseClause(XMLStreamReader reader, String[] namespace, Map<String, String> directives, Map<String, Object> attributes) throws XMLStreamException {

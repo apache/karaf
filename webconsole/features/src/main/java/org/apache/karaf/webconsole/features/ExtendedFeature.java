@@ -17,7 +17,6 @@
 package org.apache.karaf.webconsole.features;
 
 import java.util.List;
-import java.util.Map;
 
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Capability;
@@ -159,5 +158,15 @@ public class ExtendedFeature implements Feature {
     @Override
     public String getNamespace() {
         return feature.getNamespace();
+    }
+
+    @Override
+    public List<String> getResourceRepositories() {
+        return feature.getResourceRepositories();
+    }
+
+    @Override
+    public String getRepositoryUrl() {
+        return feature.getRepositoryUrl();
     }
 }
