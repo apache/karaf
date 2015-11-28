@@ -27,7 +27,9 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.xml.stream.XMLStreamException;
 
+import org.apache.karaf.features.internal.resolver.CapabilityImpl;
 import org.apache.karaf.features.internal.resolver.CapabilitySet;
+import org.apache.karaf.features.internal.resolver.ResourceImpl;
 import org.apache.karaf.features.internal.resolver.SimpleFilter;
 import org.osgi.framework.Version;
 import org.osgi.resource.Capability;
@@ -37,12 +39,15 @@ import org.osgi.resource.Resource;
 import static org.osgi.framework.namespace.IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE;
 import static org.osgi.framework.namespace.IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE;
 import static org.osgi.framework.namespace.IdentityNamespace.IDENTITY_NAMESPACE;
+import static org.osgi.service.repository.ContentNamespace.CAPABILITY_URL_ATTRIBUTE;
 
 /**
  * Repository conforming to the OSGi Repository specification.
  * The content of the URL can be gzipped.
  */
 public class XmlRepository extends BaseRepository {
+
+    public static final String REPO_NAMESPACE = "karaf.repo";
 
     protected final String url;
     protected final long expiration;
@@ -94,7 +99,22 @@ public class XmlRepository extends BaseRepository {
             throw new IllegalStateException("Invalid osgi.identity capability: " + identity);
         }
         if (!hasResource((String) type, (String) name, (Version) vers)) {
+            String location = url.substring(0, url.lastIndexOf( "/" ) + 1);
+            addRepoLocation(resource, location);
             super.addResource(resource);
+        }
+    }
+
+    private void addRepoLocation(Resource resource, String location)
+    {
+        Map<String, String> dirs = new HashMap<>();
+        Map<String, Object> attrs = new HashMap<>();
+        attrs.put(CAPABILITY_URL_ATTRIBUTE, location);
+        CapabilityImpl capability = new CapabilityImpl( resource, REPO_NAMESPACE, dirs, attrs );
+        if (resource instanceof ResourceImpl)
+        {
+            ResourceImpl internalResource = (ResourceImpl)resource;
+            internalResource.addCapability(capability);
         }
     }
 

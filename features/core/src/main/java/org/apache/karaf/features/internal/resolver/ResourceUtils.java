@@ -24,6 +24,7 @@ import java.util.Map;
 
 import org.apache.felix.utils.version.VersionRange;
 import org.apache.felix.utils.version.VersionTable;
+import org.apache.karaf.features.internal.repository.XmlRepository;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
 import org.osgi.resource.Capability;
@@ -44,8 +45,6 @@ public final class ResourceUtils {
 
     public static final String TYPE_FEATURE = "karaf.feature";
 
-    public static final String REPO_NAMESPACE = "karaf.repo";
-
     private ResourceUtils() {
     }
 
@@ -59,22 +58,13 @@ public final class ResourceUtils {
         return null;
     }
 
-    public static void addRepoLocation(ResourceImpl resource, String location)
-    {
-        Map<String, String> dirs = new HashMap<>();
-        Map<String, Object> attrs = new HashMap<>();
-        attrs.put(CAPABILITY_URL_ATTRIBUTE, location);
-        CapabilityImpl capability = new CapabilityImpl( resource, REPO_NAMESPACE, dirs, attrs );
-        resource.addCapability( capability );
-    }
-
     // TODO: Correct name should probably be toUrl
     public static String getUri(Resource resource) {
         List<Capability> caps = resource.getCapabilities(null);
         String location = null;
         String url = null;
         for (Capability cap : caps) {
-            if (cap.getNamespace().equals(REPO_NAMESPACE)) {
+            if (cap.getNamespace().equals(XmlRepository.REPO_NAMESPACE)) {
                 location = cap.getAttributes().get(CAPABILITY_URL_ATTRIBUTE).toString();
             }
             if (cap.getNamespace().equals(CONTENT_NAMESPACE)) {
