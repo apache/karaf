@@ -29,6 +29,7 @@ import java.util.Set;
 
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.internal.download.Downloader;
+import org.apache.karaf.features.internal.repository.AggregateRepository;
 import org.apache.karaf.features.internal.repository.BaseRepository;
 import org.apache.karaf.features.internal.repository.XmlRepository;
 import org.apache.karaf.features.internal.resolver.CapabilityImpl;
@@ -51,7 +52,6 @@ import org.osgi.service.resolver.HostedCapability;
 import org.osgi.service.resolver.ResolveContext;
 
 import static org.apache.karaf.features.internal.resolver.ResourceUtils.addIdentityRequirement;
-import static org.apache.karaf.features.internal.resolver.ResourceUtils.addRepoLocation;
 import static org.apache.karaf.features.internal.resolver.ResourceUtils.getUri;
 import static org.eclipse.equinox.region.RegionFilter.VISIBLE_BUNDLE_NAMESPACE;
 import static org.osgi.framework.Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE;
@@ -373,13 +373,6 @@ public class SubsystemResolveContext extends ResolveContext {
             }
             addIdentityRequirement(wrapped, subsystem, false);
             resToSub.put(wrapped, subsystem);
-            // If the repository if of type XmlRepository, then it is our own internal format
-            if (repository instanceof XmlRepository) {
-                XmlRepository xmlRepository = (XmlRepository)repository;
-                String url = xmlRepository.getUrl();
-                String location = url.substring(0, url.lastIndexOf( "/" ) + 1);
-                addRepoLocation( wrapped, location );
-            }
             try {                
                 downloader.download(getUri(wrapped), null);
             } catch (MalformedURLException e) {
