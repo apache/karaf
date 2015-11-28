@@ -43,6 +43,10 @@ public abstract class UrlLoader {
         this.expiration = expiration;
     }
 
+    public String getUrl() {
+        return url;
+    }
+
     protected boolean checkAndLoadCache() {
         long time = System.currentTimeMillis();
         if (lastChecked > 0) {

@@ -16,20 +16,19 @@
  */
 package org.apache.karaf.features.internal.repository;
 
-import java.io.InputStream;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import javax.xml.stream.Location;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
+import java.io.InputStream;
+import java.io.Writer;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.felix.utils.version.VersionTable;
 import org.apache.karaf.features.internal.resolver.CapabilityImpl;
@@ -39,6 +38,7 @@ import org.osgi.framework.Version;
 import org.osgi.resource.Capability;
 import org.osgi.resource.Requirement;
 import org.osgi.resource.Resource;
+import org.osgi.service.repository.ContentNamespace;
 
 import static javax.xml.stream.XMLStreamConstants.CHARACTERS;
 import static javax.xml.stream.XMLStreamConstants.END_ELEMENT;
@@ -178,10 +178,14 @@ public final class StaxParser {
     }
 
     public static XmlRepository parse(InputStream is) throws XMLStreamException {
-        return parse(is, null);
+        return parse(null, is, null);
     }
 
-    public static XmlRepository parse(InputStream is, XmlRepository previous) throws XMLStreamException {
+    public static XmlRepository parse(URI repositoryUrl, InputStream is) throws XMLStreamException {
+        return parse(repositoryUrl, is, null);
+    }
+
+    public static XmlRepository parse(URI repositoryUrl, InputStream is, XmlRepository previous) throws XMLStreamException {
         XMLStreamReader reader = getInputFactory().createXMLStreamReader(is);
         int event = reader.nextTag();
         if (event != START_ELEMENT || !REPOSITORY.equals(reader.getLocalName())) {
@@ -231,7 +235,7 @@ public final class StaxParser {
                 sanityCheckEndElement(reader, reader.nextTag(), REFERRAL);
                 break;
             case RESOURCE:
-                repo.resources.add(parseResource(reader));
+                repo.resources.add(parseResource(repositoryUrl, reader));
                 break;
             default:
                 throw new IllegalStateException("Unsupported element '" + element + "'. Expected 'referral' or 'resource'");
@@ -248,7 +252,7 @@ public final class StaxParser {
         }
     }
 
-    private static ResourceImpl parseResource(XMLStreamReader reader) {
+    private static ResourceImpl parseResource(URI repositoryUrl, XMLStreamReader reader) {
         try {
             if (reader.getAttributeCount() > 0) {
                 throw new IllegalStateException("Unexpected attribute '" + reader.getAttributeLocalName(0) + "'");
@@ -259,6 +263,15 @@ public final class StaxParser {
                 String element = reader.getLocalName();
                 switch (element) {
                 case CAPABILITY:
+                    CapabilityImpl cap = parseCapability(reader, resource);
+                    // Resolve relative resource urls now
+                    if (repositoryUrl != null && ContentNamespace.CONTENT_NAMESPACE.equals(cap.getNamespace())) {
+                        Object url = cap.getAttributes().get(ContentNamespace.CAPABILITY_URL_ATTRIBUTE);
+                        if (url instanceof String) {
+                            url = repositoryUrl.resolve(url.toString()).toString();
+                            cap.getAttributes().put(ContentNamespace.CAPABILITY_URL_ATTRIBUTE, url);
+                        }
+                    }
                     resource.addCapability(parseCapability(reader, resource));
                     break;
                 case REQUIREMENT:

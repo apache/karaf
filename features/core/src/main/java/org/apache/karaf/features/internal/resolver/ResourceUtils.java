@@ -16,8 +16,6 @@
  */
 package org.apache.karaf.features.internal.resolver;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,8 +42,6 @@ public final class ResourceUtils {
 
     public static final String TYPE_FEATURE = "karaf.feature";
 
-    public static final String REPO_NAMESPACE = "karaf.repo";
-
     private ResourceUtils() {
     }
 
@@ -59,42 +55,15 @@ public final class ResourceUtils {
         return null;
     }
 
-    public static void addRepoLocation(ResourceImpl resource, String location)
-    {
-        Map<String, String> dirs = new HashMap<>();
-        Map<String, Object> attrs = new HashMap<>();
-        attrs.put(CAPABILITY_URL_ATTRIBUTE, location);
-        CapabilityImpl capability = new CapabilityImpl( resource, REPO_NAMESPACE, dirs, attrs );
-        resource.addCapability( capability );
-    }
-
     // TODO: Correct name should probably be toUrl
     public static String getUri(Resource resource) {
         List<Capability> caps = resource.getCapabilities(null);
-        String location = null;
-        String url = null;
         for (Capability cap : caps) {
-            if (cap.getNamespace().equals(REPO_NAMESPACE)) {
-                location = cap.getAttributes().get(CAPABILITY_URL_ATTRIBUTE).toString();
-            }
             if (cap.getNamespace().equals(CONTENT_NAMESPACE)) {
-                url = cap.getAttributes().get(CAPABILITY_URL_ATTRIBUTE).toString();
+                return cap.getAttributes().get(CAPABILITY_URL_ATTRIBUTE).toString();
             }
         }
-
-        // If there is no location value, then just return the saved URL
-        if (location == null) {
-            return url;
-        }
-
-        // If the saved is absolute (i.e. well-formed), then return it
-        try {
-            new URL(url);
-            return url;
-        } catch (MalformedURLException e) {
-            // The URL is relative, so return the absolute URL 
-            return location + url;
-        }
+        return null;
     }
 
     public static String getFeatureId(Resource resource) {
