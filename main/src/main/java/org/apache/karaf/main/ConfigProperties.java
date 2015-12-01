@@ -187,10 +187,10 @@ public class ConfigProperties {
         Package p = Package.getPackage("org.apache.karaf.main");
         if (p != null && p.getImplementationVersion() != null)
             System.setProperty(PROP_KARAF_VERSION, p.getImplementationVersion());
-        System.setProperty(PROP_KARAF_HOME, karafHome.toURI().getRawPath());
-        System.setProperty(PROP_KARAF_BASE, karafBase.toURI().getRawPath());
-        System.setProperty(PROP_KARAF_DATA, karafData.toURI().getRawPath());
-        System.setProperty(PROP_KARAF_INSTANCES, karafInstances.toURI().getRawPath());
+        System.setProperty(PROP_KARAF_HOME, karafHome.getPath());
+        System.setProperty(PROP_KARAF_BASE, karafBase.getPath());
+        System.setProperty(PROP_KARAF_DATA, karafData.getPath());
+        System.setProperty(PROP_KARAF_INSTANCES, karafInstances.getPath());
 
         if (!karafEtc.exists()) {
             throw new FileNotFoundException("Karaf etc folder not found: " + karafEtc.getAbsolutePath());
