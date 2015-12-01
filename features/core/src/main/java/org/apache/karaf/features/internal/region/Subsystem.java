@@ -434,10 +434,11 @@ public class Subsystem extends ResourceImpl {
                 final String loc = bi.getLocation();
                 final Conditional cond = entry.getValue();
                 ResourceImpl res = bundles.get(loc);
+                int sl = bi.getStartLevel() <= 0 ? feature.getStartLevel() : bi.getStartLevel();
                 if (bi.isDependency()) {
-                    addDependency(res, false, bi.isStart(), bi.getStartLevel());
+                    addDependency(res, false, bi.isStart(), sl);
                 } else {
-                    doAddDependency(res, cond == null, bi.isStart(), bi.getStartLevel());
+                    doAddDependency(res, cond == null, bi.isStart(), sl);
                 }
                 if (cond != null) {
                     addIdentityRequirement(res, resConds.get(cond), true);
