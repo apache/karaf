@@ -17,6 +17,7 @@
 package org.apache.karaf.features.internal.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
@@ -104,6 +105,10 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
     protected List<Library> library;
     @XmlTransient
     protected String namespace;
+    @XmlTransient
+    protected List<String> resourceRepositories;
+    @XmlTransient
+    protected String repositoryUrl;
 
     public Feature() {
     }
@@ -396,5 +401,25 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
 
     public void setNamespace(String namespace) {
         this.namespace = namespace;
+    }
+
+    @Override
+    public List<String> getResourceRepositories() {
+        return resourceRepositories != null
+                ? resourceRepositories
+                : Collections.<String>emptyList();
+    }
+
+    public void setResourceRepositories(List<String> resourceRepositories) {
+        this.resourceRepositories = resourceRepositories;
+    }
+
+    @Override
+    public String getRepositoryUrl() {
+        return repositoryUrl;
+    }
+
+    public void setRepositoryUrl(String repositoryUrl) {
+        this.repositoryUrl = repositoryUrl;
     }
 }

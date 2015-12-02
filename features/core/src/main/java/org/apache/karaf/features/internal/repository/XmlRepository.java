@@ -18,6 +18,7 @@ package org.apache.karaf.features.internal.repository;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -177,7 +178,7 @@ public class XmlRepository extends BaseRepository {
         protected boolean doRead(InputStream is) throws IOException {
             try {
                 StaxParser.XmlRepository oldXml = xml;
-                xml = StaxParser.parse(is, oldXml);
+                xml = StaxParser.parse(URI.create(getUrl()), is, oldXml);
                 return oldXml != xml;
             } catch (XMLStreamException e) {
                 throw new IOException("Unable to read xml repository", e);

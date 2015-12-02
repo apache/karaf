@@ -43,7 +43,6 @@ import org.apache.karaf.features.internal.resolver.RequirementImpl;
 import org.apache.karaf.features.internal.resolver.ResolverUtil;
 import org.apache.karaf.features.internal.resolver.ResourceBuilder;
 import org.apache.karaf.features.internal.resolver.ResourceImpl;
-import org.apache.karaf.features.internal.resolver.ResourceUtils;
 import org.apache.karaf.features.internal.resolver.SimpleFilter;
 import org.apache.karaf.features.internal.util.JsonWriter;
 import org.eclipse.equinox.internal.region.StandardRegionDigraph;
@@ -188,7 +187,8 @@ public class SubsystemResolver {
         }
 
         // Download bundles
-        root.downloadBundles(manager, overrides, featureResolutionRange, serviceRequirements);
+        RepositoryManager repos = new RepositoryManager();
+        root.downloadBundles(manager, overrides, featureResolutionRange, serviceRequirements, repos);
 
         // Populate digraph and resolve
         digraph = new StandardRegionDigraph(null, null);

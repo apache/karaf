@@ -102,7 +102,7 @@ public final class JaxbUtil {
         } else {
             features = unmarshalNoValidate(uri, stream);
         }
-        features.postUnmarshall();
+        features.postUnmarshall(uri);
         return features;
     }
 
@@ -160,6 +160,9 @@ public final class JaxbUtil {
                 break;
             case FeaturesNamespaces.URI_1_3_0:
                 schemaLocation = "/org/apache/karaf/features/karaf-features-1.3.0.xsd";
+                break;
+            case FeaturesNamespaces.URI_1_4_0:
+                schemaLocation = "/org/apache/karaf/features/karaf-features-1.4.0.xsd";
                 break;
             default:
                 throw new IllegalArgumentException("Unsupported namespace: " + namespace);

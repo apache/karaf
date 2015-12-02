@@ -22,6 +22,7 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlTransient;
@@ -44,6 +45,7 @@ import javax.xml.bind.annotation.XmlType;
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
  *         &lt;element name="repository" type="{http://www.w3.org/2001/XMLSchema}anyURI" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="resource-repository" type="{http://www.w3.org/2001/XMLSchema}anyURI" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="feature" type="{http://karaf.apache.org/xmlns/features/v1.0.0}feature" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *       &lt;attribute name="name" type="{http://www.w3.org/2001/XMLSchema}string" />
@@ -54,11 +56,13 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlRootElement(name = "features")
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "features", propOrder = {"repository", "feature"})
+@XmlType(name = "features", propOrder = {"repository", "resourceRepository", "feature"})
 public class Features {
 
     @XmlSchemaType(name = "anyURI")
     protected List<String> repository;
+    @XmlSchemaType(name = "anyURI") @XmlElement(name = "resource-repository")
+    protected List<String> resourceRepository;
     protected List<Feature> feature;
     @XmlAttribute
     protected String name;
@@ -90,6 +94,33 @@ public class Features {
             repository = new ArrayList<>();
         }
         return this.repository;
+    }
+
+    /**
+     * Gets the value of the resource repository property.
+     * <p/>
+     * <p/>
+     * This accessor method returns a reference to the live list,
+     * not a snapshot. Therefore any modification you make to the
+     * returned list will be present inside the JAXB object.
+     * This is why there is not a <CODE>set</CODE> method for the resource repository property.
+     * <p/>
+     * <p/>
+     * For example, to add a new item, do as follows:
+     * <pre>
+     *    getResourceRepository().add(newItem);
+     * </pre>
+     * <p/>
+     * <p/>
+     * <p/>
+     * Objects of the following type(s) are allowed in the list
+     * {@link String }
+     */
+    public List<String> getResourceRepository() {
+        if (resourceRepository == null) {
+            resourceRepository = new ArrayList<>();
+        }
+        return this.resourceRepository;
     }
 
     /**
@@ -139,10 +170,12 @@ public class Features {
         this.name = value;
     }
 
-    public void postUnmarshall() {
+    public void postUnmarshall(String repositoryUri) {
         if (feature != null) {
             for (Feature f : feature) {
+                f.setRepositoryUrl(repositoryUri);
                 f.setNamespace(namespace);
+                f.setResourceRepositories(getResourceRepository());
                 f.postUnmarshall();
             }
         }

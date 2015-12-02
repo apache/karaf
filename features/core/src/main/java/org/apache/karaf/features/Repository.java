@@ -30,6 +30,8 @@ public interface Repository {
 
     URI[] getRepositories() throws Exception;
 
+    URI[] getResourceRepositories() throws Exception;
+
     Feature[] getFeatures() throws Exception;
 
 }

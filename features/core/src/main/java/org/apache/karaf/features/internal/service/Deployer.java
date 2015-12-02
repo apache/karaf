@@ -1373,7 +1373,8 @@ public class Deployer {
         }
         StreamProvider provider = providers.get(uri);
         if (provider == null) {
-            throw new IllegalStateException("Resource " + uri + " has no StreamProvider");
+            return new URL(uri).openStream();
+//            throw new IllegalStateException("Resource " + uri + " has no StreamProvider");
         }
         return provider.open();
     }

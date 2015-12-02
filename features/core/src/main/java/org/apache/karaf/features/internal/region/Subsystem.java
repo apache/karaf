@@ -32,7 +32,6 @@ import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import org.apache.felix.resolver.Util;
 import org.apache.felix.utils.manifest.Clause;
 import org.apache.felix.utils.manifest.Parser;
 import org.apache.felix.utils.version.VersionRange;
@@ -49,14 +48,19 @@ import org.apache.karaf.features.internal.download.DownloadCallback;
 import org.apache.karaf.features.internal.download.DownloadManager;
 import org.apache.karaf.features.internal.download.Downloader;
 import org.apache.karaf.features.internal.download.StreamProvider;
+import org.apache.karaf.features.internal.repository.BaseRepository;
+import org.apache.karaf.features.internal.resolver.CapabilityImpl;
 import org.apache.karaf.features.internal.resolver.FeatureResource;
+import org.apache.karaf.features.internal.resolver.RequirementImpl;
 import org.apache.karaf.features.internal.resolver.ResolverUtil;
 import org.apache.karaf.features.internal.resolver.ResourceBuilder;
 import org.apache.karaf.features.internal.resolver.ResourceImpl;
 import org.apache.karaf.features.internal.resolver.ResourceUtils;
+import org.apache.karaf.features.internal.resolver.SimpleFilter;
 import org.apache.karaf.features.internal.service.Overrides;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
+import org.osgi.resource.Capability;
 import org.osgi.resource.Requirement;
 import org.osgi.resource.Resource;
 
@@ -71,6 +75,7 @@ import static org.eclipse.equinox.region.RegionFilter.VISIBLE_ALL_NAMESPACE;
 import static org.osgi.framework.namespace.IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE;
 import static org.osgi.framework.namespace.IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE;
 import static org.osgi.framework.namespace.IdentityNamespace.IDENTITY_NAMESPACE;
+import static org.osgi.resource.Namespace.REQUIREMENT_FILTER_DIRECTIVE;
 
 public class Subsystem extends ResourceImpl {
 
@@ -350,9 +355,9 @@ public class Subsystem extends ResourceImpl {
     public void downloadBundles(DownloadManager manager,
                                 Set<String> overrides,
                                 String featureResolutionRange,
-                                final String serviceRequirements) throws Exception {
+                                final String serviceRequirements, RepositoryManager repos) throws Exception {
         for (Subsystem child : children) {
-            child.downloadBundles(manager, overrides, featureResolutionRange, serviceRequirements);
+            child.downloadBundles(manager, overrides, featureResolutionRange, serviceRequirements, repos);
         }
         final Map<String, ResourceImpl> bundles = new ConcurrentHashMap<>();
         final Downloader downloader = manager.createDownloader();
@@ -451,6 +456,13 @@ public class Subsystem extends ResourceImpl {
                     addDependency(res, false, false, 0);
                 }
             }
+            for (String uri : feature.getResourceRepositories()) {
+                BaseRepository repo = repos.getRepository(feature.getRepositoryUrl(), uri);
+                for (Resource resource : repo.getResources()) {
+                    ResourceImpl res = cloneResource(resource);
+                    addDependency(res, false, true, 0);
+                }
+            }
         }
         for (Clause bundle : Parser.parseClauses(this.bundles.toArray(new String[this.bundles.size()]))) {
             final String loc = bundle.getName();
@@ -474,6 +486,27 @@ public class Subsystem extends ResourceImpl {
             installable.add(info.resource);
             addIdentityRequirement(info.resource, this, info.mandatory);
         }
+    }
+
+    ResourceImpl cloneResource(Resource resource) {
+        ResourceImpl res = new ResourceImpl();
+        for (Capability cap : resource.getCapabilities(null)) {
+            res.addCapability(new CapabilityImpl(res, cap.getNamespace(),
+                    new HashMap<>(cap.getDirectives()), new HashMap<>(cap.getAttributes())));
+        }
+        for (Requirement req : resource.getRequirements(null)) {
+            SimpleFilter sf;
+            if (req instanceof RequirementImpl) {
+                sf = ((RequirementImpl) req).getFilter();
+            } else if (req.getDirectives().containsKey(REQUIREMENT_FILTER_DIRECTIVE)) {
+                sf = SimpleFilter.parse(req.getDirectives().get(REQUIREMENT_FILTER_DIRECTIVE));
+            } else {
+                sf = SimpleFilter.convert(req.getAttributes());
+            }
+            res.addRequirement(new RequirementImpl(res, req.getNamespace(),
+                    new HashMap<>(req.getDirectives()), new HashMap<>(req.getAttributes()), sf));
+        }
+        return res;
     }
 
     Map<String, String> getMetadata(StreamProvider provider) throws IOException {
