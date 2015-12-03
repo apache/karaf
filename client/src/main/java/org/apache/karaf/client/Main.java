@@ -20,6 +20,7 @@ import java.io.*;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.security.KeyPair;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Properties;
@@ -31,6 +32,7 @@ import jline.Terminal;
 import org.apache.karaf.shell.console.jline.TerminalFactory;
 import org.apache.sshd.ClientChannel;
 import org.apache.sshd.ClientSession;
+import org.apache.sshd.SshBuilder;
 import org.apache.sshd.SshClient;
 import org.apache.sshd.agent.SshAgent;
 import org.apache.sshd.agent.local.AgentImpl;
@@ -38,6 +40,11 @@ import org.apache.sshd.agent.local.LocalAgentFactory;
 import org.apache.sshd.client.UserInteraction;
 import org.apache.sshd.client.channel.ChannelShell;
 import org.apache.sshd.client.future.ConnectFuture;
+import org.apache.sshd.client.kex.ECDHP256;
+import org.apache.sshd.client.kex.ECDHP384;
+import org.apache.sshd.client.kex.ECDHP521;
+import org.apache.sshd.common.KeyExchange;
+import org.apache.sshd.common.NamedFactory;
 import org.apache.sshd.common.RuntimeSshException;
 import org.apache.sshd.common.keyprovider.FileKeyPairProvider;
 import org.fusesource.jansi.AnsiConsole;
@@ -221,7 +228,18 @@ public class Main {
         SshAgent agent = null;
         int exitStatus = 0;
         try {
-            client = SshClient.setUpDefaultClient();
+            SshBuilder.ClientBuilder clientBuilder = SshBuilder.client();
+            clientBuilder.keyExchangeFactories(Arrays.<NamedFactory<KeyExchange>>asList(
+                     new ECDHP256.Factory(),
+                     new ECDHP256.Factory(),
+                     new ECDHP384.Factory(),
+                     new ECDHP384.Factory(),
+                     new ECDHP521.Factory(),
+                     new ECDHP521.Factory()
+                     )
+                );
+
+            client = (SshClient)clientBuilder.build();
             setupAgent(user, client, keyFile);
             final Console console = System.console();
             if (console != null) {
