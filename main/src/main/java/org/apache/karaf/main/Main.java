@@ -34,11 +34,13 @@ import java.security.Security;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.info.ServerInfo;
+import org.apache.karaf.main.internal.Systemd;
 import org.apache.karaf.main.lock.Lock;
 import org.apache.karaf.main.lock.LockCallBack;
 import org.apache.karaf.main.lock.NoLock;
@@ -323,6 +325,7 @@ public class Main {
         }
         monitor();
         registerSignalHandler();
+        watchdog();
     }
 
     private void registerSignalHandler() {
@@ -404,7 +407,37 @@ public class Main {
     Lock getLock() {
         return lock;
     }
-    
+
+    private void watchdog() {
+        if(Boolean.getBoolean("karaf.systemd.enabled")) {
+            new Thread("Karaf Systemd Watchdog Thread") {
+                public void run() {
+                    try {
+                        doWatchdog();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }.start();
+        }
+    }
+
+    private void doWatchdog() throws Exception {
+        Systemd systemd = new Systemd();
+        long timeout = systemd.getWatchdogTimeout(TimeUnit.MILLISECONDS);
+
+        int code;
+        while (!exiting && timeout > 0) {
+            code = systemd.notifyWatchdog();
+            if(code < 0) {
+                System.err.println("Systemd sd_notify failed with error code: " + code);
+                break;
+            }
+
+            Thread.sleep(timeout / 2);
+        }
+    }
+
     private ClassLoader createClassLoader(ArtifactResolver resolver) throws Exception {
         List<URL> urls = new ArrayList<URL>();
         urls.add(resolver.resolve(config.frameworkBundle).toURL());
