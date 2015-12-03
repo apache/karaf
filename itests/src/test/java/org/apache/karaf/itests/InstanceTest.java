@@ -58,6 +58,22 @@ public class InstanceTest extends KarafTestSupport {
         }
     }
 
+    @Test
+    public void createStartCommand() throws Exception {
+        System.out.println(executeCommand("instance:create itest"));
+        assertContains("itest", executeCommand("instance:list"));
+        System.out.println(executeCommand("instance:start itest"));
+        Thread.sleep(5000);
+        String output = executeCommand("instance:status itest");
+        System.out.println("itest instance status: " + output);
+        assertContains("Started", output);
+        System.out.println(executeCommand("instance:stop itest"));
+        Thread.sleep(5000);
+        output = executeCommand("instance:status itest");
+        System.out.println("itest instance status: " + output);
+        assertContains("Stopped", output);
+    }
+
     private int getInstancesNum(MBeanServerConnection connection, ObjectName name) throws Exception {
         TabularData instances = (TabularData) connection.getAttribute(name, "Instances");
         return instances.size();
