@@ -74,6 +74,12 @@ public class InstanceTest extends KarafTestSupport {
         assertContains("Stopped", output);
     }
 
+    @Test
+    public void createStartConnectCommand() throws Exception {
+        System.out.println(executeCommand("instance:create itestCSCC"));
+        assertContains("itestCSCC", executeCommand("instance:list"));
+    }
+
     private int getInstancesNum(MBeanServerConnection connection, ObjectName name) throws Exception {
         TabularData instances = (TabularData) connection.getAttribute(name, "Instances");
         return instances.size();
