@@ -59,10 +59,6 @@
         <bundle start-level="30">mvn:org.springframework/spring-aop/${spring31.version}</bundle>
         <bundle start-level="30">mvn:org.springframework/spring-context/${spring31.version}</bundle>
         <bundle start-level="30">mvn:org.springframework/spring-context-support/${spring31.version}</bundle>
-        <conditional>
-            <condition>deployer</condition>
-            <bundle start-level="30">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.spring/${project.version}</bundle>
-        </conditional>
     </feature>
 
     <feature name="spring-aspects" description="Spring 3.1.x AOP support" version="${spring31.version}">
@@ -140,10 +136,6 @@
         <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-aop/${spring32.version}</bundle>
         <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-context/${spring32.version}</bundle>
         <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-context-support/${spring32.version}</bundle>
-        <conditional>
-            <condition>deployer</condition>
-            <bundle start-level="30">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.spring/${project.version}</bundle>
-        </conditional>
     </feature>
 
     <feature name="spring-aspects" description="Spring 3.2.x AOP support" version="${spring32.version}">
@@ -221,10 +213,6 @@
         <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-aop/${spring40.version}</bundle>
         <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-context/${spring40.version}</bundle>
         <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-context-support/${spring40.version}</bundle>
-        <conditional>
-            <condition>deployer</condition>
-            <bundle start-level="30">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.spring/${project.version}</bundle>
-        </conditional>
     </feature>
 
     <feature name="spring-aspects" description="Spring 4.0.x AOP support" version="${spring40.version}">
@@ -298,10 +286,6 @@
         <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-aop/${spring41.version}</bundle>
         <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-context/${spring41.version}</bundle>
         <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-context-support/${spring41.version}</bundle>
-        <conditional>
-            <condition>deployer</condition>
-            <bundle start-level="30">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.spring/${project.version}</bundle>
-        </conditional>
     </feature>
 
     <feature name="spring-aspects" description="Spring 4.1.x AOP support" version="${spring41.version}">
@@ -375,10 +359,6 @@
         <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-aop/${spring42.version}</bundle>
         <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-context/${spring42.version}</bundle>
         <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-context-support/${spring42.version}</bundle>
-        <conditional>
-            <condition>deployer</condition>
-            <bundle start-level="30">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.spring/${project.version}</bundle>
-        </conditional>
     </feature>
 
     <feature name="spring-aspects" description="Spring 4.2.x AOP support" version="${spring42.version}">

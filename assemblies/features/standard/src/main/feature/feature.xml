@@ -125,10 +125,6 @@
             <bundle start="true" start-level="24">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.blueprint/${project.version}</bundle>
         </conditional>
         <conditional>
-            <condition>spring</condition>
-            <bundle start="true" start-level="24">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.spring/${project.version}</bundle>
-        </conditional>
-        <conditional>
             <condition>kar</condition>
             <bundle start="true" start-level="24">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.kar/${project.version}</bundle>
         </conditional>
