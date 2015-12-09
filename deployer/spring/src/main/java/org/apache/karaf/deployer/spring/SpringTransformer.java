@@ -91,17 +91,24 @@ public class SpringTransformer {
             }
         }
 
+        // get original last modification date
+        long lastModified = url.openConnection().getLastModified();
+
         JarOutputStream out = new JarOutputStream(os);
         ZipEntry e = new ZipEntry(JarFile.MANIFEST_NAME);
+        e.setTime(lastModified);
         out.putNextEntry(e);
         m.write(out);
         out.closeEntry();
         e = new ZipEntry("META-INF/");
+        e.setTime(lastModified);
         out.putNextEntry(e);
         e = new ZipEntry("META-INF/spring/");
+        e.setTime(lastModified);
         out.putNextEntry(e);
         out.closeEntry();
         e = new ZipEntry("META-INF/spring/" + name);
+        e.setTime(lastModified);
         out.putNextEntry(e);
         // Copy the new DOM
         XmlUtils.transform(new DOMSource(doc), new StreamResult(out));

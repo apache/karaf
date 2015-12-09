@@ -23,6 +23,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.Properties;
@@ -89,14 +90,20 @@ public class BlueprintTransformer {
             }
         }
 
+        // get original last modification date
+        long lastModified = url.openConnection().getLastModified();
+
         JarOutputStream out = new JarOutputStream(os);
         ZipEntry e = new ZipEntry(JarFile.MANIFEST_NAME);
+        e.setTime(lastModified);
         out.putNextEntry(e);
         m.write(out);
         out.closeEntry();
         e = new ZipEntry("OSGI-INF/");
+        e.setTime(lastModified);
         out.putNextEntry(e);
         e = new ZipEntry("OSGI-INF/blueprint/");
+        e.setTime(lastModified);
         out.putNextEntry(e);
         out.closeEntry();
         // check .xml file extension
@@ -104,6 +111,7 @@ public class BlueprintTransformer {
             name +=".xml";
         }
         e = new ZipEntry("OSGI-INF/blueprint/" + name);
+        e.setTime(lastModified);
         out.putNextEntry(e);
         // Copy the new DOM
         XmlUtils.transform(new DOMSource(doc), new StreamResult(out));
