@@ -177,7 +177,7 @@ public class ArgumentCompleter implements Completer {
             completer = new FileCompleter();
         } else if (type.isAssignableFrom(Boolean.class) || type.isAssignableFrom(boolean.class)) {
             completer = new StringsCompleter(new String[] {"false", "true"}, false);
-        } else if (type.isAssignableFrom(Enum.class)) {
+        } else if (Enum.class.isAssignableFrom(type)) {
             Set<String> values = new HashSet<>();
             for (Object o : EnumSet.allOf((Class<Enum>) type)) {
                 values.add(o.toString());
