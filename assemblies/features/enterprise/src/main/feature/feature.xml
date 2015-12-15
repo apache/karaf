@@ -94,6 +94,7 @@
         <feature version="[1.1,2)">transaction-api</feature>
         <feature version="[2.0.0,2.2.0)">persistence-api</feature>
         <bundle dependency="true">mvn:org.apache.felix/org.apache.felix.coordinator/${felix.coordinator.version}</bundle>
+	<bundle dependency="true">mvn:org.osgi/org.osgi.service.jdbc/${org.osgi.service.jdbc.version}</bundle>
         <bundle>mvn:org.apache.aries.jpa/org.apache.aries.jpa.api/${aries.jpa.version}</bundle>
         <bundle>mvn:org.apache.aries.jpa/org.apache.aries.jpa.container/${aries.jpa.version}</bundle>
         <bundle>mvn:org.apache.aries.jpa/org.apache.aries.jpa.support/${aries.jpa.version}</bundle>
