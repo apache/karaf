@@ -86,7 +86,7 @@ public class GenerateServiceMetadata extends AbstractMojo {
             ClassFinder finder = createFinder(classLoader);
             List<Class<?>> classes = finder.findAnnotatedClasses(Services.class);
 
-            List<Class> activators = new ArrayList<>();
+            List<Class<?>> activators = new ArrayList<>();
             for (Class<?> clazz : classes) {
                 URL classUrl = clazz.getClassLoader().getResource(clazz.getName().replace('.', '/') + ".class");
                 URL outputDirectoryUrl = new File(project.getBuild().getOutputDirectory()).toURI().toURL();
@@ -103,30 +103,12 @@ public class GenerateServiceMetadata extends AbstractMojo {
                 Services services = clazz.getAnnotation(Services.class);
                 if (services != null) {
                     for (RequireService req : services.requires()) {
-                        String flt = req.filter();
-                        if (flt == null) {
-                            flt = "";
-                        }
-                        String fltWithClass;
-                        if (!flt.isEmpty()) {
-                            fltWithClass = "(&(objectClass=" + req.value().getName() + ")" + flt + ")";
-                        } else {
-                            fltWithClass = "(objectClass=" + req.value().getName() + ")";
-                        }
-                        if (requirements.length() > 0) {
-                            requirements.append(",");
-                        }
-                        requirements.append("osgi.service;effective:=active;filter:=\"")
-                                    .append(fltWithClass)
-                                    .append("\"");
-                        props.setProperty(req.value().getName(), flt);
+                        String fltWithClass = combine(req.filter(), "(objectClass=" + req.value().getName() + ")");
+                        addServiceReq(requirements, fltWithClass);
+                        props.setProperty(req.value().getName(), req.filter());
                     }
                     for (ProvideService cap : services.provides()) {
-                        if (capabilities.length() > 0) {
-                            capabilities.append(",");
-                        }
-                        capabilities.append("osgi.service;effective:=active;objectClass=")
-                                    .append(cap.value().getName());
+                        addServiceCap(capabilities, cap);
                     }
                 }
                 Managed managed = clazz.getAnnotation(Managed.class);
@@ -162,18 +144,47 @@ public class GenerateServiceMetadata extends AbstractMojo {
                 packages.add(clazz.getPackage().getName());
             }
             if (!packages.isEmpty()) {
-                StringBuilder sb = new StringBuilder();
-                for (String pkg : packages) {
-                    if (sb.length() > 0) {
-                        sb.append(",");
-                    }
-                    sb.append(pkg);
-                }
-                project.getProperties().setProperty("BNDExtension-Karaf-Commands", sb.toString());
+                project.getProperties().setProperty("BNDExtension-Karaf-Commands", join(packages, ","));
             }
 
         } catch (Exception e) {
             throw new MojoExecutionException("Error building commands help", e);
+        }
+    }
+
+    private String join(Set<String> packages, String separator) {
+        StringBuilder sb = new StringBuilder();
+        for (String pkg : packages) {
+            if (sb.length() > 0) {
+                sb.append(separator);
+            }
+            sb.append(pkg);
+        }
+        return sb.toString();
+    }
+
+    private void addServiceCap(StringBuilder capabilities, ProvideService cap) {
+        if (capabilities.length() > 0) {
+            capabilities.append(",");
+        }
+        capabilities.append("osgi.service;effective:=active;objectClass=")
+                    .append(cap.value().getName());
+    }
+
+    private void addServiceReq(StringBuilder requirements, String fltWithClass) {
+        if (requirements.length() > 0) {
+            requirements.append(",");
+        }
+        requirements.append("osgi.service;effective:=active;filter:=\"")
+                    .append(fltWithClass)
+                    .append("\"");
+    }
+
+    private String combine(String filter1, String filter2) {
+        if (filter1!=null && !filter1.isEmpty()) {
+            return "(&" + filter2 + filter1 + ")";
+        } else {
+            return filter2;
         }
     }
 
