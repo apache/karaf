@@ -31,7 +31,22 @@ public class DiagnosticTest extends KarafTestSupport {
     public void dumpCreateCommand() throws Exception {
         assertContains("Created dump zip", executeCommand("dev:dump-create"));
     }
-
+  
+    @Test
+    public void dumpCreateCommandNoHeapDump() throws Exception {
+        assertContains("Created dump zip", executeCommand("dev:dump-create --no-heap-dump"));
+    }
+    
+    @Test
+    public void dumpCreateCommandNoThreadDump() throws Exception {
+        assertContains("Created dump zip", executeCommand("dev:dump-create --no-thread-dump"));
+    }
+   
+    @Test
+    public void dumpCreateCommandNoHeapAndThreadDump() throws Exception {
+        assertContains("Created dump zip", executeCommand("dev:dump-create --no-heap-dump --no-thread-dump"));
+    }
+    
     @Test
     public void createDumpViaMBean() throws Exception {
         JMXConnector connector = null;

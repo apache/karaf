@@ -44,12 +44,12 @@ public final class Dump {
         return new ZipDumpDestination(file);
     }
 
-    public static void dump(BundleContext bundleContext, DumpDestination destination) {
+    public static void dump(BundleContext bundleContext, DumpDestination destination, boolean noThreadDump, boolean noHeapDump) {
         List<DumpProvider> providers = new ArrayList<DumpProvider>();
         providers.add(new EnvironmentDumpProvider(bundleContext));
         providers.add(new MemoryDumpProvider());
-        providers.add(new ThreadDumpProvider());
-        providers.add(new HeapDumpProvider());
+        if (!noThreadDump) providers.add(new ThreadDumpProvider());
+        if (!noHeapDump) providers.add(new HeapDumpProvider());
         providers.add(new BundleDumpProvider(bundleContext));
         for (DumpProvider provider : providers) {
             try {
