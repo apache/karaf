@@ -37,6 +37,7 @@ import org.apache.maven.model.Resource;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -44,6 +45,7 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.apache.xbean.finder.ClassFinder;
 import org.osgi.framework.BundleActivator;
+import org.sonatype.plexus.build.incremental.BuildContext;
 
 /**
  * Generates service requirement and capabilities for activators
@@ -75,6 +77,9 @@ public class GenerateServiceMetadata extends AbstractMojo {
      */
     @Parameter(defaultValue = "project")
     protected String classLoader;
+    
+    @Component
+    private BuildContext buildContext;
 
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
@@ -118,7 +123,7 @@ public class GenerateServiceMetadata extends AbstractMojo {
 
                 File file = new File(outputDirectory, "OSGI-INF/karaf-tracker/" + clazz.getName());
                 file.getParentFile().mkdirs();
-                try (OutputStream os = new FileOutputStream(file)) {
+                try (OutputStream os = buildContext.newFileOutputStream(file)) {
                     props.store(os, null);
                 }
                 addSourceDirectory = true;
