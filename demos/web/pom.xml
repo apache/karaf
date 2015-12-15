@@ -51,6 +51,10 @@
             <artifactId>org.apache.karaf.jaas.boot</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.apache.karaf.diagnostic</groupId>
+            <artifactId>org.apache.karaf.diagnostic.boot</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.apache.karaf</groupId>
             <artifactId>org.apache.karaf.main</artifactId>
         </dependency>
@@ -64,6 +68,17 @@
             <groupId>org.apache.geronimo.specs</groupId>
             <artifactId>geronimo-servlet_2.5_spec</artifactId>
             <version>${geronimo.servlet.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.http.proxy</artifactId>
+            <version>3.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.http.bridge</artifactId>
+            <version>3.0.0</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
@@ -130,7 +145,7 @@
                                     <type>zip</type>
                                     <overWrite>true</overWrite>
                                     <outputDirectory>${project.build.directory}/karaf/WEB-INF</outputDirectory>
-                                    <excludes>**/lib/*,**/*.txt,**/bin/*,**/demos/**,**/lib,**/bin,**/demos</excludes>
+                                    <excludes>**/lib/*,**/*.txt,**/bin/*,**/demos/**,**/lib,**/bin,**/demos,**/startup.properties,**/config.properties,**/org.apache.felix.http.bridge-3.0.0.jar</excludes>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>

@@ -15,21 +15,23 @@
  * limitations under the License.
  */
 
-EMBEDDING KARAF IN A WEB APPLICATION
-====================================
+Embedding Karaf in a WebContainer
+=================================
 
 Purpose
 -------
-To embed Karaf in a web application.
+This demo shows how to package Karaf as a webapplication (war) ready to be deployed in a webcontainer like
+Apache Tomcat.
 
+It also shows how to override some configuration files to automatically install a HTTP bridge.
 
 Prerequisites for Running the Example
 -------------------------------------
 You must have the following installed on your machine:
 
-  - JDK 1.6 or higher
+  - JDK 1.7 or higher
 
-  - Maven 3.0.3 or higher
+  - Maven 3.2.3 or higher
 
 
 Building and Deploying
@@ -40,7 +42,7 @@ You can build and deploy this example in two ways:
   This option is useful if you want to see the example up and
   running quickly.
    
-- B. Using Your Favorite Web Container
+- B. Using Your Favorite WebContainer (like Apache Tomcat)
   This option is useful if you want to see Karaf running
   as a web application inside your favorite web container.
 
