@@ -16,9 +16,11 @@
  */
 package org.apache.karaf.jaas.boot.principal;
 
+import java.io.Serializable;
 import java.security.Principal;
 
-public class RolePrincipal implements Principal {
+public class RolePrincipal implements Principal, Serializable {
+    private static final long serialVersionUID = 1L;
 
     private final String name;
 
