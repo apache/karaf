@@ -56,13 +56,13 @@ public class DiagnosticDumpMBeanImpl extends StandardMBean implements Diagnostic
      * @param name Name of the dump.
      */
     public void createDump(String name) {
-        createDump(false, name);
+        createDump(false, name, false, false);
     }
 
     /**
      * {@inheritDoc}
      */
-    public void createDump(boolean directory, String name) {
+    public void createDump(boolean directory, String name, boolean noThreadDump, boolean noHeapDump) {
         if (name == null || name.trim().length() == 0) {
             name = dumpFormat.format(new Date());
             if (!directory) {
@@ -78,7 +78,7 @@ public class DiagnosticDumpMBeanImpl extends StandardMBean implements Diagnostic
             destination = Dump.zip(target);
         }
 
-        Dump.dump(bundleContext, destination);
+        Dump.dump(bundleContext, destination, noThreadDump, noHeapDump);
         LOGGER.info("Created dump " + destination.toString());
     }
 

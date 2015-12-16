@@ -44,7 +44,7 @@ public class DumpHandler implements SignalHandler, Closeable {
         SimpleDateFormat dumpFormat = new SimpleDateFormat("yyyy-MM-dd_HHmmss-SSS");
         String fileName = "dump-" + dumpFormat.format(new Date()) + ".zip";
         DumpDestination destination = new ZipDumpDestination(new File(fileName));
-        Dump.dump(context, destination);
+        Dump.dump(context, destination, false, false);
     }
 
     @Override

@@ -37,6 +37,6 @@ public interface DiagnosticDumpMBean {
      * @param name Name of the dump.
      * @throws Exception In case of any problems.
      */
-    void createDump(boolean directory, String name) throws MBeanException;
+    void createDump(boolean directory, String name, boolean noThreadDump, boolean noHeapDump) throws MBeanException;
 
 }

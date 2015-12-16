@@ -49,6 +49,12 @@ public class DumpCommand implements Action {
     @Option(name = "-d", aliases = "--directory", description = "Creates dump in a directory in place of a ZIP archive")
     boolean directory;
 
+    @Option(name = "--no-thread-dump", description = "Include or not the thread dump in ZIP archive")
+    boolean noThreadDump = false;
+    
+    @Option(name = "--no-heap-dump", description = "Include or not the heap dump in ZIP archive")
+    boolean noHeapDump = false;
+    
     /**
      * Name of created directory or archive.
      */
@@ -78,7 +84,7 @@ public class DumpCommand implements Action {
             destination = Dump.zip(target);
         }
 
-        Dump.dump(bundleContext, destination);
+        Dump.dump(bundleContext, destination, noThreadDump, noHeapDump);
         System.out.println("Created dump " + destination.toString());
 
         return null;
