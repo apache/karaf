@@ -14,17 +14,19 @@
  */
 package org.apache.karaf.jaas.boot.principal;
 
+import java.io.Serializable;
 import java.security.Principal;
 import java.security.acl.Group;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
-public class GroupPrincipal implements Group {
+public class GroupPrincipal implements Group, Serializable {
+    private static final long serialVersionUID = 1L;
 
     private String name;
 
     private Hashtable<String,Principal> members = new Hashtable<String, Principal>();
-    
+
     public GroupPrincipal(String name) {
         assert name != null;
         this.name = name;
