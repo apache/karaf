@@ -129,7 +129,9 @@
                             org.apache.felix.webconsole.internal.servlet.KarafOsgiManagerActivator
                         </Bundle-Activator>
                         <Export-Package>
-                            org.apache.felix.webconsole;version="${felix.webconsole.api.version}",
+                            org.apache.felix.webconsole;version="${felix.webconsole.api.version}";provide:=true,
+                            org.apache.felix.webconsole.bundleinfo;version=1.0.0;provide:=true,
+                            org.apache.felix.webconsole.i18n;version=1.0.0;provide:=true,
                             org.json;version="${org.json.version.osgi}"
                         </Export-Package>
                         <Private-Package>
