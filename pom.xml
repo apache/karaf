@@ -205,7 +205,7 @@
         <aries.blueprint.annotation.version>1.0.1</aries.blueprint.annotation.version>
         <aries.blueprint.annotation.api.version>1.0.1</aries.blueprint.annotation.api.version>
         <aries.blueprint.api.version>1.0.1</aries.blueprint.api.version>
-        <aries.blueprint.core.version>1.4.5</aries.blueprint.core.version>
+        <aries.blueprint.core.version>1.5.0</aries.blueprint.core.version>
         <aries.blueprint.core.compatibility.version>1.0.0</aries.blueprint.core.compatibility.version>
         <aries.blueprint.cm.version>1.0.7</aries.blueprint.cm.version>
         <aries.blueprint.jexl.evaluator.version>1.0.0</aries.blueprint.jexl.evaluator.version>
