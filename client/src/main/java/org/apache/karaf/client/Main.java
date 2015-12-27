@@ -124,7 +124,12 @@ public class Main {
                                 if (echo[i]) {
                                     answers[i] = console.readLine(prompt[i] + " ");
                                 } else {
-                                    answers[i] = new String(console.readPassword(prompt[i] + " "));
+                                    // Use a StringBuilder for security reason
+                                    StringBuilder sb = new StringBuilder();
+                                    sb.append(console.readPassword(prompt[i] + " "));
+                                    answers[i] = sb.toString();
+                                    // Clean StringBuilder after use
+                                    sb.setLength(0);
                                 }
                                 if (answers[i] == null) {
                                     return null;
