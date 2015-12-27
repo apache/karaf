@@ -231,6 +231,7 @@ public class Main {
 
     public void launch() throws Exception {
         config = new ConfigProperties();
+        config.conditionalCleanDataFolder();
         if (config.delayConsoleStart) {
             System.out.println(config.startupMessage);
         }
@@ -296,7 +297,7 @@ public class Main {
         framework.init();
         framework.getBundleContext().addFrameworkListener(lockCallback);
         framework.start();
-
+        
         FrameworkStartLevel sl = framework.adapt(FrameworkStartLevel.class);
         sl.setInitialBundleStartLevel(config.defaultBundleStartlevel);
 

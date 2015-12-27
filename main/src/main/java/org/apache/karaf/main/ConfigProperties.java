@@ -197,24 +197,6 @@ public class ConfigProperties {
         }
         PropertiesLoader.loadSystemProperties(new File(karafEtc, SYSTEM_PROPERTIES_FILE_NAME));
 
-        File cleanAllIndicatorFile = new File(karafData, "clean_all");
-        File cleanCacheIndicatorFile = new File(karafData, "clean_cache");
-        if (Boolean.getBoolean("karaf.clean.all") || cleanAllIndicatorFile.exists()) {
-            if (cleanAllIndicatorFile.exists()) {
-                cleanAllIndicatorFile.delete();
-            }
-            Utils.deleteDirectory(this.karafData);
-            this.karafData = Utils.getKarafDirectory(PROP_KARAF_DATA, ENV_KARAF_DATA, new File(karafBase, "data"), true, true);
-        } else {
-            if (Boolean.getBoolean("karaf.clean.cache") || cleanCacheIndicatorFile.exists()) {
-                if (cleanCacheIndicatorFile.exists()) {
-                    cleanCacheIndicatorFile.delete();
-                }
-                File karafCache = Utils.validateDirectoryExists(new File(karafData, "cache").getPath(), "Invalid cache directory", true, true);
-                Utils.deleteDirectory(karafCache);
-            }
-        }
-
         File file = new File(karafEtc, CONFIG_PROPERTIES_FILE_NAME);
         this.props = PropertiesLoader.loadConfigProperties(file);
 
@@ -254,6 +236,26 @@ public class ConfigProperties {
             }
         }
     }
+
+	public void conditionalCleanDataFolder() throws IOException {
+		File cleanAllIndicatorFile = new File(karafData, "clean_all");
+        File cleanCacheIndicatorFile = new File(karafData, "clean_cache");
+        if (Boolean.getBoolean("karaf.clean.all") || cleanAllIndicatorFile.exists()) {
+            if (cleanAllIndicatorFile.exists()) {
+                cleanAllIndicatorFile.delete();
+            }
+            Utils.deleteDirectory(this.karafData);
+            this.karafData = Utils.getKarafDirectory(PROP_KARAF_DATA, ENV_KARAF_DATA, new File(karafBase, "data"), true, true);
+        } else {
+            if (Boolean.getBoolean("karaf.clean.cache") || cleanCacheIndicatorFile.exists()) {
+                if (cleanCacheIndicatorFile.exists()) {
+                    cleanCacheIndicatorFile.delete();
+                }
+                File karafCache = Utils.validateDirectoryExists(new File(karafData, "cache").getPath(), "Invalid cache directory", true, true);
+                Utils.deleteDirectory(karafCache);
+            }
+        }
+	}
     
     private String getPropertyOrFail(String propertyName) {
         String value = props.getProperty(propertyName);
