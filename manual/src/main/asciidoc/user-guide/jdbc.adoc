@@ -1,0 +1,224 @@
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+=== DataSources (JDBC)
+
+The Apache Karaf DataSources (JDBC) is an optional enterprise feature.
+
+You have to install the following features first:
+
+----
+karaf@root()> feature:repo-add pax-jdbc
+karaf@root()> feature:install pax-jdbc
+karaf@root()> feature:install pax-jdbc-config
+karaf@root()> feature:install jdbc
+----
+
+Pax JDBC provides ready to use adapters for different databases:
+
+* pax-jdbc-derby
+* pax-jdbc-derbyclient
+* pax-jdbc-h2
+* pax-jdbc-mariadb
+* pax-jdbc-mysql
+* pax-jdbc-oracle
+* pax-jdbc-postgresql
+* pax-jdbc-sqlite
+* pax-jdbc-mssql
+
+This feature provides an OSGi service to create/delete JDBC datasources in the container and perform database operations (SQL queries).
+
+This JDBC OSGi service can be manipulated programmatically (see the developer guide for details), using the `jdbc:*` commands, or using the JDBC MBean.
+
+==== Commands
+
+===== `jdbc:ds-create`
+
+The `jdbc:ds-create` command automatically creates a datasource definition file by leveraging pax-jdbc.
+
+The `jdbc:ds-create` command requires either:
+
+* the `--driverName` containing the JDBC driver name
+* or the `--driverClass` containing the JDBC driver class name
+
+The `jdbc:ds-create` accepts a set of options and the name argument:
+
+----
+DESCRIPTION
+        jdbc:ds-create
+
+        Create a JDBC datasource config for pax-jdbc-config from a DataSourceFactory
+
+SYNTAX
+        jdbc:ds-create [options] name
+
+ARGUMENTS
+        name
+                The JDBC datasource name
+
+OPTIONS
+        -dbName
+                Database name to use
+        --help
+                Display this help message
+        -dn, --driverName
+                org.osgi.driver.name property of the DataSourceFactory
+        -u, --username
+                The database username
+        -dc, --driverClass
+                org.osgi.driver.class property  of the DataSourceFactory
+        -p, --password
+                The database password
+        -url
+                The JDBC URL to use
+----
+
+* the `name` argument is required. It's the name of the datasource. The name is used to identify the datasource, and to create the datasource definition file (`deploy/datasource-[name].xml`).
+* the `-u` option is optional. It defines the database username.
+* the `-url` option is optional. It defines the JDBC URL to access to the database.
+* the `-p` option is optional. It defines the database password.
+
+For instance, to create an embedded Apache Derby database in Apache Karaf, you can do:
+
+----
+karaf@root()> jdbc:ds-create -dn derby -dbName test -url jdbc:derby:test test
+----
+
+We can see that this command created a configuration PID containing the datasource properties.
+
+==== `jdbc:ds-delete`
+
+The `jdbc:ds-delete` command deletes a datasource.
+
+----
+karaf@root()> jdbc:ds-delete test
+----
+
+==== `jdbc:ds-list`
+
+The `jdbc:ds-list` command lists the JDBC datasources:
+
+----
+karaf@root()> jdbc:ds-list
+Name | Product | Version | URL | Status
+---------------------------------------
+
+----
+
+==== `jdbc:ds-info`
+
+The `jdbc:ds-info` command provides details about a JDBC datasource:
+
+----
+karaf@root()> jdbc:ds-info test
+Property       | Value
+--------------------------------------------------
+driver.version | 10.8.2.2 - (1181258)
+username       | APP
+db.version     | 10.8.2.2 - (1181258)
+db.product     | Apache Derby
+driver.name    | Apache Derby Embedded JDBC Driver
+url            | jdbc:derby:test
+----
+
+==== `jdbc:execute`
+
+The `jdbc:execute` command executes a SQL query that doesn't return any result on a given JDBC datasource.
+
+Typically, you can use the `jdbc:execute` command to create tables, insert values into tables, etc.
+
+For instance, we can create a `person` table on our `test` datasource:
+
+----
+karaf@root()> jdbc:execute test "create table person(name varchar(100), nick varchar(100))"
+----
+
+And we can insert some records in the `person` table:
+
+----
+karaf@root()> jdbc:execute test "insert into person(name, nick) values('foo','bar')"
+karaf@root()> jdbc:execute test "insert into person(name, nick) values('test','test')"
+----
+
+==== `jdbc:query`
+
+The `jdbc:query` command is similar to the `jdbc:execute` one but it displays the query result.
+
+For instance, to display the content of the `person` table, we can do:
+
+----
+karaf@root()> jdbc:query test "select * from person"
+NICK       | NAME
+--------------------------------
+bar        | foo
+test       | test
+----
+
+==== `jdbc:tables`
+
+The `jdbc:tables` command displays all tables available on a given JDBC datasource:
+
+----
+karaf@root()> jdbc:tables test
+REF_GENERATION | TYPE_NAME | TABLE_NAME       | TYPE_CAT | REMARKS | TYPE_SCHEM | TABLE_TYPE   | TABLE_SCHEM | TABLE_CAT | SELF_REFERENCING_COL_NAME
+----------------------------------------------------------------------------------------------------------------------------------------------------
+               |           | SYSALIASES       |          |         |            | SYSTEM TABLE | SYS         |           |
+               |           | SYSCHECKS        |          |         |            | SYSTEM TABLE | SYS         |           |
+               |           | SYSCOLPERMS      |          |         |            | SYSTEM TABLE | SYS         |           |
+               |           | SYSCOLUMNS       |          |         |            | SYSTEM TABLE | SYS         |           |
+               |           | SYSCONGLOMERATES |          |         |            | SYSTEM TABLE | SYS         |           |
+               |           | SYSCONSTRAINTS   |          |         |            | SYSTEM TABLE | SYS         |           |
+               |           | SYSDEPENDS       |          |         |            | SYSTEM TABLE | SYS         |           |
+               |           | SYSFILES         |          |         |            | SYSTEM TABLE | SYS         |           |
+               |           | SYSFOREIGNKEYS   |          |         |            | SYSTEM TABLE | SYS         |           |
+               |           | SYSKEYS          |          |         |            | SYSTEM TABLE | SYS         |           |
+               |           | SYSPERMS         |          |         |            | SYSTEM TABLE | SYS         |           |
+               |           | SYSROLES         |          |         |            | SYSTEM TABLE | SYS         |           |
+               |           | SYSROUTINEPERMS  |          |         |            | SYSTEM TABLE | SYS         |           |
+               |           | SYSSCHEMAS       |          |         |            | SYSTEM TABLE | SYS         |           |
+               |           | SYSSEQUENCES     |          |         |            | SYSTEM TABLE | SYS         |           |
+               |           | SYSSTATEMENTS    |          |         |            | SYSTEM TABLE | SYS         |           |
+               |           | SYSSTATISTICS    |          |         |            | SYSTEM TABLE | SYS         |           |
+               |           | SYSTABLEPERMS    |          |         |            | SYSTEM TABLE | SYS         |           |
+               |           | SYSTABLES        |          |         |            | SYSTEM TABLE | SYS         |           |
+               |           | SYSTRIGGERS      |          |         |            | SYSTEM TABLE | SYS         |           |
+               |           | SYSVIEWS         |          |         |            | SYSTEM TABLE | SYS         |           |
+               |           | SYSDUMMY1        |          |         |            | SYSTEM TABLE | SYSIBM      |           |
+               |           | PERSON           |          |         |            | TABLE        | APP         |           |
+----
+
+==== JMX JDBC MBean
+
+The JMX JDBC MBean provides the JDBC datasources, and the operations to manipulate datasources and database.
+
+The object name to use is `org.apache.karaf:type=jdbc,name=*`.
+
+===== Attributes
+
+The `Datasources` attribute provides a tabular data of all JDBC datasource, containing:
+
+* `name` is the JDBC datasource name
+* `product` is the database product backend
+* `url` is the JDBC URL used by the datasource
+* `version` is the database version backend.
+
+===== Operations
+
+* `create(name, type, jdbcDriverClassName, version, url, user, password, installBundles)` creates a JDBC datasource (the arguments correspond to the options of the `jdbc:create` command).
+* `delete(name)` deletes a JDBC datasource.
+* `info(datasource)` returns a Map (String/String) of details about a JDBC `datasource`.
+* `tables(datasource)` returns a tabular data containing the tables available on a JDBC `datasource`.
+* `execute(datasource, command` executes a SQL command on the given JDBC `datasource`.
+* `query(datasource, query` executes a SQL query on the given JDBC `datasource` and return the execution result as tabular data.
+

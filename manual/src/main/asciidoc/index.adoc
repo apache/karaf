@@ -1,0 +1,137 @@
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+Apache Karaf Container 4.x - Documentation
+=========================================
+Apache Software Foundation
+:doctype: book
+:toc: left
+:toclevels: 3
+:toc-position: left
+:toc-title: Apache Karaf Container 4.x - Documentation
+:numbered:
+
+= Overview
+
+include::overview.adoc[]
+
+= Quick Start
+
+include::quick-start.adoc[]
+
+= Update Notes (from Karaf 3.x to 4.x versions)
+
+include::update-notes.adoc[]
+
+= User Guide
+
+include::user-guide/installation.adoc[]
+
+include::user-guide/directory-structure.adoc[]
+
+include::user-guide/start-stop.adoc[]
+
+include::user-guide/wrapper.adoc[]
+
+include::user-guide/console.adoc[]
+
+include::user-guide/remote.adoc[]
+
+include::user-guide/log.adoc[]
+
+include::user-guide/configugration.adoc[]
+
+include::user-guide/urls.adoc[]
+
+include::user-guide/provisioning.adoc[]
+
+include::user-guide/deployers.adoc[]
+
+include::user-guide/kar.adoc[]
+
+include::user-guide/instances.adoc[]
+
+include::user-guide/security.adoc[]
+
+include::user-guide/obr.adoc[]
+
+== Enterprise
+
+include::user-guide/http.adoc[]
+
+include::user-guide/webcontainer.adoc[]
+
+include::user-guide/jndi.adoc[]
+
+include::user-guide/jta.adoc[]
+
+include::user-guide/jdbc.adoc[]
+
+include::user-guide/jms.adoc[]
+
+include::user-guide/jpa.adoc[]
+
+include::user-guide/ejb.adoc[]
+
+include::user-guide/cdi.adoc[]
+
+include::user-guide/failover.adoc[]
+
+include::user-guide/monitoring.adoc[]
+
+include::user-guide/webconsole.adoc[]
+
+include::user-guide/tuning.adoc[]
+
+= Developer Guide
+
+[NOTE]
+====
+The developer guide is currently under a refactoring. The "new" developer guide will document samples providing
+in the Karaf Container distribution, in order to have more practical recipes.
+====
+
+include::developer-guide/developer-commands.adoc[]
+
+include::developer-guide/scripting.adoc[]
+
+include::developer-guide/connect.adoc[]
+
+include::developer-guide/branding.adoc[]
+
+include::developer-guide/extending.adoc[]
+
+include::developer-guide/karaf-maven-plugin.adoc[]
+
+include::developer-guide/custom-distribution.adoc[]
+
+include::developer-guide/services.adoc[]
+
+include::developer-guide/creating-bundles.adoc[]
+
+include::developer-guide/blueprint.adoc[]
+
+include::developer-guide/ds.adoc[]
+
+include::developer-guide/dev-cdi.adoc[]
+
+include::developer-guide/archetypes.adoc[]
+
+include::developer-guide/security-framework.adoc[]
+
+include::developer-guide/debugging.adoc[]
+
+include::developer-guide/writing-tests.adoc[]
+
+include::developer-guide/github-contributions.adoc[]

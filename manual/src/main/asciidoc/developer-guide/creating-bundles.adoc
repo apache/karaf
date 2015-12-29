@@ -1,0 +1,213 @@
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+== Basic bundle creation using the Felix maven-bundle-plugin
+
+Create a bundle instead of a normal jar by using a Maven POM file like this:
+
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>my.groupId</groupId>
+    <artifactId>my.bundle</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <name>My Bundle</name>
+    <description>My bundle short description</description>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <version>2.4.0</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                        ...
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
+----
+
+=== Add extended information to bundles
+
+Karaf supports a OSGI-INF/bundle.info file in a bundle.
+This file is extended description of the bundle.
+It supports ASCII character declarations (for adding color, formatting, etc) and some simple Wiki syntax.
+
+Simply add a `src/main/resources/OSGI-INF/bundle.info` file containing, for instance:
+
+----
+== SYNOPSIS
+    ${project.description}
+
+== DESCRIPTION
+    Long description of your bundle, including usage, etc.
+
+==SEE ALSO
+    [http://yourside\]
+    [http://yourside/docs\]
+----
+
+You can display this extended information using:
+
+----
+root@karaf> bundles:info
+----
+
+=== Wiki Syntax
+
+Karaf supports some simple wiki syntax in bundle info files:
+
+----
+==, ===, ... : Headings
+* : Enumerations
+[http://....] : links
+----
+
+== Creating bundles for non OSGi third party dependencies
+
+=== Dynamically wrapping jars
+
+Karaf supports the wrap: protocol execution.
+
+It allows for directly deploying third party dependencies, like Apache Commons Lang:
+
+----
+root@karaf> bundles:install wrap:mvn:commons-lang/commons-lang/2.4
+----
+
+The wrap protocol creates a bundle dynamically using the bnd. Confiugurations can be added in the wrap URL:
+
+* from the shell
+
+----
+root@karaf> bundles:install 'wrap:mvn:commons-lang/commons-lang/2.4$Bundle-SymbolicName=commons-lang&Bundle-Version=2.4'
+----
+
+* from features.xml
+
+----
+<bundle>wrap:mvn:commons-lang/commons-lang/2.4$Bundle-SymbolicName=commons-lang&amp;Bundle-Version=2.4</bundle>
+----
+
+=== Statically bundling jars
+
+You can also create a wrap bundle for a third party dependency.
+This bundle is simply a Maven POM that shades an existing jar and package into a jar bundle.
+
+For instance, to create an OSGi bundle that wraps Apache Commons Lang, simply define the following Maven POM:
+
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>osgi.commons-lang</groupId>
+    <artifactId>osgi.commons-lang</artifactId>
+    <version>2.4</version>
+    <packaging>bundle</packaging>
+    <name>commons-lang OSGi Bundle</name>
+    <description>This OSGi bundle simply wraps commons-lang-2.4.jar artifact.</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>2.4</version>
+            <optional>true</optional>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <defaultGoal>install</defaultGoal>
+
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-shade-plugin</artifactId>
+            <version>1.1</version>
+            <executions>
+                <execution>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>shade</goal>
+                    </goals>
+                    <configuration>
+                        <artifactSet>
+                            <includes>
+                                <include>commons-lang:commons-lang</include>
+                            </includes>
+                        </artifactSet>
+                        <filters>
+                            <filter>
+                                <artifact>commons-lang:commons-lang</artifact>
+                                <excludes>
+                                    <exclude>**</exclude>
+                                </excludes>
+                            </filter>
+                        </filters>
+                        <promoteTransitiveDependencies>true</promoteTransitiveDependencies>
+                        <createDependencyReducedPom>true</createDependencyReducedPom>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
+        <plugin>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>maven-bundle-plugin</artifactId>
+            <version>2.1.0</version>
+            <extensions>true</extensions>
+            <configuration>
+                <instructions>
+                    <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                    <Export-Package></Export-Package>
+                    <Import-Package></Import-Package>
+                    <_versionpolicy>[$(version;==;$(@)),$(version;+;$(@)))</_versionpolicy>
+                    <_removeheaders>Ignore-Package,Include-Resource,Private-Package,Embed-Dependency</_removeheaders>
+                </instructions>
+                <unpackBundle>true</unpackBundle>
+            </configuration>
+        </plugin>
+    </build>
+
+</project>
+----
+
+The resulting OSGi bundle can now be deployed directly:
+
+----
+root@karaf> bundles:install -s mvn:osgi.commons-lang/osgi.commons-lang/2.4
+----

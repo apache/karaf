@@ -1,0 +1,44 @@
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+=== Persistence (JPA)
+
+Apache Karaf provides JPA persistence providers (such as Apache OpenJPA) to be easy to use (in a OSGi way) and provide
+container managed persistence for applications (using Blueprint).
+
+Apache Karaf embeds Aries JPA, providing a very easy way to develop applications that use JPA persistence.
+
+See the developer guide for details about developing applications that use JPA.
+
+==== Persistence engine features
+
+Apache Karaf provides a set of ready to use persistence engine features:
+
+* Apache OpenJPA. The `openjpa` feature installs the `jpa` feature with the Apache OpenJPA as persistence engine:
+
+----
+karaf@root()> feature:install openjpa
+----
+
+* Hibernate. The `hibernate` feature installs the `jpa` feature with the Hibernate persistence engine:
+
+----
+karaf@root()> feature:install hibernate
+----
+
+* EclipseLink. The `eclipselink` feature installs the `jpa` featue with the ElipseLink persistence engine:
+
+----
+karaf@root()> feature:install eclipselink
+----

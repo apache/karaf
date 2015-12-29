@@ -2175,10 +2175,6 @@
                                 <exclude>**/foo</exclude>
                                 <exclude>**/org.ops4j.pax.exam.TestContainerFactory</exclude>
                                 <exclude>**/maven-metadata-local.xml</exclude>
-                                <!--manual resources -->
-                                <exclude>**/*.css</exclude>
-                                <exclude>**/*.ssp</exclude>
-                                <exclude>**/*.conf</exclude>
                                 <!-- test manifests -->
                                 <exclude>**/*.mf</exclude>
                                 <!-- test json files -->

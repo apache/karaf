@@ -1,0 +1,171 @@
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+This section is dedicated to users of previous Apache Karaf version.
+
+NB: for the users upgrading from Karaf 2.x, please see the "Update Notes (from 2.x to 3.x)" in the Karaf 3.x
+documentation first.
+
+NB: Karaf 4.x supports Java8.
+
+== Distributions
+
+Apache Karaf 4.x is available as tar.gz and zip archives. The content is the same and works on either Unix or Windows
+platforms.
+The `bin` folder contains both sh and bat scripts.
+
+== Commands
+
+Karaf 4 commands are close to the ones provided in Karaf 3.
+
+The sub-shell modes are the same (in `etc/org.apache.karaf.shell.cfg` or using `shell:completion` command).
+
+However, some minor changes have been introduced and new commands available:
+
+|===
+|Apache Karaf 4.x
+
+|feature:requirement-list
+
+|feature:requirement-add
+
+|feature:requirement-remove
+
+|feature:regions
+
+|feature:start
+
+|feature:stop
+
+|jaas:group-create
+
+|jaas:group-add
+
+|jaas:group-delete
+
+|jaas:group-list
+
+|jaas:group-role-add
+
+|jaas:group-role-delete
+
+|jaas:su
+
+|jaas:sudo
+
+|shell:edit
+
+|shell:env
+
+|shell:less
+
+|shell:stack-traces-print
+
+|shell:threads
+
+|shell:while
+
+|log:list
+
+|bundle:capabilities
+
+|bundle:diag
+
+|bundle:id
+
+|bundle:load-test
+
+|bundle:requirements
+
+|bundle:resolve
+
+|system:name
+|===
+
+We encourage the users to use the `--help` option to check the name and type of arguments and options.
+
+In term of development, you can still use the blueprint definition as you do in Karaf 2.x & 3.x (with the corresponding annotations).
+
+However, in Karaf 4.x, you can use DS and new annotations and avoid the usage of a blueprint XML.
+
+The new annotations are available: @Service, @Completion, @Parsing, @Reference. It allows you to complete define the command
+in the command class directly.
+
+To simplify the generation of the code and OSGi headers, Karaf 4.x provides the karaf-services-maven-plugin (in org.apache.karaf.tooling Maven groupId).
+
+Take a look in the developer guide for the command development "new style" details.
+
+== Features repositories
+
+Karaf 4.x provides:
+
+* `mvn:org.apache.karaf.features/enterprise/4.0.x/xml/features`
+* `mvn:org.apache.karaf.features/framework/4.0.x/xml/features`
+* `mvn:org.apache.karaf.features/spring/4.0.x/xml/features`
+* `mvn:org.apache.karaf.features/standard/4.0.x/xml/features`
+* `mvn:org.apache.karaf.features/static/4.0.x/xml/features`
+
+== Features resolver
+
+Apache Karaf 4.x brings a complete new feature resolver. The purpose is to simplify the features installation and
+lifecycle.
+The new resolver now checks the feature requirements (defined directly in the features XML), and check which bundles
+provides the capabilities to satisfy these requirements.
+It allows Karaf to automatically install bundles required by features.
+
+For "old style" feature (features XML using namespace from Karaf 2.x or 3.x), this feature is not enabled.
+As soon as you use a "new style" feature (with namespace 1.3.0 used by Karaf 4.x), this feature is enabled.
+
+== Namespaces
+
+Apache Karaf 4.x brings updated version of the namespaces:
+
+* Supported features namespaces:
+** `karaf-features-1.0.0.xsd`
+** `karaf-features-1.1.0.xsd`
+** `karaf-features-1.2.0.xsd`
+** `karaf-features-1.2.1.xsd`
+** `karaf-features-1.3.0.xsd`
+* Supported jaas namespaces:
+** `karaf-jaas-1.0.0.xsd`
+** `karaf-jaas-1.1.0.xsd`
+* Supported shell namespaces:
+** `karaf-shell-1.0.0.xsd`
+** `karaf-shell-1.1.0.xsd`
+
+== Maven plugin
+
+A cleanup of the goals provided by {{karaf-maven-plugin}} has been done.
+
+Now the provided goals are:
+
+* `karaf:archive` to create a tar.gz or zip of a Karaf distribution
+* `karaf:assembly` to create a custom Karaf distribution assembly
+* `karaf:kar` to create a kar file
+* `karaf:verify` to verify and validate Karaf features
+* `karaf:features-add-to-repository` to recursively copy features XML and content into a folder (repository)
+* `karaf:features-export-meta-data` to extract the metadata from a features XML
+* `karaf:features-generate-descriptor` to generate a features XML
+* `karaf:commands-generate-help` to generate help/documentation on the commands
+* `karaf:run` to run a Karaf container directly from Maven
+* `karaf:client` to interact with a remote Karaf instance
+* `karaf:deploy` to deploy an application to a remote Karaf instance
+
+== Update guide
+
+We encourage users to start a fresh Apache Karaf 4.x container.
+
+If you upgrade an existing container, `lib` and `system` folder have to be updated (just an override copy).
+
+For the `etc` folder, a diff is required as some properties changed and new configurations are available.

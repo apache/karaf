@@ -1,0 +1,61 @@
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+== WebConsole
+
+Apache Karaf provides an optional WebConsole.
+
+This WebConsole provides a graphical web GUI to see and manage your Apache Karaf container.
+
+You can use the WebConsole to:
+
+* manage Apache Karaf features
+* manage OSGi bundles
+* manage the instances
+* manage the confgurations
+* manage the log service
+
+The WebConsole is extensible via a plugins system. Some applications can add new pages to the WebConsole.
+For instance, Apache Karaf Cellar provides additional pages to administrate cluster groups, nodes, etc.
+
+=== Installation
+
+To enable the Apache Karaf WebConsole, you just have to install the `webconsole` feature:
+
+----
+karaf@root()> feature:install webconsole
+----
+
+The `webconsole` feature automatically installs the `http` feature (see the [WebContainer section|webcontainer] for details).
+
+=== Access
+
+The Apache Karaf WebConsole uses the WebContainer port number (see the [WebContainer section|webcontainer] for details)
+with the `/system/console` context.
+
+By default, the Apache Karaf WebContainer port number is `8181`.
+
+It means that the Apache Karaf WebConsole is accessible on the following URL: http://localhost:8181/system/console
+
+As the Apache Karaf WebConsole uses the security framework, an username and password will be prompted.
+
+You have to enter an username/password from the `karaf` realm. By default, you can use `karaf`/`karaf`.
+
+See the link:security[Security section] for details.
+
+[NOTE]
+====
+Only users with the `admin` role are allowed to logon on the Apache Karaf WebConsole.
+Right now, the WebConsole doesn't use RBAC system as we have for console commands, or MBeans.
+====

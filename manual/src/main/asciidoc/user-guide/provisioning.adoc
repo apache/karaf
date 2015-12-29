@@ -1,0 +1,685 @@
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+== Provisioning
+
+Apache Karaf supports the provisioning of applications and modules using the concept of Karaf Features.
+
+=== Application
+
+By provisioning application, it means install all modules, configuration, and transitive applications.
+
+=== OSGi
+
+It natively supports the deployment of OSGi applications.
+
+An OSGi application is a set of OSGi bundles. An OSGi bundles is a regular jar file, with additional metadata in the jar MANIFEST.
+
+In OSGi, a bundle can depend to other bundles. So, it means that to deploy an OSGi application, most of the time, you have
+to firstly deploy a lot of other bundles required by the application.
+
+So, you have to find these bundles first, install the bundles. Again, these "dependency" bundles may require other bundles
+to satisfy their own dependencies.
+
+More over, typically, an application requires configuration (see the [Configuration section|configuration] of the user guide).
+So, before being able to start your application, in addition of the dependency bundles, you have to create or deploy the
+configuration.
+
+As we can see, the provisioning of an application can be very long and fastidious.
+
+=== Feature and resolver
+
+Apache Karaf provides a simple and flexible way to provision applications.
+
+In Apache Karaf, the application provisioning is an Apache Karaf "feature".
+
+A feature describes an application as:
+
+* a name
+* a version
+* a optional description (eventually with a long description)
+* a set of bundles
+* optionally a set configurations or configuration files
+* optionally a set of dependency features
+
+When you install a feature, Apache Karaf installs all resources described in the feature. It means that it will
+automatically resolves and installs all bundles, configurations, and dependency features described in the feature.
+
+The feature resolver checks the service requirements, and install the bundles providing the services matching the requirements.
+The default mode enables this behavior only for "new style" features repositories (basically, the features repositories XML with
+schema equal or greater to 1.3.0). It doesn't apply for "old style" features repositories (coming from Karaf 2 or 3).
+
+You can change the service requirements enforcement mode in `etc/org.apache.karaf.features.cfg` file, using the `serviceRequirements` property.
+
+----
+serviceRequirements=default
+----
+
+The possible values are:
+
+* disable: service requirements are completely ignored, for both "old style" and "new style" features repositories
+* default: service requirements are ignored for "old style" features repositories, and enabled for "new style" features repositories.
+* enforce: service requirements are always verified, for "old style" and "new style" features repositories.
+
+Additionally, a feature can also define requirements. In that case, Karaf can automatically additional bundles or features
+providing the capabilities to satisfy the requirements.
+
+A feature has a complete lifecycle: install, start, stop, update, uninstall.
+
+=== Features repositories
+
+The features are described in a features XML descriptor. This XML file contains the description of a set of features.
+
+A features XML descriptor is named a "features repository". Before being able to install a feature, you have to register
+the features repository that provides the feature (using `feature:repo-add` command or FeatureMBean as described later).
+
+For instance, the following XML file (or "features repository") describes the `feature1` and `feature2` features:
+
+----
+<features xmlns="http://karaf.apache.org/xmlns/features/v1.3.0">
+  <feature name="feature1" version="1.0.0">
+    <bundle>...</bundle>
+    <bundle>...</bundle>
+  </feature>
+  <feature name="feature2" version="1.1.0">
+    <feature>feature1</feature>
+    <bundle>...</bundle>
+  </feature>
+</features>
+----
+
+We can note that the features XML has a schema. Take a look on [Features XML Schema section|provisioning-schema] of the user guide
+for details.
+The `feature1` feature is available in version `1.0.0`, and contains two bundles. The `<bundle/>` element contains a URL
+to the bundle artifact (see [Artifacts repositories and URLs section|urls] for details). If you install the `feature1` feature
+(using `feature:install` or the FeatureMBean as described later), Apache Karaf will automatically installs the two bundles
+described.
+The `feature2` feature is available in version `1.1.0`, and contains a reference to the `feature1` feature and a bundle.
+The `<feature/>` element contains the name of a feature. A specific feature version can be defined using the `version`
+attribute to the `<feature/>` element (`<feature version="1.0.0">feature1</feature>`). If the `version` attribute is
+not specified, Apache Karaf will install the latest version available. If you install the `feature2` feature (using `feature:install`
+or the FeatureMBean as described later), Apache Karaf will automatically installs `feature1` (if it's not already installed)
+and the bundle.
+
+A feature repository is registered using the URL to the features XML file.
+
+The features state is stored in the Apache Karaf cache (in the `KARAF_DATA` folder). You can restart Apache Karaf, the
+previously installed features remain installed and available after restart.
+If you do a clean restart or you delete the Apache Karaf cache (delete the `KARAF_DATA` folder), all previously features
+repositories registered and features installed will be lost: you will have to register the features repositories and install
+features by hand again.
+To prevent this behaviour, you can specify features as boot features.
+
+=== Boot features
+
+You can describe some features as boot features. A boot feature will be automatically install by Apache Karaf, even if it has
+not been previously installed using `feature:install` or FeatureMBean.
+
+Apache Karaf features configuration is located in the `etc/org.apache.karaf.features.cfg` configuration file.
+
+This configuration file contains the two properties to use to define boot features:
+
+* `featuresRepositories` contains a list (coma separated) of features repositories (features XML) URLs.
+* `featuresBoot` contains a list (come separated) of features to install at boot.
+
+=== Features upgrade
+
+You can update a release by installing the same feature (with the same SNAPSHOT version or a different version).
+
+Thanks to the features lifecycle, you can control the status of the feature (started, stopped, etc).
+
+You can also use a simulation to see what the update will do.
+
+=== Feature bundles
+
+==== Start Level
+
+By default, the bundles deployed by a feature will have a start-level equals to the value defined in the `etc/config.properties`
+configuration file, in the `karaf.startlevel.bundle` property.
+
+This value can be "overrided" by the `start-level` attribute of the `<bundle/>` element, in the features XML.
+
+----
+  <feature name="my-project" version="1.0.0">
+    <bundle start-level="80">mvn:com.mycompany.myproject/myproject-dao</bundle>
+    <bundle start-level="85">mvn:com.mycompany.myproject/myproject-service</bundle>
+  </feature>
+----
+
+The start-level attribute insure that the `myproject-dao` bundle is started before the bundles that use it.
+
+Instead of using start-level, a better solution is to simply let the OSGi framework know what your dependencies are by
+defining the packages or services you need. It is more robust than setting start levels.
+
+==== Simulate, Start and stop
+
+You can simulate the installation of a feature using the `-t` option to `feature:install` command.
+
+You can install a bundle without starting it. By default, the bundles in a feature are automatically started.
+
+A feature can specify that a bundle should not be started automatically (the bundle stays in resolved state).
+To do so, a feature can specify the `start` attribute to false in the `<bundle/>` element:
+
+----
+  <feature name="my-project" version="1.0.0">
+    <bundle start-level="80" start="false">mvn:com.mycompany.myproject/myproject-dao</bundle>
+    <bundle start-level="85" start="false">mvn:com.mycompany.myproject/myproject-service</bundle>
+  </feature>
+----
+
+==== Dependency
+
+A bundle can be flagged as being a dependency, using the `dependency` attribute set to true on the `<bundle/>` element.
+
+This information can be used by resolvers to compute the full list of bundles to be installed.
+
+=== Dependent features
+
+A feature can depend to a set of other features:
+
+----
+  <feature name="my-project" version="1.0.0">
+    <feature>other</feature>
+    <bundle start-level="80" start="false">mvn:com.mycompany.myproject/myproject-dao</bundle>
+    <bundle start-level="85" start="false">mvn:com.mycompany.myproject/myproject-service</bundle>
+  </feature>
+----
+
+When the `my-project` feature will be installed, the `other` feature will be automatically installed as well.
+
+It's possible to define a version range for a dependent feature:
+
+----
+<feature name="spring-dm">
+  <feature version="[2.5.6,4)">spring</feature>
+  ...
+</feature>
+----
+
+The feature with the highest version available in the range will be installed.
+
+If a single version is specified, this version will be chosen.
+
+If nothing is specified, the highest available will be installed.
+
+=== Feature configurations
+
+The `<config/>` element in a feature XML allows a feature to create and/or populate a configuration (identified by a configuration PID).
+
+----
+<config name="com.foo.bar">
+  myProperty = myValue
+</config>
+----
+
+The `name` attribute of the `<config/>` element corresponds to the configuration PID (see the [Configuration section|configuration] for details).
+
+The installation of the feature will have the same effect as dropping a file named `com.foo.bar.cfg` in the `etc` folder.
+
+The content of the `<config/>` element is a set of properties, following the key=value standard.
+
+=== Feature configuration files
+
+Instead of using the `<config/>` element, a feature can specify `<configfile/>` elements.
+
+----
+<configfile finalname="/etc/myfile.cfg" override="false">URL</configfile>
+----
+
+Instead of directly manipulating the Apache Karaf configuration layer (as when using the `<config/>` element), the
+`<configfile/>` element takes directly a file specified by a URL, and copy the file in the location specified by the
+`finalname` attribute.
+
+If not specified, the location is relative from the `KARAF_BASE` variable. It's also possible to use variable like
+${karaf.home}, ${karaf.base}, ${karaf.etc}, or even system properties.
+
+For instance:
+
+----
+<configfile finalname="${karaf.etc}/myfile.cfg" override="false">URL</configfile>
+----
+
+If the file is already present at the desired location it is kept and the deployment of the configuration file is skipped,
+as a already existing file might contain customization. This behaviour can be overriden by `override` set to true.
+
+The file URL is any URL supported by Apache Karaf (see the [Artifacts repositories and URLs|urls] of the user guide for details).
+
+==== Requirements
+
+A feature can also specify expected requirements. The feature resolver will try to satisfy the requirements. For that, it checks
+the features and bundles capabilities and will automatically install the bundles to satisfy the requirements.
+
+For instance, a feature can contain:
+
+----
+<requirement>osgi.ee;filter:=&quot;(&amp;(osgi.ee=JavaSE)(!(version&gt;=1.8)))&quot;</requirement>
+----
+
+The requirement specifies that the feature will work by only if the JDK version is not 1.8 (so basically 1.7).
+
+The features resolver is also able to refresh the bundles when an optional dependency is satisfy, rewiring the optional import.
+
+=== Commands
+
+==== `feature:repo-list`
+
+The `feature:repo-list` command lists all registered features repository:
+
+----
+karaf@root()> feature:repo-list
+Repository               | URL
+--------------------------------------------------------------------------------------
+org.ops4j.pax.cdi-0.12.0 | mvn:org.ops4j.pax.cdi/pax-cdi-features/0.12.0/xml/features
+org.ops4j.pax.web-4.1.4  | mvn:org.ops4j.pax.web/pax-web-features/4.1.4/xml/features
+standard-4.0.0           | mvn:org.apache.karaf.features/standard/4.0.0/xml/features
+enterprise-4.0.0         | mvn:org.apache.karaf.features/enterprise/4.0.0/xml/features
+spring-4.0.0             | mvn:org.apache.karaf.features/spring/4.0.0/xml/features
+----
+
+Each repository has a name and the URL to the features XML.
+
+Apache Karaf parses the features XML when you register the features repository URL (using `feature:repo-add` command
+or the FeatureMBean as described later). If you want to force Apache Karaf to reload the features repository URL (and
+so update the features definition), you can use the `-r` option:
+
+----
+karaf@root()> feature:repo-list -r
+Reloading all repositories from their urls
+
+Repository               | URL
+--------------------------------------------------------------------------------------
+org.ops4j.pax.cdi-0.12.0 | mvn:org.ops4j.pax.cdi/pax-cdi-features/0.12.0/xml/features
+org.ops4j.pax.web-4.1.4  | mvn:org.ops4j.pax.web/pax-web-features/4.1.4/xml/features
+standard-4.0.0           | mvn:org.apache.karaf.features/standard/4.0.0/xml/features
+enterprise-4.0.0         | mvn:org.apache.karaf.features/enterprise/4.0.0/xml/features
+spring-4.0.0             | mvn:org.apache.karaf.features/spring/4.0.0/xml/features
+----
+
+==== `feature:repo-add`
+
+To register a features repository (and so having new features available in Apache Karaf), you have to use the
+`feature:repo-add` command.
+
+The `feature:repo-add` command requires the `name/url` argument. This argument accepts:
+
+* a feature repository URL. It's an URL directly to the features XML file. Any URL described in the [Artifacts repositories and URLs section|urls]
+ of the user guide is supported.
+* a feature repository name defined in the `etc/org.apache.karaf.features.repos.cfg` configuration file.
+
+The `etc/org.apache.karaf.features.repos.cfg` defines a list of "pre-installed/available" features repositories:
+
+----
+################################################################################
+#
+#    Licensed to the Apache Software Foundation (ASF) under one or more
+#    contributor license agreements.  See the NOTICE file distributed with
+#    this work for additional information regarding copyright ownership.
+#    The ASF licenses this file to You under the Apache License, Version 2.0
+#    (the "License"); you may not use this file except in compliance with
+#    the License.  You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+#
+################################################################################
+
+#
+# This file describes the features repository URL
+# It could be directly installed using feature:repo-add command
+#
+enterprise=mvn:org.apache.karaf.features/enterprise/LATEST/xml/features
+spring=mvn:org.apache.karaf.features/spring/LATEST/xml/features
+cellar=mvn:org.apache.karaf.cellar/apache-karaf-cellar/LATEST/xml/features
+cave=mvn:org.apache.karaf.cave/apache-karaf-cave/LATEST/xml/features
+camel=mvn:org.apache.camel.karaf/apache-camel/LATEST/xml/features
+camel-extras=mvn:org.apache-extras.camel-extra.karaf/camel-extra/LATEST/xml/features
+cxf=mvn:org.apache.cxf.karaf/apache-cxf/LATEST/xml/features
+cxf-dosgi=mvn:org.apache.cxf.dosgi/cxf-dosgi/LATEST/xml/features
+cxf-xkms=mvn:org.apache.cxf.services.xkms/cxf-services-xkms-features/LATEST/xml
+activemq=mvn:org.apache.activemq/activemq-karaf/LATEST/xml/features
+jclouds=mvn:org.apache.jclouds.karaf/jclouds-karaf/LATEST/xml/features
+openejb=mvn:org.apache.openejb/openejb-feature/LATEST/xml/features
+wicket=mvn:org.ops4j.pax.wicket/features/LATEST/xml/features
+hawtio=mvn:io.hawt/hawtio-karaf/LATEST/xml/features
+pax-cdi=mvn:org.ops4j.pax.cdi/pax-cdi-features/LATEST/xml/features
+pax-jdbc=mvn:org.ops4j.pax.jdbc/pax-jdbc-features/LATEST/xml/features
+pax-jpa=mvn:org.ops4j.pax.jpa/pax-jpa-features/LATEST/xml/features
+pax-web=mvn:org.ops4j.pax.web/pax-web-features/LATEST/xml/features
+pax-wicket=mvn:org.ops4j.pax.wicket/pax-wicket-features/LATEST/xml/features
+ecf=http://download.eclipse.org/rt/ecf/latest/site.p2/karaf-features.xml
+decanter=mvn:org.apache.karaf.decanter/apache-karaf-decanter/LATEST/xml/features
+----
+
+You can directly provide a features repository name to the `feature:repo-add` command. For install, to install Apache Karaf Cellar, you can do:
+
+----
+karaf@root()> feature:repo-add cellar
+Adding feature url mvn:org.apache.karaf.cellar/apache-karaf-cellar/LATEST/xml/features
+----
+
+When you don't provide the optional `version` argument, Apache Karaf installs the latest version of the features repository available.
+You can specify a target version with the `version` argument:
+
+----
+karaf@root()> feature:repo-add cellar 4.0.0.RC1
+Adding feature url mvn:org.apache.karaf.cellar/apache-karaf-cellar/4.0.0.RC1/xml/features
+----
+
+Instead of providing a features repository name defined in the `etc/org.apache.karaf.features.repos.cfg` configuration file,
+you can directly provide the features repository URL to the `feature:repo-add` command:
+
+----
+karaf@root()> feature:repo-add mvn:org.apache.karaf.cellar/apache-karaf-cellar/4.0.0.RC1/xml/features
+Adding feature url mvn:org.apache.karaf.cellar/apache-karaf-cellar/4.0.0.RC1/xml/features
+----
+
+By default, the `feature:repo-add` command just registers the features repository, it doesn't install any feature.
+If you specify the `-i` option, the `feature:repo-add` command registers the features repository and installs all
+features described in this features repository:
+
+----
+karaf@root()> feature:repo-add -i cellar
+----
+
+==== `feature:repo-refresh`
+
+Apache Karaf parses the features repository XML when you register it (using `feature:repo-add` command or the FeatureMBean).
+If the features repository XML changes, you have to indicate to Apache Karaf to refresh the features repository to load the changes.
+
+The `feature:repo-refresh` command refreshes the features repository.
+
+Without argument, the command refreshes all features repository:
+
+----
+karaf@root()> feature:repo-refresh
+Refreshing feature url mvn:org.ops4j.pax.cdi/pax-cdi-features/0.12.0/xml/features
+Refreshing feature url mvn:org.ops4j.pax.web/pax-web-features/4.1.4/xml/features
+Refreshing feature url mvn:org.apache.karaf.features/standard/4.0.0/xml/features
+Refreshing feature url mvn:org.apache.karaf.features/enterprise/4.0.0/xml/features
+Refreshing feature url mvn:org.apache.karaf.features/spring/4.0.0/xml/features
+----
+
+Instead of refreshing all features repositories, you can specify the features repository to refresh, by providing the URL
+or the features repository name (and optionally version):
+
+----
+karaf@root()> feature:repo-refresh mvn:org.apache.karaf.features/standard/4.0.0/xml/features
+Refreshing feature url mvn:org.apache.karaf.features/standard/4.0.0/xml/features
+----
+
+----
+karaf@root()> feature:repo-refresh cellar
+Refreshing feature url mvn:org.apache.karaf.cellar/apache-karaf-cellar/LATEST/xml/features
+----
+
+==== `feature:repo-remove`
+
+The `feature:repo-remove` command removes a features repository from the registered ones.
+
+The `feature:repo-remove` command requires a argument:
+
+* the features repository name (as displayed in the repository column of the `feature:repo-list` command output)
+* the features repository URL (as displayed in the URL column of the `feature:repo-list` command output)
+
+----
+karaf@root()> feature:repo-remove karaf-cellar-4.0.0.RC1
+----
+
+----
+karaf@root()> feature:repo-remove mvn:org.apache.karaf.cellar/apache-karaf-cellar/LATEST/xml/features
+----
+
+By default, the `feature:repo-remove` command just removes the features repository from the registered ones: it doesn't
+uninstall the features provided by the features repository.
+
+If you use `-u` option, the `feature:repo-remove` command uninstalls all features described by the features repository:
+
+----
+karaf@root()> feature:repo-remove -u karaf-cellar-4.0.0.RC1
+----
+
+==== `feature:list`
+
+The `feature:list` command lists all available features (provided by the different registered features repositories):
+
+----
+Name                          | Version                          | Required | State       | Repository               | Description
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+pax-cdi                       | 0.12.0                           |          | Uninstalled | org.ops4j.pax.cdi-0.12.0 | Provide CDI support
+pax-cdi-1.1                   | 0.12.0                           |          | Uninstalled | org.ops4j.pax.cdi-0.12.0 | Provide CDI 1.1 support
+pax-cdi-1.2                   | 0.12.0                           |          | Uninstalled | org.ops4j.pax.cdi-0.12.0 | Provide CDI 1.2 support
+pax-cdi-weld                  | 0.12.0                           |          | Uninstalled | org.ops4j.pax.cdi-0.12.0 | Weld CDI support
+pax-cdi-1.1-weld              | 0.12.0                           |          | Uninstalled | org.ops4j.pax.cdi-0.12.0 | Weld CDI 1.1 support
+pax-cdi-1.2-weld              | 0.12.0                           |          | Uninstalled | org.ops4j.pax.cdi-0.12.0 | Weld CDI 1.2 support
+pax-cdi-openwebbeans          | 0.12.0                           |          | Uninstalled | org.ops4j.pax.cdi-0.12.0 | OpenWebBeans CDI support
+pax-cdi-web                   | 0.12.0                           |          | Uninstalled | org.ops4j.pax.cdi-0.12.0 | Web CDI support
+pax-cdi-1.1-web               | 0.12.0                           |          | Uninstalled | org.ops4j.pax.cdi-0.12.0 | Web CDI 1.1 support
+...
+----
+
+If you want to order the features by alphabetical name, you can use the `-o` option:
+
+----
+karaf@root()> feature:list -o
+Name                          | Version                          | Required | State       | Repository               | Description
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+deltaspike-core               | 1.2.1                            |          | Uninstalled | org.ops4j.pax.cdi-0.12.0 | Apache Deltaspike core support
+deltaspike-data               | 1.2.1                            |          | Uninstalled | org.ops4j.pax.cdi-0.12.0 | Apache Deltaspike data support
+deltaspike-jpa                | 1.2.1                            |          | Uninstalled | org.ops4j.pax.cdi-0.12.0 | Apache Deltaspike jpa support
+deltaspike-partial-bean       | 1.2.1                            |          | Uninstalled | org.ops4j.pax.cdi-0.12.0 | Apache Deltaspike partial bean support
+pax-cdi                       | 0.12.0                           |          | Uninstalled | org.ops4j.pax.cdi-0.12.0 | Provide CDI support
+pax-cdi-1.1                   | 0.12.0                           |          | Uninstalled | org.ops4j.pax.cdi-0.12.0 | Provide CDI 1.1 support
+pax-cdi-1.1-web               | 0.12.0                           |          | Uninstalled | org.ops4j.pax.cdi-0.12.0 | Web CDI 1.1 support
+pax-cdi-1.1-web-weld          | 0.12.0                           |          | Uninstalled | org.ops4j.pax.cdi-0.12.0 | Weld Web CDI 1.1 support
+pax-cdi-1.1-weld              | 0.12.0                           |          | Uninstalled | org.ops4j.pax.cdi-0.12.0 | Weld CDI 1.1 support
+pax-cdi-1.2                   | 0.12.0                           |          | Uninstalled | org.ops4j.pax.cdi-0.12.0 | Provide CDI 1.2 support
+...
+----
+
+By default, the `feature:list` command displays all features, whatever their current state (installed or not installed).
+
+Using the `-i` option displays only installed features:
+
+----
+karaf@root()> feature:list -i
+Name            | Version | Required | State   | Repository     | Description
+-------------------------------------------------------------------------------------------------------------------
+aries-proxy     | 4.0.0   |          | Started | standard-4.0.0 | Aries Proxy
+aries-blueprint | 4.0.0   | x        | Started | standard-4.0.0 | Aries Blueprint
+feature         | 4.0.0   | x        | Started | standard-4.0.0 | Features Support
+shell           | 4.0.0   | x        | Started | standard-4.0.0 | Karaf Shell
+shell-compat    | 4.0.0   | x        | Started | standard-4.0.0 | Karaf Shell Compatibility
+deployer        | 4.0.0   | x        | Started | standard-4.0.0 | Karaf Deployer
+bundle          | 4.0.0   | x        | Started | standard-4.0.0 | Provide Bundle support
+config          | 4.0.0   | x        | Started | standard-4.0.0 | Provide OSGi ConfigAdmin support
+diagnostic      | 4.0.0   | x        | Started | standard-4.0.0 | Provide Diagnostic support
+instance        | 4.0.0   | x        | Started | standard-4.0.0 | Provide Instance support
+jaas            | 4.0.0   | x        | Started | standard-4.0.0 | Provide JAAS support
+log             | 4.0.0   | x        | Started | standard-4.0.0 | Provide Log support
+package         | 4.0.0   | x        | Started | standard-4.0.0 | Package commands and mbeans
+service         | 4.0.0   | x        | Started | standard-4.0.0 | Provide Service support
+system          | 4.0.0   | x        | Started | standard-4.0.0 | Provide System support
+kar             | 4.0.0   | x        | Started | standard-4.0.0 | Provide KAR (KARaf archive) support
+ssh             | 4.0.0   | x        | Started | standard-4.0.0 | Provide a SSHd server on Karaf
+management      | 4.0.0   | x        | Started | standard-4.0.0 | Provide a JMX MBeanServer and a set of MBeans in
+wrap            | 0.0.0   | x        | Started | standard-4.0.0 | Wrap URL handler
+----
+
+==== `feature:install`
+
+The `feature:install` command installs a feature.
+
+It requires the `feature` argument. The `feature` argument is the name of the feature, or the name/version of the feature.
+If only the name of the feature is provided (not the version), the latest version available will be installed.
+
+----
+karaf@root()> feature:install eventadmin
+----
+
+We can simulate an installation using `-t` or `--simulate` option: it just displays what it would do, but it doesn't do it:
+
+----
+karaf@root()> feature:install -t -v eventadmin
+Adding features: eventadmin/[4.0.0,4.0.0]
+No deployment change.
+  Managing bundle:
+    org.apache.felix.metatype / 1.0.12
+----
+
+You can specify a feature version to install:
+
+----
+karaf@root()> feature:install eventadmin/4.0.0
+----
+
+By default, the `feature:install` command is not verbose. If you want to have some details about actions performed by the `feature:install`
+command, you can use the `-v` option:
+
+----
+karaf@root()> feature:install -v eventadmin
+Adding features: eventadmin/[4.0.0,4.0.0]
+No deployment change.
+Done.
+----
+
+If a feature contains a bundle which is already installed, by default, Apache Karaf will refresh this bundle.
+Sometime, this refresh can cause issue to other running applications. If you want to disable the auto-refresh of installed
+bundles, you can use the `-r` option:
+
+----
+karaf@root()> feature:install -v -r eventadmin
+Adding features: eventadmin/[4.0.0,4.0.0]
+No deployment change.
+Done.
+----
+
+You can decide to not start the bundles installed by a feature using the `-s` or `--no-auto-start` option:
+
+----
+karaf@root()> feature:install -s eventadmin
+----
+
+==== `feature:start`
+
+By default, when you install a feature, it's automatically installed. However, you can specify the `-s` option to the `feature:install` command.
+
+As soon as you install a feature (started or not), all packages provided by the bundles defined in the feature will be available, and can be used for
+the wiring in other bundles.
+
+When starting a feature, all bundles are started, and so, the feature also exposes the services.
+
+==== `feature:stop`
+
+You can also stop a feature: it means that all services provided by the feature will be stop and removed from the service registry. However, the packages
+are still available for the wiring (the bundles are in resolved state).
+
+==== `feature:uninstall`
+
+The `feature:uninstall` command uninstalls a feature. As the `feature:install` command, the `feature:uninstall` command
+requires the `feature` argument. The `feature` argument is the name of the feature, or the name/version of the feature.
+If only the name of the feature is provided (not the version), the latest version available will be installed.
+
+----
+karaf@root()> feature:uninstall eventadmin
+----
+
+The features resolver is involved during feature uninstallation: transitive features installed by the uninstalled feature can be uninstalled
+themselves if not used by other feature.
+
+=== Deployer
+
+You can "hot deploy" a features XML by dropping the file directly in the `deploy` folder.
+
+Apache Karaf provides a features deployer.
+
+When you drop a features XML in the deploy folder, the features deployer does:
+* register the features XML as a features repository
+* the features with `install` attribute set to "auto" will be automatically installed by the features deployer.
+
+For instance, dropping the following XML in the deploy folder will automatically install feature1 and feature2, whereas
+feature3 won't be installed:
+
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<features name="my-features" xmlns="http://karaf.apache.org/xmlns/features/v1.3.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.3.0 http://karaf.apache.org/xmlns/features/v1.3.0">
+
+    <feature name="feature1" version="1.0" install="auto">
+        ...
+    </feature>
+
+    <feature name="feature2" version="1.0" install="auto">
+        ...
+    </feature>
+
+    <feature name="feature3" version="1.0">
+        ...
+    </feature>
+
+</features>
+----
+
+=== JMX FeatureMBean
+
+On the JMX layer, you have a MBean dedicated to the management of the features and features repositories: the FeatureMBean.
+
+The FeatureMBean object name is: `org.apache.karaf:type=feature,name=*`.
+
+==== Attributes
+
+The FeatureMBean provides two attributes:
+
+* `Features` is a tabular data set of all features available.
+* `Repositories` is a tabular data set of all registered features repositories.
+
+The `Repositories` attribute provides the following information:
+
+* `Name` is the name of the features repository.
+* `Uri` is the URI to the features XML for this repository.
+* `Features` is a tabular data set of all features (name and version) provided by this features repository.
+* `Repositories` is a tabular data set of features repositories "imported" in this features repository.
+
+The `Features` attribute provides the following information:
+
+* `Name` is the name of the feature.
+* `Version` is the version of the feature.
+* `Installed` is a boolean. If true, it means that the feature is currently installed.
+* `Bundles` is a tabular data set of all bundles (bundles URL) described in the feature.
+* `Configurations` is a tabular data set of all configurations described in the feature.
+* `Configuration Files` is a tabular data set of all configuration files described in the feature.
+* `Dependencies` is a tabular data set of all dependent features described in the feature.
+
+==== Operations
+
+* `addRepository(url)` adds the features repository with the `url`. The `url` can be a `name` as in the `feature:repo-add` command.
+* `addRepository(url, install)` adds the features repository with the `url` and automatically installs all bundles if `install` is true. The `url` can be a `name` like in the `feature:repo-add` command.
+* `removeRepository(url)` removes the features repository with the `url`. The `url` can be a `name` as in the `feature:repo-remove` command.
+* `installFeature(name)` installs the feature with the `name`.
+* `installFeature(name, version)` installs the feature with the `name` and `version`.
+* `installFeature(name, noClean, noRefresh)` installs the feature with the `name` without cleaning the bundles in case of failure, and without refreshing already installed bundles.
+* `installFeature(name, version, noClean, noRefresh) ` installs the feature with the `name` and `version` without cleaning the bundles in case of failure, and without refreshing already installed bundles.
+* `uninstallFeature(name)` uninstalls the feature with the `name`.
+* `uninstallFeature(name, version)` uninstalls the feature with the `name` and `version`.
+
+==== Notifications
+
+The FeatureMBean sends two kind of notifications (on which you can subscribe and react):
+
+* When a feature repository changes (added or removed).
+* When a feature changes (installed or uninstalled).

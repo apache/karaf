@@ -1,0 +1,406 @@
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+== Scripting
+
+In the console section of the users guide, we introduced the scripting support.
+
+=== Assignation
+
+You already know the first usage of scripting: execution of command.
+
+----
+karaf@root()> echo hello world
+hello world
+----
+
+You can also assign value to session variables:
+
+----
+karaf@root()> msg = "hello world"
+hello world
+----
+
+Once you have assigned a value to a variable, you can display this value using the "resolved" variable name:
+
+----
+karaf@root()> echo $msg
+hello world
+----
+
+The () are execution quotes (like the backquotes when you use bash on Unix).
+
+----
+karaf@root()> ($.context bundle 1) location
+mvn:org.apache.karaf.jaas/org.apache.karaf.jaas.modules/4.0.0
+----
+
+The `$.context` access the context variables in the current session.
+We access to the `bundle` variable (an array containing all bundles), and we want to display the bundle location for
+the bundle at the index 1 in the bundle array.
+
+=== Expressions
+
+The shell has a built-in expression parser.  Expressions must be enclosed with the `%(...)` syntax.
+
+Examples:
+
+----
+karaf@root()> %(1+2)
+3
+karaf@root()> a = 0
+0
+karaf@root()> %(a+=1)
+1
+karaf@root()> %(a+=1)
+2
+karaf@root()> b=1
+1
+karaf@root()> %(SQRT(a^2 + b^2))
+1.7320508
+----
+
+==== Mathematical Operators
+
+|===
+|Operator |Description
+
+|+
+| Additive operator
+
+|-
+| Subtraction operator
+
+|*
+| Multiplication operator
+
+|/
+| Division operator
+
+|%
+| Remainder operator (Modulo)
+
+|^
+| Power operator
+|===
+
+==== Boolean Operators
+
+|===
+|Operator |Description
+
+|=
+| Equals
+
+|==
+| Equals
+
+|!=
+|Not equals
+
+|<>
+| Not equals
+
+|<
+| Less than
+
+|<=
+| Less than or equal to
+
+|>
+| Greater than
+
+|>=
+| Greater than or equal to
+
+|&&
+| Boolean and
+
+|\|\|
+|Boolean or
+|===
+
+==== Supported Functions
+
+|===
+|Function |Description
+
+|NOT(_expression_)
+|Boolean negation, 1 (means true) if the expression is not zero
+
+|IF(_condition_,_value_if_true_,_value_if_false_)
+|Returns one value if the condition evaluates to true or the other if it evaluates to false
+
+|RANDOM()
+|Produces a random number between 0 and 1
+
+|MIN(_e1_,_e2_)
+|Returns the smaller of both expressions
+
+|MAX(_e1_,_e2_)
+|Returns the bigger of both expressions
+
+|ABS(_expression_)
+|Returns the absolute (non-negative) value of the expression
+
+|ROUND(_expression_,precision)
+|Rounds a value to a certain number of digits, uses the current rounding mode
+
+|FLOOR(_expression_)
+|Rounds the value down to the nearest integer
+
+|CEILING(_expression_)
+|Rounds the value up to the nearest integer
+
+|LOG(_expression_)
+|Returns the natural logarithm (base e) of an expression
+
+|SQRT(_expression_)
+|Returns the square root of an expression
+
+|SIN(_expression_)
+|Returns the trigonometric sine of an angle (in degrees)
+
+|COS(_expression_)
+|Returns the trigonometric cosine of an angle (in degrees)
+
+|TAN(_expression_)
+|Returns the trigonometric tangens of an angle (in degrees)
+
+|SINH(_expression_)
+|Returns the hyperbolic sine of a value
+
+|COSH(_expression_)
+|Returns the hyperbolic cosine of a value
+
+|TANH(_expression_)
+|Returns the hyperbolic tangens of a value
+
+|RAD(_expression_)
+|Converts an angle measured in degrees to an approximately equivalent angle measured in radians
+
+|DEG(_expression_)
+|Converts an angle measured in radians to an approximately equivalent angle measured in degrees
+|===
+
+Functions names are case insensitive.
+
+==== Supported Constants
+
+|===
+|Constant |Description
+
+|PI
+|The value of _PI_, exact to 100 digits
+
+|TRUE
+|The value one
+
+|FALSE
+|The value zero
+|===
+
+=== List, maps, pipes and closures
+
+Using [], you can define array variable:
+
+----
+karaf@root()> list = [1 2 a b]
+1
+2
+a
+b
+
+----
+
+You can also create a map if you put variables assignation in the array:
+
+----
+karaf@root()> map = [Jan=1 Feb=2 Mar=3]
+Jan                 1
+Feb                 2
+Mar                 3
+----
+
+Using the | character, you can pipe output from a command as an input to another one.
+
+For instance, you can access to the bundles context variables and send it as input to the grep command:
+
+----
+karaf@root()> ($.context bundles) | grep -i felix
+    0|Active     |    0|org.apache.felix.framework (4.2.1)
+   21|Active     |   11|org.apache.felix.fileinstall (3.2.6)
+   43|Active     |   10|org.apache.felix.configadmin (1.6.0)
+   51|Active     |   30|org.apache.felix.gogo.runtime (0.10.0)
+----
+
+You can assign name to script execution. It's what we use for alias:
+
+----
+karaf@root()> echo2 = { echo xxx $args yyy }
+echo xxx $args yyy
+karaf@root()> echo2 hello world
+xxx hello world yyy
+----
+
+=== Startup
+
+The `etc/shell.init.script` file is executed at startup in each shell session, allowing the definition of additional
+variables or aliases or even complex functions. It's like the bashrc or profile on Unix.
+
+=== Constants and variables
+
+Apache Karaf console provides a set of implicit constants and variables that you can use in your script.
+
+* `$.context` to access a bundle context
+* `$.variables` to access the list of defined variables
+* `$.commands` to access the list of defined commands
+
+The variables starting with a # that are defined as Function (such as closures) will be executed automatically:
+
+----
+karaf@root> \#inc = { var = "${var}i" ; $var }
+var = "${var}i" ; $var
+karaf@root> echo $inc
+i
+karaf@root> echo $inc
+ii
+karaf@root>
+----
+
+=== Built-in variables and commands
+
+Apache Karaf console provides built-in variable very useful for scripting:
+
+* `$args` retrieves the list of script parameters, given to the closure being executed
+* `$1 .. $999` retrieves the nth argument of the closure
+* `$it` (same as `$1`) is used in a loop to access the current iterator value
+
+Apache Karaf console provides commands for scripting:
+
+* `shell:if`
+* `shell:new`
+* `shell:each`
+* ...
+
+See the link:commands[full list of `shell` commands] for details.
+
+=== Leveraging existing Java capabilities (via reflection)
+
+Apache Karaf console supports loading and execution of Java classes.
+
+The `$karaf.lastException` implicit variable contains the latest Exception thrown.
+
+----
+karaf@root()> ($.context bundle) loadClass foo
+Error executing command: foo not found by org.apache.karaf.shell.console [17]
+karaf@root()> $karaf.lastException printStackTrace
+java.lang.ClassNotFoundException: foo not found by org.apache.karaf.shell.console [17]
+	at org.apache.felix.framework.BundleWiringImpl.findClassOrResourceByDelegation(BundleWiringImpl.java:1460)
+	at org.apache.felix.framework.BundleWiringImpl.access$400(BundleWiringImpl.java:72)
+	at org.apache.felix.framework.BundleWiringImpl$BundleClassLoader.loadClass(BundleWiringImpl.java:1843)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:247)
+	at org.apache.felix.framework.Felix.loadBundleClass(Felix.java:1723)
+	at org.apache.felix.framework.BundleImpl.loadClass(BundleImpl.java:926)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:39)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:25)
+	at java.lang.reflect.Method.invoke(Method.java:597)
+	at org.apache.felix.gogo.runtime.Reflective.invoke(Reflective.java:137)
+	at org.apache.felix.gogo.runtime.Closure.executeMethod(Closure.java:527)
+	at org.apache.felix.gogo.runtime.Closure.executeStatement(Closure.java:403)
+	at org.apache.felix.gogo.runtime.Pipe.run(Pipe.java:108)
+	at org.apache.felix.gogo.runtime.Closure.execute(Closure.java:183)
+	at org.apache.felix.gogo.runtime.Closure.execute(Closure.java:120)
+	at org.apache.felix.gogo.runtime.CommandSessionImpl.execute(CommandSessionImpl.java:89)
+	at org.apache.karaf.shell.console.jline.Console.run(Console.java:166)
+	at java.lang.Thread.run(Thread.java:680)
+----
+
+It's possible to create objects to create commands "on the fly":
+
+----
+karaf@root()> addcommand system (($.context bundle) loadClass java.lang.System)
+karaf@root()> system:getproperty karaf.name
+root
+----
+
+It means that you can create object using the `new` directive, and call methods on the objects:
+
+----
+karaf@root> map = (new java.util.HashMap)
+karaf@root> $map put 0 0
+karaf@root> $map
+0                   0
+----
+
+=== Examples
+
+The following examples show some scripts defined in `etc/shell.init.script`.
+
+The first example show a script to add a value into a configuration list:
+
+----
+#
+# Add a value at the end of a property in the given OSGi configuration
+#
+# For example:
+# > config-add-to-list org.ops4j.pax.url.mvn org.ops4j.pax.url.mvn.repositories http://scala-tools.org/repo-releases
+#
+config-add-to-list = {
+  config:edit $1 ;
+  a = (config:property-list | grep --color never $2 | tac) ;
+  b = (echo $a | grep --color never "\b$3\b" | tac) ;
+  if { ($b trim) isEmpty } {
+    if { $a isEmpty } {
+      config:property-set $2 $3
+    } {
+      config:property-append $2 ", $3"
+    } ;
+    config:update
+  } {
+    config:cancel
+  }
+}
+----
+
+This second example shows a script to wait for an OSGi service, up to a given timeout, and combine this script in
+other scripts:
+
+----
+#
+# Wait for the given OSGi service to be available
+#
+wait-for-service-timeout = {
+  _filter = $.context createFilter $1 ;
+  _tracker = shell:new org.osgi.util.tracker.ServiceTracker $.context $_filter null ;
+  $_tracker open ;
+  _service = $_tracker waitForService $2 ;
+  $_tracker close
+}
+#
+# Wait for the given OSGi service to be available with a timeout of 10 seconds
+#
+wait-for-service = {
+  wait-for-service-timeout $1 10000
+}
+#
+# Wait for the given command to be available with a timeout of 10 seconds
+# For example:
+# > wait-for-command dev watch
+#
+wait-for-command = {
+  wait-for-service "(&(objectClass=org.apache.felix.service.command.Function)(osgi.command.scope=$1)(osgi.command.function=$2))"
+}
+----

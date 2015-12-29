@@ -1,0 +1,235 @@
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+== Deployers
+
+The following picture describes the architecture of the deployers.
+
+Apache Karaf polls the `deploy` folder for new files.
+
+You can configure the location of the `deploy` folder, and the polling behaviour in the `etc/org.apache.felix.fileinstall-deploy.cfg`
+configuration file:
+
+----
+################################################################################
+#
+#    Licensed to the Apache Software Foundation (ASF) under one or more
+#    contributor license agreements.  See the NOTICE file distributed with
+#    this work for additional information regarding copyright ownership.
+#    The ASF licenses this file to You under the Apache License, Version 2.0
+#    (the "License"); you may not use this file except in compliance with
+#    the License.  You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+#
+################################################################################
+
+felix.fileinstall.dir           = ${karaf.base}/deploy
+felix.fileinstall.tmpdir        = ${karaf.data}/generated-bundles
+felix.fileinstall.poll          = 1000
+felix.fileinstall.start.level   = 80
+felix.fileinstall.active.level  = 80
+felix.fileinstall.log.level     = 3
+----
+
+* `felix.fileinstall.dir` defines the location of the `deploy` folder. Default value is `KARAF_BASE/deploy`.
+* `felix.fileinstall.tmpdir` defines a temporary folder where the deployers store their files. Default value is `KARAF_DATA/generated-bundles`.
+* `felix.fileinstall.poll` defines the polling interval (in milliseconds). Default value is 1 second.
+
+When Apache Karaf polls a file from the `deploy` folder, it "delegates" the file handling to a deployer.
+
+By default, Apache Karaf provides a set of deployers:
+
+* Blueprint deployer is able to handle Blueprint XML files.
+* Spring deployer is able to handle Spring XML files.
+* Features deployer is able to handle Apache Karaf features XML files (see [Provisioning section|provisioning] for details).
+* KAR deployer is able to handle KAR files (see [KAR section|kar] for details).
+* Wrap deployer is able to handle non-OSGi jar files and turns it as OSGi bundles "on the fly".
+* Optionally, WAR deployer (if you install the war feature) is able to handle WAR files.
+
+=== Blueprint deployer
+
+The Blueprint deployer is able to handle plain Blueprint XML configuration files.
+
+The Blueprint deployer is able to transform "on the fly" any Blueprint XML file into valid OSGi bundle.
+
+The generated OSGi MANIFEST will contain the following headers:
+
+----
+Manifest-Version: 2
+Bundle-SymbolicName: [name of the file]
+Bundle-Version: [version of the file]
+Import-Package: [required packages]
+DynamicImport-Package: *
+----
+
+The `name` and `version` of the file are extracted using a heuristic that will match common patterns.
+
+For example `my-config-1.0.1.xml` will lead to `name = my-config` and `version = 1.0.1`.
+
+The default imported packages are extracted from the spring file definition and includes all classes referenced directly.
+
+If you need to customize the generated manifest, you can do so by including an xml element in your blueprint configuration:
+
+----
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
+  <manifest xmlns="http://karaf.apache.org/xmlns/deployer/blueprint/v1.0.0">
+    Require-Bundle= my-bundle
+  </manifest>
+----
+
+=== Spring deployer
+
+The Spring deployer is similar to the Blueprint deployer.
+
+The Spring deployer is able to deploy Spring XML files.
+
+Like the Blueprint deployer, the generated OSGi MANIFEST will contain the following headers:
+
+----
+Manifest-Version: 2
+Bundle-SymbolicName: [name of the file]
+Bundle-Version: [version of the file]
+Spring-Context: *;publish-context:=false;create-asynchronously:=true
+Import-Package: [required packages]
+DynamicImport-Package: *
+----
+
+If you need to customize the generated manifest, you can do so by including a XML element in your Spring configuration:
+
+----
+<spring:beans ...>
+  <manifest xmlns="http://karaf.apache.org/xmlns/deployer/spring/v1.0.0">
+    Require-Bundle= my-bundle
+  </manifest>
+----
+
+=== Features deployer
+
+See the link:provisioning[Provisioning section] for details.
+
+=== KAR deployer
+
+See the link:kar[KAR section] for details.
+
+=== War deployer
+
+The installation of the WAR feature enables a WAR deployer.
+
+It means that with the war feature installed, Apache Karaf is a complete OSGi WebContainer (like Tomcat) where
+you can deploy WAB (WebApplication Bundle) or pure WAR (WebApplication aRchive).
+
+You can install the war feature with:
+
+----
+karaf@root()> feature:install war
+----
+
+The WAR deployer supports:
+
+* WAB files
+* WAR files
+* exploded WAR (as a directory named `*.war`).
+
+The only requirement of the WAR deployer is that the archive contains the `WEB-INF/web.xml` file.
+
+=== Wrap deployer
+
+The wrap deployer allows you to "hot deploy" non-OSGi jar files ("classical" jar files) from the deploy folder.
+
+The wrap deployer creates "on the fly" an OSGi bundle with a non-OSGi jar file.
+
+The wrap deployer looks for jar files in the deploy folder. A jar file is considered as non-OSGi if the MANIFEST doesn't
+contain the `Bundle-SymbolicName` and `Bundle-Version` attributes, or if there is no MANIFEST at all.
+
+The wrap deployer "transforms" non-OSGi jar file into an OSGi bundle.
+
+The wrap deployer tries to populate the Bundle-SymbolicName and Bundle-Version extracted from the jar file path.
+
+For example, if you simply copy commons-lang-2.3.jar (which is not an OSGi bundle) into the deploy folder, you
+will see:
+
+----
+karaf@root()> la|grep -i commons-lang
+80 | Active   |  80 | 2.3                   | commons-lang
+----
+
+If you take a look on the commons-lang headers, you can see that the bundle exports all packages with optional resolution
+and that `Bundle-SymbolicName` and `Bundle-Version` have been populated:
+
+----
+karaf@root()> bundle:headers 80
+
+commons-lang (80)
+-----------------
+Specification-Title = Commons Lang
+Tool = Bnd-2.1.0.20130426-122213
+Specification-Version = 2.3
+Specification-Vendor = Apache Software Foundation
+Implementation-Version = 2.3
+Generated-By-Ops4j-Pax-From = wrap:file:/opt/apache-karaf-4.0.0/deploy/commons-lang-2.3.jar$Bundle-SymbolicName=commons-lang&Bundle-Version=2.3
+Implementation-Vendor-Id = org.apache
+Created-By = 1.7.0_21 (Oracle Corporation)
+Implementation-Title = Commons Lang
+Manifest-Version = 1.0
+Bnd-LastModified = 1386339925753
+X-Compile-Target-JDK = 1.1
+Originally-Created-By = 1.3.1_09-85 ("Apple Computer, Inc.")
+Ant-Version = Apache Ant 1.6.5
+Package = org.apache.commons.lang
+X-Compile-Source-JDK = 1.3
+Extension-Name = commons-lang
+Implementation-Vendor = Apache Software Foundation
+
+Bundle-Name = commons-lang
+Bundle-SymbolicName = commons-lang
+Bundle-Version = 2.3
+Bundle-ManifestVersion = 2
+
+Export-Package =
+        org.apache.commons.lang;uses:=org.apache.commons.lang.exception,
+        org.apache.commons.lang.builder,
+        org.apache.commons.lang.enum,
+        org.apache.commons.lang.enums,
+        org.apache.commons.lang.exception,
+        org.apache.commons.lang.math,
+        org.apache.commons.lang.mutable,
+        org.apache.commons.lang.text,
+        org.apache.commons.lang.time,
+        org,
+        org.apache,
+        org.apache.commons
+
+----
+
+You can specify some MANIFEST headers by specifying the headers as URL parameters.
+
+In the URL parameters, you can specify the headers using the '$' character and '&' to separate the different headers.
+For instance:
+
+----
+karaf@root()> bundle:install -s 'wrap:mvn:jboss/jbossall-client/4.2.3.GA/$Bundle-SymbolicName=jbossall-client&Bundle-Version=4.2.3.GA&Export-Package=org.jboss.remoting;version="4.2.3.GA",\!*'
+----
+
+When defined in a features.xml file, it's necessary to escape any ampersands and quotes, or use a CDATA tag:
+
+----
+<bundle>wrap:mvn:jboss/jbossall-client/4.3.2.GA/$Bundle-SymbolicName=jbossall-client&amp;Bundle-Version=4.3.2.GA&amp;Export-Package=org.jboss.remoting;version=&quot;4.3.2.GA&quot;,!*</bundle>
+----

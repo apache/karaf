@@ -1,0 +1,242 @@
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+== Developer commands
+
+As you can see in the users guide, Apache Karaf is an enterprise ready OSGi container.
+
+It's also a container designed to simplify the life for developers and administrators to get details about the
+running container.
+
+=== Dump
+
+If you encounter issues like performance degradations, weird behaviour, it could be helpful to have a kind of snapshot
+about the current activity of the container.
+
+The `dev:dump-create` command creates a dump file containing:
+
+* the `bundles.txt` file contains the list of all OSGi bundles, with id, symbolic name, version, current status
+* the `features.txt` file contains the list of all features, including current status
+* the `environment.txt` file contains details about Apache Karaf, OSGi framework, Operating System, JVM, system
+ properties, threads count, classes loaded
+* the `memory.txt` file contains the status of the JVM memory at the dump time
+* the `heapdump.txt` file contains a memory heap dump, with all objects instances, space usage, etc.
+* the `threads.txt` file contains a thread dump, with all threads, waiting status, etc.
+* the `log` folder contains the `data/log` folder, with all log files.
+
+By default, the `dev:dump-create` command creates a zip file in the `KARAF_BASE` folder, with the timestamp of the
+dump creation:
+
+----
+karaf@root()> dev:dump-create
+Created dump zip: 2015-07-01_171434.zip
+----
+
+We can see the file generated in the `KARAF_BASE` folder:
+
+----
+$ cd /opt/apache-karaf-4.0.0
+$ ls -lh *.zip
+-rw-rw-r-- 1 user group 17M Jul  1 17:14 2015-07-01_171434.zip
+----
+
+You can specify the file name of the zip archive:
+
+----
+karaf@root()> dev:dump-create mydump.zip
+Diagnostic dump created.
+----
+
+Instead of a zip archive, you can create the dump (exploded) in a directory using the `-d` (`--directory`) option:
+
+----
+karaf@root()> dev:dump-create -d /tmp/mydump
+Diagnostic dump created.
+----
+
+=== Diagnostic
+
+It's not always easy for the developers to understand why a bundle is not active.
+
+It could be because the Activator failed, the Blueprint container start failed, etc.
+
+The `bundle:diag` command gives you details about a bundle is not active:
+
+----
+karaf@root()> bundle:diag
+Apache ServiceMix :: Bundles :: avro-ipc (81)
+---------------------------------------------
+Status: Installed
+Unsatisfied Requirements:
+[81.0] osgi.wiring.package; (&(osgi.wiring.package=javax.servlet)(version>=2.5.0)(!(version>=3.0.0)))
+[81.0] osgi.wiring.package; (&(osgi.wiring.package=javax.servlet.http)(version>=2.5.0)(!(version>=3.0.0)))
+[81.0] osgi.wiring.package; (&(osgi.wiring.package=org.apache.avro)(version>=1.7.0)(!(version>=2.0.0)))
+[81.0] osgi.wiring.package; (&(osgi.wiring.package=org.apache.avro.data)(version>=1.7.0)(!(version>=2.0.0)))
+[81.0] osgi.wiring.package; (&(osgi.wiring.package=org.apache.avro.file)(version>=1.7.0)(!(version>=2.0.0)))
+[81.0] osgi.wiring.package; (&(osgi.wiring.package=org.apache.avro.generic)(version>=1.7.0)(!(version>=2.0.0)))
+[81.0] osgi.wiring.package; (&(osgi.wiring.package=org.apache.avro.io)(version>=1.7.0)(!(version>=2.0.0)))
+[81.0] osgi.wiring.package; (&(osgi.wiring.package=org.apache.avro.reflect)(version>=1.7.0)(!(version>=2.0.0)))
+[81.0] osgi.wiring.package; (&(osgi.wiring.package=org.apache.avro.specific)(version>=1.7.0)(!(version>=2.0.0)))
+[81.0] osgi.wiring.package; (&(osgi.wiring.package=org.apache.avro.util)(version>=1.7.0)(!(version>=2.0.0)))
+[81.0] osgi.wiring.package; (osgi.wiring.package=org.apache.velocity)
+[81.0] osgi.wiring.package; (osgi.wiring.package=org.apache.velocity.app)
+[81.0] osgi.wiring.package; (osgi.wiring.package=org.apache.velocity.context)
+[81.0] osgi.wiring.package; (osgi.wiring.package=org.apache.velocity.exception)
+[81.0] osgi.wiring.package; (&(osgi.wiring.package=org.jboss.netty.bootstrap)(version>=3.4.0)(!(version>=4.0.0)))
+[81.0] osgi.wiring.package; (&(osgi.wiring.package=org.jboss.netty.buffer)(version>=3.4.0)(!(version>=4.0.0)))
+[81.0] osgi.wiring.package; (&(osgi.wiring.package=org.jboss.netty.channel)(version>=3.4.0)(!(version>=4.0.0)))
+[81.0] osgi.wiring.package; (&(osgi.wiring.package=org.jboss.netty.channel.group)(version>=3.4.0)(!(version>=4.0.0)))
+[81.0] osgi.wiring.package; (&(osgi.wiring.package=org.jboss.netty.channel.socket.nio)(version>=3.4.0)(!(version>=4.0.0)))
+[81.0] osgi.wiring.package; (&(osgi.wiring.package=org.jboss.netty.handler.codec.frame)(version>=3.4.0)(!(version>=4.0.0)))
+[81.0] osgi.wiring.package; (&(osgi.wiring.package=org.jboss.netty.handler.codec.oneone)(version>=3.4.0)(!(version>=4.0.0)))
+[81.0] osgi.wiring.package; (&(osgi.wiring.package=org.jboss.netty.handler.execution)(version>=3.4.0)(!(version>=4.0.0)))
+[81.0] osgi.wiring.package; (&(osgi.wiring.package=org.mortbay.jetty)(version>=6.1.0)(!(version>=7.0.0)))
+[81.0] osgi.wiring.package; (&(osgi.wiring.package=org.mortbay.jetty.bio)(version>=6.1.0)(!(version>=7.0.0)))
+[81.0] osgi.wiring.package; (&(osgi.wiring.package=org.mortbay.jetty.nio)(version>=6.1.0)(!(version>=7.0.0)))
+[81.0] osgi.wiring.package; (&(osgi.wiring.package=org.mortbay.jetty.servlet)(version>=6.1.0)(!(version>=7.0.0)))
+[81.0] osgi.wiring.package; (&(osgi.wiring.package=org.mortbay.resource)(version>=6.1.0)(!(version>=7.0.0)))
+----
+
+=== Dynamic import
+
+The `bundle:dynamic-import` command allows you to enable or disable the dynamic import of a given bundle:
+
+----
+karaf@root()> bundle:dynamic-import 50
+Enabling dynamic imports on bundle org.ops4j.pax.url.wrap [50]
+----
+
+The purpose of dynamic import is to allow a bundle to be wired up to packages that may not be knwon about in advance.
+When a class is requested, if it cannot be solved via the bundle's existing imports, the dynamic import allows other
+bundles to be considered for a wiring import to be added.
+
+The `bundle:dynamic-import` command allows or doesn't allow this behaviour.
+
+=== OSGi framework
+
+The `system:framework` command allows to display the current OSGi framework in use, and enable/disable debugging inside the OSGi framework.
+
+----
+karaf@root()> system:framework
+Current OSGi framework is felix
+karaf@root()> system:framework -debug
+Enabling debug for OSGi framework (felix)
+karaf@root()> system:framework -nodebug
+Disabling debug for OSGi framework (felix)
+----
+
+=== Stack traces printout
+
+The `shell:stack-traces-print` command prints the full stack trace when the execution of a command
+throws an exception.
+
+You can enable or disable this behaviour by passing true (to enable) or false (to disable) on the command on the fly:
+
+----
+karaf@root()> stack-traces-print
+Printing of stacktraces set to true
+karaf@root()> bundle:start
+java.lang.RuntimeException: Access to system bundle 0 denied. You can override with -f
+        at org.apache.karaf.bundle.command.BundlesCommand.assertNoSystemBundles(BundlesCommand.java:57)
+        at org.apache.karaf.bundle.command.BundlesCommand.doExecute(BundlesCommand.java:48)
+        at org.apache.karaf.bundle.command.BundlesCommandWithConfirmation.doExecute(BundlesCommandWithConfirmation.java:41)
+        at org.apache.karaf.shell.console.AbstractAction.execute(AbstractAction.java:33)
+        at org.apache.karaf.shell.console.OsgiCommandSupport.execute(OsgiCommandSupport.java:39)
+        at org.apache.karaf.shell.commands.basic.AbstractCommand.execute(AbstractCommand.java:33)
+        at sun.reflect.GeneratedMethodAccessor30.invoke(Unknown Source)
+        at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+        at java.lang.reflect.Method.invoke(Method.java:601)
+        at org.apache.aries.proxy.impl.ProxyHandler$1.invoke(ProxyHandler.java:54)
+        at org.apache.aries.proxy.impl.ProxyHandler.invoke(ProxyHandler.java:119)
+        at org.apache.karaf.shell.console.commands.$BlueprintCommand14083304.execute(Unknown Source)
+        at sun.reflect.GeneratedMethodAccessor30.invoke(Unknown Source)
+        at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+        at java.lang.reflect.Method.invoke(Method.java:601)
+        at org.apache.aries.proxy.impl.ProxyHandler$1.invoke(ProxyHandler.java:54)
+        at org.apache.aries.proxy.impl.ProxyHandler.invoke(ProxyHandler.java:119)
+        at org.apache.karaf.shell.console.commands.$BlueprintCommand14083304.execute(Unknown Source)
+        at org.apache.felix.gogo.runtime.CommandProxy.execute(CommandProxy.java:78)
+        at org.apache.felix.gogo.runtime.Closure.executeCmd(Closure.java:477)
+        at org.apache.felix.gogo.runtime.Closure.executeStatement(Closure.java:403)
+        at org.apache.felix.gogo.runtime.Pipe.run(Pipe.java:108)
+        at org.apache.felix.gogo.runtime.Closure.execute(Closure.java:183)
+        at org.apache.felix.gogo.runtime.Closure.execute(Closure.java:120)
+        at org.apache.felix.gogo.runtime.CommandSessionImpl.execute(CommandSessionImpl.java:89)
+        at org.apache.karaf.shell.console.impl.jline.ConsoleImpl$DelegateSession.execute(ConsoleImpl.java:497)
+        at org.apache.karaf.shell.console.impl.jline.ConsoleImpl.run(ConsoleImpl.java:198)
+        at java.lang.Thread.run(Thread.java:722)
+        at org.apache.karaf.shell.console.impl.jline.ConsoleFactoryService$3.doRun(ConsoleFactoryService.java:118)
+        at org.apache.karaf.shell.console.impl.jline.ConsoleFactoryService$3$1.run(ConsoleFactoryService.java:109)
+        at java.security.AccessController.doPrivileged(Native Method)
+        at org.apache.karaf.jaas.modules.JaasHelper.doAs(JaasHelper.java:47)
+        at org.apache.karaf.shell.console.impl.jline.ConsoleFactoryService$3.run(ConsoleFactoryService.java:107)
+karaf@root()> stack-traces-print false
+Printing of stacktraces set to false
+karaf@root()> bundle:start
+Error executing command: Access to system bundle 0 denied. You can override with -f
+----
+
+=== Bundle tree
+
+The `bundle:tree-show` command shows the bundle dependency tree based on the wiring information of a given single bundle
+ID.
+
+----
+karaf@root()> bundle:tree-show 40
+Bundle org.ops4j.pax.url.wrap [40] is currently ACTIVE
+
+org.ops4j.pax.url.wrap [40]
++- org.ops4j.base.util.property [14]
++- org.ops4j.pax.url.commons [49]
+|  +- org.ops4j.base.util.property [14]
+|  +- org.ops4j.pax.logging.pax-logging-api [23]
+|  +- org.ops4j.pax.swissbox.property [31]
+|  |  +- org.ops4j.base.util.property [14]
+|  |  +- org.ops4j.base.lang [41]
+|  +- org.apache.felix.configadmin [43]
+|  |  +- org.ops4j.pax.logging.pax-logging-api [23]
+|  +- org.ops4j.base.lang [41]
++- org.ops4j.pax.logging.pax-logging-api [23]
++- org.ops4j.pax.swissbox.bnd [25]
+|  +- biz.aQute.bndlib [30]
+|  |  +- org.apache.servicemix.bundles.junit [36]
+|  +- org.ops4j.pax.logging.pax-logging-api [23]
+|  +- org.ops4j.base.lang [41]
++- org.apache.felix.configadmin [43]
++- org.ops4j.base.net [29]
+|  +- org.ops4j.base.monitors [37]
+|  +- org.ops4j.base.lang [41]
++- org.ops4j.base.lang [41]
+----
+
+=== Watch
+
+The `bundle:watch` command enables watching the local Maven repository for updates on bundles.
+If the bundle file changes on the Maven repository, Apache Karaf will automatically update the bundle.
+
+The `bundle:watch` allows you to configure a set of URLs to monitore. All bundles bundles whose location matches the
+given URL will be automatically updated. It avoids needing to manually update the bundles or even copy the bundle to the
+system folder.
+
+{warning}
+Only Maven based URLs and Maven SNAPSHOTs will actually be updated automatically.
+{warning}
+
+The following command:
+
+----
+karaf@root()> bundle:watch *
+----
+
+will monitor all bundles that have a location matching mvn:* and '-SNAPSHOT' in their URL.

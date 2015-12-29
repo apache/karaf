@@ -1,0 +1,159 @@
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+== Tuning
+
+=== Garbage Collection
+
+Like any Java applications, Apache Karaf uses a JVM. An important feature of the JVM is the Garbage Collector.
+
+Apache Karaf default configuration is sized for small to medium needs and to work on most machine.
+
+That's why this default configuration may appear like "small".
+
+By default, Apache Karaf uses:
+
+* `-Xms128M`
+* `-Xmx512M`
+* `-XX:+UnlockDiagnosticVMOptions`
+* `-XX:+UnsyncloadClass`
+
+On Sun/Oracle JVM:
+
+* the Perm size is the JVM default (for Java 7)
+
+On IBM JVM and AIX system:
+
+* `-Xverify:none`
+* `-Xdump:heap`
+* `-Xlp`
+
+For any container, it's always difficult to predict the usage of the resources and the behaviour of the artifacts deployed.
+
+Generally speaking, a good approach for tuning is to enable `-verbose:gc` and use tools like VisualVM to identify the potentials
+memory leaks, and see the possible optimisation of the spaces and GC.
+
+You can find introduction about GC here: [http://www.oracle.com/webfolder/technetwork/tutorials/obe/java/gc01/index.html].
+
+==== Java 6
+
+If you have enough resources available on the machine, a good configuration may be:
+
+* `-server`
+* `-Xmx1024M`
+* `-XX:MaxPermSize=640M`
+* `-XX:+UseConcMarkSweepGC`
+* `-XX:+UseParNewGC`
+* `-XX:+CMSClassUnloadingEnabled`
+
+It will give more resources to Apache Karaf, and avoid some perm space saturation if you do a lot of bundles refresh.
+
+See http://www.oracle.com/technetwork/java/javase/gc-tuning-6-140523.html for details about Java 6 tuning.
+
+==== Java 7
+
+Java 7 introduces a new GC algorithm: the GC1.
+
+Depending of the use cases (and usage of the heap), the new GC1 algorithm can give good performance improvements:
+
+* `-XX:+UseG1GC`
+* `-XX:-UseAdaptiveSizePolicy`
+
+See http://docs.oracle.com/javase/7/docs/technotes/guides/vm/G1.html for details about Java 7 GC1 tuning.
+
+You can find a good article about Java 7 tuning here: http://java-is-the-new-c.blogspot.de/2013/07/tuning-and-benchmarking-java-7s-garbage.html
+
+=== Threads
+
+In high loaded system, the number of threads can be very large.
+
+==== WebContainer
+
+If you use the Apache Karaf WebContainer, the Jetty connectors create threads to handle the incoming HTTP requests.
+
+The `etc/jetty.xml` configuration file allows you to tune the Jetty connector.
+
+For instance, the following connector configuration:
+
+----
+    <Call name="addConnector">
+        <Arg>
+            <New class="org.eclipse.jetty.server.nio.SelectChannelConnector">
+                <Set name="host">
+                    <Property name="jetty.host" />
+                </Set>
+                <Set name="port">
+                    <Property name="jetty.port" default="8181" />
+                </Set>
+                <Set name="maxIdleTime">300000</Set>
+                <Set name="Acceptors">2</Set>
+                <Set name="statsOn">false</Set>
+                <Set name="confidentialPort">8443</Set>
+                <Set name="lowResourcesConnections">20000</Set>
+                <Set name="lowResourcesMaxIdleTime">5000</Set>
+            </New>
+        </Arg>
+    </Call>
+----
+
+defines the following properties:
+
+* `maxIdleTime` is the maximum inactivity time for a connection.
+* `lowResourcesConnections` defines the number of connections. If the current number of connections is greater than
+ this value, the status is "low on resources". In that case, a new connection timeout is applied: the `lowResourceMaxIdleTime`.
+* `Acceptors` defines the number of threads for incoming connections.
+
+==== Apache Camel
+
+For instance, if you use Apache Camel inside Apache Karaf, Camel components can create a lot of threads.
+
+Apache Camel use the notion of `threadPoolProfile` to control the threads creation.
+
+For instance, the following Camel configuration defines a pool creation strategy:
+
+----
+<threadPoolProfile id="defaultThreadPoolProfile" defaultProfile="true"
+                   poolSize="10" maxPoolSize="20" maxQueueSize="1000"
+                   rejectedPolicy="CallerRuns"/>
+----
+
+See the http://camel.apache.org for details.
+
+==== Apache CXF
+
+Apache CXF uses workqueues to handle server request/response.
+
+You may see a `etc/org.apache.cxf.workqueues-default.cfg` configuration file. It's the default configuration applied
+to all workqueues (a workqueue can be associated to a specific endpoint).
+
+On a workqueue, you can define the following properties about the threads:
+
+* `org.apache.cxf.workqueue.default.highWaterMark` defines the maximum number of threads.
+* `org.apache.cxf.workqueue.default.lowWaterMark` defines the minimum number of threads.
+* `org.apache.cxf.workqueue.default.initialSize` defines the initial number of threads.
+
+See the http://cxf.apache.org for details.
+
+=== System packages
+
+The `etc/jre.properties` defines the packages directly provided by the JVM.
+
+Most of the time, the default configuration in Apache Karaf is fine and works in most of the use cases.
+
+However, some times, you may want to not use the packages provided by the JVM, but the same packages provided by a bundle.
+
+For instance, the JAXB version provided by the JVM is "old", and you want to use new JAXB bundles.
+
+In that case, you have to comment the packages in `etc/jre.properties` to avoid to be provided by the JVM and use the
+ones from the bundles.

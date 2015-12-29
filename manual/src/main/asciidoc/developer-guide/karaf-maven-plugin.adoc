@@ -1,0 +1,486 @@
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+== Using the karaf-maven-plugin
+
+The Karaf Maven plugin allows you:
+
+* to work with Karaf features: validate a features descriptor, add features bundle into a repository, create a KAR archive from a features descriptor, etc.
+* to create Karaf commands help: it generates help from Karaf commands
+* to modify Karaf instances and create distributions
+
+=== Packaging
+
+The most generally useful features of the karaf-maven-plugin are exposed as packagings.  To use the packagings the pom or an ancestor must configure the karaf-maven-plugin with extensions:
+
+----
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.karaf.tooling</groupId>
+                    <artifactId>karaf-maven-plugin</artifactId>
+                    <version>${project.version}</version>
+                    <extensions>true</extensions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.karaf.tooling</groupId>
+                <artifactId>karaf-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+----
+
+Then specify the packaging in your project as usual, e.g.
+
+----
+    <packaging>kar</packaging>
+----
+
+|===
+|Packaging |Description
+
+|feature
+|The feature packaging generates a features.xml descriptor using the `karaf:features-generate-descriptor`
+
+|kar
+|The kar packaging generates a features.xml descriptor using the `karaf:features-generate-descriptor` and then packages a kar using the `karaf:features-create-kar`
+
+|karaf-assembly
+|Assembles a Karaf server based on the features descriptors and kar files listed as Maven dependencies.
+|===
+
+=== Commands goals
+
+The `karaf-maven-plugin` is able to generate documentation for Karaf commands
+
+==== `karaf:commands-generate-help`
+
+The `karaf:commands-generate-help` goal generates documentation containing Karaf commands help.
+
+It looks for Karaf commands in the current project class loader and generates the help as displayed with the `--help`
+option in the Karaf shell console.
+
+===== Example
+
+The example below generates help for the commands in the current project:
+
+----
+<project>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.karaf.tooling</groupId>
+        <artifactId>karaf-maven-plugin</artifactId>
+        <version>${project.version}</version>
+
+        <executions>
+          <execution>
+            <id>document-commands</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>commands-generate-help</goal>
+            </goals>
+            <configuration>
+              <targetFolder>${project.build.directory}/docbook/sources</targetFolder>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>
+----
+
+===== Parameters
+
+|===
+|Name |Type |Description
+
+|`targetFolder`
+|`File`
+|The directory where the documentation output files are to be generated. Default value: ${project.build.directory}/docbkx/sources
+
+|`format`
+|`String`
+|The output format (docbx, asciidoc, or conf) of the commands documentation. Default value: docbx
+
+|`classLoader`
+|`String`
+|The class loader to use in loading the commands. Default value: ${project}
+|===
+
+=== Features and kar goals
+
+[NOTE]
+====
+You should use the features or kar packaging instead of these individual goals.
+====
+
+The `karaf-maven-plugin` provides several goals to help you create and validate features XML descriptors as well as leverage your features to create a custom Karaf distribution.
+
+==== `karaf:features-generate-descriptor`
+
+Except in unusual circumstances, use the `<packaging>feature</packaging>` to run this goal.
+
+The `karaf:features-generate-descriptor` goal generates a features XML file based on the Maven dependencies.
+By default, it will follow Maven transitive dependencies, stopping when it encounters bundles already present in features that are Maven dependencies.
+
+A record of the dependency tree search can be found in target/history/treeListing.txt.
+
+You can track dependency changes and warn or fail on change.
+
+===== Configuration
+
+Specify the packaging as a top level element
+
+----
+<packaging>feature</packaging>
+----
+
+You can supply a feature descriptor to extend in `src/main/feature/feature.xml`.
+
+|===
+|Parameter Name |Type |Description
+
+|aggregateFeatures
+|boolean (false)
+|Specifies processing of feature repositories that are (transitive) Maven dependencies.
+If false, all features in these repositories become dependencies of the generated feature.
+If true, all features in these repositories are copied into the generated feature repository.
+
+|startLevel
+|int
+|The start level for the bundles determined from Maven dependencies.
+This can be overridden by specifying the bundle in the source feature.xml with the desired startlevel.
+
+|includeTransitiveDependency
+|boolean (true)
+|Whether to follow Maven transitive dependencies.
+
+|checkDependencyChange
+|boolean (false)
+|Whether to record dependencies in `src/main/history/dependencies.xml` for change tracking.
+
+|warnOnDependencyChange
+|boolean (false)
+|whether to fail on changed dependencies (false, default) or warn in the build output (true).
+
+|logDependencyChanges
+|boolean (false)
+|If true, added and removed dependencies are shown in `target/history`.
+
+|overwriteChangedDependencies
+|boolean (false)
+|If true, the `src/main/history/dependencies.xml` file will be overwritten if it has changed.
+|===
+
+===== Example
+
+----
+<project>
+...
+  <packaging>feature</packaging>
+  <dependencies>
+    <dependency>
+      <groupId>org.apache</groupId>
+      <artifactId>bundle1</artifactId>
+      <version>1.0</version>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.karaf.tooling</groupId>
+        <artifactId>karaf-maven-plugin</artifactId>
+        <version>${project.version}</version>
+        <extensions>true</extensions>
+          <configuration>
+            <startLevel>80</startLevel>
+            <aggregateFeatures>true</aggregateFeatures>
+          </configuration>
+        </plugin>
+    </plugins>
+  </build>
+</project>
+----
+
+==== `karaf:features-validate-descriptor`
+
+The `karaf:features-validate-descriptor` goal validates a features XML descriptor by checking if all the required imports
+for the bundles defined in the features can be matched to a provided export.
+
+By default, the plugin tries to add the Karaf core features (standard and enterprise) in the repositories set.
+It means that it's not required to explicitly define the Karaf features descriptor in the repository section of
+your features descriptor.
+
+===== Example
+
+The example below validates the features defined in the `target/features.xml` by checking all the imports and exports.
+It reads the definition for the packages that are exported by the system bundle from the `src/main/resources/config.properties` file.
+
+----
+<project>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.karaf.tooling</groupId>
+        <artifactId>karaf-maven-plugin</artifactId>
+        <version>${project.version}</version>
+          <executions>
+            <execution>
+              <id>validate</id>
+              <phase>process-resources</phase>
+              <goals>
+                <goal>features-validate-descriptor</goal>
+              </goals>
+              <configuration>
+                <file>target/features.xml</file>
+                <karafConfig>src/main/resources/config.properties</karafConfig>
+              </configuration>
+            </execution>
+          </executions>
+          <dependencies>
+            <dependency>
+              <groupId>org.slf4j</groupId>
+              <artifactId>slf4j-simple</artifactId>
+              <version>1.4.3</version>
+	        </dependency>
+          </dependencies>
+        </plugin>
+    </plugins>
+  </build>
+</project>
+----
+
+===== Parameters
+
+|===
+|Name |Type |Description
+
+|`file`
+|`File`
+|The features XML descriptor file to validate. Default value: `${project.build.directory}/classes/features.xml`
+
+|`karafConfig`
+|`String`
+|The Karaf `config.properties` file to use during the validation process. Default value: `config.properties`
+
+|`jreVersion`
+|`String`
+|The JRE version that is used during the validation process. Default value: `jre-1.5`
+
+|`karafVersion`
+|`String`
+|The target Karaf version used to get the Karaf core features (standard and enterprise). Default is the version of the plugin
+
+|`repositories`
+|`String[]`
+|Additional features XML descriptors that will be used during the validation process
+|===
+
+==== `karaf:features-add-to-repository`
+
+Consider using the karaf-assembly packaging which makes it easy to assemble a custom distribution in one step instead
+of this individual goal.
+
+The `karaf:features-add-to-repository` goal adds all the required bundles for a given set of features into directory.
+You can use this goal to create a `/system` directory for building your own Karaf-based distribution.
+
+By default, the Karaf core features descriptors (standard and enterprise) are automatically included in the descriptors set.
+
+===== Example
+
+The example below copies the bundles for the `spring` and `war` features defined in the Karaf features XML descriptor
+into the `target/features-repo` directory.
+
+----
+<project>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.karaf.tooling</groupId>
+        <artifactId>karaf-maven-plugin</artifactId>
+        <version>${project.version}</version>
+
+        <executions>
+          <execution>
+            <id>features-add-to-repo</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>features-add-to-repository</goal>
+            </goals>
+            <configuration>
+              <descriptors>
+                <descriptor>mvn:org.apache.karaf.features/standard/4.0.0/xml/features</descriptor>
+                <descriptor>mvn:my.groupid/my.artifactid/1.0.0/xml/features</descriptor>
+              </descriptors>
+              <features>
+                <feature>spring</feature>
+                <feature>war</feature>
+                <feature>my</feature>
+              </features>
+              <repository>target/features-repo</repository>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>
+----
+
+===== Parameters
+
+|===
+|Name |Type |Description
+
+|`descriptors`
+|`String[]`
+|List of features XML descriptors where the features are defined
+
+|`features`
+|`String[]`
+|List of features that bundles should be copied to the repository directory
+
+|`repository`
+|`File`
+|The directory where the bundles will be copied by the plugin goal
+|===
+
+==== `karaf:create-kar`
+
+[NOTE]
+====
+Except in unusual circumstances, use the `<packaging>kar</packaging>` to run this goal.
+====
+
+The `karaf:kar` goal assembles a KAR archive from a features XML descriptor file, normally generated in the same project
+with the `karaf:features-generate-descriptor` goal.
+
+There are two important directories in a kar:
+
+* `repository/`  contains a Maven structured repository of artifacts to be copied into the Karaf repository.
+The features descriptor and all the bundles mentioned in it are installed in this directory.
+* `resources/` contains other resources to be copied over the Karaf installation.
+
+Everything in `target/classes` is copied into the kar.
+Therefore resources you want installed into Karaf need to be in e.g. `src/main/resources/resources`.
+This choice is so other resources such as legal files from the maven-remote-resources-plugin can be included under
+META-INF in the kar, without getting installed into Karaf.
+
+===== Example
+
+----
+<project>
+...
+  <packaging>kar</packaging>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.karaf.tooling</groupId>
+        <artifactId>karaf-maven-plugin</artifactId>
+        <version>${project.version}</version>
+        <extensions>true</extensions>
+        <!-- There is no useful configuration for the kar mojo. The features-generate-descriptor mojo configuration may be useful -->
+      </plugin>
+    </plugins>
+  </build>
+</project>
+----
+
+==== `karaf:install-kar`
+
+=== Instances and distributions goals
+
+[NOTE]
+====
+You should use the karaf-assembly packaging instead of this individual goal.
+====
+
+The `karaf-maven-plugin` helps you to build custom Karaf distributions or archives existing Karaf instances:
+
+==== `karaf:archive`
+
+[NOTE]
+====
+This goal is run as part of the karaf-assembly packaging.
+====
+
+The `karaf:archive` goal packages a Karaf instance archive from a given assembled instance.
+
+Both tar.gz and zip formats are generated in the destination folder.
+
+===== Example
+
+The example below create archives for the given Karaf instance:
+
+----
+<project>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.karaf.tooling</groupId>
+        <artifactId>karaf-maven-plugin</artifactId>
+        <version>${project.version}</version>
+          <executions>
+            <execution>
+              <id>generate</id>
+              <phase>package</phase>
+              <goals>
+                <goal>archive</goal>
+              </goals>
+              <configuration>
+                <destDir>${project.build.directory}</destDir>
+                <targetServerDirectory>${project.build.directory}/assembly</targetServerDirectory>
+                <targetFile>${project.file}</targetFile>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+    </plugins>
+  </build>
+</project>
+----
+
+===== Parameters
+
+|===
+|Name |Type |Description
+
+|`destDir`
+|`File`
+| The target directory of the project. Default value: ${project.build.directory}
+
+|`targetServerDirectory`
+|`File`
+|The location of the server repository. Default value: ${project.build.directory}/assembly
+
+|`targetFile`
+|`File`
+|The target file to set as the project's artifact. Default value: ${project.file}
+|===
+
+==== `karaf:assembly`
+
+=== Run, client, deploy goals
+
+==== `karaf:run`
+
+==== `karaf:client`
+
+==== `karaf:deploy`
