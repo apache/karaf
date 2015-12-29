@@ -314,7 +314,7 @@ if "%KARAF_PROFILER%" == "" goto :RUN
     goto :RUN_LOOP
 
 :EXECUTE_CLEAN
-    rmdir /S /Q "%KARAF_DATA%"
+    pushd "%KARAF_DATA%" && (rmdir /S /Q "%KARAF_DATA%" 2>nul & popd)
     shift
     goto :RUN_LOOP
 
