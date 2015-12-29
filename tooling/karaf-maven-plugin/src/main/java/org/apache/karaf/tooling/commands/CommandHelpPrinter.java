@@ -25,6 +25,7 @@ import java.util.Set;
 import org.apache.karaf.shell.api.action.Action;
 
 public interface CommandHelpPrinter {
+
     /**
      * Print help for a single action to the out stream
      * 
@@ -41,4 +42,5 @@ public interface CommandHelpPrinter {
      * @param out
      */
     void printOverview(Map<String, Set<String>> commands, PrintStream out);
+
 }

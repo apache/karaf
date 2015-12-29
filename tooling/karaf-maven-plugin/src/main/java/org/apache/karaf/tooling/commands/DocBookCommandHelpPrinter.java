@@ -33,7 +33,6 @@ import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.impl.action.command.HelpOption;
 
-
 /**
  * Prints documentation in docbook syntax
  */

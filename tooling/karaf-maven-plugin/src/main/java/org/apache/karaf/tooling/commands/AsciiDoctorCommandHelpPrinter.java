@@ -18,25 +18,20 @@
  */
 package org.apache.karaf.tooling.commands;
 
-import java.io.PrintStream;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.impl.action.command.HelpOption;
 
+import java.io.PrintStream;
+import java.lang.reflect.Field;
+import java.util.*;
+
 /**
- * Prints documentation in wiki syntax
+ * Prints documentation in asciidoc syntax
  */
-public class UserConfCommandHelpPrinter extends AbstractCommandHelpPrinter {
+public class AsciiDoctorCommandHelpPrinter extends AbstractCommandHelpPrinter {
 
     @Override
     public void printHelp(Action action, PrintStream out, boolean includeHelpOption) {
@@ -70,31 +65,32 @@ public class UserConfCommandHelpPrinter extends AbstractCommandHelpPrinter {
         if (includeHelpOption)
             options.add(HelpOption.HELP);
 
-        out.println("h1. " + command.scope() + ":" + command.name());
+        out.println("= " + command.scope() + ":" + command.name());
         out.println();
 
-        out.println("h2. Description");
+        out.println("== Description");
         out.println(command.description());
         out.println();
 
         StringBuffer syntax = new StringBuffer();
         syntax.append(String.format("%s:%s", command.scope(), command.name()));
         if (options.size() > 0) {
-            syntax.append(" \\[options\\]");
+            syntax.append(" [options]");
         }
         if (arguments.size() > 0) {
             syntax.append(' ');
             for (Argument argument : arguments) {
-                syntax.append(String.format(argument.required() ? "%s " : "\\[%s\\] ", argument.name()));
+                syntax.append(String.format(argument.required() ? "%s " : "[%s] ", argument.name()));
             }
         }
-        out.println("h2. Syntax");
+        out.println("== Syntax");
         out.println(syntax.toString());
         out.println();
 
         if (arguments.size() > 0) {
-            out.println("h2. Arguments");
-            out.println("|| Name || Description ||");
+            out.println("== Arguments");
+            out.println("|===");
+            out.println("|Name |Description");
             for (Argument argument : arguments) {
                 String description = argument.description();
                 if (!argument.required()) {
@@ -104,13 +100,15 @@ public class UserConfCommandHelpPrinter extends AbstractCommandHelpPrinter {
                         description += " (defaults to " + o.toString() + ")";
                     }
                 }
-                out.println("| " + argument.name() + " | " + description + " |");
+                out.println("| " + argument.name());
+                out.println("| " + description);
             }
-            out.println();
+            out.println("|===");
         }
         if (options.size() > 0) {
-            out.println("h2. Options");
-            out.println("|| Name || Description ||");
+            out.println("== Options");
+            out.println("|===");
+            out.println("|Name |Description");
             for (Option option : options) {
                 String opt = option.name();
                 String desc = option.description();
@@ -122,12 +120,13 @@ public class UserConfCommandHelpPrinter extends AbstractCommandHelpPrinter {
                 if (defaultValue != null) {
                     desc += " (defaults to " + defaultValue + ")";
                 }
-                out.println("| " + opt + " | " + desc + " |");
+                out.println("|" + opt);
+                out.println("|" + desc);
             }
-            out.println();
+            out.println("|===");
         }
         if (command.detailedDescription().length() > 0) {
-            out.println("h2. Details");
+            out.println("== Details");
             out.println(command.detailedDescription());
         }
         out.println();
@@ -135,10 +134,10 @@ public class UserConfCommandHelpPrinter extends AbstractCommandHelpPrinter {
 
     @Override
     public void printOverview(Map<String, Set<String>> commands, PrintStream writer) {
-        writer.println("h1. Commands");
+        writer.println("= Commands");
         writer.println();
         for (String key : commands.keySet()) {
-            writer.println("h2. " + key);
+            writer.println("== " + key);
             writer.println();
             for (String cmd : commands.get(key)) {
                 writer.println("* [" + key + ":" + cmd + "|" + key + "-" + cmd + "]");

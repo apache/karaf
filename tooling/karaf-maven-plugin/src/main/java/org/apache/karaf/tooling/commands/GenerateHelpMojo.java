@@ -81,14 +81,14 @@ public class GenerateHelpMojo extends AbstractMojo {
     @Parameter(defaultValue = "${project}")
     protected MavenProject project;
 
-
     private static final String FORMAT_CONF = "conf";
     private static final String FORMAT_DOCBX = "docbx";
+    private static final String FORMAT_ASCIIDOC = "asciidoc";
 
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
-            if (!FORMAT_DOCBX.equals(format) && !FORMAT_CONF.equals(format)) {
-                throw new MojoFailureException("Unsupported format: " + format + ". Supported formats are: docbx or conf.");
+            if (!FORMAT_DOCBX.equals(format) && !FORMAT_CONF.equals(format) && !FORMAT_ASCIIDOC.equals(format)) {
+                throw new MojoFailureException("Unsupported format: " + format + ". Supported formats are: asciidoc, docbx, or conf.");
             }
             if (!targetFolder.exists()) {
                 targetFolder.mkdirs();
@@ -99,14 +99,30 @@ public class GenerateHelpMojo extends AbstractMojo {
             if (classes.isEmpty()) {
                 throw new MojoFailureException("No command found");
             }
-            
-            CommandHelpPrinter helpPrinter = FORMAT_DOCBX.equals(format) 
-                ? new DocBookCommandHelpPrinter()
-                : new UserConfCommandHelpPrinter();
+
+            CommandHelpPrinter helpPrinter = null;
+            if (FORMAT_ASCIIDOC.equals(format)) {
+                helpPrinter = new AsciiDoctorCommandHelpPrinter();
+            }
+            if (FORMAT_CONF.equals(format)) {
+                helpPrinter = new UserConfCommandHelpPrinter();
+            }
+            if (FORMAT_DOCBX.equals(format)) {
+                helpPrinter = new DocBookCommandHelpPrinter();
+            }
 
             Map<String, Set<String>> commands = new TreeMap<String, Set<String>>();
 
-            String commandSuffix = FORMAT_DOCBX.equals(format) ? "xml" : "conf"; 
+            String commandSuffix = null;
+            if (FORMAT_ASCIIDOC.equals(format)) {
+                commandSuffix = "adoc";
+            }
+            if (FORMAT_CONF.equals(format)) {
+                commandSuffix = "conf";
+            }
+            if (FORMAT_DOCBX.equals(format)) {
+                commandSuffix = "xml";
+            }
             for (Class<?> clazz : classes) {
                 try {
                     Action action = (Action) clazz.newInstance();
@@ -134,7 +150,16 @@ public class GenerateHelpMojo extends AbstractMojo {
                 }
             }
 
-            String overViewSuffix = FORMAT_DOCBX.equals(format) ? "xml" : "conf";
+            String overViewSuffix = null;
+            if (FORMAT_ASCIIDOC.equals(format)) {
+                overViewSuffix = "adoc";
+            }
+            if (FORMAT_CONF.equals(format)) {
+                overViewSuffix = "conf";
+            }
+            if (FORMAT_DOCBX.equals(format)) {
+                overViewSuffix = "xml";
+            }
             PrintStream writer = new PrintStream(new FileOutputStream(new File(targetFolder, "commands." + overViewSuffix)));
             helpPrinter.printOverview(commands, writer);
             writer.close();
