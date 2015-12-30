@@ -100,6 +100,7 @@ public class AsciiDoctorCommandHelpPrinter extends AbstractCommandHelpPrinter {
                         description += " (defaults to " + o.toString() + ")";
                     }
                 }
+                out.println();
                 out.println("| " + argument.name());
                 out.println("| " + description);
             }
@@ -120,6 +121,7 @@ public class AsciiDoctorCommandHelpPrinter extends AbstractCommandHelpPrinter {
                 if (defaultValue != null) {
                     desc += " (defaults to " + defaultValue + ")";
                 }
+                out.println();
                 out.println("|" + opt);
                 out.println("|" + desc);
             }
