@@ -50,5 +50,7 @@ public interface BundlesMBean {
     void uninstall(String bundleId) throws MBeanException;
     
     String getDiag(long bundleId);
+    
+    String getStatus(String bundleId) throws MBeanException;
 
 }
