@@ -490,9 +490,10 @@ Installing feature eventadmin 3.0.0
 Found installed bundle: org.apache.felix.eventadmin [80]
 ----
 
-If a feature contains a bundle which is already installed, by default, Apache Karaf will refresh this bundle.
-Sometime, this refresh can cause issue to other running applications. If you want to disable the auto-refresh of installed
-bundles, you can use the `-r` option:
+IMPORTANT: If a feature contains a bundle which is already installed, by default, Apache Karaf will refresh this bundle. Applications
+that are dependent on this bundle and lack proper behavior in such situations are likely to crash.
+
+If you want to disable the auto-refresh of installed bundles, you can use the `-r` option:
 
 ----
 karaf@root()> feature:install -v -r eventadmin
