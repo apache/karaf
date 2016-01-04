@@ -92,11 +92,12 @@ public class GenerateHelpMojo extends AbstractMojo {
 
     private static final String FORMAT_CONF = "conf";
     private static final String FORMAT_DOCBX = "docbx";
+    private static final String FORMAT_ASCIIDOC = "asciidoc";
 
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
-            if (!FORMAT_DOCBX.equals(format) && !FORMAT_CONF.equals(format)) {
-                throw new MojoFailureException("Unsupported format: " + format + ". Supported formats are: docbx or conf.");
+            if (!FORMAT_DOCBX.equals(format) && !FORMAT_CONF.equals(format) && !FORMAT_ASCIIDOC.equals(format)) {
+                throw new MojoFailureException("Unsupported format: " + format + ". Supported formats are: docbx, asciidoc, or conf.");
             }
             if (!targetFolder.exists()) {
                 targetFolder.mkdirs();
@@ -107,14 +108,31 @@ public class GenerateHelpMojo extends AbstractMojo {
             if (classes.isEmpty()) {
                 throw new MojoFailureException("No command found");
             }
-            
-            CommandHelpPrinter helpPrinter = FORMAT_DOCBX.equals(format) 
-                ? new DocBookCommandHelpPrinter()
-                : new UserConfCommandHelpPrinter();
+
+            CommandHelpPrinter helpPrinter = null;
+            if (FORMAT_DOCBX.equals(format)) {
+                helpPrinter = new DocBookCommandHelpPrinter();
+            }
+            if (FORMAT_CONF.equals(format)) {
+                helpPrinter = new UserConfCommandHelpPrinter();
+            }
+            if (FORMAT_ASCIIDOC.equals(format)) {
+                helpPrinter = new AsciiDoctorCommandHelpPrinter();
+            }
 
             Map<String, Set<String>> commands = new TreeMap<String, Set<String>>();
 
-            String commandSuffix = FORMAT_DOCBX.equals(format) ? "xml" : "conf"; 
+            String commandSuffix = null;
+            if (FORMAT_DOCBX.equals(format)) {
+                commandSuffix = "xml";
+            }
+            if (FORMAT_CONF.equals(format)) {
+                commandSuffix = "conf";
+            }
+            if (FORMAT_ASCIIDOC.equals(format)) {
+                commandSuffix = "adoc";
+            }
+             
             for (Class<?> clazz : classes) {
                 try {
                     Action action = (Action) clazz.newInstance();
