@@ -12,7 +12,7 @@
 // limitations under the License.
 //
 
-=== Persistence (JPA)
+==== Persistence (JPA)
 
 Apache Karaf provides JPA persistence providers (such as Apache OpenJPA) to be easy to use (in a OSGi way) and provide
 container managed persistence for applications (using Blueprint).
@@ -21,7 +21,7 @@ Apache Karaf embeds Aries JPA, providing a very easy way to develop applications
 
 See the developer guide for details about developing applications that use JPA.
 
-==== Persistence engine features
+===== Persistence engine features
 
 Apache Karaf provides a set of ready to use persistence engine features:
 

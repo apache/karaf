@@ -12,9 +12,9 @@
 // limitations under the License.
 //
 
-== Configuration
+=== Configuration
 
-=== Files
+==== Files
 
 Apache Karaf stores and loads all configuration in files located in the `etc` folder.
 
@@ -75,11 +75,11 @@ You can change the configuration at runtime by directly editiing the configurati
 
 You can also do the same using the `config:*` commands or the ConfigMBean.
 
-=== `config:*` commands
+==== `config:*` commands
 
 Apache Karaf provides a set of commands to manage the configuration.
 
-==== `config:list`
+===== `config:list`
 
 `config:list` displays the list of all configurations available, or the properties in a given configuration (PID).
 
@@ -128,7 +128,7 @@ Properties:
    size = 500
 ----
 
-==== `config:edit`
+===== `config:edit`
 
 `config:edit` is the first command to do when you want to change a configuration. `config:edit` command put you
 in edition mode for a given configuration.
@@ -149,7 +149,7 @@ All changes that you do in configuration edit mode are store in your console ses
 applied in the configuration. It allows you to "commit" the changes (see `config:update` command) or "rollback" and
 cancel your changes (see `config:cancel` command).
 
-==== `config:property-list`
+===== `config:property-list`
 
 The `config:property-list` lists the properties for the currently edited configuration.
 
@@ -163,7 +163,7 @@ karaf@root()> config:property-list
    size = 500
 ----
 
-==== `config:property-set`
+===== `config:property-set`
 
 The `config:property-set` command update the value of a given property in the currently edited configuration.
 
@@ -201,7 +201,7 @@ Properties:
 Using the `pid` option, you bypass the configuration commit and rollback mechanism.
 ====
 
-==== `config:property-append`
+===== `config:property-append`
 
 The `config:property-append` is similar to `config:property-set` command, but instead of completely replacing the
 property value, it appends a string at the end of the property value.
@@ -241,7 +241,7 @@ Properties:
 Using the `pid` option, you bypass the configuration commit and rollback mechanism.
 ====
 
-==== `config:property-delete`
+===== `config:property-delete`
 
 The `config:property-delete` command delete a property in the currently edited configuration.
 
@@ -270,7 +270,7 @@ You can use the `config:property-delete` command outside the configuration edit 
 karaf@root()> config:property-delete -p org.apache.karaf.log test
 ----
 
-==== `config:update` and `config:cancel`
+===== `config:update` and `config:cancel`
 
 When you are in the configuration edit mode, all changes that you do using `config:property*` commands are stored in "memory"
 (actually in the console session).
@@ -318,7 +318,7 @@ Properties:
    felix.fileinstall.filename = file:/opt/apache-karaf-4.0.0/etc/org.apache.karaf.log.cfg
 ----
 
-==== `config:delete`
+===== `config:delete`
 
 The `config:delete` command completely delete an existing configuration. You don't have to be in edit mode to delete
 a configuration.
@@ -347,7 +347,7 @@ karaf@root()> config:list "(service.pid=my.config)"
 karaf@root()>
 ----
 
-==== `config:meta`
+===== `config:meta`
 
 The `config:meta` command lists the meta type information related to a given configuration.
 
@@ -362,17 +362,17 @@ size    | Size    | int    | 500                                                
 pattern | Pattern | String | %d{ABSOLUTE} | %-5.5p | %-16.16t | %-32.32c{1} | %-32.32C %4L | %m%n | Pattern used to display log entries
 ---- 
 
-=== JMX ConfigMBean
+==== JMX ConfigMBean
 
 On the JMX layer, you have a MBean dedicated to the management of the configurations: the ConfigMBean.
 
 The ConfigMBean object name is: `org.apache.karaf:type=config,name=*`.
 
-==== Attributes
+===== Attributes
 
 The `Configs` attribute is a list of all configuration PIDs.
 
-==== Operations
+===== Operations
 
 * `listProperties(pid)` returns the list of properties (property=value formatted) for the configuration `pid`.
 * `deleteProperty(pid, property)` deletes the `property` from the configuration `pid`.

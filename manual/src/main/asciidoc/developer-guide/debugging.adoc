@@ -12,11 +12,11 @@
 // limitations under the License.
 //
 
-== Troubleshooting, Debugging, Profiling, and Monitoring
+=== Troubleshooting, Debugging, Profiling, and Monitoring
 
-=== Troubleshooting
+==== Troubleshooting
 
-==== Logging
+===== Logging
 
 Logging is easy to control through the console, with commands grouped under _log_ shell. To learn about the available
 logging commands type:
@@ -34,7 +34,7 @@ Typical usage is:
 . Execute the problematic operation
 . Use `log:display` (or `log:display-exception` to display the log
 
-==== Worst Case Scenario
+===== Worst Case Scenario
 
 If you end up with a Karaf in a really bad state (i.e. you can not boot it anymore) or you just want to revert to a
 clean state quickly, you can safely remove the `data` directory just in the installation directory.  This folder
@@ -42,7 +42,7 @@ contains transient data and will be recreated if removed when you relaunch Karaf
 You may also want to remove the files in the `deploy` folder to avoid them being automatically installed when Karaf
 is started the first time.
 
-=== Debugging
+==== Debugging
 
 Usually, the easiest way to debug Karaf or any application deployed onto it is to use remote debugging.
 Remote debugging can be easily activated by using the `debug` parameter on the command line.
@@ -101,7 +101,7 @@ and on Windows,
 set DEFAULT_JAVA_DEBUG_OPTS='-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005'
 ----
 
-==== Debugging Environment Variables
+===== Debugging Environment Variables
 
 |===
 |Variable |Description |Default
@@ -123,9 +123,9 @@ set DEFAULT_JAVA_DEBUG_OPTS='-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:tr
 |5005
 |===
 
-=== Profiling
+==== Profiling
 
-==== jVisualVM
+===== jVisualVM
 
 You have to edit the `etc/config.properties` configuration file to add the jVisualVM package:
 
@@ -135,7 +135,7 @@ org.osgi.framework.bootdelegation=...,org.netbeans.lib.profiler.server
 
 Run Karaf from the console, and you should now be able to connect using jVisualVM.
 
-==== YourKit
+===== YourKit
 
 You need a few steps to be able to profile Karaf using YourKit.
 
@@ -159,7 +159,7 @@ set JAVA_OPTS='-Xmx512M -agentlib:yjpagent'
 
 Run Karaf from the console, and you should now be able to connect using YourKit standalone or from your favorite IDE.
 
-=== Monitoring
+==== Monitoring
 
 Karaf uses JMX for monitoring and management of all Karaf components.
 

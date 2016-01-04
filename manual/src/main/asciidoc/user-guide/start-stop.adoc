@@ -12,9 +12,9 @@
 // limitations under the License.
 //
 
-== Start, stop, restart, connect
+=== Start, stop, restart, connect
 
-=== Start
+==== Start
 
 Apache Karaf supports different start mode:
 
@@ -24,7 +24,7 @@ Apache Karaf supports different start mode:
 
 You can also manage Apache Karaf as a system service (see link:wrapper[System Service] section).
 
-==== Regular mode
+===== Regular mode
 
 The regular mode uses the `bin/karaf` Unix script (`bin\karaf.bat` on Windows). It's the default start process.
 
@@ -73,7 +73,7 @@ karaf@root()>
 Closing the console or shell window will cause Apache Karaf to terminate.
 ====
 
-==== Server mode
+===== Server mode
 
 The server mode starts Apache Karaf as a foreground process, but it doesn't start the shell console.
 
@@ -100,7 +100,7 @@ Closing the console or shell window will cause Apache Karaf to terminate.
 
 You can connect to the shell console using SSH or client (see the Connect section in this page).
 
-==== Background mode
+===== Background mode
 
 The background mode starts Apache Karaf as a background process.
 
@@ -120,7 +120,7 @@ bin\start.bat
 
 You can connect to the shell console using SSH or client (see the Connect section in this page).
 
-==== Clean start
+===== Clean start
 
 Apache Karaf stores all previously applications installed and changes that you did in the data folder.
 
@@ -148,7 +148,7 @@ bin\karaf.bat clean
 bin\start.bat clean
 ----
 
-==== Customize variables
+===== Customize variables
 
 Apache Karaf accepts environment variables:
 
@@ -183,7 +183,7 @@ set JAVA_MIN_MEM=256M
 set JAVA_MAX_MEM=1024M
 ----
 
-==== Connect
+===== Connect
 
 Even if you start Apache Karaf without the console (using server or background modes), you can connect to the console.
 This connection can be local or remote. It means that you can access to Karaf console remotely.
@@ -301,7 +301,7 @@ Hit '<ctrl-d>' or type 'logout' to disconnect shell from current session.
 karaf@root()>
 ----
 
-=== Stop
+==== Stop
 
 When you start Apache Karaf in regular mode, the `logout` command or CTRL-D key binding logout from the console and shutdown Apache Karaf.
 
@@ -375,7 +375,7 @@ OPTIONS
                 Reboot the Karaf container.
 ----
 
-=== Status
+==== Status
 
 When you start Apache Karaf in background mode, you may want to check the current status.
 
@@ -410,7 +410,7 @@ bin\status.bat
 Running ...
 ----
 
-=== Restart
+==== Restart
 
 The `shutdown` command accepts the `-r` (`--restart`) option to restart Apache Karaf:
 
@@ -423,7 +423,7 @@ karaf@root()> system:shutdown -r
 This command does not start a new JVM. It simply restarts the OSGi framework.
 ====
 
-=== SystemMBean
+==== SystemMBean
 
 Apache Karaf provides the JMX SystemMBean dedicated to control of the container itself.
 

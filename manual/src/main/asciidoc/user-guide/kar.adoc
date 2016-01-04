@@ -12,7 +12,7 @@
 // limitations under the License.
 //
 
-== KAR
+=== KAR
 
 As described in the link:provisioning[Provisioning section], Apache Karaf features describe applications.
 
@@ -97,7 +97,7 @@ updating: repository/ (stored 0%)
 
 You can create KAR files using Apache Maven, or directly in the Apache Karaf console.
 
-=== Maven
+==== Maven
 
 Apache Karaf provides a Maven plugin: `karaf-maven-plugin`.
 
@@ -145,11 +145,11 @@ To create the KAR file, simply type:
 
 Uou will have your kar in the `target` directory.
 
-=== Commands
+==== Commands
 
 Apache Karaf provides `kar:*` commands to manage KAR archives.
 
-==== `kar:list`
+===== `kar:list`
 
 The `kar:list` command lists the installed KAR archives.
 
@@ -162,7 +162,7 @@ my-kar-1.0-SNAPSHOT
 
 A KAR is identified by its name.
 
-==== `kar:create`
+===== `kar:create`
 
 Instead of using the `karaf-maven-plugin` or create the KAR archive by hand, you can use the `kar:create` command.
 
@@ -211,7 +211,7 @@ Adding feature pax-tomcat
 Kar file created : /opt/apache-karaf-4.1.4/data/kar/org.ops4j.pax.web-4.1.4.kar
 ----
 
-==== `kar:install`
+===== `kar:install`
 
 You can deploy a KAR file using `kar:install` command.
 
@@ -227,7 +227,7 @@ The KAR file is uncompressed and populated the `KARAF_BASE/system` folder.
 The Apache Karaf KAR service is looking for features XML files in the KAR file, registers the features XML and automatically
 installs all features described in the features repositories present in the KAR file.
 
-==== `kar:uninstall`
+===== `kar:uninstall`
 
 The `kar:uninstall` command uninstall a KAR file (identified by a name).
 
@@ -242,7 +242,7 @@ For instance, to uninstall the previously installed `my-kar-1.0-SNAPSHOT.kar` KA
 karaf@root()> kar:uninstall my-kar-1.0-SNAPSHOT
 ----
 
-=== Deployer
+==== Deployer
 
 Apache Karaf also provides a KAR deployer. It means that you can drop a KAR file directly in the `deploy` folder.
 
@@ -280,17 +280,17 @@ noAutoRefreshBundles=false
 By default, when the KAR deployer install features, by default, it refresh the bundles already installed.
 You can disable the automatic bundles refresh by setting the `noAutoRefreshBundles` property to `false`.
 
-=== JMX KarMBean
+==== JMX KarMBean
 
 On the JMX layer, you have a MBean dedicated to the management of the KAR files.
 
 The ObjectName to use is `org.apache.karaf:type=kar,name=*`.
 
-==== Attributes
+===== Attributes
 
 The `Kars` attributes provides the list of KAR files (name) installed.
 
-==== Operations
+===== Operations
 
 * `install(url)` installs the KAR file at the given `url`.
 * `create(repository, features)` creates a KAR file using the given features `repository` name, and optionally the

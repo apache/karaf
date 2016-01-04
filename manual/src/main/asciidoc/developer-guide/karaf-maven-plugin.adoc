@@ -12,7 +12,7 @@
 // limitations under the License.
 //
 
-== Using the karaf-maven-plugin
+=== Using the karaf-maven-plugin
 
 The Karaf Maven plugin allows you:
 
@@ -20,7 +20,7 @@ The Karaf Maven plugin allows you:
 * to create Karaf commands help: it generates help from Karaf commands
 * to modify Karaf instances and create distributions
 
-=== Packaging
+==== Packaging
 
 The most generally useful features of the karaf-maven-plugin are exposed as packagings.  To use the packagings the pom or an ancestor must configure the karaf-maven-plugin with extensions:
 
@@ -64,18 +64,18 @@ Then specify the packaging in your project as usual, e.g.
 |Assembles a Karaf server based on the features descriptors and kar files listed as Maven dependencies.
 |===
 
-=== Commands goals
+==== Commands goals
 
 The `karaf-maven-plugin` is able to generate documentation for Karaf commands
 
-==== `karaf:commands-generate-help`
+===== `karaf:commands-generate-help`
 
 The `karaf:commands-generate-help` goal generates documentation containing Karaf commands help.
 
 It looks for Karaf commands in the current project class loader and generates the help as displayed with the `--help`
 option in the Karaf shell console.
 
-===== Example
+====== Example
 
 The example below generates help for the commands in the current project:
 
@@ -106,7 +106,7 @@ The example below generates help for the commands in the current project:
 </project>
 ----
 
-===== Parameters
+====== Parameters
 
 |===
 |Name |Type |Description
@@ -124,7 +124,7 @@ The example below generates help for the commands in the current project:
 |The class loader to use in loading the commands. Default value: ${project}
 |===
 
-=== Features and kar goals
+==== Features and kar goals
 
 [NOTE]
 ====
@@ -133,7 +133,7 @@ You should use the features or kar packaging instead of these individual goals.
 
 The `karaf-maven-plugin` provides several goals to help you create and validate features XML descriptors as well as leverage your features to create a custom Karaf distribution.
 
-==== `karaf:features-generate-descriptor`
+===== `karaf:features-generate-descriptor`
 
 Except in unusual circumstances, use the `<packaging>feature</packaging>` to run this goal.
 
@@ -144,7 +144,7 @@ A record of the dependency tree search can be found in target/history/treeListin
 
 You can track dependency changes and warn or fail on change.
 
-===== Configuration
+====== Configuration
 
 Specify the packaging as a top level element
 
@@ -189,7 +189,7 @@ This can be overridden by specifying the bundle in the source feature.xml with t
 |If true, the `src/main/history/dependencies.xml` file will be overwritten if it has changed.
 |===
 
-===== Example
+====== Example
 
 ----
 <project>
@@ -219,7 +219,7 @@ This can be overridden by specifying the bundle in the source feature.xml with t
 </project>
 ----
 
-==== `karaf:features-validate-descriptor`
+===== `karaf:features-validate-descriptor`
 
 The `karaf:features-validate-descriptor` goal validates a features XML descriptor by checking if all the required imports
 for the bundles defined in the features can be matched to a provided export.
@@ -228,7 +228,7 @@ By default, the plugin tries to add the Karaf core features (standard and enterp
 It means that it's not required to explicitly define the Karaf features descriptor in the repository section of
 your features descriptor.
 
-===== Example
+====== Example
 
 The example below validates the features defined in the `target/features.xml` by checking all the imports and exports.
 It reads the definition for the packages that are exported by the system bundle from the `src/main/resources/config.properties` file.
@@ -267,7 +267,7 @@ It reads the definition for the packages that are exported by the system bundle 
 </project>
 ----
 
-===== Parameters
+====== Parameters
 
 |===
 |Name |Type |Description
@@ -293,7 +293,7 @@ It reads the definition for the packages that are exported by the system bundle 
 |Additional features XML descriptors that will be used during the validation process
 |===
 
-==== `karaf:features-add-to-repository`
+===== `karaf:features-add-to-repository`
 
 Consider using the karaf-assembly packaging which makes it easy to assemble a custom distribution in one step instead
 of this individual goal.
@@ -303,7 +303,7 @@ You can use this goal to create a `/system` directory for building your own Kara
 
 By default, the Karaf core features descriptors (standard and enterprise) are automatically included in the descriptors set.
 
-===== Example
+====== Example
 
 The example below copies the bundles for the `spring` and `war` features defined in the Karaf features XML descriptor
 into the `target/features-repo` directory.
@@ -344,7 +344,7 @@ into the `target/features-repo` directory.
 </project>
 ----
 
-===== Parameters
+====== Parameters
 
 |===
 |Name |Type |Description
@@ -362,7 +362,7 @@ into the `target/features-repo` directory.
 |The directory where the bundles will be copied by the plugin goal
 |===
 
-==== `karaf:create-kar`
+===== `karaf:create-kar`
 
 [NOTE]
 ====
@@ -383,7 +383,7 @@ Therefore resources you want installed into Karaf need to be in e.g. `src/main/r
 This choice is so other resources such as legal files from the maven-remote-resources-plugin can be included under
 META-INF in the kar, without getting installed into Karaf.
 
-===== Example
+====== Example
 
 ----
 <project>
@@ -403,9 +403,9 @@ META-INF in the kar, without getting installed into Karaf.
 </project>
 ----
 
-==== `karaf:install-kar`
+===== `karaf:install-kar`
 
-=== Instances and distributions goals
+==== Instances and distributions goals
 
 [NOTE]
 ====
@@ -414,7 +414,7 @@ You should use the karaf-assembly packaging instead of this individual goal.
 
 The `karaf-maven-plugin` helps you to build custom Karaf distributions or archives existing Karaf instances:
 
-==== `karaf:archive`
+===== `karaf:archive`
 
 [NOTE]
 ====
@@ -425,7 +425,7 @@ The `karaf:archive` goal packages a Karaf instance archive from a given assemble
 
 Both tar.gz and zip formats are generated in the destination folder.
 
-===== Example
+====== Example
 
 The example below create archives for the given Karaf instance:
 
@@ -457,7 +457,7 @@ The example below create archives for the given Karaf instance:
 </project>
 ----
 
-===== Parameters
+====== Parameters
 
 |===
 |Name |Type |Description
@@ -475,12 +475,12 @@ The example below create archives for the given Karaf instance:
 |The target file to set as the project's artifact. Default value: ${project.file}
 |===
 
-==== `karaf:assembly`
+===== `karaf:assembly`
 
-=== Run, client, deploy goals
+==== Run, client, deploy goals
 
-==== `karaf:run`
+===== `karaf:run`
 
-==== `karaf:client`
+===== `karaf:client`
 
-==== `karaf:deploy`
+===== `karaf:deploy`

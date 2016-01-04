@@ -12,9 +12,11 @@
 // limitations under the License.
 //
 
+== Quick Start
+
 These instructions should help you get Apache Karaf up and running in 5 to 15 minutes.
 
-== Prerequisites
+=== Prerequisites
 
 Karaf requires a Java SE 7 or Java SE 8 environment to run. Refer to http://www.oracle.com/technetwork/java/javase/ for details on how to download and install Java SE 1.7 or greater.
 
@@ -22,7 +24,7 @@ Karaf requires a Java SE 7 or Java SE 8 environment to run. Refer to http://www.
 * Download the binary distribution that matches your system (zip for windows, tar.gz for unixes)
 * Extract the archive to a new folder on your hard drive; for example in c:\karaf - from now on this directory will be referenced as <KARAF_HOME>.
 
-== Start the server
+=== Start the server
 
 Open a command line console and change the directory to <KARAF_HOME>.
 
@@ -57,7 +59,7 @@ karaf@root()>
 
 ----
 
-== Shell console basics
+=== Shell console basics
 
 You can now run your first command.  Simply type the `<tab>` key in the console.
 
@@ -114,7 +116,7 @@ OPTIONS
 
 Note that the console supports tab completion so if you start typing a command it will show all possible completions and also auto complete if there is only one completion.
 
-== Deploy a sample application
+=== Deploy a sample application
 
 While you will learn in the Karaf user's guide how to fully use and leverage Apache Karaf, let's install a sample http://camel.apache.org[Apache Camel] application for now:
 
@@ -143,7 +145,7 @@ karaf@root()> log:display
 2015-06-30 13:39:48,730 | INFO  |  timer://myTimer | ExampleRouter                    | 53 - org.apache.camel.camel-core - 2.15.2 | Exchange[ExchangePattern: InOnly, BodyType: String, Body: SpringDSL set body:  Tue Jun 30 13:39:48 CEST 2015]
 ----
 
-== Stopping and uninstalling the sample application
+=== Stopping and uninstalling the sample application
 
 To stop and uninstall the demo, run the following command:
 
@@ -152,7 +154,7 @@ karaf@root()> bundle:stop camel-example-osgi
 karaf@root()> bundle:uninstall camel-example-osgi
 ----
 
-== Stopping Karaf
+=== Stopping Karaf
 
 To stop Karaf from the console, enter `^D` in the console:
 
@@ -172,10 +174,10 @@ halt is also an alias for system:shutdown:
 karaf@root()> halt
 ----
 
-== Cleaning the Karaf state
+=== Cleaning the Karaf state
 
 Normally Karaf remembers the features and bundles you installed and started. To reset Karaf into a clean state, just delete the data directory when Karaf is not running.
 
-== Summary
+=== Summary
 
 This document shows how simple it is to get Apache Karaf up and running and install a simple Apache Camel application.

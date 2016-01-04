@@ -15,26 +15,20 @@
 Apache Karaf Container 4.x - Documentation
 =========================================
 Apache Software Foundation
-:doctype: book
+:doctype: article
 :toc: left
 :toclevels: 3
 :toc-position: left
 :toc-title: Apache Karaf Container 4.x - Documentation
 :numbered:
 
-= Overview
-
 include::overview.adoc[]
-
-= Quick Start
 
 include::quick-start.adoc[]
 
-= Update Notes (from Karaf 3.x to 4.x versions)
-
 include::update-notes.adoc[]
 
-= User Guide
+== User Guide
 
 include::user-guide/installation.adoc[]
 
@@ -66,7 +60,7 @@ include::user-guide/security.adoc[]
 
 include::user-guide/obr.adoc[]
 
-== Enterprise
+=== Enterprise
 
 include::user-guide/http.adoc[]
 
@@ -94,7 +88,7 @@ include::user-guide/webconsole.adoc[]
 
 include::user-guide/tuning.adoc[]
 
-= Developer Guide
+== Developer Guide
 
 [NOTE]
 ====

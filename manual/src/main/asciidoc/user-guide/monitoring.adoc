@@ -12,7 +12,7 @@
 // limitations under the License.
 //
 
-== Monitoring and Management using JMX
+=== Monitoring and Management using JMX
 
 Apache Karaf provides a complete JMX layer.
 
@@ -20,7 +20,7 @@ You can remotely connect to a running Apache Karaf instance using any JMX client
 
 The Apache Karaf features provide a set of MBeans, dedicating for the monitoring and management.
 
-=== Connecting
+==== Connecting
 
 Apache Karaf exposes a complete MBean server that you can use remotely.
 
@@ -45,7 +45,7 @@ The JMX layer user the security framework, and so, by default, it uses the users
 
 You can change the port numbers of the JMX layer in the `etc/org.apache.karaf.management.cfg` configuration file.
 
-=== Configuration
+==== Configuration
 
 The Apache Karaf JMX management layer is configured in the `etc/org.apache.karaf.management.cfg` configuration file:
 
@@ -119,7 +119,7 @@ objectName = connector:name=rmi
 * `rmiServerPort` property contains the port number of the JMX RMI server. Default is `44444`.
 * `jmxRealm` is the security realm to use as authentication backend. By default it uses the `karaf` realm.
 
-=== MBeans
+==== MBeans
 
 Apache Karaf provides a bunch of MBeans.
 
@@ -151,7 +151,7 @@ The following MBeans list is non exhaustive:
 * `org.apache.karaf:type=web,name=*`: management of WebApplications (provided by the `war` feature).
 * `org.apache.karaf:type=wrapper,name=*`: management of the service wrapper (provided by the `wrapper` feature).
 
-=== RBAC
+==== RBAC
 
 Apache Karaf provides a complete Role-Based Access Control to the JMX MBeans and operations.
 
@@ -231,7 +231,7 @@ By default, all "read-only" operations (`list*`, `get*`, `is*`) can be performed
 The `org.apache.karaf:type=security,area=jmx` MBean can be used to check whether the current user can access a certain MBean or invoke a specific operation on it.
 This MBean can be used by management clients (monitoring tools, etc) to decide whether to show certain MBeans or operations to the end user.
 
-=== JMX-HTTP bridge with Jolokia
+==== JMX-HTTP bridge with Jolokia
 
 It's not always easy to use a JMX client with the RMI protocol.
 
@@ -282,6 +282,6 @@ Enter host password for user 'karaf':
 
 You can find details on the http://www.jolokia.org[Jolokia website] and in the http://www.jolokia.org/reference/html/[documentation].
 
-=== Decanter
+==== Apache Karaf Decanter
 
 Apache Karaf Decanter provides a complete monitoring solution including data history, turnkey dashboards, SLA and alerting support.

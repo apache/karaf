@@ -12,7 +12,7 @@
 // limitations under the License.
 //
 
-== WebConsole
+=== WebConsole
 
 Apache Karaf provides an optional WebConsole.
 
@@ -29,7 +29,7 @@ You can use the WebConsole to:
 The WebConsole is extensible via a plugins system. Some applications can add new pages to the WebConsole.
 For instance, Apache Karaf Cellar provides additional pages to administrate cluster groups, nodes, etc.
 
-=== Installation
+==== Installation
 
 To enable the Apache Karaf WebConsole, you just have to install the `webconsole` feature:
 
@@ -39,7 +39,7 @@ karaf@root()> feature:install webconsole
 
 The `webconsole` feature automatically installs the `http` feature (see the [WebContainer section|webcontainer] for details).
 
-=== Access
+==== Access
 
 The Apache Karaf WebConsole uses the WebContainer port number (see the [WebContainer section|webcontainer] for details)
 with the `/system/console` context.

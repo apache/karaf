@@ -214,10 +214,10 @@
 						<configuration>
 							<sourceHighlighter>coderay</sourceHighlighter>
 							<backend>html5</backend>
+							<doctype>article</doctype>
 							<attributes>
 								<toc />
 								<linkcss>false</linkcss>
-								<doctype>book</doctype>
 							</attributes>
 						</configuration>
 					</execution>
@@ -225,7 +225,7 @@
 				<configuration>
 					<sourceDirectory>src/main/asciidoc</sourceDirectory>
 					<headerFooter>true</headerFooter>
-					<imagesDir>../resources/images</imagesDir>
+					<imagesDir>src/main/asciidoc/images</imagesDir>
 				</configuration>
 			</plugin>
 			<plugin>

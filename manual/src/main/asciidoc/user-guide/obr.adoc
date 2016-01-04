@@ -12,7 +12,7 @@
 // limitations under the License.
 //
 
-== OBR
+=== OBR
 
 The goal of OBR (OSGi Bundle Repository) is:
 
@@ -47,7 +47,7 @@ Thanks to that, when you install ("deploy" in OBR wording) a bundle using the OB
 providing the capabilities matching the bundle requirements.
 It will automatically install the bundles needed for the bundle.
 
-=== Features OBR resolver
+==== Features OBR resolver
 
 If the feature specifies `obr` in the `resolver` attribute, Apache Karaf can use the OBR service to construct the list
 of bundles to install with the features.
@@ -56,9 +56,9 @@ The feature default resolver just consider the bundles described in the feature 
 
 Using the OBR resolver, Apache Karaf can extend the bundle list at the feature installation time using the OBR service.
 
-=== Commands
+==== Commands
 
-==== `obr:url-add`
+===== `obr:url-add`
 
 The `obr:url-add` command registers the OBR repository at a given URL in the OBR service.
 
@@ -73,7 +73,7 @@ For instance:
 karaf@root()> obr:url-add file:///user/.m2/repository/repository.xml
 ----
 
-==== `obr:url-list`
+===== `obr:url-list`
 
 The `obr:url-list` command lists the OBR repository (with URL) registered in the OBR service:
 
@@ -84,7 +84,7 @@ Index | OBR URL
 0     | file:/user/.m2/repository/repository.xml
 ----
 
-==== `obr:url-refresh`
+===== `obr:url-refresh`
 
 The `obr:url-refresh` command refresh an OBR repository (reloading the URL).
 
@@ -110,7 +110,7 @@ To do so, you have to use the `-i` option:
 karaf@root()> obr:url-refresh -i 0
 ----
 
-==== `obr:url-remove`
+===== `obr:url-remove`
 
 The `obr:url-remove` command removes an OBR repository from the OBR service.
 
@@ -127,7 +127,7 @@ To do so, you have to use the `-i` option:
 karaf@root()> obr:url-remove -i 0
 ----
 
-==== `obr:list`
+===== `obr:list`
 
 The `obr:list` command lists all bundles available on the registered OBR repositories:
 
@@ -143,7 +143,7 @@ Apache Aries Application API                                                 | o
 ...
 ----
 
-==== `obr:info`
+===== `obr:info`
 
 The `obr:info` command displays the details about bundles available on the OBR service. Especially, it provides details about
 capabilities and requirements of bundles.
@@ -197,7 +197,7 @@ karaf@root()> obr:info org.apache.karaf.wrapper.core,4.0.0 org.apache.karaf.wrap
 ...
 ----
 
-==== `obr:source`
+===== `obr:source`
 
 In addition of the bundles executable, the OBR service can also store the bundles sources.
 
@@ -221,7 +221,7 @@ karaf@root()> obr:source /tmp org.apache.karaf.wrapper.core,4.0.0 org.apache.kar
 ...
 ----
 
-==== `obr:resolve`
+===== `obr:resolve`
 
 The `obr:resolve` command displays the resolution output for a given set of requirements. Actually, it show the bundles providing
 the capabilities to match the requirements. It's what the OBR service does when executing `obr:deploy`.
@@ -237,7 +237,7 @@ Required resource(s):
    Apache Karaf :: Wrapper :: Core (4.0.0)
 ----
 
-==== `obr:find`
+===== `obr:find`
 
 The `obr:find` command is similar to the `obr:resolve` one. It displays the bundles resolving the provided requirements, with details.
 
@@ -275,7 +275,7 @@ Capabilities:
    package:{package=org.apache.karaf.wrapper.management, uses:=javax.management, version=4.0.0}
 ----
 
-==== `obr:deploy`
+===== `obr:deploy`
 
 The `obr:deploy` command installs a bundle from the OBR repository, including all bundles required to satisfy the bundle requirements.
 
@@ -309,7 +309,7 @@ karaf@root()> obr:deploy org.apache.karaf.wrapper.core,4.0.0 org.apache.karaf.wr
 ...
 ----
 
-=== `obr:start`
+==== `obr:start`
 
 The `obr:start` command does the same as `obr:deploy -s` command. It installs the bundle (and all required bundles to
 satisfy the requirements) and starts all installed bundles.
@@ -342,19 +342,19 @@ karaf@root()> obr:start org.apache.karaf.wrapper.core,4.0.0 org.apache.karaf.wra
 ...
 ----
 
-=== JMX ObrMBean
+==== JMX ObrMBean
 
 On the JMX layer, Apache Karaf provides a MBean dedicated to the management of the OBR service: the ObrMBean.
 
 The ObjectName to use is `org.apache.karaf:type=obr,name=*`.
 
-==== Attributes
+===== Attributes
 
 The `Urls` attribute provides the list of registered OBR repositories URLs.
 
 The `Bundles` attribute provides a tabular data containing all bundles available on the registered OBR repositories.
 
-==== Operations
+===== Operations
 
 * `addUrl(url)` registers the OBR repository using the `url` to the `repository.xml`.
 * `removeUrl(url)` removes the OBR repository at the given `url`.
@@ -366,7 +366,7 @@ The `Bundles` attribute provides a tabular data containing all bundles available
 
 The name to identify a bundle uses the following syntax: `symbolic_name,version` where version is optional.
 
-=== Apache Karaf Cave
+==== Apache Karaf Cave
 
 In addition of being an OBR client, Apache Karaf can act as an OBR repositories server, thanks to Apache Karaf Cave.
 

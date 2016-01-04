@@ -12,7 +12,7 @@
 // limitations under the License.
 //
 
-== Integration in the operating system: the Service Wrapper
+=== Integration in the operating system: the Service Wrapper
 
 In the previous chapter, we saw the different scripts and commands to start, stop, restart Apache Karaf.
 
@@ -29,7 +29,7 @@ It also includes advanced fault detection software which monitors an application
 The "Service Wrapper" is able to detect crashes, freezes, out of memory and other exception events, then automatically react by restarting Apache Karaf with a minimum of delay.
 It guarantees the maximum possible uptime of Apache Karaf.
 
-=== Supported platforms
+==== Supported platforms
 
 * Windows 8, 7, 2008 R2, 2003, Vista (32 and 64 bits architecture)
 * Linux RedHat Enterprise Linux, Debian, CentOS, Fedora, Ubuntu (32 and 64 bits architecture)
@@ -40,7 +40,7 @@ It guarantees the maximum possible uptime of Apache Karaf.
 * SGI Irix
 * MacOS X
 
-=== Installation
+==== Installation
 
 Apache Karaf Service Wrapper is an optional feature. You have to install the "Service Wrapper" installer first.
 
@@ -79,7 +79,7 @@ OPTIONS
                 (defaults to )
 ----
 
-=== Installation
+==== Installation
 
 Karaf Wrapper is an optional feature. To install it, simply type:
 
@@ -177,7 +177,7 @@ systemctl enable /opt/apache-karaf-4.0.2/bin/karaf.service
 
 This will enable Karaf at system boot.
 
-=== Uninstall
+==== Uninstall
 
 The `wrapper:install` provides the system commands to perform to uninstall the service/daemon).
 
@@ -199,7 +199,7 @@ You can remove the "Wrapper Service" installer after that:
 karaf@root()> feature:uninstall service-wrapper
 ----
 
-=== Note for MacOS users
+==== Note for MacOS users
 
 On MacOS you can install the service for an user or for the system.
 
@@ -238,7 +238,7 @@ If you want to remove the service call:
 launchctl remove org.apache.karaf.KARAF
 ----
 
-=== Configuration
+==== Configuration
 
 When using scripts in the Apache Karaf `bin` folder, you can using `bin/setenv` Unix script (`bin\setenv.bat` on Windows) as described in the [Start, stop, restart, connect|start-stop] section of the documentation.
 

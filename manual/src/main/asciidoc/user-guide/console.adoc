@@ -12,9 +12,9 @@
 // limitations under the License.
 //
 
-== Using the console
+=== Using the console
 
-=== Available commands
+==== Available commands
 
 To see a list of the available commands in the console, you can use the `help`:
 
@@ -40,7 +40,7 @@ karaf@root()> Display all 294 possibilities? (y or n)
 ...
 ----
 
-=== Subshell and completion mode
+==== Subshell and completion mode
 
 The commands have a scope and a name. For instance, the command `feature:list` has `feature` as scope, and `list` as name.
 
@@ -163,11 +163,11 @@ backlog-tracer-dump backlog-tracer-info backlog-tracer-start backlog-tracer-stop
 route-resume route-show route-start route-stop route-suspend
 ----
 
-=== Unix like environment
+==== Unix like environment
 
 Karaf console provides a full Unix like environment.
 
-==== Help or man
+===== Help or man
 
 We already saw the usage of the `help` command to display all commands available.
 
@@ -206,7 +206,7 @@ OPTIONS
 
 ----
 
-==== Completion
+===== Completion
 
 When you type the tab key, Karaf tries to complete:
 
@@ -216,7 +216,7 @@ When you type the tab key, Karaf tries to complete:
 * command arguments
 * command options
 
-==== Alias
+===== Alias
 
 An alias is another name associated to a given command.
 
@@ -274,7 +274,7 @@ You can see here the aliases available by default:
 
 You can create your own aliases in the `etc/shell.init.script` file.
 
-==== Key binding
+===== Key binding
 
 Like on most Unix environment, Karaf console support some key bindings:
 
@@ -283,7 +283,7 @@ Like on most Unix environment, Karaf console support some key bindings:
 * CTRL-R to search previously executed command
 * CTRL-U to remove the current line
 
-==== Pipe
+===== Pipe
 
 You can pipe the output of one command as input to another one. It's a pipe, using the | character:
 
@@ -295,7 +295,7 @@ war                           | 4.0.0                            |          | Un
 blueprint-web                 | 4.0.0                            |          | Uninstalled | standard-4.0.0           | Provides an OSGI-aware Servlet ContextListener fo
 ----
 
-==== Grep, more, find, ...
+===== Grep, more, find, ...
 
 Karaf console provides some core commands similar to Unix environment:
 
@@ -336,7 +336,7 @@ So you can use 'head' instead of 'shell:head'
 
 Again, you can find details and all options of these commands using `help` command or `--help` option.
 
-==== Scripting
+===== Scripting
 
 The Apache Karaf Console supports a complete scripting language, similar to bash or csh on Unix.
 
@@ -451,7 +451,7 @@ You can also named you script with an alias. Actually, the aliases are just scri
 
 See the Scripting section of the developers guide for details.
 
-=== Security
+==== Security
 
 The Apache Karaf console supports a Role Based Access Control (RBAC) security mechanism. It means that depending of
 the user connected to the console, you can define, depending of the user's groups and roles, the permission to execute

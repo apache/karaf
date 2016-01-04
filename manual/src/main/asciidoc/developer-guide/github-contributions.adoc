@@ -12,15 +12,15 @@
 // limitations under the License.
 //
 
-== Github Contributions
+=== Github Contributions
 
 Some people prefer to make contributions to karaf source via github. If you are one of them, this is for you!
 
-=== Introduction
+==== Introduction
 
 Apache Karaf is available as a periodically replicated mirror on: https://github.com/apache/karaf
 
-=== Suggested Workflow
+==== Suggested Workflow
 
 . Make a fork of karaf repo github mirror
 . Do all your new work on your own karaf fork
@@ -30,14 +30,14 @@ Apache Karaf is available as a periodically replicated mirror on: https://github
 . Now pray to your favorite ASF committer to really accept the patch :-)
 . When your patch is committed to the svn, and you can verify it in the latest karaf snapshot, close your pull request on github
 
-=== License Reminder
+==== License Reminder
 
 In order for your contributions to be accepted:
 
 * All files must contain ASL license grant header
 * You must select ASF grant check box when attaching patch to the jira
 
-=== How to Generate a One-File-Patch Via Throw-Away Branch
+==== How to Generate a One-File-Patch Via Throw-Away Branch
 
 Here is one way to generate squash of your commits:
 

@@ -12,12 +12,12 @@
 // limitations under the License.
 //
 
-== Programmatically connect
+=== Programmatically connect
 
 As described in the users guide, Apache Karaf supports remote access to both the console (by embedding a SSHd server) and
 the management layer.
 
-=== To the console
+==== To the console
 
 You can write a Apache Karaf remote console client in Java (or other language).
 
@@ -70,7 +70,7 @@ public class Main {
 }
 ----
 
-=== To the management layer
+==== To the management layer
 
 The Apache Karaf management layer uses JMX. Apache Karaf embeds a JMX MBeanServer that you can use remotely.
 

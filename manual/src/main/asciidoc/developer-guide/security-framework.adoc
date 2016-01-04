@@ -12,14 +12,14 @@
 // limitations under the License.
 //
 
-== Security framework
+=== Security framework
 
 Karaf supports http://download.oracle.com/javase/6/docs/technotes/guides/security/jaas/JAASRefGuide.html[JAAS] with
 some enhancements to allow JAAS to work nicely in an OSGi environment.
 
 This framework also features an OSGi keystore manager with the ability to deploy new keystores or truststores at runtime.
 
-=== Overview
+==== Overview
 
 This feature allows runtime deployment of JAAS based configuration for use in various parts of the application. This
 includes the remote console login, which uses the `karaf` realm, but which is configured with a dummy login module
@@ -31,7 +31,7 @@ up HTTPS connectors or using certificates for WS-Security.
 
 A very simple XML schema for spring has been defined, allowing the deployment of a new realm or a new keystore very easily.
 
-=== Schema
+==== Schema
 
 To override or deploy a new realm, you can use the following XSD which is supported by a Spring namespace handler and
 can thus be defined in a Spring xml configuration file.
@@ -84,7 +84,7 @@ The content of the `module` element is parsed as a properties file and will be u
 
 Deploying such a code will lead to a JaasRealm object in the OSGi registry, which will then be used when using the JAAS login module.
 
-==== Configuration override and use of the `rank` attribute
+===== Configuration override and use of the `rank` attribute
 
 The `rank` attribute on the `config` element is tied to the ranking of the underlying OSGi service.  When the JAAS
 framework performs an authentication, it will use the realm name to find a matching JAAS configuration.  If multiple
@@ -112,7 +112,7 @@ JMX layer), you need to deploy a JAAS configuration with the name `name="karaf"`
 </blueprint>
 ----
 
-=== Architecture
+==== Architecture
 
 Due to constraints in the JAAS specification, one class has to be available for all bundles.
 This class is called ProxyLoginModule and is a LoginModule that acts as a proxy for an OSGi defines LoginModule.
@@ -133,13 +133,13 @@ allows you to manipulate users and roles directly from Karaf (adding a new user,
 The backend engine is constructed by a backend engine factory, registered as an OSGi service.
 Some login modules (for security reason for instance) don't provide backend engine.
 
-=== Available realm and login modules
+==== Available realm and login modules
 
 Karaf comes with a default realm named "karaf" using login modules.
 
 Karaf also provides a set of login modules and backend engines to handle authentication needs for your environment.
 
-==== PropertiesLoginModule
+===== PropertiesLoginModule
 
 |===
 |LoginModule |BackendEngineFactory
@@ -208,7 +208,7 @@ shows how to register the PropertiesLoginModule and the corresponding backend en
 </blueprint>
 ----
 
-==== OsgiConfigLoginModule
+===== OsgiConfigLoginModule
 
 |===
 |LoginModule |BackendEngineFactory
@@ -257,7 +257,7 @@ The following blueprint shows how to use this configuration:
 The OsgiConfigLoginModule doesn't provide a backend engine.
 ====
 
-==== JDBCLoginModule
+===== JDBCLoginModule
 
 |===
 |LoginModule |BackendEngineFactory
@@ -348,7 +348,7 @@ The following blueprint shows how to define the JDBCLoginModule with the corresp
 </blueprint>
 ----
 
-==== LDAPLoginModule
+===== LDAPLoginModule
 
 |===
 |LoginModule |BackendEngineFactory
@@ -505,7 +505,7 @@ The LDAPLoginModule doesn't provide backend engine. It means that the administra
 performed directly on the LDAP backend.
 ====
 
-==== SyncopeLoginModule
+===== SyncopeLoginModule
 
 |===
 |LoginModule |BackendEngineFactory
@@ -573,14 +573,14 @@ For instance, the following blueprint descriptor enables the SyncopeLoginModule 
 </blueprint>
 ----
 
-=== Encryption service
+==== Encryption service
 
 The EncryptionService is a service registered in the OSGi registry providing means to encrypt and check encrypted passwords.
 This service acts as a factory for Encryption objects actually performing the encryption.
 
 This service is used in all Karaf login modules to support encrypted passwords.
 
-==== Configuring properties
+===== Configuring properties
 
 Each login module supports the following additional set of properties:
 
@@ -626,12 +626,12 @@ A simple example follows:
 </jaas:config>
 ----
 
-==== Prefix and suffix
+===== Prefix and suffix
 
 The login modules have the ability to support both encrypted and plain passwords at the same time.
 In some cases, some login modules may be able to encrypt the passwords on the fly and save them back in an encrypted form.
 
-==== Jasypt
+===== Jasypt
 
 Karaf default installation comes with a simple encryption service which usually fullfill simple needs. However, in some
 cases, you may want to install the Jasypt (http://www.jasypt.org/) library which provides stronger encryption algorithms
@@ -685,7 +685,7 @@ A typical realm definition using Jasypt encryption service would look like:
 </jaas:config>
 ----
 
-==== Using encrypted property placeholders
+===== Using encrypted property placeholders
 
 When using blueprint framework for OSGi for configuring devices that requires passwords like JDBC datasources,
 it is undesirable to use plain text passwords in configuration files. To avoid this problem it is good to store database
@@ -750,7 +750,7 @@ Don't forget to install the jasypt feature to add the support of the enc namespa
 karaf@root()> feature:install jasypt-encryption
 ----
 
-=== Role discovery policies
+==== Role discovery policies
 
 The JAAS specification does not provide means to distinguish between User and Role Principals without referring to the
 specification classes. In order to provide means to the application developer to decouple the application from Karaf
@@ -821,7 +821,7 @@ for (Principal p : subject.getPrincipals()) {
 }
 ----
 
-=== Default role policies
+==== Default role policies
 
 The previous section describes how to leverage role policies. However, Karaf provides a default role policy, based on the following class names:
 

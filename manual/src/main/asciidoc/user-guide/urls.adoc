@@ -12,7 +12,7 @@
 // limitations under the License.
 //
 
-== Artifacts repositories and URLs
+=== Artifacts repositories and URLs
 
 The main information provided by a feature is the set of OSGi bundles that defines the application.  Such bundles are URLs pointing to the actual bundle jars.  For example, one would write the following definition:
 
@@ -35,7 +35,7 @@ located in a directory which is not available using Maven
 
 Note: The path is relative to the Apache Karaf installation directory
 
-=== Maven URL Handler
+==== Maven URL Handler
 
 The equivalent of the above bundle would be:
 

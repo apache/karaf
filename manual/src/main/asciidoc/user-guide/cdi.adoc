@@ -12,12 +12,12 @@
 // limitations under the License.
 //
 
-=== CDI
+==== CDI
 
 This section described how to add support of CDI, and embed a CDI container in Apache Karaf. It doesn't describe
 how to develop CDI applications. See the developer guide for that.
 
-==== Pax CDI
+===== Pax CDI
 
 Apache Karaf supports different CDI containers by using Pax CDI.
 
@@ -47,13 +47,13 @@ deltaspike-partial-bean                 | 1.2.1                            |    
 deltaspike-data                         | 1.2.1                            |          | Uninstalled | org.ops4j.pax.cdi-0.12.0 | Apache Deltaspike data support
 ----
 
-==== CDI Containers
+===== CDI Containers
 
 Thanks to Pax CDI, Apache Karaf supports multiple CDI implementation versions, and different CDI containers.
 
 You just have to install the feature corresponding to the CDI container and version that you want to use.
 
-===== Apache OpenWebBeans
+====== Apache OpenWebBeans
 
 Apache Karaf provides a ready to use feature for Apache OpenWebBeans.
 
@@ -64,7 +64,7 @@ karaf@root()> feature:install http
 karaf@root()> feature:install pax-cdi-openwebbeans
 ----
 
-===== JBoss Weld CDI container
+====== JBoss Weld CDI container
 
 Apache Karaf provides a ready to use feature for JBoss Weld.
 

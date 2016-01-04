@@ -12,11 +12,11 @@
 // limitations under the License.
 //
 
-== Scripting
+=== Scripting
 
 In the console section of the users guide, we introduced the scripting support.
 
-=== Assignation
+==== Assignation
 
 You already know the first usage of scripting: execution of command.
 
@@ -50,7 +50,7 @@ The `$.context` access the context variables in the current session.
 We access to the `bundle` variable (an array containing all bundles), and we want to display the bundle location for
 the bundle at the index 1 in the bundle array.
 
-=== Expressions
+==== Expressions
 
 The shell has a built-in expression parser.  Expressions must be enclosed with the `%(...)` syntax.
 
@@ -71,7 +71,7 @@ karaf@root()> %(SQRT(a^2 + b^2))
 1.7320508
 ----
 
-==== Mathematical Operators
+===== Mathematical Operators
 
 |===
 |Operator |Description
@@ -95,7 +95,7 @@ karaf@root()> %(SQRT(a^2 + b^2))
 | Power operator
 |===
 
-==== Boolean Operators
+===== Boolean Operators
 
 |===
 |Operator |Description
@@ -131,7 +131,7 @@ karaf@root()> %(SQRT(a^2 + b^2))
 |Boolean or
 |===
 
-==== Supported Functions
+===== Supported Functions
 
 |===
 |Function |Description
@@ -196,7 +196,7 @@ karaf@root()> %(SQRT(a^2 + b^2))
 
 Functions names are case insensitive.
 
-==== Supported Constants
+===== Supported Constants
 
 |===
 |Constant |Description
@@ -211,7 +211,7 @@ Functions names are case insensitive.
 |The value zero
 |===
 
-=== List, maps, pipes and closures
+==== List, maps, pipes and closures
 
 Using [], you can define array variable:
 
@@ -254,12 +254,12 @@ karaf@root()> echo2 hello world
 xxx hello world yyy
 ----
 
-=== Startup
+==== Startup
 
 The `etc/shell.init.script` file is executed at startup in each shell session, allowing the definition of additional
 variables or aliases or even complex functions. It's like the bashrc or profile on Unix.
 
-=== Constants and variables
+==== Constants and variables
 
 Apache Karaf console provides a set of implicit constants and variables that you can use in your script.
 
@@ -279,7 +279,7 @@ ii
 karaf@root>
 ----
 
-=== Built-in variables and commands
+==== Built-in variables and commands
 
 Apache Karaf console provides built-in variable very useful for scripting:
 
@@ -296,7 +296,7 @@ Apache Karaf console provides commands for scripting:
 
 See the link:commands[full list of `shell` commands] for details.
 
-=== Leveraging existing Java capabilities (via reflection)
+==== Leveraging existing Java capabilities (via reflection)
 
 Apache Karaf console supports loading and execution of Java classes.
 
@@ -345,7 +345,7 @@ karaf@root> $map
 0                   0
 ----
 
-=== Examples
+==== Examples
 
 The following examples show some scripts defined in `etc/shell.init.script`.
 

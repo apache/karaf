@@ -12,7 +12,7 @@
 // limitations under the License.
 //
 
-=== Transaction (JTA)
+==== Transaction (JTA)
 
 Apache Karaf provides container managed transactions, available as OSGi services.
 
@@ -25,7 +25,7 @@ karaf@root()> feature:install transaction
 However, the `transaction` feature is installed (as a transitive dependency) when installing enterprise features
 (like `jdbc` or `jms` features for instance).
 
-==== Apache Aries Transaction and ObjectWeb HOWL
+===== Apache Aries Transaction and ObjectWeb HOWL
 
 The `transaction` feature uses Apache Aries and ObjectWeb HOWL. Aapache Aries Transaction "exposes" the transaction
 manager as OSGi service. The actual implementation of the transaction manager is ObjectWeb HOWL.
@@ -41,7 +41,7 @@ It is not a replacement for traditional log kits such as LOG4J and Java SE Loggi
 In Apache Karaf, ObjectWeb HOWL (High-speed ObjectWeb Logger) is used to implement TransactionLog (in Aries Transaction),
 providing a very performant transaction manager in an OSGi way.
 
-==== Configuration
+===== Configuration
 
 The installation of the `transaction` feature installs a new configuration: `org.apache.aries.transaction`.
 

@@ -12,7 +12,7 @@
 // limitations under the License.
 //
 
-== Security
+=== Security
 
 Apache Karaf provides an advanced and flexible security system, powered by JAAS (Java Authentication and Authorization
 Service) in an OSGi compliant way.
@@ -28,7 +28,7 @@ The Apache Karaf security framework is used internally to control the access to:
 
 Your applications can also use the security framework (see the developer guide for details).
 
-=== Realms
+==== Realms
 
 Apache Karaf is able to manage multiple realms. A realm contains the definition of the login modules to use for the
 authentication and/or authorization on this realm. The login modules define the authentication and authorization for
@@ -62,7 +62,7 @@ Apache Karaf provides additional login modules (see the developer guide for deta
 
 You can manage an existing realm, login module, or create your own realm using the `jaas:realm-manage` command.
 
-=== Users, groups, roles, and passwords
+==== Users, groups, roles, and passwords
 
 As we saw, by default, Apache Karaf uses a PropertiesLoginModule.
 
@@ -118,11 +118,11 @@ roles.
 
 It means that the `karaf` user will have the roles defined by the `admingroup`.
 
-==== Commands
+===== Commands
 
 The `jaas:*` commands manage the realms, users, groups, roles in the console.
 
-===== `jaas:realm-list`
+====== `jaas:realm-list`
 
 We already used the `jaas:realm-list` previously in this section.
 
@@ -140,7 +140,7 @@ We have here one realm (`karaf`) containing two login modules (`PropertiesLoginM
 
 The `index` is used by the `jaas:realm-manage` command to easily identify the realm/login module that we want to manage.
 
-===== `jaas:realm-manage`
+====== `jaas:realm-manage`
 
 The `jaas:realm-manage` command switch in realm/login module edit mode, where you can manage the users, groups, and roles in the login module.
 
@@ -158,7 +158,7 @@ option expects the login module class name:
 karaf@root()> jaas:realm-manage --realm karaf --module org.apache.karaf.jaas.modules.properties.PropertiesLoginModule
 ----
 
-===== `jaas:user-list`
+====== `jaas:user-list`
 
 When you are in edit mode, you can list the users in the login module using the `jaas:user-list`:
 
@@ -173,7 +173,7 @@ karaf     | admingroup | viewer
 
 You can see the user name and the group by role.
 
-===== `jaas:user-add`
+====== `jaas:user-add`
 
 The `jaas:user-add` command adds a new user (and the password) in the currently edited login module:
 
@@ -197,7 +197,7 @@ foo       |            |
 
 On the other hand, if you want to rollback the user addition, you can use the `jaas:cancel` command.
 
-===== `jaas:user-delete`
+====== `jaas:user-delete`
 
 The `jaas:user-delete` command deletes an user from the currently edited login module:
 
@@ -218,7 +218,7 @@ karaf     | admingroup | manager
 karaf     | admingroup | viewer
 ----
 
-===== `jaas:group-add`
+====== `jaas:group-add`
 
 The `jaas:group-add` command assigns a group (and eventually creates the group) to an user in the currently edited login module:
 
@@ -226,7 +226,7 @@ The `jaas:group-add` command assigns a group (and eventually creates the group) 
 karaf@root()> jaas:group-add karaf mygroup
 ----
 
-===== `jaas:group-delete`
+====== `jaas:group-delete`
 
 The `jaas:group-delete` command removes an user from a group in the currently edited login module:
 
@@ -234,7 +234,7 @@ The `jaas:group-delete` command removes an user from a group in the currently ed
 karaf@root()> jaas:group-delete karaf mygroup
 ----
 
-===== `jaas:group-role-add`
+====== `jaas:group-role-add`
 
 The `jaas:group-role-add` command adds a role in a group in the currently edited login module:
 
@@ -242,7 +242,7 @@ The `jaas:group-role-add` command adds a role in a group in the currently edited
 karaf@root()> jaas:group-role-add mygroup myrole
 ----
 
-===== `jaas:group-role-delete`
+====== `jaas:group-role-delete`
 
 The `jaas:group-role-delete` command removes a role from a group in the currently edited login module:
 
@@ -250,16 +250,16 @@ The `jaas:group-role-delete` command removes a role from a group in the currentl
 karaf@root()> jaas:group-role-delete mygroup myrole
 ----
 
-===== `jaas:update`
+====== `jaas:update`
 
 The `jaas:update` command commits your changes in the login module backend. For instance, in the case of the PropertiesLoginModule,
 the `etc/users.properties` will be updated only after the execution of the `jaas:update` command.
 
-===== `jaas:cancel`
+====== `jaas:cancel`
 
 The `jaas:cancel` command rollback your changes and doesn't update the login module backend.
 
-=== Passwords encryption
+==== Passwords encryption
 
 By default, the passwords are stored in clear form in the `etc/users.properties` file.
 
@@ -345,7 +345,7 @@ The `etc/org.apache.karaf.jaas.cfg` configuration file allows you to define adva
 * the `encryption.encoding` property defines the encoding of the encrypted password. The possible values are `hexadecimal`
  or `base64`. The default value is `hexadecimal`.
 
-=== Managing authentication by key
+==== Managing authentication by key
 
 For the SSH layer, Karaf supports the authentication by key, allowing to login without providing the password.
 
@@ -402,7 +402,7 @@ or to ssh
 ssh -p 8101 -i ~/karaf.id_dsa karaf@localhost
 ----
 
-=== RBAC
+==== RBAC
 
 Apache Karaf uses the roles to control the access to the resources: it's a RBAC (Role Based Access Control) system.
 
@@ -413,11 +413,11 @@ The roles are used to control:
 * access to JMX (MBeans and/or operations)
 * access to the WebConsole
 
-==== OSGi services
+===== OSGi services
 
 The details about OSGi services RBAC support is explained in the developer guide.
 
-==== Console
+===== Console
 
 Console RBAC supports is a specialization of the OSGi service RBAC. Actually, in Apache Karaf, all console commands are
 defined as OSGi services.
@@ -483,7 +483,7 @@ You can fine tuned the command RBAC support by editing the `karaf.secured.servic
 karaf.secured.services = (&(osgi.command.scope=*)(osgi.command.function=*))
 ----
 
-==== JMX
+===== JMX
 
 Like for the console commands, you can define ACL (AccessLists) to the JMX layer.
 
@@ -518,7 +518,7 @@ By default, Apache Karaf defines the following JMX ACLs:
  The `list*()`, `get*()`, `is*()` operations can be performed by users with the `viewer` role.
  The `set*()` and all other `*()` operations can be performed by users with the `admin` role.
 
-==== WebConsole
+===== WebConsole
 
 The Apache Karaf WebConsole is not available by default. To enable it, you have to install the `webconsole` feature:
 
@@ -530,14 +530,14 @@ The WebConsole doesn't support fine grained RBAC like console or JMX for now.
 
 All users with the `admin` role can logon the WebConsole and perform any operations.
 
-=== SecurityMBean
+==== SecurityMBean
 
 Apache Karaf provides a JMX MBean to check if the current user can invoke a given MBean and/or operation.
 
 The `canInvoke()` operation gets the roles of the current user, and check if one the roles can invoke the MBean and/or the
 operation, eventually with a given argument value.
 
-==== Operations
+===== Operations
 
 * `canInvoke(objectName)` returns `true` if the current user can invoke the MBean with the `objectName`, `false` else.
 * `canInvoke(objectName, methodName)` returns `true` if the current user can invoke the operation `methodName` on the MBean
@@ -547,7 +547,7 @@ with the array of arguments types `argumentTypes` on the MBean with `objectName`
 * `canInvoke(bulkQuery)` returns a tabular data containing for each operation in the `bulkQuery` tabular data if `canInvoke`
 is `true` or `false`.
 
-=== Security providers
+==== Security providers
 
 Some applications require specific security providers to be available, such as [BouncyCastle|http://www.bouncycastle.org].
 

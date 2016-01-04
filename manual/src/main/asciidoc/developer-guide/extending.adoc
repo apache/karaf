@@ -12,11 +12,11 @@
 // limitations under the License.
 //
 
-== Extending
+=== Extending
 
 Apache Karaf is a very flexible container that you can extend very easily.
 
-=== Console
+==== Console
 
 In this section, you will see how to extend the console by adding your own command.
 
@@ -24,14 +24,14 @@ We will leverage Apache Maven to create and build the OSGi bundle.
 This OSGi bundle will use Blueprint. We don't cover the details of OSGi bundle and Blueprint, see the specific
 sections for details.
 
-==== Create the Maven project
+===== Create the Maven project
 
 To create the Maven project, we can:
 
 * use a Maven archetype
 * create by hand
 
-===== Using archetype
+====== Using archetype
 
 The Maven Quickstart archetype can create an empty Maven project where you can put your project definition.
 
@@ -59,7 +59,7 @@ Define value for version:  1.0-SNAPSHOT: :
 Define value for package: : org.apache.karaf.shell.samples
 ----
 
-==== By hand
+===== By hand
 
 Alternatively, you can simply create the directory `shell-sample-commands` and create the `pom.xml` file inside it:
 
@@ -112,7 +112,7 @@ Alternatively, you can simply create the directory `shell-sample-commands` and c
 </project>
 ----
 
-==== Configuring for Java 6/7
+===== Configuring for Java 6/7
 
 We are using annotations to define commands, so we need to ensure Maven will actually use JDK 1.6 or 1.7 to compile the jar.
 Just add the following snippet after the `dependencies` section.
@@ -132,7 +132,7 @@ Just add the following snippet after the `dependencies` section.
 </build>
 ----
 
-==== Loading the project in your IDE
+===== Loading the project in your IDE
 
 We can use Maven to generate the needed files for your IDE:
 
@@ -150,7 +150,7 @@ mvn idea:idea
 
 The project files for your IDE should now be created.  Just open the IDE and load the project.
 
-==== Creating a basic command class
+===== Creating a basic command class
 
 We can now create the command class `HelloShellCommand.java`
 
@@ -173,7 +173,7 @@ public class HelloShellCommand implements Action {
 }
 ----
 
-==== Manifest
+===== Manifest
 
 In order for Karaf to find your command, you need to add the `Karaf-Commands=*` manifest header.
 
@@ -191,7 +191,7 @@ This is usually done by modifying the maven bundle plugin configuration
 </plugin>
 ----
 
-==== Compile
+===== Compile
 
 Let's try to build the jar.  Remove the test classes and sample classes if you used the artifact, then from the command line, run:
 
@@ -207,7 +207,7 @@ The end of the maven output should look like:
 [INFO] ------------------------------------------------------------------------
 ----
 
-==== Test
+===== Test
 
 Launch Apache Karaf and install your bundle:
 
@@ -222,14 +222,14 @@ karaf@root()> test:hello
 Executing Hello command
 ----
 
-==== Command completer
+===== Command completer
 
 A completer allows you to automatically complete a command argument using <tab>. A completer is simply a bean which is
 injected to a command.
 
 Of course to be able to complete it, the command should require an argument.
 
-==== Command argument
+===== Command argument
 
 We add an argument to the HelloCommand:
 
@@ -258,7 +258,7 @@ public class HelloShellCommand implements Action {
 }
 ----
 
-==== Completer bean
+===== Completer bean
 
 A completer is a bean which implements the Completer interface:
 
@@ -290,7 +290,7 @@ public class SimpleNameCompleter implements Completer {
 }
 ----
 
-==== Completers for option values
+===== Completers for option values
 
 Quite often your commands will not have just arguments, but also options. You can provide completers for option values.
 The snippet below shows the HelloShellCommand with an option to specify what the greet message will be.
@@ -325,7 +325,7 @@ public class HelloShellCommand implements Action {
 }
 ----
 
-==== Completers with state
+===== Completers with state
 
 Some times we want to tune the behavior of the completer depending on the commands already executed, in the current shell
 or even the rest of the arguments that have been already passed to the command. Such example is the config:set-property
@@ -337,7 +337,7 @@ The pre-parsed CommandLine objects allows you to check the previous arguments an
 the behavior of the Completer.
 Those two objects are given to the Completer when calling the `complete` method.
 
-==== Test
+===== Test
 
 Launch a Karaf instance and run the following command to install the newly created bundle:
 
@@ -352,7 +352,7 @@ karaf@root> test:hello <tab>
  one    two    three
 ----
 
-=== WebConsole
+==== WebConsole
 
 You can also extend the Apache Karaf WebConsole by providing and installing a webconsole plugin.
 

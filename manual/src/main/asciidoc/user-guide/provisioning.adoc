@@ -12,15 +12,15 @@
 // limitations under the License.
 //
 
-== Provisioning
+=== Provisioning
 
 Apache Karaf supports the provisioning of applications and modules using the concept of Karaf Features.
 
-=== Application
+==== Application
 
 By provisioning application, it means install all modules, configuration, and transitive applications.
 
-=== OSGi
+==== OSGi
 
 It natively supports the deployment of OSGi applications.
 
@@ -38,7 +38,7 @@ configuration.
 
 As we can see, the provisioning of an application can be very long and fastidious.
 
-=== Feature and resolver
+==== Feature and resolver
 
 Apache Karaf provides a simple and flexible way to provision applications.
 
@@ -77,7 +77,7 @@ providing the capabilities to satisfy the requirements.
 
 A feature has a complete lifecycle: install, start, stop, update, uninstall.
 
-=== Features repositories
+==== Features repositories
 
 The features are described in a features XML descriptor. This XML file contains the description of a set of features.
 
@@ -121,7 +121,7 @@ repositories registered and features installed will be lost: you will have to re
 features by hand again.
 To prevent this behaviour, you can specify features as boot features.
 
-=== Boot features
+==== Boot features
 
 You can describe some features as boot features. A boot feature will be automatically install by Apache Karaf, even if it has
 not been previously installed using `feature:install` or FeatureMBean.
@@ -133,7 +133,7 @@ This configuration file contains the two properties to use to define boot featur
 * `featuresRepositories` contains a list (coma separated) of features repositories (features XML) URLs.
 * `featuresBoot` contains a list (come separated) of features to install at boot.
 
-=== Features upgrade
+==== Features upgrade
 
 You can update a release by installing the same feature (with the same SNAPSHOT version or a different version).
 
@@ -141,9 +141,9 @@ Thanks to the features lifecycle, you can control the status of the feature (sta
 
 You can also use a simulation to see what the update will do.
 
-=== Feature bundles
+==== Feature bundles
 
-==== Start Level
+===== Start Level
 
 By default, the bundles deployed by a feature will have a start-level equals to the value defined in the `etc/config.properties`
 configuration file, in the `karaf.startlevel.bundle` property.
@@ -162,7 +162,7 @@ The start-level attribute insure that the `myproject-dao` bundle is started befo
 Instead of using start-level, a better solution is to simply let the OSGi framework know what your dependencies are by
 defining the packages or services you need. It is more robust than setting start levels.
 
-==== Simulate, Start and stop
+===== Simulate, Start and stop
 
 You can simulate the installation of a feature using the `-t` option to `feature:install` command.
 
@@ -178,13 +178,13 @@ To do so, a feature can specify the `start` attribute to false in the `<bundle/>
   </feature>
 ----
 
-==== Dependency
+===== Dependency
 
 A bundle can be flagged as being a dependency, using the `dependency` attribute set to true on the `<bundle/>` element.
 
 This information can be used by resolvers to compute the full list of bundles to be installed.
 
-=== Dependent features
+==== Dependent features
 
 A feature can depend to a set of other features:
 
@@ -213,7 +213,7 @@ If a single version is specified, this version will be chosen.
 
 If nothing is specified, the highest available will be installed.
 
-=== Feature configurations
+==== Feature configurations
 
 The `<config/>` element in a feature XML allows a feature to create and/or populate a configuration (identified by a configuration PID).
 
@@ -229,7 +229,7 @@ The installation of the feature will have the same effect as dropping a file nam
 
 The content of the `<config/>` element is a set of properties, following the key=value standard.
 
-=== Feature configuration files
+==== Feature configuration files
 
 Instead of using the `<config/>` element, a feature can specify `<configfile/>` elements.
 
@@ -255,7 +255,7 @@ as a already existing file might contain customization. This behaviour can be ov
 
 The file URL is any URL supported by Apache Karaf (see the [Artifacts repositories and URLs|urls] of the user guide for details).
 
-==== Requirements
+===== Requirements
 
 A feature can also specify expected requirements. The feature resolver will try to satisfy the requirements. For that, it checks
 the features and bundles capabilities and will automatically install the bundles to satisfy the requirements.
@@ -270,9 +270,9 @@ The requirement specifies that the feature will work by only if the JDK version 
 
 The features resolver is also able to refresh the bundles when an optional dependency is satisfy, rewiring the optional import.
 
-=== Commands
+==== Commands
 
-==== `feature:repo-list`
+===== `feature:repo-list`
 
 The `feature:repo-list` command lists all registered features repository:
 
@@ -306,7 +306,7 @@ enterprise-4.0.0         | mvn:org.apache.karaf.features/enterprise/4.0.0/xml/fe
 spring-4.0.0             | mvn:org.apache.karaf.features/spring/4.0.0/xml/features
 ----
 
-==== `feature:repo-add`
+===== `feature:repo-add`
 
 To register a features repository (and so having new features available in Apache Karaf), you have to use the
 `feature:repo-add` command.
@@ -397,7 +397,7 @@ features described in this features repository:
 karaf@root()> feature:repo-add -i cellar
 ----
 
-==== `feature:repo-refresh`
+===== `feature:repo-refresh`
 
 Apache Karaf parses the features repository XML when you register it (using `feature:repo-add` command or the FeatureMBean).
 If the features repository XML changes, you have to indicate to Apache Karaf to refresh the features repository to load the changes.
@@ -428,7 +428,7 @@ karaf@root()> feature:repo-refresh cellar
 Refreshing feature url mvn:org.apache.karaf.cellar/apache-karaf-cellar/LATEST/xml/features
 ----
 
-==== `feature:repo-remove`
+===== `feature:repo-remove`
 
 The `feature:repo-remove` command removes a features repository from the registered ones.
 
@@ -454,7 +454,7 @@ If you use `-u` option, the `feature:repo-remove` command uninstalls all feature
 karaf@root()> feature:repo-remove -u karaf-cellar-4.0.0.RC1
 ----
 
-==== `feature:list`
+===== `feature:list`
 
 The `feature:list` command lists all available features (provided by the different registered features repositories):
 
@@ -521,7 +521,7 @@ management      | 4.0.0   | x        | Started | standard-4.0.0 | Provide a JMX 
 wrap            | 0.0.0   | x        | Started | standard-4.0.0 | Wrap URL handler
 ----
 
-==== `feature:install`
+===== `feature:install`
 
 The `feature:install` command installs a feature.
 
@@ -575,7 +575,7 @@ You can decide to not start the bundles installed by a feature using the `-s` or
 karaf@root()> feature:install -s eventadmin
 ----
 
-==== `feature:start`
+===== `feature:start`
 
 By default, when you install a feature, it's automatically installed. However, you can specify the `-s` option to the `feature:install` command.
 
@@ -584,12 +584,12 @@ the wiring in other bundles.
 
 When starting a feature, all bundles are started, and so, the feature also exposes the services.
 
-==== `feature:stop`
+===== `feature:stop`
 
 You can also stop a feature: it means that all services provided by the feature will be stop and removed from the service registry. However, the packages
 are still available for the wiring (the bundles are in resolved state).
 
-==== `feature:uninstall`
+===== `feature:uninstall`
 
 The `feature:uninstall` command uninstalls a feature. As the `feature:install` command, the `feature:uninstall` command
 requires the `feature` argument. The `feature` argument is the name of the feature, or the name/version of the feature.
@@ -602,7 +602,7 @@ karaf@root()> feature:uninstall eventadmin
 The features resolver is involved during feature uninstallation: transitive features installed by the uninstalled feature can be uninstalled
 themselves if not used by other feature.
 
-=== Deployer
+==== Deployer
 
 You can "hot deploy" a features XML by dropping the file directly in the `deploy` folder.
 
@@ -635,13 +635,13 @@ feature3 won't be installed:
 </features>
 ----
 
-=== JMX FeatureMBean
+==== JMX FeatureMBean
 
 On the JMX layer, you have a MBean dedicated to the management of the features and features repositories: the FeatureMBean.
 
 The FeatureMBean object name is: `org.apache.karaf:type=feature,name=*`.
 
-==== Attributes
+===== Attributes
 
 The FeatureMBean provides two attributes:
 
@@ -665,7 +665,7 @@ The `Features` attribute provides the following information:
 * `Configuration Files` is a tabular data set of all configuration files described in the feature.
 * `Dependencies` is a tabular data set of all dependent features described in the feature.
 
-==== Operations
+===== Operations
 
 * `addRepository(url)` adds the features repository with the `url`. The `url` can be a `name` as in the `feature:repo-add` command.
 * `addRepository(url, install)` adds the features repository with the `url` and automatically installs all bundles if `install` is true. The `url` can be a `name` like in the `feature:repo-add` command.
@@ -677,7 +677,7 @@ The `Features` attribute provides the following information:
 * `uninstallFeature(name)` uninstalls the feature with the `name`.
 * `uninstallFeature(name, version)` uninstalls the feature with the `name` and `version`.
 
-==== Notifications
+===== Notifications
 
 The FeatureMBean sends two kind of notifications (on which you can subscribe and react):
 

@@ -12,11 +12,11 @@
 // limitations under the License.
 //
 
-=== EJB
+==== EJB
 
 This section describes how to add support of EJB in Apache Karaf. It doesn't describe how to develop EJB applications.
 
-==== Apache OpenEJB
+===== Apache OpenEJB
 
 Apache Karaf doesn't provide "native" support of EJB (Enterprise Java Beans).
 
@@ -82,7 +82,7 @@ You can add EJB support installing the `openejb-core` feature:
 karaf@root()> feature:install openejb-core
 ----
 
-==== Apache KarafEE
+===== Apache KarafEE
 
 A custom distribution of Apache Karaf embedding OpenEJB is available in the Apache TomEE project.
 

@@ -12,7 +12,7 @@
 // limitations under the License.
 //
 
-=== WebContainer (JSP/Servlet)
+==== WebContainer (JSP/Servlet)
 
 Apache Karaf can act a complete WebContainer, fully supporting JSP/Servlet specification.
 
@@ -38,7 +38,7 @@ The `war` feature provides:
 * a set of console commands
 * a new war deployer
 
-==== Configuration
+===== Configuration
 
 The default port used by the WebContainer is 8181.
 
@@ -153,14 +153,14 @@ The following resources give you details about advanced `etc/jetty.xml` configur
 * http://wiki.eclipse.org/Jetty/Howto/Configure_SSL
 * http://wiki.eclipse.org/Jetty/Reference/jetty.xml_syntax
 
-==== Deploy
+===== Deploy
 
 Apache Karaf WebContainer is able to deploy:
 
 * pure OSGi WebApplication Bundle (WAB)
 * "classical" standard WebApplication aRchive (WAR)
 
-===== WAB (WebApplication Bundle)
+====== WAB (WebApplication Bundle)
 
 A WAB is a standard WAR or JAR archive containing at least the following properties in the MANIFEST:
 
@@ -178,7 +178,7 @@ For instance, the Apache Karaf manual (documentation) is available as a WAB that
 karaf@root()> bundle:install -s mvn:org.apache.karaf/manual/4.0.0/war
 ----
 
-===== WAR (WebApplication aRchive)
+====== WAR (WebApplication aRchive)
 
 Apache Karaf allows you to deploy directly WAR files without repackaging as WAB.
 
@@ -192,9 +192,9 @@ karaf@root()> bundle:install -s "webbundle:http://tomcat.apache.org/tomcat-7.0-d
 
 You can note the `webbundle` prefix, and the `Bundle-SymbolicName` and `Web-ContextPath` headers on the URL.
 
-==== Commands
+===== Commands
 
-===== `http:list`
+====== `http:list`
 
 The `http:list` lists the available Servlets deployed in the WebContainer.
 
@@ -215,7 +215,7 @@ The `State` is the current state of the Servlet (`Deployed` or `Undeployed`).
 
 The `Url` is the URL where the Servlet is available.
 
-===== `web:list`
+====== `web:list`
 
 The `web:list` command lists the WebApplication Bundles ("native" WAB or "wrapped WAR") deployed in the WebContainer.
 
@@ -228,7 +228,7 @@ ID  | State       | Web-State   | Level | Web-ContextPath | Name
 111 | Active      | Deployed    | 80    | /karaf-doc      | Apache Karaf :: Manual (4.0.0)
 ----
 
-===== `web:stop`
+====== `web:stop`
 
 The `web:stop` command stops a web application in the WebContainer. The `web:stop` command expects a `id` argument
 corresponding to the bundle ID (as displayed by the `web:list` command).
@@ -239,7 +239,7 @@ For instance, to stop the Apache Karaf manual web application:
 karaf@root()> web:stop 111
 ----
 
-===== `web:start`
+====== `web:start`
 
 The `web:start` command starts a web application in the WebContainer. The `web:start` command expects a `id` argument
 corresponding to the bundle ID (as displayed by the `web:list` command).
@@ -250,13 +250,13 @@ For instance, to start the Apache Karaf manual web application:
 karaf@root()> web:start 111
 ----
 
-==== JMX HttpMBean
+===== JMX HttpMBean
 
 On the JMX layer, you have a MBean dedicated to the manipulation of the Servlets: the HttpMBean.
 
 The ObjectName to use is `org.apache.karaf:type=http,name=*`.
 
-===== Attributes
+====== Attributes
 
 The `Servlets` attribute provides a tabular data providing the list of deployed Servlets including:
 
@@ -266,13 +266,13 @@ The `Servlets` attribute provides a tabular data providing the list of deployed 
 * `State` is the current Servlet state (`Deployed` or `Undeployed`).
 * `URL` is the URL of the Servlet (the Servlet context path).
 
-==== JMX WebMBean
+===== JMX WebMBean
 
 On the JMX layer, you have a MBean dedicated to the manipulation of the Web Applications: the WebMBean.
 
 The ObjectName to use is `org.apache.karaf:type=web,name=*`.
 
-===== Attributes
+====== Attributes
 
 The `WebBundles` attribute provides a tabular data providing the list of deployed Web Applications including:
 
@@ -283,7 +283,7 @@ The `WebBundles` attribute provides a tabular data providing the list of deploye
 * `Web-ContextPath` is the context path of the Web Application.
 * `Web-State` is the current status of the Web Application (`Deployed` or `Undeployed`).
 
-===== Operations
+====== Operations
 
 * `start(id)` starts the web context of the bundle with `id`.
 * `start(list)` starts the web context of the bundles with ID in the provided `list`.

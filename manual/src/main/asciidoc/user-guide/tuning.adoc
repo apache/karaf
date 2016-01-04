@@ -12,9 +12,9 @@
 // limitations under the License.
 //
 
-== Tuning
+=== Tuning
 
-=== Garbage Collection
+==== Garbage Collection
 
 Like any Java applications, Apache Karaf uses a JVM. An important feature of the JVM is the Garbage Collector.
 
@@ -46,7 +46,7 @@ memory leaks, and see the possible optimisation of the spaces and GC.
 
 You can find introduction about GC here: [http://www.oracle.com/webfolder/technetwork/tutorials/obe/java/gc01/index.html].
 
-==== Java 6
+===== Java 6
 
 If you have enough resources available on the machine, a good configuration may be:
 
@@ -61,7 +61,7 @@ It will give more resources to Apache Karaf, and avoid some perm space saturatio
 
 See http://www.oracle.com/technetwork/java/javase/gc-tuning-6-140523.html for details about Java 6 tuning.
 
-==== Java 7
+===== Java 7
 
 Java 7 introduces a new GC algorithm: the GC1.
 
@@ -74,11 +74,11 @@ See http://docs.oracle.com/javase/7/docs/technotes/guides/vm/G1.html for details
 
 You can find a good article about Java 7 tuning here: http://java-is-the-new-c.blogspot.de/2013/07/tuning-and-benchmarking-java-7s-garbage.html
 
-=== Threads
+==== Threads
 
 In high loaded system, the number of threads can be very large.
 
-==== WebContainer
+===== WebContainer
 
 If you use the Apache Karaf WebContainer, the Jetty connectors create threads to handle the incoming HTTP requests.
 
@@ -114,7 +114,7 @@ defines the following properties:
  this value, the status is "low on resources". In that case, a new connection timeout is applied: the `lowResourceMaxIdleTime`.
 * `Acceptors` defines the number of threads for incoming connections.
 
-==== Apache Camel
+===== Apache Camel
 
 For instance, if you use Apache Camel inside Apache Karaf, Camel components can create a lot of threads.
 
@@ -130,7 +130,7 @@ For instance, the following Camel configuration defines a pool creation strategy
 
 See the http://camel.apache.org for details.
 
-==== Apache CXF
+===== Apache CXF
 
 Apache CXF uses workqueues to handle server request/response.
 
@@ -145,7 +145,7 @@ On a workqueue, you can define the following properties about the threads:
 
 See the http://cxf.apache.org for details.
 
-=== System packages
+==== System packages
 
 The `etc/jre.properties` defines the packages directly provided by the JVM.
 

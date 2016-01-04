@@ -12,7 +12,7 @@
 // limitations under the License.
 //
 
-== Basic bundle creation using the Felix maven-bundle-plugin
+=== Basic bundle creation using the Felix maven-bundle-plugin
 
 Create a bundle instead of a normal jar by using a Maven POM file like this:
 
@@ -59,7 +59,7 @@ Create a bundle instead of a normal jar by using a Maven POM file like this:
 </project>
 ----
 
-=== Add extended information to bundles
+==== Add extended information to bundles
 
 Karaf supports a OSGI-INF/bundle.info file in a bundle.
 This file is extended description of the bundle.
@@ -85,7 +85,7 @@ You can display this extended information using:
 root@karaf> bundles:info
 ----
 
-=== Wiki Syntax
+==== Wiki Syntax
 
 Karaf supports some simple wiki syntax in bundle info files:
 
@@ -95,9 +95,9 @@ Karaf supports some simple wiki syntax in bundle info files:
 [http://....] : links
 ----
 
-== Creating bundles for non OSGi third party dependencies
+=== Creating bundles for non OSGi third party dependencies
 
-=== Dynamically wrapping jars
+==== Dynamically wrapping jars
 
 Karaf supports the wrap: protocol execution.
 
@@ -121,7 +121,7 @@ root@karaf> bundles:install 'wrap:mvn:commons-lang/commons-lang/2.4$Bundle-Symbo
 <bundle>wrap:mvn:commons-lang/commons-lang/2.4$Bundle-SymbolicName=commons-lang&amp;Bundle-Version=2.4</bundle>
 ----
 
-=== Statically bundling jars
+==== Statically bundling jars
 
 You can also create a wrap bundle for a third party dependency.
 This bundle is simply a Maven POM that shades an existing jar and package into a jar bundle.

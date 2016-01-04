@@ -12,7 +12,7 @@
 // limitations under the License.
 //
 
-=== Naming (JNDI)
+==== Naming (JNDI)
 
 The Apache Karaf Naming (JNDI) is an optional enterprise feature.
 
@@ -29,7 +29,7 @@ You have two parts in the Apache Karaf JNDI support:
 * a fully compliant implementation of the OSGi Alliance JNDI Service specification.
 * a more "regular" JNDI context, containing different names that you can administrate.
 
-==== OSGi Services Registry and JNDI
+===== OSGi Services Registry and JNDI
 
 The OSGi Service Registry provides a centralized register/query capabilities for OSGi services.
 
@@ -51,7 +51,7 @@ Context ctx = new InitialContext();
 Runnable r = (Runnable) ctx.lookup("osgi:service/java.lang.Runnable");
 ----
 
-==== JNDI service
+===== JNDI service
 
 Apache Karaf also supports regular JNDI, including a directoy system where you can register name bindings, sub-context, etc.
 
@@ -65,11 +65,11 @@ Runnable r = (Runnable) ctx.lookup("this/is/the/name");
 It also allows you to bind some OSGi services as "pure" JNDI name. In that case, you don't have to use the specific
 `osgi:service` scheme.
 
-==== Commands
+===== Commands
 
 Apache Karaf provides specific commands to manipulate the JNDI service.
 
-===== `jndi:names`
+====== `jndi:names`
 
 The `jndi:names` command lists all JNDI names. It groups both the JNDI names from the `osgi:service` scheme and the
 regular JNDI names:
@@ -102,7 +102,7 @@ The `jndi:names` lists only names (the full qualified name). It means that the e
 To display all JNDI sub-contexts (empty or not), you can use the `jndi:contexts` command.
 ====
 
-===== `jndi:contexts`
+====== `jndi:contexts`
 
 The `jndi:contexts` command lists all JNDI sub-contexts:
 
@@ -114,7 +114,7 @@ other/context
 foo/bar
 ----
 
-===== `jndi:create`
+====== `jndi:create`
 
 The `jndi:create` command creates a new JNDI sub-context:
 
@@ -122,7 +122,7 @@ The `jndi:create` command creates a new JNDI sub-context:
 karaf@root()> jndi:create my/company
 ----
 
-===== `jndi:delete`
+====== `jndi:delete`
 
 The `jndi:delete` command deletes a JNDI sub-context:
 
@@ -130,7 +130,7 @@ The `jndi:delete` command deletes a JNDI sub-context:
 karaf@root()> jndi:delete my/company
 ----
 
-===== `jndi:alias`
+====== `jndi:alias`
 
 The `jndi:alias` command creates a new JNDI name (alias) with an existing one.
 
@@ -162,7 +162,7 @@ alias/jndi/service | org.apache.karaf.jndi.internal.JndiServiceImpl
 The `jndi:alias` automatically creates all required JNDI sub-contexts.
 ====
 
-===== `jndi:bind`
+====== `jndi:bind`
 
 The `jndi:bind` command binds an OSGi service with a JNDI name.
 
@@ -179,7 +179,7 @@ osgi:service/jndi | org.apache.karaf.jndi.internal.JndiServiceImpl
 services/kar      | org.apache.karaf.kar.internal.KarServiceImpl
 ----
 
-===== `jndi:unbind`
+====== `jndi:unbind`
 
 The `jndi:unbind` command unbind a given JNDI name:
 
@@ -201,20 +201,20 @@ osgi:service/jndi | org.apache.karaf.jndi.internal.JndiServiceImpl
 It's not possible to unbind a name from the `osgi:service` schema, as it's linked to a OSGi service.
 ====
 
-==== JMX JndiMBean
+===== JMX JndiMBean
 
 The JMX JndiMBean provides the JNDI names, and the operations to manipulate the JNDI service.
 
 The object name to use is `org.apache.karaf:type=jndi,name=*`.
 
-===== Attributes
+====== Attributes
 
 The `Names` attribute provides a map containing all JNDI names and class names from both `osgi:service` scheme
 and the regular JNDI service.
 
 The `Contexts` attribute provides a list containing all JNDI sub-contexts.
 
-===== Operations
+====== Operations
 
 * `getNames(context)` provides a map containing JNDI names and class names in a given JNDI sub-context.
 * `create(context)` creates a new JNDI sub-context.

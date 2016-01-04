@@ -12,6 +12,8 @@
 // limitations under the License.
 //
 
+== Overview
+
 Apache Karaf is a modern and polymorphic container.
 
 Karaf can be used standalone as a container, supporting a wide range of applications and technologies.

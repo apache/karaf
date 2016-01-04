@@ -12,7 +12,7 @@
 // limitations under the License.
 //
 
-=== DataSources (JDBC)
+==== DataSources (JDBC)
 
 The Apache Karaf DataSources (JDBC) is an optional enterprise feature.
 
@@ -41,9 +41,9 @@ This feature provides an OSGi service to create/delete JDBC datasources in the c
 
 This JDBC OSGi service can be manipulated programmatically (see the developer guide for details), using the `jdbc:*` commands, or using the JDBC MBean.
 
-==== Commands
+===== Commands
 
-===== `jdbc:ds-create`
+====== `jdbc:ds-create`
 
 The `jdbc:ds-create` command automatically creates a datasource definition file by leveraging pax-jdbc.
 
@@ -97,7 +97,7 @@ karaf@root()> jdbc:ds-create -dn derby -dbName test -url jdbc:derby:test test
 
 We can see that this command created a configuration PID containing the datasource properties.
 
-==== `jdbc:ds-delete`
+===== `jdbc:ds-delete`
 
 The `jdbc:ds-delete` command deletes a datasource.
 
@@ -105,7 +105,7 @@ The `jdbc:ds-delete` command deletes a datasource.
 karaf@root()> jdbc:ds-delete test
 ----
 
-==== `jdbc:ds-list`
+===== `jdbc:ds-list`
 
 The `jdbc:ds-list` command lists the JDBC datasources:
 
@@ -116,7 +116,7 @@ Name | Product | Version | URL | Status
 
 ----
 
-==== `jdbc:ds-info`
+===== `jdbc:ds-info`
 
 The `jdbc:ds-info` command provides details about a JDBC datasource:
 
@@ -132,7 +132,7 @@ driver.name    | Apache Derby Embedded JDBC Driver
 url            | jdbc:derby:test
 ----
 
-==== `jdbc:execute`
+===== `jdbc:execute`
 
 The `jdbc:execute` command executes a SQL query that doesn't return any result on a given JDBC datasource.
 
@@ -151,7 +151,7 @@ karaf@root()> jdbc:execute test "insert into person(name, nick) values('foo','ba
 karaf@root()> jdbc:execute test "insert into person(name, nick) values('test','test')"
 ----
 
-==== `jdbc:query`
+===== `jdbc:query`
 
 The `jdbc:query` command is similar to the `jdbc:execute` one but it displays the query result.
 
@@ -165,7 +165,7 @@ bar        | foo
 test       | test
 ----
 
-==== `jdbc:tables`
+===== `jdbc:tables`
 
 The `jdbc:tables` command displays all tables available on a given JDBC datasource:
 
@@ -198,13 +198,13 @@ REF_GENERATION | TYPE_NAME | TABLE_NAME       | TYPE_CAT | REMARKS | TYPE_SCHEM 
                |           | PERSON           |          |         |            | TABLE        | APP         |           |
 ----
 
-==== JMX JDBC MBean
+===== JMX JDBC MBean
 
 The JMX JDBC MBean provides the JDBC datasources, and the operations to manipulate datasources and database.
 
 The object name to use is `org.apache.karaf:type=jdbc,name=*`.
 
-===== Attributes
+====== Attributes
 
 The `Datasources` attribute provides a tabular data of all JDBC datasource, containing:
 
@@ -213,7 +213,7 @@ The `Datasources` attribute provides a tabular data of all JDBC datasource, cont
 * `url` is the JDBC URL used by the datasource
 * `version` is the database version backend.
 
-===== Operations
+====== Operations
 
 * `create(name, type, jdbcDriverClassName, version, url, user, password, installBundles)` creates a JDBC datasource (the arguments correspond to the options of the `jdbc:create` command).
 * `delete(name)` deletes a JDBC datasource.

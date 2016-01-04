@@ -12,7 +12,7 @@
 // limitations under the License.
 //
 
-=== JMS
+==== JMS
 
 The Apache Karaf MOM (Messaging Oriented Middleware/JMS) is an optional enterprise feature.
 
@@ -52,9 +52,9 @@ and perform JMS operations (send or consume messages, get information about a JM
 
 This JMS OSGi service can be manipulated programmatically (see the developer guide for details), using the `jms:*` commands, or using the JMS MBean.
 
-==== Commands
+===== Commands
 
-===== `jms:create`
+====== `jms:create`
 
 The `jms:create` command creates a JMS connection factory in the Apache Karaf container. It automatically creates a
 blueprint XML file in the `deploy` folder containing the JMS connection factory definition corresponding
@@ -128,7 +128,7 @@ By default, the `jms:create` command constructs a JNDI name for the connection f
 
 It means that the connection factory name to use for the other `jms:*` commands is `/jms/[name]`.
 
-===== `jms:delete`
+====== `jms:delete`
 
 The `jms:delete` command deletes a JMS connection factory. The `name` argument is the name that you used at creation time:
 
@@ -136,7 +136,7 @@ The `jms:delete` command deletes a JMS connection factory. The `name` argument i
 karaf@root()> jms:delete test
 ----
 
-===== `jms:connectionfactories`
+====== `jms:connectionfactories`
 
 The `jms:connectionfactories` command lists the JMS connection factories:
 
@@ -147,7 +147,7 @@ JMS Connection Factory
 /jms/test     
 ----
 
-===== `jms:info`
+====== `jms:info`
 
 The `jms:info` command provides details about the JMS connection factory:
 
@@ -163,7 +163,7 @@ You can see the JMS broker product and version.
 
 If the JMS broker requires an authentication, you can use the `-u` (`--username`) and `-p` (`--password`) options.
 
-===== `jms:queues`
+====== `jms:queues`
 
 The `jms:queues` command lists the JMS queues available on a JMS broker. For instance:
 
@@ -184,7 +184,7 @@ Depending of the JMS connection factory type, this command may not work.
 For now, the command works only with Apache ActiveMQ.
 ====
 
-===== `jms:topics`
+====== `jms:topics`
 
 The `jms:topics` command lists the JMS topics available on a JMS broker. For instance:
 
@@ -205,7 +205,7 @@ Depending of the JMS connection factory type, this command may not work.
 For now, the command works only with Apache ActiveMQ.
 ====
 
-===== `jms:send`
+====== `jms:send`
 
 The `jms:send` command sends a message to a given JMS queue.
 
@@ -217,7 +217,7 @@ karaf@root()> jms:send /jms/test MyQueue "Hello World"
 
 If the JMS broker requires an authentication, you can use the `-u` (`--username`) and `-p` (`--password`) options.
 
-===== `jms:consume`
+====== `jms:consume`
 
 The `jms:consume` command consumes messages from a JMS queue.
 
@@ -238,7 +238,7 @@ The `jms:consume` command just consumes (so removes) messages from a JMS queue. 
 If you want to see the details of messages, you can use the `jms:browse` command.
 ====
 
-===== `jms:count`
+====== `jms:count`
 
 The `jms:count` command counts the number of pending messages into a JMS queue.
 
@@ -253,7 +253,7 @@ Messages Count
 
 If the JMS broker requires an authentication, you can use the `-u` (`--username`) and `-p` (`--password`) options.
 
-===== `jms:browse`
+====== `jms:browse`
 
 The `jms:browse` command browses a JMS queue and display details about messages.
 
@@ -283,7 +283,7 @@ If you want to browse only some messages, you can define a selector using the `-
 
 If the JMS broker requires an authentication, you can use the `-u` (`--username`) and `-p` (`--password`) options.
 
-===== `jms:move`
+====== `jms:move`
 
 The `jms:move` command consumes all messages from a JMS queue and send it to another one.
 
@@ -294,17 +294,17 @@ karaf@root()> jms:move /jms/test MyQueue AnotherQueue
 3 message(s) moved
 ----
 
-==== JMX JMS MBean
+===== JMX JMS MBean
 
 The JMX JMS MBean provides the attributes and operations to manipulate the JMS connection factories and JMS messages.
 
 The object name to use is `org.apache.karaf:type=jms,name=*`.
 
-===== Attributes
+====== Attributes
 
 The `Connectionfactories` attribute provides the list of all JMS connection factories names.
 
-===== Operations
+====== Operations
 
 * `create(name, type, url)` creates a JMS connection factory.
 * `delete(name)` deletes a JMS connection factory.

@@ -12,20 +12,28 @@
 // limitations under the License.
 //
 
+== Update Notes (from Karaf 3.x to 4.x versions)
+
 This section is dedicated to users of previous Apache Karaf version.
 
-NB: for the users upgrading from Karaf 2.x, please see the "Update Notes (from 2.x to 3.x)" in the Karaf 3.x
+[NOTE]
+====
+For the users upgrading from Karaf 2.x, please see the "Update Notes (from 2.x to 3.x)" in the Karaf 3.x
 documentation first.
+====
 
-NB: Karaf 4.x supports Java8.
+[NOTE]
+====
+Karaf 4.x supports Java8.
+====
 
-== Distributions
+=== Distributions
 
 Apache Karaf 4.x is available as tar.gz and zip archives. The content is the same and works on either Unix or Windows
 platforms.
 The `bin` folder contains both sh and bat scripts.
 
-== Commands
+=== Commands
 
 Karaf 4 commands are close to the ones provided in Karaf 3.
 
@@ -106,7 +114,7 @@ To simplify the generation of the code and OSGi headers, Karaf 4.x provides the 
 
 Take a look in the developer guide for the command development "new style" details.
 
-== Features repositories
+=== Features repositories
 
 Karaf 4.x provides:
 
@@ -116,7 +124,7 @@ Karaf 4.x provides:
 * `mvn:org.apache.karaf.features/standard/4.0.x/xml/features`
 * `mvn:org.apache.karaf.features/static/4.0.x/xml/features`
 
-== Features resolver
+=== Features resolver
 
 Apache Karaf 4.x brings a complete new feature resolver. The purpose is to simplify the features installation and
 lifecycle.
@@ -127,7 +135,7 @@ It allows Karaf to automatically install bundles required by features.
 For "old style" feature (features XML using namespace from Karaf 2.x or 3.x), this feature is not enabled.
 As soon as you use a "new style" feature (with namespace 1.3.0 used by Karaf 4.x), this feature is enabled.
 
-== Namespaces
+=== Namespaces
 
 Apache Karaf 4.x brings updated version of the namespaces:
 
@@ -144,7 +152,7 @@ Apache Karaf 4.x brings updated version of the namespaces:
 ** `karaf-shell-1.0.0.xsd`
 ** `karaf-shell-1.1.0.xsd`
 
-== Maven plugin
+=== Maven plugin
 
 A cleanup of the goals provided by {{karaf-maven-plugin}} has been done.
 
@@ -162,7 +170,7 @@ Now the provided goals are:
 * `karaf:client` to interact with a remote Karaf instance
 * `karaf:deploy` to deploy an application to a remote Karaf instance
 
-== Update guide
+=== Update guide
 
 We encourage users to start a fresh Apache Karaf 4.x container.
 

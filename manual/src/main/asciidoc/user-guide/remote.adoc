@@ -12,14 +12,14 @@
 // limitations under the License.
 //
 
-== Remote
+=== Remote
 
 Apache Karaf supports a complete remote mechanism allowing you to remotely connect to a running Apache Karaf instance.
 More over, you can also browse, download, and upload files remotely to a running Apache Karaf instance.
 
 Apache Karaf embeds a complete SSHd server.
 
-=== SSHd server
+==== SSHd server
 
 When you start Apache Karaf, it enables a remote console that can be accessed over SSH.
 
@@ -30,7 +30,7 @@ container and services running inside of it. As the "local" console, the remote 
 In addition of the remote console, Apache Karaf also provides a remote filesystem. This remote filesystem can be accessed
 using a SCP/SFTP client.
 
-==== Configuration
+===== Configuration
 
 The configuration of the SSHd server is stored in the `etc/org.apache.karaf.shell.cfg` file:
 
@@ -141,9 +141,9 @@ karaf@root()> bundle:restart -f org.apache.karaf.shell.ssh
 
 The Apache Karaf SSHd server supports key/agent authentication and password authentication.
 
-==== Console clients
+===== Console clients
 
-===== System native clients
+====== System native clients
 
 The Apache Karaf SSHd server is a pure SSHd server, similar to OpenSSH daemon.
 
@@ -178,7 +178,7 @@ On Windows, you can use Putty, Kitty, etc.
 
 If you don't have SSH client installed on your machine, you can use Apache Karaf client.
 
-===== `ssh:ssh` command
+====== `ssh:ssh` command
 
 Apache Karaf itself provides a SSH client. When you are on the Apache Karaf console, you have the `ssh:ssh` command:
 
@@ -262,7 +262,7 @@ Last login: Sun Sep  8 19:21:12 2013
 user@server:~$
 ----
 
-===== Apache Karaf client
+====== Apache Karaf client
 
 The `ssh:ssh` command requires to be run into a running Apache Karaf console.
 
@@ -333,7 +333,7 @@ Welcome to Ubuntu 13.10 (GNU/Linux 3.11.0-13-generic x86_64)
 Last login: Tue Dec  3 18:18:31 2013 from localhost
 ----
 
-===== Logout
+====== Logout
 
 When you are connected to a remote Apache Karaf console, you can logout using:
 
@@ -341,14 +341,14 @@ When you are connected to a remote Apache Karaf console, you can logout using:
  the Apache Karaf instance (as CTRL-D does when used on a local console).
 * using `shell:logout` command (or simply `logout`)
 
-==== Filsystem clients
+===== Filsystem clients
 
 Apache Karaf SSHd server also provides complete fileystem access via SSH. For security reason, the available filesystem
 is limited to `KARAF_BASE` directory.
 
 You can use this remote filesystem with any SCP/SFTP compliant clients.
 
-===== Native SCP/SFTP clients
+====== Native SCP/SFTP clients
 
 On Unix, you can directly use `scp` command to download/upload files to the Apache Karaf filesystem. For instance,
 to retrieve the `karaf.log` file remotely:
@@ -397,7 +397,7 @@ You can also use graphic client like `filezilla`, `gftp`, `nautilus`, etc.
 
 On Windows, you can use `filezilla`, `WinSCP`, etc.
 
-===== Apache Maven
+====== Apache Maven
 
 Apache Karaf `system` folder is the Karaf repository, that use a Maven directory structure. It's where Apache Karaf
 looks for the artifacts (bundles, features, kars, etc).
@@ -415,7 +415,7 @@ mvn deploy:deploy-file -Dfile=org.apache.servicemix.bundles.facebook4j-2.0.2_1.j
 If you want to turn Apache Karaf as a simple Maven repository, you can use link:http://karaf.apache.org/index/subprojects/cave.html[Apache Karaf Cave].
 ====
 
-=== JMX MBeanServer
+==== JMX MBeanServer
 
 Apache Karaf provides a JMX MBeanServer.
 

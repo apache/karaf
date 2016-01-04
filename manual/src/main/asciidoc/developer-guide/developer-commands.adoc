@@ -12,14 +12,14 @@
 // limitations under the License.
 //
 
-== Developer commands
+=== Developer commands
 
 As you can see in the users guide, Apache Karaf is an enterprise ready OSGi container.
 
 It's also a container designed to simplify the life for developers and administrators to get details about the
 running container.
 
-=== Dump
+==== Dump
 
 If you encounter issues like performance degradations, weird behaviour, it could be helpful to have a kind of snapshot
 about the current activity of the container.
@@ -65,7 +65,7 @@ karaf@root()> dev:dump-create -d /tmp/mydump
 Diagnostic dump created.
 ----
 
-=== Diagnostic
+==== Diagnostic
 
 It's not always easy for the developers to understand why a bundle is not active.
 
@@ -108,7 +108,7 @@ Unsatisfied Requirements:
 [81.0] osgi.wiring.package; (&(osgi.wiring.package=org.mortbay.resource)(version>=6.1.0)(!(version>=7.0.0)))
 ----
 
-=== Dynamic import
+==== Dynamic import
 
 The `bundle:dynamic-import` command allows you to enable or disable the dynamic import of a given bundle:
 
@@ -123,7 +123,7 @@ bundles to be considered for a wiring import to be added.
 
 The `bundle:dynamic-import` command allows or doesn't allow this behaviour.
 
-=== OSGi framework
+==== OSGi framework
 
 The `system:framework` command allows to display the current OSGi framework in use, and enable/disable debugging inside the OSGi framework.
 
@@ -136,7 +136,7 @@ karaf@root()> system:framework -nodebug
 Disabling debug for OSGi framework (felix)
 ----
 
-=== Stack traces printout
+==== Stack traces printout
 
 The `shell:stack-traces-print` command prints the full stack trace when the execution of a command
 throws an exception.
@@ -187,7 +187,7 @@ karaf@root()> bundle:start
 Error executing command: Access to system bundle 0 denied. You can override with -f
 ----
 
-=== Bundle tree
+==== Bundle tree
 
 The `bundle:tree-show` command shows the bundle dependency tree based on the wiring information of a given single bundle
 ID.
@@ -220,7 +220,7 @@ org.ops4j.pax.url.wrap [40]
 +- org.ops4j.base.lang [41]
 ----
 
-=== Watch
+==== Watch
 
 The `bundle:watch` command enables watching the local Maven repository for updates on bundles.
 If the bundle file changes on the Maven repository, Apache Karaf will automatically update the bundle.
@@ -229,9 +229,10 @@ The `bundle:watch` allows you to configure a set of URLs to monitore. All bundle
 given URL will be automatically updated. It avoids needing to manually update the bundles or even copy the bundle to the
 system folder.
 
-{warning}
+[NOTE]
+====
 Only Maven based URLs and Maven SNAPSHOTs will actually be updated automatically.
-{warning}
+====
 
 The following command:
 

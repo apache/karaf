@@ -12,16 +12,16 @@
 // limitations under the License.
 //
 
-== Archetypes
+=== Archetypes
 
 Karaf provides archetypes to easily create commands, manage features or repository and create a kar archive.
 This section describes each of them and explain How to use it.
 
-=== Create a command (karaf-command-archetype)
+==== Create a command (karaf-command-archetype)
 
 This archetype creates a Maven skeleton project that you will use to develop new Karaf commands.
 
-==== Command line
+===== Command line
 
 Using the command line, we can create our project:
 
@@ -36,7 +36,7 @@ mvn archetype:generate \
   -Dpackage=com.mycompany.package
 ----
 
-==== Additional parameters
+===== Additional parameters
 
 During the maven creation process, additional questions will be asked on the console :
 
@@ -46,7 +46,7 @@ This description will be displayed in the Karaf console when the parameter --hel
 * Define value for property 'scope': this value represents the family name to which the command belongs
 (features, osgi, admin, jaas, ...)
 
-==== Result of Maven command execution
+===== Result of Maven command execution
 
 ----
 [INFO] Scanning for projects...
@@ -106,12 +106,12 @@ scope: my
 
 Next, you can import your project in Eclipse/IntelliJ and developp the Karaf command.
 
-=== Create an OSGi bundle (karaf-bundle-archetype)
+==== Create an OSGi bundle (karaf-bundle-archetype)
 
 This archetype creates a Maven skeleton to create an OSGi bundle, including a bundle Activator (a special callback
 class for bundle start/stop).
 
-==== Command line
+===== Command line
 
 Using the command line, we can create our project:
 
@@ -126,7 +126,7 @@ mvn archetype:generate \
     -Dpackage=com.mycompany.package
 ----
 
-==== Result of Maven command execution
+===== Result of Maven command execution
 
 ----
 [INFO] Scanning for projects...
@@ -174,12 +174,12 @@ package: com.mycompany.package
 [INFO] ------------------------------------------------------------------------
 ----
 
-=== Create an OSGi blueprint bundle (karaf-blueprint-archetype)
+==== Create an OSGi blueprint bundle (karaf-blueprint-archetype)
 
 This archetype creates a Maven skeleton project to create an OSGi blueprint bundle, including a sample bean exposed as
 an OSGi service in the blueprint XML descriptor.
 
-==== Command line
+===== Command line
 
 Using the command line, we can create our project:
 
@@ -194,7 +194,7 @@ mvn archetype:generate \
     -Dpackage=com.mycompany.blueprint
 ----
 
-==== Result of Maven command execution
+===== Result of Maven command execution
 
 ----
 [INFO] Scanning for projects...
@@ -242,12 +242,12 @@ package: com.mycompany.package
 [INFO] ------------------------------------------------------------------------
 ----
 
-=== Create a features XML (karaf-feature-archetype)
+==== Create a features XML (karaf-feature-archetype)
 
 This archetype creates a Maven skeleton project which create a features XML file, using the dependencies that you define
 in the POM.
 
-==== Command line
+===== Command line
 
 Using the command line, we can create our project:
 
@@ -262,7 +262,7 @@ mvn archetype:generate \
     -Dpackage=my.company.package
 ----
 
-==== Result of maven command execution
+===== Result of maven command execution
 
 ----
 [INFO] Scanning for projects...
@@ -310,11 +310,11 @@ package: com.mycompany.package
 [INFO] ------------------------------------------------------------------------
 ----
 
-=== Create a KAR file (karaf-kar-archetype)
+==== Create a KAR file (karaf-kar-archetype)
 
 This archetype creates a Maven skeleton project including a features XML sample, used to generate a KAR file.
 
-==== Command line
+===== Command line
 
 Using the command line, we can create our project:
 
@@ -329,7 +329,7 @@ mvn archetype:generate \
     -Dpackage=com.mycompany.package
 ----
 
-==== Result of maven command execution
+===== Result of maven command execution
 
 ----
 [INFO] Scanning for projects...

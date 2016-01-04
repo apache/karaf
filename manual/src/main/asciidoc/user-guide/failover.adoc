@@ -12,7 +12,7 @@
 // limitations under the License.
 //
 
-=== HA/failover and cluster
+==== HA/failover and cluster
 
 Apache Karaf natively provides a failover mechanism. It uses a kind of master/slave topology where one instance is active
 and the others are in standby.
@@ -22,7 +22,7 @@ If you are looking for cluster of Apache Karaf instances (active/active), [Apach
 Karaf provides failover capability using either a simple lock file or a JDBC locking mechanism.
 In both cases, a container-level lock system allows bundles to be preloaded into the slave Karaf instance in order to provide faster failover performance.
 
-==== HA/failover (active/passive)
+===== HA/failover (active/passive)
 
 The Apache Karaf failover capability uses a lock system.
 
@@ -37,7 +37,7 @@ When a first instance starts, if the lock is available, it takes the lock and be
 If a second instance starts, it tries to acquire the lock. As the lock is already hold by the master, the instance becomes
 a slave, in standby mode (not active). A slave periodically check if the lock has been released or not.
 
-===== Filesystem lock
+====== Filesystem lock
 
 The Apache Karaf instances share a lock on the filesystem. It means that the filesystem storing the lock has to be accessible
 to the different instances (using SAN, NFS, ...).
@@ -56,7 +56,7 @@ karaf.lock.delay=10000
 * `karaf.lock.dir` property contains the location where the lock will be written. All instances have to share the same lock.
 * `karaf.lock.delay` property is the interval period (in milliseconds) to check if the lock has been released or not.
 
-===== Database lock
+====== Database lock
 
 It's not always possible and easy to have a shared filesystem between multiple Apache Karaf instances.
 
@@ -113,7 +113,7 @@ If the connection to the database is lost, the master instance tries to graceful
 become the master when the database is back. The former master instance will required a manual restart.
 ====
 
-====== Lock on Oracle
+*Lock on Oracle*
 
 Apache Karaf supports Oracle database for locking. The lock implementation class name to use is `org.apache.karaf.main.lock.OracleJDBCLock`:
 
@@ -137,7 +137,7 @@ The `karaf.lock.jdbc.url` property contains a JDBC URL which requires an active 
 database instance first before using the lock mechanism.
 ====
 
-====== Lock on Derby
+*Lock on Derby*
 
 Apache Karaf supports Apache Derby database for locking. The lock implementation class name to use is `org.apache.karaf.main.lock.DerbyJDBCLock`:
 
@@ -155,7 +155,7 @@ karaf.lock.jdbc.timeout=30
 
 The Derby JDBC driver file name has to be copied in the `lib/ext` folder.
 
-====== Lock on MySQL
+*Lock on MySQL*
 
 Apache Karaf supports MySQL database for locking. The lock implementation class name to use is `org.apache.karaf.main.lock.MySQLJDBCLock`:
 
@@ -173,7 +173,7 @@ karaf.lock.jdbc.timeout=30
 
 The MySQL JDBC driver file name has to be copied in `lib/ext` folder.
 
-====== Lock on PostgreSQL
+*Lock on PostgreSQL*
 
 Apache Karaf supports PostgreSQL database for locking. The lock implementation class name to use is `org.apache.karaf.main.lock.PostgreSQLJDBCLock`:
 
@@ -191,7 +191,7 @@ karaf.lock.jdbc.timeout=0
 
 The PostgreSQL JDBC driver file has to be copied in the `lib/ext` folder.
 
-====== Lock on Microsoft SQLServer
+*Lock on Microsoft SQLServer*
 
 Apache Karaf supports Microsoft SQLServer database for locking. The lock implementation class name to use is `org.apache.karaf.main.lock.SQLServerJDBCLock`:
 
@@ -211,7 +211,7 @@ karaf.lock.jdbc.timeout=30
 
 The JTDS JDBC driver file has to be copied in the `lib/ext` folder.
 
-===== Container-level locking
+====== Container-level locking
 
 Apache Karaf supports container-level locking. It allows bundles to be preloaded into the slave instance.
 Thanks to that, switching to a slave instance is very fast as the slave instance already contains all required bundles.
@@ -248,7 +248,7 @@ Using 'hot' standby means that the slave instances are running and bind some por
 to update the slave configuration to bind the services (ssh, JMX, etc) on different port numbers.
 ====
 
-==== Cluster (active/active)
+===== Cluster (active/active)
 
 Apache Karaf doesn't natively support cluster. By cluster, we mean several active instances, synchronized with each other.
 

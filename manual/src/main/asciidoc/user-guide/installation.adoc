@@ -12,11 +12,11 @@
 // limitations under the License.
 //
 
-== Installation
+=== Installation
 
 Apache Karaf is a lightweight container, very easy to install and administrate, on both Unix and Windows platforms.
 
-=== Requirements
+==== Requirements
 
 *Hardware:*
 
@@ -32,7 +32,7 @@ Apache Karaf is a lightweight container, very easy to install and administrate, 
 * Java SE 1.7.x or greater (http://www.oracle.com/technetwork/java/javase/).
 * The JAVA_HOME environment variable must be set to the directory where the Java runtime is installed,
 
-=== Using Apache Karaf binary distributions
+==== Using Apache Karaf binary distributions
 
 Apache Karaf is available in two distributions, both as a tar.gz and zip archives.
 
@@ -44,15 +44,21 @@ It means that Apache Karaf minimal distribution requires an Internet connection 
 The features provided by the "minimal" distribution are exactly the same as in the "default" distribution, the difference
 is that the minimal distribution will download the features from Internet.
 
-==== Installation on Windows platform
+===== Installation on Windows platform
 
-NB: the JAVA_HOME environment variable has to be correctly defined. To accomplish that, press Windows key and Break key together, switch to "Advanced" tab and click on "Environment Variables".
+[NOTE]
+====
+The JAVA_HOME environment variable has to be correctly defined. To accomplish that, press Windows key and Break key together, switch to "Advanced" tab and click on "Environment Variables".
+====
 
 . From a browser, navigate to http://karaf.apache.org/index/community/download.html.
 . Download Apache Karaf binary distribution in the zip format: `apache-karaf-4.0.0.zip`.
 . Extract the files from the zip file into a directory of your choice (it's the `KARAF_HOME`.
 
-NB: remember the restrictions concerning illegal characters in Java paths, e.g. \!, % etc.
+[NOTE]
+====
+Remember the restrictions concerning illegal characters in Java paths, e.g. \!, % etc.
+====
 
 [NOTE]
 ====
@@ -65,9 +71,11 @@ subst S: "C:\your very % problematic path!\KARAF"
 so your Karaf root directory is S: --- which works for sure and is short to type.
 ====
 
-==== Installation on Unix platforms
+===== Installation on Unix platforms
 
-NB: the JAVA_HOME environment variable has to be correctly defined. Check the current value using
+[NOTE]
+====
+The JAVA_HOME environment variable has to be correctly defined. Check the current value using
 
 ----
 echo $JAVA_HOME
@@ -78,6 +86,7 @@ If it's not correct, fix it using:
 ----
 export JAVA_HOME=....
 ----
+====
 
 . From a browser, navigate to http://karaf.apache.org/index/community/download.html.
 . Download Apache Karaf binary distribution in the tar.gz format: `apache-karaf-4.0.0.tar.gz`.
@@ -88,9 +97,12 @@ gunzip apache-karaf-4.0.0.tar.gz
 tar xvf apache-karaf-4.0.0.tar
 ----
 
-NB: remember the restrictions concerning illegal characters in Java paths, e.g. \!, % etc.
+[NOTE]
+====
+Remember the restrictions concerning illegal characters in Java paths, e.g. \!, % etc.
+====
 
-=== Post-Installation steps
+==== Post-Installation steps
 
 Thought it is not always required, it is strongly advised to set up the `JAVA_HOME` environment property to point to the JDK you want Apache Karaf to use before starting it.
 This property is used to locate the `java` executable and should be configured to point to the home directory of the Java SE 7 installation.
@@ -103,7 +115,7 @@ You can define your own directory layout, by using some Karaf environment variab
 * `KARAF_ETC` is the location of the etc folder, where Karaf stores configuration files.
 * `KARAF_BASE` is the Karaf base folder. By default `KARAF_BASE` is the same as `KARAF_HOME`.
 
-=== Building from Sources
+==== Building from Sources
 
 If you intend to build Apache Karaf from the sources, the requirements are a bit different:
 
@@ -116,7 +128,7 @@ If you intend to build Apache Karaf from the sources, the requirements are a bit
 * Java SE Development Kit 1.7.x or greater (http://www.oracle.com/technetwork/java/javase/).
 * Apache Maven 3.0.4 or greater (http://maven.apache.org/download.html).
 
-==== Building on Windows platform
+===== Building on Windows platform
 
 You can get the Apache Karaf sources from:
 
@@ -133,15 +145,18 @@ Use Apache Maven to build Apache Karaf:
 mvn clean install
 ----
 
-NB: you can speed up the build by bypassing the unit tests:
+[NOTE]
+====
+You can speed up the build by bypassing the unit tests:
 
 ----
 mvn clean install -DskipTests
 ----
+====
 
 Now, you can find the built binary distribution in `assemblies\apache-karaf\target\apache-karaf-4.0.0.zip`.
 
-==== Building on Unix platforms
+===== Building on Unix platforms
 
 You can get the Apache Karaf sources from:
 
@@ -158,10 +173,13 @@ Use Apache Maven to build Apache Karaf:
 mvn clean install
 ----
 
-NB: you can speed up the build by bypassing the unit tests:
+[NOTE]
+====
+You can speed up the build by bypassing the unit tests:
 
 ----
 mvn clean install -DskipTests
 ----
+====
 
 Now, you can find the built binary distribution in `assemblies/apache-karaf/target/apache-karaf-4.0.0.tar.gz`.

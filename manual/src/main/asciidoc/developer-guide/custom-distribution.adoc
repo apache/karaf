@@ -12,7 +12,7 @@
 // limitations under the License.
 //
 
-== Custom distributions
+=== Custom distributions
 
 As Karaf is an OSGi container, it's heavily used as as application and middleware kernel.
 
@@ -27,7 +27,7 @@ This custom distribution could contain:
 * renamed or specific scripts in the bin folder
 * system documentation files
 
-=== Maven assembly
+==== Maven assembly
 
 The recommended way to create a Karaf server assembly is to use the karaf-assembly packaging with the karaf-maven-plugin.
 This assembles a server from the maven dependencies in the project pom.  After explanation of the configuration options
@@ -39,7 +39,7 @@ limitations we have to simulate rather than use the karaf-assembly packaging.
 This packaging creates tar.gz and zip archives containing the assembled server.
 They are identical except that zip archives don't unpack with appropriate unix file permissions for the scripts.
 
-==== Maven dependencies
+===== Maven dependencies
 
 Maven dependencies in a karaf-assembly project can be feature repositories (classifier "features") or kar archives.
 Feature repositories are installed in the internal "system" Maven structured repository.
@@ -53,7 +53,7 @@ configuration file `etc/org.apache.karaf.features.cfg` `featuresRepositories` pr
 * runtime: feature installation is controlled by `<startupFeature>`, `<bootFeature>`, and `<installedFeature>` elements
 in the karaf-maven-plugin configuration. The feature repo uri is listed in the features service configuration file.
 
-==== Plugin configuration
+===== Plugin configuration
 
 Control how features are installed using these elements referring to features from installed feature repositories:
 
@@ -67,7 +67,7 @@ You can use feature_name or feature_name/feature_version formats.
 the "system" internal repository.  Therefore at runtime the feature may be installed without access to external repositories.
 You can use feature_name or feature_name/feature_version formats.
 
-==== Minimal Distribution Example
+===== Minimal Distribution Example
 
 This is the minimal assembly pom changed to use the packaging and annotated
 
@@ -156,7 +156,7 @@ This is the minimal assembly pom changed to use the packaging and annotated
 </project>
 ----
 
-==== Custom Distribution Example
+===== Custom Distribution Example
 
 It's possible to specify feature versions using the name/version format.
 
@@ -254,7 +254,7 @@ For instance, to pre-install Spring 4.0.7.RELEASE_1 feature in your custom distr
 </project>
 ----
 
-=== (deprecated old style) Maven assembly
+==== (deprecated old style) Maven assembly
 
 Basically a Karaf custom distribution involves:
 

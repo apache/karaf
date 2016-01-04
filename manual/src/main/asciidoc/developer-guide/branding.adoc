@@ -12,9 +12,9 @@
 // limitations under the License.
 //
 
-== Branding
+=== Branding
 
-=== Console
+==== Console
 
 You can "brand" the Apache Karaf console.
 
@@ -28,7 +28,7 @@ There are 2 ways of branding the Karaf console:
 . adding a branding.properties file to etc
 . creating a branding bundle.
 
-=== Adding a branding.properties file to etc
+==== Adding a branding.properties file to etc
 
 Create a `etc/branding.properties` file similar to:
 
@@ -51,7 +51,7 @@ prompt = \u001B[1m${USER}@${APPLICATION}\u001B[0m>
 
 Start Karaf and you will see your branded Karaf console.
 
-=== Branding bundle
+==== Branding bundle
 
 At startup, Apache Karaf is looking for a bundle which exports the `org.apache.karaf.branding` package, containing
 a `branding.properties` file.
@@ -147,7 +147,7 @@ prompt = \u001B[36mmy-karaf-user\u001B[0m\u001B[1m@\u001B[0m\u001B[34m${APPLICAT
 prompt = my-user@my-karaf>
 ----
 
-=== Installing the branding bundle
+==== Installing the branding bundle
 
 Thanks to the `pom.xml`, we can use `mvn` to build the branding bundle:
 
@@ -163,7 +163,7 @@ cp branding.jar /opt/apache-karaf-4.0.0/lib/karaf-branding.jar
 
 You can now start Apache Karaf to see your branded console.
 
-=== WebConsole
+==== WebConsole
 
 It's also possible to brand the Apache Karaf WebConsole.
 

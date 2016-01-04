@@ -12,7 +12,7 @@
 // limitations under the License.
 //
 
-== Directory structure
+=== Directory structure
 
 The directory layout of a Karaf installation is as follows:
 
