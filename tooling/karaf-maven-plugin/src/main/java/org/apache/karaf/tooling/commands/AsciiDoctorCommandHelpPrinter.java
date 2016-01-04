@@ -69,6 +69,7 @@ public class AsciiDoctorCommandHelpPrinter extends AbstractCommandHelpPrinter {
         out.println();
 
         out.println("== Description");
+        out.println();
         out.println(command.description());
         out.println();
 
@@ -84,11 +85,13 @@ public class AsciiDoctorCommandHelpPrinter extends AbstractCommandHelpPrinter {
             }
         }
         out.println("== Syntax");
+        out.println();
         out.println(syntax.toString());
         out.println();
 
         if (arguments.size() > 0) {
             out.println("== Arguments");
+            out.println();
             out.println("|===");
             out.println("|Name |Description");
             for (Argument argument : arguments) {
@@ -105,9 +108,11 @@ public class AsciiDoctorCommandHelpPrinter extends AbstractCommandHelpPrinter {
                 out.println("| " + description);
             }
             out.println("|===");
+            out.println();
         }
         if (options.size() > 0) {
             out.println("== Options");
+            out.println();
             out.println("|===");
             out.println("|Name |Description");
             for (Option option : options) {
@@ -126,9 +131,11 @@ public class AsciiDoctorCommandHelpPrinter extends AbstractCommandHelpPrinter {
                 out.println("|" + desc);
             }
             out.println("|===");
+            out.println();
         }
         if (command.detailedDescription().length() > 0) {
             out.println("== Details");
+            out.println();
             out.println(command.detailedDescription());
         }
         out.println();
