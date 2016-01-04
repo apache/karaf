@@ -75,8 +75,6 @@ public class AsciiDoctorCommandHelpPrinter implements CommandHelpPrinter {
             out.println("|===");
             out.println("|Name |Description");
             for (Argument argument : arguments) {
-                out.println("    <tr>");
-                out.println("      <td>" + argument.name() + "</td>");
                 String description = argument.description();
                 if (!argument.required()) {
                     Object o = actionMeta.getDefaultValue(action, argument);
