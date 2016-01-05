@@ -1,0 +1,96 @@
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+=== Programmatically connect
+
+As described in the users guide, Apache Karaf supports remote access to both the console (by embedding a SSHd server) and
+the management layer.
+
+==== To the console
+
+You can write a Apache Karaf remote console client in Java (or other language).
+
+Accessing to a remote Apache Karaf console means writing a SSH client. This SSH client can be in pure Java or in
+another language.
+
+For instance, the `bin/client` script starts a SSH client written in Java.
+
+The following code is a simple code to create a SSH client:
+
+----
+import org.apache.sshd.ClientChannel;
+import org.apache.sshd.ClientSession;
+import org.apache.sshd.SshClient;
+import org.apache.sshd.client.future.ConnectFuture;
+
+public class Main {
+
+    public static void main(String[] args) throws Exception {
+        String host = "localhost";
+        int port = 8101;
+        String user = "karaf";
+        String password = "karaf";
+
+        SshClient client = null;
+        try {
+            client = SshClient.setUpDefaultClient();
+            client.start();
+            ConnectFuture future = client.connect(host, port);
+            future.await();
+            ClientSession session = future.getSession();
+            session.authPassword(user, password);
+            ClientChannel channel = session.createChannel("shell");
+            channel.setIn(System.in);
+            channel.setOut(System.out);
+            channel.setErr(System.err);
+            channel.open();
+            channel.waitFor(ClientChannel.CLOSED, 0);
+        } catch (Throwable t) {
+            t.printStackTrace();
+            System.exit(1);
+        } finally {
+            try {
+                client.stop();
+            } catch (Throwable t) { }
+        }
+        System.exit(0);
+    }
+
+}
+----
+
+==== To the management layer
+
+The Apache Karaf management layer uses JMX. Apache Karaf embeds a JMX MBeanServer that you can use remotely.
+
+In order to use the MBeanServer remotely, you have to write a JMX client.
+
+The following example shows a simple JMX client stopping Apache Karaf remotely via the JMX layer:
+
+----
+javax.management.*;
+
+public class Main {
+
+    public static void main(String[] args) throws Exception {
+        JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:1099/karaf-root");
+        JMXConnector connector = JMXConnectorFactory.connect(url, null);
+        MBeanServerConnection mbeanServer = connector.getMBeanServerConnection();
+        ObjectName systemMBean = new ObjectName("org.apache.karaf:type=system,name=karaf-root");
+        mbeanServer.invoke(systemMBean, "halt", null, null);
+        connector.close();
+    }
+
+}
+----

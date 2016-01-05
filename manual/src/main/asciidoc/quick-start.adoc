@@ -1,0 +1,157 @@
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+== Quick Start
+
+This instructions should help you get Apache Karaf up and running in 5 to 15 minutes.
+
+=== Prerequisites
+
+Karaf requires a Java SE 7 environment to run. Refer to http://www.oracle.com/technetwork/java/javase/ for details on how to download and install Java SE 1.7 or greater.
+
+* Open a Web browser and access the following URL: http://karaf.apache.org/index/community/download.html
+* Download the binary distribution that matches your system (zip for windows, tar.gz for unixes) 
+* Extract the archive a new folder on your hard drive; for example in c:\karaf - from now on this directory will be referenced as <KARAF_HOME>.
+
+=== Start the server
+
+Open a command line console and change the directory to <KARAF_HOME>. 
+
+To start the server, run the following command in Windows:
+
+----
+bin\karaf.bat
+----
+
+respectively on Unix:
+
+----
+bin/karaf
+----
+
+You should see the following information on the command line console:
+
+----
+        __ __                  ____
+       / //_/____ __________ _/ __/
+      / ,<  / __ `/ ___/ __ `/ /_
+     / /| |/ /_/ / /  / /_/ / __/
+    /_/ |_|\__,_/_/   \__,_/_/
+
+  Apache Karaf (3.0.0)
+
+Hit '<tab>' for a list of available commands
+and '[cmd] --help' for help on a specific command.
+Hit '<ctrl-d>' or type 'system:shutdown' or 'logout' to shutdown Karaf.
+
+karaf@root()>
+
+----
+
+=== Some shell Basics
+
+You can now run your first command.  Simply type the `<tab>` key in the console.
+
+----
+karaf@root> Display all 183 possibilities? (y or n)
+*:config                            *:dev                               *:feature                           *:instance                          *:jaas                              *:kar                               *:log                               *:package
+*:region                            *:service                           *:shell                             *:ssh                               addbundle                           addfilter                           addregion                           alias
+cancel                              cl                                  clear                               clone                               config                              config:cancel                       config:delete                       config:edit
+config:list                         config:property-append              config:property-delete              config:property-list                config:property-set                 config:update                       connect                             create
+date                                delete                              destroy                             dev                                 dev:dump-create                     display                             dump-create                         each
+...
+----
+
+You can then grab more specific help for a given command using the `--help` option for this command:
+
+----
+karaf@root()> bundle:list --help
+DESCRIPTION
+        bundle:list
+
+        Lists all installed bundles.
+
+SYNTAX
+        bundle:list [options]
+
+OPTIONS
+        -u
+                Shows the update locations
+        --help
+                Display this help message
+        --table
+                Show bundles using a shell table
+        -t
+                Specifies the bundle threshold; bundles with a start-level less than this value will not get printed out.
+        -l
+                Show the locations
+        -s
+                Shows the symbolic name
+
+----
+
+Note that the console supports tab completion so if your start typing a command it will show possible completions and also auto complete if there is only one completion.
+
+=== Deploy a sample application
+
+While you will learn in the Karaf user's guide how to fully use and leverage Apache Karaf, let's install a sample http://camel.apache.org[Apache Camel] application for now:
+
+In the console, run the following commands:
+
+----
+karaf@root()> feature:repo-add camel 2.10.0
+Adding feature url mvn:org.apache.camel.karaf/apache-camel/2.10.0/xml/features
+karaf@root()> feature:install camel-spring
+karaf@root()> bundle:install -s mvn:org.apache.camel/camel-example-osgi/2.10.1
+----
+
+The example installed is using Camel to start a timer every 2 seconds and output a message on the console.
+The previous commands download the Camel features descriptor and install the example feature.
+
+----
+>>>> SpringDSL set body:  Fri Jan 07 11:59:51 CET 2011
+>>>> SpringDSL set body:  Fri Jan 07 11:59:53 CET 2011
+>>>> SpringDSL set body:  Fri Jan 07 11:59:55 CET 2011
+
+----
+
+==== Stopping and uninstalling the sample application
+
+To stop this demo, run the following command:
+
+----
+karaf@root()> bundle:stop org.apache.camel.camel-example-osgi
+----
+
+=== Stopping Karaf
+
+To stop Karaf from the console, enter `^D` in the console:
+
+----
+^D
+----
+
+Alternatively, you can also run the following command:
+
+----
+system:shutdown
+----
+
+==== Cleaning the Karaf state
+
+Normally Karaf remembers the features and bundles you installed and started. The reset Karaf into a clean state just delete the data directory when karaf is not running.
+
+=== Summary
+
+This document showed how simple it is to have Apache Karaf up and running and install a simple Apache Camel application.
