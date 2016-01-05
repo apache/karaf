@@ -633,14 +633,18 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
             }
             if (repo == null) {
                 RepositoryImpl rep = new RepositoryImpl(URI.create(uri), blacklisted);
-                rep.load();
-                repo = rep;
-                synchronized (lock) {
-                    repositoryCache.put(uri, repo);
+                try {
+                    rep.load();
+                    repo = rep;
+                    synchronized (lock) {
+                        repositoryCache.put(uri, repo);
+                    }
+                    for (URI u : repo.getRepositories()) {
+                        toLoad.add(u.toString());
+                    }
+                } catch (Exception e) {
+                    LOGGER.warn("Can't load features repository {}", uri, e);
                 }
-            }
-            for (URI u : repo.getRepositories()) {
-                toLoad.add(u.toString());
             }
         }
         List<Repository> repos;
