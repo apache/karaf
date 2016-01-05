@@ -17,6 +17,7 @@
 package org.apache.karaf.client;
 
 import java.io.*;
+import java.io.Closeable;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -51,12 +52,7 @@ import org.apache.sshd.client.future.ConnectFuture;
 import org.apache.sshd.client.kex.ECDHP256;
 import org.apache.sshd.client.kex.ECDHP384;
 import org.apache.sshd.client.kex.ECDHP521;
-import org.apache.sshd.common.KeyExchange;
-import org.apache.sshd.common.NamedFactory;
-import org.apache.sshd.common.PtyMode;
-import org.apache.sshd.common.RuntimeSshException;
-import org.apache.sshd.common.Session;
-import org.apache.sshd.common.SshConstants;
+import org.apache.sshd.common.*;
 import org.apache.sshd.common.keyprovider.FileKeyPairProvider;
 import org.apache.sshd.common.util.Buffer;
 import org.fusesource.jansi.AnsiConsole;
@@ -108,8 +104,9 @@ public class Main {
                      )
                 );
 
-            client = (SshClient)clientBuilder.build();
+            client = clientBuilder.build();
             setupAgent(config.getUser(), config.getKeyFile(), client);
+            client.getProperties().put(FactoryManager.IDLE_TIMEOUT, String.valueOf(config.getIdleTimeout()));
             final Console console = System.console();
             if (console != null) {
                 client.setUserInteraction(new UserInteraction() {
