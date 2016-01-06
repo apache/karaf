@@ -31,13 +31,16 @@ public class FeatureConfigInstallerTest {
     @Test
     public void testSubstFinalName() {
         final String karafBase = "/tmp/karaf.base";
+        final String karafEtc = karafBase + "/etc";
         final String foo = "/foo";
         
         System.setProperty("karaf.base", karafBase);
+        System.setProperty("karaf.etc", karafEtc);
         System.setProperty("foo", foo);
         
         substEqual("etc/test.cfg", karafBase + File.separator + "etc/test.cfg");
         substEqual("/etc/test.cfg", karafBase + File.separator + "/etc/test.cfg");
+        substEqual("${karaf.etc}/test.cfg", karafEtc + "/test.cfg");
         substEqual("${karaf.base}/etc/test.cfg", karafBase + "/etc/test.cfg");
         substEqual("etc/${foo}/test.cfg", karafBase + File.separator + "etc/" + foo + "/test.cfg");
         substEqual("${foo}/test.cfg", foo + "/test.cfg");
