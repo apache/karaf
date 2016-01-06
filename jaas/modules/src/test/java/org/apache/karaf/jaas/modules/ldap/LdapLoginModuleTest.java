@@ -257,7 +257,7 @@ public class LdapLoginModuleTest extends AbstractLdapTestUnit {
     @Test
     public void testRoleMappingSimple() throws Exception {
         Properties options = ldapLoginModuleOptions();
-        options.put(LDAPLoginModule.ROLE_MAPPING, "admin=karaf");
+        options.put(LDAPOptions.ROLE_MAPPING, "admin=karaf");
         LDAPLoginModule module = new LDAPLoginModule();
         CallbackHandler cb = new CallbackHandler() {
             @Override
@@ -301,7 +301,7 @@ public class LdapLoginModuleTest extends AbstractLdapTestUnit {
     @Test
     public void testRoleMappingAdvanced() throws Exception {
         Properties options = ldapLoginModuleOptions();
-        options.put(LDAPLoginModule.ROLE_MAPPING, "admin=karaf,test;admin=another");
+        options.put(LDAPOptions.ROLE_MAPPING, "admin=karaf,test;admin=another");
         LDAPLoginModule module = new LDAPLoginModule();
         CallbackHandler cb = new CallbackHandler() {
             public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
@@ -347,7 +347,7 @@ public class LdapLoginModuleTest extends AbstractLdapTestUnit {
     @Test
     public void testRoleMappingParsing() throws Exception {
         Properties options = ldapLoginModuleOptions();
-        options.put(LDAPLoginModule.ROLE_MAPPING, "admin = karaf, test; admin = another");
+        options.put(LDAPOptions.ROLE_MAPPING, "admin = karaf, test; admin = another");
         LDAPLoginModule module = new LDAPLoginModule();
         CallbackHandler cb = new CallbackHandler() {
             public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
