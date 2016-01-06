@@ -531,6 +531,7 @@
         </conditional>
         <conditional>
             <condition>webconsole</condition>
+            <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.inventory/${felix.inventory.version}</bundle>
             <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.webconsole.plugins.ds/${felix.scr.webconsole.plugin.version}</bundle>
         </conditional>
         <conditional>
