@@ -38,6 +38,7 @@ public class ClientConfig {
     private int level;
     private int retryAttempts;
     private int retryDelay;
+    private long idleTimeout;
     private boolean batch;
     private String file = null;
     private String keyFile = null;
@@ -64,6 +65,7 @@ public class ClientConfig {
         level = Integer.parseInt(shellCfg.getProperty("logLevel", "1"));
         retryAttempts = 0;
         retryDelay = 2;
+        idleTimeout = Long.parseLong(shellCfg.getProperty("sshIdleTimeout", "1800000"));
         batch = false;
         file = null;
         user = null;
@@ -139,6 +141,13 @@ public class ClientConfig {
                     } else {
                         keyFile = args[i];
                     }
+                } else if (args[i].equals("-t")) {
+                    if (args.length <= ++i) {
+                        System.err.println("miss the idle timeout");
+                        System.exit(1);
+                    } else {
+                        idleTimeout = Long.parseLong(args[i]);
+                    }
                 } else if (args[i].equals("--help")) {
                     showHelp();
                 } else {
@@ -187,7 +196,8 @@ public class ClientConfig {
         System.out.println("  -d [delay]    intra-retry delay (defaults to 2 seconds)");
         System.out.println("  -b            batch mode, specify multiple commands via standard input");
         System.out.println("  -f [file]     read commands from the specified file");
-        System.out.println("  -k [keyFile]    specify the private keyFile location when using key login, need have BouncyCastle registered as security provider using this flag");
+        System.out.println("  -k [keyFile]  specify the private keyFile location when using key login, need have BouncyCastle registered as security provider using this flag");
+        System.out.println("  -t [timeout]  specify the idle timeout");
         System.out.println("  [commands]    commands to run");
         System.out.println("If no commands are specified, the client will be put in an interactive mode");
         System.exit(0);
@@ -293,4 +303,9 @@ public class ClientConfig {
     public String getKeyFile() {
         return keyFile;
     }
+
+    public long getIdleTimeout() {
+        return idleTimeout;
+    }
+
 }
