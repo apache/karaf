@@ -113,7 +113,7 @@ public class FeatureConfigInstaller {
 				Dictionary<String,Object> properties = cfg.getProperties();
                 for (String key : props.stringPropertyNames()) {
                     if (properties.get(key) == null) {
-                        properties.put(pid[0], props.getProperty(key));
+                        properties.put(key, props.getProperty(key));
                         update = true;
                     }
                 }
