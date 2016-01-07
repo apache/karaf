@@ -22,9 +22,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -53,7 +51,6 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
-import org.osgi.framework.ServiceReference;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
 import org.osgi.framework.startlevel.BundleStartLevel;
@@ -358,7 +355,13 @@ public class Main {
                     lockCallback.lockLost();
                 }
             } else {
-                lockCallback.waitingForLock();
+                if (config.lockExclusive) {
+                    LOG.log(Level.SEVERE, "Can't lock, and lock is exclusive");
+                    System.err.println("Can't lock (another instance is running), and lock is exclusive");
+                    System.exit(5);
+                } else {
+                    lockCallback.waitingForLock();
+                }
             }
             Thread.sleep(config.lockDelay);
         }
