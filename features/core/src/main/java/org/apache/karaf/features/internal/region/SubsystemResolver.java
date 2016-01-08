@@ -21,14 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.apache.felix.utils.collections.DictionaryAsMap;
 import org.apache.karaf.features.BundleInfo;
@@ -172,7 +165,10 @@ public class SubsystemResolver {
     }
 
     public Set<String> collectPrerequisites() throws Exception {
-        return root.collectPrerequisites();
+        if (root != null) {
+            return root.collectPrerequisites();
+        }
+        return new HashSet<String>();
     }
 
     public Map<Resource, List<Wire>> resolve(
@@ -279,15 +275,17 @@ public class SubsystemResolver {
     }
 
     private void addBundleInfos(Subsystem subsystem) {
-        String region = getFlatSubsystemsMap().get(subsystem.getName());
-        Map<String, BundleInfo> bis = bundleInfos.get(region);
-        if (bis == null) {
-            bis = new HashMap<>();
-            bundleInfos.put(region, bis);
-        }
-        bis.putAll(subsystem.getBundleInfos());
-        for (Subsystem child : subsystem.getChildren()) {
-            addBundleInfos(child);
+        if (subsystem != null) {
+            String region = getFlatSubsystemsMap().get(subsystem.getName());
+            Map<String, BundleInfo> bis = bundleInfos.get(region);
+            if (bis == null) {
+                bis = new HashMap<>();
+                bundleInfos.put(region, bis);
+            }
+            bis.putAll(subsystem.getBundleInfos());
+            for (Subsystem child : subsystem.getChildren()) {
+                addBundleInfos(child);
+            }
         }
     }
 
@@ -303,28 +301,30 @@ public class SubsystemResolver {
         if (flatDigraph == null) {
             flatDigraph = new StandardRegionDigraph(null, null);
             Map<String, String> flats = getFlatSubsystemsMap();
-            for (Region r : digraph.getRegions()) {
-                if (r.getName().equals(flats.get(r.getName()))) {
-                    flatDigraph.createRegion(r.getName());
+            if (digraph != null) {
+                for (Region r : digraph.getRegions()) {
+                    if (r.getName().equals(flats.get(r.getName()))) {
+                        flatDigraph.createRegion(r.getName());
+                    }
                 }
-            }
-            for (Region r : digraph.getRegions()) {
-                for (RegionDigraph.FilteredRegion fr : digraph.getEdges(r)) {
-                    String rt = flats.get(r.getName());
-                    String rh = flats.get(fr.getRegion().getName());
-                    if (!rh.equals(rt)) {
-                        Region tail = flatDigraph.getRegion(rt);
-                        Region head = flatDigraph.getRegion(rh);
-                        RegionFilterBuilder rfb = flatDigraph.createRegionFilterBuilder();
-                        for (Map.Entry<String, Collection<String>> entry : fr.getFilter().getSharingPolicy().entrySet()) {
-                            // Discard osgi.identity namespace
-                            if (!IDENTITY_NAMESPACE.equals(entry.getKey())) {
-                                for (String f : entry.getValue()) {
-                                    rfb.allow(entry.getKey(), f);
+                for (Region r : digraph.getRegions()) {
+                    for (RegionDigraph.FilteredRegion fr : digraph.getEdges(r)) {
+                        String rt = flats.get(r.getName());
+                        String rh = flats.get(fr.getRegion().getName());
+                        if (!rh.equals(rt)) {
+                            Region tail = flatDigraph.getRegion(rt);
+                            Region head = flatDigraph.getRegion(rh);
+                            RegionFilterBuilder rfb = flatDigraph.createRegionFilterBuilder();
+                            for (Map.Entry<String, Collection<String>> entry : fr.getFilter().getSharingPolicy().entrySet()) {
+                                // Discard osgi.identity namespace
+                                if (!IDENTITY_NAMESPACE.equals(entry.getKey())) {
+                                    for (String f : entry.getValue()) {
+                                        rfb.allow(entry.getKey(), f);
+                                    }
                                 }
                             }
+                            flatDigraph.connect(tail, rfb.build(), head);
                         }
-                        flatDigraph.connect(tail, rfb.build(), head);
                     }
                 }
             }
@@ -390,14 +390,16 @@ public class SubsystemResolver {
         Map<Resource, String> resources = new HashMap<>();
         SimpleFilter sf = createFilter(IDENTITY_NAMESPACE, "*",
                 CAPABILITY_TYPE_ATTRIBUTE, TYPE_SUBSYSTEM);
-        for (Resource resource : wiring.keySet()) {
-            if (findMatchingCapability(resourceFilter, resource.getCapabilities(null)) != null) {
-                // Find the subsystem where this feature is installed
-                Wire wire = findMatchingWire(sf, wiring.get(resource));
-                if (wire != null) {
-                    String region = (String) wire.getCapability().getAttributes().get(IDENTITY_NAMESPACE);
-                    region = flats.get(region);
-                    resources.put(resource, region);
+        if (wiring != null) {
+            for (Resource resource : wiring.keySet()) {
+                if (findMatchingCapability(resourceFilter, resource.getCapabilities(null)) != null) {
+                    // Find the subsystem where this feature is installed
+                    Wire wire = findMatchingWire(sf, wiring.get(resource));
+                    if (wire != null) {
+                        String region = (String) wire.getCapability().getAttributes().get(IDENTITY_NAMESPACE);
+                        region = flats.get(region);
+                        resources.put(resource, region);
+                    }
                 }
             }
         }
@@ -483,13 +485,17 @@ public class SubsystemResolver {
         while (isFlat(nonFlat)) {
             nonFlat = nonFlat.getParent();
         }
-        toFlatten.put(subsystem.getName(), nonFlat.getName());
-        for (Subsystem child : subsystem.getChildren()) {
-            findSubsystemsToFlatten(child, toFlatten);
+        if (subsystem != null) {
+            toFlatten.put(subsystem.getName(), nonFlat.getName());
+            for (Subsystem child : subsystem.getChildren()) {
+                findSubsystemsToFlatten(child, toFlatten);
+            }
         }
     }
 
     private boolean isFlat(Subsystem subsystem) {
+        if (subsystem == null || subsystem.getFeature() == null)
+            return false;
         return subsystem.getFeature() != null && subsystem.getFeature().getScoping() == null;
     }
 
