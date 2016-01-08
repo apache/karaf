@@ -111,7 +111,7 @@ public class ConfigProperties {
 
     private static final String PROPERTY_LOCK_LEVEL = "karaf.lock.level";
 
-    private static final String PROPERTY_LOCK_EXCLUSIVE = "karaf.lock.exclusive";
+    private static final String PROPERTY_LOCK_SLAVE_BLOCK = "karaf.lock.slave.block";
 
     private static final String DEFAULT_REPO = "karaf.default.repository";
     
@@ -161,7 +161,7 @@ public class ConfigProperties {
     int lockStartLevel = 1;
     int lockDefaultBootLevel = 1;
     int lockDelay;
-    boolean lockExclusive = false;
+    boolean lockSlaveBlock = false;
     int shutdownTimeout = 5 * 60 * 1000;
     boolean useLock;
     String lockClass;
@@ -226,7 +226,7 @@ public class ConfigProperties {
         System.setProperty(Constants.FRAMEWORK_BEGINNING_STARTLEVEL, Integer.toString(this.defaultStartLevel));
         this.lockStartLevel = Integer.parseInt(props.getProperty(PROPERTY_LOCK_LEVEL, Integer.toString(lockStartLevel)));                
         this.lockDelay = Integer.parseInt(props.getProperty(PROPERTY_LOCK_DELAY, DEFAULT_LOCK_DELAY));
-        this.lockExclusive = Boolean.parseBoolean(props.getProperty(PROPERTY_LOCK_EXCLUSIVE, "false"));
+        this.lockSlaveBlock = Boolean.parseBoolean(props.getProperty(PROPERTY_LOCK_SLAVE_BLOCK, "false"));
         this.props.setProperty(Constants.FRAMEWORK_BEGINNING_STARTLEVEL, Integer.toString(lockDefaultBootLevel));
         this.shutdownTimeout = Integer.parseInt(props.getProperty(KARAF_SHUTDOWN_TIMEOUT, Integer.toString(shutdownTimeout)));
         this.useLock = Boolean.parseBoolean(props.getProperty(PROPERTY_USE_LOCK, "true"));

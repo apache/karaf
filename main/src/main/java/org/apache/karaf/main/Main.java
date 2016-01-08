@@ -355,7 +355,7 @@ public class Main {
                     lockCallback.lockLost();
                 }
             } else {
-                if (config.lockExclusive) {
+                if (config.lockSlaveBlock) {
                     LOG.log(Level.SEVERE, "Can't lock, and lock is exclusive");
                     System.err.println("Can't lock (another instance is running), and lock is exclusive");
                     System.exit(5);
