@@ -302,7 +302,13 @@ public class Main {
                     lockCallback.lockLost();
                 }
             } else {
-                lockCallback.waitingForLock();
+                if (config.lockExclusive) {
+                    LOG.log(Level.SEVERE, "Can't lock, and lock is exclusive");
+                    System.err.println("Can't lock (another instance is running), and lock is exclusive");
+                    System.exit(5);
+                } else {
+                    lockCallback.waitingForLock();
+                }
             }
             Thread.sleep(config.lockDelay);
         }
