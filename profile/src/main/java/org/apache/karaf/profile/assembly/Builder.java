@@ -751,10 +751,12 @@ public class Builder {
                 }
             }
             for (Conditional cond : feature.getConditional()) {
-                for (Bundle bundle : cond.getBundle()) {
-                    if (!ignoreDependencyFlag || !bundle.isDependency()) {
-                        installArtifact(downloader, bundle.getLocation().trim());
-                    }
+                if (isConditionalMet(cond, installedFeatures)) {
+                  for (Bundle bundle : cond.getBundle()) {
+                      if (!ignoreDependencyFlag || !bundle.isDependency()) {
+                          installArtifact(downloader, bundle.getLocation().trim());
+                      }
+                  }
                 }
             }
         }
@@ -820,9 +822,11 @@ public class Builder {
                 }
             }
             for (Conditional cond : feature.getConditional()) {
-                for (Bundle bundle : cond.getBundle()) {
-                    if (!ignoreDependencyFlag || !bundle.isDependency()) {
-                        locations.add(bundle.getLocation().trim());
+                if (isConditionalMet(cond, bootFeatures)) {
+                    for (Bundle bundle : cond.getBundle()) {
+                        if (!ignoreDependencyFlag || !bundle.isDependency()) {
+                            locations.add(bundle.getLocation().trim());
+                        }
                     }
                 }
             }
@@ -855,8 +859,10 @@ public class Builder {
                 installArtifact(downloader, configFile.getLocation().trim());
             }
             for (Conditional cond : feature.getConditional()) {
-                for (ConfigFile configFile : cond.getConfigfile()) {
-                    installArtifact(downloader, configFile.getLocation().trim());
+                if (isConditionalMet(cond, bootFeatures)) {
+                    for (ConfigFile configFile : cond.getConfigfile()) {
+                        installArtifact(downloader, configFile.getLocation().trim());
+                    }
                 }
             }
             // Install libraries
@@ -925,6 +931,17 @@ public class Builder {
         }
         downloader.await();
         return allBootFeatures;
+    }
+
+    private boolean isConditionalMet(Conditional cond, Set<Feature> bootFeatures) {
+        for (String condition : cond.getCondition()) {
+            for (Feature feature : bootFeatures) {
+                if (feature.getName().equals(condition)) {
+                  return true;
+                }
+            }
+        }
+        return false;
     }
 
     private String getRepos(Features rep) {
