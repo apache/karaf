@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache.karaf.scr</groupId>
         <artifactId>scr</artifactId>
-        <version>4.0.4-SNAPSHOT</version>
+        <version>4.0.4</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
