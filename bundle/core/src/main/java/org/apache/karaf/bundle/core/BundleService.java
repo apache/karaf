@@ -49,5 +49,7 @@ public interface BundleService {
     void disableDynamicImports(Bundle bundle);
 
     int getSystemBundleThreshold();
+    
+    String getStatus(String id);
 
 }

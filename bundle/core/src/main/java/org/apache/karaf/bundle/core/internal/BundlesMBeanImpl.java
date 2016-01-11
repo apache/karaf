@@ -247,6 +247,14 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
             throw new MBeanException(null, e.getMessage());
         }
     }
+    
+	public String getStatus(String bundleId) throws MBeanException{
+        try {
+            return bundleService.getStatus(bundleId);
+        } catch (Exception e) {
+            throw new MBeanException(null, e.getMessage());
+        }
+	}
 
     public BundleContext getBundleContext() {
         return this.bundleContext;
