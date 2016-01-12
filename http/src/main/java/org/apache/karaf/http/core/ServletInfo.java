@@ -21,7 +21,7 @@ import org.osgi.framework.Bundle;
 
 public class ServletInfo {
     private String name;
-    private Bundle bundle;
+    private long bundleId;
     private String className;
     private String alias;
     private int state;
@@ -33,11 +33,11 @@ public class ServletInfo {
     public void setName(String name) {
         this.name = name;
     }
-    public Bundle getBundle() {
-        return bundle;
+    public long getBundleId() {
+        return bundleId;
     }
-    public void setBundle(Bundle bundle) {
-        this.bundle = bundle;
+    public void setBundleId(long bundleId) {
+        this.bundleId = bundleId;
     }
     public String getClassName() {
         return className;

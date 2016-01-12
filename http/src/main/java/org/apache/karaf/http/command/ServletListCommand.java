@@ -49,7 +49,7 @@ public class ServletListCommand implements Action {
         table.column(new Col("Url"));
 
         for (ServletInfo info : servletService.getServlets()) {
-            table.addRow().addContent(info.getBundle().getBundleId(), info.getClassName(), info.getName(),
+            table.addRow().addContent(info.getBundleId(), info.getClassName(), info.getName(),
                                       info.getStateString(), info.getAlias(), Arrays.toString(info.getUrls()));
         }
         table.print(System.out, !noFormat);

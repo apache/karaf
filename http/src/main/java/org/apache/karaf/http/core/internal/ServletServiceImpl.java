@@ -38,12 +38,9 @@ public class ServletServiceImpl implements ServletService {
         List<ServletInfo> servletInfos = new ArrayList<ServletInfo>();
         Collection<ServletEvent> events = servletEventHandler.getServletEvents();
         for (ServletEvent event : events) {
-            Servlet servlet = event.getServlet();
-            String servletClassName = " ";
-            if (servlet != null) {
-                servletClassName = servlet.getClass().getName();
-                servletClassName = servletClassName.substring(servletClassName.lastIndexOf(".") + 1,
-                                                              servletClassName.length());
+            String servletClassName = event.getServletClassName();
+            if (servletClassName.contains(".")) {
+                servletClassName = servletClassName.substring(servletClassName.lastIndexOf(".") + 1, servletClassName.length());
             }
             String servletName = event.getServletName() != null ? event.getServletName() : " ";
             if (servletName.contains(".")) {
@@ -54,7 +51,7 @@ public class ServletServiceImpl implements ServletService {
 
             String[] urls = (String[])(event.getUrlParameter() != null ? event.getUrlParameter() : new String[] {""});
             ServletInfo info = new ServletInfo();
-            info.setBundle(event.getBundle());
+            info.setBundleId(event.getBundleId());
             info.setName(servletName);
             info.setClassName(servletClassName);
             info.setState(event.getType());

@@ -59,7 +59,7 @@ public class HttpMBeanImpl extends StandardMBean implements HttpMBean {
             
                 CompositeData data = new CompositeDataSupport(servletType,
                         new String[]{"Bundle-ID", "Servlet", "Servlet Name", "State", "Alias", "URL"},
-                        new Object[]{info.getBundle().getBundleId(), info.getClassName(), info.getName(), info.getStateString(), info.getAlias(), Arrays.toString(info.getUrls())});
+                        new Object[]{info.getBundleId(), info.getClassName(), info.getName(), info.getStateString(), info.getAlias(), Arrays.toString(info.getUrls())});
                 table.put(data);
             
             }

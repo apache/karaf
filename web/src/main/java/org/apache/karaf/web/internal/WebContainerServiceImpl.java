@@ -117,15 +117,8 @@ public class WebContainerServiceImpl implements WebContainerService, BundleListe
         if (bundleIds != null && !bundleIds.isEmpty()) {
             for (long bundleId : bundleIds) {
                 if (webEventHandler.getBundleEvents().containsKey(bundleId)) {
-                    WebEvent webEvent = webEventHandler.getBundleEvents().get(bundleId);
-                    Bundle bundle = webEvent.getBundle();
-                    if (bundle != null) {
-                        // deploy
-                        warManager.start(bundleId, null);
-                    } else {
-                        System.out.println("Bundle ID " + bundleId + " is invalid");
-                        LOGGER.warn("Bundle ID {} is invalid", bundleId);
-                    }
+                    // deploy
+                    warManager.start(bundleId, null);
                 }
             }
         }
@@ -135,15 +128,8 @@ public class WebContainerServiceImpl implements WebContainerService, BundleListe
         if (bundleIds != null && !bundleIds.isEmpty()) {
             for (long bundleId : bundleIds) {
                 if (webEventHandler.getBundleEvents().containsKey(bundleId)) {
-                    WebEvent webEvent = webEventHandler.getBundleEvents().get(bundleId);
-                    Bundle bundle = webEvent.getBundle();
-                    if (bundle != null) {
-                        // deploy
-                        warManager.stop(bundleId);
-                    } else {
-                        System.out.println("Bundle ID " + bundleId + " is invalid");
-                        LOGGER.warn("Bundle ID {} is invalid", bundleId);
-                    }
+                    // undeploy
+                    warManager.stop(bundleId);
                 }
             }
         }
