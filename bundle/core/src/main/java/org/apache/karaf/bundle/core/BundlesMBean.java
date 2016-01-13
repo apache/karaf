@@ -51,4 +51,6 @@ public interface BundlesMBean {
     
     String getDiag(long bundleId);
 
+    String getStatus(String bundleId) throws MBeanException;
+
 }

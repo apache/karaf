@@ -16,28 +16,38 @@
  */
 package org.apache.karaf.bundle.command;
 
-import org.apache.karaf.bundle.core.BundleInfo;
-import org.apache.karaf.bundle.core.BundleState;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.apache.karaf.shell.support.ShellUtil;
 import org.osgi.framework.Bundle;
 
-@Command(scope = "bundle", name = "diag", description = "Displays diagnostic information why a bundle is not Active")
+@Command(scope = "bundle", name = "status", description = "Get the bundle current status")
 @Service
-public class Diag extends BundlesCommand {
+public class Status extends BundleCommand {
 
     @Override
-    protected void executeOnBundle(Bundle bundle) throws Exception {
-        BundleInfo info = bundleService.getInfo(bundle);
-        if (info.getState() == BundleState.Failure || info.getState() == BundleState.Waiting
-            || info.getState() == BundleState.GracePeriod || info.getState() == BundleState.Installed) {
-            String title = ShellUtil.getBundleName(bundle);
-            System.out.println(title);
-            System.out.println(ShellUtil.getUnderlineString(title));
-            System.out.println("Status: " + info.getState().toString());
-            System.out.println(this.bundleService.getDiag(bundle));
-            System.out.println();
+    protected Object doExecute(Bundle bundle) throws Exception {
+        return getState(bundle);
+    }
+
+    /**
+     * Return a String representation of a bundle state
+     */
+    private String getState(Bundle bundle) {
+        switch (bundle.getState()) {
+            case Bundle.UNINSTALLED:
+                return "Uninstalled";
+            case Bundle.INSTALLED:
+                return "Installed";
+            case Bundle.RESOLVED:
+                return "Resolved";
+            case Bundle.STARTING:
+                return "Starting";
+            case Bundle.STOPPING:
+                return "Stopping";
+            case Bundle.ACTIVE:
+                return "Active";
+            default:
+                return "Unknown";
         }
     }
 
