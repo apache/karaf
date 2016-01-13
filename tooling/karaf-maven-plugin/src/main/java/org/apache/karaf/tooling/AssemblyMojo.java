@@ -181,7 +181,7 @@ public class AssemblyMojo extends MojoSupport {
     /**
      * Specify the version of Java SE to be assumed for osgi.ee.
      */
-    @Parameter(defaultValue = "1.7")
+    @Parameter(defaultValue = "1.8")
     protected String javase;
 
     /**
