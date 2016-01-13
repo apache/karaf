@@ -63,13 +63,29 @@ public class InstanceTest extends KarafTestSupport {
         System.out.println(executeCommand("instance:create itest"));
         assertContains("itest", executeCommand("instance:list"));
         System.out.println(executeCommand("instance:start itest"));
-        Thread.sleep(10000);
         String output = executeCommand("instance:status itest");
+        int i = 0;
+        while (!output.contains("Started")) {
+            if (i >= 10) {
+                break;
+            }
+            i = i + 1;
+            Thread.sleep(5000);
+            output = executeCommand("instance:status itest");
+        }
         System.out.println("itest instance status: " + output);
         assertContains("Started", output);
         System.out.println(executeCommand("instance:stop itest"));
-        Thread.sleep(10000);
         output = executeCommand("instance:status itest");
+        i = 0;
+        while (!output.contains("Stopped")) {
+            if (i >= 10) {
+                break;
+            }
+            i = i + 1;
+            Thread.sleep(5000);
+            output = executeCommand("instance:status itest");
+        }
         System.out.println("itest instance status: " + output);
         assertContains("Stopped", output);
     }
