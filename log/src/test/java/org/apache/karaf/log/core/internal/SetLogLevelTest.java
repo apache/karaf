@@ -45,6 +45,8 @@ public class SetLogLevelTest extends TestCase {
         super.setUp();
 
         properties = new Hashtable<String, String>();
+        properties.put(ROOT_LOGGER, "info");
+
         final Configuration configuration = EasyMock.createMock(Configuration.class);
         EasyMock.expect(configuration.getProperties()).andReturn(properties);
         configuration.update(properties);        

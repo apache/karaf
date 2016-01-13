@@ -18,9 +18,7 @@ package org.apache.karaf.log.core.internal;
 
 import java.io.IOException;
 import java.util.Dictionary;
-import java.util.Enumeration;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.apache.karaf.log.core.Level;
 import org.apache.karaf.log.core.LogService;
@@ -32,11 +30,7 @@ import org.osgi.service.cm.ConfigurationAdmin;
 public class LogServiceImpl implements LogService {
 
     static final String CONFIGURATION_PID = "org.ops4j.pax.logging";
-    static final String ROOT_LOGGER_PREFIX = "log4j.rootLogger";
-    static final String LOGGER_PREFIX = "log4j.logger.";
-    static final String ALL_LOGGER = "ALL";
-    static final String ROOT_LOGGER = "ROOT";
-    
+
     private final ConfigurationAdmin configAdmin;
     private final LruList events;
 
@@ -45,8 +39,20 @@ public class LogServiceImpl implements LogService {
         this.events = events;
     }
 
+    private LogServiceInternal getDelegate(Dictionary<String, Object> config) {
+        if (config.get("log4j.rootLogger") != null) {
+            return new LogServiceLog4j1Impl(config);
+        }
+        else if (config.get("log4j2.rootLogger.level") != null) {
+            return new LogServiceLog4j2Impl(config);
+        }
+        else {
+            throw new IllegalStateException("Unrecognized configuration");
+        }
+    }
+
     public String getLevel() {
-        return getLevel(null).get(ROOT_LOGGER);
+        return getLevel(LogServiceInternal.ROOT_LOGGER).get(LogServiceInternal.ROOT_LOGGER);
     }
 
     public Map<String, String> getLevel(String logger) {
@@ -56,118 +62,37 @@ public class LogServiceImpl implements LogService {
         } catch (IOException e) {
             throw new RuntimeException("Error retrieving Log information from config admin", e);
         }
-        @SuppressWarnings("rawtypes")
-        Dictionary props = cfg.getProperties();
-
-        if (ROOT_LOGGER.equalsIgnoreCase(logger)) {
-            logger = null;
+        if (logger == null) {
+            logger = LogServiceInternal.ROOT_LOGGER;
         }
-
-        Map<String, String> loggers = new TreeMap<String, String>();
-
-        if (ALL_LOGGER.equalsIgnoreCase(logger)) {
-            String root = getLevelFromProperty((String) props.get(ROOT_LOGGER_PREFIX));
-            loggers.put("ROOT", root);
-            for (Enumeration e = props.keys(); e.hasMoreElements(); ) {
-                String prop = (String) e.nextElement();
-                if (prop.startsWith(LOGGER_PREFIX)) {
-                    String val = getLevelFromProperty((String) props.get(prop));
-                    loggers.put(prop.substring(LOGGER_PREFIX.length()), val);
-                }
-            }
-            return loggers;
-        }
-
-        String l = logger;
-        String val;
-        for (;;) {
-            String prop;
-            if (l == null) {
-                prop = ROOT_LOGGER_PREFIX;
-            } else {
-                prop = LOGGER_PREFIX + l;
-            }
-            val = (String) props.get(prop);
-            val = getLevelFromProperty(val);
-            if (val != null || l == null) {
-                break;
-            }
-            int idx = l.lastIndexOf('.');
-            if (idx < 0) {
-                l = null;
-            } else {
-                l = l.substring(0, idx);
-            }
-        }
-
-        if (logger == null)
-            logger = ROOT_LOGGER;
-
-        loggers.put(logger, val);
-
-        return loggers;
+        return getDelegate(cfg.getProperties()).getLevel(logger);
     }
 
     public void setLevel(String level) {
-        setLevel(null, level);
+        setLevel(LogServiceInternal.ROOT_LOGGER, level);
     }
 
     @SuppressWarnings("unchecked")
     public void setLevel(String logger, String level) {
-        if (ROOT_LOGGER.equalsIgnoreCase(logger)) {
-            logger = null;
-        }
-
         // make sure both uppercase and lowercase levels are supported
         level = level.toUpperCase();
-
         // check if the level is valid
-        Level.valueOf(level);
-
-        if (Level.isDefault(level) && logger == null) {
+        Level lvl = Level.valueOf(level);
+        // Default logger
+        if (logger == null) {
+            logger = LogServiceInternal.ROOT_LOGGER;
+        }
+        // Verify
+        if (lvl == Level.DEFAULT && LogServiceInternal.ROOT_LOGGER.equals(logger)) {
             throw new IllegalStateException("Can not unset the ROOT logger");
         }
 
+        // Get config
         Configuration cfg = getConfiguration();
-        Dictionary props = cfg.getProperties();
-
-        String val;
-        String prop;
-        if (logger == null) {
-            prop = ROOT_LOGGER_PREFIX;
-        } else {
-            prop = LOGGER_PREFIX + logger;
-        }
-
-        val = (String) props.get(prop);
-        if (Level.isDefault(level)) {
-            if (val != null) {
-                val = val.trim();
-                int idx = val.indexOf(",");
-                if (idx < 0) {
-                    val = null;
-                } else {
-                    val = val.substring(idx);
-                }
-            }
-        } else {
-            if (val == null) {
-                val = level;
-            } else {
-                val = val.trim();
-                int idx = val.indexOf(",");
-                if (idx < 0) {
-                    val = level;
-                } else {
-                    val = level + val.substring(idx);
-                }
-            }
-        }
-        if (val == null) {
-            props.remove(prop);
-        } else {
-            props.put(prop, val);
-        }
+        Dictionary<String, Object> props = cfg.getProperties();
+        // Update
+        getDelegate(props).setLevel(logger, level);
+        // Save
         try {
             cfg.update(props);
         } catch (IOException e) {
@@ -176,22 +101,7 @@ public class LogServiceImpl implements LogService {
     }
 
     private boolean checkIfFromRequestedLog(PaxLoggingEvent event, String logger) {
-        return (event.getLoggerName().lastIndexOf(logger) >= 0) ? true : false;
-    }
-
-    private String getLevelFromProperty(String prop) {
-        if (prop == null) {
-            return null;
-        } else {
-            String val = prop.trim();
-            int idx = val.indexOf(",");
-            if (idx == 0) {
-                val = null;
-            } else if (idx > 0) {
-                val = val.substring(0, idx);
-            }
-            return val;
-        }
+        return (event.getLoggerName().lastIndexOf(logger) >= 0);
     }
 
     private Configuration getConfiguration() {
@@ -247,15 +157,6 @@ public class LogServiceImpl implements LogService {
     @Override
     public void removeAppender(PaxAppender appender) {
         events.removeAppender(appender);
-    }
-
-    public Level convertToLevel(String level) {
-        level = level.toUpperCase();
-        Level res = Level.valueOf(level);
-        if (res == null) {
-            throw new IllegalArgumentException("level must be set to TRACE, DEBUG, INFO, WARN or ERROR (or DEFAULT to unset it)");
-        }
-        return res;
     }
 
 }

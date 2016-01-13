@@ -21,7 +21,6 @@ import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -68,9 +67,10 @@ public class LogTest extends KarafTestSupport {
         assertTrue("Should be empty but was: " + displayOutput, displayOutput.trim().isEmpty());
     }
     
-    public void assertSetLevel(String level) {
+    public void assertSetLevel(String level) throws InterruptedException {
         System.out.println(executeCommand("log:set " + level));
         assertContains(level, executeCommand("log:get"));
+        Thread.sleep(100);
     }
 
 }

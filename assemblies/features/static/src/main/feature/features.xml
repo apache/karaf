@@ -21,7 +21,7 @@
     <feature version="${project.version}" description="Karaf core feature" name="static-framework">
         <!-- logging -->
         <bundle start="true" start-level="8">mvn:org.ops4j.pax.logging/pax-logging-api/${pax.logging.version}</bundle>
-        <bundle start="true" start-level="8">mvn:org.ops4j.pax.logging/pax-logging-service/${pax.logging.version}</bundle>
+        <bundle start="true" start-level="8">mvn:org.ops4j.pax.logging/pax-logging-log4j2/${pax.logging.version}</bundle>
         <!-- static config admin -->
         <bundle start="true" start-level="10">mvn:org.apache.karaf.services/org.apache.karaf.services.staticcm/${project.version}</bundle>
     </feature>

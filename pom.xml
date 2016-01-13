@@ -393,6 +393,7 @@
             </snapshots>
         </repository>
         <!-- Jolokia snapshots -->
+        <!--
         <repository>
             <id>labs-consol-snapshot</id>
             <name>ConSol* Labs Repository (Snapshots)</name>
@@ -404,6 +405,7 @@
                 <enabled>false</enabled>
             </releases>
         </repository>
+        -->
     </repositories>
     <pluginRepositories>
         <!-- Apache snapshots -->
@@ -1240,12 +1242,11 @@
                 <groupId>org.ops4j.pax.logging</groupId>
                 <artifactId>pax-logging-service</artifactId>
                 <version>${pax.logging.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>log4j</groupId>
-                        <artifactId>log4j</artifactId>
-                    </exclusion>
-                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.ops4j.pax.logging</groupId>
+                <artifactId>pax-logging-log4j2</artifactId>
+                <version>${pax.logging.version}</version>
             </dependency>
 
             <dependency>

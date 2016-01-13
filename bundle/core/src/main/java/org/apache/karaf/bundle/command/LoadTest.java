@@ -54,7 +54,7 @@ public class LoadTest implements Action {
     int refresh = 20;
 
     @Option(name = "--excludes", description = "List of bundles (ids or symbolic names) to exclude")
-    List<String> excludes = Arrays.asList("0", "org.ops4j.pax.url.mvn", "org.ops4j.pax.logging.pax-logging-api", "org.ops4j.pax.logging.pax-logging-service");
+    List<String> excludes = Arrays.asList("0", "org.ops4j.pax.url.mvn", "org.ops4j.pax.logging.pax-logging-api", "org.ops4j.pax.logging.pax-logging-log4j2");
 
     @Reference
     Session session;

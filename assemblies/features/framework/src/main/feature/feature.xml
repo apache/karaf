@@ -26,7 +26,7 @@
         <bundle start="true" start-level="5">mvn:org.ops4j.pax.url/pax-url-aether/${pax.url.version}</bundle>
         <!-- logging -->
         <bundle start="true" start-level="8">mvn:org.ops4j.pax.logging/pax-logging-api/${pax.logging.version}</bundle>
-        <bundle start="true" start-level="8">mvn:org.ops4j.pax.logging/pax-logging-service/${pax.logging.version}</bundle>
+        <bundle start="true" start-level="8">mvn:org.ops4j.pax.logging/pax-logging-log4j2/${pax.logging.version}</bundle>
         <!-- config admin -->
         <bundle start="true" start-level="10">mvn:org.apache.felix/org.apache.felix.configadmin/${felix.configadmin.version}</bundle>
         <!-- file install -->
