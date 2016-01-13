@@ -265,4 +265,13 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
         return bundleService.getDiag(bundle);
     }
 
+    @Override
+    public String getStatus(String bundleId) throws MBeanException {
+        try {
+            return bundleService.getStatus(bundleId);
+        } catch (Exception e) {
+            throw new MBeanException(null, e.getMessage());
+        }
+    }
+
 }

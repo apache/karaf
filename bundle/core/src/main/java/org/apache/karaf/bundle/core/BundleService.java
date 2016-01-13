@@ -50,4 +50,6 @@ public interface BundleService {
 
     int getSystemBundleThreshold();
 
+    String getStatus(String id);
+
 }

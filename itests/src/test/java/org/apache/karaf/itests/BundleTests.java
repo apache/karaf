@@ -116,4 +116,11 @@ public class BundleTests extends KarafTestSupport {
         assertFalse(bundleTreeOutput.isEmpty());
     }
 
+    @Test
+    public void statusCommand() throws Exception {
+        String statusOutput = executeCommand("bundle:status org.apache.karaf.management.server");
+        System.out.println(statusOutput);
+        assertFalse(statusOutput.isEmpty());
+    }
+
 }

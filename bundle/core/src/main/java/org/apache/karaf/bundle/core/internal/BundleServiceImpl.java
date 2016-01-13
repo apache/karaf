@@ -320,4 +320,36 @@ public class BundleServiceImpl implements BundleService {
     public boolean isDynamicImport(Bundle bundle) {
         return bundle.getHeaders().get(ORIGINAL_WIRES) != null;
     }
+
+    @Override
+    public String getStatus(String id) {
+        Bundle bundle = getBundle(id);
+        return getState(bundle);
+    }
+
+    /**
+     * Return a String representing current bundle state
+     *
+     * @param bundle the bundle
+     * @return bundle state String
+     */
+    private String getState(Bundle bundle) {
+        switch (bundle.getState()) {
+            case Bundle.UNINSTALLED:
+                return "Uninstalled";
+            case Bundle.INSTALLED:
+                return "Installed";
+            case Bundle.RESOLVED:
+                return "Resolved";
+            case Bundle.STARTING:
+                return "Starting";
+            case Bundle.STOPPING:
+                return "Stopping";
+            case Bundle.ACTIVE:
+                return "Active";
+            default:
+                return "Unknown";
+        }
+    }
+
 }
