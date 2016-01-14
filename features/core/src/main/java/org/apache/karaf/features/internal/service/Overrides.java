@@ -71,33 +71,40 @@ public final class Overrides {
     public static <T extends Resource> void override(Map<String, T> resources, Collection<String> overrides) {
         // Do override replacement
         for (Clause override : Parser.parseClauses(overrides.toArray(new String[overrides.size()]))) {
-            String url = override.getName();
-            String vr = override.getAttribute(OVERRIDE_RANGE);
-            T over = resources.get(url);
+            String overrideRange = override.getAttribute(OVERRIDE_RANGE);
+            T over = resources.get(override.getName());
             if (over == null) {
                 // Ignore invalid overrides
                 continue;
             }
             for (String uri : new ArrayList<String>(resources.keySet())) {
                 Resource res = resources.get(uri);
-                if (getSymbolicName(res).equals(getSymbolicName(over))) {
-                    VersionRange range;
-                    if (vr == null) {
-                        // default to micro version compatibility
-                        Version v1 = getVersion(res);
-                        Version v2 = new Version(v1.getMajor(), v1.getMinor() + 1, 0);
-                        range = new VersionRange(false, v1, v2, true);
-                    } else {
-                        range = VersionRange.parseVersionRange(vr);
-                    }
-                    // The resource matches, so replace it with the overridden resource
-                    // if the override is actually a newer version than what we currently have
-                    if (range.contains(getVersion(over)) && getVersion(res).compareTo(getVersion(over)) < 0) {
-                        resources.put(uri, over);
-                    }
+                if (shouldOverride(res, over, overrideRange)) {
+                    resources.put(uri, over);
                 }
             }
         }
+    }
+
+    /**
+     * @param resource resource to be overriden
+     * @param explicitRange range set on the override clause
+     * @return if the resource should be overriden by the given override
+     */
+    private static <T extends Resource> boolean shouldOverride(Resource resource, T override, String explicitRange) {
+        if (!getSymbolicName(resource).equals(getSymbolicName(override))) {
+            return false;
+        }
+        VersionRange range;
+        if (explicitRange == null) {
+            // default to micro version compatibility
+            Version v1 = getVersion(resource);
+            Version v2 = new Version(v1.getMajor(), v1.getMinor() + 1, 0);
+            range = new VersionRange(false, v1, v2, true);
+        } else {
+            range = VersionRange.parseVersionRange(explicitRange);
+        }
+        return range.contains(getVersion(override)) && getVersion(resource).compareTo(getVersion(override)) < 0;
     }
 
     public static Set<String> loadOverrides(String overridesUrl) {
