@@ -141,6 +141,18 @@ Thanks to the features lifecycle, you can control the status of the feature (sta
 
 You can also use a simulation to see what the update will do.
 
+==== Overrides
+
+Bundles defined in features can be overridden by using a file etc/overrides.properties.
+Each line in the file defines one override. The syntax is:
+<bundle-uri>[;range="[min,max)"]
+The given bundle will override all bundles in feature definitions with the same symbolic name if the version
+of the override is greater than the version of the overridden bundle and the range matches.
+If no range is given then compatibility on the micro version level is assumed.
+
+So for example the override mvn:org.ops4j.pax.logging/pax-logging-service/1.8.5
+would overide pax-logging-service 1.8.3 but not 1.8.6 or 1.7.0.
+
 ==== Feature bundles
 
 ===== Start Level
