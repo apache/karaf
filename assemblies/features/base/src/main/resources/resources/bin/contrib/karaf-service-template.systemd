@@ -1,0 +1,28 @@
+[Unit]
+Description=Karaf - ${KARAF_SERVICE_NAME}
+After=syslog.target network.target
+
+[Service]
+EnvironmentFile=${KARAF_SERVICE_CONF}
+Environment="KARAF_OPTS=-Dkaraf.systemd.enabled=true"
+
+User=${KARAF_SERVICE_USER}
+Group=${KARAF_SERVICE_GROUP}
+PIDFile=${KARAF_SERVICE_PIDFILE}
+ExecStart=${KARAF_SERVICE_PATH}/bin/karaf daemon
+ExecStop=${KARAF_SERVICE_PATH}/bin/stop
+
+Restart=on-failure
+RestartSec=5s
+StartLimitInterval=60s
+StartLimitBurst=3
+
+SuccessExitStatus=0 143
+
+LimitNOFILE=102642
+
+#WatchdogSec=60
+
+[Install]
+WantedBy=multi-user.target
+
