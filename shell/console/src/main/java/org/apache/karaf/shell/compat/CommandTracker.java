@@ -186,7 +186,12 @@ public class CommandTracker implements ServiceTrackerCustomizer<Object, Object> 
 
                         @Override
                         public String getDescription() {
-                            return reference.getProperty("osgi.command.description").toString();
+                            Object property = reference.getProperty("osgi.command.description");
+                            if (property != null) {
+                                return property.toString();
+                            } else {
+                                return null;
+                            }
                         }
 
                         @Override
