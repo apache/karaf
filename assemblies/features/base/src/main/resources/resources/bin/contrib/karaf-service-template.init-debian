@@ -18,7 +18,7 @@
 #
 #
 ### BEGIN INIT INFO
-# Provides:             ${KARAF_SERVICE_NAME} 
+# Provides:             ${KARAF_SERVICE_NAME}
 # Required-Start:       $remote_fs $network
 # Required-Stop:        $remote_fs $network
 # Should-Start:         $named
@@ -29,8 +29,8 @@
 # Description:          Provide Karaf startup/shutdown script
 ### END INIT INFO
 
-NAME=${KARAF_SERVICE_NAME} 
-DESC="Karaf"
+NAME=${KARAF_SERVICE_NAME}
+DESC=${KARAF_SERVICE_NAME}
 DEFAULT="/etc/default/$NAME"
 
 # Check privileges
@@ -119,7 +119,7 @@ case "$1" in
     cat /dev/null > "$KARAF_SERVICE_LOG"
     chown $KARAF_SERVICE_USER:$KARAF_SERVICE_GROUP $(dirname "$KARAF_SERVICE_LOG")
     chown $KARAF_SERVICE_USER:$KARAF_SERVICE_GROUP $KARAF_SERVICE_LOG
-    
+
     start-stop-daemon \
         --start \
         --user "$KARAF_SERVICE_USER" \
@@ -127,7 +127,7 @@ case "$1" in
         --chdir "$KARAF_SERVICE_PATH" \
         --pidfile "$KARAF_SERVICE_PIDFILE" \
         --make-pidfile \
-        --exec "$KARAF_SERVICE_PATH/bin/karaf" -- "daemon" \
+        --exec "$KARAF_SERVICE_PATH/bin/$KARAF_SERVICE_EXECUTABLE" -- "daemon" \
     >> "$KARAF_SERVICE_LOG" 2>&1 &
 
     count=0
@@ -160,10 +160,11 @@ case "$1" in
         kwait=$SHUTDOWN_WAIT
         read kpid < "$KARAF_SERVICE_PIDFILE"
         log_daemon_msg "Stopping $DESC" "$NAME"
-        
+
         children_pids=$(pgrep -P $kpid)
 
-        su - $KARAF_SERVICE_USER -c $KARAF_SERVICE_PATH/bin/stop
+        su - $KARAF_SERVICE_USER \
+            -c "$KARAF_SERVICE_PATH/bin/$KARAF_SERVICE_EXECUTABLE stop"
 
         count=0
         until [ `ps --pid $kpid 2> /dev/null | grep -c $kpid 2> /dev/null` -eq '0' ] || [ $count -gt $kwait ]
@@ -181,17 +182,17 @@ case "$1" in
                 --user "$KARAF_SERVICE_USER" \
                 --retry=TERM/$SHUTDOWN_WAIT/KILL/5 \
             > /dev/null 2>&1
-        
+
             if [ $? -eq 2 ]; then
                 log_failure_msg "$DESC can't be stopped"
                 exit 1
             fi
         fi
-        
+
         for child in $children_pids; do
             /bin/kill -9 $child >/dev/null 2>&1
         done
-        
+
         log_end_msg 0
 
         rm -rf $KARAF_SERVICE_PIDFILE
@@ -224,7 +225,7 @@ case "$1" in
         log_action_msg "$DESC is not running"
         exit 3
     else
-        log_action_msg "Unable to determine $NAME status"
+        log_action_msg "Unable to determine $DESC status"
         exit 4
     fi
  ;;

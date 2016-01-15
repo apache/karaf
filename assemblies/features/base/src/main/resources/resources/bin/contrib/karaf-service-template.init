@@ -64,7 +64,7 @@ do_start() {
             rm -f $KARAF_SERVICE_PIDFILE
         fi
     fi
-    
+
     mkdir -p $(dirname $KARAF_SERVICE_LOG)
     cat /dev/null > $KARAF_SERVICE_LOG
     chown $KARAF_SERVICE_USER:$KARAF_SERVICE_GROUP  $KARAF_SERVICE_LOG
@@ -74,10 +74,15 @@ do_start() {
 
     if [ ! -z "$KARAF_SERVICE_USER" ]; then
         su - $KARAF_SERVICE_USER \
-            -c " { $KARAF_SERVICE_PATH/bin/karaf daemon >> $KARAF_SERVICE_LOG 2>&1 & } ; echo \$! >| $KARAF_SERVICE_PIDFILE "
+            -c " { $KARAF_SERVICE_PATH/bin/$KARAF_SERVICE_EXECUTABLE daemon >> $KARAF_SERVICE_LOG 2>&1 & } ; echo \$! >| $KARAF_SERVICE_PIDFILE "
+
+        sleep 1
+        if [ -f $KARAF_SERVICE_PIDFILE ]; then
+            chown $KARAF_SERVICE_USER:$KARAF_SERVICE_GROUP $KARAF_SERVICE_PIDFILE
+        fi
     fi
- 
-    RETVAL=$?    
+
+    RETVAL=$?
     return $RETVAL
 }
 
@@ -89,8 +94,9 @@ do_stop() {
         read kpid < $KARAF_SERVICE_PIDFILE
         let kwait=$SHUTDOWN_WAIT
 
-        # Try issuing SIGTERM
-        su - $KARAF_SERVICE_USER -c $KARAF_SERVICE_PATH/bin/stop
+        su - $KARAF_SERVICE_USER \
+            -c "$KARAF_SERVICE_PATH/bin/$KARAF_SERVICE_EXECUTABLE stop >> $KARAF_SERVICE_LOG 2>&1"
+
         until [ `ps -p $kpid 2> /dev/null | grep -c $kpid 2> /dev/null` -eq '0' ] || [ $count -gt $kwait ]
         do
             sleep 1
@@ -98,7 +104,9 @@ do_stop() {
         done
 
         if [ $count -gt $kwait ]; then
-            kill -9 $kpid
+            if [ `ps -p $ppid 2> /dev/null | grep -c $ppid 2> /dev/null` -eq '1' ]; then
+                kill -9 $kpid
+            fi
         fi
     fi
 
