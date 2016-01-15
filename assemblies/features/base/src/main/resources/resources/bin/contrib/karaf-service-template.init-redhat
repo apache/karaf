@@ -61,7 +61,7 @@ start() {
             rm -f $KARAF_SERVICE_PIDFILE
         fi
     fi
-    
+
     mkdir -p $(dirname $KARAF_SERVICE_LOG)
     cat /dev/null > $KARAF_SERVICE_LOG
     chown $KARAF_SERVICE_USER:$KARAF_SERVICE_GROUP  $KARAF_SERVICE_LOG
@@ -74,20 +74,24 @@ start() {
             daemon \
                 --user="$KARAF_SERVICE_USER" \
                 --pidfile="$KARAF_SERVICE_PIDFILE" \
-                " { $KARAF_SERVICE_PATH/bin/karaf daemon >> $KARAF_SERVICE_LOG 2>&1 & } ; echo \$! >| $KARAF_SERVICE_PIDFILE "
+                " { $KARAF_SERVICE_PATH/bin/$KARAF_SERVICE_EXECUTABLE daemon >> $KARAF_SERVICE_LOG 2>&1 & } ; echo \$! >| $KARAF_SERVICE_PIDFILE "
         else
             su - $KARAF_SERVICE_USER \
-                -c " { $KARAF_SERVICE_PATH/bin/karaf daemon >> $KARAF_SERVICE_LOG 2>&1 & } ; echo \$! >| $KARAF_SERVICE_PIDFILE "
+                -c " { $KARAF_SERVICE_PATH/bin/$KARAF_SERVICE_EXECUTABLE daemon >> $KARAF_SERVICE_LOG 2>&1 & } ; echo \$! >| $KARAF_SERVICE_PIDFILE "
+        fi
+
+        if [ -f $KARAF_SERVICE_PIDFILE ]; then
+            chown $KARAF_SERVICE_USER:$KARAF_SERVICE_GROUP $KARAF_SERVICE_PIDFILE
         fi
     fi
- 
+
     RETVAL=$?
     echo
-    
+
     if [ $RETVAL -eq 0 ]; then
         touch $KARAF_LOCKFILE
     fi
-    
+
     return $RETVAL
 }
 
@@ -100,7 +104,9 @@ stop() {
         let kwait=$SHUTDOWN_WAIT
 
         # Try issuing SIGTERM
-        su - $KARAF_SERVICE_USER -c $KARAF_SERVICE_PATH/bin/stop
+        su - $KARAF_SERVICE_USER \
+            -c "$KARAF_SERVICE_PATH/bin/$KARAF_SERVICE_EXECUTABLE stop"
+
         until [ `ps --pid $kpid 2> /dev/null | grep -c $kpid 2> /dev/null` -eq '0' ] || [ $count -gt $kwait ]
         do
             sleep 1

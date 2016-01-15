@@ -22,6 +22,10 @@
 
       KARAF_SERVICE_NAME
       KARAF_SERVICE_PATH
+      KARAF_SERVICE_EXECUTABLE
+
+    For a detailed overview of the confguration options, please visit winsw home
+    page (https://github.com/kohsuke/winsw)
   -->
 
   <id>%KARAF_SERVICE_NAME%</id>
@@ -29,11 +33,11 @@
   <description>Apache Karaf %KARAF_SERVICE_NAME%</description>
 
   <!-- start -->
-  <executable>%KARAF_SERVICE_PATH%\bin\karaf.bat</executable>
+  <executable>%KARAF_SERVICE_PATH%\bin\%KARAF_SERVICE_EXECUTABLE%</executable>
   <startargument>daemon</startargument>
   
   <!-- stop -->
-  <stopexecutable>%KARAF_SERVICE_PATH%\bin\karaf.bat</stopexecutable>
+  <stopexecutable>%KARAF_SERVICE_PATH%\bin\%KARAF_SERVICE_EXECUTABLE%</stopexecutable>
   <stopargument>stop</stopargument>
   <stoptimeout>10sec</stoptimeout>
 

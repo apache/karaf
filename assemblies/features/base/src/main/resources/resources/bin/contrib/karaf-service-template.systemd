@@ -21,13 +21,13 @@ After=syslog.target network.target
 
 [Service]
 EnvironmentFile=${KARAF_SERVICE_CONF}
-Environment="KARAF_OPTS=-Dkaraf.systemd.enabled=true"
+#Environment="KARAF_OPTS=-Dkaraf.systemd.enabled=true"
 
 User=${KARAF_SERVICE_USER}
 Group=${KARAF_SERVICE_GROUP}
 PIDFile=${KARAF_SERVICE_PIDFILE}
-ExecStart=${KARAF_SERVICE_PATH}/bin/karaf daemon
-ExecStop=${KARAF_SERVICE_PATH}/bin/stop
+ExecStart=${KARAF_SERVICE_PATH}/bin/${KARAF_SERVICE_EXECUTABLE} daemon
+ExecStop=${KARAF_SERVICE_PATH}/bin/${KARAF_SERVICE_EXECUTABLE} stop
 
 Restart=on-failure
 RestartSec=5s

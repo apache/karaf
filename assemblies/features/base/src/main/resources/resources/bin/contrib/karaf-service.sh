@@ -18,19 +18,20 @@
 
 function usage {
     cat <<-END >&2
-    USAGE: $0 [-k KARAF_SERVICE_PATH] [-d KARAF_SERVICE_DATA] [-p KARAF_SERVICE_PIDFILE] [-n KARAF_SERVICE_NAME] [-e KARAF_ENV, ...]
-            -k KARAF_SERVICE_PATH     # Karaf installation path
-            -d KARAF_SERVICE_DATA     # Karaf data path (default to \${KARAF_SERVICE_PATH}/data)
-            -c KARAF_SERVICE_CONF     # Karaf configuration file
-            -t KARAF_SERVICE_ETC      # Karaf etc path (default to \${KARAF_SERVICE_PATH/etc}
-            -p KARAF_SERVICE_PIDFILE  # Karaf pid path (default to \${KARAF_SERVICE_DATA}/\${KARAF_SERVICE_NAME}.pid)
-            -n KARAF_SERVICE_NAME     # Karaf service name (default karaf)
-            -e KARAF_ENV              # Karaf environment variable (can be repeated)
-            -u KARAF_SERVICE_USER     # Karaf user
-            -g KARAF_SERVICE_GROUP    # Karaf group (default \${KARAF_SERVICE_USER)
-            -l KARAF_SERVICE_LOG      # Karaf console log (default to \${KARAF_SERVICE_DATA}/log/\${KARAF_SERVICE_NAME}-console.log)
-            -f KARAF_SERVICE_TEMPLATE # Template file to use
-            -h                        # this usage message
+    USAGE: $0
+        -k KARAF_SERVICE_PATH       # Karaf installation path
+        -d KARAF_SERVICE_DATA       # Karaf data path (default to \${KARAF_SERVICE_PATH}/data)
+        -c KARAF_SERVICE_CONF       # Karaf configuration file (default to \${KARAF_SERVICE_PATH/etc/\${KARAF_SERVICE_NAME}.conf
+        -t KARAF_SERVICE_ETC        # Karaf etc path (default to \${KARAF_SERVICE_PATH/etc}
+        -p KARAF_SERVICE_PIDFILE    # Karaf pid path (default to \${KARAF_SERVICE_DATA}/\${KARAF_SERVICE_NAME}.pid)
+        -n KARAF_SERVICE_NAME       # Karaf service name (default karaf)
+        -e KARAF_ENV                # Karaf environment variable (can be repeated)
+        -u KARAF_SERVICE_USER       # Karaf user
+        -g KARAF_SERVICE_GROUP      # Karaf group (default \${KARAF_SERVICE_USER)
+        -l KARAF_SERVICE_LOG        # Karaf console log (default to \${KARAF_SERVICE_DATA}/log/\${KARAF_SERVICE_NAME}-console.log)
+        -f KARAF_SERVICE_TEMPLATE   # Template file to use
+        -x KARAF_SERVICE_EXECUTABLE # Karaf executable name (defaul karaf, should support daemon and stop commands)
+        -h                          # this usage message
 END
     exit
 }
@@ -47,12 +48,12 @@ SOLARIS_SMF_TEMPLATE="karaf-service-template.solaris-smf"
 
 KARAF_ENV=()
 
-while getopts k:d:c:p:n:u:g:l:t:e:f:h opt
+while getopts k:d:c:p:n:u:g:l:t:e:f:x:h opt
 do
     case $opt in
     k)  export KARAF_SERVICE_PATH=$OPTARG ;;
-    d)  export KARAF_SERVICE_DATA=$OPTARG ;;    
-    c)  export KARAF_SERVICE_CONF=$OPTARG ;;    
+    d)  export KARAF_SERVICE_DATA=$OPTARG ;;
+    c)  export KARAF_SERVICE_CONF=$OPTARG ;;
     p)  export KARAF_SERVICE_PIDFILE=$OPTARG ;;
     n)  export KARAF_SERVICE_NAME=$OPTARG ;;
     u)  export KARAF_SERVICE_USER=$OPTARG ;;
@@ -60,6 +61,7 @@ do
     l)  export KARAF_SERVICE_LOG=$OPTARG ;;
     t)  export KARAF_SERVICE_ETC=$OPTARG ;;
     f)  export KARAF_SERVICE_TEMPLATE=$OPTARG ;;
+    x)  export KARAF_SERVICE_EXECUTABLE=$OPTARG ;;
     e)  KARAF_ENV+=($OPTARG) ;;
     h|?) usage ;;
     esac
@@ -67,41 +69,45 @@ done
 
 shift $(( $OPTIND - 1 ))
 
-if [[ ! $KARAF_SERVICE_PATH ]]; then 
+if [[ ! $KARAF_SERVICE_PATH ]]; then
     echo "Warning, KARAF_SERVICE_PATH is required"
     usage
 fi
 
-if [[ ! $KARAF_SERVICE_DATA ]]; then 
+if [[ ! $KARAF_SERVICE_DATA ]]; then
     export KARAF_SERVICE_DATA=${KARAF_SERVICE_PATH}/data
 fi
 
-if [[ ! $KARAF_SERVICE_ETC ]]; then 
+if [[ ! $KARAF_SERVICE_ETC ]]; then
     export KARAF_SERVICE_ETC=${KARAF_SERVICE_PATH}/etc
 fi
 
-if [[ ! $KARAF_SERVICE_CONF ]]; then 
+if [[ ! $KARAF_SERVICE_CONF ]]; then
     export KARAF_SERVICE_CONF=${KARAF_SERVICE_PATH}/etc/${KARAF_SERVICE_NAME}.conf
 fi
 
-if [[ ! $KARAF_SERVICE_NAME ]]; then 
+if [[ ! $KARAF_SERVICE_NAME ]]; then
     export KARAF_SERVICE_NAME="karaf"
 fi
 
-if [[ ! $KARAF_SERVICE_PIDFILE ]]; then 
+if [[ ! $KARAF_SERVICE_PIDFILE ]]; then
     export KARAF_SERVICE_PIDFILE=${KARAF_SERVICE_DATA}/${KARAF_SERVICE_NAME}.pid
 fi
 
-if [[ ! $KARAF_SERVICE_LOG ]]; then 
+if [[ ! $KARAF_SERVICE_LOG ]]; then
     export KARAF_SERVICE_LOG=${KARAF_SERVICE_DATA}/log/${KARAF_SERVICE_NAME}-console.log
 fi
 
-if [[ ! $KARAF_SERVICE_USER ]]; then 
+if [[ ! $KARAF_SERVICE_USER ]]; then
     export KARAF_SERVICE_USER="root"
 fi
 
-if [[ ! $KARAF_SERVICE_GROUP ]]; then 
+if [[ ! $KARAF_SERVICE_GROUP ]]; then
     export KARAF_SERVICE_GROUP=${KARAF_SERVICE_USER}
+fi
+
+if [[ ! $KARAF_SERVICE_EXECUTABLE ]]; then
+    export KARAF_SERVICE_EXECUTABLE="karaf"
 fi
 
 ################################################################################
