@@ -15,6 +15,35 @@
  * limitations under the License.
  */
 
+                    Apache Karaf 2.3.12
+                    ===================
+  Overview
+  --------
+
+  This is an update patch for Apache Karaf 2.3.x, containing several bug fixes. For more information, please read the below changelog.
+
+  WARNING: Karaf 2.3.12 is the last release on the karaf-2.3.x branch. The karaf-2.3.x is now in "Non Active" mode. We encourage all users to upgrade to more recent Karaf versions.
+
+  Changelog
+  ---------
+
+** Bug
+    * [KARAF-1823|https://issues.apache.org/jira/browse/KARAF-1823] - Memory leak on windows in SSHD ServerSession
+    * [KARAF-2522|https://issues.apache.org/jira/browse/KARAF-2522] - Boot feature bundle failure forces other bundles to start regardless 'start' flag
+    * [KARAF-3656|https://issues.apache.org/jira/browse/KARAF-3656] - SSH message channel closed too early
+    * [KARAF-3713|https://issues.apache.org/jira/browse/KARAF-3713] - JDBC generic datasource doesn't use the correct username property
+    * [KARAF-3747|https://issues.apache.org/jira/browse/KARAF-3747] - jndi:alias prefix a name with a /
+    * [KARAF-3767|https://issues.apache.org/jira/browse/KARAF-3767] - Generic JDBC datasource should use 1 instead of WHEN_EXHAUSTED_BLOCK
+    * [KARAF-3996|https://issues.apache.org/jira/browse/KARAF-3996] - bin/karaf does not set ulimit if MAX_FD_LIMIT="unlimited"
+
+** Dependency upgrade
+    * [KARAF-3667|https://issues.apache.org/jira/browse/KARAF-3667] - Upgrade to sshd 0.14.0
+
+** Improvement
+    * [KARAF-3790|https://issues.apache.org/jira/browse/KARAF-3790] - Add comment with karaf.lock.dir property in etc/system.properties
+    * [KARAF-3860|https://issues.apache.org/jira/browse/KARAF-3860] - fix [KARAF-3373] Log lower level root cause exception in LDAPLoginModule.doLogin()
+
+
                     Apache Karaf 2.3.11
                     ===================
   Overview
