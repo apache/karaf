@@ -545,7 +545,9 @@ public class FeaturesServiceImpl implements FeaturesService {
             // Force start of bundles so that they are flagged as persistently started
             for (Bundle b : state.installed) {
                 try {
-                    b.start();
+                    BundleInfo info = state.bundleInfos.get(b.getBundleId());
+                    if (info.isStart())
+                        b.start();
                 } catch (Exception e2) {
                     // Ignore
                 }
