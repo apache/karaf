@@ -1153,6 +1153,13 @@ public class FeaturesServiceImpl implements FeaturesService {
         uninstallFeature(name, version, EnumSet.noneOf(Option.class));
     }
 
+    private void recursiveFeatures(Feature feature, ArrayList<Feature> dependencyFeatures) {
+        for (Feature inner : feature.getDependencies()) {
+            dependencyFeatures.add(inner);
+            recursiveFeatures(inner, dependencyFeatures);
+        }
+    }
+
     public void uninstallFeature(String name, String version, EnumSet<Option> options) throws Exception {
         ArrayList<Exception> exceptions = new ArrayList<Exception>();
         Feature[] features = getFeatures(name, version);
@@ -1160,6 +1167,9 @@ public class FeaturesServiceImpl implements FeaturesService {
         for (Feature feature : features) {
             if (installed.containsKey(feature)) {
                 featuresToUninstall.add(feature);
+                if (options.contains(Option.Recursive)) {
+                    recursiveFeatures(feature, featuresToUninstall);
+                }
             }
         }
         if (featuresToUninstall.isEmpty()) {

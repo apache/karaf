@@ -293,6 +293,17 @@ public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
         featuresService.uninstallFeature(name, options);
     }
 
+    public void uninstallFeature(String name, boolean noRefresh, boolean recursive) throws Exception {
+        EnumSet<FeaturesService.Option> options = EnumSet.noneOf(FeaturesService.Option.class);
+        if (noRefresh) {
+            options.add(FeaturesService.Option.NoAutoRefreshBundles);
+        }
+        if (recursive) {
+            options.add(FeaturesService.Option.Recursive);
+        }
+        featuresService.uninstallFeature(name, options);
+    }
+
     public void uninstallFeature(String name, String version) throws Exception {
         featuresService.uninstallFeature(name, version);
     }
@@ -301,6 +312,17 @@ public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
         EnumSet<FeaturesService.Option> options = EnumSet.noneOf(FeaturesService.Option.class);
         if (noRefresh) {
             options.add(FeaturesService.Option.NoAutoRefreshBundles);
+        }
+        featuresService.uninstallFeature(name, version, options);
+    }
+
+    public void uninstallFeature(String name, String version, boolean noRefresh, boolean recursive) throws Exception {
+        EnumSet<FeaturesService.Option> options = EnumSet.noneOf(FeaturesService.Option.class);
+        if (noRefresh) {
+            options.add(FeaturesService.Option.NoAutoRefreshBundles);
+        }
+        if (recursive) {
+            options.add(FeaturesService.Option.Recursive);
         }
         featuresService.uninstallFeature(name, version, options);
     }

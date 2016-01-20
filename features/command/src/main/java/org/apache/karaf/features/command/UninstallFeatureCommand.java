@@ -33,6 +33,9 @@ public class UninstallFeatureCommand extends FeaturesCommandSupport {
     @Option(name = "-r", aliases = "--no-auto-refresh", description = "Do not automatically refresh bundles", required = false, multiValued = false)
     boolean noRefresh;
 
+    @Option(name = "--recursive", description = "Recursively uninstall features", required = false, multiValued = false)
+    boolean recursive;
+
     @Option(name = "-v", aliases = "--verbose", description = "Explain what is being done", required = false, multiValued = false)
     boolean verbose;
 
@@ -44,6 +47,9 @@ public class UninstallFeatureCommand extends FeaturesCommandSupport {
         }
         if (verbose) {
             options.add(FeaturesService.Option.Verbose);
+        }
+        if (recursive) {
+            options.add(FeaturesService.Option.Recursive);
         }
         for (String feature : features) {
             String[] split = feature.split("/");
