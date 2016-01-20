@@ -49,21 +49,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Dictionary;
-import java.util.EnumSet;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
@@ -730,9 +716,24 @@ public class FeaturesServiceImpl implements FeaturesService {
         uninstallFeature(name, version, EnumSet.noneOf(Option.class));
     }
 
+    private void recursiveFeatures(Feature feature, ArrayList<Feature> dependencyFeatures) throws Exception {
+        for (Dependency dependency : feature.getDependencies()) {
+            Feature inner = getFeature(dependency.getName(), dependency.getVersion());
+            dependencyFeatures.add(inner);
+            recursiveFeatures(inner, dependencyFeatures);
+        }
+    }
+
     public void uninstallFeature(String name, String version, EnumSet<Option> options) throws Exception {
-        Feature[] features = getFeatures(name, version);
-        for (Feature feature : features) {
+        ArrayList<Feature> features = new ArrayList<Feature>(Arrays.asList(getFeatures(name, version)));
+        ArrayList<Feature> featuresToUninstall = new ArrayList<Feature>();
+        featuresToUninstall.addAll(features);
+        if (options.contains(Option.Recursive)) {
+            for (Feature feature : features) {
+                recursiveFeatures(feature, featuresToUninstall);
+            }
+        }
+        for (Feature feature : featuresToUninstall) {
             if (installed.containsKey(feature)) {
                 boolean verbose = options != null && options.contains(Option.Verbose);
                 boolean refresh = options == null || !options.contains(Option.NoAutoRefreshBundles);

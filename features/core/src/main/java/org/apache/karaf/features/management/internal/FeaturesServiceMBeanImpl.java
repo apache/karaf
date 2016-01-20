@@ -260,6 +260,17 @@ public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
         featuresService.uninstallFeature(name, options);
     }
 
+    public void uninstallFeature(String name, boolean noRefresh, boolean recursive) throws Exception {
+        EnumSet<org.apache.karaf.features.FeaturesService.Option> options = EnumSet.noneOf(org.apache.karaf.features.FeaturesService.Option.class);
+        if (noRefresh) {
+            options.add(org.apache.karaf.features.FeaturesService.Option.NoAutoRefreshBundles);
+        }
+        if (recursive) {
+            options.add(org.apache.karaf.features.FeaturesService.Option.Recursive);
+        }
+        featuresService.uninstallFeature(name, options);
+    }
+
     public void uninstallFeature(String name, String version) throws Exception {
         featuresService.uninstallFeature(name, version);
     }
@@ -268,6 +279,17 @@ public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
         EnumSet<org.apache.karaf.features.FeaturesService.Option> options = EnumSet.noneOf(org.apache.karaf.features.FeaturesService.Option.class);
         if (noRefresh) {
             options.add(org.apache.karaf.features.FeaturesService.Option.NoAutoRefreshBundles);
+        }
+        featuresService.uninstallFeature(name, version, options);
+    }
+
+    public void uninstallFeature(String name, String version, boolean noRefresh, boolean recursive) throws Exception {
+        EnumSet<org.apache.karaf.features.FeaturesService.Option> options = EnumSet.noneOf(org.apache.karaf.features.FeaturesService.Option.class);
+        if (noRefresh) {
+            options.add(org.apache.karaf.features.FeaturesService.Option.NoAutoRefreshBundles);
+        }
+        if (recursive) {
+            options.add(org.apache.karaf.features.FeaturesService.Option.Recursive);
         }
         featuresService.uninstallFeature(name, version, options);
     }
