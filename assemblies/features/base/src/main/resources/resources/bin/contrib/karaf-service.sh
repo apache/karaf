@@ -38,6 +38,7 @@ END
 
 CONF_TEMPLATE="karaf-service-template.conf"
 SYSTEMD_TEMPLATE="karaf-service-template.systemd"
+SYSTEMD_TEMPLATE_INSTANCES="karaf-service-template.systemd-instances"
 INIT_REDHAT_TEMPLATE="karaf-service-template.init-redhat"
 INIT_DEBIAN_TEMPLATE="karaf-service-template.init-debian"
 SOLARIS_SMF_TEMPLATE="karaf-service-template.solaris-smf"
@@ -115,12 +116,18 @@ fi
 ################################################################################
 
 function generate_service_descriptor {
+    echo "Writing service file $2"
     perl -p -e 's/\$\{([^}]+)\}/defined $ENV{$1} ? $ENV{$1} : $&/eg' < $1 > $2
-    perl -p -e 's/\$\{([^}]+)\}/defined $ENV{$1} ? $ENV{$1} : $&/eg' < ${CONF_TEMPLATE} > ${KARAF_SERVICE_CONF}
 
-    for var in "${KARAF_ENV[@]}"; do
-      echo "${var}" >> ${KARAF_SERVICE_CONF}
-    done
+    if [ $# -eq 4 ]; then
+
+        echo "Writing service configuration file $4"
+        perl -p -e 's/\$\{([^}]+)\}/defined $ENV{$1} ? $ENV{$1} : $&/eg' < $3 > $4
+
+        for var in "${KARAF_ENV[@]}"; do
+          echo "${var}" >> $4
+        done
+    fi
 }
 
 ################################################################################
@@ -131,20 +138,45 @@ if [[ ! $KARAF_SERVICE_TEMPLATE ]]; then
     case $(uname | tr [:upper:] [:lower:]) in
         sunos)
             # smc vs initv
-            generate_service_descriptor $SOLARIS_SMF_TEMPLATE ${PWD}/${KARAF_SERVICE_NAME}.xml
+            generate_service_descriptor \
+                $SOLARIS_SMF_TEMPLATE \
+                ${PWD}/${KARAF_SERVICE_NAME}.xml
             ;;
         linux)
             if [ -d /run/systemd/system ]; then
-                generate_service_descriptor $SYSTEMD_TEMPLATE ${PWD}/${KARAF_SERVICE_NAME}.service
+                generate_service_descriptor \
+                    $SYSTEMD_TEMPLATE \
+                    ${PWD}/${KARAF_SERVICE_NAME}.service \
+                    ${CONF_TEMPLATE} \
+                    ${KARAF_SERVICE_CONF}
+
+                generate_service_descriptor \
+                    $SYSTEMD_TEMPLATE_INSTANCES \
+                    ${PWD}/${KARAF_SERVICE_NAME}@.service
+
             elif [ -f /etc/redhat-release ]; then
-                generate_service_descriptor $INIT_REDHAT_TEMPLATE ${PWD}/${KARAF_SERVICE_NAME}
-                chmod 755 ${PWD}/${KARAF_SERVICE_NAME}
+                generate_service_descriptor \
+                    $INIT_REDHAT_TEMPLATE \
+                    ${PWD}/${KARAF_SERVICE_NAME} \
+                    ${CONF_TEMPLATE} \
+                    ${KARAF_SERVICE_CONF}
+
+                chmod 755 ${PWD}/${KARAF_SERVICE_NAME} 
             elif [ -f /etc/debian-release ]; then
-                generate_service_descriptor $INIT_DEBIAN_TEMPLATE ${PWD}/${KARAF_SERVICE_NAME}
+                generate_service_descriptor \
+                    $INIT_DEBIAN_TEMPLATE \
+                    ${PWD}/${KARAF_SERVICE_NAME} \
+                    ${CONF_TEMPLATE} \
+                    ${KARAF_SERVICE_CONF}
+
                 chmod 755 ${PWD}/${KARAF_SERVICE_NAME}
             fi
             ;;
     esac
 else
-    generate_service_descriptor $KARAF_SERVICE_TEMPLATE ${PWD}/${KARAF_SERVICE_NAME}
+    generate_service_descriptor \
+        $KARAF_SERVICE_TEMPLATE \
+        ${PWD}/${KARAF_SERVICE_NAME} \
+        ${CONF_TEMPLATE} \
+        ${KARAF_SERVICE_CONF}
 fi
