@@ -16,11 +16,15 @@
 #
 
 [Unit]
-Description=Karaf - ${KARAF_SERVICE_NAME}
+Description=Karaf - ${KARAF_SERVICE_NAME} - %i
 After=syslog.target network.target
+Requires=${KARAF_SERVICE_NAME}.service
 
 [Service]
-EnvironmentFile=${KARAF_SERVICE_CONF}
+EnvironmentFile=-${KARAF_SERVICE_PATH}/etc/${KARAF_SERVICE_NAME}-%i.conf
+EnvironmentFile=-${KARAF_SERVICE_PATH}/instances/%i/etc/${KARAF_SERVICE_NAME}.conf
+Environment=KARAF_HOME=${KARAF_SERVICE_PATH}
+Environment=KARAF_BASE=${KARAF_SERVICE_PATH}/instances/%i
 
 ExecStart=${KARAF_SERVICE_PATH}/bin/${KARAF_SERVICE_EXECUTABLE} daemon
 ExecStop=${KARAF_SERVICE_PATH}/bin/${KARAF_SERVICE_EXECUTABLE} stop
@@ -28,7 +32,7 @@ ExecStop=${KARAF_SERVICE_PATH}/bin/${KARAF_SERVICE_EXECUTABLE} stop
 User=${KARAF_SERVICE_USER}
 Group=${KARAF_SERVICE_GROUP}
 
-SuccessExitStatus=0 143
+SuccessExitStatus=0 1 143
 RestartSec=15
 Restart=on-failure
 
@@ -36,4 +40,3 @@ LimitNOFILE=102642
 
 [Install]
 WantedBy=multi-user.target
-
