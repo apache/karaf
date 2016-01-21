@@ -107,6 +107,7 @@ import static org.apache.karaf.features.internal.util.MapUtils.remove;
 public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCallback {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FeaturesServiceImpl.class);
+    private static final String FEATURE_OSGI_REQUIREMENT_PREFIX = "feature:";
 
     /**
      * Our bundle.
@@ -734,7 +735,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
 
     @Override
     public boolean isRequired(Feature f) {
-        String id = "feature:" + f.getName() + "/" + new VersionRange(f.getVersion(), true);
+        String id = FEATURE_OSGI_REQUIREMENT_PREFIX + f.getName() + "/" + new VersionRange(f.getVersion(), true);
         synchronized (lock) {
             Set<String> features = state.requirements.get(ROOT_REGION);
             return features != null && features.contains(id);
@@ -822,7 +823,13 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         if (region == null || region.isEmpty()) {
             region = ROOT_REGION;
         }
+        Set<String> fl = required.get(region);
+        if (fl == null) {
+            fl = new HashSet<>();
+            required.put(region, fl);
+        }
         List<String> featuresToAdd = new ArrayList<>();
+        List<String> featuresToRemove = new ArrayList<>();
         for (String feature : features) {
             feature = normalize(feature);
             String name = feature.substring(0, feature.indexOf("/"));
@@ -849,16 +856,28 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
             if (!matched && !options.contains(Option.NoFailOnFeatureNotFound)) {
                 throw new IllegalArgumentException("No matching features for " + feature);
             }
+            if (options.contains(Option.Upgrade)) {
+                for (String existentFeatureReq : fl) {
+                    //remove requirement prefix feature:
+                    String existentFeature = existentFeatureReq.substring(FEATURE_OSGI_REQUIREMENT_PREFIX.length());
+                    if (existentFeature.startsWith(name + "/")
+                            && !featuresToAdd.contains(existentFeature)) {
+                        featuresToRemove.add(existentFeature);
+                        //do not break cycle to remove all old versions of feature
+                    }
+                }
+            }
+        }
+        if (!featuresToRemove.isEmpty()) {
+            print("Removing features: " + join(featuresToRemove), options.contains(Option.Verbose));
+            for (String featureReq : featuresToRemove) {
+                fl.remove(FEATURE_OSGI_REQUIREMENT_PREFIX + featureReq);
+            }
         }
         featuresToAdd = new ArrayList<>(new LinkedHashSet<>(featuresToAdd));
         print("Adding features: " + join(featuresToAdd), options.contains(Option.Verbose));
-        Set<String> fl = required.get(region);
-        if (fl == null) {
-            fl = new HashSet<>();
-            required.put(region, fl);
-        }
         for (String feature : featuresToAdd) {
-            fl.add("feature:" + feature);
+            fl.add(FEATURE_OSGI_REQUIREMENT_PREFIX + feature);
         }
         Map<String, Map<String, FeatureState>> stateChanges = Collections.emptyMap();
         doProvisionInThread(required, stateChanges, state, options);
@@ -881,7 +900,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
             feature = normalize(feature);
             if (feature.endsWith("/0.0.0")) {
                 // Match only on name
-                String nameSep = "feature:" + feature.substring(0, feature.indexOf("/") + 1);
+                String nameSep = FEATURE_OSGI_REQUIREMENT_PREFIX + feature.substring(0, feature.indexOf("/") + 1);
                 for (String f : fl) {
                     Pattern pattern = Pattern.compile(nameSep.substring(0, nameSep.length() - 1));
                     Matcher matcher = pattern.matcher(f);
@@ -1316,7 +1335,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
     }
     
     private Pattern getFeaturePattern(String name, String version) {
-        String req = "feature:" + name + "/" + new VersionRange(version, true);
+        String req = FEATURE_OSGI_REQUIREMENT_PREFIX + name + "/" + new VersionRange(version, true);
         req = req.replace("[", "\\[");
         req = req.replace("(", "\\(");
         req = req.replace("]", "\\]");
