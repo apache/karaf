@@ -15,6 +15,57 @@
  * limitations under the License.
  */
 
+                    Apache Karaf 2.4.4
+                    ==================
+
+  Overview
+  --------
+ 
+  This is an update patch for Apache Karaf 2.4.x, containing many bug fixes, dependency updates, and improvements. 
+
+  WARNING: Karaf 2.4.4 is the last release on the karaf-2.x branch. The karaf-2.x is now in "Non Active" mode. We encourage all users to upgrade to more recent Karaf versions.
+
+  Changelog
+  ---------
+
+** Bug
+    * [KARAF-969] - Feature installer should not accept different features with equal names
+    * [KARAF-2522] - Boot feature bundle failure forces other bundles to start regardless 'start' flag
+    * [KARAF-3303] - "keyStoreAvailabilityTimeout" is treated as boolean in JMX configuration
+    * [KARAF-3448] - Feature conditions doesn't work when version is provided
+    * [KARAF-3885] - Memory leak when use interactive client shell
+    * [KARAF-3886] - should escape specify characters in ROLE names
+    * [KARAF-3892] - System properties missing when logging in remotely
+    * [KARAF-3899] - PID file for child instances not getting written when dir has spaces
+    * [KARAF-3945] - Don't try and set permgen settings in Java 8
+    * [KARAF-3946] - LDAP role mapping too sensitive to extra whitespace
+    * [KARAF-3956] - should also add xalan into the endorse folder of distributions
+    * [KARAF-3965] - Calling Ctrl+D in Karaf console, when karaf asks if it is necessary to dispay all console commands, causes console not responding forever
+    * [KARAF-3996] - bin/karaf does not set ulimit if MAX_FD_LIMIT="unlimited"
+    * [KARAF-4024] - role.policy "group" ceased to function
+    * [KARAF-4026] - Karaf wrapper:install produces a SPARC32 binary on Solaris x86_64
+    * [KARAF-4062] - Karaf client does now work after installing BouncyCastle
+    * [KARAF-4066] - Features command bundle should recover if FeatureService unavailable initially
+    * [KARAF-4094] - Multiple shutdown ports opened on 2.4.x when using file lock
+    * [KARAF-4123] - Provide a more dynamic default for serviceUrl configuration
+    * [KARAF-4150] - bin/status fails if KARAF_DEBUG is set
+    * [KARAF-4267] - Remove derby config from windows karaf.bat
+
+** Dependency upgrade
+    * [KARAF-3914] - Upgrade to Spring 4.1.7.RELEASE
+    * [KARAF-3915] - Upgrade to Spring 3.2.14.RELEASE
+    * [KARAF-4023] - Upgrade to Pax Logging 1.8.4
+
+** Improvement
+    * [KARAF-3860] - fix [KARAF-3373] Log lower level root cause exception in LDAPLoginModule.doLogin()
+    * [KARAF-3959] - make jdbc:create work better with MS SQL Server
+    * [KARAF-3962] - Client can't use properties defined in custom.properties
+    * [KARAF-3978] - enable specify different shell.init.script env for remote shell in "exec" and "shell" mode
+
+** New Feature
+    * [KARAF-1047] - feature:uninstall command may provide -r option
+
+
                     Apache Karaf 2.4.3
                     ==================
 
