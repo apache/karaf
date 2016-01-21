@@ -1776,12 +1776,26 @@ public class FeaturesServiceImpl implements FeaturesService {
     private boolean dependenciesSatisfied(List<Feature> dependencies, Set<Feature> installed) throws Exception {
        boolean satisfied = true;
        for (Feature dep : dependencies) {
-           Feature f = getFeature(dep.getName(), dep.getVersion());
-           if (f != null && !installed.contains(f)) {
+           if (!featureInstalled(dep.getName(), dep.getVersion(), installed)) {
                satisfied = false;
            }
        }
        return satisfied;
+    }
+
+    private boolean featureInstalled(String name, String version, Set<Feature> installed) {
+        for (Feature install : installed) {
+            if (version.equals(FeatureImpl.DEFAULT_VERSION)) {
+                if (name.equals(install.getName())) {
+                    return true;
+                }
+            } else {
+                if (name.equals(install.getName()) && version.equals(install.getVersion())) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
 }
