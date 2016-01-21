@@ -56,7 +56,8 @@ public interface FeaturesService {
         NoAutoStartBundles,
         NoAutoManageBundles,
         Simulate,
-        Verbose
+        Verbose,
+        Upgrade
     }
 
     /**

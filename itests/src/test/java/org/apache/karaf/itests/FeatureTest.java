@@ -66,6 +66,18 @@ public class FeatureTest extends KarafTestSupport {
     }
 
     @Test
+    public void installWithUpgradeCommand() throws Exception {
+        final String featureToUpgrade = "transaction-api";
+        final String oldVersion = "1.1.0";
+        final String newVersion = "1.2.0";
+        System.out.println(executeCommand("feature:install -v -r " + featureToUpgrade + "/" + oldVersion, new RolePrincipal("admin")));
+        assertFeatureInstalled(featureToUpgrade, oldVersion);
+        System.out.println(executeCommand("feature:install -r --upgrade " + featureToUpgrade + "/" + newVersion, new RolePrincipal("admin")));
+        assertFeatureNotInstalled(featureToUpgrade, oldVersion);
+        assertFeatureInstalled(featureToUpgrade, newVersion);
+    }
+
+    @Test
     public void installUninstallViaMBean() throws Exception {
         MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
         ObjectName name = new ObjectName("org.apache.karaf:type=feature,name=root");

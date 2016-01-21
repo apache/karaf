@@ -52,6 +52,9 @@ public class InstallFeatureCommand extends FeaturesCommandSupport {
     @Option(name = "-t", aliases = "--simulate", description = "Perform a simulation only", required = false, multiValued = false)
     boolean simulate;
 
+    @Option(name = "-u", aliases = "--upgrade", description = "Perform an upgrade of feature if previous version are installed or install it", required = false, multiValued = false)
+    boolean upgrade;
+
     @Option(name = "--store", description = "Store the resolution into the given file and result for offline analysis")
     String outputFile;
 
@@ -64,6 +67,7 @@ public class InstallFeatureCommand extends FeaturesCommandSupport {
         addOption(FeaturesService.Option.NoAutoRefreshBundles, noRefresh);
         addOption(FeaturesService.Option.NoAutoManageBundles, noManage);
         addOption(FeaturesService.Option.Verbose, verbose);
+        addOption(FeaturesService.Option.Upgrade, upgrade);
         admin.setResolutionOutputFile(outputFile);
         admin.installFeatures(new HashSet<String>(features), region, options);
     }
