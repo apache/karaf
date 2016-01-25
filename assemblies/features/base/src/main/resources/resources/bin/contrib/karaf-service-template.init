@@ -21,6 +21,13 @@
 # config: ${KARAF_SERVICE_CONF}
 #
 
+if [ -r "${KARAF_SERVICE_CONF}" ]; then
+    . "${KARAF_SERVICE_CONF}"
+else
+    echo "Error KARAF_SERVICE_CONF not defined"
+    exit -1
+fi
+
 # Location of JDK
 if [ -n "$JAVA_HOME" ]; then
     export JAVA_HOME
@@ -35,13 +42,6 @@ if [ -z "$JAVA" ]; then
     fi
 fi
 
-if [ -r "${KARAF_SERVICE_CONF}" ]; then
-    . "${KARAF_SERVICE_CONF}"
-else
-    echo "Error KARAF_SERVICE_CONF not defined"
-    exit -1
-fi
-
 if [ -z "$STARTUP_WAIT" ]; then
     STARTUP_WAIT=30
 fi
@@ -51,7 +51,6 @@ if [ -z "$SHUTDOWN_WAIT" ]; then
 fi
 
 prog=${KARAF_SERVICE_NAME}
-currenttime=$(date +%s%N | cut -b1-13)
 
 do_start() {
     echo "Starting $prog: "
@@ -65,16 +64,16 @@ do_start() {
         fi
     fi
 
-    mkdir -p $(dirname $KARAF_SERVICE_LOG)
+    mkdir -p `dirname $KARAF_SERVICE_LOG`
     cat /dev/null > $KARAF_SERVICE_LOG
     chown $KARAF_SERVICE_USER:$KARAF_SERVICE_GROUP  $KARAF_SERVICE_LOG
 
-    mkdir -p $(dirname $KARAF_SERVICE_PIDFILE)
-    chown $KARAF_SERVICE_USER:$KARAF_SERVICE_GROUP $(dirname $KARAF_SERVICE_PIDFILE) || true
+    mkdir -p `dirname $KARAF_SERVICE_PIDFILE`
+    chown $KARAF_SERVICE_USER:$KARAF_SERVICE_GROUP `dirname $KARAF_SERVICE_PIDFILE` || true
 
     if [ ! -z "$KARAF_SERVICE_USER" ]; then
         su - $KARAF_SERVICE_USER \
-            -c " { $KARAF_SERVICE_PATH/bin/$KARAF_SERVICE_EXECUTABLE daemon >> $KARAF_SERVICE_LOG 2>&1 & } ; echo \$! >| $KARAF_SERVICE_PIDFILE "
+            -c " { export JAVA_HOME=$JAVA_HOME; $KARAF_SERVICE_PATH/bin/$KARAF_SERVICE_EXECUTABLE daemon >> $KARAF_SERVICE_LOG 2>&1 & } ; echo \$! >| $KARAF_SERVICE_PIDFILE "
 
         sleep 1
         if [ -f $KARAF_SERVICE_PIDFILE ]; then
@@ -92,15 +91,15 @@ do_stop() {
 
     if [ -f $KARAF_SERVICE_PIDFILE ]; then
         read kpid < $KARAF_SERVICE_PIDFILE
-        let kwait=$SHUTDOWN_WAIT
+        kwait=$SHUTDOWN_WAIT
 
         su - $KARAF_SERVICE_USER \
-            -c "$KARAF_SERVICE_PATH/bin/$KARAF_SERVICE_EXECUTABLE stop >> $KARAF_SERVICE_LOG 2>&1"
+            -c "export JAVA_HOME=$JAVA_HOME; $KARAF_SERVICE_PATH/bin/$KARAF_SERVICE_EXECUTABLE stop >> $KARAF_SERVICE_LOG 2>&1"
 
         until [ `ps -p $kpid 2> /dev/null | grep -c $kpid 2> /dev/null` -eq '0' ] || [ $count -gt $kwait ]
         do
             sleep 1
-            let count=$count+1;
+            count=`expr $count + 1`
         done
 
         if [ $count -gt $kwait ]; then
