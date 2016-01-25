@@ -191,7 +191,7 @@
         <felix.webconsole.version>4.2.14</felix.webconsole.version>
         <felix.webconsole.api.version>3.1.2</felix.webconsole.api.version>
         <felix.metatype.version>1.1.2</felix.metatype.version>
-        <felix.eventadmin.version>1.4.4</felix.eventadmin.version>
+        <felix.eventadmin.version>1.4.6</felix.eventadmin.version>
         <felix.eventadmin.webconsole.plugin.version>1.1.4</felix.eventadmin.webconsole.plugin.version>
         <felix.obr.version>1.0.2</felix.obr.version>
         <felix.scr.version>2.0.2</felix.scr.version>
