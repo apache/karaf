@@ -16,16 +16,17 @@ package org.apache.karaf.itests;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import javax.management.MBeanServerConnection;
+import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.management.openmbean.TabularDataSupport;
-import javax.management.remote.JMXConnector;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
+
+import java.lang.management.ManagementFactory;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
@@ -40,16 +41,10 @@ public class BundleTests extends KarafTestSupport {
 
     @Test
     public void listViaMBean() throws Exception {
-        JMXConnector connector = null;
-        try {
-            connector = getJMXConnector();
-            MBeanServerConnection connection = connector.getMBeanServerConnection();
+        MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
             ObjectName name = new ObjectName("org.apache.karaf:type=bundle,name=root");
-            TabularDataSupport value = (TabularDataSupport) connection.getAttribute(name, "Bundles");
+            TabularDataSupport value = (TabularDataSupport) mbeanServer.getAttribute(name, "Bundles");
             assertTrue(value.size() > 0);
-        } finally {
-        	close(connector);
-        }
     }
 
     @Test

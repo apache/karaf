@@ -16,12 +16,12 @@ package org.apache.karaf.itests;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.lang.management.ManagementFactory;
 import java.util.List;
 import java.util.Map;
 
-import javax.management.MBeanServerConnection;
+import javax.management.MBeanServer;
 import javax.management.ObjectName;
-import javax.management.remote.JMXConnector;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -46,19 +46,13 @@ public class ConfigTest extends KarafTestSupport {
     @SuppressWarnings("unchecked")
     @Test
     public void configsViaMBean() throws Exception {
-        JMXConnector connector = null;
-        try {
-            connector = this.getJMXConnector();
-            MBeanServerConnection connection = connector.getMBeanServerConnection();
-            ObjectName name = new ObjectName("org.apache.karaf:type=config,name=root");
-            List<String> configs = (List<String>) connection.getAttribute(name, "Configs");
-            assertTrue(configs.size() > 0);
-            assertTrue(configs.contains("org.apache.karaf.features"));
-            Map<String, String> properties = (Map<String, String>) connection.invoke(name, "listProperties", new Object[]{ "org.apache.karaf.features" }, new String[]{ "java.lang.String" });
-            assertTrue(properties.keySet().size() > 0);
-        } finally {
-        	close(connector);
-        }
+        MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
+        ObjectName name = new ObjectName("org.apache.karaf:type=config,name=root");
+        List<String> configs = (List<String>) mbeanServer.getAttribute(name, "Configs");
+        assertTrue(configs.size() > 0);
+        assertTrue(configs.contains("org.apache.karaf.features"));
+        Map<String, String> properties = (Map<String, String>) mbeanServer.invoke(name, "listProperties", new Object[]{"org.apache.karaf.features"}, new String[]{"java.lang.String"});
+        assertTrue(properties.keySet().size() > 0);
     }
 
 }

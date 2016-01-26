@@ -16,16 +16,15 @@ package org.apache.karaf.itests;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.lang.management.ManagementFactory;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.SortedMap;
 
 import javax.inject.Inject;
-import javax.management.MBeanServerConnection;
+import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.management.openmbean.TabularData;
-import javax.management.remote.JMXConnector;
 
 import org.apache.karaf.packages.core.PackageService;
 import org.apache.karaf.packages.core.PackageVersion;
@@ -51,16 +50,10 @@ public class PackageTest extends KarafTestSupport {
 
     @Test
     public void exportsViaMBean() throws Exception {
-        JMXConnector connector = null;
-        try {
-            connector = this.getJMXConnector();
-            MBeanServerConnection connection = connector.getMBeanServerConnection();
-            ObjectName name = new ObjectName("org.apache.karaf:type=package,name=root");
-            TabularData exports = (TabularData)connection.getAttribute(name, "Exports");
-            assertTrue(exports.size() > 0);
-        } finally {
-            close(connector);
-        }
+        MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
+        ObjectName name = new ObjectName("org.apache.karaf:type=package,name=root");
+        TabularData exports = (TabularData) mbeanServer.getAttribute(name, "Exports");
+        assertTrue(exports.size() > 0);
     }
 
     @Test
@@ -72,16 +65,10 @@ public class PackageTest extends KarafTestSupport {
 
     @Test
     public void importsViaMBean() throws Exception {
-        JMXConnector connector = null;
-        try {
-            connector = this.getJMXConnector();
-            MBeanServerConnection connection = connector.getMBeanServerConnection();
-            ObjectName name = new ObjectName("org.apache.karaf:type=package,name=root");
-            TabularData imports = (TabularData)connection.getAttribute(name, "Imports");
-            assertTrue(imports.size() > 0);
-        } finally {
-            close(connector);
-        }
+        MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
+        ObjectName name = new ObjectName("org.apache.karaf:type=package,name=root");
+        TabularData imports = (TabularData) mbeanServer.getAttribute(name, "Imports");
+        assertTrue(imports.size() > 0);
     }
 
     @Test

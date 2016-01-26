@@ -15,11 +15,11 @@ package org.apache.karaf.itests;
 
 import static org.junit.Assert.assertEquals;
 
+import java.lang.management.ManagementFactory;
 import java.util.List;
 
-import javax.management.MBeanServerConnection;
+import javax.management.MBeanServer;
 import javax.management.ObjectName;
-import javax.management.remote.JMXConnector;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,17 +38,11 @@ public class KarTest extends KarafTestSupport {
 
     @Test
     public void listViaMBean() throws Exception {
-        JMXConnector connector = null;
-        try {
-            connector = this.getJMXConnector();
-            MBeanServerConnection connection = connector.getMBeanServerConnection();
-            ObjectName name = new ObjectName("org.apache.karaf:type=kar,name=root");
-            @SuppressWarnings("unchecked")
-            List<String> kars = (List<String>) connection.getAttribute(name, "Kars");
-            assertEquals(0, kars.size());
-        } finally {
-            close(connector);
-        }
+        MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
+        ObjectName name = new ObjectName("org.apache.karaf:type=kar,name=root");
+        @SuppressWarnings("unchecked")
+        List<String> kars = (List<String>) mbeanServer.getAttribute(name, "Kars");
+        assertEquals(0, kars.size());
     }
 
 }

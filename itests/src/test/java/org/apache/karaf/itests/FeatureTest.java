@@ -16,10 +16,9 @@ package org.apache.karaf.itests;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import javax.management.MBeanServerConnection;
+import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.management.openmbean.TabularData;
-import javax.management.remote.JMXConnector;
 
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.junit.Test;
@@ -27,6 +26,8 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
+
+import java.lang.management.ManagementFactory;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
@@ -50,16 +51,10 @@ public class FeatureTest extends KarafTestSupport {
 
     @Test
     public void listViaMBean() throws Exception {
-        JMXConnector connector = null;
-        try {
-            connector = this.getJMXConnector();
-            MBeanServerConnection connection = connector.getMBeanServerConnection();
-            ObjectName name = new ObjectName("org.apache.karaf:type=feature,name=root");
-            TabularData features = (TabularData) connection.getAttribute(name, "Features");
-            assertTrue(features.size() > 0);
-        } finally {
-        	close(connector);
-        }
+        MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
+        ObjectName name = new ObjectName("org.apache.karaf:type=feature,name=root");
+        TabularData features = (TabularData) mbeanServer.getAttribute(name, "Features");
+        assertTrue(features.size() > 0);
     }
 
     @Test
@@ -72,18 +67,12 @@ public class FeatureTest extends KarafTestSupport {
 
     @Test
     public void installUninstallViaMBean() throws Exception {
-        JMXConnector connector = null;
-        try {
-            connector = this.getJMXConnector();
-            MBeanServerConnection connection = connector.getMBeanServerConnection();
-            ObjectName name = new ObjectName("org.apache.karaf:type=feature,name=root");
-            connection.invoke(name, "installFeature", new Object[] { "wrapper", true }, new String[]{ "java.lang.String", "boolean" });
-            assertFeatureInstalled("wrapper");
-            connection.invoke(name, "uninstallFeature", new Object[] { "wrapper", true }, new String[]{ "java.lang.String", "boolean" });
-            assertFeatureNotInstalled("wrapper");
-        } finally {
-        	close(connector);
-        }
+        MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
+        ObjectName name = new ObjectName("org.apache.karaf:type=feature,name=root");
+        mbeanServer.invoke(name, "installFeature", new Object[]{"wrapper", true}, new String[]{"java.lang.String", "boolean"});
+        assertFeatureInstalled("wrapper");
+        mbeanServer.invoke(name, "uninstallFeature", new Object[]{"wrapper", true}, new String[]{"java.lang.String", "boolean"});
+        assertFeatureNotInstalled("wrapper");
     }
 
     @Test
@@ -104,30 +93,18 @@ public class FeatureTest extends KarafTestSupport {
 
     @Test
     public void repoAddRemoveViaMBean() throws Exception {
-        JMXConnector connector = null;
-        try {
-            connector = this.getJMXConnector();
-            MBeanServerConnection connection = connector.getMBeanServerConnection();
-            ObjectName name = new ObjectName("org.apache.karaf:type=feature,name=root");
-            connection.invoke(name, "addRepository", new Object[] { "mvn:org.apache.karaf.cellar/apache-karaf-cellar/3.0.0/xml/features" }, new String[]{ "java.lang.String" });
-            connection.invoke(name, "removeRepository", new Object[] { "mvn:org.apache.karaf.cellar/apache-karaf-cellar/3.0.0/xml/features" }, new String[]{ "java.lang.String" });
-        } finally {
-        	close(connector);
-        }
+        MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
+        ObjectName name = new ObjectName("org.apache.karaf:type=feature,name=root");
+        mbeanServer.invoke(name, "addRepository", new Object[] { "mvn:org.apache.karaf.cellar/apache-karaf-cellar/3.0.0/xml/features" }, new String[]{ "java.lang.String" });
+        mbeanServer.invoke(name, "removeRepository", new Object[] { "mvn:org.apache.karaf.cellar/apache-karaf-cellar/3.0.0/xml/features" }, new String[]{ "java.lang.String" });
     }
 
     @Test
     public void repoAddRemoveWithRegexViaMBean() throws Exception {
-        JMXConnector connector = null;
-        try {
-            connector = this.getJMXConnector();
-            MBeanServerConnection connection = connector.getMBeanServerConnection();
-            ObjectName name = new ObjectName("org.apache.karaf:type=feature,name=root");
-            connection.invoke(name, "addRepository", new Object[] { "mvn:org.apache.karaf.cellar/apache-karaf-cellar/3.0.0/xml/features" }, new String[]{ "java.lang.String" });
-            connection.invoke(name, "removeRepository", new Object[] { ".*apache-karaf-cellar.*" }, new String[]{ "java.lang.String" });
-        } finally {
-            close(connector);
-        }
+        MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
+        ObjectName name = new ObjectName("org.apache.karaf:type=feature,name=root");
+        mBeanServer.invoke(name, "addRepository", new Object[] { "mvn:org.apache.karaf.cellar/apache-karaf-cellar/3.0.0/xml/features" }, new String[]{ "java.lang.String" });
+        mBeanServer.invoke(name, "removeRepository", new Object[] { ".*apache-karaf-cellar.*" }, new String[]{ "java.lang.String" });
     }
 
     @Test
@@ -139,15 +116,9 @@ public class FeatureTest extends KarafTestSupport {
 
     @Test
     public void repoRefreshViaMBean() throws Exception {
-        JMXConnector connector = null;
-        try {
-            connector = this.getJMXConnector();
-            MBeanServerConnection connection = connector.getMBeanServerConnection();
-            ObjectName name = new ObjectName("org.apache.karaf:type=feature,name=root");
-            connection.invoke(name, "refreshRepository", new Object[] { ".*pax-web.*" }, new String[]{ "java.lang.String" });
-        } finally {
-            close(connector);
-        }
+        MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
+        ObjectName name = new ObjectName("org.apache.karaf:type=feature,name=root");
+        mbeanServer.invoke(name, "refreshRepository", new Object[] { ".*pax-web.*" }, new String[]{ "java.lang.String" });
     }
 
 }

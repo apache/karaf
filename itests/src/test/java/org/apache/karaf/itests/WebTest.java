@@ -16,10 +16,9 @@ package org.apache.karaf.itests;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
-import javax.management.MBeanServerConnection;
+import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.management.openmbean.TabularData;
-import javax.management.remote.JMXConnector;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -27,6 +26,8 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
+
+import java.lang.management.ManagementFactory;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
@@ -46,16 +47,10 @@ public class WebTest extends KarafTestSupport {
 
     @Test
     public void listViaMBean() throws Exception {
-        JMXConnector connector = null;
-        try {
-            connector = this.getJMXConnector();
-            MBeanServerConnection connection = connector.getMBeanServerConnection();
-            ObjectName name = new ObjectName("org.apache.karaf:type=web,name=root");
-            TabularData webBundles = (TabularData) connection.getAttribute(name, "WebBundles");
-            assertEquals(0, webBundles.size());
-        } finally {
-            close(connector);
-        }
+        MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
+        ObjectName name = new ObjectName("org.apache.karaf:type=web,name=root");
+        TabularData webBundles = (TabularData) mbeanServer.getAttribute(name, "WebBundles");
+        assertEquals(0, webBundles.size());
     }
 
 }

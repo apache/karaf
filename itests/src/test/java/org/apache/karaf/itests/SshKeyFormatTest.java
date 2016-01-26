@@ -60,9 +60,11 @@ public class SshKeyFormatTest extends SshCommandTestBase {
         ByteSource source = Resources.asByteSource(testPemURL);
         PKCS8Key pkcs8 = new PKCS8Key(source.openStream(), null);
 
+        String sshPort = getSshPort();
+
         client.setServerKeyVerifier(new RequiredServerKeyVerifier(pkcs8.getPublicKey()));
         client.start();
-        ConnectFuture future = client.connect("karaf", "localhost", 8101).await();
+        ConnectFuture future = client.connect("karaf", "localhost", Integer.parseInt(sshPort)).await();
         ClientSession session = future.getSession();
         int ret = ClientSession.WAIT_AUTH;
         while ((ret & ClientSession.WAIT_AUTH) != 0) {

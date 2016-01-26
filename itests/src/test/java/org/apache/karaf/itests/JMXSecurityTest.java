@@ -54,13 +54,14 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.exam.options.extra.VMOption;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
+import org.osgi.service.cm.ConfigurationAdmin;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
 public class JMXSecurityTest extends KarafTestSupport {
+
     private static AtomicInteger counter = new AtomicInteger(0);
 
     @Configuration
@@ -93,6 +94,12 @@ public class JMXSecurityTest extends KarafTestSupport {
             ";jaas:update" +
             ";jaas:realm-manage --realm karaf" +
             ";jaas:user-list", new RolePrincipal("admin")));
+
+        ConfigurationAdmin configurationAdmin = getOsgiService(ConfigurationAdmin.class, 30000);
+        org.osgi.service.cm.Configuration configuration = configurationAdmin.getConfiguration("org.apache.karaf.management", null);
+        if (configuration == null) {
+
+        }
 
         JMXConnector connector = getJMXConnector(viewerUser, viewerUser);
         MBeanServerConnection connection = connector.getMBeanServerConnection();

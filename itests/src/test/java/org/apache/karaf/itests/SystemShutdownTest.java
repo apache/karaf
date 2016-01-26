@@ -13,9 +13,8 @@
  */
 package org.apache.karaf.itests;
 
-import javax.management.MBeanServerConnection;
+import javax.management.MBeanServer;
 import javax.management.ObjectName;
-import javax.management.remote.JMXConnector;
 
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.junit.Test;
@@ -23,6 +22,8 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerMethod;
+
+import java.lang.management.ManagementFactory;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerMethod.class)
@@ -35,15 +36,9 @@ public class SystemShutdownTest extends KarafTestSupport {
 
     @Test
     public void shutdownViaMBean() throws Exception {
-        JMXConnector connector = null;
-        try {
-            connector = this.getJMXConnector();
-            MBeanServerConnection connection = connector.getMBeanServerConnection();
-            ObjectName name = new ObjectName("org.apache.karaf:type=system,name=root");
-            connection.invoke(name, "halt", new Object[]{}, new String[]{});
-        } finally {
-        	close(connector);
-        }
+        MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
+        ObjectName name = new ObjectName("org.apache.karaf:type=system,name=root");
+        mbeanServer.invoke(name, "halt", new Object[]{}, new String[]{});
     }
 
 }

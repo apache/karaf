@@ -15,10 +15,10 @@ package org.apache.karaf.itests;
 
 import static org.junit.Assert.assertTrue;
 
+import javax.management.MBeanServer;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import javax.management.openmbean.TabularData;
-import javax.management.remote.JMXConnector;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -26,6 +26,8 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
+
+import java.lang.management.ManagementFactory;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
@@ -41,21 +43,14 @@ public class InstanceTest extends KarafTestSupport {
 
     @Test
     public void createDestroyViaMBean() throws Exception {
-        JMXConnector connector = null;
-        try {
-            connector = this.getJMXConnector();
-            MBeanServerConnection connection = connector.getMBeanServerConnection();
-            ObjectName name = new ObjectName("org.apache.karaf:type=instance,name=root");
-            int oldNum = getInstancesNum(connection, name);  
-            connection.invoke(name, "createInstance", new Object[]{ "itest2", 0, 0, 0, null, null, null, null },
-                    new String[]{ "java.lang.String", "int", "int", "int", "java.lang.String", "java.lang.String", "java.lang.String", "java.lang.String" });
-            Assert.assertEquals(oldNum + 1, getInstancesNum(connection, name));
-            connection.invoke(name, "destroyInstance", new Object[]{ "itest2" }, new String[]{ "java.lang.String" });
-            Assert.assertEquals(oldNum, getInstancesNum(connection, name));
-        } finally {
-            if (connector != null)
-        	    close(connector);
-        }
+        MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
+        ObjectName name = new ObjectName("org.apache.karaf:type=instance,name=root");
+        int oldNum = getInstancesNum(mbeanServer, name);
+        mbeanServer.invoke(name, "createInstance", new Object[]{"itest2", 0, 0, 0, null, null, null, null},
+                new String[]{"java.lang.String", "int", "int", "int", "java.lang.String", "java.lang.String", "java.lang.String", "java.lang.String"});
+        Assert.assertEquals(oldNum + 1, getInstancesNum(mbeanServer, name));
+        mbeanServer.invoke(name, "destroyInstance", new Object[]{"itest2"}, new String[]{"java.lang.String"});
+        Assert.assertEquals(oldNum, getInstancesNum(mbeanServer, name));
     }
 
     @Test
@@ -109,19 +104,12 @@ public class InstanceTest extends KarafTestSupport {
 
     @Test
     public void cloneViaMBean() throws Exception {
-        JMXConnector connector = null;
-        try {
-            connector = this.getJMXConnector();
-            MBeanServerConnection connection = connector.getMBeanServerConnection();
-            ObjectName name = new ObjectName("org.apache.karaf:type=instance,name=root");
-            int oldNum = getInstancesNum(connection, name);
-            connection.invoke(name, "cloneInstance", new Object[]{ "root", "itest4", 0, 0, 0, null, null },
-                    new String[]{ "java.lang.String", "java.lang.String", "int", "int", "int", "java.lang.String", "java.lang.String" });
-            Assert.assertEquals(oldNum + 1, getInstancesNum(connection, name));
-        } finally {
-            if (connector != null)
-                connector.close();
-        }
+        MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
+        ObjectName name = new ObjectName("org.apache.karaf:type=instance,name=root");
+        int oldNum = getInstancesNum(mbeanServer, name);
+        mbeanServer.invoke(name, "cloneInstance", new Object[]{"root", "itest4", 0, 0, 0, null, null},
+                new String[]{"java.lang.String", "java.lang.String", "int", "int", "int", "java.lang.String", "java.lang.String"});
+        Assert.assertEquals(oldNum + 1, getInstancesNum(mbeanServer, name));
     }
 
     @Test
@@ -135,18 +123,11 @@ public class InstanceTest extends KarafTestSupport {
 
     @Test
     public void renameViaMBean() throws Exception {
-        JMXConnector connector = null;
-        try {
-            connector = this.getJMXConnector();
-            MBeanServerConnection connection = connector.getMBeanServerConnection();
-            ObjectName name = new ObjectName("org.apache.karaf:type=instance,name=root");
-            connection.invoke(name, "createInstance", new Object[]{ "itest5", 0, 0, 0, null, null, null, null },
-                    new String[]{ "java.lang.String", "int", "int", "int", "java.lang.String", "java.lang.String", "java.lang.String", "java.lang.String" });
-            connection.invoke(name, "renameInstance", new Object[]{ "itest5", "new_itest5" }, new String[]{ "java.lang.String", "java.lang.String" });
-        } finally {
-            if (connector != null)
-                connector.close();
-        }
+        MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
+        ObjectName name = new ObjectName("org.apache.karaf:type=instance,name=root");
+        mbeanServer.invoke(name, "createInstance", new Object[]{"itest5", 0, 0, 0, null, null, null, null},
+                new String[]{"java.lang.String", "int", "int", "int", "java.lang.String", "java.lang.String", "java.lang.String", "java.lang.String"});
+        mbeanServer.invoke(name, "renameInstance", new Object[]{"itest5", "new_itest5"}, new String[]{"java.lang.String", "java.lang.String"});
     }
 
 }
