@@ -180,6 +180,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
     private final Object lock = new Object();
     private final State state = new State();
     private final Map<String, Repository> repositoryCache = new HashMap<>();
+    private final ExecutorService executor;
     private Map<String, Map<String, Feature>> featureCache;
 
     public FeaturesServiceImpl(Bundle bundle,
@@ -220,6 +221,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         this.scheduleMaxRun = scheduleMaxRun;
         this.blacklisted = blacklisted;
         this.configCfgStore = FeaturesService.DEFAULT_CONFIG_CFG_STORE;
+        this.executor = Executors.newSingleThreadExecutor();
         loadState();
         checkResolve();
     }
@@ -263,6 +265,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         this.scheduleMaxRun = scheduleMaxRun;
         this.blacklisted = blacklisted;
         this.configCfgStore = configCfgStore;
+        this.executor = Executors.newSingleThreadExecutor();
         loadState();
         checkResolve();
     }
@@ -270,6 +273,11 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
     @SuppressWarnings({
      "unchecked", "rawtypes"
     })
+    public void stop() {
+      this.executor.shutdown();
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private void checkResolve() {
         if (bundle == null) {
             return; // Most certainly in unit tests
@@ -1052,7 +1060,6 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
                                     final Map<String, Map<String, FeatureState>> stateChanges,
                                     final State state,
                                     final EnumSet<Option> options) throws Exception {
-        ExecutorService executor = Executors.newCachedThreadPool();
         try {
             final String outputFile = this.outputFile.get();
             this.outputFile.set(null);
@@ -1074,8 +1081,6 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
             } else {
                 throw e;
             }
-        } finally {
-            executor.shutdown();
         }
     }
 
