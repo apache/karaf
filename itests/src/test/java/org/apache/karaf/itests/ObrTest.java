@@ -15,12 +15,12 @@ package org.apache.karaf.itests;
 
 import static org.junit.Assert.assertEquals;
 
+import java.lang.management.ManagementFactory;
 import java.util.List;
 
-import javax.management.MBeanServerConnection;
+import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.management.openmbean.TabularData;
-import javax.management.remote.JMXConnector;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -46,19 +46,13 @@ public class ObrTest extends KarafTestSupport {
 
     @Test
     public void listsViaMBean() throws Exception {
-        JMXConnector connector = null;
-        try {
-            connector = this.getJMXConnector();
-            MBeanServerConnection connection = connector.getMBeanServerConnection();
-            ObjectName name = new ObjectName("org.apache.karaf:type=obr,name=root");
-            @SuppressWarnings("unchecked")
-            List<String> urls = (List<String>) connection.getAttribute(name, "Urls");
-            assertEquals(0, urls.size());
-            TabularData bundles = (TabularData) connection.getAttribute(name, "Bundles");
-            assertEquals(0, bundles.size());
-        } finally {
-        	close(connector);
-        }
+        MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
+        ObjectName name = new ObjectName("org.apache.karaf:type=obr,name=root");
+        @SuppressWarnings("unchecked")
+        List<String> urls = (List<String>) mbeanServer.getAttribute(name, "Urls");
+        assertEquals(0, urls.size());
+        TabularData bundles = (TabularData) mbeanServer.getAttribute(name, "Bundles");
+        assertEquals(0, bundles.size());
     }
 
 }

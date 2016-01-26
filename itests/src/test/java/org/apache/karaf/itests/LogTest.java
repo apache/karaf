@@ -17,9 +17,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import javax.management.Attribute;
-import javax.management.MBeanServerConnection;
+import javax.management.MBeanServer;
 import javax.management.ObjectName;
-import javax.management.remote.JMXConnector;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,6 +27,8 @@ import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.lang.management.ManagementFactory;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
@@ -44,18 +45,12 @@ public class LogTest extends KarafTestSupport {
     @Test
     public void setDebugViaMBean() throws Exception {
         assertSetLevel("INFO");
-        JMXConnector connector = null;
-        try {
-            connector = this.getJMXConnector();
-            MBeanServerConnection connection = connector.getMBeanServerConnection();
-            ObjectName name = new ObjectName("org.apache.karaf:type=log,name=root");
-            Attribute attribute = new Attribute("Level", "DEBUG");
-            connection.setAttribute(name, attribute);
-            String logLevel = (String) connection.getAttribute(name, "Level");
-            assertEquals("DEBUG", logLevel);
-        } finally {
-        	close(connector);
-        }
+        MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
+        ObjectName name = new ObjectName("org.apache.karaf:type=log,name=root");
+        Attribute attribute = new Attribute("Level", "DEBUG");
+        mbeanServer.setAttribute(name, attribute);
+        String logLevel = (String) mbeanServer.getAttribute(name, "Level");
+        assertEquals("DEBUG", logLevel);
     }
 
     @Test
