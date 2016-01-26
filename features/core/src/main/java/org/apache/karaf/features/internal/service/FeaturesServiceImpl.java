@@ -177,6 +177,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
     private final Object lock = new Object();
     private final State state = new State();
     private final Map<String, Repository> repositoryCache = new HashMap<>();
+    private final ExecutorService executor;
     private Map<String, Map<String, Feature>> featureCache;
 
 
@@ -217,9 +218,14 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         this.scheduleDelay = scheduleDelay;
         this.scheduleMaxRun = scheduleMaxRun;
         this.blacklisted = blacklisted;
+        this.executor = Executors.newSingleThreadExecutor();
         loadState();
         checkResolve();
 
+    }
+
+    public void stop() {
+      this.executor.shutdown();
     }
 
     @SuppressWarnings("unchecked")
@@ -975,7 +981,6 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
                                     final Map<String, Map<String, FeatureState>> stateChanges,
                                     final State state,
                                     final EnumSet<Option> options) throws Exception {
-        ExecutorService executor = Executors.newCachedThreadPool();
         try {
             final String outputFile = this.outputFile.get();
             this.outputFile.set(null);
@@ -997,8 +1002,6 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
             } else {
                 throw e;
             }
-        } finally {
-            executor.shutdown();
         }
     }
 

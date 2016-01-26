@@ -273,6 +273,7 @@ public class Activator extends BaseActivator {
         }
         super.doStop();
         if (featuresService != null) {
+            featuresService.stop();
             featuresService = null;
         }
         if (digraph != null) {
