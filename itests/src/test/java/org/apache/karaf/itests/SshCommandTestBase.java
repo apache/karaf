@@ -116,7 +116,7 @@ public class SshCommandTestBase extends KarafTestSupport {
     private OutputStream openSshChannel(String username, String password, OutputStream ... outputs) throws Exception {
         client = SshClient.setUpDefaultClient();
         client.start();
-        ConnectFuture future = client.connect(username, "localhost", 8101).await();
+        ConnectFuture future = client.connect(username, "localhost", Integer.parseInt(getSshPort())).await();
         session = future.getSession();
 
         int ret = ClientSession.WAIT_AUTH;

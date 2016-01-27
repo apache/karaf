@@ -22,6 +22,7 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.net.ServerSocket;
 import java.net.URL;
 import java.security.Principal;
 import java.security.PrivilegedExceptionAction;
@@ -60,15 +61,21 @@ import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class KarafTestSupport {
 
-    public static final String RMI_SERVER_PORT = "44445";
-    public static final String HTTP_PORT = "9081";
-    public static final String RMI_REG_PORT = "1100";
+    public static final String MIN_RMI_SERVER_PORT = "44444";
+    public static final String MAX_RMI_SERVER_PORT = "66666";
+    public static final String MIN_HTTP_PORT = "9080";
+    public static final String MAX_HTTP_PORT = "9999";
+    public static final String MIN_RMI_REG_PORT = "1099";
+    public static final String MAX_RMI_REG_PORT = "9999";
+    public static final String MIN_SSH_PORT = "8101";
+    public static final String MAX_SSH_PORT = "8888";
 
     static final Long COMMAND_TIMEOUT = 30000L;
     static final Long SERVICE_TIMEOUT = 30000L;
@@ -85,6 +92,9 @@ public class KarafTestSupport {
 
     @Inject
     protected FeaturesService featureService;
+
+    @Inject
+    protected ConfigurationAdmin configurationAdmin;
 
     /**
      * To make sure the tests run only when the boot features are fully installed
@@ -109,6 +119,12 @@ public class KarafTestSupport {
     @Configuration
     public Option[] config() {
         MavenArtifactUrlReference karafUrl = maven().groupId("org.apache.karaf").artifactId("apache-karaf").versionAsInProject().type("tar.gz");
+
+        String httpPort = Integer.toString(getAvailablePort(Integer.parseInt(MIN_HTTP_PORT), Integer.parseInt(MAX_HTTP_PORT)));
+        String rmiRegistryPort = Integer.toString(getAvailablePort(Integer.parseInt(MIN_RMI_REG_PORT), Integer.parseInt(MAX_RMI_REG_PORT)));
+        String rmiServerPort = Integer.toString(getAvailablePort(Integer.parseInt(MIN_RMI_SERVER_PORT), Integer.parseInt(MIN_RMI_SERVER_PORT)));
+        String sshPort = Integer.toString(getAvailablePort(Integer.parseInt(MIN_SSH_PORT), Integer.parseInt(MAX_SSH_PORT)));
+
         return new Option[]{
             // KarafDistributionOption.debugConfiguration("8889", true),
             karafDistributionConfiguration().frameworkUrl(karafUrl).name("Apache Karaf").unpackDirectory(new File("target/exam")),
@@ -118,15 +134,29 @@ public class KarafTestSupport {
 				logLevel(LogLevel.INFO),
             replaceConfigurationFile("etc/org.ops4j.pax.logging.cfg", getConfigFile("/etc/org.ops4j.pax.logging.cfg")),
             editConfigurationFilePut("etc/org.apache.karaf.features.cfg", "featuresBoot", "config,standard,region,package,kar,management"),
-            editConfigurationFilePut("etc/org.ops4j.pax.web.cfg", "org.osgi.service.http.port", HTTP_PORT),
-            editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiRegistryPort", RMI_REG_PORT),
-            editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiServerPort", RMI_SERVER_PORT),
+            editConfigurationFilePut("etc/org.ops4j.pax.web.cfg", "org.osgi.service.http.port", httpPort),
+            editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiRegistryPort", rmiRegistryPort),
+            editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiServerPort", rmiServerPort),
+            editConfigurationFilePut("etc/org.apache.karaf.shell.cfg", "sshPort", sshPort),
             editConfigurationFilePut("etc/system.properties", "spring31.version", System.getProperty("spring31.version")),
             editConfigurationFilePut("etc/system.properties", "spring32.version", System.getProperty("spring32.version")),
             editConfigurationFilePut("etc/system.properties", "spring40.version", System.getProperty("spring40.version")),
             editConfigurationFilePut("etc/system.properties", "spring41.version", System.getProperty("spring41.version")),
             editConfigurationFilePut("etc/system.properties", "spring42.version", System.getProperty("spring42.version")),
         };
+    }
+
+    private int getAvailablePort(int min, int max) {
+        for (int i = min; i <= max; i++) {
+            try {
+                ServerSocket serverSocket = new ServerSocket(i);
+                return serverSocket.getLocalPort();
+            } catch (Exception e) {
+                System.err.println("Port " + i + " not available, trying next one");
+                continue; // try next port
+            }
+        }
+        throw new IllegalStateException("Can't find available network ports");
     }
 
     /**
@@ -330,12 +360,28 @@ public class KarafTestSupport {
     }
 
     public JMXConnector getJMXConnector(String userName, String passWord) throws Exception {
-        JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:" + RMI_REG_PORT+ "/karaf-root");
+        JMXServiceURL url = new JMXServiceURL(getJmxServiceUrl());
         Hashtable<String, Object> env = new Hashtable<String, Object>();
         String[] credentials = new String[]{ userName, passWord };
         env.put("jmx.remote.credentials", credentials);
         JMXConnector connector = JMXConnectorFactory.connect(url, env);
         return connector;
+    }
+
+    public String getJmxServiceUrl() throws Exception {
+        org.osgi.service.cm.Configuration configuration = configurationAdmin.getConfiguration("org.apache.karaf.management", null);
+        if (configuration != null) {
+            return configuration.getProperties().get("serviceUrl").toString();
+        }
+        return "service:jmx:rmi:///jndi/rmi://localhost:" + MIN_RMI_SERVER_PORT + "/karaf-root";
+    }
+
+    public String getSshPort() throws Exception {
+        org.osgi.service.cm.Configuration configuration = configurationAdmin.getConfiguration("org.apache.karaf.shell", null);
+        if (configuration != null) {
+            return configuration.getProperties().get("sshPort").toString();
+        }
+        return "8101";
     }
 
     public void assertFeatureInstalled(String featureName) {
