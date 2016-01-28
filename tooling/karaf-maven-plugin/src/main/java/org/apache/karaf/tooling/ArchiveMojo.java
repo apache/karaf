@@ -45,7 +45,7 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 /**
  * Package a server archive from an assembled server
  */
-@Mojo(name = "archive", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME)
+@Mojo(name = "archive", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME, threadSafe = true)
 public class ArchiveMojo extends MojoSupport {
 
     /**

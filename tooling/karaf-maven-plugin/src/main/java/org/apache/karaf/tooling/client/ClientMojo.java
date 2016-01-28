@@ -58,7 +58,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Client MOJO to deployWithSsh command on a running Karaf instance
  */
-@Mojo(name = "client", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME)
+@Mojo(name = "client", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME, threadSafe = true)
 public class ClientMojo extends AbstractMojo {
 
     @Parameter(defaultValue = "8101")

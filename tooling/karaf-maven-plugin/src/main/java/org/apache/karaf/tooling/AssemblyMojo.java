@@ -51,7 +51,7 @@ import java.util.List;
  * and then added to the assembly by this goal.
  * <br>
  */
-@Mojo(name = "assembly", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME)
+@Mojo(name = "assembly", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME, threadSafe = true)
 public class AssemblyMojo extends MojoSupport {
 
     /**

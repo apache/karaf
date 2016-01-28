@@ -38,7 +38,7 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 /**
  * Add features to a repository directory
  */
-@Mojo(name = "features-add-to-repository", defaultPhase = LifecyclePhase.COMPILE, requiresDependencyResolution = ResolutionScope.RUNTIME)
+@Mojo(name = "features-add-to-repository", defaultPhase = LifecyclePhase.COMPILE, requiresDependencyResolution = ResolutionScope.RUNTIME, threadSafe = true)
 public class AddToRepositoryMojo extends AbstractFeatureMojo {
 
     @Parameter(defaultValue = "${project.build.directory}/features-repo")

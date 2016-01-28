@@ -52,7 +52,7 @@ import java.util.regex.Pattern;
 /**
  * Run a Karaf instance
  */
-@Mojo(name = "run", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME)
+@Mojo(name = "run", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME, threadSafe = false)
 public class RunMojo extends MojoSupport {
 
     /**

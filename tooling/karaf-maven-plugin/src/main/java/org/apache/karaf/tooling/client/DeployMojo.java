@@ -68,7 +68,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Deploy MOJO to deploy an artifact remotely on a running Karaf instance, using ssh or JMX
  */
-@Mojo(name = "deploy", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME)
+@Mojo(name = "deploy", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME, threadSafe = true)
 public class DeployMojo extends MojoSupport {
 
     @Parameter(defaultValue = "8101")

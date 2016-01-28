@@ -108,7 +108,7 @@ import org.osgi.service.resolver.ResolutionException;
 
 import static java.util.jar.JarFile.MANIFEST_NAME;
 
-@Mojo(name = "verify", requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
+@Mojo(name = "verify", requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME, threadSafe = true)
 public class VerifyMojo extends MojoSupport {
 
     @Parameter(property = "descriptors")
