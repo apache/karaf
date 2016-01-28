@@ -46,7 +46,7 @@ import org.osgi.framework.Version;
 /**
  * Export meta data about features
  */
-@Mojo(name = "features-export-meta-data", defaultPhase = LifecyclePhase.COMPILE, requiresDependencyResolution = ResolutionScope.RUNTIME)
+@Mojo(name = "features-export-meta-data", defaultPhase = LifecyclePhase.COMPILE, requiresDependencyResolution = ResolutionScope.RUNTIME, threadSafe = true)
 public class ExportFeatureMetaDataMojo extends AbstractFeatureMojo {
     
     /**

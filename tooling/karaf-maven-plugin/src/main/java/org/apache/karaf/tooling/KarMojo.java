@@ -58,7 +58,7 @@ import org.codehaus.plexus.archiver.jar.JarArchiver;
 /**
  * Assemble a kar archive from a features.xml file
  */
-@Mojo(name = "kar", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME)
+@Mojo(name = "kar", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME, threadSafe = true)
 public class KarMojo extends MojoSupport {
 
     /**

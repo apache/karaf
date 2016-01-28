@@ -47,7 +47,7 @@ import org.apache.xbean.finder.ClassFinder;
  * Generates help documentation for Karaf commands
  */
 @Mojo(name = "commands-generate-help", defaultPhase = LifecyclePhase.GENERATE_RESOURCES,
-        requiresDependencyResolution = ResolutionScope.RUNTIME, inheritByDefault = false)
+        requiresDependencyResolution = ResolutionScope.RUNTIME, inheritByDefault = false, threadSafe = true)
 public class GenerateHelpMojo extends AbstractMojo {
 
     /**
