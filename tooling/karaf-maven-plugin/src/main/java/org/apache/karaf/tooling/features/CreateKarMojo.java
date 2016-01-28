@@ -56,6 +56,7 @@ import org.codehaus.plexus.archiver.jar.JarArchiver;
  * @requiresDependencyResolution runtime
  * @inheritByDefault true
  * @description Assemble a kar archive from a features.xml file
+ * @threadSafe
  */
 public class CreateKarMojo extends MojoSupport {
 

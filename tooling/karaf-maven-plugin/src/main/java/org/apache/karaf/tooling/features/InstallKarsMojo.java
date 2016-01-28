@@ -50,6 +50,7 @@ import org.apache.maven.plugin.MojoFailureException;
  * @requiresDependencyResolution runtime
  * @inheritByDefault true
  * @description Install kar dependencies
+ * @threadSafe
  */
 public class InstallKarsMojo extends MojoSupport {
     static {

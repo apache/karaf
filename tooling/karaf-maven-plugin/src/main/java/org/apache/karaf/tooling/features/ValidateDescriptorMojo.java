@@ -60,6 +60,7 @@ import static org.apache.karaf.tooling.features.ManifestUtils.*;
  * @requiresDependencyResolution runtime
  * @inheritByDefault true
  * @description Validates the features XML file
+ * @threadSafe
  */
 @SuppressWarnings("deprecation")
 public class ValidateDescriptorMojo extends MojoSupport {

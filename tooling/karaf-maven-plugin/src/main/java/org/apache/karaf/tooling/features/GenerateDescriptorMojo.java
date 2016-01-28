@@ -63,6 +63,7 @@ import static org.apache.karaf.deployer.kar.KarArtifactInstaller.FEATURE_CLASSIF
  * @inheritByDefault true
  * @description Generates the features XML file starting with an optional source feature.xml and adding
  * project dependencies as bundles and feature/car dependencies
+ * @threadSafe
  */
 public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
 

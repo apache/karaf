@@ -50,6 +50,7 @@ import org.apache.xbean.finder.ClassFinder;
  * @requiresDependencyResolution runtime
  * @inheritByDefault false
  * @description Generates help for Karaf commands
+ * @threadSafe
  */
 public class GenerateHelpMojo extends AbstractMojo {
 

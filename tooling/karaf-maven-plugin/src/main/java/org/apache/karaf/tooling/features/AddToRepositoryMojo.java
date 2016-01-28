@@ -36,6 +36,7 @@ import org.apache.maven.plugin.MojoFailureException;
  * @requiresDependencyResolution runtime
  * @inheritByDefault true
  * @description Add the features to the repository
+ * @threadSafe
  */
 public class AddToRepositoryMojo extends AbstractFeatureMojo {
 

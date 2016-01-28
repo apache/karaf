@@ -41,6 +41,7 @@ import org.apache.maven.plugin.MojoFailureException;
  * @requiresDependencyResolution runtime
  * @inheritByDefault true
  * @description Package a server archive from an assembled server
+ * @threadSafe
  */
 public class CreateArchiveMojo extends MojoSupport {
 

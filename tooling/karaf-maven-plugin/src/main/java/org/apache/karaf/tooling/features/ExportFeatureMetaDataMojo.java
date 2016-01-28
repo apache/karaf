@@ -39,6 +39,7 @@ import org.osgi.framework.Version;
  * @requiresDependencyResolution runtime
  * @inheritByDefault true
  * @description Export meta data about features
+ * @threadSafe
  */
 public class ExportFeatureMetaDataMojo extends AbstractFeatureMojo {
     
