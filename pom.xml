@@ -243,7 +243,7 @@
         <hibernate3.version>3.3.2.GA</hibernate3.version>
         <hibernate42.version>4.2.15.Final</hibernate42.version>
         <hibernate43.version>4.3.6.Final</hibernate43.version>
-        <hibernate.validator.version>5.0.3.Final</hibernate.validator.version>
+        <hibernate.validator.version>5.2.3.Final</hibernate.validator.version>
         <jansi.version>1.11</jansi.version>
         <javassist.version>3.9.0.GA</javassist.version>
         <jline.version>2.13</jline.version>
