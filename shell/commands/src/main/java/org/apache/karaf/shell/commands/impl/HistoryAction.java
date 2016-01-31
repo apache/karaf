@@ -42,14 +42,17 @@ public class HistoryAction implements Action {
         if (history != null && clear) {
             history.clear();
         }
-        for (int index = history.first(); index <= history.last(); index++) {
-            System.out.println(
+        
+        if (!clear) {
+            for (int index = history.first(); index <= history.last(); index++) {
+                System.out.println(
                     Ansi.ansi()
                         .a("  ")
                         .a(Ansi.Attribute.INTENSITY_BOLD).render("%3d", index).a(Ansi.Attribute.INTENSITY_BOLD_OFF)
                         .a("  ")
                         .a(history.get(index))
                         .toString());
+            }
         }
         return null;
     }
