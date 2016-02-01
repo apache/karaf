@@ -81,6 +81,7 @@ public class SyncopeLoginModule extends AbstractKarafLoginModule {
         Credentials creds = new UsernamePasswordCredentials(user, password);
         client.getCredentialsProvider().setCredentials(AuthScope.ANY, creds);
         HttpGet get = new HttpGet(address + "/users/self");
+        get.setHeader("Content-Type", "application/xml");
         List<String> roles = new ArrayList<String>();
         try {
             CloseableHttpResponse response = client.execute(get);
