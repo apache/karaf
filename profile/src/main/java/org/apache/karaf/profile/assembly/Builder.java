@@ -75,6 +75,7 @@ import org.apache.karaf.kar.internal.Kar;
 import org.apache.karaf.profile.Profile;
 import org.apache.karaf.profile.ProfileBuilder;
 import org.apache.karaf.profile.impl.Profiles;
+import org.apache.karaf.profile.versioning.VersionUtils;
 import org.apache.karaf.tools.utils.KarafPropertiesEditor;
 import org.apache.karaf.tools.utils.model.KarafPropertyEdit;
 import org.apache.karaf.tools.utils.model.KarafPropertyEdits;
@@ -1094,9 +1095,25 @@ public class Builder {
      * @return
      */
     private boolean matches(Feature f, Dependency featureRef) {
-        String version = featureRef.getVersion();
-        return f.getName().equals(featureRef.getName()) 
-            && (version == null || version.equals("0.0.0")|| version.startsWith("[") || f.getVersion().equals(version));
+        if (!f.getName().equals(featureRef.getName())) {
+            return false;
+        }
+
+        final String featureRefVersion = featureRef.getVersion();
+
+        if (featureRefVersion == null) {
+            return true;
+        }
+
+        if (featureRefVersion.equals("0.0.0")) {
+            return true;
+        }
+
+        if (featureRefVersion.startsWith("[")) {
+            return true;
+        }
+
+        return VersionUtils.versionEquals(f.getVersion(), featureRefVersion);
     }
 
     private List<String> getStaged(Stage stage, Map<String, Stage> data) {
