@@ -59,6 +59,7 @@ public class SyncopeBackingEngine implements BackingEngine {
             throw new IllegalArgumentException("Group prefix " + GROUP_PREFIX + " not permitted with Syncope backend");
         }
         HttpPost request = new HttpPost(address + "/users");
+        request.setHeader("Content-Type", "application/xml");
         String userTO = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" +
                 "<user>" +
                 "<attributes>" +
@@ -84,6 +85,7 @@ public class SyncopeBackingEngine implements BackingEngine {
             throw new IllegalArgumentException("Group prefix " + GROUP_PREFIX + " not permitted with Syncope backend");
         }
         HttpDelete request = new HttpDelete(address + "/users/" + username);
+        request.setHeader("Content-Type", "application/xml");
         try {
             client.execute(request);
         } catch (Exception e) {
@@ -95,6 +97,7 @@ public class SyncopeBackingEngine implements BackingEngine {
     public List<UserPrincipal> listUsers() {
         List<UserPrincipal> users = new ArrayList<>();
         HttpGet request = new HttpGet(address + "/users");
+        request.setHeader("Content-Type", "application/xml");
         try {
             HttpResponse response = client.execute(request);
             String responseTO = EntityUtils.toString(response.getEntity());
@@ -122,6 +125,7 @@ public class SyncopeBackingEngine implements BackingEngine {
     public List<RolePrincipal> listRoles(Principal principal) {
         List<RolePrincipal> roles = new ArrayList<>();
         HttpGet request = new HttpGet(address + "/users?username=" + principal.getName());
+        request.setHeader("Content-Type", "application/xml");
         try {
             HttpResponse response  = client.execute(request);
             String responseTO = EntityUtils.toString(response.getEntity());
