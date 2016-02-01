@@ -83,6 +83,7 @@ import org.apache.karaf.profile.ProfileBuilder;
 import org.apache.karaf.profile.impl.Profiles;
 import org.apache.karaf.tools.utils.KarafPropertiesEditor;
 import org.apache.karaf.tools.utils.model.KarafPropertyEdits;
+import org.apache.karaf.profile.versioning.VersionUtils;
 import org.apache.karaf.util.config.PropertiesLoader;
 import org.apache.karaf.util.maven.Parser;
 import org.ops4j.pax.url.mvn.MavenResolver;
@@ -1271,6 +1272,42 @@ public class Builder {
                 addFeatures(allFeatures, dep.toString(), features, !dep.isDependency() && !dep.isPrerequisite());
             }
         }
+    }
+
+    private String getFeatureSt(Dependency dep) {
+        String version = dep.getVersion() == null || "0.0.0".equals(dep.getVersion()) ? "" : "/" + dep.getVersion();
+        return dep.getName() + version;
+    }
+
+    /**
+     * Checks if a given feature f matches the featureRef.
+     * TODO Need to also check for version ranges. Currently ranges are ignored and all features matching the name
+     * are copied in that case.
+     *  
+     * @param f
+     * @param featureRef
+     * @return
+     */
+    private boolean matches(Feature f, Dependency featureRef) {
+        if (!f.getName().equals(featureRef.getName())) {
+            return false;
+        }
+
+        final String featureRefVersion = featureRef.getVersion();
+
+        if (featureRefVersion == null) {
+            return true;
+        }
+
+        if (featureRefVersion.equals("0.0.0")) {
+            return true;
+        }
+
+        if (featureRefVersion.startsWith("[")) {
+            return true;
+        }
+
+        return VersionUtils.versionEquals(f.getVersion(), featureRefVersion);
     }
 
     private List<String> getStaged(Stage stage, Map<String, Stage> data) {
