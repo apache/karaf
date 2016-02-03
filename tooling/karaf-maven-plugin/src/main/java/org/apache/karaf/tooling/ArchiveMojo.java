@@ -197,7 +197,7 @@ public class ArchiveMojo extends MojoSupport {
             String entryName = base + f.getFileName().toString();
             TarArchiveEntry tarEntry = new TarArchiveEntry(entryName);
             tarEntry.setSize(Files.size(f));
-            if (entryName.contains("/bin/")) {
+            if (entryName.contains("/bin/") || (!usePathPrefix && entryName.startsWith("bin/"))) {
                 if (entryName.endsWith(".bat")) {
                     tarEntry.setMode(0644);
                 } else {
@@ -232,7 +232,7 @@ public class ArchiveMojo extends MojoSupport {
             String entryName = base + f.getFileName().toString();
             ZipArchiveEntry zipEntry = new ZipArchiveEntry(entryName);
             zipEntry.setSize(Files.size(f));
-            if (entryName.contains("/bin/")) {
+            if (entryName.contains("/bin/") || (!usePathPrefix && entryName.startsWith("bin"))) {
                 if (!entryName.endsWith(".bat")) {
                     zipEntry.setUnixMode(0755);
                 } else {
