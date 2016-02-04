@@ -72,8 +72,17 @@ do_start() {
     chown $KARAF_SERVICE_USER:$KARAF_SERVICE_GROUP `dirname $KARAF_SERVICE_PIDFILE` || true
 
     if [ ! -z "$KARAF_SERVICE_USER" ]; then
-        su - $KARAF_SERVICE_USER \
-            -c " { export JAVA_HOME=$JAVA_HOME; $KARAF_SERVICE_PATH/bin/$KARAF_SERVICE_EXECUTABLE daemon >> $KARAF_SERVICE_LOG 2>&1 & } ; echo \$! >| $KARAF_SERVICE_PIDFILE "
+        if [ "$KARAF_SERVICE_USER" = "root" ]; then
+            JAVA_HOME=$JAVA_HOME 
+            export JAVA_HOME
+
+            $KARAF_SERVICE_PATH/bin/$KARAF_SERVICE_EXECUTABLE server >> $KARAF_SERVICE_LOG 2>&1 &
+
+            echo $! > $KARAF_SERVICE_PIDFILE
+        else
+            su - $KARAF_SERVICE_USER \
+                -c " { export JAVA_HOME=$JAVA_HOME; $KARAF_SERVICE_PATH/bin/$KARAF_SERVICE_EXECUTABLE daemon >> $KARAF_SERVICE_LOG 2>&1 & } ; echo \$! >| $KARAF_SERVICE_PIDFILE "
+        fi
 
         sleep 1
         if [ -f $KARAF_SERVICE_PIDFILE ]; then
@@ -93,8 +102,15 @@ do_stop() {
         read kpid < $KARAF_SERVICE_PIDFILE
         kwait=$SHUTDOWN_WAIT
 
-        su - $KARAF_SERVICE_USER \
-            -c "export JAVA_HOME=$JAVA_HOME; $KARAF_SERVICE_PATH/bin/$KARAF_SERVICE_EXECUTABLE stop >> $KARAF_SERVICE_LOG 2>&1"
+        if [ "$KARAF_SERVICE_USER" = "root" ]; then
+            JAVA_HOME=$JAVA_HOME
+            export JAVA_HOME
+
+            $KARAF_SERVICE_PATH/bin/$KARAF_SERVICE_EXECUTABLE stop >> $KARAF_SERVICE_LOG 2>&1
+        else
+            su - $KARAF_SERVICE_USER \
+                -c "export JAVA_HOME=$JAVA_HOME; $KARAF_SERVICE_PATH/bin/$KARAF_SERVICE_EXECUTABLE stop >> $KARAF_SERVICE_LOG 2>&1"
+        fi
 
         until [ `ps -p $kpid 2> /dev/null | grep -c $kpid 2> /dev/null` -eq '0' ] || [ $count -gt $kwait ]
         do
@@ -103,7 +119,7 @@ do_stop() {
         done
 
         if [ $count -gt $kwait ]; then
-            if [ `ps -p $ppid 2> /dev/null | grep -c $ppid 2> /dev/null` -eq '1' ]; then
+            if [ `ps -p $kpid 2> /dev/null | grep -c $kpid 2> /dev/null` -eq '1' ]; then
                 kill -9 $kpid
             fi
         fi
