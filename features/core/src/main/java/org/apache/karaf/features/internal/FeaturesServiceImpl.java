@@ -66,6 +66,8 @@ import static java.lang.String.format;
 public class FeaturesServiceImpl implements FeaturesService {
     private static final Logger LOGGER = LoggerFactory.getLogger(FeaturesServiceImpl.class);
 
+    private static Pattern NON_REGEXP_EXPRESSION = Pattern.compile("^[a-zA-Z0-9_\\-]*$");
+
     private static final int KARAF_BUNDLE_START_LEVEL =
             Integer.parseInt(System.getProperty("karaf.startlevel.bundle", "80"));
 
@@ -833,44 +835,59 @@ public class FeaturesServiceImpl implements FeaturesService {
     }
 
     public Feature[] getFeatures(String name, String version) throws Exception {
-        ArrayList<Feature> features = new ArrayList<Feature>();
         if (version != null) {
             version = version.trim();
         }
-        Pattern pattern = Pattern.compile(name);
-        for (String featureName : getFeatures().keySet()) {
-            Matcher matcher = pattern.matcher(featureName);
-            if (matcher.matches()) {
-                Map<String, Feature> versions = getFeatures().get(featureName);
-                if (versions != null && !versions.isEmpty()) {
-                    Feature feature = versions.get(version);
-                    if (feature == null) {
-                        if (org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION.equals(version)) {
-                            Version latest = new Version(cleanupVersion(version));
-                            for (String available : versions.keySet()) {
-                                Version availableVersion = new Version(cleanupVersion(available));
-                                if (availableVersion.compareTo(latest) > 0) {
-                                    feature = versions.get(available);
-                                    latest = availableVersion;
-                                }
-                            }
-                        } else {
-                            Version latest = new Version(cleanupVersion(org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION));
-                            VersionRange versionRange = new VersionRange(version, true, true);
-                            for (String available : versions.keySet()) {
-                                Version availableVersion = new Version(cleanupVersion(available));
-                                if (availableVersion.compareTo(latest) > 0 && versionRange.contains(availableVersion)) {
-                                    feature = versions.get(available);
-                                    latest = availableVersion;
-                                }
-                            }
-                        }
+        Matcher simpleFeatureName = NON_REGEXP_EXPRESSION.matcher(name);
+        if (simpleFeatureName.matches()) {
+            Map<String, Feature> versions = getFeatures().get(name);
+            Feature feature = selectFeatureVersion(versions, version);
+            return new Feature[]{feature};
+        } else {
+            List<Feature> features = new ArrayList<Feature>();
+            Pattern pattern = Pattern.compile(name);
+            for (String featureName : getFeatures().keySet()) {
+                Matcher matcher = pattern.matcher(featureName);
+                if (matcher.matches()) {
+                    Map<String, Feature> versions = getFeatures().get(featureName);
+                    Feature feature = selectFeatureVersion(versions, version);
+                    if (feature != null) {
+                        features.add(feature);
                     }
-                    features.add(feature);
                 }
             }
+            return features.toArray(new Feature[features.size()]);
         }
-        return features.toArray(new Feature[features.size()]);
+    }
+
+    private static Feature selectFeatureVersion(Map<String, Feature> versions, String version) {
+        if (versions != null && !versions.isEmpty()) {
+            Feature feature = versions.get(version);
+            if (feature == null) {
+                if (org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION.equals(version)) {
+                    Version latest = new Version(cleanupVersion(version));
+                    for (String available : versions.keySet()) {
+                        Version availableVersion = new Version(cleanupVersion(available));
+                        if (availableVersion.compareTo(latest) > 0) {
+                            feature = versions.get(available);
+                            latest = availableVersion;
+                        }
+                    }
+                } else {
+                    Version latest = new Version(cleanupVersion(org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION));
+                    VersionRange versionRange = new VersionRange(version, true, true);
+                    for (String available : versions.keySet()) {
+                        Version availableVersion = new Version(cleanupVersion(available));
+                        if (availableVersion.compareTo(latest) > 0 && versionRange.contains(availableVersion)) {
+                            feature = versions.get(available);
+                            latest = availableVersion;
+                        }
+                    }
+                }
+            }
+            return feature;
+        }
+        return null;
     }
 
     public Feature[] getFeatures(String name) throws Exception {

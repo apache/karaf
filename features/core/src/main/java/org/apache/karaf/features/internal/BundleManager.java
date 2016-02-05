@@ -87,6 +87,11 @@ public class BundleManager {
     }
 
     public BundleInstallerResult installBundleIfNeeded(String bundleLocation, int startLevel, String regionName) throws IOException, BundleException {
+        Bundle foundByLocationBundle = findInstalledByLocation(bundleLocation);
+        if (foundByLocationBundle != null) {
+            LOGGER.debug("Found installed bundle by location: {}", foundByLocationBundle);
+            return new BundleInstallerResult(foundByLocationBundle, false);
+        }
         BundleInstallerResult result = doInstallBundleIfNeeded(bundleLocation, startLevel);
         installToRegion(regionName, result.bundle, result.isNew);
         return result;
@@ -136,7 +141,7 @@ public class BundleManager {
                 // is = new BufferedInputStream(new
                 // URL(bundleLocation).openStream());
             }
-            is = new BufferedInputStream(new FilterInputStream(is) {
+            is = new FilterInputStream(is) {
                 @Override
                 public int read(byte b[], int off, int len) throws IOException {
                     if (Thread.currentThread().isInterrupted()) {
@@ -144,7 +149,7 @@ public class BundleManager {
                     }
                     return super.read(b, off, len);
                 }
-            });
+            };
 
             LOGGER.debug("Installing bundle " + bundleLocation);
             Bundle b = bundleContext.installBundle(bundleLocation, is);
@@ -160,6 +165,10 @@ public class BundleManager {
     }
     
     public Bundle isBundleInstalled(String bundleLocation) throws IOException, BundleException {
+        Bundle foundByLocationBundle = findInstalledByLocation(bundleLocation);
+        if (foundByLocationBundle != null) {
+            return foundByLocationBundle;
+        }
         InputStream is = getInputStreamForBundle(bundleLocation);
         try {
             is.mark(256 * 1024);
@@ -210,6 +219,15 @@ public class BundleManager {
                 if (version.equals(bv)) {
                     return b;
                 }
+            }
+        }
+        return null;
+    }
+
+    private Bundle findInstalledByLocation(String location) {
+        for (Bundle b : bundleContext.getBundles()) {
+            if (b.getLocation() != null && b.getLocation().equals(location)) {
+                return b;
             }
         }
         return null;
