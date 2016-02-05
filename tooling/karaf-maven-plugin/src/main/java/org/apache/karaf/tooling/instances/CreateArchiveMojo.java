@@ -20,6 +20,10 @@ package org.apache.karaf.tooling.instances;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 
 import org.apache.karaf.tooling.utils.MojoSupport;
 import org.apache.tools.ant.Project;
@@ -32,6 +36,7 @@ import org.apache.tools.ant.types.ZipFileSet;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.tools.ant.util.FileUtils;
 
 /**
  * Package a server archive from an assembled server
@@ -85,6 +90,15 @@ public class CreateArchiveMojo extends MojoSupport {
     private boolean archiveZip = true;
 
     public void execute() throws MojoExecutionException, MojoFailureException {
+        getLog().debug("Preparing assembly");
+        File outputDirectory = new File(this.project.getBuild().getOutputDirectory());
+        if (outputDirectory.exists()) {
+            try {
+                org.apache.commons.io.FileUtils.copyDirectory(outputDirectory, targetServerDirectory);
+            } catch (Exception e) {
+                throw new MojoExecutionException("Can't prepare assembly", e);
+            }
+        }
         getLog().debug("Setting artifact file: " + targetFile);
         org.apache.maven.artifact.Artifact artifact = project.getArtifact();
         artifact.setFile(targetFile);
@@ -130,6 +144,9 @@ public class CreateArchiveMojo extends MojoSupport {
     }
 
     private <T extends ArchiveFileSet> void populateArchive(Archiver<T> archiver, File source, String serverName) {
+
+        System.out.println("Source " + source.getAbsolutePath());
+
         Project project = new Project();
         T fileSet = archiver.createFileSet();
         fileSet.setDir(source);
@@ -153,16 +170,6 @@ public class CreateArchiveMojo extends MojoSupport {
         fileSet.setProject(project);
         fileSet.setIncludes("bin/*.bat");
         archiver.add(fileSet);
-
-        File outputDirectory = new File(this.project.getBuild().getOutputDirectory());
-        if (outputDirectory.exists()) {
-            fileSet = archiver.createFileSet();
-            fileSet.setPrefix(serverName);
-            fileSet.setDir(outputDirectory);
-            fileSet.setProject(project);
-            fileSet.setExcludes("**/*.class");
-            archiver.add(fileSet);
-        }
 
         MatchingTask task = archiver.getTask();
         task.setProject(project);
