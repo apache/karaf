@@ -48,7 +48,9 @@ public interface BundlesMBean {
     void stop(String bundleId) throws MBeanException;
 
     void uninstall(String bundleId) throws MBeanException;
-    
+
+    TabularData getDiag() throws MBeanException;
+
     String getDiag(long bundleId);
 
     String getStatus(String bundleId) throws MBeanException;
