@@ -847,12 +847,20 @@ public class InstanceServiceImpl implements InstanceService {
         setKarafPort(name, "etc/org.apache.karaf.shell.cfg", "sshPort", port);
     }
 
+    String getInstanceSshHost(String name) {
+        return getKarafHost(name, "etc/org.apache.karaf.shell.cfg", "sshHost");
+    }
+
     int getInstanceRmiRegistryPort(String name) {
         return getKarafPort(name, "etc/org.apache.karaf.management.cfg", "rmiRegistryPort");
     }
 
     void changeInstanceRmiRegistryPort(String name, final int port) throws Exception {
         setKarafPort(name, "etc/org.apache.karaf.management.cfg", "rmiRegistryPort", port);
+    }
+
+    String getInstanceRmiRegistryHost(String name) {
+        return getKarafHost(name, "etc/org.apache.karaf.management.cfg", "rmiRegistryHost");
     }
 
     int getInstanceRmiServerPort(String name) {
@@ -863,6 +871,10 @@ public class InstanceServiceImpl implements InstanceService {
         setKarafPort(name, "etc/org.apache.karaf.management.cfg", "rmiServerPort", port);
     }
 
+    String getInstanceRmiServerHost(String name) {
+        return getKarafHost(name, "etc/org.apache.karaf.management.cfg", "rmiServerHost");
+    }
+
     private int getKarafPort(final String name, final String path, final String key) {
         return execute(new Task<Integer>() {
             public Integer call(State state) throws IOException {
@@ -870,6 +882,7 @@ public class InstanceServiceImpl implements InstanceService {
             }
         }, false);
     }
+
 
     private Integer getKarafPort(State state, String name, String path, final String key) {
         InstanceState instance = state.instances.get(name);
@@ -885,23 +898,6 @@ public class InstanceServiceImpl implements InstanceService {
             }, false);
         } catch (IOException e) {
             return 0;
-        }
-    }
-    
-    private String getKarafHost(State state, String name, String path, final String key) {
-        InstanceState instance = state.instances.get(name);
-        if (instance == null) {
-            throw new IllegalArgumentException("Instance " + name + " not found");
-        }
-        File f = new File(instance.loc, path);
-        try {
-            return FileLockUtils.execute(f, new FileLockUtils.CallableWithProperties<String>() {
-                public String call(org.apache.felix.utils.properties.Properties properties) throws IOException {
-                    return properties.get(key).toString();
-                }
-            }, false);
-        } catch (IOException e) {
-            return "0.0.0.0";
         }
     }
 
@@ -925,6 +921,31 @@ public class InstanceServiceImpl implements InstanceService {
                 return null;
             }
         }, true);
+    }
+
+    private String getKarafHost(final String name, final String path, final String key) {
+        return execute(new Task<String>() {
+            public String call(State state) throws IOException {
+                return InstanceServiceImpl.this.getKarafHost(state, name, path, key);
+            }
+        }, false);
+    }
+
+    private String getKarafHost(State state, String name, String path, final String key) {
+        InstanceState instance = state.instances.get(name);
+        if (instance == null) {
+            throw new IllegalArgumentException("Instance " + name + " not found");
+        }
+        File f = new File(instance.loc, path);
+        try {
+            return FileLockUtils.execute(f, new FileLockUtils.CallableWithProperties<String>() {
+                public String call(org.apache.felix.utils.properties.Properties properties) throws IOException {
+                    return properties.get(key).toString();
+                }
+            }, false);
+        } catch (IOException e) {
+            return "0.0.0.0";
+        }
     }
 
     boolean isInstanceRoot(final String name) {

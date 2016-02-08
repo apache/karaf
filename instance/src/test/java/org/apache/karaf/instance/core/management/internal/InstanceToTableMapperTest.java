@@ -36,8 +36,11 @@ public class InstanceToTableMapperTest extends TestCase {
         EasyMock.expect(instance.getName()).andReturn("MyInstance");
         EasyMock.expect(instance.isRoot()).andReturn(false);
         EasyMock.expect(instance.getSshPort()).andReturn(0);
+        EasyMock.expect(instance.getSshHost()).andReturn("0.0.0.0");
         EasyMock.expect(instance.getRmiRegistryPort()).andReturn(0);
+        EasyMock.expect(instance.getRmiRegistryHost()).andReturn("0.0.0.0");
         EasyMock.expect(instance.getRmiServerPort()).andReturn(0);
+        EasyMock.expect(instance.getRmiServerHost()).andReturn("0.0.0.0");
         EasyMock.expect(instance.getState()).andThrow(new Exception("gotcha"));
         EasyMock.expect(instance.getLocation()).andReturn("somewhere");
         EasyMock.expect(instance.getJavaOpts()).andReturn("someopts");
@@ -52,8 +55,11 @@ public class InstanceToTableMapperTest extends TestCase {
         Assert.assertEquals("MyInstance", cd.get("Name"));
         Assert.assertEquals(false, cd.get("Is Root"));
         Assert.assertEquals(0, cd.get("SSH Port"));
+        Assert.assertEquals("0.0.0.0", cd.get("SSH Host"));
         Assert.assertEquals(0, cd.get("RMI Registry Port"));
+        Assert.assertEquals("0.0.0.0", cd.get("RMI Registry Host"));
         Assert.assertEquals(0, cd.get("RMI Server Port"));
+        Assert.assertEquals("0.0.0.0", cd.get("RMI Server Host"));
         Assert.assertEquals("Error", cd.get("State"));
         Assert.assertEquals("somewhere", cd.get("Location"));
         Assert.assertEquals("someopts", cd.get("JavaOpts"));
@@ -65,8 +71,11 @@ public class InstanceToTableMapperTest extends TestCase {
         EasyMock.expect(instance.getName()).andReturn("MyInstance");
         EasyMock.expect(instance.isRoot()).andReturn(true);
         EasyMock.expect(instance.getSshPort()).andReturn(0);
+        EasyMock.expect(instance.getSshHost()).andReturn("0.0.0.0");
         EasyMock.expect(instance.getRmiRegistryPort()).andReturn(0);
+        EasyMock.expect(instance.getRmiRegistryHost()).andReturn("0.0.0.0");
         EasyMock.expect(instance.getRmiServerPort()).andReturn(0);
+        EasyMock.expect(instance.getRmiServerHost()).andReturn("0.0.0.0");
         EasyMock.expect(instance.getState()).andReturn("Started");
         EasyMock.expect(instance.getLocation()).andReturn(null);
         EasyMock.expect(instance.getJavaOpts()).andReturn(null);
@@ -81,8 +90,11 @@ public class InstanceToTableMapperTest extends TestCase {
         Assert.assertEquals("MyInstance", cd.get("Name"));
         Assert.assertEquals(true, cd.get("Is Root"));
         Assert.assertEquals(0, cd.get("SSH Port"));
+        Assert.assertEquals("0.0.0.0", cd.get("SSH Host"));
         Assert.assertEquals(0, cd.get("RMI Registry Port"));
+        Assert.assertEquals("0.0.0.0", cd.get("RMI Registry Host"));
         Assert.assertEquals(0, cd.get("RMI Server Port"));
+        Assert.assertEquals("0.0.0.0", cd.get("RMI Server Host"));
         Assert.assertEquals("Started", cd.get("State"));
         Assert.assertNull(cd.get("Location"));
         Assert.assertNull(cd.get("JavaOpts"));
