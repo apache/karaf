@@ -19,6 +19,7 @@ REM ------------------------------------------------------------------------
 
 setlocal
 
+set JAVA_HOME=${java.home}
 set APP_NAME=${name}
 set APP_LONG_NAME=${displayName}
 set APP_BASE=${karaf.base}
