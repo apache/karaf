@@ -66,8 +66,11 @@ public class InstanceServiceMBeanImplTest extends TestCase {
         Instance i1 = EasyMock.createMock(Instance.class);
         EasyMock.expect(i1.getPid()).andReturn(1234);
         EasyMock.expect(i1.getSshPort()).andReturn(8818);
+        EasyMock.expect(i1.getSshHost()).andReturn("0.0.0.0");
         EasyMock.expect(i1.getRmiRegistryPort()).andReturn(1122);
+        EasyMock.expect(i1.getRmiRegistryHost()).andReturn("0.0.0.0");
         EasyMock.expect(i1.getRmiServerPort()).andReturn(44444);
+        EasyMock.expect(i1.getRmiServerHost()).andReturn("0.0.0.0");
         EasyMock.expect(i1.getName()).andReturn("i1");
         EasyMock.expect(i1.isRoot()).andReturn(true);
         EasyMock.expect(i1.getLocation()).andReturn("somewhere");
@@ -92,6 +95,7 @@ public class InstanceServiceMBeanImplTest extends TestCase {
         Assert.assertTrue(cd1.containsValue(8818));
         Assert.assertTrue(cd1.containsValue(1122));
         Assert.assertTrue(cd1.containsValue(44444));
+        Assert.assertTrue(cd1.containsValue("0.0.0.0"));
         Assert.assertTrue(cd1.containsValue("somewhere"));
         Assert.assertTrue(cd1.containsValue("someopts"));
         Assert.assertTrue(cd1.containsValue("Stopped"));

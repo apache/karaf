@@ -25,14 +25,17 @@ public interface InstancesMBean {
     String INSTANCE_NAME = "Name";
     String INSTANCE_IS_ROOT = "Is Root";
     String INSTANCE_SSH_PORT = "SSH Port";
+    String INSTANCE_SSH_HOST = "SSH Host";
     String INSTANCE_RMI_REGISTRY_PORT = "RMI Registry Port";
+    String INSTANCE_RMI_REGISTRY_HOST = "RMI Registry Host";
     String INSTANCE_RMI_SERVER_PORT = "RMI Server Port";
+    String INSTANCE_RMI_SERVER_HOST = "RMI Server Host";
     String INSTANCE_STATE = "State";
     String INSTANCE_LOCATION = "Location";
     String INSTANCE_JAVAOPTS = "JavaOpts";
 
-    String[] INSTANCE = {INSTANCE_PID, INSTANCE_NAME, INSTANCE_IS_ROOT, INSTANCE_SSH_PORT, INSTANCE_RMI_REGISTRY_PORT,
-            INSTANCE_RMI_SERVER_PORT, INSTANCE_STATE, INSTANCE_LOCATION, INSTANCE_JAVAOPTS };
+    String[] INSTANCE = {INSTANCE_PID, INSTANCE_NAME, INSTANCE_IS_ROOT, INSTANCE_SSH_PORT, INSTANCE_SSH_HOST, INSTANCE_RMI_REGISTRY_PORT, INSTANCE_RMI_REGISTRY_HOST,
+            INSTANCE_RMI_SERVER_PORT, INSTANCE_RMI_SERVER_HOST, INSTANCE_STATE, INSTANCE_LOCATION, INSTANCE_JAVAOPTS };
 
     // Operations
     int createInstance(String name, int sshPort, int rmiRegistryPort, int rmiServerPort, String location, String javaOpts, String features, String featureURLs) throws MBeanException;

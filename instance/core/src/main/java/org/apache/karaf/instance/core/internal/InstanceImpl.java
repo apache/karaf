@@ -60,6 +60,10 @@ public class InstanceImpl implements Instance {
         return service.getInstanceSshPort(name);
     }
 
+    public String getSshHost() {
+        return service.getInstanceSshHost(name);
+    }
+
     public void changeSshPort(int port) throws Exception {
         service.changeInstanceSshPort(name, port);
     }
@@ -72,12 +76,20 @@ public class InstanceImpl implements Instance {
         service.changeInstanceRmiRegistryPort(name, port);
     }
 
+    public String getRmiRegistryHost() {
+        return service.getInstanceRmiRegistryHost(name);
+    }
+
     public int getRmiServerPort() {
         return service.getInstanceRmiServerPort(name);
     }
 
     public void changeRmiServerPort(int port) throws Exception {
         service.changeInstanceRmiServerPort(name, port);
+    }
+
+    public String getRmiServerHost() {
+        return service.getInstanceRmiServerHost(name);
     }
 
     public String getJavaOpts() {

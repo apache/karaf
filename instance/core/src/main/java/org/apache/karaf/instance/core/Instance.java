@@ -41,13 +41,19 @@ public interface Instance {
 
     void changeSshPort(int port) throws Exception;
 
+    String getSshHost();
+
     int getRmiRegistryPort();
 
     void changeRmiRegistryPort(int port) throws Exception;
 
+    String getRmiRegistryHost();
+
     int getRmiServerPort();
 
     void changeRmiServerPort(int port) throws Exception;
+
+    String getRmiServerHost();
 
     String getJavaOpts();
 
