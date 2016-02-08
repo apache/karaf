@@ -43,8 +43,10 @@ public class InstanceToTableMapper {
             state = "Error";
         }
         Object[] itemValues = new Object[] {instance.getPid(), instance.getName(), instance.isRoot(),
-                                            instance.getSshPort(), instance.getRmiRegistryPort(),
-                                            instance.getRmiServerPort(), state, instance.getLocation(),
+                                            instance.getSshPort(), instance.getSshHost(),
+                                            instance.getRmiRegistryPort(), instance.getRmiRegistryHost(),
+                                            instance.getRmiServerPort(), instance.getRmiServerHost(),
+                                            state, instance.getLocation(),
                                             instance.getJavaOpts()};
         return new CompositeDataSupport(comp, InstancesMBean.INSTANCE, itemValues);
     }
@@ -52,13 +54,18 @@ public class InstanceToTableMapper {
     private static CompositeType createRowType() throws OpenDataException {
         String desc = "This type describes Karaf instance";
         OpenType<?>[] itemTypes = new OpenType[] {SimpleType.INTEGER, SimpleType.STRING, SimpleType.BOOLEAN,
-                                                  SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.INTEGER,
+                                                  SimpleType.INTEGER, SimpleType.STRING,
+                                                  SimpleType.INTEGER, SimpleType.STRING,
+                                                  SimpleType.INTEGER, SimpleType.STRING,
                                                   SimpleType.STRING, SimpleType.STRING, SimpleType.STRING};
         String[] descriptions = new String[] {"The Process ID of the instance or 0 if not running",
                                               "The name of the instance", "Whether the instance is root",
                                               "The SSH port that can be used to connect to the instance",
+                                              "The host address where the SSH server is listening",
                                               "The RMI registry port that can be used to manage the instance",
+                                              "The host address where the RMI registry is listening",
                                               "The RMI server port that can be used to manage the instance",
+                                              "The host address where the RMI server is listening",
                                               "The state of the instance", "The location of the instance",
                                               "The Java options of the instance"};
         CompositeType comp = new CompositeType("Instances", desc, InstancesMBean.INSTANCE, descriptions, itemTypes);

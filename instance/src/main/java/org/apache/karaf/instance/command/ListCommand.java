@@ -39,16 +39,22 @@ public class ListCommand extends InstanceCommandSupport {
         Instance[] instances = getInstanceService().getInstances();
         ShellTable table = new ShellTable();
         table.column("SSH Port").alignRight();
+        table.column("SSH Host").alignRight();
         table.column("RMI Registry").alignRight();
+        table.column("RMI Registry Host").alignRight();
         table.column("RMI Server").alignRight();
+        table.column("RMI Server Host").alignRight();
         table.column("State");
         table.column("PID");
         table.column(getRightColumnHeader());
         for (Instance instance : instances) {
             table.addRow().addContent(
                     instance.getSshPort(),
+                    instance.getSshHost(),
                     instance.getRmiRegistryPort(),
+                    instance.getRmiRegistryHost(),
                     instance.getRmiServerPort(),
+                    instance.getRmiServerHost(),
                     instance.getState(),
                     instance.getPid(),
                     getRightColumnValue(instance));
