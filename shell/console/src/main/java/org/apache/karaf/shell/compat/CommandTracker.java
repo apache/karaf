@@ -190,7 +190,7 @@ public class CommandTracker implements ServiceTrackerCustomizer<Object, Object> 
                             if (property != null) {
                                 return property.toString();
                             } else {
-                                return null;
+                                return getName();
                             }
                         }
 
