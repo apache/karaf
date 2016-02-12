@@ -2006,8 +2006,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                     <maxmem>256M</maxmem>
                     <fork>${compiler.fork}</fork>
                 </configuration>
@@ -2027,7 +2027,7 @@
                                     <version>[3,4)</version>
                                 </requireMavenVersion>
                                 <requireJavaVersion>
-                                    <version>[1.7,1.9)</version>
+                                    <version>[1.8,1.9]</version>
                                 </requireJavaVersion>
                             </rules>
                         </configuration>
