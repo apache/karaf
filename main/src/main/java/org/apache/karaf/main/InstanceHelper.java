@@ -95,14 +95,12 @@ public class InstanceHelper {
                             int count = Integer.parseInt(props.getProperty("count"));
                             for (int i = 0; i < count; i++) {
                                 String name = props.getProperty("item." + i + ".name");
-                                if (name.equals(instanceName)) {
+                                boolean isRootInstance = Boolean.parseBoolean(props.getProperty("item." + i + ".root"));
+                                if (name.equals(instanceName) && !isRootInstance) {
                                     props.setProperty("item." + i + ".pid", pid);
                                     return;
                                 }
                             }
-                            // it's not found, let assume it's the root instance, so 0
-                            props.setProperty("item.0.name", instanceName);
-                            props.setProperty("item.0.pid", pid);
                         }
                     }
                 }, true);
