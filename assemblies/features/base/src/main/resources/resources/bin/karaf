@@ -435,7 +435,7 @@ run() {
     while true; do
         # When users want to update the lib version of, they just need to create
         # a lib.next directory and on the new restart, it will replace the current lib directory.
-        if [ -d ${KARAF_HOME}/lib.next ] ; then
+        if [ -d "${KARAF_HOME}/lib.next" ] ; then
             echo "Updating libs..."
             rm -rf "${KARAF_HOME}/lib"
             mv -f "${KARAF_HOME}/lib.next" "${KARAF_HOME}/lib"

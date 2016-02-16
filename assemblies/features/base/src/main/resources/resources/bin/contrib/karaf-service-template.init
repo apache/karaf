@@ -54,39 +54,44 @@ prog=${KARAF_SERVICE_NAME}
 
 do_start() {
     echo "Starting $prog: "
-    if [ -f $KARAF_SERVICE_PIDFILE ]; then
-        read ppid < $KARAF_SERVICE_PIDFILE
+    if [ -f "$KARAF_SERVICE_PIDFILE" ]; then
+        read ppid < "$KARAF_SERVICE_PIDFILE"
         if [ `ps -p $ppid 2> /dev/null | grep -c $ppid 2> /dev/null` -eq '1' ]; then
             echo "$prog is already running"
             return 1
         else
-            rm -f $KARAF_SERVICE_PIDFILE
+            rm -f "$KARAF_SERVICE_PIDFILE"
         fi
     fi
 
-    mkdir -p `dirname $KARAF_SERVICE_LOG`
-    cat /dev/null > $KARAF_SERVICE_LOG
-    chown $KARAF_SERVICE_USER:$KARAF_SERVICE_GROUP  $KARAF_SERVICE_LOG
+    LOG_PATH=`dirname "$KARAF_SERVICE_LOG"`
+    mkdir -p "$LOG_PATH"
+    cat /dev/null > "$KARAF_SERVICE_LOG"
+    chown $KARAF_SERVICE_USER:$KARAF_SERVICE_GROUP  "$KARAF_SERVICE_LOG"
 
-    mkdir -p `dirname $KARAF_SERVICE_PIDFILE`
-    chown $KARAF_SERVICE_USER:$KARAF_SERVICE_GROUP `dirname $KARAF_SERVICE_PIDFILE` || true
+    PID_PATH=`dirname "$KARAF_SERVICE_PIDFILE"`
+    mkdir -p "$PID_PATH"
+    chown $KARAF_SERVICE_USER:$KARAF_SERVICE_GROUP "$PID_PATH" || true
 
     if [ ! -z "$KARAF_SERVICE_USER" ]; then
         if [ "$KARAF_SERVICE_USER" = "root" ]; then
+            KARAF_EXEC=exec 
+            export KARAF_EXEC
+
             JAVA_HOME=$JAVA_HOME 
             export JAVA_HOME
 
-            $KARAF_SERVICE_PATH/bin/$KARAF_SERVICE_EXECUTABLE server >> $KARAF_SERVICE_LOG 2>&1 &
+            "$KARAF_SERVICE_PATH/bin/$KARAF_SERVICE_EXECUTABLE" daemon >> "$KARAF_SERVICE_LOG" 2>&1 &
 
-            echo $! > $KARAF_SERVICE_PIDFILE
+            echo $! > "$KARAF_SERVICE_PIDFILE"
         else
             su - $KARAF_SERVICE_USER \
-                -c " { export JAVA_HOME=$JAVA_HOME; $KARAF_SERVICE_PATH/bin/$KARAF_SERVICE_EXECUTABLE daemon >> $KARAF_SERVICE_LOG 2>&1 & } ; echo \$! >| $KARAF_SERVICE_PIDFILE "
+                -c " { export KARAF_EXEC=exec; export JAVA_HOME=$JAVA_HOME; \"$KARAF_SERVICE_PATH/bin/$KARAF_SERVICE_EXECUTABLE\" daemon >> \"$KARAF_SERVICE_LOG\" 2>&1 & } ; echo \$! >| \"$KARAF_SERVICE_PIDFILE\" "
         fi
 
         sleep 1
-        if [ -f $KARAF_SERVICE_PIDFILE ]; then
-            chown $KARAF_SERVICE_USER:$KARAF_SERVICE_GROUP $KARAF_SERVICE_PIDFILE
+        if [ -f "$KARAF_SERVICE_PIDFILE" ]; then
+            chown $KARAF_SERVICE_USER:$KARAF_SERVICE_GROUP "$KARAF_SERVICE_PIDFILE"
         fi
     fi
 
@@ -98,19 +103,19 @@ do_stop() {
     echo $"Stopping $prog: "
     count=0;
 
-    if [ -f $KARAF_SERVICE_PIDFILE ]; then
-        read kpid < $KARAF_SERVICE_PIDFILE
+    if [ -f "$KARAF_SERVICE_PIDFILE" ]; then
+        read kpid < "$KARAF_SERVICE_PIDFILE"
         kwait=$SHUTDOWN_WAIT
 
         if [ "$KARAF_SERVICE_USER" = "root" ]; then
             JAVA_HOME=$JAVA_HOME
             export JAVA_HOME
 
-            $KARAF_SERVICE_PATH/bin/$KARAF_SERVICE_EXECUTABLE stop >> $KARAF_SERVICE_LOG 2>&1
+            "$KARAF_SERVICE_PATH/bin/$KARAF_SERVICE_EXECUTABLE" stop >> "$KARAF_SERVICE_LOG" 2>&1
         else
             su - $KARAF_SERVICE_USER \
-                -c "export JAVA_HOME=$JAVA_HOME; $KARAF_SERVICE_PATH/bin/$KARAF_SERVICE_EXECUTABLE stop >> $KARAF_SERVICE_LOG 2>&1"
-        fi
+                -c "export JAVA_HOME=$JAVA_HOME; \"$KARAF_SERVICE_PATH/bin/$KARAF_SERVICE_EXECUTABLE\" stop >> \"$KARAF_SERVICE_LOG\" 2>&1"
+        fi 
 
         until [ `ps -p $kpid 2> /dev/null | grep -c $kpid 2> /dev/null` -eq '0' ] || [ $count -gt $kwait ]
         do
@@ -125,13 +130,13 @@ do_stop() {
         fi
     fi
 
-    rm -f $KARAF_SERVICE_PIDFILE
+    rm -f "$KARAF_SERVICE_PIDFILE"
     rm -f $KARAF_LOCKFILE
 }
 
 do_status() {
-    if [ -f $KARAF_SERVICE_PIDFILE ]; then
-        read ppid < $KARAF_SERVICE_PIDFILE
+    if [ -f "$KARAF_SERVICE_PIDFILE" ]; then
+        read ppid < "$KARAF_SERVICE_PIDFILE"
         if [ `ps -p $ppid 2> /dev/null | grep -c $ppid 2> /dev/null` -eq '1' ]; then
             echo "$prog is running (pid $ppid)"
             return 0
