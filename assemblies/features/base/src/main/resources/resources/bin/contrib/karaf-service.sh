@@ -52,18 +52,18 @@ KARAF_ENV=()
 while getopts k:d:c:p:n:u:g:l:t:e:f:x:h opt
 do
     case $opt in
-    k)  export KARAF_SERVICE_PATH=$OPTARG ;;
-    d)  export KARAF_SERVICE_DATA=$OPTARG ;;
-    c)  export KARAF_SERVICE_CONF=$OPTARG ;;
-    p)  export KARAF_SERVICE_PIDFILE=$OPTARG ;;
-    n)  export KARAF_SERVICE_NAME=$OPTARG ;;
-    u)  export KARAF_SERVICE_USER=$OPTARG ;;
-    g)  export KARAF_SERVICE_GROUP=$OPTARG ;;
-    l)  export KARAF_SERVICE_LOG=$OPTARG ;;
-    t)  export KARAF_SERVICE_ETC=$OPTARG ;;
-    f)  export KARAF_SERVICE_TEMPLATE=$OPTARG ;;
-    x)  export KARAF_SERVICE_EXECUTABLE=$OPTARG ;;
-    e)  KARAF_ENV+=($OPTARG) ;;
+    k)  export KARAF_SERVICE_PATH="$OPTARG" ;;
+    d)  export KARAF_SERVICE_DATA="$OPTARG" ;;
+    c)  export KARAF_SERVICE_CONF="$OPTARG" ;;
+    p)  export KARAF_SERVICE_PIDFILE="$OPTARG" ;;
+    n)  export KARAF_SERVICE_NAME="$OPTARG" ;;
+    u)  export KARAF_SERVICE_USER="$OPTARG" ;;
+    g)  export KARAF_SERVICE_GROUP="$OPTARG" ;;
+    l)  export KARAF_SERVICE_LOG="$OPTARG" ;;
+    t)  export KARAF_SERVICE_ETC="$OPTARG" ;;
+    f)  export KARAF_SERVICE_TEMPLATE="$OPTARG" ;;
+    x)  export KARAF_SERVICE_EXECUTABLE="$OPTARG" ;;
+    e)  KARAF_ENV+=("$OPTARG") ;;
     h|?) usage ;;
     esac
 done
@@ -76,27 +76,27 @@ if [[ ! $KARAF_SERVICE_PATH ]]; then
 fi
 
 if [[ ! $KARAF_SERVICE_DATA ]]; then
-    export KARAF_SERVICE_DATA=${KARAF_SERVICE_PATH}/data
+    export KARAF_SERVICE_DATA="${KARAF_SERVICE_PATH}/data"
 fi
 
 if [[ ! $KARAF_SERVICE_ETC ]]; then
-    export KARAF_SERVICE_ETC=${KARAF_SERVICE_PATH}/etc
-fi
-
-if [[ ! $KARAF_SERVICE_CONF ]]; then
-    export KARAF_SERVICE_CONF=${KARAF_SERVICE_PATH}/etc/${KARAF_SERVICE_NAME}.conf
+    export KARAF_SERVICE_ETC="${KARAF_SERVICE_PATH}/etc"
 fi
 
 if [[ ! $KARAF_SERVICE_NAME ]]; then
     export KARAF_SERVICE_NAME="karaf"
 fi
 
+if [[ ! $KARAF_SERVICE_CONF ]]; then
+    export KARAF_SERVICE_CONF="${KARAF_SERVICE_PATH}/etc/${KARAF_SERVICE_NAME}.conf"
+fi
+
 if [[ ! $KARAF_SERVICE_PIDFILE ]]; then
-    export KARAF_SERVICE_PIDFILE=${KARAF_SERVICE_DATA}/${KARAF_SERVICE_NAME}.pid
+    export KARAF_SERVICE_PIDFILE="${KARAF_SERVICE_DATA}/${KARAF_SERVICE_NAME}.pid"
 fi
 
 if [[ ! $KARAF_SERVICE_LOG ]]; then
-    export KARAF_SERVICE_LOG=${KARAF_SERVICE_DATA}/log/${KARAF_SERVICE_NAME}-console.log
+    export KARAF_SERVICE_LOG="${KARAF_SERVICE_DATA}/log/${KARAF_SERVICE_NAME}-console.log"
 fi
 
 if [[ ! $KARAF_SERVICE_USER ]]; then
@@ -104,7 +104,7 @@ if [[ ! $KARAF_SERVICE_USER ]]; then
 fi
 
 if [[ ! $KARAF_SERVICE_GROUP ]]; then
-    export KARAF_SERVICE_GROUP=${KARAF_SERVICE_USER}
+    export KARAF_SERVICE_GROUP="${KARAF_SERVICE_USER}"
 fi
 
 if [[ ! $KARAF_SERVICE_EXECUTABLE ]]; then
@@ -116,16 +116,15 @@ fi
 ################################################################################
 
 function generate_service_descriptor {
-    echo "Writing service file $2"
-    perl -p -e 's/\$\{([^}]+)\}/defined $ENV{$1} ? $ENV{$1} : $&/eg' < $1 > $2
+    echo "Writing service file \"$2\""
+    perl -p -e 's/\$\{([^}]+)\}/defined $ENV{$1} ? $ENV{$1} : $&/eg' < "$1" > "$2"
 
     if [ $# -eq 4 ]; then
-
-        echo "Writing service configuration file $4"
-        perl -p -e 's/\$\{([^}]+)\}/defined $ENV{$1} ? $ENV{$1} : $&/eg' < $3 > $4
+        echo "Writing service configuration file \"$4\""
+        perl -p -e 's/\$\{([^}]+)\}/defined $ENV{$1} ? $ENV{$1} : $&/eg' < "$3" > "$4"
 
         for var in "${KARAF_ENV[@]}"; do
-          echo "${var}" >> $4
+          echo "${var}" >> "$4"
         done
     fi
 }
@@ -139,44 +138,44 @@ if [[ ! $KARAF_SERVICE_TEMPLATE ]]; then
         sunos)
             # smc vs initv
             generate_service_descriptor \
-                $SOLARIS_SMF_TEMPLATE \
-                ${PWD}/${KARAF_SERVICE_NAME}.xml
+                "$SOLARIS_SMF_TEMPLATE" \
+                "${PWD}/${KARAF_SERVICE_NAME}.xml"
             ;;
         linux)
             if [ -d /run/systemd/system ]; then
                 generate_service_descriptor \
-                    $SYSTEMD_TEMPLATE \
-                    ${PWD}/${KARAF_SERVICE_NAME}.service \
-                    ${CONF_TEMPLATE} \
-                    ${KARAF_SERVICE_CONF}
+                    "$SYSTEMD_TEMPLATE" \
+                    "${PWD}/${KARAF_SERVICE_NAME}.service" \
+                    "${CONF_TEMPLATE}" \
+                    "${KARAF_SERVICE_CONF}"
 
                 generate_service_descriptor \
-                    $SYSTEMD_TEMPLATE_INSTANCES \
-                    ${PWD}/${KARAF_SERVICE_NAME}@.service
+                    "$SYSTEMD_TEMPLATE_INSTANCES" \
+                    "${PWD}/${KARAF_SERVICE_NAME}@.service"
 
             elif [ -f /etc/redhat-release ]; then
                 generate_service_descriptor \
-                    $INIT_REDHAT_TEMPLATE \
-                    ${PWD}/${KARAF_SERVICE_NAME} \
-                    ${CONF_TEMPLATE} \
-                    ${KARAF_SERVICE_CONF}
+                    "$INIT_REDHAT_TEMPLATE" \
+                    "${PWD}/${KARAF_SERVICE_NAME}" \
+                    "${CONF_TEMPLATE}" \
+                    "${KARAF_SERVICE_CONF}"
 
-                chmod 755 ${PWD}/${KARAF_SERVICE_NAME} 
-            elif [ -f /etc/debian-release ]; then
+                chmod 755 "${PWD}/${KARAF_SERVICE_NAME}"
+            elif [ -f /etc/debian-release ] || [ -f /etc/debian_version ]; then
                 generate_service_descriptor \
-                    $INIT_DEBIAN_TEMPLATE \
-                    ${PWD}/${KARAF_SERVICE_NAME} \
-                    ${CONF_TEMPLATE} \
-                    ${KARAF_SERVICE_CONF}
+                    "$INIT_DEBIAN_TEMPLATE" \
+                    "${PWD}/${KARAF_SERVICE_NAME}" \
+                    "${CONF_TEMPLATE}" \
+                    "${KARAF_SERVICE_CONF}"
 
-                chmod 755 ${PWD}/${KARAF_SERVICE_NAME}
+                chmod 755 "${PWD}/${KARAF_SERVICE_NAME}"
             fi
             ;;
     esac
 else
     generate_service_descriptor \
-        $KARAF_SERVICE_TEMPLATE \
-        ${PWD}/${KARAF_SERVICE_NAME} \
-        ${CONF_TEMPLATE} \
-        ${KARAF_SERVICE_CONF}
+        "$KARAF_SERVICE_TEMPLATE" \
+        "${PWD}/${KARAF_SERVICE_NAME}" \
+        "${CONF_TEMPLATE}" \
+        "${KARAF_SERVICE_CONF}"
 fi
