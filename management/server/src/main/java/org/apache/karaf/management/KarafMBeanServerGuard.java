@@ -31,9 +31,14 @@ import java.security.AccessControlContext;
 import java.security.AccessController;
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
@@ -49,6 +54,8 @@ public class KarafMBeanServerGuard implements InvocationHandler {
     private static final String ROLE_WILDCARD = "*";
 
     private static final String JMX_OBJECTNAME_PROPERTY_WILDCARD = "_";
+
+    private static final Comparator<String[]> WILDCARD_PID_COMPARATOR = new WildcardPidComparator();
 
     private ConfigurationAdmin configAdmin;
 
@@ -316,6 +323,7 @@ public class KarafMBeanServerGuard implements InvocationHandler {
     private String getGeneralPid(List<String> allPids, String pid) {
         String ret = "";
         String[] pidStrArray = pid.split(Pattern.quote("."));
+        Set<String[]> rets = new TreeSet<String[]>(WILDCARD_PID_COMPARATOR);
         for (String id : allPids) {
             String[] idStrArray = id.split(Pattern.quote("."));
             if (idStrArray.length == pidStrArray.length) {
@@ -330,13 +338,24 @@ public class KarafMBeanServerGuard implements InvocationHandler {
                     }
                 }
                 if (match) {
-                    ret = id;
-                    return ret;
+                    rets.add(idStrArray);
                 }
             }
         }
-        
-        return ret;
+
+        Iterator<String[]> it = rets.iterator();
+        if (!it.hasNext()) {
+            return "";
+        } else {
+            StringBuilder buffer = new StringBuilder();
+            for (String segment : it.next()) {
+                if (buffer.length() > 0) {
+                    buffer.append(".");
+                }
+                buffer.append(segment);
+            }
+            return buffer.toString();
+        }
     }
 
     private List<String> getNameSegments(ObjectName objectName) {
@@ -421,6 +440,42 @@ public class KarafMBeanServerGuard implements InvocationHandler {
         }
 
         return false;
+    }
+
+    /**
+     * <code>nulls</code>-last comparator of PIDs split to segments. {@link #JMX_OBJECTNAME_PROPERTY_WILDCARD}
+     * in a segment makes the PID more generic, thus - with lower prioroty.
+     */
+    private static class WildcardPidComparator implements Comparator<String[]> {
+        @Override
+        public int compare(String[] o1, String[] o2) {
+            if (o1 == null && o2 == null) {
+                return 0;
+            }
+            if (o1 == null) {
+                return 1;
+            }
+            if (o2 == null) {
+                return -1;
+            }
+            if (o1.length != o2.length) {
+                // not necessary - not called with PIDs of different segment count
+                return o1.length - o2.length;
+            }
+            for (int n = 0; n < o1.length; n++) {
+                if (o1[n].equals(o2[n])) {
+                    continue;
+                }
+                if (o1[n].equals(JMX_OBJECTNAME_PROPERTY_WILDCARD)) {
+                    return 1;
+                }
+                if (o2[n].equals(JMX_OBJECTNAME_PROPERTY_WILDCARD)) {
+                    return -1;
+                }
+                return o1[n].compareTo(o2[n]);
+            }
+            return 0;
+        }
     }
 
 }
