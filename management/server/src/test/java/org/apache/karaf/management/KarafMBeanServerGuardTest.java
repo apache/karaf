@@ -291,6 +291,83 @@ public class KarafMBeanServerGuardTest extends TestCase {
                 guard.getRequiredRoles(on, "zar", new Object[]{}, new String[]{}));
     }
 
+    @SuppressWarnings("unchecked")
+    public void testRequiredRolesHierarchyWildcard1() throws Exception {
+        Dictionary<String, Object> conf1 = new Hashtable<String, Object>();
+        conf1.put("foo", "viewer");
+        conf1.put(Constants.SERVICE_PID, "jmx.acl._.bar.Test");
+        Dictionary<String, Object> conf2 = new Hashtable<String, Object>();
+        conf2.put("foo", "editor");
+        conf2.put(Constants.SERVICE_PID, "jmx.acl.foo.bar.Test");
+
+        ConfigurationAdmin ca = getMockConfigAdmin2(conf1, conf2);
+        assertEquals("Precondition", 2, ca.listConfigurations("(service.pid=jmx.acl*)").length);
+
+        KarafMBeanServerGuard guard = new KarafMBeanServerGuard();
+        guard.setConfigAdmin(ca);
+
+        ObjectName on1 = ObjectName.getInstance("foo.bar:type=Test");
+        assertEquals("Should only return the most specific definition",
+                Collections.singletonList("editor"),
+                guard.getRequiredRoles(on1, "foo", new Object[]{}, new String[]{}));
+        ObjectName on2 = ObjectName.getInstance("tar.bar:type=Test");
+        assertEquals("Should return definition from wildcard PID",
+                Collections.singletonList("viewer"),
+                guard.getRequiredRoles(on2, "foo", new Object[]{}, new String[]{}));
+    }
+
+    @SuppressWarnings("unchecked")
+    public void testRequiredRolesHierarchyWildcard2() throws Exception {
+        Dictionary<String, Object> conf1 = new Hashtable<String, Object>();
+        conf1.put("foo", "viewer");
+        conf1.put(Constants.SERVICE_PID, "jmx.acl.foo.bar.Test");
+        Dictionary<String, Object> conf2 = new Hashtable<String, Object>();
+        conf2.put("foo", "editor");
+        conf2.put(Constants.SERVICE_PID, "jmx.acl._.bar.Test");
+
+        ConfigurationAdmin ca = getMockConfigAdmin2(conf1, conf2);
+        assertEquals("Precondition", 2, ca.listConfigurations("(service.pid=jmx.acl*)").length);
+
+        KarafMBeanServerGuard guard = new KarafMBeanServerGuard();
+        guard.setConfigAdmin(ca);
+
+        ObjectName on1 = ObjectName.getInstance("foo.bar:type=Test");
+        assertEquals("Should only return the most specific definition",
+                Collections.singletonList("viewer"),
+                guard.getRequiredRoles(on1, "foo", new Object[]{}, new String[]{}));
+        ObjectName on2 = ObjectName.getInstance("tar.bar:type=Test");
+        assertEquals("Should return definition from wildcard PID",
+                Collections.singletonList("editor"),
+                guard.getRequiredRoles(on2, "foo", new Object[]{}, new String[]{}));
+    }
+
+    @SuppressWarnings("unchecked")
+    public void testRequiredRolesHierarchyWildcard3() throws Exception {
+        Dictionary<String, Object> conf1 = new Hashtable<String, Object>();
+        conf1.put("foo", "viewer");
+        conf1.put(Constants.SERVICE_PID, "jmx.acl._.bar.Test");
+        Dictionary<String, Object> conf2 = new Hashtable<String, Object>();
+        conf2.put("foo", "editor");
+        conf2.put(Constants.SERVICE_PID, "jmx.acl.foo._.Test");
+
+        ConfigurationAdmin ca = getMockConfigAdmin2(conf1, conf2);
+        assertEquals("Precondition", 2, ca.listConfigurations("(service.pid=jmx.acl*)").length);
+
+        KarafMBeanServerGuard guard = new KarafMBeanServerGuard();
+        guard.setConfigAdmin(ca);
+
+        ObjectName on1 = ObjectName.getInstance("foo.bar:type=Test");
+        assertEquals("Should only return the most specific definition",
+                Collections.singletonList("editor"),
+                guard.getRequiredRoles(on1, "foo", new Object[]{}, new String[]{}));
+        ObjectName on2 = ObjectName.getInstance("foo.tar:type=Test");
+        assertEquals(Collections.singletonList("editor"),
+                guard.getRequiredRoles(on2, "foo", new Object[]{}, new String[]{}));
+        ObjectName on3 = ObjectName.getInstance("boo.bar:type=Test");
+        assertEquals(Collections.singletonList("viewer"),
+                guard.getRequiredRoles(on3, "foo", new Object[]{}, new String[]{}));
+    }
+
     public void testRequiredRolesMethodNameWildcard() throws Exception {
         Dictionary<String, Object> configuration = new Hashtable<String, Object>();
         configuration.put("getFoo", "viewer");
