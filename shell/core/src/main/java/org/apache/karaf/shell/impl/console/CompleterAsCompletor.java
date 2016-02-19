@@ -19,6 +19,7 @@
 package org.apache.karaf.shell.impl.console;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.karaf.shell.api.console.CommandLine;
 import org.apache.karaf.shell.api.console.Completer;
@@ -37,8 +38,14 @@ public class CompleterAsCompletor implements jline.console.completer.Completer {
 
     @SuppressWarnings("unchecked")
 	public int complete(String buffer, int cursor, @SuppressWarnings("rawtypes") List candidates) {
-        CommandLine cmdLine = CommandLineParser.buildCommandLine(session, buffer, cursor);
-        return completer.complete(session, cmdLine, candidates);
+        AtomicInteger begOfLine = new AtomicInteger();
+        CommandLine cmdLine = CommandLineParser.buildCommandLine(session, buffer, cursor, begOfLine);
+        int res = completer.complete(session, cmdLine, candidates);
+        if (res >= 0) {
+            return res + begOfLine.get();
+        } else {
+            return res;
+        }
     }
 
 }
