@@ -19,6 +19,7 @@ package org.apache.karaf.bundle.command;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.karaf.bundle.core.BundleService;
 import org.apache.karaf.shell.api.action.Action;
@@ -104,14 +105,10 @@ public class Install implements Action {
         if (bundles.size() == 1) {
             System.out.println("Bundle ID: " + bundles.get(0).getBundleId());
         } else {
-            StringBuffer sb = new StringBuffer("Bundle IDs: ");
-            for (Bundle bundle : bundles) {
-                if (sb.length() > 0) {
-                    sb.append(", ");
-                }
-                sb.append(bundle.getBundleId());
-            }
-            System.out.println(sb);
+            String msg = bundles.stream()
+                    .map(b -> Long.toString(b.getBundleId()))
+                    .collect(Collectors.joining(", ", "Bundle IDs: ", ""));
+            System.out.println(msg);
         }
         MultiException.throwIf("Error installing bundles", exceptions);
         return null;
