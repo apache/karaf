@@ -324,7 +324,20 @@ setupDefaults() {
     #DEFAULT_JAVA_DEBUG_OPTS="-Xrunyjpagent"
 }
 
-
+checkRootInstance() {
+   ROOT_INSTANCE_RUNNING=false
+   if [ -f "${KARAF_HOME}/instances/instance.properties" ]; 
+   then
+      ROOT_INSTANCE_PID=$(sed -n -e '/item.0.pid/ s/.*\= *//p' "${KARAF_HOME}/instances/instance.properties")
+      ROOT_INSTANCE_NAME=$(sed -n -e '/item.0.name/ s/.*\= *//p' "${KARAF_HOME}/instances/instance.properties")
+      if [ "$ROOT_INSTANCE_PID" -ne "0" ]; then 
+          if ps ax | grep -v grep | grep "$ROOT_INSTANCE_PID" > /dev/null
+          then
+              ROOT_INSTANCE_RUNNING=true
+          fi
+      fi
+   fi
+}
 
 init() {
     # Determine if there is special OS handling we must perform
@@ -357,6 +370,9 @@ init() {
     # Determine the JVM version >= 1.6
     checkJvmVersion
 
+    # Check if a root instance is already running
+    checkRootInstance
+
     # Setup default options
     setupDefaults
 
@@ -368,6 +384,7 @@ init() {
 run() {
     OPTS="-Dkaraf.startLocalConsole=true -Dkaraf.startRemoteShell=true"
     MAIN=org.apache.karaf.main.Main
+    CHECK_ROOT_INSTANCE_RUNNING=true
     while [ "$1" != "" ]; do
         case $1 in
             'clean')
@@ -383,13 +400,16 @@ run() {
                 ;;
             'status')
                 MAIN=org.apache.karaf.main.Status
+                CHECK_ROOT_INSTANCE_RUNNING=false
                 shift
                 ;;
             'stop')
                 MAIN=org.apache.karaf.main.Stop
+                CHECK_ROOT_INSTANCE_RUNNING=false
                 shift
                 ;;
             'console')
+                CHECK_ROOT_INSTANCE_RUNNING=false
                 shift
                 ;;
             'server')
@@ -404,6 +424,7 @@ run() {
                 ;;
             'client')
                 OPTS="-Dkaraf.startLocalConsole=true -Dkaraf.startRemoteShell=false"
+                CHECK_ROOT_INSTANCE_RUNNING=false
                 shift
                 ;;
             *)
@@ -447,22 +468,26 @@ run() {
             mkdir -p "$KARAF_DATA/log"
         fi
 
-        $KARAF_EXEC "$JAVA" $JAVA_OPTS \
-            -Djava.endorsed.dirs="${JAVA_ENDORSED_DIRS}" \
-            -Djava.ext.dirs="${JAVA_EXT_DIRS}" \
-            -Dkaraf.instances="${KARAF_HOME}/instances" \
-            -Dkaraf.home="$KARAF_HOME" \
-            -Dkaraf.base="$KARAF_BASE" \
-            -Dkaraf.data="$KARAF_DATA" \
-            -Dkaraf.etc="$KARAF_ETC" \
-            -Dkaraf.restart.jvm.supported=true \
-            -Djava.io.tmpdir="$KARAF_DATA/tmp" \
-            -Djava.util.logging.config.file="$KARAF_BASE/etc/java.util.logging.properties" \
-            $KARAF_SYSTEM_OPTS \
-            $KARAF_OPTS \
-            $OPTS \
-            -classpath "$CLASSPATH" \
-            $MAIN "$@"
+        if [ "$ROOT_INSTANCE_RUNNING" = "false" ] || [ "$CHECK_ROOT_INSTANCE_RUNNING" = "false" ] ; then
+            $KARAF_EXEC "$JAVA" $JAVA_OPTS \
+                -Djava.endorsed.dirs="${JAVA_ENDORSED_DIRS}" \
+                -Djava.ext.dirs="${JAVA_EXT_DIRS}" \
+                -Dkaraf.instances="${KARAF_HOME}/instances" \
+                -Dkaraf.home="$KARAF_HOME" \
+                -Dkaraf.base="$KARAF_BASE" \
+                -Dkaraf.data="$KARAF_DATA" \
+                -Dkaraf.etc="$KARAF_ETC" \
+                -Dkaraf.restart.jvm.supported=true \
+                -Djava.io.tmpdir="$KARAF_DATA/tmp" \
+                -Djava.util.logging.config.file="$KARAF_BASE/etc/java.util.logging.properties" \
+                $KARAF_SYSTEM_OPTS \
+                $KARAF_OPTS \
+                $OPTS \
+                -classpath "$CLASSPATH" \
+                $MAIN "$@"
+        else
+            die "There is a Root instance already running with name $ROOT_INSTANCE_NAME and pid $ROOT_INSTANCE_PID"
+        fi
 
         KARAF_RC=$?
         if [ $KARAF_DAEMON ] ; then
