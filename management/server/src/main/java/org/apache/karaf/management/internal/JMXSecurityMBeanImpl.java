@@ -42,36 +42,50 @@ public class JMXSecurityMBeanImpl extends StandardMBean implements JMXSecurityMB
     }
 
     public boolean canInvoke(String objectName) throws Exception {
-        if (guard == null)
-            return true;
-
-        return guard.canInvoke(mbeanServer, new ObjectName(objectName));
+        return canInvoke((BulkRequestContext) null, objectName);
     }
 
     public boolean canInvoke(String objectName, String methodName) throws Exception {
-        if (guard == null)
-            return true;
-
-        return guard.canInvoke(mbeanServer, new ObjectName(objectName), methodName);
+        return canInvoke(null, objectName, methodName);
     }
 
     public boolean canInvoke(String objectName, String methodName, String[] argumentTypes) throws Exception {
+        return canInvoke(null, objectName, methodName, argumentTypes);
+    }
+
+    private boolean canInvoke(BulkRequestContext context, String objectName) throws Exception {
+        if (guard == null)
+            return true;
+
+        return guard.canInvoke(context, mbeanServer, new ObjectName(objectName));
+    }
+
+    private boolean canInvoke(BulkRequestContext context, String objectName, String methodName) throws Exception {
+        if (guard == null)
+            return true;
+
+        return guard.canInvoke(context, mbeanServer, new ObjectName(objectName), methodName);
+    }
+
+    private boolean canInvoke(BulkRequestContext context, String objectName, String methodName, String[] argumentTypes) throws Exception {
         ObjectName on = new ObjectName(objectName);
 
         if (guard == null)
             return true;
 
-        return guard.canInvoke(mbeanServer, on, methodName, argumentTypes);
+        return guard.canInvoke(context, mbeanServer, on, methodName, argumentTypes);
     }
 
     public TabularData canInvoke(Map<String, List<String>> bulkQuery) throws Exception {
         TabularData table = new TabularDataSupport(CAN_INVOKE_TABULAR_TYPE);
 
+        BulkRequestContext context = BulkRequestContext.newContext(guard.getConfigAdmin());
+
         for (Map.Entry<String, List<String>> entry : bulkQuery.entrySet()) {
             String objectName = entry.getKey();
             List<String> methods = entry.getValue();
             if (methods.size() == 0) {
-                boolean res = canInvoke(objectName);
+                boolean res = canInvoke(context, objectName);
                 CompositeData data = new CompositeDataSupport(CAN_INVOKE_RESULT_ROW_TYPE, CAN_INVOKE_RESULT_COLUMNS, new Object[]{ objectName, "", res });
                 table.put(data);
             } else {
@@ -81,9 +95,9 @@ public class JMXSecurityMBeanImpl extends StandardMBean implements JMXSecurityMB
 
                     boolean res;
                     if (name.equals(method)) {
-                        res = canInvoke(objectName, name);
+                        res = canInvoke(context, objectName, name);
                     } else {
-                        res = canInvoke(objectName, name, argTypes.toArray(new String[]{}));
+                        res = canInvoke(context, objectName, name, argTypes.toArray(new String[]{}));
                     }
                     CompositeData data = new CompositeDataSupport(CAN_INVOKE_RESULT_ROW_TYPE, CAN_INVOKE_RESULT_COLUMNS, new Object[]{ objectName, method, res });
                     table.put(data);

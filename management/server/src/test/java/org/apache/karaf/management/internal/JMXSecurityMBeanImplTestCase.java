@@ -19,19 +19,21 @@ package org.apache.karaf.management.internal;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import junit.framework.TestCase;
+import org.apache.karaf.management.KarafMBeanServerGuard;
+import org.easymock.EasyMock;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.TabularData;
-
-import junit.framework.TestCase;
-
-import org.apache.karaf.management.KarafMBeanServerGuard;
-import org.easymock.EasyMock;
 
 public class JMXSecurityMBeanImplTestCase extends TestCase {
 
@@ -50,7 +52,7 @@ public class JMXSecurityMBeanImplTestCase extends TestCase {
 
         String objectName = "foo.bar.testing:type=SomeMBean";
         KarafMBeanServerGuard testGuard = EasyMock.createMock(KarafMBeanServerGuard.class);
-        EasyMock.expect(testGuard.canInvoke(mbs, new ObjectName(objectName))).andReturn(true);
+        EasyMock.expect(testGuard.canInvoke(null, mbs, new ObjectName(objectName))).andReturn(true);
         EasyMock.replay(testGuard);
 
         JMXSecurityMBeanImpl mb = new JMXSecurityMBeanImpl();
@@ -65,7 +67,7 @@ public class JMXSecurityMBeanImplTestCase extends TestCase {
 
         String objectName = "foo.bar.testing:type=SomeMBean";
         KarafMBeanServerGuard testGuard = EasyMock.createMock(KarafMBeanServerGuard.class);
-        EasyMock.expect(testGuard.canInvoke(mbs, new ObjectName(objectName))).andReturn(false);
+        EasyMock.expect(testGuard.canInvoke(null, mbs, new ObjectName(objectName))).andReturn(false);
         EasyMock.replay(testGuard);
 
         JMXSecurityMBeanImpl mb = new JMXSecurityMBeanImpl();
@@ -81,7 +83,7 @@ public class JMXSecurityMBeanImplTestCase extends TestCase {
 
             String objectName = "foo.bar.testing:type=SomeMBean";
             KarafMBeanServerGuard testGuard = EasyMock.createMock(KarafMBeanServerGuard.class);
-            EasyMock.expect(testGuard.canInvoke(mbs, new ObjectName(objectName))).andThrow(new IOException());
+            EasyMock.expect(testGuard.canInvoke(null, mbs, new ObjectName(objectName))).andThrow(new IOException());
             EasyMock.replay(testGuard);
 
             JMXSecurityMBeanImpl mb = new JMXSecurityMBeanImpl();
@@ -108,9 +110,9 @@ public class JMXSecurityMBeanImplTestCase extends TestCase {
         String[] la = new String[]{"long"};
         String[] sa = new String[]{"java.lang.String"};
         String[] sa2 = new String[]{"java.lang.String", "java.lang.String"};
-        EasyMock.expect(testGuard.canInvoke(mbs, new ObjectName(objectName), "testMethod", la)).andReturn(true);
-        EasyMock.expect(testGuard.canInvoke(mbs, new ObjectName(objectName), "testMethod", sa)).andReturn(true);
-        EasyMock.expect(testGuard.canInvoke(mbs, new ObjectName(objectName), "otherMethod", sa2)).andReturn(false);
+        EasyMock.expect(testGuard.canInvoke(null, mbs, new ObjectName(objectName), "testMethod", la)).andReturn(true);
+        EasyMock.expect(testGuard.canInvoke(null, mbs, new ObjectName(objectName), "testMethod", sa)).andReturn(true);
+        EasyMock.expect(testGuard.canInvoke(null, mbs, new ObjectName(objectName), "otherMethod", sa2)).andReturn(false);
         EasyMock.replay(testGuard);
 
         JMXSecurityMBeanImpl mb = new JMXSecurityMBeanImpl();
@@ -129,7 +131,7 @@ public class JMXSecurityMBeanImplTestCase extends TestCase {
             String objectName = "foo.bar.testing:type=SomeMBean";
             KarafMBeanServerGuard testGuard = EasyMock.createMock(KarafMBeanServerGuard.class);
             String[] ea = new String[]{};
-            EasyMock.expect(testGuard.canInvoke(mbs, new ObjectName(objectName), "testMethod", ea)).andThrow(new IOException());
+            EasyMock.expect(testGuard.canInvoke(null, mbs, new ObjectName(objectName), "testMethod", ea)).andThrow(new IOException());
             EasyMock.replay(testGuard);
 
             JMXSecurityMBeanImpl mb = new JMXSecurityMBeanImpl();
@@ -151,17 +153,25 @@ public class JMXSecurityMBeanImplTestCase extends TestCase {
         MBeanServer mbs = EasyMock.createMock(MBeanServer.class);
         EasyMock.replay(mbs);
 
+        ConfigurationAdmin testConfigAdmin = EasyMock.createMock(ConfigurationAdmin.class);
+        EasyMock.expect(testConfigAdmin.listConfigurations(EasyMock.eq("(service.pid=jmx.acl*)")))
+                .andReturn(new Configuration[0]).anyTimes();
+        EasyMock.expect(testConfigAdmin.listConfigurations(EasyMock.eq("(service.pid=jmx.acl.whitelist)")))
+                .andReturn(new Configuration[0]).once();
+        EasyMock.replay(testConfigAdmin);
+
         KarafMBeanServerGuard testGuard = EasyMock.createMock(KarafMBeanServerGuard.class);
         String objectName = "foo.bar.testing:type=SomeMBean";
         final String[] la = new String[]{"long"};
         final String[] sa = new String[]{"java.lang.String"};
-        EasyMock.expect(testGuard.canInvoke(EasyMock.eq(mbs), EasyMock.eq(new ObjectName(objectName)), EasyMock.eq("testMethod"), EasyMock.aryEq(la))).andReturn(true).anyTimes();
-        EasyMock.expect(testGuard.canInvoke(EasyMock.eq(mbs), EasyMock.eq(new ObjectName(objectName)), EasyMock.eq("testMethod"), EasyMock.aryEq(sa))).andReturn(false).anyTimes();
-        EasyMock.expect(testGuard.canInvoke(EasyMock.eq(mbs), EasyMock.eq(new ObjectName(objectName)), EasyMock.eq("otherMethod"))).andReturn(true).anyTimes();
+        EasyMock.expect(testGuard.getConfigAdmin()).andReturn(testConfigAdmin).anyTimes();
+        EasyMock.expect(testGuard.canInvoke(EasyMock.anyObject(BulkRequestContext.class), EasyMock.eq(mbs), EasyMock.eq(new ObjectName(objectName)), EasyMock.eq("testMethod"), EasyMock.aryEq(la))).andReturn(true).anyTimes();
+        EasyMock.expect(testGuard.canInvoke(EasyMock.anyObject(BulkRequestContext.class), EasyMock.eq(mbs), EasyMock.eq(new ObjectName(objectName)), EasyMock.eq("testMethod"), EasyMock.aryEq(sa))).andReturn(false).anyTimes();
+        EasyMock.expect(testGuard.canInvoke(EasyMock.anyObject(BulkRequestContext.class), EasyMock.eq(mbs), EasyMock.eq(new ObjectName(objectName)), EasyMock.eq("otherMethod"))).andReturn(true).anyTimes();
         String objectName2 = "foo.bar.testing:type=SomeOtherMBean";
-        EasyMock.expect(testGuard.canInvoke(EasyMock.eq(mbs), EasyMock.eq(new ObjectName(objectName2)))).andReturn(true).anyTimes();
+        EasyMock.expect(testGuard.canInvoke(EasyMock.anyObject(BulkRequestContext.class), EasyMock.eq(mbs), EasyMock.eq(new ObjectName(objectName2)))).andReturn(true).anyTimes();
         String objectName3 = "foo.bar.foo.testing:type=SomeOtherMBean";
-        EasyMock.expect(testGuard.canInvoke(EasyMock.eq(mbs), EasyMock.eq(new ObjectName(objectName3)))).andReturn(false).anyTimes();
+        EasyMock.expect(testGuard.canInvoke(EasyMock.anyObject(BulkRequestContext.class), EasyMock.eq(mbs), EasyMock.eq(new ObjectName(objectName3)))).andReturn(false).anyTimes();
         EasyMock.replay(testGuard);
 
         JMXSecurityMBeanImpl mb = new JMXSecurityMBeanImpl();
@@ -194,6 +204,59 @@ public class JMXSecurityMBeanImplTestCase extends TestCase {
         assertEquals(objectName3, cd5.get("ObjectName"));
         assertEquals("", cd5.get("Method"));
         assertEquals(false, cd5.get("CanInvoke"));
+    }
+
+    public void testCanInvokeBulkCacheConfigAdmin() throws Exception {
+        MBeanServer mbs = EasyMock.createMock(MBeanServer.class);
+        EasyMock.replay(mbs);
+
+        Configuration fooWildcardTesting = EasyMock.createMock(Configuration.class);
+        EasyMock.expect(fooWildcardTesting.getPid()).andReturn("jmx.acl.foo._.testing").once();
+        EasyMock.replay(fooWildcardTesting);
+
+        Dictionary<String, Object> fooBarProperties = new Hashtable<>();
+        // using '*' frees us from mocking JAAS
+        fooBarProperties.put("testMethod(java.lang.String)", "*");
+        fooBarProperties.put("testMethod(long)", "*");
+        Configuration fooBarTesting = EasyMock.createMock(Configuration.class);
+        EasyMock.expect(fooBarTesting.getPid()).andReturn("jmx.acl.foo.bar.testing").once();
+        EasyMock.expect(fooBarTesting.getProperties()).andReturn(fooBarProperties).once();
+        EasyMock.replay(fooBarTesting);
+
+        ConfigurationAdmin testConfigAdmin = EasyMock.createMock(ConfigurationAdmin.class);
+        EasyMock.expect(testConfigAdmin.listConfigurations(EasyMock.eq("(service.pid=jmx.acl*)")))
+                .andReturn(new Configuration[] { fooWildcardTesting, fooBarTesting }).once();
+        EasyMock.expect(testConfigAdmin.listConfigurations(EasyMock.eq("(service.pid=jmx.acl.whitelist)")))
+                .andReturn(new Configuration[0]).once();
+        EasyMock.expect(testConfigAdmin.getConfiguration(EasyMock.eq("jmx.acl.foo.bar.testing"), EasyMock.isNull(String.class)))
+                .andReturn(fooBarTesting).once();
+        EasyMock.replay(testConfigAdmin);
+
+        KarafMBeanServerGuard guard = new KarafMBeanServerGuard();
+        guard.setConfigAdmin(testConfigAdmin);
+
+        String objectName = "foo.bar.testing:type=SomeMBean";
+        String objectName2 = "foo.bar.testing:type=SomeOtherMBean";
+
+        JMXSecurityMBeanImpl mb = new JMXSecurityMBeanImpl();
+        mb.setMBeanServer(mbs);
+        mb.setGuard(guard);
+        Map<String, List<String>> query = new HashMap<String, List<String>>();
+        query.put(objectName, Collections.singletonList("testMethod(java.lang.String)"));
+        query.put(objectName2, Collections.singletonList("testMethod(long)"));
+        TabularData result = mb.canInvoke(query);
+        assertEquals(2, result.size());
+
+        CompositeData cd2 = result.get(new Object[]{objectName, "testMethod(java.lang.String)"});
+        assertEquals(objectName, cd2.get("ObjectName"));
+        assertEquals("testMethod(java.lang.String)", cd2.get("Method"));
+        assertEquals(true, cd2.get("CanInvoke"));
+        CompositeData cd4 = result.get(new Object[]{objectName2, "testMethod(long)"});
+        assertEquals(objectName2, cd4.get("ObjectName"));
+        assertEquals("testMethod(long)", cd4.get("Method"));
+        assertEquals(true, cd4.get("CanInvoke"));
+
+        EasyMock.verify(testConfigAdmin, fooWildcardTesting, fooBarTesting);
     }
 
 }
