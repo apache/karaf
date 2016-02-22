@@ -17,11 +17,18 @@
 package org.apache.karaf.management.internal;
 
 import java.io.IOException;
+import java.security.AccessControlContext;
+import java.security.AccessController;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import javax.security.auth.Subject;
 
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
@@ -41,6 +48,11 @@ public class BulkRequestContext {
 
     private ConfigurationAdmin configAdmin;
 
+    // if there's AccessControlContext or subject, we can fail fast
+    private boolean anonymous = false;
+    // otherwise we can cache current subject's principals for faster access
+    private Set<Principal> principals = new HashSet<Principal>();
+
     // cache with lifecycle bound to BulkRequestContext instance
     private Map<String, Dictionary<String, Object>> cachedConfigurations = new HashMap<String, Dictionary<String, Object>>();
 
@@ -50,6 +62,18 @@ public class BulkRequestContext {
         BulkRequestContext context = new BulkRequestContext();
         context.configAdmin = configAdmin;
         try {
+            // check JAAS subject here
+            AccessControlContext acc = AccessController.getContext();
+            if (acc == null) {
+                context.anonymous = true;
+            } else {
+                Subject subject = Subject.getSubject(acc);
+                if (subject == null) {
+                    context.anonymous = true;
+                } else {
+                    context.principals.addAll(subject.getPrincipals());
+                }
+            }
             // list available ACL configs - valid for this instance only
             for (Configuration config : configAdmin.listConfigurations("(service.pid=jmx.acl*)")) {
                 context.allPids.add(config.getPid());
@@ -95,6 +119,14 @@ public class BulkRequestContext {
             cachedConfigurations.put(generalPid, configAdmin.getConfiguration(generalPid, null).getProperties());
         }
         return cachedConfigurations.get(generalPid);
+    }
+
+    public boolean isAnonymous() {
+        return anonymous;
+    }
+
+    public Set<Principal> getPrincipals() {
+        return principals;
     }
 
 }
