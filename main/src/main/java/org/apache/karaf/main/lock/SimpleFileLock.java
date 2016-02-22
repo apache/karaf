@@ -37,9 +37,8 @@ public class SimpleFileLock implements Lock {
     private FileLock lock;
 
     public SimpleFileLock(Properties props) {
+        BootstrapLogManager.configureLogger(LOG);
         try {
-
-            LOG.addHandler( BootstrapLogManager.getDefaultHandler() );
             String lock = props.getProperty(PROPERTY_LOCK_DIR);
 
             if (lock != null) {

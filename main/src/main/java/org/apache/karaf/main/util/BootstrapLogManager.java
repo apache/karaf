@@ -27,8 +27,13 @@ import java.io.IOException;
 import org.apache.felix.utils.properties.Properties;
 import org.apache.felix.utils.properties.InterpolationHelper;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.logging.ConsoleHandler;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 import java.util.logging.StreamHandler;
 
 /**
@@ -57,6 +62,23 @@ public class BootstrapLogManager {
         }
     	return instance.getDefaultHandlerInternal();
     }
+
+    public static synchronized List<Handler> getDefaultHandlers() {
+        if (instance == null) {
+            throw new IllegalStateException("Properties must be set before calling getDefaultHandler");
+        }
+        return instance.getDefaultHandlersInternal();
+    }
+
+    public static void configureLogger(Logger logger) {
+        try {
+            for (Handler handler : getDefaultHandlers()) {
+                logger.addHandler(handler);
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+    }
     
     public static void setProperties(Properties configProps) {
         setProperties(configProps, null);
@@ -80,6 +102,14 @@ public class BootstrapLogManager {
 			throw new RuntimeException(e.getMessage(), e);
 		}
 	}
+
+    private List<Handler> getDefaultHandlersInternal() {
+        if (Boolean.getBoolean("karaf.log.console")) {
+            return Arrays.asList(new ConsoleHandler(), getDefaultHandlerInternal());
+        } else {
+            return Collections.singletonList(getDefaultHandlerInternal());
+        }
+    }
 
 	private Properties loadPaxLoggingConfig() {
     	Properties props = new Properties();

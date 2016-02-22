@@ -416,6 +416,10 @@ run() {
                 OPTS="-Dkaraf.startLocalConsole=false -Dkaraf.startRemoteShell=true"
                 shift
                 ;;
+            'run')
+                OPTS="-Dkaraf.startLocalConsole=false -Dkaraf.startRemoteShell=true -Dkaraf.log.console=true"
+                shift
+                ;;
             'daemon')
                 OPTS="-Dkaraf.startLocalConsole=false -Dkaraf.startRemoteShell=true"
                 KARAF_DAEMON="true"

@@ -170,12 +170,7 @@ public class GenericJDBCLock implements Lock {
     private int currentLockDelay;
 
     public GenericJDBCLock(Properties props) {
-        try {
-            LOG.addHandler(BootstrapLogManager.getDefaultHandler());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
+        BootstrapLogManager.configureLogger(LOG);
         this.url = props.getProperty(PROPERTY_LOCK_URL);
         this.driver = props.getProperty(PROPERTY_LOCK_JDBC_DRIVER);
         this.user = props.getProperty(PROPERTY_LOCK_JDBC_USER, DEFAULT_USER);

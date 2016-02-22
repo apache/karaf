@@ -33,6 +33,7 @@ import java.util.List;
 import org.apache.felix.utils.properties.Properties;
 
 import java.util.StringTokenizer;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -235,7 +236,7 @@ public class Main {
         BootstrapLogManager.setProperties(config.props, log4jConfigPath);
         lockCallback = new KarafLockCallback();
         InstanceHelper.updateInstancePid(config.karafHome, config.karafBase, true);
-        LOG.addHandler(BootstrapLogManager.getDefaultHandler());
+        BootstrapLogManager.configureLogger(LOG);
 
         for (String provider : config.securityProviders) {
             addSecurityProvider(provider);

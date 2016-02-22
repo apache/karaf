@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.jar.Manifest;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -45,12 +46,7 @@ public class KarafActivatorManager {
     public KarafActivatorManager(ClassLoader classLoader, Framework framework) {
         this.classLoader = classLoader;
         this.framework = framework;
-        try{
-            LOG.addHandler(BootstrapLogManager.getDefaultHandler());
-        }catch(Exception e){
-            e.printStackTrace();
-        }
-
+        BootstrapLogManager.configureLogger(LOG);
     }
 
     void startKarafActivators() throws IOException {
