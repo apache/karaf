@@ -249,7 +249,7 @@ public class KarafMBeanServerGuard implements InvocationHandler {
             return true;
         }
         for (String role : getRequiredRoles(context, objectName, methodName, signature)) {
-            if (currentUserHasRole(role))
+            if (currentUserHasRole(context.getPrincipals(), role))
                 return true;
         }
 
@@ -463,12 +463,28 @@ public class KarafMBeanServerGuard implements InvocationHandler {
         res.add(JMX_ACL_PID_PREFIX); // this is the top PID (aka jmx.acl)
         return res;
     }
-
     static boolean currentUserHasRole(String requestedRole) {
         if (ROLE_WILDCARD.equals(requestedRole)) {
             return true;
         }
-        
+
+        AccessControlContext acc = AccessController.getContext();
+        if (acc == null) {
+            return false;
+        }
+        Subject subject = Subject.getSubject(acc);
+        if (subject == null) {
+            return false;
+        }
+
+        return currentUserHasRole(subject.getPrincipals(), requestedRole);
+    }
+
+    static boolean currentUserHasRole(Set<Principal> principals, String requestedRole) {
+        if (ROLE_WILDCARD.equals(requestedRole)) {
+            return true;
+        }
+
         String clazz;
         String role;
         int index = requestedRole.indexOf(':');
@@ -480,17 +496,7 @@ public class KarafMBeanServerGuard implements InvocationHandler {
             role = requestedRole;
         }
 
-        AccessControlContext acc = AccessController.getContext();
-        if (acc == null) {
-            return false;
-        }
-        Subject subject = Subject.getSubject(acc);
-
-        if (subject == null) {
-            return false;
-        }
-
-        for (Principal p : subject.getPrincipals()) {
+        for (Principal p : principals) {
             if (clazz.equals(p.getClass().getName()) && role.equals(p.getName())) {
                 return true;
             }

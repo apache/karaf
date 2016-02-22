@@ -214,7 +214,7 @@ public class JMXSecurityMBeanImplTestCase extends TestCase {
         EasyMock.expect(fooWildcardTesting.getPid()).andReturn("jmx.acl.foo._.testing").once();
         EasyMock.replay(fooWildcardTesting);
 
-        Dictionary<String, Object> fooBarProperties = new Hashtable<>();
+        Dictionary<String, Object> fooBarProperties = new Hashtable<String, Object>();
         // using '*' frees us from mocking JAAS
         fooBarProperties.put("testMethod(java.lang.String)", "*");
         fooBarProperties.put("testMethod(long)", "*");
