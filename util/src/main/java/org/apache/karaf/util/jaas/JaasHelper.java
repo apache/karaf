@@ -22,6 +22,7 @@ import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.security.ProtectionDomain;
+import java.util.Set;
 
 import javax.security.auth.Subject;
 import javax.security.auth.SubjectDomainCombiner;
@@ -36,7 +37,24 @@ public class JaasHelper {
         if (ROLE_WILDCARD.equals(requestedRole)) {
             return true;
         }
-        
+
+        AccessControlContext acc = AccessController.getContext();
+        if (acc == null) {
+            return false;
+        }
+        Subject subject = Subject.getSubject(acc);
+        if (subject == null) {
+            return false;
+        }
+
+        return currentUserHasRole(subject.getPrincipals(), requestedRole);
+    }
+
+    public static boolean currentUserHasRole(Set<Principal> principals, String requestedRole) {
+        if (ROLE_WILDCARD.equals(requestedRole)) {
+            return true;
+        }
+
         String clazz;
         String role;
         int index = requestedRole.indexOf(':');
@@ -47,15 +65,7 @@ public class JaasHelper {
             clazz = RolePrincipal.class.getName();
             role = requestedRole;
         }
-        AccessControlContext acc = AccessController.getContext();
-        if (acc == null) {
-            return false;
-        }
-        Subject subject = Subject.getSubject(acc);
-        if (subject == null) {
-            return false;
-        }
-        for (Principal p : subject.getPrincipals()) {
+        for (Principal p : principals) {
             if (clazz.equals(p.getClass().getName()) && role.equals(p.getName())) {
                 return true;
             }

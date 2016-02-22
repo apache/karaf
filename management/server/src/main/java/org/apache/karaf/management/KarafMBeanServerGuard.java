@@ -234,7 +234,7 @@ public class KarafMBeanServerGuard implements InvocationHandler {
             return true;
         }
         for (String role : getRequiredRoles(context, objectName, methodName, signature)) {
-            if (JaasHelper.currentUserHasRole(role))
+            if (JaasHelper.currentUserHasRole(context.getPrincipals(), role))
                 return true;
         }
 
