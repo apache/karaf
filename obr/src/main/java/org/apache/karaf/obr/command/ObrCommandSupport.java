@@ -188,7 +188,7 @@ public abstract class ObrCommandSupport implements Action {
 
     }
 
-    private String getResourceId(Resource resource) {
+    protected String getResourceId(Resource resource) {
         return resource.getPresentationName() != null ? resource.getPresentationName() : resource.getSymbolicName();
     }
 
