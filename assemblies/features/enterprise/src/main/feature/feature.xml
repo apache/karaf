@@ -171,10 +171,10 @@
         <requirement>osgi.ee;filter:="(&amp;(osgi.ee=JavaSE)(!(version>=1.8)))"</requirement>
     </feature>
 
-    <feature name="openjpa" description="Apache OpenJPA 2.4.x persistence engine support" version="2.4.0">
+    <feature name="openjpa" description="Apache OpenJPA 2.4.x persistence engine support" version="2.4.1">
         <details>Enable Apache OpenJPA as persistence engine.</details>
         <feature>jndi</feature>
-        <feature version="[1.1,1.2)">transaction-api</feature>
+        <feature version="[1.2,1.3)">transaction-api</feature>
         <feature version="[2.0.0,2.1.0)">persistence-api</feature>
         <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-annotation_1.0_spec/1.1.1</bundle>
         <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-servlet_2.5_spec/1.2</bundle>
@@ -187,7 +187,7 @@
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.serp/${serp.bundle.version}</bundle>
         <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-jms_1.1_spec/${geronimo.jms-spec.version}</bundle>
         <bundle dependency="true">mvn:org.apache.xbean/xbean-asm5-shaded/4.3</bundle>
-        <bundle>mvn:org.apache.openjpa/openjpa/2.4.0</bundle>
+        <bundle>mvn:org.apache.openjpa/openjpa/2.4.1</bundle>
     </feature>
 
     <feature name="hibernate" description="Hibernate 3.x JPA persistence engine support" version="${hibernate3.version}">
