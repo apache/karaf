@@ -24,14 +24,11 @@ import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
-import org.apache.felix.bundlerepository.Reason;
-import org.apache.felix.bundlerepository.Repository;
-import org.apache.felix.bundlerepository.RepositoryAdmin;
-import org.apache.felix.bundlerepository.Requirement;
-import org.apache.felix.bundlerepository.Resolver;
-import org.apache.felix.bundlerepository.Resource;
+import org.apache.felix.bundlerepository.*;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.osgi.framework.Bundle;
@@ -124,6 +121,7 @@ public abstract class ObrCommandSupport implements Action {
 
     protected void doDeploy(RepositoryAdmin admin, List<String> bundles, boolean start, boolean deployOptional) throws Exception {
         Resolver resolver = admin.resolver();
+
         for (String bundle : bundles) {
             String[] target = getTarget(bundle);
             Resource resource = selectNewestVersion(searchRepository(admin, target[0], target[1]));
@@ -133,14 +131,16 @@ public abstract class ObrCommandSupport implements Action {
                 System.err.println("Unknown bundle - " + target[0]);
             }
         }
+
         if ((resolver.getAddedResources() != null) &&
                 (resolver.getAddedResources().length > 0)) {
+
             if (resolver.resolve(deployOptional ? 0 : Resolver.NO_OPTIONAL_RESOURCES)) {
                 System.out.println("Target resource(s):");
                 printUnderline(System.out, 19);
                 Resource[] resources = resolver.getAddedResources();
                 for (int resIdx = 0; (resources != null) && (resIdx < resources.length); resIdx++) {
-                    System.out.println("   " + resources[resIdx].getPresentationName()
+                    System.out.println("   " + getResourceId(resources[resIdx])
                             + " (" + resources[resIdx].getVersion() + ")");
                 }
                 resources = resolver.getRequiredResources();
@@ -148,7 +148,7 @@ public abstract class ObrCommandSupport implements Action {
                     System.out.println("\nRequired resource(s):");
                     printUnderline(System.out, 21);
                     for (int resIdx = 0; resIdx < resources.length; resIdx++) {
-                        System.out.println("   " + resources[resIdx].getPresentationName()
+                        System.out.println("   " + getResourceId(resources[resIdx])
                                 + " (" + resources[resIdx].getVersion() + ")");
                     }
                 }
@@ -158,7 +158,7 @@ public abstract class ObrCommandSupport implements Action {
                         System.out.println("\nOptional resource(s):");
                         printUnderline(System.out, 21);
                         for (int resIdx = 0; resIdx < resources.length; resIdx++) {
-                            System.out.println("   " + resources[resIdx].getPresentationName() + " (" + resources[resIdx].getVersion() + ")");
+                            System.out.println("   " + getResourceId(resources[resIdx]) + " (" + resources[resIdx].getVersion() + ")");
                         }
                     }
                 }
@@ -170,6 +170,7 @@ public abstract class ObrCommandSupport implements Action {
                 } catch (IllegalStateException ex) {
                     System.err.println(ex);
                 }
+
             } else {
                 Reason[] reqs = resolver.getUnsatisfiedRequirements();
                 if ((reqs != null) && (reqs.length > 0)) {
@@ -177,7 +178,7 @@ public abstract class ObrCommandSupport implements Action {
                     printUnderline(System.out, 27);
                     for (int reqIdx = 0; reqIdx < reqs.length; reqIdx++) {
                         System.out.println("   " + reqs[reqIdx].getRequirement().getFilter());
-                        System.out.println("      " + reqs[reqIdx].getResource().getPresentationName());
+                        System.out.println("      " + getResourceId(reqs[reqIdx].getResource()));
                     }
                 } else {
                     System.out.println("Could not resolve targets.");
@@ -187,6 +188,9 @@ public abstract class ObrCommandSupport implements Action {
 
     }
 
+    private String getResourceId(Resource resource) {
+        return resource.getPresentationName() != null ? resource.getPresentationName() : resource.getSymbolicName();
+    }
 
     protected Requirement parseRequirement(RepositoryAdmin admin, String req) throws InvalidSyntaxException {
         int p = req.indexOf(':');
@@ -200,6 +204,8 @@ public abstract class ObrCommandSupport implements Action {
                 name = "package";
             } else if (req.contains("service")) {
                 name = "service";
+            } else if (req.contains("osgi.extender")) {
+                name = "osgi.extender";
             } else {
                 name = "bundle";
             }

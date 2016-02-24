@@ -62,9 +62,19 @@ public class InfoCommand extends ObrCommandSupport {
 
     private void printResource(PrintStream out, Resource resource)
     {
-        printUnderline(out, resource.getPresentationName().length());
-        out.println(resource.getPresentationName());
-        printUnderline(out, resource.getPresentationName().length());
+        String presentationName = resource.getPresentationName();
+
+        if (presentationName != null) {
+            printUnderline(out, presentationName.length());
+            out.println(presentationName);
+            printUnderline(out, presentationName.length());
+        } else {
+            // OBR per Spec has no presentation name
+            String symbolicName = resource.getSymbolicName();
+            printUnderline(out, symbolicName.length());
+            out.println(symbolicName);
+            printUnderline(out, symbolicName.length());
+        }
 
         Map map = resource.getProperties();
         for (Iterator iter = map.entrySet().iterator(); iter.hasNext(); )
