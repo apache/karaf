@@ -121,6 +121,24 @@ root@karaf> bundles:install 'wrap:mvn:commons-lang/commons-lang/2.4$Bundle-Symbo
 <bundle>wrap:mvn:commons-lang/commons-lang/2.4$Bundle-SymbolicName=commons-lang&amp;Bundle-Version=2.4</bundle>
 ----
 
+Important notice : Add as child of your feature definition, the reference to wrap feature
+
+----
+<feature prerequisiste="true">wrap</feature>
+----
+
+For instance : 
+
+----
+<features xmlns="http://karaf.apache.org/xmlns/features/v1.4.0" name="app-2.0.0">
+	<feature name="external-libs" version="2.0.0" description="External libs">
+		<details>External dependencies</details>
+		<feature prerequisite="true">wrap</feature>
+		<bundle start-level="80">wrap:mvn:net.sf.ehcache/ehcache-core/2.6.11$Bundle-SymbolicName=ehcache-core&amp;Bundle-Version=2.6.11</bundle>		
+	</feature>
+</features>
+----
+
 ==== Statically bundling jars
 
 You can also create a wrap bundle for a third party dependency.
