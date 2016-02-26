@@ -32,13 +32,13 @@ public class SshServerAction extends OsgiCommandSupport implements BlueprintCont
 {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    @Option(name = "-p", aliases = { "--port" }, description = "The port to setup the SSH server (Default: 8101)", required = false, multiValued = false)
+    @Option(name = "-p", aliases = { "--port" }, description = "The port to setup the SSH server", required = false, multiValued = false)
     private int port = 8101;
 
-    @Option(name = "-b", aliases = { "--background" }, description = "The service will run in the background (Default: true)", required = false, multiValued = false)
+    @Option(name = "-b", aliases = { "--background" }, description = "The service will run in the background", required = false, multiValued = false)
     private boolean background = true;
 
-    @Option(name = "-i", aliases = { "--idle-timeout" }, description = "The session idle timeout (Default: 1800000ms)", required = false, multiValued = false)
+    @Option(name = "-i", aliases = { "--idle-timeout" }, description = "The session idle timeout in milliseconds", required = false, multiValued = false)
     private long idleTimeout = 1800000;
 
     @Option(name = "-w", aliases = { "--welcome-banner" }, description = "The welcome banner to display when logging in", required = false, multiValued = false)
