@@ -225,6 +225,10 @@ If a single version is specified, this version will be chosen.
 
 If nothing is specified, the highest available will be installed.
 
+===== Feature prerequisites
+
+Prerequisite feature is special kind of dependency. If you will add `prerequisite` attribute to dependant feature tag then it will force installation and also activation of bundles in dependant feature before installation of actual feature. This may be handy in case if bundles enlisted in given feature are not using pre installed URL such `wrap` or `war`.
+
 ==== Feature configurations
 
 The `<config/>` element in a feature XML allows a feature to create and/or populate a configuration (identified by a configuration PID).

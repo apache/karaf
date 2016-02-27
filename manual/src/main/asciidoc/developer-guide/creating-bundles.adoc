@@ -127,6 +127,8 @@ Important notice : Add as child of your feature definition, the reference to wra
 <feature prerequisiste="true">wrap</feature>
 ----
 
+Additional information about meaning of `prerequisiste` attribute can be found in link:provisioning[Feature prerequisites] description.
+
 For instance : 
 
 ----
