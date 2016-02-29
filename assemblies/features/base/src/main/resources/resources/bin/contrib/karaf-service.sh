@@ -39,6 +39,7 @@ END
 CONF_TEMPLATE="karaf-service-template.conf"
 SYSTEMD_TEMPLATE="karaf-service-template.systemd"
 SYSTEMD_TEMPLATE_INSTANCES="karaf-service-template.systemd-instances"
+INIT_TEMPLATE="karaf-service-template.init"
 INIT_REDHAT_TEMPLATE="karaf-service-template.init-redhat"
 INIT_DEBIAN_TEMPLATE="karaf-service-template.init-debian"
 SOLARIS_SMF_TEMPLATE="karaf-service-template.solaris-smf"
@@ -170,6 +171,15 @@ if [[ ! $KARAF_SERVICE_TEMPLATE ]]; then
 
                 chmod 755 "${PWD}/${KARAF_SERVICE_NAME}"
             fi
+            ;;
+        *)
+            generate_service_descriptor \
+                "$INIT_TEMPLATE" \
+                "${PWD}/${KARAF_SERVICE_NAME}" \
+                "${CONF_TEMPLATE}" \
+                "${KARAF_SERVICE_CONF}"
+
+            chmod 755 "${PWD}/${KARAF_SERVICE_NAME}"
             ;;
     esac
 else
