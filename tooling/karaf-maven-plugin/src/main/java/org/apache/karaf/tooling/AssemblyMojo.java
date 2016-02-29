@@ -39,7 +39,9 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Creates a customized Karaf distribution by installing features and setting up
@@ -222,6 +224,14 @@ public class AssemblyMojo extends MojoSupport {
     @Parameter(defaultValue = "${project.basedir}/src/main/karaf/assembly-property-edits.xml")
     protected String propertyFileEdits;
 
+    /**
+     * Specify a set of translated urls to use instead of downloading the artifacts
+     * from their original locations.  The given set will be extended with already
+     * built artifacts from the maven project.
+     */
+    @Parameter
+    protected Map<String, String> translatedUrls;
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
@@ -304,6 +314,31 @@ public class AssemblyMojo extends MojoSupport {
                 builder.propertyEdits(edits);
             }
         }
+
+        Map<String, String> urls = new HashMap<>();
+        List<Artifact> artifacts = new ArrayList<>(project.getAttachedArtifacts());
+        artifacts.add(project.getArtifact());
+        for (Artifact artifact : artifacts) {
+            if (artifact.getFile() != null && artifact.getFile().exists()) {
+                String mvnUrl = "mvn:" + artifact.getGroupId() + "/" + artifact.getArtifactId()
+                        + "/" + artifact.getVersion();
+                String type = artifact.getType();
+                if ("bundle".equals(type)) {
+                    type = "jar";
+                }
+                if (!"jar".equals(type) || artifact.getClassifier() != null) {
+                    mvnUrl += "/" + type;
+                    if (artifact.getClassifier() != null) {
+                        mvnUrl += "/" + artifact.getClassifier();
+                    }
+                }
+                urls.put(mvnUrl, artifact.getFile().toURI().toString());
+            }
+        }
+        if (translatedUrls != null) {
+            urls.putAll(translatedUrls);
+        }
+        builder.translatedUrls(urls);
 
         // creating system directory
         getLog().info("Creating work directory");

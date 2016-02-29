@@ -160,6 +160,7 @@ public class Builder {
     private Path systemDirectory;
     private Map<String, Profile> allProfiles;
     private KarafPropertyEdits propertyEdits;
+    private Map<String, String> translatedUrls;
 
     public static Builder newInstance() {
         return new Builder();
@@ -362,6 +363,17 @@ public class Builder {
         return this;
     }
 
+    /**
+     * Specify a set of url mappings to use instead of
+     * downloading from the original urls.
+     * @param translatedUrls the urls translations.
+     * @return this.
+     */
+    public Builder translatedUrls(Map<String, String> translatedUrls) {
+        this.translatedUrls = translatedUrls;
+        return this;
+    }
+
     public List<String> getBlacklistedProfiles() {
         return blacklistedProfiles;
     }
@@ -415,7 +427,7 @@ public class Builder {
         }
         MavenResolver resolver = MavenResolvers.createMavenResolver(props, ORG_OPS4J_PAX_URL_MVN_PID);
         executor = Executors.newScheduledThreadPool(8);
-        manager = new CustomDownloadManager(resolver, executor);
+        manager = new CustomDownloadManager(resolver, executor, null, translatedUrls);
         this.resolver = new ResolverImpl(new Slf4jResolverLog(LOGGER));
 
         //
@@ -506,7 +518,7 @@ public class Builder {
         Profile overallOverlay = Profiles.getOverlay(overallProfile, allProfiles, environment);
         Profile overallEffective = Profiles.getEffective(overallOverlay, false);
 
-        manager = new CustomDownloadManager(resolver, executor, overallEffective);
+        manager = new CustomDownloadManager(resolver, executor, overallEffective, translatedUrls);
 
         Hashtable<String, String> agentProps = new Hashtable<>(overallEffective.getConfiguration(ORG_OPS4J_PAX_URL_MVN_PID));
         final Map<String, String> properties = new HashMap<>();

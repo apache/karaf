@@ -78,7 +78,7 @@ public class MavenDownloadManager implements DownloadManager {
         return (Map) Collections.synchronizedMap(downloaded);
     }
 
-    class MavenDownloader implements Downloader {
+    protected class MavenDownloader implements Downloader {
 
         private volatile int pending = 0;
         private final MultiException exception = new MultiException("Error");

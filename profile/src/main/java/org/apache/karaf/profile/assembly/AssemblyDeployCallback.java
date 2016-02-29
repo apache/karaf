@@ -202,7 +202,7 @@ public class AssemblyDeployCallback implements Deployer.DeployCallback {
                 path = Parser.pathFromMaven(uri);
             } else {
                 uri = uri.replaceAll("[^0-9a-zA-Z.\\-_]+", "_");
-		if (uri.length() > 256) {
+		        if (uri.length() > 256) {
                     //to avoid the File name too long exception
                     uri = uri.substring(0, 255);
                 }
