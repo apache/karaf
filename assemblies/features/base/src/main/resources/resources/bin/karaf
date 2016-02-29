@@ -166,22 +166,22 @@ setupNativePath() {
 }
 
 pathCanonical() {
-    local dst="${1}"
-    while [ -h "${dst}" ] ; do
-        ls=`ls -ld "${dst}"`
+    local_dst="${1}"
+    while [ -h "${local_dst}" ] ; do
+        ls=`ls -ld "${local_dst}"`
         link=`expr "$ls" : '.*-> \(.*\)$'`
         if expr "$link" : '/.*' > /dev/null; then
-            dst="$link"
+            local_dst="$link"
         else
-            dst="`dirname "${dst}"`/$link"
+            local_dst="`dirname "${local_dst}"`/$link"
         fi
     done
-    local bas=`basename "${dst}"`
-    local dir=`dirname "${dst}"`
-    if [ "$bas" != "$dir" ]; then
-      dst="`pathCanonical "$dir"`/$bas"
+    local_bas=`basename "${local_dst}"`
+    local_dir=`dirname "${local_dst}"`
+    if [ "$local_bas" != "$local_dir" ]; then
+      local_dst="`pathCanonical "$local_dir"`/$local_bas"
     fi
-    echo "${dst}" | sed -e 's#//#/#g' -e 's#/./#/#g' -e 's#/[^/]*/../#/#g'
+    echo "${local_dst}" | sed -e 's#//#/#g' -e 's#/./#/#g' -e 's#/[^/]*/../#/#g'
 }
 
 locateJava() {
