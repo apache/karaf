@@ -140,7 +140,7 @@ public abstract class ObrCommandSupport implements Action {
                 printUnderline(System.out, 19);
                 Resource[] resources = resolver.getAddedResources();
                 for (int resIdx = 0; (resources != null) && (resIdx < resources.length); resIdx++) {
-                    System.out.println("   " + resources[resIdx].getPresentationName()
+                    System.out.println("   " + getResourceId(resources[resIdx])
                             + " (" + resources[resIdx].getVersion() + ")");
                 }
                 resources = resolver.getRequiredResources();
@@ -148,7 +148,7 @@ public abstract class ObrCommandSupport implements Action {
                     System.out.println("\nRequired resource(s):");
                     printUnderline(System.out, 21);
                     for (int resIdx = 0; resIdx < resources.length; resIdx++) {
-                        System.out.println("   " + resources[resIdx].getPresentationName()
+                        System.out.println("   " + getResourceId(resources[resIdx])
                                 + " (" + resources[resIdx].getVersion() + ")");
                     }
                 }
@@ -158,7 +158,7 @@ public abstract class ObrCommandSupport implements Action {
                         System.out.println("\nOptional resource(s):");
                         printUnderline(System.out, 21);
                         for (int resIdx = 0; resIdx < resources.length; resIdx++) {
-                            System.out.println("   " + resources[resIdx].getPresentationName() + " (" + resources[resIdx].getVersion() + ")");
+                            System.out.println("   " + getResourceId(resources[resIdx]) + " (" + resources[resIdx].getVersion() + ")");
                         }
                     }
                 }
@@ -177,7 +177,7 @@ public abstract class ObrCommandSupport implements Action {
                     printUnderline(System.out, 27);
                     for (int reqIdx = 0; reqIdx < reqs.length; reqIdx++) {
                         System.out.println("   " + reqs[reqIdx].getRequirement().getFilter());
-                        System.out.println("      " + reqs[reqIdx].getResource().getPresentationName());
+                        System.out.println("      " + getResourceId(reqs[reqIdx].getResource()));
                     }
                 } else {
                     System.out.println("Could not resolve targets.");
@@ -187,6 +187,9 @@ public abstract class ObrCommandSupport implements Action {
 
     }
 
+    protected String getResourceId(Resource resource) {
+        return resource.getPresentationName() != null ? resource.getPresentationName() : resource.getSymbolicName();
+    }
 
     protected Requirement parseRequirement(RepositoryAdmin admin, String req) throws InvalidSyntaxException {
         int p = req.indexOf(':');
@@ -200,6 +203,8 @@ public abstract class ObrCommandSupport implements Action {
                 name = "package";
             } else if (req.contains("service")) {
                 name = "service";
+            } else if (req.contains("osgi.extender")) {
+                name = "osgi.extender";
             } else {
                 name = "bundle";
             }
