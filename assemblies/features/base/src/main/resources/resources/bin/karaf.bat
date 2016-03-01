@@ -220,7 +220,10 @@ if not "%JAVA%" == "" goto :Check_JAVA_END
     set ROOT_INSTANCE_PID=%pid:~13%
 
     set ROOT_INSTANCE_NAME=%name:~14%
-    if not "%ROOT_INSTANCE_PID%"=="0" (
+    SET CHECK_RUNNING_CONDITION=true
+    if "%ROOT_INSTANCE_PID%" == "~13" SET CHECK_RUNNING_CONDITION=false
+    if "%ROOT_INSTANCE_PID%" == "0" SET CHECK_RUNNING_CONDITION=false
+    if "%CHECK_RUNNING_CONDITION%" == "true" (
         tasklist /fi "PID eq %ROOT_INSTANCE_PID%" /fi "STATUS eq running" /fo 2>NUL
         if "%ERRORLEVEL%"=="0" set ROOT_INSTANCE_RUNNING=true
     )
