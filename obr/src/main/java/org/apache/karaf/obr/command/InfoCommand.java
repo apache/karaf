@@ -62,9 +62,12 @@ public class InfoCommand extends ObrCommandSupport {
 
     private void printResource(PrintStream out, Resource resource)
     {
-        printUnderline(out, resource.getPresentationName().length());
-        out.println(resource.getPresentationName());
-        printUnderline(out, resource.getPresentationName().length());
+        // OBR R5 per Spec has no presentation name
+        String resourceId = getResourceId(resource);
+
+        printUnderline(out, resourceId.length());
+        out.println(resourceId);
+        printUnderline(out, resourceId.length());
 
         Map map = resource.getProperties();
         for (Iterator iter = map.entrySet().iterator(); iter.hasNext(); )
