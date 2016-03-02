@@ -400,11 +400,12 @@ if "%KARAF_PROFILER%" == "" goto :RUN
             if ERRORLEVEL 10 (
                 echo Restarting ...
                 %KARAF_DAEMON% restart!
-        )
-    ) else (
-        if ERRORLEVEL 10 (
-            echo Restarting JVM...
-            goto EXECUTE
+            )
+        ) else (
+            if ERRORLEVEL 10 (
+                echo Restarting JVM...
+                goto EXECUTE
+            )
         )
     )
 
