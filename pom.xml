@@ -821,6 +821,13 @@
             </dependency>
             <dependency>
               <groupId>org.apache.karaf.features</groupId>
+              <artifactId>framework</artifactId>
+              <classifier>features</classifier>
+              <type>xml</type>
+              <version>${project.version}</version>
+            </dependency>
+            <dependency>
+              <groupId>org.apache.karaf.features</groupId>
               <artifactId>static</artifactId>
               <type>kar</type>
               <version>${project.version}</version>
