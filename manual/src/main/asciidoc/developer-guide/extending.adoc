@@ -112,7 +112,7 @@ Alternatively, you can simply create the directory `shell-sample-commands` and c
 </project>
 ----
 
-===== Configuring for Java 6/7
+===== Configuring for Java 8
 
 We are using annotations to define commands, so we need to ensure Maven will actually use JDK 1.6 or 1.7 to compile the jar.
 Just add the following snippet after the `dependencies` section.
@@ -124,8 +124,8 @@ Just add the following snippet after the `dependencies` section.
       <groupId>org.apache.maven.plugins</groupId>
       <artifactId>maven-compiler-plugin</artifactId>
       <configuration>
-        <target>1.6</target>
-        <source>1.6</source>
+        <target>1.8</target>
+        <source>1.8</source>
       </configuration>
     </plugin>
   </plugins>
