@@ -961,7 +961,7 @@ public class Deployer {
                     continue;
                 }
                 // Ignore bundles that won't be wired
-                List<Wire> newWires = resolution.get(resource);
+                List<Wire> newWires = resolution != null ? resolution.get(resource) : null;
                 if (newWires == null) {
                     continue;
                 }
