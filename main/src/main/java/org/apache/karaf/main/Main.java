@@ -22,7 +22,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -33,7 +35,6 @@ import java.util.List;
 import org.apache.felix.utils.properties.Properties;
 
 import java.util.StringTokenizer;
-import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -253,7 +254,7 @@ public class Main {
         /*
          * KARAF-3706: disable the logger related code to avoid the exception
          * It needs to be revisited when the FELIX-4871 is fixed.
-         *
+         */
         // Hack to set felix logger
         try {
             if (framework.getClass().getName().startsWith("org.apache.felix.")) {
@@ -263,7 +264,7 @@ public class Main {
                 Method method = logger.getClass().getDeclaredMethod("setLogger", Object.class);
                 method.setAccessible(true);
                 method.invoke(logger, new Object() {
-                    public void log(ServiceReference sr, int level, String message, Throwable exception) {
+                    public void log(int level, String message, Throwable exception) {
                         Level lvl;
                         switch (level) {
                             case 1:
@@ -289,7 +290,6 @@ public class Main {
         } catch (Throwable t) {
             t.printStackTrace();
         }
-        */
 
         framework.init();
         framework.getBundleContext().addFrameworkListener(lockCallback);
